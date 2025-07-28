@@ -4,6 +4,7 @@ template:
   bootstrap: 5
   bootswatch: darkly
   theme: breeze-dark
+  math-rendering: katex
   bslib:
     code-bg: "#2b2b2b"
     base_font: {google: "Noto Sans"}
@@ -49,9 +50,9 @@ reference:
   contents:
   - read_tree
   - rarefy
+  - n_cpus
   
 - title: Datasets
   contents:
   - ex_counts
   - ex_tree
-  - n_cpus
