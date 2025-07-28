@@ -342,10 +342,13 @@ SEXP C_beta_div(
         pair->otu_vec_2 = otu_mtx  + (j * n_otus);
         pair->distance  = dist_vec + dist_idx;
         pair_idx++;
+        
+        if (pair_idx == n_pairs) goto end_loops;
       }
       dist_idx++;
     }
   }
+  end_loops:
   
   
   // Run WITH multithreading
