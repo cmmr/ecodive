@@ -54,3 +54,4 @@ reference:
   contents:
   - ex_counts
   - ex_tree
+  - n_cpus

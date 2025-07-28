@@ -1,16 +1,22 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+
+name: pkgdown.yaml
+permissions: read-all
+
 on:
   push:
-    branches: [main, master]
+    branches: [main]
+    paths:
+      - man/**
+      - pkgdown/**
+      - vignettes/**
+      - README.md
+      - .github/workflows/pkgdown.yaml
   pull_request:
   release:
     types: [published]
   workflow_dispatch:
-
-name: pkgdown.yaml
-
-permissions: read-all
 
 jobs:
   pkgdown:
