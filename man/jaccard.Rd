@@ -60,7 +60,7 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
     jaccard(ex_counts, weighted = FALSE)
     
     # Only calculate distances for A vs all.
-    jaccard(counts, pairs = 1:3)
+    jaccard(ex_counts, pairs = 1:3)
     
 }
 \references{

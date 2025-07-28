@@ -74,7 +74,7 @@ counts. \code{n} is the number of rows (OTUs) in \code{counts}.
     gower(ex_counts, weighted = FALSE)
     
     # Only calculate distances for A vs all.
-    gower(counts, pairs = 1:3)
+    gower(ex_counts, pairs = 1:3)
     
 }
 \seealso{

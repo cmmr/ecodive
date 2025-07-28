@@ -58,7 +58,7 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
     euclidean(ex_counts, weighted = FALSE)
     
     # Only calculate distances for A vs all.
-    euclidean(counts, pairs = 1:3)
+    euclidean(ex_counts, pairs = 1:3)
     
 }
 \references{

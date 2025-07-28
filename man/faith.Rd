@@ -21,8 +21,19 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \description{
-Faith's phylogenetic diversity metric
+A higher value indicates a greater amount of evolutionary history
+represented within the community, suggesting higher biodiversity in terms of
+evolutionary relationships.
 }
+\section{Calculation}{
+
+
+Given \eqn{n} branches with lengths \eqn{L} and a sample's
+abundances on each of those branches coded as 1 for present or 0 for absent:
+
+\deqn{\sum_{i = 1}^{n} P_i \times L_i
+}
+
 \examples{
     # Example counts matrix
     ex_counts
@@ -30,6 +41,12 @@ Faith's phylogenetic diversity metric
     # Faith diversity values
     faith(ex_counts, tree = ex_tree)
     
+}
+\references{
+Faith DP 1992.
+Conservation evaluation and phylogenetic diversity.
+Biological Conservation, 61:1-10.
+\url{https://doi.org/10.1016/0006-3207(92)91201-3}
 }
 \seealso{
 Other alpha_diversity: 

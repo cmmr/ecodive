@@ -1,0 +1,57 @@
+url: https://cmmr.github.io/fastbiom
+
+template:
+  bootstrap: 5
+  bootswatch: darkly
+  theme: breeze-dark
+  bslib:
+    code-bg: "#2b2b2b"
+    base_font: {google: "Noto Sans"}
+    heading_font: {google: "Noto Sans"}
+
+figures:
+  dev: ragg::agg_png
+  fig.width: 8
+  fig.height: 4
+
+
+reference:
+- title: Classic Alpha Diversity
+  contents:
+  - chao1
+  - shannon
+  - simpson
+  - inv_simpson
+
+reference:
+- title: Phylogenetic Alpha Diversity
+  contents:
+  - faith
+  
+- title: Classic Beta Diversity
+  contents:
+  - bray_curtis
+  - canberra
+  - euclidean
+  - gower
+  - jaccard
+  - kulczynski
+  - manhattan
+  
+- title: Phylogenetic Beta Diversity
+  contents:
+  - unweighted_unifrac
+  - weighted_unifrac
+  - normalized_unifrac
+  - generalized_unifrac
+  - variance_adjusted_unifrac
+  
+- title: Utility
+  contents:
+  - read_tree
+  - rarefy
+  
+- title: Datasets
+  contents:
+  - ex_counts
+  - ex_tree

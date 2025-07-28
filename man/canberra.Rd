@@ -60,7 +60,7 @@ OTUs must be removed if they are absent from both samples.
     canberra(ex_counts, weighted = FALSE)
     
     # Only calculate distances for A vs all.
-    canberra(counts, pairs = 1:3)
+    canberra(ex_counts, pairs = 1:3)
     
 }
 \references{

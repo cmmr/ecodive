@@ -20,6 +20,30 @@ Gauges the uniformity of species within a community. A Simpson index of \code{1}
 indicates that one or a few high abundance OTUs dominate the community,
 which is indicative of low diversity.
 }
+\section{Calculation}{
+
+
+Pre-transformation: drop all OTUs with zero abundance.
+
+In the formulas below, \eqn{x} is a single column (sample) from \code{counts}.
+\eqn{p} are the relative abundances.
+
+\tabular{lll}{
+\strong{Formula} \tab  \tab \strong{Example} \cr
+\deqn{p_{i} = \displaystyle \frac{x_i}{\sum x}}
+\deqn{D = \displaystyle 1 - \sum_{i = 1}^{n} p_{i}\times\ln(p_{i})}
+\tab
+\tab
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 2, 6)[-2]  
+  p <- x / sum(x)
+  1 - sum(p * log(p))
+  #>  2.309526
+}\if{html}{\out{</div>}}
+
+}
+}
+
 \examples{
     # Example counts matrix
     ex_counts
@@ -27,6 +51,24 @@ which is indicative of low diversity.
     # Simpson diversity values
     simpson(ex_counts)
     
+    # Low diversity
+    simpson(c(100, 1, 1, 1, 1)) # 0.075
+    
+    # High diversity
+    simpson(c(20, 20, 20, 20, 20)) # 0.8
+    
+    # Low richness
+    simpson(1:3) # 0.61
+    
+    # High richness
+    simpson(1:100) # 0.99
+    
+}
+\references{
+Simpson EH 1949.
+Measurement of diversity.
+Nature, 163.
+\url{https://doi.org/10.1038/163688a0}
 }
 \seealso{
 Other alpha_diversity: 

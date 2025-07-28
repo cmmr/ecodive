@@ -28,7 +28,7 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 \description{
 Normalized UniFrac beta diversity metric
 }
-\section{Equation}{
+\section{Calculation}{
 
 
 Given \eqn{n} branches with lengths \eqn{L} and a pair of samples'
@@ -48,7 +48,7 @@ a worked example.
     normalized_unifrac(ex_counts, tree = ex_tree)
     
     # Only calculate distances for A vs all.
-    normalized_unifrac(counts, tree = ex_tree, pairs = 1:3)
+    normalized_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
     
 }
 \references{

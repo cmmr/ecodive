@@ -16,8 +16,8 @@ and \code{TreeSummarizedExperiment} objects.}
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \description{
-A diversity index based on information theory that takes into account both
-species richness and evenness.
+The index considers both the number of different OTUs (richness) and how
+evenly the observations are distributed among those OTUs (evenness).
 }
 \section{Calculation}{
 
@@ -25,7 +25,7 @@ species richness and evenness.
 Pre-transformation: drop all OTUs with zero abundance.
 
 In the formulas below, \eqn{x} is a single column (sample) from \code{counts}.
-\eqn{p} are the relative abundances.
+\eqn{p_i} is the proportion of the \eqn{i}-th OTU in the total community.
 
 \tabular{lll}{
 \strong{Formula} \tab  \tab \strong{Example} \cr
@@ -49,6 +49,18 @@ In the formulas below, \eqn{x} is a single column (sample) from \code{counts}.
     
     # Shannon diversity values
     shannon(ex_counts)
+    
+    # Low diversity
+    shannon(c(100, 1, 1, 1, 1)) # 0.22
+    
+    # High diversity
+    shannon(c(20, 20, 20, 20, 20)) # 1.61
+    
+    # Low richness
+    shannon(1:3) # 1.01
+    
+    # High richness
+    shannon(1:100) # 4.42
     
 }
 \references{

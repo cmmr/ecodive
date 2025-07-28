@@ -7,12 +7,12 @@
 read_tree(newick, underscores = FALSE)
 }
 \arguments{
+\item{newick}{Input data as either a file path, URL, or Newick string.
+Compressed (gzip or bzip2) files are also supported.}
+
 \item{underscores}{If \code{TRUE}, underscores in unquoted names will remain
 underscores. If \code{FALSE}, underscores in unquoted named will be
 converted to spaces.}
-
-\item{src}{Input data as either a file path, URL, or Newick string.
-Compressed (gzip or bzip2) files are also supported.}
 }
 \value{
 A \code{phylo} class object representing the tree.

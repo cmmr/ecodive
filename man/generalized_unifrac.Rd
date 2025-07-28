@@ -38,7 +38,7 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 \description{
 Generalized UniFrac beta diversity metric
 }
-\section{Equation}{
+\section{Calculation}{
 
 
 Given \eqn{n} branches with lengths \eqn{L}, a pair of samples'
@@ -59,7 +59,7 @@ a worked example.
     generalized_unifrac(ex_counts, tree = ex_tree)
     
     # Only calculate distances for A vs all.
-    generalized_unifrac(counts, tree = ex_tree, pairs = 1:3)
+    generalized_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
     
 }
 \references{

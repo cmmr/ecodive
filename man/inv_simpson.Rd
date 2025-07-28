@@ -18,6 +18,30 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 \description{
 Inverse Simpson alpha diversity metric
 }
+\section{Calculation}{
+
+
+Pre-transformation: drop all OTUs with zero abundance.
+
+In the formulas below, \eqn{x} is a single column (sample) from \code{counts}.
+\eqn{p} are the relative abundances.
+
+\tabular{lll}{
+\strong{Formula} \tab  \tab \strong{Example} \cr
+\deqn{p_{i} = \displaystyle \frac{x_i}{\sum x}}
+\deqn{D = \displaystyle 1 / \sum_{i = 1}^{n} p_{i}\times\ln(p_{i})}
+\tab
+\tab
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 2, 6)[-2]  
+  p <- x / sum(x)
+  1 / sum(p * log(p))
+  #>  -0.7636352
+}\if{html}{\out{</div>}}
+
+}
+}
+
 \examples{
     # Example counts matrix
     ex_counts
@@ -25,6 +49,24 @@ Inverse Simpson alpha diversity metric
     # Inverse Simpson diversity values
     inv_simpson(ex_counts)
     
+    # Low diversity
+    inv_simpson(c(100, 1, 1, 1, 1)) # 1.08
+    
+    # High diversity
+    inv_simpson(c(20, 20, 20, 20, 20)) # 5
+    
+    # Low richness
+    inv_simpson(1:3) # 2.57
+    
+    # High richness
+    inv_simpson(1:100) # 75.37
+    
+}
+\references{
+Simpson EH 1949.
+Measurement of diversity.
+Nature, 163.
+\url{https://doi.org/10.1038/163688a0}
 }
 \seealso{
 Other alpha_diversity: 

@@ -43,7 +43,9 @@ singletons, and \eqn{b} is the number of doubletons.
 
 }
 
-Note that when \code{x} does not have any doubletons (\eqn{b = 0}), the result will be \code{NaN}.
+Note that when \eqn{x} does not have any singletons or doubletons
+(\eqn{a = 0, b = 0}), the result will be \code{NaN}. When \eqn{x} has singletons
+but no doubletons (\eqn{a > 0, b = 0}), the result will be \code{Inf}.
 }
 
 \examples{
@@ -52,6 +54,18 @@ Note that when \code{x} does not have any doubletons (\eqn{b = 0}), the result w
     
     # Chao1 diversity values
     chao1(ex_counts)
+    
+    # Low diversity
+    chao1(c(100, 1, 1, 1, 1)) # Inf
+    
+    # High diversity
+    chao1(c(20, 20, 20, 20, 20)) # NaN
+    
+    # Low richness
+    chao1(1:3) # 3.5
+    
+    # High richness
+    chao1(1:100) # 100.5
     
 }
 \references{

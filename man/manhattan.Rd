@@ -58,7 +58,7 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
     manhattan(ex_counts, weighted = FALSE)
     
     # Only calculate distances for A vs all.
-    manhattan(counts, pairs = 1:3)
+    manhattan(ex_counts, pairs = 1:3)
     
 }
 \references{

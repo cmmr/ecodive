@@ -58,7 +58,7 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
     bray_curtis(ex_counts, weighted = FALSE)
     
     # Only calculate distances for A vs all.
-    bray_curtis(counts, pairs = 1:3)
+    bray_curtis(ex_counts, pairs = 1:3)
     
 }
 \references{
