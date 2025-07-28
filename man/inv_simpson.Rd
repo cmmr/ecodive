@@ -2,7 +2,7 @@
 % Please edit documentation in R/alpha_div.r
 \name{inv_simpson}
 \alias{inv_simpson}
-\title{Inverse Simpson alpha diversity metric}
+\title{Inverse Simpson}
 \usage{
 inv_simpson(counts, cpus = n_cpus())
 }
@@ -15,8 +15,11 @@ and \code{TreeSummarizedExperiment} objects.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A numeric vector.
+}
 \description{
-Inverse Simpson alpha diversity metric
+Inverse Simpson alpha diversity metric.
 }
 \section{Calculation}{
 

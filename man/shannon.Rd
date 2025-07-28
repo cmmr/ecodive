@@ -2,7 +2,7 @@
 % Please edit documentation in R/alpha_div.r
 \name{shannon}
 \alias{shannon}
-\title{Shannon alpha diversity metric}
+\title{Shannon}
 \usage{
 shannon(counts, cpus = n_cpus())
 }
@@ -15,7 +15,11 @@ and \code{TreeSummarizedExperiment} objects.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A numeric vector.
+}
 \description{
+Shannon alpha diversity metric.\cr\cr
 The index considers both the number of different OTUs (richness) and how
 evenly the observations are distributed among those OTUs (evenness).
 }

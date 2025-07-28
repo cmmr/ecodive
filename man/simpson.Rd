@@ -2,7 +2,7 @@
 % Please edit documentation in R/alpha_div.r
 \name{simpson}
 \alias{simpson}
-\title{Simpson alpha diversity metric}
+\title{Simpson}
 \usage{
 simpson(counts, cpus = n_cpus())
 }
@@ -15,7 +15,11 @@ and \code{TreeSummarizedExperiment} objects.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A numeric vector.
+}
 \description{
+Simpson alpha diversity metric.\cr\cr
 Gauges the uniformity of species within a community. A Simpson index of \code{1}
 indicates that one or a few high abundance OTUs dominate the community,
 which is indicative of low diversity.

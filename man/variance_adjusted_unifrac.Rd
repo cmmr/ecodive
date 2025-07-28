@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta_div.r
 \name{variance_adjusted_unifrac}
 \alias{variance_adjusted_unifrac}
-\title{Variance Adjusted UniFrac beta diversity metric}
+\title{Variance Adjusted UniFrac}
 \usage{
 variance_adjusted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
 }
@@ -25,8 +25,11 @@ distance matrix to calculate. See examples.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A \code{dist} object.
+}
 \description{
-Variance Adjusted UniFrac beta diversity metric
+Variance Adjusted UniFrac beta diversity metric.
 }
 \section{Calculation}{
 
@@ -34,7 +37,7 @@ Variance Adjusted UniFrac beta diversity metric
 Given \eqn{n} branches with lengths \eqn{L} and a pair of samples'
 abundances (\eqn{A} and \eqn{B}) on each of those branches:
 
-\deqn{\displaystyle \frac{\sum_{i = 1}^{n} L_i\displaystyle \frac{|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }{\sum_{i = 1}^{n} L_i\displaystyle \frac{\frac{A_i}{A_T} + \frac{B_i}{B_T}}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }}
+\deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i\displaystyle \frac{|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }{\sum_{i = 1}^{n} L_i\displaystyle \frac{\frac{A_i}{A_T} + \frac{B_i}{B_T}}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }}
 
 See \url{https://cmmr.github.io/fastbiom/articles/unifrac.html} for details and
 a worked example.

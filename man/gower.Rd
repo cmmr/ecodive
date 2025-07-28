@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta_div.r
 \name{gower}
 \alias{gower}
-\title{Gower beta diversity metric}
+\title{Gower}
 \usage{
 gower(counts, weighted = TRUE, pairs = NULL, cpus = n_cpus())
 }
@@ -23,8 +23,11 @@ distance matrix to calculate. See examples.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A \code{dist} object.
+}
 \description{
-Gower beta diversity metric
+Gower beta diversity metric.
 }
 \section{Calculation}{
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/alpha_div.r
 \name{faith}
 \alias{faith}
-\title{Faith's phylogenetic diversity metric}
+\title{Faith's PD}
 \usage{
 faith(counts, tree, cpus = n_cpus())
 }
@@ -20,7 +20,11 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A numeric vector.
+}
 \description{
+Faith's phylogenetic diversity metric.\cr\cr
 A higher value indicates a greater amount of evolutionary history
 represented within the community, suggesting higher biodiversity in terms of
 evolutionary relationships.

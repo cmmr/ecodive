@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta_div.r
 \name{generalized_unifrac}
 \alias{generalized_unifrac}
-\title{Generalized UniFrac beta diversity metric}
+\title{Generalized UniFrac}
 \usage{
 generalized_unifrac(
   counts,
@@ -35,8 +35,11 @@ distance matrix to calculate. See examples.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A \code{dist} object.
+}
 \description{
-Generalized UniFrac beta diversity metric
+Generalized UniFrac beta diversity metric.
 }
 \section{Calculation}{
 
@@ -45,7 +48,7 @@ Given \eqn{n} branches with lengths \eqn{L}, a pair of samples'
 abundances (\eqn{A} and \eqn{B}) on each of those branches, and
 abundance weighting \eqn{0 \le \alpha \le 1}:
 
-\deqn{\displaystyle \frac{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}|\displaystyle \frac{\frac{A_i}{A_T} - \frac{B_i}{B_T}}{\frac{A_i}{A_T} + \frac{B_i}{B_T}} |}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}}}
+\deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}|\displaystyle \frac{\frac{A_i}{A_T} - \frac{B_i}{B_T}}{\frac{A_i}{A_T} + \frac{B_i}{B_T}} |}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}}}
 
 See \url{https://cmmr.github.io/fastbiom/articles/unifrac.html} for details and
 a worked example.

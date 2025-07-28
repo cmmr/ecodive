@@ -26,6 +26,8 @@
 #'        will be sequential, starting from `seed`.
 #' 
 #' 
+#' @return An integer matrix.
+#' 
 #' @export
 #' @examples
 #'     # Create an OTU matrix with 4 samples (A-D) and 5 OTUs.

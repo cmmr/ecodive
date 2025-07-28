@@ -17,17 +17,26 @@ figures:
 
 
 reference:
+
+- title: Phylogenetic Alpha Diversity
+  contents:
+  - faith
+  
 - title: Classic Alpha Diversity
   contents:
   - chao1
   - shannon
   - simpson
   - inv_simpson
-
-- title: Phylogenetic Alpha Diversity
-  contents:
-  - faith
   
+- title: Phylogenetic Beta Diversity
+  contents:
+  - unweighted_unifrac
+  - weighted_unifrac
+  - normalized_unifrac
+  - generalized_unifrac
+  - variance_adjusted_unifrac
+
 - title: Classic Beta Diversity
   contents:
   - bray_curtis
@@ -37,14 +46,6 @@ reference:
   - jaccard
   - kulczynski
   - manhattan
-  
-- title: Phylogenetic Beta Diversity
-  contents:
-  - unweighted_unifrac
-  - weighted_unifrac
-  - normalized_unifrac
-  - generalized_unifrac
-  - variance_adjusted_unifrac
   
 - title: Utility
   contents:

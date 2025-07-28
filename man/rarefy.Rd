@@ -40,6 +40,9 @@ will be sequential, starting from \code{seed}.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+An integer matrix.
+}
 \description{
 Sub-sample OTU observations such that all samples have an equal number.
 If called on data with non-integer abundances, values will be re-scaled to

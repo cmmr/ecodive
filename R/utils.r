@@ -1,6 +1,6 @@
 
 
-#' Number of CPU cores.
+#' Number of CPU Cores
 #' 
 #' A thin wrapper around 
 #' `parallel::detectCores(all.tests = TRUE, logical = TRUE)` which falls back  
@@ -15,7 +15,7 @@
 #' 
 #' @examples
 #'     n_cpus()
-#'     
+#' 
 n_cpus <- function () {
   
   if (!n_cpus_cached) {

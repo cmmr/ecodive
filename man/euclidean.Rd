@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta_div.r
 \name{euclidean}
 \alias{euclidean}
-\title{Euclidean beta diversity metric}
+\title{Euclidean}
 \usage{
 euclidean(counts, weighted = TRUE, pairs = NULL, cpus = n_cpus())
 }
@@ -23,8 +23,11 @@ distance matrix to calculate. See examples.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A \code{dist} object.
+}
 \description{
-Euclidean beta diversity metric
+Euclidean beta diversity metric.
 }
 \section{Calculation}{
 

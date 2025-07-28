@@ -31,5 +31,4 @@
 #' @param cpus   How many parallel processing threads should be used. The
 #'        default, `n_cpus()`, will use all logical CPU cores.
 #' 
-#'   
 NULL

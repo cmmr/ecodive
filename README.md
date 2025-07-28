@@ -1,7 +1,6 @@
 # fastbiom
 
 <!-- badges: start -->
-
 [![cran](https://www.r-pkg.org/badges/version/fastbiom)](https://CRAN.R-project.org/package=fastbiom)
 [![conda](https://anaconda.org/conda-forge/r-fastbiom/badges/version.svg)](https://anaconda.org/conda-forge/r-fastbiom)
 [![downloads](https://cranlogs.r-pkg.org/badges/grand-total/fastbiom)](https://cranlogs.r-pkg.org/)
@@ -9,12 +8,11 @@
 [![covr](https://codecov.io/gh/cmmr/fastbiom/graph/badge.svg)](https://app.codecov.io/gh/cmmr/fastbiom)
 <!-- badges: end -->
 
-`fastbiom` provides the fastest implementations of:
-
-* 5 alpha diversity metrics: Shannon, Simpson, Inverse Simpson, Chao1, and Faith's Phylogenetic Diversity.
-* 12 beta diversity metrics: Bray Curtis, Canberra, Euclidean, Gower, Jaccard, Kulczynski, Manhattan, Unweighted UniFrac, Weighted UniFrac, Normalized UniFrac, Generalized UniFrac, and Variance Adjusted UniFrac.
-* Count matrix rarefaction
-* Newick file parsing
+`fastbiom` provides the fastest implementations of several alpha- and 
+beta-diversity metrics for R, including phylogenetic metrics such as Faith's PD 
+and 5 variants of UniFrac. It is compatible with phyloseq, rbiom, and 
+BioConductor objects. Zero dependencies, making it quick to install and ideal
+for package developers.
 
 
 ## Installation

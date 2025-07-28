@@ -12,7 +12,7 @@
 #'        underscores. If `FALSE`, underscores in unquoted named will be 
 #'        converted to spaces.
 #'        
-#' @return A \code{phylo} class object representing the tree.
+#' @return A `phylo` class object representing the tree.
 #' 
 #' @export
 #' @examples

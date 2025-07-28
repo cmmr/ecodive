@@ -2,8 +2,9 @@
 # https://forum.qiime2.org/t/alpha-and-beta-diversity-explanations-and-commands/2282
 
 
-#' Chao1 alpha diversity metric
+#' Chao1
 #' 
+#' Chao1 alpha diversity metric.\cr\cr
 #' A non-parametric estimator of the number of unobserved species in a sample.
 #' The Chao1 index estimates total species richness based on the number of 
 #' species that occur only once (singletons) and twice (doubletons) in the 
@@ -11,6 +12,8 @@
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
+#' 
+#' @return A numeric vector.
 #' 
 #' @section Calculation:
 #' 
@@ -73,14 +76,17 @@ chao1 <- function (counts, cpus = n_cpus()) {
 }
 
 
-#' Faith's phylogenetic diversity metric
+#' Faith's PD
 #' 
+#' Faith's phylogenetic diversity metric.\cr\cr
 #' A higher value indicates a greater amount of evolutionary history 
 #' represented within the community, suggesting higher biodiversity in terms of 
 #' evolutionary relationships.
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
+#' 
+#' @return A numeric vector.
 #' 
 #' @section Calculation:
 #' 
@@ -115,10 +121,14 @@ faith <- function (counts, tree, cpus = n_cpus()) {
 }
 
 
-#' Inverse Simpson alpha diversity metric
+#' Inverse Simpson
+#' 
+#' Inverse Simpson alpha diversity metric.
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
+#' 
+#' @return A numeric vector.
 #' 
 #' @section Calculation:
 #' 
@@ -179,13 +189,16 @@ inv_simpson <- function (counts, cpus = n_cpus()) {
 }
 
 
-#' Shannon alpha diversity metric
+#' Shannon
 #' 
+#' Shannon alpha diversity metric.\cr\cr
 #' The index considers both the number of different OTUs (richness) and how 
 #' evenly the observations are distributed among those OTUs (evenness).
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
+#' 
+#' @return A numeric vector.
 #' 
 #' @section Calculation:
 #' 
@@ -245,14 +258,17 @@ shannon <- function (counts, cpus = n_cpus()) {
 }
 
 
-#' Simpson alpha diversity metric
+#' Simpson
 #' 
+#' Simpson alpha diversity metric.\cr\cr
 #' Gauges the uniformity of species within a community. A Simpson index of `1` 
 #' indicates that one or a few high abundance OTUs dominate the community, 
 #' which is indicative of low diversity.
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
+#' 
+#' @return A numeric vector.
 #' 
 #' @section Calculation:
 #' 

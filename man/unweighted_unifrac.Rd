@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta_div.r
 \name{unweighted_unifrac}
 \alias{unweighted_unifrac}
-\title{Unweighted UniFrac beta diversity metric}
+\title{Unweighted UniFrac}
 \usage{
 unweighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
 }
@@ -25,8 +25,11 @@ distance matrix to calculate. See examples.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A \code{dist} object.
+}
 \description{
-Unweighted UniFrac beta diversity metric
+Unweighted UniFrac beta diversity metric.
 }
 \section{Calculation}{
 
@@ -34,7 +37,7 @@ Unweighted UniFrac beta diversity metric
 Given \eqn{n} branches with lengths \eqn{L} and a pair of samples'
 abundances (\eqn{A} and \eqn{B}) on each of those branches:
 
-\deqn{\displaystyle \frac{\sum_{i = 1}^{n} L_i(|A_i - B_i|)}{\sum_{i = 1}^{n} L_i(max(A_i,B_i))}}
+\deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i(|A_i - B_i|)}{\sum_{i = 1}^{n} L_i(max(A_i,B_i))}}
 
 Abundances in \eqn{A} and \eqn{B} are coded as \code{1} or \code{0} to indicate their
 presence or absence, respectively, on each branch.

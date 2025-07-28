@@ -2,7 +2,7 @@
 % Please edit documentation in R/alpha_div.r
 \name{chao1}
 \alias{chao1}
-\title{Chao1 alpha diversity metric}
+\title{Chao1}
 \usage{
 chao1(counts, cpus = n_cpus())
 }
@@ -15,7 +15,11 @@ and \code{TreeSummarizedExperiment} objects.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A numeric vector.
+}
 \description{
+Chao1 alpha diversity metric.\cr\cr
 A non-parametric estimator of the number of unobserved species in a sample.
 The Chao1 index estimates total species richness based on the number of
 species that occur only once (singletons) and twice (doubletons) in the

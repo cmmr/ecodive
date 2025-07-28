@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.r
 \name{n_cpus}
 \alias{n_cpus}
-\title{Number of CPU cores.}
+\title{Number of CPU Cores}
 \usage{
 n_cpus()
 }
@@ -18,5 +18,5 @@ in place of \code{n_cpus()} for more advanced interrogation of system resources.
 }
 \examples{
     n_cpus()
-    
+
 }

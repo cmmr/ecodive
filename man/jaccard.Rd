@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta_div.r
 \name{jaccard}
 \alias{jaccard}
-\title{Jaccard beta diversity metric}
+\title{Jaccard}
 \usage{
 jaccard(counts, weighted = TRUE, pairs = NULL, cpus = n_cpus())
 }
@@ -23,8 +23,11 @@ distance matrix to calculate. See examples.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A \code{dist} object.
+}
 \description{
-Jaccard beta diversity metric
+Jaccard beta diversity metric.
 }
 \section{Calculation}{
 

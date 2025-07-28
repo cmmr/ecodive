@@ -5,10 +5,14 @@
 # https://forum.qiime2.org/t/alpha-and-beta-diversity-explanations-and-commands/2282
 
 
-#' Bray-Curtis beta diversity metric
+#' Bray-Curtis
+#' 
+#' Bray-Curtis beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
@@ -63,10 +67,14 @@ bray_curtis <- function (
 }
 
 
-#' Canberra beta diversity metric
+#' Canberra
+#' 
+#' Canberra beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
@@ -124,10 +132,14 @@ canberra <- function (
 }
 
 
-#' Euclidean beta diversity metric
+#' Euclidean
+#' 
+#' Euclidean beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
@@ -183,10 +195,14 @@ euclidean <- function (
 }
 
 
-#' Gower beta diversity metric
+#' Gower
+#' 
+#' Gower beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
@@ -250,10 +266,14 @@ gower <- function (
 }
 
 
-#' Jaccard beta diversity metric
+#' Jaccard
+#' 
+#' Jaccard beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
@@ -311,10 +331,14 @@ jaccard <- function (
 }
 
 
-#' Kulczynski beta diversity metric
+#' Kulczynski
+#' 
+#' Kulczynski beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
@@ -371,10 +395,14 @@ kulczynski <- function (
 }
 
 
-#' Manhattan beta diversity metric
+#' Manhattan
+#' 
+#' Manhattan beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
@@ -430,17 +458,21 @@ manhattan <- function (
 }
 
 
-#' Unweighted UniFrac beta diversity metric
+#' Unweighted UniFrac
+#' 
+#' Unweighted UniFrac beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
 #' Given \eqn{n} branches with lengths \eqn{L} and a pair of samples' 
 #' abundances (\eqn{A} and \eqn{B}) on each of those branches:
 #' 
-#' \deqn{\displaystyle \frac{\sum_{i = 1}^{n} L_i(|A_i - B_i|)}{\sum_{i = 1}^{n} L_i(max(A_i,B_i))}}
+#' \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i(|A_i - B_i|)}{\sum_{i = 1}^{n} L_i(max(A_i,B_i))}}
 #' 
 #' Abundances in \eqn{A} and \eqn{B} are coded as `1` or `0` to indicate their 
 #' presence or absence, respectively, on each branch.
@@ -482,17 +514,21 @@ unweighted_unifrac <- function (
 }
 
 
-#' Weighted UniFrac beta diversity metric
+#' Weighted UniFrac
+#' 
+#' Weighted UniFrac beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
 #' Given \eqn{n} branches with lengths \eqn{L} and a pair of samples' 
 #' abundances (\eqn{A} and \eqn{B}) on each of those branches:
 #' 
-#' \deqn{\sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}
+#' \deqn{D = \sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}
 #' 
 #' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
 #' a worked example.
@@ -531,17 +567,21 @@ weighted_unifrac <- function (
 }
 
 
-#' Normalized UniFrac beta diversity metric
+#' Normalized UniFrac
+#' 
+#' Normalized UniFrac beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
 #' Given \eqn{n} branches with lengths \eqn{L} and a pair of samples' 
 #' abundances (\eqn{A} and \eqn{B}) on each of those branches:
 #' 
-#' \deqn{\displaystyle \frac{\sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})}}
+#' \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})}}
 #' 
 #' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
 #' a worked example.
@@ -580,10 +620,14 @@ normalized_unifrac <- function (
 } 
 
 
-#' Generalized UniFrac beta diversity metric
+#' Generalized UniFrac
+#' 
+#' Generalized UniFrac beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
@@ -591,7 +635,7 @@ normalized_unifrac <- function (
 #' abundances (\eqn{A} and \eqn{B}) on each of those branches, and 
 #' abundance weighting \eqn{0 \le \alpha \le 1}:
 #' 
-#' \deqn{\displaystyle \frac{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}|\displaystyle \frac{\frac{A_i}{A_T} - \frac{B_i}{B_T}}{\frac{A_i}{A_T} + \frac{B_i}{B_T}} |}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}}}
+#' \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}|\displaystyle \frac{\frac{A_i}{A_T} - \frac{B_i}{B_T}}{\frac{A_i}{A_T} + \frac{B_i}{B_T}} |}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}}}
 #' 
 #' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
 #' a worked example.
@@ -630,17 +674,21 @@ generalized_unifrac <- function (
 }
 
 
-#' Variance Adjusted UniFrac beta diversity metric
+#' Variance Adjusted UniFrac
+#' 
+#' Variance Adjusted UniFrac beta diversity metric.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
+#' 
+#' @return A `dist` object.
 #' 
 #' @section Calculation:
 #' 
 #' Given \eqn{n} branches with lengths \eqn{L} and a pair of samples' 
 #' abundances (\eqn{A} and \eqn{B}) on each of those branches:
 #' 
-#' \deqn{\displaystyle \frac{\sum_{i = 1}^{n} L_i\displaystyle \frac{|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }{\sum_{i = 1}^{n} L_i\displaystyle \frac{\frac{A_i}{A_T} + \frac{B_i}{B_T}}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }}
+#' \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i\displaystyle \frac{|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }{\sum_{i = 1}^{n} L_i\displaystyle \frac{\frac{A_i}{A_T} + \frac{B_i}{B_T}}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }}
 #' 
 #' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
 #' a worked example.

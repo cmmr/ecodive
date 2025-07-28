@@ -2,7 +2,7 @@
 % Please edit documentation in R/beta_div.r
 \name{weighted_unifrac}
 \alias{weighted_unifrac}
-\title{Weighted UniFrac beta diversity metric}
+\title{Weighted UniFrac}
 \usage{
 weighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
 }
@@ -25,8 +25,11 @@ distance matrix to calculate. See examples.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
+\value{
+A \code{dist} object.
+}
 \description{
-Weighted UniFrac beta diversity metric
+Weighted UniFrac beta diversity metric.
 }
 \section{Calculation}{
 
@@ -34,7 +37,7 @@ Weighted UniFrac beta diversity metric
 Given \eqn{n} branches with lengths \eqn{L} and a pair of samples'
 abundances (\eqn{A} and \eqn{B}) on each of those branches:
 
-\deqn{\sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}
+\deqn{D = \sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}
 
 See \url{https://cmmr.github.io/fastbiom/articles/unifrac.html} for details and
 a worked example.
