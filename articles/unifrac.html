@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>UniFrac Calculations • fastbiom</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Noto_Sans-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -225,22 +226,11 @@ OTUs in rows.</i></small></p>
 <div class="section level2">
 <h2 id="definitions">Definitions<a class="anchor" aria-label="anchor" href="#definitions"></a>
 </h2>
-<p>The branch indices (green circles) are used for ordering the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>,
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
-arrays. Values for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
-are drawn from the input phylogenetic tree. Values for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
-are the total number of OTU observations descending from that branch;
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
-for Sample_1, and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
-for Sample_2.</p>
+<p>The branch indices (green circles) are used for ordering the <span class="math inline">L</span>, <span class="math inline">A</span>, and
+<span class="math inline">B</span> arrays. Values for <span class="math inline">L</span> are drawn from the input phylogenetic tree.
+Values for <span class="math inline">A</span> and <span class="math inline">B</span> are the total number of OTU observations
+descending from that branch; <span class="math inline">A</span> for
+Sample_1, and <span class="math inline">B</span> for Sample_2.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">local</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  </span>
@@ -268,7 +258,7 @@ for Sample_2.</p>
 <table class="table def_table">
 <tr>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">n = 8</annotation></semantics></math>
+<span class="math inline">n = 8</span>
 </td>
 <td>
 Number of branches
@@ -276,7 +266,7 @@ Number of branches
 </tr>
 <tr>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mn>9</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>9</mn><mo>,</mo><mn>6</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>3</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">A = \{9, 0, 0, 0, 9, 6, 3, 3\}</annotation></semantics></math>
+<span class="math inline">A = \{9, 0, 0, 0, 9, 6, 3, 3\}</span>
 </td>
 <td>
 Branch <strong>weights</strong> for Sample_1.
@@ -284,7 +274,7 @@ Branch <strong>weights</strong> for Sample_1.
 </tr>
 <tr>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mn>7</mn><mo>,</mo><mn>5</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>4</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>8</mn><mo>,</mo><mn>8</mn><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">B = \{7, 5, 1, 4, 2, 8, 8, 0\}</annotation></semantics></math>
+<span class="math inline">B = \{7, 5, 1, 4, 2, 8, 8, 0\}</span>
 </td>
 <td>
 Branch <strong>weights</strong> for Sample_2.
@@ -292,7 +282,7 @@ Branch <strong>weights</strong> for Sample_2.
 </tr>
 <tr>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mi>T</mi></msub><mo>=</mo><mn>15</mn></mrow><annotation encoding="application/x-tex">A_T = 15</annotation></semantics></math>
+<span class="math inline">A_T = 15</span>
 </td>
 <td>
 Total OTU counts for Sample_1.
@@ -300,7 +290,7 @@ Total OTU counts for Sample_1.
 </tr>
 <tr>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>B</mi><mi>T</mi></msub><mo>=</mo><mn>15</mn></mrow><annotation encoding="application/x-tex">B_T = 15</annotation></semantics></math>
+<span class="math inline">B_T = 15</span>
 </td>
 <td>
 Total OTU counts for Sample_2.
@@ -308,7 +298,8 @@ Total OTU counts for Sample_2.
 </tr>
 <tr>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mn>0.2</mn><mo>,</mo><mn>0.4</mn><mo>,</mo><mn>0.8</mn><mo>,</mo><mn>0.5</mn><mo>,</mo><mn>0.9</mn><mo>,</mo><mn>0.6</mn><mo>,</mo><mn>0.7</mn><mo>,</mo><mn>0.3</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">L = \{0.2, 0.4, 0.8, 0.5, 0.9, 0.6, 0.7, 0.3\}</annotation></semantics></math>
+<span class="math inline">L = \{0.2, 0.4, 0.8, 0.5, 0.9, 0.6, 0.7,
+0.3\}</span>
 </td>
 <td>
 The branch <strong>lengths</strong>.
@@ -347,28 +338,38 @@ et al, 2005</a>: Unweighted UniFrac</li>
 indicators.</p>
 <table class="table center" style="width:75%"><tr>
 <td style="border-width:0">
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>A</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mn>9</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>9</mn><mo>,</mo><mn>6</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>3</mn><mo stretchy="false" form="postfix">}</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>A</mi><mi>′</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+<p><span class="math display">\begin{align*}
 A  &amp;= \{9, 0, 0, 0, 9, 6, 3, 3\} \\
 A' &amp;= \{1, 0, 0, 0, 1, 1, 1, 1\}
-\end{align*}</annotation></semantics></math></p>
+\end{align*}</span></p>
 </td>
 <td style="border-width:0">
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>B</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mn>7</mn><mo>,</mo><mn>5</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>4</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>8</mn><mo>,</mo><mn>8</mn><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">}</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>B</mi><mi>′</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">}</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+<p><span class="math display">\begin{align*}
 B  &amp;= \{7, 5, 1, 4, 2, 8, 8, 0\} \\
 B' &amp;= \{1, 1, 1, 1, 1, 1, 1, 0\}
-\end{align*}</annotation></semantics></math></p>
+\end{align*}</span></p>
 </td>
 </tr></table>
 <p>Then apply the formula:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>U</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">|</mo><mi>A</mi><msub><mi>′</mi><mi>i</mi></msub><mo>−</mo><mi>B</mi><msub><mi>′</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><msub><mi>′</mi><mi>i</mi></msub><mo>,</mo><mi>B</mi><msub><mi>′</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>U</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><msub><mi>L</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">|</mo><mi>A</mi><msub><mi>′</mi><mn>1</mn></msub><mo>−</mo><mi>B</mi><msub><mi>′</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">|</mo><mi>A</mi><msub><mi>′</mi><mn>2</mn></msub><mo>−</mo><mi>B</mi><msub><mi>′</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">|</mo><mi>A</mi><msub><mi>′</mi><mi>n</mi></msub><mo>−</mo><mi>B</mi><msub><mi>′</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><msub><mi>L</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><msub><mi>′</mi><mn>1</mn></msub><mo>,</mo><mi>B</mi><msub><mi>′</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><msub><mi>′</mi><mn>2</mn></msub><mo>,</mo><mi>B</mi><msub><mi>′</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><msub><mi>′</mi><mi>n</mi></msub><mo>,</mo><mi>B</mi><msub><mi>′</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>U</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><mn>0.2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">|</mo><mn>1</mn><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.4</mn><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">|</mo><mn>0</mn><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">|</mo><mn>1</mn><mo>−</mo><mn>0</mn><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mn>0.2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.4</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>U</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><mn>0.2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.4</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.8</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.5</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.9</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.6</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.7</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.3</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mn>0.2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.4</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.8</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.5</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.9</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.6</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.7</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.3</mn><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>U</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><mn>0.4</mn><mo>+</mo><mn>0.8</mn><mo>+</mo><mn>0.5</mn><mo>+</mo><mn>0.3</mn></mrow><mrow><mn>0.2</mn><mo>+</mo><mn>0.4</mn><mo>+</mo><mn>0.8</mn><mo>+</mo><mn>0.5</mn><mo>+</mo><mn>0.9</mn><mo>+</mo><mn>0.6</mn><mo>+</mo><mn>0.7</mn><mo>+</mo><mn>0.3</mn></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>U</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mn>2</mn><mn>4.4</mn></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>U</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.4545455</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
-U &amp;= \displaystyle \frac{\sum_{i = 1}^{n} L_i(|A'_i - B'_i|)}{\sum_{i = 1}^{n} L_i(max(A'_i,B'_i))}  \\ \\
-U &amp;= \displaystyle \frac{L_1(|A'_1-B'_1|) + L_2(|A'_2-B'_2|) + \cdots + L_n(|A'_n-B'_n|)}{L_1(max(A'_1,B'_1)) + L_2(max(A'_2,B'_2)) + \cdots + L_n(max(A'_n,B'_n))}  \\ \\
-U &amp;= \displaystyle \frac{0.2(|1-1|) + 0.4(|0-1|) + \cdots + 0.3(|1-0|)}{0.2(max(1,1)) + 0.4(max(0,1)) + \cdots + 0.3(max(1,0))}  \\ \\
-U &amp;= \displaystyle \frac{0.2(0) + 0.4(1) + 0.8(1) + 0.5(1) + 0.9(0) + 0.6(0) + 0.7(0) + 0.3(1)}{0.2(1) + 0.4(1) + 0.8(1) + 0.5(1) + 0.9(1) + 0.6(1) + 0.7(1) + 0.3(1)}  \\ \\
-U &amp;= \displaystyle \frac{0.4 + 0.8 + 0.5 + 0.3}{0.2 + 0.4 + 0.8 + 0.5 + 0.9 + 0.6 + 0.7 + 0.3}  \\ \\
+<p><span class="math display">\begin{align*}
+U &amp;= \displaystyle \frac{\sum_{i = 1}^{n} L_i(|A'_i -
+B'_i|)}{\sum_{i = 1}^{n} L_i(max(A'_i,B'_i))}  \\ \\
+U &amp;= \displaystyle \frac{L_1(|A'_1-B'_1|) +
+L_2(|A'_2-B'_2|) + \cdots +
+L_n(|A'_n-B'_n|)}{L_1(max(A'_1,B'_1)) +
+L_2(max(A'_2,B'_2)) + \cdots + L_n(max(A'_n,B'_n))}  \\
+\\
+U &amp;= \displaystyle \frac{0.2(|1-1|) + 0.4(|0-1|) + \cdots +
+0.3(|1-0|)}{0.2(max(1,1)) + 0.4(max(0,1)) + \cdots + 0.3(max(1,0))}  \\
+\\
+U &amp;= \displaystyle \frac{0.2(0) + 0.4(1) + 0.8(1) + 0.5(1) + 0.9(0)
++ 0.6(0) + 0.7(0) + 0.3(1)}{0.2(1) + 0.4(1) + 0.8(1) + 0.5(1) + 0.9(1) +
+0.6(1) + 0.7(1) + 0.3(1)}  \\ \\
+U &amp;= \displaystyle \frac{0.4 + 0.8 + 0.5 + 0.3}{0.2 + 0.4 + 0.8 +
+0.5 + 0.9 + 0.6 + 0.7 + 0.3}  \\ \\
 U &amp;= \displaystyle \frac{2}{4.4}  \\ \\
 U &amp;= 0.4545455
-\end{align*}</annotation></semantics></math></p>
+\end{align*}</span></p>
 </div>
 <div class="section level2">
 <h2 id="weighted">Weighted<a class="anchor" aria-label="anchor" href="#weighted"></a>
@@ -391,13 +392,17 @@ U &amp;= 0.4545455
 <code>qiime diversity beta-phylogenetic --p-metric weighted_unifrac</code>
 </li>
 </ul>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>W</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>W</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mi>L</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mn>2</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mn>2</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>W</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.2</mn><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>7</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><mn>0.4</mn><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>5</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>W</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.02</mn><mover><mn>6</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.1</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.05</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.1</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.42</mn><mo>+</mo><mn>0.08</mn><mo>+</mo><mn>0.2</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.06</mn></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>W</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>1.14</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+<p><span class="math display">\begin{align*}
 W &amp;= \sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|  \\ \\
-W &amp;= L_1|\frac{A_1}{A_T} - \frac{B_1}{B_T}| + L_2|\frac{A_2}{A_T} - \frac{B_2}{B_T}| + \cdots + L_n|\frac{A_n}{A_T} - \frac{B_n}{B_T}|  \\ \\
-W &amp;= 0.2|\frac{9}{15} - \frac{7}{15}| + 0.4|\frac{0}{15} - \frac{5}{15}| + \cdots + 0.3|\frac{3}{15} - \frac{0}{15}|  \\ \\
-W &amp;= 0.02\overline{6} + 0.1\overline{3} + 0.05\overline{3} + 0.1\overline{3} + 0.42 + 0.08 + 0.2\overline{3} + 0.06  \\ \\
+W &amp;= L_1|\frac{A_1}{A_T} - \frac{B_1}{B_T}| + L_2|\frac{A_2}{A_T} -
+\frac{B_2}{B_T}| + \cdots + L_n|\frac{A_n}{A_T} - \frac{B_n}{B_T}|  \\
+\\
+W &amp;= 0.2|\frac{9}{15} - \frac{7}{15}| + 0.4|\frac{0}{15} -
+\frac{5}{15}| + \cdots + 0.3|\frac{3}{15} - \frac{0}{15}|  \\ \\
+W &amp;= 0.02\overline{6} + 0.1\overline{3} + 0.05\overline{3} +
+0.1\overline{3} + 0.42 + 0.08 + 0.2\overline{3} + 0.06  \\ \\
 W &amp;= 1.14
-\end{align*}</annotation></semantics></math></p>
+\end{align*}</span></p>
 </div>
 <div class="section level2">
 <h2 id="normalized">Normalized<a class="anchor" aria-label="anchor" href="#normalized"></a>
@@ -424,7 +429,7 @@ W &amp;= 1.14
 <code>unifrac.weighted()</code>
 </li>
 </ul>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>N</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>N</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><msub><mi>L</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mn>2</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mn>2</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mrow><mrow><msub><mi>L</mi><mn>1</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>L</mi><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mn>2</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mn>2</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>N</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><mn>0.2</mn><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>7</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><mn>0.4</mn><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>5</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mrow><mrow><mn>0.2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>7</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>0.4</mn><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>5</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>N</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><mn>0.02</mn><mover><mn>6</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.1</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.05</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.1</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.42</mn><mo>+</mo><mn>0.08</mn><mo>+</mo><mn>0.2</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.06</mn></mrow><mrow><mn>0.21</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.1</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.05</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.1</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.66</mn><mo>+</mo><mn>0.56</mn><mo>+</mo><mn>0.51</mn><mover><mn>3</mn><mo accent="true">¯</mo></mover><mo>+</mo><mn>0.06</mn></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>N</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mn>1.14</mn><mn>2.326667</mn></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>N</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.4899713</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+<p><span class="math display">\begin{align*}
 
 N &amp;= \displaystyle \frac
   {\sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}
@@ -432,23 +437,29 @@ N &amp;= \displaystyle \frac
   \\ \\
   
 N &amp;= \displaystyle \frac
-  {L_1|\frac{A_1}{A_T} - \frac{B_1}{B_T}| + L_2|\frac{A_2}{A_T} - \frac{B_2}{B_T}| + \cdots + L_n|\frac{A_n}{A_T} - \frac{B_n}{B_T}|}
-  {L_1(\frac{A_1}{A_T} + \frac{B_1}{B_T}) + L_2(\frac{A_2}{A_T} + \frac{B_2}{B_T}) + \cdots + L_n(\frac{A_n}{A_T} + \frac{B_n}{B_T})}
+  {L_1|\frac{A_1}{A_T} - \frac{B_1}{B_T}| + L_2|\frac{A_2}{A_T} -
+\frac{B_2}{B_T}| + \cdots + L_n|\frac{A_n}{A_T} - \frac{B_n}{B_T}|}
+  {L_1(\frac{A_1}{A_T} + \frac{B_1}{B_T}) + L_2(\frac{A_2}{A_T} +
+\frac{B_2}{B_T}) + \cdots + L_n(\frac{A_n}{A_T} + \frac{B_n}{B_T})}
   \\ \\
   
 N &amp;= \displaystyle \frac
-  {0.2|\frac{9}{15} - \frac{7}{15}| + 0.4|\frac{0}{15} - \frac{5}{15}| + \cdots + 0.3|\frac{3}{15} - \frac{0}{15}|}
-  {0.2(\frac{9}{15} + \frac{7}{15}) + 0.4(\frac{0}{15} + \frac{5}{15}) + \cdots + 0.3(\frac{3}{15} + \frac{0}{15})}
+  {0.2|\frac{9}{15} - \frac{7}{15}| + 0.4|\frac{0}{15} - \frac{5}{15}| +
+\cdots + 0.3|\frac{3}{15} - \frac{0}{15}|}
+  {0.2(\frac{9}{15} + \frac{7}{15}) + 0.4(\frac{0}{15} + \frac{5}{15}) +
+\cdots + 0.3(\frac{3}{15} + \frac{0}{15})}
   \\ \\
   
 N &amp;= \displaystyle \frac
-  {0.02\overline{6} + 0.1\overline{3} + 0.05\overline{3} + 0.1\overline{3} + 0.42 + 0.08 + 0.2\overline{3} + 0.06}
-  {0.21\overline{3} + 0.1\overline{3} + 0.05\overline{3} + 0.1\overline{3} + 0.66 + 0.56 + 0.51\overline{3} + 0.06}
+  {0.02\overline{6} + 0.1\overline{3} + 0.05\overline{3} +
+0.1\overline{3} + 0.42 + 0.08 + 0.2\overline{3} + 0.06}
+  {0.21\overline{3} + 0.1\overline{3} + 0.05\overline{3} +
+0.1\overline{3} + 0.66 + 0.56 + 0.51\overline{3} + 0.06}
   \\ \\
   
 N &amp;= \displaystyle \frac{1.14}{2.326667}  \\ \\
 N &amp;= 0.4899713
-\end{align*}</annotation></semantics></math></p>
+\end{align*}</span></p>
 </div>
 <div class="section level2">
 <h2 id="generalized">Generalized<a class="anchor" aria-label="anchor" href="#generalized"></a>
@@ -471,29 +482,30 @@ al. 2012</a>: Generalized UniFrac</li>
 <code>qiime diversity beta-phylogenetic --p-metric generalized_unifrac -a 0.5</code>
 </li>
 </ul>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>G</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mi>α</mi></msup><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mrow><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow><mrow><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mi>α</mi></msup></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>G</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><msub><mi>L</mi><mn>1</mn></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>0.5</mn></msup><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mrow><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow><mrow><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>0.5</mn></msup><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mrow><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow><mrow><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mrow><mrow><msub><mi>L</mi><mn>1</mn></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>0.5</mn></msup><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>0.5</mn></msup></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>G</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><mn>0.2</mn><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>7</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>0.5</mn></msup><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mrow><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>7</mn><mn>15</mn></mfrac></mrow><mrow><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>7</mn><mn>15</mn></mfrac></mrow></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>0.5</mn></msup><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mrow><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>0</mn><mn>15</mn></mfrac></mrow><mrow><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>0</mn><mn>15</mn></mfrac></mrow></mfrac><mo stretchy="true" form="postfix">|</mo></mrow></mrow><mrow><mn>0.2</mn><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>7</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>0.5</mn></msup><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mn>0.5</mn></msup></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>G</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>≈</mo><mfrac><mrow><mn>0.03</mn><mo>+</mo><mn>0.23</mn><mo>+</mo><mn>0.21</mn><mo>+</mo><mn>0.26</mn><mo>+</mo><mn>0.49</mn><mo>+</mo><mn>0.08</mn><mo>+</mo><mn>0.27</mn><mo>+</mo><mn>0.13</mn></mrow><mrow><mn>0.21</mn><mo>+</mo><mn>0.23</mn><mo>+</mo><mn>0.21</mn><mo>+</mo><mn>0.26</mn><mo>+</mo><mn>0.77</mn><mo>+</mo><mn>0.58</mn><mo>+</mo><mn>0.60</mn><mo>+</mo><mn>0.13</mn></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>G</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mn>1.701419</mn><mn>2.986235</mn></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>G</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.569754</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+<p><span class="math display">\begin{align*}
 
 G &amp;= \displaystyle \frac
   {\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}
     |\displaystyle \frac
       {\frac{A_i}{A_T} - \frac{B_i}{B_T}}
       {\frac{A_i}{A_T} + \frac{B_i}{B_T}} |}
-  {\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}}  \\ \\
+  {\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}}  \\
+\\
 
 G &amp;= \displaystyle \frac
   {
     L_1(\frac{A_1}{A_T} + \frac{B_1}{B_T})^{0.5}
       |\displaystyle \frac
         {\frac{A_1}{A_T} - \frac{B_1}{B_T}}
-        {\frac{A_1}{A_T} + \frac{B_1}{B_T}}| + 
-    \cdots + 
+        {\frac{A_1}{A_T} + \frac{B_1}{B_T}}| +
+    \cdots +
     L_n(\frac{A_n}{A_T} + \frac{B_n}{B_T})^{0.5}
       |\displaystyle \frac
         {\frac{A_n}{A_T} - \frac{B_n}{B_T}}
         {\frac{A_n}{A_T} + \frac{B_n}{B_T}}|
   }{
-    L_1(\frac{A_1}{A_T} + \frac{B_1}{B_T})^{0.5} + 
-    \cdots + 
+    L_1(\frac{A_1}{A_T} + \frac{B_1}{B_T})^{0.5} +
+    \cdots +
     L_n(\frac{A_n}{A_T} + \frac{B_n}{B_T})^{0.5}
   }  
   \\ \\
@@ -503,15 +515,15 @@ G &amp;= \displaystyle \frac
     0.2(\frac{9}{15} + \frac{7}{15})^{0.5}
       |\displaystyle \frac
         {\frac{9}{15} - \frac{7}{15}}
-        {\frac{9}{15} + \frac{7}{15}}| + 
-    \cdots + 
+        {\frac{9}{15} + \frac{7}{15}}| +
+    \cdots +
     0.3(\frac{3}{15} + \frac{0}{15})^{0.5}
       |\displaystyle \frac
         {\frac{3}{15} - \frac{0}{15}}
         {\frac{3}{15} + \frac{0}{15}}|
   }{
-    0.2(\frac{9}{15} + \frac{7}{15})^{0.5} + 
-    \cdots + 
+    0.2(\frac{9}{15} + \frac{7}{15})^{0.5} +
+    \cdots +
     0.3(\frac{3}{15} + \frac{0}{15})^{0.5}
   }  
   \\ \\
@@ -524,7 +536,7 @@ G &amp;\approx \displaystyle \frac
 G &amp;= \displaystyle \frac{1.701419}{2.986235}  \\ \\
 G &amp;= 0.569754
 
-\end{align*}</annotation></semantics></math></p>
+\end{align*}</span></p>
 </div>
 <div class="section level2">
 <h2 id="variance-adjusted">Variance Adjusted<a class="anchor" aria-label="anchor" href="#variance-adjusted"></a>
@@ -544,7 +556,7 @@ G &amp;= 0.569754
 <code>qiime diversity beta-phylogenetic --p-metric weighted_normalized_unifrac --p-variance-adjusted</code>
 </li>
 </ul>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>V</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><mfrac><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>i</mi></msub><mo>+</mo><msub><mi>B</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>T</mi></msub><mo>+</mo><msub><mi>B</mi><mi>T</mi></msub><mo>−</mo><msub><mi>A</mi><mi>i</mi></msub><mo>−</mo><msub><mi>B</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>L</mi><mi>i</mi></msub><mfrac><mrow><mfrac><msub><mi>A</mi><mi>i</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>i</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>i</mi></msub><mo>+</mo><msub><mi>B</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>T</mi></msub><mo>+</mo><msub><mi>B</mi><mi>T</mi></msub><mo>−</mo><msub><mi>A</mi><mi>i</mi></msub><mo>−</mo><msub><mi>B</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>V</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><msub><mi>L</mi><mn>1</mn></msub><mfrac><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mn>1</mn></msub><mo>+</mo><msub><mi>B</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>T</mi></msub><mo>+</mo><msub><mi>B</mi><mi>T</mi></msub><mo>−</mo><msub><mi>A</mi><mn>1</mn></msub><mo>−</mo><msub><mi>B</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><mfrac><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>−</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>n</mi></msub><mo>+</mo><msub><mi>B</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>T</mi></msub><mo>+</mo><msub><mi>B</mi><mi>T</mi></msub><mo>−</mo><msub><mi>A</mi><mi>n</mi></msub><mo>−</mo><msub><mi>B</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac></mrow><mrow><msub><mi>L</mi><mn>1</mn></msub><mfrac><mrow><mfrac><msub><mi>A</mi><mn>1</mn></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mn>1</mn></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mn>1</mn></msub><mo>+</mo><msub><mi>B</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>T</mi></msub><mo>+</mo><msub><mi>B</mi><mi>T</mi></msub><mo>−</mo><msub><mi>A</mi><mn>1</mn></msub><mo>−</mo><msub><mi>B</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac><mo>+</mo><mi>⋯</mi><mo>+</mo><msub><mi>L</mi><mi>n</mi></msub><mfrac><mrow><mfrac><msub><mi>A</mi><mi>n</mi></msub><msub><mi>A</mi><mi>T</mi></msub></mfrac><mo>+</mo><mfrac><msub><mi>B</mi><mi>n</mi></msub><msub><mi>B</mi><mi>T</mi></msub></mfrac></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>n</mi></msub><mo>+</mo><msub><mi>B</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>A</mi><mi>T</mi></msub><mo>+</mo><msub><mi>B</mi><mi>T</mi></msub><mo>−</mo><msub><mi>A</mi><mi>n</mi></msub><mo>−</mo><msub><mi>B</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>V</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mrow><mn>0.2</mn><mfrac><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>7</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>9</mn><mo>+</mo><mn>7</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>15</mn><mo>+</mo><mn>15</mn><mo>−</mo><mn>9</mn><mo>−</mo><mn>7</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><mfrac><mrow><mo stretchy="true" form="prefix">|</mo><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>−</mo><mfrac><mn>0</mn><mn>15</mn></mfrac><mo stretchy="true" form="postfix">|</mo></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>3</mn><mo>+</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>15</mn><mo>+</mo><mn>15</mn><mo>−</mo><mn>3</mn><mo>−</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac></mrow><mrow><mn>0.2</mn><mfrac><mrow><mfrac><mn>9</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>7</mn><mn>15</mn></mfrac></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>9</mn><mo>+</mo><mn>7</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>15</mn><mo>+</mo><mn>15</mn><mo>−</mo><mn>9</mn><mo>−</mo><mn>7</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac><mo>+</mo><mi>⋯</mi><mo>+</mo><mn>0.3</mn><mfrac><mrow><mfrac><mn>3</mn><mn>15</mn></mfrac><mo>+</mo><mfrac><mn>0</mn><mn>15</mn></mfrac></mrow><msqrt><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>3</mn><mo>+</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>15</mn><mo>+</mo><mn>15</mn><mo>−</mo><mn>3</mn><mo>−</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mfrac></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>V</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>≈</mo><mfrac><mrow><mn>0.002</mn><mo>+</mo><mn>0.012</mn><mo>+</mo><mn>0.010</mn><mo>+</mo><mn>0.013</mn><mo>+</mo><mn>0.029</mn><mo>+</mo><mn>0.005</mn><mo>+</mo><mn>0.016</mn><mo>+</mo><mn>0.007</mn></mrow><mrow><mn>0.014</mn><mo>+</mo><mn>0.012</mn><mo>+</mo><mn>0.010</mn><mo>+</mo><mn>0.013</mn><mo>+</mo><mn>0.046</mn><mo>+</mo><mn>0.037</mn><mo>+</mo><mn>0.036</mn><mo>+</mo><mn>0.007</mn></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>V</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mfrac><mn>4.09389</mn><mn>4.174402</mn></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>V</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.9807128</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+<p><span class="math display">\begin{align*}
 
 V &amp;= \displaystyle \frac
   {\sum_{i = 1}^{n} L_i\displaystyle \frac
@@ -558,16 +570,16 @@ V &amp;= \displaystyle \frac
   {
     L_1\displaystyle \frac
     {|\frac{A_1}{A_T} - \frac{B_1}{B_T}|}
-    {\sqrt{(A_1 + B_1)(A_T + B_T - A_1 - B_1)}} + 
-    \cdots + 
+    {\sqrt{(A_1 + B_1)(A_T + B_T - A_1 - B_1)}} +
+    \cdots +
     L_n\displaystyle \frac
     {|\frac{A_n}{A_T} - \frac{B_n}{B_T}|}
     {\sqrt{(A_n + B_n)(A_T + B_T - A_n - B_n)}}
   }{
     L_1\displaystyle \frac
     {\frac{A_1}{A_T} + \frac{B_1}{B_T}}
-    {\sqrt{(A_1 + B_1)(A_T + B_T - A_1 - B_1)}} + 
-    \cdots + 
+    {\sqrt{(A_1 + B_1)(A_T + B_T - A_1 - B_1)}} +
+    \cdots +
     L_n\displaystyle \frac
     {\frac{A_n}{A_T} + \frac{B_n}{B_T}}
     {\sqrt{(A_n + B_n)(A_T + B_T - A_n - B_n)}}
@@ -578,16 +590,16 @@ V &amp;= \displaystyle \frac
   {
     0.2\displaystyle \frac
     {|\frac{9}{15} - \frac{7}{15}|}
-    {\sqrt{(9 + 7)(15 + 15 - 9 - 7)}} + 
-    \cdots + 
+    {\sqrt{(9 + 7)(15 + 15 - 9 - 7)}} +
+    \cdots +
     0.3\displaystyle \frac
     {|\frac{3}{15} - \frac{0}{15}|}
     {\sqrt{(3 + 0)(15 + 15 - 3 - 0)}}
   }{
     0.2\displaystyle \frac
     {\frac{9}{15} + \frac{7}{15}}
-    {\sqrt{(9 + 7)(15 + 15 - 9 - 7)}} + 
-    \cdots + 
+    {\sqrt{(9 + 7)(15 + 15 - 9 - 7)}} +
+    \cdots +
     0.3\displaystyle \frac
     {\frac{3}{15} + \frac{0}{15}}
     {\sqrt{(3 + 0)(15 + 15 - 3 - 0)}}
@@ -602,7 +614,7 @@ V &amp;\approx \displaystyle \frac
 V &amp;= \displaystyle \frac{4.09389}{4.174402}  \\ \\
 V &amp;= 0.9807128
 
-\end{align*}</annotation></semantics></math></p>
+\end{align*}</span></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
