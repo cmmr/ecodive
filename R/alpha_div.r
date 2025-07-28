@@ -87,7 +87,7 @@ chao1 <- function (counts, cpus = n_cpus()) {
 #' Given \eqn{n} branches with lengths \eqn{L} and a sample's
 #' abundances on each of those branches coded as 1 for present or 0 for absent:
 #' 
-#' \deqn{\sum_{i = 1}^{n} P_i \times L_i
+#' \deqn{\sum_{i = 1}^{n} P_i \times L_i}
 #' 
 #' @references
 #' 

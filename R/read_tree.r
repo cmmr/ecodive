@@ -20,8 +20,7 @@
 #'         (A:0.99,((B:0.87,C:0.89):0.51,(((D:0.16,(E:0.83,F:0.96)
 #'         :0.94):0.69,(G:0.92,(H:0.62,I:0.85):0.54):0.23):0.74,J:0.1
 #'         2):0.43):0.67);")
-#'     print(tree)
-#'     plot(tree)
+#'     class(tree)
 #'
 read_tree <- function (newick, underscores = FALSE) {
   
