@@ -1,0 +1,31 @@
+useDynLib(fastbiom, 
+  C_pthreads, 
+  C_rarefy, C_read_tree,
+  C_alpha_div, C_faith, 
+  C_beta_div, C_gower, C_unifrac )
+
+importFrom(parallel, detectCores)
+
+export(shannon)
+export(chao1)
+export(simpson)
+export(inv_simpson)
+export(faith)
+
+export(bray_curtis)
+export(euclidean)
+export(gower)
+export(canberra)
+export(kulczynski)
+export(manhattan)
+export(jaccard)
+
+export(unweighted_unifrac)
+export(weighted_unifrac)
+export(normalized_unifrac)
+export(generalized_unifrac)
+export(variance_adjusted_unifrac)
+
+export(n_cpus)
+export(rarefy)
+export(read_tree)
