@@ -59,10 +59,10 @@ test_that("validation", {
   skip_on_cran()
   skip_if_not_installed('rbiom')
   
-  data('hmp50', package = 'rbiom', envir = environment())
-  convert_to_phyloseq <- getFromNamespace('convert_to_phyloseq', ns = asNamespace('rbiom'))
-  convert_to_TSE      <- getFromNamespace('convert_to_TSE',      ns = asNamespace('rbiom'))
-  convert_to_SE       <- getFromNamespace('convert_to_SE',       ns = asNamespace('rbiom'))
+  hmp50               <- do.call(`::`, list('rbiom', 'hmp50'))
+  convert_to_phyloseq <- do.call(`::`, list('rbiom', 'convert_to_phyloseq'))
+  convert_to_TSE      <- do.call(`::`, list('rbiom', 'convert_to_TSE'))
+  convert_to_SE       <- do.call(`::`, list('rbiom', 'convert_to_SE'))
   
   env$tree   <- NULL
   env$counts <- hmp50

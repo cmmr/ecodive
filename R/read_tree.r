@@ -5,7 +5,7 @@
 #' This tree must be in Newick format, also known as parenthetic format and
 #' New Hampshire format.
 #'
-#' @param src   Input data as either a file path, URL, or Newick string. 
+#' @param newick   Input data as either a file path, URL, or Newick string. 
 #'        Compressed (gzip or bzip2) files are also supported.
 #'
 #' @param underscores   If `TRUE`, underscores in unquoted names will remain

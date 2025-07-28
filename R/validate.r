@@ -286,7 +286,7 @@ validate_alpha <- function (env) {
   tryCatch(
     with(env, {
       
-      if (class(alpha) != 'numeric')
+      if (!inherits(alpha, 'numeric'))
         alpha <- as.numeric(alpha)
       
       stopifnot(length(alpha) == 1)

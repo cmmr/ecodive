@@ -46,7 +46,7 @@
 #'     bray_curtis(ex_counts, weighted = FALSE)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     bray_curtis(counts, pairs = 1:3)
+#'     bray_curtis(ex_counts, pairs = 1:3)
 #'     
 bray_curtis <- function (
     counts, 
@@ -107,7 +107,7 @@ bray_curtis <- function (
 #'     canberra(ex_counts, weighted = FALSE)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     canberra(counts, pairs = 1:3)
+#'     canberra(ex_counts, pairs = 1:3)
 #'     
 canberra <- function (
     counts, 
@@ -166,7 +166,7 @@ canberra <- function (
 #'     euclidean(ex_counts, weighted = FALSE)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     euclidean(counts, pairs = 1:3)
+#'     euclidean(ex_counts, pairs = 1:3)
 #'     
 euclidean <- function (
     counts, 
@@ -233,7 +233,7 @@ euclidean <- function (
 #'     gower(ex_counts, weighted = FALSE)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     gower(counts, pairs = 1:3)
+#'     gower(ex_counts, pairs = 1:3)
 #'     
 gower <- function (
     counts, 
@@ -294,7 +294,7 @@ gower <- function (
 #'     jaccard(ex_counts, weighted = FALSE)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     jaccard(counts, pairs = 1:3)
+#'     jaccard(ex_counts, pairs = 1:3)
 #'     
 jaccard <- function (
     counts, 
@@ -354,7 +354,7 @@ jaccard <- function (
 #'     kulczynski(ex_counts, weighted = FALSE)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     kulczynski(counts, pairs = 1:3)
+#'     kulczynski(ex_counts, pairs = 1:3)
 #'     
 kulczynski <- function (
     counts, 
@@ -413,7 +413,7 @@ kulczynski <- function (
 #'     manhattan(ex_counts, weighted = FALSE)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     manhattan(counts, pairs = 1:3)
+#'     manhattan(ex_counts, pairs = 1:3)
 #'     
 manhattan <- function (
     counts, 
@@ -464,7 +464,7 @@ manhattan <- function (
 #'     unweighted_unifrac(ex_counts, tree = ex_tree)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     unweighted_unifrac(counts, tree = ex_tree, pairs = 1:3)
+#'     unweighted_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
 #'     
 unweighted_unifrac <- function (
     counts, 
@@ -513,7 +513,7 @@ unweighted_unifrac <- function (
 #'     weighted_unifrac(ex_counts, tree = ex_tree)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     weighted_unifrac(counts, tree = ex_tree, pairs = 1:3)
+#'     weighted_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
 #'     
 weighted_unifrac <- function (
     counts, 
@@ -562,7 +562,7 @@ weighted_unifrac <- function (
 #'     normalized_unifrac(ex_counts, tree = ex_tree)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     normalized_unifrac(counts, tree = ex_tree, pairs = 1:3)
+#'     normalized_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
 #'     
 normalized_unifrac <- function (
     counts, 
@@ -612,7 +612,7 @@ normalized_unifrac <- function (
 #'     generalized_unifrac(ex_counts, tree = ex_tree)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     generalized_unifrac(counts, tree = ex_tree, pairs = 1:3)
+#'     generalized_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
 #'     
 generalized_unifrac <- function (
     counts, 
@@ -661,7 +661,7 @@ generalized_unifrac <- function (
 #'     variance_adjusted_unifrac(ex_counts, tree = ex_tree)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     variance_adjusted_unifrac(counts, tree = ex_tree, pairs = 1:3)
+#'     variance_adjusted_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
 #'     
 variance_adjusted_unifrac <- function (
     counts, 
