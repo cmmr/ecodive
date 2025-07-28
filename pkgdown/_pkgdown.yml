@@ -23,7 +23,6 @@ reference:
   - simpson
   - inv_simpson
 
-reference:
 - title: Phylogenetic Alpha Diversity
   contents:
   - faith
