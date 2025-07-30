@@ -1,0 +1,149 @@
+---
+title: "Alpha Diversity"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Alpha Diversity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Input Matrix
+
+```r
+library(fastbiom)
+
+counts <- matrix(
+  c(185, 0, 206, 1, 0, 900, 0, 100, 1, 1, 25, 556, 2, 288, 270),
+  nrow     = 5,
+  dimnames = list(
+    c('Streptococcus', 'Corynebacterium', 'Haemophilus', 'Propionibacterium', 'Staphylococcus'), 
+    c('Saliva', 'Gums', 'Nose') ))
+
+counts
+#>                   Saliva Gums Nose
+#> Streptococcus        185  900   25
+#> Corynebacterium        0    0  556
+#> Haemophilus          206  100    2
+#> Propionibacterium      1    1  288
+#> Staphylococcus         0    1  270
+```
+
+
+# Alpha Diversity
+
+Alpha diversity is a measure of diversity within a single sample.
+
+Depending on the metric, it may measure **richness** and/or **evenness**.
+
+
+## Richness
+
+Richness is how many species are present in a sample. The simplest metric is to 
+count the non-zero species.
+
+```r
+colSums(counts > 0)
+#> Saliva   Gums   Nose 
+#>      3      4      5
+```
+
+The Chao1 metric takes this a step further by including unobserved low abundance species, inferred using the number of times `counts == 1` vs `counts == 2`.
+
+```r
+# Infers 8 unobserved species
+chao1(c(1, 1, 1, 1, 2, 5, 5, 5))
+#> [1] 16
+
+# Infers 1/12 unobserved species
+chao1(c(1, 2, 2, 2, 2, 5, 5, 5))
+#> [1] 8.125
+
+# Datasets without 1s and 2s give Inf or NaN
+chao1(counts)
+#> Saliva   Gums   Nose 
+#>    Inf    Inf      5 
+```
+
+
+## Evenness
+
+Evenness is how equally distributed species are within a community. 
+The Simpson metric is a good measure of evenness.
+
+```r
+# High Evenness
+simpson(c(20, 20, 20, 20, 20))
+#> [1] 0.8
+
+# Low Evenness
+simpson(c(100, 1, 1, 1, 1))
+#> [1] 0.07507396
+
+# Gums < Saliva < Nose
+sort(simpson(counts))
+#>      Gums    Saliva      Nose 
+#> 0.1832682 0.5011063 0.6423567 
+```
+
+
+## Richness and Evenness
+
+The Shannon diversity index weights both richness and evenness.
+
+```r
+# Low richness, Low evenness
+shannon(c(1, 1, 100))
+#> [1] 0.1101001
+
+# Low richness, High evenness
+shannon(c(100, 100, 100))
+#> [1] 1.098612
+
+# High richness, Low evenness
+shannon(1:100)
+#> [1] 4.416898
+
+# High richness, High evenness
+shannon(rep(100, 100))
+#> [1] 4.60517
+
+# Gums < Saliva < Nose
+sort(shannon(counts))
+#>      Gums    Saliva      Nose 
+#> 0.3402200 0.7077202 1.1336902
+```
+
+
+## Phylogenetic Alpha Diversity
+
+Faith's phylogenetic diversity index incorporates a phylogenetic tree of the species in order to measure how many of the tree's branches are represented by each sample.
+
+```r
+tree <- read_tree("
+  (Haemophilus:46,
+    ((Streptococcus:18,Staphylococcus:11):12,
+    (Corynebacterium:24,Propionibacterium:13):12):11);")
+    
+#   +----------------46--------------- Haemophilus
+#   |                   
+#   |           +--------18------ Streptococcus
+#   |    +--12--|       
+#   |    |      +--11-- Staphylococcus
+#   +-11-|              
+#        |      +------------24---------- Corynebacterium
+#        +--12--|
+#               +----13--- Propionibacterium
+
+
+faith(c(Propionibacterium = 1, Corynebacterium = 1), tree = tree)
+#> [1] 60
+
+faith(c(Propionibacterium = 1, Haemophilus = 1), tree = tree)
+#> [1] 82
+
+# Saliva < Gums < Nose
+sort(faith(counts, tree = tree))
+#> Saliva   Gums   Nose 
+#>    112    123    147 
+```
+

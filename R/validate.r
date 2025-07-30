@@ -62,7 +62,7 @@ validate_counts <- function (env) {
     }),
     
     error = function (e) 
-      stop('`counts` must be a valid numeric matrix.\n', e$message)
+      stop(e$message, '\n`counts` must be a valid numeric matrix.')
   )
 }
 
@@ -110,7 +110,7 @@ validate_pairs <- function (env) {
     }),
     
     error = function (e) 
-      stop('`pairs` must be a numeric or logical vector.\n', e$message)
+      stop(e$message, '\n`pairs` must be a numeric or logical vector.')
   )
 }
 
@@ -127,7 +127,7 @@ validate_weighted <- function (env) {
     }),
     
     error = function (e) 
-      stop('`weighted` must be TRUE or FALSE.\n', e$message)
+      stop(e$message, '\n`weighted` must be TRUE or FALSE.')
   )
 }
 
@@ -145,7 +145,7 @@ validate_newick <- function (env) {
     }),
     
     error = function (e) 
-      stop('`newick` must be a character string.\n', e$message)
+      stop(e$message, '\n`newick` must be a character string.')
   )
 }
 
@@ -162,7 +162,7 @@ validate_underscores <- function (env) {
     }),
     
     error = function (e) 
-      stop('`underscores` must be TRUE or FALSE.\n', e$message)
+      stop(e$message, '\n`underscores` must be TRUE or FALSE.')
   )
 }
 
@@ -182,7 +182,7 @@ validate_cpus <- function (env) {
     }),
     
     error = function (e) 
-      stop('`cpus` must be an integer greater than 0.\n', e$message)
+      stop(e$message, '\n`cpus` must be an integer greater than 0.')
   )
 }
 
@@ -203,7 +203,7 @@ validate_seed <- function (env) {
     }),
     
     error = function (e) 
-      stop('`seed` must be an integer between -2147483648 and 2147483647.\n', e$message)
+      stop(e$message, '\n`seed` must be an integer between -2147483648 and 2147483647.')
   )
 }
 
@@ -226,7 +226,7 @@ validate_times <- function (env) {
     }),
     
     error = function (e) 
-      stop('`times` must be an integer greater than 0.\n', e$message)
+      stop(e$message, '\n`times` must be an integer greater than 0.')
   )
 }
 
@@ -249,7 +249,7 @@ validate_depth <- function (env) {
     }),
     
     error = function (e) 
-      stop('`depth` must be a positive integer or be between 0 and 1.\n', e$message)
+      stop(e$message, '\n`depth` must be a positive integer or be between 0 and 1.')
   )
 }
 
@@ -277,7 +277,7 @@ validate_n_samples <- function (env) {
     }),
     
     error = function (e) 
-      stop('`n_samples` must be an integer or be between 0 and 1.\n', e$message)
+      stop(e$message, '\n`n_samples` must be an integer or be between 0 and 1.')
   )
 }
 
@@ -295,7 +295,7 @@ validate_alpha <- function (env) {
     }),
     
     error = function (e) 
-      stop('`alpha` must be a single number between 0 and 1.\n', e$message)
+      stop(e$message, '\n`alpha` must be a single number between 0 and 1.')
   )
 }
 
@@ -323,11 +323,22 @@ validate_tree <- function (env) {
       stopifnot(hasName(tree, 'tip.label'))
       stopifnot(!is.null(rownames(counts)))
       stopifnot(all(rownames(counts) %in% tree$tip.label))
-      stopifnot(all(tree$tip.label %in% rownames(counts)))
-      counts <- counts[as.character(tree$tip.label),]
+      
+      missing <- setdiff(tree$tip.label, rownames(counts))
+      if (length(missing))
+        counts <- rbind(
+          counts, 
+          matrix(
+            data     = 0, 
+            nrow     = length(missing), 
+            ncol     = ncol(counts),
+            dimnames = list(missing, colnames(counts)) ))
+      remove('missing')
+      
+      counts <- counts[as.character(tree$tip.label),,drop=FALSE]
     }),
     
     error = function (e) 
-      stop('`tree` is not a valid phylo object.\n', e$message)
+      stop(e$message, '\n`tree` is not a valid phylo object.')
   )
 }

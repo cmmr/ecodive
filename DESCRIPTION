@@ -2,7 +2,7 @@ Package: fastbiom
 Type: Package
 Title: Microbiome Algorithms Implemented in 'C'
 Version: 1.0.0
-Date: 2025-07-18
+Date: 2025-07-30
 Authors@R: c(
     person(
       "Daniel P.", "Smith",
@@ -29,4 +29,7 @@ Config/testthat/edition: 3
 Imports:
     parallel
 Suggests:
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr

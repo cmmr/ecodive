@@ -20,7 +20,7 @@ A numeric vector.
 }
 \description{
 Simpson alpha diversity metric.\cr\cr
-Gauges the uniformity of species within a community. A Simpson index of \code{1}
+Gauges the uniformity of species within a community. A Simpson index of \code{0}
 indicates that one or a few high abundance OTUs dominate the community,
 which is indicative of low diversity.
 }

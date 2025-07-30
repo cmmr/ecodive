@@ -1,0 +1,168 @@
+---
+title: "Introduction to fastbiom"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to fastbiom}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Intoduction
+
+`fastbiom` provides fast algorithms for calculating biome diversity. Most of
+these algorithms fall into two categories - alpha diversity and beta diversity.
+
+
+## Alpha Diversity
+
+A measure of how many different species are present in a biome. Depending on 
+the metric, this can take into account the number of unique species (richness), 
+how evenly the population is split among species (evenness), or how similar the 
+species are (phylogenetic diversity).
+
+* Classic metrics: `chao1()`, `shannon()`, `simpson()`, `inv_simpson()`
+
+* Phylogenetic metrics: `faith()`
+
+* Further reading: `vignette('adiv')`
+
+
+## Beta Diversity
+
+A measure of how different two biomes are, based on the species observed. Also 
+known as "distance" or "dissimilarity". UniFrac metrics incorporate a 
+phylogenetic tree into this calculation.
+
+* Classic metrics: `bray_curtis()`, `canberra()`, `euclidean()`, `gower()`, 
+`jaccard()`, `kulczynski()`, `manhattan()`
+
+* Phylogenetic metrics: `unweighted_unifrac()`, `weighted_unifrac()`, 
+`normalized_unifrac()`, `generalized_unifrac()`, `variance_adjusted_unifrac()`
+
+* Further reading: `vignette('bdiv')` and `vignette('unifrac')`.
+
+
+## Example
+
+### Input Matrix
+
+A counts matrix is required for all alpha and beta diversity metrics. Here we'll
+use a simple R matrix, but `rbiom`, `phyloseq`, and similar data structures are 
+also supported.
+
+```r
+counts <- matrix(
+  data     = c(185, 0, 206, 1, 0, 900, 0, 100, 1, 1, 25, 556, 2, 288, 270),
+  nrow     = 5,
+  dimnames = list(
+    c('Streptococcus', 'Corynebacterium', 'Haemophilus', 'Propionibacterium', 'Staphylococcus'), 
+    c('Saliva', 'Gums', 'Nose') ))
+
+counts
+#>                   Saliva Gums Nose
+#> Streptococcus        185  900   25
+#> Corynebacterium        0    0  556
+#> Haemophilus          206  100    2
+#> Propionibacterium      1    1  288
+#> Staphylococcus         0    1  270
+
+colSums(counts)
+#> Saliva   Gums   Nose 
+#>    392   1002   1141 
+```
+
+
+### Rarefaction
+
+The raw counts matrix has 392 saliva observations, but gums and nose have 1000+
+observations. This unequal sampling depth can cause systematic biases.
+Specifically, rare species will be observed more often in biomes with greater
+sampling depths, thereby artificially inflating the observed richness.
+
+The first step then is to rarefy the counts matrix so that all biomes have the 
+same number of observations. This randomly removes observations from biomes with 
+more observations.
+
+
+```r
+library(fastbiom)
+
+counts <- rarefy(counts)
+
+counts
+#>                   Saliva Gums Nose
+#> Streptococcus        185  354    9
+#> Corynebacterium        0    0  191
+#> Haemophilus          206   37    2
+#> Propionibacterium      1    1   99
+#> Staphylococcus         0    0   91
+
+colSums(counts)
+#> Saliva   Gums   Nose 
+#>    392    392    392
+```
+
+
+### Classic Metrics
+
+These metrics have been around for 50+ years and don't require a phylogenetic
+tree. The beta diversity functions can take a `weighted = FALSE` argument to 
+use only presence/absence information instead of relative abundances.
+
+```r
+shannon(counts)
+#>    Saliva      Gums      Nose 
+#> 0.7077202 0.3301009 1.1504694
+
+bray_curtis(counts)
+#>         Saliva      Gums
+#> Gums 0.4311224          
+#> Nose 0.9693878 0.9693878
+
+bray_curtis(counts, weighted = FALSE)
+#>      Saliva Gums
+#> Gums   0.00     
+#> Nose   0.25 0.25
+
+as.matrix(bray_curtis(counts, weighted = FALSE))
+#>        Saliva Gums Nose
+#> Saliva   0.00 0.00 0.25
+#> Gums     0.00 0.00 0.25
+#> Nose     0.25 0.25 0.00
+```
+
+
+### Phylogenetic Metrics
+
+`faith()` and the `*_unifrac()` functions require a phylogenetic tree for the
+species in `counts`. You can use `fastbiom`'s `read_tree()` function to import a
+phylogenetic tree from a newick formatted string or file.
+
+
+```r
+tree <- read_tree("
+  (Haemophilus:46,
+    ((Streptococcus:18,Staphylococcus:11):12,
+    (Corynebacterium:24,Propionibacterium:13):12):11);")
+    
+#   +----------------46--------------- Haemophilus
+#   |                   
+#   |           +--------18------ Streptococcus
+#   |    +--12--|       
+#   |    |      +--11-- Staphylococcus
+#   +-11-|              
+#        |      +------------24---------- Corynebacterium
+#        +--12--|
+#               +----13--- Propionibacterium
+
+
+faith(counts, tree)
+#> Saliva   Gums   Nose 
+#>    112    112    147 
+
+normalized_unifrac(counts, tree)
+#>         Saliva      Gums
+#> Gums 0.4408828          
+#> Nose 0.7876058 0.6671201
+```

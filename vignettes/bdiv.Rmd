@@ -1,0 +1,29 @@
+---
+title: "Beta Diversity"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Beta Diversity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Input Matrix
+
+```r
+library(fastbiom)
+
+counts <- matrix(
+  c(185, 0, 206, 1, 0, 900, 0, 100, 1, 1, 25, 556, 2, 288, 270),
+  nrow     = 5,
+  dimnames = list(
+    c('Streptococcus', 'Corynebacterium', 'Haemophilus', 'Propionibacterium', 'Staphylococcus'), 
+    c('Saliva', 'Gums', 'Nose') ))
+
+counts
+#>                   Saliva Gums Nose
+#> Streptococcus        185  900   25
+#> Corynebacterium        0    0  556
+#> Haemophilus          206  100    2
+#> Propionibacterium      1    1  288
+#> Staphylococcus         0    1  270
+```

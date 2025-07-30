@@ -1,59 +1,17 @@
 ---
 title: "UniFrac Calculations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{UniFrac Calculations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+resource_files:
+  - '../man/figures/unifrac-tree.png'
+  - '../man/figures/unifrac-weights.png'
+figures:
+  fig.width: 6
+  fig.height: 2.75
 ---
-
-```{css, echo=FALSE}
-
-.sourceCode           { display: none;   }
-math[display="block"] { font-size: 22px; }
-
-img {
-  background-color: #fff;
-  border: 2px gray solid;
-}
-
-.center {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.otu_matrix {
-  width: 80%; 
-  border-width: 0;
-  border-collapse: separate;
-  padding: 10px;
-  font-size: 14pt;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.def_table {
-  font-size: 12pt;
-  margin-left: auto;
-  margin-right: auto;
-}
-.def_table td {
-  padding: 10px; 
-}
-
-.level2 {
-  margin-top: 40px;
-}
-
-.level1 {
-  margin-top: 50px;
-}
-
-```
-
-
-
-```{r setup, echo=FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment  = "#>",
-  dev      = 'ragg_png' )
-```
 
 
 # Introduction
@@ -65,92 +23,104 @@ The different UniFrac algorithms are listed below, along with examples for calcu
 
 # Input Data
 
-```{r input_data}
+```{r input_data, echo=FALSE}
+library(fastbiom)
 
-mtx <- matrix(
+counts <- matrix(
   data     = c(0, 0, 9, 3, 3, 1, 4, 2, 8, 0), 
-  nrow     = 5, 
-  dimnames = list(paste0('OTU_', 1:5), paste0('Sample_', 1:2)) )
+  ncol     = 2, 
+  dimnames = list(paste0('Species_', 1:5), c('Sample_A', 'Sample_B')) )
 
-phy <- fastbiom::read_tree(
-  newick      = "(((OTU_1:0.8,OTU_2:0.5):0.4,OTU_3:0.9):0.2,(OTU_4:0.7,OTU_5:0.3):0.6);",
-  underscores = TRUE )
+tree <- read_tree(
+  underscores = TRUE,
+  newick      = "
+    (((Species_1:0.8,Species_2:0.5):0.4,Species_3:0.9):0.2,(Species_4:0.7,Species_5:0.3):0.6);" )
 
-L <- phy$edge.length
+L <- tree$edge.length
 A <- c(9,0,0,0,9,6,3,3)
 B <- c(7,5,1,4,2,8,8,0)
+
+# local({ # man/figures/unifrac-tree.png
+#     
+#   par(xpd = NA)
+#   ape::plot.phylo(
+#     x          = tree, 
+#     direction  = 'downwards', 
+#     srt        = 90, 
+#     adj        = 0.5, 
+#     no.margin  = TRUE,
+#     underscore = TRUE,
+#     x.lim      = c(0.5, 5.5) )
+#   
+#   ape::edgelabels(tree$edge.length, bg = 'white', frame = 'none', adj = -0.4)
+# })
+# 
+# local({ # man/figures/unifrac-weights.png
+#   
+#   tree$edge.length <- c(1, 1, 1, 1, 2, 1, 2, 2)
+#   
+#   par(xpd = NA)
+#   ape::plot.phylo(
+#     x               = tree, 
+#     direction       = 'downwards', 
+#     srt             = 90, 
+#     adj             = 0.5, 
+#     no.margin       = TRUE,
+#     underscore      = TRUE,
+#     x.lim           = c(.8, 6) )
+#   
+#   ape::edgelabels(1:8, frame = 'circle')
+#   
+#   ape::edgelabels(paste('A =', A), bg = 'white', frame = 'none', adj = c(-0.4, -1.2))
+#   ape::edgelabels(paste('B =', B), bg = 'white', frame = 'none', adj = c(-0.4,  0.0))
+#   ape::edgelabels(paste('L =', L), bg = 'white', frame = 'none', adj = c(-0.3,  1.2))
+# })
 ```
 
-* An OTU matrix with two samples and five OTUs.
-* A phylogenetic tree for those five OTUs.
+* A numeric matrix with two samples and five species.
+* A phylogenetic tree for those five species.
 
-<div style='text-align:center'>
+<table><tr><td>
 
-```{r input_data_mtx, results='asis'}
-knitr::kable(t(mtx), format="html", table.attr='class="otu_matrix" cellspacing="0"', align='c')
+  <table>
+  <tr><th>         </th><th>                    Sample_A   </th><th>                    Sample_B   </th></tr>
+  <tr><td>Species_1</td><td align='right'> `r counts[1,1]` </td><td align='right'> `r counts[1,2]` </td></tr>
+  <tr><td>Species_2</td><td align='right'> `r counts[2,1]` </td><td align='right'> `r counts[2,2]` </td></tr>
+  <tr><td>Species_3</td><td align='right'> `r counts[3,1]` </td><td align='right'> `r counts[3,2]` </td></tr>
+  <tr><td>Species_4</td><td align='right'> `r counts[4,1]` </td><td align='right'> `r counts[4,2]` </td></tr>
+  <tr><td>Species_5</td><td align='right'> `r counts[5,1]` </td><td align='right'> `r counts[5,2]` </td></tr>
+  </table>
+
+</td><td>
+
+```{r input_data_tree, out.width = "100%", echo=FALSE}
+  knitr::include_graphics('../man/figures/unifrac-tree.png')
 ```
 
-<small><i>Shown transposed. Fastbiom expects samples in columns and OTUs in rows.</i></small>
-</div>
-
-<br>
-
-```{r input_data_tree, fig.asp = 0.5, fig.align = 'center', out.width = "75%", fig.width = 6}
-par(xpd = NA)
-ape::plot.phylo(
-  x          = phy, 
-  direction  = 'downwards', 
-  srt        = 90, 
-  adj        = 0.5, 
-  no.margin  = TRUE,
-  underscore = TRUE,
-  x.lim      = c(0.5, 5.5) )
-
-ape::edgelabels(phy$edge.length, bg = 'white', frame = 'none', adj = -0.4)
-```
+</td></tr></table>
 
 
 <br>
 
 # Definitions
 
-The branch indices (green circles) are used for ordering the $L$, $A$, and $B$ arrays. Values for $L$ are drawn from the input phylogenetic tree. Values for $A$ and $B$ are the total number of OTU observations descending from that branch; $A$ for Sample_1, and $B$ for Sample_2.
+The branch indices (green circles) are used for ordering the $L$, $A$, and $B$ arrays. Values for $L$ are drawn from the input phylogenetic tree. Values for $A$ and $B$ are the total number of species observations descending from that branch; $A$ for Sample_A, and $B$ for Sample_B.
 
-```{r definitions, fig.asp = 0.5, fig.align = 'center', out.width = "75%", fig.width = 6}
-local({
-  
-  phy$edge.length <- c(1, 1, 1, 1, 2, 1, 2, 2)
-  
-  par(xpd = NA)
-  ape::plot.phylo(
-    x               = phy, 
-    direction       = 'downwards', 
-    srt             = 90, 
-    adj             = 0.5, 
-    no.margin       = TRUE,
-    underscore      = TRUE,
-    x.lim           = c(.8, 6) )
-  
-  ape::edgelabels(1:8, frame = 'circle')
-  
-  ape::edgelabels(paste('A =', A), bg = 'white', frame = 'none', adj = c(-0.4, -1.2))
-  ape::edgelabels(paste('B =', B), bg = 'white', frame = 'none', adj = c(-0.4,  0.0))
-  ape::edgelabels(paste('L =', L), bg = 'white', frame = 'none', adj = c(-0.3,  1.2))
-})
+```{r definitions, fig.align = 'center', out.width = "75%", echo=FALSE}
+knitr::include_graphics('../man/figures/unifrac-weights.png')
 ```
 
 <br>
 
-<div style='text-align:center'>
-  <table class='def_table'>
-  <tr><td> $n = 8$         </td><td> Number of branches               </td></tr>
-  <tr><td> $A = \{`r A`\}$ </td><td> Branch **weights** for Sample_1. </td></tr>
-  <tr><td> $B = \{`r B`\}$ </td><td> Branch **weights** for Sample_2. </td></tr>
-  <tr><td> $A_T = 15$      </td><td> Total OTU counts for Sample_1.   </td></tr>
-  <tr><td> $B_T = 15$      </td><td> Total OTU counts for Sample_2.   </td></tr>
-  <tr><td> $L = \{`r L`\}$ </td><td> The branch **lengths**.          </td></tr>
-  </table>
-</div>
+<table>
+<tr><td> $n = 8$         </td><td> Number of branches               </td></tr>
+<tr><td> $A = \{`r A`\}$ </td><td> Branch **weights** for Sample_A. </td></tr>
+<tr><td> $B = \{`r B`\}$ </td><td> Branch **weights** for Sample_B. </td></tr>
+<tr><td> $A_T = 15$      </td><td> Total observations for Sample_A. </td></tr>
+<tr><td> $B_T = 15$      </td><td> Total observations for Sample_B. </td></tr>
+<tr><td> $L = \{`r L`\}$ </td><td> The branch **lengths**.          </td></tr>
+</table>
+
 
 <br>
 
@@ -159,15 +129,15 @@ local({
 
 * [Lozupone et al, 2005](https://doi.org/10.1128/AEM.71.12.8228-8235.2005): Unweighted UniFrac
 * R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `unweighted_unifrac()`
-* R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=FALSE)`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `unweighted_unifrac()`
+* R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=FALSE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric unweighted_unifrac`
 * [mothur](https://mothur.org/): `unifrac.unweighted()`
 
 
 First, transform A and B into presence (1) and absence (0) indicators.
 
-<table class='center' style='width:75%'><tr><td style='border-width:0'>
+<table style='width:75%'><tr><td style='border-width:0'>
 
 \begin{align*}
 A  &= \{`r A`\} \\
@@ -201,8 +171,8 @@ U &= 0.4545455
 
 * [Lozupone et al, 2007](https://doi.org/10.1128/AEM.01996-06): Raw Weighted UniFrac
 * R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `weighted_unifrac()`
-* R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=TRUE, normalized=FALSE)`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `weighted_unifrac()`
+* R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=TRUE, normalized=FALSE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric weighted_unifrac`
 
 \begin{align*}
@@ -218,8 +188,8 @@ W &= 1.14
 
 * [Lozupone et al, 2007](https://doi.org/10.1128/AEM.01996-06): Normalized Weighted UniFrac
 * R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `normalized_unifrac()`
-* R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=TRUE, normalized=TRUE)`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `weighted_normalized_unifrac()`
+* R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=TRUE, normalized=TRUE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric weighted_normalized_unifrac`
 * [mothur](https://mothur.org/): `unifrac.weighted()`
 
@@ -255,8 +225,8 @@ N &= 0.4899713
 
 * [Chen et al. 2012](https://doi.org/10.1093/bioinformatics/bts342): Generalized UniFrac
 * R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `generalized_unifrac(alpha = 0.5)`
-* R Package [GUniFrac](https://cran.r-project.org/web/packages/GUniFrac/index.html): `GUniFrac(alpha = 0.5)`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `generalized_unifrac(alpha = 0.5)`
+* R Package [GUniFrac](https://cran.r-project.org/web/packages/GUniFrac/index.html): `GUniFrac(alpha = 0.5)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric generalized_unifrac -a 0.5`
 
 \begin{align*}

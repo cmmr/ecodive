@@ -10,11 +10,6 @@ template:
     base_font: {google: "Noto Sans"}
     heading_font: {google: "Noto Sans"}
 
-figures:
-  dev: ragg::agg_png
-  fig.width: 8
-  fig.height: 4
-
 
 reference:
 

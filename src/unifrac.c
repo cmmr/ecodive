@@ -3,7 +3,6 @@
 #include <math.h>   // fabs, pow
 #include <stdlib.h> // calloc, free
 #include <string.h> // memset
-#include <assert.h> // assert
 #include "get.h"
 
 // Detect if pthread is available.
@@ -440,7 +439,6 @@ SEXP C_unifrac(
   n_pairs           = LENGTH(sexp_pair_idx_vec);
   n_threads         = asInteger(sexp_n_threads);
   double *dist_vec  = REAL(sexp_result_dist);
-  int n_dist        = LENGTH(sexp_result_dist);
   
   
   // branch_weight/depth for each (sample,edge) combo.
@@ -482,11 +480,6 @@ SEXP C_unifrac(
   pair_vec   = calloc(n_pairs,             sizeof(pair_t));
   total_vec  = calloc(n_samples,           sizeof(double));
   
-  assert(weight_mtx != NULL);
-  assert(nodes      != NULL);
-  assert(pair_vec   != NULL);
-  assert(total_vec  != NULL);
-  
   if (weight_mtx == NULL || nodes == NULL || pair_vec == NULL || total_vec == NULL) { // # nocov start
     free(weight_mtx); free(nodes); free(pair_vec); free(total_vec);
     error("Unable to allocate memory for UniFrac calculation.");
@@ -518,9 +511,6 @@ SEXP C_unifrac(
     for (int j = i + 1; j < n_samples; j++) {
       if (pair_idx_vec[pair_idx] == dist_idx) {
         
-        assert(pair_idx < n_pairs);
-        assert(dist_idx < n_dist);
-        
         pair_t *pair       = pair_vec   + pair_idx;
         pair->total_1      = total_vec  + i;
         pair->total_2      = total_vec  + j;
@@ -545,22 +535,12 @@ SEXP C_unifrac(
       pthread_t *tids = calloc(n_threads, sizeof(pthread_t));
       int       *args = calloc(n_threads, sizeof(int));
       
-      assert(tids != NULL);
-      assert(args != NULL);
-      
       int i, n = n_threads;
       for (i = 0; i < n; i++) args[i] = i;
       for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, calc_weight_mtx, &args[i]);
       for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
       for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, calc_dist_vec, &args[i]);
       for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
-      
-      assert(tids       != NULL);
-      assert(args       != NULL);
-      assert(weight_mtx != NULL);
-      assert(nodes      != NULL);
-      assert(pair_vec   != NULL);
-      assert(total_vec  != NULL);
       
       free(tids); free(args);
       free(weight_mtx); free(nodes); free(pair_vec); free(total_vec);
@@ -575,11 +555,6 @@ SEXP C_unifrac(
   int thread_i = 0;
   calc_weight_mtx(&thread_i);
   calc_dist_vec(&thread_i);
-  
-  assert(weight_mtx != NULL);
-  assert(nodes      != NULL);
-  assert(pair_vec   != NULL);
-  assert(total_vec  != NULL);
   
   free(weight_mtx); free(nodes); free(pair_vec); free(total_vec);
   
