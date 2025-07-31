@@ -96,8 +96,8 @@ validate_pairs <- function (env) {
         }
         else if (is.numeric(pairs)) {
           if (any(pairs %% 1 > 0)) stop('non-integer values')
-          stopifnot(all(pairs > 0))
-          stopifnot(exprObject = bquote(all(pairs <= .(n_distances))))
+          if (!all(pairs >= 1 & pairs <= n_distances))
+            stop('expected `pairs` values between 1 and ', n_distances)
           pairs <- sort(unique(as.integer(pairs)))
         }
         else {
