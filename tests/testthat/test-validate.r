@@ -36,6 +36,7 @@ test_that("validation", {
   
   # validate_tree() ===========================================================
   
+  env$counts <- counts[1:3,,drop=FALSE]
   tree2 <- tree
   tree2$edge.length <- as.integer(tree$edge.length * 100)
   tree2$edge <- matrix(

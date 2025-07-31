@@ -12,20 +12,16 @@ vignette: >
 ```r
 library(fastbiom)
 
-counts <- matrix(
-  c(185, 0, 206, 1, 0, 900, 0, 100, 1, 1, 25, 556, 2, 288, 270),
-  nrow     = 5,
-  dimnames = list(
-    c('Streptococcus', 'Corynebacterium', 'Haemophilus', 'Propionibacterium', 'Staphylococcus'), 
-    c('Saliva', 'Gums', 'Nose') ))
+counts <- rarefy(ex_counts)
 
 counts
-#>                   Saliva Gums Nose
-#> Streptococcus        185  900   25
-#> Corynebacterium        0    0  556
-#> Haemophilus          206  100    2
-#> Propionibacterium      1    1  288
-#> Staphylococcus         0    1  270
+#>                   Saliva Gums Nose Stool
+#> Streptococcus        162  309    6     1
+#> Bacteroides            2    2    0   341
+#> Corynebacterium        0    0  171     1
+#> Haemophilus          180   34    0     1
+#> Propionibacterium      1    0   82     0
+#> Staphylococcus         0    0   86     1
 ```
 
 
@@ -38,30 +34,31 @@ Depending on the metric, it may measure **richness** and/or **evenness**.
 
 ## Richness
 
-Richness is how many species are present in a sample. The simplest metric is to 
-count the non-zero species.
+Richness is how many species are present in a sample. The simplest metric is to
+count the non-zero species (or genera in this example).
 
 ```r
 colSums(counts > 0)
-#> Saliva   Gums   Nose 
-#>      3      4      5
+#> Saliva   Gums   Nose  Stool 
+#>      4      3      4      5 
 ```
 
-The Chao1 metric takes this a step further by including unobserved low abundance species, inferred using the number of times `counts == 1` vs `counts == 2`.
+The Chao1 metric takes this a step further by including unobserved low abundance
+species, inferred using the number of times `counts == 1` vs `counts == 2`.
 
 ```r
 # Infers 8 unobserved species
 chao1(c(1, 1, 1, 1, 2, 5, 5, 5))
 #> [1] 16
 
-# Infers 1/12 unobserved species
+# Infers less than 1 unobserved species
 chao1(c(1, 2, 2, 2, 2, 5, 5, 5))
 #> [1] 8.125
 
 # Datasets without 1s and 2s give Inf or NaN
 chao1(counts)
-#> Saliva   Gums   Nose 
-#>    Inf    Inf      5 
+#> Saliva   Gums   Nose  Stool 
+#>    4.5    3.0    NaN    Inf 
 ```
 
 
@@ -79,10 +76,10 @@ simpson(c(20, 20, 20, 20, 20))
 simpson(c(100, 1, 1, 1, 1))
 #> [1] 0.07507396
 
-# Gums < Saliva < Nose
+# Stool < Gums < Saliva < Nose
 sort(simpson(counts))
-#>      Gums    Saliva      Nose 
-#> 0.1832682 0.5011063 0.6423567 
+#>      Stool       Gums     Saliva       Nose 
+#> 0.02302037 0.18806133 0.50725478 0.63539593 
 ```
 
 
@@ -107,43 +104,44 @@ shannon(1:100)
 shannon(rep(100, 100))
 #> [1] 4.60517
 
-# Gums < Saliva < Nose
+# Stool < Gums < Saliva < Nose
 sort(shannon(counts))
-#>      Gums    Saliva      Nose 
-#> 0.3402200 0.7077202 1.1336902
+#>      Stool       Gums     Saliva       Nose 
+#> 0.07927797 0.35692121 0.74119910 1.10615349 
 ```
 
 
 ## Phylogenetic Alpha Diversity
 
-Faith's phylogenetic diversity index incorporates a phylogenetic tree of the species in order to measure how many of the tree's branches are represented by each sample.
+Faith's phylogenetic diversity index incorporates a phylogenetic tree of the
+species in order to measure how many of the tree's branches are represented by
+each sample.
 
 ```r
-tree <- read_tree("
-  (Haemophilus:46,
-    ((Streptococcus:18,Staphylococcus:11):12,
-    (Corynebacterium:24,Propionibacterium:13):12):11);")
-    
-#   +----------------46--------------- Haemophilus
-#   |                   
-#   |           +--------18------ Streptococcus
-#   |    +--12--|       
-#   |    |      +--11-- Staphylococcus
-#   +-11-|              
-#        |      +------------24---------- Corynebacterium
-#        +--12--|
-#               +----13--- Propionibacterium
+# ex_tree:
+#
+#       +----------44---------- Haemophilus
+#   +-2-|
+#   |   +----------------68---------------- Bacteroides  
+#   |                      
+#   |             +---18---- Streptococcus
+#   |      +--12--|       
+#   |      |      +--11-- Staphylococcus
+#   +--11--|              
+#          |      +-----24----- Corynebacterium
+#          +--12--|
+#                 +--13-- Propionibacterium
 
 
-faith(c(Propionibacterium = 1, Corynebacterium = 1), tree = tree)
+faith(c(Propionibacterium = 1, Corynebacterium = 1), tree = ex_tree)
 #> [1] 60
 
-faith(c(Propionibacterium = 1, Haemophilus = 1), tree = tree)
+faith(c(Propionibacterium = 1, Haemophilus = 1), tree = ex_tree)
 #> [1] 82
 
-# Saliva < Gums < Nose
-sort(faith(counts, tree = tree))
-#> Saliva   Gums   Nose 
-#>    112    123    147 
+# Nose < Gums < Saliva < Stool
+sort(faith(counts, tree = ex_tree))
+#>   Nose   Gums Saliva  Stool 
+#>    101    155    180    202 
 ```
 

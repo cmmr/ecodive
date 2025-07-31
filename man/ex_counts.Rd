@@ -5,12 +5,16 @@
 \alias{ex_counts}
 \title{Example counts matrix}
 \format{
-A matrix of 4 samples (column) x 5 OTUs (rows).
+A matrix of 4 samples (columns) x 6 genera (rows).
+}
+\source{
+Derived from The Human Microbiome Project dataset.
+\url{https://commonfund.nih.gov/hmp}
 }
 \usage{
 ex_counts
 }
 \description{
-Example counts matrix
+Genera found on four human body sites.
 }
 \keyword{datasets}

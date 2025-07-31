@@ -50,8 +50,7 @@ abundance weighting \eqn{0 \le \alpha \le 1}:
 
 \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}|\displaystyle \frac{\frac{A_i}{A_T} - \frac{B_i}{B_T}}{\frac{A_i}{A_T} + \frac{B_i}{B_T}} |}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}}}
 
-See \url{https://cmmr.github.io/fastbiom/articles/unifrac.html} for details and
-a worked example.
+See \code{vignette('unifrac')} for details and a worked example.
 }
 
 \examples{

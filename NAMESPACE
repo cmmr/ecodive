@@ -5,6 +5,7 @@ useDynLib(fastbiom,
   C_beta_div, C_gower, C_unifrac )
 
 importFrom(parallel, detectCores)
+importFrom(utils, combn)
 
 export(shannon)
 export(chao1)

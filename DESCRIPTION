@@ -2,7 +2,7 @@ Package: fastbiom
 Type: Package
 Title: Microbiome Algorithms Implemented in 'C'
 Version: 1.0.0
-Date: 2025-07-30
+Date: 2025-07-31
 Authors@R: c(
     person(
       "Daniel P.", "Smith",
@@ -27,7 +27,8 @@ RoxygenNote: 7.3.2
 Config/Needs/website: rmarkdown
 Config/testthat/edition: 3
 Imports:
-    parallel
+    parallel,
+    utils
 Suggests:
     knitr,
     rmarkdown,

@@ -5,12 +5,28 @@
 \alias{ex_tree}
 \title{Example phylogenetic tree}
 \format{
-A \code{phylo} object for 5 OTUs.
+A \code{phylo} object.
 }
 \usage{
 ex_tree
 }
 \description{
-Example phylogenetic tree
+Companion tree for \code{ex_counts}.
+}
+\details{
+\code{ex_tree} encodes this tree structure:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{      +----------44---------- Haemophilus
+  +-2-|
+  |   +----------------68---------------- Bacteroides  
+  |                      
+  |             +---18---- Streptococcus
+  |      +--12--|       
+  |      |      +--11-- Staphylococcus
+  +--11--|              
+         |      +-----24----- Corynebacterium
+         +--12--|
+                +--13-- Propionibacterium
+}\if{html}{\out{</div>}}
 }
 \keyword{datasets}

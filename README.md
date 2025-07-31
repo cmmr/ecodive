@@ -15,6 +15,7 @@ BioConductor objects. Zero dependencies, making it quick to install and ideal
 for package developers.
 
 
+
 ## Installation
 
 The latest stable version can be installed from CRAN.
@@ -30,51 +31,59 @@ install.packages('pak')
 pak::pak('cmmr/fastbiom')
 ```
 
+
+
 ## Usage
 
-#### Calculate alpha diverity
-
 ``` r
-ex_counts
-#>      A B C  D
-#> OTU1 4 0 0  0
-#> OTU2 0 8 9 10
-#> OTU3 3 0 0  0
-#> OTU4 2 0 0  0
-#> OTU5 6 5 7  1
 
-shannon(ex_counts)
-#>         A         B         C         D 
-#> 1.3095258 0.6662784 0.6853142 0.3046361 
+## Example Data ----------------------
 
-faith(ex_counts, tree = ex_tree)
-#>   A   B   C   D 
-#> 3.4 2.2 2.2 2.2
+counts <- rarefy(ex_counts)
+counts
+#>                   Saliva Gums Nose Stool
+#> Streptococcus        162  309    6     1
+#> Bacteroides            2    2    0   341
+#> Corynebacterium        0    0  171     1
+#> Haemophilus          180   34    0     1
+#> Propionibacterium      1    0   82     0
+#> Staphylococcus         0    0   86     1
+
+
+## Alpha Diversity -------------------
+
+shannon(counts)
+#>     Saliva       Gums       Nose      Stool 
+#> 0.74119910 0.35692121 1.10615349 0.07927797 
+
+faith(counts, tree = ex_tree)
+#> Saliva   Gums   Nose  Stool 
+#>    180    155    101    202 
+
+
+## Beta Diversity --------------------
+
+bray_curtis(counts)
+#>          Saliva      Gums      Nose
+#> Gums  0.4260870                    
+#> Nose  0.9797101 0.9826087          
+#> Stool 0.9884058 0.9884058 0.9913043
+
+weighted_unifrac(counts, tree = ex_tree)
+#>          Saliva      Gums      Nose
+#> Gums   36.97681                    
+#> Nose   67.23768  55.97101          
+#> Stool 109.77971 109.44058 110.00870
 ```
 
-#### Calculate beta diverity
-
-``` r
-bray_curtis(ex_counts)
-#>           A         B         C
-#> B 0.6428571                    
-#> C 0.6129032 0.1034483          
-#> D 0.9230769 0.2500000 0.2592593
-
-generalized_unifrac(ex_counts, tree = ex_tree, alpha = 0.5)
-#>            A          B          C
-#> B 0.61036006                      
-#> C 0.60260471 0.04873043           
-#> D 0.75764452 0.25262174 0.29851111
-```
 
 
 ## Documentation
 
 The online manual for `fastbiom` is available at
 <https://cmmr.github.io/fastbiom/>. It includes a getting started guide,
-articles that explore specific use cases, and reference pages for each
-function.
+articles on alpha/beta diversity, and reference pages for each function.
+
 
 
 ## Automated tests
@@ -87,12 +96,16 @@ install.packages('testthat')
 testthat::test_check('fastbiom')
 ```
 
+
+
 ## Community guidelines
+
 
 ### Support
 
 Bug reports, feature requests, and general questions can be submitted at
 <https://github.com/cmmr/fastbiom/issues>.
+
 
 ### Contributing
 
@@ -100,3 +113,8 @@ Pull requests are welcome. Please ensure contributed code is covered by
 tests and documentation (add additional tests and documentation as
 needed) and passes all automated tests.
 
+New functions should leverage C and pthreads to minimize memory and CPU time.
+
+Please note that the fastbiom project is released with a [Contributor Code of
+Conduct](https://cmmr.github.io/fastbiom/CODE_OF_CONDUCT.html). By contributing
+to this project, you agree to abide by its terms.

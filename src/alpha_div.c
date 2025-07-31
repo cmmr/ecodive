@@ -24,35 +24,58 @@ static int     n_threads;
 static double *result_vec;
 
 
+
+/*
+ * START_SAMPLE_LOOP and END_SAMPLE_LOOP define a simple loop 
+ * for iterating over all samples, ensuring that each is 
+ * assigned to only a single thread. Provides `otu_vec` and 
+ * `result` initialized to 0; expects `result` at the end.
+ */
+
+#define START_SAMPLE_LOOP                                      \
+  int thread_i = *((int *) arg);                               \
+  for (int sample = thread_i; sample < n_samples; sample += n_threads) {\
+    double *otu_vec = otu_mtx    + (sample * n_otus);          \
+    double  result  = 0;
+
+
+#define END_SAMPLE_LOOP                                        \
+    result_vec[sample] = result;                               \
+  }                                                            \
+  return NULL;
+
+
+#define CALCULATE_DEPTH                                        \
+  double depth = 0;                                            \
+  for (int otu = 0; otu < n_otus; otu++) {                     \
+    depth += otu_vec[otu];                                     \
+  }
+  
+
+
 //======================================================
 // Chao1
 // sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
 //======================================================
 static void *calc_chao1(void *arg) {
+  START_SAMPLE_LOOP
+    
+  double nnz  = 0;
+  double ones = 0;
+  double twos = 0;
   
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
-    
-    double *otu_vec = otu_mtx + (sample * n_otus);
-    
-    double nnz  = 0;
-    double ones = 0;
-    double twos = 0;
-    
-    for (int otu = 0; otu < n_otus; otu++) {
-      double x = otu_vec[otu];
-      if (x > 0) {
-        nnz++;
-        if      (x <= 1) ones++;
-        else if (x <= 2) twos++;
-      }
+  for (int otu = 0; otu < n_otus; otu++) {
+    double x = otu_vec[otu];
+    if (x > 0) {
+      nnz++;
+      if      (x <= 1) ones++;
+      else if (x <= 2) twos++;
     }
-    
-    result_vec[sample] = nnz + ((ones * ones) / (2 * twos));
   }
   
-  return NULL;
+  result = nnz + ((ones * ones) / (2 * twos));
+  
+  END_SAMPLE_LOOP
 }
 
 
@@ -62,34 +85,20 @@ static void *calc_chao1(void *arg) {
 // 1 / sum(p ** 2)
 //======================================================
 static void *calc_inv_simpson(void *arg) {
+  START_SAMPLE_LOOP
+  CALCULATE_DEPTH
   
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
-    
-    double *otu_vec = otu_mtx + (sample * n_otus);
-    
-    double depth = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      depth += otu_vec[otu];
+  for (int otu = 0; otu < n_otus; otu++) {
+    double x = otu_vec[otu];
+    if (x > 0) {
+      double p = x / depth;
+      result += p * p;
     }
-    
-    double result = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      double x = otu_vec[otu];
-      if (x > 0) {
-        double p = x / depth;
-        result += p * p;
-      }
-    }
-    if (result != 0) {
-      result = 1 / result;
-    }
-    
-    result_vec[sample] = result;
   }
   
-  return NULL;
+  if (result != 0) result = 1 / result;
+    
+  END_SAMPLE_LOOP
 }
 
 
@@ -99,32 +108,19 @@ static void *calc_inv_simpson(void *arg) {
 // -sum(p * log(p))
 //======================================================
 static void *calc_shannon(void *arg) {
+  START_SAMPLE_LOOP
+  CALCULATE_DEPTH
   
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
-    
-    double *otu_vec = otu_mtx + (sample * n_otus);
-    
-    double depth = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      depth += otu_vec[otu];
+  for (int otu = 0; otu < n_otus; otu++) {
+    double x = otu_vec[otu];
+    if (x > 0) {
+      double p = x / depth;
+      result += p * log(p);
     }
-    
-    double result = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      double x = otu_vec[otu];
-      if (x > 0) {
-        double p = x / depth;
-        result += p * log(p);
-      }
-    }
-    result *= -1;
-    
-    result_vec[sample] = result;
   }
+  result *= -1;
   
-  return NULL;
+  END_SAMPLE_LOOP
 }
 
 
@@ -134,32 +130,19 @@ static void *calc_shannon(void *arg) {
 // 1 - sum(p ** 2)
 //======================================================
 static void *calc_simpson(void *arg) {
+  START_SAMPLE_LOOP
+  CALCULATE_DEPTH
   
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
-    
-    double *otu_vec = otu_mtx + (sample * n_otus);
-    
-    double depth = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      depth += otu_vec[otu];
+  for (int otu = 0; otu < n_otus; otu++) {
+    double x = otu_vec[otu];
+    if (x > 0) {
+      double p = x / depth;
+      result += p * p;
     }
-    
-    double result = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      double x = otu_vec[otu];
-      if (x > 0) {
-        double p = x / depth;
-        result += p * p;
-      }
-    }
-    result = 1 - result;
-    
-    result_vec[sample] = result;
   }
+  result = 1 - result;
   
-  return NULL;
+  END_SAMPLE_LOOP
 }
 
 
@@ -186,8 +169,12 @@ SEXP C_alpha_div(
     case INV_SIMPSON: calc_adiv = calc_inv_simpson; break;
     case SHANNON:     calc_adiv = calc_shannon;     break;
     case SIMPSON:     calc_adiv = calc_simpson;     break;
-  default: error("Invalid adiv metric."); return R_NilValue; // # nocov
   }
+  
+  if (calc_adiv == NULL) { // # nocov start
+    error("Invalid alpha diversity algorithm.");
+    return R_NilValue;
+  } // # nocov end
   
   
   // Run WITH multithreading
@@ -197,6 +184,12 @@ SEXP C_alpha_div(
       // threads and their thread_i arguments
       pthread_t *tids = calloc(n_threads, sizeof(pthread_t));
       int       *args = calloc(n_threads, sizeof(int));
+      
+      if (tids == NULL || args == NULL) { // # nocov start
+        free(tids); free(args);
+        error("Insufficient memory for parallel alpha diversity calculation.");
+        return R_NilValue;
+      } // # nocov end
       
       int i, n = n_threads;
       for (i = 0; i < n; i++) args[i] = i;

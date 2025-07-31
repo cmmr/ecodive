@@ -530,8 +530,7 @@ unweighted_unifrac <- function (
 #' 
 #' \deqn{D = \sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}
 #' 
-#' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
-#' a worked example.
+#' See `vignette('unifrac')` for details and a worked example.
 #' 
 #' @references
 #' 
@@ -583,8 +582,7 @@ weighted_unifrac <- function (
 #' 
 #' \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})}}
 #' 
-#' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
-#' a worked example.
+#' See `vignette('unifrac')` for details and a worked example.
 #' 
 #' @references
 #' 
@@ -637,8 +635,7 @@ normalized_unifrac <- function (
 #' 
 #' \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}|\displaystyle \frac{\frac{A_i}{A_T} - \frac{B_i}{B_T}}{\frac{A_i}{A_T} + \frac{B_i}{B_T}} |}{\sum_{i = 1}^{n} L_i(\frac{A_i}{A_T} + \frac{B_i}{B_T})^{\alpha}}}
 #' 
-#' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
-#' a worked example.
+#' See `vignette('unifrac')` for details and a worked example.
 #' 
 #' @references
 #' 
@@ -690,8 +687,7 @@ generalized_unifrac <- function (
 #' 
 #' \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i\displaystyle \frac{|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }{\sum_{i = 1}^{n} L_i\displaystyle \frac{\frac{A_i}{A_T} + \frac{B_i}{B_T}}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }}
 #' 
-#' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
-#' a worked example.
+#' See `vignette('unifrac')` for details and a worked example.
 #' 
 #' @references
 #' 

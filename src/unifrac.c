@@ -21,17 +21,8 @@
 
 
 typedef struct {
-  double *total_1;
-  double *total_2;
-  double *weight_vec_1;
-  double *weight_vec_2;
-  double *distance;
-} pair_t;
-
-
-typedef struct {
-  int    edge;
-  int    parent;
+  int edge;
+  int parent;
   double length;
 } node_t;
 
@@ -45,76 +36,140 @@ static int     n_otus;
 static int     n_samples;
 static int     n_edges;
 static double *edge_lengths;
-static pair_t *pair_vec;
-static int     n_pairs;
 static double  alpha;
+static int    *pairs_vec;
+static int     n_pairs;
 static double *weight_mtx;
 static node_t *nodes;
 static double *total_vec;
 static int     n_threads;
+static double *dist_vec;
 
 
 
+/*
+ * START_SAMPLE_LOOP and END_SAMPLE_LOOP define a simple loop 
+ * for iterating over all samples, ensuring that each is 
+ * assigned to only a single thread. Provides the `otu_vec` and 
+ * `weight_vec` for each sample.
+ */
+
+#define START_SAMPLE_LOOP                                      \
+  int thread_i = *((int *) arg);                               \
+  for (int sample = thread_i; sample < n_samples; sample += n_threads) {\
+    double *otu_vec    = otu_mtx    + (sample * n_otus);       \
+    double *weight_vec = weight_mtx + (sample * n_edges);
+
+
+#define END_SAMPLE_LOOP                                        \
+  }                                                            \
+  return NULL;
+
+
+
+/*
+ * The START_PAIR_LOOP and END_PAIR_LOOP macros efficiently 
+ * loop through all combinations of samples. Skips unwanted 
+ * pairings and pairings not assigned to the current thread. 
+ * Ensures all threads process the same number of pairs.
+ * 
+ * After calling START_PAIR_LOOP the code can expect 
+ * `x_weight_vec` and `y_weight_vec` point to the two samples'
+ * columns in `weight_mtx`.  The code should assign to 
+ * `distance` before calling END_PAIR_LOOP.
+ * 
+ * START_PAIR_TOTAL_LOOP is identical to START_PAIR_LOOP, but
+ * also assigns `x_total` and `y_total` from `total_vec`.
+ * 
+ * Implemented as macros to avoid the overhead of a function
+ * call or the messiness of duplicated code.
+ */
+
+
+#define START_PAIR_LOOP                                        \
+  int thread_i = *((int *) arg);                               \
+  double distance;                                             \
+  int pair_idx = 0;                                            \
+  int dist_idx = 0;                                            \
+  for (int i = 0; i < n_samples - 1; i++) {                    \
+    double *x_weight_vec = weight_mtx + (i * n_edges);         \
+    for (int j = i + 1; j < n_samples; j++) {                  \
+      if (pairs_vec[pair_idx] == dist_idx) {                   \
+        if (pair_idx % n_threads == thread_i) {                \
+          double *y_weight_vec = weight_mtx + (j * n_edges);
+
+
+#define START_PAIR_TOTAL_LOOP                                  \
+  int thread_i = *((int *) arg);                               \
+  double distance;                                             \
+  int pair_idx = 0;                                            \
+  int dist_idx = 0;                                            \
+  for (int i = 0; i < n_samples - 1; i++) {                    \
+    double  x_total      = total_vec[i];                       \
+    double *x_weight_vec = weight_mtx + (i * n_edges);         \
+    for (int j = i + 1; j < n_samples; j++) {                  \
+      if (pairs_vec[pair_idx] == dist_idx) {                   \
+        if (pair_idx % n_threads == thread_i) {                \
+          double  y_total      = total_vec[j];                 \
+          double *y_weight_vec = weight_mtx + (j * n_edges);
+
+
+#define END_PAIR_LOOP                                          \
+          dist_vec[dist_idx] = distance;                       \
+        }                                                      \
+        pair_idx++;                                            \
+        if (pair_idx == n_pairs) return NULL;                  \
+      }                                                        \
+      dist_idx++;                                              \
+    }                                                          \
+  }                                                            \
+  return NULL;
+  
+
+  
+  
 
 //======================================================
 // Unweighted UniFrac.
 //======================================================
 static void *unweighted_mtx (void *arg) {
-  
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
+  START_SAMPLE_LOOP
     
-    double *otu_vec    = otu_mtx    + (sample * n_otus);
-    double *weight_vec = weight_mtx + (sample * n_edges);
+  for (int otu = 0; otu < n_otus; otu++) {
     
-    for (int otu = 0; otu < n_otus; otu++) {
-      
-      if (otu_vec[otu] == 0) continue; // OTU not present in sample
-      
-      int node = otu;     // start at OTU tip/leaf in tree
-      while (node > -1) { // traverse until we hit the tree's root
-        int edge = nodes[node].edge;
-        if (weight_vec[edge]) break; // already traversed
-        weight_vec[edge] = 1;
-        node = nodes[node].parent;   // proceed on up the tree
-      }
-      
+    if (otu_vec[otu] == 0) continue; // OTU not present in sample
+    
+    int node = otu;     // start at OTU tip/leaf in tree
+    while (node > -1) { // traverse until we hit the tree's root
+      int edge = nodes[node].edge;
+      if (weight_vec[edge]) break; // already traversed
+      weight_vec[edge] = 1;
+      node = nodes[node].parent;   // proceed on up the tree
     }
+    
   }
   
-  return NULL;
+  END_SAMPLE_LOOP
 }
 
 
 static void *unweighted_dist (void *arg) {
+  START_PAIR_LOOP
+    
+  double distinct = 0, shared = 0;
   
-  int thread_i = *((int *) arg);
-  
-  for (int pair_i = thread_i; pair_i < n_pairs; pair_i += n_threads) {
+  for (int edge = 0; edge < n_edges; edge++) {
     
-    pair_t *pair = pair_vec + pair_i;
+    char x = x_weight_vec[edge] > 0;
+    char y = y_weight_vec[edge] > 0;
     
-    // pointers to each sample's column in weight_mtx
-    double *x_vec = pair->weight_vec_1;
-    double *y_vec = pair->weight_vec_2;
-    
-    double distinct = 0, shared = 0;
-    
-    for (int edge = 0; edge < n_edges; edge++) {
-      
-      char x = x_vec[edge] > 0;
-      char y = y_vec[edge] > 0;
-      
-      if      (x & y) { shared   += edge_lengths[edge]; }
-      else if (x | y) { distinct += edge_lengths[edge]; }
-    }
-    
-    // value to return
-    *(pair->distance) = distinct / (distinct + shared);
+    if      (x & y) { shared   += edge_lengths[edge]; }
+    else if (x | y) { distinct += edge_lengths[edge]; }
   }
   
-  return NULL;
+  distance = distinct / (distinct + shared);
+  
+  END_PAIR_LOOP
 }
 
 
@@ -124,69 +179,45 @@ static void *unweighted_dist (void *arg) {
 // Weighted UniFrac.
 //======================================================
 static void *weighted_mtx (void *arg) {
-  
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
+  START_SAMPLE_LOOP
     
-    double *otu_vec    = otu_mtx    + (sample * n_otus);
-    double *weight_vec = weight_mtx + (sample * n_edges);
+  double sample_depth = 0;
+  for (int otu = 0; otu < n_otus; otu++)
+    sample_depth += otu_vec[otu];
+  
+  for (int otu = 0; otu < n_otus; otu++) {
     
-    double sample_depth = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      sample_depth += otu_vec[otu];
+    double abundance = otu_vec[otu];
+    if (abundance == 0) continue; // OTU not present in sample
+    
+    int node = otu;     // start at OTU tip/leaf in tree
+    while (node > -1) { // traverse until we hit the tree's root
+      
+      int    edge   = nodes[node].edge;
+      double length = nodes[node].length;
+      
+      // relative abundance, weighted by branch length
+      double relative_abundance = abundance / sample_depth;
+      double weighted_abundance = length * relative_abundance;
+      weight_vec[edge] += weighted_abundance;
+      
+      node = nodes[node].parent; // proceed on up the tree
     }
     
-    for (int otu = 0; otu < n_otus; otu++) {
-      
-      double abundance = otu_vec[otu];
-      if (abundance == 0) continue; // OTU not present in sample
-      
-      int node = otu;     // start at OTU tip/leaf in tree
-      while (node > -1) { // traverse until we hit the tree's root
-        
-        int    edge   = nodes[node].edge;
-        double length = nodes[node].length;
-        
-        // relative abundance, weighted by branch length
-        double relative_abundance = abundance / sample_depth;
-        double weighted_abundance = length * relative_abundance;
-        weight_vec[edge] += weighted_abundance;
-        
-        node = nodes[node].parent; // proceed on up the tree
-      }
-      
-    }
   }
   
-  return NULL;
+  END_SAMPLE_LOOP
 }
 
 static void *weighted_dist (void *arg) {
+  START_PAIR_LOOP
+    
+  distance = 0;
   
-  int thread_i = *((int *) arg);
+  for (int edge = 0; edge < n_edges; edge++)
+    distance += fabs(x_weight_vec[edge] - y_weight_vec[edge]);
   
-  for (int pair_i = thread_i; pair_i < n_pairs; pair_i += n_threads) {
-    
-    pair_t *pair = pair_vec + pair_i;
-    
-    // pointers to each sample's column in weight_mtx
-    double *x_vec = pair->weight_vec_1;
-    double *y_vec = pair->weight_vec_2;
-    
-    double distance = 0;
-    
-    for (int edge = 0; edge < n_edges; edge++) {
-      double weight_1 = x_vec[edge];
-      double weight_2 = y_vec[edge];
-      distance += fabs(weight_1 - weight_2);
-    }
-    
-    // value to return
-    *(pair->distance) = distance;
-  }
-  
-  return NULL;
+  END_PAIR_LOOP
 }
 
 
@@ -196,69 +227,48 @@ static void *weighted_dist (void *arg) {
 // Normalized Weighted UniFrac.
 //======================================================
 static void *normalized_mtx (void *arg) {
-  
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
+  START_SAMPLE_LOOP
     
-    double *otu_vec    = otu_mtx    + (sample * n_otus);
-    double *weight_vec = weight_mtx + (sample * n_edges);
+  double sample_depth = 0;
+  for (int otu = 0; otu < n_otus; otu++)
+    sample_depth += otu_vec[otu];
+  
+  for (int otu = 0; otu < n_otus; otu++) {
     
-    double sample_depth = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      sample_depth += otu_vec[otu];
+    double abundance = otu_vec[otu];
+    if (abundance == 0) continue; // OTU not present in sample
+    
+    int node = otu;  // start at OTU tip/leaf in tree
+    while (node > -1) { // traverse until we hit the tree's root
+      
+      int    edge   = nodes[node].edge;
+      double length = nodes[node].length;
+      
+      // relative abundance, weighted by branch length
+      double relative_abundance = abundance / sample_depth;
+      double weighted_abundance = length * relative_abundance;
+      weight_vec[edge]  += weighted_abundance;
+      total_vec[sample] += weighted_abundance;
+      
+      node = nodes[node].parent; // proceed on up the tree
     }
     
-    for (int otu = 0; otu < n_otus; otu++) {
-      
-      double abundance = otu_vec[otu];
-      if (abundance == 0) continue; // OTU not present in sample
-      
-      int node = otu;     // start at OTU tip/leaf in tree
-      while (node > -1) { // traverse until we hit the tree's root
-        
-        int    edge   = nodes[node].edge;
-        double length = nodes[node].length;
-        
-        // relative abundance, weighted by branch length
-        double relative_abundance = abundance / sample_depth;
-        double weighted_abundance = length * relative_abundance;
-        weight_vec[edge]  += weighted_abundance;
-        total_vec[sample] += weighted_abundance;
-        
-        node = nodes[node].parent; // proceed on up the tree
-      }
-      
-    }
   }
   
-  return NULL;
+  END_SAMPLE_LOOP
 }
 
 static void *normalized_dist (void *arg) {
+  START_PAIR_TOTAL_LOOP
+    
+  distance = 0;
+    
+  for (int edge = 0; edge < n_edges; edge++)
+    distance += fabs(x_weight_vec[edge] - y_weight_vec[edge]);
   
-  int thread_i = *((int *) arg);
+  distance /= x_total + y_total;
   
-  for (int pair_i = thread_i; pair_i < n_pairs; pair_i += n_threads) {
-    
-    pair_t *pair = pair_vec + pair_i;
-    
-    // pointers to each sample's column in weight_mtx
-    double *x_vec = pair->weight_vec_1;
-    double *y_vec = pair->weight_vec_2;
-    
-    double distance = 0;
-    
-    for (int edge = 0; edge < n_edges; edge++) {
-      distance += fabs(x_vec[edge] - y_vec[edge]);
-    }
-    distance /= *(pair->total_1) + *(pair->total_2);
-    
-    // value to return
-    *(pair->distance) = distance;
-  }
-  
-  return NULL;
+  END_PAIR_LOOP
 }
 
 
@@ -268,73 +278,54 @@ static void *normalized_dist (void *arg) {
 // Generalized UniFrac.
 //======================================================
 static void *generalized_mtx (void *arg) {
-  
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
+  START_SAMPLE_LOOP
     
-    double *otu_vec    = otu_mtx    + (sample * n_otus);
-    double *weight_vec = weight_mtx + (sample * n_edges);
+  double sample_depth = 0;
+  for (int otu = 0; otu < n_otus; otu++)
+    sample_depth += otu_vec[otu];
+  
+  for (int otu = 0; otu < n_otus; otu++) {
     
-    double sample_depth = 0;
-    for (int otu = 0; otu < n_otus; otu++) {
-      sample_depth += otu_vec[otu];
+    double abundance = otu_vec[otu];
+    if (abundance == 0) continue; // OTU not present in sample
+    
+    int node = otu;     // start at OTU tip/leaf in tree
+    while (node > -1) { // traverse until we hit the tree's root
+      int edge = nodes[node].edge;
+      weight_vec[edge] += abundance / sample_depth;
+      node = nodes[node].parent; // proceed on up the tree
     }
     
-    for (int otu = 0; otu < n_otus; otu++) {
-      
-      double abundance = otu_vec[otu];
-      if (abundance == 0) continue; // OTU not present in sample
-      
-      int node = otu;     // start at OTU tip/leaf in tree
-      while (node > -1) { // traverse until we hit the tree's root
-        int edge = nodes[node].edge;
-        weight_vec[edge] += abundance / sample_depth;
-        node = nodes[node].parent; // proceed on up the tree
-      }
-      
-    }
   }
   
-  return NULL;
+  END_SAMPLE_LOOP
 }
 
 static void *generalized_dist (void *arg) {
+  START_PAIR_LOOP
   
-  int thread_i = *((int *) arg);
-  
-  for (int pair_i = thread_i; pair_i < n_pairs; pair_i += n_threads) {
+  distance = 0;
+  double denominator = 0;
     
-    pair_t *pair = pair_vec + pair_i;
+  for (int edge = 0; edge < n_edges; edge++) {
     
-    // pointers to each sample's column in weight_mtx
-    double *x_vec = pair->weight_vec_1;
-    double *y_vec = pair->weight_vec_2;
+    double x = x_weight_vec[edge];
+    double y = y_weight_vec[edge];
     
-    double distance    = 0;
-    double denominator = 0;
+    double sum = x + y;
     
-    for (int edge = 0; edge < n_edges; edge++) {
+    if (sum > 0) {
+      double frac = fabs((x - y) / sum);
+      double norm = edge_lengths[edge] * pow(sum, alpha);
       
-      double x = x_vec[edge];
-      double y = y_vec[edge];
-      
-      double sum = x + y;
-      
-      if (sum > 0) {
-        double frac = fabs((x - y) / sum);
-        double norm = edge_lengths[edge] * pow(sum, alpha);
-        
-        distance    += norm * frac;
-        denominator += norm;
-      }
+      distance    += norm * frac;
+      denominator += norm;
     }
-    
-    // value to return
-    *(pair->distance) = distance / denominator;
   }
   
-  return NULL;
+  distance = distance / denominator;
+
+  END_PAIR_LOOP
 }
 
 
@@ -344,75 +335,55 @@ static void *generalized_dist (void *arg) {
 // Variance Adjusted Weighted UniFrac.
 //======================================================
 static void *var_adjusted_mtx (void *arg) {
+  START_SAMPLE_LOOP
   
-  int thread_i = *((int *) arg);
+  double sample_depth = 0;
   
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
+  for (int otu = 0; otu < n_otus; otu++) {
     
-    double  sample_depth = 0;
-    double *otu_vec      = otu_mtx    + (sample * n_otus);
-    double *weight_vec   = weight_mtx + (sample * n_edges);
+    double abundance = otu_vec[otu];
+    if (abundance == 0) continue; // OTU not present in sample
+    sample_depth += abundance;
     
-    for (int otu = 0; otu < n_otus; otu++) {
-      
-      double abundance = otu_vec[otu];
-      if (abundance == 0) continue; // OTU not present in sample
-      sample_depth += abundance;
-      
-      int node = otu;     // start at OTU tip/leaf in tree
-      while (node > -1) { // traverse until we hit the tree's root
-        int edge = nodes[node].edge;
-        weight_vec[edge] += abundance;
-        node = nodes[node].parent; // proceed on up the tree
-      }
+    int node = otu;     // start at OTU tip/leaf in tree
+    while (node > -1) { // traverse until we hit the tree's root
+      int edge = nodes[node].edge;
+      weight_vec[edge] += abundance;
+      node = nodes[node].parent; // proceed on up the tree
     }
-    
-    total_vec[sample] = sample_depth;
   }
   
-  return NULL;
+  total_vec[sample] = sample_depth;
+  
+  END_SAMPLE_LOOP
 }
 
 static void *var_adjusted_dist (void *arg) {
+  START_PAIR_TOTAL_LOOP
+    
+  distance = 0;
+  double denominator = 0;
   
-  int thread_i = *((int *) arg);
-  
-  for (int pair_i = thread_i; pair_i < n_pairs; pair_i += n_threads) {
+  for (int edge = 0; edge < n_edges; edge++) {
     
-    pair_t *pair = pair_vec + pair_i;
+    double x = x_weight_vec[edge];
+    double y = y_weight_vec[edge];
     
-    // pointers to each sample's column in weight_mtx
-    double *x_vec = pair->weight_vec_1;
-    double *y_vec = pair->weight_vec_2;
+    double norm = (x + y) * (x_total + y_total - x - y);
     
-    double x_total = *(pair->total_1);
-    double y_total = *(pair->total_2);
-    
-    double distance    = 0;
-    double denominator = 0;
-    
-    for (int edge = 0; edge < n_edges; edge++) {
+    if (norm > 0) {
+      norm = edge_lengths[edge] / sqrt(norm);
+      x   /= x_total;
+      y   /= y_total;
       
-      double x = x_vec[edge];
-      double y = y_vec[edge];
-      
-      double norm = (x + y) * (x_total + y_total - x - y);
-      
-      if (norm > 0) {
-        norm = edge_lengths[edge] / sqrt(norm);
-        x   /= x_total;
-        y   /= y_total;
-        
-        distance    += fabs(x - y) * norm;
-        denominator +=     (x + y) * norm;
-      }
+      distance    += fabs(x - y) * norm;
+      denominator +=     (x + y) * norm;
     }
-    
-    // value to return
-    *(pair->distance) = distance / denominator;
   }
+    
+  distance = distance / denominator;
   
-  return NULL;
+  END_PAIR_LOOP
 }
 
 
@@ -424,21 +395,21 @@ static void *var_adjusted_dist (void *arg) {
 SEXP C_unifrac(
     SEXP sexp_algorithm, 
     SEXP sexp_otu_mtx,   SEXP sexp_phylo_tree, 
-    SEXP sexp_alpha,     SEXP sexp_pair_idx_vec, 
+    SEXP sexp_alpha,     SEXP sexp_pairs_vec, 
     SEXP sexp_n_threads, SEXP sexp_result_dist ) {
   
-  algorithm         = asInteger(sexp_algorithm);
-  otu_mtx           = REAL( sexp_otu_mtx);
-  n_otus            = nrows(sexp_otu_mtx);
-  n_samples         = ncols(sexp_otu_mtx);
-  int *edge_mtx     = INTEGER(get(sexp_phylo_tree, "edge"));
-  n_edges           = nrows(  get(sexp_phylo_tree, "edge"));
-  edge_lengths      = REAL(   get(sexp_phylo_tree, "edge.length"));
-  alpha             = asReal(sexp_alpha);
-  int *pair_idx_vec = INTEGER(sexp_pair_idx_vec);
-  n_pairs           = LENGTH(sexp_pair_idx_vec);
-  n_threads         = asInteger(sexp_n_threads);
-  double *dist_vec  = REAL(sexp_result_dist);
+  algorithm     = asInteger(sexp_algorithm);
+  otu_mtx       = REAL( sexp_otu_mtx);
+  n_otus        = nrows(sexp_otu_mtx);
+  n_samples     = ncols(sexp_otu_mtx);
+  int *edge_mtx = INTEGER(get(sexp_phylo_tree, "edge"));
+  n_edges       = nrows(  get(sexp_phylo_tree, "edge"));
+  edge_lengths  = REAL(   get(sexp_phylo_tree, "edge.length"));
+  alpha         = asReal(sexp_alpha);
+  pairs_vec     = INTEGER(sexp_pairs_vec);
+  n_pairs       = LENGTH(sexp_pairs_vec);
+  n_threads     = asInteger(sexp_n_threads);
+  dist_vec      = REAL(sexp_result_dist);
   
   
   // branch_weight/depth for each (sample,edge) combo.
@@ -468,25 +439,27 @@ SEXP C_unifrac(
       calc_weight_mtx = var_adjusted_mtx;
       calc_dist_vec   = var_adjusted_dist;
       break;
-    default:                         // # nocov start
-      error("Invalid adiv metric.");
-      return R_NilValue;             // # nocov end
   }
+  
+  if (calc_weight_mtx == NULL || calc_dist_vec == NULL) { // # nocov start
+    error("Invalid UniFrac algorithm.");
+    return R_NilValue;
+  } // # nocov end
   
   
   // intermediary values
   weight_mtx = calloc(n_samples * n_edges, sizeof(double));
-  nodes      = calloc(n_edges,             sizeof(node_t));
-  pair_vec   = calloc(n_pairs,             sizeof(pair_t));
   total_vec  = calloc(n_samples,           sizeof(double));
+  nodes      = calloc(n_edges,             sizeof(node_t));
   
-  if (weight_mtx == NULL || nodes == NULL || pair_vec == NULL || total_vec == NULL) { // # nocov start
-    free(weight_mtx); free(nodes); free(pair_vec); free(total_vec);
-    error("Unable to allocate memory for UniFrac calculation.");
+  if (weight_mtx == NULL || total_vec == NULL || nodes == NULL) { // # nocov start
+    free(weight_mtx); free(total_vec); free(nodes);
+    error("Insufficient memory for UniFrac calculation.");
     return R_NilValue;
   } // # nocov end
   
   memset(weight_mtx, 0, n_samples * n_edges * sizeof(double));
+  memset(total_vec,  0, n_samples           * sizeof(double));
   
   
   // sort edge data by child node
@@ -503,29 +476,6 @@ SEXP C_unifrac(
     nodes[child].length = edge_lengths[edge];
   }
   
-  // pointers to input and output for 
-  // each pairwise comparison
-  int pair_idx = 0;
-  int dist_idx = 0;
-  for (int i = 0; i < n_samples - 1; i++) {
-    for (int j = i + 1; j < n_samples; j++) {
-      if (pair_idx_vec[pair_idx] == dist_idx) {
-        
-        pair_t *pair       = pair_vec   + pair_idx;
-        pair->total_1      = total_vec  + i;
-        pair->total_2      = total_vec  + j;
-        pair->weight_vec_1 = weight_mtx + (i * n_edges);
-        pair->weight_vec_2 = weight_mtx + (j * n_edges);
-        pair->distance     = dist_vec   + dist_idx;
-        pair_idx++;
-        
-        if (pair_idx == n_pairs) goto end_loops;
-      }
-      dist_idx++;
-    }
-  }
-  end_loops:
-  
   
   // Run WITH multithreading
   #ifdef HAVE_PTHREAD
@@ -535,6 +485,13 @@ SEXP C_unifrac(
       pthread_t *tids = calloc(n_threads, sizeof(pthread_t));
       int       *args = calloc(n_threads, sizeof(int));
       
+      if (tids == NULL || args == NULL) { // # nocov start
+        free(tids); free(args);
+        free(weight_mtx); free(total_vec); free(nodes);
+        error("Insufficient memory for parallel UniFrac calculation.");
+        return R_NilValue;
+      } // # nocov end
+      
       int i, n = n_threads;
       for (i = 0; i < n; i++) args[i] = i;
       for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, calc_weight_mtx, &args[i]);
@@ -543,7 +500,7 @@ SEXP C_unifrac(
       for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
       
       free(tids); free(args);
-      free(weight_mtx); free(nodes); free(pair_vec); free(total_vec);
+      free(weight_mtx); free(total_vec); free(nodes);
       
       return sexp_result_dist;
     }
@@ -556,7 +513,7 @@ SEXP C_unifrac(
   calc_weight_mtx(&thread_i);
   calc_dist_vec(&thread_i);
   
-  free(weight_mtx); free(nodes); free(pair_vec); free(total_vec);
+  free(weight_mtx); free(total_vec); free(nodes);
   
   return sexp_result_dist;
 }

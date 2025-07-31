@@ -39,8 +39,7 @@ abundances (\eqn{A} and \eqn{B}) on each of those branches:
 
 \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} L_i\displaystyle \frac{|\frac{A_i}{A_T} - \frac{B_i}{B_T}|}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }{\sum_{i = 1}^{n} L_i\displaystyle \frac{\frac{A_i}{A_T} + \frac{B_i}{B_T}}{\sqrt{(A_i + B_i)(A_T + B_T - A_i - B_i)}} }}
 
-See \url{https://cmmr.github.io/fastbiom/articles/unifrac.html} for details and
-a worked example.
+See \code{vignette('unifrac')} for details and a worked example.
 }
 
 \examples{

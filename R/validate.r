@@ -76,28 +76,28 @@ validate_pairs <- function (env) {
   
   tryCatch(
     with(env, {
-      n <- ncol(counts)
-      n <- n * (n - 1) / 2
+      n_samples   <- ncol(counts)
+      n_distances <- n_samples * (n_samples - 1) / 2
       
       if (is.null(pairs)) {
-        pairs <- as.integer(seq_len(n) - 1)
+        pairs <- as.integer(seq_len(n_distances) - 1)
       }
       else {
         
         if (is.function(pairs))
           pairs <- local({
-            m <- combn(n, 2)
+            m <- combn(n_samples, 2)
             mapply(pairs, m[1,], m[2,])
           })
         
         if (is.logical(pairs)) {
-          stopifnot(exprObject = bquote(length(pairs) == .(n)))
+          stopifnot(exprObject = bquote(length(pairs) == .(n_distances)))
           pairs <- which(pairs)
         }
         else if (is.numeric(pairs)) {
           if (any(pairs %% 1 > 0)) stop('non-integer values')
           stopifnot(all(pairs > 0))
-          stopifnot(exprObject = bquote(all(pairs <= .(n))))
+          stopifnot(exprObject = bquote(all(pairs <= .(n_distances))))
           pairs <- sort(unique(as.integer(pairs)))
         }
         else {
@@ -106,7 +106,7 @@ validate_pairs <- function (env) {
         
         pairs <- pairs - 1L
       }
-      remove('n')
+      remove('n_samples', 'n_distances')
     }),
     
     error = function (e) 
