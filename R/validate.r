@@ -91,7 +91,8 @@ validate_pairs <- function (env) {
           })
         
         if (is.logical(pairs)) {
-          stopifnot(exprObject = bquote(length(pairs) == .(n_distances)))
+          if (length(pairs) != n_distances)
+            stop('logical vector `pairs` must have length ', n_distances)
           pairs <- which(pairs)
         }
         else if (is.numeric(pairs)) {
