@@ -3,6 +3,7 @@
 .Rhistory
 .Ruserdata
 .gitignore
+ecodive.Rproj
 src/*.o
 src/*.so
 src/*.dll

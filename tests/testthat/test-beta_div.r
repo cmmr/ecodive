@@ -118,7 +118,7 @@ test_that("beta diversity", {
   # Normalized UniFrac ========================================================
   
   expect_equal( # pairwise(counts, abdiv::weighted_normalized_unifrac, tree)
-    object   = as.vector(normalized_unifrac(counts, tree)), 
+    object   = as.vector(weighted_normalized_unifrac(counts, tree)), 
     expected = c(0.392778473738226, 0.378863215786652, 0.542965436810857, 
                  0.0479898763749635, 0.207216197053649, 0.254811004455059 ))
   

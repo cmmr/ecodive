@@ -47,7 +47,7 @@ For the UniFrac algorithms, `unweighted_unifrac()` is unweighted and all the oth
 
 * Unweighted: `unweighted_unifrac()`
 
-* Weighted: `weighted_unifrac()`, `normalized_unifrac()`, `generalized_unifrac()`, `variance_adjusted_unifrac()`
+* Weighted: `weighted_unifrac()`, `weighted_normalized_unifrac()`, `generalized_unifrac()`, `variance_adjusted_unifrac()`
 
 
 

@@ -16,7 +16,7 @@
 #' 
 #' @param alpha   How much weight to give to relative abundances; a value 
 #'        between 0 and 1, inclusive. Setting `alpha=1` is equivalent to 
-#'        `normalized_unifrac()`.
+#'        `weighted_normalized_unifrac()`.
 #' 
 #' @param tree   A `phylo`-class object representing the phylogenetic tree for 
 #'        the OTUs in `counts`. The OTU identifiers given by `colnames(counts)` 

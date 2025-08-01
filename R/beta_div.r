@@ -597,12 +597,12 @@ weighted_unifrac <- function (
 #'     ex_counts
 #'     
 #'     # UniFrac weighted distance matrix
-#'     normalized_unifrac(ex_counts, tree = ex_tree)
+#'     weighted_normalized_unifrac(ex_counts, tree = ex_tree)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     normalized_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
+#'     weighted_normalized_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
 #'     
-normalized_unifrac <- function (
+weighted_normalized_unifrac <- function (
     counts, 
     tree   = NULL, 
     pairs  = NULL, 

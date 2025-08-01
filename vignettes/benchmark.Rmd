@@ -61,8 +61,8 @@ We will use the microbenchmark R package to run each package's functions multipl
 install.packages('pak')
 
 pak::pkg_install(pkg = c(
-  'abdiv, 'ecodive', 'GUniFrac', 'kasperskytte/ampvis2', 
-  'microbenchmark', 'phyloseq', 'ecodive', 'vegan' ))
+  'abdiv', 'ecodive', 'GUniFrac', 'kasperskytte/ampvis2', 
+  'microbenchmark', 'phyloseq', 'rbiom', 'vegan' ))
   
 version$version.string
 #> [1] "R version 4.5.1 (2025-06-13 ucrt)"
@@ -73,7 +73,7 @@ sapply(FUN = packageDescription, fields = 'Version', c(
 #>  "0.2.0"  "2.8.9"  "1.0.0"     "1.8"  "1.52.0"  "2.7-1"
 
 (n_cpus <- ecodive::n_cpus())
-#> 6
+#> [1] 6
 ```
 
 
@@ -82,8 +82,8 @@ sapply(FUN = packageDescription, fields = 'Version', c(
 ```r
 
 # HMP50 dataset has 50 Samples
-hmp50      <- ecodive::hmp50
-hmp50_phy  <- ecodive::convert_to_phyloseq(hmp50)
+hmp50      <- rbiom::hmp50
+hmp50_phy  <- rbiom::convert_to_phyloseq(hmp50)
 hmp50_mtx  <- as.matrix(hmp50)
 hmp50_tmtx <- t(hmp50_mtx)
 hmp50_tree <- hmp50$tree
@@ -95,7 +95,7 @@ microbenchmark::microbenchmark(
   times    = 100,
   control  = list('warmup'),
   unit     = 'milliseconds',
-  ecodive    = ecodive::bdiv_distmat(hmp50, bdiv='UniFrac', weighted=TRUE, normalized=TRUE),
+  ecodive  = ecodive::bdiv_distmat(hmp50, bdiv='UniFrac', weighted=TRUE, normalized=TRUE),
   phyloseq = phyloseq::UniFrac(hmp50_phy, weighted=TRUE, normalized=TRUE, parallel=TRUE),
   GUniFrac = as.dist(GUniFrac::GUniFrac(hmp50_tmtx, hmp50_tree, alpha=1, verbose=FALSE)[[1]][,,1]) )
 #> Unit: milliseconds

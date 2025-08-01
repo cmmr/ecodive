@@ -28,7 +28,7 @@ reference:
   contents:
   - unweighted_unifrac
   - weighted_unifrac
-  - normalized_unifrac
+  - weighted_normalized_unifrac
   - generalized_unifrac
   - variance_adjusted_unifrac
 

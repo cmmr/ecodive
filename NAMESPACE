@@ -23,7 +23,7 @@ export(jaccard)
 
 export(unweighted_unifrac)
 export(weighted_unifrac)
-export(normalized_unifrac)
+export(weighted_normalized_unifrac)
 export(generalized_unifrac)
 export(variance_adjusted_unifrac)
 
