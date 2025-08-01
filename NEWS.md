@@ -1,3 +1,3 @@
-# fastbiom 1.0.0
+# ecodive 1.0.0
 
-* This is the first release of fastbiom.
+* This is the first release of ecodive.

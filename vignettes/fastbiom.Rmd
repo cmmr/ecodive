@@ -1,8 +1,8 @@
 ---
-title: "Introduction to fastbiom"
+title: "Introduction to ecodive"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to fastbiom}
+  %\VignetteIndexEntry{Introduction to ecodive}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,7 +10,7 @@ vignette: >
 
 ## Intoduction
 
-`fastbiom` provides fast algorithms for calculating biome diversity. Most of
+`ecodive` provides fast algorithms for calculating biome diversity. Most of
 these algorithms fall into two categories - alpha diversity and beta diversity.
 
 
@@ -48,14 +48,14 @@ phylogenetic tree into this calculation.
 ### Input Matrix
 
 A counts matrix is required for all alpha and beta diversity metrics. An example
-counts matrix, `ex_counts` is included with `fastbiom` and we'll use it for the
+counts matrix, `ex_counts` is included with `ecodive` and we'll use it for the
 following examples.
 
-It's worth noting that `fastbiom` can accept a wide range of objects, including
+It's worth noting that `ecodive` can accept a wide range of objects, including
 numeric vectors, data frames, `rbiom` objects, `phyloseq` objects and more.
 
 ```r
-library(fastbiom)
+library(ecodive)
 
 ex_counts
 #>                   Saliva Gums Nose Stool
@@ -140,8 +140,8 @@ values for communities with more distantly related species. Faith (for alpha
 diversity) and UniFrac (for beta diversity) are examples of phylogenetic
 metrics.
 
-The `ex_tree` object included with `fastbiom` provides the phylogenetic tree for
-the genera in `ex_counts`. For your own datasets, you can use `fastbiom`'s
+The `ex_tree` object included with `ecodive` provides the phylogenetic tree for
+the genera in `ex_counts`. For your own datasets, you can use `ecodive`'s
 `read_tree()` function to import a phylogenetic tree from a newick formatted
 string or file.
 

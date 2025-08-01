@@ -1,0 +1,154 @@
+---
+title: "Benchmarks"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Benchmarks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Introduction
+
+<table><tr><td valign="top">
+
+### State of the Field
+
+The table at right shows a collection of bioinformatics R packages and how they implement classic &alpha;/&beta; ecology diversity metrics (e.g. Bray-Curtis, Shannon, etc) and how they implement UniFrac metrics.
+
+Only six packages - abdiv, ampvis2, ecodive, GUniFrac, phyloseq, and vegan - have their own implementations of these algorithms. Other R packages import code from ecodive, GUniFrac, phyloseq, and/or vegan to handle alpha and beta diversity computations. Therefore, only these six packages will be benchmarked.
+
+### Methodology
+
+We will use the microbenchmark R package to run each package's functions multiple times on the following hardware.
+
+    6-Core i5-9600K CPU @ 3.70GHz; 64.0 GB RAM
+    Windows 11 Pro x64 24H2 26100.4652
+
+</td><td>
+
+<table>
+<tr><th>R Package</th><th>Classic &alpha;/&beta; Implementation</th><th>UniFrac Implementation</th></tr>
+<tr><td>[abdiv](https://doi.org/10.32614/CRAN.package.abdiv)</td><td>***Serial R***</td><td>***Serial R***</td></tr>
+<tr><td>[ampvis2](https://github.com/KasperSkytte/ampvis2)</td><td>vegan</td><td>***Serial R***</td></tr>
+<tr><td>[animalcules](https://github.com/wejlab/animalcules)</td><td>vegan</td><td>GUniFrac</td></tr>
+<tr><td>[ecodive](https://doi.org/10.32614/CRAN.package.ecodive)</td><td>***Parallel C***</td><td>***Parallel C***</td></tr>
+<tr><td>[GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)</td><td>*none*</td><td>***Serial C***</td></tr>
+<tr><td>[phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)</td><td>vegan</td><td>***Parallel R***</td></tr>
+<tr><td>[mia](https://doi.org/doi:10.18129/B9.bioc.mia)</td><td>vegan</td><td>ecodive</td></tr>
+<tr><td>[microbiome](https://doi.org/doi:10.18129/B9.bioc.microbiome)</td><td>vegan</td><td>phyloseq</td></tr>
+<tr><td>[microeco](https://doi.org/10.32614/CRAN.package.microeco)</td><td>vegan</td><td>GUniFrac</td></tr>
+<tr><td>[microViz](https://github.com/david-barnett/microViz)</td><td>vegan</td><td>GUniFrac</td></tr>
+<tr><td>[phylosmith](https://github.com/schuyler-smith/phylosmith)</td><td>vegan</td><td>*none*</td></tr>
+<tr><td>[ecodive](https://doi.org/10.32614/CRAN.package.ecodive)</td><td>ecodive</td><td>ecodive</td></tr>
+<tr><td>[tidytacos](https://github.com/LebeerLab/tidytacos)</td><td>vegan</td><td>phyloseq</td></tr>
+<tr><td>[vegan](https://doi.org/10.32614/CRAN.package.vegan)</td><td>***Serial C***</td><td>*none*</td></tr>
+</table>
+
+</td></tr></table>
+
+
+# Setup
+
+```r
+install.packages('pak')
+
+pak::pkg_install(pkg = c(
+  'abdiv, 'ecodive', 'GUniFrac', 'kasperskytte/ampvis2', 
+  'microbenchmark', 'phyloseq', 'ecodive', 'vegan' ))
+  
+version$version.string
+#> [1] "R version 4.5.1 (2025-06-13 ucrt)"
+
+sapply(FUN = packageDescription, fields = 'Version', c(
+  'abdiv', 'ampvis2', 'ecodive', 'GUniFrac', 'phyloseq', 'vegan' ))
+#>    abdiv  ampvis2  ecodive  GUniFrac  phyloseq    vegan 
+#>  "0.2.0"  "2.8.9"  "1.0.0"     "1.8"  "1.52.0"  "2.7-1"
+
+(n_cpus <- ecodive::n_cpus())
+#> 6
+```
+
+
+# Weighted Normalized UniFrac
+
+```r
+
+# HMP50 dataset has 50 Samples
+hmp50      <- ecodive::hmp50
+hmp50_phy  <- ecodive::convert_to_phyloseq(hmp50)
+hmp50_mtx  <- as.matrix(hmp50)
+hmp50_tmtx <- t(hmp50_mtx)
+hmp50_tree <- hmp50$tree
+
+cl <- parallel::makeCluster(n_cpus)
+doParallel::registerDoParallel(cl)
+
+microbenchmark::microbenchmark(
+  times    = 100,
+  control  = list('warmup'),
+  unit     = 'milliseconds',
+  ecodive    = ecodive::bdiv_distmat(hmp50, bdiv='UniFrac', weighted=TRUE, normalized=TRUE),
+  phyloseq = phyloseq::UniFrac(hmp50_phy, weighted=TRUE, normalized=TRUE, parallel=TRUE),
+  GUniFrac = as.dist(GUniFrac::GUniFrac(hmp50_tmtx, hmp50_tree, alpha=1, verbose=FALSE)[[1]][,,1]) )
+#> Unit: milliseconds
+#>      expr      min       lq       mean    median        uq       max neval
+#>     ecodive   6.9196   7.4851   8.044243   7.77585   8.28915   20.7615   100
+#>  phyloseq 289.9793 305.0021 386.685350 309.46380 314.67285 6490.5718   100
+#>  GUniFrac  89.6219  92.9128 106.370146  95.07380 102.02750  680.5833   100
+
+parallel::stopCluster(cl)
+
+
+# ampvis2 conflicts with phyloseq cluster, so run separately
+microbenchmark::microbenchmark(
+  times    = 100,
+  control  = list('warmup'),
+  unit     = 'milliseconds',
+  ampvis2  = {
+    ampvis2:::dist.unifrac(hmp50_mtx, hmp50_tree, weighted=TRUE, normalise=TRUE, num_threads=n_cpus)
+    doParallel::stopImplicitCluster()
+  })
+#> Unit: milliseconds
+#>     expr      min       lq     mean   median       uq      max neval
+#>  ampvis2 3222.314 3331.174 3411.738 3390.686 3447.769 3923.836   100
+```
+
+
+# Classic Beta Diversity
+
+```r
+# GEMS dataset has 1006 Samples
+gems_mtx  <- as.matrix(ecodive::gems)
+gems_tmtx <- t(gems_mtx)
+
+microbenchmark::microbenchmark(
+  times   = 100,
+  control = list('warmup'),
+  unit    = 'milliseconds',
+  ecodive_bray = ecodive::bdiv_distmat(gems_mtx, 'bray'),
+  ecodive_eucl = ecodive::bdiv_distmat(gems_mtx, 'euclidean'),
+  ecodive_manh = ecodive::bdiv_distmat(gems_mtx, 'manhattan'),
+  ecodive_jacc = ecodive::bdiv_distmat(gems_mtx, 'jaccard'),
+  vegan_bray   = vegan::vegdist(gems_tmtx, 'bray'),
+  vegan_eucl   = vegan::vegdist(gems_tmtx, 'euclidean'),
+  vegan_manh   = vegan::vegdist(gems_tmtx, 'manhattan'),
+  vegan_jacc   = vegan::vegdist(gems_tmtx, 'jaccard') )
+#> Unit: milliseconds
+#>          expr       min        lq      mean    median        uq       max neval
+#>  ecodive_bray  392.8480  411.9878  452.1987  422.0814  434.1527  957.1814   100
+#>  ecodive_eucl  376.0261  390.7452  432.1333  399.3859  409.2418  745.7182   100
+#>  ecodive_manh  398.1766  410.4937  464.1193  419.8621  434.3308  783.0719   100
+#>  ecodive_jacc  394.6261  413.1661  449.6972  425.6042  438.0386  789.8647   100
+#>  vegan_bray    1684.6904 1906.3394 1973.9582 1965.0728 2016.4819 2871.2950  100
+#>  vegan_eucl    1561.9423 1782.3277 1867.9286 1846.6766 1928.6212 2455.4238  100
+#>  vegan_manh    1564.6130 1789.2117 1868.4523 1840.0278 1937.3641 2334.4634  100
+#>  vegan_jacc    1779.2507 1922.1949 2008.4732 1982.0686 2054.5181 2462.9468  100
+```

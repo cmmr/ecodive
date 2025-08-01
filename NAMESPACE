@@ -1,4 +1,4 @@
-useDynLib(fastbiom, 
+useDynLib(ecodive, 
   C_pthreads, 
   C_rarefy, C_read_tree,
   C_alpha_div, C_faith, 

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(fastbiom)
+library(ecodive)
 
-test_check("fastbiom")
+test_check("ecodive")

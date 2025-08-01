@@ -1,17 +1,17 @@
-# fastbiom
+# ecodive
 
 <!-- badges: start -->
-[![cran](https://www.r-pkg.org/badges/version/fastbiom)](https://CRAN.R-project.org/package=fastbiom)
-[![conda](https://anaconda.org/conda-forge/r-fastbiom/badges/version.svg)](https://anaconda.org/conda-forge/r-fastbiom)
-[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/fastbiom)](https://cranlogs.r-pkg.org/)
-[![dev](https://github.com/cmmr/fastbiom/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cmmr/fastbiom/actions/workflows/R-CMD-check.yaml)
-[![covr](https://codecov.io/gh/cmmr/fastbiom/graph/badge.svg)](https://app.codecov.io/gh/cmmr/fastbiom)
+[![cran](https://www.r-pkg.org/badges/version/ecodive)](https://CRAN.R-project.org/package=ecodive)
+[![conda](https://anaconda.org/conda-forge/r-ecodive/badges/version.svg)](https://anaconda.org/conda-forge/r-ecodive)
+[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/ecodive)](https://cranlogs.r-pkg.org/)
+[![dev](https://github.com/cmmr/ecodive/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cmmr/ecodive/actions/workflows/R-CMD-check.yaml)
+[![covr](https://codecov.io/gh/cmmr/ecodive/graph/badge.svg)](https://app.codecov.io/gh/cmmr/ecodive)
 <!-- badges: end -->
 
-`fastbiom` provides the fastest implementations of several alpha- and 
-beta-diversity metrics for R, including phylogenetic metrics such as Faith's PD 
-and 5 variants of UniFrac. It is compatible with phyloseq, rbiom, and 
-BioConductor objects. Zero dependencies, making it quick to install and ideal
+`ecodive` provides the fastest implementations of several alpha- and
+beta-diversity metrics for R, including phylogenetic metrics such as Faith's PD
+and 5 variants of UniFrac. It is compatible with phyloseq, rbiom, and
+BioConductor objects. With zero dependencies, it's quick to install and ideal
 for package developers.
 
 
@@ -21,14 +21,14 @@ for package developers.
 The latest stable version can be installed from CRAN.
 
 ``` r
-install.packages('fastbiom')
+install.packages('ecodive')
 ```
 
 The development version is available on GitHub.
 
 ``` r
 install.packages('pak')
-pak::pak('cmmr/fastbiom')
+pak::pak('cmmr/ecodive')
 ```
 
 
@@ -80,20 +80,20 @@ weighted_unifrac(counts, tree = ex_tree)
 
 ## Documentation
 
-The online manual for `fastbiom` is available at
-<https://cmmr.github.io/fastbiom/>. It includes a getting started guide,
+The online manual for `ecodive` is available at
+<https://cmmr.github.io/ecodive/>. It includes a getting started guide,
 articles on alpha/beta diversity, and reference pages for each function.
 
 
 
 ## Automated tests
 
-The following commands will check if `fastbiom` passes the bundled testing
+The following commands will check if `ecodive` passes the bundled testing
 suite.
 
 ``` r
 install.packages('testthat')
-testthat::test_check('fastbiom')
+testthat::test_check('ecodive')
 ```
 
 
@@ -104,7 +104,7 @@ testthat::test_check('fastbiom')
 ### Support
 
 Bug reports, feature requests, and general questions can be submitted at
-<https://github.com/cmmr/fastbiom/issues>.
+<https://github.com/cmmr/ecodive/issues>.
 
 
 ### Contributing
@@ -115,6 +115,6 @@ needed) and passes all automated tests.
 
 New functions should leverage C and pthreads to minimize memory and CPU time.
 
-Please note that the fastbiom project is released with a [Contributor Code of
-Conduct](https://cmmr.github.io/fastbiom/CODE_OF_CONDUCT.html). By contributing
+Please note that the ecodive project is released with a [Contributor Code of
+Conduct](https://cmmr.github.io/ecodive/CODE_OF_CONDUCT.html). By contributing
 to this project, you agree to abide by its terms.

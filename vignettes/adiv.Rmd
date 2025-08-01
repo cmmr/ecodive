@@ -10,7 +10,7 @@ vignette: >
 # Input Matrix
 
 ```r
-library(fastbiom)
+library(ecodive)
 
 counts <- rarefy(ex_counts)
 

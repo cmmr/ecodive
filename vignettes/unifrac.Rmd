@@ -24,7 +24,7 @@ The different UniFrac algorithms are listed below, along with examples for calcu
 # Input Data
 
 ```{r input_data, echo=FALSE}
-library(fastbiom)
+library(ecodive)
 
 counts <- matrix(
   data     = c(0, 0, 9, 3, 3, 1, 4, 2, 8, 0), 
@@ -128,7 +128,7 @@ knitr::include_graphics('../man/figures/unifrac-weights.png')
 # Unweighted
 
 * [Lozupone et al, 2005](https://doi.org/10.1128/AEM.71.12.8228-8235.2005): Unweighted UniFrac
-* R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `unweighted_unifrac()`
+* R Package [ecodive](https://cran.r-project.org/package=ecodive): `unweighted_unifrac()`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `unweighted_unifrac()`
 * R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=FALSE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric unweighted_unifrac`
@@ -170,7 +170,7 @@ U &= 0.4545455
 # Weighted
 
 * [Lozupone et al, 2007](https://doi.org/10.1128/AEM.01996-06): Raw Weighted UniFrac
-* R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `weighted_unifrac()`
+* R Package [ecodive](https://cran.r-project.org/package=ecodive): `weighted_unifrac()`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `weighted_unifrac()`
 * R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=TRUE, normalized=FALSE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric weighted_unifrac`
@@ -187,7 +187,7 @@ W &= 1.14
 # Normalized
 
 * [Lozupone et al, 2007](https://doi.org/10.1128/AEM.01996-06): Normalized Weighted UniFrac
-* R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `normalized_unifrac()`
+* R Package [ecodive](https://cran.r-project.org/package=ecodive): `normalized_unifrac()`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `weighted_normalized_unifrac()`
 * R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=TRUE, normalized=TRUE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric weighted_normalized_unifrac`
@@ -224,7 +224,7 @@ N &= 0.4899713
 # Generalized
 
 * [Chen et al. 2012](https://doi.org/10.1093/bioinformatics/bts342): Generalized UniFrac
-* R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `generalized_unifrac(alpha = 0.5)`
+* R Package [ecodive](https://cran.r-project.org/package=ecodive): `generalized_unifrac(alpha = 0.5)`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `generalized_unifrac(alpha = 0.5)`
 * R Package [GUniFrac](https://cran.r-project.org/web/packages/GUniFrac/index.html): `GUniFrac(alpha = 0.5)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric generalized_unifrac -a 0.5`
@@ -289,7 +289,7 @@ G &= 0.569754
 # Variance Adjusted
 
 * [Chang et al, 2011](https://doi.org/10.1186/1471-2105-12-118): Variance Adjusted Weighted (VAW) UniFrac
-* R Package [fastbiom](https://cran.r-project.org/package=fastbiom): `variance_adjusted_unifrac()`
+* R Package [ecodive](https://cran.r-project.org/package=ecodive): `variance_adjusted_unifrac()`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `variance_adjusted_unifrac()`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric weighted_normalized_unifrac --p-variance-adjusted`
 

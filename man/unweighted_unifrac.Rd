@@ -42,7 +42,7 @@ abundances (\eqn{A} and \eqn{B}) on each of those branches:
 Abundances in \eqn{A} and \eqn{B} are coded as \code{1} or \code{0} to indicate their
 presence or absence, respectively, on each branch.
 
-See \url{https://cmmr.github.io/fastbiom/articles/unifrac.html} for details and
+See \url{https://cmmr.github.io/ecodive/articles/unifrac.html} for details and
 a worked example.
 }
 

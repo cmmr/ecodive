@@ -477,7 +477,7 @@ manhattan <- function (
 #' Abundances in \eqn{A} and \eqn{B} are coded as `1` or `0` to indicate their 
 #' presence or absence, respectively, on each branch.
 #' 
-#' See <https://cmmr.github.io/fastbiom/articles/unifrac.html> for details and 
+#' See <https://cmmr.github.io/ecodive/articles/unifrac.html> for details and 
 #' a worked example.
 #' 
 #' @references

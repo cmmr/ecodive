@@ -1,4 +1,4 @@
-Package: fastbiom
+Package: ecodive
 Type: Package
 Title: Microbiome Algorithms Implemented in 'C'
 Version: 1.0.0
@@ -16,8 +16,8 @@ Description:
     Computes alpha- and beta- diversity metrics (including 'UniFrac'). 
     Also parses newick trees into a 'phylo' object and rarefies abundance
     matrices. Algorithms are parallelized across all CPU cores by default.
-URL: https://cmmr.github.io/fastbiom/, https://github.com/cmmr/fastbiom
-BugReports: https://github.com/cmmr/fastbiom/issues
+URL: https://cmmr.github.io/ecodive/, https://github.com/cmmr/ecodive
+BugReports: https://github.com/cmmr/ecodive/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
