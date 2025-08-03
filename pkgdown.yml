@@ -4,9 +4,10 @@ pkgdown_sha: ~
 articles:
   adiv: adiv.html
   bdiv: bdiv.html
-  fastbiom: fastbiom.html
+  benchmark: benchmark.html
+  ecodive: ecodive.html
   unifrac: unifrac.html
-last_built: 2025-07-30T19:35Z
+last_built: 2025-08-03T23:44Z
 urls:
-  reference: https://cmmr.github.io/fastbiom/reference
-  article: https://cmmr.github.io/fastbiom/articles
+  reference: https://cmmr.github.io/ecodive/reference
+  article: https://cmmr.github.io/ecodive/articles
