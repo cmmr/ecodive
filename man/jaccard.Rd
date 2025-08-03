@@ -81,9 +81,9 @@ Other beta_diversity:
 \code{\link{gower}()},
 \code{\link{kulczynski}()},
 \code{\link{manhattan}()},
-\code{\link{normalized_unifrac}()},
 \code{\link{unweighted_unifrac}()},
 \code{\link{variance_adjusted_unifrac}()},
+\code{\link{weighted_normalized_unifrac}()},
 \code{\link{weighted_unifrac}()}
 }
 \concept{beta_diversity}

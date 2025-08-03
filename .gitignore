@@ -4,6 +4,7 @@
 .Ruserdata
 .gitignore
 ecodive.Rproj
+*.rds
 src/*.o
 src/*.so
 src/*.dll

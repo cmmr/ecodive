@@ -9,6 +9,11 @@ vignette: >
 
 # Input Matrix
 
+Here we'll use the `ex_counts` feature table included with ecodive. It contains
+the number of observations of each bacterial genera in each sample. In the text
+below, you can substitute the word 'genera' for the feature of interest in your
+own data.
+
 ```r
 library(ecodive)
 
@@ -34,8 +39,8 @@ Depending on the metric, it may measure **richness** and/or **evenness**.
 
 ## Richness
 
-Richness is how many species are present in a sample. The simplest metric is to
-count the non-zero species (or genera in this example).
+Richness is how many genera are present in a sample. The simplest metric is to
+count the non-zero genera.
 
 ```r
 colSums(counts > 0)
@@ -44,14 +49,14 @@ colSums(counts > 0)
 ```
 
 The Chao1 metric takes this a step further by including unobserved low abundance
-species, inferred using the number of times `counts == 1` vs `counts == 2`.
+genera, inferred using the number of times `counts == 1` vs `counts == 2`.
 
 ```r
-# Infers 8 unobserved species
+# Infers 8 unobserved genera
 chao1(c(1, 1, 1, 1, 2, 5, 5, 5))
 #> [1] 16
 
-# Infers less than 1 unobserved species
+# Infers less than 1 unobserved genera
 chao1(c(1, 2, 2, 2, 2, 5, 5, 5))
 #> [1] 8.125
 
@@ -64,7 +69,7 @@ chao1(counts)
 
 ## Evenness
 
-Evenness is how equally distributed species are within a community. 
+Evenness is how equally distributed genera are within a sample. 
 The Simpson metric is a good measure of evenness.
 
 ```r
@@ -114,7 +119,7 @@ sort(shannon(counts))
 ## Phylogenetic Alpha Diversity
 
 Faith's phylogenetic diversity index incorporates a phylogenetic tree of the
-species in order to measure how many of the tree's branches are represented by
+genera in order to measure how many of the tree's branches are represented by
 each sample.
 
 ```r

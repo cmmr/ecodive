@@ -25,7 +25,7 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 
 \item{alpha}{How much weight to give to relative abundances; a value
 between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
-\code{normalized_unifrac()}.}
+\code{weighted_normalized_unifrac()}.}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -79,9 +79,9 @@ Other beta_diversity:
 \code{\link{jaccard}()},
 \code{\link{kulczynski}()},
 \code{\link{manhattan}()},
-\code{\link{normalized_unifrac}()},
 \code{\link{unweighted_unifrac}()},
 \code{\link{variance_adjusted_unifrac}()},
+\code{\link{weighted_normalized_unifrac}()},
 \code{\link{weighted_unifrac}()}
 }
 \concept{beta_diversity}

@@ -8,11 +8,11 @@
 [![covr](https://codecov.io/gh/cmmr/ecodive/graph/badge.svg)](https://app.codecov.io/gh/cmmr/ecodive)
 <!-- badges: end -->
 
-`ecodive` provides the fastest implementations of several alpha- and
-beta-diversity metrics for R, including phylogenetic metrics such as Faith's PD
-and 5 variants of UniFrac. It is compatible with phyloseq, rbiom, and
-BioConductor objects. With zero dependencies, it's quick to install and ideal
-for package developers.
+`ecodive` provides the fastest implementations of alpha and beta diversity
+metrics for R, including UniFrac, Faith's PD, Bray-Curtis, Shannon, and many
+others. It works with any matrix-like object, including phyloseq, rbiom, and
+BioConductor data structures. With zero dependencies, it's quick to install and
+ideal for end users and package developers alike.
 
 
 

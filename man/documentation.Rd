@@ -17,7 +17,7 @@ total branch length. Options: \code{TRUE} or \code{FALSE}.}
 
 \item{alpha}{How much weight to give to relative abundances; a value
 between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
-\code{normalized_unifrac()}.}
+\code{weighted_normalized_unifrac()}.}
 
 \item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
 the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}

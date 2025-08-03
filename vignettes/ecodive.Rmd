@@ -10,49 +10,13 @@ vignette: >
 
 ## Intoduction
 
-`ecodive` provides fast algorithms for calculating biome diversity. Most of
-these algorithms fall into two categories - alpha diversity and beta diversity.
+Ecodive calculates ecological diversity metrics. Alpha diversity metrics
+provide insight about a single sample's diversity, whereas beta diversity
+metrics indicate how different a pair of samples are from each other.
 
-
-## Alpha Diversity
-
-A measure of how many different species are present in a biome. Depending on 
-the metric, this can take into account the number of unique species (richness), 
-how evenly the population is split among species (evenness), or how distantly
-related the species are (phylogenetic diversity).
-
-* Classic metrics: `chao1()`, `shannon()`, `simpson()`, `inv_simpson()`
-
-* Phylogenetic metrics: `faith()`
-
-* Further reading: `vignette('adiv')`
-
-
-## Beta Diversity
-
-A measure of how different two biomes are, based on the species observed in
-each. Also known as "distance" or "dissimilarity". UniFrac metrics incorporate a
-phylogenetic tree into this calculation.
-
-* Classic metrics: `bray_curtis()`, `canberra()`, `euclidean()`, `gower()`, 
-`jaccard()`, `kulczynski()`, `manhattan()`
-
-* Phylogenetic metrics: `unweighted_unifrac()`, `weighted_unifrac()`, 
-`weighted_normalized_unifrac()`, `generalized_unifrac()`, `variance_adjusted_unifrac()`
-
-* Further reading: `vignette('bdiv')` and `vignette('unifrac')`.
-
-
-## Example
-
-### Input Matrix
-
-A counts matrix is required for all alpha and beta diversity metrics. An example
-counts matrix, `ex_counts` is included with `ecodive` and we'll use it for the
-following examples.
-
-It's worth noting that `ecodive` can accept a wide range of objects, including
-numeric vectors, data frames, `rbiom` objects, `phyloseq` objects and more.
+In this guide, we'll use the `ex_counts` dataset included with ecodive.
+`ex_counts` is a feature table that enumerates how many times each bacterial
+genera was observed on different body sites.
 
 ```r
 library(ecodive)
@@ -65,27 +29,69 @@ ex_counts
 #> Haemophilus          180   87    2     1
 #> Propionibacterium      1    1  251     0
 #> Staphylococcus         0    1  236     1
-
-colSums(ex_counts)
-#> Saliva   Gums   Nose  Stool 
-#>    345    886   1011    615 
 ```
 
+In this example, the 'features' in our feature table are genera. However, your 
+own dataset can use whatever feature makes sense - species, OTUs, ASVs, or 
+even something completely unrelated to ecology.
+
+
+
+## Alpha Diversity
+
+Alpha diversity metrics describe how many different genera are present in a
+sample. Depending on the metric, this can take into account the number of unique
+genera (richness), how evenly the population is split among genera (evenness),
+or how distantly related the genera are (phylogenetic diversity).
+
+* Classic metrics: `chao1()`, `shannon()`, `simpson()`, `inv_simpson()`
+
+* Phylogenetic metrics: `faith()`
+
+* Further reading: `vignette('adiv')`
+
+
+## Beta Diversity
+
+Beta diversity metrics describe how different two samples are, based on the
+genera observed in each. Also known as "distance" or "dissimilarity". UniFrac
+metrics incorporate a phylogenetic tree into this calculation.
+
+* Classic metrics: `bray_curtis()`, `canberra()`, `euclidean()`, `gower()`, 
+`jaccard()`, `kulczynski()`, `manhattan()`
+
+* Phylogenetic metrics: `unweighted_unifrac()`, `weighted_unifrac()`,
+`weighted_normalized_unifrac()`, `generalized_unifrac()`,
+`variance_adjusted_unifrac()`
+
+* Further reading: `vignette('bdiv')` and `vignette('unifrac')`.
+
+
+
+## Example
 
 ### Rarefaction
 
-The `ex_counts` matrix has 345 saliva observations, but nose has 1011
+The `ex_counts` feature table has 345 saliva observations, but nose has 1011
 observations. This unequal sampling depth can cause systematic biases.
-Specifically, rare species will be observed more often in biomes with greater
+Specifically, rare genera will be observed more often in samples with greater
 sampling depths, thereby artificially inflating the observed richness.
 
-The first step then is to rarefy the `ex_counts` matrix so that all biomes have
+The first step then is to rarefy `ex_counts` so that all samples have
 the same number of observations. Rarefying randomly removes observations from
-biomes with more observations.
+samples with more observations.
 
 
 ```r
+colSums(ex_counts)
+#> Saliva   Gums   Nose  Stool 
+#>    345    886   1011    615 
+
 counts <- rarefy(ex_counts)
+
+colSums(counts)
+#> Saliva   Gums   Nose  Stool 
+#>    345    345    345    345 
 
 counts
 #>                   Saliva Gums Nose Stool
@@ -95,18 +101,15 @@ counts
 #> Haemophilus          180   34    0     1
 #> Propionibacterium      1    0   82     0
 #> Staphylococcus         0    0   86     1
-
-colSums(counts)
-#> Saliva   Gums   Nose  Stool 
-#>    345    345    345    345 
 ```
 
 
 ### Classic Metrics
 
-These metrics have been around for 50+ years and don't require a phylogenetic
-tree. The beta diversity functions can take a `weighted = FALSE` argument to 
-use only presence/absence information instead of relative abundances.
+These alpha and beta diversity metrics have been around for 50+ years and don't
+require a phylogenetic tree. The beta diversity functions can take a `weighted =
+FALSE` argument to use only presence/absence information instead of relative
+abundances.
 
 ```r
 ## Alpha Diversity -------------------
@@ -134,14 +137,14 @@ bray_curtis(counts, weighted = FALSE)
 
 ### Phylogenetic Metrics
 
-A phylogenetic tree enables diversity metrics to take into account evolutionary
-relatedness between the observed species, generally giving higher diversity
-values for communities with more distantly related species. Faith (for alpha
-diversity) and UniFrac (for beta diversity) are examples of phylogenetic
-metrics.
+A phylogenetic tree enables alpha and beta diversity metrics to take into
+account evolutionary relatedness between the observed genera, generally giving
+higher diversity values for samples with more distantly related genera. Faith
+(for alpha diversity) and UniFrac (for beta diversity) are examples of
+phylogenetic metrics.
 
-The `ex_tree` object included with `ecodive` provides the phylogenetic tree for
-the genera in `ex_counts`. For your own datasets, you can use `ecodive`'s
+The `ex_tree` object included with ecodive provides the phylogenetic tree for
+the genera in `ex_counts`. For your own datasets, you can use ecodive's
 `read_tree()` function to import a phylogenetic tree from a newick formatted
 string or file.
 

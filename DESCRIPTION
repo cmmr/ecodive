@@ -1,8 +1,8 @@
 Package: ecodive
 Type: Package
-Title: Microbiome Algorithms Implemented in 'C'
+Title: Fast Implementations of Ecological Diversity Metrics
 Version: 1.0.0
-Date: 2025-07-31
+Date: 2025-08-03
 Authors@R: c(
     person(
       "Daniel P.", "Smith",
@@ -13,9 +13,10 @@ Authors@R: c(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description:
-    Computes alpha- and beta- diversity metrics (including 'UniFrac'). 
-    Also parses newick trees into a 'phylo' object and rarefies abundance
-    matrices. Algorithms are parallelized across all CPU cores by default.
+    Computes alpha and beta diversity metrics using concurrent 'C' threads.
+    Metrics include 'UniFrac', Faith's phylogenetic diversity, Bray-Curtis
+    dissimilarity, Shannon diversity index, and many others.
+    Also parses newick trees into 'phylo' objects and rarefies feature tables.
 URL: https://cmmr.github.io/ecodive/, https://github.com/cmmr/ecodive
 BugReports: https://github.com/cmmr/ecodive/issues
 License: MIT + file LICENSE

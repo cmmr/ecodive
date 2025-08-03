@@ -9,6 +9,11 @@ vignette: >
 
 # Input Matrix
 
+Here we'll use the `ex_counts` feature table included with ecodive. It contains
+the number of observations of each bacterial genera in each sample. In the text
+below, you can substitute the word 'genera' for the feature of interest in your
+own data.
+
 ```r
 library(ecodive)
 
@@ -39,7 +44,9 @@ samples and `1` for completely different samples.
 
 ## Weighted vs Unweighted
 
-The classic algorithms all run in weighted mode by default. Specifying `weighted = FALSE`, e.g. `canberra(counts, weighted = FALSE)` will switch them to unweighted mode.
+The classic algorithms all run in weighted mode by default. Specifying `weighted
+= FALSE`, e.g. `canberra(counts, weighted = FALSE)` will switch them to
+unweighted mode.
 
 * `bray_curtis()`, `canberra()`, `euclidean()`, `gower()`, `jaccard()`, `kulczynski()`, `manhattan()`
 
@@ -53,8 +60,8 @@ For the UniFrac algorithms, `unweighted_unifrac()` is unweighted and all the oth
 
 # Partial Calculation
 
-Generally, the completely calculated all-vs-all distance matrix returned by the
-beta diversity functions by default will meet your needs.
+The default value of `pairs=NULL` in ecodive's beta diversity functions results
+in the returned all-vs-all distance matrix being completely filled in.
 
 ```r
 bray_curtis(counts)
@@ -82,7 +89,7 @@ The `pairs` argument can be:
 * A logical vector, indicating whether to calculate a position in the result.
 * A `function(i,j)` that returns whether columns `i` and `j` should be compared.
 
-Therefore, all of the follow are equivalent:
+Therefore, all of the following are equivalent:
 
 ```r
 bray_curtis(counts, pairs = 1:3)
@@ -94,13 +101,13 @@ bray_curtis(counts, pairs = function (i, j) i == 1)
 The ordering of `pairs` follows the pairings produced by `combn()`.
 
 ```r
-# Column index pairs
+# Column index pairings
 combn(ncol(counts), 2)
 #>      [,1] [,2] [,3] [,4] [,5] [,6]
 #> [1,]    1    1    1    2    2    3
 #> [2,]    2    3    4    3    4    4
 
-# Sample name pairs
+# Sample name pairings
 combn(colnames(counts), 2)
 #>      [,1]     [,2]     [,3]     [,4]   [,5]    [,6]   
 #> [1,] "Saliva" "Saliva" "Saliva" "Gums" "Gums"  "Nose" 
@@ -112,6 +119,10 @@ So, for instance, to use gums as the reference sample:
 ```r
 my_combn <- combn(colnames(counts), 2)
 my_pairs <- my_combn[1,] == 'Gums' | my_combn[2,] == 'Gums'
+
+my_pairs
+#> [1]  TRUE FALSE FALSE  TRUE  TRUE FALSE
+
 bray_curtis(counts, pairs = my_pairs)
 #>          Saliva      Gums      Nose
 #> Gums  0.4260870                    
