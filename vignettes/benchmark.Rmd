@@ -62,6 +62,8 @@ these benchmarking runs has the following specifications.
 The `bench::mark()` function also checks that the output from all benchmarked
 expressions are equal.
 
+<br>
+
 
 # Setup
 
@@ -135,7 +137,9 @@ gems_tmtx <- t(gems_mtx)
 ```
 
 </details>
-<br><br>
+
+<br>
+
 
 # UniFrac
 
@@ -337,7 +341,7 @@ ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
 
 All of ecodive's UniFrac functions are faster than abdiv, GUniFrac, phyloseq, and ampvis2's implementations by 1 - 3 orders of magnitude. All of ecodive's UniFrac functions are also more memory efficient than the other packages' by 1 - 4 orders of magnitude.
 
-<br><br>
+<br>
 
 
 # Classic Beta Diversity
@@ -426,7 +430,7 @@ Ecodive's Bray-Curtis, Euclidean, Jaccard, and Manhattan implementations are fas
 
 Furthermore, the values returned by `abdiv::jaccard()` were inconsistent with those returned by the equivalent ecodive and vegan functions.
 
-<br><br>
+<br>
 
 
 # Alpha Diversity
