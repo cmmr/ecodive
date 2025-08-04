@@ -35,12 +35,8 @@ Kulczynski beta diversity metric.
 In the formulas below, \code{x} and \code{y} are two columns (samples) from \code{counts}.
 \code{n} is the number of rows (OTUs) in \code{counts}.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{t = \displaystyle \sum_{i = 1}^{n} min(x_i,y_i)}
 \deqn{D = \displaystyle 1 - 0.5(\frac{t}{\sum_{i = 1}^{n} x_i} + \frac{t}{\sum_{i = 1}^{n} y_i})}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 2, 6)
   y <- c(0, 8, 0, 0, 5)
@@ -48,8 +44,6 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
   1 - (t/sum(x) + t/sum(y)) / 2  
   #>  0.6410256
 }\if{html}{\out{</div>}}
-
-}
 }
 
 \examples{

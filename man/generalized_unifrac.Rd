@@ -68,7 +68,7 @@ See \code{vignette('unifrac')} for details and a worked example.
 Chen J, Bittinger K, Charlson ES, Hoffmann C, Lewis J, Wu GD, Collman RG, Bushman FD, Li H 2012.
 Associating microbiome composition with environmental covariates using generalized UniFrac distances.
 Bioinformatics, 28(16).
-\url{https://doi.org/10.1093/bioinformatics/bts342}
+\doi{10.1093/bioinformatics/bts342}
 }
 \seealso{
 Other beta_diversity: 

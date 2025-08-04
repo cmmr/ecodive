@@ -57,7 +57,7 @@ See \code{vignette('unifrac')} for details and a worked example.
 Chang Q, Luan Y, Sun F 2011.
 Variance adjusted weighted UniFrac: a powerful beta diversity measure for comparing communities based on phylogeny.
 BMC Bioinformatics, 12.
-\url{https://doi.org/10.1186/1471-2105-12-118}
+\doi{10.1186/1471-2105-12-118}
 }
 \seealso{
 Other beta_diversity: 

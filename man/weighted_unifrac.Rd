@@ -57,7 +57,7 @@ See \code{vignette('unifrac')} for details and a worked example.
 Lozupone CA, Hamady M, Kelley ST, Knight R 2007.
 Quantitative and Qualitative \eqn{\beta} Diversity Measures Lead to Different Insights into Factors That Structure Microbial Communities.
 Applied and Environmental Microbiology, 73(5).
-\url{https://doi.org/10.1128/AEM.01996-06}
+\doi{10.1128/AEM.01996-06}
 }
 \seealso{
 Other beta_diversity: 

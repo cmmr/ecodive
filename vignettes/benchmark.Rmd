@@ -32,7 +32,7 @@ Shannon, etc) and how they implement UniFrac metrics.
 | [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)          | ***Serial R***   | ***Serial R***   |
 | [ampvis2](https://github.com/KasperSkytte/ampvis2)            | vegan            | ***Serial R***   |
 | [animalcules](https://github.com/wejlab/animalcules)          | vegan            | GUniFrac         |
-| [ecodive](https://doi.org/10.32614/CRAN.package.ecodive)      | ***Parallel C*** | ***Parallel C*** |
+| [ecodive](https://cran.r-project.org/package=ecodive)         | ***Parallel C*** | ***Parallel C*** |
 | [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)    | *none*           | ***Serial C***   |
 | [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)     | vegan            | ***Parallel R*** |
 | [mia](https://doi.org/doi:10.18129/B9.bioc.mia)               | vegan            | ecodive          |
@@ -40,7 +40,7 @@ Shannon, etc) and how they implement UniFrac metrics.
 | [microeco](https://doi.org/10.32614/CRAN.package.microeco)    | vegan            | GUniFrac         |
 | [microViz](https://github.com/david-barnett/microViz)         | vegan            | GUniFrac         |
 | [phylosmith](https://github.com/schuyler-smith/phylosmith)    | vegan            | *none*           |
-| [ecodive](https://doi.org/10.32614/CRAN.package.ecodive)      | ecodive          | ecodive          |
+| [rbiom](https://doi.org/10.32614/CRAN.package.rbiom)          | ecodive          | ecodive          |
 | [tidytacos](https://github.com/LebeerLab/tidytacos)           | vegan            | phyloseq         |
 | [vegan](https://doi.org/10.32614/CRAN.package.vegan)          | ***Serial C***   | *none*           |
 

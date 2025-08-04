@@ -61,7 +61,7 @@ a worked example.
 Lozupone C, Knight R 2005.
 UniFrac: A new phylogenetic method for comparing microbial communities.
 Applied and Environmental Microbiology, 71(12).
-\url{https://doi.org/10.1128/AEM.71.12.8228-8235.2005}
+\doi{10.1128/AEM.71.12.8228-8235.2005}
 }
 \seealso{
 Other beta_diversity: 

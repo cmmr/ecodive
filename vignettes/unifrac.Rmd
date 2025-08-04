@@ -226,7 +226,7 @@ N &= 0.4899713
 * [Chen et al. 2012](https://doi.org/10.1093/bioinformatics/bts342): Generalized UniFrac
 * R Package [ecodive](https://cran.r-project.org/package=ecodive): `generalized_unifrac(alpha = 0.5)`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `generalized_unifrac(alpha = 0.5)`
-* R Package [GUniFrac](https://cran.r-project.org/web/packages/GUniFrac/index.html): `GUniFrac(alpha = 0.5)`
+* R Package [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac): `GUniFrac(alpha = 0.5)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric generalized_unifrac -a 0.5`
 
 \begin{align*}

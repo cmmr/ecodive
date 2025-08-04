@@ -37,19 +37,13 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
 
 OTUs must be removed if they are absent from both samples.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{D = \displaystyle \frac{1}{n}\sum_{i = 1}^{n} \frac{|x_i - y_i|}{x_i + y_i}}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 0, 6)[-4]
   y <- c(0, 8, 0, 0, 5)[-4]
   sum(abs(x-y) / (x+y)) / length(x)  
   #>  0.7727273
 }\if{html}{\out{</div>}}
-
-}
 }
 
 \examples{
@@ -70,7 +64,7 @@ OTUs must be removed if they are absent from both samples.
 Lance, Godfrey LN, Williams WT 1967.
 A general theory of classificatory sorting strategies II. Clustering systems.
 The computer journal, 10(3).
-\url{https://doi.org/10.1093/comjnl/10.3.271}
+\doi{10.1093/comjnl/10.3.271}
 }
 \seealso{
 Other beta_diversity: 

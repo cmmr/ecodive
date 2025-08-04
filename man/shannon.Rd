@@ -31,20 +31,14 @@ Pre-transformation: drop all OTUs with zero abundance.
 In the formulas below, \eqn{x} is a single column (sample) from \code{counts}.
 \eqn{p_i} is the proportion of the \eqn{i}-th OTU in the total community.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{p_{i} = \displaystyle \frac{x_i}{\sum x}}
 \deqn{D = \displaystyle -\sum_{i = 1}^{n} p_{i}\times\ln(p_{i})}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 2, 6)[-2]  
   p <- x / sum(x)
   -sum(p * log(p))
   #>  1.309526
 }\if{html}{\out{</div>}}
-
-}
 }
 
 \examples{

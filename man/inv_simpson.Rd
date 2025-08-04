@@ -29,20 +29,14 @@ Pre-transformation: drop all OTUs with zero abundance.
 In the formulas below, \eqn{x} is a single column (sample) from \code{counts}.
 \eqn{p} are the relative abundances.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{p_{i} = \displaystyle \frac{x_i}{\sum x}}
 \deqn{D = \displaystyle 1 / \sum_{i = 1}^{n} p_{i}\times\ln(p_{i})}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 2, 6)[-2]  
   p <- x / sum(x)
   1 / sum(p * log(p))
   #>  -0.7636352
 }\if{html}{\out{</div>}}
-
-}
 }
 
 \examples{
@@ -69,7 +63,7 @@ In the formulas below, \eqn{x} is a single column (sample) from \code{counts}.
 Simpson EH 1949.
 Measurement of diversity.
 Nature, 163.
-\url{https://doi.org/10.1038/163688a0}
+\doi{10.1038/163688a0}
 }
 \seealso{
 Other alpha_diversity: 

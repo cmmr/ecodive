@@ -19,18 +19,14 @@
 #' In the formulas below, `x` and `y` are two columns (samples) from `counts`. 
 #' `n` is the number of rows (OTUs) in `counts`.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{D = \displaystyle \frac{\sum_{i = 1}^{n} |x_i - y_i|}{\sum_{i = 1}^{n} (x_i + y_i)}}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 2, 6)
 #'   y <- c(0, 8, 0, 0, 5)
 #'   sum(abs(x-y)) / sum(x+y)  
 #'   #>  0.6428571
 #' ```
-#' }
 #' 
 #' @references
 #' 
@@ -83,25 +79,21 @@ bray_curtis <- function (
 #' 
 #' OTUs must be removed if they are absent from both samples.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{D = \displaystyle \frac{1}{n}\sum_{i = 1}^{n} \frac{|x_i - y_i|}{x_i + y_i}}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 0, 6)[-4]
 #'   y <- c(0, 8, 0, 0, 5)[-4]
 #'   sum(abs(x-y) / (x+y)) / length(x)  
 #'   #>  0.7727273
 #' ```
-#' }
 #' 
 #' @references
 #' 
 #' Lance, Godfrey LN, Williams WT 1967.
 #' A general theory of classificatory sorting strategies II. Clustering systems.
 #' The computer journal, 10(3).
-#' <https://doi.org/10.1093/comjnl/10.3.271>
+#' \doi{10.1093/comjnl/10.3.271}
 #' 
 #' @export
 #' @examples
@@ -146,25 +138,21 @@ canberra <- function (
 #' In the formulas below, `x` and `y` are two columns (samples) from `counts`. 
 #' `n` is the number of rows (OTUs) in `counts`.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{D = \displaystyle \sqrt{\sum_{i = 1}^{n} (x_i - y_i)^{2}}}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 2, 6)  
 #'   y <- c(0, 8, 0, 0, 5)  
 #'   sqrt(sum((x-y)^2))
 #'   #>  9.69536
 #' ```
-#' }
 #' 
 #' @references
 #' 
 #' Legendre P, Caceres M 2013.
 #' Beta diversity as the variance of community data: dissimilarity coefficients and partitioning.
 #' Ecology Letters. 16(8).
-#' <https://doi.org/10.1111/ele.12141>
+#' \doi{10.1111/ele.12141}
 #' 
 #' @export
 #' @examples
@@ -209,33 +197,25 @@ euclidean <- function (
 #' Each row (OTU) of `counts` is rescaled to the range 0-1. In cases where a 
 #' row is all the same value, those values are replaced with `0`.
 #' 
-#' \tabular{l}{
-#' ```
-#' #   counts                 scaled recounts
-#' #        A B C  D                 A   B   C D  
-#' #   OTU1 0 0 0  0    ->    OTU1 0.0 0.0 0.0 0
-#' #   OTU2 0 8 9 10    ->    OTU2 0.0 0.8 0.9 1
-#' #   OTU3 5 5 5  5    ->    OTU3 0.0 0.0 0.0 0
-#' #   OTU4 2 0 0  0    ->    OTU4 1.0 0.0 0.0 0
-#' #   OTU5 4 6 4  1    ->    OTU5 0.6 1.0 0.6 0
-#' ```
-#' }
+#'     counts                 scaled recounts
+#'          A B C  D                 A   B   C D  
+#'     OTU1 0 0 0  0    ->    OTU1 0.0 0.0 0.0 0
+#'     OTU2 0 8 9 10    ->    OTU2 0.0 0.8 0.9 1
+#'     OTU3 5 5 5  5    ->    OTU3 0.0 0.0 0.0 0
+#'     OTU4 2 0 0  0    ->    OTU4 1.0 0.0 0.0 0
+#'     OTU5 4 6 4  1    ->    OTU5 0.6 1.0 0.6 0
 #' 
 #' In the formulas below, `x` and `y` are two columns (samples) from the scaled 
 #' counts. `n` is the number of rows (OTUs) in `counts`.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{D = \displaystyle \frac{1}{n}\sum_{i = 1}^{n} |x_i - y_i|}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(0, 0, 0, 1, 0.6)
 #'   y <- c(0, 0.8, 0, 0, 1)
 #'   sum(abs(x-y)) / length(x)  
 #'   #>  0.44
 #' ```
-#' }
 #' 
 #' @export
 #' @examples
@@ -280,12 +260,9 @@ gower <- function (
 #' In the formulas below, `x` and `y` are two columns (samples) from `counts`. 
 #' `n` is the number of rows (OTUs) in `counts`.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{b = \displaystyle \frac{\sum_{i = 1}^{n} |x_i - y_i|}{\sum_{i = 1}^{n} x_i + y_i}}
 #' \deqn{D = \displaystyle \frac{2b}{1 + b}}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 2, 6)  
 #'   y <- c(0, 8, 0, 0, 5)  
@@ -293,14 +270,13 @@ gower <- function (
 #'   2 * bray / (1 + bray)
 #'   #>  0.7826087
 #' ```
-#' }
 #' 
 #' @references
 #' 
 #' Jaccard P 1908.
 #' Nouvellesrecherches sur la distribution florale.
 #' Bulletin de la Societe Vaudoise des Sciences Naturelles, 44(163).
-#' <https://doi.org/10.5169/seals-268384>
+#' \doi{10.5169/seals-268384}
 #' 
 #' @export
 #' @examples
@@ -345,12 +321,9 @@ jaccard <- function (
 #' In the formulas below, `x` and `y` are two columns (samples) from `counts`. 
 #' `n` is the number of rows (OTUs) in `counts`.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{t = \displaystyle \sum_{i = 1}^{n} min(x_i,y_i)}
 #' \deqn{D = \displaystyle 1 - 0.5(\frac{t}{\sum_{i = 1}^{n} x_i} + \frac{t}{\sum_{i = 1}^{n} y_i})}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 2, 6)
 #'   y <- c(0, 8, 0, 0, 5)
@@ -358,7 +331,6 @@ jaccard <- function (
 #'   1 - (t/sum(x) + t/sum(y)) / 2  
 #'   #>  0.6410256
 #' ```
-#' }
 #' 
 #' @references
 #' 
@@ -409,18 +381,14 @@ kulczynski <- function (
 #' In the formulas below, `x` and `y` are two columns (samples) from `counts`. 
 #' `n` is the number of rows (OTUs) in `counts`.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{D = \displaystyle \sum_{i = 1}^{n} |x_i - y_i|}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 2, 6)  
 #'   y <- c(0, 8, 0, 0, 5)  
 #'   sum(abs(x-y))
 #'   #>  18
 #' ```
-#' }
 #' 
 #' @references
 #' 
@@ -485,7 +453,7 @@ manhattan <- function (
 #' Lozupone C, Knight R 2005.
 #' UniFrac: A new phylogenetic method for comparing microbial communities.
 #' Applied and Environmental Microbiology, 71(12).
-#' <https://doi.org/10.1128/AEM.71.12.8228-8235.2005>
+#' \doi{10.1128/AEM.71.12.8228-8235.2005}
 #' 
 #' @export
 #' @examples
@@ -537,7 +505,7 @@ unweighted_unifrac <- function (
 #' Lozupone CA, Hamady M, Kelley ST, Knight R 2007.
 #' Quantitative and Qualitative \eqn{\beta} Diversity Measures Lead to Different Insights into Factors That Structure Microbial Communities. 
 #' Applied and Environmental Microbiology, 73(5).
-#' <https://doi.org/10.1128/AEM.01996-06>
+#' \doi{10.1128/AEM.01996-06}
 #' 
 #' @export
 #' @examples
@@ -589,7 +557,7 @@ weighted_unifrac <- function (
 #' Lozupone CA, Hamady M, Kelley ST, Knight R 2007.
 #' Quantitative and Qualitative \eqn{\beta} Diversity Measures Lead to Different Insights into Factors That Structure Microbial Communities. 
 #' Applied and Environmental Microbiology, 73(5).
-#' <https://doi.org/10.1128/AEM.01996-06>
+#' \doi{10.1128/AEM.01996-06}
 #' 
 #' @export
 #' @examples
@@ -642,7 +610,7 @@ weighted_normalized_unifrac <- function (
 #' Chen J, Bittinger K, Charlson ES, Hoffmann C, Lewis J, Wu GD, Collman RG, Bushman FD, Li H 2012.
 #' Associating microbiome composition with environmental covariates using generalized UniFrac distances. 
 #' Bioinformatics, 28(16).
-#' <https://doi.org/10.1093/bioinformatics/bts342>
+#' \doi{10.1093/bioinformatics/bts342}
 #' 
 #' @export
 #' @examples
@@ -694,7 +662,7 @@ generalized_unifrac <- function (
 #' Chang Q, Luan Y, Sun F 2011.
 #' Variance adjusted weighted UniFrac: a powerful beta diversity measure for comparing communities based on phylogeny. 
 #' BMC Bioinformatics, 12.
-#' <https://doi.org/10.1186/1471-2105-12-118>
+#' \doi{10.1186/1471-2105-12-118}
 #' 
 #' @export
 #' @examples

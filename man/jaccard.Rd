@@ -35,12 +35,8 @@ Jaccard beta diversity metric.
 In the formulas below, \code{x} and \code{y} are two columns (samples) from \code{counts}.
 \code{n} is the number of rows (OTUs) in \code{counts}.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{b = \displaystyle \frac{\sum_{i = 1}^{n} |x_i - y_i|}{\sum_{i = 1}^{n} x_i + y_i}}
 \deqn{D = \displaystyle \frac{2b}{1 + b}}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 2, 6)  
   y <- c(0, 8, 0, 0, 5)  
@@ -48,8 +44,6 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
   2 * bray / (1 + bray)
   #>  0.7826087
 }\if{html}{\out{</div>}}
-
-}
 }
 
 \examples{
@@ -70,7 +64,7 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
 Jaccard P 1908.
 Nouvellesrecherches sur la distribution florale.
 Bulletin de la Societe Vaudoise des Sciences Naturelles, 44(163).
-\url{https://doi.org/10.5169/seals-268384}
+\doi{10.5169/seals-268384}
 }
 \seealso{
 Other beta_diversity: 

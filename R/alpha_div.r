@@ -23,17 +23,13 @@
 #' \eqn{n} is the total number of non-zero OTUs, \eqn{a} is the number of 
 #' singletons, and \eqn{b} is the number of doubletons.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{D = \displaystyle n + \frac{a^{2}}{2b}}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(1, 0, 3, 2, 6)
 #'   sum(x>0) + (sum(x==1) ^ 2) / (2 * sum(x==2))  
 #'   #>  4.5
 #' ```
-#' }
 #' 
 #' Note that when \eqn{x} does not have any singletons or doubletons 
 #' (\eqn{a = 0, b = 0}), the result will be `NaN`. When \eqn{x} has singletons
@@ -100,7 +96,7 @@ chao1 <- function (counts, cpus = n_cpus()) {
 #' Faith DP 1992.
 #' Conservation evaluation and phylogenetic diversity.
 #' Biological Conservation, 61:1-10.
-#' <https://doi.org/10.1016/0006-3207(92)91201-3>
+#' \doi{10.1016/0006-3207(92)91201-3}
 #' 
 #' @export
 #' @examples
@@ -137,26 +133,22 @@ faith <- function (counts, tree, cpus = n_cpus()) {
 #' In the formulas below, \eqn{x} is a single column (sample) from `counts`.
 #' \eqn{p} are the relative abundances.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{p_{i} = \displaystyle \frac{x_i}{\sum x}}
 #' \deqn{D = \displaystyle 1 / \sum_{i = 1}^{n} p_{i}\times\ln(p_{i})}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 2, 6)[-2]  
 #'   p <- x / sum(x)
 #'   1 / sum(p * log(p))
 #'   #>  -0.7636352
 #' ```
-#' }
 #' 
 #' @references
 #' 
 #' Simpson EH 1949.
 #' Measurement of diversity.
 #' Nature, 163.
-#' <https://doi.org/10.1038/163688a0>
+#' \doi{10.1038/163688a0}
 #' 
 #' @export
 #' @examples
@@ -207,19 +199,15 @@ inv_simpson <- function (counts, cpus = n_cpus()) {
 #' In the formulas below, \eqn{x} is a single column (sample) from `counts`.
 #' \eqn{p_i} is the proportion of the \eqn{i}-th OTU in the total community.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{p_{i} = \displaystyle \frac{x_i}{\sum x}}
 #' \deqn{D = \displaystyle -\sum_{i = 1}^{n} p_{i}\times\ln(p_{i})}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 2, 6)[-2]  
 #'   p <- x / sum(x)
 #'   -sum(p * log(p))
 #'   #>  1.309526
 #' ```
-#' }
 #' 
 #' @references
 #' 
@@ -277,26 +265,22 @@ shannon <- function (counts, cpus = n_cpus()) {
 #' In the formulas below, \eqn{x} is a single column (sample) from `counts`.
 #' \eqn{p} are the relative abundances.
 #' 
-#' \tabular{lll}{
-#' \strong{Formula} \tab  \tab \strong{Example} \cr
 #' \deqn{p_{i} = \displaystyle \frac{x_i}{\sum x}}
 #' \deqn{D = \displaystyle 1 - \sum_{i = 1}^{n} p_{i}\times\ln(p_{i})}
-#' \tab
-#' \tab
+#' 
 #' ```
 #'   x <- c(4, 0, 3, 2, 6)[-2]  
 #'   p <- x / sum(x)
 #'   1 - sum(p * log(p))
 #'   #>  2.309526
 #' ```
-#' }
 #' 
 #' @references
 #' 
 #' Simpson EH 1949.
 #' Measurement of diversity.
 #' Nature, 163.
-#' <https://doi.org/10.1038/163688a0>
+#' \doi{10.1038/163688a0}
 #' 
 #' @export
 #' @examples

@@ -34,18 +34,12 @@ In the formulas below, \code{x} is a single column (sample) from \code{counts}.
 \eqn{n} is the total number of non-zero OTUs, \eqn{a} is the number of
 singletons, and \eqn{b} is the number of doubletons.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{D = \displaystyle n + \frac{a^{2}}{2b}}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(1, 0, 3, 2, 6)
   sum(x>0) + (sum(x==1) ^ 2) / (2 * sum(x==2))  
   #>  4.5
 }\if{html}{\out{</div>}}
-
-}
 
 Note that when \eqn{x} does not have any singletons or doubletons
 (\eqn{a = 0, b = 0}), the result will be \code{NaN}. When \eqn{x} has singletons

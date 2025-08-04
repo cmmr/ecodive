@@ -1,13 +1,14 @@
 ^LICENSE\.md$
 ^.*\.Rproj$
-^.*\.rds$
 ^\.Rproj\.user$
 ^vignettes/articles$
 ^codecov\.yml$
 ^\.github$
 ^_pkgdown\.yml$
-^docs$
 ^pkgdown$
 ^doc$
+^docs$
+^man/figures/.*\.rds$
 ^Meta$
 ^CODE_OF_CONDUCT\.md$
+^cran-comments\.md$

@@ -35,35 +35,25 @@ Gower beta diversity metric.
 Each row (OTU) of \code{counts} is rescaled to the range 0-1. In cases where a
 row is all the same value, those values are replaced with \code{0}.
 
-\tabular{l}{
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{#   counts                 scaled recounts
-#        A B C  D                 A   B   C D  
-#   OTU1 0 0 0  0    ->    OTU1 0.0 0.0 0.0 0
-#   OTU2 0 8 9 10    ->    OTU2 0.0 0.8 0.9 1
-#   OTU3 5 5 5  5    ->    OTU3 0.0 0.0 0.0 0
-#   OTU4 2 0 0  0    ->    OTU4 1.0 0.0 0.0 0
-#   OTU5 4 6 4  1    ->    OTU5 0.6 1.0 0.6 0
+\if{html}{\out{<div class="sourceCode">}}\preformatted{counts                 scaled recounts
+     A B C  D                 A   B   C D  
+OTU1 0 0 0  0    ->    OTU1 0.0 0.0 0.0 0
+OTU2 0 8 9 10    ->    OTU2 0.0 0.8 0.9 1
+OTU3 5 5 5  5    ->    OTU3 0.0 0.0 0.0 0
+OTU4 2 0 0  0    ->    OTU4 1.0 0.0 0.0 0
+OTU5 4 6 4  1    ->    OTU5 0.6 1.0 0.6 0
 }\if{html}{\out{</div>}}
-
-}
 
 In the formulas below, \code{x} and \code{y} are two columns (samples) from the scaled
 counts. \code{n} is the number of rows (OTUs) in \code{counts}.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{D = \displaystyle \frac{1}{n}\sum_{i = 1}^{n} |x_i - y_i|}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(0, 0, 0, 1, 0.6)
   y <- c(0, 0.8, 0, 0, 1)
   sum(abs(x-y)) / length(x)  
   #>  0.44
 }\if{html}{\out{</div>}}
-
-}
 }
 
 \examples{

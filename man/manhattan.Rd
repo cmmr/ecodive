@@ -35,19 +35,13 @@ Manhattan beta diversity metric.
 In the formulas below, \code{x} and \code{y} are two columns (samples) from \code{counts}.
 \code{n} is the number of rows (OTUs) in \code{counts}.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{D = \displaystyle \sum_{i = 1}^{n} |x_i - y_i|}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 2, 6)  
   y <- c(0, 8, 0, 0, 5)  
   sum(abs(x-y))
   #>  18
 }\if{html}{\out{</div>}}
-
-}
 }
 
 \examples{

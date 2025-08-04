@@ -35,19 +35,13 @@ Euclidean beta diversity metric.
 In the formulas below, \code{x} and \code{y} are two columns (samples) from \code{counts}.
 \code{n} is the number of rows (OTUs) in \code{counts}.
 
-\tabular{lll}{
-\strong{Formula} \tab  \tab \strong{Example} \cr
 \deqn{D = \displaystyle \sqrt{\sum_{i = 1}^{n} (x_i - y_i)^{2}}}
-\tab
-\tab
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{  x <- c(4, 0, 3, 2, 6)  
   y <- c(0, 8, 0, 0, 5)  
   sqrt(sum((x-y)^2))
   #>  9.69536
 }\if{html}{\out{</div>}}
-
-}
 }
 
 \examples{
@@ -68,7 +62,7 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
 Legendre P, Caceres M 2013.
 Beta diversity as the variance of community data: dissimilarity coefficients and partitioning.
 Ecology Letters. 16(8).
-\url{https://doi.org/10.1111/ele.12141}
+\doi{10.1111/ele.12141}
 }
 \seealso{
 Other beta_diversity: 

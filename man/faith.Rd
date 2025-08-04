@@ -50,7 +50,7 @@ abundances on each of those branches coded as 1 for present or 0 for absent:
 Faith DP 1992.
 Conservation evaluation and phylogenetic diversity.
 Biological Conservation, 61:1-10.
-\url{https://doi.org/10.1016/0006-3207(92)91201-3}
+\doi{10.1016/0006-3207(92)91201-3}
 }
 \seealso{
 Other alpha_diversity: 
