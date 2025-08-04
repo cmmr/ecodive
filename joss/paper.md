@@ -1,24 +1,27 @@
 ---
 title: 'ecodive: Fast Implementations of Ecological Diversity Metrics in R'
 authors:
-  - name: Daniel P Smith
-    orcid: 0000-0002-2479-2044
-    corresponding: true
-    affiliation: 1
-  - name: Joseph F Petrosino
-    orcid: 0000-0002-4046-6898
-    affiliation: 1
-affiliations:
- - name: Alkek Center for Metagenomics and Microbiome Research, Department of Molecular Virology and Microbiology, Baylor College of Medicine, Houston, Texas, USA
-   index: 1
-   ror: 02pttbw34
+- name: Daniel P Smith
+  orcid: "0000-0002-2479-2044"
+  corresponding: true
+  affiliation: 1
+- name: Joseph F Petrosino
+  orcid: "0000-0002-4046-6898"
+  affiliation: 1
+date: "04 August 2025"
+output:
+  word_document: default
+  pdf_document: default
 tags:
-  - R
-  - microbiome
-  - unifrac
-  - bioinformatics
-output: pdf_document
-date: 04 August 2025
+- R
+- microbiome
+- unifrac
+- bioinformatics
+affiliations:
+- name: Alkek Center for Metagenomics and Microbiome Research, Department of Molecular
+    Virology and Microbiology, Baylor College of Medicine, Houston, Texas, USA
+  index: 1
+  ror: 02pttbw34
 bibliography: paper.bib
 ---
 
@@ -68,13 +71,13 @@ benchmark vignette, which is available from within R with
 <https://cmmr.github.io/ecodive/articles/benchmark.html>.
 
 
-![UniFrac benchmarks. Ecodive is up to 15x to 2800x faster and uses 60x - 25000x less memory.](../man/figures/unifrac-benchmark.png)
+![UniFrac benchmarks. Ecodive is 15x to 2800x faster and uses 60x - 25000x less memory.](../man/figures/unifrac-benchmark.png)
 
 
-![Classic beta diversity benchmarks. Ecodive is up to 23x to 160x faster and uses 0.8x to 640x less memory.](../man/figures/bdiv-benchmark.png)
+![Classic beta diversity benchmarks. Ecodive is 23x to 160x faster and uses 0.8x to 640x less memory.](../man/figures/bdiv-benchmark.png)
 
 
-![Alpha  diversity benchmarks. Ecodive is up to 10x to 40x faster and uses 5x to 25x less memory.](../man/figures/adiv-benchmark.png)
+![Alpha  diversity benchmarks. Ecodive is 10x to 40x faster and uses 5x to 25x less memory.](../man/figures/adiv-benchmark.png)
 
 
 

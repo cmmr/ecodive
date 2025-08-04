@@ -1,4 +1,4 @@
-# ecodive <img src="logo/ecodive.png" align="right" height="138" alt="ecodive logo">
+# ecodive <img src="man/logo/ecodive.png" align="right" alt="ecodive logo">
 
 <!-- badges: start
 [![cran](https://www.r-pkg.org/badges/version/ecodive)](https://CRAN.R-project.org/package=ecodive)
