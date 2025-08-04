@@ -9,6 +9,9 @@
 ^doc$
 ^docs$
 ^man/figures/.*\.rds$
+^joss$
+^logo$
 ^Meta$
 ^CODE_OF_CONDUCT\.md$
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
