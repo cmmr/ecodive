@@ -26,7 +26,7 @@ bibliography: paper.bib
 ---
 
 
-![Ecodive package logo](../logo/ecodive.png){height="150pt"}
+![Ecodive package logo](../man/figures/logo.png)
 
 
 # Summary

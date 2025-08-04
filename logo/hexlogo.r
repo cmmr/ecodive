@@ -26,7 +26,7 @@ ggplot() +
 
 ggsave(
   path     = 'logo',
-  filename = 'ecodive.png', 
+  filename = 'man/figures/logo.png', 
   device   = 'png',
   width    = 200, 
   height   = 200, 
