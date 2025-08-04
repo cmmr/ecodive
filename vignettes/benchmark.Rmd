@@ -21,13 +21,29 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-<table><tr><td valign="top">
-
 ### State of the Field
 
-The table at right shows a collection of bioinformatics R packages and how they
-implement classic &alpha;/&beta; ecology diversity metrics (e.g. Bray-Curtis,
+The table below shows a collection of bioinformatics R packages and how they
+implement classic alpha/beta ecology diversity metrics (e.g. Bray-Curtis,
 Shannon, etc) and how they implement UniFrac metrics.
+
+| R Package           | Classic alpha/beta  | UniFrac             |
+|:--------------------|:--------------------|:--------------------|
+| [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)          | ***Serial R***   | ***Serial R***   |
+| [ampvis2](https://github.com/KasperSkytte/ampvis2)            | vegan            | ***Serial R***   |
+| [animalcules](https://github.com/wejlab/animalcules)          | vegan            | GUniFrac         |
+| [ecodive](https://doi.org/10.32614/CRAN.package.ecodive)      | ***Parallel C*** | ***Parallel C*** |
+| [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)    | *none*           | ***Serial C***   |
+| [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)     | vegan            | ***Parallel R*** |
+| [mia](https://doi.org/doi:10.18129/B9.bioc.mia)               | vegan            | ecodive          |
+| [microbiome](https://doi.org/doi:10.18129/B9.bioc.microbiome) | vegan            | phyloseq         |
+| [microeco](https://doi.org/10.32614/CRAN.package.microeco)    | vegan            | GUniFrac         |
+| [microViz](https://github.com/david-barnett/microViz)         | vegan            | GUniFrac         |
+| [phylosmith](https://github.com/schuyler-smith/phylosmith)    | vegan            | *none*           |
+| [ecodive](https://doi.org/10.32614/CRAN.package.ecodive)      | ecodive          | ecodive          |
+| [tidytacos](https://github.com/LebeerLab/tidytacos)           | vegan            | phyloseq         |
+| [vegan](https://doi.org/10.32614/CRAN.package.vegan)          | ***Serial C***   | *none*           |
+
 
 Only six packages - abdiv, ampvis2, ecodive, GUniFrac, phyloseq, and vegan -
 have their own implementations of these algorithms. Other R packages import code
@@ -45,28 +61,6 @@ these benchmarking runs has the following specifications.
 
 The `bench::mark()` function also checks that the output from all benchmarked
 expressions are equal.
-
-</td><td valign="top">
-
-<table>
-<tr><th>R Package</th><th>Classic &alpha;/&beta; Implementation</th><th>UniFrac Implementation</th></tr>
-<tr><td>[abdiv](https://doi.org/10.32614/CRAN.package.abdiv)</td><td>***Serial R***</td><td>***Serial R***</td></tr>
-<tr><td>[ampvis2](https://github.com/KasperSkytte/ampvis2)</td><td>vegan</td><td>***Serial R***</td></tr>
-<tr><td>[animalcules](https://github.com/wejlab/animalcules)</td><td>vegan</td><td>GUniFrac</td></tr>
-<tr><td>[ecodive](https://doi.org/10.32614/CRAN.package.ecodive)</td><td>***Parallel C***</td><td>***Parallel C***</td></tr>
-<tr><td>[GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)</td><td>*none*</td><td>***Serial C***</td></tr>
-<tr><td>[phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)</td><td>vegan</td><td>***Parallel R***</td></tr>
-<tr><td>[mia](https://doi.org/doi:10.18129/B9.bioc.mia)</td><td>vegan</td><td>ecodive</td></tr>
-<tr><td>[microbiome](https://doi.org/doi:10.18129/B9.bioc.microbiome)</td><td>vegan</td><td>phyloseq</td></tr>
-<tr><td>[microeco](https://doi.org/10.32614/CRAN.package.microeco)</td><td>vegan</td><td>GUniFrac</td></tr>
-<tr><td>[microViz](https://github.com/david-barnett/microViz)</td><td>vegan</td><td>GUniFrac</td></tr>
-<tr><td>[phylosmith](https://github.com/schuyler-smith/phylosmith)</td><td>vegan</td><td>*none*</td></tr>
-<tr><td>[ecodive](https://doi.org/10.32614/CRAN.package.ecodive)</td><td>ecodive</td><td>ecodive</td></tr>
-<tr><td>[tidytacos](https://github.com/LebeerLab/tidytacos)</td><td>vegan</td><td>phyloseq</td></tr>
-<tr><td>[vegan](https://doi.org/10.32614/CRAN.package.vegan)</td><td>***Serial C***</td><td>*none*</td></tr>
-</table>
-
-</td></tr></table>
 
 
 # Setup
