@@ -15,7 +15,7 @@ sample."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.90</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,9 +91,11 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
 <p>In the formulas below, <code>x</code> is a single column (sample) from <code>counts</code>.
 \(n\) is the total number of non-zero OTUs, \(a\) is the number of
 singletons, and \(b\) is the number of doubletons.</p>
-<table class="table table"><tr><td><strong>Formula</strong></td><td></td><td><strong>Example</strong></td></tr><tr><td>$$D = \displaystyle n + \frac{a^{2}}{2b}$$</td><td></td><td><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">6</span>)</span>
+<p>$$D = \displaystyle n + \frac{a^{2}}{2b}$$</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">6</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="fu">sum</span>(x<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">+</span> (<span class="fu">sum</span>(x<span class="sc">==</span><span class="dv">1</span>) <span class="sc">^</span> <span class="dv">2</span>) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fu">sum</span>(x<span class="sc">==</span><span class="dv">2</span>))</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="co">#&gt;  4.5</span></span></code></pre></div></td></tr></table><p>Note that when \(x\) does not have any singletons or doubletons
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="co">#&gt;  4.5</span></span></code></pre><p></p></div>
+<p>Note that when \(x\) does not have any singletons or doubletons
 (\(a = 0, b = 0\)), the result will be <code>NaN</code>. When \(x\) has singletons
 but no doubletons (\(a &gt; 0, b = 0\)), the result will be <code>Inf</code>.</p>
     </div>
