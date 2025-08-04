@@ -10,8 +10,8 @@ authors:
   affiliation: 1
 date: "04 August 2025"
 output:
-  word_document: default
   pdf_document: default
+  word_document: default
 tags:
 - R
 - microbiome
@@ -26,7 +26,7 @@ bibliography: paper.bib
 ---
 
 
-![Ecodive package logo](../man/figures/logo.png)
+![Ecodive package logo](../man/figures/logo.png){height="200pt"}
 
 
 # Summary

@@ -1,11 +1,12 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+
+name: R CMD check
+
 on:
   push:
     branches: [main]
   pull_request:
-
-name: R-CMD-check.yaml
 
 permissions: read-all
 
