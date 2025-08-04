@@ -1,7 +1,7 @@
 Package: ecodive
 Type: Package
 Title: Fast Implementations of Ecological Diversity Metrics
-Version: 0.0.90
+Version: 1.0.0
 Date: 2025-08-03
 Authors@R: c(
     person(
