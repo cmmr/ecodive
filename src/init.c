@@ -1,3 +1,7 @@
+// Copyright (c) 2025 ecodive authors
+// Licensed under the MIT License: https://opensource.org/license/mit
+
+
 /* Generated with tools::package_native_routine_registration_skeleton('.',,,FALSE) */
 
 #include <R.h>

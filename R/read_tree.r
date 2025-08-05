@@ -1,3 +1,7 @@
+# Copyright (c) 2025 ecodive authors
+# Licensed under the MIT License: https://opensource.org/license/mit
+
+
 #' Read a newick formatted phylogenetic tree.
 #' 
 #' A phylogenetic tree is required for computing UniFrac distance matrices.

@@ -1,3 +1,7 @@
+# Copyright (c) 2025 ecodive authors
+# Licensed under the MIT License: https://opensource.org/license/mit
+
+
 # References as given by
 # https://forum.qiime2.org/t/alpha-and-beta-diversity-explanations-and-commands/2282
 

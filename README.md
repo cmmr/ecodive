@@ -25,13 +25,14 @@ The latest stable version can be installed from CRAN.
 install.packages('ecodive')
 ```
 
-The development version is available on GitHub.
+The development version is available on GitHub. Please note that this method
+requires a compiler - see http://www.rstudio.com/ide/docs/packages/prerequisites
+if the installation does not succeed on the first try.
 
 ``` r
 install.packages('pak')
 pak::pak('cmmr/ecodive')
 ```
-
 
 
 ## Usage
@@ -81,7 +82,7 @@ weighted_unifrac(counts, tree = ex_tree)
 
 ## Documentation
 
-The online manual for `ecodive` is available at
+The online manual for ecodive is available at
 <https://cmmr.github.io/ecodive/>. It includes a getting started guide,
 articles on alpha/beta diversity, and reference pages for each function.
 
@@ -89,7 +90,7 @@ articles on alpha/beta diversity, and reference pages for each function.
 
 ## Automated tests
 
-The following commands will check if `ecodive` passes the bundled testing
+The following commands will check if ecodive passes the bundled testing
 suite.
 
 ``` r

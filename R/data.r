@@ -1,3 +1,7 @@
+# Copyright (c) 2025 ecodive authors
+# Licensed under the MIT License: https://opensource.org/license/mit
+
+
 #' Example counts matrix
 #' 
 #' Genera found on four human body sites.

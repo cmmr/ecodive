@@ -1,3 +1,7 @@
+// Copyright (c) 2025 ecodive authors
+// Licensed under the MIT License: https://opensource.org/license/mit
+
+
 #include <R.h>
 #include <Rinternals.h>
 #include <stdlib.h> // calloc, free
