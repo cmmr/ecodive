@@ -16,6 +16,13 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+# To add:
+#  - adiv
+#  - entropart
+#  - picante has unweighted unifrac: unifrac()
+#  - phyloregion has faith pd: PD() and unweighted unifrac: unifrac()
+
 ```
 
 

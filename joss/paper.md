@@ -26,7 +26,7 @@ bibliography: paper.bib
 ---
 
 
-![Ecodive package logo](figures/logo.png){height="150pt"}
+![Ecodive package logo](../man/figures/logo.png){height="150pt"}
 
 
 # Summary
@@ -71,13 +71,13 @@ benchmark vignette, which is available from within R with
 <https://cmmr.github.io/ecodive/articles/benchmark.html>.
 
 
-![UniFrac benchmarks. Ecodive is 15x to 2800x faster and uses 60x - 25000x less memory.](../man/figures/unifrac-benchmark.png)
+![UniFrac benchmarks. Ecodive is 15 to 2800x faster and uses 60 - 25000x less memory.](../man/figures/unifrac-benchmark.png)
 
 
-![Classic beta diversity benchmarks. Ecodive is 23x to 160x faster and uses 0.8x to 640x less memory.](../man/figures/bdiv-benchmark.png)
+![Classic beta diversity benchmarks. Ecodive is 23 to 160x faster and uses 0.8 to 640x less memory.](../man/figures/bdiv-benchmark.png)
 
 
-![Alpha  diversity benchmarks. Ecodive is 10x to 40x faster and uses 5x to 25x less memory.](../man/figures/adiv-benchmark.png)
+![Alpha  diversity benchmarks. Ecodive is 10 to 40x faster and uses 5 to 25x less memory.](../man/figures/adiv-benchmark.png)
 
 
 

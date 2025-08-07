@@ -1,7 +1,6 @@
 library(ggplot2)
 library(ggpattern)
 library(magick)
-library(magrittr)
 
 ggplot() + 
   geom_polygon_pattern(
@@ -10,9 +9,9 @@ ggplot() +
       y = 1200 * .5 * c(2, 1, -1, -2, -1, 1) ),
     pattern          = 'image',
     pattern_type     = 'expand',
-    pattern_filename = 'logo/ecodiver.png',
-    color            = '#0C356A',
-    linewidth        = 4 ) + 
+    pattern_filename = 'logo/cartoon.png',
+    color            = '#0078a5',
+    linewidth        = 6 ) + 
   coord_fixed(ratio = 1) +
   theme_void() +
   theme(rect = element_rect(fill = 'transparent')) +
@@ -37,15 +36,7 @@ ggsave(
   bg       = 'transparent' )
 
 
-# pkgdown website sets logo width to 120px
-magick::image_read('logo/ecodive.png') %>%
-  image_trim() %>%
-  image_resize('120x') %>%
+image_read('logo/ecodive.png') |>
+  image_trim() |>
+  image_resize('x200') |>
   image_write('man/figures/logo.png')
-
-
-# height = 200px (150pt) for joss paper
-magick::image_read('logo/ecodive.png') %>%
-  image_trim() %>%
-  image_resize('x200') %>%
-  image_write('joss/figures/logo.png')
