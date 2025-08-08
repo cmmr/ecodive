@@ -1,10 +1,5 @@
 # ecodive <img src="man/figures/logo.png" align="right" width="174" height="200" alt="ecodive logo" />
 
-<!--
-[![cran](https://www.r-pkg.org/badges/version/ecodive)](https://CRAN.R-project.org/package=ecodive)
-[![conda](https://anaconda.org/conda-forge/r-ecodive/badges/version.svg)](https://anaconda.org/conda-forge/r-ecodive)
-[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/ecodive)](https://cranlogs.r-pkg.org/)
--->
 <!-- badges: start -->
 [![dev](https://github.com/cmmr/ecodive/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cmmr/ecodive/actions/workflows/R-CMD-check.yaml)
 [![covr](https://codecov.io/gh/cmmr/ecodive/graph/badge.svg)](https://app.codecov.io/gh/cmmr/ecodive)

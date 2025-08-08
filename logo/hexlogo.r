@@ -11,7 +11,7 @@ ggplot() +
     pattern_type     = 'expand',
     pattern_filename = 'logo/cartoon.png',
     color            = '#0078a5',
-    linewidth        = 6 ) + 
+    linewidth        = NA ) + 
   coord_fixed(ratio = 1) +
   theme_void() +
   theme(rect = element_rect(fill = 'transparent')) +
