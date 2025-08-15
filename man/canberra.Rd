@@ -61,7 +61,7 @@ OTUs must be removed if they are absent from both samples.
     
 }
 \references{
-Lance, Godfrey LN, Williams WT 1967.
+Lance GN and Williams WT 1967.
 A general theory of classificatory sorting strategies II. Clustering systems.
 The computer journal, 10(3).
 \doi{10.1093/comjnl/10.3.271}

@@ -38,6 +38,11 @@
 #' A method of establishing groups of equal amplitude in plant sociology based on similarity of species content.
 #' Kongelige Danske Videnskabernes Selskab, 5.
 #' 
+#' Bray JR and Curtis JT 1957.
+#' An ordination of the upland forest communities of southern Wisconsin.
+#' Ecological Monographs, 27(4).
+#' \doi{10.2307/1942268}
+#' 
 #' @export
 #' @examples
 #'     # Example counts matrix
@@ -94,7 +99,7 @@ bray_curtis <- function (
 #' 
 #' @references
 #' 
-#' Lance, Godfrey LN, Williams WT 1967.
+#' Lance GN and Williams WT 1967.
 #' A general theory of classificatory sorting strategies II. Clustering systems.
 #' The computer journal, 10(3).
 #' \doi{10.1093/comjnl/10.3.271}
@@ -152,6 +157,11 @@ canberra <- function (
 #' ```
 #' 
 #' @references
+#' 
+#' Gower JC, Legendre P 1986.
+#' Metric and Euclidean Properties of Dissimilarity Coefficients.
+#' Journal of Classification. 3.
+#'  \doi{10.1007/BF01896809}
 #' 
 #' Legendre P, Caceres M 2013.
 #' Beta diversity as the variance of community data: dissimilarity coefficients and partitioning.
@@ -220,6 +230,19 @@ euclidean <- function (
 #'   sum(abs(x-y)) / length(x)  
 #'   #>  0.44
 #' ```
+#' 
+#' @references
+#' 
+#' Gower JC 1971.
+#' A general coefficient of similarity and some of its properties.
+#' Biometrics. 27(4).
+#'  \doi{10.2307/2528823}
+#' 
+#' Gower JC, Legendre P 1986.
+#' Metric and Euclidean Properties of Dissimilarity Coefficients.
+#' Journal of Classification. 3.
+#'  \doi{10.1007/BF01896809}
+#' 
 #' 
 #' @export
 #' @examples
@@ -339,8 +362,8 @@ jaccard <- function (
 #' @references
 #' 
 #' Kulcynski S 1927.
-#' Die Pflanzenassoziationen der Pieninen. Bulletin International de l'Academie Polonaise des Sciences et des Lettres.
-#' Classe des Sciences Mathematiques et Naturelles.
+#' Die Pflanzenassoziationen der Pieninen.
+#' Bulletin International de l'Académie Polonaise des Sciences et des Lettres, Classe des Sciences Mathématiques et Naturelles, Série B: Sciences Naturelles.
 #' 
 #' @export
 #' @examples

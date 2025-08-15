@@ -59,6 +59,11 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
     
 }
 \references{
+Gower JC, Legendre P 1986.
+Metric and Euclidean Properties of Dissimilarity Coefficients.
+Journal of Classification. 3.
+\doi{10.1007/BF01896809}
+
 Legendre P, Caceres M 2013.
 Beta diversity as the variance of community data: dissimilarity coefficients and partitioning.
 Ecology Letters. 16(8).

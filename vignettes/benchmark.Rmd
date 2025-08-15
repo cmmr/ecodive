@@ -17,12 +17,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-# To add:
-#  - adiv
-#  - entropart
-#  - picante has unweighted unifrac: unifrac()
-#  - phyloregion has faith pd: PD() and unweighted unifrac: unifrac()
-
 ```
 
 
@@ -36,16 +30,20 @@ Shannon, etc) and how they implement UniFrac metrics.
 
 | R Package           | Classic alpha/beta  | UniFrac             |
 |:--------------------|:--------------------|:--------------------|
-| [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)          | ***Serial R***   | ***Serial R***   |
+| [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)          | ***Serial R***   | *none*           |
+| [adiv](https://doi.org/10.32614/CRAN.package.adiv)            | ***Serial R***   | ***Serial R***   |
 | [ampvis2](https://github.com/KasperSkytte/ampvis2)            | vegan            | ***Serial R***   |
 | [animalcules](https://github.com/wejlab/animalcules)          | vegan            | GUniFrac         |
 | [ecodive](https://cran.r-project.org/package=ecodive)         | ***Parallel C*** | ***Parallel C*** |
+| [entropart](https://doi.org/10.32614/CRAN.package.entropart)  | ***Serial R***   | *none*           |
 | [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)    | *none*           | ***Serial C***   |
 | [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)     | vegan            | ***Parallel R*** |
 | [mia](https://doi.org/doi:10.18129/B9.bioc.mia)               | vegan            | ecodive          |
 | [microbiome](https://doi.org/doi:10.18129/B9.bioc.microbiome) | vegan            | phyloseq         |
 | [microeco](https://doi.org/10.32614/CRAN.package.microeco)    | vegan            | GUniFrac         |
 | [microViz](https://github.com/david-barnett/microViz)         | vegan            | GUniFrac         |
+| [picante](https://doi.org/10.32614/CRAN.package.picante)      | vegan            | ***Serial R***   |
+| [phyloregion](https://github.com/schuyler-smith/phyloregion)  | vegan            | ***Serial R***   |
 | [phylosmith](https://github.com/schuyler-smith/phylosmith)    | vegan            | *none*           |
 | [rbiom](https://doi.org/10.32614/CRAN.package.rbiom)          | ecodive          | ecodive          |
 | [tidytacos](https://github.com/LebeerLab/tidytacos)           | vegan            | phyloseq         |
@@ -85,8 +83,8 @@ The input and output formats for the six R packages are not identical, so the be
 install.packages('pak')
 
 pak::pkg_install(pkg = c(
-  'abdiv', 'ecodive', 'GUniFrac', 'kasperskytte/ampvis2', 
-  'bench', 'phyloseq', 'rbiom', 'vegan' ))
+  'adiv', 'abdiv', 'bench', 'ecodive', 'entropart', 'GUniFrac', 'kasperskytte/ampvis2', 
+  'phyloregion', 'phyloseq', 'picante', 'rbiom', 'vegan' ))
 
 
 library(bench)
@@ -98,9 +96,9 @@ version$version.string
 #> [1] "R version 4.5.1 (2025-06-13 ucrt)"
 
 sapply(FUN = packageDescription, fields = 'Version', c(
-  'abdiv', 'ampvis2', 'ecodive', 'GUniFrac', 'phyloseq', 'vegan' ))
-#>    abdiv  ampvis2  ecodive  GUniFrac  phyloseq    vegan 
-#>  "0.2.0"  "2.8.9"  "1.0.0"     "1.8"  "1.52.0"  "2.7-1"
+  'abdiv', 'adiv', 'ampvis2', 'ecodive', 'entropart', 'GUniFrac', 'phyloregion', 'phyloseq', 'picante', 'vegan' ))
+#>    abdiv     adiv  ampvis2  ecodive  entropart  GUniFrac  phyloregion  phyloseq  picante    vegan
+#>  "0.2.0"  "2.2.1"  "2.8.9"  "1.0.0"   "1.6-16"     "1.8"      "1.0.9"  "1.52.0"  "1.8.2"  "2.7-1"
 
 (n_cpus <- ecodive::n_cpus())
 #> [1] 6
@@ -135,6 +133,7 @@ hmp50      <- rbiom::hmp50
 hmp50_phy  <- rbiom::convert_to_phyloseq(hmp50)
 hmp50_mtx  <- as.matrix(hmp50)
 hmp50_tmtx <- t(hmp50_mtx)
+hmp50_pmtx <- t(t(hmp50_mtx) / colSums(hmp50_mtx))
 hmp50_tree <- hmp50$tree
 
 
@@ -167,11 +166,13 @@ u_unifrac_res <- rbind(
     on.exit(parallel::stopCluster(cl))
     
     bench::mark(
-      iterations = 10,
-      'abdiv'    = cleanup(pairwise(abdiv::unweighted_unifrac, hmp50_mtx, hmp50_tree)),
-      'ecodive'  = cleanup(ecodive::unweighted_unifrac(hmp50_mtx, hmp50_tree)),
-      'GUniFrac' = cleanup(as.dist(GUniFrac::GUniFrac(hmp50_tmtx, hmp50_tree, alpha=1, verbose=FALSE)[[1]][,,2])),
-      'phyloseq' = cleanup(phyloseq::UniFrac(hmp50_phy, weighted=FALSE, normalized=FALSE, parallel=TRUE)) )
+      iterations    = 10,
+      'abdiv'       = cleanup(pairwise(abdiv::unweighted_unifrac, hmp50_mtx, hmp50_tree)),
+      'ecodive'     = cleanup(ecodive::unweighted_unifrac(hmp50_mtx, hmp50_tree)),
+      'GUniFrac'    = cleanup(as.dist(GUniFrac::GUniFrac(hmp50_tmtx, hmp50_tree, alpha=1, verbose=FALSE)[[1]][,,2])),
+      'phyloregion' = cleanup(phyloregion::unifrac(hmp50_tmtx, hmp50_tree)),
+      'phyloseq'    = cleanup(phyloseq::UniFrac(hmp50_phy, weighted=FALSE, normalized=FALSE, parallel=TRUE)),
+      'picante'     = cleanup(picante::unifrac(hmp50_tmtx, hmp50_tree)) )
   }),
   
   # ampvis2 conflicts with phyloseq cluster, so run separately
@@ -300,29 +301,44 @@ unifrac_res <- bind_rows(
   arrange(Package)
 
 
-unifrac_res
-#> # A tibble: 19 × 4
-#>    Package  `UniFrac Variant`     median mem_alloc
-#>    <chr>    <chr>               <bch:tm> <bch:byt>
-#>  1 GUniFrac Unweighted            80.4ms   92.14MB
-#>  2 GUniFrac Weighted Normalized  79.01ms   92.14MB
-#>  3 GUniFrac Generalized          77.28ms   92.18MB
-#>  4 abdiv    Unweighted            14.38s   20.05GB
-#>  5 abdiv    Weighted              14.55s   20.02GB
-#>  6 abdiv    Weighted Normalized   14.29s   20.03GB
-#>  7 abdiv    Generalized           14.59s   20.18GB
-#>  8 abdiv    Variance Adjusted      16.6s   24.46GB
-#>  9 ampvis2  Unweighted             3.44s   49.76MB
-#> 10 ampvis2  Weighted               3.38s   52.78MB
-#> 11 ampvis2  Weighted Normalized    3.43s   49.34MB
-#> 12 ecodive  Unweighted            5.31ms   770.5KB
-#> 13 ecodive  Weighted              5.17ms  779.72KB
-#> 14 ecodive  Weighted Normalized   4.93ms   770.5KB
-#> 15 ecodive  Generalized           5.61ms    1.03MB
-#> 16 ecodive  Variance Adjusted     4.81ms  779.73KB
-#> 17 phyloseq Unweighted          327.01ms   49.94MB
-#> 18 phyloseq Weighted            306.97ms   50.29MB
-#> 19 phyloseq Weighted Normalized 293.69ms   49.53MB
+print(unifrac_res, n = 21)
+#> # A tibble: 21 × 4
+#>    Package     `UniFrac Variant`     median mem_alloc
+#>    <chr>       <chr>               <bch:tm> <bch:byt>
+#>  1 GUniFrac    Unweighted           77.43ms   113.4MB
+#>  2 GUniFrac    Weighted Normalized  78.29ms   92.15MB
+#>  3 GUniFrac    Generalized          75.25ms   92.15MB
+#>  4 abdiv       Unweighted            14.36s   20.05GB
+#>  5 abdiv       Weighted              13.61s   20.02GB
+#>  6 abdiv       Weighted Normalized   13.59s   20.03GB
+#>  7 abdiv       Generalized           13.72s   20.18GB
+#>  8 abdiv       Variance Adjusted     15.57s   24.46GB
+#>  9 ampvis2     Unweighted             3.31s   53.44MB
+#> 10 ampvis2     Weighted               3.25s    49.2MB
+#> 11 ampvis2     Weighted Normalized     3.3s   49.34MB
+#> 12 ecodive     Unweighted            3.94ms    1.01MB
+#> 13 ecodive     Weighted              3.46ms  779.72KB
+#> 14 ecodive     Weighted Normalized   3.82ms  779.73KB
+#> 15 ecodive     Generalized           5.59ms   799.3KB
+#> 16 ecodive     Variance Adjusted     4.12ms  779.73KB
+#> 17 phyloregion Unweighted            6.35ms  146.44MB
+#> 18 phyloseq    Unweighted           290.5ms   50.87MB
+#> 19 phyloseq    Weighted            287.27ms    49.4MB
+#> 20 phyloseq    Weighted Normalized 291.59ms   49.55MB
+#> 21 picante     Unweighted             2.43s    1.79GB
+
+
+# How much faster and more memory efficient is ecodive?
+plyr::ddply(unifrac_res, as.name('UniFrac Variant'), function (x) {
+  x[['median']]    <- as.numeric(x[['median']])
+  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
+  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
+  x       <- x[x[['Package']] != 'ecodive',]
+  data.frame(
+    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
+    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
+})
+
 
 ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
   geom_point(aes(shape = `UniFrac Variant`), size = 2) +
@@ -411,6 +427,18 @@ bdiv_res
 #> 11 vegan   Manhattan      1.68s    19.4MB
 #> 12 vegan   Euclidean      1.68s    19.4MB
 
+
+# How much faster and more memory efficient is ecodive?
+plyr::ddply(bdiv_res, 'Metric', function (x) {
+  x[['median']]    <- as.numeric(x[['median']])
+  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
+  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
+  x       <- x[x[['Package']] != 'ecodive',]
+  data.frame(
+    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
+    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
+})
+
 ggplot(bdiv_res, aes(x = median, y = mem_alloc)) +
   geom_point(aes(shape = Metric), size = 2) +
   geom_label_repel(
@@ -450,21 +478,30 @@ Last, we'll compare the Shannon, Simpson, and Faith alpha diversity implementati
 ```r
 
 shannon_res <- bench::mark(
-  iterations = 10,
-  'abdiv'    = apply(gems_mtx, 2L, abdiv::shannon),
-  'ecodive'  = ecodive::shannon(gems_mtx),
-  'vegan'    = vegan::diversity(gems_tmtx, 'shannon') )
+  iterations  = 10,
+  'abdiv'     = apply(gems_mtx, 2L, abdiv::shannon),
+  'adiv'      = adiv::speciesdiv(gems_tmtx, 'Shannon')[,1],
+  'ecodive'   = ecodive::shannon(gems_mtx),
+  'entropart' = apply(gems_mtx, 2L, entropart::Shannon, CheckArguments = FALSE),
+  'vegan'     = vegan::diversity(gems_tmtx, 'shannon') )
 
 simpson_res <- bench::mark(
-  iterations = 10,
-  'abdiv'    = apply(gems_mtx, 2L, abdiv::simpson),
-  'ecodive'  = ecodive::simpson(gems_mtx),
-  'vegan'    = vegan::diversity(gems_tmtx, 'simpson') )
+  iterations  = 10,
+  check       = FALSE, # entropart is off by a small bit
+  'abdiv'     = apply(gems_mtx, 2L, abdiv::simpson),
+  'adiv'      = adiv::speciesdiv(gems_tmtx, 'GiniSimpson')[,1],
+  'ecodive'   = ecodive::simpson(gems_mtx),
+  'entropart' = apply(gems_mtx, 2L, entropart::Simpson, CheckArguments = FALSE),
+  'vegan'     = vegan::diversity(gems_tmtx, 'simpson') )
 
 faith_res <- bench::mark(
-  iterations = 10,
-  'abdiv'    = apply(hmp50_mtx, 2L, abdiv::faith_pd, hmp50_tree),
-  'ecodive'  = ecodive::faith(hmp50_mtx, hmp50_tree) )
+  iterations    = 10,
+  check         = FALSE, # entropart has incorrect output on non-ultrametric tree
+  'abdiv'       = apply(hmp50_mtx, 2L, abdiv::faith_pd, hmp50_tree),
+  'adiv'        = apply(hmp50_mtx, 2L, \(x) adiv::EH(hmp50_tree, rownames(hmp50_mtx)[x > 0])),
+  'ecodive'     = ecodive::faith(hmp50_mtx, hmp50_tree),
+  'entropart'   = apply(hmp50_pmtx, 2L, entropart::PDFD, hmp50_tree, CheckArguments = FALSE),
+  'phyloregion' = phyloregion::PD(hmp50_tmtx, hmp50_tree) )
 
 adiv_res <- bind_rows(
     mutate(shannon_res, Metric = 'Shannon x 1006'),
@@ -476,17 +513,36 @@ adiv_res <- bind_rows(
 
 
 adiv_res
-#> # A tibble: 8 × 4
-#>   Package Metric           median mem_alloc
-#>   <chr>   <chr>          <bch:tm> <bch:byt>
-#> 1 abdiv   Shannon x 1006  65.41ms    89.5MB
-#> 2 abdiv   Simpson x 1006   14.4ms    26.8MB
-#> 3 abdiv   Faith PD x 50  503.49ms   651.4MB
-#> 4 ecodive Shannon x 1006   7.13ms    14.7MB
-#> 5 ecodive Simpson x 1006   7.05ms    14.7MB
-#> 6 ecodive Faith PD x 50  843.25µs   749.2KB
-#> 7 vegan   Shannon x 1006  59.41ms    62.2MB
-#> 8 vegan   Simpson x 1006  37.46ms    56.3MB
+#> # A tibble: 15 × 4
+#>    Package     Metric           median mem_alloc
+#>    <chr>       <chr>          <bch:tm> <bch:byt>
+#>  1 abdiv       Shannon x 1006  67.06ms    89.5MB
+#>  2 abdiv       Simpson x 1006  14.77ms   26.75MB
+#>  3 abdiv       Faith PD x 50  490.64ms  651.37MB
+#>  4 adiv        Shannon x 1006  40.42ms   128.1MB
+#>  5 adiv        Simpson x 1006  34.19ms   53.18MB
+#>  6 adiv        Faith PD x 50     1.78s  488.78MB
+#>  7 ecodive     Shannon x 1006   7.53ms   14.74MB
+#>  8 ecodive     Simpson x 1006   7.48ms   14.72MB
+#>  9 ecodive     Faith PD x 50  684.95µs  749.23KB
+#> 10 entropart   Shannon x 1006    1.34s   296.1MB
+#> 11 entropart   Simpson x 1006  25.07ms   21.48MB
+#> 12 entropart   Faith PD x 50    29.48s   23.95GB
+#> 13 phyloregion Faith PD x 50    2.91ms    1.93MB
+#> 14 vegan       Shannon x 1006   59.3ms    62.2MB
+#> 15 vegan       Simpson x 1006  39.69ms   56.27MB
+
+
+# How much faster and more memory efficient is ecodive?
+plyr::ddply(adiv_res, 'Metric', function (x) {
+  x[['median']]    <- as.numeric(x[['median']])
+  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
+  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
+  x       <- x[x[['Package']] != 'ecodive',]
+  data.frame(
+    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
+    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
+})
 
 ggplot(adiv_res, aes(x = median, y = mem_alloc)) +
   geom_point(size = 2) +

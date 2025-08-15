@@ -62,8 +62,8 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
 }
 \references{
 Kulcynski S 1927.
-Die Pflanzenassoziationen der Pieninen. Bulletin International de l'Academie Polonaise des Sciences et des Lettres.
-Classe des Sciences Mathematiques et Naturelles.
+Die Pflanzenassoziationen der Pieninen.
+Bulletin International de l'Académie Polonaise des Sciences et des Lettres, Classe des Sciences Mathématiques et Naturelles, Série B: Sciences Naturelles.
 }
 \seealso{
 Other beta_diversity: 

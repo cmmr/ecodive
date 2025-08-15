@@ -70,6 +70,17 @@ counts. \code{n} is the number of rows (OTUs) in \code{counts}.
     gower(ex_counts, pairs = 1:3)
     
 }
+\references{
+Gower JC 1971.
+A general coefficient of similarity and some of its properties.
+Biometrics. 27(4).
+\doi{10.2307/2528823}
+
+Gower JC, Legendre P 1986.
+Metric and Euclidean Properties of Dissimilarity Coefficients.
+Journal of Classification. 3.
+\doi{10.1007/BF01896809}
+}
 \seealso{
 Other beta_diversity: 
 \code{\link{bray_curtis}()},

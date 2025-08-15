@@ -62,6 +62,11 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
 Sorenson T 1948.
 A method of establishing groups of equal amplitude in plant sociology based on similarity of species content.
 Kongelige Danske Videnskabernes Selskab, 5.
+
+Bray JR and Curtis JT 1957.
+An ordination of the upland forest communities of southern Wisconsin.
+Ecological Monographs, 27(4).
+\doi{10.2307/1942268}
 }
 \seealso{
 Other beta_diversity: 
