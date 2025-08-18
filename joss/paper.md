@@ -30,9 +30,6 @@ bibliography: paper.bib
 ---
 
 
-![`ecodive` package logo](../man/figures/logo.png){height="150pt"}
-
-
 
 # Summary
 
@@ -69,30 +66,31 @@ performance gains.
 
 ## Related Works
 
-There are currently nine other R packages that can calculate alpha and beta
+There are currently ten other R packages that can calculate alpha and beta
 diversity metrics: `abdiv` [@abdiv], `adiv` [@adiv], `ampvis2` [@ampvis2],
-`entropart` [@entropart], `GUniFrac` [@GUniFrac], `phyloregion` [@phyloregion],
-`phyloseq` [@phyloseq], `picante` [@picante], and `vegan` [@vegan]. While
-several R packages offer diversity metric calculations, `ecodive` distinguishes
-itself by providing an implementation that is both significantly faster and more
-memory efficient. This superior performance, across various diversity metrics,
-is rigorously demonstrated in Figures 1-3 through comprehensive benchmarking.
+`ecodist` [@ecodist], `entropart` [@entropart], `GUniFrac` [@GUniFrac],
+`phyloregion` [@phyloregion], `phyloseq` [@phyloseq], `picante` [@picante], and
+`vegan` [@vegan]. While several R packages offer diversity metric calculations,
+`ecodive` distinguishes itself by providing an implementation that is both
+significantly faster and more memory efficient. This superior performance,
+across various diversity metrics, is demonstrated in Figures 1-3 through
+comprehensive benchmarking.
 
 The `bench` R package [@bench] was used to compare `abdiv`, `adiv`, `ampvis2`,
-`entropart`, `ecodive`, `GUniFrac`, `phyloregion`, `phyloseq`, `picante`, and
-`vegan`. The benchmarking runs are detailed in the benchmark vignette, which is
-available from within R with `vignette('benchmark')` and online at
-<https://cmmr.github.io/ecodive/articles/benchmark.html>. Note that not all R
-packages offer all diversity metrics.
+`ecodist`, `ecodive`, `entropart`, `GUniFrac`, `phyloregion`, `phyloseq`,
+`picante`, and `vegan`. The benchmarking runs are detailed in the benchmark
+vignette, which is available from within R with `vignette('benchmark')` and
+online at <https://cmmr.github.io/ecodive/articles/benchmark.html>. Note that
+not all R packages offer all diversity metrics.
 
 
-![Figure 1: UniFrac benchmarks. `ecodive` demonstrates substantial performance gains for UniFrac, being 2 to 3,900x faster and using 50 - 32,000x less memory, which helps overcome computational bottlenecks in large-scale analyses.](../man/figures/unifrac-benchmark.png)
+![Figure 1: UniFrac benchmarks. `ecodive` demonstrates substantial performance gains for UniFrac, being 2 to 3,900x faster and using 50 - 32,000x less memory, which helps overcome computational bottlenecks in large-scale analyses.](../man/figures/unifrac-benchmark.svg)
 
 
-![Figure 2: Classic beta diversity benchmarks. `ecodive` is 23 to 210x faster and uses 1 to 850x less memory, enabling more efficient analysis of community dissimilarities.](../man/figures/bdiv-benchmark.png)
+![Figure 2: Classic beta diversity benchmarks. `ecodive` is 6 to 2,300x faster and uses 1 to 1,800x less memory, enabling more efficient analysis of community dissimilarities.](../man/figures/bdiv-benchmark.svg)
 
 
-![Figure 3: Alpha diversity benchmarks. `ecodive` is 2 to 43,000x faster and uses 1 to 33,000x less memory, significantly accelerating the analysis of diversity within single samples.](../man/figures/adiv-benchmark.png)
+![Figure 3: Alpha diversity benchmarks. `ecodive` is 2 to 43,000x faster and uses 1 to 33,000x less memory, significantly accelerating the analysis of diversity within single samples.](../man/figures/adiv-benchmark.svg)
 
 
 
@@ -160,8 +158,8 @@ ecodive::weighted_unifrac(esophagus)
 This study was supported by NIH/NIAD (Grant number U19 AI44297), and Baylor
 College of Medicine and Alkek Foundation Seed.
 
-The authors would like to thank Gemini for its assistance in refining this
-manuscript.
+The authors acknowledge usage of Google AI's Gemini app for refinements of the
+final draft of this manuscript.
 
 
 # References

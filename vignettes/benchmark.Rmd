@@ -34,6 +34,7 @@ Shannon, etc) and how they implement UniFrac metrics.
 | [adiv](https://doi.org/10.32614/CRAN.package.adiv)            | ***Serial R***   | ***Serial R***   |
 | [ampvis2](https://github.com/KasperSkytte/ampvis2)            | vegan            | ***Serial R***   |
 | [animalcules](https://github.com/wejlab/animalcules)          | vegan            | GUniFrac         |
+| [ecodist](https://doi.org/10.32614/CRAN.package.ecodist)      | ***Serial R***   | *none*           |
 | [ecodive](https://cran.r-project.org/package=ecodive)         | ***Parallel C*** | ***Parallel C*** |
 | [entropart](https://doi.org/10.32614/CRAN.package.entropart)  | ***Serial R***   | *none*           |
 | [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)    | *none*           | ***Serial C***   |
@@ -338,6 +339,12 @@ plyr::ddply(unifrac_res, as.name('UniFrac Variant'), function (x) {
     speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
     memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
 })
+#>       UniFrac Variant        speed         memory
+#> 1         Generalized   13 - 2454x   118 - 26475x
+#> 2          Unweighted    2 - 3647x    50 - 20248x
+#> 3   Variance Adjusted 3776 - 3776x 32891 - 32891x
+#> 4            Weighted   83 - 3931x    65 - 26922x
+#> 5 Weighted Normalized   20 - 3555x    65 - 26934x
 
 
 ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
@@ -348,18 +355,20 @@ ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
     box.padding = 0.4,
     min.segment.length = Inf ) + 
   scale_shape(solid = FALSE) + 
+  scale_y_log10(labels = scales::label_bytes()) +
   labs(
     title = 'UniFrac Implementations',
     subtitle = 'All-vs-all 50 sample benchmarking on six CPU cores',
     x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale)' ) +
-  theme_bw()
+    y = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_text(margin = margin(t = 10)))
 ```
 
 </details>
 
 ```{r out.width = "98%", echo=FALSE}
-  knitr::include_graphics('../man/figures/unifrac-benchmark.png')
+  knitr::include_graphics('../man/figures/unifrac-benchmark.svg')
 ```
 
 All of ecodive's UniFrac functions are faster than abdiv, GUniFrac, phyloseq, and ampvis2's implementations by 1 - 3 orders of magnitude. All of ecodive's UniFrac functions are also more memory efficient than the other packages' by 1 - 4 orders of magnitude.
@@ -378,6 +387,7 @@ Here we'll benchmark the Bray-Curtis, Euclidean, Jaccard, and Manhattan classic 
 bray_curtis_res <- bench::mark(
   iterations = 10,
   'abdiv'    = cleanup(pairwise(abdiv::bray_curtis, gems_mtx)),
+  'ecodist'  = cleanup(ecodist::bcdist(gems_tmtx)),
   'ecodive'  = cleanup(ecodive::bray_curtis(gems_mtx)),
   'vegan'    = cleanup(vegan::vegdist(gems_tmtx, 'bray')) )
 
@@ -385,18 +395,21 @@ jaccard_res <- bench::mark(
   iterations = 10,
   check      = FALSE, # abdiv has incorrect output
   'abdiv'    = cleanup(pairwise(abdiv::jaccard, gems_mtx)),
+  'ecodist'  = cleanup(ecodist::distance(gems_tmtx, 'jaccard')),
   'ecodive'  = cleanup(ecodive::jaccard(gems_mtx)),
   'vegan'    = cleanup(vegan::vegdist(gems_tmtx, 'jaccard')) )
 
 manhattan_res <- bench::mark(
   iterations = 10,
   'abdiv'    = cleanup(pairwise(abdiv::manhattan, gems_mtx)),
+  'ecodist'  = cleanup(ecodist::distance(gems_tmtx, 'manhattan')),
   'ecodive'  = cleanup(ecodive::manhattan(gems_mtx)),
   'vegan'    = cleanup(vegan::vegdist(gems_tmtx, 'manhattan')) )
 
 euclidean_res <- bench::mark(
   iterations = 10,
   'abdiv'    = cleanup(pairwise(abdiv::euclidean, gems_mtx)),
+  'ecodist'  = cleanup(ecodist::distance(gems_tmtx, 'euclidean')),
   'ecodive'  = cleanup(ecodive::euclidean(gems_mtx)),
   'vegan'    = cleanup(vegan::vegdist(gems_tmtx, 'euclidean')) )
 
@@ -438,27 +451,32 @@ plyr::ddply(bdiv_res, 'Metric', function (x) {
     speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
     memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
 })
+#>        Metric       speed     memory
+#> 1 Bray-Curtis    6 - 680x   1 - 571x
+#> 2   Euclidean  24 - 2825x   1 - 849x
+#> 3     Jaccard  25 - 3359x  1 - 1865x
+#> 4   Manhattan  23 - 2340x   1 - 849x
+
 
 ggplot(bdiv_res, aes(x = median, y = mem_alloc)) +
-  geom_point(aes(shape = Metric), size = 2) +
-  geom_label_repel(
-    data = ~subset(., Metric == 'Bray-Curtis'),
-    mapping = aes(label = Package),
-    box.padding = 1,
-    min.segment.length = Inf ) + 
-  scale_shape(solid = FALSE) + 
+  geom_point() +
+  facet_wrap('Metric', scales = 'fixed') + 
+  geom_label_repel(aes(label = Package), direction = 'y') + 
+  bench::scale_x_bench_time(limits = c(.05, 500), breaks = c(.1, 1, 10, 60, 300)) +
+  scale_y_log10(limits = 10^c(6,11.5), labels = scales::label_bytes()) +
   labs(
     title = 'Classic Beta Diversity Implementations',
     subtitle = 'All-vs-all 1,006 sample benchmarking on six CPU cores',
     x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale)' ) +
-  theme_bw()
+    y = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_text(margin = margin(t = 10)))
 ```
 
 </details>
 
 ```{r out.width = "98%", echo=FALSE}
-  knitr::include_graphics('../man/figures/bdiv-benchmark.png')
+  knitr::include_graphics('../man/figures/bdiv-benchmark.svg')
 ```
 
 Ecodive's Bray-Curtis, Euclidean, Jaccard, and Manhattan implementations are faster than abdiv and vegan by 1 - 2 orders of magnitude. Ecodive's classic beta diversity implementations are also more memory efficient than abdiv and about the same as vegan.
@@ -543,23 +561,30 @@ plyr::ddply(adiv_res, 'Metric', function (x) {
     speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
     memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
 })
+#>           Metric      speed     memory
+#> 1  Faith PD x 50 4 - 43038x 3 - 33517x
+#> 2 Shannon x 1006   5 - 178x    4 - 20x
+#> 3 Simpson x 1006     2 - 5x     1 - 4x
+
 
 ggplot(adiv_res, aes(x = median, y = mem_alloc)) +
   geom_point(size = 2) +
   geom_label_repel(aes(label = Package)) + 
   facet_wrap('Metric', nrow = 1, scales = 'free') + 
+  scale_y_log10(labels = scales::label_bytes()) +
   labs(
     title = 'Alpha Diversity Implementations',
     subtitle = '50 or 1,006 sample benchmarking on six CPU cores',
     x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale)' ) +
-  theme_bw()
+    y = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_text(margin = margin(t = 10)))
 ```
 
 </details>
 
 ```{r out.width = "98%", echo=FALSE}
-  knitr::include_graphics('../man/figures/adiv-benchmark.png')
+  knitr::include_graphics('../man/figures/adiv-benchmark.svg')
 ```
 
 Ecodive's Faith, Shannon, and Simpson implementations are faster than abdiv and vegan by 1 - 2 orders of magnitude. Ecodive's alpha diversity implementations are also more memory efficient than abdiv and vegan, especially for Faith's phylogenetic diversity.
