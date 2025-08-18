@@ -43,7 +43,7 @@ implement classic and phylogenetic alpha/beta ecology diversity metrics.
 | [microeco](https://doi.org/10.32614/CRAN.package.microeco)    | vegan            | GUniFrac         |
 | [microViz](https://github.com/david-barnett/microViz)         | vegan            | GUniFrac         |
 | [picante](https://doi.org/10.32614/CRAN.package.picante)      | vegan            | ***Serial R***   |
-| [phyloregion](https://github.com/schuyler-smith/phyloregion)  | vegan            | ***Serial R***   |
+| [phyloregion](https://github.com/darunabas/phyloregion)       | vegan            | ***Serial R***   |
 | [phylosmith](https://github.com/schuyler-smith/phylosmith)    | vegan            | *none*           |
 | [rbiom](https://doi.org/10.32614/CRAN.package.rbiom)          | ecodive          | ecodive          |
 | [tidytacos](https://github.com/LebeerLab/tidytacos)           | vegan            | phyloseq         |

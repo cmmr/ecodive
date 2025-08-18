@@ -49,10 +49,10 @@ pak::pak('cmmr/ecodive')
 `ecodive` functions are straightforward to use. Here are a few examples.
 
 
-### With `phyloseq` objects
+### With `phyloseq` or `rbiom` objects
 
-The easiest way to use `ecodive` is with a `phyloseq` or `rbiom` object, which
-conveniently bundle the count data and phylogenetic tree.
+The easiest way to use `ecodive` is with a `phyloseq` or `rbiom` object. These
+objects conveniently bundle the count data and phylogenetic tree.
 
 ``` r
 library(ecodive)

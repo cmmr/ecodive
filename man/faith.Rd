@@ -4,7 +4,7 @@
 \alias{faith}
 \title{Faith's PD}
 \usage{
-faith(counts, tree, cpus = n_cpus())
+faith(counts, tree = NULL, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{An OTU abundance matrix where each column is a sample, and
