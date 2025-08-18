@@ -83,8 +83,7 @@
 <h4 id="state-of-the-field">State of the Field<a class="anchor" aria-label="anchor" href="#state-of-the-field"></a>
 </h4>
 <p>The table below shows a collection of bioinformatics R packages and
-how they implement classic alpha/beta ecology diversity metrics
-(e.g. Bray-Curtis, Shannon, etc) and how they implement UniFrac
+how they implement classic and phylogenetic alpha/beta ecology diversity
 metrics.</p>
 <table class="table">
 <colgroup>
@@ -95,7 +94,7 @@ metrics.</p>
 <thead><tr class="header">
 <th align="left">R Package</th>
 <th align="left">Classic alpha/beta</th>
-<th align="left">UniFrac</th>
+<th align="left">Phylogenetic alpha/beta</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -120,7 +119,7 @@ metrics.</p>
 </tr>
 <tr class="odd">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.ecodist" class="external-link">ecodist</a></td>
-<td align="left"><strong><em>Serial R</em></strong></td>
+<td align="left"><strong><em>Serial C/R</em></strong></td>
 <td align="left"><em>none</em></td>
 </tr>
 <tr class="even">
@@ -195,18 +194,22 @@ metrics.</p>
 </tr>
 </tbody>
 </table>
-<p>Only six packages - abdiv, ampvis2, ecodive, GUniFrac, phyloseq, and
-vegan - have their own implementations of these algorithms. Other R
-packages import code from ecodive, GUniFrac, phyloseq, and/or vegan to
-handle alpha and beta diversity computations. Therefore, only these six
-packages will be benchmarked.</p>
+<p>Only ten packages - <code>abdiv</code>, <code>adiv</code>,
+<code>ampvis2</code>, <code>ecodist</code>, <code>entropart</code>,
+<code>GUniFrac</code>, <code>phyloregion</code>, <code>phyloseq</code>,
+<code>picante</code>, and <code>vegan</code> - have their own
+implementations of these algorithms. Other R packages import code from
+<code>ecodive</code>, <code>GUniFrac</code>, <code>phyloseq</code>,
+and/or <code>vegan</code> to handle alpha and beta diversity
+computations. Therefore, only these ten packages will be
+benchmarked.</p>
 </div>
 <div class="section level4">
 <h4 id="methodology">Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
 </h4>
-<p>We will use the ‘bench’ R package to track the runtime and memory
-consumption of the diversity algorithms in each of the six R packages.
-The host system for these benchmarking runs has the following
+<p>We will use the <code>bench</code> R package to track the runtime and
+memory consumption of the diversity algorithms in each of the ten R
+packages. The host system for these benchmarking runs has the following
 specifications.</p>
 <pre><code>6-Core i5-9600K CPU @ 3.70GHz; 64.0 GB RAM
 Windows 11 Pro x64 24H2 26100.4652</code></pre>
@@ -235,7 +238,7 @@ Click to reveal R code.
 <span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span>pkg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">'adiv'</span>, <span class="st">'abdiv'</span>, <span class="st">'bench'</span>, <span class="st">'ecodive'</span>, <span class="st">'entropart'</span>, <span class="st">'GUniFrac'</span>, <span class="st">'kasperskytte/ampvis2'</span>, </span>
-<span>  <span class="st">'phyloregion'</span>, <span class="st">'phyloseq'</span>, <span class="st">'picante'</span>, <span class="st">'rbiom'</span>, <span class="st">'vegan'</span> <span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="st">'phylocomr'</span>, <span class="st">'phyloregion'</span>, <span class="st">'phyloseq'</span>, <span class="st">'picante'</span>, <span class="st">'rbiom'</span>, <span class="st">'vegan'</span> <span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bench.r-lib.org/" class="external-link">bench</a></span><span class="op">)</span></span>
@@ -247,9 +250,10 @@ Click to reveal R code.
 <span><span class="co">#&gt; [1] "R version 4.5.1 (2025-06-13 ucrt)"</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span>FUN <span class="op">=</span> <span class="va">packageDescription</span>, fields <span class="op">=</span> <span class="st">'Version'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">'abdiv'</span>, <span class="st">'adiv'</span>, <span class="st">'ampvis2'</span>, <span class="st">'ecodive'</span>, <span class="st">'entropart'</span>, <span class="st">'GUniFrac'</span>, <span class="st">'phyloregion'</span>, <span class="st">'phyloseq'</span>, <span class="st">'picante'</span>, <span class="st">'vegan'</span> <span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    abdiv     adiv  ampvis2  ecodive  entropart  GUniFrac  phyloregion  phyloseq  picante    vegan</span></span>
-<span><span class="co">#&gt;  "0.2.0"  "2.2.1"  "2.8.9"  "1.0.0"   "1.6-16"     "1.8"      "1.0.9"  "1.52.0"  "1.8.2"  "2.7-1"</span></span>
+<span>  <span class="st">'abdiv'</span>, <span class="st">'adiv'</span>, <span class="st">'ampvis2'</span>, <span class="st">'ecodive'</span>, <span class="st">'entropart'</span>, <span class="st">'GUniFrac'</span>, </span>
+<span>  <span class="st">'phylocomr'</span>, <span class="st">'phyloregion'</span>, <span class="st">'phyloseq'</span>, <span class="st">'picante'</span>, <span class="st">'vegan'</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    abdiv     adiv  ampvis2  ecodive  entropart  GUniFrac  phylocomr  phyloregion  phyloseq  picante    vegan</span></span>
+<span><span class="co">#&gt;  "0.2.0"  "2.2.1"  "2.8.9"  "1.0.0"   "1.6-16"     "1.8"    "0.3.4"      "1.0.9"  "1.52.0"  "1.8.2"  "2.7-1"</span></span>
 <span></span>
 <span><span class="op">(</span><span class="va">n_cpus</span> <span class="op">&lt;-</span> <span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 6</span></span>
@@ -298,9 +302,11 @@ Click to reveal R code.
 </h2>
 <p>Here we’ll compare the time and memory taken by the unweighted,
 weighted, weight normalized, generalized, and variance adjusted UniFrac
-functions from the abdiv, ecodive, GUniFrac, phyloseq, and ampvis2 R
-packages. Each of the functions will be run 10 times to time them for
-speed, and 1 time to analyze memory usage.</p>
+functions from the <code>abdiv</code>,<code>ampvis2</code>
+<code>ecodive</code>, <code>GUniFrac</code>, <code>phyloseq</code>,
+<code>phyloregion</code> and <code>picante</code> R packages. Each of
+the functions will be run 10 times to time them for speed, and 1 time to
+analyze memory usage.</p>
 <details><summary>
 Click to reveal R code.
 </summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -512,19 +518,18 @@ Click to reveal R code.
 <span>  <span class="fu">theme_bw</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>margin <span class="op">=</span> <span class="fu">margin</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </details><p><img src="../reference/figures/unifrac-benchmark.svg" width="98%"></p>
-<p>All of ecodive’s UniFrac functions are faster than abdiv, GUniFrac,
-phyloseq, and ampvis2’s implementations by 1 - 3 orders of magnitude.
-All of ecodive’s UniFrac functions are also more memory efficient than
-the other packages’ by 1 - 4 orders of magnitude.</p>
-<p><br></p>
+<p><code>ecodive</code> demonstrates substantial performance gains for
+UniFrac, being 2 to 3,900x faster and using 50 - 32,000x less memory.
+<br></p>
 </div>
 <div class="section level2">
 <h2 id="classic-beta-diversity">Classic Beta Diversity<a class="anchor" aria-label="anchor" href="#classic-beta-diversity"></a>
 </h2>
 <p>Here we’ll benchmark the Bray-Curtis, Euclidean, Jaccard, and
-Manhattan classic beta diversity algorithms from the abdiv, ecodive, and
-vegan R packages. Each of the functions will be run 10 times to time
-them for speed, and 1 time to analyze memory usage.</p>
+Manhattan classic beta diversity algorithms from the <code>abdiv</code>,
+<code>ecodive</code>, <code>ecodist</code>, and <code>vegan</code> R
+packages. Each of the functions will be run 10 times to time them for
+speed, and 1 time to analyze memory usage.</p>
 <details><summary>
 Click to reveal R code.
 </summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -616,22 +621,19 @@ Click to reveal R code.
 <span>  <span class="fu">theme_bw</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>margin <span class="op">=</span> <span class="fu">margin</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </details><p><img src="../reference/figures/bdiv-benchmark.svg" width="98%"></p>
-<p>Ecodive’s Bray-Curtis, Euclidean, Jaccard, and Manhattan
-implementations are faster than abdiv and vegan by 1 - 2 orders of
-magnitude. Ecodive’s classic beta diversity implementations are also
-more memory efficient than abdiv and about the same as vegan.</p>
-<p>Furthermore, the values returned by <code>abdiv::jaccard()</code>
-were inconsistent with those returned by the equivalent ecodive and
-vegan functions.</p>
+<p><code>ecodive</code> is 6 to 2,300x faster and uses 1 to 1,800x less
+memory.</p>
 <p><br></p>
 </div>
 <div class="section level2">
 <h2 id="alpha-diversity">Alpha Diversity<a class="anchor" aria-label="anchor" href="#alpha-diversity"></a>
 </h2>
 <p>Last, we’ll compare the Shannon, Simpson, and Faith alpha diversity
-implementations from the abdiv, ecodive, and vegan R packages. Faith’s
-phylogenetic diversity metric will be run on 50 samples, while Shannon
-and Simpson metrics will be run on 1,006 samples.</p>
+implementations from the <code>abdiv</code>, <code>ecodive</code>,
+<code>entropart</code>, <code>phyloregion</code>, and <code>vegan</code>
+R packages. Faith’s phylogenetic diversity metric will be run on 50
+samples, while Shannon and Simpson metrics will be run on 1,006
+samples.</p>
 <details><summary>
 Click to reveal R code.
 </summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -721,10 +723,8 @@ Click to reveal R code.
 <span>  <span class="fu">theme_bw</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>margin <span class="op">=</span> <span class="fu">margin</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </details><p><img src="../reference/figures/adiv-benchmark.svg" width="98%"></p>
-<p>Ecodive’s Faith, Shannon, and Simpson implementations are faster than
-abdiv and vegan by 1 - 2 orders of magnitude. Ecodive’s alpha diversity
-implementations are also more memory efficient than abdiv and vegan,
-especially for Faith’s phylogenetic diversity.</p>
+<p><code>ecodive</code> is 2 to 43,000x faster and uses 1 to 33,000x
+less memory.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
