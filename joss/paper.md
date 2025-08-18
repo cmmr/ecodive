@@ -11,15 +11,17 @@ authors:
 - name: Joseph F Petrosino
   orcid: "0000-0002-4046-6898"
   affiliation: "1, 2"
-date: "15 August 2025"
+date: "18 August 2025"
 output:
   word_document: default
   pdf_document: default
 tags:
 - R
-- microbiome
-- unifrac
+- ecology
 - bioinformatics
+- microbiome
+- diversity
+- high-performance computing
 affiliations:
 - name: The Alkek Center for Metagenomics and Microbiome Research, Department of Molecular Virology and Microbiology, Baylor College of Medicine, Houston, TX 77030, USA
   index: 1
@@ -33,55 +35,54 @@ bibliography: paper.bib
 
 # Summary
 
-In ecology, diversity measures the composition of communities and is the first
-step toward understanding the role communities play within their environment.
-The most common measures of diversity in microbiome research are alpha-diversity
-and beta-diversity. While alpha-diversity aims to describe the richness and
-evenness of features within a single sample, beta-diversity assesses the
-dissimilarities between two or more communities. Diversity calculations may
-include the number of species or other features present, relative abundances,
-evolutionary relationships, or a combination thereof.
-
-Applying these metrics to large collections of communities, such as thousands of
-gut microbiome samples, offers insights into predicting or diagnosing disease
-states through ecological "fingerprints," a computationally intensive task.
-
+Characterizing the composition of biological communities is a fundamental task
+in ecology, but the calculations involved can be computationally prohibitive.
+`ecodive` is an R package that addresses this challenge by providing a highly
+optimized implementation of common ecological diversity metrics, including
+alpha-diversity (within-sample richness and evenness) and beta-diversity
+(between-sample dissimilarity). These metrics can incorporate species counts,
+relative abundances, and evolutionary relationships, providing a multi-faceted
+view of ecological structure. By leveraging a compiled C library with pthreads
+for parallelization, `ecodive` delivers substantial performance gains in both
+speed and memory usage, enabling researchers to analyze larger datasets more
+efficiently.
 
 
 # Statement of Need
 
-Processing diversity metrics for thousands of communities is computationally
-intensive. The speed and memory footprint of these calculations often become a
-bottleneck for analysis, limiting the scope and scale of research studies. This
-is especially true for Faith's PD [@Faith1992] and UniFrac [@Lozupone2005],
-which require complex integration of species counts with evolutionary distances
-by traversing phylogenetic trees. A faster and more memory-efficient
-implementation enables researchers to analyze a greater number of samples,
-leading to more robust and comprehensive insights. The `ecodive` R package
-addresses these challenges by employing a compiled C library with pthreads
-parallelization to efficiently compute these metrics, offering significant
-performance gains.
+The analysis of ecological diversity in large-scale studies is often hampered by
+the computational demands of calculating metrics across thousands of
+communities, a common requirement in modern microbiome research. This is
+particularly true for phylogenetic metrics like Faith's PD [@Faith1992] and the
+UniFrac distance family [@Lozupone2005], which integrate species abundance with
+evolutionary data from phylogenetic trees. The resulting high demand on
+processing time and memory can limit the scope and scale of scientific inquiry.
+
+`ecodive` overcomes these limitations by offering a significantly faster and
+more memory-efficient solution. This allows researchers to analyze more samples,
+explore more complex questions, and obtain more robust insights from their data.
+By providing a high-performance, parallelized engine for these calculations,
+`ecodive` empowers researchers to push the boundaries of large-scale ecological
+analysis.
 
 
 
-## Related Works
+## Comparison to Existing Packages
 
-There are currently ten other R packages that can calculate alpha and beta
-diversity metrics: `abdiv` [@abdiv], `adiv` [@adiv], `ampvis2` [@ampvis2],
-`ecodist` [@ecodist], `entropart` [@entropart], `GUniFrac` [@GUniFrac],
-`phyloregion` [@phyloregion], `phyloseq` [@phyloseq], `picante` [@picante], and
-`vegan` [@vegan]. While several R packages offer diversity metric calculations,
-`ecodive` distinguishes itself by providing an implementation that is both
-significantly faster and more memory efficient. This superior performance,
-across various diversity metrics, is demonstrated in Figures 1-3 through
-comprehensive benchmarking.
+While numerous R packages can calculate diversity metrics, our comparison
+focuses on those that provide their own implementations: `abdiv` [@abdiv],
+`adiv` [@adiv], `ampvis2` [@ampvis2], `ecodist` [@ecodist], `entropart`
+[@entropart], `GUniFrac` [@GUniFrac], `phyloregion` [@phyloregion], `phyloseq`
+[@phyloseq], `picante` [@picante], and `vegan` [@vegan]. `ecodive` sets itself
+apart from these packages through its superior performance. Furthermore,
+`ecodive` has zero external R dependencies. This makes it a lightweight, stable,
+and secure computational backend, minimizing installation conflicts and
+simplifying long-term maintenance for developers who build upon it.
 
-The `bench` R package [@bench] was used to compare `abdiv`, `adiv`, `ampvis2`,
-`ecodist`, `ecodive`, `entropart`, `GUniFrac`, `phyloregion`, `phyloseq`,
-`picante`, and `vegan`. The benchmarking runs are detailed in the benchmark
-vignette, which is available from within R with `vignette('benchmark')` and
-online at <https://cmmr.github.io/ecodive/articles/benchmark.html>. Note that
-not all R packages offer all diversity metrics.
+Comprehensive benchmarks, conducted using the `bench` package [@bench],
+demonstrate these advantages across a range of metrics (Figures 1-3). The
+complete benchmark code and results are available in the package vignette
+(`vignette('benchmark')`) and online.
 
 
 ![Figure 1: UniFrac benchmarks. `ecodive` demonstrates substantial performance gains for UniFrac, being 2 to 3,900x faster and using 50 - 32,000x less memory, which helps overcome computational bottlenecks in large-scale analyses.](../man/figures/unifrac-benchmark.svg)
@@ -94,52 +95,37 @@ not all R packages offer all diversity metrics.
 
 
 
-# Algorithms
+# Implemented Metrics
 
-The full list of alpha and beta diversity metrics currently implemented by
-`ecodive` is provided below. This set of metrics is subject to expansion as new
-functionalities are developed. Refer to `ecodive`'s official documentation at
-<https://cmmr.github.io/ecodive/reference/index.html> for the most up-to-date list
-and detailed descriptions.
+`ecodive` provides a comprehensive suite of alpha and beta diversity metrics.
+The current implementation includes:
 
 
-### Classic Alpha Diversity
+### Alpha Diversity
 
-* Shannon Index [@Shannon1948]
-* Simpson Index [@Simpson1949; @Gini1912]
-* Inverse Simpson Index [@Simpson1949]
-* Chao1 [@Chao1984]
+* Classic: Shannon Index [@Shannon1948], Simpson Index [@Simpson1949; @Gini1912], Inverse Simpson Index [@Simpson1949], and Chao1 [@Chao1984].
 
-
-### Phylogenetic Alpha Diversity
-
-* Faith's Phylogenetic Diversity [@Faith1992]
+* Phylogenetic: Faith's Phylogenetic Diversity [@Faith1992].
 
 
-### Classic Beta Diversity
+### Beta Diversity
 
-* Bray-Curtis Index [@Bray1957; @Sorenson1948]
-* Canberra [@Godfrey1967]
-* Euclidean [@Gower1986; @Legendre2013]
-* Gower [@Gower1971; @Gower1986]
-* Jaccard [@Jaccard1908]
-* Kulczynski [@Kulczynski1927]
-* Manhattan [@Kaufman1990]
+* Classic: Bray-Curtis [@Bray1957; @Sorenson1948], Canberra [@Godfrey1967], Euclidean [@Gower1986; @Legendre2013], Gower [@Gower1971; @Gower1986], Jaccard [@Jaccard1908], Kulczynski [@Kulczynski1927], and Manhattan [@Kaufman1990].
+
+* Phylogenetic: Unweighted UniFrac [@Lozupone2005], Weighted UniFrac [@Lozupone2007], Normalized Weighted UniFrac [@Lozupone2007], Generalized UniFrac [@Chen2012], and Variance Adjusted Weighted UniFrac [@Chang2011].
 
 
-### Phylogenetic Beta Diversity
-
-* Unweighted UniFrac [@Lozupone2005]
-* Weighted UniFrac [@Lozupone2007]
-* Normalized Weighted UniFrac [@Lozupone2007]
-* Generalized UniFrac [@Chen2012]
-* Variance Adjusted Weighted UniFrac [@Chang2011]
+For the most up-to-date list and detailed descriptions, please refer to the
+official ecodive documentation at
+<https://cmmr.github.io/ecodive/reference/index.html>.
 
 
-# Usage
 
-Users can easily compute alpha and beta diversity metrics using `ecodive`. For
-example, to calculate weighted UniFrac distances with a `phyloseq` object:
+# Example Usage
+
+ecodive is designed for ease of use and integrates seamlessly with existing
+bioinformatics workflows, such as those using phyloseq objects. For example,
+calculating weighted UniFrac distances is straightforward:
 
 ``` r
 library(phyloseq)
@@ -156,10 +142,8 @@ ecodive::weighted_unifrac(esophagus)
 # Acknowledgements
 
 This study was supported by NIH/NIAD (Grant number U19 AI44297), and Baylor
-College of Medicine and Alkek Foundation Seed.
-
-The authors acknowledge usage of Google AI's Gemini app for refinements of the
-final draft of this manuscript.
+College of Medicine and Alkek Foundation Seed. The authors also acknowledge the
+use of Google's Gemini for assistance in refining this manuscript.
 
 
 # References

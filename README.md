@@ -5,11 +5,24 @@
 [![covr](https://codecov.io/gh/cmmr/ecodive/graph/badge.svg)](https://app.codecov.io/gh/cmmr/ecodive)
 <!-- badges: end -->
 
-Ecodive provides the fastest implementations of alpha and beta diversity metrics
-for R, including UniFrac, Faith's PD, Bray-Curtis, Shannon, and many others. It
-works with any matrix-like object, including phyloseq, rbiom, and BioConductor
-data structures. With zero dependencies, it's quick to install and ideal for end
-users and package developers alike.
+`ecodive` is an R package for calculating ecological diversity metrics in a
+parallelized and memory-efficient manner. It is designed to handle large
+datasets, such as those common in microbiome research, with significant speed
+and memory improvements over existing tools.
+
+
+## Why ecodive?
+
+Analyzing ecological diversity is often a computational bottleneck, especially
+with large datasets. `ecodive` addresses this by providing:
+
+* **High Performance:** `ecodive` is written in C and parallelized using pthreads, making it dramatically faster than other R packages. [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html) show it can be up to **43,000x faster** and use up to **33,000x less memory**.
+
+* **Zero Dependencies:** The package has no external R dependencies, making it lightweight, stable, and easy to install. This also makes it an ideal and secure backend for other R packages.
+
+* **Comprehensive Metrics:** It implements a wide range of common alpha and beta diversity metrics, including classic and phylogenetic-aware methods like **Faith's PD** and the **complete UniFrac family**.
+
+* **Ease of Use:** The API is simple and integrates seamlessly with popular bioinformatics packages like [`phyloseq`](http://joey711.github.io/phyloseq/) and [`rbiom`](https://cmmr.github.io/rbiom/).
 
 
 
@@ -33,8 +46,41 @@ pak::pak('cmmr/ecodive')
 
 ## Usage
 
-``` r
+`ecodive` functions are straightforward to use. Here are a few examples.
 
+
+### With `phyloseq` objects
+
+The easiest way to use `ecodive` is with a `phyloseq` or `rbiom` object, which
+conveniently bundle the count data and phylogenetic tree.
+
+``` r
+library(ecodive)
+data(esophagus, package = 'phyloseq')
+data(hmp50,     package = 'rbiom')
+
+# Calculate weighted UniFrac distance
+w_unifrac <- weighted_unifrac(esophagus)
+print(w_unifrac)
+#>           B         C
+#> C 0.1050480          
+#> D 0.1401124 0.1422409
+
+# Calculate Faith's Phylogenetic Diversity
+faith_pd <- faith(hmp50)
+print(faith_pd[1:4])
+#>   HMP01   HMP02   HMP03   HMP04 
+#> 6.22296 8.59432 8.93375 9.86597 
+```
+
+
+### With basic R objects
+
+You can also provide the count data and phylogenetic tree as separate objects.
+
+The `ex_counts` and `ex_tree` objects are included with `ecodive`.
+
+``` r
 ## Example Data ----------------------
 
 counts <- rarefy(ex_counts)
@@ -111,7 +157,7 @@ Pull requests are welcome. Please ensure contributed code is covered by
 tests and documentation (add additional tests and documentation as
 needed) and passes all automated tests.
 
-New functions should leverage C and pthreads to minimize memory and CPU time.
+New functions must leverage C and pthreads to minimize memory and CPU time.
 
 Please note that the ecodive project is released with a [Contributor Code of
 Conduct](https://cmmr.github.io/ecodive/CODE_OF_CONDUCT.html). By contributing

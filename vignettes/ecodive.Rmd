@@ -8,7 +8,7 @@ vignette: >
 ---
 
 
-## Intoduction
+## Introduction
 
 Ecodive calculates ecological diversity metrics. Alpha diversity metrics
 provide insight about a single sample's diversity, whereas beta diversity

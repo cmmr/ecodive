@@ -110,7 +110,7 @@ chao1 <- function (counts, cpus = n_cpus()) {
 #'     # Faith diversity values
 #'     faith(ex_counts, tree = ex_tree)
 #'     
-faith <- function (counts, tree, cpus = n_cpus()) {
+faith <- function (counts, tree = NULL, cpus = n_cpus()) {
   
   validate_args()
   result_vec <- init_result_vec(counts)

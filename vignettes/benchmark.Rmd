@@ -25,16 +25,15 @@ knitr::opts_chunk$set(
 ### State of the Field
 
 The table below shows a collection of bioinformatics R packages and how they
-implement classic alpha/beta ecology diversity metrics (e.g. Bray-Curtis,
-Shannon, etc) and how they implement UniFrac metrics.
+implement classic and phylogenetic alpha/beta ecology diversity metrics.
 
-| R Package           | Classic alpha/beta  | UniFrac             |
-|:--------------------|:--------------------|:--------------------|
+| R Package               | Classic alpha/beta      | Phylogenetic alpha/beta |
+|:------------------------|:------------------------|:------------------------|
 | [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)          | ***Serial R***   | *none*           |
 | [adiv](https://doi.org/10.32614/CRAN.package.adiv)            | ***Serial R***   | ***Serial R***   |
 | [ampvis2](https://github.com/KasperSkytte/ampvis2)            | vegan            | ***Serial R***   |
 | [animalcules](https://github.com/wejlab/animalcules)          | vegan            | GUniFrac         |
-| [ecodist](https://doi.org/10.32614/CRAN.package.ecodist)      | ***Serial R***   | *none*           |
+| [ecodist](https://doi.org/10.32614/CRAN.package.ecodist)      | ***Serial C/R*** | *none*           |
 | [ecodive](https://cran.r-project.org/package=ecodive)         | ***Parallel C*** | ***Parallel C*** |
 | [entropart](https://doi.org/10.32614/CRAN.package.entropart)  | ***Serial R***   | *none*           |
 | [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)    | *none*           | ***Serial C***   |
@@ -51,15 +50,16 @@ Shannon, etc) and how they implement UniFrac metrics.
 | [vegan](https://doi.org/10.32614/CRAN.package.vegan)          | ***Serial C***   | *none*           |
 
 
-Only six packages - abdiv, ampvis2, ecodive, GUniFrac, phyloseq, and vegan -
-have their own implementations of these algorithms. Other R packages import code
-from ecodive, GUniFrac, phyloseq, and/or vegan to handle alpha and beta
-diversity computations. Therefore, only these six packages will be benchmarked.
+Only ten packages - `abdiv`, `adiv`, `ampvis2`, `ecodist`, `entropart`, `GUniFrac`,
+`phyloregion`, `phyloseq`, `picante`, and `vegan` - have their own implementations of
+these algorithms. Other R packages import code from `ecodive`, `GUniFrac`, `phyloseq`,
+and/or `vegan` to handle alpha and beta diversity computations. Therefore, only
+these ten packages will be benchmarked.
 
 ### Methodology
 
-We will use the 'bench' R package to track the runtime and memory consumption of
-the diversity algorithms in each of the six R packages. The host system for
+We will use the `bench` R package to track the runtime and memory consumption of
+the diversity algorithms in each of the ten R packages. The host system for
 these benchmarking runs has the following specifications.
 
     6-Core i5-9600K CPU @ 3.70GHz; 64.0 GB RAM
@@ -85,7 +85,7 @@ install.packages('pak')
 
 pak::pkg_install(pkg = c(
   'adiv', 'abdiv', 'bench', 'ecodive', 'entropart', 'GUniFrac', 'kasperskytte/ampvis2', 
-  'phyloregion', 'phyloseq', 'picante', 'rbiom', 'vegan' ))
+  'phylocomr', 'phyloregion', 'phyloseq', 'picante', 'rbiom', 'vegan' ))
 
 
 library(bench)
@@ -97,9 +97,10 @@ version$version.string
 #> [1] "R version 4.5.1 (2025-06-13 ucrt)"
 
 sapply(FUN = packageDescription, fields = 'Version', c(
-  'abdiv', 'adiv', 'ampvis2', 'ecodive', 'entropart', 'GUniFrac', 'phyloregion', 'phyloseq', 'picante', 'vegan' ))
-#>    abdiv     adiv  ampvis2  ecodive  entropart  GUniFrac  phyloregion  phyloseq  picante    vegan
-#>  "0.2.0"  "2.2.1"  "2.8.9"  "1.0.0"   "1.6-16"     "1.8"      "1.0.9"  "1.52.0"  "1.8.2"  "2.7-1"
+  'abdiv', 'adiv', 'ampvis2', 'ecodive', 'entropart', 'GUniFrac', 
+  'phylocomr', 'phyloregion', 'phyloseq', 'picante', 'vegan' ))
+#>    abdiv     adiv  ampvis2  ecodive  entropart  GUniFrac  phylocomr  phyloregion  phyloseq  picante    vegan
+#>  "0.2.0"  "2.2.1"  "2.8.9"  "1.0.0"   "1.6-16"     "1.8"    "0.3.4"      "1.0.9"  "1.52.0"  "1.8.2"  "2.7-1"
 
 (n_cpus <- ecodive::n_cpus())
 #> [1] 6
@@ -150,7 +151,7 @@ gems_tmtx <- t(gems_mtx)
 
 # UniFrac
 
-Here we'll compare the time and memory taken by the unweighted, weighted, weight normalized, generalized, and variance adjusted UniFrac functions from the abdiv, ecodive, GUniFrac, phyloseq, and ampvis2 R packages. Each of the functions will be run 10 times to time them for speed, and 1 time to analyze memory usage.
+Here we'll compare the time and memory taken by the unweighted, weighted, weight normalized, generalized, and variance adjusted UniFrac functions from the `abdiv`,`ampvis2` `ecodive`, `GUniFrac`, `phyloseq`, `phyloregion` and `picante` R packages. Each of the functions will be run 10 times to time them for speed, and 1 time to analyze memory usage.
 
 <details>
   <summary>Click to reveal R code.</summary>
@@ -371,14 +372,13 @@ ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
   knitr::include_graphics('../man/figures/unifrac-benchmark.svg')
 ```
 
-All of ecodive's UniFrac functions are faster than abdiv, GUniFrac, phyloseq, and ampvis2's implementations by 1 - 3 orders of magnitude. All of ecodive's UniFrac functions are also more memory efficient than the other packages' by 1 - 4 orders of magnitude.
-
+`ecodive` demonstrates substantial performance gains for UniFrac, being 2 to 3,900x faster and using 50 - 32,000x less memory.
 <br>
 
 
 # Classic Beta Diversity
 
-Here we'll benchmark the Bray-Curtis, Euclidean, Jaccard, and Manhattan classic beta diversity algorithms from the abdiv, ecodive, and vegan R packages. Each of the functions will be run 10 times to time them for speed, and 1 time to analyze memory usage.
+Here we'll benchmark the Bray-Curtis, Euclidean, Jaccard, and Manhattan classic beta diversity algorithms from the `abdiv`, `ecodive`, `ecodist`, and `vegan` R packages. Each of the functions will be run 10 times to time them for speed, and 1 time to analyze memory usage.
 
 <details>
   <summary>Click to reveal R code.</summary>
@@ -479,16 +479,14 @@ ggplot(bdiv_res, aes(x = median, y = mem_alloc)) +
   knitr::include_graphics('../man/figures/bdiv-benchmark.svg')
 ```
 
-Ecodive's Bray-Curtis, Euclidean, Jaccard, and Manhattan implementations are faster than abdiv and vegan by 1 - 2 orders of magnitude. Ecodive's classic beta diversity implementations are also more memory efficient than abdiv and about the same as vegan.
-
-Furthermore, the values returned by `abdiv::jaccard()` were inconsistent with those returned by the equivalent ecodive and vegan functions.
+`ecodive` is 6 to 2,300x faster and uses 1 to 1,800x less memory.
 
 <br>
 
 
 # Alpha Diversity
 
-Last, we'll compare the Shannon, Simpson, and Faith alpha diversity implementations from the abdiv, ecodive, and vegan R packages. Faith's phylogenetic diversity metric will be run on 50 samples, while Shannon and Simpson metrics will be run on 1,006 samples.
+Last, we'll compare the Shannon, Simpson, and Faith alpha diversity implementations from the `abdiv`, `ecodive`, `entropart`, `phyloregion`, and `vegan` R packages. Faith's phylogenetic diversity metric will be run on 50 samples, while Shannon and Simpson metrics will be run on 1,006 samples.
 
 <details>
   <summary>Click to reveal R code.</summary>
@@ -587,7 +585,7 @@ ggplot(adiv_res, aes(x = median, y = mem_alloc)) +
   knitr::include_graphics('../man/figures/adiv-benchmark.svg')
 ```
 
-Ecodive's Faith, Shannon, and Simpson implementations are faster than abdiv and vegan by 1 - 2 orders of magnitude. Ecodive's alpha diversity implementations are also more memory efficient than abdiv and vegan, especially for Faith's phylogenetic diversity.
+`ecodive` is 2 to 43,000x faster and uses 1 to 33,000x less memory.
 
 
 
