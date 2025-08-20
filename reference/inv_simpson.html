@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,6 +70,24 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
     <p>A numeric vector.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The Inverse Simpson index is another way to present the information from the
+Simpson index, but in a more intuitive format. While the standard Simpson
+index calculates the probability of two randomly selected individuals
+belonging to the same species (where a lower value means more diversity), the
+Inverse Simpson index is the reciprocal of that value (1/D). This simple
+transformation makes the index easier to interpret: the value increases as
+diversity increases.</p>
+<p>The primary advantage of the Inverse Simpson index is that its value can be
+understood as the "effective number of species". This means a community with
+an Inverse Simpson index of 10 has a diversity that is equivalent to a
+community composed of 10 equally abundant species. This provides a more
+direct and biologically meaningful interpretation compared to more abstract
+indices. Like the standard Simpson index, it is more heavily weighted by the
+most abundant species and is less sensitive to sampling depth than richness
+metrics like Observed Features or Chao1.</p>
+    </div>
+    <div class="section level2">
     <h2 id="calculation">Calculation<a class="anchor" aria-label="anchor" href="#calculation"></a></h2>
 
 
@@ -94,8 +112,11 @@ Nature, 163.
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other alpha_diversity:
+<code><a href="alpha_div.html">alpha_div</a>()</code>,
+<code><a href="beta_div.html">beta_div</a>()</code>,
 <code><a href="chao1.html">chao1</a>()</code>,
 <code><a href="faith.html">faith</a>()</code>,
+<code><a href="observed.html">observed</a>()</code>,
 <code><a href="shannon.html">shannon</a>()</code>,
 <code><a href="simpson.html">simpson</a>()</code></p></div>
     </div>
