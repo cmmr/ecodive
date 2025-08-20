@@ -19,11 +19,26 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 A numeric vector.
 }
 \description{
-Chao1 alpha diversity metric.\cr\cr
-A non-parametric estimator of the number of unobserved species in a sample.
-The Chao1 index estimates total species richness based on the number of
-species that occur only once (singletons) and twice (doubletons) in the
-sample.
+Chao1 alpha diversity metric.
+}
+\details{
+The Chao1 index is a non-parametric estimator that seeks to predict the true
+species richness of a community, including species that were likely missed
+due to undersampling. It works by using the counts of the rarest observed
+taxa — specifically "singletons" (taxa seen only once) and "doubletons" (taxa
+seen twice) — to estimate how many species were not detected at all. The
+logic is that if you find many species represented by only one or two
+individuals, it is highly probable that many other rare species were missed
+entirely.
+
+\strong{Important Caveat:} The Chao1 estimator is mathematically dependent on
+singleton counts. However, modern bioinformatic pipelines that generate ASVs
+(like DADA2) are designed to remove singletons, as they are often
+indistinguishable from sequencing errors. Using Chao1 on data that has had
+singletons removed will produce a scientifically meaningless result that is
+often just the same as the observed richness. Therefore, this metric is
+considered methodologically unsound for most modern ASV-based workflows and
+should be used with extreme caution.
 }
 \section{Calculation}{
 
@@ -73,8 +88,11 @@ Scandinavian Journal of Statistics, 11:265-270.
 }
 \seealso{
 Other alpha_diversity: 
+\code{\link{alpha_div}()},
+\code{\link{beta_div}()},
 \code{\link{faith}()},
 \code{\link{inv_simpson}()},
+\code{\link{observed}()},
 \code{\link{shannon}()},
 \code{\link{simpson}()}
 }

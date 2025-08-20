@@ -3,6 +3,52 @@
 
 
 
+#' API for browsing functions
+#' 
+#' Programmatic access to the lists of available metrics, and their associated
+#' functions.
+#' 
+#' @return   A nested list of functions for alpha and beta diversity.
+#' 
+#' @export
+#' 
+#' @examples
+#'     names(metrics)
+#'     
+#'     names(metrics$alpha)
+#'     
+#'     names(formals(metrics$alpha$faith))
+#'     
+#'     metrics$alpha$faith(ex_counts, ex_tree)
+#' 
+
+metrics <-list(
+  
+  alpha = list(
+    'observed'    = observed, 
+    'chao1'       = chao1, 
+    'shannon'     = shannon, 
+    'simpson'     = simpson, 
+    'inv_simpson' = inv_simpson, 
+    'faith'       = faith ),
+  
+  beta = list(
+    'bray_curtis'                 = bray_curtis, 
+    'sorenson'                    = sorenson, 
+    'canberra'                    = canberra, 
+    'euclidean'                   = euclidean, 
+    'gower'                       = gower, 
+    'jaccard'                     = jaccard, 
+    'kulczynski'                  = kulczynski, 
+    'manhattan'                   = manhattan, 
+    'unweighted_unifrac'          = unweighted_unifrac, 
+    'weighted_unifrac'            = weighted_unifrac, 
+    'weighted_normalized_unifrac' = weighted_normalized_unifrac, 
+    'generalized_unifrac'         = generalized_unifrac, 
+    'variance_adjusted_unifrac'   = variance_adjusted_unifrac )
+)
+
+
 
 #' Number of CPU Cores
 #' 

@@ -13,18 +13,28 @@ template:
 
 reference:
 
-- title: Phylogenetic Alpha Diversity
+- title: Alpha Diversity
+  contents:
+  - alpha_div
+
+- subtitle: Phylogenetic
   contents:
   - faith
   
-- title: Classic Alpha Diversity
+- subtitle: Classic
   contents:
+  - observed
   - chao1
   - shannon
   - simpson
   - inv_simpson
   
-- title: Phylogenetic Beta Diversity
+
+- title: Beta Diversity
+  contents:
+  - beta_div
+  
+- title: Phylogenetic
   contents:
   - unweighted_unifrac
   - weighted_unifrac
@@ -32,8 +42,9 @@ reference:
   - generalized_unifrac
   - variance_adjusted_unifrac
 
-- title: Classic Beta Diversity
+- title: Classic
   contents:
+  - sorenson
   - bray_curtis
   - canberra
   - euclidean
@@ -42,11 +53,13 @@ reference:
   - kulczynski
   - manhattan
   
+  
 - title: Utility
   contents:
   - read_tree
   - rarefy
   - n_cpus
+  - metrics
   
 - title: Datasets
   contents:

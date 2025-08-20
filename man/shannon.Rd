@@ -19,9 +19,19 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 A numeric vector.
 }
 \description{
-Shannon alpha diversity metric.\cr\cr
-The index considers both the number of different OTUs (richness) and how
-evenly the observations are distributed among those OTUs (evenness).
+Shannon alpha diversity metric.
+}
+\details{
+The Shannon index is a widely used metric that quantifies diversity by
+considering both the number of species (richness) and their abundance
+distribution (evenness). Borrowed from information theory, it measures the
+"uncertainty" or entropy in predicting the identity of a microbe drawn
+randomly from the sample. A community with many different species that are
+present in similar proportions will have high uncertainty and thus a high
+Shannon index value. Compared to the Simpson index, the Shannon index gives
+more equitable weight to both rare and abundant species, making it more
+sensitive to changes in richness. Higher values indicate greater community
+diversity.
 }
 \section{Calculation}{
 
@@ -68,9 +78,12 @@ University of Illinois Press.
 }
 \seealso{
 Other alpha_diversity: 
+\code{\link{alpha_div}()},
+\code{\link{beta_div}()},
 \code{\link{chao1}()},
 \code{\link{faith}()},
 \code{\link{inv_simpson}()},
+\code{\link{observed}()},
 \code{\link{simpson}()}
 }
 \concept{alpha_diversity}

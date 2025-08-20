@@ -1,8 +1,8 @@
 Package: ecodive
 Type: Package
 Title: Parallel and Memory-Efficient Ecological Diversity Metrics
-Version: 1.0.0
-Date: 2025-08-18
+Version: 1.0.0.9001
+Date: 2025-08-20
 Authors@R: c(
     person(
       "Daniel P.", "Smith",

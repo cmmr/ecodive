@@ -24,10 +24,22 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 A numeric vector.
 }
 \description{
-Faith's phylogenetic diversity metric.\cr\cr
-A higher value indicates a greater amount of evolutionary history
-represented within the community, suggesting higher biodiversity in terms of
-evolutionary relationships.
+Faith's phylogenetic diversity metric.
+}
+\details{
+Faith's Phylogenetic Diversity (PD) is a unique richness metric that
+incorporates the evolutionary relationships between the members of a
+community. Instead of simply counting the number of unique taxa, Faith's PD
+is calculated as the sum of the lengths of all the branches on a phylogenetic
+tree that connect all the species present in a sample. The rationale is that
+a community composed of distantly related organisms (e.g., from different
+phyla) is more "diverse" in an evolutionary sense than a community with the
+same number of species that are all closely related (e.g., from the same
+genus). A higher PD value indicates greater phylogenetic diversity. Because
+evolutionary relatedness often correlates with function, Faith's PD can also
+serve as a valuable proxy for the unmeasured functional diversity of a
+community. This metric requires a phylogenetic tree as an input for its
+calculation.
 }
 \section{Calculation}{
 
@@ -54,8 +66,11 @@ Biological Conservation, 61:1-10.
 }
 \seealso{
 Other alpha_diversity: 
+\code{\link{alpha_div}()},
+\code{\link{beta_div}()},
 \code{\link{chao1}()},
 \code{\link{inv_simpson}()},
+\code{\link{observed}()},
 \code{\link{shannon}()},
 \code{\link{simpson}()}
 }

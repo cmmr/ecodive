@@ -9,9 +9,49 @@
 # https://forum.qiime2.org/t/alpha-and-beta-diversity-explanations-and-commands/2282
 
 
+
+#' Beta diversity wrapper
+#' 
+#' @inherit documentation
+#' @family alpha_diversity
+#' 
+#' @param metric   The name of a beta diversity metric. Current options are
+#'   `c('bray_curtis', 'sorenson', 'canberra', 'euclidean', 'gower', 'jaccard',
+#'   'kulczynski', 'manhattan', 'unweighted_unifrac', 'weighted_unifrac',
+#'   'weighted_normalized_unifrac', 'generalized_unifrac',
+#'   'variance_adjusted_unifrac')`. Supports partial name matching. Options are
+#'   also available via `names(metrics$beta)`.
+#'   
+#' @param ...  Additional options to pass through to the called function. I.e.
+#'   `tree`, `weighted`, `pairs`, `alpha`, or `cpus`.
+#' 
+#' @return A numeric vector.
+#' 
+#' @export
+#' @examples
+#'     # Example counts matrix
+#'     ex_counts
+#'     
+#'     # Shannon diversity values
+#'     alpha_div(ex_counts, 'Shannon')
+#'     
+#'     # Chao1 diversity values
+#'     alpha_div(ex_counts, 'c')
+#'     
+#'     # Faith PD values
+#'     alpha_div(ex_counts, 'faith', tree = ex_tree)
+#'     
+#'     
+beta_div <- function (counts, metric, ...) {
+  metric <- match.arg(tolower(metric), names(metrics$beta))
+  do.call(metrics$beta[[metric]], list(counts = counts, ...))
+}
+
+
+
 #' Bray-Curtis
 #' 
-#' Bray-Curtis beta diversity metric.
+#' Bray-Curtis beta diversity metric. Sorenson is an alias for unweighted Bray-Curtis.
 #' 
 #' @inherit documentation
 #' @family beta_diversity
@@ -54,6 +94,9 @@
 #'     # Bray-Curtis unweighted distance matrix
 #'     bray_curtis(ex_counts, weighted = FALSE)
 #'     
+#'     # Sorenson is the same as unweighted Bray-Curtis
+#'     sorenson(ex_counts)
+#'     
 #'     # Only calculate distances for A vs all.
 #'     bray_curtis(ex_counts, pairs = 1:3)
 #'     
@@ -65,6 +108,21 @@ bray_curtis <- function (
   
   validate_args()
   result_dist <- init_result_dist(counts)
+  
+  .Call(
+    C_beta_div, 1L, 
+    counts, weighted, pairs, cpus, result_dist )
+}
+
+
+#' @rdname bray_curtis
+#' @export
+sorenson <- function (counts, pairs = NULL, cpus = n_cpus()) {
+  
+  validate_args()
+  result_dist <- init_result_dist(counts)
+  
+  weighted <- FALSE
   
   .Call(
     C_beta_div, 1L, 

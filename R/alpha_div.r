@@ -6,13 +6,65 @@
 # https://forum.qiime2.org/t/alpha-and-beta-diversity-explanations-and-commands/2282
 
 
+
+#' Alpha diversity wrapper
+#' 
+#' @inherit documentation
+#' @family alpha_diversity
+#' 
+#' @param metric   The name of an alpha diversity metric. Current options are
+#'   `c('observed', 'chao1', 'shannon', 'simpson', 'inv_simpson', 'faith')`.
+#'   Supports partial name matching. Options are also available via
+#'   `names(metrics$alpha)`.
+#'   
+#' @param ...  Additional options to pass through to the called function. I.e.
+#'   `cpus` or `tree`.
+#' 
+#' @return A numeric vector.
+#' 
+#' @export
+#' @examples
+#'     # Example counts matrix
+#'     ex_counts
+#'     
+#'     # Shannon diversity values
+#'     alpha_div(ex_counts, 'Shannon')
+#'     
+#'     # Chao1 diversity values
+#'     alpha_div(ex_counts, 'c')
+#'     
+#'     # Faith PD values
+#'     alpha_div(ex_counts, 'faith', tree = ex_tree)
+#'     
+#'     
+alpha_div <- function (counts, metric, ...) {
+  metric <- match.arg(tolower(metric), names(metrics$alpha))
+  do.call(metrics$alpha[[metric]], list(counts = counts, ...))
+}
+
+
+
 #' Chao1
 #' 
-#' Chao1 alpha diversity metric.\cr\cr
-#' A non-parametric estimator of the number of unobserved species in a sample.
-#' The Chao1 index estimates total species richness based on the number of 
-#' species that occur only once (singletons) and twice (doubletons) in the 
-#' sample.
+#' Chao1 alpha diversity metric.
+#' 
+#' The Chao1 index is a non-parametric estimator that seeks to predict the true
+#' species richness of a community, including species that were likely missed
+#' due to undersampling. It works by using the counts of the rarest observed
+#' taxa — specifically "singletons" (taxa seen only once) and "doubletons" (taxa
+#' seen twice) — to estimate how many species were not detected at all. The
+#' logic is that if you find many species represented by only one or two
+#' individuals, it is highly probable that many other rare species were missed
+#' entirely.
+#' 
+#' **Important Caveat:** The Chao1 estimator is mathematically dependent on
+#' singleton counts. However, modern bioinformatic pipelines that generate ASVs
+#' (like DADA2) are designed to remove singletons, as they are often
+#' indistinguishable from sequencing errors. Using Chao1 on data that has had
+#' singletons removed will produce a scientifically meaningless result that is
+#' often just the same as the observed richness. Therefore, this metric is
+#' considered methodologically unsound for most modern ASV-based workflows and
+#' should be used with extreme caution.
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
@@ -78,10 +130,21 @@ chao1 <- function (counts, cpus = n_cpus()) {
 
 #' Faith's PD
 #' 
-#' Faith's phylogenetic diversity metric.\cr\cr
-#' A higher value indicates a greater amount of evolutionary history 
-#' represented within the community, suggesting higher biodiversity in terms of 
-#' evolutionary relationships.
+#' Faith's phylogenetic diversity metric.
+#' 
+#' Faith's Phylogenetic Diversity (PD) is a unique richness metric that
+#' incorporates the evolutionary relationships between the members of a
+#' community. Instead of simply counting the number of unique taxa, Faith's PD
+#' is calculated as the sum of the lengths of all the branches on a phylogenetic
+#' tree that connect all the species present in a sample. The rationale is that
+#' a community composed of distantly related organisms (e.g., from different
+#' phyla) is more "diverse" in an evolutionary sense than a community with the
+#' same number of species that are all closely related (e.g., from the same
+#' genus). A higher PD value indicates greater phylogenetic diversity. Because
+#' evolutionary relatedness often correlates with function, Faith's PD can also
+#' serve as a valuable proxy for the unmeasured functional diversity of a
+#' community. This metric requires a phylogenetic tree as an input for its
+#' calculation.
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
@@ -124,6 +187,23 @@ faith <- function (counts, tree = NULL, cpus = n_cpus()) {
 #' Inverse Simpson
 #' 
 #' Inverse Simpson alpha diversity metric.
+#' 
+#' The Inverse Simpson index is another way to present the information from the
+#' Simpson index, but in a more intuitive format. While the standard Simpson
+#' index calculates the probability of two randomly selected individuals
+#' belonging to the same species (where a lower value means more diversity), the
+#' Inverse Simpson index is the reciprocal of that value (1/D). This simple
+#' transformation makes the index easier to interpret: the value increases as
+#' diversity increases.
+#' 
+#' The primary advantage of the Inverse Simpson index is that its value can be
+#' understood as the "effective number of species". This means a community with
+#' an Inverse Simpson index of 10 has a diversity that is equivalent to a
+#' community composed of 10 equally abundant species. This provides a more
+#' direct and biologically meaningful interpretation compared to more abstract
+#' indices. Like the standard Simpson index, it is more heavily weighted by the
+#' most abundant species and is less sensitive to sampling depth than richness
+#' metrics like Observed Features or Chao1.
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
@@ -185,11 +265,71 @@ inv_simpson <- function (counts, cpus = n_cpus()) {
 }
 
 
+#' Observed Features
+#' 
+#' Observed Features alpha diversity metric.
+#' 
+#' This is the most straightforward and intuitive measure of diversity. It is a
+#' simple count of the number of unique microbial taxa (such as Amplicon
+#' Sequence Variants, or ASVs) detected in a sample. A higher value indicates
+#' greater richness. While easy to understand, this metric is highly sensitive
+#' to the number of sequences per sample (sequencing depth). A sample with more
+#' sequences is more likely to detect rare taxa by chance, leading to an
+#' inflated richness value. Therefore, it is not appropriate to directly compare
+#' the Observed Features of samples with different sequencing depths without
+#' first normalizing the data, typically through a process called rarefaction
+#' (subsampling all samples to an equal depth).
+#' 
+#' @inherit documentation
+#' @family alpha_diversity
+#' 
+#' @return A numeric vector.
+#' 
+#' @section Calculation:
+#' 
+#' Pre-transformation: drop all OTUs with zero abundance.
+#' 
+#' In the formulas below, \eqn{x} is a single column (sample) from `counts`.
+#' 
+#' \deqn{p_{i} = \displaystyle \frac{x_i}{\sum x}}
+#' \deqn{D = \displaystyle \sum_{i = 1}^{n} 1}
+#' 
+#' ```
+#'   x <- c(4, 0, 3, 2, 6)[-2]
+#'   length(x)
+#'   #>  4
+#' ```
+#' 
+#' @export
+#' @examples
+#'     # Example counts matrix
+#'     ex_counts
+#'     
+#'     # Observed features
+#'     observed(ex_counts)
+#'     
+observed <- function (counts, cpus = n_cpus()) {
+  
+  validate_args()
+  counts[] <- as.logical(counts)
+  colSums(counts)
+}
+
+
 #' Shannon
 #' 
-#' Shannon alpha diversity metric.\cr\cr
-#' The index considers both the number of different OTUs (richness) and how 
-#' evenly the observations are distributed among those OTUs (evenness).
+#' Shannon alpha diversity metric.
+#' 
+#' The Shannon index is a widely used metric that quantifies diversity by
+#' considering both the number of species (richness) and their abundance
+#' distribution (evenness). Borrowed from information theory, it measures the
+#' "uncertainty" or entropy in predicting the identity of a microbe drawn
+#' randomly from the sample. A community with many different species that are
+#' present in similar proportions will have high uncertainty and thus a high
+#' Shannon index value. Compared to the Simpson index, the Shannon index gives
+#' more equitable weight to both rare and abundant species, making it more
+#' sensitive to changes in richness. Higher values indicate greater community
+#' diversity.
 #' 
 #' @inherit documentation
 #' @family alpha_diversity
@@ -252,10 +392,18 @@ shannon <- function (counts, cpus = n_cpus()) {
 
 #' Simpson
 #' 
-#' Simpson alpha diversity metric.\cr\cr
-#' Gauges the uniformity of species within a community. A Simpson index of `0` 
-#' indicates that one or a few high abundance OTUs dominate the community, 
-#' which is indicative of low diversity.
+#' Simpson alpha diversity metric.
+#' 
+#' The Simpson index is a popular metric that incorporates both richness and
+#' evenness to describe community diversity. The most common version, the
+#' Gini-Simpson index (implemented here), measures the probability that two
+#' individuals selected randomly from the community will belong to  different
+#' species. The value ranges from 0 to 1, where higher values indicate greater
+#' diversity. Because the calculation involves squaring the proportional
+#' abundances of each species, the index is heavily weighted by the most
+#' abundant (dominant) taxa and is less sensitive to the presence of rare
+#' species. A low Simpson index suggests that the community is dominated by one
+#' or a few species, making it a strong measure of community dominance.
 #' 
 #' @inherit documentation
 #' @family alpha_diversity

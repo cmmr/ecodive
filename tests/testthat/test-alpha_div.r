@@ -1,5 +1,22 @@
 test_that("alpha diversity", {
   
+  
+  
+  # alpha_div wrapper =========================================================
+  
+  expect_equal(alpha_div(counts, 'observed'), observed(counts))
+  expect_equal(metrics$alpha$observed(counts), observed(counts))
+  
+  
+  
+  # Observed Features =========================================================
+  
+  expect_equal( # colSums(counts > 0)
+    object   = observed(counts), 
+    expected = c(A = 3, B = 3, C = 3, D = 2) )
+  
+  
+  
   # Chao1 =====================================================================
   
   expect_equal(

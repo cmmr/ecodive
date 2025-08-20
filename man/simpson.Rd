@@ -19,10 +19,19 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 A numeric vector.
 }
 \description{
-Simpson alpha diversity metric.\cr\cr
-Gauges the uniformity of species within a community. A Simpson index of \code{0}
-indicates that one or a few high abundance OTUs dominate the community,
-which is indicative of low diversity.
+Simpson alpha diversity metric.
+}
+\details{
+The Simpson index is a popular metric that incorporates both richness and
+evenness to describe community diversity. The most common version, the
+Gini-Simpson index (implemented here), measures the probability that two
+individuals selected randomly from the community will belong to  different
+species. The value ranges from 0 to 1, where higher values indicate greater
+diversity. Because the calculation involves squaring the proportional
+abundances of each species, the index is heavily weighted by the most
+abundant (dominant) taxa and is less sensitive to the presence of rare
+species. A low Simpson index suggests that the community is dominated by one
+or a few species, making it a strong measure of community dominance.
 }
 \section{Calculation}{
 
@@ -70,9 +79,12 @@ Nature, 163.
 }
 \seealso{
 Other alpha_diversity: 
+\code{\link{alpha_div}()},
+\code{\link{beta_div}()},
 \code{\link{chao1}()},
 \code{\link{faith}()},
 \code{\link{inv_simpson}()},
+\code{\link{observed}()},
 \code{\link{shannon}()}
 }
 \concept{alpha_diversity}

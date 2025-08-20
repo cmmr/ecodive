@@ -2,9 +2,12 @@
 % Please edit documentation in R/beta_div.r
 \name{bray_curtis}
 \alias{bray_curtis}
+\alias{sorenson}
 \title{Bray-Curtis}
 \usage{
 bray_curtis(counts, weighted = TRUE, pairs = NULL, cpus = n_cpus())
+
+sorenson(counts, pairs = NULL, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{An OTU abundance matrix where each column is a sample, and
@@ -27,7 +30,7 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 A \code{dist} object.
 }
 \description{
-Bray-Curtis beta diversity metric.
+Bray-Curtis beta diversity metric. Sorenson is an alias for unweighted Bray-Curtis.
 }
 \section{Calculation}{
 
@@ -53,6 +56,9 @@ In the formulas below, \code{x} and \code{y} are two columns (samples) from \cod
     
     # Bray-Curtis unweighted distance matrix
     bray_curtis(ex_counts, weighted = FALSE)
+    
+    # Sorenson is the same as unweighted Bray-Curtis
+    sorenson(ex_counts)
     
     # Only calculate distances for A vs all.
     bray_curtis(ex_counts, pairs = 1:3)

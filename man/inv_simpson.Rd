@@ -21,6 +21,24 @@ A numeric vector.
 \description{
 Inverse Simpson alpha diversity metric.
 }
+\details{
+The Inverse Simpson index is another way to present the information from the
+Simpson index, but in a more intuitive format. While the standard Simpson
+index calculates the probability of two randomly selected individuals
+belonging to the same species (where a lower value means more diversity), the
+Inverse Simpson index is the reciprocal of that value (1/D). This simple
+transformation makes the index easier to interpret: the value increases as
+diversity increases.
+
+The primary advantage of the Inverse Simpson index is that its value can be
+understood as the "effective number of species". This means a community with
+an Inverse Simpson index of 10 has a diversity that is equivalent to a
+community composed of 10 equally abundant species. This provides a more
+direct and biologically meaningful interpretation compared to more abstract
+indices. Like the standard Simpson index, it is more heavily weighted by the
+most abundant species and is less sensitive to sampling depth than richness
+metrics like Observed Features or Chao1.
+}
 \section{Calculation}{
 
 
@@ -67,8 +85,11 @@ Nature, 163.
 }
 \seealso{
 Other alpha_diversity: 
+\code{\link{alpha_div}()},
+\code{\link{beta_div}()},
 \code{\link{chao1}()},
 \code{\link{faith}()},
+\code{\link{observed}()},
 \code{\link{shannon}()},
 \code{\link{simpson}()}
 }

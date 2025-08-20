@@ -1,6 +1,15 @@
 test_that("beta diversity", {
   
-  # Bray-Curtis ===============================================================
+  
+  
+  # beta_div wrapper =========================================================
+  
+  expect_equal(beta_div(counts, 'manhattan'), manhattan(counts))
+  expect_equal(metrics$beta$manhattan(counts), manhattan(counts))
+  
+  
+  
+  # Bray-Curtis / Sorenson ====================================================
   
   expect_equal( # as.vector(vegan::vegdist(t(counts), 'bray', FALSE))
     object   = as.vector(bray_curtis(counts, TRUE)), 
@@ -10,6 +19,8 @@ test_that("beta diversity", {
   expect_equal( # as.vector(vegan::vegdist(t(counts), 'bray', TRUE))
     object   = as.vector(bray_curtis(counts, FALSE)), 
     expected = c(0.333333333333333, 0.333333333333333, 0.6, 0, 0.2, 0.2) )
+  
+  expect_equal(sorenson(counts), bray_curtis(counts, FALSE))
   
   
   
