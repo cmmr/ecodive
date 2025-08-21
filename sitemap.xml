@@ -31,6 +31,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/manhattan.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/metrics.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/n_cpus.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/normalized_unifrac.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/observed.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefy.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/read_tree.html</loc></url>
@@ -38,7 +39,6 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/simpson.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/unweighted_unifrac.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.html</loc></url>
-<url><loc>https://cmmr.github.io/ecodive/reference/weighted_normalized_unifrac.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/weighted_unifrac.html</loc></url>
 </urlset>
 

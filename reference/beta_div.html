@@ -62,7 +62,8 @@ and <code>TreeSummarizedExperiment</code> objects.</p></dd>
 
 <dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
 <dd><p>The name of a beta diversity metric. Current options are
-<code>c('bray_curtis', 'sorenson', 'canberra', 'euclidean', 'gower', 'jaccard', 'kulczynski', 'manhattan', 'unweighted_unifrac', 'weighted_unifrac', 'weighted_normalized_unifrac', 'generalized_unifrac', 'variance_adjusted_unifrac')</code>. Supports partial name matching. Options are
+<code>c('bray_curtis', 'sorenson', 'canberra', 'euclidean', 'gower', 'jaccard', 'kulczynski', 'manhattan', 'unweighted_unifrac', 'weighted_unifrac', 'normalized_unifrac', 'generalized_unifrac', 'variance_adjusted_unifrac')</code>.
+Supports flexible name matching - see details section below. Options are
 also available via <code>names(metrics$beta)</code>.</p></dd>
 
 
@@ -74,6 +75,18 @@ also available via <code>names(metrics$beta)</code>.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A numeric vector.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><strong>Flexible name matching</strong></p>
+<p>Case insensitive and partial matching. Any runs of non-alpha characters are
+converted to underscores. E.g. <code>metric = 'Bray Curtis</code> selects Bray-Curtis.</p>
+<p>UniFrac names can be shortened to the first letter plus "unifrac". E.g.
+<code>uunifrac</code>, <code>w_unifrac</code>, or <code>V UniFrac</code>. These also support partial matching,
+but the primary options take precedence. For instance <code>metric = 'g'</code>
+selects Gower, whereas <code>metric = 'gu'</code> selects Generalized UniFrac.</p>
+<p>Finished code should always use the full primary option name to avoid
+ambiguity with future additions to the metrics list.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -99,20 +112,26 @@ also available via <code>names(metrics$beta)</code>.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Propionibacterium      1    1  251     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Staphylococcus         0    1  236     1</span>
 <span class="r-in"><span>    </span></span>
-<span class="r-in"><span>    <span class="co"># Shannon diversity values</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="alpha_div.html">alpha_div</a></span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'Shannon'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Saliva       Gums       Nose      Stool </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.74119910 0.36684449 1.14222899 0.04824952 </span>
+<span class="r-in"><span>    <span class="co"># Bray-Curtis distances</span></span></span>
+<span class="r-in"><span>    <span class="fu">beta_div</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'bray_curtis'</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Saliva      Gums      Nose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums  0.5905768                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose  0.9601770 0.9704797          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool 0.9916667 0.9906729 0.9926199</span>
 <span class="r-in"><span>    </span></span>
-<span class="r-in"><span>    <span class="co"># Chao1 diversity values</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="alpha_div.html">alpha_div</a></span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'c'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Saliva   Gums   Nose  Stool </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    4.5    Inf    6.0    Inf </span>
+<span class="r-in"><span>    <span class="co"># Kulczynski distances</span></span></span>
+<span class="r-in"><span>    <span class="fu">beta_div</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'k'</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Saliva      Gums      Nose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums  0.4925704                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose  0.9475164 0.9703510          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool 0.9909509 0.9903586 0.9921546</span>
 <span class="r-in"><span>    </span></span>
-<span class="r-in"><span>    <span class="co"># Faith PD values</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="alpha_div.html">alpha_div</a></span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'faith'</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Saliva   Gums   Nose  Stool </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    180    191    215    202 </span>
+<span class="r-in"><span>    <span class="co"># Generalized UniFrac distances</span></span></span>
+<span class="r-in"><span>    <span class="fu">beta_div</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'GUniFrac'</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Saliva      Gums      Nose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums  0.4471644                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose  0.8215129 0.7607876          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool 0.9727827 0.9784242 0.9730332</span>
 <span class="r-in"><span>    </span></span>
 <span class="r-in"><span>    </span></span>
 </code></pre></div>
