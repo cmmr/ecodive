@@ -90,7 +90,7 @@ validate_pairs <- function (env) {
         
         if (is.function(pairs))
           pairs <- local({
-            m <- combn(n_samples, 2)
+            m <- utils::combn(n_samples, 2)
             mapply(pairs, m[1,], m[2,])
           })
         

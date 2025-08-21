@@ -10,11 +10,11 @@ n_cpus()
 A scalar integer, guaranteed to be at least \code{1}.
 }
 \description{
-A thin wrapper around
-\code{parallel::detectCores(all.tests = TRUE, logical = TRUE)} which falls back
-to \code{1} when the number of CPU cores cannot be detected, or when the system
-does not support \code{pthreads}. Consider using \code{parallely::availableCores()}
-in place of \code{n_cpus()} for more advanced interrogation of system resources.
+A thin wrapper around \code{parallely::availableCores()}. If the \code{parallely}
+package is not installed, then it falls back to
+\code{parallel::detectCores(all.tests = TRUE, logical = TRUE)}. Returns \code{1} if
+\code{pthread} support is unavailable or when the number of cpus cannot be
+determined.
 }
 \examples{
     n_cpus()

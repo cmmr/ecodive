@@ -52,11 +52,11 @@ metrics <-list(
 
 #' Number of CPU Cores
 #' 
-#' A thin wrapper around 
-#' `parallel::detectCores(all.tests = TRUE, logical = TRUE)` which falls back  
-#' to `1` when the number of CPU cores cannot be detected, or when the system 
-#' does not support `pthreads`. Consider using `parallely::availableCores()` 
-#' in place of `n_cpus()` for more advanced interrogation of system resources.
+#' A thin wrapper around `parallely::availableCores()`. If the `parallely`
+#' package is not installed, then it falls back to  
+#' `parallel::detectCores(all.tests = TRUE, logical = TRUE)`. Returns `1` if
+#' `pthread` support is unavailable or when the number of cpus cannot be
+#' determined.
 #' 
 #' @return   A scalar integer, guaranteed to be at least `1`.
 #' 
@@ -70,8 +70,17 @@ n_cpus <- function () {
   
   if (!n_cpus_cached) {
     n_cpus_cached <- 1L
+    
     if (pthreads()) {
-      n <- detectCores(all.tests = TRUE, logical = TRUE)
+      
+      if (nzchar(system.file(package = 'parallelly'))) {
+        n <- do.call(`::`, list('parallelly', 'availableCores'))()
+        n <- unname(n)
+      }
+      else {
+        n <- parallel::detectCores(all.tests = TRUE, logical = TRUE) # nocov
+      }
+      
       if (isTRUE(n > 0))
         n_cpus_cached <- n
     }

@@ -141,7 +141,7 @@ ecodive::weighted_unifrac(esophagus)
 
 # Acknowledgements
 
-This study was supported by NIH/NIAD (Grant number U19 AI44297), and Baylor
+This study was supported by NIH/NIAD (Grant number U19 AI144297), and Baylor
 College of Medicine and Alkek Foundation Seed. The authors also acknowledge the
 use of Google's Gemini for assistance in refining this manuscript.
 
