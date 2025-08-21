@@ -4,8 +4,16 @@ test_that("alpha diversity", {
   
   # alpha_div wrapper =========================================================
   
-  expect_equal(alpha_div(counts, 'observed'), observed(counts))
+  expect_equal(alpha_div(counts, 'observed'),  observed(counts))
+  expect_equal(alpha_div(counts, 'otus'),      observed(counts))
   expect_equal(metrics$alpha$observed(counts), observed(counts))
+  
+  expect_error(alpha_div(counts, 'badoption'))   # not a valid metric name
+  expect_error(alpha_div(counts, 's'))           # matches shannon and simpson
+  expect_error(alpha_div(counts, 3))             # stopifnot(is.character(metric))
+  expect_error(alpha_div(counts, c('a', 'b')))   # stopifnot(length(metric) == 1)
+  expect_error(alpha_div(counts, NA_character_)) # stopifnot(!is.na(metric))
+  expect_error(alpha_div(counts, '  '))          # stopifnot(nchar(metric) > 0)
   
   
   

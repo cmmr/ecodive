@@ -14,8 +14,8 @@
 #' 
 #' @param metric   The name of an alpha diversity metric. Current options are
 #'   `c('observed', 'chao1', 'shannon', 'simpson', 'inv_simpson', 'faith')`.
-#'   Supports partial name matching. Options are also available via
-#'   `names(metrics$alpha)`.
+#'   Supports case-insensitive and partial name matching. Options are also
+#'   available via `names(metrics$alpha)`.
 #'   
 #' @param ...  Additional options to pass through to the called function. I.e.
 #'   `cpus` or `tree`.
@@ -38,7 +38,7 @@
 #'     
 #'     
 alpha_div <- function (counts, metric, ...) {
-  metric <- match.arg(tolower(metric), names(metrics$alpha))
+  metric <- as_alpha_metric(metric)
   do.call(metrics$alpha[[metric]], list(counts = counts, ...))
 }
 

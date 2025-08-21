@@ -33,20 +33,85 @@ metrics <-list(
     'faith'       = faith ),
   
   beta = list(
-    'bray_curtis'                 = bray_curtis, 
-    'sorenson'                    = sorenson, 
-    'canberra'                    = canberra, 
-    'euclidean'                   = euclidean, 
-    'gower'                       = gower, 
-    'jaccard'                     = jaccard, 
-    'kulczynski'                  = kulczynski, 
-    'manhattan'                   = manhattan, 
-    'unweighted_unifrac'          = unweighted_unifrac, 
-    'weighted_unifrac'            = weighted_unifrac, 
-    'weighted_normalized_unifrac' = weighted_normalized_unifrac, 
-    'generalized_unifrac'         = generalized_unifrac, 
-    'variance_adjusted_unifrac'   = variance_adjusted_unifrac )
+    'bray_curtis'               = bray_curtis, 
+    'sorenson'                  = sorenson, 
+    'canberra'                  = canberra, 
+    'euclidean'                 = euclidean, 
+    'gower'                     = gower, 
+    'jaccard'                   = jaccard, 
+    'kulczynski'                = kulczynski, 
+    'manhattan'                 = manhattan, 
+    'unweighted_unifrac'        = unweighted_unifrac, 
+    'weighted_unifrac'          = weighted_unifrac, 
+    'normalized_unifrac'        = normalized_unifrac, 
+    'generalized_unifrac'       = generalized_unifrac, 
+    'variance_adjusted_unifrac' = variance_adjusted_unifrac )
 )
+
+
+as_alpha_metric <- function (metric) {
+  
+  metric_match(
+    metric  = metric,
+    primary = names(metrics$alpha),
+    mapped  = c(
+      otus       = 'observed', 
+      invsimpson = 'inv_simpson', 
+      faith_pd   = 'faith' ))
+}
+
+
+as_beta_metric <- function (metric) {
+  
+  metric_match(
+    metric  = metric,
+    primary = names(metrics$beta),
+    mapped  = c(
+      uunifrac  = 'unweighted_unifrac', 
+      u_unifrac = 'unweighted_unifrac', 
+      wunifrac  = 'weighted_unifrac', 
+      w_unifrac = 'weighted_unifrac', 
+      nunifrac  = 'normalized_unifrac', 
+      n_unifrac = 'normalized_unifrac', 
+      gunifrac  = 'generalized_unifrac', 
+      g_unifrac = 'generalized_unifrac', 
+      vunifrac  = 'variance_adjusted_unifrac', 
+      v_unifrac = 'variance_adjusted_unifrac' ))
+}
+
+
+metric_match <- function (metric, primary, mapped) {
+  
+  tryCatch({
+      stopifnot(is.character(metric))
+      stopifnot(length(metric) == 1)
+      stopifnot(!is.na(metric))
+      newick <- trimws(metric)
+      stopifnot(nchar(metric) > 0)
+    },
+    
+    error = function (e) 
+      stop(e$message, '\n`metric` must be a character string.')
+  )
+  
+  metric <- gsub('[^a-z]+', '_', tolower(metric))
+  
+  i <- which(startsWith(primary, metric))
+  if (length(i) == 1) return (primary[[i]])
+  
+  if (length(i) > 1)
+    stop(
+      '`metric` "', metric, '" matches multiple options: ', 
+      paste(collapse = ',', primary[i]) )
+  
+  
+  i <- which(startsWith(names(mapped), metric))
+  if (length(i) == 1) return (mapped[[i]])
+  
+  stop(
+    'invalid `metric:` "', metric, '"\n', 
+    '`metric` must be one of: ', paste(collapse = ',', primary))
+}
 
 
 

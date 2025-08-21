@@ -14,8 +14,8 @@ and \code{TreeSummarizedExperiment} objects.}
 
 \item{metric}{The name of an alpha diversity metric. Current options are
 \code{c('observed', 'chao1', 'shannon', 'simpson', 'inv_simpson', 'faith')}.
-Supports partial name matching. Options are also available via
-\code{names(metrics$alpha)}.}
+Supports case-insensitive and partial name matching. Options are also
+available via \code{names(metrics$alpha)}.}
 
 \item{...}{Additional options to pass through to the called function. I.e.
 \code{cpus} or \code{tree}.}

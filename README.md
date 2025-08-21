@@ -7,8 +7,7 @@
 
 `ecodive` is an R package for calculating ecological diversity metrics in a
 parallelized and memory-efficient manner. It is designed to handle large
-datasets, such as those common in microbiome research, with significant speed
-and memory improvements over existing tools.
+datasets, such as those common in microbiome research.
 
 
 ## Why ecodive?

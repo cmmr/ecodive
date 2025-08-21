@@ -243,7 +243,7 @@ wn_unifrac_res <- rbind(
     bench::mark(
       iterations = 10,
       'abdiv'    = cleanup(pairwise(abdiv::weighted_normalized_unifrac, hmp50_mtx, hmp50_tree)),
-      'ecodive'  = cleanup(ecodive::weighted_normalized_unifrac(hmp50_mtx, hmp50_tree)),
+      'ecodive'  = cleanup(ecodive::normalized_unifrac(hmp50_mtx, hmp50_tree)),
       'GUniFrac' = cleanup(as.dist(GUniFrac::GUniFrac(hmp50_tmtx, hmp50_tree, alpha=1, verbose=FALSE)[[1]][,,1])),
       'phyloseq' = cleanup(phyloseq::UniFrac(hmp50_phy, weighted=TRUE, normalized=TRUE, parallel=TRUE)) )
   }),

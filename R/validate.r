@@ -347,3 +347,4 @@ validate_tree <- function (env) {
       stop(e$message, '\n`tree` is not a valid phylo object.')
   )
 }
+

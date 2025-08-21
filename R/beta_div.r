@@ -18,8 +18,8 @@
 #' @param metric   The name of a beta diversity metric. Current options are
 #'   `c('bray_curtis', 'sorenson', 'canberra', 'euclidean', 'gower', 'jaccard',
 #'   'kulczynski', 'manhattan', 'unweighted_unifrac', 'weighted_unifrac',
-#'   'weighted_normalized_unifrac', 'generalized_unifrac',
-#'   'variance_adjusted_unifrac')`. Supports partial name matching. Options are
+#'   'normalized_unifrac', 'generalized_unifrac', 'variance_adjusted_unifrac')`. 
+#'   Supports flexible name matching - see details section below. Options are
 #'   also available via `names(metrics$beta)`.
 #'   
 #' @param ...  Additional options to pass through to the called function. I.e.
@@ -27,23 +27,40 @@
 #' 
 #' @return A numeric vector.
 #' 
+#' 
+#' @details
+#' 
+#' **Flexible name matching**
+#' 
+#' Case insensitive and partial matching. Any runs of non-alpha characters are
+#' converted to underscores. E.g. `metric = 'Bray Curtis` selects Bray-Curtis.
+#' 
+#' UniFrac names can be shortened to the first letter plus "unifrac". E.g. 
+#' `uunifrac`, `w_unifrac`, or `V UniFrac`. These also support partial matching,
+#' but the primary options take precedence. For instance `metric = 'g'`
+#' selects Gower, whereas `metric = 'gu'` selects Generalized UniFrac.
+#' 
+#' Finished code should always use the full primary option name to avoid
+#' ambiguity with future additions to the metrics list.
+#' 
+#' 
 #' @export
 #' @examples
 #'     # Example counts matrix
 #'     ex_counts
 #'     
-#'     # Shannon diversity values
-#'     alpha_div(ex_counts, 'Shannon')
+#'     # Bray-Curtis distances
+#'     beta_div(ex_counts, 'bray_curtis')
 #'     
-#'     # Chao1 diversity values
-#'     alpha_div(ex_counts, 'c')
+#'     # Kulczynski distances
+#'     beta_div(ex_counts, 'k')
 #'     
-#'     # Faith PD values
-#'     alpha_div(ex_counts, 'faith', tree = ex_tree)
+#'     # Generalized UniFrac distances
+#'     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)
 #'     
 #'     
 beta_div <- function (counts, metric, ...) {
-  metric <- match.arg(tolower(metric), names(metrics$beta))
+  metric <- as_beta_metric(metric)
   do.call(metrics$beta[[metric]], list(counts = counts, ...))
 }
 
@@ -650,12 +667,12 @@ weighted_unifrac <- function (
 #'     ex_counts
 #'     
 #'     # UniFrac weighted distance matrix
-#'     weighted_normalized_unifrac(ex_counts, tree = ex_tree)
+#'     normalized_unifrac(ex_counts, tree = ex_tree)
 #'     
 #'     # Only calculate distances for A vs all.
-#'     weighted_normalized_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
+#'     normalized_unifrac(ex_counts, tree = ex_tree, pairs = 1:3)
 #'     
-weighted_normalized_unifrac <- function (
+normalized_unifrac <- function (
     counts, 
     tree   = NULL, 
     pairs  = NULL, 

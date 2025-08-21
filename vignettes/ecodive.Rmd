@@ -61,8 +61,7 @@ metrics incorporate a phylogenetic tree into this calculation.
 `jaccard()`, `kulczynski()`, `manhattan()`
 
 * Phylogenetic metrics: `unweighted_unifrac()`, `weighted_unifrac()`,
-`weighted_normalized_unifrac()`, `generalized_unifrac()`,
-`variance_adjusted_unifrac()`
+`normalized_unifrac()`, `generalized_unifrac()`, `variance_adjusted_unifrac()`
 
 * Further reading: `vignette('bdiv')` and `vignette('unifrac')`.
 
@@ -159,7 +158,7 @@ faith(counts, tree = ex_tree)
 
 ## Beta Diversity --------------------
 
-weighted_normalized_unifrac(counts, tree = ex_tree)
+normalized_unifrac(counts, tree = ex_tree)
 #>          Saliva      Gums      Nose
 #> Gums  0.4328662                    
 #> Nose  0.7928701 0.6767840          

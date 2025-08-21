@@ -13,7 +13,8 @@ given here, as well as \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment
 and \code{TreeSummarizedExperiment} objects.}
 
 \item{metric}{The name of a beta diversity metric. Current options are
-\code{c('bray_curtis', 'sorenson', 'canberra', 'euclidean', 'gower', 'jaccard', 'kulczynski', 'manhattan', 'unweighted_unifrac', 'weighted_unifrac', 'weighted_normalized_unifrac', 'generalized_unifrac', 'variance_adjusted_unifrac')}. Supports partial name matching. Options are
+\code{c('bray_curtis', 'sorenson', 'canberra', 'euclidean', 'gower', 'jaccard', 'kulczynski', 'manhattan', 'unweighted_unifrac', 'weighted_unifrac', 'normalized_unifrac', 'generalized_unifrac', 'variance_adjusted_unifrac')}.
+Supports flexible name matching - see details section below. Options are
 also available via \code{names(metrics$beta)}.}
 
 \item{...}{Additional options to pass through to the called function. I.e.
@@ -25,18 +26,32 @@ A numeric vector.
 \description{
 Beta diversity wrapper
 }
+\details{
+\strong{Flexible name matching}
+
+Case insensitive and partial matching. Any runs of non-alpha characters are
+converted to underscores. E.g. \verb{metric = 'Bray Curtis} selects Bray-Curtis.
+
+UniFrac names can be shortened to the first letter plus "unifrac". E.g.
+\code{uunifrac}, \code{w_unifrac}, or \verb{V UniFrac}. These also support partial matching,
+but the primary options take precedence. For instance \code{metric = 'g'}
+selects Gower, whereas \code{metric = 'gu'} selects Generalized UniFrac.
+
+Finished code should always use the full primary option name to avoid
+ambiguity with future additions to the metrics list.
+}
 \examples{
     # Example counts matrix
     ex_counts
     
-    # Shannon diversity values
-    alpha_div(ex_counts, 'Shannon')
+    # Bray-Curtis distances
+    beta_div(ex_counts, 'bray_curtis')
     
-    # Chao1 diversity values
-    alpha_div(ex_counts, 'c')
+    # Kulczynski distances
+    beta_div(ex_counts, 'k')
     
-    # Faith PD values
-    alpha_div(ex_counts, 'faith', tree = ex_tree)
+    # Generalized UniFrac distances
+    beta_div(ex_counts, 'GUniFrac', tree = ex_tree)
     
     
 }
