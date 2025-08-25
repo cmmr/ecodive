@@ -32,6 +32,8 @@ export(generalized_unifrac)
 export(variance_adjusted_unifrac)
 
 export(metrics)
+export(as_alpha_metric)
+export(as_beta_metric)
 export(n_cpus)
 export(rarefy)
 export(read_tree)

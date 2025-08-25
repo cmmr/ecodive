@@ -60,6 +60,8 @@ reference:
   - rarefy
   - n_cpus
   - metrics
+  - as_alpha_metric
+  - as_beta_metric
   
 - title: Datasets
   contents:

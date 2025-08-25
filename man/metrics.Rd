@@ -3,15 +3,29 @@
 \docType{data}
 \name{metrics}
 \alias{metrics}
+\alias{as_alpha_metric}
+\alias{as_beta_metric}
 \title{API for browsing functions}
 \format{
 An object of class \code{list} of length 2.
 }
 \usage{
 metrics
+
+as_alpha_metric(metric, evar = "metric")
+
+as_beta_metric(metric, evar = "metric")
+}
+\arguments{
+\item{metric}{The name, partial name, alternate name, or partial alternate
+name of an alpha/beta diversity metric.}
+
+\item{evar}{The name of the variable to display in an error message.}
 }
 \value{
-A nested list of functions for alpha and beta diversity.
+\code{metrics} is a nested list of functions for alpha and beta
+diversity. \code{as_alpha_metric()} and \code{as_beta_metric()} return a validated
+metric name or throws an error.
 }
 \description{
 Programmatic access to the lists of available metrics, and their associated
@@ -25,6 +39,10 @@ functions.
     names(formals(metrics$alpha$faith))
     
     metrics$alpha$faith(ex_counts, ex_tree)
+    
+    as_alpha_metric('otus')
+    
+    as_beta_metric('guni')
 
 }
 \keyword{datasets}
