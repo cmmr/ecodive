@@ -12,13 +12,15 @@ An object of class \code{list} of length 2.
 \usage{
 metrics
 
-as_alpha_metric(metric, evar = "metric")
+as_alpha_metric(metric, multiple = FALSE, evar = "metric")
 
-as_beta_metric(metric, evar = "metric")
+as_beta_metric(metric, multiple = FALSE, evar = "metric")
 }
 \arguments{
 \item{metric}{The name, partial name, alternate name, or partial alternate
 name of an alpha/beta diversity metric.}
+
+\item{multiple}{If \code{TRUE}, allow \code{length(metric)} to be longer than 1.}
 
 \item{evar}{The name of the variable to display in an error message.}
 }

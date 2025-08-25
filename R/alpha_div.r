@@ -14,7 +14,7 @@
 #' 
 #' @param metric   The name of an alpha diversity metric. Current options are
 #'   `c('observed', 'chao1', 'shannon', 'simpson', 'inv_simpson', 'faith')`.
-#'   Supports case-insensitive and partial name matching. Options are also
+#'   Case-insensitive and partial name matching is supported. Options are also
 #'   available via `names(metrics$alpha)`.
 #'   
 #' @param ...  Additional options to pass through to the called function. I.e.
