@@ -79,7 +79,7 @@ HAYSTACK <- local({
   names(result) <- character(0)
   alt_ids <- strsplit(METRICS$alt_ids, ' ', fixed = TRUE)
   for (i in seq_len(nrow(METRICS))) {
-    ids <- c(METRICS$name[[i]], METRICS$id[[i]], alt_ids[[i]])
+    ids <- c(METRICS$name[[i]], METRICS$id[[i]], na.omit(alt_ids[[i]]))
     ids <- unique(gsub('[^a-z]', '', tolower(ids)))
     ids <- ids[order(nchar(ids), decreasing = TRUE)]
     res <- rep_len(METRICS$id[[i]], length(ids))
