@@ -12,64 +12,64 @@ METRICS <- local({
     quote            = "", 
     strip.white      = TRUE, 
     stringsAsFactors = FALSE, 
-    na.strings       = "NA", 
-    tryLogical       = FALSE, # R 3.6.3 doesn't offer this parameter
+    na.strings       = "", 
     text             = "
       name,                                          id,                        phylo, weighted, true_metric, div,   alt_ids
-      Abundance-based Coverage Estimator (ACE),      ace,                       FALSE, TRUE,     NA,          alpha, 
-      Aitchison Distance,                            aitchison,                 FALSE, TRUE,     TRUE,        beta,  
-      Berger-Parker Index,                           berger,                    FALSE, TRUE,     NA,          alpha, 
-      Bhattacharyya Distance,                        bhattacharyya,             FALSE, TRUE,     TRUE,        beta,  
-      Bray-Curtis Dissimilarity,                     bray,                      FALSE, TRUE,     FALSE,       beta,  
-      Brillouin Index,                               brillouin,                 FALSE, TRUE,     NA,          alpha, 
-      Canberra Distance,                             canberra,                  FALSE, TRUE,     TRUE,        beta,  
-      Chao1,                                         chao1,                     FALSE, TRUE,     NA,          alpha, 
-      Chebyshev Distance,                            chebyshev,                 FALSE, TRUE,     TRUE,        beta,  
-      Chord Distance,                                chord,                     FALSE, TRUE,     TRUE,        beta,  
-      Clark's Divergence Distance,                   clark,                     FALSE, TRUE,     TRUE,        beta,  
-      Dice-Sorensen Dissimilarity,                   sorensen,                  FALSE, FALSE,    FALSE,       beta,  
-      Divergence,                                    divergence,                FALSE, TRUE,     TRUE,        beta,  
-      Euclidean Distance,                            euclidean,                 FALSE, TRUE,     TRUE,        beta,  
-      Faith's Phylogenetic Diversity,                faith,                     TRUE,  FALSE,    NA,          alpha, faithpd
-      Fisher's Alpha,                                fisher,                    FALSE, TRUE,     NA,          alpha, 
-      Generalized UniFrac (GUniFrac),                generalized_unifrac,       TRUE,  TRUE,     TRUE,        beta,  gunifrac
-      Gini-Simpson Index,                            simpson,                   FALSE, TRUE,     NA,          alpha, 
-      Gower Distance,                                gower,                     FALSE, TRUE,     TRUE,        beta,  
-      Hamming Distance,                              hamming,                   FALSE, FALSE,    TRUE,        beta,  
-      Hellinger Distance,                            hellinger,                 FALSE, TRUE,     TRUE,        beta,  
-      Horn-Morisita Dissimilarity,                   horn,                      FALSE, TRUE,     FALSE,       beta,  
-      Inverse Simpson Index,                         inv_simpson,               FALSE, TRUE,     NA,          alpha, 
-      Jaccard Distance,                              jaccard,                   FALSE, FALSE,    TRUE,        beta,  
-      Jensen-Shannon Distance,                       jensen,                    FALSE, TRUE,     TRUE,        beta,  
-      Jensen-Shannon Divergence (JSD),               jsd,                       FALSE, TRUE,     TRUE,        beta,  
-      Lorentzian Distance,                           lorentzian,                FALSE, TRUE,     FALSE,       beta,  
-      Manhattan Distance,                            manhattan,                 FALSE, TRUE,     TRUE,        beta,  
-      Margalef's Richness Index,                     margalef,                  FALSE, TRUE,     NA,          alpha, 
-      Matusita Distance,                             matusita,                  FALSE, TRUE,     TRUE,        beta,  
-      McIntosh Index,                                mcintosh,                  FALSE, TRUE,     NA,          alpha, 
-      Menhinick's Richness Index,                    menhinick,                 FALSE, TRUE,     NA,          alpha, 
-      Minkowski Distance,                            minkowski,                 FALSE, TRUE,     TRUE,        beta,  
-      Morisita Dissimilarity,                        morisita,                  FALSE, TRUE,     FALSE,       beta,  
-      Motyka Dissimilarity,                          motyka,                    FALSE, TRUE,     FALSE,       beta,  
-      Normalized Weighted UniFrac,                   normalized_unifrac,        TRUE,  TRUE,     TRUE,        beta,  nunifrac
-      Observed Features,                             observed,                  FALSE, FALSE,    NA,          alpha, otus asvs
-      Otsuka-Ochiai Dissimilarity,                   ochiai,                    FALSE, FALSE,    FALSE,       beta,  
-      Probabilistic Symmetric Chi-Squared Distance,  psym_chisq,                FALSE, TRUE,     FALSE,       beta,  
-      Shannon Diversity Index,                       shannon,                   FALSE, TRUE,     NA,          alpha, 
-      Soergel Distance,                              soergel,                   FALSE, TRUE,     TRUE,        beta,  
-      Squared Chi-Squared Distance,                  squared_chisq,             FALSE, TRUE,     FALSE,       beta,  
-      Squared Chord Distance,                        squared_chord,             FALSE, TRUE,     FALSE,       beta,  
-      Squared Euclidean Distance,                    squared_euclidean,         FALSE, TRUE,     FALSE,       beta,  
-      Squares Richness Estimator,                    squares,                   FALSE, TRUE,     NA,          alpha, 
-      Topsoe Distance,                               topsoe,                    FALSE, TRUE,     TRUE,        beta,  
-      Unweighted UniFrac,                            unweighted_unifrac,        TRUE,  TRUE,     TRUE,        beta,  uunifrac
-      Variance-Adjusted Weighted UniFrac,            variance_adjusted_unifrac, TRUE,  TRUE,     TRUE,        beta,  vunifrac
-      Wave Hedges Distance,                          wave_hedges,               FALSE, TRUE,     FALSE,       beta,  
-      Weighted UniFrac,                              weighted_unifrac,          TRUE,  TRUE,     TRUE,        beta,  wunifrac
+      Abundance-based Coverage Estimator (ACE),      ace,                       NO,    YES,      NA,          alpha, 
+      Aitchison Distance,                            aitchison,                 NO,    YES,      YES,         beta,  
+      Berger-Parker Index,                           berger,                    NO,    YES,      NA,          alpha, 
+      Bhattacharyya Distance,                        bhattacharyya,             NO,    YES,      YES,         beta,  
+      Bray-Curtis Dissimilarity,                     bray,                      NO,    YES,      NO,          beta,  
+      Brillouin Index,                               brillouin,                 NO,    YES,      NA,          alpha, 
+      Canberra Distance,                             canberra,                  NO,    YES,      YES,         beta,  
+      Chao1,                                         chao1,                     NO,    YES,      NA,          alpha, 
+      Chebyshev Distance,                            chebyshev,                 NO,    YES,      YES,         beta,  
+      Chord Distance,                                chord,                     NO,    YES,      YES,         beta,  
+      Clark's Divergence Distance,                   clark,                     NO,    YES,      YES,         beta,  
+      Dice-Sorensen Dissimilarity,                   sorensen,                  NO,    NO,       NO,          beta,  
+      Divergence,                                    divergence,                NO,    YES,      YES,         beta,  
+      Euclidean Distance,                            euclidean,                 NO,    YES,      YES,         beta,  
+      Faith's Phylogenetic Diversity,                faith,                     YES,   NO,       NA,          alpha, faithpd
+      Fisher's Alpha,                                fisher,                    NO,    YES,      NA,          alpha, 
+      Generalized UniFrac (GUniFrac),                generalized_unifrac,       YES,   YES,      YES,         beta,  gunifrac
+      Gini-Simpson Index,                            simpson,                   NO,    YES,      NA,          alpha, 
+      Gower Distance,                                gower,                     NO,    YES,      YES,         beta,  
+      Hamming Distance,                              hamming,                   NO,    NO,       YES,         beta,  
+      Hellinger Distance,                            hellinger,                 NO,    YES,      YES,         beta,  
+      Horn-Morisita Dissimilarity,                   horn,                      NO,    YES,      NO,          beta,  
+      Inverse Simpson Index,                         inv_simpson,               NO,    YES,      NA,          alpha, 
+      Jaccard Distance,                              jaccard,                   NO,    NO,       YES,         beta,  
+      Jensen-Shannon Distance,                       jensen,                    NO,    YES,      YES,         beta,  
+      Jensen-Shannon Divergence (JSD),               jsd,                       NO,    YES,      YES,         beta,  
+      Lorentzian Distance,                           lorentzian,                NO,    YES,      NO,          beta,  
+      Manhattan Distance,                            manhattan,                 NO,    YES,      YES,         beta,  
+      Margalef's Richness Index,                     margalef,                  NO,    YES,      NA,          alpha, 
+      Matusita Distance,                             matusita,                  NO,    YES,      YES,         beta,  
+      McIntosh Index,                                mcintosh,                  NO,    YES,      NA,          alpha, 
+      Menhinick's Richness Index,                    menhinick,                 NO,    YES,      NA,          alpha, 
+      Minkowski Distance,                            minkowski,                 NO,    YES,      YES,         beta,  
+      Morisita Dissimilarity,                        morisita,                  NO,    YES,      NO,          beta,  
+      Motyka Dissimilarity,                          motyka,                    NO,    YES,      NO,          beta,  
+      Normalized Weighted UniFrac,                   normalized_unifrac,        YES,   YES,      YES,         beta,  nunifrac
+      Observed Features,                             observed,                  NO,    NO,       NA,          alpha, otus asvs
+      Otsuka-Ochiai Dissimilarity,                   ochiai,                    NO,    NO,       NO,          beta,  
+      Probabilistic Symmetric Chi-Squared Distance,  psym_chisq,                NO,    YES,      NO,          beta,  
+      Shannon Diversity Index,                       shannon,                   NO,    YES,      NA,          alpha, 
+      Soergel Distance,                              soergel,                   NO,    YES,      YES,         beta,  
+      Squared Chi-Squared Distance,                  squared_chisq,             NO,    YES,      NO,          beta,  
+      Squared Chord Distance,                        squared_chord,             NO,    YES,      NO,          beta,  
+      Squared Euclidean Distance,                    squared_euclidean,         NO,    YES,      NO,          beta,  
+      Squares Richness Estimator,                    squares,                   NO,    YES,      NA,          alpha, 
+      Topsoe Distance,                               topsoe,                    NO,    YES,      YES,         beta,  
+      Unweighted UniFrac,                            unweighted_unifrac,        YES,   YES,      YES,         beta,  uunifrac
+      Variance-Adjusted Weighted UniFrac,            variance_adjusted_unifrac, YES,   YES,      YES,         beta,  vunifrac
+      Wave Hedges Distance,                          wave_hedges,               NO,    YES,      NO,          beta,  
+      Weighted UniFrac,                              weighted_unifrac,          YES,   YES,      YES,         beta,  wunifrac
   ")
   
+  # R 3.6.3 doesn't offer read.table(tryLogical) parameter
   for (i in c('phylo', 'weighted', 'true_metric'))
-    df[[i]] <- unname(c('TRUE' = TRUE, 'FALSE' = FALSE, 'NA' = NA)[df[[i]]])
+    df[[i]] <- unname(c('YES' = TRUE, 'NO' = FALSE, 'NA' = NA)[df[[i]]])
 
   return (df)
 })
