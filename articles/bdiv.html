@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/unifrac.html">UniFrac Calculations</a></li>
@@ -116,18 +117,18 @@ e.g. <code>canberra(counts, weighted = FALSE)</code> will switch them to
 unweighted mode.</p>
 <ul>
 <li>
-<code><a href="../reference/bray_curtis.html">bray_curtis()</a></code>, <code><a href="../reference/canberra.html">canberra()</a></code>,
-<code><a href="../reference/euclidean.html">euclidean()</a></code>, <code><a href="../reference/gower.html">gower()</a></code>, <code><a href="../reference/jaccard.html">jaccard()</a></code>,
-<code><a href="../reference/kulczynski.html">kulczynski()</a></code>, <code><a href="../reference/manhattan.html">manhattan()</a></code>
+<code>bray_curtis()</code>, <code><a href="../reference/bdiv_functions.html">canberra()</a></code>,
+<code><a href="../reference/bdiv_functions.html">euclidean()</a></code>, <code><a href="../reference/bdiv_functions.html">gower()</a></code>, <code><a href="../reference/bdiv_functions.html">jaccard()</a></code>,
+<code>kulczynski()</code>, <code><a href="../reference/bdiv_functions.html">manhattan()</a></code>
 </li>
 </ul>
-<p>For the UniFrac algorithms, <code><a href="../reference/unweighted_unifrac.html">unweighted_unifrac()</a></code> is
+<p>For the UniFrac algorithms, <code><a href="../reference/bdiv_functions.html">unweighted_unifrac()</a></code> is
 unweighted and all the others are weighted.</p>
 <ul>
-<li><p>Unweighted: <code><a href="../reference/unweighted_unifrac.html">unweighted_unifrac()</a></code></p></li>
-<li><p>Weighted: <code><a href="../reference/weighted_unifrac.html">weighted_unifrac()</a></code>,
-<code><a href="../reference/normalized_unifrac.html">normalized_unifrac()</a></code>, <code><a href="../reference/generalized_unifrac.html">generalized_unifrac()</a></code>,
-<code><a href="../reference/variance_adjusted_unifrac.html">variance_adjusted_unifrac()</a></code></p></li>
+<li><p>Unweighted: <code><a href="../reference/bdiv_functions.html">unweighted_unifrac()</a></code></p></li>
+<li><p>Weighted: <code><a href="../reference/bdiv_functions.html">weighted_unifrac()</a></code>,
+<code><a href="../reference/bdiv_functions.html">normalized_unifrac()</a></code>, <code><a href="../reference/bdiv_functions.html">generalized_unifrac()</a></code>,
+<code><a href="../reference/bdiv_functions.html">variance_adjusted_unifrac()</a></code></p></li>
 </ul>
 </div>
 </div>
@@ -138,7 +139,7 @@ unweighted and all the others are weighted.</p>
 diversity functions results in the returned all-vs-all distance matrix
 being completely filled in.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4260870                    </span></span>
 <span><span class="co">#&gt; Nose  0.9797101 0.9826087          </span></span>
@@ -148,7 +149,7 @@ being completely filled in.</p>
 CPU time. The larger the dataset, the more noticeable the improvement
 will be.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4260870                    </span></span>
 <span><span class="co">#&gt; Nose  0.9797101        NA          </span></span>
@@ -164,9 +165,9 @@ result.</li>
 </ul>
 <p>Therefore, all of the following are equivalent:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="kw">function</span> <span class="op">(</span><span class="va">i</span>, <span class="va">j</span><span class="op">)</span> <span class="va">i</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="kw">function</span> <span class="op">(</span><span class="va">i</span>, <span class="va">j</span><span class="op">)</span> <span class="va">i</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>The ordering of <code>pairs</code> follows the pairings produced by
 <code><a href="https://rdrr.io/r/utils/combn.html" class="external-link">combn()</a></code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -189,7 +190,7 @@ result.</li>
 <span><span class="va">my_pairs</span></span>
 <span><span class="co">#&gt; [1]  TRUE FALSE FALSE  TRUE  TRUE FALSE</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="va">my_pairs</span><span class="op">)</span></span>
+<span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="va">my_pairs</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4260870                    </span></span>
 <span><span class="co">#&gt; Nose         NA 0.9826087          </span></span>

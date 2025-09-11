@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/unifrac.html">UniFrac Calculations</a></li>
@@ -102,6 +103,12 @@ sites.</p>
 However, your own dataset can use whatever feature makes sense -
 species, OTUs, ASVs, or even something completely unrelated to
 ecology.</p>
+<p>The metrics implemented natively in <code>ecodive</code> are highly
+optimized for both speed and memory. However, to provide the broadest
+range of metrics through the same interface, <code>ecodive</code> also
+provides wrappers around functions from the <code>vegan</code> and
+<code>tabula</code> R packages. To use them, <code>vegan</code> and/or
+<code>tabula</code> must be installed separately.</p>
 </div>
 <div class="section level2">
 <h2 id="alpha-diversity">Alpha Diversity<a class="anchor" aria-label="anchor" href="#alpha-diversity"></a>
@@ -112,9 +119,15 @@ the number of unique genera (richness), how evenly the population is
 split among genera (evenness), or how distantly related the genera are
 (phylogenetic diversity).</p>
 <ul>
-<li><p>Classic metrics: <code><a href="../reference/chao1.html">chao1()</a></code>, <code><a href="../reference/shannon.html">shannon()</a></code>,
-<code><a href="../reference/simpson.html">simpson()</a></code>, <code><a href="../reference/inv_simpson.html">inv_simpson()</a></code></p></li>
-<li><p>Phylogenetic metrics: <code><a href="../reference/faith.html">faith()</a></code></p></li>
+<li><p>Classic metrics: <code><a href="../reference/adiv_functions.html">chao1()</a></code>, <code><a href="../reference/adiv_functions.html">shannon()</a></code>,
+<code><a href="../reference/adiv_functions.html">simpson()</a></code>, <code><a href="../reference/adiv_functions.html">inv_simpson()</a></code></p></li>
+<li><p>Classic metrics (via <code>vegan</code>): <code><a href="../reference/adiv_functions.html">fisher()</a></code>,
+<code><a href="../reference/adiv_functions.html">ace()</a></code></p></li>
+<li><p>Classic metrics (via <code>tabula</code>):
+<code><a href="../reference/adiv_functions.html">brillouin()</a></code>, <code><a href="../reference/adiv_functions.html">mcintosh()</a></code>,
+<code><a href="../reference/adiv_functions.html">berger()</a></code>, <code><a href="../reference/adiv_functions.html">margalef()</a></code>,
+<code><a href="../reference/adiv_functions.html">menhinick()</a></code>, <code><a href="../reference/adiv_functions.html">squares()</a></code></p></li>
+<li><p>Phylogenetic metrics: <code><a href="../reference/adiv_functions.html">faith()</a></code></p></li>
 <li><p>Further reading: <code><a href="../articles/adiv.html">vignette('adiv')</a></code></p></li>
 </ul>
 </div>
@@ -126,14 +139,20 @@ on the genera observed in each. Also known as “distance” or
 “dissimilarity”. UniFrac metrics incorporate a phylogenetic tree into
 this calculation.</p>
 <ul>
-<li><p>Classic metrics: <code><a href="../reference/bray_curtis.html">bray_curtis()</a></code>,
-<code><a href="../reference/canberra.html">canberra()</a></code>, <code><a href="../reference/euclidean.html">euclidean()</a></code>, <code><a href="../reference/gower.html">gower()</a></code>,
-<code><a href="../reference/jaccard.html">jaccard()</a></code>, <code><a href="../reference/kulczynski.html">kulczynski()</a></code>,
-<code><a href="../reference/manhattan.html">manhattan()</a></code></p></li>
-<li><p>Phylogenetic metrics: <code><a href="../reference/unweighted_unifrac.html">unweighted_unifrac()</a></code>,
-<code><a href="../reference/weighted_unifrac.html">weighted_unifrac()</a></code>, <code><a href="../reference/normalized_unifrac.html">normalized_unifrac()</a></code>,
-<code><a href="../reference/generalized_unifrac.html">generalized_unifrac()</a></code>,
-<code><a href="../reference/variance_adjusted_unifrac.html">variance_adjusted_unifrac()</a></code></p></li>
+<li><p>Classic metrics: <code>bray_curtis()</code>,
+<code><a href="../reference/bdiv_functions.html">canberra()</a></code>, <code><a href="../reference/bdiv_functions.html">euclidean()</a></code>, <code><a href="../reference/bdiv_functions.html">gower()</a></code>,
+<code><a href="../reference/bdiv_functions.html">jaccard()</a></code>, <code>kulczynski()</code>,
+<code><a href="../reference/bdiv_functions.html">manhattan()</a></code></p></li>
+<li><p>Classic metrics (via <code>vegan</code>): <code><a href="../reference/bdiv_functions.html">clark()</a></code>,
+<code>alt_gower()</code>, <code><a href="../reference/bdiv_functions.html">morisita()</a></code>, <code><a href="../reference/bdiv_functions.html">horn()</a></code>,
+<code>mountford()</code>, <code>raup()</code>, <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial()</a></code>,
+<code>cao()</code>, <code><a href="https://rdrr.io/r/stats/mahalanobis.html" class="external-link">mahalanobis()</a></code>, <code>chisq()</code>,
+<code><a href="../reference/bdiv_functions.html">chord()</a></code>, <code><a href="../reference/bdiv_functions.html">hellinger()</a></code>,
+<code><a href="../reference/bdiv_functions.html">aitchison()</a></code>, <code>robust_aitchison()</code></p></li>
+<li><p>Phylogenetic metrics: <code><a href="../reference/bdiv_functions.html">unweighted_unifrac()</a></code>,
+<code><a href="../reference/bdiv_functions.html">weighted_unifrac()</a></code>, <code><a href="../reference/bdiv_functions.html">normalized_unifrac()</a></code>,
+<code><a href="../reference/bdiv_functions.html">generalized_unifrac()</a></code>,
+<code><a href="../reference/bdiv_functions.html">variance_adjusted_unifrac()</a></code></p></li>
 <li><p>Further reading: <code><a href="../articles/bdiv.html">vignette('bdiv')</a></code> and
 <code><a href="../articles/unifrac.html">vignette('unifrac')</a></code>.</p></li>
 </ul>
@@ -182,20 +201,20 @@ presence/absence information instead of relative abundances.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Alpha Diversity -------------------</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/shannon.html">shannon</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Saliva       Gums       Nose      Stool </span></span>
 <span><span class="co">#&gt; 0.74119910 0.35692121 1.10615349 0.07927797 </span></span>
 <span></span>
 <span></span>
 <span><span class="co">## Beta Diversity --------------------</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4260870                    </span></span>
 <span><span class="co">#&gt; Nose  0.9797101 0.9826087          </span></span>
 <span><span class="co">#&gt; Stool 0.9884058 0.9884058 0.9913043</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.1428571                    </span></span>
 <span><span class="co">#&gt; Nose  0.5000000 0.7142857          </span></span>
@@ -216,14 +235,14 @@ import a phylogenetic tree from a newick formatted string or file.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Alpha Diversity -------------------</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/faith.html">faith</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
 <span><span class="co">#&gt;    180    155    101    202 </span></span>
 <span></span>
 <span></span>
 <span><span class="co">## Beta Diversity --------------------</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/normalized_unifrac.html">normalized_unifrac</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/bdiv_functions.html">normalized_unifrac</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4328662                    </span></span>
 <span><span class="co">#&gt; Nose  0.7928701 0.6767840          </span></span>
@@ -236,7 +255,7 @@ import a phylogenetic tree from a newick formatted string or file.</p>
 convert this to a standard R matrix with the <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>
 function.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray_curtis.html">bray_curtis</a></span><span class="op">(</span><span class="va">counts</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu">bray_curtis</span><span class="op">(</span><span class="va">counts</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">dm</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.1428571                    </span></span>
