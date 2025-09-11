@@ -29,32 +29,37 @@ implement classic and phylogenetic alpha/beta ecology diversity metrics.
 
 | R Package               | Classic alpha/beta      | Phylogenetic alpha/beta |
 |:------------------------|:------------------------|:------------------------|
-| [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)          | ***Serial R***   | *none*           |
-| [adiv](https://doi.org/10.32614/CRAN.package.adiv)            | ***Serial R***   | ***Serial R***   |
-| [ampvis2](https://github.com/KasperSkytte/ampvis2)            | vegan            | ***Serial R***   |
-| [animalcules](https://github.com/wejlab/animalcules)          | vegan            | GUniFrac         |
-| [ecodist](https://doi.org/10.32614/CRAN.package.ecodist)      | ***Serial C/R*** | *none*           |
-| [ecodive](https://cran.r-project.org/package=ecodive)         | ***Parallel C*** | ***Parallel C*** |
-| [entropart](https://doi.org/10.32614/CRAN.package.entropart)  | ***Serial R***   | *none*           |
-| [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)    | *none*           | ***Serial C***   |
-| [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)     | vegan            | ***Parallel R*** |
-| [mia](https://doi.org/doi:10.18129/B9.bioc.mia)               | vegan            | ecodive          |
-| [microbiome](https://doi.org/doi:10.18129/B9.bioc.microbiome) | vegan            | phyloseq         |
-| [microeco](https://doi.org/10.32614/CRAN.package.microeco)    | vegan            | GUniFrac         |
-| [microViz](https://github.com/david-barnett/microViz)         | vegan            | GUniFrac         |
-| [picante](https://doi.org/10.32614/CRAN.package.picante)      | vegan            | ***Serial R***   |
-| [phyloregion](https://github.com/darunabas/phyloregion)       | vegan            | ***Serial R***   |
-| [phylosmith](https://github.com/schuyler-smith/phylosmith)    | vegan            | *none*           |
-| [rbiom](https://doi.org/10.32614/CRAN.package.rbiom)          | ecodive          | ecodive          |
-| [tidytacos](https://github.com/LebeerLab/tidytacos)           | vegan            | phyloseq         |
-| [vegan](https://doi.org/10.32614/CRAN.package.vegan)          | ***Serial C***   | *none*           |
+| [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)               | ***Serial R***       | *none*             |
+| [adiv](https://doi.org/10.32614/CRAN.package.adiv)                 | ***Serial R***       | ***Serial R***     |
+| [ampvis2](https://github.com/KasperSkytte/ampvis2)                 | vegan                | ***Serial R***     |
+| [animalcules](https://github.com/wejlab/animalcules)               | vegan                | GUniFrac           |
+| [ecodist](https://doi.org/10.32614/CRAN.package.ecodist)           | ***Serial C/R***     | *none*             |
+| [ecodive](https://cran.r-project.org/package=ecodive)              | ***Parallel C***     | ***Parallel C***   |
+| [entropart](https://doi.org/10.32614/CRAN.package.entropart)       | ***Serial R***       | *none*             |
+| [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)         | *none*               | ***Serial C***     |
+| [labdsv](https://doi.org/10.32614/CRAN.package.labdsv)             | ***Serial FORTRAN*** | *none*             |
+| [mia](https://doi.org/doi:10.18129/B9.bioc.mia)                    | vegan                | ecodive            |
+| [microbiome](https://doi.org/doi:10.18129/B9.bioc.microbiome)      | vegan                | phyloseq           |
+| [microeco](https://doi.org/10.32614/CRAN.package.microeco)         | vegan                | GUniFrac           |
+| [microViz](https://github.com/david-barnett/microViz)              | vegan                | GUniFrac           |
+| [parallelDist](https://doi.org/10.32614/CRAN.package.parallelDist) | ***Parallel C++***   | ***Parallel C++*** |
+| [philentropy](https://doi.org/10.32614/CRAN.package.philentropy)   | ***Serial C++***     | *none*             |
+| [phyloregion](https://github.com/darunabas/phyloregion)            | vegan                | ***Serial R***     |
+| [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)          | vegan                | ***Parallel R***   |
+| [phylosmith](https://github.com/schuyler-smith/phylosmith)         | vegan                | *none*             |
+| [picante](https://doi.org/10.32614/CRAN.package.picante)           | vegan                | ***Serial R***     |
+| [rbiom](https://doi.org/10.32614/CRAN.package.rbiom)               | ecodive              | ecodive            |
+| [tabula](https://github.com/LebeerLab/tabula)                      | ***Serial R***       | *none*             |
+| [tidytacos](https://github.com/LebeerLab/tidytacos)                | vegan                | phyloseq           |
+| [vegan](https://doi.org/10.32614/CRAN.package.vegan)               | ***Serial C***       | *none*             |
 
 
-Only ten packages - `abdiv`, `adiv`, `ampvis2`, `ecodist`, `entropart`, `GUniFrac`,
-`phyloregion`, `phyloseq`, `picante`, and `vegan` - have their own implementations of
-these algorithms. Other R packages import code from `ecodive`, `GUniFrac`, `phyloseq`,
-and/or `vegan` to handle alpha and beta diversity computations. Therefore, only
-these ten packages will be benchmarked.
+Only thirteen packages - `abdiv`, `adiv`, `ampvis2`, `ecodist`, `entropart`,
+`GUniFrac`, `labdsv`, `phyloregion`, `phyloseq`, `picante`, `picante`, `tabula`,
+and `vegan` - have their own implementations of these algorithms. Other R
+packages import code from `ecodive`, `GUniFrac`, `phyloseq`, and/or `vegan` to
+handle alpha and beta diversity computations. Therefore, only these thirteen
+packages will be benchmarked.
 
 ### Methodology
 
@@ -84,8 +89,9 @@ The input and output formats for the six R packages are not identical, so the be
 install.packages('pak')
 
 pak::pkg_install(pkg = c(
-  'adiv', 'abdiv', 'bench', 'ecodive', 'entropart', 'GUniFrac', 'kasperskytte/ampvis2', 
-  'phylocomr', 'phyloregion', 'phyloseq', 'picante', 'rbiom', 'vegan' ))
+  'adiv', 'abdiv', 'bench', 'ecodive', 'entropart', 'GUniFrac', 
+  'kasperskytte/ampvis2', 'labdsv', 'philentropy', 'phylocomr', 
+  'phyloregion', 'phyloseq', 'picante', 'rbiom', 'tabula', 'vegan' ))
 
 
 library(bench)
@@ -97,10 +103,12 @@ version$version.string
 #> [1] "R version 4.5.1 (2025-06-13 ucrt)"
 
 sapply(FUN = packageDescription, fields = 'Version', c(
-  'abdiv', 'adiv', 'ampvis2', 'ecodive', 'entropart', 'GUniFrac', 
-  'phylocomr', 'phyloregion', 'phyloseq', 'picante', 'vegan' ))
-#>    abdiv     adiv  ampvis2  ecodive  entropart  GUniFrac  phylocomr  phyloregion  phyloseq  picante    vegan
-#>  "0.2.0"  "2.2.1"  "2.8.9"  "1.0.0"   "1.6-16"     "1.8"    "0.3.4"      "1.0.9"  "1.52.0"  "1.8.2"  "2.7-1"
+  'abdiv', 'adiv', 'ampvis2', 'ecodive', 'entropart', 'GUniFrac', 'labdsv', 
+  'philentropy', 'phylocomr', 'phyloregion', 'phyloseq', 'picante', 'tabula', 'vegan' ))
+#>        abdiv         adiv      ampvis2      ecodive    entropart     GUniFrac       labdsv 
+#>      "0.2.0"      "2.2.1"      "2.8.9"      "1.0.1"     "1.6-16"        "1.8"      "2.1-2" 
+#>  philentropy    phylocomr  phyloregion     phyloseq      picante       tabula        vegan 
+#>      "0.9.0"      "0.3.4"      "1.0.9"     "1.52.0"      "1.8.2"      "3.3.1"      "2.7-1"
 
 (n_cpus <- ecodive::n_cpus())
 #> [1] 6

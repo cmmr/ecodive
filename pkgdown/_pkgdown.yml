@@ -14,44 +14,21 @@ template:
 reference:
 
 - title: Alpha Diversity
-  contents:
+  contents: 
   - alpha_div
-
-- subtitle: Phylogenetic
-  contents:
-  - faith
-  
-- subtitle: Classic
-  contents:
-  - observed
-  - chao1
-  - shannon
-  - simpson
-  - inv_simpson
+  - has_concept('adiv_functions')
   
 
 - title: Beta Diversity
-  contents:
+  contents: 
   - beta_div
-  
-- title: Phylogenetic
-  contents:
-  - unweighted_unifrac
-  - weighted_unifrac
-  - normalized_unifrac
-  - generalized_unifrac
-  - variance_adjusted_unifrac
+  - has_concept('bdiv_functions')
 
-- title: Classic
+  
+- title: Programmatic Access
   contents:
-  - sorenson
-  - bray_curtis
-  - canberra
-  - euclidean
-  - gower
-  - jaccard
-  - kulczynski
-  - manhattan
+  - match_metric
+  - list_metrics
   
   
 - title: Utility
@@ -59,9 +36,6 @@ reference:
   - read_tree
   - rarefy
   - n_cpus
-  - metrics
-  - as_alpha_metric
-  - as_beta_metric
   
 - title: Datasets
   contents:

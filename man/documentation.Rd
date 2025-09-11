@@ -4,20 +4,21 @@
 \alias{documentation}
 \title{documentation}
 \arguments{
-\item{counts}{An OTU abundance matrix where each column is a sample, and
-each row is an OTU. Any object coercible with \code{as.matrix()} can be
-given here, as well as \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment},
-and \code{TreeSummarizedExperiment} objects.}
-
-\item{weighted}{If \code{TRUE}, the algorithm takes relative abundances into
-account. If \code{FALSE}, only presence/absence is considered.}
-
-\item{normalized}{For weighted UniFrac only, normalize distances by the
-total branch length. Options: \code{TRUE} or \code{FALSE}.}
+\item{counts}{A numeric matrix of count data where each column is a sample,
+and each row is a feature. Any object coercible with \code{as.matrix()}
+can be given here, as well as \code{phyloseq}, \code{rbiom},
+\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
 \item{alpha}{How much weight to give to relative abundances; a value
 between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
 \code{normalized_unifrac()}.}
+
+\item{pseudocount}{The value to add to all counts to prevent taking
+\code{log(0)} for unobserved features. The default, \code{NULL}, selects the
+smallest non-zero value in \code{counts}.}
+
+\item{power}{Scaling factor for the magnitude of differences between
+communities (\eqn{p}). Default: \code{1.5}}
 
 \item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
 the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
@@ -28,6 +29,12 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
 Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.}
+
+\item{digits}{Precision of the returned values, in number of decimal
+places. E.g. the default \code{digits=3} could return \code{6.392}.}
+
+\item{cutoff}{The maximum number of observations to consider "rare".
+Default: \code{10}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

@@ -73,16 +73,20 @@ While numerous R packages can calculate diversity metrics, our comparison
 focuses on those that provide their own implementations: `abdiv` [@abdiv],
 `adiv` [@adiv], `ampvis2` [@ampvis2], `ecodist` [@ecodist], `entropart`
 [@entropart], `GUniFrac` [@GUniFrac], `phyloregion` [@phyloregion], `phyloseq`
-[@phyloseq], `picante` [@picante], and `vegan` [@vegan]. `ecodive` sets itself
-apart from these packages through its superior performance. Furthermore,
+[@phyloseq], `picante` [@picante], `tabula` [@tabula], and `vegan` [@vegan]. For
+every metric listed in the Implemented Metrics section, `ecodive` offers
+superior performance, setting it apart from these packages. Furthermore,
 `ecodive` has zero external R dependencies. This makes it a lightweight, stable,
 and secure computational backend, minimizing installation conflicts and
 simplifying long-term maintenance for developers who build upon it.
 
 Comprehensive benchmarks, conducted using the `bench` package [@bench],
 demonstrate these advantages across a range of metrics (Figures 1-3). The
-complete benchmark code and results are available in the package vignette
-(`vignette('benchmark')`) and online.
+benchmark suite also confirms that ecodive produces numerically identical output
+to other packages for every metric. The sole exception was the Jaccard metric,
+for which `abdiv`'s output differed from the concordant results of `ecodive`,
+`vegan`, and `ecodist`. The complete benchmark code and results are available in
+the package vignette (`vignette('benchmark')`) and online.
 
 
 ![Figure 1: UniFrac benchmarks. `ecodive` demonstrates substantial performance gains for UniFrac, being 2 to 3,900x faster and using 50 - 32,000x less memory, which helps overcome computational bottlenecks in large-scale analyses.](../man/figures/unifrac-benchmark.svg)

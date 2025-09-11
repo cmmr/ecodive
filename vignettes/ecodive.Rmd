@@ -35,6 +35,12 @@ In this example, the 'features' in our feature table are genera. However, your
 own dataset can use whatever feature makes sense - species, OTUs, ASVs, or 
 even something completely unrelated to ecology.
 
+The metrics implemented natively in `ecodive` are highly optimized for both
+speed and memory. However, to provide the broadest range of metrics through the
+same interface, `ecodive` also provides wrappers around functions from the
+`vegan` and `tabula` R packages. To use them, `vegan` and/or `tabula` must be
+installed separately.
+
 
 
 ## Alpha Diversity
@@ -45,6 +51,10 @@ genera (richness), how evenly the population is split among genera (evenness),
 or how distantly related the genera are (phylogenetic diversity).
 
 * Classic metrics: `chao1()`, `shannon()`, `simpson()`, `inv_simpson()`
+
+* Classic metrics (via `vegan`): `fisher()`, `ace()`
+
+* Classic metrics (via `tabula`): `brillouin()`, `mcintosh()`, `berger()`, `margalef()`, `menhinick()`, `squares()`
 
 * Phylogenetic metrics: `faith()`
 
@@ -59,6 +69,8 @@ metrics incorporate a phylogenetic tree into this calculation.
 
 * Classic metrics: `bray_curtis()`, `canberra()`, `euclidean()`, `gower()`, 
 `jaccard()`, `kulczynski()`, `manhattan()`
+
+* Classic metrics (via `vegan`): `clark()`, `alt_gower()`, `morisita()`, `horn()`, `mountford()`, `raup()`, `binomial()`, `cao()`, `mahalanobis()`, `chisq()`, `chord()`, `hellinger()`, `aitchison()`, `robust_aitchison()`
 
 * Phylogenetic metrics: `unweighted_unifrac()`, `weighted_unifrac()`,
 `normalized_unifrac()`, `generalized_unifrac()`, `variance_adjusted_unifrac()`

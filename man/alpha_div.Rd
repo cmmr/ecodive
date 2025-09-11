@@ -2,20 +2,18 @@
 % Please edit documentation in R/alpha_div.r
 \name{alpha_div}
 \alias{alpha_div}
-\title{Alpha diversity wrapper}
+\title{Alpha Diversity Wrapper Function}
 \usage{
 alpha_div(counts, metric, ...)
 }
 \arguments{
-\item{counts}{An OTU abundance matrix where each column is a sample, and
-each row is an OTU. Any object coercible with \code{as.matrix()} can be
-given here, as well as \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment},
-and \code{TreeSummarizedExperiment} objects.}
+\item{counts}{A numeric matrix of count data where each column is a sample,
+and each row is a feature. Any object coercible with \code{as.matrix()}
+can be given here, as well as \code{phyloseq}, \code{rbiom},
+\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
-\item{metric}{The name of an alpha diversity metric. Current options are
-\code{c('observed', 'chao1', 'shannon', 'simpson', 'inv_simpson', 'faith')}.
-Case-insensitive and partial name matching is supported. Options are also
-available via \code{names(metrics$alpha)}.}
+\item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson', 'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson', 'squares')}. Case-insensitive and partial name matching is supported.
+Programmatic access via \code{list_metrics('alpha')}.}
 
 \item{...}{Additional options to pass through to the called function. I.e.
 \code{cpus} or \code{tree}.}
@@ -24,7 +22,29 @@ available via \code{names(metrics$alpha)}.}
 A numeric vector.
 }
 \description{
-Alpha diversity wrapper
+Alpha Diversity Wrapper Function
+}
+\details{
+\subsection{Integer Count Requirements}{
+
+A frequent and critical error in alpha diversity analysis is providing the
+wrong type of data to a metric's formula. Some indices are mathematically
+defined based on counts of individuals and require raw, integer abundance
+data. Others are based on proportional abundances and can accept either
+integer counts (which are then converted to proportions) or pre-normalized
+proportional data. Using proportional data with a metric that requires
+integer counts will return an error message.\tabular{ll}{
+   Requires Integer Counts Only \tab Can Use Proportional Data \cr
+   Chao1 \tab Observed Features \cr
+   ACE \tab Shannon Index \cr
+   Squares Richness Estimator \tab Gini-Simpson Index \cr
+   Margalef's Index \tab Inverse Simpson Index \cr
+   Menhinick's Index \tab Berger-Parker Index \cr
+   Fisher's Alpha \tab McIntosh Index \cr
+   Brillouin Index \tab Faith's PD (presence/absence) \cr
+}
+
+}
 }
 \examples{
     # Example counts matrix
@@ -43,12 +63,6 @@ Alpha diversity wrapper
 }
 \seealso{
 Other alpha_diversity: 
-\code{\link{beta_div}()},
-\code{\link{chao1}()},
-\code{\link{faith}()},
-\code{\link{inv_simpson}()},
-\code{\link{observed}()},
-\code{\link{shannon}()},
-\code{\link{simpson}()}
+\code{\link{beta_div}()}
 }
 \concept{alpha_diversity}

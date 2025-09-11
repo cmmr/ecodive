@@ -40,7 +40,6 @@ static int     n_otus;
 static int     n_samples;
 static int     n_edges;
 static double *edge_lengths;
-static double  alpha;
 static int    *pairs_vec;
 static int     n_pairs;
 static double *weight_mtx;
@@ -48,6 +47,7 @@ static node_t *nodes;
 static double *total_vec;
 static int     n_threads;
 static double *dist_vec;
+static SEXP   *sexp_extra;
 
 
 
@@ -306,6 +306,9 @@ static void *generalized_mtx (void *arg) {
 }
 
 static void *generalized_dist (void *arg) {
+  
+  double alpha = asReal(*sexp_extra);
+  
   START_PAIR_LOOP
   
   distance = 0;
@@ -398,9 +401,9 @@ static void *var_adjusted_dist (void *arg) {
 //======================================================
 SEXP C_unifrac(
     SEXP sexp_algorithm, 
-    SEXP sexp_otu_mtx,   SEXP sexp_phylo_tree, 
-    SEXP sexp_alpha,     SEXP sexp_pairs_vec, 
-    SEXP sexp_n_threads, SEXP sexp_result_dist ) {
+    SEXP sexp_otu_mtx,     SEXP sexp_phylo_tree, 
+    SEXP sexp_pairs_vec,   SEXP sexp_n_threads, 
+    SEXP sexp_result_dist, SEXP sexp_extra_args ) {
   
   algorithm     = asInteger(sexp_algorithm);
   otu_mtx       = REAL( sexp_otu_mtx);
@@ -409,11 +412,11 @@ SEXP C_unifrac(
   int *edge_mtx = INTEGER(get(sexp_phylo_tree, "edge"));
   n_edges       = nrows(  get(sexp_phylo_tree, "edge"));
   edge_lengths  = REAL(   get(sexp_phylo_tree, "edge.length"));
-  alpha         = asReal(sexp_alpha);
   pairs_vec     = INTEGER(sexp_pairs_vec);
   n_pairs       = LENGTH(sexp_pairs_vec);
   n_threads     = asInteger(sexp_n_threads);
   dist_vec      = REAL(sexp_result_dist);
+  sexp_extra    = &sexp_extra_args;
   
   
   // branch_weight/depth for each (sample,edge) combo.

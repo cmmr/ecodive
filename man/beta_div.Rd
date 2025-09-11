@@ -2,40 +2,79 @@
 % Please edit documentation in R/beta_div.r
 \name{beta_div}
 \alias{beta_div}
-\title{Beta diversity wrapper}
+\title{Beta Diversity Wrapper Function}
 \usage{
 beta_div(counts, metric, ...)
 }
 \arguments{
-\item{counts}{An OTU abundance matrix where each column is a sample, and
-each row is an OTU. Any object coercible with \code{as.matrix()} can be
-given here, as well as \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment},
-and \code{TreeSummarizedExperiment} objects.}
+\item{counts}{A numeric matrix of count data where each column is a sample,
+and each row is a feature. Any object coercible with \code{as.matrix()}
+can be given here, as well as \code{phyloseq}, \code{rbiom},
+\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
-\item{metric}{The name of a beta diversity metric. Current options are
-\code{c('bray_curtis', 'sorenson', 'canberra', 'euclidean', 'gower', 'jaccard', 'kulczynski', 'manhattan', 'unweighted_unifrac', 'weighted_unifrac', 'normalized_unifrac', 'generalized_unifrac', 'variance_adjusted_unifrac')}.
-Supports flexible name matching - see details section below. Options are
-also available via \code{names(metrics$beta)}.}
+\item{metric}{The name of a beta diversity metric. One of \code{c('aitchison', 'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'psym_chisq', 'soergel', 'sorensen', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')}. Flexible
+matching is supported (see below). Programmatic access via
+\code{list_metrics('beta')}.}
 
 \item{...}{Additional options to pass through to the called function. I.e.
-\code{tree}, \code{weighted}, \code{pairs}, \code{alpha}, or \code{cpus}.}
+\code{tree}, \code{pairs}, \code{alpha}, or \code{cpus}.}
 }
 \value{
 A numeric vector.
 }
 \description{
-Beta diversity wrapper
+Beta Diversity Wrapper Function
 }
 \details{
+\strong{List of Beta Diversity Metrics}\tabular{ll}{
+   Option / Function Name \tab Metric Name \cr
+   \code{aitchison} \tab Aitchison distance \cr
+   \code{bhattacharyya} \tab Bhattacharyya distance \cr
+   \code{bray} \tab Bray-Curtis dissimilarity \cr
+   \code{canberra} \tab Canberra distance \cr
+   \code{chebyshev} \tab Chebyshev distance \cr
+   \code{chord} \tab Chord distance \cr
+   \code{clark} \tab Clark's divergence distance \cr
+   \code{divergence} \tab Divergence \cr
+   \code{euclidean} \tab Euclidean distance \cr
+   \code{generalized_unifrac} \tab Generalized UniFrac (GUniFrac) \cr
+   \code{gower} \tab Gower distance \cr
+   \code{hamming} \tab Hamming distance \cr
+   \code{hellinger} \tab Hellinger distance \cr
+   \code{horn} \tab Horn-Morisita dissimilarity \cr
+   \code{jaccard} \tab Jaccard distance \cr
+   \code{jensen} \tab Jensen-Shannon distance \cr
+   \code{jsd} \tab Jesen-Shannon divergence (JSD) \cr
+   \code{lorentzian} \tab Lorentzian distance \cr
+   \code{manhattan} \tab Manhattan distance \cr
+   \code{matusita} \tab Matusita distance \cr
+   \code{minkowski} \tab Minkowski distance \cr
+   \code{morisita} \tab Morisita dissimilarity \cr
+   \code{motyka} \tab Motyka dissimilarity \cr
+   \code{normalized_unifrac} \tab Normalized Weighted UniFrac \cr
+   \code{ochiai} \tab Otsuka-Ochiai dissimilarity \cr
+   \code{psym_chisq} \tab Probabilistic Symmetric Chi-Squared distance \cr
+   \code{soergel} \tab Soergel distance \cr
+   \code{sorensen} \tab Dice-Sorensen dissimilarity \cr
+   \code{squared_chisq} \tab Squared Chi-Squared distance \cr
+   \code{squared_chord} \tab Squared Chord distance \cr
+   \code{squared_euclidean} \tab Squared Euclidean distance \cr
+   \code{topsoe} \tab Topsoe distance \cr
+   \code{unweighted_unifrac} \tab Unweighted UniFrac \cr
+   \code{variance_adjusted_unifrac} \tab Variance-Adjusted Weighted UniFrac (VAW-UniFrac) \cr
+   \code{wave_hedges} \tab Wave Hedges distance \cr
+   \code{weighted_unifrac} \tab Weighted UniFrac \cr
+}
+
+
 \strong{Flexible name matching}
 
 Case insensitive and partial matching. Any runs of non-alpha characters are
-converted to underscores. E.g. \verb{metric = 'Bray Curtis} selects Bray-Curtis.
+converted to underscores. E.g. \verb{metric = 'Weighted UniFrac} selects
+\code{weighted_unifrac}.
 
 UniFrac names can be shortened to the first letter plus "unifrac". E.g.
-\code{uunifrac}, \code{w_unifrac}, or \verb{V UniFrac}. These also support partial matching,
-but the primary options take precedence. For instance \code{metric = 'g'}
-selects Gower, whereas \code{metric = 'gu'} selects Generalized UniFrac.
+\code{uunifrac}, \code{w_unifrac}, or \verb{V UniFrac}. These also support partial matching.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the metrics list.
@@ -45,24 +84,14 @@ ambiguity with future additions to the metrics list.
     ex_counts
     
     # Bray-Curtis distances
-    beta_div(ex_counts, 'bray_curtis')
-    
-    # Kulczynski distances
-    beta_div(ex_counts, 'k')
+    beta_div(ex_counts, 'bray')
     
     # Generalized UniFrac distances
     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)
     
-    
 }
 \seealso{
 Other alpha_diversity: 
-\code{\link{alpha_div}()},
-\code{\link{chao1}()},
-\code{\link{faith}()},
-\code{\link{inv_simpson}()},
-\code{\link{observed}()},
-\code{\link{shannon}()},
-\code{\link{simpson}()}
+\code{\link{alpha_div}()}
 }
 \concept{alpha_diversity}

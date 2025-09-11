@@ -14,10 +14,10 @@ rarefy(
 )
 }
 \arguments{
-\item{counts}{An OTU abundance matrix where each column is a sample, and
-each row is an OTU. Any object coercible with \code{as.matrix()} can be
-given here, as well as \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment},
-and \code{TreeSummarizedExperiment} objects.}
+\item{counts}{A numeric matrix of count data where each column is a sample,
+and each row is a feature. Any object coercible with \code{as.matrix()}
+can be given here, as well as \code{phyloseq}, \code{rbiom},
+\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
 \item{depth}{How many observations to keep per sample. When
 \verb{0 < depth < 1}, it is taken as the minimum percentage of the

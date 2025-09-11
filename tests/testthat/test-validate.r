@@ -1,8 +1,18 @@
 test_that("validation", {
   
-  # validate_pairs() ==========================================================
-  
   env <- new.env()
+  
+  
+  
+  
+  # assert_integer_counts() ====
+  
+  env$counts <- counts_p
+  expect_error(assert_integer_counts(env))
+  
+  
+  
+  # validate_pairs() ====
   
   env$counts <- matrix(nrow = 5, ncol = 0)
   expect_error(validate_pairs(env))
@@ -26,15 +36,42 @@ test_that("validation", {
   
   
   
-  # validate_alpha() ==========================================================
+  # validate_alpha() ====
   
   env$alpha <- 1L
-  validate_alpha(env)
+  expect_silent(validate_alpha(env))
   
   
   
   
-  # validate_tree() ===========================================================
+  # validate_cpus() ====
+  
+  env$cpus <- 1
+  expect_silent(validate_cpus(env))
+  
+  
+  
+  
+  # validate_power() ====
+  
+  env$power <- 1L
+  expect_silent(validate_power(env))
+  
+  
+  
+  
+  # validate_pseudocount() ====
+  
+  env$pseudocount <- NULL
+  expect_silent(validate_pseudocount(env))
+  
+  env$pseudocount <- 1L
+  expect_silent(validate_pseudocount(env))
+  
+  
+  
+  
+  # validate_tree() ====
   
   env$counts <- counts[1:3,,drop=FALSE]
   tree2 <- tree
@@ -45,12 +82,12 @@ test_that("validation", {
     ncol     = ncol(tree$edge),
     dimnames = dimnames(tree$edge) )
   env$tree <- tree2
-  validate_tree(env)
+  expect_silent(validate_tree(env))
   
   
   
   
-  # validate_counts() =========================================================
+  # validate_counts() ====
   
   env$tree   <- NULL
   env$counts <- counts

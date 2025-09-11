@@ -6,12 +6,34 @@
 validate_args <- function () {
   env  <- parent.frame()
   args <- ls(env)
-  for (arg in args[order(args != 'counts')])
+  
+  # move counts and pseudocount to head of the line
+  args <- unique(c(intersect(c('counts', 'pseudocount'), args), sort(args)))
+  
+  for (arg in args)
     do.call(paste0('validate_', arg), list(env))
 }
 
 
-validate_counts <- function (env) {
+validate_alpha <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      if (!inherits(alpha, 'numeric'))
+        alpha <- as.numeric(alpha)
+      
+      stopifnot(length(alpha) == 1)
+      stopifnot(!is.na(alpha))
+      stopifnot(alpha >= 0 && alpha <= 1)
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`alpha` must be a single number between 0 and 1.')
+  )
+}
+
+
+validate_counts <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
@@ -71,7 +93,136 @@ validate_counts <- function (env) {
 }
 
 
-validate_pairs <- function (env) {
+validate_cpus <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      stopifnot(is.numeric(cpus))
+      stopifnot(length(cpus) == 1)
+      stopifnot(!is.na(cpus))
+      stopifnot(cpus > 0)
+      stopifnot(cpus %% 1 == 0)
+      
+      if (!is.integer(cpus))
+        cpus <- as.integer(cpus)
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`cpus` must be an integer greater than 0.')
+  )
+}
+
+
+validate_cutoff <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      stopifnot(is.numeric(cutoff))
+      stopifnot(length(cutoff) == 1)
+      stopifnot(!is.na(cutoff))
+      stopifnot(cutoff > 0)
+      stopifnot(cutoff %% 1 == 0)
+      
+      cutoff <- as.integer(cutoff)
+      
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`cutoff` must be a positive integer.')
+  )
+}
+
+
+validate_depth <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      stopifnot(is.numeric(depth))
+      stopifnot(length(depth) == 1)
+      stopifnot(!is.na(depth))
+      stopifnot(depth > 0)
+      stopifnot(depth %% 1 == 0 || depth < 1)
+      
+      if (depth %% 1 == 0) {
+        stopifnot(depth <= max(colSums(counts)))
+        depth <- as.integer(depth)
+      }
+      
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`depth` must be a positive integer or be between 0 and 1.')
+  )
+}
+
+
+validate_digits <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      stopifnot(is.numeric(digits))
+      stopifnot(length(digits) == 1)
+      stopifnot(!is.na(digits))
+      stopifnot(digits >= 0)
+      stopifnot(digits <= 10)
+      stopifnot(digits %% 1 == 0)
+      
+      digits <- as.integer(digits)
+      
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`digits` must be an integer between 0 and 10.')
+  )
+}
+
+
+validate_n_samples <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      if (!is.null(n_samples)) {
+        
+        stopifnot(is.numeric(n_samples))
+        stopifnot(length(n_samples) == 1)
+        stopifnot(!is.na(n_samples))
+        
+        if (n_samples %% 1 == 0) {
+          stopifnot(n_samples <= ncol(counts))
+          stopifnot(n_samples > -ncol(counts))
+          n_samples <- as.integer(n_samples)
+        }
+        else {
+          stopifnot(n_samples > 0 && n_samples < 1)
+        }
+      }
+      
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`n_samples` must be an integer or be between 0 and 1.')
+  )
+}
+
+
+validate_newick <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      stopifnot(is.character(newick))
+      stopifnot(length(newick) == 1)
+      stopifnot(!is.na(newick))
+      newick <- trimws(newick)
+      stopifnot(nchar(newick) > 0)
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`newick` must be a character string.')
+  )
+}
+
+
+validate_pairs <- function (env = parent.frame()) {
   
   with(env, {
     if (ncol(counts) < 2)
@@ -120,79 +271,45 @@ validate_pairs <- function (env) {
 }
 
 
-validate_weighted <- function (env) {
+validate_power <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
-      if (!is.logical(weighted))
-        weighted <- as.logical(weighted)
+      if (!inherits(power, 'numeric'))
+        power <- as.numeric(power)
       
-      stopifnot(length(weighted) == 1)
-      stopifnot(!is.na(weighted))
+      stopifnot(length(power) == 1)
+      stopifnot(!is.na(power))
     }),
     
     error = function (e) 
-      stop(e$message, '\n`weighted` must be TRUE or FALSE.')
+      stop(e$message, '\n`power` must be a single number.')
   )
 }
 
 
-
-validate_newick <- function (env) {
+validate_pseudocount <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
-      stopifnot(is.character(newick))
-      stopifnot(length(newick) == 1)
-      stopifnot(!is.na(newick))
-      newick <- trimws(newick)
-      stopifnot(nchar(newick) > 0)
+      if (is.null(pseudocount))
+        pseudocount <- min(counts[counts > 0])
+      
+      if (!inherits(pseudocount, 'numeric'))
+        pseudocount <- as.numeric(pseudocount)
+      
+      stopifnot(length(pseudocount) == 1)
+      stopifnot(!is.na(pseudocount))
+      stopifnot(pseudocount >= 0)
     }),
     
     error = function (e) 
-      stop(e$message, '\n`newick` must be a character string.')
+      stop(e$message, '\n`pseudocount` must be a single positive number.')
   )
 }
 
 
-validate_underscores <- function (env) {
-  tryCatch(
-    with(env, {
-      
-      if (!is.logical(underscores))
-        underscores <- as.logical(underscores)
-      
-      stopifnot(length(underscores) == 1)
-      stopifnot(!is.na(underscores))
-    }),
-    
-    error = function (e) 
-      stop(e$message, '\n`underscores` must be TRUE or FALSE.')
-  )
-}
-
-
-validate_cpus <- function (env) {
-  tryCatch(
-    with(env, {
-      
-      stopifnot(is.numeric(cpus))
-      stopifnot(length(cpus) == 1)
-      stopifnot(!is.na(cpus))
-      stopifnot(cpus > 0)
-      stopifnot(cpus %% 1 == 0)
-      
-      if (!is.integer(cpus))
-        cpus <- as.integer(cpus)
-    }),
-    
-    error = function (e) 
-      stop(e$message, '\n`cpus` must be an integer greater than 0.')
-  )
-}
-
-
-validate_seed <- function (env) {
+validate_seed <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
@@ -213,7 +330,7 @@ validate_seed <- function (env) {
 }
 
 
-validate_times <- function (env) {
+validate_times <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
@@ -236,76 +353,7 @@ validate_times <- function (env) {
 }
 
 
-validate_depth <- function (env) {
-  tryCatch(
-    with(env, {
-      
-      stopifnot(is.numeric(depth))
-      stopifnot(length(depth) == 1)
-      stopifnot(!is.na(depth))
-      stopifnot(depth > 0)
-      stopifnot(depth %% 1 == 0 || depth < 1)
-      
-      if (depth %% 1 == 0) {
-        stopifnot(depth <= max(colSums(counts)))
-        depth <- as.integer(depth)
-      }
-      
-    }),
-    
-    error = function (e) 
-      stop(e$message, '\n`depth` must be a positive integer or be between 0 and 1.')
-  )
-}
-
-
-validate_n_samples <- function (env) {
-  tryCatch(
-    with(env, {
-      
-      if (!is.null(n_samples)) {
-      
-        stopifnot(is.numeric(n_samples))
-        stopifnot(length(n_samples) == 1)
-        stopifnot(!is.na(n_samples))
-        
-        if (n_samples %% 1 == 0) {
-          stopifnot(n_samples <= ncol(counts))
-          stopifnot(n_samples > -ncol(counts))
-          n_samples <- as.integer(n_samples)
-        }
-        else {
-          stopifnot(n_samples > 0 && n_samples < 1)
-        }
-      }
-      
-    }),
-    
-    error = function (e) 
-      stop(e$message, '\n`n_samples` must be an integer or be between 0 and 1.')
-  )
-}
-
-
-validate_alpha <- function (env) {
-  tryCatch(
-    with(env, {
-      
-      if (!inherits(alpha, 'numeric'))
-        alpha <- as.numeric(alpha)
-      
-      stopifnot(length(alpha) == 1)
-      stopifnot(!is.na(alpha))
-      stopifnot(alpha >= 0 && alpha <= 1)
-    }),
-    
-    error = function (e) 
-      stop(e$message, '\n`alpha` must be a single number between 0 and 1.')
-  )
-}
-
-
-validate_tree <- function (env) {
+validate_tree <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
@@ -348,3 +396,29 @@ validate_tree <- function (env) {
   )
 }
 
+
+validate_underscores <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      if (!is.logical(underscores))
+        underscores <- as.logical(underscores)
+      
+      stopifnot(length(underscores) == 1)
+      stopifnot(!is.na(underscores))
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`underscores` must be TRUE or FALSE.')
+  )
+}
+
+
+
+
+assert_integer_counts <- function (env = parent.frame()) {
+  with(env, {
+    if (!all(counts %% 1 == 0))
+      stop('`counts` must be whole numbers (integers).')
+  })
+}
