@@ -35,9 +35,10 @@
 #define BDIV_MOTYKA        18
 #define BDIV_OCHIAI        19
 #define BDIV_SOERGEL       20
-#define BDIV_SQUARED_CHISQ 21
-#define BDIV_SQUARED_CHORD 22
-#define BDIV_WAVE_HEDGES   23
+#define BDIV_SORENSEN      21
+#define BDIV_SQUARED_CHISQ 22
+#define BDIV_SQUARED_CHORD 23
+#define BDIV_WAVE_HEDGES   24
 
 static int     algorithm;
 static double *otu_mtx;
@@ -66,33 +67,33 @@ static SEXP   *sexp_extra;
  * call or the messiness of duplicated code.
  */
 
-#define START_PAIR_LOOP                                     \
-int     thread_i = *((int *) arg);                          \
-double *x_vec    = otu_mtx;                                 \
-double *y_vec    = otu_mtx + n_otus;                        \
-int     pair_idx = 0;                                       \
-int     dist_idx = 0;                                       \
-while (pair_idx < n_pairs) {                                \
-  if (pairs_vec[pair_idx] == dist_idx) {                    \
-    if (pair_idx % n_threads == thread_i) {                 \
+#define START_PAIR_LOOP                                         \
+int     thread_i = *((int *) arg);                              \
+double *x_vec    = otu_mtx;                                     \
+double *y_vec    = otu_mtx + n_otus;                            \
+int     pair_idx = 0;                                           \
+int     dist_idx = 0;                                           \
+while (pair_idx < n_pairs) {                                    \
+  if (pairs_vec == NULL || pairs_vec[pair_idx] == dist_idx) {   \
+    if (pair_idx % n_threads == thread_i) {                     \
         double distance = 0;
 
 
-#define END_PAIR_LOOP                                       \
-      dist_vec[dist_idx] = distance;                        \
-    }                                                       \
-    pair_idx++;                                             \
-  }                                                         \
-  if (y_vec == last_sample) {                               \
-    x_vec += n_otus;                                        \
-    if (x_vec == last_sample) return NULL;                  \
-    y_vec = x_vec + n_otus;                                 \
-  } else {                                                  \
-    y_vec += n_otus;                                        \
-  }                                                         \
-  dist_idx++;                                               \
-}                                                           \
-return NULL;                                                \
+#define END_PAIR_LOOP                                           \
+      dist_vec[dist_idx] = distance;                            \
+    }                                                           \
+    pair_idx++;                                                 \
+  }                                                             \
+  if (y_vec == last_sample) {                                   \
+    x_vec += n_otus;                                            \
+    if (x_vec == last_sample) return NULL;                      \
+    y_vec = x_vec + n_otus;                                     \
+  } else {                                                      \
+    y_vec += n_otus;                                            \
+  }                                                             \
+  dist_idx++;                                                   \
+}                                                               \
+return NULL;                                                    \
 
 
 
@@ -265,7 +266,7 @@ static void *gower(void *arg) {
 
 //======================================================
 // Hamming
-// sum(!xor(x, y))
+// sum(xor(x, y))
 //======================================================
 static void *hamming(void *arg) {
   START_PAIR_LOOP
@@ -469,6 +470,30 @@ static void *motyka(void *arg) {
 }
 
 
+//======================================================
+// Dice-Sorensen
+// 2 * sum(x & y) / sum(x>0, y>0)
+//======================================================
+static void *sorensen(void *arg) {
+  START_PAIR_LOOP
+  
+  double top = 0, bot = 0;
+  
+  for (int otu = 0; otu < n_otus; otu++) {
+    double x = x_vec[otu], y = y_vec[otu];
+    
+    if (x || y) {
+      bot++;
+      if (x && y) { top++; bot++; }
+    }
+  }
+  
+  distance = 1 - 2 * top / bot;
+    
+  END_PAIR_LOOP
+}
+
+
 
 //======================================================
 // Ochiai
@@ -589,44 +614,53 @@ SEXP C_beta_div(
   otu_mtx    = REAL(sexp_otu_mtx);
   n_otus     = nrows(sexp_otu_mtx);
   n_samples  = ncols(sexp_otu_mtx);
-  pairs_vec  = INTEGER(sexp_pairs_vec);
-  n_pairs    = LENGTH(sexp_pairs_vec);
   n_threads  = asInteger(sexp_n_threads);
   dist_vec   = REAL(sexp_result_dist);
   sexp_extra = &sexp_extra_args;
   
   last_sample = otu_mtx + ((n_samples - 1) * n_otus);
   
-  
-  // function to run
-  void * (*calc_dist_vec)(void *) = NULL;
-  
-  switch (algorithm) {
-    case BDIV_BHATTACHARYYA: calc_dist_vec = bhattacharyya; break;
-    case BDIV_BRAY:          calc_dist_vec = bray;          break;
-    case BDIV_CANBERRA:      calc_dist_vec = canberra;      break;
-    case BDIV_CHEBYSHEV:     calc_dist_vec = chebyshev;     break;
-    case BDIV_CLARK:         calc_dist_vec = clark;         break;
-    case BDIV_DIVERGENCE:    calc_dist_vec = divergence;    break;
-    case BDIV_EUCLIDEAN:     calc_dist_vec = euclidean;     break;
-    case BDIV_GOWER:         calc_dist_vec = gower;         break;
-    case BDIV_HAMMING:       calc_dist_vec = hamming;       break;
-    case BDIV_HORN:          calc_dist_vec = horn;          break;
-    case BDIV_JACCARD:       calc_dist_vec = jaccard;       break;
-    case BDIV_JSD:           calc_dist_vec = jsd;           break;
-    case BDIV_LORENTZIAN:    calc_dist_vec = lorentzian;    break;
-    case BDIV_MANHATTAN:     calc_dist_vec = manhattan;     break;
-    case BDIV_MINKOWSKI:     calc_dist_vec = minkowski;     break;
-    case BDIV_MORISITA:      calc_dist_vec = morisita;      break;
-    case BDIV_MOTYKA:        calc_dist_vec = motyka;        break;
-    case BDIV_OCHIAI:        calc_dist_vec = ochiai;        break;
-    case BDIV_SOERGEL:       calc_dist_vec = soergel;       break;
-    case BDIV_SQUARED_CHISQ: calc_dist_vec = squared_chisq; break;
-    case BDIV_SQUARED_CHORD: calc_dist_vec = squared_chord; break;
-    case BDIV_WAVE_HEDGES:   calc_dist_vec = wave_hedges;   break;
+  // Avoid allocating pairs_vec for common all-vs-all case
+  if (isNull(sexp_pairs_vec)) {
+    pairs_vec = NULL;
+    n_pairs   = n_samples * (n_samples - 1) / 2;
+  }
+  else {
+    pairs_vec = INTEGER(sexp_pairs_vec);
+    n_pairs   = LENGTH(sexp_pairs_vec);
   }
   
-  if (calc_dist_vec == NULL) { // # nocov start
+  
+  // function to run
+  void * (*bdiv_func)(void *) = NULL;
+  
+  switch (algorithm) {
+    case BDIV_BHATTACHARYYA: bdiv_func = bhattacharyya; break;
+    case BDIV_BRAY:          bdiv_func = bray;          break;
+    case BDIV_CANBERRA:      bdiv_func = canberra;      break;
+    case BDIV_CHEBYSHEV:     bdiv_func = chebyshev;     break;
+    case BDIV_CLARK:         bdiv_func = clark;         break;
+    case BDIV_DIVERGENCE:    bdiv_func = divergence;    break;
+    case BDIV_EUCLIDEAN:     bdiv_func = euclidean;     break;
+    case BDIV_GOWER:         bdiv_func = gower;         break;
+    case BDIV_HAMMING:       bdiv_func = hamming;       break;
+    case BDIV_HORN:          bdiv_func = horn;          break;
+    case BDIV_JACCARD:       bdiv_func = jaccard;       break;
+    case BDIV_JSD:           bdiv_func = jsd;           break;
+    case BDIV_LORENTZIAN:    bdiv_func = lorentzian;    break;
+    case BDIV_MANHATTAN:     bdiv_func = manhattan;     break;
+    case BDIV_MINKOWSKI:     bdiv_func = minkowski;     break;
+    case BDIV_MORISITA:      bdiv_func = morisita;      break;
+    case BDIV_MOTYKA:        bdiv_func = motyka;        break;
+    case BDIV_OCHIAI:        bdiv_func = ochiai;        break;
+    case BDIV_SOERGEL:       bdiv_func = soergel;       break;
+    case BDIV_SORENSEN:      bdiv_func = sorensen;      break;
+    case BDIV_SQUARED_CHISQ: bdiv_func = squared_chisq; break;
+    case BDIV_SQUARED_CHORD: bdiv_func = squared_chord; break;
+    case BDIV_WAVE_HEDGES:   bdiv_func = wave_hedges;   break;
+  }
+  
+  if (bdiv_func == NULL) { // # nocov start
     error("Invalid beta diversity algorithm.");
     return R_NilValue;
   } // # nocov end
@@ -648,7 +682,7 @@ SEXP C_beta_div(
       
       int i, n = n_threads;
       for (i = 0; i < n; i++) args[i] = i;
-      for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, calc_dist_vec, &args[i]);
+      for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, bdiv_func, &args[i]);
       for (i = 0; i < n; i++) pthread_join(tids[i], NULL);
       
       free(tids); free(args);
@@ -661,7 +695,7 @@ SEXP C_beta_div(
   // Run WITHOUT multithreading
       n_threads = 1;
   int thread_i  = 0;
-  calc_dist_vec(&thread_i);
+  bdiv_func(&thread_i);
   
   return sexp_result_dist;
 }

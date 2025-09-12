@@ -42,57 +42,57 @@
 \usage{
 aitchison(counts, pseudocount = NULL, pairs = NULL, cpus = n_cpus())
 
-bhattacharyya(counts, pairs = NULL, cpus = n_cpus())
+bhattacharyya(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-bray(counts, pairs = NULL, cpus = n_cpus())
+bray(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-canberra(counts, pairs = NULL, cpus = n_cpus())
+canberra(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-chebyshev(counts, pairs = NULL, cpus = n_cpus())
+chebyshev(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
 chord(counts, pairs = NULL, cpus = n_cpus())
 
-clark(counts, pairs = NULL, cpus = n_cpus())
+clark(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-divergence(counts, pairs = NULL, cpus = n_cpus())
+divergence(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-euclidean(counts, pairs = NULL, cpus = n_cpus())
+euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-gower(counts, pairs = NULL, cpus = n_cpus())
+gower(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-hellinger(counts, pairs = NULL, cpus = n_cpus())
+hellinger(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-horn(counts, pairs = NULL, cpus = n_cpus())
+horn(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-jensen(counts, pairs = NULL, cpus = n_cpus())
+jensen(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-jsd(counts, pairs = NULL, cpus = n_cpus())
+jsd(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-lorentzian(counts, pairs = NULL, cpus = n_cpus())
+lorentzian(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-manhattan(counts, pairs = NULL, cpus = n_cpus())
+manhattan(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-matusita(counts, pairs = NULL, cpus = n_cpus())
+matusita(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-minkowski(counts, power = 1.5, pairs = NULL, cpus = n_cpus())
+minkowski(counts, rescale = TRUE, power = 1.5, pairs = NULL, cpus = n_cpus())
 
 morisita(counts, pairs = NULL, cpus = n_cpus())
 
-motyka(counts, pairs = NULL, cpus = n_cpus())
+motyka(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-psym_chisq(counts, pairs = NULL, cpus = n_cpus())
+psym_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-soergel(counts, pairs = NULL, cpus = n_cpus())
+soergel(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_chisq(counts, pairs = NULL, cpus = n_cpus())
+squared_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_chord(counts, pairs = NULL, cpus = n_cpus())
+squared_chord(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_euclidean(counts, pairs = NULL, cpus = n_cpus())
+squared_euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-topsoe(counts, pairs = NULL, cpus = n_cpus())
+topsoe(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-wave_hedges(counts, pairs = NULL, cpus = n_cpus())
+wave_hedges(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
 hamming(counts, pairs = NULL, cpus = n_cpus())
 
@@ -135,6 +135,9 @@ distance matrix to calculate. See examples.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
+
+\item{rescale}{Normalize each sample's counts so they sum to \code{1}.
+Default: \code{TRUE}}
 
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}

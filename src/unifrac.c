@@ -90,43 +90,43 @@ static SEXP   *sexp_extra;
  */
 
 
-#define START_PAIR_LOOP                                        \
-  int thread_i = *((int *) arg);                               \
-  double distance;                                             \
-  int pair_idx = 0;                                            \
-  int dist_idx = 0;                                            \
-  for (int i = 0; i < n_samples - 1; i++) {                    \
-    double *x_weight_vec = weight_mtx + (i * n_edges);         \
-    for (int j = i + 1; j < n_samples; j++) {                  \
-      if (pairs_vec[pair_idx] == dist_idx) {                   \
-        if (pair_idx % n_threads == thread_i) {                \
+#define START_PAIR_LOOP                                             \
+  int thread_i = *((int *) arg);                                    \
+  double distance;                                                  \
+  int pair_idx = 0;                                                 \
+  int dist_idx = 0;                                                 \
+  for (int i = 0; i < n_samples - 1; i++) {                         \
+    double *x_weight_vec = weight_mtx + (i * n_edges);              \
+    for (int j = i + 1; j < n_samples; j++) {                       \
+      if (pairs_vec == NULL || pairs_vec[pair_idx] == dist_idx) {   \
+        if (pair_idx % n_threads == thread_i) {                     \
           double *y_weight_vec = weight_mtx + (j * n_edges);
 
 
-#define START_PAIR_TOTAL_LOOP                                  \
-  int thread_i = *((int *) arg);                               \
-  double distance;                                             \
-  int pair_idx = 0;                                            \
-  int dist_idx = 0;                                            \
-  for (int i = 0; i < n_samples - 1; i++) {                    \
-    double  x_total      = total_vec[i];                       \
-    double *x_weight_vec = weight_mtx + (i * n_edges);         \
-    for (int j = i + 1; j < n_samples; j++) {                  \
-      if (pairs_vec[pair_idx] == dist_idx) {                   \
-        if (pair_idx % n_threads == thread_i) {                \
-          double  y_total      = total_vec[j];                 \
+#define START_PAIR_TOTAL_LOOP                                       \
+  int thread_i = *((int *) arg);                                    \
+  double distance;                                                  \
+  int pair_idx = 0;                                                 \
+  int dist_idx = 0;                                                 \
+  for (int i = 0; i < n_samples - 1; i++) {                         \
+    double  x_total      = total_vec[i];                            \
+    double *x_weight_vec = weight_mtx + (i * n_edges);              \
+    for (int j = i + 1; j < n_samples; j++) {                       \
+      if (pairs_vec == NULL || pairs_vec[pair_idx] == dist_idx) {   \
+        if (pair_idx % n_threads == thread_i) {                     \
+          double  y_total      = total_vec[j];                      \
           double *y_weight_vec = weight_mtx + (j * n_edges);
 
 
-#define END_PAIR_LOOP                                          \
-          dist_vec[dist_idx] = distance;                       \
-        }                                                      \
-        pair_idx++;                                            \
-        if (pair_idx == n_pairs) return NULL;                  \
-      }                                                        \
-      dist_idx++;                                              \
-    }                                                          \
-  }                                                            \
+#define END_PAIR_LOOP                                               \
+          dist_vec[dist_idx] = distance;                            \
+        }                                                           \
+        pair_idx++;                                                 \
+        if (pair_idx == n_pairs) return NULL;                       \
+      }                                                             \
+      dist_idx++;                                                   \
+    }                                                               \
+  }                                                                 \
   return NULL;
   
 
@@ -412,11 +412,20 @@ SEXP C_unifrac(
   int *edge_mtx = INTEGER(get(sexp_phylo_tree, "edge"));
   n_edges       = nrows(  get(sexp_phylo_tree, "edge"));
   edge_lengths  = REAL(   get(sexp_phylo_tree, "edge.length"));
-  pairs_vec     = INTEGER(sexp_pairs_vec);
-  n_pairs       = LENGTH(sexp_pairs_vec);
   n_threads     = asInteger(sexp_n_threads);
   dist_vec      = REAL(sexp_result_dist);
   sexp_extra    = &sexp_extra_args;
+  
+  
+  // Avoid allocating pairs_vec for common all-vs-all case
+  if (isNull(sexp_pairs_vec)) {
+    pairs_vec = NULL;
+    n_pairs   = n_samples * (n_samples - 1) / 2;
+  }
+  else {
+    pairs_vec = INTEGER(sexp_pairs_vec);
+    n_pairs   = LENGTH(sexp_pairs_vec);
+  }
   
   
   // branch_weight/depth for each (sample,edge) combo.

@@ -43,32 +43,30 @@ Supports partial matching. All non-alpha characters are ignored.}
 \strong{\code{match_metric()}}
 
 A \code{list} with the following elements.
-
-\describe{
-\item{\code{name} - }{ Metric name, e.g. \code{"Faith's Phylogenetic Diversity"} }
-\item{\code{id} - }{ Metric ID - also the name of the function, e.g. \code{"faith"} }
-\item{\code{div} - }{ Either \code{"alpha"} or \code{"beta"}. }
-\item{\code{phylo} - }{ \code{TRUE} if metric requires a phylogenetic tree; \code{FALSE} otherwise. }
-\item{\code{weighted} - }{ \code{TRUE} if metric takes relative abundance into account; \code{FALSE} if it only uses presence/absence. }
-\item{\code{true_metric} - }{ \code{TRUE} if metric satisfies the triangle inequality; \code{FALSE} if it is a non-metric dissimilarity; \code{NA} for alpha diversity metrics. }
-\item{\code{func} - }{ The function for this metric, e.g. \code{ecodive::faith} }
-\item{\code{params} - }{ Formal args for \code{func}, e.g. \code{c("counts", "tree", "cpus")} }
+\itemize{
+\item \code{name} : Metric name, e.g. \code{"Faith's Phylogenetic Diversity"}
+\item \code{id} : Metric ID - also the name of the function, e.g. \code{"faith"}
+\item \code{div} : Either \code{"alpha"} or \code{"beta"}.
+\item \code{phylo} : \code{TRUE} if metric requires a phylogenetic tree; \code{FALSE} otherwise.
+\item \code{weighted} : \code{TRUE} if metric takes relative abundance into account; \code{FALSE} if it only uses presence/absence.
+\item \code{true_metric} : \code{TRUE} if metric satisfies the triangle inequality; \code{FALSE} if it is a non-metric dissimilarity; \code{NA} for alpha diversity metrics.
+\item \code{func} : The function for this metric, e.g. \code{ecodive::faith}
+\item \code{params} : Formal args for \code{func}, e.g. \code{c("counts", "tree", "cpus")}
 }
 
 \strong{\code{list_metrics()}}
 
 The returned object's type and values are controlled with the \code{val} and \code{nm} arguments.
-
-\describe{
-\item{\code{val = "data.frame"} - }{ The data.frame from which the below options are sourced. }
-\item{\code{val = "list"} - }{ A list of objects as returned by \code{match_metric()} (above). }
-\item{\code{val = "func"} - }{ A list of functions. }
-\item{\code{val = "id"} - }{ A character vector of metric IDs. }
-\item{\code{val = "name"} - }{ A character vector of metric names. }
-\item{\code{val = "div"} - }{ A character vector \code{"alpha"} and/or \code{"beta"}. }
-\item{\code{val = "phylo"} - }{ A logical vector indicating which metrics require a tree. }
-\item{\code{val = "weighted"} - }{ A logical vector indicating which metrics take relative abundance into account (as opposed to just presence/absence). }
-\item{\code{val = "true_metric"} - }{ A logical vector indicating which metrics satisfy the triangle inequality, which work better for ordinations such as PCoA. }
+\itemize{
+\item \code{val = "data.frame"} : The data.frame from which the below options are sourced.
+\item \code{val = "list"} : A list of objects as returned by \code{match_metric()} (above).
+\item \code{val = "func"} : A list of functions.
+\item \code{val = "id"} : A character vector of metric IDs.
+\item \code{val = "name"} : A character vector of metric names.
+\item \code{val = "div"} : A character vector \code{"alpha"} and/or \code{"beta"}.
+\item \code{val = "phylo"} : A logical vector indicating which metrics require a tree.
+\item \code{val = "weighted"} : A logical vector indicating which metrics take relative abundance into account (as opposed to just presence/absence).
+\item \code{val = "true_metric"} : A logical vector indicating which metrics satisfy the triangle inequality, which work better for ordinations such as PCoA.
 }
 
 If \code{nm} is set, then the names of the vector or list will be the metric ID

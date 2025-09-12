@@ -6,9 +6,9 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 resource_files:
-  - '../man/figures/unifrac-benchmark.png'
-  - '../man/figures/bdiv-benchmark.png'
   - '../man/figures/adiv-benchmark.png'
+  - '../man/figures/bdiv-benchmark.png'
+  - '../man/figures/unifrac-benchmark.png'
 ---
 
 ```{r, include = FALSE}
@@ -24,63 +24,67 @@ knitr::opts_chunk$set(
 
 ### State of the Field
 
-The table below shows a collection of bioinformatics R packages and how they
-implement classic and phylogenetic alpha/beta ecology diversity metrics.
+This analysis provides a comparative benchmark of R packages designed for
+calculating standard and phylogenetic metrics of alpha and beta diversity. The
+primary objective is to evaluate their computational efficiency, with a focus on
+processing speed and memory allocation. Packages that rely on these foundational
+libraries as dependencies have been omitted from this study to isolate the
+performance of the core implementations.
+
 
 | R Package               | Classic alpha/beta      | Phylogenetic alpha/beta |
 |:------------------------|:------------------------|:------------------------|
 | [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)               | ***Serial R***       | *none*             |
 | [adiv](https://doi.org/10.32614/CRAN.package.adiv)                 | ***Serial R***       | ***Serial R***     |
 | [ampvis2](https://github.com/KasperSkytte/ampvis2)                 | vegan                | ***Serial R***     |
-| [animalcules](https://github.com/wejlab/animalcules)               | vegan                | GUniFrac           |
 | [ecodist](https://doi.org/10.32614/CRAN.package.ecodist)           | ***Serial C/R***     | *none*             |
-| [ecodive](https://cran.r-project.org/package=ecodive)              | ***Parallel C***     | ***Parallel C***   |
+| [ecodive](https://doi.org/10.32614/CRAN.package.ecodive)           | ***Parallel C***     | ***Parallel C***   |
 | [entropart](https://doi.org/10.32614/CRAN.package.entropart)       | ***Serial R***       | *none*             |
 | [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)         | *none*               | ***Serial C***     |
 | [labdsv](https://doi.org/10.32614/CRAN.package.labdsv)             | ***Serial FORTRAN*** | *none*             |
-| [mia](https://doi.org/doi:10.18129/B9.bioc.mia)                    | vegan                | ecodive            |
-| [microbiome](https://doi.org/doi:10.18129/B9.bioc.microbiome)      | vegan                | phyloseq           |
-| [microeco](https://doi.org/10.32614/CRAN.package.microeco)         | vegan                | GUniFrac           |
-| [microViz](https://github.com/david-barnett/microViz)              | vegan                | GUniFrac           |
 | [parallelDist](https://doi.org/10.32614/CRAN.package.parallelDist) | ***Parallel C++***   | ***Parallel C++*** |
 | [philentropy](https://doi.org/10.32614/CRAN.package.philentropy)   | ***Serial C++***     | *none*             |
-| [phyloregion](https://github.com/darunabas/phyloregion)            | vegan                | ***Serial R***     |
+| [phyloregion](https://doi.org/10.32614/CRAN.package.phyloregion)   | vegan                | ***Serial R***     |
 | [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)          | vegan                | ***Parallel R***   |
-| [phylosmith](https://github.com/schuyler-smith/phylosmith)         | vegan                | *none*             |
 | [picante](https://doi.org/10.32614/CRAN.package.picante)           | vegan                | ***Serial R***     |
-| [rbiom](https://doi.org/10.32614/CRAN.package.rbiom)               | ecodive              | ecodive            |
-| [tabula](https://github.com/LebeerLab/tabula)                      | ***Serial R***       | *none*             |
-| [tidytacos](https://github.com/LebeerLab/tidytacos)                | vegan                | phyloseq           |
+| [tabula](https://doi.org/10.32614/CRAN.package.tabula)             | ***Serial R***       | *none*             |
 | [vegan](https://doi.org/10.32614/CRAN.package.vegan)               | ***Serial C***       | *none*             |
 
 
-Only thirteen packages - `abdiv`, `adiv`, `ampvis2`, `ecodist`, `entropart`,
-`GUniFrac`, `labdsv`, `phyloregion`, `phyloseq`, `picante`, `picante`, `tabula`,
-and `vegan` - have their own implementations of these algorithms. Other R
-packages import code from `ecodive`, `GUniFrac`, `phyloseq`, and/or `vegan` to
-handle alpha and beta diversity computations. Therefore, only these thirteen
-packages will be benchmarked.
 
 ### Methodology
 
-We will use the `bench` R package to track the runtime and memory consumption of
-the diversity algorithms in each of the ten R packages. The host system for
-these benchmarking runs has the following specifications.
+The `bench` R package was employed to quantify the computational runtime and
+memory allocation for the diversity algorithms within each of the 15 selected
+packages. All benchmarks were executed on a host system with the following
+hardware and software configuration:
 
-    6-Core i5-9600K CPU @ 3.70GHz; 64.0 GB RAM
-    Windows 11 Pro x64 24H2 26100.4652
+    CPU: 6-Core Intel i5-9600K @ 3.70GHz
+    RAM: 64.0 GB
+    OS: Windows 11 Pro (64-bit, Version 24H2, Build 26100.4652)
 
-The `bench::mark()` function also checks that the output from all benchmarked
-expressions are equal.
+Furthermore, the `bench::mark()` function was utilized to verify that the
+outputs from all benchmarked expressions were numerically equivalent, ensuring
+the consistency and comparability of the results.
+
 
 <br>
 
 
 # Setup
 
-We'll use two datasets from the rbiom R package: `hmp50` and `gems`. `hmp50` has 50 samples and a phylogenetic tree. It will be used for benchmarking the UniFrac and Faith phylogenetic metrics. The classic diversity metrics are much faster to calculate. Therefore, we'll use the 1,006-sample `gems` dataset for those.
+Two standard datasets from the `rbiom` R package, `hmp50` and `gems`, were
+selected for this evaluation. The `hmp50` dataset, which includes 50 samples and
+an associated phylogenetic tree, was used to benchmark the computationally
+intensive phylogenetic metrics, such as UniFrac and Faith's PD. For the
+traditional diversity metrics, which are significantly less demanding, the
+larger `gems` dataset, comprising 1,006 samples, was employed.
 
-The input and output formats for the six R packages are not identical, so the benchmarking code will transform data as needed. Whenever possible, these transformations will take place outside the timed block.
+To account for the heterogeneous input and output formats across the 15 R
+packages, necessary data transformations were performed. To ensure that the
+benchmarks exclusively measured the performance of the diversity calculations,
+these data conversion steps were executed outside of the timed code blocks
+whenever possible.
 
 <details>
   <summary>Click to reveal R code.</summary>
@@ -88,27 +92,53 @@ The input and output formats for the six R packages are not identical, so the be
 ```r
 install.packages('pak')
 
+# Tools and Datasets for Benchmarking Report
 pak::pkg_install(pkg = c(
-  'adiv', 'abdiv', 'bench', 'ecodive', 'entropart', 'GUniFrac', 
-  'kasperskytte/ampvis2', 'labdsv', 'philentropy', 'phylocomr', 
-  'phyloregion', 'phyloseq', 'picante', 'rbiom', 'tabula', 'vegan' ))
+  'bench', 'dplyr', 'ggplot2', 'ggrepel', 'rbiom' ))
 
+# Diversity Metric Implementations
+pak::pkg_install(pkg = c(
+  'abdiv', 'adiv', 'ecodist', 'ecodive', 'entropart', 'GUniFrac', 
+  'kasperskytte/ampvis2', 'labdsv', 'parallelDist', 'philentropy', 
+  'phyloregion', 'phyloseq', 'picante', 'tabula', 'vegan' ))
+
+
+# Software Versions
+
+version$version.string
+#> [1] "R version 4.5.1 (2025-06-13 ucrt)"
+
+data.frame(ver = sapply(FUN = packageDescription, fields = 'Version', c(
+  'bench', 'dplyr', 'ggplot2', 'ggrepel', 'rbiom',
+  'abdiv', 'adiv', 'ecodist', 'ecodive', 'entropart', 'GUniFrac', 
+  'ampvis2', 'labdsv', 'parallelDist', 'philentropy', 
+  'phyloregion', 'phyloseq', 'picante', 'tabula', 'vegan' )))
+#>                     ver
+#> bench             1.1.4
+#> dplyr             1.1.4
+#> ggplot2           3.5.2
+#> ggrepel           0.9.6
+#> rbiom             2.2.1
+#> abdiv             0.2.0
+#> adiv              2.2.1
+#> ecodist           2.1.3
+#> ecodive           1.0.1
+#> entropart        1.6-16
+#> GUniFrac            1.8
+#> ampvis2           2.8.9
+#> labdsv            2.1-2
+#> parallelDist      0.2.6
+#> philentropy       0.9.0
+#> phyloregion       1.0.9
+#> phyloseq         1.52.0
+#> picante           1.8.2
+#> tabula            3.3.1
+#> vegan             2.7-1
 
 library(bench)
 library(ggplot2)
 library(ggrepel)
 library(dplyr)
-
-version$version.string
-#> [1] "R version 4.5.1 (2025-06-13 ucrt)"
-
-sapply(FUN = packageDescription, fields = 'Version', c(
-  'abdiv', 'adiv', 'ampvis2', 'ecodive', 'entropart', 'GUniFrac', 'labdsv', 
-  'philentropy', 'phylocomr', 'phyloregion', 'phyloseq', 'picante', 'tabula', 'vegan' ))
-#>        abdiv         adiv      ampvis2      ecodive    entropart     GUniFrac       labdsv 
-#>      "0.2.0"      "2.2.1"      "2.8.9"      "1.0.1"     "1.6-16"        "1.8"      "2.1-2" 
-#>  philentropy    phylocomr  phyloregion     phyloseq      picante       tabula        vegan 
-#>      "0.9.0"      "0.3.4"      "1.0.9"     "1.52.0"      "1.8.2"      "3.3.1"      "2.7-1"
 
 (n_cpus <- ecodive::n_cpus())
 #> [1] 6
@@ -131,9 +161,8 @@ pairwise <- function (f, data, ...) {
 # Remove any extraneous attributes from dist objects,
 # allowing them to be compared with `all.equal()`.
 cleanup <- function (x) {
-  attr(x, 'maxdist') <- NULL
-  attr(x, 'method')  <- NULL
-  attr(x, 'call')    <- NULL
+  for (i in setdiff(names(attributes(x)), c('class', 'Labels', 'Size', 'Diag', 'Upper')))
+    attr(x, i) <- NULL
   return (x)
 }
 
@@ -141,15 +170,14 @@ cleanup <- function (x) {
 # HMP50 dataset has 50 Samples
 hmp50      <- rbiom::hmp50
 hmp50_phy  <- rbiom::convert_to_phyloseq(hmp50)
-hmp50_mtx  <- as.matrix(hmp50)
+hmp50_mtx  <- rbiom::rescale_cols(as.matrix(hmp50))
 hmp50_tmtx <- t(hmp50_mtx)
-hmp50_pmtx <- t(t(hmp50_mtx) / colSums(hmp50_mtx))
 hmp50_tree <- hmp50$tree
 
 
 # GEMS dataset has 1006 Samples
-gems_mtx  <- as.matrix(rbiom::gems)
-gems_tmtx <- t(gems_mtx)
+gems_mtx    <- rbiom::rescale_cols(as.matrix(rbiom::gems))
+gems_tmtx   <- t(gems_mtx)
 ```
 
 </details>
@@ -394,59 +422,91 @@ Here we'll benchmark the Bray-Curtis, Euclidean, Jaccard, and Manhattan classic 
 ```r
 bray_curtis_res <- bench::mark(
   iterations = 10,
-  'abdiv'    = cleanup(pairwise(abdiv::bray_curtis, gems_mtx)),
-  'ecodist'  = cleanup(ecodist::bcdist(gems_tmtx)),
-  'ecodive'  = cleanup(ecodive::bray_curtis(gems_mtx)),
-  'vegan'    = cleanup(vegan::vegdist(gems_tmtx, 'bray')) )
+  'abdiv'        = cleanup(pairwise(abdiv::bray_curtis, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::bcdist(gems_tmtx)),
+  'ecodive'      = cleanup(ecodive::bray(gems_mtx, rescale = FALSE)),
+  'labdsv'       = cleanup(labdsv::dsvdis(gems_tmtx, 'bray/curtis')),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_tmtx, 'bray')),
+  'philentropy'  = cleanup(philentropy::distance(gems_tmtx, 'sorensen', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'tabula'       = cleanup(1 - pairwise(tabula::index_bray, gems_mtx)),
+  'vegan'        = cleanup(vegan::vegdist(gems_tmtx, 'bray')) )
 
 jaccard_res <- bench::mark(
   iterations = 10,
-  check      = FALSE, # abdiv has incorrect output
-  'abdiv'    = cleanup(pairwise(abdiv::jaccard, gems_mtx)),
-  'ecodist'  = cleanup(ecodist::distance(gems_tmtx, 'jaccard')),
-  'ecodive'  = cleanup(ecodive::jaccard(gems_mtx)),
-  'vegan'    = cleanup(vegan::vegdist(gems_tmtx, 'jaccard')) )
+  'abdiv'        = cleanup(pairwise(abdiv::jaccard, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_tmtx, 'jaccard')),
+  'ecodive'      = cleanup(ecodive::jaccard(gems_mtx, rescale = FALSE)),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_tmtx, 'binary')),
+  'philentropy'  = cleanup(philentropy::distance(gems_tmtx > 0, 'jaccard', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'phyloregion'  = cleanup(phyloregion::beta_diss(gems_tmtx, 'jaccard')$beta.jac),
+  'stats'        = cleanup(stats::dist(gems_tmtx, 'binary')),
+  'vegan'        = cleanup(vegan::vegdist(gems_tmtx, 'jaccard', binary = TRUE)) )
 
 manhattan_res <- bench::mark(
   iterations = 10,
-  'abdiv'    = cleanup(pairwise(abdiv::manhattan, gems_mtx)),
-  'ecodist'  = cleanup(ecodist::distance(gems_tmtx, 'manhattan')),
-  'ecodive'  = cleanup(ecodive::manhattan(gems_mtx)),
-  'vegan'    = cleanup(vegan::vegdist(gems_tmtx, 'manhattan')) )
+  'abdiv'        = cleanup(pairwise(abdiv::manhattan, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_tmtx, 'manhattan')),
+  'ecodive'      = cleanup(ecodive::manhattan(gems_mtx, rescale = FALSE)),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_tmtx, 'manhattan')),
+  'philentropy'  = cleanup(philentropy::distance(gems_tmtx, 'manhattan', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'stats'        = cleanup(stats::dist(gems_tmtx, 'manhattan')),
+  'vegan'        = cleanup(vegan::vegdist(gems_tmtx, 'manhattan')) )
 
 euclidean_res <- bench::mark(
   iterations = 10,
-  'abdiv'    = cleanup(pairwise(abdiv::euclidean, gems_mtx)),
-  'ecodist'  = cleanup(ecodist::distance(gems_tmtx, 'euclidean')),
-  'ecodive'  = cleanup(ecodive::euclidean(gems_mtx)),
-  'vegan'    = cleanup(vegan::vegdist(gems_tmtx, 'euclidean')) )
+  'abdiv'        = cleanup(pairwise(abdiv::euclidean, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_tmtx, 'euclidean')),
+  'ecodive'      = cleanup(ecodive::euclidean(gems_mtx, rescale = FALSE)),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_tmtx, 'euclidean')),
+  'philentropy'  = cleanup(philentropy::distance(gems_tmtx, 'euclidean', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'stats'        = cleanup(stats::dist(gems_tmtx, 'euclidean')),
+  'vegan'        = cleanup(vegan::vegdist(gems_tmtx, 'euclidean')) )
 
 bdiv_res <- bind_rows(
     mutate(bray_curtis_res, Metric = 'Bray-Curtis'),
-    mutate(jaccard_res,     Metric = 'Jaccard'),
-    mutate(manhattan_res,   Metric = 'Manhattan'),
-    mutate(euclidean_res,   Metric = 'Euclidean') ) %>%
+    # mutate(jaccard_res,     Metric = 'Jaccard'),
+    # mutate(manhattan_res,   Metric = 'Manhattan'),
+    # mutate(euclidean_res,   Metric = 'Euclidean') 
+    ) %>%
   mutate(Package = as.character(expression)) %>%
   select(Package, Metric, median, mem_alloc) %>%
   arrange(Package)
 
 
-bdiv_res
-#> # A tibble: 12 × 4
-#>    Package Metric        median mem_alloc
-#>    <chr>   <chr>       <bch:tm> <bch:byt>
-#>  1 abdiv   Bray-Curtis   12.16s    14.7GB
-#>  2 abdiv   Jaccard        15.6s      22GB
-#>  3 abdiv   Manhattan     10.13s    13.2GB
-#>  4 abdiv   Euclidean     10.92s    16.1GB
-#>  5 ecodive Bray-Curtis   72.8ms    26.3MB
-#>  6 ecodive Jaccard      73.68ms    26.3MB
-#>  7 ecodive Manhattan    73.47ms    26.3MB
-#>  8 ecodive Euclidean    72.84ms    26.3MB
-#>  9 vegan   Bray-Curtis    1.75s    22.4MB
-#> 10 vegan   Jaccard        1.82s    22.3MB
-#> 11 vegan   Manhattan      1.68s    19.4MB
-#> 12 vegan   Euclidean      1.68s    19.4MB
+print(bdiv_res, n = 30)
+#> # A tibble: 30 × 4
+#>    Package      Metric        median mem_alloc
+#>    <chr>        <chr>       <bch:tm> <bch:byt>
+#>  1 abdiv        Bray-Curtis    11.5s   20.43GB
+#>  2 abdiv        Jaccard        1.83m   24.89GB
+#>  3 abdiv        Manhattan       2.9m   17.52GB
+#>  4 abdiv        Euclidean      2.35m   17.52GB
+#>  5 ecodist      Bray-Curtis  482.5ms   29.25MB
+#>  6 ecodist      Jaccard        3.04m   47.89GB
+#>  7 ecodist      Manhattan      2.14m    21.8GB
+#>  8 ecodist      Euclidean      2.07m    21.8GB
+#>  9 ecodive      Bray-Curtis 115.72ms   20.41MB
+#> 10 ecodive      Jaccard      100.5ms   14.52MB
+#> 11 ecodive      Manhattan   156.29ms   20.42MB
+#> 12 ecodive      Euclidean   143.38ms   20.42MB
+#> 13 labdsv       Bray-Curtis    1.13s   63.94MB
+#> 14 parallelDist Bray-Curtis 258.71ms    4.02MB
+#> 15 parallelDist Jaccard     317.93ms    3.86MB
+#> 16 parallelDist Manhattan   163.51ms    3.86MB
+#> 17 parallelDist Euclidean   158.62ms    3.86MB
+#> 18 philentropy  Bray-Curtis    11.2s   14.65GB
+#> 19 philentropy  Jaccard        1.89m    17.6GB
+#> 20 philentropy  Manhattan      2.18m   14.65GB
+#> 21 philentropy  Euclidean       2.3m   14.65GB
+#> 22 phyloregion  Jaccard     141.15ms  193.92MB
+#> 23 stats        Jaccard        3.02s    3.86MB
+#> 24 stats        Manhattan      2.21s    3.86MB
+#> 25 stats        Euclidean      2.22s    3.86MB
+#> 26 tabula       Bray-Curtis   21.77s   20.44GB
+#> 27 vegan        Bray-Curtis    2.63s    12.6MB
+#> 28 vegan        Jaccard        1.95s   59.69MB
+#> 29 vegan        Manhattan      1.61s    9.64MB
+#> 30 vegan        Euclidean      1.63s    9.64MB
 
 
 # How much faster and more memory efficient is ecodive?
@@ -524,7 +584,7 @@ faith_res <- bench::mark(
   'abdiv'       = apply(hmp50_mtx, 2L, abdiv::faith_pd, hmp50_tree),
   'adiv'        = apply(hmp50_mtx, 2L, \(x) adiv::EH(hmp50_tree, rownames(hmp50_mtx)[x > 0])),
   'ecodive'     = ecodive::faith(hmp50_mtx, hmp50_tree),
-  'entropart'   = apply(hmp50_pmtx, 2L, entropart::PDFD, hmp50_tree, CheckArguments = FALSE),
+  'entropart'   = apply(hmp50_mtx, 2L, entropart::PDFD, hmp50_tree, CheckArguments = FALSE),
   'phyloregion' = phyloregion::PD(hmp50_tmtx, hmp50_tree) )
 
 adiv_res <- bind_rows(

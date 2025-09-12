@@ -1,4 +1,22 @@
 
+
+
+# Integer IDs for C code.
+ADIV_ACE         <-  1L
+ADIV_BERGER      <-  2L
+ADIV_BRILLOUIN   <-  3L
+ADIV_CHAO1       <-  4L
+ADIV_FISHER      <-  5L
+ADIV_INV_SIMPSON <-  6L
+ADIV_MARGALEF    <-  7L
+ADIV_MCINTOSH    <-  8L
+ADIV_MENHINICK   <-  9L
+ADIV_OBSERVED    <- 10L
+ADIV_SHANNON     <- 11L
+ADIV_SIMPSON     <- 12L
+ADIV_SQUARES     <- 13L
+
+
 #' Alpha Diversity Metrics
 #' 
 #' 
@@ -96,7 +114,7 @@ ace <- function (counts, cutoff = 10, cpus = n_cpus()) {
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 11L, 
+    C_alpha_div, ADIV_ACE, 
     counts, cpus, result_vec, cutoff )
 }
 
@@ -105,13 +123,13 @@ ace <- function (counts, cutoff = 10, cpus = n_cpus()) {
 #  max(x / sum(x))
 #' @export
 #' @rdname adiv_functions
-berger <- function (counts, cpus = n_cpus()) {
+berger <- function (counts, rescale = TRUE, cpus = n_cpus()) {
   
   validate_args()
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 7L, 
+    C_alpha_div, ADIV_BERGER, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -128,7 +146,7 @@ brillouin <- function (counts, cpus = n_cpus()) {
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 5L, 
+    C_alpha_div, ADIV_BRILLOUIN, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -144,7 +162,7 @@ chao1 <- function (counts, cpus = n_cpus()) {
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 1L, 
+    C_alpha_div, ADIV_CHAO1, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -173,7 +191,7 @@ fisher <- function (counts, digits = 3L, cpus = n_cpus()) {
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 12L, 
+    C_alpha_div, ADIV_FISHER, 
     counts, cpus, result_vec, digits )
 }
 
@@ -183,13 +201,13 @@ fisher <- function (counts, digits = 3L, cpus = n_cpus()) {
 #  1 / sum(p ** 2)
 #' @export
 #' @rdname adiv_functions
-inv_simpson <- function (counts, cpus = n_cpus()) {
+inv_simpson <- function (counts, rescale = TRUE, cpus = n_cpus()) {
   
   validate_args()
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 2L, 
+    C_alpha_div, ADIV_INV_SIMPSON, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -205,7 +223,7 @@ margalef <- function (counts, cpus = n_cpus()) {
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 8L, 
+    C_alpha_div, ADIV_MARGALEF, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -220,7 +238,7 @@ mcintosh <- function (counts, cpus = n_cpus()) {
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 6L, 
+    C_alpha_div, ADIV_MCINTOSH, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -236,7 +254,7 @@ menhinick <- function (counts, cpus = n_cpus()) {
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 9L, 
+    C_alpha_div, ADIV_MENHINICK, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -257,13 +275,13 @@ observed <- function (counts, cpus = n_cpus()) {
 #  -sum(p * log(p))
 #' @export
 #' @rdname adiv_functions
-shannon <- function (counts, cpus = n_cpus()) {
+shannon <- function (counts, rescale = TRUE, cpus = n_cpus()) {
   
   validate_args()
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 3L, 
+    C_alpha_div, ADIV_SHANNON, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -273,13 +291,13 @@ shannon <- function (counts, cpus = n_cpus()) {
 #  1 - sum(p ** 2)
 #' @export
 #' @rdname adiv_functions
-simpson <- function (counts, cpus = n_cpus()) {
+simpson <- function (counts, rescale = TRUE, cpus = n_cpus()) {
   
   validate_args()
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 4L, 
+    C_alpha_div, ADIV_SIMPSON, 
     counts, cpus, result_vec, NULL )
 }
 
@@ -298,6 +316,6 @@ squares <- function (counts, cpus = n_cpus()) {
   result_vec <- init_result_vec(counts)
   
   .Call(
-    C_alpha_div, 10L, 
+    C_alpha_div, ADIV_SQUARES, 
     counts, cpus, result_vec, NULL )
 }

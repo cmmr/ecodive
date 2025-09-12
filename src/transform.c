@@ -141,16 +141,16 @@ SEXP C_transform(
     SEXP sexp_otu_mtx,   SEXP sexp_algorithm, 
     SEXP sexp_n_threads, SEXP sexp_extra_args ) {
   
-  otu_mtx   = REAL(sexp_otu_mtx);
-  n_otus    = nrows(sexp_otu_mtx);
-  n_samples = ncols(sexp_otu_mtx);
-  algorithm = asInteger(sexp_algorithm);
-  n_threads = asInteger(sexp_n_threads);
+  otu_mtx    = REAL(sexp_otu_mtx);
+  n_otus     = nrows(sexp_otu_mtx);
+  n_samples  = ncols(sexp_otu_mtx);
+  algorithm  = asInteger(sexp_algorithm);
+  n_threads  = asInteger(sexp_n_threads);
   sexp_extra = &sexp_extra_args;
   
   // Copy `otu_mtx` to a new object named `result_mtx`.
-  SEXP sexp_result_mtx;
-  PROTECT(sexp_result_mtx = allocMatrix(REALSXP, n_otus, n_samples));
+  SEXP sexp_result_mtx = duplicate(sexp_otu_mtx);
+  PROTECT(sexp_result_mtx);
   result_mtx = REAL(sexp_result_mtx);
   
   

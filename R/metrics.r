@@ -121,33 +121,29 @@ ENV <- environment()
 #' 
 #' A `list` with the following elements.
 #' 
-#' \describe{
-#'   \item{`name` - }{ Metric name, e.g. `"Faith's Phylogenetic Diversity"` }
-#'   \item{`id` - }{ Metric ID - also the name of the function, e.g. `"faith"` }
-#'   \item{`div` - }{ Either `"alpha"` or `"beta"`. }
-#'   \item{`phylo` - }{ `TRUE` if metric requires a phylogenetic tree; `FALSE` otherwise. }
-#'   \item{`weighted` - }{ `TRUE` if metric takes relative abundance into account; `FALSE` if it only uses presence/absence. }
-#'   \item{`true_metric` - }{ `TRUE` if metric satisfies the triangle inequality; `FALSE` if it is a non-metric dissimilarity; `NA` for alpha diversity metrics. }
-#'   \item{`func` - }{ The function for this metric, e.g. `ecodive::faith` }
-#'   \item{`params` - }{ Formal args for `func`, e.g. `c("counts", "tree", "cpus")` }
-#' }
+#' * `name` : Metric name, e.g. `"Faith's Phylogenetic Diversity"`
+#' * `id` : Metric ID - also the name of the function, e.g. `"faith"`
+#' * `div` : Either `"alpha"` or `"beta"`.
+#' * `phylo` : `TRUE` if metric requires a phylogenetic tree; `FALSE` otherwise.
+#' * `weighted` : `TRUE` if metric takes relative abundance into account; `FALSE` if it only uses presence/absence.
+#' * `true_metric` : `TRUE` if metric satisfies the triangle inequality; `FALSE` if it is a non-metric dissimilarity; `NA` for alpha diversity metrics.
+#' * `func` : The function for this metric, e.g. `ecodive::faith`
+#' * `params` : Formal args for `func`, e.g. `c("counts", "tree", "cpus")`
 #' 
 #' 
 #' **`list_metrics()`**
 #' 
 #' The returned object's type and values are controlled with the `val` and `nm` arguments.
 #' 
-#' \describe{
-#'   \item{`val = "data.frame"` - }{ The data.frame from which the below options are sourced. }
-#'   \item{`val = "list"` - }{ A list of objects as returned by `match_metric()` (above). }
-#'   \item{`val = "func"` - }{ A list of functions. }
-#'   \item{`val = "id"` - }{ A character vector of metric IDs. }
-#'   \item{`val = "name"` - }{ A character vector of metric names. }
-#'   \item{`val = "div"` - }{ A character vector `"alpha"` and/or `"beta"`. }
-#'   \item{`val = "phylo"` - }{ A logical vector indicating which metrics require a tree. }
-#'   \item{`val = "weighted"` - }{ A logical vector indicating which metrics take relative abundance into account (as opposed to just presence/absence). }
-#'   \item{`val = "true_metric"` - }{ A logical vector indicating which metrics satisfy the triangle inequality, which work better for ordinations such as PCoA. }
-#' }
+#' * `val = "data.frame"` : The data.frame from which the below options are sourced.
+#' * `val = "list"` : A list of objects as returned by `match_metric()` (above).
+#' * `val = "func"` : A list of functions.
+#' * `val = "id"` : A character vector of metric IDs.
+#' * `val = "name"` : A character vector of metric names.
+#' * `val = "div"` : A character vector `"alpha"` and/or `"beta"`.
+#' * `val = "phylo"` : A logical vector indicating which metrics require a tree.
+#' * `val = "weighted"` : A logical vector indicating which metrics take relative abundance into account (as opposed to just presence/absence).
+#' * `val = "true_metric"` : A logical vector indicating which metrics satisfy the triangle inequality, which work better for ordinations such as PCoA.
 #' 
 #' If `nm` is set, then the names of the vector or list will be the metric ID
 #' (`nm="id"`) or name (`nm="name"`). When `val="data.frame"`, the names will be

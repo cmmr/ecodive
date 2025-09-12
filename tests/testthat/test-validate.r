@@ -71,6 +71,17 @@ test_that("validation", {
   
   
   
+  # validate_rescale() ====
+  
+  env$rescale <- NULL
+  expect_error(validate_rescale(env))
+  
+  env$rescale <- 'a'
+  expect_error(validate_rescale(env))
+  
+  
+  
+  
   # validate_tree() ====
   
   env$counts <- counts[1:3,,drop=FALSE]

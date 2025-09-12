@@ -75,7 +75,6 @@ validate_counts <- function (env = parent.frame()) {
       
       stopifnot(is.numeric(counts))
       stopifnot(length(dim(counts)) == 2)
-      stopifnot(all(counts >= 0))
       stopifnot(nrow(counts) > 0)
       stopifnot(ncol(counts) > 0)
       
@@ -231,13 +230,11 @@ validate_pairs <- function (env = parent.frame()) {
   
   tryCatch(
     with(env, {
-      n_samples   <- ncol(counts)
-      n_distances <- n_samples * (n_samples - 1) / 2
       
-      if (is.null(pairs)) {
-        pairs <- as.integer(seq_len(n_distances) - 1)
-      }
-      else {
+      if (!is.null(pairs)) {
+        
+        n_samples   <- ncol(counts)
+        n_distances <- n_samples * (n_samples - 1) / 2
         
         if (is.function(pairs))
           pairs <- local({
@@ -261,8 +258,8 @@ validate_pairs <- function (env = parent.frame()) {
         }
         
         pairs <- pairs - 1L
+        remove('n_samples', 'n_distances')
       }
-      remove('n_samples', 'n_distances')
     }),
     
     error = function (e) 
@@ -305,6 +302,23 @@ validate_pseudocount <- function (env = parent.frame()) {
     
     error = function (e) 
       stop(e$message, '\n`pseudocount` must be a single positive number.')
+  )
+}
+
+
+validate_rescale <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      
+      stopifnot(is.logical(rescale))
+      stopifnot(length(rescale) == 1)
+      
+      if (isTRUE(rescale))
+        counts <- transform_pct(counts)
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`rescale` must be TRUE or FALSE.')
   )
 }
 
