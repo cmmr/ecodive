@@ -24,6 +24,17 @@ test_that("beta diversity", {
   
   
   
+  # Pairs != NULL ====
+  
+  expect_equal(
+    object   = as.vector(bray(counts, pairs = 1:2)), 
+    expected = c(0.444444444444444,  0.428571428571429, NA, NA, NA, NA) )
+  
+  expect_equal(
+    object   = as.vector(unweighted_unifrac(counts, tree, pairs = 1:2)), 
+    expected = c(0.426927101499826, 0.426927101499826, NA, NA, NA, NA) )
+  
+  
   
   # Aitchison ====
   

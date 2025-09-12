@@ -235,6 +235,7 @@ margalef <- function (counts, cpus = n_cpus()) {
 mcintosh <- function (counts, cpus = n_cpus()) {
   
   validate_args()
+  assert_integer_counts()
   result_vec <- init_result_vec(counts)
   
   .Call(
@@ -266,7 +267,11 @@ menhinick <- function (counts, cpus = n_cpus()) {
 observed <- function (counts, cpus = n_cpus()) {
   
   validate_args()
-  colSums(counts > 0)
+  result_vec <- init_result_vec(counts)
+  
+  .Call(
+    C_alpha_div, ADIV_OBSERVED, 
+    counts, cpus, result_vec, NULL )
 }
 
 

@@ -53,8 +53,7 @@ pthreads <- function () {
 
 TRANSFORM_PCT   <- 1L
 TRANSFORM_CLR   <- 2L
-TRANSFORM_BIN   <- 3L
-TRANSFORM_CHORD <- 4L
+TRANSFORM_CHORD <- 3L
 
 transform_pct <- function (counts, cpus = n_cpus()) {
   .Call(C_transform, counts, TRANSFORM_PCT, cpus, NULL)
@@ -62,10 +61,6 @@ transform_pct <- function (counts, cpus = n_cpus()) {
 
 transform_clr <- function (counts, pseudocount, cpus = n_cpus()) {
   .Call(C_transform, counts, TRANSFORM_CLR, cpus, pseudocount)
-}
-
-transform_bin <- function (counts, cpus = n_cpus()) {
-  .Call(C_transform, counts, TRANSFORM_BIN, cpus, NULL)
 }
 
 transform_chord <- function (counts, cpus = n_cpus()) {

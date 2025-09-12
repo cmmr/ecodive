@@ -405,6 +405,7 @@ SEXP C_alpha_div(
     case ADIV_MARGALEF:    adiv_func = margalef;    break;
     case ADIV_MCINTOSH:    adiv_func = mcintosh;    break;
     case ADIV_MENHINICK:   adiv_func = menhinick;   break;
+    case ADIV_OBSERVED:    adiv_func = observed;    break;
     case ADIV_SHANNON:     adiv_func = shannon;     break;
     case ADIV_SIMPSON:     adiv_func = simpson;     break;
     case ADIV_SQUARES:     adiv_func = squares;     break;

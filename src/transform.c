@@ -17,8 +17,7 @@
 
 #define TRANSFORM_PCT    1
 #define TRANSFORM_CLR    2
-#define TRANSFORM_BIN    3
-#define TRANSFORM_CHORD  4
+#define TRANSFORM_CHORD  3
 
 static double *otu_mtx;
 static int     n_otus;
@@ -84,27 +83,6 @@ static void *transform_clr(void *arg) {
 
 
 //======================================================
-// Binary Presence/Absence
-// x > 0
-//======================================================
-static void *transform_bin(void *arg) {
-  
-  int thread_i = *((int *) arg);
-  
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {
-    
-    double *otu_vec    = otu_mtx    + (sample * n_otus);
-    double *result_vec = result_mtx + (sample * n_otus);
-    
-    for (int otu = 0; otu < n_otus; otu++)
-      result_vec[otu] = otu_vec[otu] > 0;
-  }
-  
-  return NULL;
-}
-
-
-//======================================================
 // Chord-Transformed Relative Abundance
 // x / sqrt(sum(x ^ 2))
 //======================================================
@@ -160,7 +138,6 @@ SEXP C_transform(
   switch (algorithm) {
     case TRANSFORM_PCT:   transformer = transform_pct;   break;
     case TRANSFORM_CLR:   transformer = transform_clr;   break;
-    case TRANSFORM_BIN:   transformer = transform_bin;   break;
     case TRANSFORM_CHORD: transformer = transform_chord; break;
   }
   
