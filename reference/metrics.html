@@ -9,7 +9,7 @@ functions."><meta property="og:image" content="https://cmmr.github.io/ecodive/lo
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9003</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,63 +99,25 @@ Supports partial matching. All non-alpha characters are ignored.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><strong><code>match_metric()</code></strong></p>
-<p>A <code>list</code> with the following elements.</p>
-<dl><dt><code>name</code> - </dt>
-<dd><p>Metric name, e.g. <code>"Faith's Phylogenetic Diversity"</code></p></dd>
-
-<dt><code>id</code> - </dt>
-<dd><p>Metric ID - also the name of the function, e.g. <code>"faith"</code></p></dd>
-
-<dt><code>div</code> - </dt>
-<dd><p>Either <code>"alpha"</code> or <code>"beta"</code>.</p></dd>
-
-<dt><code>phylo</code> - </dt>
-<dd><p><code>TRUE</code> if metric requires a phylogenetic tree; <code>FALSE</code> otherwise.</p></dd>
-
-<dt><code>weighted</code> - </dt>
-<dd><p><code>TRUE</code> if metric takes relative abundance into account; <code>FALSE</code> if it only uses presence/absence.</p></dd>
-
-<dt><code>true_metric</code> - </dt>
-<dd><p><code>TRUE</code> if metric satisfies the triangle inequality; <code>FALSE</code> if it is a non-metric dissimilarity; <code>NA</code> for alpha diversity metrics.</p></dd>
-
-<dt><code>func</code> - </dt>
-<dd><p>The function for this metric, e.g. <code><a href="adiv_functions.html">ecodive::faith</a></code></p></dd>
-
-<dt><code>params</code> - </dt>
-<dd><p>Formal args for <code>func</code>, e.g. <code>c("counts", "tree", "cpus")</code></p></dd>
-
-
-</dl><p><strong><code>list_metrics()</code></strong></p>
-<p>The returned object's type and values are controlled with the <code>val</code> and <code>nm</code> arguments.</p>
-<dl><dt><code>val = "data.frame"</code> - </dt>
-<dd><p>The data.frame from which the below options are sourced.</p></dd>
-
-<dt><code>val = "list"</code> - </dt>
-<dd><p>A list of objects as returned by <code>match_metric()</code> (above).</p></dd>
-
-<dt><code>val = "func"</code> - </dt>
-<dd><p>A list of functions.</p></dd>
-
-<dt><code>val = "id"</code> - </dt>
-<dd><p>A character vector of metric IDs.</p></dd>
-
-<dt><code>val = "name"</code> - </dt>
-<dd><p>A character vector of metric names.</p></dd>
-
-<dt><code>val = "div"</code> - </dt>
-<dd><p>A character vector <code>"alpha"</code> and/or <code>"beta"</code>.</p></dd>
-
-<dt><code>val = "phylo"</code> - </dt>
-<dd><p>A logical vector indicating which metrics require a tree.</p></dd>
-
-<dt><code>val = "weighted"</code> - </dt>
-<dd><p>A logical vector indicating which metrics take relative abundance into account (as opposed to just presence/absence).</p></dd>
-
-<dt><code>val = "true_metric"</code> - </dt>
-<dd><p>A logical vector indicating which metrics satisfy the triangle inequality, which work better for ordinations such as PCoA.</p></dd>
-
-
-</dl><p>If <code>nm</code> is set, then the names of the vector or list will be the metric ID
+<p>A <code>list</code> with the following elements.</p><ul><li><p><code>name</code> : Metric name, e.g. <code>"Faith's Phylogenetic Diversity"</code></p></li>
+<li><p><code>id</code> : Metric ID - also the name of the function, e.g. <code>"faith"</code></p></li>
+<li><p><code>div</code> : Either <code>"alpha"</code> or <code>"beta"</code>.</p></li>
+<li><p><code>phylo</code> : <code>TRUE</code> if metric requires a phylogenetic tree; <code>FALSE</code> otherwise.</p></li>
+<li><p><code>weighted</code> : <code>TRUE</code> if metric takes relative abundance into account; <code>FALSE</code> if it only uses presence/absence.</p></li>
+<li><p><code>true_metric</code> : <code>TRUE</code> if metric satisfies the triangle inequality; <code>FALSE</code> if it is a non-metric dissimilarity; <code>NA</code> for alpha diversity metrics.</p></li>
+<li><p><code>func</code> : The function for this metric, e.g. <code><a href="adiv_functions.html">ecodive::faith</a></code></p></li>
+<li><p><code>params</code> : Formal args for <code>func</code>, e.g. <code>c("counts", "tree", "cpus")</code></p></li>
+</ul><p><strong><code>list_metrics()</code></strong></p>
+<p>The returned object's type and values are controlled with the <code>val</code> and <code>nm</code> arguments.</p><ul><li><p><code>val = "data.frame"</code> : The data.frame from which the below options are sourced.</p></li>
+<li><p><code>val = "list"</code> : A list of objects as returned by <code>match_metric()</code> (above).</p></li>
+<li><p><code>val = "func"</code> : A list of functions.</p></li>
+<li><p><code>val = "id"</code> : A character vector of metric IDs.</p></li>
+<li><p><code>val = "name"</code> : A character vector of metric names.</p></li>
+<li><p><code>val = "div"</code> : A character vector <code>"alpha"</code> and/or <code>"beta"</code>.</p></li>
+<li><p><code>val = "phylo"</code> : A logical vector indicating which metrics require a tree.</p></li>
+<li><p><code>val = "weighted"</code> : A logical vector indicating which metrics take relative abundance into account (as opposed to just presence/absence).</p></li>
+<li><p><code>val = "true_metric"</code> : A logical vector indicating which metrics satisfy the triangle inequality, which work better for ordinations such as PCoA.</p></li>
+</ul><p>If <code>nm</code> is set, then the names of the vector or list will be the metric ID
 (<code>nm="id"</code>) or name (<code>nm="name"</code>). When <code>val="data.frame"</code>, the names will be
 applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames()</a></code> property of the <code>data.table</code>.</p>
     </div>
@@ -173,12 +135,12 @@ applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="exter
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5                Bray-Curtis Dissimilarity          bray FALSE     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6                          Brillouin Index     brillouin FALSE     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   true_metric   div alt_ids</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          NA alpha        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        TRUE  beta        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3          NA alpha        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        TRUE  beta        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       FALSE  beta        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6          NA alpha        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          NA alpha    &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        TRUE  beta    &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          NA alpha    &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        TRUE  beta    &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       FALSE  beta    &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6          NA alpha    &lt;NA&gt;</span>
 <span class="r-in"><span>    </span></span>
 <span class="r-in"><span>    <span class="co"># All alpha diversity function names.</span></span></span>
 <span class="r-in"><span>    <span class="fu">list_metrics</span><span class="op">(</span><span class="st">'alpha'</span>, val <span class="op">=</span> <span class="st">'id'</span><span class="op">)</span></span></span>

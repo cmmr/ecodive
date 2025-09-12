@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9003</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,9 +83,13 @@
 <div class="section level4">
 <h4 id="state-of-the-field">State of the Field<a class="anchor" aria-label="anchor" href="#state-of-the-field"></a>
 </h4>
-<p>The table below shows a collection of bioinformatics R packages and
-how they implement classic and phylogenetic alpha/beta ecology diversity
-metrics.</p>
+<p>This analysis provides a comparative benchmark of R packages designed
+for calculating standard and phylogenetic metrics of alpha and beta
+diversity. The primary objective is to evaluate their computational
+efficiency, with a focus on processing speed and memory allocation.
+Packages that rely on these foundational libraries as dependencies have
+been omitted from this study to isolate the performance of the core
+implementations.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -114,79 +118,49 @@ metrics.</p>
 <td align="left"><strong><em>Serial R</em></strong></td>
 </tr>
 <tr class="even">
-<td align="left"><a href="https://github.com/wejlab/animalcules" class="external-link">animalcules</a></td>
-<td align="left">vegan</td>
-<td align="left">GUniFrac</td>
-</tr>
-<tr class="odd">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.ecodist" class="external-link">ecodist</a></td>
 <td align="left"><strong><em>Serial C/R</em></strong></td>
 <td align="left"><em>none</em></td>
 </tr>
-<tr class="even">
-<td align="left"><a href="https://cran.r-project.org/package=ecodive" class="external-link">ecodive</a></td>
+<tr class="odd">
+<td align="left"><a href="https://doi.org/10.32614/CRAN.package.ecodive" class="external-link">ecodive</a></td>
 <td align="left"><strong><em>Parallel C</em></strong></td>
 <td align="left"><strong><em>Parallel C</em></strong></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.entropart" class="external-link">entropart</a></td>
 <td align="left"><strong><em>Serial R</em></strong></td>
 <td align="left"><em>none</em></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.GUniFrac" class="external-link">GUniFrac</a></td>
 <td align="left"><em>none</em></td>
 <td align="left"><strong><em>Serial C</em></strong></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.labdsv" class="external-link">labdsv</a></td>
 <td align="left"><strong><em>Serial FORTRAN</em></strong></td>
 <td align="left"><em>none</em></td>
 </tr>
-<tr class="even">
-<td align="left"><a href="https://doi.org/doi:10.18129/B9.bioc.mia" class="external-link">mia</a></td>
-<td align="left">vegan</td>
-<td align="left">ecodive</td>
-</tr>
 <tr class="odd">
-<td align="left"><a href="https://doi.org/doi:10.18129/B9.bioc.microbiome" class="external-link">microbiome</a></td>
-<td align="left">vegan</td>
-<td align="left">phyloseq</td>
-</tr>
-<tr class="even">
-<td align="left"><a href="https://doi.org/10.32614/CRAN.package.microeco" class="external-link">microeco</a></td>
-<td align="left">vegan</td>
-<td align="left">GUniFrac</td>
-</tr>
-<tr class="odd">
-<td align="left"><a href="https://github.com/david-barnett/microViz" class="external-link">microViz</a></td>
-<td align="left">vegan</td>
-<td align="left">GUniFrac</td>
-</tr>
-<tr class="even">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.parallelDist" class="external-link">parallelDist</a></td>
 <td align="left"><strong><em>Parallel C++</em></strong></td>
 <td align="left"><strong><em>Parallel C++</em></strong></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.philentropy" class="external-link">philentropy</a></td>
 <td align="left"><strong><em>Serial C++</em></strong></td>
 <td align="left"><em>none</em></td>
 </tr>
-<tr class="even">
-<td align="left"><a href="https://github.com/darunabas/phyloregion" class="external-link">phyloregion</a></td>
+<tr class="odd">
+<td align="left"><a href="https://doi.org/10.32614/CRAN.package.phyloregion" class="external-link">phyloregion</a></td>
 <td align="left">vegan</td>
 <td align="left"><strong><em>Serial R</em></strong></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="https://doi.org/doi:10.18129/B9.bioc.phyloseq" class="external-link">phyloseq</a></td>
 <td align="left">vegan</td>
 <td align="left"><strong><em>Parallel R</em></strong></td>
-</tr>
-<tr class="even">
-<td align="left"><a href="https://github.com/schuyler-smith/phylosmith" class="external-link">phylosmith</a></td>
-<td align="left">vegan</td>
-<td align="left"><em>none</em></td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.picante" class="external-link">picante</a></td>
@@ -194,19 +168,9 @@ metrics.</p>
 <td align="left"><strong><em>Serial R</em></strong></td>
 </tr>
 <tr class="even">
-<td align="left"><a href="https://doi.org/10.32614/CRAN.package.rbiom" class="external-link">rbiom</a></td>
-<td align="left">ecodive</td>
-<td align="left">ecodive</td>
-</tr>
-<tr class="odd">
-<td align="left"><a href="https://github.com/LebeerLab/tabula" class="external-link">tabula</a></td>
+<td align="left"><a href="https://doi.org/10.32614/CRAN.package.tabula" class="external-link">tabula</a></td>
 <td align="left"><strong><em>Serial R</em></strong></td>
 <td align="left"><em>none</em></td>
-</tr>
-<tr class="even">
-<td align="left"><a href="https://github.com/LebeerLab/tidytacos" class="external-link">tidytacos</a></td>
-<td align="left">vegan</td>
-<td align="left">phyloseq</td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="https://doi.org/10.32614/CRAN.package.vegan" class="external-link">vegan</a></td>
@@ -215,70 +179,93 @@ metrics.</p>
 </tr>
 </tbody>
 </table>
-<p>Only thirteen packages - <code>abdiv</code>, <code>adiv</code>,
-<code>ampvis2</code>, <code>ecodist</code>, <code>entropart</code>,
-<code>GUniFrac</code>, <code>labdsv</code>, <code>phyloregion</code>,
-<code>phyloseq</code>, <code>picante</code>, <code>picante</code>,
-<code>tabula</code>, and <code>vegan</code> - have their own
-implementations of these algorithms. Other R packages import code from
-<code>ecodive</code>, <code>GUniFrac</code>, <code>phyloseq</code>,
-and/or <code>vegan</code> to handle alpha and beta diversity
-computations. Therefore, only these thirteen packages will be
-benchmarked.</p>
 </div>
 <div class="section level4">
 <h4 id="methodology">Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
 </h4>
-<p>We will use the <code>bench</code> R package to track the runtime and
-memory consumption of the diversity algorithms in each of the ten R
-packages. The host system for these benchmarking runs has the following
-specifications.</p>
-<pre><code>6-Core i5-9600K CPU @ 3.70GHz; 64.0 GB RAM
-Windows 11 Pro x64 24H2 26100.4652</code></pre>
-<p>The <code>bench::mark()</code> function also checks that the output
-from all benchmarked expressions are equal.</p>
+<p>The <code>bench</code> R package was employed to quantify the
+computational runtime and memory allocation for the diversity algorithms
+within each of the 15 selected packages. All benchmarks were executed on
+a host system with the following hardware and software
+configuration:</p>
+<pre><code>CPU: 6-Core Intel i5-9600K @ 3.70GHz
+RAM: 64.0 GB
+OS: Windows 11 Pro (64-bit, Version 24H2, Build 26100.4652)</code></pre>
+<p>Furthermore, the <code>bench::mark()</code> function was utilized to
+verify that the outputs from all benchmarked expressions were
+numerically equivalent, ensuring the consistency and comparability of
+the results.</p>
 <p><br></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
-<p>We’ll use two datasets from the rbiom R package: <code>hmp50</code>
-and <code>gems</code>. <code>hmp50</code> has 50 samples and a
-phylogenetic tree. It will be used for benchmarking the UniFrac and
-Faith phylogenetic metrics. The classic diversity metrics are much
-faster to calculate. Therefore, we’ll use the 1,006-sample
-<code>gems</code> dataset for those.</p>
-<p>The input and output formats for the six R packages are not
-identical, so the benchmarking code will transform data as needed.
-Whenever possible, these transformations will take place outside the
-timed block.</p>
+<p>Two standard datasets from the <code>rbiom</code> R package,
+<code>hmp50</code> and <code>gems</code>, were selected for this
+evaluation. The <code>hmp50</code> dataset, which includes 50 samples
+and an associated phylogenetic tree, was used to benchmark the
+computationally intensive phylogenetic metrics, such as UniFrac and
+Faith’s PD. For the traditional diversity metrics, which are
+significantly less demanding, the larger <code>gems</code> dataset,
+comprising 1,006 samples, was employed.</p>
+<p>To account for the heterogeneous input and output formats across the
+15 R packages, necessary data transformations were performed. To ensure
+that the benchmarks exclusively measured the performance of the
+diversity calculations, these data conversion steps were executed
+outside of the timed code blocks whenever possible.</p>
 <details><summary>
 Click to reveal R code.
 </summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'pak'</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Tools and Datasets for Benchmarking Report</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span>pkg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">'adiv'</span>, <span class="st">'abdiv'</span>, <span class="st">'bench'</span>, <span class="st">'ecodive'</span>, <span class="st">'entropart'</span>, <span class="st">'GUniFrac'</span>, </span>
-<span>  <span class="st">'kasperskytte/ampvis2'</span>, <span class="st">'labdsv'</span>, <span class="st">'philentropy'</span>, <span class="st">'phylocomr'</span>, </span>
-<span>  <span class="st">'phyloregion'</span>, <span class="st">'phyloseq'</span>, <span class="st">'picante'</span>, <span class="st">'rbiom'</span>, <span class="st">'tabula'</span>, <span class="st">'vegan'</span> <span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="st">'bench'</span>, <span class="st">'dplyr'</span>, <span class="st">'ggplot2'</span>, <span class="st">'ggrepel'</span>, <span class="st">'rbiom'</span> <span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Diversity Metric Implementations</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span>pkg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">'abdiv'</span>, <span class="st">'adiv'</span>, <span class="st">'ecodist'</span>, <span class="st">'ecodive'</span>, <span class="st">'entropart'</span>, <span class="st">'GUniFrac'</span>, </span>
+<span>  <span class="st">'kasperskytte/ampvis2'</span>, <span class="st">'labdsv'</span>, <span class="st">'parallelDist'</span>, <span class="st">'philentropy'</span>, </span>
+<span>  <span class="st">'phyloregion'</span>, <span class="st">'phyloseq'</span>, <span class="st">'picante'</span>, <span class="st">'tabula'</span>, <span class="st">'vegan'</span> <span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># Software Versions</span></span>
+<span></span>
+<span><span class="va">version</span><span class="op">$</span><span class="va">version.string</span></span>
+<span><span class="co">#&gt; [1] "R version 4.5.1 (2025-06-13 ucrt)"</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ver <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span>FUN <span class="op">=</span> <span class="va">packageDescription</span>, fields <span class="op">=</span> <span class="st">'Version'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">'bench'</span>, <span class="st">'dplyr'</span>, <span class="st">'ggplot2'</span>, <span class="st">'ggrepel'</span>, <span class="st">'rbiom'</span>,</span>
+<span>  <span class="st">'abdiv'</span>, <span class="st">'adiv'</span>, <span class="st">'ecodist'</span>, <span class="st">'ecodive'</span>, <span class="st">'entropart'</span>, <span class="st">'GUniFrac'</span>, </span>
+<span>  <span class="st">'ampvis2'</span>, <span class="st">'labdsv'</span>, <span class="st">'parallelDist'</span>, <span class="st">'philentropy'</span>, </span>
+<span>  <span class="st">'phyloregion'</span>, <span class="st">'phyloseq'</span>, <span class="st">'picante'</span>, <span class="st">'tabula'</span>, <span class="st">'vegan'</span> <span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                     ver</span></span>
+<span><span class="co">#&gt; bench             1.1.4</span></span>
+<span><span class="co">#&gt; dplyr             1.1.4</span></span>
+<span><span class="co">#&gt; ggplot2           3.5.2</span></span>
+<span><span class="co">#&gt; ggrepel           0.9.6</span></span>
+<span><span class="co">#&gt; rbiom             2.2.1</span></span>
+<span><span class="co">#&gt; abdiv             0.2.0</span></span>
+<span><span class="co">#&gt; adiv              2.2.1</span></span>
+<span><span class="co">#&gt; ecodist           2.1.3</span></span>
+<span><span class="co">#&gt; ecodive           1.0.1</span></span>
+<span><span class="co">#&gt; entropart        1.6-16</span></span>
+<span><span class="co">#&gt; GUniFrac            1.8</span></span>
+<span><span class="co">#&gt; ampvis2           2.8.9</span></span>
+<span><span class="co">#&gt; labdsv            2.1-2</span></span>
+<span><span class="co">#&gt; parallelDist      0.2.6</span></span>
+<span><span class="co">#&gt; philentropy       0.9.0</span></span>
+<span><span class="co">#&gt; phyloregion       1.0.9</span></span>
+<span><span class="co">#&gt; phyloseq         1.52.0</span></span>
+<span><span class="co">#&gt; picante           1.8.2</span></span>
+<span><span class="co">#&gt; tabula            3.3.1</span></span>
+<span><span class="co">#&gt; vegan             2.7-1</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bench.r-lib.org/" class="external-link">bench</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggrepel.slowkow.com/" class="external-link">ggrepel</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">version</span><span class="op">$</span><span class="va">version.string</span></span>
-<span><span class="co">#&gt; [1] "R version 4.5.1 (2025-06-13 ucrt)"</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span>FUN <span class="op">=</span> <span class="va">packageDescription</span>, fields <span class="op">=</span> <span class="st">'Version'</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">'abdiv'</span>, <span class="st">'adiv'</span>, <span class="st">'ampvis2'</span>, <span class="st">'ecodive'</span>, <span class="st">'entropart'</span>, <span class="st">'GUniFrac'</span>, <span class="st">'labdsv'</span>, </span>
-<span>  <span class="st">'philentropy'</span>, <span class="st">'phylocomr'</span>, <span class="st">'phyloregion'</span>, <span class="st">'phyloseq'</span>, <span class="st">'picante'</span>, <span class="st">'tabula'</span>, <span class="st">'vegan'</span> <span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        abdiv         adiv      ampvis2      ecodive    entropart     GUniFrac       labdsv </span></span>
-<span><span class="co">#&gt;      "0.2.0"      "2.2.1"      "2.8.9"      "1.0.1"     "1.6-16"        "1.8"      "2.1-2" </span></span>
-<span><span class="co">#&gt;  philentropy    phylocomr  phyloregion     phyloseq      picante       tabula        vegan </span></span>
-<span><span class="co">#&gt;      "0.9.0"      "0.3.4"      "1.0.9"     "1.52.0"      "1.8.2"      "3.3.1"      "2.7-1"</span></span>
 <span></span>
 <span><span class="op">(</span><span class="va">n_cpus</span> <span class="op">&lt;-</span> <span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 6</span></span>
@@ -301,25 +288,23 @@ Click to reveal R code.
 <span><span class="co"># Remove any extraneous attributes from dist objects,</span></span>
 <span><span class="co"># allowing them to be compared with `all.equal()`.</span></span>
 <span><span class="va">cleanup</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">'maxdist'</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">'method'</span><span class="op">)</span>  <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">'call'</span><span class="op">)</span>    <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'class'</span>, <span class="st">'Labels'</span>, <span class="st">'Size'</span>, <span class="st">'Diag'</span>, <span class="st">'Upper'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span> <span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span></span>
 <span><span class="co"># HMP50 dataset has 50 Samples</span></span>
-<span><span class="va">hmp50</span>      <span class="op">&lt;-</span> <span class="fu">rbiom</span><span class="fu">::</span><span class="va">hmp50</span></span>
-<span><span class="va">hmp50_phy</span>  <span class="op">&lt;-</span> <span class="fu">rbiom</span><span class="fu">::</span><span class="fu">convert_to_phyloseq</span><span class="op">(</span><span class="va">hmp50</span><span class="op">)</span></span>
-<span><span class="va">hmp50_mtx</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">hmp50</span><span class="op">)</span></span>
+<span><span class="va">hmp50</span>      <span class="op">&lt;-</span> <span class="fu">rbiom</span><span class="fu">::</span><span class="va"><a href="https://cmmr.github.io/rbiom/reference/hmp50.html" class="external-link">hmp50</a></span></span>
+<span><span class="va">hmp50_phy</span>  <span class="op">&lt;-</span> <span class="fu">rbiom</span><span class="fu">::</span><span class="fu"><a href="https://cmmr.github.io/rbiom/reference/convert_to.html" class="external-link">convert_to_phyloseq</a></span><span class="op">(</span><span class="va">hmp50</span><span class="op">)</span></span>
+<span><span class="va">hmp50_mtx</span>  <span class="op">&lt;-</span> <span class="fu">rbiom</span><span class="fu">::</span><span class="fu"><a href="https://cmmr.github.io/rbiom/reference/rarefy_cols.html" class="external-link">rescale_cols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">hmp50</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">hmp50_tmtx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">hmp50_mtx</span><span class="op">)</span></span>
-<span><span class="va">hmp50_pmtx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">hmp50_mtx</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">hmp50_mtx</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">hmp50_tree</span> <span class="op">&lt;-</span> <span class="va">hmp50</span><span class="op">$</span><span class="va">tree</span></span>
 <span></span>
 <span></span>
 <span><span class="co"># GEMS dataset has 1006 Samples</span></span>
-<span><span class="va">gems_mtx</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">rbiom</span><span class="fu">::</span><span class="va">gems</span><span class="op">)</span></span>
-<span><span class="va">gems_tmtx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">gems_mtx</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">gems_mtx</span>    <span class="op">&lt;-</span> <span class="fu">rbiom</span><span class="fu">::</span><span class="fu"><a href="https://cmmr.github.io/rbiom/reference/rarefy_cols.html" class="external-link">rescale_cols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">rbiom</span><span class="fu">::</span><span class="va"><a href="https://cmmr.github.io/rbiom/reference/gems.html" class="external-link">gems</a></span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">gems_tmtx</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">gems_mtx</span><span class="op">)</span></span></code></pre></div>
 </details><p><br></p>
 </div>
 <div class="section level2">
@@ -351,7 +336,7 @@ Click to reveal R code.
 <span>      <span class="st">'ecodive'</span>     <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">unweighted_unifrac</a></span><span class="op">(</span><span class="va">hmp50_mtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>      <span class="st">'GUniFrac'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html" class="external-link">as.dist</a></span><span class="op">(</span><span class="fu">GUniFrac</span><span class="fu">::</span><span class="fu">GUniFrac</span><span class="op">(</span><span class="va">hmp50_tmtx</span>, <span class="va">hmp50_tree</span>, alpha<span class="op">=</span><span class="fl">1</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>,,<span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>      <span class="st">'phyloregion'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">phyloregion</span><span class="fu">::</span><span class="fu">unifrac</span><span class="op">(</span><span class="va">hmp50_tmtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>      <span class="st">'phyloseq'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">phyloseq</span><span class="fu">::</span><span class="fu">UniFrac</span><span class="op">(</span><span class="va">hmp50_phy</span>, weighted<span class="op">=</span><span class="cn">FALSE</span>, normalized<span class="op">=</span><span class="cn">FALSE</span>, parallel<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      <span class="st">'phyloseq'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">phyloseq</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/UniFrac-methods.html" class="external-link">UniFrac</a></span><span class="op">(</span><span class="va">hmp50_phy</span>, weighted<span class="op">=</span><span class="cn">FALSE</span>, normalized<span class="op">=</span><span class="cn">FALSE</span>, parallel<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>      <span class="st">'picante'</span>     <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">picante</span><span class="fu">::</span><span class="fu">unifrac</span><span class="op">(</span><span class="va">hmp50_tmtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span>,</span>
 <span>  </span>
@@ -373,15 +358,15 @@ Click to reveal R code.
 <span><span class="co">#&gt; 4 phyloseq   292.07ms 327.01ms    2.49      49.9MB   0         10     0      4.02s</span></span>
 <span><span class="co">#&gt; 5 ampvis2       3.36s    3.44s    0.288     49.8MB   0.0320     9     1     31.29s</span></span>
 <span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">u_unifrac_res</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span>, y <span class="op">=</span> <span class="va">mem_alloc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_label_repel</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">u_unifrac_res</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span>, y <span class="op">=</span> <span class="va">mem_alloc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggrepel.slowkow.com/reference/geom_text_repel.html" class="external-link">geom_label_repel</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">'Unweighted UniFrac Implementations'</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">'50 sample all-vs-all benchmarking on six CPU cores'</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">'Median Calculation Time (log scale; n=10)'</span>, </span>
 <span>    y <span class="op">=</span> <span class="st">'Memory Allocated\n(log scale)'</span> <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  </span>
 <span>  </span>
 <span><span class="co">## Weighted UniFrac</span></span>
@@ -397,7 +382,7 @@ Click to reveal R code.
 <span>      iterations <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>      <span class="st">'abdiv'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">weighted_unifrac</span>, <span class="va">hmp50_mtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>      <span class="st">'ecodive'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">weighted_unifrac</a></span><span class="op">(</span><span class="va">hmp50_mtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>      <span class="st">'phyloseq'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">phyloseq</span><span class="fu">::</span><span class="fu">UniFrac</span><span class="op">(</span><span class="va">hmp50_phy</span>, weighted<span class="op">=</span><span class="cn">TRUE</span>, normalized<span class="op">=</span><span class="cn">FALSE</span>, parallel<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span>      <span class="st">'phyloseq'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">phyloseq</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/UniFrac-methods.html" class="external-link">UniFrac</a></span><span class="op">(</span><span class="va">hmp50_phy</span>, weighted<span class="op">=</span><span class="cn">TRUE</span>, normalized<span class="op">=</span><span class="cn">FALSE</span>, parallel<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span>,</span>
 <span>  </span>
 <span>  <span class="co"># ampvis2 conflicts with phyloseq cluster, so run separately</span></span>
@@ -423,7 +408,7 @@ Click to reveal R code.
 <span>      <span class="st">'abdiv'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">weighted_normalized_unifrac</span>, <span class="va">hmp50_mtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>      <span class="st">'ecodive'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">normalized_unifrac</a></span><span class="op">(</span><span class="va">hmp50_mtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>      <span class="st">'GUniFrac'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html" class="external-link">as.dist</a></span><span class="op">(</span><span class="fu">GUniFrac</span><span class="fu">::</span><span class="fu">GUniFrac</span><span class="op">(</span><span class="va">hmp50_tmtx</span>, <span class="va">hmp50_tree</span>, alpha<span class="op">=</span><span class="fl">1</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>,,<span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>      <span class="st">'phyloseq'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">phyloseq</span><span class="fu">::</span><span class="fu">UniFrac</span><span class="op">(</span><span class="va">hmp50_phy</span>, weighted<span class="op">=</span><span class="cn">TRUE</span>, normalized<span class="op">=</span><span class="cn">TRUE</span>, parallel<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span>      <span class="st">'phyloseq'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">phyloseq</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/UniFrac-methods.html" class="external-link">UniFrac</a></span><span class="op">(</span><span class="va">hmp50_phy</span>, weighted<span class="op">=</span><span class="cn">TRUE</span>, normalized<span class="op">=</span><span class="cn">TRUE</span>, parallel<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span>,</span>
 <span>  </span>
 <span>  <span class="co"># ampvis2 conflicts with phyloseq cluster, so run separately</span></span>
@@ -470,15 +455,15 @@ Click to reveal R code.
 <span><span class="op">)</span></span>
 <span></span>
 <span></span>
-<span><span class="va">unifrac_res</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span></span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">u_unifrac_res</span>,  `UniFrac Variant` <span class="op">=</span> <span class="st">'Unweighted'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">w_unifrac_res</span>,  `UniFrac Variant` <span class="op">=</span> <span class="st">'Weighted'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">wn_unifrac_res</span>, `UniFrac Variant` <span class="op">=</span> <span class="st">'Weighted Normalized'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">g_unifrac_res</span>,  `UniFrac Variant` <span class="op">=</span> <span class="st">'Generalized'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">va_unifrac_res</span>, `UniFrac Variant` <span class="op">=</span> <span class="st">'Variance Adjusted'</span><span class="op">)</span> <span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>Package <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Package</span>, <span class="va">`UniFrac Variant`</span>, <span class="va">median</span>, <span class="va">mem_alloc</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">Package</span><span class="op">)</span></span>
+<span><span class="va">unifrac_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">u_unifrac_res</span>,  `UniFrac Variant` <span class="op">=</span> <span class="st">'Unweighted'</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">w_unifrac_res</span>,  `UniFrac Variant` <span class="op">=</span> <span class="st">'Weighted'</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">wn_unifrac_res</span>, `UniFrac Variant` <span class="op">=</span> <span class="st">'Weighted Normalized'</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">g_unifrac_res</span>,  `UniFrac Variant` <span class="op">=</span> <span class="st">'Generalized'</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">va_unifrac_res</span>, `UniFrac Variant` <span class="op">=</span> <span class="st">'Variance Adjusted'</span><span class="op">)</span> <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Package <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Package</span>, <span class="va">`UniFrac Variant`</span>, <span class="va">median</span>, <span class="va">mem_alloc</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">Package</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">unifrac_res</span>, n <span class="op">=</span> <span class="fl">21</span><span class="op">)</span></span>
@@ -509,7 +494,7 @@ Click to reveal R code.
 <span></span>
 <span></span>
 <span><span class="co"># How much faster and more memory efficient is ecodive?</span></span>
-<span><span class="fu">plyr</span><span class="fu">::</span><span class="fu">ddply</span><span class="op">(</span><span class="va">unifrac_res</span>, <span class="fu"><a href="https://rdrr.io/r/base/name.html" class="external-link">as.name</a></span><span class="op">(</span><span class="st">'UniFrac Variant'</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="fu">plyr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyr/man/ddply.html" class="external-link">ddply</a></span><span class="op">(</span><span class="va">unifrac_res</span>, <span class="fu"><a href="https://rdrr.io/r/base/name.html" class="external-link">as.name</a></span><span class="op">(</span><span class="st">'UniFrac Variant'</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span><span class="op">[[</span><span class="st">'median'</span><span class="op">]</span><span class="op">]</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="st">'median'</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="va">x</span><span class="op">[[</span><span class="st">'mem_alloc'</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="st">'mem_alloc'</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="va">ecodive</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">x</span><span class="op">[[</span><span class="st">'Package'</span><span class="op">]</span><span class="op">]</span> <span class="op">==</span> <span class="st">'ecodive'</span>,<span class="op">]</span><span class="op">)</span></span>
@@ -526,22 +511,22 @@ Click to reveal R code.
 <span><span class="co">#&gt; 5 Weighted Normalized   20 - 3555x    65 - 26934x</span></span>
 <span></span>
 <span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">unifrac_res</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span>, y <span class="op">=</span> <span class="va">mem_alloc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>shape <span class="op">=</span> <span class="va">`UniFrac Variant`</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_label_repel</span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">unifrac_res</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span>, y <span class="op">=</span> <span class="va">mem_alloc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="va">`UniFrac Variant`</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggrepel.slowkow.com/reference/geom_text_repel.html" class="external-link">geom_label_repel</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">`UniFrac Variant`</span> <span class="op">==</span> <span class="st">'Unweighted'</span><span class="op">)</span>,</span>
-<span>    mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>label <span class="op">=</span> <span class="va">Package</span><span class="op">)</span>,</span>
+<span>    mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">Package</span><span class="op">)</span>,</span>
 <span>    box.padding <span class="op">=</span> <span class="fl">0.4</span>,</span>
 <span>    min.segment.length <span class="op">=</span> <span class="cn">Inf</span> <span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">scale_shape</span><span class="op">(</span>solid <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">scale_y_log10</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu">label_bytes</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_shape.html" class="external-link">scale_shape</a></span><span class="op">(</span>solid <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_log10</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_bytes.html" class="external-link">label_bytes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">'UniFrac Implementations'</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">'All-vs-all 50 sample benchmarking on six CPU cores'</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">'Median Calculation Time (log scale; n=10)'</span>, </span>
 <span>    y <span class="op">=</span> <span class="st">'Memory Allocated\n(log scale; n=1)'</span> <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_bw</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>margin <span class="op">=</span> <span class="fu">margin</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">margin</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </details><p><img src="../reference/figures/unifrac-benchmark.svg" width="98%"></p>
 <p><code>ecodive</code> demonstrates substantial performance gains for
 UniFrac, being 2 to 3,900x faster and using 50 - 32,000x less memory.
@@ -560,63 +545,95 @@ Click to reveal R code.
 </summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bray_curtis_res</span> <span class="op">&lt;-</span> <span class="fu">bench</span><span class="fu">::</span><span class="fu">mark</span><span class="op">(</span></span>
 <span>  iterations <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  <span class="st">'abdiv'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">bray_curtis</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'ecodist'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodist</span><span class="fu">::</span><span class="fu">bcdist</span><span class="op">(</span><span class="va">gems_tmtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'ecodive'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu">bray_curtis</span><span class="op">(</span><span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'vegan'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu">vegdist</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'bray'</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="st">'abdiv'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">bray_curtis</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'ecodist'</span>      <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodist</span><span class="fu">::</span><span class="fu">bcdist</span><span class="op">(</span><span class="va">gems_tmtx</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'ecodive'</span>      <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">gems_mtx</span>, rescale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'labdsv'</span>       <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">labdsv</span><span class="fu">::</span><span class="fu">dsvdis</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'bray/curtis'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'parallelDist'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">parallelDist</span><span class="fu">::</span><span class="fu">parallelDist</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'bray'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'philentropy'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">philentropy</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'sorensen'</span>, test.na <span class="op">=</span> <span class="cn">FALSE</span>, use.row.names <span class="op">=</span> <span class="cn">TRUE</span>, as.dist.obj <span class="op">=</span> <span class="cn">TRUE</span>, mute.message <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'tabula'</span>       <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu">pairwise</span><span class="op">(</span><span class="fu">tabula</span><span class="fu">::</span><span class="va">index_bray</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'vegan'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://vegandevs.github.io/vegan/reference/vegdist.html" class="external-link">vegdist</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'bray'</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="va">jaccard_res</span> <span class="op">&lt;-</span> <span class="fu">bench</span><span class="fu">::</span><span class="fu">mark</span><span class="op">(</span></span>
 <span>  iterations <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  check      <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># abdiv has incorrect output</span></span>
-<span>  <span class="st">'abdiv'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">jaccard</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'ecodist'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodist</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'jaccard'</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'ecodive'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">jaccard</a></span><span class="op">(</span><span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'vegan'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu">vegdist</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'jaccard'</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="st">'abdiv'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">jaccard</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'ecodist'</span>      <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodist</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'jaccard'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'ecodive'</span>      <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">jaccard</a></span><span class="op">(</span><span class="va">gems_mtx</span>, rescale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'parallelDist'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">parallelDist</span><span class="fu">::</span><span class="fu">parallelDist</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'binary'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'philentropy'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">philentropy</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">'jaccard'</span>, test.na <span class="op">=</span> <span class="cn">FALSE</span>, use.row.names <span class="op">=</span> <span class="cn">TRUE</span>, as.dist.obj <span class="op">=</span> <span class="cn">TRUE</span>, mute.message <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'phyloregion'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">phyloregion</span><span class="fu">::</span><span class="fu">beta_diss</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'jaccard'</span><span class="op">)</span><span class="op">$</span><span class="va">beta.jac</span><span class="op">)</span>,</span>
+<span>  <span class="st">'stats'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html" class="external-link">dist</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'binary'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'vegan'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://vegandevs.github.io/vegan/reference/vegdist.html" class="external-link">vegdist</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'jaccard'</span>, binary <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="va">manhattan_res</span> <span class="op">&lt;-</span> <span class="fu">bench</span><span class="fu">::</span><span class="fu">mark</span><span class="op">(</span></span>
 <span>  iterations <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  <span class="st">'abdiv'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">manhattan</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'ecodist'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodist</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'manhattan'</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'ecodive'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">manhattan</a></span><span class="op">(</span><span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'vegan'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu">vegdist</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'manhattan'</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="st">'abdiv'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">manhattan</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'ecodist'</span>      <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodist</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'manhattan'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'ecodive'</span>      <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">manhattan</a></span><span class="op">(</span><span class="va">gems_mtx</span>, rescale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'parallelDist'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">parallelDist</span><span class="fu">::</span><span class="fu">parallelDist</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'manhattan'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'philentropy'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">philentropy</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'manhattan'</span>, test.na <span class="op">=</span> <span class="cn">FALSE</span>, use.row.names <span class="op">=</span> <span class="cn">TRUE</span>, as.dist.obj <span class="op">=</span> <span class="cn">TRUE</span>, mute.message <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'stats'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html" class="external-link">dist</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'manhattan'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'vegan'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://vegandevs.github.io/vegan/reference/vegdist.html" class="external-link">vegdist</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'manhattan'</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="va">euclidean_res</span> <span class="op">&lt;-</span> <span class="fu">bench</span><span class="fu">::</span><span class="fu">mark</span><span class="op">(</span></span>
 <span>  iterations <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  <span class="st">'abdiv'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">euclidean</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'ecodist'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodist</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'euclidean'</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'ecodive'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">euclidean</a></span><span class="op">(</span><span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="st">'vegan'</span>    <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu">vegdist</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'euclidean'</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="st">'abdiv'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">pairwise</span><span class="op">(</span><span class="fu">abdiv</span><span class="fu">::</span><span class="va">euclidean</span>, <span class="va">gems_mtx</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'ecodist'</span>      <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodist</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'euclidean'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'ecodive'</span>      <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/bdiv_functions.html">euclidean</a></span><span class="op">(</span><span class="va">gems_mtx</span>, rescale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'parallelDist'</span> <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">parallelDist</span><span class="fu">::</span><span class="fu">parallelDist</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'euclidean'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'philentropy'</span>  <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">philentropy</span><span class="fu">::</span><span class="fu">distance</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'euclidean'</span>, test.na <span class="op">=</span> <span class="cn">FALSE</span>, use.row.names <span class="op">=</span> <span class="cn">TRUE</span>, as.dist.obj <span class="op">=</span> <span class="cn">TRUE</span>, mute.message <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'stats'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html" class="external-link">dist</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'euclidean'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="st">'vegan'</span>        <span class="op">=</span> <span class="fu">cleanup</span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://vegandevs.github.io/vegan/reference/vegdist.html" class="external-link">vegdist</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'euclidean'</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="va">bdiv_res</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span></span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">bray_curtis_res</span>, Metric <span class="op">=</span> <span class="st">'Bray-Curtis'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">jaccard_res</span>,     Metric <span class="op">=</span> <span class="st">'Jaccard'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">manhattan_res</span>,   Metric <span class="op">=</span> <span class="st">'Manhattan'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">euclidean_res</span>,   Metric <span class="op">=</span> <span class="st">'Euclidean'</span><span class="op">)</span> <span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>Package <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Package</span>, <span class="va">Metric</span>, <span class="va">median</span>, <span class="va">mem_alloc</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">Package</span><span class="op">)</span></span>
+<span><span class="va">bdiv_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">bray_curtis_res</span>, Metric <span class="op">=</span> <span class="st">'Bray-Curtis'</span><span class="op">)</span>,</span>
+<span>    <span class="co"># mutate(jaccard_res,     Metric = 'Jaccard'),</span></span>
+<span>    <span class="co"># mutate(manhattan_res,   Metric = 'Manhattan'),</span></span>
+<span>    <span class="co"># mutate(euclidean_res,   Metric = 'Euclidean') </span></span>
+<span>    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Package <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Package</span>, <span class="va">Metric</span>, <span class="va">median</span>, <span class="va">mem_alloc</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">Package</span><span class="op">)</span></span>
 <span></span>
 <span></span>
-<span><span class="va">bdiv_res</span></span>
-<span><span class="co">#&gt; # A tibble: 12 × 4</span></span>
-<span><span class="co">#&gt;    Package Metric        median mem_alloc</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;       &lt;bch:tm&gt; &lt;bch:byt&gt;</span></span>
-<span><span class="co">#&gt;  1 abdiv   Bray-Curtis   12.16s    14.7GB</span></span>
-<span><span class="co">#&gt;  2 abdiv   Jaccard        15.6s      22GB</span></span>
-<span><span class="co">#&gt;  3 abdiv   Manhattan     10.13s    13.2GB</span></span>
-<span><span class="co">#&gt;  4 abdiv   Euclidean     10.92s    16.1GB</span></span>
-<span><span class="co">#&gt;  5 ecodive Bray-Curtis   72.8ms    26.3MB</span></span>
-<span><span class="co">#&gt;  6 ecodive Jaccard      73.68ms    26.3MB</span></span>
-<span><span class="co">#&gt;  7 ecodive Manhattan    73.47ms    26.3MB</span></span>
-<span><span class="co">#&gt;  8 ecodive Euclidean    72.84ms    26.3MB</span></span>
-<span><span class="co">#&gt;  9 vegan   Bray-Curtis    1.75s    22.4MB</span></span>
-<span><span class="co">#&gt; 10 vegan   Jaccard        1.82s    22.3MB</span></span>
-<span><span class="co">#&gt; 11 vegan   Manhattan      1.68s    19.4MB</span></span>
-<span><span class="co">#&gt; 12 vegan   Euclidean      1.68s    19.4MB</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">bdiv_res</span>, n <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 30 × 4</span></span>
+<span><span class="co">#&gt;    Package      Metric        median mem_alloc</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;        &lt;chr&gt;       &lt;bch:tm&gt; &lt;bch:byt&gt;</span></span>
+<span><span class="co">#&gt;  1 abdiv        Bray-Curtis    11.5s   20.43GB</span></span>
+<span><span class="co">#&gt;  2 abdiv        Jaccard        1.83m   24.89GB</span></span>
+<span><span class="co">#&gt;  3 abdiv        Manhattan       2.9m   17.52GB</span></span>
+<span><span class="co">#&gt;  4 abdiv        Euclidean      2.35m   17.52GB</span></span>
+<span><span class="co">#&gt;  5 ecodist      Bray-Curtis  482.5ms   29.25MB</span></span>
+<span><span class="co">#&gt;  6 ecodist      Jaccard        3.04m   47.89GB</span></span>
+<span><span class="co">#&gt;  7 ecodist      Manhattan      2.14m    21.8GB</span></span>
+<span><span class="co">#&gt;  8 ecodist      Euclidean      2.07m    21.8GB</span></span>
+<span><span class="co">#&gt;  9 ecodive      Bray-Curtis 115.72ms   20.41MB</span></span>
+<span><span class="co">#&gt; 10 ecodive      Jaccard      100.5ms   14.52MB</span></span>
+<span><span class="co">#&gt; 11 ecodive      Manhattan   156.29ms   20.42MB</span></span>
+<span><span class="co">#&gt; 12 ecodive      Euclidean   143.38ms   20.42MB</span></span>
+<span><span class="co">#&gt; 13 labdsv       Bray-Curtis    1.13s   63.94MB</span></span>
+<span><span class="co">#&gt; 14 parallelDist Bray-Curtis 258.71ms    4.02MB</span></span>
+<span><span class="co">#&gt; 15 parallelDist Jaccard     317.93ms    3.86MB</span></span>
+<span><span class="co">#&gt; 16 parallelDist Manhattan   163.51ms    3.86MB</span></span>
+<span><span class="co">#&gt; 17 parallelDist Euclidean   158.62ms    3.86MB</span></span>
+<span><span class="co">#&gt; 18 philentropy  Bray-Curtis    11.2s   14.65GB</span></span>
+<span><span class="co">#&gt; 19 philentropy  Jaccard        1.89m    17.6GB</span></span>
+<span><span class="co">#&gt; 20 philentropy  Manhattan      2.18m   14.65GB</span></span>
+<span><span class="co">#&gt; 21 philentropy  Euclidean       2.3m   14.65GB</span></span>
+<span><span class="co">#&gt; 22 phyloregion  Jaccard     141.15ms  193.92MB</span></span>
+<span><span class="co">#&gt; 23 stats        Jaccard        3.02s    3.86MB</span></span>
+<span><span class="co">#&gt; 24 stats        Manhattan      2.21s    3.86MB</span></span>
+<span><span class="co">#&gt; 25 stats        Euclidean      2.22s    3.86MB</span></span>
+<span><span class="co">#&gt; 26 tabula       Bray-Curtis   21.77s   20.44GB</span></span>
+<span><span class="co">#&gt; 27 vegan        Bray-Curtis    2.63s    12.6MB</span></span>
+<span><span class="co">#&gt; 28 vegan        Jaccard        1.95s   59.69MB</span></span>
+<span><span class="co">#&gt; 29 vegan        Manhattan      1.61s    9.64MB</span></span>
+<span><span class="co">#&gt; 30 vegan        Euclidean      1.63s    9.64MB</span></span>
 <span></span>
 <span></span>
 <span><span class="co"># How much faster and more memory efficient is ecodive?</span></span>
-<span><span class="fu">plyr</span><span class="fu">::</span><span class="fu">ddply</span><span class="op">(</span><span class="va">bdiv_res</span>, <span class="st">'Metric'</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="fu">plyr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyr/man/ddply.html" class="external-link">ddply</a></span><span class="op">(</span><span class="va">bdiv_res</span>, <span class="st">'Metric'</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span><span class="op">[[</span><span class="st">'median'</span><span class="op">]</span><span class="op">]</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="st">'median'</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="va">x</span><span class="op">[[</span><span class="st">'mem_alloc'</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="st">'mem_alloc'</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="va">ecodive</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">x</span><span class="op">[[</span><span class="st">'Package'</span><span class="op">]</span><span class="op">]</span> <span class="op">==</span> <span class="st">'ecodive'</span>,<span class="op">]</span><span class="op">)</span></span>
@@ -632,19 +649,19 @@ Click to reveal R code.
 <span><span class="co">#&gt; 4   Manhattan  23 - 2340x   1 - 849x</span></span>
 <span></span>
 <span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">bdiv_res</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span>, y <span class="op">=</span> <span class="va">mem_alloc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="st">'Metric'</span>, scales <span class="op">=</span> <span class="st">'fixed'</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">geom_label_repel</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>label <span class="op">=</span> <span class="va">Package</span><span class="op">)</span>, direction <span class="op">=</span> <span class="st">'y'</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">bdiv_res</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span>, y <span class="op">=</span> <span class="va">mem_alloc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="st">'Metric'</span>, scales <span class="op">=</span> <span class="st">'fixed'</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggrepel.slowkow.com/reference/geom_text_repel.html" class="external-link">geom_label_repel</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">Package</span><span class="op">)</span>, direction <span class="op">=</span> <span class="st">'y'</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu">bench</span><span class="fu">::</span><span class="fu">scale_x_bench_time</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.05</span>, <span class="fl">500</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">60</span>, <span class="fl">300</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_y_log10</span><span class="op">(</span>limits <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>,<span class="fl">11.5</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu">label_bytes</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_log10</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>,<span class="fl">11.5</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_bytes.html" class="external-link">label_bytes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">'Classic Beta Diversity Implementations'</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">'All-vs-all 1,006 sample benchmarking on six CPU cores'</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">'Median Calculation Time (log scale; n=10)'</span>, </span>
 <span>    y <span class="op">=</span> <span class="st">'Memory Allocated\n(log scale; n=1)'</span> <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_bw</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>margin <span class="op">=</span> <span class="fu">margin</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">margin</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </details><p><img src="../reference/figures/bdiv-benchmark.svg" width="98%"></p>
 <p><code>ecodive</code> is 6 to 2,300x faster and uses 1 to 1,800x less
 memory.</p>
@@ -669,7 +686,7 @@ Click to reveal R code.
 <span>  <span class="st">'adiv'</span>      <span class="op">=</span> <span class="fu">adiv</span><span class="fu">::</span><span class="fu">speciesdiv</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'Shannon'</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,</span>
 <span>  <span class="st">'ecodive'</span>   <span class="op">=</span> <span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="va">gems_mtx</span><span class="op">)</span>,</span>
 <span>  <span class="st">'entropart'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">gems_mtx</span>, <span class="fl">2L</span>, <span class="fu">entropart</span><span class="fu">::</span><span class="va">Shannon</span>, CheckArguments <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
-<span>  <span class="st">'vegan'</span>     <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="fu">diversity</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'shannon'</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="st">'vegan'</span>     <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://vegandevs.github.io/vegan/reference/diversity.html" class="external-link">diversity</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'shannon'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="va">simpson_res</span> <span class="op">&lt;-</span> <span class="fu">bench</span><span class="fu">::</span><span class="fu">mark</span><span class="op">(</span></span>
 <span>  iterations  <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -678,7 +695,7 @@ Click to reveal R code.
 <span>  <span class="st">'adiv'</span>      <span class="op">=</span> <span class="fu">adiv</span><span class="fu">::</span><span class="fu">speciesdiv</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'GiniSimpson'</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,</span>
 <span>  <span class="st">'ecodive'</span>   <span class="op">=</span> <span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/adiv_functions.html">simpson</a></span><span class="op">(</span><span class="va">gems_mtx</span><span class="op">)</span>,</span>
 <span>  <span class="st">'entropart'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">gems_mtx</span>, <span class="fl">2L</span>, <span class="fu">entropart</span><span class="fu">::</span><span class="va">Simpson</span>, CheckArguments <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
-<span>  <span class="st">'vegan'</span>     <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="fu">diversity</span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'simpson'</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="st">'vegan'</span>     <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://vegandevs.github.io/vegan/reference/diversity.html" class="external-link">diversity</a></span><span class="op">(</span><span class="va">gems_tmtx</span>, <span class="st">'simpson'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="va">faith_res</span> <span class="op">&lt;-</span> <span class="fu">bench</span><span class="fu">::</span><span class="fu">mark</span><span class="op">(</span></span>
 <span>  iterations    <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -686,16 +703,16 @@ Click to reveal R code.
 <span>  <span class="st">'abdiv'</span>       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">hmp50_mtx</span>, <span class="fl">2L</span>, <span class="fu">abdiv</span><span class="fu">::</span><span class="va">faith_pd</span>, <span class="va">hmp50_tree</span><span class="op">)</span>,</span>
 <span>  <span class="st">'adiv'</span>        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">hmp50_mtx</span>, <span class="fl">2L</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">adiv</span><span class="fu">::</span><span class="fu">EH</span><span class="op">(</span><span class="va">hmp50_tree</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">hmp50_mtx</span><span class="op">)</span><span class="op">[</span><span class="va">x</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="st">'ecodive'</span>     <span class="op">=</span> <span class="fu">ecodive</span><span class="fu">::</span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="va">hmp50_mtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span>,</span>
-<span>  <span class="st">'entropart'</span>   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">hmp50_pmtx</span>, <span class="fl">2L</span>, <span class="fu">entropart</span><span class="fu">::</span><span class="va">PDFD</span>, <span class="va">hmp50_tree</span>, CheckArguments <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  <span class="st">'entropart'</span>   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">hmp50_mtx</span>, <span class="fl">2L</span>, <span class="fu">entropart</span><span class="fu">::</span><span class="va">PDFD</span>, <span class="va">hmp50_tree</span>, CheckArguments <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  <span class="st">'phyloregion'</span> <span class="op">=</span> <span class="fu">phyloregion</span><span class="fu">::</span><span class="fu">PD</span><span class="op">(</span><span class="va">hmp50_tmtx</span>, <span class="va">hmp50_tree</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="va">adiv_res</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span></span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">shannon_res</span>, Metric <span class="op">=</span> <span class="st">'Shannon x 1006'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">simpson_res</span>, Metric <span class="op">=</span> <span class="st">'Simpson x 1006'</span><span class="op">)</span>,</span>
-<span>    <span class="fu">mutate</span><span class="op">(</span><span class="va">faith_res</span>,   Metric <span class="op">=</span> <span class="st">'Faith PD x 50'</span><span class="op">)</span> <span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>Package <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Package</span>, <span class="va">Metric</span>, <span class="va">median</span>, <span class="va">mem_alloc</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">Package</span><span class="op">)</span></span>
+<span><span class="va">adiv_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">shannon_res</span>, Metric <span class="op">=</span> <span class="st">'Shannon x 1006'</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">simpson_res</span>, Metric <span class="op">=</span> <span class="st">'Simpson x 1006'</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">faith_res</span>,   Metric <span class="op">=</span> <span class="st">'Faith PD x 50'</span><span class="op">)</span> <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Package <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">expression</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Package</span>, <span class="va">Metric</span>, <span class="va">median</span>, <span class="va">mem_alloc</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">Package</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="va">adiv_res</span></span>
@@ -720,7 +737,7 @@ Click to reveal R code.
 <span></span>
 <span></span>
 <span><span class="co"># How much faster and more memory efficient is ecodive?</span></span>
-<span><span class="fu">plyr</span><span class="fu">::</span><span class="fu">ddply</span><span class="op">(</span><span class="va">adiv_res</span>, <span class="st">'Metric'</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="fu">plyr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plyr/man/ddply.html" class="external-link">ddply</a></span><span class="op">(</span><span class="va">adiv_res</span>, <span class="st">'Metric'</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span><span class="op">[[</span><span class="st">'median'</span><span class="op">]</span><span class="op">]</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="st">'median'</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="va">x</span><span class="op">[[</span><span class="st">'mem_alloc'</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="st">'mem_alloc'</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="va">ecodive</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">x</span><span class="op">[[</span><span class="st">'Package'</span><span class="op">]</span><span class="op">]</span> <span class="op">==</span> <span class="st">'ecodive'</span>,<span class="op">]</span><span class="op">)</span></span>
@@ -735,18 +752,18 @@ Click to reveal R code.
 <span><span class="co">#&gt; 3 Simpson x 1006     2 - 5x     1 - 4x</span></span>
 <span></span>
 <span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">adiv_res</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span>, y <span class="op">=</span> <span class="va">mem_alloc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_label_repel</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>label <span class="op">=</span> <span class="va">Package</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="st">'Metric'</span>, nrow <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">'free'</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">scale_y_log10</span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu">label_bytes</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">adiv_res</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span>, y <span class="op">=</span> <span class="va">mem_alloc</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggrepel.slowkow.com/reference/geom_text_repel.html" class="external-link">geom_label_repel</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">Package</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="st">'Metric'</span>, nrow <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">'free'</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_log10</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_bytes.html" class="external-link">label_bytes</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">'Alpha Diversity Implementations'</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">'50 or 1,006 sample benchmarking on six CPU cores'</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">'Median Calculation Time (log scale; n=10)'</span>, </span>
 <span>    y <span class="op">=</span> <span class="st">'Memory Allocated\n(log scale; n=1)'</span> <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_bw</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>margin <span class="op">=</span> <span class="fu">margin</span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">margin</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </details><p><img src="../reference/figures/adiv-benchmark.svg" width="98%"></p>
 <p><code>ecodive</code> is 2 to 43,000x faster and uses 1 to 33,000x
 less memory.</p>
