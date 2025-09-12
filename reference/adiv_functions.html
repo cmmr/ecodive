@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9004</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9005</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ace</span><span class="op">(</span><span class="va">counts</span>, cutoff <span class="op">=</span> <span class="fl">10</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">berger</span><span class="op">(</span><span class="va">counts</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">berger</span><span class="op">(</span><span class="va">counts</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">brillouin</span><span class="op">(</span><span class="va">counts</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -59,7 +59,7 @@
 <span></span>
 <span><span class="fu">fisher</span><span class="op">(</span><span class="va">counts</span>, digits <span class="op">=</span> <span class="fl">3L</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">inv_simpson</span><span class="op">(</span><span class="va">counts</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">inv_simpson</span><span class="op">(</span><span class="va">counts</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">margalef</span><span class="op">(</span><span class="va">counts</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -69,9 +69,9 @@
 <span></span>
 <span><span class="fu">observed</span><span class="op">(</span><span class="va">counts</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">shannon</span><span class="op">(</span><span class="va">counts</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">shannon</span><span class="op">(</span><span class="va">counts</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">simpson</span><span class="op">(</span><span class="va">counts</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">simpson</span><span class="op">(</span><span class="va">counts</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">squares</span><span class="op">(</span><span class="va">counts</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -95,6 +95,11 @@ Default: <code>10</code>.</p></dd>
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
 <dd><p>How many parallel processing threads should be used. The
 default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical CPU cores.</p></dd>
+
+
+<dt id="arg-rescale">rescale<a class="anchor" aria-label="anchor" href="#arg-rescale"></a></dt>
+<dd><p>Normalize each sample's counts so they sum to <code>1</code>.
+Default: <code>TRUE</code></p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
