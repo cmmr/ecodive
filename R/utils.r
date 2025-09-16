@@ -55,33 +55,33 @@ TRANSFORM_PCT   <- 1L
 TRANSFORM_CLR   <- 2L
 TRANSFORM_CHORD <- 3L
 
-transform_pct <- function (counts, cpus = n_cpus()) {
-  .Call(C_transform, counts, TRANSFORM_PCT, cpus, NULL)
+transform_pct <- function (x, cpus = n_cpus()) {
+  .Call(C_transform, x, TRANSFORM_PCT, cpus, NULL)
 }
 
-transform_clr <- function (counts, pseudocount, cpus = n_cpus()) {
-  .Call(C_transform, counts, TRANSFORM_CLR, cpus, pseudocount)
+transform_clr <- function (x, pseudocount, cpus = n_cpus()) {
+  .Call(C_transform, x, TRANSFORM_CLR, cpus, pseudocount)
 }
 
-transform_chord <- function (counts, cpus = n_cpus()) {
-  .Call(C_transform, counts, TRANSFORM_CHORD, cpus, NULL)
+transform_chord <- function (x, cpus = n_cpus()) {
+  .Call(C_transform, x, TRANSFORM_CHORD, cpus, NULL)
 }
 
 
 
-init_result_vec <- function (counts) {
-  result_vec        <- rep(NA_real_, ncol(counts))
-  names(result_vec) <- colnames(counts)
+init_result_vec <- function (x) {
+  result_vec        <- rep(NA_real_, nrow(x))
+  names(result_vec) <- rownames(x)
   return (result_vec)
 }
 
 
-init_result_dist <- function (counts) {
-  n <- ncol(counts)
+init_result_dist <- function (x) {
+  n <- nrow(x)
   structure(
     rep(NA_real_, n * (n - 1) / 2),
     class  = 'dist',
-    Labels = colnames(counts),
+    Labels = rownames(x),
     Size   = n,
     Diag   = FALSE,
     Upper  = FALSE )

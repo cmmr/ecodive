@@ -16,13 +16,13 @@
 #  endif
 #endif
 
-static int *otu_mtx;
-static int  n_otus;
-static int  n_samples;
-static int  target;
-static int  seed;
-static int  n_threads;
-static int *result_mtx;
+static double *otu_mtx;
+static int     n_otus;
+static int     n_samples;
+static int     target;
+static int     seed;
+static int     n_threads;
+static double *result_mtx;
 
 
 
@@ -72,33 +72,36 @@ static void *rarefy_worker(void *arg) {
   
   for (int sample = thread_i; sample < n_samples; sample += n_threads) {
     
-    int *otu_vec = otu_mtx + (sample * n_otus);
-    
     // Sum the counts for this sample
-    int  depth = 0;
+    int depth = 0;
     for (int otu = 0; otu < n_otus; otu++) {
-      depth += otu_vec[otu];
+      depth += otu_mtx[sample + otu * n_samples];
     }
     
-    // Insufficient sequences - leave as all zeroes.
-    if (depth < target) continue;
+    // Already rarefied - leave copied values as they are.
+    if (depth == target) continue;
     
-    // Already rarefied - copy input to output
-    int *result_vec = result_mtx + (sample * n_otus);
-    if (depth == target) {
-      memcpy(result_vec, otu_vec, n_otus * sizeof(int));
+    
+    // Insufficient sequences - set all abundances to zero.
+    if (depth < target) {
+      for (int otu = 0; otu < n_otus; otu++) {
+        result_mtx[sample + otu * n_samples] = 0;
+      }
       continue;
     }
     
-    // Seed the PRNG for this thread.
+    // Seed the PRNG for this sample.
     pcg32_random_t rng;
     pcg32_srandom_r(&rng, seed, sample);
     
     // Knuth algorithm for choosing target seqs from depth.
     int tried = 0, kept = 0;
-    for (int otu = 0; otu < n_otus && kept < target; otu++) {
+    for (int otu = 0; otu < n_otus; otu++) {
       
-      int n_seqs = otu_vec[otu];
+      int i         = sample + otu * n_samples;
+      int n_seqs    = (int)(otu_mtx[i]); // Current # of observations
+      result_mtx[i] = 0;                 // Rarefied # of observations
+      
       for (int seq = 0; seq < n_seqs && kept < target; seq++) {
         
         uint32_t not_tried  = depth - tried;
@@ -106,7 +109,7 @@ static void *rarefy_worker(void *arg) {
         uint32_t rand_int   = pcg32_random_r(&rng);
         
         if (rand_int % not_tried < still_need) {
-          result_vec[otu]++; // retain this observation
+          result_mtx[i]++; // retain this observation
           kept++;
         }
         
@@ -125,17 +128,20 @@ static void *rarefy_worker(void *arg) {
 // R interface. Assigns samples to worker threads.
 //======================================================
 SEXP C_rarefy(
-    SEXP sexp_otu_mtx,   SEXP sexp_target, 
-    SEXP sexp_seed,      SEXP sexp_n_threads, 
-    SEXP sexp_result_mtx ) {
+    SEXP sexp_otu_mtx, SEXP sexp_target, 
+    SEXP sexp_seed,    SEXP sexp_n_threads ) {
   
-  otu_mtx    = INTEGER(sexp_otu_mtx);
-  n_otus     = nrows(sexp_otu_mtx);
-  n_samples  = ncols(sexp_otu_mtx);
+  otu_mtx    = REAL(sexp_otu_mtx);
+  n_otus     = ncols(sexp_otu_mtx);
+  n_samples  = nrows(sexp_otu_mtx);
   target     = asInteger(sexp_target);
   seed       = asInteger(sexp_seed);
   n_threads  = asInteger(sexp_n_threads);
-  result_mtx = INTEGER(sexp_result_mtx);
+  
+  // Copy `otu_mtx` to a new object named `result_mtx`.
+  SEXP sexp_result_mtx = duplicate(sexp_otu_mtx);
+  PROTECT(sexp_result_mtx);
+  result_mtx = REAL(sexp_result_mtx);
   
   
   // Run WITH multithreading
@@ -153,6 +159,7 @@ SEXP C_rarefy(
       
       free(tids); free(args);
       
+      UNPROTECT(1);
       return sexp_result_mtx;
     }
   #endif
@@ -163,6 +170,7 @@ SEXP C_rarefy(
   int thread_i = 0;
   rarefy_worker(&thread_i);
   
+  UNPROTECT(1);
   return sexp_result_mtx;
 }
 

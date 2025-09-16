@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9006</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,8 +88,7 @@ for the feature of interest in your own data.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cmmr.github.io/ecodive/">ecodive</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rarefy.html">rarefy</a></span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">counts</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                   Saliva Gums Nose Stool</span></span>
 <span><span class="co">#&gt; Streptococcus        162  309    6     1</span></span>
 <span><span class="co">#&gt; Bacteroides            2    2    0   341</span></span>
@@ -108,9 +107,14 @@ and/or <strong>evenness</strong>.</p>
 <h3 id="richness">Richness<a class="anchor" aria-label="anchor" href="#richness"></a>
 </h3>
 <p>Richness is how many genera are present in a sample. The simplest
-metric is to count the non-zero genera.</p>
+metric is to count the non-zero genera. You can do this with base R’s
+<code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums()</a></code> or with ecodive’s <code><a href="../reference/adiv_functions.html">observed()</a></code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">counts</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">counts</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
+<span><span class="co">#&gt;      4      3      4      5 </span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">observed</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
 <span><span class="co">#&gt;      4      3      4      5 </span></span></code></pre></div>
 <p>The Chao1 metric takes this a step further by including unobserved
@@ -118,15 +122,15 @@ low abundance genera, inferred using the number of times
 <code>counts == 1</code> vs <code>counts == 2</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Infers 8 unobserved genera</span></span>
-<span><span class="fu"><a href="../reference/alpha_estimators.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 16</span></span>
 <span></span>
 <span><span class="co"># Infers less than 1 unobserved genera</span></span>
-<span><span class="fu"><a href="../reference/alpha_estimators.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 8.125</span></span>
 <span></span>
 <span><span class="co"># Datasets without 1s and 2s give Inf or NaN</span></span>
-<span><span class="fu"><a href="../reference/alpha_estimators.html">chao1</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">chao1</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
 <span><span class="co">#&gt;    4.5    3.0    NaN    Inf </span></span></code></pre></div>
 </div>
@@ -137,15 +141,15 @@ low abundance genera, inferred using the number of times
 Simpson metric is a good measure of evenness.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># High Evenness</span></span>
-<span><span class="fu"><a href="../reference/alpha_integrated.html">simpson</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">simpson</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.8</span></span>
 <span></span>
 <span><span class="co"># Low Evenness</span></span>
-<span><span class="fu"><a href="../reference/alpha_integrated.html">simpson</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">simpson</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.07507396</span></span>
 <span></span>
 <span><span class="co"># Stool &lt; Gums &lt; Saliva &lt; Nose</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/alpha_integrated.html">simpson</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/adiv_functions.html">simpson</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      Stool       Gums     Saliva       Nose </span></span>
 <span><span class="co">#&gt; 0.02302037 0.18806133 0.50725478 0.63539593 </span></span></code></pre></div>
 </div>
@@ -155,23 +159,23 @@ Simpson metric is a good measure of evenness.</p>
 <p>The Shannon diversity index weights both richness and evenness.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Low richness, Low evenness</span></span>
-<span><span class="fu"><a href="../reference/alpha_integrated.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.1101001</span></span>
 <span></span>
 <span><span class="co"># Low richness, High evenness</span></span>
-<span><span class="fu"><a href="../reference/alpha_integrated.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1.098612</span></span>
 <span></span>
 <span><span class="co"># High richness, Low evenness</span></span>
-<span><span class="fu"><a href="../reference/alpha_integrated.html">shannon</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4.416898</span></span>
 <span></span>
 <span><span class="co"># High richness, High evenness</span></span>
-<span><span class="fu"><a href="../reference/alpha_integrated.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4.60517</span></span>
 <span></span>
 <span><span class="co"># Stool &lt; Gums &lt; Saliva &lt; Nose</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/alpha_integrated.html">shannon</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      Stool       Gums     Saliva       Nose </span></span>
 <span><span class="co">#&gt; 0.07927797 0.35692121 0.74119910 1.10615349 </span></span></code></pre></div>
 </div>
@@ -197,14 +201,14 @@ represented by each sample.</p>
 <span><span class="co">#                 +--13-- Propionibacterium</span></span>
 <span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/alpha_phylo.html">faith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Propionibacterium <span class="op">=</span> <span class="fl">1</span>, Corynebacterium <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Propionibacterium <span class="op">=</span> <span class="fl">1</span>, Corynebacterium <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 60</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/alpha_phylo.html">faith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Propionibacterium <span class="op">=</span> <span class="fl">1</span>, Haemophilus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Propionibacterium <span class="op">=</span> <span class="fl">1</span>, Haemophilus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 82</span></span>
 <span></span>
 <span><span class="co"># Nose &lt; Gums &lt; Saliva &lt; Stool</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/alpha_phylo.html">faith</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Nose   Gums Saliva  Stool </span></span>
 <span><span class="co">#&gt;    101    155    180    202 </span></span></code></pre></div>
 </div>

@@ -11,8 +11,8 @@
 #'        between 0 and 1, inclusive. Setting `alpha=1` is equivalent to 
 #'        `normalized_unifrac()`.
 #' 
-#' @param counts   A numeric matrix of count data where each column is a sample, 
-#'        and each row is a feature. Any object coercible with `as.matrix()` 
+#' @param x   A numeric matrix of count data where each column is a feature, 
+#'        and each row is a sample. Any object coercible with `as.matrix()` 
 #'        can be given here, as well as `phyloseq`, `rbiom`, 
 #'        `SummarizedExperiment`, and `TreeSummarizedExperiment` objects. 
 #' 
@@ -33,16 +33,16 @@
 #' @param power   Scaling factor for the magnitude of differences between
 #'        communities (\eqn{p}). Default: `1.5`
 #' 
-#' @param pseudocount   The value to add to all counts to prevent taking 
+#' @param pseudocount   The value to add to all counts in `x` to prevent taking 
 #'        `log(0)` for unobserved features. The default, `NULL`, selects the 
-#'        smallest non-zero value in `counts`.
+#'        smallest non-zero value in `x`.
 #' 
 #' @param rescale   Normalize each sample's counts so they sum to `1`.
 #'        Default: `TRUE`
 #' 
 #' @param tree   A `phylo`-class object representing the phylogenetic tree for 
-#'        the OTUs in `counts`. The OTU identifiers given by `colnames(counts)` 
+#'        the OTUs in `x`. The OTU identifiers given by `colnames(x)` 
 #'        must be present in `tree`. Can be omitted if a tree is embedded with
-#'        the `counts` object or as `attr(counts, 'tree')`.
+#'        the `x` object or as `attr(x, 'tree')`.
 #' 
 NULL

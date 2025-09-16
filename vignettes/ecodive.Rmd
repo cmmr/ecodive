@@ -21,7 +21,7 @@ genera was observed on different body sites.
 ```r
 library(ecodive)
 
-ex_counts
+t(ex_counts)
 #>                   Saliva Gums Nose Stool
 #> Streptococcus        162  793   22     1
 #> Bacteroides            2    4    2   611
@@ -35,12 +35,6 @@ In this example, the 'features' in our feature table are genera. However, your
 own dataset can use whatever feature makes sense - species, OTUs, ASVs, or 
 even something completely unrelated to ecology.
 
-The metrics implemented natively in `ecodive` are highly optimized for both
-speed and memory. However, to provide the broadest range of metrics through the
-same interface, `ecodive` also provides wrappers around functions from the
-`vegan` and `tabula` R packages. To use them, `vegan` and/or `tabula` must be
-installed separately.
-
 
 
 ## Alpha Diversity
@@ -50,13 +44,26 @@ sample. Depending on the metric, this can take into account the number of unique
 genera (richness), how evenly the population is split among genera (evenness),
 or how distantly related the genera are (phylogenetic diversity).
 
-* Classic metrics: `chao1()`, `shannon()`, `simpson()`, `inv_simpson()`
+The available alpha diversity metrics can be listed using `list_methods()`.
 
-* Classic metrics (via `vegan`): `fisher()`, `ace()`
-
-* Classic metrics (via `tabula`): `brillouin()`, `mcintosh()`, `berger()`, `margalef()`, `menhinick()`, `squares()`
-
-* Phylogenetic metrics: `faith()`
+```r
+list_methods('alpha')[,1:5]
+#>                                        name          id phylo weighted int_only
+#> 1  Abundance-based Coverage Estimator (ACE)         ace FALSE     TRUE     TRUE
+#> 3                       Berger-Parker Index      berger FALSE     TRUE    FALSE
+#> 6                           Brillouin Index   brillouin FALSE     TRUE     TRUE
+#> 8                                     Chao1       chao1 FALSE     TRUE     TRUE
+#> 15           Faith's Phylogenetic Diversity       faith  TRUE    FALSE    FALSE
+#> 16                           Fisher's Alpha      fisher FALSE     TRUE     TRUE
+#> 18                       Gini-Simpson Index     simpson FALSE     TRUE    FALSE
+#> 23                    Inverse Simpson Index inv_simpson FALSE     TRUE    FALSE
+#> 29                Margalef's Richness Index    margalef FALSE     TRUE     TRUE
+#> 31                           McIntosh Index    mcintosh FALSE     TRUE     TRUE
+#> 32               Menhinick's Richness Index   menhinick FALSE     TRUE     TRUE
+#> 37                        Observed Features    observed FALSE    FALSE    FALSE
+#> 40                  Shannon Diversity Index     shannon FALSE     TRUE    FALSE
+#> 45               Squares Richness Estimator     squares FALSE     TRUE     TRUE
+```
 
 * Further reading: `vignette('adiv')`
 
@@ -64,18 +71,52 @@ or how distantly related the genera are (phylogenetic diversity).
 ## Beta Diversity
 
 Beta diversity metrics describe how different two samples are, based on the
-genera observed in each. Also known as "distance" or "dissimilarity". UniFrac
-metrics incorporate a phylogenetic tree into this calculation.
+genera observed in each.UniFrac metrics incorporate a phylogenetic tree into
+this calculation.
 
-* Classic metrics: `bray_curtis()`, `canberra()`, `euclidean()`, `gower()`, 
-`jaccard()`, `kulczynski()`, `manhattan()`
+The available alpha diversity metrics can be listed using `list_methods()`.
 
-* Classic metrics (via `vegan`): `clark()`, `alt_gower()`, `morisita()`, `horn()`, `mountford()`, `raup()`, `binomial()`, `cao()`, `mahalanobis()`, `chisq()`, `chord()`, `hellinger()`, `aitchison()`, `robust_aitchison()`
+```r
+list_methods('beta')[,2:6]
+#>                           id phylo weighted int_only true_metric
+#> 2                  aitchison FALSE     TRUE    FALSE        TRUE
+#> 4              bhattacharyya FALSE     TRUE    FALSE        TRUE
+#> 5                       bray FALSE     TRUE    FALSE       FALSE
+#> 7                   canberra FALSE     TRUE    FALSE        TRUE
+#> 9                  chebyshev FALSE     TRUE    FALSE        TRUE
+#> 10                     chord FALSE     TRUE    FALSE        TRUE
+#> 11                     clark FALSE     TRUE    FALSE        TRUE
+#> 12                  sorensen FALSE    FALSE    FALSE       FALSE
+#> 13                divergence FALSE     TRUE    FALSE        TRUE
+#> 14                 euclidean FALSE     TRUE    FALSE        TRUE
+#> 17       generalized_unifrac  TRUE     TRUE    FALSE        TRUE
+#> 19                     gower FALSE     TRUE    FALSE        TRUE
+#> 20                   hamming FALSE    FALSE    FALSE        TRUE
+#> 21                 hellinger FALSE     TRUE    FALSE        TRUE
+#> 22                      horn FALSE     TRUE    FALSE       FALSE
+#> 24                   jaccard FALSE    FALSE    FALSE        TRUE
+#> 25                    jensen FALSE     TRUE    FALSE        TRUE
+#> 26                       jsd FALSE     TRUE    FALSE        TRUE
+#> 27                lorentzian FALSE     TRUE    FALSE       FALSE
+#> 28                 manhattan FALSE     TRUE    FALSE        TRUE
+#> 30                  matusita FALSE     TRUE    FALSE        TRUE
+#> 33                 minkowski FALSE     TRUE    FALSE        TRUE
+#> 34                  morisita FALSE     TRUE     TRUE       FALSE
+#> 35                    motyka FALSE     TRUE    FALSE       FALSE
+#> 36        normalized_unifrac  TRUE     TRUE    FALSE        TRUE
+#> 38                    ochiai FALSE    FALSE    FALSE       FALSE
+#> 39                psym_chisq FALSE     TRUE    FALSE       FALSE
+#> 41                   soergel FALSE     TRUE    FALSE        TRUE
+#> 42             squared_chisq FALSE     TRUE    FALSE       FALSE
+#> 43             squared_chord FALSE     TRUE    FALSE       FALSE
+#> 44         squared_euclidean FALSE     TRUE    FALSE       FALSE
+#> 46                    topsoe FALSE     TRUE    FALSE        TRUE
+#> 47        unweighted_unifrac  TRUE     TRUE    FALSE        TRUE
+#> 48 variance_adjusted_unifrac  TRUE     TRUE    FALSE        TRUE
+#> 49               wave_hedges FALSE     TRUE    FALSE       FALSE
+#> 50          weighted_unifrac  TRUE     TRUE    FALSE        TRUE
+```
 
-* Phylogenetic metrics: `unweighted_unifrac()`, `weighted_unifrac()`,
-`normalized_unifrac()`, `generalized_unifrac()`, `variance_adjusted_unifrac()`
-
-* Further reading: `vignette('bdiv')` and `vignette('unifrac')`.
 
 
 
@@ -94,17 +135,17 @@ samples with more observations.
 
 
 ```r
-colSums(ex_counts)
+rowSums(ex_counts)
 #> Saliva   Gums   Nose  Stool 
 #>    345    886   1011    615 
 
 counts <- rarefy(ex_counts)
 
-colSums(counts)
+rowSums(counts)
 #> Saliva   Gums   Nose  Stool 
 #>    345    345    345    345 
 
-counts
+t(counts)
 #>                   Saliva Gums Nose Stool
 #> Streptococcus        162  309    6     1
 #> Bacteroides            2    2    0   341
@@ -132,17 +173,11 @@ shannon(counts)
 
 ## Beta Diversity --------------------
 
-bray_curtis(counts)
+bray(counts)
 #>          Saliva      Gums      Nose
 #> Gums  0.4260870                    
 #> Nose  0.9797101 0.9826087          
 #> Stool 0.9884058 0.9884058 0.9913043
-
-bray_curtis(counts, weighted = FALSE)
-#>          Saliva      Gums      Nose
-#> Gums  0.1428571                    
-#> Nose  0.5000000 0.7142857          
-#> Stool 0.3333333 0.2500000 0.3333333
 ```
 
 
@@ -184,7 +219,7 @@ Beta diversity functions return a `dist` object. You can convert this to a
 standard R matrix with the `as.matrix()` function.
 
 ```r
-dm <- bray_curtis(counts, weighted = FALSE)
+dm <- bray(counts)
 dm
 #>          Saliva      Gums      Nose
 #> Gums  0.1428571                    

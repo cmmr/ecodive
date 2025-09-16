@@ -11,11 +11,11 @@
 #' @inherit documentation
 #' @family alpha_diversity
 #' 
-#' @param metric   The name of an alpha diversity metric. One of `c('ace',
+#' @param method   The name of an alpha diversity metric. One of `c('ace',
 #'   'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson',
 #'   'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson',
 #'   'squares')`. Case-insensitive and partial name matching is supported.
-#'   Programmatic access via `list_metrics('alpha')`.
+#'   Programmatic access via `list_methods('alpha')`.
 #'   
 #' @param ...  Additional options to pass through to the called function. I.e.
 #'   `cpus` or `tree`.
@@ -60,8 +60,8 @@
 #'     alpha_div(ex_counts, 'faith', tree = ex_tree)
 #'     
 #'     
-alpha_div <- function (counts, metric, ...) {
-  match_metric(metric, div = 'alpha')$func(counts = counts, ...)
+alpha_div <- function (x, method, ...) {
+  match_method(method, div = 'alpha')$func(x = x, ...)
 }
 
 

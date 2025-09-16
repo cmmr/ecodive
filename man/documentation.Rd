@@ -8,8 +8,8 @@
 between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
 \code{normalized_unifrac()}.}
 
-\item{counts}{A numeric matrix of count data where each column is a sample,
-and each row is a feature. Any object coercible with \code{as.matrix()}
+\item{x}{A numeric matrix of count data where each column is a feature,
+and each row is a sample. Any object coercible with \code{as.matrix()}
 can be given here, as well as \code{phyloseq}, \code{rbiom},
 \code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
@@ -30,17 +30,17 @@ distance matrix to calculate. See examples.}
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
 
-\item{pseudocount}{The value to add to all counts to prevent taking
+\item{pseudocount}{The value to add to all counts in \code{x} to prevent taking
 \code{log(0)} for unobserved features. The default, \code{NULL}, selects the
-smallest non-zero value in \code{counts}.}
+smallest non-zero value in \code{x}.}
 
 \item{rescale}{Normalize each sample's counts so they sum to \code{1}.
 Default: \code{TRUE}}
 
 \item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
-the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
+the OTUs in \code{x}. The OTU identifiers given by \code{colnames(x)}
 must be present in \code{tree}. Can be omitted if a tree is embedded with
-the \code{counts} object or as \code{attr(counts, 'tree')}.}
+the \code{x} object or as \code{attr(x, 'tree')}.}
 }
 \description{
 documentation

@@ -14,5 +14,7 @@ CRAN-SUBMISSION
 cran-comments.md
 revdep/
 tmp/
+/benchmark/
 /doc/
 /Meta/
+/refs/

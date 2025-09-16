@@ -62,8 +62,8 @@ export(variance_adjusted_unifrac)
 export(wave_hedges)
 export(weighted_unifrac)
 
-export(list_metrics)
-export(match_metric)
+export(list_methods)
+export(match_method)
 
 export(n_cpus)
 export(rarefy)

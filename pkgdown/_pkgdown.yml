@@ -27,8 +27,8 @@ reference:
   
 - title: Programmatic Access
   contents:
-  - match_metric
-  - list_metrics
+  - match_method
+  - list_methods
   
   
 - title: Utility

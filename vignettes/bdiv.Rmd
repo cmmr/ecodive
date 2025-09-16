@@ -18,8 +18,7 @@ own data.
 library(ecodive)
 
 counts <- rarefy(ex_counts)
-
-counts
+t(counts)
 #>                   Saliva Gums Nose Stool
 #> Streptococcus        162  309    6     1
 #> Bacteroides            2    2    0   341
@@ -44,18 +43,30 @@ samples and `1` for completely different samples.
 
 ## Weighted vs Unweighted
 
-The classic algorithms all run in weighted mode by default. Specifying `weighted
-= FALSE`, e.g. `canberra(counts, weighted = FALSE)` will switch them to
-unweighted mode.
+Weighted methods take relative abundances into account, whereas unweighted
+methods only consider presence/absence. To determine which methods are weighted
+or unweighted, consult `list_methods()`.
 
-* `bray_curtis()`, `canberra()`, `euclidean()`, `gower()`, `jaccard()`, `kulczynski()`, `manhattan()`
+``` r
+list_methods('beta', 'id', weighted = FALSE)
+#> [1] "sorensen" "hamming"  "jaccard"  "ochiai"
 
-For the UniFrac algorithms, `unweighted_unifrac()` is unweighted and all the others are weighted.
+list_methods('beta', 'id', weighted = TRUE)
+#>  [1] "aitchison"                 "bhattacharyya"             "bray"                     
+#>  [4] "canberra"                  "chebyshev"                 "chord"                    
+#>  [7] "clark"                     "divergence"                "euclidean"                
+#> [10] "generalized_unifrac"       "gower"                     "hellinger"                
+#> [13] "horn"                      "jensen"                    "jsd"                      
+#> [16] "lorentzian"                "manhattan"                 "matusita"                 
+#> [19] "minkowski"                 "morisita"                  "motyka"                   
+#> [22] "normalized_unifrac"        "psym_chisq"                "soergel"                  
+#> [25] "squared_chisq"             "squared_chord"             "squared_euclidean"        
+#> [28] "topsoe"                    "unweighted_unifrac"        "variance_adjusted_unifrac"
+#> [31] "wave_hedges"               "weighted_unifrac"
+```
 
-* Unweighted: `unweighted_unifrac()`
-
-* Weighted: `weighted_unifrac()`, `normalized_unifrac()`, `generalized_unifrac()`, `variance_adjusted_unifrac()`
-
+Note that `sorsensen()` is an unweighted version of `bray(rescale = FALSE)`, and
+`jaccard()` is an unweighted version of `soergel(rescale = FALSE)`.
 
 
 # Partial Calculation
@@ -64,7 +75,7 @@ The default value of `pairs=NULL` in ecodive's beta diversity functions results
 in the returned all-vs-all distance matrix being completely filled in.
 
 ```r
-bray_curtis(counts)
+bray(counts)
 #>          Saliva      Gums      Nose
 #> Gums  0.4260870                    
 #> Nose  0.9797101 0.9826087          
@@ -76,7 +87,7 @@ parameter to skip unwanted calculations and save some CPU time. The larger the
 dataset, the more noticeable the improvement will be.
 
 ```r
-bray_curtis(counts, pairs = 1:3)
+bray(counts, pairs = 1:3)
 #>          Saliva      Gums      Nose
 #> Gums  0.4260870                    
 #> Nose  0.9797101        NA          
@@ -92,9 +103,9 @@ The `pairs` argument can be:
 Therefore, all of the following are equivalent:
 
 ```r
-bray_curtis(counts, pairs = 1:3)
-bray_curtis(counts, pairs = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
-bray_curtis(counts, pairs = function (i, j) i == 1)
+bray(counts, pairs = 1:3)
+bray(counts, pairs = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
+bray(counts, pairs = function (i, j) i == 1)
 ```
 
 
@@ -102,13 +113,13 @@ The ordering of `pairs` follows the pairings produced by `combn()`.
 
 ```r
 # Column index pairings
-combn(ncol(counts), 2)
+combn(nrow(counts), 2)
 #>      [,1] [,2] [,3] [,4] [,5] [,6]
 #> [1,]    1    1    1    2    2    3
 #> [2,]    2    3    4    3    4    4
 
 # Sample name pairings
-combn(colnames(counts), 2)
+combn(rownames(counts), 2)
 #>      [,1]     [,2]     [,3]     [,4]   [,5]    [,6]   
 #> [1,] "Saliva" "Saliva" "Saliva" "Gums" "Gums"  "Nose" 
 #> [2,] "Gums"   "Nose"   "Stool"  "Nose" "Stool" "Stool"
@@ -117,13 +128,13 @@ combn(colnames(counts), 2)
 So, for instance, to use gums as the reference sample:
 
 ```r
-my_combn <- combn(colnames(counts), 2)
+my_combn <- combn(rownames(counts), 2)
 my_pairs <- my_combn[1,] == 'Gums' | my_combn[2,] == 'Gums'
 
 my_pairs
 #> [1]  TRUE FALSE FALSE  TRUE  TRUE FALSE
 
-bray_curtis(counts, pairs = my_pairs)
+bray(counts, pairs = my_pairs)
 #>          Saliva      Gums      Nose
 #> Gums  0.4260870                    
 #> Nose         NA 0.9826087          

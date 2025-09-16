@@ -13,12 +13,14 @@
 <url><loc>https://cmmr.github.io/ecodive/LICENSE-text.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/LICENSE.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/news/index.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/adiv_functions.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/alpha_div.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/alpha_estimators.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/alpha_integrated.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/alpha_phylo.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/alpha_richness.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_compositional.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/bdiv_functions.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_geometric.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_mainstays.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_metrics.html</loc></url>
@@ -30,6 +32,8 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/ex_counts.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ex_tree.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/index.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/match_metric.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/methods.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/metrics.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/n_cpus.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/prob_symm.html</loc></url>

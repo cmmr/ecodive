@@ -11,7 +11,7 @@ integers between 1 and depth such that they sum to depth."><meta property="og:im
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9006</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@ integers between 1 and <code>depth</code> such that they sum to <code>depth</cod
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rarefy</span><span class="op">(</span></span>
-<span>  <span class="va">counts</span>,</span>
+<span>  <span class="va">x</span>,</span>
 <span>  depth <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  n_samples <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -67,9 +67,9 @@ integers between 1 and <code>depth</code> such that they sum to <code>depth</cod
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
-<dd><p>A numeric matrix of count data where each column is a sample,
-and each row is a feature. Any object coercible with <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>A numeric matrix of count data where each column is a feature,
+and each row is a sample. Any object coercible with <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>
 can be given here, as well as <code>phyloseq</code>, <code>rbiom</code>,
 <code>SummarizedExperiment</code>, and <code>TreeSummarizedExperiment</code> objects.</p></dd>
 
@@ -131,14 +131,14 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
 <span class="r-in"><span>    <span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu">rarefy</span><span class="op">(</span><span class="va">counts</span>, depth <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">counts</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      A B C D</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OTU1 4 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OTU2 0 0 9 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OTU3 3 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OTU4 2 0 0 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OTU5 5 0 5 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OTU1 0 0 0 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OTU2 0 5 5 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OTU3 0 0 0 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OTU4 0 0 0 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OTU5 4 2 7 1</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  A  B  C  D </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14  0 14  0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4  7 12  5 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

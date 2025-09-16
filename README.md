@@ -16,7 +16,7 @@ datasets, such as those common in microbiome research.
 Analyzing ecological diversity is often a computational bottleneck, especially
 with large datasets. `ecodive` addresses this by providing:
 
-* **High Performance:** `ecodive` is written in C and parallelized using pthreads, making it dramatically faster than other R packages. [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html) show it can be up to **43,000x faster** and use up to **33,000x less memory**.
+* **High Performance:** `ecodive` is written in C and parallelized using pthreads, making it dramatically faster than other R packages. [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html) show it can be up to **10,000x faster** and use up to **90,000x less memory**.
 
 * **Zero Dependencies:** The package has no external R dependencies, making it lightweight, stable, and easy to install. This also makes it an ideal and secure backend for other R packages.
 
@@ -34,9 +34,7 @@ The latest stable version can be installed from CRAN.
 install.packages('ecodive')
 ```
 
-The development version is available on GitHub. Please note that this method
-requires a compiler - see http://www.rstudio.com/ide/docs/packages/prerequisites
-if the installation does not succeed on the first try.
+The development version is available on GitHub.
 
 ``` r
 install.packages('pak')
@@ -82,20 +80,16 @@ The `ex_counts` and `ex_tree` objects are included with `ecodive`.
 
 ``` r
 ## Example Data ----------------------
-
 counts <- rarefy(ex_counts)
-counts
-#>                   Saliva Gums Nose Stool
-#> Streptococcus        162  309    6     1
-#> Bacteroides            2    2    0   341
-#> Corynebacterium        0    0  171     1
-#> Haemophilus          180   34    0     1
-#> Propionibacterium      1    0   82     0
-#> Staphylococcus         0    0   86     1
+counts[,1:4]
+#>        Streptococcus Bacteroides Corynebacterium Haemophilus
+#> Saliva           162           2               0         180
+#> Gums             309           2               0          34
+#> Nose               6           0             171           0
+#> Stool              1         341               1           1
 
 
 ## Alpha Diversity -------------------
-
 shannon(counts)
 #>     Saliva       Gums       Nose      Stool 
 #> 0.74119910 0.35692121 1.10615349 0.07927797 
@@ -106,8 +100,7 @@ faith(counts, tree = ex_tree)
 
 
 ## Beta Diversity --------------------
-
-bray_curtis(counts)
+bray(counts)
 #>          Saliva      Gums      Nose
 #> Gums  0.4260870                    
 #> Nose  0.9797101 0.9826087          
@@ -120,6 +113,33 @@ weighted_unifrac(counts, tree = ex_tree)
 #> Stool 109.77971 109.44058 110.00870
 ```
 
+
+## Available Methods
+
+Use `list_methods()` to browse the methods available for calculating diversity.
+
+``` r
+# Alpha Diversity
+list_methods('alpha', 'id')
+#>  [1] "ace"         "berger"      "brillouin"   "chao1"       "faith"      
+#>  [6] "fisher"      "simpson"     "inv_simpson" "margalef"    "mcintosh"   
+#> [11] "menhinick"   "observed"    "shannon"     "squares"    
+
+# Beta Diversity
+list_methods('beta', 'id')
+#>  [1] "aitchison"                 "bhattacharyya"             "bray"                     
+#>  [4] "canberra"                  "chebyshev"                 "chord"                    
+#>  [7] "clark"                     "sorensen"                  "divergence"               
+#> [10] "euclidean"                 "generalized_unifrac"       "gower"                    
+#> [13] "hamming"                   "hellinger"                 "horn"                     
+#> [16] "jaccard"                   "jensen"                    "jsd"                      
+#> [19] "lorentzian"                "manhattan"                 "matusita"                 
+#> [22] "minkowski"                 "morisita"                  "motyka"                   
+#> [25] "normalized_unifrac"        "ochiai"                    "psym_chisq"               
+#> [28] "soergel"                   "squared_chisq"             "squared_chord"            
+#> [31] "squared_euclidean"         "topsoe"                    "unweighted_unifrac"       
+#> [34] "variance_adjusted_unifrac" "wave_hedges"               "weighted_unifrac"   
+```
 
 
 ## Documentation

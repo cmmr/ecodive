@@ -2,10 +2,10 @@ test_that("beta diversity", {
   
   
   # # Hand columns to an abdiv function in pairs.
-  # abdiv        <- function (x, method, ...) apply(combn(seq_len(ncol(x)), 2), 2L, \(i) do.call(`::`, list('abdiv', method))(x[,i[1]], x[,i[2]], ...))
-  # parallelDist <- function (x, method, ...) as.vector(parallelDist::parallelDist(t(x), method, ...))
-  # philentropy  <- function (x, method, ...) suppressMessages(as.vector(as.dist(philentropy::distance(t(x), method, ...))))
-  # vegan        <- function (x, method, ...) as.vector(vegan::vegdist(t(x), method, ...))
+  # abdiv        <- function (x, method, ...) apply(combn(seq_len(nrow(x)), 2), 2L, \(i) do.call(`::`, list('abdiv', method))(x[i[1],], x[i[2],], ...))
+  # parallelDist <- function (x, method, ...) as.vector(parallelDist::parallelDist(x, method, ...))
+  # philentropy  <- function (x, method, ...) suppressMessages(as.vector(as.dist(philentropy::distance(x, method, ...))))
+  # vegan        <- function (x, method, ...) as.vector(vegan::vegdist(x, method, ...))
   
   
   
@@ -56,7 +56,7 @@ test_that("beta diversity", {
   
   # Bray-Curtis ====
   
-  expect_equal( # vegan::vegdist(counts_p, 'bray')
+  expect_equal( # vegan(counts_p, 'bray')
     object   = as.vector(bray(counts)), 
     expected = c(0.444444444444444,  0.428571428571429, 0.666666666666667, 
                  0.0555555555555556, 0.277777777777778, 0.333333333333333 ))

@@ -5,7 +5,7 @@
 \title{Rarefy OTU counts.}
 \usage{
 rarefy(
-  counts,
+  x,
   depth = 0.1,
   n_samples = NULL,
   seed = 0,
@@ -14,8 +14,8 @@ rarefy(
 )
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a sample,
-and each row is a feature. Any object coercible with \code{as.matrix()}
+\item{x}{A numeric matrix of count data where each column is a feature,
+and each row is a sample. Any object coercible with \code{as.matrix()}
 can be given here, as well as \code{phyloseq}, \code{rbiom},
 \code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 

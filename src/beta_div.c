@@ -47,8 +47,8 @@ static int     n_samples;
 static int     n_pairs;
 static int     n_threads;
 static int    *pairs_vec;
+static char    all_pairs;
 static double *dist_vec;
-static double *last_sample;
 static SEXP   *sexp_extra;
 
 
@@ -58,42 +58,51 @@ static SEXP   *sexp_extra;
  * pairings and pairings not assigned to the current thread. 
  * Ensures all threads process the same number of pairs.
  * 
- * After calling START_PAIR_LOOP the code can expect `x_vec` 
- * and `y_vec` to point to the two samples' columns in 
+ * After calling START_PAIR_LOOP the code can expect `x1` 
+ * and `y1` to be the two samples' first indices in 
  * `otu_mtx`. The code should assign to `distance` before 
  * calling END_PAIR_LOOP.
+ * 
+ * After calling START_OTU_LOOP the code can expect `x` 
+ * and `y` to be the current OTU's values from `otu_mtx`.
  * 
  * Implemented as macros to avoid the overhead of a function
  * call or the messiness of duplicated code.
  */
 
-#define START_PAIR_LOOP                                         \
-int     thread_i = *((int *) arg);                              \
-double *x_vec    = otu_mtx;                                     \
-double *y_vec    = otu_mtx + n_otus;                            \
-int     pair_idx = 0;                                           \
-int     dist_idx = 0;                                           \
-while (pair_idx < n_pairs) {                                    \
-  if (pairs_vec == NULL || pairs_vec[pair_idx] == dist_idx) {   \
-    if (pair_idx % n_threads == thread_i) {                     \
-        double distance = 0;
+#define START_PAIR_LOOP                                        \
+int thread_i = *((int *) arg);                                 \
+int pair_idx = 0; /* The pairs that we're asked to compute */  \
+int dist_idx = 0; /* All combinations; length of return vec */ \
+for (int x1 = 0; x1 < n_samples - 1; x1++) {                   \
+  for (int y1 = x1 + 1; y1 < n_samples; y1++) {                \
+    if (all_pairs || pairs_vec[pair_idx] == dist_idx) {        \
+      if (pair_idx % n_threads == thread_i) {                  \
+        double distance = 0;                                   \
+
+        
+#define START_OTU_LOOP                                         \
+        for (int otu = 0; otu < n_otus; otu++) {               \
+          double x = otu_mtx[x1 + otu * n_samples];            \
+          double y = otu_mtx[y1 + otu * n_samples];            \
 
 
-#define END_PAIR_LOOP                                           \
-      dist_vec[dist_idx] = distance;                            \
-    }                                                           \
-    pair_idx++;                                                 \
-  }                                                             \
-  if (y_vec == last_sample) {                                   \
-    x_vec += n_otus;                                            \
-    if (x_vec == last_sample) return NULL;                      \
-    y_vec = x_vec + n_otus;                                     \
-  } else {                                                      \
-    y_vec += n_otus;                                            \
-  }                                                             \
-  dist_idx++;                                                   \
-}                                                               \
-return NULL;                                                    \
+#define END_OTU_LOOP                                           \
+        }                                                      \
+
+
+#define END_PAIR_LOOP                                          \
+        dist_vec[dist_idx] = distance;                         \
+      }                                                        \
+      pair_idx++;                                              \
+      if (pair_idx == n_pairs) goto end_loops;                 \
+    }                                                          \
+    dist_idx++;                                                \
+  }                                                            \
+}                                                              \
+end_loops:                                                     \
+
+
 
 
 
@@ -104,12 +113,14 @@ return NULL;                                                    \
 static void *bhattacharyya(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++)
-    distance += sqrt(x_vec[otu] * y_vec[otu]);
+  START_OTU_LOOP
+  distance += sqrt(x * y);
+  END_OTU_LOOP
   
   distance = -1 * log(distance);
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -124,16 +135,15 @@ static void *bray(void *arg) {
   double diffs = 0;
   double sums  = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    sums  += x + y;
-    diffs += (x > y) ? x - y : y - x;
-  }
+  START_OTU_LOOP
+  sums  += x + y;
+  diffs += (x > y) ? x - y : y - x;
+  END_OTU_LOOP
   
   distance = diffs / sums;
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -146,16 +156,15 @@ static void *bray(void *arg) {
 static void *canberra(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y) {
-      if (x > y) { distance += (x - y) / (x + y); }
-      else       { distance += (y - x) / (x + y); }
-    }
+  START_OTU_LOOP
+  if (x || y) {
+    if (x > y) { distance += (x - y) / (x + y); }
+    else       { distance += (y - x) / (x + y); }
   }
+  END_OTU_LOOP
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -166,14 +175,13 @@ static void *canberra(void *arg) {
 static void *chebyshev(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    double d = (x > y) ? x - y : y - x;
-    if (d > distance) distance = d;
-  }
+  START_OTU_LOOP
+  double d = (x > y) ? x - y : y - x;
+  if (d > distance) distance = d;
+  END_OTU_LOOP
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -184,16 +192,15 @@ static void *chebyshev(void *arg) {
 static void *clark(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y)
-      distance += ((x - y) / (x + y)) * ((x - y) / (x + y));
-  }
+  START_OTU_LOOP
+  if (x || y)
+    distance += ((x - y) / (x + y)) * ((x - y) / (x + y));
+  END_OTU_LOOP
   
   distance = sqrt(distance);
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -204,16 +211,15 @@ static void *clark(void *arg) {
 static void *divergence(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y)
-      distance += ((x - y) * (x - y)) / ((x + y) * (x + y));
-  }
+  START_OTU_LOOP
+  if (x || y)
+    distance += ((x - y) * (x - y)) / ((x + y) * (x + y));
+  END_OTU_LOOP
   
   distance = 2 * distance;
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -224,16 +230,15 @@ static void *divergence(void *arg) {
 static void *euclidean(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y)
-      distance += (x - y) * (x - y);
-  }
+  START_OTU_LOOP
+  if (x || y)
+    distance += (x - y) * (x - y);
+  END_OTU_LOOP
   
   distance = sqrt(distance);
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -248,19 +253,15 @@ static void *gower(void *arg) {
   
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    
-    double x = x_vec[otu];
-    double y = y_vec[otu];
-    double r = range_vec[otu];
-    
-    if      (x > y) { distance += (x - y) / r; }
-    else if (y > x) { distance += (y - x) / r; }
-  }
+  START_OTU_LOOP
+  if      (x > y) { distance += (x - y) / range_vec[otu]; }
+  else if (y > x) { distance += (y - x) / range_vec[otu]; }
+  END_OTU_LOOP
   
   distance /= n_otus;
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -271,11 +272,12 @@ static void *gower(void *arg) {
 static void *hamming(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++)
-    if (!x_vec[otu] ^ !y_vec[otu])
-      distance++;
+  START_OTU_LOOP
+  if (!x ^ !y) distance++;
+  END_OTU_LOOP
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -291,15 +293,13 @@ static void *horn(void *arg) {
   double sum_x = 0, sum_x2 = 0;
   double sum_y = 0, sum_y2 = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y) {
-      distance += x * y;
-      sum_x += x; sum_x2 += x * x;
-      sum_y += y; sum_y2 += y * y;
-    }
+  START_OTU_LOOP
+  if (x || y) {
+    distance += x * y;
+    sum_x += x; sum_x2 += x * x;
+    sum_y += y; sum_y2 += y * y;
   }
+  END_OTU_LOOP
   
   sum_x2 /= sum_x * sum_x;
   sum_y2 /= sum_y * sum_y;
@@ -307,6 +307,7 @@ static void *horn(void *arg) {
   distance = 1 - (2 * distance) / ((sum_x2 + sum_y2) * sum_x * sum_y);
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -319,14 +320,15 @@ static void *jaccard(void *arg) {
   
   double D = 0, U = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    if      (x_vec[otu]) { U++; if (!y_vec[otu]) D++; } 
-    else if (y_vec[otu]) { U++; D++; }
-  }
+  START_OTU_LOOP
+  if      (x) { U++; if (!y) D++; }
+  else if (y) { U++; D++; }
+  END_OTU_LOOP
   
   distance = D / U;
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -337,16 +339,15 @@ static void *jaccard(void *arg) {
 static void *jsd(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x) distance += x * log(2 * x / (x + y));
-    if (y) distance += y * log(2 * y / (x + y));
-  }
+  START_OTU_LOOP
+  if (x) distance += x * log(2 * x / (x + y));
+  if (y) distance += y * log(2 * y / (x + y));
+  END_OTU_LOOP
   
   distance /= 2;
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -357,14 +358,12 @@ static void *jsd(void *arg) {
 static void *lorentzian(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y)
-      distance += log(1 + fabs(x - y));
-  }
+  START_OTU_LOOP
+  if (x || y) distance += log(1 + fabs(x - y));
+  END_OTU_LOOP
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -375,16 +374,15 @@ static void *lorentzian(void *arg) {
 static void *manhattan(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y) {
-      if (x > y) { distance += x - y; }
-      else       { distance += y - x; }
-    }
+  START_OTU_LOOP
+  if (x || y) {
+    if (x > y) { distance += x - y; }
+    else       { distance += y - x; }
   }
+  END_OTU_LOOP
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -399,18 +397,17 @@ static void *minkowski(void *arg) {
   
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y) {
-      if (x > y) { distance += pow(x - y, power); }
-      else       { distance += pow(y - x, power); }
-    }
+  START_OTU_LOOP
+  if (x || y) {
+    if (x > y) { distance += pow(x - y, power); }
+    else       { distance += pow(y - x, power); }
   }
+  END_OTU_LOOP
   
   distance = pow(distance, inv_power);
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -427,15 +424,13 @@ static void *morisita(void *arg) {
   double simpson_x = 0, sum_x = 0;
   double simpson_y = 0, sum_y = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y) {
-      distance += x * y;
-      sum_x += x; simpson_x += x * (x - 1);
-      sum_y += y; simpson_y += y * (y - 1);
-    }
+  START_OTU_LOOP
+  if (x || y) {
+    distance += x * y;
+    sum_x += x; simpson_x += x * (x - 1);
+    sum_y += y; simpson_y += y * (y - 1);
   }
+  END_OTU_LOOP
   
   simpson_x /= sum_x * (sum_x - 1);
   simpson_y /= sum_y * (sum_y - 1);
@@ -443,6 +438,7 @@ static void *morisita(void *arg) {
   distance = 1 - (2 * distance) / ((simpson_x + simpson_y) * sum_x * sum_y);
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -457,16 +453,15 @@ static void *motyka(void *arg) {
   
   double sums = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    distance += (x > y) ? x : y;
-    sums     += x + y;
-  }
+  START_OTU_LOOP
+  distance += (x > y) ? x : y;
+  sums     += x + y;
+  END_OTU_LOOP
   
   distance /= sums;
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -479,18 +474,17 @@ static void *sorensen(void *arg) {
   
   double top = 0, bot = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y) {
-      bot++;
-      if (x && y) { top++; bot++; }
-    }
+  START_OTU_LOOP
+  if (x || y) {
+    bot++;
+    if (x && y) { top++; bot++; }
   }
+  END_OTU_LOOP
   
   distance = 1 - 2 * top / bot;
     
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -504,14 +498,15 @@ static void *ochiai(void *arg) {
   
   double A = 0, B = 0, J = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    if      (x_vec[otu]) { A++; if (y_vec[otu]) { B++; J++; } } 
-    else if (y_vec[otu]) { B++; }
-  }
+  START_OTU_LOOP
+  if      (x) { A++; if (y) { B++; J++; } } 
+  else if (y) { B++; }
+  END_OTU_LOOP
   
   distance = 1 - J / sqrt(A * B);
   
   END_PAIR_LOOP
+  return NULL;
 }
   
   
@@ -525,21 +520,15 @@ static void *soergel(void *arg) {
   double min_sum = 0;
   double max_sum = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x < y) {
-      min_sum += x;
-      max_sum += y;
-    } else {
-      min_sum += y;
-      max_sum += x;
-    }
-  }
+  START_OTU_LOOP
+  if (x < y) { min_sum += x; max_sum += y; } 
+  else       { min_sum += y; max_sum += x; }
+  END_OTU_LOOP
   
   distance = 1 - (min_sum / max_sum);
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -550,14 +539,12 @@ static void *soergel(void *arg) {
 static void *squared_chisq(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y)
-      distance += (x - y) * (x - y) / (x + y);
-  }
+  START_OTU_LOOP
+  if (x || y) distance += (x - y) * (x - y) / (x + y);
+  END_OTU_LOOP
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -568,16 +555,15 @@ static void *squared_chisq(void *arg) {
 static void *squared_chord(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y) {
-      double d = sqrt(x) - sqrt(y);
-      distance += d * d;
-    }
+  START_OTU_LOOP
+  if (x || y) {
+    double d = sqrt(x) - sqrt(y);
+    distance += d * d;
   }
+  END_OTU_LOOP
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -588,16 +574,15 @@ static void *squared_chord(void *arg) {
 static void *wave_hedges(void *arg) {
   START_PAIR_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = x_vec[otu], y = y_vec[otu];
-    
-    if (x || y) {
-      if (x > y) { distance += (x - y) / x; }
-      else       { distance += (y - x) / y; }
-    }
+  START_OTU_LOOP
+  if (x || y) {
+    if (x > y) { distance += (x - y) / x; }
+    else       { distance += (y - x) / y; }
   }
+  END_OTU_LOOP
   
   END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -612,20 +597,20 @@ SEXP C_beta_div(
   
   algorithm  = asInteger(sexp_algorithm);
   otu_mtx    = REAL(sexp_otu_mtx);
-  n_otus     = nrows(sexp_otu_mtx);
-  n_samples  = ncols(sexp_otu_mtx);
+  n_otus     = ncols(sexp_otu_mtx);
+  n_samples  = nrows(sexp_otu_mtx);
   n_threads  = asInteger(sexp_n_threads);
   dist_vec   = REAL(sexp_result_dist);
   sexp_extra = &sexp_extra_args;
   
-  last_sample = otu_mtx + ((n_samples - 1) * n_otus);
-  
   // Avoid allocating pairs_vec for common all-vs-all case
   if (isNull(sexp_pairs_vec)) {
+    all_pairs = 1;
     pairs_vec = NULL;
     n_pairs   = n_samples * (n_samples - 1) / 2;
   }
   else {
+    all_pairs = 0;
     pairs_vec = INTEGER(sexp_pairs_vec);
     n_pairs   = LENGTH(sexp_pairs_vec);
   }

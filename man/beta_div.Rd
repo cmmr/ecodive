@@ -4,17 +4,17 @@
 \alias{beta_div}
 \title{Beta Diversity Wrapper Function}
 \usage{
-beta_div(counts, metric, ...)
+beta_div(x, method, ...)
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a sample,
-and each row is a feature. Any object coercible with \code{as.matrix()}
+\item{x}{A numeric matrix of count data where each column is a feature,
+and each row is a sample. Any object coercible with \code{as.matrix()}
 can be given here, as well as \code{phyloseq}, \code{rbiom},
 \code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
-\item{metric}{The name of a beta diversity metric. One of \code{c('aitchison', 'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'psym_chisq', 'soergel', 'sorensen', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')}. Flexible
+\item{method}{The name of a beta diversity metric. One of \code{c('aitchison', 'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'psym_chisq', 'soergel', 'sorensen', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')}. Flexible
 matching is supported (see below). Programmatic access via
-\code{list_metrics('beta')}.}
+\code{list_methods('beta')}.}
 
 \item{...}{Additional options to pass through to the called function. I.e.
 \code{tree}, \code{pairs}, \code{alpha}, or \code{cpus}.}

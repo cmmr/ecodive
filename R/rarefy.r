@@ -47,7 +47,7 @@
 #'     colSums(counts)
 #' 
 rarefy <- function (
-    counts, 
+    x, 
     depth     = 0.1, 
     n_samples = NULL, 
     seed      = 0, 
@@ -55,35 +55,26 @@ rarefy <- function (
     cpus      = n_cpus() ) {
   
   validate_args()
+  assert_integer_counts()
   
-  if (any(counts %% 1 > 0))
-    stop('Non-integer counts cannot be rarefied.')
   
-  n_rows <- nrow(counts)
-  n_cols <- ncol(counts)
-  dnames <- dimnames(counts)
-  
-  counts <- matrix(
-    data     = as.integer(counts), 
-    nrow     = n_rows, 
-    ncol     = n_cols,
-    dimnames = dnames )
   
   
   # Set target depth according to number/pct of samples to keep/drop.
   if (!is.null(n_samples)) {
-    if (n_samples == 0)     n_samples <- n_cols             # Keep all
-    if (abs(n_samples) < 1) n_samples <- n_samples * n_cols # Keep/drop percentage
-    if (n_samples <= -1)    n_samples <- n_cols + n_samples # Drop n_samples
-    n_samples <- max(1, floor(n_samples))                   # Keep at least one
-    target    <- rev(sort(colSums(counts)))[[n_samples]]
+    if (n_samples == 0)     n_samples <- nrow(x)             # Keep all
+    if (abs(n_samples) < 1) n_samples <- n_samples * nrow(x) # Keep/drop percentage
+    if (n_samples <= -1)    n_samples <- nrow(x) + n_samples # Drop n_samples
+    n_samples   <- max(1, floor(n_samples))                       # Keep at least one
+    curr_depths <- rowSums(x)
+    target      <- rev(sort(curr_depths))[[n_samples]]
   }
   
   # Depth is given as minimum percent of observations to keep.
   else if (depth < 1) {
-    depths <- colSums(counts)   # observations per sample
-    target <- (sum(depths) * depth) / length(depths)
-    target <- min(depths[depths >= target])
+    curr_depths <- rowSums(x)
+    target      <- (sum(curr_depths) * depth) / length(curr_depths)
+    target      <- min(curr_depths[curr_depths >= target])
   }
   
   # Depth is given as observations per sample to keep.
@@ -96,16 +87,14 @@ rarefy <- function (
   
   if (is.null(times)) {
     
-    result_mtx <- matrix(0L, n_rows, n_cols, FALSE, dnames)
-    .Call(C_rarefy, counts, target, seed, cpus, result_mtx)
+    .Call(C_rarefy, x, target, seed, cpus)
     
   } else {
     
     seeds <- ((seed + 2**31 - 1 + seq_len(times)) %% 2**32) - 2**31
     
     lapply(seeds, function (seed) {
-      result_mtx <- matrix(0L, n_rows, n_cols, FALSE, dnames)
-      .Call(C_rarefy, counts, target, seed, cpus, result_mtx)
+      .Call(C_rarefy, x, target, seed, cpus)
     })
   }
   

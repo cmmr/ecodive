@@ -40,93 +40,87 @@
 \alias{variance_adjusted_unifrac}
 \title{Beta Diversity Metrics}
 \usage{
-aitchison(counts, pseudocount = NULL, pairs = NULL, cpus = n_cpus())
+aitchison(x, pseudocount = NULL, pairs = NULL, cpus = n_cpus())
 
-bhattacharyya(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+bhattacharyya(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-bray(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+bray(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-canberra(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+canberra(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-chebyshev(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+chebyshev(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-chord(counts, pairs = NULL, cpus = n_cpus())
+chord(x, pairs = NULL, cpus = n_cpus())
 
-clark(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+clark(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-divergence(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+divergence(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+euclidean(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-gower(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+gower(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-hellinger(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+hellinger(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-horn(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+horn(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-jensen(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+jensen(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-jsd(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+jsd(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-lorentzian(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+lorentzian(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-manhattan(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+manhattan(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-matusita(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+matusita(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-minkowski(counts, rescale = TRUE, power = 1.5, pairs = NULL, cpus = n_cpus())
+minkowski(x, rescale = TRUE, power = 1.5, pairs = NULL, cpus = n_cpus())
 
-morisita(counts, pairs = NULL, cpus = n_cpus())
+morisita(x, pairs = NULL, cpus = n_cpus())
 
-motyka(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+motyka(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-psym_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+psym_chisq(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-soergel(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+soergel(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+squared_chisq(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_chord(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+squared_chord(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+squared_euclidean(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-topsoe(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+topsoe(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-wave_hedges(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+wave_hedges(x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-hamming(counts, pairs = NULL, cpus = n_cpus())
+hamming(x, pairs = NULL, cpus = n_cpus())
 
-jaccard(counts, pairs = NULL, cpus = n_cpus())
+jaccard(x, pairs = NULL, cpus = n_cpus())
 
-ochiai(counts, pairs = NULL, cpus = n_cpus())
+ochiai(x, pairs = NULL, cpus = n_cpus())
 
-sorensen(counts, pairs = NULL, cpus = n_cpus())
+sorensen(x, pairs = NULL, cpus = n_cpus())
 
-unweighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
+unweighted_unifrac(x, tree = NULL, pairs = NULL, cpus = n_cpus())
 
-weighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
+weighted_unifrac(x, tree = NULL, pairs = NULL, cpus = n_cpus())
 
-normalized_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
+normalized_unifrac(x, tree = NULL, pairs = NULL, cpus = n_cpus())
 
-generalized_unifrac(
-  counts,
-  tree = NULL,
-  alpha = 0.5,
-  pairs = NULL,
-  cpus = n_cpus()
-)
+generalized_unifrac(x, tree = NULL, alpha = 0.5, pairs = NULL, cpus = n_cpus())
 
-variance_adjusted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
+variance_adjusted_unifrac(x, tree = NULL, pairs = NULL, cpus = n_cpus())
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a sample,
-and each row is a feature. Any object coercible with \code{as.matrix()}
+\item{x}{A numeric matrix of count data where each column is a feature,
+and each row is a sample. Any object coercible with \code{as.matrix()}
 can be given here, as well as \code{phyloseq}, \code{rbiom},
 \code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
-\item{pseudocount}{The value to add to all counts to prevent taking
+\item{pseudocount}{The value to add to all counts in \code{x} to prevent taking
 \code{log(0)} for unobserved features. The default, \code{NULL}, selects the
-smallest non-zero value in \code{counts}.}
+smallest non-zero value in \code{x}.}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -143,9 +137,9 @@ Default: \code{TRUE}}
 communities (\eqn{p}). Default: \code{1.5}}
 
 \item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
-the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
+the OTUs in \code{x}. The OTU identifiers given by \code{colnames(x)}
 must be present in \code{tree}. Can be omitted if a tree is embedded with
-the \code{counts} object or as \code{attr(counts, 'tree')}.}
+the \code{x} object or as \code{attr(x, 'tree')}.}
 
 \item{alpha}{How much weight to give to relative abundances; a value
 between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to

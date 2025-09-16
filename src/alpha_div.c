@@ -37,26 +37,24 @@ static int     n_samples;
 static int     n_threads;
 static SEXP   *sexp_extra;
 static double *result_vec;
+static int     mtx_len;
 
 
 /*
  * START_SAMPLE_LOOP and END_SAMPLE_LOOP define a simple loop 
  * for iterating over all samples, ensuring that each is 
- * assigned to only a single thread. Provides `otu_vec` and 
+ * assigned to only a single thread. Provides `sample`, and 
  * `result` initialized to 0; expects `result` at the end.
  */
 
 #define START_SAMPLE_LOOP                                                 \
   int thread_i = *((int *) arg);                                          \
   for (int sample = thread_i; sample < n_samples; sample += n_threads) {  \
-    double *otu_vec = otu_mtx + (sample * n_otus);                        \
-    double  result  = 0;
+    double result = 0;
 
-
-#define END_SAMPLE_LOOP            \
-    result_vec[sample] = result;   \
-  }                                \
-  return NULL;
+#define END_SAMPLE_LOOP                                        \
+    result_vec[sample] = result;                               \
+  }
 
 
 //======================================================
@@ -75,8 +73,8 @@ static void *ace(void *arg) {
   
   memset(rare_nnz_k, 0, cutoff * sizeof(double));
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = otu_vec[otu];
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
     if (x) {
       if (x < cutoff) {
         int x_int = (int)(ceil(x));
@@ -102,6 +100,7 @@ static void *ace(void *arg) {
   END_SAMPLE_LOOP
   
   free(rare_nnz_k);
+  return NULL;
 }
   
   
@@ -112,11 +111,13 @@ static void *ace(void *arg) {
 static void *berger(void *arg) {
   START_SAMPLE_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++)
-    if (otu_vec[otu] > result)
-      result = otu_vec[otu];
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
+    if (x > result) result = x;
+  }
   
   END_SAMPLE_LOOP
+  return NULL;
 }
   
   
@@ -129,14 +130,19 @@ static void *brillouin(void *arg) {
   START_SAMPLE_LOOP
   
   double depth = 0;
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = otu_vec[otu];
-    depth  += x;
-    result += lgamma(x + 1);
+  
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
+    if (x) {
+      depth  += x;
+      result += lgamma(x + 1);
+    }
   }
+  
   result = (lgamma(depth + 1) - result) / depth;
   
   END_SAMPLE_LOOP
+  return NULL;
 }
   
 
@@ -148,12 +154,10 @@ static void *brillouin(void *arg) {
 static void *chao1(void *arg) {
   START_SAMPLE_LOOP
     
-  double nnz  = 0;
-  double ones = 0;
-  double twos = 0;
+  double nnz = 0, ones = 0, twos = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = otu_vec[otu];
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
     if (x) {
       nnz++;
       if      (x <= 1) ones++;
@@ -164,6 +168,7 @@ static void *chao1(void *arg) {
   result = nnz + ((ones * ones) / (2 * twos));
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -173,29 +178,28 @@ static void *chao1(void *arg) {
 //======================================================
 static void *fisher(void *arg) {
   
-  int digits  = asInteger(*sexp_extra);
-  double mult = pow(10, digits);
+  int    digits = asInteger(*sexp_extra);
+  double mult   = pow(10, digits);
   
   START_SAMPLE_LOOP
   
-  double nnz_otus = 0;
-  double depth    = 0;
+  double nnz = 0, depth = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = otu_vec[otu];
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
     if (x) {
-      nnz_otus++;
+      nnz++;
       depth += x;
     }
   }
   
-  if (nnz_otus) {
+  if (nnz) {
     
     double alpha, lo = 2, hi = 16;
     
     // Sometimes the result will be less than 2 or greater than 16.
-    while (lo * log(1 + depth/lo) > nnz_otus) { hi = lo; lo /= 2; }
-    while (hi * log(1 + depth/hi) < nnz_otus) { lo = hi; hi *= 2; }
+    while (lo * log(1 + depth/lo) > nnz) { hi = lo; lo /= 2; }
+    while (hi * log(1 + depth/hi) < nnz) { lo = hi; hi *= 2; }
     
     // Check if range has converged to same value after rounding.
     while (round(hi * mult) != round(lo * mult)) {
@@ -204,8 +208,8 @@ static void *fisher(void *arg) {
       alpha = (lo + hi) / 2;
       
       // Update the range we need to examine.
-      if (alpha * log(1 + depth/alpha) > nnz_otus) { hi = alpha; }
-      else                                         { lo = alpha; }
+      if (alpha * log(1 + depth/alpha) > nnz) { hi = alpha; }
+      else                                    { lo = alpha; }
       
     }
     
@@ -214,6 +218,7 @@ static void *fisher(void *arg) {
   
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -225,13 +230,15 @@ static void *fisher(void *arg) {
 static void *inv_simpson(void *arg) {
   START_SAMPLE_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++)
-    if (otu_vec[otu])
-      result += otu_vec[otu] * otu_vec[otu];
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
+    if (x) result += x * x;
+  }
   
   if (result) result = 1 / result;
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -242,15 +249,20 @@ static void *inv_simpson(void *arg) {
 static void *margalef(void *arg) {
   START_SAMPLE_LOOP
   
-  double depth = 0;
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = otu_vec[otu];
-    depth += x;
-    if (x) result++;
+  double nnz = 0, depth = 0;
+  
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
+    if (x) {
+      nnz++;
+      depth += x;
+    }
   }
-  result = (result - 1) / log(depth);
+  
+  result = (nnz - 1) / log(depth);
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -262,14 +274,19 @@ static void *mcintosh(void *arg) {
   START_SAMPLE_LOOP
   
   double depth = 0;
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = otu_vec[otu];
-    depth  += x;
-    result += x * x;
+  
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
+    if (x) {
+      depth  += x;
+      result += x * x;
+    }
   }
+  
   result = (depth - sqrt(result)) / (depth - sqrt(depth));
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -281,14 +298,19 @@ static void *menhinick(void *arg) {
   START_SAMPLE_LOOP
   
   double depth = 0;
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = otu_vec[otu];
-    depth += x;
-    if (x) result++;
+  
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
+    if (x) {
+      depth += x;
+      result++;
+    }
   }
+  
   result /= sqrt(depth);
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -299,11 +321,12 @@ static void *menhinick(void *arg) {
 static void *observed(void *arg) {
   START_SAMPLE_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++)
-    if (otu_vec[otu])
+  for (int i = sample; i < mtx_len; i += n_samples)
+    if (otu_mtx[i])
       result++;
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -315,13 +338,15 @@ static void *observed(void *arg) {
 static void *shannon(void *arg) {
   START_SAMPLE_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++)
-    if (otu_vec[otu])
-      result += otu_vec[otu] * log(otu_vec[otu]);
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
+    if (x) result += x * log(x);
+  }
   
   result *= -1;
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -333,13 +358,15 @@ static void *shannon(void *arg) {
 static void *simpson(void *arg) {
   START_SAMPLE_LOOP
   
-  for (int otu = 0; otu < n_otus; otu++)
-    if (otu_vec[otu])
-      result += otu_vec[otu] * otu_vec[otu];
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
+    if (x) result += x * x;
+  }
   
   result = 1 - result;
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -353,25 +380,24 @@ static void *simpson(void *arg) {
 static void *squares(void *arg) {
   START_SAMPLE_LOOP
   
-  double depth      = 0;
-  double singletons = 0;
-  double nz_otus    = 0;
+  double nnz = 0, depth = 0, singletons = 0;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    double x = otu_vec[otu];
-    depth += x;
+  for (int i = sample; i < mtx_len; i += n_samples) {
+    double x = otu_mtx[i];
     if (x) {
-      nz_otus++;
+      nnz++;
+      depth  += x;
       result += x * x;
       if (x == 1) singletons++;
     }
   }
   
   result *= (singletons * singletons);
-  result /= (depth * depth) - singletons * nz_otus;
-  result += nz_otus;
+  result /= (depth * depth) - singletons * nnz;
+  result += nnz;
   
   END_SAMPLE_LOOP
+  return NULL;
 }
 
 
@@ -386,11 +412,13 @@ SEXP C_alpha_div(
   
   algorithm  = asInteger(sexp_algorithm);
   otu_mtx    = REAL(sexp_otu_mtx);
-  n_otus     = nrows(sexp_otu_mtx);
-  n_samples  = ncols(sexp_otu_mtx);
+  n_otus     = ncols(sexp_otu_mtx);
+  n_samples  = nrows(sexp_otu_mtx);
   n_threads  = asInteger(sexp_n_threads);
   result_vec = REAL(sexp_result_vec);
   sexp_extra = &sexp_extra_args;
+  
+  mtx_len = n_otus * n_samples;
   
   
   // function to run

@@ -24,8 +24,9 @@ static int     n_otus;
 static int     n_samples;
 static int     algorithm;
 static int     n_threads;
-static double *result_mtx;
 static SEXP   *sexp_extra;
+static double *result_mtx;
+static int     mtx_len;
 
 
 //======================================================
@@ -38,16 +39,13 @@ static void *transform_pct(void *arg) {
   
   for (int sample = thread_i; sample < n_samples; sample += n_threads) {
     
-    double *otu_vec    = otu_mtx    + (sample * n_otus);
-    double *result_vec = result_mtx + (sample * n_otus);
-    
     // Sum the counts for this sample
     double depth = 0;
-    for (int otu = 0; otu < n_otus; otu++)
-      depth += otu_vec[otu];
+    for (int i = sample; i < mtx_len; i += n_samples)
+      depth += otu_mtx[i];
     
-    for (int otu = 0; otu < n_otus; otu++)
-      result_vec[otu] = otu_vec[otu] / depth;
+    for (int i = sample; i < mtx_len; i += n_samples)
+      result_mtx[i] = otu_mtx[i] / depth;
   }
   
   return NULL;
@@ -65,17 +63,14 @@ static void *transform_clr(void *arg) {
   
   for (int sample = thread_i; sample < n_samples; sample += n_threads) {
     
-    double *otu_vec    = otu_mtx    + (sample * n_otus);
-    double *result_vec = result_mtx + (sample * n_otus);
-    
     double norm = 0;
-    for (int otu = 0; otu < n_otus; otu++)
-      norm += log(otu_vec[otu] + pseudocount);
+    for (int i = sample; i < mtx_len; i += n_samples)
+      norm += log(otu_mtx[i] + pseudocount);
     
     norm = exp(norm / n_otus);
     
-    for (int otu = 0; otu < n_otus; otu++)
-      result_vec[otu] = log((otu_vec[otu] + pseudocount) / norm);
+    for (int i = sample; i < mtx_len; i += n_samples)
+      result_mtx[i] = log((otu_mtx[i] + pseudocount) / norm);
   }
   
   return NULL;
@@ -92,18 +87,15 @@ static void *transform_chord(void *arg) {
   
   for (int sample = thread_i; sample < n_samples; sample += n_threads) {
     
-    double *otu_vec    = otu_mtx    + (sample * n_otus);
-    double *result_vec = result_mtx + (sample * n_otus);
-    
     double sq_sum = 0;
     
-    for (int otu = 0; otu < n_otus; otu++)
-      sq_sum += otu_vec[otu] * otu_vec[otu];
+    for (int i = sample; i < mtx_len; i += n_samples)
+      sq_sum += otu_mtx[i] * otu_mtx[i];
     
     sq_sum = sqrt(sq_sum);
     
-    for (int otu = 0; otu < n_otus; otu++)
-      result_vec[otu] = otu_vec[otu] / sq_sum;
+    for (int i = sample; i < mtx_len; i += n_samples)
+      result_mtx[i] = otu_mtx[i] / sq_sum;
   }
   
   return NULL;
@@ -120,11 +112,13 @@ SEXP C_transform(
     SEXP sexp_n_threads, SEXP sexp_extra_args ) {
   
   otu_mtx    = REAL(sexp_otu_mtx);
-  n_otus     = nrows(sexp_otu_mtx);
-  n_samples  = ncols(sexp_otu_mtx);
+  n_otus     = ncols(sexp_otu_mtx);
+  n_samples  = nrows(sexp_otu_mtx);
   algorithm  = asInteger(sexp_algorithm);
   n_threads  = asInteger(sexp_n_threads);
   sexp_extra = &sexp_extra_args;
+  
+  mtx_len = n_otus * n_samples;
   
   // Copy `otu_mtx` to a new object named `result_mtx`.
   SEXP sexp_result_mtx = duplicate(sexp_otu_mtx);

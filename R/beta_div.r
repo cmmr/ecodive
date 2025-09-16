@@ -8,7 +8,7 @@
 #' @inherit documentation
 #' @family alpha_diversity
 #' 
-#' @param metric   The name of a beta diversity metric. One of `c('aitchison',
+#' @param method   The name of a beta diversity metric. One of `c('aitchison',
 #'   'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark',
 #'   'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming',
 #'   'hellinger', 'horn', 'jaccard', 'jensen', 'jsd', 'lorentzian', 'manhattan',
@@ -17,7 +17,7 @@
 #'   'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac',
 #'   'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')`. Flexible
 #'   matching is supported (see below). Programmatic access via
-#'   `list_metrics('beta')`.
+#'   `list_methods('beta')`.
 #'   
 #' @param ...  Additional options to pass through to the called function. I.e.
 #'   `tree`, `pairs`, `alpha`, or `cpus`.
@@ -97,8 +97,8 @@
 #'     # Generalized UniFrac distances
 #'     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)
 #'     
-beta_div <- function (counts, metric, ...) {
-  match_metric(metric, div = 'beta')$func(counts = counts, ...)
+beta_div <- function (x, method, ...) {
+  match_method(method, div = 'beta')$func(x = x, ...)
 }
 
 

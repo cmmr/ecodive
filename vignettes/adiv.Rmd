@@ -18,8 +18,7 @@ own data.
 library(ecodive)
 
 counts <- rarefy(ex_counts)
-
-counts
+t(counts)
 #>                   Saliva Gums Nose Stool
 #> Streptococcus        162  309    6     1
 #> Bacteroides            2    2    0   341
@@ -40,10 +39,15 @@ Depending on the metric, it may measure **richness** and/or **evenness**.
 ## Richness
 
 Richness is how many genera are present in a sample. The simplest metric is to
-count the non-zero genera.
+count the non-zero genera. You can do this with base R's `rowSums()` or with 
+ecodive's `observed()`.
 
 ```r
-colSums(counts > 0)
+rowSums(counts > 0)
+#> Saliva   Gums   Nose  Stool 
+#>      4      3      4      5 
+
+observed(counts)
 #> Saliva   Gums   Nose  Stool 
 #>      4      3      4      5 
 ```
