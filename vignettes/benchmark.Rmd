@@ -358,7 +358,7 @@ saveRDS(unifrac_res, 'benchmark/unifrac_res.rds')
 ```
 
 ```{r out.width = "98%", fig.width = '800px', fig.height = '350px'}
-unifrac_res <- readRDS('../benchmark/unifrac_res.rds')
+# unifrac_res <- readRDS('../benchmark/unifrac_res.rds')
 
 # print(unifrac_res, n = Inf)
 # 
