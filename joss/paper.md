@@ -36,37 +36,42 @@ bibliography: paper.bib
 # Summary
 
 Characterizing the composition of biological communities is a fundamental task
-in ecology, but the calculations involved can be computationally prohibitive.
-`ecodive` is an R package that addresses this challenge by providing a highly
-optimized implementation of common ecological diversity metrics, including
-alpha-diversity (within-sample richness and evenness) and beta-diversity
-(between-sample dissimilarity). These metrics can incorporate species counts,
-relative abundances, and evolutionary relationships, providing a multi-faceted
-view of ecological structure. By leveraging a compiled C library with pthreads
-for parallelization, `ecodive` delivers substantial performance gains in both
-speed and memory usage, enabling researchers to analyze larger datasets more
-efficiently.
+in ecology, but the calculations involved can be computationally prohibitive
+when applied to large studies. `ecodive` is an R package that addresses this
+challenge by providing highly optimized implementations of common ecological
+diversity metrics, including alpha-diversity (within-sample richness and
+evenness) and beta-diversity (between-sample dissimilarity). These metrics can
+incorporate species counts, relative abundances, and evolutionary relationships,
+providing a multi-faceted view of ecological structure. By leveraging a compiled
+C library with pthreads for parallelization, `ecodive` delivers substantial
+performance gains in both speed and memory usage, enabling researchers to
+analyze large datasets quickly and efficiently.
 
 
 
 # Statement of Need
 
-The analysis of ecological diversity in large-scale studies is often hampered by
-the computational demands of calculating metrics across thousands of
-communities, a common requirement in modern microbiome research, where studies
-routinely involve analyzing thousands of samples from large cohorts. This is
-particularly true for phylogenetic metrics like Faith's PD [@Faith1992] and the
-UniFrac distance family [@Lozupone2005; @Lozupone2007; @Chen2012; @Chang2011],
-which integrate species abundance with evolutionary data from phylogenetic
-trees. The resulting high demand on processing time and memory can limit the
-scope and scale of scientific inquiry.
+A primary challenge in large-scale ecological analysis is the computational
+complexity of beta diversity calculations. These algorithms exhibit O(n²)
+complexity, meaning their computational cost scales quadratically with the
+number of samples (n). As microbiome and ecological studies grow to include
+thousands of samples, this quadratic scaling creates a significant bottleneck,
+demanding immense processing time and memory. This issue is further compounded
+by computationally intensive phylogenetic metrics like Faith's PD and the
+UniFrac distance family.
 
-`ecodive` overcomes these limitations by offering a significantly faster and
-more memory-efficient solution. This allows researchers to analyze more samples,
-explore more complex questions, and obtain more robust insights from their data.
-By providing a high-performance, parallelized engine for these calculations,
-`ecodive` empowers researchers to push the boundaries of large-scale ecological
-analysis.
+A second challenge is the fragmentation of diversity metrics across numerous R
+packages. Researchers often need to install and manage a suite of dependencies
+to access the full range of metrics required for a comprehensive analysis,
+leading to potential version conflicts and a disjointed workflow.
+
+`ecodive` addresses both of these critical needs. First, it provides a highly
+optimized, parallelized C-based engine that dramatically reduces the time and
+memory required by these algorithms, enabling the analysis of much larger
+datasets. Second, it consolidates a vast collection of alpha and beta diversity
+metrics into a single, dependency-free package. By solving the dual problems of
+computational inefficiency and methodological fragmentation, `ecodive` empowers
+researchers to push the boundaries of large-scale ecological analysis.
 
 
 
