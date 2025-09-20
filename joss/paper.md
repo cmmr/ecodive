@@ -56,10 +56,7 @@ complexity of beta diversity calculations. These algorithms exhibit $O(n^2)$
 complexity, meaning their computational cost scales quadratically with the
 number of samples ($n$). As microbiome and ecological studies grow to include
 thousands of samples, this quadratic scaling creates a significant bottleneck,
-demanding immense processing time and memory. This issue is further compounded
-by computationally intensive phylogenetic metrics like Faith's PD [@Faith1992]
-and the UniFrac distance family [@Lozupone2005; @Lozupone2007; @Chen2012;
-@Chang2011].
+demanding immense processing time and memory.
 
 A second challenge is the fragmentation of diversity metrics across numerous R
 packages. Researchers often need to install and manage a suite of dependencies
@@ -109,13 +106,14 @@ package. The suite of alpha diversity metrics includes staples like the Shannon
 Diversity Index [@Shannon1948] and Chao1 [@Chao1984], important estimators such
 as the Abundance-based Coverage Estimator (ACE) [@Chao1992] and Fisher's Alpha
 [@Fisher1943], and key phylogeny-aware metrics like Faith's Phylogenetic
-Diversity, offering robust ways to assess within-sample richness and evenness.
-For assessing between-sample dissimilarity, `ecodive` implements essential beta
-diversity metrics widely used in microbial ecology, including Bray-Curtis
-Dissimilarity [@Bray1957; @Sorenson1948], the complete UniFrac family, and the
-Aitchison distance [@Aitchison1982] for compositional data analysis. This
-extensive collection allows for a thorough and multi-faceted analysis of
-community structure.
+Diversity [@Faith1992], offering robust ways to assess within-sample richness
+and evenness. For assessing between-sample dissimilarity, `ecodive` implements
+essential beta diversity metrics widely used in microbial ecology, including
+Bray-Curtis Dissimilarity [@Bray1957; @Sorenson1948], the complete UniFrac
+family [@Lozupone2005; @Lozupone2007; @Chen2012; @Chang2011], and the Aitchison
+distance [@Aitchison1982] for compositional data analysis. This extensive
+collection allows for a thorough and multi-faceted analysis of community
+structure.
 
 For the most up-to-date list and detailed descriptions, please refer to the
 official `ecodive` documentation at <https://cmmr.github.io/ecodive>.
