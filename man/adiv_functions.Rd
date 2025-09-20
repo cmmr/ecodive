@@ -141,7 +141,7 @@ Given \eqn{n} branches with lengths \eqn{L} and a sample's abundances
 
 \examples{
     # Example counts matrix
-    ex_counts
+    t(ex_counts)
     
     ace(ex_counts)
     

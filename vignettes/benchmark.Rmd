@@ -7,8 +7,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 resource_files:
   - '../man/figures/shannon-benchmark.png'
+  - '../man/figures/simpson-benchmark.png'
   - '../man/figures/faith-benchmark.png'
-  - '../man/figures/bray-benchmark.png'
+  - '../man/figures/bdiv-benchmark.png'
   - '../man/figures/unifrac-benchmark.png'
 ---
 
@@ -354,51 +355,24 @@ unifrac_res <- bind_rows(
   arrange(Package)
   
 saveRDS(unifrac_res, 'benchmark/unifrac_res.rds')
+```
 
+```{r out.width = "98%", fig.width = '800px', fig.height = '350px'}
+unifrac_res <- readRDS('../benchmark/unifrac_res.rds')
 
-print(unifrac_res, n = Inf)
-#> # A tibble: 21 × 4
-#>    Package     `UniFrac Variant`     median mem_alloc
-#>    <chr>       <chr>               <bch:tm> <bch:byt>
-#>  1 GUniFrac    Unweighted           86.15ms   113.4MB
-#>  2 GUniFrac    Weighted Normalized  78.51ms    92.1MB
-#>  3 GUniFrac    Generalized           75.7ms    92.1MB
-#>  4 abdiv       Unweighted               15s    20.1GB
-#>  5 abdiv       Weighted              13.67s      20GB
-#>  6 abdiv       Weighted Normalized   13.78s      20GB
-#>  7 abdiv       Generalized           13.78s    20.2GB
-#>  8 abdiv       Variance Adjusted     15.81s    24.5GB
-#>  9 ampvis2     Unweighted             3.64s    53.7MB
-#> 10 ampvis2     Weighted                3.2s    49.2MB
-#> 11 ampvis2     Weighted Normalized    3.33s    49.3MB
-#> 12 ecodive     Unweighted            6.66ms   532.6KB
-#> 13 ecodive     Weighted              6.53ms   283.7KB
-#> 14 ecodive     Weighted Normalized   6.92ms   283.7KB
-#> 15 ecodive     Generalized           7.59ms   304.3KB
-#> 16 ecodive     Variance Adjusted     6.72ms   283.7KB
-#> 17 phyloregion Unweighted             7.1ms   145.9MB
-#> 18 phyloseq    Unweighted          325.11ms    50.9MB
-#> 19 phyloseq    Weighted            288.33ms    49.4MB
-#> 20 phyloseq    Weighted Normalized 296.54ms    49.5MB
-#> 21 picante     Unweighted             2.56s     1.8GB
-
-
-# How much faster and more memory efficient is ecodive?
-plyr::ddply(unifrac_res, as.name('UniFrac Variant'), function (x) {
-  x[['median']]    <- as.numeric(x[['median']])
-  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
-  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
-  x       <- x[x[['Package']] != 'ecodive',]
-  data.frame(
-    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
-    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
-})
-#>       UniFrac Variant        speed         memory
-#> 1         Generalized   10 - 1814x   310 - 69563x
-#> 2          Unweighted    1 - 2251x    98 - 39485x
-#> 3   Variance Adjusted 2353 - 2353x 90421 - 90421x
-#> 4            Weighted   44 - 2094x   178 - 74013x
-#> 5 Weighted Normalized   11 - 1991x   178 - 74049x
+# print(unifrac_res, n = Inf)
+# 
+# 
+# # How much faster and more memory efficient is ecodive?
+# plyr::ddply(unifrac_res, as.name('UniFrac Variant'), function (x) {
+#   x[['median']]    <- as.numeric(x[['median']])
+#   x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
+#   ecodive <- as.list(x[x[['Package']] == 'ecodive',])
+#   x       <- x[x[['Package']] != 'ecodive',]
+#   data.frame(
+#     speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
+#     memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
+# })
 
 
 ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
@@ -503,6 +477,58 @@ saveRDS(bdiv_res, 'benchmark/bdiv_res.rds')
 
 
 print(bdiv_res, n = Inf)
+
+
+# How much faster and more memory efficient is ecodive?
+plyr::ddply(bdiv_res, 'Metric', function (x) {
+  x[['median']]    <- as.numeric(x[['median']])
+  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
+  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
+  x       <- x[x[['Package']] != 'ecodive',]
+  data.frame(
+    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
+    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
+})
+
+
+ggplot(bdiv_res, aes(x = median, y = mem_alloc)) +
+  geom_point() +
+  geom_label_repel(
+    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
+    direction = 'y', 
+    seed      = 5 ) + 
+  facet_wrap('Metric', ncol = 1, scales = 'free_y') + 
+  bench::scale_x_bench_time(limits = c(.1, 180), breaks = c(.1, .3, 1, 3, 10, 30, 60, 180)) +
+  scale_y_log10(limits = 10^c(5,12), labels = scales::label_bytes()) +
+  labs(
+    title = 'Beta Diversity Implementations',
+    subtitle = 'All-vs-all 1,006 sample benchmarking on six CPU cores',
+    x = 'Median Calculation Time (log scale; n=10)', 
+    y = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_text(margin = margin(t = 10)))
+
+
+ggplot(subset(bdiv_res, Metric == 'Bray-Curtis'), aes(x = median, y = mem_alloc)) +
+  geom_point() +
+  geom_label_repel(
+    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
+    direction = 'y', 
+    seed      = 1 ) + 
+  bench::scale_x_bench_time(limits = c(.1, 61), breaks = c(.1, 1, 10, 60)) +
+  scale_y_log10(limits = 10^c(5,11.5), labels = scales::label_bytes()) +
+  labs(
+    title = 'Bray-Curtis Dissimilarity Implementations',
+    subtitle = 'All-vs-all 1,006 sample benchmarking on six CPU cores',
+    x = 'Median Calculation Time (log scale; n=10)', 
+    y = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_text(margin = margin(t = 10)))
+```
+
+</details>
+
+```{r out.width = "98%", echo=FALSE}
 #> # A tibble: 30 × 4
 #>    Package      Metric        median mem_alloc
 #>    <chr>        <chr>       <bch:tm> <bch:byt>
@@ -537,45 +563,13 @@ print(bdiv_res, n = Inf)
 #> 29 vegan        Manhattan      1.55s    13.5MB
 #> 30 vegan        Euclidean      1.55s    13.5MB
 
-
-# How much faster and more memory efficient is ecodive?
-plyr::ddply(bdiv_res, 'Metric', function (x) {
-  x[['median']]    <- as.numeric(x[['median']])
-  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
-  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
-  x       <- x[x[['Package']] != 'ecodive',]
-  data.frame(
-    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
-    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
-})
 #>        Metric    speed     memory
 #> 1 Bray-Curtis 1 - 166x  2 - 5312x
 #> 2   Euclidean 1 - 640x  2 - 5771x
 #> 3     Jaccard 1 - 805x 2 - 12677x
 #> 4   Manhattan 1 - 600x  2 - 5771x
 
-
-ggplot(subset(bdiv_res, Metric == 'Bray-Curtis'), aes(x = median, y = mem_alloc)) +
-  geom_point() +
-  geom_label_repel(
-    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
-    direction = 'y', 
-    seed      = 1 ) + 
-  bench::scale_x_bench_time(limits = c(.1, 61), breaks = c(.1, 1, 10, 60)) +
-  scale_y_log10(limits = 10^c(5,11.5), labels = scales::label_bytes()) +
-  labs(
-    title = 'Bray-Curtis Dissimilarity Implementations',
-    subtitle = 'All-vs-all 1,006 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
-```
-
-</details>
-
-```{r out.width = "98%", echo=FALSE}
-  knitr::include_graphics('../man/figures/bray-benchmark.svg')
+  knitr::include_graphics('../man/figures/bdiv-benchmark.svg')
 ```
 
 `ecodive` is 1 to 800x faster and uses 2 to 12,000x less memory.
@@ -640,6 +634,74 @@ saveRDS(adiv_res, 'benchmark/adiv_res.rds')
 
 
 print(adiv_res, n = Inf)
+
+
+# How much faster and more memory efficient is ecodive?
+plyr::ddply(adiv_res, 'Metric', function (x) {
+  x[['median']]    <- as.numeric(x[['median']])
+  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
+  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
+  x       <- x[x[['Package']] != 'ecodive',]
+  data.frame(
+    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
+    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
+})
+
+
+ggplot(subset(adiv_res, Metric == 'Shannon x 1006'), aes(x = median, y = mem_alloc)) +
+  geom_point(size = 2) +
+  geom_label_repel(
+    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
+    direction = 'y', 
+    seed      = 10 ) + 
+  bench::scale_x_bench_time(limits = c(.008, 2), breaks = c(.01, .025, .05, .1, .25, .5, 1)) +
+  scale_y_log10(limits = 10^c(6.5,8.5), labels = scales::label_bytes()) +
+  labs(
+    title = 'Shannon Diversity Index Implementations',
+    subtitle = '1,006 sample benchmarking on six CPU cores',
+    x = 'Median Calculation Time (log scale; n=10)', 
+    y = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_text(margin = margin(t = 10)))
+
+
+ggplot(subset(adiv_res, Metric == 'Simpson x 1006'), aes(x = median, y = mem_alloc)) +
+  geom_point(size = 2) +
+  geom_label_repel(
+    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
+    direction = 'y', 
+    seed      = 10 ) + 
+  bench::scale_x_bench_time(limits = c(.01, .05), breaks = c(.01, .015, .025, .05)) +
+  scale_y_log10(limits = 10^c(6.5,8.5), labels = scales::label_bytes()) +
+  labs(
+    title = 'Gini-Simpson Index Implementations',
+    subtitle = '1,006 sample benchmarking on six CPU cores',
+    x = 'Median Calculation Time (log scale; n=10)', 
+    y = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_text(margin = margin(t = 10)))
+  
+  
+ggplot(subset(adiv_res, Metric == 'Faith PD x 50'), aes(x = median, y = mem_alloc)) +
+  geom_point(size = 2) +
+  geom_label_repel(
+    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
+    direction = 'y', 
+    seed      = 10 ) + 
+  bench::scale_x_bench_time(limits = c(.002, 35), breaks = c(.01, .1, 1, 10)) +
+  scale_y_log10(limits = 10^c(5,10.6), labels = scales::label_bytes()) +
+  labs(
+    title = 'Faith\'s Phylogenetic Diversity Implementations',
+    subtitle = '50 sample benchmarking on six CPU cores',
+    x = 'Median Calculation Time (log scale; n=10)', 
+    y = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_text(margin = margin(t = 10)))
+```
+
+</details>
+
+```{r out.width = "98%", echo=FALSE}
 #> # A tibble: 19 × 4
 #>    Package     Metric           median mem_alloc
 #>    <chr>       <chr>          <bch:tm> <bch:byt>
@@ -664,66 +726,14 @@ print(adiv_res, n = Inf)
 #> 19 vegan       Simpson x 1006  37.76ms   62.15MB
 
 
-# How much faster and more memory efficient is ecodive?
-plyr::ddply(adiv_res, 'Metric', function (x) {
-  x[['median']]    <- as.numeric(x[['median']])
-  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
-  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
-  x       <- x[x[['Package']] != 'ecodive',]
-  data.frame(
-    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
-    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
-})
 #>           Metric      speed       memory
 #> 1  Faith PD x 50 1 - 10413x 212 - 74389x
 #> 2 Shannon x 1006   2 - 113x      6 - 22x
 #> 3 Simpson x 1006     2 - 4x      5 - 10x
 
 
-ggplot(subset(adiv_res, Metric == 'Shannon x 1006'), aes(x = median, y = mem_alloc)) +
-  geom_point(size = 2) +
-  geom_label_repel(
-    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
-    direction = 'y', 
-    seed      = 10 ) + 
-  bench::scale_x_bench_time(limits = c(.008, 2), breaks = c(.01, .025, .05, .1, .25, .5, 1)) +
-  scale_y_log10(limits = 10^c(6.5,8.5), labels = scales::label_bytes()) +
-  labs(
-    title = 'Shannon Diversity Index Implementations',
-    subtitle = '1,006 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
-```
-
-</details>
-
-```{r out.width = "98%", echo=FALSE}
   knitr::include_graphics('../man/figures/shannon-benchmark.svg')
-```
-
-```r
-ggplot(subset(adiv_res, Metric == 'Faith PD x 50'), aes(x = median, y = mem_alloc)) +
-  geom_point(size = 2) +
-  geom_label_repel(
-    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
-    direction = 'y', 
-    seed      = 10 ) + 
-  bench::scale_x_bench_time(limits = c(.002, 35), breaks = c(.01, .1, 1, 10)) +
-  scale_y_log10(limits = 10^c(5,10.6), labels = scales::label_bytes()) +
-  labs(
-    title = 'Faith\'s Phylogenetic Diversity Implementations',
-    subtitle = '50 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
-```
-
-</details>
-
-```{r out.width = "98%", echo=FALSE}
+  knitr::include_graphics('../man/figures/simpson-benchmark.svg')
   knitr::include_graphics('../man/figures/faith-benchmark.svg')
 ```
 

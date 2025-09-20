@@ -407,15 +407,13 @@ static void *squares(void *arg) {
 //======================================================
 SEXP C_alpha_div(
     SEXP sexp_algorithm, SEXP sexp_otu_mtx, 
-    SEXP sexp_n_threads, SEXP sexp_result_vec,
-    SEXP sexp_extra_args ) {
+    SEXP sexp_n_threads, SEXP sexp_extra_args ) {
   
   algorithm  = asInteger(sexp_algorithm);
   otu_mtx    = REAL(sexp_otu_mtx);
   n_otus     = ncols(sexp_otu_mtx);
   n_samples  = nrows(sexp_otu_mtx);
   n_threads  = asInteger(sexp_n_threads);
-  result_vec = REAL(sexp_result_vec);
   sexp_extra = &sexp_extra_args;
   
   mtx_len = n_otus * n_samples;
@@ -445,6 +443,18 @@ SEXP C_alpha_div(
   } // # nocov end
   
   
+  // Create the diversity vector to return
+  SEXP sexp_result_vec = PROTECT(allocVector(REALSXP, n_samples));
+  result_vec           = REAL(sexp_result_vec);
+  SEXP sexp_mtx_dimnames = getAttrib(sexp_otu_mtx, R_DimNamesSymbol);
+  if (sexp_mtx_dimnames != R_NilValue) {
+    SEXP sexp_mtx_rownames = VECTOR_ELT(sexp_mtx_dimnames, 0);
+    if (sexp_mtx_rownames != R_NilValue) {
+      setAttrib(sexp_result_vec, R_NamesSymbol, sexp_mtx_rownames);
+    }
+  }
+  
+  
   // Run WITH multithreading
   #ifdef HAVE_PTHREAD
     if (n_threads > 1 && n_samples > 100) {
@@ -466,6 +476,7 @@ SEXP C_alpha_div(
       
       free(tids); free(args);
       
+      UNPROTECT(1);
       return sexp_result_vec;
     }
   #endif
@@ -476,5 +487,6 @@ SEXP C_alpha_div(
   int thread_i = 0;
   adiv_func(&thread_i);
   
+  UNPROTECT(1);
   return sexp_result_vec;
 }

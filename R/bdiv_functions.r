@@ -26,6 +26,12 @@ BDIV_SQUARED_CHISQ <- 22L
 BDIV_SQUARED_CHORD <- 23L
 BDIV_WAVE_HEDGES   <- 24L
 
+U_UNIFRAC <- 1L
+W_UNIFRAC <- 2L
+N_UNIFRAC <- 3L
+G_UNIFRAC <- 4L
+V_UNIFRAC <- 5L
+
 
 #' Beta Diversity Metrics
 #' 
@@ -123,7 +129,7 @@ BDIV_WAVE_HEDGES   <- 24L
 #' @export
 #' @examples
 #'     # Example counts matrix
-#'     ex_counts
+#'     t(ex_counts)
 #'     
 #'     bray(ex_counts)
 #'     
@@ -145,13 +151,10 @@ NULL
 aitchison <- function (x, pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
   x <- transform_clr(x, pseudocount)
   
-  .Call(
-    C_beta_div, BDIV_EUCLIDEAN, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_EUCLIDEAN, x, pairs, cpus, NULL)
 }
 
 
@@ -163,11 +166,7 @@ aitchison <- function (x, pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
 bhattacharyya <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_BHATTACHARYYA, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_BHATTACHARYYA, x, pairs, cpus, NULL)
 }
 
 
@@ -179,11 +178,7 @@ bhattacharyya <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 bray <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_BRAY, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_BRAY, x, pairs, cpus, NULL)
 }
 
 
@@ -194,11 +189,7 @@ bray <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 canberra <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_CANBERRA, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_CANBERRA, x, pairs, cpus, NULL)
 }
 
 
@@ -209,11 +200,7 @@ canberra <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 chebyshev <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_CHEBYSHEV, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_CHEBYSHEV, x, pairs, cpus, NULL)
 }
 
 
@@ -224,13 +211,10 @@ chebyshev <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 chord <- function (x, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
   x <- transform_chord(x)
   
-  .Call(
-    C_beta_div, BDIV_EUCLIDEAN, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_EUCLIDEAN, x, pairs, cpus, NULL)
 }
 
 
@@ -241,11 +225,7 @@ chord <- function (x, pairs = NULL, cpus = n_cpus()) {
 clark <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_CLARK, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_CLARK, x, pairs, cpus, NULL)
 }
 
 
@@ -256,11 +236,7 @@ clark <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 divergence <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_DIVERGENCE, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_DIVERGENCE, x, pairs, cpus, NULL)
 }
 
 
@@ -271,11 +247,7 @@ divergence <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 euclidean <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_EUCLIDEAN, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_EUCLIDEAN, x, pairs, cpus, NULL)
 }
 
 
@@ -288,13 +260,10 @@ euclidean <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 gower <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
   range_vec <- apply(x, 2L, function (x) diff(range(x)))
   
-  .Call(
-    C_beta_div, BDIV_GOWER, 
-    x, pairs, cpus, result_dist, range_vec )
+  .Call(C_beta_div, BDIV_GOWER, x, pairs, cpus, range_vec)
 }
 
 
@@ -305,11 +274,8 @@ gower <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 hellinger <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
-  sqc <- .Call(
-    C_beta_div, BDIV_SQUARED_CHORD, 
-    x, pairs, cpus, result_dist, NULL )
+  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, x, pairs, cpus, NULL)
   
   sqrt(sqc)
 }
@@ -323,11 +289,7 @@ hellinger <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 horn <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_HORN, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_HORN, x, pairs, cpus, NULL)
 }
 
 
@@ -338,11 +300,8 @@ horn <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 jensen <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
-  jsd <- .Call(
-    C_beta_div, BDIV_JSD, 
-    x, pairs, cpus, result_dist, NULL )
+  jsd <- .Call(C_beta_div, BDIV_JSD, x, pairs, cpus, NULL)
   
   sqrt(jsd)
 }
@@ -355,11 +314,7 @@ jensen <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 jsd <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_JSD, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_JSD, x, pairs, cpus, NULL)
 }
 
 
@@ -370,11 +325,7 @@ jsd <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 lorentzian <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_LORENTZIAN, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_LORENTZIAN, x, pairs, cpus, NULL)
 }
 
 
@@ -385,11 +336,7 @@ lorentzian <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 manhattan <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_MANHATTAN, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_MANHATTAN, x, pairs, cpus, NULL)
 }
 
 
@@ -400,11 +347,8 @@ manhattan <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 matusita <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
-  sqc <- .Call(
-    C_beta_div, BDIV_SQUARED_CHORD, 
-    x, pairs, cpus, result_dist, NULL )
+  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, x, pairs, cpus, NULL)
   
   sqrt(sqc)
 }
@@ -418,11 +362,7 @@ matusita <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 minkowski <- function (x, rescale = TRUE, power = 1.5, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_MINKOWSKI, 
-    x, pairs, cpus, result_dist, power )
+  .Call(C_beta_div, BDIV_MINKOWSKI, x, pairs, cpus, power)
 }
 
 
@@ -435,13 +375,9 @@ minkowski <- function (x, rescale = TRUE, power = 1.5, pairs = NULL, cpus = n_cp
 morisita <- function (x, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
   assert_integer_counts()
   
-  .Call(
-    C_beta_div, BDIV_MORISITA, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_MORISITA, x, pairs, cpus, NULL)
 }
 
 
@@ -452,11 +388,7 @@ morisita <- function (x, pairs = NULL, cpus = n_cpus()) {
 motyka <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_MOTYKA, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_MOTYKA, x, pairs, cpus, NULL)
 }
 
 
@@ -467,11 +399,8 @@ motyka <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 psym_chisq <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
-  scs <- .Call(
-    C_beta_div, BDIV_SQUARED_CHISQ, 
-    x, pairs, cpus, result_dist, NULL )
+  scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, x, pairs, cpus, NULL)
   
   2 * scs
 }
@@ -484,11 +413,7 @@ psym_chisq <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 soergel <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_SOERGEL, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_SOERGEL, x, pairs, cpus, NULL)
 }
 
 
@@ -499,11 +424,7 @@ soergel <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 squared_chisq <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_SQUARED_CHISQ, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_SQUARED_CHISQ, x, pairs, cpus, NULL)
 }
 
 
@@ -514,11 +435,7 @@ squared_chisq <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 squared_chord <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_SQUARED_CHORD, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_SQUARED_CHORD, x, pairs, cpus, NULL)
 }
 
 
@@ -529,11 +446,8 @@ squared_chord <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 squared_euclidean <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
-  euc <- .Call(
-    C_beta_div, BDIV_EUCLIDEAN, 
-    x, pairs, cpus, result_dist, NULL )
+  euc <- .Call(C_beta_div, BDIV_EUCLIDEAN, x, pairs, cpus, NULL)
   
   euc ^ 2
 }
@@ -546,11 +460,8 @@ squared_euclidean <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 topsoe <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
   
-  jsd <- .Call(
-    C_beta_div, BDIV_JSD, 
-    x, pairs, cpus, result_dist, NULL )
+  jsd <- .Call(C_beta_div, BDIV_JSD, x, pairs, cpus, NULL)
   
   2 * jsd
 }
@@ -563,11 +474,7 @@ topsoe <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 wave_hedges <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_WAVE_HEDGES, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_WAVE_HEDGES, x, pairs, cpus, NULL)
 }
 
 
@@ -583,11 +490,7 @@ wave_hedges <- function (x, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 hamming <- function (x, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_HAMMING, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_HAMMING, x, pairs, cpus, NULL)
 }
 
 
@@ -598,11 +501,7 @@ hamming <- function (x, pairs = NULL, cpus = n_cpus()) {
 jaccard <- function (x, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_JACCARD, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_JACCARD, x, pairs, cpus, NULL)
 }
 
 
@@ -613,11 +512,7 @@ jaccard <- function (x, pairs = NULL, cpus = n_cpus()) {
 ochiai <- function (x, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_OCHIAI, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_OCHIAI, x, pairs, cpus, NULL)
 }
 
 
@@ -628,11 +523,7 @@ ochiai <- function (x, pairs = NULL, cpus = n_cpus()) {
 sorensen <- function (x, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_beta_div, BDIV_SORENSEN, 
-    x, pairs, cpus, result_dist, NULL )
+  .Call(C_beta_div, BDIV_SORENSEN, x, pairs, cpus, NULL)
 }
 
 
@@ -645,11 +536,7 @@ sorensen <- function (x, pairs = NULL, cpus = n_cpus()) {
 unweighted_unifrac <- function (x, tree = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_unifrac, 1L, 
-    x, tree, pairs, cpus, result_dist, NULL )
+  .Call(C_unifrac, U_UNIFRAC, x, tree, pairs, cpus, NULL)
 }
 
 
@@ -658,11 +545,7 @@ unweighted_unifrac <- function (x, tree = NULL, pairs = NULL, cpus = n_cpus()) {
 weighted_unifrac <- function (x, tree = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_unifrac, 2L, 
-    x, tree, pairs, cpus, result_dist, NULL )
+  .Call(C_unifrac, W_UNIFRAC, x, tree, pairs, cpus, NULL)
 }
 
 
@@ -671,11 +554,7 @@ weighted_unifrac <- function (x, tree = NULL, pairs = NULL, cpus = n_cpus()) {
 normalized_unifrac <- function (x, tree = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_unifrac, 3L, 
-    x, tree, pairs, cpus, result_dist, NULL )
+  .Call(C_unifrac, N_UNIFRAC, x, tree, pairs, cpus, NULL)
 } 
 
 
@@ -684,11 +563,7 @@ normalized_unifrac <- function (x, tree = NULL, pairs = NULL, cpus = n_cpus()) {
 generalized_unifrac <- function (x, tree = NULL, alpha = 0.5, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_unifrac, 4L, 
-    x, tree, pairs, cpus, result_dist, alpha )
+  .Call(C_unifrac, G_UNIFRAC, x, tree, pairs, cpus, alpha)
 }
 
 
@@ -697,9 +572,5 @@ generalized_unifrac <- function (x, tree = NULL, alpha = 0.5, pairs = NULL, cpus
 variance_adjusted_unifrac <- function (x, tree = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_dist <- init_result_dist(x)
-  
-  .Call(
-    C_unifrac, 5L, 
-    x, tree, pairs, cpus, result_dist, NULL )
+  .Call(C_unifrac, V_UNIFRAC, x, tree, pairs, cpus, NULL)
 }

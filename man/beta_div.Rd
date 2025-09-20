@@ -90,8 +90,3 @@ ambiguity with future additions to the metrics list.
     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)
     
 }
-\seealso{
-Other alpha_diversity: 
-\code{\link{alpha_div}()}
-}
-\concept{alpha_diversity}

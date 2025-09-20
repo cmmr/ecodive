@@ -6,7 +6,6 @@
 #' Beta Diversity Wrapper Function
 #' 
 #' @inherit documentation
-#' @family alpha_diversity
 #' 
 #' @param method   The name of a beta diversity metric. One of `c('aitchison',
 #'   'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark',

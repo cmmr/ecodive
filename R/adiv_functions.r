@@ -93,7 +93,7 @@ ADIV_SQUARES     <- 13L
 #' @export
 #' @examples
 #'     # Example counts matrix
-#'     ex_counts
+#'     t(ex_counts)
 #'     
 #'     ace(ex_counts)
 #'     
@@ -111,11 +111,8 @@ ace <- function (x, cutoff = 10, cpus = n_cpus()) {
   
   validate_args()
   assert_integer_counts()
-  result_vec <- init_result_vec(x)
   
-  .Call(
-    C_alpha_div, ADIV_ACE, 
-    x, cpus, result_vec, cutoff )
+  .Call(C_alpha_div, ADIV_ACE, x, cpus, cutoff)
 }
 
 
@@ -126,11 +123,7 @@ ace <- function (x, cutoff = 10, cpus = n_cpus()) {
 berger <- function (x, rescale = TRUE, cpus = n_cpus()) {
   
   validate_args()
-  result_vec <- init_result_vec(x)
-  
-  .Call(
-    C_alpha_div, ADIV_BERGER, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_BERGER, x, cpus, NULL)
 }
 
 
@@ -143,11 +136,8 @@ brillouin <- function (x, cpus = n_cpus()) {
   
   validate_args()
   assert_integer_counts()
-  result_vec <- init_result_vec(x)
   
-  .Call(
-    C_alpha_div, ADIV_BRILLOUIN, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_BRILLOUIN, x, cpus, NULL)
 }
 
 
@@ -159,11 +149,8 @@ chao1 <- function (x, cpus = n_cpus()) {
   
   validate_args()
   assert_integer_counts()
-  result_vec <- init_result_vec(x)
   
-  .Call(
-    C_alpha_div, ADIV_CHAO1, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_CHAO1, x, cpus, NULL)
 }
 
 
@@ -173,11 +160,7 @@ chao1 <- function (x, cpus = n_cpus()) {
 faith <- function (x, tree = NULL, cpus = n_cpus()) {
   
   validate_args()
-  result_vec <- init_result_vec(x)
-  
-  .Call(
-    C_faith, 
-    x, tree, cpus, result_vec )
+  .Call(C_faith, x, tree, cpus)
 }
 
 
@@ -188,11 +171,8 @@ fisher <- function (x, digits = 3L, cpus = n_cpus()) {
   
   validate_args()
   assert_integer_counts()
-  result_vec <- init_result_vec(x)
   
-  .Call(
-    C_alpha_div, ADIV_FISHER, 
-    x, cpus, result_vec, digits )
+  .Call(C_alpha_div, ADIV_FISHER, x, cpus, digits)
 }
 
 
@@ -204,11 +184,7 @@ fisher <- function (x, digits = 3L, cpus = n_cpus()) {
 inv_simpson <- function (x, rescale = TRUE, cpus = n_cpus()) {
   
   validate_args()
-  result_vec <- init_result_vec(x)
-  
-  .Call(
-    C_alpha_div, ADIV_INV_SIMPSON, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_INV_SIMPSON, x, cpus, NULL)
 }
 
 
@@ -220,11 +196,8 @@ margalef <- function (x, cpus = n_cpus()) {
   
   validate_args()
   assert_integer_counts()
-  result_vec <- init_result_vec(x)
   
-  .Call(
-    C_alpha_div, ADIV_MARGALEF, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_MARGALEF, x, cpus, NULL)
 }
 
 
@@ -236,11 +209,8 @@ mcintosh <- function (x, cpus = n_cpus()) {
   
   validate_args()
   assert_integer_counts()
-  result_vec <- init_result_vec(x)
   
-  .Call(
-    C_alpha_div, ADIV_MCINTOSH, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_MCINTOSH, x, cpus, NULL)
 }
 
 
@@ -252,11 +222,8 @@ menhinick <- function (x, cpus = n_cpus()) {
   
   validate_args()
   assert_integer_counts()
-  result_vec <- init_result_vec(x)
   
-  .Call(
-    C_alpha_div, ADIV_MENHINICK, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_MENHINICK, x, cpus, NULL)
 }
 
 
@@ -267,11 +234,7 @@ menhinick <- function (x, cpus = n_cpus()) {
 observed <- function (x, cpus = n_cpus()) {
   
   validate_args()
-  result_vec <- init_result_vec(x)
-  
-  .Call(
-    C_alpha_div, ADIV_OBSERVED, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_OBSERVED, x, cpus, NULL)
 }
 
 
@@ -283,11 +246,7 @@ observed <- function (x, cpus = n_cpus()) {
 shannon <- function (x, rescale = TRUE, cpus = n_cpus()) {
   
   validate_args()
-  result_vec <- init_result_vec(x)
-  
-  .Call(
-    C_alpha_div, ADIV_SHANNON, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_SHANNON, x, cpus, NULL)
 }
 
 
@@ -299,11 +258,7 @@ shannon <- function (x, rescale = TRUE, cpus = n_cpus()) {
 simpson <- function (x, rescale = TRUE, cpus = n_cpus()) {
   
   validate_args()
-  result_vec <- init_result_vec(x)
-  
-  .Call(
-    C_alpha_div, ADIV_SIMPSON, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_SIMPSON, x, cpus, NULL)
 }
 
 
@@ -318,9 +273,6 @@ squares <- function (x, cpus = n_cpus()) {
   
   validate_args()
   assert_integer_counts()
-  result_vec <- init_result_vec(x)
   
-  .Call(
-    C_alpha_div, ADIV_SQUARES, 
-    x, cpus, result_vec, NULL )
+  .Call(C_alpha_div, ADIV_SQUARES, x, cpus, NULL)
 }

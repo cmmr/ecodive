@@ -229,7 +229,7 @@ See \code{vignette('unifrac')} for detailed example UniFrac calculations.
 
 \examples{
     # Example counts matrix
-    ex_counts
+    t(ex_counts)
     
     bray(ex_counts)
     

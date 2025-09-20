@@ -9,7 +9,6 @@
 #' Alpha Diversity Wrapper Function
 #' 
 #' @inherit documentation
-#' @family alpha_diversity
 #' 
 #' @param method   The name of an alpha diversity metric. One of `c('ace',
 #'   'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson',

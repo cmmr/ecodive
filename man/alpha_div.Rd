@@ -61,8 +61,3 @@ integer counts will return an error message.\tabular{ll}{
     
     
 }
-\seealso{
-Other alpha_diversity: 
-\code{\link{beta_div}()}
-}
-\concept{alpha_diversity}

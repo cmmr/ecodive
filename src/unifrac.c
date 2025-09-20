@@ -17,11 +17,11 @@
 #  endif
 #endif
 
-#define UNWEIGHTED   1
-#define WEIGHTED     2
-#define NORMALIZED   3
-#define GENERALIZED  4
-#define VAR_ADJUSTED 5
+#define U_UNIFRAC 1
+#define W_UNIFRAC 2
+#define N_UNIFRAC 3
+#define G_UNIFRAC 4
+#define V_UNIFRAC 5
 
 
 typedef struct {
@@ -169,8 +169,8 @@ static void *unweighted_dist (void *arg) {
     double y = y_weight_vec[edge];
     
     if (x || y) {
-      if (x && y) { shared   += edge_lengths[edge]; }
-      else        { distance += edge_lengths[edge]; }
+  if (x && y) { shared   += edge_lengths[edge]; }
+  else        { distance += edge_lengths[edge]; }
     }
   }
   
@@ -218,15 +218,15 @@ static void *weighted_mtx (void *arg) {
 
 static void *weighted_dist (void *arg) {
   START_PAIR_LOOP
-  
+    
   for (int edge = 0; edge < n_edges; edge++) {
     
     double x = x_weight_vec[edge];
     double y = y_weight_vec[edge];
     
     if (x || y) {
-      if (x > y) { distance += x - y; }
-      else       { distance += y - x; }
+  if (x > y) { distance += x - y; }
+  else       { distance += y - x; }
     }
   }
   
@@ -273,15 +273,15 @@ static void *normalized_mtx (void *arg) {
 
 static void *normalized_dist (void *arg) {
   START_PAIR_TOTAL_LOOP
-    
+  
   for (int edge = 0; edge < n_edges; edge++) {
     
     double x = x_weight_vec[edge];
     double y = y_weight_vec[edge];
     
     if (x || y) {
-      if (x > y) { distance += x - y; }
-      else       { distance += y - x; }
+  if (x > y) { distance += x - y; }
+  else       { distance += y - x; }
     }
   }
   
@@ -327,9 +327,9 @@ static void *generalized_dist (void *arg) {
   START_PAIR_LOOP
   
   double denominator = 0;
-    
+  
   for (int edge = 0; edge < n_edges; edge++) {
-    
+  
     double x = x_weight_vec[edge];
     double y = y_weight_vec[edge];
     
@@ -338,9 +338,9 @@ static void *generalized_dist (void *arg) {
       double sum  = x + y;
       double frac = fabs((x - y) / sum);
       double norm = edge_lengths[edge] * pow(sum, alpha);
-      
-      distance    += norm * frac;
-      denominator += norm;
+  
+  distance    += norm * frac;
+  denominator += norm;
     }
   }
   
@@ -390,15 +390,15 @@ static void *var_adjusted_dist (void *arg) {
     double y = y_weight_vec[edge];
     
     if (x || y) {
-      
-      double norm = (x + y) * (x_total + y_total - x - y);
-             norm = edge_lengths[edge] / sqrt(norm);
-      
-      x /= x_total;
-      y /= y_total;
-      
-      distance    += fabs(x - y) * norm;
-      denominator +=     (x + y) * norm;
+  
+  double norm = (x + y) * (x_total + y_total - x - y);
+         norm = edge_lengths[edge] / sqrt(norm);
+  
+  x /= x_total;
+  y /= y_total;
+  
+  distance    += fabs(x - y) * norm;
+  denominator +=     (x + y) * norm;
     }
   }
     
@@ -414,10 +414,9 @@ static void *var_adjusted_dist (void *arg) {
 // R interface. Dispatches threads on compute methods.
 //======================================================
 SEXP C_unifrac(
-    SEXP sexp_algorithm, 
-    SEXP sexp_otu_mtx,     SEXP sexp_phylo_tree, 
-    SEXP sexp_pairs_vec,   SEXP sexp_n_threads, 
-    SEXP sexp_result_dist, SEXP sexp_extra_args ) {
+    SEXP sexp_algorithm,  SEXP sexp_otu_mtx, 
+    SEXP sexp_phylo_tree, SEXP sexp_pairs_vec, 
+    SEXP sexp_n_threads,  SEXP sexp_extra_args ) {
   
   algorithm     = asInteger(sexp_algorithm);
   otu_mtx       = REAL( sexp_otu_mtx);
@@ -427,21 +426,7 @@ SEXP C_unifrac(
   n_edges       = nrows(  get(sexp_phylo_tree, "edge"));
   edge_lengths  = REAL(   get(sexp_phylo_tree, "edge.length"));
   n_threads     = asInteger(sexp_n_threads);
-  dist_vec      = REAL(sexp_result_dist);
   sexp_extra    = &sexp_extra_args;
-  
-  
-  // Avoid allocating pairs_vec for common all-vs-all case
-  if (isNull(sexp_pairs_vec)) {
-    all_pairs = 1;
-    pairs_vec = NULL;
-    n_pairs   = n_samples * (n_samples - 1) / 2;
-  }
-  else {
-    all_pairs = 0;
-    pairs_vec = INTEGER(sexp_pairs_vec);
-    n_pairs   = LENGTH(sexp_pairs_vec);
-  }
   
   
   // branch_weight/depth for each (sample,edge) combo.
@@ -451,23 +436,23 @@ SEXP C_unifrac(
   void * (*calc_dist_vec)(void *) = NULL;
   
   switch (algorithm) {
-    case UNWEIGHTED:
+    case U_UNIFRAC:
       calc_weight_mtx = unweighted_mtx;
       calc_dist_vec   = unweighted_dist;
       break;
-    case WEIGHTED:
+    case W_UNIFRAC:
       calc_weight_mtx = weighted_mtx;
       calc_dist_vec   = weighted_dist;
       break;
-    case NORMALIZED:
+    case N_UNIFRAC:
       calc_weight_mtx = normalized_mtx;
       calc_dist_vec   = normalized_dist;
       break;
-    case GENERALIZED:
+    case G_UNIFRAC:
       calc_weight_mtx = generalized_mtx;
       calc_dist_vec   = generalized_dist;
       break;
-    case VAR_ADJUSTED:
+    case V_UNIFRAC:
       calc_weight_mtx = var_adjusted_mtx;
       calc_dist_vec   = var_adjusted_dist;
       break;
@@ -509,6 +494,39 @@ SEXP C_unifrac(
   }
   
   
+  
+  // Create the dist object to return
+  int n_dist            = n_samples * (n_samples - 1) / 2;
+  SEXP sexp_result_dist = PROTECT(allocVector(REALSXP, n_dist));
+  dist_vec              = REAL(sexp_result_dist);
+  setAttrib(sexp_result_dist, R_ClassSymbol,     mkString("dist"));
+  setAttrib(sexp_result_dist, mkString("Size"),  ScalarInteger(n_samples));
+  setAttrib(sexp_result_dist, mkString("Diag"),  ScalarLogical(0));
+  setAttrib(sexp_result_dist, mkString("Upper"), ScalarLogical(0));
+  SEXP sexp_mtx_dimnames = getAttrib(sexp_otu_mtx, R_DimNamesSymbol);
+  if (sexp_mtx_dimnames != R_NilValue) {
+    SEXP sexp_mtx_rownames = VECTOR_ELT(sexp_mtx_dimnames, 0);
+    if (sexp_mtx_rownames != R_NilValue) {
+      setAttrib(sexp_result_dist, mkString("Labels"), sexp_mtx_rownames);
+    }
+  }
+  
+  
+  // Avoid allocating pairs_vec for common all-vs-all case
+  if (isNull(sexp_pairs_vec)) {
+    all_pairs = 1;
+    pairs_vec = NULL;
+    n_pairs   = n_dist;
+  }
+  else {
+    all_pairs = 0;
+    pairs_vec = INTEGER(sexp_pairs_vec);
+    n_pairs   = LENGTH(sexp_pairs_vec);
+    for (int i = 0; i < n_dist; i++)
+      dist_vec[i] = R_NaReal;
+  }
+  
+  
   // Run WITH multithreading
   #ifdef HAVE_PTHREAD
     if (n_threads > 1 && n_pairs > 100) {
@@ -534,6 +552,7 @@ SEXP C_unifrac(
       free(tids); free(args);
       free(weight_mtx); free(total_vec); free(nodes);
       
+      UNPROTECT(1);
       return sexp_result_dist;
     }
   #endif
@@ -547,6 +566,7 @@ SEXP C_unifrac(
   
   free(weight_mtx); free(total_vec); free(nodes);
   
+  UNPROTECT(1);
   return sexp_result_dist;
 }
 

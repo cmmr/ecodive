@@ -231,8 +231,7 @@ static void *euclidean(void *arg) {
   START_PAIR_LOOP
   
   START_OTU_LOOP
-  if (x || y)
-    distance += (x - y) * (x - y);
+  if (x || y) distance += (x - y) * (x - y);
   END_OTU_LOOP
   
   distance = sqrt(distance);
@@ -593,27 +592,14 @@ static void *wave_hedges(void *arg) {
 SEXP C_beta_div(
     SEXP sexp_algorithm,   SEXP sexp_otu_mtx,   
     SEXP sexp_pairs_vec,   SEXP sexp_n_threads, 
-    SEXP sexp_result_dist, SEXP sexp_extra_args ) {
+    SEXP sexp_extra_args ) {
   
   algorithm  = asInteger(sexp_algorithm);
   otu_mtx    = REAL(sexp_otu_mtx);
   n_otus     = ncols(sexp_otu_mtx);
   n_samples  = nrows(sexp_otu_mtx);
   n_threads  = asInteger(sexp_n_threads);
-  dist_vec   = REAL(sexp_result_dist);
   sexp_extra = &sexp_extra_args;
-  
-  // Avoid allocating pairs_vec for common all-vs-all case
-  if (isNull(sexp_pairs_vec)) {
-    all_pairs = 1;
-    pairs_vec = NULL;
-    n_pairs   = n_samples * (n_samples - 1) / 2;
-  }
-  else {
-    all_pairs = 0;
-    pairs_vec = INTEGER(sexp_pairs_vec);
-    n_pairs   = LENGTH(sexp_pairs_vec);
-  }
   
   
   // function to run
@@ -651,6 +637,38 @@ SEXP C_beta_div(
   } // # nocov end
   
   
+  // Create the dist object to return
+  int n_dist            = n_samples * (n_samples - 1) / 2;
+  SEXP sexp_result_dist = PROTECT(allocVector(REALSXP, n_dist));
+  dist_vec              = REAL(sexp_result_dist);
+  setAttrib(sexp_result_dist, R_ClassSymbol,     mkString("dist"));
+  setAttrib(sexp_result_dist, mkString("Size"),  ScalarInteger(n_samples));
+  setAttrib(sexp_result_dist, mkString("Diag"),  ScalarLogical(0));
+  setAttrib(sexp_result_dist, mkString("Upper"), ScalarLogical(0));
+  SEXP sexp_mtx_dimnames = getAttrib(sexp_otu_mtx, R_DimNamesSymbol);
+  if (sexp_mtx_dimnames != R_NilValue) {
+    SEXP sexp_mtx_rownames = VECTOR_ELT(sexp_mtx_dimnames, 0);
+    if (sexp_mtx_rownames != R_NilValue) {
+      setAttrib(sexp_result_dist, mkString("Labels"), sexp_mtx_rownames);
+    }
+  }
+  
+  
+  // Avoid allocating pairs_vec for common all-vs-all case
+  if (isNull(sexp_pairs_vec)) {
+    all_pairs = 1;
+    pairs_vec = NULL;
+    n_pairs   = n_dist;
+  }
+  else {
+    all_pairs = 0;
+    pairs_vec = INTEGER(sexp_pairs_vec);
+    n_pairs   = LENGTH(sexp_pairs_vec);
+    for (int i = 0; i < n_dist; i++)
+      dist_vec[i] = R_NaReal;
+  }
+  
+  
   // Run WITH multithreading
   #ifdef HAVE_PTHREAD
     if (n_threads > 1 && n_pairs > 100) {
@@ -672,6 +690,7 @@ SEXP C_beta_div(
       
       free(tids); free(args);
       
+      UNPROTECT(1);
       return sexp_result_dist;
     }
   #endif
@@ -682,6 +701,7 @@ SEXP C_beta_div(
   int thread_i  = 0;
   bdiv_func(&thread_i);
   
+  UNPROTECT(1);
   return sexp_result_dist;
 }
 

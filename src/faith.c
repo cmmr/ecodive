@@ -92,8 +92,8 @@ static void *faith_result(void *arg) {
 // R interface. Dispatches threads on compute methods.
 //======================================================
 SEXP C_faith(
-    SEXP sexp_otu_mtx,   SEXP sexp_phylo_tree,  
-    SEXP sexp_n_threads, SEXP sexp_result_vec ) {
+    SEXP sexp_otu_mtx,  SEXP sexp_phylo_tree,  
+    SEXP sexp_n_threads ) {
   
   otu_mtx   = REAL( sexp_otu_mtx);
   n_otus    = ncols(sexp_otu_mtx);
@@ -105,8 +105,7 @@ SEXP C_faith(
   n_edges       = nrows(  get(sexp_phylo_tree, "edge"));
   edge_lengths  = REAL(   get(sexp_phylo_tree, "edge.length"));
   
-  n_threads  = asInteger(sexp_n_threads);
-  result_vec = REAL(sexp_result_vec);
+  n_threads = asInteger(sexp_n_threads);
   
   
   // intermediary values
@@ -135,6 +134,18 @@ SEXP C_faith(
   }
   
   
+  // Create the diversity vector to return
+  SEXP sexp_result_vec = PROTECT(allocVector(REALSXP, n_samples));
+  result_vec           = REAL(sexp_result_vec);
+  SEXP sexp_mtx_dimnames = getAttrib(sexp_otu_mtx, R_DimNamesSymbol);
+  if (sexp_mtx_dimnames != R_NilValue) {
+    SEXP sexp_mtx_rownames = VECTOR_ELT(sexp_mtx_dimnames, 0);
+    if (sexp_mtx_rownames != R_NilValue) {
+      setAttrib(sexp_result_vec, R_NamesSymbol, sexp_mtx_rownames);
+    }
+  }
+  
+  
   // Run WITH multithreading
   #ifdef HAVE_PTHREAD
     if (n_threads > 1 && n_samples > 100) {
@@ -150,6 +161,7 @@ SEXP C_faith(
       
       free(tids); free(args); free(nodes);
       
+      UNPROTECT(1);
       return sexp_result_vec;
     }
   #endif
@@ -162,6 +174,7 @@ SEXP C_faith(
   
   free(nodes);
   
+  UNPROTECT(1);
   return sexp_result_vec;
 }
 

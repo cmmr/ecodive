@@ -67,23 +67,3 @@ transform_chord <- function (x, cpus = n_cpus()) {
   .Call(C_transform, x, TRANSFORM_CHORD, cpus, NULL)
 }
 
-
-
-init_result_vec <- function (x) {
-  result_vec        <- rep(NA_real_, nrow(x))
-  names(result_vec) <- rownames(x)
-  return (result_vec)
-}
-
-
-init_result_dist <- function (x) {
-  n <- nrow(x)
-  structure(
-    rep(NA_real_, n * (n - 1) / 2),
-    class  = 'dist',
-    Labels = rownames(x),
-    Size   = n,
-    Diag   = FALSE,
-    Upper  = FALSE )
-}
-
