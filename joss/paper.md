@@ -52,13 +52,14 @@ analyze large datasets quickly and efficiently.
 # Statement of Need
 
 A primary challenge in large-scale ecological analysis is the computational
-complexity of beta diversity calculations. These algorithms exhibit O(n²)
+complexity of beta diversity calculations. These algorithms exhibit $O(n^2)$
 complexity, meaning their computational cost scales quadratically with the
-number of samples (n). As microbiome and ecological studies grow to include
+number of samples ($n$). As microbiome and ecological studies grow to include
 thousands of samples, this quadratic scaling creates a significant bottleneck,
 demanding immense processing time and memory. This issue is further compounded
-by computationally intensive phylogenetic metrics like Faith's PD and the
-UniFrac distance family.
+by computationally intensive phylogenetic metrics like Faith's PD [@Faith1992]
+and the UniFrac distance family [@Lozupone2005; @Lozupone2007; @Chen2012;
+@Chang2011].
 
 A second challenge is the fragmentation of diversity metrics across numerous R
 packages. Researchers often need to install and manage a suite of dependencies
