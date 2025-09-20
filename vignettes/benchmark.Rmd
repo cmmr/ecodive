@@ -375,26 +375,26 @@ unifrac_res <- readRDS('../benchmark/unifrac_res.rds')
 # })
 
 
-ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
-  geom_point(aes(shape = `UniFrac Variant`), size = 2) +
-  geom_label_repel(
-    data          = ~subset(., `UniFrac Variant` == 'Unweighted'),
-    mapping       = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)),
-    direction     = 'y', 
-    box.padding   = 0.4,
-    point.padding = 10,
-    seed          = 2,
-    min.segment.length = Inf ) + 
-  scale_shape(solid = FALSE) + 
-  bench::scale_x_bench_time(limits = c(.004, 20), breaks = c(.01, .1, 1, 10)) +
-  scale_y_log10(limits = 10^c(4.5,11.5), labels = scales::label_bytes()) +
-  labs(
-    title = 'UniFrac Implementations',
-    subtitle = 'All-vs-all 50 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
+# ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
+#   geom_point(aes(shape = `UniFrac Variant`), size = 2) +
+#   geom_label_repel(
+#     data          = ~subset(., `UniFrac Variant` == 'Unweighted'),
+#     mapping       = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)),
+#     direction     = 'y', 
+#     box.padding   = 0.4,
+#     point.padding = 10,
+#     seed          = 2,
+#     min.segment.length = Inf ) + 
+#   scale_shape(solid = FALSE) + 
+#   bench::scale_x_bench_time(limits = c(.004, 20), breaks = c(.01, .1, 1, 10)) +
+#   scale_y_log10(limits = 10^c(4.5,11.5), labels = scales::label_bytes()) +
+#   labs(
+#     title = 'UniFrac Implementations',
+#     subtitle = 'All-vs-all 50 sample benchmarking on six CPU cores',
+#     x = 'Median Calculation Time (log scale; n=10)', 
+#     y = 'Memory Allocated\n(log scale; n=1)' ) +
+#   theme_bw(base_size = 12) +
+#   theme(axis.title.x = element_text(margin = margin(t = 10)))
 ```
 
 </details>

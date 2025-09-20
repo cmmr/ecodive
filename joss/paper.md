@@ -139,7 +139,6 @@ calculating weighted UniFrac distances is straightforward:
 
 ``` r
 data(esophagus, package = 'phyloseq')
-
 ecodive::weighted_unifrac(esophagus)
 #>           B         C
 #> C 0.1050480          
