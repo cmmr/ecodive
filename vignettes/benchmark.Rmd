@@ -6,11 +6,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 resource_files:
-  - '../man/figures/shannon-benchmark.png'
-  - '../man/figures/simpson-benchmark.png'
-  - '../man/figures/faith-benchmark.png'
-  - '../man/figures/bdiv-benchmark.png'
-  - '../man/figures/unifrac-benchmark.png'
+  - '../man/figures/JOSS_Fig1A.svg'
 ---
 
 ```{r, include = FALSE}
@@ -123,7 +119,7 @@ data.frame(ver = sapply(FUN = packageDescription, fields = 'Version', c(
 #> abdiv             0.2.0
 #> adiv              2.2.1
 #> ecodist           2.1.3
-#> ecodive           1.0.1
+#> ecodive           2.0.0
 #> entropart        1.6-16
 #> GUniFrac            1.8
 #> ampvis2           2.8.9
@@ -419,7 +415,8 @@ Fig1A <- ggplot(Fig1A_data, aes(x = median, y = mem_alloc)) +
       min.segment.length = 0 ) + 
     scale_alpha_identity(guide = 'none') +
     scale_size_identity(guide = 'none') +
-    scale_y_log10(limits = 10^c(5.3,11), labels = scales::label_bytes()) +
+    bench::scale_x_bench_time() +
+    scale_y_log10(labels = scales::label_bytes()) +
     labs(
       tag = 'A',
       x   = 'Median Calculation Time (log scale; n=10)', 
@@ -464,8 +461,8 @@ Fig1B <- ggplot(Fig1B_data, aes(x = median, y = mem_alloc)) +
   scale_shape(solid = FALSE) + 
   scale_alpha_identity(guide = 'none') +
   scale_size_identity(guide = 'none') +
-  bench::scale_x_bench_time(limits = c(.004, 20), breaks = c(.01, .1, 1, 10)) +
-  scale_y_log10(limits = 10^c(4.1,11.5), labels = scales::label_bytes()) +
+  bench::scale_x_bench_time() +
+  scale_y_log10(labels = scales::label_bytes()) +
   labs(
     tag = 'B',
     x   = 'Median Calculation Time (log scale; n=10)', 
