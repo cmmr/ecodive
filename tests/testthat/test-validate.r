@@ -85,7 +85,7 @@ test_that("validation", {
   # validate_tree() ====
   
   env$counts <- counts[1:3,,drop=FALSE]
-  tree2 <- tree
+  tree2      <- tree
   tree2$edge.length <- as.integer(tree$edge.length * 100)
   tree2$edge <- matrix(
     data     = as.numeric(tree$edge), 
@@ -95,13 +95,17 @@ test_that("validation", {
   env$tree <- tree2
   expect_silent(validate_tree(env))
   
+  env$counts <- counts[1:3,,drop=FALSE]
+  env$tree   <- tree
+  expect_silent(validate_tree(env))
+  
   
   
   
   # validate_counts() ====
   
-  env$tree <- NULL
-  env$counts    <- counts
+  env$tree   <- NULL
+  env$counts <- counts
   attr(env$counts, 'tree') <- tree
   expect_silent(validate_counts(env))
   
@@ -112,6 +116,14 @@ test_that("validation", {
   convert_to_phyloseq <- do.call(`::`, list('rbiom', 'convert_to_phyloseq'))
   convert_to_TSE      <- do.call(`::`, list('rbiom', 'convert_to_TSE'))
   convert_to_SE       <- do.call(`::`, list('rbiom', 'convert_to_SE'))
+  
+  env$tree   <- NULL
+  env$counts <- 1:10
+  expect_silent(validate_counts(env))
+  
+  env$tree   <- NULL
+  env$counts <- t(hmp50$counts)
+  expect_silent(validate_counts(env))
   
   env$tree   <- NULL
   env$counts <- hmp50
