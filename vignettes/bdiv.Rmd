@@ -98,7 +98,7 @@ The `pairs` argument can be:
 
 * A numeric vector, giving the positions in the result to calculate.
 * A logical vector, indicating whether to calculate a position in the result.
-* A `function(i,j)` that returns whether columns `i` and `j` should be compared.
+* A `function(i,j)` that returns whether rows `i` and `j` should be compared.
 
 Therefore, all of the following are equivalent:
 

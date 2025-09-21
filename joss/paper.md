@@ -37,15 +37,15 @@ bibliography: paper.bib
 
 Characterizing the composition of biological communities is a fundamental task
 in ecology, but the calculations involved can be computationally prohibitive
-when applied to large studies. `ecodive` is an R package that addresses this
-challenge by providing highly optimized implementations of common ecological
-diversity metrics, including alpha-diversity (within-sample richness and
-evenness) and beta-diversity (between-sample dissimilarity). These metrics can
-incorporate species counts, relative abundances, and evolutionary relationships,
-providing a multi-faceted view of ecological structure. By leveraging a compiled
-C library with pthreads for parallelization, `ecodive` delivers substantial
-performance gains in both speed and memory usage, enabling researchers to
-analyze large datasets quickly and efficiently.
+when applied to large datasets. `ecodive` is an R package that addresses this
+challenge by providing highly optimized implementations of 50 ecological
+metrics for alpha-diversity (within-sample richness and evenness) and
+beta-diversity (between-sample dissimilarity). These metrics can incorporate
+species counts, relative abundances, and evolutionary relationships, providing a
+multi-faceted view of ecological structure. By leveraging a compiled C library
+with pthreads for parallelization, `ecodive` delivers substantial performance
+gains in both speed and memory usage, enabling researchers to analyze large
+datasets quickly and efficiently.
 
 
 
@@ -87,18 +87,18 @@ and memory efficiency for each of the metrics tested.
 
 ![Figure 1: `ecodive` performance benchmarks. Each point represents an R package, plotted by median calculation time (x-axis) and memory consumption (y-axis) from ten trials. (A) Benchmarks for Shannon Diversity Index, Bray-Curtis Dissimilarity, and Faith's Phylogenetic Diversity. (B) Benchmarks for the UniFrac family of metrics, with different variants distinguished by point shape. Not all packages implement every metric, but `ecodive` is consistently the fastest and most memory-efficient across all tested metrics, often by several orders of magnitude.](figures/fig1.svg){width="100%"}
 
-Crucially, the benchmark suite confirms these performance gains do not come at
-the cost of accuracy, as `ecodive` produces numerically identical output to the
-other packages. Beyond its computational advantages, `ecodive` has zero external
-R dependencies. This makes it a lightweight, stable, and secure backend,
-minimizing installation conflicts and simplifying long-term maintenance for
-developers who build upon it. The complete benchmark code and results are
+Crucially, the benchmark suite also confirms these performance gains do not come
+at the cost of accuracy, as `ecodive` produces numerically identical output to
+the other packages. Beyond its computational advantages, `ecodive` has zero
+external R dependencies. This makes it a lightweight, stable, and secure
+backend, minimizing installation conflicts and simplifying long-term maintenance
+for developers who build upon it. The complete benchmark code and results are
 available in the package vignette (`vignette('benchmark')`) and online.
 
 
 # Implemented Metrics
 
-`ecodive` stands out by offering an extensive and diverse collection of over 50
+`ecodive` stands out by offering an extensive and diverse collection of 50
 metrics for both alpha and beta diversity analysis, making it a uniquely
 comprehensive tool. It provides researchers with a wide array of both
 traditional and phylogeny-aware algorithms in a single, high-performance
