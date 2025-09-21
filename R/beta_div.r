@@ -223,7 +223,7 @@ beta_div <- function (counts, metric, ...) {
 #' @references
 #' 
 #' Levy, A., Shalom, B. R., & Chalamish, M. (2024). A guide to similarity
-#' measures. *arXiv*. \doi{10.48550/arXiv.2408.07706v1}
+#' measures. *arXiv*.
 #' 
 #' Cha, S.-H. (2007). Comprehensive survey on distance/similarity measures
 #' between probability density functions. *International Journal of Mathematical

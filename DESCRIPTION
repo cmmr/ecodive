@@ -1,7 +1,7 @@
 Package: ecodive
 Type: Package
 Title: Parallel and Memory-Efficient Ecological Diversity Metrics
-Version: 1.0.0.9009
+Version: 1.0.1
 Date: 2025-09-20
 Authors@R: c(
     person(
@@ -24,7 +24,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.6.0)
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Config/Needs/website: rmarkdown
 Config/testthat/edition: 3
 Imports:
