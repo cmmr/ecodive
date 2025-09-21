@@ -2,10 +2,10 @@ test_that("beta diversity", {
   
   
   # # Hand columns to an abdiv function in pairs.
-  # abdiv        <- function (x, method, ...) apply(combn(seq_len(nrow(x)), 2), 2L, \(i) do.call(`::`, list('abdiv', method))(x[i[1],], x[i[2],], ...))
-  # parallelDist <- function (x, method, ...) as.vector(parallelDist::parallelDist(x, method, ...))
-  # philentropy  <- function (x, method, ...) suppressMessages(as.vector(as.dist(philentropy::distance(x, method, ...))))
-  # vegan        <- function (x, method, ...) as.vector(vegan::vegdist(x, method, ...))
+  # abdiv        <- function (x, metric, ...) apply(combn(seq_len(nrow(x)), 2), 2L, \(i) do.call(`::`, list('abdiv', metric))(x[i[1],], x[i[2],], ...))
+  # parallelDist <- function (x, metric, ...) as.vector(parallelDist::parallelDist(x, metric, ...))
+  # philentropy  <- function (x, metric, ...) suppressMessages(as.vector(as.dist(philentropy::distance(x, metric, ...))))
+  # vegan        <- function (x, metric, ...) as.vector(vegan::vegdist(x, metric, ...))
   
   
   

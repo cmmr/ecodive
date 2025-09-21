@@ -43,15 +43,15 @@ samples and `1` for completely different samples.
 
 ## Weighted vs Unweighted
 
-Weighted methods take relative abundances into account, whereas unweighted
-methods only consider presence/absence. To determine which methods are weighted
-or unweighted, consult `list_methods()`.
+Weighted metrics take relative abundances into account, whereas unweighted
+metrics only consider presence/absence. To determine which metrics are weighted
+or unweighted, consult `list_metrics()`.
 
 ``` r
-list_methods('beta', 'id', weighted = FALSE)
+list_metrics('beta', 'id', weighted = FALSE)
 #> [1] "sorensen" "hamming"  "jaccard"  "ochiai"
 
-list_methods('beta', 'id', weighted = TRUE)
+list_metrics('beta', 'id', weighted = TRUE)
 #>  [1] "aitchison"                 "bhattacharyya"             "bray"                     
 #>  [4] "canberra"                  "chebyshev"                 "chord"                    
 #>  [7] "clark"                     "divergence"                "euclidean"                

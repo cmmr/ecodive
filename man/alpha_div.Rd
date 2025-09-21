@@ -4,16 +4,16 @@
 \alias{alpha_div}
 \title{Alpha Diversity Wrapper Function}
 \usage{
-alpha_div(x, method, ...)
+alpha_div(counts, metric, ...)
 }
 \arguments{
-\item{x}{A numeric matrix of count data where each column is a feature,
-and each row is a sample. Any object coercible with \code{as.matrix()}
-can be given here, as well as \code{phyloseq}, \code{rbiom},
+\item{counts}{A numeric matrix of count data where each column is a
+feature, and each row is a sample. Any object coercible with
+\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
 \code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
-\item{method}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson', 'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson', 'squares')}. Case-insensitive and partial name matching is supported.
-Programmatic access via \code{list_methods('alpha')}.}
+\item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson', 'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson', 'squares')}. Case-insensitive and partial name matching is supported.
+Programmatic access via \code{list_metrics('alpha')}.}
 
 \item{...}{Additional options to pass through to the called function. I.e.
 \code{cpus} or \code{tree}.}

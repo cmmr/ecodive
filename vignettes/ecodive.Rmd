@@ -44,10 +44,10 @@ sample. Depending on the metric, this can take into account the number of unique
 genera (richness), how evenly the population is split among genera (evenness),
 or how distantly related the genera are (phylogenetic diversity).
 
-The available alpha diversity metrics can be listed using `list_methods()`.
+The available alpha diversity metrics can be listed using `list_metrics()`.
 
 ```r
-list_methods('alpha')[,1:5]
+list_metrics('alpha')[,1:5]
 #>                                        name          id phylo weighted int_only
 #> 1  Abundance-based Coverage Estimator (ACE)         ace FALSE     TRUE     TRUE
 #> 3                       Berger-Parker Index      berger FALSE     TRUE    FALSE
@@ -74,10 +74,10 @@ Beta diversity metrics describe how different two samples are, based on the
 genera observed in each.UniFrac metrics incorporate a phylogenetic tree into
 this calculation.
 
-The available alpha diversity metrics can be listed using `list_methods()`.
+The available alpha diversity metrics can be listed using `list_metrics()`.
 
 ```r
-list_methods('beta')[,2:6]
+list_metrics('beta')[,2:6]
 #>                           id phylo weighted int_only true_metric
 #> 2                  aitchison FALSE     TRUE    FALSE        TRUE
 #> 4              bhattacharyya FALSE     TRUE    FALSE        TRUE

@@ -8,9 +8,9 @@
 between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
 \code{normalized_unifrac()}.}
 
-\item{x}{A numeric matrix of count data where each column is a feature,
-and each row is a sample. Any object coercible with \code{as.matrix()}
-can be given here, as well as \code{phyloseq}, \code{rbiom},
+\item{counts}{A numeric matrix of count data where each column is a
+feature, and each row is a sample. Any object coercible with
+\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
 \code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
 
 \item{cpus}{How many parallel processing threads should be used. The
@@ -30,17 +30,17 @@ distance matrix to calculate. See examples.}
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
 
-\item{pseudocount}{The value to add to all counts in \code{x} to prevent taking
-\code{log(0)} for unobserved features. The default, \code{NULL}, selects the
-smallest non-zero value in \code{x}.}
+\item{pseudocount}{The value to add to all counts in \code{counts} to prevent
+taking \code{log(0)} for unobserved features. The default, \code{NULL}, selects
+the smallest non-zero value in \code{counts}.}
 
 \item{rescale}{Normalize each sample's counts so they sum to \code{1}.
 Default: \code{TRUE}}
 
 \item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
-the OTUs in \code{x}. The OTU identifiers given by \code{colnames(x)}
+the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
 must be present in \code{tree}. Can be omitted if a tree is embedded with
-the \code{x} object or as \code{attr(x, 'tree')}.}
+the \code{counts} object or as \code{attr(counts, 'tree')}.}
 }
 \description{
 documentation

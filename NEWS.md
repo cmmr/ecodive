@@ -3,7 +3,6 @@
 ## Breaking Changes
 
 * Input matrix is now samples as rows.
-* Parameter names are now `x` and `method`, not `counts` and `metric`.
 * Removed `weighted` parameter.
 
 ## Added New Diversity Methods

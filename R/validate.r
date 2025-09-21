@@ -7,8 +7,8 @@ validate_args <- function () {
   env  <- parent.frame()
   args <- ls(env)
   
-  # move x and pseudocount to head of the line
-  args <- unique(c(intersect(c('x', 'pseudocount'), args), sort(args)))
+  # move counts and pseudocount to head of the line
+  args <- unique(c(intersect(c('counts', 'pseudocount'), args), sort(args)))
   
   for (arg in args)
     do.call(paste0('validate_', arg), list(env))
@@ -33,65 +33,65 @@ validate_alpha <- function (env = parent.frame()) {
 }
 
 
-validate_x <- function (env = parent.frame()) {
+validate_counts <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
-      # Pull a tree from complex x object.
+      # Pull a tree from complex counts object.
       if (exists('tree', inherits = FALSE) && is.null(tree)) {
         
-        if (inherits(x, 'phyloseq')) {
-          tree <- x@phy_tree
+        if (inherits(counts, 'phyloseq')) {
+          tree <- counts@phy_tree
         }
-        else if (inherits(x, 'rbiom')) {
-          tree <- x$tree
+        else if (inherits(counts, 'rbiom')) {
+          tree <- counts$tree
         }
-        else if (inherits(x, 'TreeSummarizedExperiment')) {
-          tree <- x@rowTree[[1]]
+        else if (inherits(counts, 'TreeSummarizedExperiment')) {
+          tree <- counts@rowTree[[1]]
         }
         else {
-          tree <- attr(x, 'tree', exact = TRUE)
+          tree <- attr(counts, 'tree', exact = TRUE)
         }
       }
       
       # Derive matrix from simple vector or complex object.
-      if (!is.matrix(x)) {
+      if (!is.matrix(counts)) {
         
-        if (is.vector(x)) {
-          x <- matrix(data = x, nrow = 1)
+        if (is.vector(counts)) {
+          counts <- matrix(data = counts, nrow = 1)
         }
-        else if (inherits(x, 'phyloseq')) {
-          x <- t(as.matrix(x@otu_table))
+        else if (inherits(counts, 'phyloseq')) {
+          counts <- t(as.matrix(counts@otu_table))
         }
-        else if (inherits(x, 'rbiom')) {
-          x <- as.matrix(t(x$counts))
+        else if (inherits(counts, 'rbiom')) {
+          counts <- as.matrix(t(counts$counts))
         }
-        else if (inherits(x, 'TreeSummarizedExperiment')) {
-          x <- t(as.matrix(x@assays@data[[1]]))
+        else if (inherits(counts, 'TreeSummarizedExperiment')) {
+          counts <- t(as.matrix(counts@assays@data[[1]]))
         }
-        else if (inherits(x, 'SummarizedExperiment')) {
-          x <- t(as.matrix(x@assays@data[[1]]))
+        else if (inherits(counts, 'SummarizedExperiment')) {
+          counts <- t(as.matrix(counts@assays@data[[1]]))
         }
         else {
-          x <- as.matrix(x)
+          counts <- as.matrix(counts)
         }
         
       }
       
-      stopifnot(length(dim(x)) == 2)
-      stopifnot(nrow(x) > 0)
-      stopifnot(ncol(x) > 0)
+      stopifnot(length(dim(counts)) == 2)
+      stopifnot(nrow(counts) > 0)
+      stopifnot(ncol(counts) > 0)
       
-      if (typeof(x) != 'double')
-        x <- matrix(
-          data     = as.numeric(x), 
-          nrow     = nrow(x), 
-          ncol     = ncol(x),
-          dimnames = dimnames(x) )
+      if (typeof(counts) != 'double')
+        counts <- matrix(
+          data     = as.numeric(counts), 
+          nrow     = nrow(counts), 
+          ncol     = ncol(counts),
+          dimnames = dimnames(counts) )
     }),
     
     error = function (e) 
-      stop(e$message, '\n`x` must be a valid numeric matrix.')
+      stop(e$message, '\n`counts` must be a valid numeric matrix.')
   )
 }
 
@@ -147,7 +147,7 @@ validate_depth <- function (env = parent.frame()) {
       stopifnot(depth %% 1 == 0 || depth < 1)
       
       if (depth %% 1 == 0) {
-        stopifnot(depth <= max(colSums(x)))
+        stopifnot(depth <= max(colSums(counts)))
         depth <- as.integer(depth)
       }
       
@@ -191,8 +191,8 @@ validate_n_samples <- function (env = parent.frame()) {
         stopifnot(!is.na(n_samples))
         
         if (n_samples %% 1 == 0) {
-          stopifnot(n_samples <= ncol(x))
-          stopifnot(n_samples > -ncol(x))
+          stopifnot(n_samples <= ncol(counts))
+          stopifnot(n_samples > -ncol(counts))
           n_samples <- as.integer(n_samples)
         }
         else {
@@ -228,8 +228,8 @@ validate_newick <- function (env = parent.frame()) {
 validate_pairs <- function (env = parent.frame()) {
   
   with(env, {
-    if (ncol(x) < 2)
-      stop('`x` must have at least two samples.')
+    if (ncol(counts) < 2)
+      stop('`counts` must have at least two samples.')
   })
   
   tryCatch(
@@ -237,7 +237,7 @@ validate_pairs <- function (env = parent.frame()) {
       
       if (!is.null(pairs)) {
         
-        n_samples   <- ncol(x)
+        n_samples   <- ncol(counts)
         n_distances <- n_samples * (n_samples - 1) / 2
         
         if (is.function(pairs))
@@ -294,7 +294,7 @@ validate_pseudocount <- function (env = parent.frame()) {
     with(env, {
       
       if (is.null(pseudocount))
-        pseudocount <- min(x[x > 0])
+        pseudocount <- min(counts[counts > 0])
       
       if (!inherits(pseudocount, 'numeric'))
         pseudocount <- as.numeric(pseudocount)
@@ -318,7 +318,7 @@ validate_rescale <- function (env = parent.frame()) {
       stopifnot(length(rescale) == 1)
       
       if (isTRUE(rescale))
-        x <- transform_pct(x)
+        counts <- transform_pct(counts)
     }),
     
     error = function (e) 
@@ -392,21 +392,21 @@ validate_tree <- function (env = parent.frame()) {
         tree$edge.length <- as.numeric(tree$edge.length)
       
       stopifnot(hasName(tree, 'tip.label'))
-      stopifnot(!is.null(colnames(x)))
-      stopifnot(all(colnames(x) %in% tree$tip.label))
+      stopifnot(!is.null(colnames(counts)))
+      stopifnot(all(colnames(counts) %in% tree$tip.label))
       
-      missing <- setdiff(tree$tip.label, colnames(x))
+      missing <- setdiff(tree$tip.label, colnames(counts))
       if (length(missing))
-        x <- cbind(
-          x, 
+        counts <- cbind(
+          counts, 
           matrix(
             data     = 0, 
-            nrow     = nrow(x),
+            nrow     = nrow(counts),
             ncol     = length(missing), 
-            dimnames = list(rownames(x), missing) ))
+            dimnames = list(rownames(counts), missing) ))
       remove('missing')
       
-      x <- x[,as.character(tree$tip.label),drop=FALSE]
+      counts <- counts[,as.character(tree$tip.label),drop=FALSE]
     }),
     
     error = function (e) 
@@ -436,7 +436,7 @@ validate_underscores <- function (env = parent.frame()) {
 
 assert_integer_counts <- function (env = parent.frame()) {
   with(env, {
-    if (!all(x %% 1 == 0))
-      stop('`x` must be whole numbers (integers).')
+    if (!all(counts %% 1 == 0))
+      stop('`counts` must be whole numbers (integers).')
   })
 }

@@ -7,17 +7,17 @@ test_that("validation", {
   
   # assert_integer_counts() ====
   
-  env$x <- counts_p
+  env$counts <- counts_p
   expect_error(assert_integer_counts(env))
   
   
   
   # validate_pairs() ====
   
-  env$x <- matrix(nrow = 5, ncol = 0)
+  env$counts <- matrix(nrow = 5, ncol = 0)
   expect_error(validate_pairs(env))
   
-  env$x <- counts
+  env$counts <- counts
   
   env$pairs <- function (i,j) list()
   expect_error(validate_pairs(env))
@@ -84,7 +84,7 @@ test_that("validation", {
   
   # validate_tree() ====
   
-  env$x <- counts[1:3,,drop=FALSE]
+  env$counts <- counts[1:3,,drop=FALSE]
   tree2 <- tree
   tree2$edge.length <- as.integer(tree$edge.length * 100)
   tree2$edge <- matrix(
@@ -98,12 +98,12 @@ test_that("validation", {
   
   
   
-  # validate_x() ====
+  # validate_counts() ====
   
   env$tree <- NULL
-  env$x    <- counts
-  attr(env$x, 'tree') <- tree
-  expect_silent(validate_x(env))
+  env$counts    <- counts
+  attr(env$counts, 'tree') <- tree
+  expect_silent(validate_counts(env))
   
   skip_on_cran()
   skip_if_not_installed('rbiom')
@@ -114,20 +114,20 @@ test_that("validation", {
   convert_to_SE       <- do.call(`::`, list('rbiom', 'convert_to_SE'))
   
   env$tree   <- NULL
-  env$x <- hmp50
-  expect_silent(validate_x(env))
+  env$counts <- hmp50
+  expect_silent(validate_counts(env))
   
   env$tree   <- NULL
-  env$x <- convert_to_phyloseq(hmp50)
-  expect_silent(validate_x(env))
+  env$counts <- convert_to_phyloseq(hmp50)
+  expect_silent(validate_counts(env))
   
   env$tree   <- NULL
-  env$x <- convert_to_TSE(hmp50)
-  expect_silent(validate_x(env))
+  env$counts <- convert_to_TSE(hmp50)
+  expect_silent(validate_counts(env))
   
   env$tree   <- NULL
-  env$x <- convert_to_SE(hmp50)
-  expect_silent(validate_x(env))
+  env$counts <- convert_to_SE(hmp50)
+  expect_silent(validate_counts(env))
   
   
 })

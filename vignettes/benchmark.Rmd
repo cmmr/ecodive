@@ -177,27 +177,92 @@ hmp50_tree <- hmp50$tree
 
 # GEMS dataset has 1006 Samples
 gems_mtx <- t(rbiom::rescale_cols(as.matrix(rbiom::gems)))
-```
-
-</details>
-
-<br>
 
 
-# UniFrac
+## Bray-Curtis Dissimilarity
+bray_curtis_res <- bench::mark(
+  iterations = 10,
+  'abdiv'        = cleanup(pairwise(abdiv::bray_curtis, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::bcdist(gems_mtx)),
+  'ecodive'      = cleanup(ecodive::bray(gems_mtx, rescale = FALSE)),
+  'labdsv'       = cleanup(labdsv::dsvdis(gems_mtx, 'bray/curtis')),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'bray')),
+  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'sorensen', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'tabula'       = cleanup(1 - pairwise(tabula::index_bray, gems_mtx)),
+  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'bray')) )
 
-This section evaluates the computational performance of several UniFrac
-implementations across seven R packages: `abdiv`, `ampvis2`, `ecodive`,
-`GUniFrac`, `phyloseq`, `phyloregion`, and `picante.` The comparison includes
-the unweighted, weighted, normalized weighted, generalized, and
-variance-adjusted variants of the UniFrac metric. To establish a robust measure
-of processing speed, each function was benchmarked across ten replicate runs,
-while memory usage was profiled from a single execution.
 
-<details>
-  <summary>Click to reveal R code.</summary>
+## Jaccard Distance
+jaccard_res <- bench::mark(
+  iterations = 10,
+  'abdiv'        = cleanup(pairwise(abdiv::jaccard, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'jaccard')),
+  'ecodive'      = cleanup(ecodive::jaccard(gems_mtx)),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'binary')),
+  'philentropy'  = cleanup(philentropy::distance(gems_mtx > 0, 'jaccard', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'phyloregion'  = cleanup(phyloregion::beta_diss(gems_mtx, 'jaccard')$beta.jac),
+  'stats'        = cleanup(stats::dist(gems_mtx, 'binary')),
+  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'jaccard', binary = TRUE)) )
+
+
+## Manhattan Distance
+manhattan_res <- bench::mark(
+  iterations = 10,
+  'abdiv'        = cleanup(pairwise(abdiv::manhattan, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'manhattan')),
+  'ecodive'      = cleanup(ecodive::manhattan(gems_mtx, rescale = FALSE)),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'manhattan')),
+  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'manhattan', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'stats'        = cleanup(stats::dist(gems_mtx, 'manhattan')),
+  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'manhattan')) )
+
+
+## Euclidean Distance
+euclidean_res <- bench::mark(
+  iterations = 10,
+  'abdiv'        = cleanup(pairwise(abdiv::euclidean, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'euclidean')),
+  'ecodive'      = cleanup(ecodive::euclidean(gems_mtx, rescale = FALSE)),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'euclidean')),
+  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'euclidean', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'stats'        = cleanup(stats::dist(gems_mtx, 'euclidean')),
+  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'euclidean')) )
+
+
+## Shannon Diversity Index
+shannon_res <- bench::mark(
+  iterations  = 10,
+  'abdiv'       = apply(gems_mtx, 1L, abdiv::shannon),
+  'adiv'        = adiv::speciesdiv(gems_mtx, 'Shannon')[,1],
+  'ecodive'     = ecodive::shannon(gems_mtx),
+  'entropart'   = apply(gems_mtx, 1L, entropart::Shannon, CheckArguments = FALSE),
+  'philentropy' = apply(gems_mtx, 1L, philentropy::H, unit = 'log'),
+  'tabula'      = apply(gems_mtx, 1L, tabula::index_shannon),
+  'vegan'       = vegan::diversity(gems_mtx, 'shannon') )
+
+
+## Gini-Simpson Index
+simpson_res <- bench::mark(
+  iterations  = 10,
+  'abdiv'     = apply(gems_mtx, 1L, abdiv::simpson),
+  'adiv'      = adiv::speciesdiv(gems_mtx, 'GiniSimpson')[,1],
+  'ecodive'   = ecodive::simpson(gems_mtx),
+  'entropart' = apply(gems_mtx, 1L, entropart::Simpson, CheckArguments = FALSE),
+  'tabula'    = 1 - apply(gems_mtx, 1L, tabula::index_simpson),
+  'vegan'     = vegan::diversity(gems_mtx, 'simpson') )
+
+
+## Faith's Phylogenetic Diversity
+faith_res <- bench::mark(
+  iterations    = 10,
+  check         = FALSE, # entropart has incorrect output on non-ultrametric tree
+  'abdiv'       = apply(hmp50_mtx, 1L, abdiv::faith_pd, hmp50_tree),
+  'adiv'        = apply(hmp50_mtx, 1L, \(x) adiv::EH(hmp50_tree, colnames(hmp50_mtx)[x > 0])),
+  'ecodive'     = ecodive::faith(hmp50_mtx, hmp50_tree),
+  'entropart'   = apply(hmp50_mtx, 1L, entropart::PDFD, hmp50_tree, CheckArguments = FALSE),
+  'phyloregion' = phyloregion::PD(hmp50_mtx, hmp50_tree),
+  'picante'     = as.matrix(picante::pd(hmp50_mtx, hmp50_tree))[,'PD'] )
   
-```r
 
 ## Unweighted UniFrac
 u_unifrac_res <- rbind(
@@ -228,28 +293,6 @@ u_unifrac_res <- rbind(
         doParallel::stopImplicitCluster() } )
   })
 )
-
-u_unifrac_res[,1:9]
-#> # A tibble: 7 × 9
-#>   expression       min   median `itr/sec` mem_alloc `gc/sec` n_itr  n_gc total_time
-#>   <bch:expr>  <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl> <int> <dbl>   <bch:tm>
-#> 1 abdiv         14.59s      15s    0.0655    20.1GB   2.92      10   446      2.54m
-#> 2 ecodive       6.36ms   6.66ms  148.       532.6KB   0         10     0    67.79ms
-#> 3 GUniFrac      79.4ms  86.15ms   10.6      113.4MB   2.11      10     2   947.45ms
-#> 4 phyloregion   6.96ms    7.1ms  139.       145.9MB   0         10     0    71.95ms
-#> 5 phyloseq    306.89ms 325.11ms    2.85      50.9MB   0.571     10     2       3.5s
-#> 6 picante        2.53s    2.56s    0.389      1.8GB   1.52      10    39     25.68s
-#> 7 ampvis2        3.21s    3.64s    0.278     53.7MB   0.0309     9     1     32.34s
-
-ggplot(u_unifrac_res, aes(x = median, y = mem_alloc)) +
-  geom_point() +
-  geom_label_repel(aes(label = as.character(expression))) + 
-  labs(
-    title = 'Unweighted UniFrac Implementations',
-    subtitle = '50 sample all-vs-all benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale)' ) +
-  theme_bw()
   
   
 ## Weighted UniFrac
@@ -342,9 +385,53 @@ va_unifrac_res <- rbind(
       'ecodive'  = cleanup(ecodive::variance_adjusted_unifrac(hmp50_mtx, hmp50_tree)) )
   })
 )
+  
+
+## Data frame for Figure 1A
+Fig1A_data <- bind_rows(
+    mutate(bray_curtis_res, Metric = 'bray'),
+    mutate(shannon_res,     Metric = 'shannon'),
+    mutate(faith_res,       Metric = 'faith') ) %>%
+  mutate(Package = as.character(expression)) %>%
+  select(Package, Metric, median, mem_alloc) %>%
+  arrange(Metric, median)
+
+Fig1A_data$Title <- factor(
+  x      = Fig1A_data$Metric, 
+  levels = c("shannon", "bray", "faith"), 
+  labels = c(
+    "**Shannon Diversity Index**<br>1006 samples", 
+    "**Bray-Curtis Dissimilarity**<br>1006 samples", 
+    "**Faith's Phylogenetic Diversity**<br>50 samples") )
 
 
-unifrac_res <- bind_rows(
+## ggplot for Figure 1A
+Fig1A <- ggplot(Fig1A_data, aes(x = median, y = mem_alloc)) +
+    facet_wrap('Title', nrow = 1, scales = 'free_x') + 
+    geom_point() +
+    geom_label_repel(aes(
+        label    = Package,
+        alpha    = ifelse(Package == 'ecodive', 1, 0.6),
+        fontface = ifelse(Package == 'ecodive', 2, 1),
+        size     = ifelse(Package == 'ecodive', 3.2, 3) ), 
+      box.padding        = .4,
+      point.padding      = .5,
+      min.segment.length = 0 ) + 
+    scale_alpha_identity(guide = 'none') +
+    scale_size_identity(guide = 'none') +
+    scale_y_log10(limits = 10^c(5.3,11), labels = scales::label_bytes()) +
+    labs(
+      tag = 'A',
+      x   = 'Median Calculation Time (log scale; n=10)', 
+      y   = 'Memory Allocated\n(log scale; n=1)' ) +
+    theme_bw(base_size = 12) +
+    theme(
+      strip.text   = ggtext::element_markdown(hjust = 0, lineheight = 1.2),
+      axis.title.x = element_text(margin = margin(t = 10)))
+      
+
+## Data frame for Figure 1B
+Fig1B_data <- bind_rows(
     mutate(u_unifrac_res,  `UniFrac Variant` = 'Unweighted'),
     mutate(w_unifrac_res,  `UniFrac Variant` = 'Weighted'),
     mutate(wn_unifrac_res, `UniFrac Variant` = 'Weighted Normalized'),
@@ -353,134 +440,69 @@ unifrac_res <- bind_rows(
   mutate(Package = as.character(expression)) %>%
   select(Package, `UniFrac Variant`, median, mem_alloc) %>%
   arrange(Package)
-  
-saveRDS(unifrac_res, 'benchmark/unifrac_res.rds')
-```
 
-```{r out.width = "98%", fig.width = '800px', fig.height = '350px'}
-# unifrac_res <- readRDS('../benchmark/unifrac_res.rds')
-
-# print(unifrac_res, n = Inf)
-# 
-# 
-# # How much faster and more memory efficient is ecodive?
-# plyr::ddply(unifrac_res, as.name('UniFrac Variant'), function (x) {
-#   x[['median']]    <- as.numeric(x[['median']])
-#   x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
-#   ecodive <- as.list(x[x[['Package']] == 'ecodive',])
-#   x       <- x[x[['Package']] != 'ecodive',]
-#   data.frame(
-#     speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
-#     memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
-# })
+Fig1B_data$Title <- "**UniFrac Family**<br>50 samples"
+Fig1B_data$`UniFrac Variant` <- factor(
+  x      = Fig1B_data$`UniFrac Variant`, 
+  levels = c("Unweighted", "Weighted", "Weighted Normalized", "Generalized", "Variance Adjusted") )
 
 
-# ggplot(unifrac_res, aes(x = median, y = mem_alloc)) +
-#   geom_point(aes(shape = `UniFrac Variant`), size = 2) +
-#   geom_label_repel(
-#     data          = ~subset(., `UniFrac Variant` == 'Unweighted'),
-#     mapping       = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)),
-#     direction     = 'y', 
-#     box.padding   = 0.4,
-#     point.padding = 10,
-#     seed          = 2,
-#     min.segment.length = Inf ) + 
-#   scale_shape(solid = FALSE) + 
-#   bench::scale_x_bench_time(limits = c(.004, 20), breaks = c(.01, .1, 1, 10)) +
-#   scale_y_log10(limits = 10^c(4.5,11.5), labels = scales::label_bytes()) +
-#   labs(
-#     title = 'UniFrac Implementations',
-#     subtitle = 'All-vs-all 50 sample benchmarking on six CPU cores',
-#     x = 'Median Calculation Time (log scale; n=10)', 
-#     y = 'Memory Allocated\n(log scale; n=1)' ) +
-#   theme_bw(base_size = 12) +
-#   theme(axis.title.x = element_text(margin = margin(t = 10)))
+## ggplot for Figure 1B
+Fig1B <- ggplot(Fig1B_data, aes(x = median, y = mem_alloc)) +
+  facet_wrap('Title') + 
+  geom_point(aes(shape = `UniFrac Variant`), size = 2) +
+  geom_label_repel(aes(
+      label    = Package, 
+      alpha    = ifelse(Package == 'ecodive', 1, 0.6),
+      fontface = ifelse(Package == 'ecodive', 2, 1),
+      size     = ifelse(Package == 'ecodive', 3.2, 3) ),
+    data          = ~subset(., `UniFrac Variant` == 'Unweighted'),
+    direction     = 'y', 
+    box.padding   = 0.4,
+    point.padding = 10,
+    min.segment.length = Inf ) + 
+  scale_shape(solid = FALSE) + 
+  scale_alpha_identity(guide = 'none') +
+  scale_size_identity(guide = 'none') +
+  bench::scale_x_bench_time(limits = c(.004, 20), breaks = c(.01, .1, 1, 10)) +
+  scale_y_log10(limits = 10^c(4.1,11.5), labels = scales::label_bytes()) +
+  labs(
+    tag = 'B',
+    x   = 'Median Calculation Time (log scale; n=10)', 
+    y   = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(
+    strip.text   = ggtext::element_markdown(hjust = 0, lineheight = 1.2),
+    axis.title.x = element_text(margin = margin(t = 10)) )
+
+
+## Combined Figure 1
+Fig1 <- patchwork::wrap_plots(
+  Fig1A, 
+  Fig1B, 
+  patchwork::guide_area(), 
+  design = "111\n223", 
+  guides = 'collect' )
 ```
 
 </details>
 
-```{r out.width = "98%", echo=FALSE}
-  knitr::include_graphics('../man/figures/unifrac-benchmark.svg')
-```
 
-`ecodive` demonstrates substantial performance gains for UniFrac, being 1 to 2,300x faster and using 90 - 90,000x less memory.
-<br>
-
-
-# Classic Beta Diversity
-
-This section assesses the computational performance of functions for calculating
-several traditional beta diversity metrics, including Bray-Curtis, Euclidean,
-Jaccard, and Manhattan distances. The evaluation covers implementations from
-nine R packages: `abdiv`, `ecodist`, `ecodive`, `labdsv`, `parallelDist`,
-`philentropy`, `tabula`, `stats`, and `vegan.` Following the established
-protocol, processing speed was measured across ten replicate runs, while a
-single run was used to profile memory consumption.
-
-
-<details>
-  <summary>Click to reveal R code.</summary>
+# Results
 
 ```r
-bray_curtis_res <- bench::mark(
-  iterations = 10,
-  'abdiv'        = cleanup(pairwise(abdiv::bray_curtis, gems_mtx)),
-  'ecodist'      = cleanup(ecodist::bcdist(gems_mtx)),
-  'ecodive'      = cleanup(ecodive::bray(gems_mtx, rescale = FALSE)),
-  'labdsv'       = cleanup(labdsv::dsvdis(gems_mtx, 'bray/curtis')),
-  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'bray')),
-  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'sorensen', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
-  'tabula'       = cleanup(1 - pairwise(tabula::index_bray, gems_mtx)),
-  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'bray')) )
+print(Fig1)
+```
 
-jaccard_res <- bench::mark(
-  iterations = 10,
-  'abdiv'        = cleanup(pairwise(abdiv::jaccard, gems_mtx)),
-  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'jaccard')),
-  'ecodive'      = cleanup(ecodive::jaccard(gems_mtx)),
-  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'binary')),
-  'philentropy'  = cleanup(philentropy::distance(gems_mtx > 0, 'jaccard', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
-  'phyloregion'  = cleanup(phyloregion::beta_diss(gems_mtx, 'jaccard')$beta.jac),
-  'stats'        = cleanup(stats::dist(gems_mtx, 'binary')),
-  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'jaccard', binary = TRUE)) )
-
-manhattan_res <- bench::mark(
-  iterations = 10,
-  'abdiv'        = cleanup(pairwise(abdiv::manhattan, gems_mtx)),
-  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'manhattan')),
-  'ecodive'      = cleanup(ecodive::manhattan(gems_mtx, rescale = FALSE)),
-  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'manhattan')),
-  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'manhattan', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
-  'stats'        = cleanup(stats::dist(gems_mtx, 'manhattan')),
-  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'manhattan')) )
-
-euclidean_res <- bench::mark(
-  iterations = 10,
-  'abdiv'        = cleanup(pairwise(abdiv::euclidean, gems_mtx)),
-  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'euclidean')),
-  'ecodive'      = cleanup(ecodive::euclidean(gems_mtx, rescale = FALSE)),
-  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'euclidean')),
-  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'euclidean', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
-  'stats'        = cleanup(stats::dist(gems_mtx, 'euclidean')),
-  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'euclidean')) )
-
-bdiv_res <- bind_rows(
-    mutate(bray_curtis_res, Metric = 'Bray-Curtis'),
-    mutate(jaccard_res,     Metric = 'Jaccard'),
-    mutate(manhattan_res,   Metric = 'Manhattan'),
-    mutate(euclidean_res,   Metric = 'Euclidean') ) %>%
-  mutate(Package = as.character(expression)) %>%
-  select(Package, Metric, median, mem_alloc) %>%
-  arrange(Package)
-  
-saveRDS(bdiv_res, 'benchmark/bdiv_res.rds')
+```{r out.width = "98%", echo=FALSE}
+  knitr::include_graphics('../man/figures/JOSS_Fig1A.svg')
+```
 
 
-print(bdiv_res, n = Inf)
+## How much faster and more memory efficient is ecodive?
 
-
-# How much faster and more memory efficient is ecodive?
-plyr::ddply(bdiv_res, 'Metric', function (x) {
+```r
+plyr::ddply(Fig1A_data, as.name('Metric'), function (x) {
   x[['median']]    <- as.numeric(x[['median']])
   x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
   ecodive <- as.list(x[x[['Package']] == 'ecodive',])
@@ -489,155 +511,13 @@ plyr::ddply(bdiv_res, 'Metric', function (x) {
     speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
     memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
 })
+#>    Metric      speed       memory
+#> 1    bray   1 - 166x    2 - 5312x
+#> 2   faith 1 - 10413x 212 - 74389x
+#> 3 shannon   2 - 113x      6 - 22x
 
 
-ggplot(bdiv_res, aes(x = median, y = mem_alloc)) +
-  geom_point() +
-  geom_label_repel(
-    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
-    direction = 'y', 
-    seed      = 5 ) + 
-  facet_wrap('Metric', ncol = 1, scales = 'free_y') + 
-  bench::scale_x_bench_time(limits = c(.1, 180), breaks = c(.1, .3, 1, 3, 10, 30, 60, 180)) +
-  scale_y_log10(limits = 10^c(5,12), labels = scales::label_bytes()) +
-  labs(
-    title = 'Beta Diversity Implementations',
-    subtitle = 'All-vs-all 1,006 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
-
-
-ggplot(subset(bdiv_res, Metric == 'Bray-Curtis'), aes(x = median, y = mem_alloc)) +
-  geom_point() +
-  geom_label_repel(
-    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
-    direction = 'y', 
-    seed      = 1 ) + 
-  bench::scale_x_bench_time(limits = c(.1, 61), breaks = c(.1, 1, 10, 60)) +
-  scale_y_log10(limits = 10^c(5,11.5), labels = scales::label_bytes()) +
-  labs(
-    title = 'Bray-Curtis Dissimilarity Implementations',
-    subtitle = 'All-vs-all 1,006 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
-```
-
-</details>
-
-```{r out.width = "98%", echo=FALSE}
-#> # A tibble: 30 × 4
-#>    Package      Metric        median mem_alloc
-#>    <chr>        <chr>       <bch:tm> <bch:byt>
-#>  1 abdiv        Bray-Curtis   13.75s   20.43GB
-#>  2 abdiv        Jaccard        1.35m   24.89GB
-#>  3 abdiv        Manhattan      2.13m   17.52GB
-#>  4 abdiv        Euclidean      42.8s   17.52GB
-#>  5 ecodist      Bray-Curtis 398.33ms   29.43MB
-#>  6 ecodist      Jaccard        2.41m   47.89GB
-#>  7 ecodist      Manhattan      1.87m    21.8GB
-#>  8 ecodist      Euclidean         2m    21.8GB
-#>  9 ecodive      Bray-Curtis 149.79ms    3.94MB
-#> 10 ecodive      Jaccard     179.59ms    3.87MB
-#> 11 ecodive      Manhattan   213.66ms    3.87MB
-#> 12 ecodive      Euclidean   212.74ms    3.87MB
-#> 13 labdsv       Bray-Curtis 726.73ms   68.16MB
-#> 14 parallelDist Bray-Curtis 187.72ms    7.88MB
-#> 15 parallelDist Jaccard     310.59ms    7.71MB
-#> 16 parallelDist Manhattan   158.28ms    7.71MB
-#> 17 parallelDist Euclidean   159.81ms    7.71MB
-#> 18 philentropy  Bray-Curtis   10.31s   14.66GB
-#> 19 philentropy  Jaccard        1.57m    17.6GB
-#> 20 philentropy  Manhattan      2.08m   14.66GB
-#> 21 philentropy  Euclidean      2.27m   14.66GB
-#> 22 phyloregion  Jaccard     132.97ms   194.7MB
-#> 23 stats        Jaccard        2.64s    7.71MB
-#> 24 stats        Manhattan      2.12s    7.71MB
-#> 25 stats        Euclidean      2.12s    7.71MB
-#> 26 tabula       Bray-Curtis   24.89s   20.43GB
-#> 27 vegan        Bray-Curtis    1.69s   16.45MB
-#> 28 vegan        Jaccard        1.78s   63.68MB
-#> 29 vegan        Manhattan      1.55s    13.5MB
-#> 30 vegan        Euclidean      1.55s    13.5MB
-
-#>        Metric    speed     memory
-#> 1 Bray-Curtis 1 - 166x  2 - 5312x
-#> 2   Euclidean 1 - 640x  2 - 5771x
-#> 3     Jaccard 1 - 805x 2 - 12677x
-#> 4   Manhattan 1 - 600x  2 - 5771x
-
-  knitr::include_graphics('../man/figures/bdiv-benchmark.svg')
-```
-
-`ecodive` is 1 to 800x faster and uses 2 to 12,000x less memory.
-
-<br>
-
-
-# Alpha Diversity
-
-Finally, this section presents a comparative performance analysis of several key
-alpha diversity metrics: Shannon index, Simpson index, and Faith's Phylogenetic
-Diversity (PD). The evaluation includes implementations from the `abdiv`,
-`adiv`, `ecodive`, `entropart`, `philentropy`, `phyloregion`, `tabula`, and
-`vegan` R packages. Consistent with the beta diversity benchmarks, the
-computationally intensive Faith's PD metric was evaluated using the 50-sample
-dataset, while the traditional Shannon and Simpson metrics were benchmarked
-against the larger 1,006-sample dataset.
-
-<details>
-  <summary>Click to reveal R code.</summary>
-
-```r
-
-shannon_res <- bench::mark(
-  iterations  = 10,
-  'abdiv'       = apply(gems_mtx, 1L, abdiv::shannon),
-  'adiv'        = adiv::speciesdiv(gems_mtx, 'Shannon')[,1],
-  'ecodive'     = ecodive::shannon(gems_mtx),
-  'entropart'   = apply(gems_mtx, 1L, entropart::Shannon, CheckArguments = FALSE),
-  'philentropy' = apply(gems_mtx, 1L, philentropy::H, unit = 'log'),
-  'tabula'      = apply(gems_mtx, 1L, tabula::index_shannon),
-  'vegan'       = vegan::diversity(gems_mtx, 'shannon') )
-
-simpson_res <- bench::mark(
-  iterations  = 10,
-  'abdiv'     = apply(gems_mtx, 1L, abdiv::simpson),
-  'adiv'      = adiv::speciesdiv(gems_mtx, 'GiniSimpson')[,1],
-  'ecodive'   = ecodive::simpson(gems_mtx),
-  'entropart' = apply(gems_mtx, 1L, entropart::Simpson, CheckArguments = FALSE),
-  'tabula'    = 1 - apply(gems_mtx, 1L, tabula::index_simpson),
-  'vegan'     = vegan::diversity(gems_mtx, 'simpson') )
-
-faith_res <- bench::mark(
-  iterations    = 10,
-  check         = FALSE, # entropart has incorrect output on non-ultrametric tree
-  'abdiv'       = apply(hmp50_mtx, 1L, abdiv::faith_pd, hmp50_tree),
-  'adiv'        = apply(hmp50_mtx, 1L, \(x) adiv::EH(hmp50_tree, colnames(hmp50_mtx)[x > 0])),
-  'ecodive'     = ecodive::faith(hmp50_mtx, hmp50_tree),
-  'entropart'   = apply(hmp50_mtx, 1L, entropart::PDFD, hmp50_tree, CheckArguments = FALSE),
-  'phyloregion' = phyloregion::PD(hmp50_mtx, hmp50_tree),
-  'picante'     = as.matrix(picante::pd(hmp50_mtx, hmp50_tree))[,'PD'] )
-
-adiv_res <- bind_rows(
-    mutate(shannon_res, Metric = 'Shannon x 1006'),
-    mutate(simpson_res, Metric = 'Simpson x 1006'),
-    mutate(faith_res,   Metric = 'Faith PD x 50') ) %>%
-  mutate(Package = as.character(expression)) %>%
-  select(Package, Metric, median, mem_alloc) %>%
-  arrange(Package)
-  
-saveRDS(adiv_res, 'benchmark/adiv_res.rds')
-
-
-print(adiv_res, n = Inf)
-
-
-# How much faster and more memory efficient is ecodive?
-plyr::ddply(adiv_res, 'Metric', function (x) {
+plyr::ddply(Fig1B_data, as.name('UniFrac Variant'), function (x) {
   x[['median']]    <- as.numeric(x[['median']])
   x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
   ecodive <- as.list(x[x[['Package']] == 'ecodive',])
@@ -646,101 +526,75 @@ plyr::ddply(adiv_res, 'Metric', function (x) {
     speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
     memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
 })
-
-
-ggplot(subset(adiv_res, Metric == 'Shannon x 1006'), aes(x = median, y = mem_alloc)) +
-  geom_point(size = 2) +
-  geom_label_repel(
-    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
-    direction = 'y', 
-    seed      = 10 ) + 
-  bench::scale_x_bench_time(limits = c(.008, 2), breaks = c(.01, .025, .05, .1, .25, .5, 1)) +
-  scale_y_log10(limits = 10^c(6.5,8.5), labels = scales::label_bytes()) +
-  labs(
-    title = 'Shannon Diversity Index Implementations',
-    subtitle = '1,006 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
-
-
-ggplot(subset(adiv_res, Metric == 'Simpson x 1006'), aes(x = median, y = mem_alloc)) +
-  geom_point(size = 2) +
-  geom_label_repel(
-    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
-    direction = 'y', 
-    seed      = 10 ) + 
-  bench::scale_x_bench_time(limits = c(.01, .05), breaks = c(.01, .015, .025, .05)) +
-  scale_y_log10(limits = 10^c(6.5,8.5), labels = scales::label_bytes()) +
-  labs(
-    title = 'Gini-Simpson Index Implementations',
-    subtitle = '1,006 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
-  
-  
-ggplot(subset(adiv_res, Metric == 'Faith PD x 50'), aes(x = median, y = mem_alloc)) +
-  geom_point(size = 2) +
-  geom_label_repel(
-    mapping   = aes(label = Package, fontface = ifelse(Package == 'ecodive', 2, 1)), 
-    direction = 'y', 
-    seed      = 10 ) + 
-  bench::scale_x_bench_time(limits = c(.002, 35), breaks = c(.01, .1, 1, 10)) +
-  scale_y_log10(limits = 10^c(5,10.6), labels = scales::label_bytes()) +
-  labs(
-    title = 'Faith\'s Phylogenetic Diversity Implementations',
-    subtitle = '50 sample benchmarking on six CPU cores',
-    x = 'Median Calculation Time (log scale; n=10)', 
-    y = 'Memory Allocated\n(log scale; n=1)' ) +
-  theme_bw(base_size = 12) +
-  theme(axis.title.x = element_text(margin = margin(t = 10)))
+#>       UniFrac Variant        speed         memory
+#> 1          Unweighted    1 - 2251x    98 - 39485x
+#> 2            Weighted   44 - 2094x   178 - 74013x
+#> 3 Weighted Normalized   11 - 1991x   178 - 74049x
+#> 4         Generalized   10 - 1814x   310 - 69563x
+#> 5   Variance Adjusted 2353 - 2353x 90421 - 90421x
 ```
 
-</details>
 
-```{r out.width = "98%", echo=FALSE}
-#> # A tibble: 19 × 4
-#>    Package     Metric           median mem_alloc
-#>    <chr>       <chr>          <bch:tm> <bch:byt>
-#>  1 abdiv       Shannon x 1006  85.22ms   95.41MB
-#>  2 abdiv       Simpson x 1006  17.24ms   32.64MB
-#>  3 abdiv       Faith PD x 50  476.24ms  651.64MB
-#>  4 adiv        Shannon x 1006   46.8ms  131.49MB
-#>  5 adiv        Simpson x 1006  30.95ms   50.24MB
-#>  6 adiv        Faith PD x 50     1.72s  489.05MB
-#>  7 ecodive     Shannon x 1006  11.16ms    6.06MB
-#>  8 ecodive     Simpson x 1006  11.41ms    5.92MB
-#>  9 ecodive     Faith PD x 50    2.62ms  337.58KB
-#> 10 entropart   Shannon x 1006  40.73ms   41.77MB
-#> 11 entropart   Simpson x 1006  40.86ms   47.54MB
-#> 12 entropart   Faith PD x 50    27.27s   23.95GB
-#> 13 philentropy Shannon x 1006    1.26s   52.78MB
-#> 14 phyloregion Faith PD x 50    3.08ms  141.47MB
-#> 15 picante     Faith PD x 50      77ms   69.86MB
-#> 16 tabula      Shannon x 1006  25.34ms    36.6MB
-#> 17 tabula      Simpson x 1006  21.45ms   27.57MB
-#> 18 vegan       Shannon x 1006  68.58ms   68.08MB
-#> 19 vegan       Simpson x 1006  37.76ms   62.15MB
+## Raw Data for Figure 1 Panel A
 
-
-#>           Metric      speed       memory
-#> 1  Faith PD x 50 1 - 10413x 212 - 74389x
-#> 2 Shannon x 1006   2 - 113x      6 - 22x
-#> 3 Simpson x 1006     2 - 4x      5 - 10x
-
-
-  knitr::include_graphics('../man/figures/shannon-benchmark.svg')
-  knitr::include_graphics('../man/figures/simpson-benchmark.svg')
-  knitr::include_graphics('../man/figures/faith-benchmark.svg')
+```r
+print(Fig1A_data[,1:4], n = Inf)
+#> # A tibble: 21 × 4
+#>    Package      Metric    median mem_alloc
+#>    <chr>        <chr>   <bch:tm> <bch:byt>
+#>  1 ecodive      bray    149.79ms    3.94MB
+#>  2 parallelDist bray    187.72ms    7.88MB
+#>  3 ecodist      bray    398.33ms   29.43MB
+#>  4 labdsv       bray    726.73ms   68.16MB
+#>  5 vegan        bray       1.69s   16.45MB
+#>  6 philentropy  bray      10.31s   14.66GB
+#>  7 abdiv        bray      13.75s   20.43GB
+#>  8 tabula       bray      24.89s   20.43GB
+#>  9 ecodive      faith     2.62ms  337.58KB
+#> 10 phyloregion  faith     3.08ms  141.47MB
+#> 11 picante      faith       77ms   69.86MB
+#> 12 abdiv        faith   476.24ms  651.64MB
+#> 13 adiv         faith      1.72s  489.05MB
+#> 14 entropart    faith     27.27s   23.95GB
+#> 15 ecodive      shannon  11.16ms    6.06MB
+#> 16 tabula       shannon  25.34ms    36.6MB
+#> 17 entropart    shannon  40.73ms   41.77MB
+#> 18 adiv         shannon   46.8ms  131.49MB
+#> 19 vegan        shannon  68.58ms   68.08MB
+#> 20 abdiv        shannon  85.22ms   95.41MB
+#> 21 philentropy  shannon    1.26s   52.78MB
 ```
 
-`ecodive` is 1 to 10,000x faster and uses 5 to 74,000x less memory.
 
+## Raw Data for Figure 1 Panel B
 
-
+```r
+print(Fig1B_data[,1:4], n = Inf)
+#> # A tibble: 21 × 4
+#>    Package     `UniFrac Variant`     median mem_alloc
+#>    <chr>       <fct>               <bch:tm> <bch:byt>
+#>  1 GUniFrac    Unweighted           86.15ms   113.4MB
+#>  2 GUniFrac    Weighted Normalized  78.51ms    92.1MB
+#>  3 GUniFrac    Generalized           75.7ms    92.1MB
+#>  4 abdiv       Unweighted               15s    20.1GB
+#>  5 abdiv       Weighted              13.67s      20GB
+#>  6 abdiv       Weighted Normalized   13.78s      20GB
+#>  7 abdiv       Generalized           13.78s    20.2GB
+#>  8 abdiv       Variance Adjusted     15.81s    24.5GB
+#>  9 ampvis2     Unweighted             3.64s    53.7MB
+#> 10 ampvis2     Weighted                3.2s    49.2MB
+#> 11 ampvis2     Weighted Normalized    3.33s    49.3MB
+#> 12 ecodive     Unweighted            6.66ms   532.6KB
+#> 13 ecodive     Weighted              6.53ms   283.7KB
+#> 14 ecodive     Weighted Normalized   6.92ms   283.7KB
+#> 15 ecodive     Generalized           7.59ms   304.3KB
+#> 16 ecodive     Variance Adjusted     6.72ms   283.7KB
+#> 17 phyloregion Unweighted             7.1ms   145.9MB
+#> 18 phyloseq    Unweighted          325.11ms    50.9MB
+#> 19 phyloseq    Weighted            288.33ms    49.4MB
+#> 20 phyloseq    Weighted Normalized 296.54ms    49.5MB
+#> 21 picante     Unweighted             2.56s     1.8GB
+```
 
 
 

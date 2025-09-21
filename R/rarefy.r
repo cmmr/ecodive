@@ -47,7 +47,7 @@
 #'     colSums(counts)
 #' 
 rarefy <- function (
-    x, 
+    counts, 
     depth     = 0.1, 
     n_samples = NULL, 
     seed      = 0, 
@@ -62,17 +62,17 @@ rarefy <- function (
   
   # Set target depth according to number/pct of samples to keep/drop.
   if (!is.null(n_samples)) {
-    if (n_samples == 0)     n_samples <- nrow(x)             # Keep all
-    if (abs(n_samples) < 1) n_samples <- n_samples * nrow(x) # Keep/drop percentage
-    if (n_samples <= -1)    n_samples <- nrow(x) + n_samples # Drop n_samples
+    if (n_samples == 0)     n_samples <- nrow(counts)             # Keep all
+    if (abs(n_samples) < 1) n_samples <- n_samples * nrow(counts) # Keep/drop percentage
+    if (n_samples <= -1)    n_samples <- nrow(counts) + n_samples # Drop n_samples
     n_samples   <- max(1, floor(n_samples))                       # Keep at least one
-    curr_depths <- rowSums(x)
+    curr_depths <- rowSums(counts)
     target      <- rev(sort(curr_depths))[[n_samples]]
   }
   
   # Depth is given as minimum percent of observations to keep.
   else if (depth < 1) {
-    curr_depths <- rowSums(x)
+    curr_depths <- rowSums(counts)
     target      <- (sum(curr_depths) * depth) / length(curr_depths)
     target      <- min(curr_depths[curr_depths >= target])
   }
@@ -87,14 +87,14 @@ rarefy <- function (
   
   if (is.null(times)) {
     
-    .Call(C_rarefy, x, target, seed, cpus)
+    .Call(C_rarefy, counts, target, seed, cpus)
     
   } else {
     
     seeds <- ((seed + 2**31 - 1 + seq_len(times)) %% 2**32) - 2**31
     
     lapply(seeds, function (seed) {
-      .Call(C_rarefy, x, target, seed, cpus)
+      .Call(C_rarefy, counts, target, seed, cpus)
     })
   }
   

@@ -89,7 +89,7 @@ static void *faith_result(void *arg) {
 
 
 //======================================================
-// R interface. Dispatches threads on compute methods.
+// R interface. Dispatches threads.
 //======================================================
 SEXP C_faith(
     SEXP sexp_otu_mtx,  SEXP sexp_phylo_tree,  

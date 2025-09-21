@@ -97,10 +97,10 @@ ENV <- environment()
 
 #' Find and Browse Available Metrics
 #' 
-#' Programmatic access to the lists of available methods, and their associated
+#' Programmatic access to the lists of available metrics, and their associated
 #' functions.
 #' 
-#' @param method   The name of an alpha/beta diversity method to search for. 
+#' @param metric   The name of an alpha/beta diversity metric to search for. 
 #'        Supports partial matching. All non-alpha characters are ignored.
 #'   
 #' @param val   Sets the return value for this function call. See "Value" 
@@ -110,67 +110,67 @@ ENV <- environment()
 #'        Default is `"id"` when `val` is `"list"` or `"func"`, otherwise the 
 #'        default is `NA` (no name).
 #'   
-#' @param div,phylo,weighted,int_only,true_metric   Consider only methods 
+#' @param div,phylo,weighted,int_only,true_metric   Consider only metrics 
 #'        matching specific criteria. For example, `div = "alpha"` will only 
-#'        return alpha diversity methods.
+#'        return alpha diversity metrics.
 #'        Default: `NULL`
 #' 
 #' @return 
 #' 
-#' **`match_method()`**
+#' **`match_metric()`**
 #' 
 #' A `list` with the following elements.
 #' 
-#' * `name` : Method name, e.g. `"Faith's Phylogenetic Diversity"`
-#' * `id` : Method ID - also the name of the function, e.g. `"faith"`
+#' * `name` : Metric name, e.g. `"Faith's Phylogenetic Diversity"`
+#' * `id` : Metric ID - also the name of the function, e.g. `"faith"`
 #' * `div` : Either `"alpha"` or `"beta"`.
-#' * `phylo` : `TRUE` if method requires a phylogenetic tree; `FALSE` otherwise.
-#' * `weighted` : `TRUE` if method takes relative abundance into account; `FALSE` if it only uses presence/absence.
-#' * `int_only` : `TRUE` if method requires integer counts; `FALSE` otherwise.
-#' * `true_metric` : `TRUE` if method is a true metric and satisfies the triangle inequality; `FALSE` if it is a non-metric dissimilarity; `NA` for alpha diversity methods.
-#' * `func` : The function for this method, e.g. `ecodive::faith`
-#' * `params` : Formal args for `func`, e.g. `c("x", "tree", "cpus")`
+#' * `phylo` : `TRUE` if metric requires a phylogenetic tree; `FALSE` otherwise.
+#' * `weighted` : `TRUE` if metric takes relative abundance into account; `FALSE` if it only uses presence/absence.
+#' * `int_only` : `TRUE` if metric requires integer counts; `FALSE` otherwise.
+#' * `true_metric` : `TRUE` if metric is a true metric and satisfies the triangle inequality; `FALSE` if it is a non-metric dissimilarity; `NA` for alpha diversity metrics.
+#' * `func` : The function for this metric, e.g. `ecodive::faith`
+#' * `params` : Formal args for `func`, e.g. `c("counts", "tree", "cpus")`
 #' 
 #' 
-#' **`list_methods()`**
+#' **`list_metrics()`**
 #' 
 #' The returned object's type and values are controlled with the `val` and `nm` arguments.
 #' 
 #' * `val = "data.frame"` : The data.frame from which the below options are sourced.
-#' * `val = "list"` : A list of objects as returned by `match_method()` (above).
+#' * `val = "list"` : A list of objects as returned by `match_metric()` (above).
 #' * `val = "func"` : A list of functions.
-#' * `val = "id"` : A character vector of method IDs.
-#' * `val = "name"` : A character vector of method names.
+#' * `val = "id"` : A character vector of metric IDs.
+#' * `val = "name"` : A character vector of metric names.
 #' * `val = "div"` : A character vector `"alpha"` and/or `"beta"`.
-#' * `val = "phylo"` : A logical vector indicating which methods require a tree.
-#' * `val = "weighted"` : A logical vector indicating which methods take relative abundance into account (as opposed to just presence/absence).
-#' * `val = "int_only"` : A logical vector indicating which methods require integer counts.
-#' * `val = "true_metric"` : A logical vector indicating which methods are true metrics and satisfy the triangle inequality, which work better for ordinations such as PCoA.
+#' * `val = "phylo"` : A logical vector indicating which metrics require a tree.
+#' * `val = "weighted"` : A logical vector indicating which metrics take relative abundance into account (as opposed to just presence/absence).
+#' * `val = "int_only"` : A logical vector indicating which metrics require integer counts.
+#' * `val = "true_metric"` : A logical vector indicating which metrics are true metrics and satisfy the triangle inequality, which work better for ordinations such as PCoA.
 #' 
-#' If `nm` is set, then the names of the vector or list will be the method ID
+#' If `nm` is set, then the names of the vector or list will be the metric ID
 #' (`nm="id"`) or name (`nm="name"`). When `val="data.frame"`, the names will be
 #' applied to the `rownames()` property of the `data.table`.
 #' 
 #' 
-#' @rdname methods
+#' @rdname metrics
 #' @export
 #' 
 #' @examples
 #' 
-#'     # A data.frame of all available methods.
-#'     head(list_methods())
+#'     # A data.frame of all available metrics.
+#'     head(list_metrics())
 #'     
 #'     # All alpha diversity function names.
-#'     list_methods('alpha', val = 'id')
+#'     list_metrics('alpha', val = 'id')
 #'     
-#'     # Try to find a method named 'otus'.
-#'     m <- match_method('otus')
+#'     # Try to find a metric named 'otus'.
+#'     m <- match_metric('otus')
 #'     
 #'     # The result is a list that includes the function.
 #'     str(m)
 #' 
 
-list_methods <- function (
+list_metrics <- function (
     div = c(NA, 'alpha', 'beta'), 
     val = c('data.frame', 'list', 'func', 'id', 'name', 'div', 'phylo', 'weighted', 'int_only', 'true_metric'), 
     nm  = c(NA, 'id', 'name'), phylo = NULL, weighted = NULL, int_only = NULL, true_metric = NULL ) {
@@ -183,7 +183,7 @@ list_methods <- function (
   
   
   #________________________________________________________
-  # Subset the methods according to `div`, `phylo`, etc.
+  # Subset the metrics according to `div`, `phylo`, etc.
   #________________________________________________________
   
   df <- METRICS
@@ -238,17 +238,17 @@ list_methods <- function (
 }
 
 
-#' @rdname methods
+#' @rdname metrics
 #' @export
 #' 
-match_method <- function (
-    method, div = NULL, phylo = NULL, weighted = NULL, int_only = NULL, true_metric = NULL ) {
+match_metric <- function (
+    metric, div = NULL, phylo = NULL, weighted = NULL, int_only = NULL, true_metric = NULL ) {
     
-  if (!is.character(method)) stop('`method` must be a character vector')
-  if (length(method) != 1)   stop('`method` must be length 1')
+  if (!is.character(metric)) stop('`metric` must be a character vector')
+  if (length(metric) != 1)   stop('`metric` must be length 1')
   
   
-  df <- list_methods(
+  df <- list_metrics(
     div         = div, 
     phylo       = phylo, 
     weighted    = weighted, 
@@ -257,35 +257,35 @@ match_method <- function (
   
   
   # Exact match
-  if (method %in% df$id) {
-    method <- as.list(df[df$id == method,])
+  if (metric %in% df$id) {
+    metric <- as.list(df[df$id == metric,])
   }
   
   # Use partial matching
   else {
     
-    needle <- gsub('[^a-z]', '', tolower(method))
-    if (nchar(needle) == 0) stop('`method` must contain alphabetic characters')
+    needle <- gsub('[^a-z]', '', tolower(metric))
+    if (nchar(needle) == 0) stop('`metric` must contain alphabetic characters')
     
     opts  <- HAYSTACK[unname(HAYSTACK) %in% df$id]
     match <- unique(unname(opts[startsWith(names(opts), needle)]))
     
     if (length(match) > 1) stop(
-      '`method = "', method, '"` matches multiple options: ', 
+      '`metric = "', metric, '"` matches multiple options: ', 
       paste(collapse = ', ', sort(match)) )
     
     if (length(match) == 0) stop(
-      '`method = "', method, '"` does not match any option: \n', 
+      '`metric = "', metric, '"` does not match any option: \n', 
       paste(collapse = '\n', strwrap(paste(collapse = ', ', sort(unique(unname(opts)))))) )
     
-    method <- as.list(df[df$id == match,])
+    metric <- as.list(df[df$id == match,])
   }
   
-  method$alt_ids <- NULL
-  method$func    <- get(method$id, ENV)
-  method$params  <- names(formals(method$func))
+  metric$alt_ids <- NULL
+  metric$func    <- get(metric$id, ENV)
+  metric$params  <- names(formals(metric$func))
   
-  return (method)
+  return (metric)
 }
 
 

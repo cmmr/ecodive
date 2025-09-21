@@ -81,19 +81,19 @@ that provide their own implementations of diversity metrics, including `abdiv`
 `entropart` [@entropart], `GUniFrac` [@GUniFrac], `labdsv` [@labdsv],
 `parallelDist` [@parallelDist], `philentropy` [@philentropy], `phyloregion`
 [@phyloregion], `phyloseq` [@phyloseq], `picante` [@picante], `tabula`
-[@tabula], and `vegan` [@vegan]. The results, conducted using the bench package,
-are summarized in Figure 1 and demonstrate `ecodive`'s superior speed and memory
-efficiency for each of the metrics tested. Crucially, the benchmark suite
-confirms these performance gains do not come at the cost of accuracy, as
-`ecodive` produces numerically identical output to the other packages. Beyond
-its computational advantages, `ecodive` has zero external R dependencies. This
-makes it a lightweight, stable, and secure backend, minimizing installation
-conflicts and simplifying long-term maintenance for developers who build upon
-it. The complete benchmark code and results are available in the package
-vignette (`vignette('benchmark')`) and online.
+[@tabula], and `vegan` [@vegan]. The results, conducted using the `bench` R
+package, are summarized in Figure 1 and demonstrate `ecodive`'s superior speed
+and memory efficiency for each of the metrics tested.
 
 ![Figure 1: `ecodive` performance benchmarks. Each point represents an R package, plotted by median calculation time (x-axis) and memory consumption (y-axis) from ten trials. (A) Benchmarks for Shannon Diversity Index, Bray-Curtis Dissimilarity, and Faith's Phylogenetic Diversity. (B) Benchmarks for the UniFrac family of metrics, with different variants distinguished by point shape. Not all packages implement every metric, but `ecodive` is consistently the fastest and most memory-efficient across all tested metrics, often by several orders of magnitude.](figures/fig1.svg){width="100%"}
 
+Crucially, the benchmark suite confirms these performance gains do not come at
+the cost of accuracy, as `ecodive` produces numerically identical output to the
+other packages. Beyond its computational advantages, `ecodive` has zero external
+R dependencies. This makes it a lightweight, stable, and secure backend,
+minimizing installation conflicts and simplifying long-term maintenance for
+developers who build upon it. The complete benchmark code and results are
+available in the package vignette (`vignette('benchmark')`) and online.
 
 
 # Implemented Metrics
@@ -124,9 +124,9 @@ official `ecodive` documentation at <https://cmmr.github.io/ecodive>.
 
 Beyond interactive analysis, `ecodive` is engineered for programmatic use,
 making it an ideal backend for applications like R Shiny web apps [@shiny]. The
-package includes a `list_methods()` function that allows developers to
+package includes a `list_metrics()` function that allows developers to
 dynamically filter and present available diversity metrics based on specific
-criteria. For instance, methods can be programmatically selected if they are
+criteria. For instance, metrics can be programmatically selected if they are
 phylogeny-aware, abundance-weighted, capable of handling non-integer counts, or
 are "true metrics" that satisfy the triangle inequality. This powerful API
 simplifies the integration of `ecodive` into other software, enabling developers

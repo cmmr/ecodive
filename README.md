@@ -116,17 +116,17 @@ weighted_unifrac(counts, tree = ex_tree)
 
 ## Available Methods
 
-Use `list_methods()` to browse the methods available for calculating diversity.
+Use `list_metrics()` to browse the metrics available for calculating diversity.
 
 ``` r
 # Alpha Diversity
-list_methods('alpha', 'id')
+list_metrics('alpha', 'id')
 #>  [1] "ace"         "berger"      "brillouin"   "chao1"       "faith"      
 #>  [6] "fisher"      "simpson"     "inv_simpson" "margalef"    "mcintosh"   
 #> [11] "menhinick"   "observed"    "shannon"     "squares"    
 
 # Beta Diversity
-list_methods('beta', 'id')
+list_metrics('beta', 'id')
 #>  [1] "aitchison"                 "bhattacharyya"             "bray"                     
 #>  [4] "canberra"                  "chebyshev"                 "chord"                    
 #>  [7] "clark"                     "sorensen"                  "divergence"               

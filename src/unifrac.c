@@ -411,7 +411,7 @@ static void *var_adjusted_dist (void *arg) {
 
 
 //======================================================
-// R interface. Dispatches threads on compute methods.
+// R interface. Dispatches threads on unifrac variants.
 //======================================================
 SEXP C_unifrac(
     SEXP sexp_algorithm,  SEXP sexp_otu_mtx, 
