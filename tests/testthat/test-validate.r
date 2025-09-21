@@ -95,7 +95,7 @@ test_that("validation", {
   env$tree <- tree2
   expect_silent(validate_tree(env))
   
-  env$counts <- counts[1:3,,drop=FALSE]
+  env$counts <- counts[,1:4,drop=FALSE]
   env$tree   <- tree
   expect_silent(validate_tree(env))
   

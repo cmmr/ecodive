@@ -152,7 +152,7 @@ pairwise <- function (f, data, ...) {
       FUN = function (i, j) f(data[i,], data[j,], ...), 
       i   = pairs[1,], j = pairs[2,] ),
     class  = 'dist',
-    Labels = colnames(data),
+    Labels = rownames(data),
     Size   = nrow(data),
     Diag   = FALSE,
     Upper  = FALSE )
