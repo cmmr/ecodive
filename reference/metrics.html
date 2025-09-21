@@ -9,7 +9,7 @@ functions."><meta property="og:image" content="https://cmmr.github.io/ecodive/lo
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,10 +53,11 @@ functions.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">list_metrics</span><span class="op">(</span></span>
 <span>  div <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="st">"alpha"</span>, <span class="st">"beta"</span><span class="op">)</span>,</span>
 <span>  val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"data.frame"</span>, <span class="st">"list"</span>, <span class="st">"func"</span>, <span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"div"</span>, <span class="st">"phylo"</span>, <span class="st">"weighted"</span>,</span>
-<span>    <span class="st">"true_metric"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"int_only"</span>, <span class="st">"true_metric"</span><span class="op">)</span>,</span>
 <span>  nm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="st">"id"</span>, <span class="st">"name"</span><span class="op">)</span>,</span>
 <span>  phylo <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weighted <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int_only <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  true_metric <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -65,6 +66,7 @@ functions.</p>
 <span>  div <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  phylo <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weighted <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  int_only <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  true_metric <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -73,11 +75,11 @@ functions.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-div-phylo-weighted-true-metric">div, phylo, weighted, true_metric<a class="anchor" aria-label="anchor" href="#arg-div-phylo-weighted-true-metric"></a></dt>
-<dd><p>Consider only metrics matching
-specific criteria. For example, <code>div = "alpha"</code> will only return
-alpha diversity metrics.
-Default: <code>div=NULL, phylo=NULL, weighted=NULL, true_metric=NULL</code></p></dd>
+<dl><dt id="arg-div-phylo-weighted-int-only-true-metric">div, phylo, weighted, int_only, true_metric<a class="anchor" aria-label="anchor" href="#arg-div-phylo-weighted-int-only-true-metric"></a></dt>
+<dd><p>Consider only metrics
+matching specific criteria. For example, <code>div = "alpha"</code> will only
+return alpha diversity metrics.
+Default: <code>NULL</code></p></dd>
 
 
 <dt id="arg-val">val<a class="anchor" aria-label="anchor" href="#arg-val"></a></dt>
@@ -104,7 +106,8 @@ Supports partial matching. All non-alpha characters are ignored.</p></dd>
 <li><p><code>div</code> : Either <code>"alpha"</code> or <code>"beta"</code>.</p></li>
 <li><p><code>phylo</code> : <code>TRUE</code> if metric requires a phylogenetic tree; <code>FALSE</code> otherwise.</p></li>
 <li><p><code>weighted</code> : <code>TRUE</code> if metric takes relative abundance into account; <code>FALSE</code> if it only uses presence/absence.</p></li>
-<li><p><code>true_metric</code> : <code>TRUE</code> if metric satisfies the triangle inequality; <code>FALSE</code> if it is a non-metric dissimilarity; <code>NA</code> for alpha diversity metrics.</p></li>
+<li><p><code>int_only</code> : <code>TRUE</code> if metric requires integer counts; <code>FALSE</code> otherwise.</p></li>
+<li><p><code>true_metric</code> : <code>TRUE</code> if metric is a true metric and satisfies the triangle inequality; <code>FALSE</code> if it is a non-metric dissimilarity; <code>NA</code> for alpha diversity metrics.</p></li>
 <li><p><code>func</code> : The function for this metric, e.g. <code><a href="adiv_functions.html">ecodive::faith</a></code></p></li>
 <li><p><code>params</code> : Formal args for <code>func</code>, e.g. <code>c("counts", "tree", "cpus")</code></p></li>
 </ul><p><strong><code>list_metrics()</code></strong></p>
@@ -116,7 +119,8 @@ Supports partial matching. All non-alpha characters are ignored.</p></dd>
 <li><p><code>val = "div"</code> : A character vector <code>"alpha"</code> and/or <code>"beta"</code>.</p></li>
 <li><p><code>val = "phylo"</code> : A logical vector indicating which metrics require a tree.</p></li>
 <li><p><code>val = "weighted"</code> : A logical vector indicating which metrics take relative abundance into account (as opposed to just presence/absence).</p></li>
-<li><p><code>val = "true_metric"</code> : A logical vector indicating which metrics satisfy the triangle inequality, which work better for ordinations such as PCoA.</p></li>
+<li><p><code>val = "int_only"</code> : A logical vector indicating which metrics require integer counts.</p></li>
+<li><p><code>val = "true_metric"</code> : A logical vector indicating which metrics are true metrics and satisfy the triangle inequality, which work better for ordinations such as PCoA.</p></li>
 </ul><p>If <code>nm</code> is set, then the names of the vector or list will be the metric ID
 (<code>nm="id"</code>) or name (<code>nm="name"</code>). When <code>val="data.frame"</code>, the names will be
 applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames()</a></code> property of the <code>data.table</code>.</p>
@@ -134,13 +138,13 @@ applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="exter
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4                   Bhattacharyya Distance bhattacharyya FALSE     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5                Bray-Curtis Dissimilarity          bray FALSE     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6                          Brillouin Index     brillouin FALSE     TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   true_metric   div alt_ids</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          NA alpha    &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        TRUE  beta    &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3          NA alpha    &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        TRUE  beta    &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       FALSE  beta    &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6          NA alpha    &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   int_only true_metric   div</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     TRUE          NA alpha</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    FALSE        TRUE  beta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    FALSE          NA alpha</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    FALSE        TRUE  beta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    FALSE       FALSE  beta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     TRUE          NA alpha</span>
 <span class="r-in"><span>    </span></span>
 <span class="r-in"><span>    <span class="co"># All alpha diversity function names.</span></span></span>
 <span class="r-in"><span>    <span class="fu">list_metrics</span><span class="op">(</span><span class="st">'alpha'</span>, val <span class="op">=</span> <span class="st">'id'</span><span class="op">)</span></span></span>
@@ -153,11 +157,12 @@ applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="exter
 <span class="r-in"><span>    </span></span>
 <span class="r-in"><span>    <span class="co"># The result is a list that includes the function.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ name       : chr "Observed Features"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ id         : chr "observed"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ phylo      : logi FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ weighted   : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ int_only   : logi FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ true_metric: logi NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ div        : chr "alpha"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ func       :function (counts, cpus = n_cpus())  </span>

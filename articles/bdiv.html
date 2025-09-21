@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9006</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -110,15 +110,15 @@ completely different samples.</p>
 <div class="section level3">
 <h3 id="weighted-vs-unweighted">Weighted vs Unweighted<a class="anchor" aria-label="anchor" href="#weighted-vs-unweighted"></a>
 </h3>
-<p>Weighted methods take relative abundances into account, whereas
-unweighted methods only consider presence/absence. To determine which
-methods are weighted or unweighted, consult
-<code><a href="../reference/methods.html">list_methods()</a></code>.</p>
+<p>Weighted metrics take relative abundances into account, whereas
+unweighted metrics only consider presence/absence. To determine which
+metrics are weighted or unweighted, consult
+<code><a href="../reference/metrics.html">list_metrics()</a></code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/methods.html">list_methods</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "sorensen" "hamming"  "jaccard"  "ochiai"</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/methods.html">list_methods</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "aitchison"                 "bhattacharyya"             "bray"                     </span></span>
 <span><span class="co">#&gt;  [4] "canberra"                  "chebyshev"                 "chord"                    </span></span>
 <span><span class="co">#&gt;  [7] "clark"                     "divergence"                "euclidean"                </span></span>

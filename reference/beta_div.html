@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9006</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,24 +47,24 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">beta_div</span><span class="op">(</span><span class="va">x</span>, <span class="va">method</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">beta_div</span><span class="op">(</span><span class="va">counts</span>, <span class="va">metric</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A numeric matrix of count data where each column is a feature,
-and each row is a sample. Any object coercible with <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>
-can be given here, as well as <code>phyloseq</code>, <code>rbiom</code>,
+<dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
+<dd><p>A numeric matrix of count data where each column is a
+feature, and each row is a sample. Any object coercible with
+<code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> can be given here, as well as <code>phyloseq</code>, <code>rbiom</code>,
 <code>SummarizedExperiment</code>, and <code>TreeSummarizedExperiment</code> objects.</p></dd>
 
 
-<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
+<dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
 <dd><p>The name of a beta diversity metric. One of <code>c('aitchison', 'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'psym_chisq', 'soergel', 'sorensen', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')</code>. Flexible
 matching is supported (see below). Programmatic access via
-<code>list_methods('beta')</code>.</p></dd>
+<code>list_metrics('beta')</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -86,11 +86,6 @@ converted to underscores. E.g. <code>metric = 'Weighted UniFrac</code> selects
 <code>uunifrac</code>, <code>w_unifrac</code>, or <code>V UniFrac</code>. These also support partial matching.</p>
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the metrics list.</p>
-    </div>
-    <div class="section level2">
-    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other alpha_diversity:
-<code><a href="alpha_div.html">alpha_div</a>()</code></p></div>
     </div>
 
     <div class="section level2">
