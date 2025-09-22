@@ -4,6 +4,7 @@
 [![cran](https://www.r-pkg.org/badges/version/ecodive)](https://CRAN.R-project.org/package=ecodive)
 [![conda](https://anaconda.org/conda-forge/r-ecodive/badges/version.svg)](https://anaconda.org/conda-forge/r-ecodive)
 [![covr](https://codecov.io/gh/cmmr/ecodive/graph/badge.svg)](https://app.codecov.io/gh/cmmr/ecodive)
+[![joss](https://joss.theoj.org/papers/a93132f1a403729a2973a8fcc2be3685/status.svg)](https://joss.theoj.org/papers/a93132f1a403729a2973a8fcc2be3685)
 <!-- badges: end -->
 
 `ecodive` is an R package for calculating ecological diversity metrics in a

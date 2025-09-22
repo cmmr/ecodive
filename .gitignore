@@ -16,5 +16,6 @@ revdep/
 tmp/
 /benchmark/
 /doc/
+/docs/
 /Meta/
 /refs/
