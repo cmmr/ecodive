@@ -2,6 +2,8 @@ name: Draft PDF
 
 on:
   push:
+    branches:
+      - main
     paths:
       - joss/paper.md
       - joss/paper.bib
