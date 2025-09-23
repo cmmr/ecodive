@@ -1,7 +1,7 @@
 
 # ecodive 2.0.1
 
-* Extra parameters to alpha and beta diversity functions will be silently ignored.
+* `alpha_div()` and `beta_div()` will only forward applicable parameters.
 
 
 

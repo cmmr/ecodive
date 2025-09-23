@@ -40,97 +40,83 @@
 \alias{variance_adjusted_unifrac}
 \title{Beta Diversity Metrics}
 \usage{
-aitchison(counts, pseudocount = NULL, pairs = NULL, cpus = n_cpus(), ...)
+aitchison(counts, pseudocount = NULL, pairs = NULL, cpus = n_cpus())
 
-bhattacharyya(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+bhattacharyya(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-bray(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+bray(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-canberra(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+canberra(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-chebyshev(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+chebyshev(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-chord(counts, pairs = NULL, cpus = n_cpus(), ...)
+chord(counts, pairs = NULL, cpus = n_cpus())
 
-clark(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+clark(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-divergence(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+divergence(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-gower(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+gower(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-hellinger(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+hellinger(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-horn(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+horn(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-jensen(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+jensen(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-jsd(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+jsd(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-lorentzian(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+lorentzian(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-manhattan(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+manhattan(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-matusita(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+matusita(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-minkowski(
-  counts,
-  rescale = TRUE,
-  power = 1.5,
-  pairs = NULL,
-  cpus = n_cpus(),
-  ...
-)
+minkowski(counts, rescale = TRUE, power = 1.5, pairs = NULL, cpus = n_cpus())
 
-morisita(counts, pairs = NULL, cpus = n_cpus(), ...)
+morisita(counts, pairs = NULL, cpus = n_cpus())
 
-motyka(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+motyka(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-psym_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+psym_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-soergel(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+soergel(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+squared_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_chord(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+squared_chord(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-squared_euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+squared_euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-topsoe(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+topsoe(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-wave_hedges(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus(), ...)
+wave_hedges(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
 
-hamming(counts, pairs = NULL, cpus = n_cpus(), ...)
+hamming(counts, pairs = NULL, cpus = n_cpus())
 
-jaccard(counts, pairs = NULL, cpus = n_cpus(), ...)
+jaccard(counts, pairs = NULL, cpus = n_cpus())
 
-ochiai(counts, pairs = NULL, cpus = n_cpus(), ...)
+ochiai(counts, pairs = NULL, cpus = n_cpus())
 
-sorensen(counts, pairs = NULL, cpus = n_cpus(), ...)
+sorensen(counts, pairs = NULL, cpus = n_cpus())
 
-unweighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus(), ...)
+unweighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
 
-weighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus(), ...)
+weighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
 
-normalized_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus(), ...)
+normalized_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
 
 generalized_unifrac(
   counts,
   tree = NULL,
   alpha = 0.5,
   pairs = NULL,
-  cpus = n_cpus(),
-  ...
+  cpus = n_cpus()
 )
 
-variance_adjusted_unifrac(
-  counts,
-  tree = NULL,
-  pairs = NULL,
-  cpus = n_cpus(),
-  ...
-)
+variance_adjusted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{A numeric matrix of count data where each column is a
@@ -149,8 +135,6 @@ distance matrix to calculate. See examples.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
-
-\item{...}{Not used.}
 
 \item{rescale}{Normalize each sample's counts so they sum to \code{1}.
 Default: \code{TRUE}}

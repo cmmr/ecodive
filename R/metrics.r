@@ -218,7 +218,7 @@ list_metrics <- function (
       row         <- as.list(row)
       row$alt_ids <- NULL
       row$func    <- get(row$id, ENV)
-      row$params  <- setdiff(names(formals(row$func)), '...')
+      row$params  <- names(formals(row$func))
       return(row)
     })
     if (!is.na(nm)) names(result) <- df[[nm]]
@@ -283,7 +283,7 @@ match_metric <- function (
   
   metric$alt_ids <- NULL
   metric$func    <- get(metric$id, ENV)
-  metric$params  <- setdiff(names(formals(metric$func)), '...')
+  metric$params  <- names(formals(metric$func))
   
   return (metric)
 }
