@@ -41,6 +41,8 @@ Default: \code{TRUE}}
 the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
 must be present in \code{tree}. Can be omitted if a tree is embedded with
 the \code{counts} object or as \code{attr(counts, 'tree')}.}
+
+\item{...}{Not used.}
 }
 \description{
 documentation

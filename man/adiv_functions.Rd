@@ -18,33 +18,33 @@
 \alias{squares}
 \title{Alpha Diversity Metrics}
 \usage{
-ace(counts, cutoff = 10, cpus = n_cpus())
+ace(counts, cutoff = 10, cpus = n_cpus(), ...)
 
-berger(counts, rescale = TRUE, cpus = n_cpus())
+berger(counts, rescale = TRUE, cpus = n_cpus(), ...)
 
-brillouin(counts, cpus = n_cpus())
+brillouin(counts, cpus = n_cpus(), ...)
 
-chao1(counts, cpus = n_cpus())
+chao1(counts, cpus = n_cpus(), ...)
 
-faith(counts, tree = NULL, cpus = n_cpus())
+faith(counts, tree = NULL, cpus = n_cpus(), ...)
 
-fisher(counts, digits = 3L, cpus = n_cpus())
+fisher(counts, digits = 3L, cpus = n_cpus(), ...)
 
-inv_simpson(counts, rescale = TRUE, cpus = n_cpus())
+inv_simpson(counts, rescale = TRUE, cpus = n_cpus(), ...)
 
-margalef(counts, cpus = n_cpus())
+margalef(counts, cpus = n_cpus(), ...)
 
-mcintosh(counts, cpus = n_cpus())
+mcintosh(counts, cpus = n_cpus(), ...)
 
-menhinick(counts, cpus = n_cpus())
+menhinick(counts, cpus = n_cpus(), ...)
 
-observed(counts, cpus = n_cpus())
+observed(counts, cpus = n_cpus(), ...)
 
-shannon(counts, rescale = TRUE, cpus = n_cpus())
+shannon(counts, rescale = TRUE, cpus = n_cpus(), ...)
 
-simpson(counts, rescale = TRUE, cpus = n_cpus())
+simpson(counts, rescale = TRUE, cpus = n_cpus(), ...)
 
-squares(counts, cpus = n_cpus())
+squares(counts, cpus = n_cpus(), ...)
 }
 \arguments{
 \item{counts}{A numeric matrix of count data where each column is a
@@ -57,6 +57,8 @@ Default: \code{10}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
+
+\item{...}{Not used.}
 
 \item{rescale}{Normalize each sample's counts so they sum to \code{1}.
 Default: \code{TRUE}}

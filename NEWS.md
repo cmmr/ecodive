@@ -1,3 +1,10 @@
+
+# ecodive 2.0.1
+
+* Extra parameters to alpha and beta diversity functions will be silently ignored.
+
+
+
 # ecodive 2.0.0
 
 ## Breaking Changes

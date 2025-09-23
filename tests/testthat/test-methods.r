@@ -46,6 +46,6 @@ test_that("match_metric", {
   expect_identical(m$int_only,     FALSE)
   expect_identical(m$true_metric,  FALSE)
   expect_identical(m$func,         bray)
-  expect_identical(m$params, names(formals(bray)))
+  expect_identical(m$params,       c("counts", "rescale", "pairs", "cpus"))
   
 })

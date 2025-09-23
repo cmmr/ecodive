@@ -44,6 +44,8 @@
 #'        the OTUs in `counts`. The OTU identifiers given by `colnames(counts)` 
 #'        must be present in `tree`. Can be omitted if a tree is embedded with
 #'        the `counts` object or as `attr(counts, 'tree')`.
+#'        
+#' @param ... Not used.
 #' 
 NULL
 
