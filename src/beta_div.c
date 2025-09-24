@@ -661,11 +661,18 @@ SEXP C_beta_div(
     n_pairs   = n_dist;
   }
   else {
+    
     all_pairs = 0;
     pairs_vec = INTEGER(sexp_pairs_vec);
     n_pairs   = LENGTH(sexp_pairs_vec);
+    
     for (int i = 0; i < n_dist; i++)
       dist_vec[i] = R_NaReal;
+    
+    if (n_pairs == 0) {
+      UNPROTECT(1);
+      return sexp_result_dist;
+    }
   }
   
   

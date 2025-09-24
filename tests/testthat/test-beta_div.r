@@ -36,6 +36,18 @@ test_that("beta diversity", {
   
   
   
+  # Pairs == integer(0) ====
+  
+  expect_equal(
+    object   = as.vector(bray(counts, pairs = integer(0))), 
+    expected = as.numeric(c(NA, NA, NA, NA, NA, NA)) )
+  
+  expect_equal(
+    object   = as.vector(unweighted_unifrac(counts, tree, pairs = integer(0))), 
+    expected = as.numeric(c(NA, NA, NA, NA, NA, NA)) )
+  
+  
+  
   # Aitchison ====
   
   expect_equal( # vegan(counts + 1, 'aitchison')

@@ -2,6 +2,7 @@
 # ecodive 2.0.1
 
 * `alpha_div()` and `beta_div()` will only forward applicable parameters.
+* No longer crashes when `pairs = integer(0)`.
 
 
 
