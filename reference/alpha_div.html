@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,15 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">alpha_div</span><span class="op">(</span><span class="va">counts</span>, <span class="va">metric</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">alpha_div</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  <span class="va">metric</span>,</span>
+<span>  rescale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cutoff <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,9 +74,31 @@ feature, and each row is a sample. Any object coercible with
 Programmatic access via <code>list_metrics('alpha')</code>.</p></dd>
 
 
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional options to pass through to the called function. I.e.
-<code>cpus</code> or <code>tree</code>.</p></dd>
+<dt id="arg-rescale">rescale<a class="anchor" aria-label="anchor" href="#arg-rescale"></a></dt>
+<dd><p>Normalize each sample's counts so they sum to <code>1</code>.
+Default: <code>TRUE</code></p></dd>
+
+
+<dt id="arg-cutoff">cutoff<a class="anchor" aria-label="anchor" href="#arg-cutoff"></a></dt>
+<dd><p>The maximum number of observations to consider "rare".
+Default: <code>10</code>.</p></dd>
+
+
+<dt id="arg-digits">digits<a class="anchor" aria-label="anchor" href="#arg-digits"></a></dt>
+<dd><p>Precision of the returned values, in number of decimal
+places. E.g. the default <code>digits=3</code> could return <code>6.392</code>.</p></dd>
+
+
+<dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
+<dd><p>A <code>phylo</code>-class object representing the phylogenetic tree for
+the OTUs in <code>counts</code>. The OTU identifiers given by <code>colnames(counts)</code>
+must be present in <code>tree</code>. Can be omitted if a tree is embedded with
+the <code>counts</code> object or as <code>attr(counts, 'tree')</code>.</p></dd>
+
+
+<dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
+<dd><p>How many parallel processing threads should be used. The
+default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical CPU cores.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -88,7 +118,32 @@ defined based on counts of individuals and require raw, integer abundance
 data. Others are based on proportional abundances and can accept either
 integer counts (which are then converted to proportions) or pre-normalized
 proportional data. Using proportional data with a metric that requires
-integer counts will return an error message.</p><table class="table table"><tr><td>Requires Integer Counts Only</td><td>Can Use Proportional Data</td></tr><tr><td>Chao1</td><td>Observed Features</td></tr><tr><td>ACE</td><td>Shannon Index</td></tr><tr><td>Squares Richness Estimator</td><td>Gini-Simpson Index</td></tr><tr><td>Margalef's Index</td><td>Inverse Simpson Index</td></tr><tr><td>Menhinick's Index</td><td>Berger-Parker Index</td></tr><tr><td>Fisher's Alpha</td><td>McIntosh Index</td></tr><tr><td>Brillouin Index</td><td>Faith's PD (presence/absence)</td></tr></table></div>
+integer counts will return an error message.</p><div class="section">
+<h4 id="requires-integer-counts-only">Requires Integer Counts Only<a class="anchor" aria-label="anchor" href="#requires-integer-counts-only"></a></h4>
+
+<ul><li><p>Chao1</p></li>
+<li><p>ACE</p></li>
+<li><p>Squares Richness Estimator</p></li>
+<li><p>Margalef's Index</p></li>
+<li><p>Menhinick's Index</p></li>
+<li><p>Fisher's Alpha</p></li>
+<li><p>Brillouin Index</p></li>
+</ul></div>
+
+<div class="section">
+<h4 id="can-use-proportional-data">Can Use Proportional Data<a class="anchor" aria-label="anchor" href="#can-use-proportional-data"></a></h4>
+
+<ul><li><p>Observed Features</p></li>
+<li><p>Shannon Index</p></li>
+<li><p>Gini-Simpson Index</p></li>
+<li><p>Inverse Simpson Index</p></li>
+<li><p>Berger-Parker Index</p></li>
+<li><p>McIntosh Index</p></li>
+<li><p>Faith's PD</p></li>
+</ul></div>
+
+
+</div>
 
     </div>
 
