@@ -28,9 +28,6 @@ ADIV_SQUARES     <- 13L
 #'   'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson',
 #'   'squares')`. Case-insensitive and partial name matching is supported.
 #'   Programmatic access via `list_metrics('alpha')`.
-#'   
-#' @param ...  Additional options to pass through to the called function. I.e.
-#'   `cpus` or `tree`.
 #' 
 #' @return A numeric vector.
 #' 
@@ -46,15 +43,26 @@ ADIV_SQUARES     <- 13L
 #' proportional data. Using proportional data with a metric that requires
 #' integer counts will return an error message.
 #' 
-#' | Requires Integer Counts Only | Can Use Proportional Data     |
-#' | :--------------------------  | :---------------------------- |
-#' | Chao1                        | Observed Features             |
-#' | ACE                          | Shannon Index                 |
-#' | Squares Richness Estimator   | Gini-Simpson Index            |
-#' | Margalef's Index             | Inverse Simpson Index         |
-#' | Menhinick's Index            | Berger-Parker Index           |
-#' | Fisher's Alpha               | McIntosh Index                |
-#' | Brillouin Index              | Faith's PD (presence/absence) |
+#' ### Requires Integer Counts Only
+#' 
+#' * Chao1  
+#' * ACE
+#' * Squares Richness Estimator
+#' * Margalef's Index
+#' * Menhinick's Index
+#' * Fisher's Alpha
+#' * Brillouin Index
+#' 
+#' ### Can Use Proportional Data
+#' 
+#' * Observed Features
+#' * Shannon Index
+#' * Gini-Simpson Index
+#' * Inverse Simpson Index
+#' * Berger-Parker Index
+#' * McIntosh Index
+#' * Faith's PD
+#' 
 #' 
 #' 
 #' @export
@@ -72,10 +80,18 @@ ADIV_SQUARES     <- 13L
 #'     alpha_div(ex_counts, 'faith', tree = ex_tree)
 #'     
 #'     
-alpha_div <- function (counts, metric, ...) {
+alpha_div <- function (
+    counts, 
+    metric, 
+    rescale = TRUE, 
+    cutoff  = 10, 
+    digits  = 3L, 
+    tree    = NULL, 
+    cpus    = n_cpus() ) {
+  
   metric <- match_metric(metric, div = 'alpha')
-  args   <- list(counts = counts, ...)
-  args   <- args[names(args) %in% c('', metric$params)]
+  args   <- mget(metric$params, environment())
+  
   do.call(metric$func, args)
 }
 

@@ -4,7 +4,15 @@
 \alias{alpha_div}
 \title{Alpha Diversity Wrapper Function}
 \usage{
-alpha_div(counts, metric, ...)
+alpha_div(
+  counts,
+  metric,
+  rescale = TRUE,
+  cutoff = 10,
+  digits = 3L,
+  tree = NULL,
+  cpus = n_cpus()
+)
 }
 \arguments{
 \item{counts}{A numeric matrix of count data where each column is a
@@ -15,8 +23,22 @@ feature, and each row is a sample. Any object coercible with
 \item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson', 'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson', 'squares')}. Case-insensitive and partial name matching is supported.
 Programmatic access via \code{list_metrics('alpha')}.}
 
-\item{...}{Additional options to pass through to the called function. I.e.
-\code{cpus} or \code{tree}.}
+\item{rescale}{Normalize each sample's counts so they sum to \code{1}.
+Default: \code{TRUE}}
+
+\item{cutoff}{The maximum number of observations to consider "rare".
+Default: \code{10}.}
+
+\item{digits}{Precision of the returned values, in number of decimal
+places. E.g. the default \code{digits=3} could return \code{6.392}.}
+
+\item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
+the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
+must be present in \code{tree}. Can be omitted if a tree is embedded with
+the \code{counts} object or as \code{attr(counts, 'tree')}.}
+
+\item{cpus}{How many parallel processing threads should be used. The
+default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
 A numeric vector.
@@ -33,15 +55,29 @@ defined based on counts of individuals and require raw, integer abundance
 data. Others are based on proportional abundances and can accept either
 integer counts (which are then converted to proportions) or pre-normalized
 proportional data. Using proportional data with a metric that requires
-integer counts will return an error message.\tabular{ll}{
-   Requires Integer Counts Only \tab Can Use Proportional Data \cr
-   Chao1 \tab Observed Features \cr
-   ACE \tab Shannon Index \cr
-   Squares Richness Estimator \tab Gini-Simpson Index \cr
-   Margalef's Index \tab Inverse Simpson Index \cr
-   Menhinick's Index \tab Berger-Parker Index \cr
-   Fisher's Alpha \tab McIntosh Index \cr
-   Brillouin Index \tab Faith's PD (presence/absence) \cr
+integer counts will return an error message.
+\subsection{Requires Integer Counts Only}{
+\itemize{
+\item Chao1
+\item ACE
+\item Squares Richness Estimator
+\item Margalef's Index
+\item Menhinick's Index
+\item Fisher's Alpha
+\item Brillouin Index
+}
+}
+
+\subsection{Can Use Proportional Data}{
+\itemize{
+\item Observed Features
+\item Shannon Index
+\item Gini-Simpson Index
+\item Inverse Simpson Index
+\item Berger-Parker Index
+\item McIntosh Index
+\item Faith's PD
+}
 }
 
 }

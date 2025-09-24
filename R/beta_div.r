@@ -52,7 +52,8 @@ V_UNIFRAC <- 5L
 #'   `list_metrics('beta')`.
 #'   
 #' @param ...  Additional options to pass through to the called function. I.e.
-#'   `tree`, `pairs`, `alpha`, or `cpus`.
+#'   `tree`, `pairs`, `alpha`, or `cpus`. Named options will only be passed 
+#'   though if the function expects them.
 #' 
 #' @return A numeric vector.
 #' 
@@ -129,10 +130,20 @@ V_UNIFRAC <- 5L
 #'     # Generalized UniFrac distances
 #'     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)
 #'     
-beta_div <- function (counts, metric, ...) {
+beta_div <- function (
+    counts, 
+    metric, 
+    rescale     = TRUE, 
+    power       = 1.5, 
+    pseudocount = NULL, 
+    alpha       = 0.5, 
+    tree        = NULL, 
+    pairs       = NULL, 
+    cpus        = n_cpus() ) {
+  
   metric <- match_metric(metric, div = 'beta')
-  args   <- list(counts = counts, ...)
-  args   <- args[names(args) %in% c('', metric$params)]
+  args   <- mget(metric$params, environment())
+  
   do.call(metric$func, args)
 }
 
