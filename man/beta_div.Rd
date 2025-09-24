@@ -52,10 +52,6 @@ distance matrix to calculate. See examples.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
-
-\item{...}{Additional options to pass through to the called function. I.e.
-\code{tree}, \code{pairs}, \code{alpha}, or \code{cpus}. Named options will only be passed
-though if the function expects them.}
 }
 \value{
 A numeric vector.

@@ -50,10 +50,6 @@ V_UNIFRAC <- 5L
 #'   'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')`. Flexible
 #'   matching is supported (see below). Programmatic access via
 #'   `list_metrics('beta')`.
-#'   
-#' @param ...  Additional options to pass through to the called function. I.e.
-#'   `tree`, `pairs`, `alpha`, or `cpus`. Named options will only be passed 
-#'   though if the function expects them.
 #' 
 #' @return A numeric vector.
 #' 
