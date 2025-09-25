@@ -129,7 +129,7 @@ V_UNIFRAC <- 5L
 beta_div <- function (
     counts, 
     metric, 
-    rescale     = TRUE, 
+    norm        = 'percent', 
     power       = 1.5, 
     pseudocount = NULL, 
     alpha       = 0.5, 
@@ -277,7 +277,7 @@ aitchison <- function (counts, pseudocount = NULL, pairs = NULL, cpus = n_cpus()
 #  -log(sum(sqrt(x * y)))
 #' @export
 #' @rdname bdiv_functions
-bhattacharyya <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+bhattacharyya <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_BHATTACHARYYA, counts, pairs, cpus, NULL)
@@ -289,7 +289,7 @@ bhattacharyya <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()
 # sum(abs(x-y)) / sum(x+y)
 #' @export
 #' @rdname bdiv_functions
-bray <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+bray <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_BRAY, counts, pairs, cpus, NULL)
@@ -300,7 +300,7 @@ bray <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum(abs(x-y) / (x+y))
 #' @export
 #' @rdname bdiv_functions
-canberra <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+canberra <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_CANBERRA, counts, pairs, cpus, NULL)
@@ -311,7 +311,7 @@ canberra <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  max(abs(x-y))
 #' @export
 #' @rdname bdiv_functions
-chebyshev <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+chebyshev <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_CHEBYSHEV, counts, pairs, cpus, NULL)
@@ -336,7 +336,7 @@ chord <- function (counts, pairs = NULL, cpus = n_cpus()) {
 #  sqrt(sum((abs(x - y) / (x + y)) ^ 2))  
 #' @export
 #' @rdname bdiv_functions
-clark <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+clark <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_CLARK, counts, pairs, cpus, NULL)
@@ -347,7 +347,7 @@ clark <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  2 * sum((x - y)^2 / (x + y)^2)
 #' @export
 #' @rdname bdiv_functions
-divergence <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+divergence <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_DIVERGENCE, counts, pairs, cpus, NULL)
@@ -358,7 +358,7 @@ divergence <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sqrt(sum((x-y)^2))
 #' @export
 #' @rdname bdiv_functions
-euclidean <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+euclidean <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_EUCLIDEAN, counts, pairs, cpus, NULL)
@@ -371,7 +371,7 @@ euclidean <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum(abs(x-y) / r) / n
 #' @export
 #' @rdname bdiv_functions
-gower <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+gower <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -385,7 +385,7 @@ gower <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sqrt(sum((sqrt(x) - sqrt(y)) ^ 2))
 #' @export
 #' @rdname bdiv_functions
-hellinger <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+hellinger <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -400,7 +400,7 @@ hellinger <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  1 - ((2 * sum(x * y)) / (z * sum(x) * sum(y)))
 #' @export
 #' @rdname bdiv_functions
-horn <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+horn <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_HORN, counts, pairs, cpus, NULL)
@@ -411,7 +411,7 @@ horn <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sqrt(sum(x * log(2 * x / (x+y)), y * log(2 * y / (x+y))) / 2)  
 #' @export
 #' @rdname bdiv_functions
-jensen <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+jensen <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -425,7 +425,7 @@ jensen <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum(x * log(2 * x / (x+y)), y * log(2 * y / (x+y))) / 2  
 #' @export
 #' @rdname bdiv_functions
-jsd <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+jsd <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_JSD, counts, pairs, cpus, NULL)
@@ -436,7 +436,7 @@ jsd <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum(log(1 + abs(x - y)))
 #' @export
 #' @rdname bdiv_functions
-lorentzian <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+lorentzian <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_LORENTZIAN, counts, pairs, cpus, NULL)
@@ -447,7 +447,7 @@ lorentzian <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum(abs(x-y))
 #' @export
 #' @rdname bdiv_functions
-manhattan <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+manhattan <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_MANHATTAN, counts, pairs, cpus, NULL)
@@ -458,7 +458,7 @@ manhattan <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sqrt(sum((sqrt(x) - sqrt(y)) ^ 2))
 #' @export
 #' @rdname bdiv_functions
-matusita <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+matusita <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -473,7 +473,7 @@ matusita <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum(abs(x - y)^p) ^ (1/p)
 #' @export
 #' @rdname bdiv_functions
-minkowski <- function (counts, rescale = TRUE, power = 1.5, pairs = NULL, cpus = n_cpus()) {
+minkowski <- function (counts, norm = 'percent', power = 1.5, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_MINKOWSKI, counts, pairs, cpus, power)
@@ -499,7 +499,7 @@ morisita <- function (counts, pairs = NULL, cpus = n_cpus()) {
 #  sum(pmax(x, y)) / sum(x, y)
 #' @export
 #' @rdname bdiv_functions
-motyka <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+motyka <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_MOTYKA, counts, pairs, cpus, NULL)
@@ -510,7 +510,7 @@ motyka <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  2 * sum((x - y)^2 / (x + y))
 #' @export
 #' @rdname bdiv_functions
-psym_chisq <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+psym_chisq <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -524,7 +524,7 @@ psym_chisq <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum(abs(x - y)) / sum(pmax(x, y))
 #' @export
 #' @rdname bdiv_functions
-soergel <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+soergel <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_SOERGEL, counts, pairs, cpus, NULL)
@@ -535,7 +535,7 @@ soergel <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum((x - y)^2 / (x + y))
 #' @export
 #' @rdname bdiv_functions
-squared_chisq <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+squared_chisq <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, pairs, cpus, NULL)
@@ -546,7 +546,7 @@ squared_chisq <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()
 #  sum((sqrt(x) - sqrt(y)) ^ 2)
 #' @export
 #' @rdname bdiv_functions
-squared_chord <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+squared_chord <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, pairs, cpus, NULL)
@@ -557,7 +557,7 @@ squared_chord <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()
 #  sum((x-y)^2)
 #' @export
 #' @rdname bdiv_functions
-squared_euclidean <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+squared_euclidean <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -571,7 +571,7 @@ squared_euclidean <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cp
 #  sum(x * log(2 * x / (x+y)), y * log(2 * y / (x+y)))
 #' @export
 #' @rdname bdiv_functions
-topsoe <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+topsoe <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -585,7 +585,7 @@ topsoe <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
 #  sum(abs(x - y) / pmax(x, y))
 #' @export
 #' @rdname bdiv_functions
-wave_hedges <- function (counts, rescale = TRUE, pairs = NULL, cpus = n_cpus()) {
+wave_hedges <- function (counts, norm = 'percent', pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_WAVE_HEDGES, counts, pairs, cpus, NULL)

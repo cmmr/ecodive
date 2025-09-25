@@ -7,7 +7,7 @@
 alpha_div(
   counts,
   metric,
-  rescale = TRUE,
+  norm = "percent",
   cutoff = 10,
   digits = 3L,
   tree = NULL,
@@ -23,8 +23,15 @@ feature, and each row is a sample. Any object coercible with
 \item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson', 'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson', 'squares')}. Case-insensitive and partial name matching is supported.
 Programmatic access via \code{list_metrics('alpha')}.}
 
-\item{rescale}{Normalize each sample's counts so they sum to \code{1}.
-Default: \code{TRUE}}
+\item{norm}{Normalize the incoming counts. Options are:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{   * `norm = 'percent'` - Relative abundance (sample abundances sum to 1).
+   * `norm = 'binary'`  - Unweighted presence/absence (each count is either 0 or 1).
+   * `norm = 'clr'`     - Centered log ratio.
+   * `norm = 'none'`    - No transformation.
+   
+   Default: `'percent'`, which is the expected input for these formulas.
+}\if{html}{\out{</div>}}}
 
 \item{cutoff}{The maximum number of observations to consider "rare".
 Default: \code{10}.}

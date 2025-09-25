@@ -59,7 +59,8 @@ transform_pct <- function (counts, cpus = n_cpus()) {
   .Call(C_transform, counts, TRANSFORM_PCT, cpus, NULL)
 }
 
-transform_clr <- function (counts, pseudocount, cpus = n_cpus()) {
+transform_clr <- function (counts, pseudocount = NULL, cpus = n_cpus()) {
+  if (is.null(pseudocount)) pseudocount <- min(counts[counts > 0])
   .Call(C_transform, counts, TRANSFORM_CLR, cpus, pseudocount)
 }
 

@@ -25,8 +25,8 @@
 
 
 typedef struct {
-  int edge;
-  int parent;
+  int    edge;
+  int    parent;
   double length;
 } node_t;
 
@@ -169,8 +169,8 @@ static void *unweighted_dist (void *arg) {
     double y = y_weight_vec[edge];
     
     if (x || y) {
-  if (x && y) { shared   += edge_lengths[edge]; }
-  else        { distance += edge_lengths[edge]; }
+      if (x && y) { shared   += edge_lengths[edge]; }
+      else        { distance += edge_lengths[edge]; }
     }
   }
   
@@ -225,8 +225,8 @@ static void *weighted_dist (void *arg) {
     double y = y_weight_vec[edge];
     
     if (x || y) {
-  if (x > y) { distance += x - y; }
-  else       { distance += y - x; }
+      if (x > y) { distance += x - y; }
+      else       { distance += y - x; }
     }
   }
   
@@ -280,8 +280,8 @@ static void *normalized_dist (void *arg) {
     double y = y_weight_vec[edge];
     
     if (x || y) {
-  if (x > y) { distance += x - y; }
-  else       { distance += y - x; }
+      if (x > y) { distance += x - y; }
+      else       { distance += y - x; }
     }
   }
   
@@ -338,9 +338,9 @@ static void *generalized_dist (void *arg) {
       double sum  = x + y;
       double frac = fabs((x - y) / sum);
       double norm = edge_lengths[edge] * pow(sum, alpha);
-  
-  distance    += norm * frac;
-  denominator += norm;
+      
+      distance    += norm * frac;
+      denominator += norm;
     }
   }
   
@@ -391,14 +391,14 @@ static void *var_adjusted_dist (void *arg) {
     
     if (x || y) {
   
-  double norm = (x + y) * (x_total + y_total - x - y);
-         norm = edge_lengths[edge] / sqrt(norm);
-  
-  x /= x_total;
-  y /= y_total;
-  
-  distance    += fabs(x - y) * norm;
-  denominator +=     (x + y) * norm;
+      double norm = (x + y) * (x_total + y_total - x - y);
+             norm = edge_lengths[edge] / sqrt(norm);
+      
+      x /= x_total;
+      y /= y_total;
+      
+      distance    += fabs(x - y) * norm;
+      denominator +=     (x + y) * norm;
     }
   }
     

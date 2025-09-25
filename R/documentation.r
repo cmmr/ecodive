@@ -37,8 +37,14 @@
 #'        taking `log(0)` for unobserved features. The default, `NULL`, selects 
 #'        the smallest non-zero value in `counts`.
 #' 
-#' @param rescale   Normalize each sample's counts so they sum to `1`.
-#'        Default: `TRUE`
+#' @param norm   Normalize the incoming counts. Options are:
+#' 
+#'        * `norm = 'percent'` - Relative abundance (sample abundances sum to 1).
+#'        * `norm = 'binary'`  - Unweighted presence/absence (each count is either 0 or 1).
+#'        * `norm = 'clr'`     - Centered log ratio.
+#'        * `norm = 'none'`    - No transformation.
+#'        
+#'        Default: `'percent'`, which is the expected input for these formulas.
 #' 
 #' @param tree   A `phylo`-class object representing the phylogenetic tree for 
 #'        the OTUs in `counts`. The OTU identifiers given by `colnames(counts)` 

@@ -55,6 +55,10 @@ test_that("beta diversity", {
     expected = c(2.42489292341729,  2.48372587230057, 3.26493363948397, 
                  0.250928909965064, 1.6566104027154,  1.88303098843395 ))
   
+  expect_equal( # clr euclidean == aitchison
+    object   = as.vector(euclidean(counts, norm = 'clr')), 
+    expected = as.vector(aitchison(counts)) )
+  
   
   
   # Bhattacharyya ====
@@ -72,6 +76,10 @@ test_that("beta diversity", {
     object   = as.vector(bray(counts)), 
     expected = c(0.444444444444444,  0.428571428571429, 0.666666666666667, 
                  0.0555555555555556, 0.277777777777778, 0.333333333333333 ))
+  
+  expect_equal( # binary bray == sorensen
+    object   = as.vector(bray(counts, norm = 'binary')), 
+    expected = as.vector(sorensen(counts)) )
   
   
   

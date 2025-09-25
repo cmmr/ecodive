@@ -71,14 +71,29 @@ test_that("validation", {
   
   
   
-  # validate_rescale() ====
+  # validate_norm() ====
   
-  env$rescale <- NULL
-  expect_error(validate_rescale(env))
+  env$norm <- 'badoption'
+  expect_error(validate_norm(env))
   
-  env$rescale <- 'a'
-  expect_error(validate_rescale(env))
+  env$norm <- NULL
+  expect_silent(validate_norm(env))
   
+  env$counts <- counts
+  env$norm   <- 'percent'
+  expect_silent(validate_norm(env))
+  
+  env$counts <- counts
+  env$norm   <- 'binary'
+  expect_silent(validate_norm(env))
+  
+  env$counts <- counts
+  env$norm   <- 'clr'
+  expect_silent(validate_norm(env))
+  
+  env$counts <- counts
+  env$norm   <- 'none'
+  expect_silent(validate_norm(env))
   
   
   

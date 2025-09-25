@@ -310,20 +310,17 @@ validate_pseudocount <- function (env = parent.frame()) {
 }
 
 
-validate_rescale <- function (env = parent.frame()) {
-  tryCatch(
-    with(env, {
-      
-      stopifnot(is.logical(rescale))
-      stopifnot(length(rescale) == 1)
-      
-      if (isTRUE(rescale))
-        counts <- transform_pct(counts)
-    }),
+validate_norm <- function (env = parent.frame()) {
+  with(env, {
     
-    error = function (e) 
-      stop(e$message, '\n`rescale` must be TRUE or FALSE.')
-  )
+    if (is.null(norm)) norm <- 'none'
+    norm <- match.arg(tolower(norm), choices = c('percent', 'binary', 'clr', 'none'))
+    
+    if      (norm == 'percent') { counts   <- transform_pct(counts)  }
+    else if (norm == 'binary')  { counts[] <- as.numeric(counts > 0) }
+    else if (norm == 'clr')     { counts   <- transform_clr(counts)  }
+    
+  })
 }
 
 

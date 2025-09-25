@@ -42,57 +42,57 @@
 \usage{
 aitchison(counts, pseudocount = NULL, pairs = NULL, cpus = n_cpus())
 
-bhattacharyya(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+bhattacharyya(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-bray(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+bray(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-canberra(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+canberra(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-chebyshev(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+chebyshev(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
 chord(counts, pairs = NULL, cpus = n_cpus())
 
-clark(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+clark(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-divergence(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+divergence(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+euclidean(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-gower(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+gower(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-hellinger(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+hellinger(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-horn(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+horn(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-jensen(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+jensen(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-jsd(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+jsd(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-lorentzian(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+lorentzian(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-manhattan(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+manhattan(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-matusita(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+matusita(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-minkowski(counts, rescale = TRUE, power = 1.5, pairs = NULL, cpus = n_cpus())
+minkowski(counts, norm = "percent", power = 1.5, pairs = NULL, cpus = n_cpus())
 
 morisita(counts, pairs = NULL, cpus = n_cpus())
 
-motyka(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+motyka(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-psym_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+psym_chisq(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-soergel(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+soergel(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-squared_chisq(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+squared_chisq(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-squared_chord(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+squared_chord(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-squared_euclidean(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+squared_euclidean(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-topsoe(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+topsoe(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
-wave_hedges(counts, rescale = TRUE, pairs = NULL, cpus = n_cpus())
+wave_hedges(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
 
 hamming(counts, pairs = NULL, cpus = n_cpus())
 
@@ -136,8 +136,15 @@ distance matrix to calculate. See examples.}
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 
-\item{rescale}{Normalize each sample's counts so they sum to \code{1}.
-Default: \code{TRUE}}
+\item{norm}{Normalize the incoming counts. Options are:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{   * `norm = 'percent'` - Relative abundance (sample abundances sum to 1).
+   * `norm = 'binary'`  - Unweighted presence/absence (each count is either 0 or 1).
+   * `norm = 'clr'`     - Centered log ratio.
+   * `norm = 'none'`    - No transformation.
+   
+   Default: `'percent'`, which is the expected input for these formulas.
+}\if{html}{\out{</div>}}}
 
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
