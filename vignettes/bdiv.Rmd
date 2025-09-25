@@ -65,8 +65,8 @@ list_metrics('beta', 'id', weighted = TRUE)
 #> [31] "wave_hedges"               "weighted_unifrac"
 ```
 
-Note that `sorsensen()` is an unweighted version of `bray(rescale = FALSE)`, and
-`jaccard()` is an unweighted version of `soergel(rescale = FALSE)`.
+Note that `sorsensen()` is equivalent to `bray(norm = 'binary')`, and
+`jaccard()` is equivalent to `soergel(norm = 'binary')`.
 
 
 # Partial Calculation

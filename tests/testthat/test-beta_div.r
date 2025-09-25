@@ -295,6 +295,10 @@ test_that("beta diversity", {
     expected = c(0.615384615384615, 0.6,               0.8, 
                  0.105263157894737, 0.434782608695652, 0.5 ))
   
+  expect_equal( # binary soergel == jaccard
+    object   = as.vector(soergel(counts, norm = 'binary')), 
+    expected = as.vector(jaccard(counts)) )
+  
   
   
   # Dice-Sorensen ====

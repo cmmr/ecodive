@@ -164,15 +164,15 @@ cleanup <- function (x) {
 }
 
 
-# HMP50 dataset has 50 Samples
+# HMP50 dataset has 50 samples; convert to relative abundances
 hmp50      <- rbiom::hmp50
 hmp50_phy  <- rbiom::convert_to_phyloseq(hmp50)
-hmp50_mtx  <- t(rbiom::rescale_cols(as.matrix(hmp50)))
+hmp50_mtx  <- t(apply(as.matrix(hmp50), 2L, function (x) x / sum(x)))
 hmp50_tree <- hmp50$tree
 
 
-# GEMS dataset has 1006 Samples
-gems_mtx <- t(rbiom::rescale_cols(as.matrix(rbiom::gems)))
+# GEMS dataset has 1006 samples; convert to relative abundances
+gems_mtx <- t(apply(as.matrix(rbiom::gems), 2L, function (x) x / sum(x)))
 
 
 ## Bray-Curtis Dissimilarity
@@ -180,7 +180,7 @@ bray_curtis_res <- bench::mark(
   iterations = 10,
   'abdiv'        = cleanup(pairwise(abdiv::bray_curtis, gems_mtx)),
   'ecodist'      = cleanup(ecodist::bcdist(gems_mtx)),
-  'ecodive'      = cleanup(ecodive::bray(gems_mtx, rescale = FALSE)),
+  'ecodive'      = cleanup(ecodive::bray(gems_mtx, norm = 'none')),
   'labdsv'       = cleanup(labdsv::dsvdis(gems_mtx, 'bray/curtis')),
   'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'bray')),
   'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'sorensen', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
@@ -206,7 +206,7 @@ manhattan_res <- bench::mark(
   iterations = 10,
   'abdiv'        = cleanup(pairwise(abdiv::manhattan, gems_mtx)),
   'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'manhattan')),
-  'ecodive'      = cleanup(ecodive::manhattan(gems_mtx, rescale = FALSE)),
+  'ecodive'      = cleanup(ecodive::manhattan(gems_mtx, norm = 'none')),
   'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'manhattan')),
   'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'manhattan', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
   'stats'        = cleanup(stats::dist(gems_mtx, 'manhattan')),
@@ -218,7 +218,7 @@ euclidean_res <- bench::mark(
   iterations = 10,
   'abdiv'        = cleanup(pairwise(abdiv::euclidean, gems_mtx)),
   'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'euclidean')),
-  'ecodive'      = cleanup(ecodive::euclidean(gems_mtx, rescale = FALSE)),
+  'ecodive'      = cleanup(ecodive::euclidean(gems_mtx, norm = 'none')),
   'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'euclidean')),
   'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'euclidean', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
   'stats'        = cleanup(stats::dist(gems_mtx, 'euclidean')),
