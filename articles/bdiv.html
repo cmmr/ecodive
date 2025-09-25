@@ -130,9 +130,9 @@ metrics are weighted or unweighted, consult
 <span><span class="co">#&gt; [25] "squared_chisq"             "squared_chord"             "squared_euclidean"        </span></span>
 <span><span class="co">#&gt; [28] "topsoe"                    "unweighted_unifrac"        "variance_adjusted_unifrac"</span></span>
 <span><span class="co">#&gt; [31] "wave_hedges"               "weighted_unifrac"</span></span></code></pre></div>
-<p>Note that <code>sorsensen()</code> is an unweighted version of
-<code>bray(rescale = FALSE)</code>, and <code><a href="../reference/bdiv_functions.html">jaccard()</a></code> is an
-unweighted version of <code>soergel(rescale = FALSE)</code>.</p>
+<p>Note that <code>sorsensen()</code> is equivalent to
+<code>bray(norm = 'binary')</code>, and <code><a href="../reference/bdiv_functions.html">jaccard()</a></code> is
+equivalent to <code>soergel(norm = 'binary')</code>.</p>
 </div>
 </div>
 <div class="section level2">
