@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9003</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9005</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,9 +42,20 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.1" id="ecodive-201">ecodive 2.0.1<a class="anchor" aria-label="anchor" href="#ecodive-201"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-2-0-1">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-2-0-1"></a></h3>
+<ul><li>
+<code>rescale</code> parameter is superseded by <code>norm</code> parameter.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixes-2-0-1">Fixes<a class="anchor" aria-label="anchor" href="#fixes-2-0-1"></a></h3>
 <ul><li>
 <code><a href="../reference/alpha_div.html">alpha_div()</a></code> and <code><a href="../reference/beta_div.html">beta_div()</a></code> will only forward applicable parameters.</li>
+<li>No longer crashes when <code>pairs = integer(0)</code>.</li>
+<li>
+<code>pseudocount = NULL</code> correctly selects smallest non-zero count.</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.0" id="ecodive-200">ecodive 2.0.0<a class="anchor" aria-label="anchor" href="#ecodive-200"></a></h2><p class="text-muted">CRAN release: 2025-09-21</p>
 <div class="section level3">
