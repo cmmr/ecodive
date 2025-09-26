@@ -24,14 +24,13 @@ feature, and each row is a sample. Any object coercible with
 Programmatic access via \code{list_metrics('alpha')}.}
 
 \item{norm}{Normalize the incoming counts. Options are:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{   * `norm = 'percent'` - Relative abundance (sample abundances sum to 1).
-   * `norm = 'binary'`  - Unweighted presence/absence (each count is either 0 or 1).
-   * `norm = 'clr'`     - Centered log ratio.
-   * `norm = 'none'`    - No transformation.
-   
-   Default: `'percent'`, which is the expected input for these formulas.
-}\if{html}{\out{</div>}}}
+\describe{
+\item{\code{norm = "percent"} - }{ Relative abundance (sample abundances sum to 1). }
+\item{\code{norm = "binary"}  - }{ Unweighted presence/absence (each count is either 0 or 1). }
+\item{\code{norm = "clr"}     - }{ Centered log ratio. }
+\item{\code{norm = "none"}    - }{ No transformation. }
+}
+Default: \code{'percent'}, which is the expected input for these formulas.}
 
 \item{cutoff}{The maximum number of observations to consider "rare".
 Default: \code{10}.}
