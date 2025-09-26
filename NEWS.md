@@ -1,5 +1,5 @@
 
-# ecodive 2.0.1
+# ecodive 2.1.0
 
 ## Breaking Changes
 
