@@ -38,12 +38,12 @@
 #'        the smallest non-zero value in `counts`.
 #' 
 #' @param norm   Normalize the incoming counts. Options are:
-#' 
-#'        * `norm = 'percent'` - Relative abundance (sample abundances sum to 1).
-#'        * `norm = 'binary'`  - Unweighted presence/absence (each count is either 0 or 1).
-#'        * `norm = 'clr'`     - Centered log ratio.
-#'        * `norm = 'none'`    - No transformation.
-#'        
+#'        \describe{
+#'            \item{`norm = "percent"` - }{ Relative abundance (sample abundances sum to 1). }
+#'            \item{`norm = "binary"`  - }{ Unweighted presence/absence (each count is either 0 or 1). }
+#'            \item{`norm = "clr"`     - }{ Centered log ratio. }
+#'            \item{`norm = "none"`    - }{ No transformation. }
+#'        }
 #'        Default: `'percent'`, which is the expected input for these formulas.
 #' 
 #' @param tree   A `phylo`-class object representing the phylogenetic tree for 
