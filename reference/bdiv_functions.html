@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -156,13 +156,20 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
 
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
-<dd><p>Normalize the incoming counts. Options are:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>   <span class="sc">*</span> <span class="st">`</span><span class="at">norm = 'percent'</span><span class="st">`</span> <span class="sc">-</span> Relative <span class="fu">abundance</span> (sample abundances sum to <span class="dv">1</span>).</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>   <span class="sc">*</span> <span class="st">`</span><span class="at">norm = 'binary'</span><span class="st">`</span>  <span class="sc">-</span> Unweighted presence<span class="sc">/</span><span class="fu">absence</span> (each count is either <span class="dv">0</span> or <span class="dv">1</span>).</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>   <span class="sc">*</span> <span class="st">`</span><span class="at">norm = 'clr'</span><span class="st">`</span>     <span class="sc">-</span> Centered log ratio.</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>   <span class="sc">*</span> <span class="st">`</span><span class="at">norm = 'none'</span><span class="st">`</span>    <span class="sc">-</span> No transformation.</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>   Default<span class="sc">:</span> <span class="st">`</span><span class="at">'percent'</span><span class="st">`</span>, which is the expected input <span class="cf">for</span> these formulas.</span></code></pre><p></p></div></dd>
+<dd><p>Normalize the incoming counts. Options are:</p><dl><dt><code>norm = "percent"</code> - </dt>
+<dd><p>Relative abundance (sample abundances sum to 1).</p></dd>
+
+<dt><code>norm = "binary"</code>  - </dt>
+<dd><p>Unweighted presence/absence (each count is either 0 or 1).</p></dd>
+
+<dt><code>norm = "clr"</code>     - </dt>
+<dd><p>Centered log ratio.</p></dd>
+
+<dt><code>norm = "none"</code>    - </dt>
+<dd><p>No transformation.</p></dd>
+
+
+</dl><p>Default: <code>'percent'</code>, which is the expected input for these formulas.</p></dd>
 
 
 <dt id="arg-power">power<a class="anchor" aria-label="anchor" href="#arg-power"></a></dt>
