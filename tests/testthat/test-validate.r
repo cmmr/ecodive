@@ -124,7 +124,7 @@ test_that("validation", {
   attr(env$counts, 'tree') <- tree
   expect_silent(validate_counts(env))
   
-  skip_on_cran()
+  # skip_on_cran()
   # skip_if_not_installed('rbiom')
   # 
   # hmp50               <- do.call(`::`, list('rbiom', 'hmp50'))
