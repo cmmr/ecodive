@@ -43,6 +43,11 @@ the smallest non-zero value in \code{counts}.}
 }
 Default: \code{'percent'}, which is the expected input for these formulas.}
 
+\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
+your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
+\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
+\code{TreeSummarizedExperiment} object. Default: \code{1L}}
+
 \item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
 the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
 must be present in \code{tree}. Can be omitted if a tree is embedded with

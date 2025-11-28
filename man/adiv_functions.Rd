@@ -18,33 +18,33 @@
 \alias{squares}
 \title{Alpha Diversity Metrics}
 \usage{
-ace(counts, cutoff = 10, cpus = n_cpus())
+ace(counts, cutoff = 10L, margin = 1L, cpus = n_cpus())
 
-berger(counts, norm = "percent", cpus = n_cpus())
+berger(counts, norm = "percent", margin = 1L, cpus = n_cpus())
 
-brillouin(counts, cpus = n_cpus())
+brillouin(counts, margin = 1L, cpus = n_cpus())
 
-chao1(counts, cpus = n_cpus())
+chao1(counts, margin = 1L, cpus = n_cpus())
 
-faith(counts, tree = NULL, cpus = n_cpus())
+faith(counts, tree = NULL, margin = 1L, cpus = n_cpus())
 
-fisher(counts, digits = 3L, cpus = n_cpus())
+fisher(counts, digits = 3L, margin = 1L, cpus = n_cpus())
 
-inv_simpson(counts, norm = "percent", cpus = n_cpus())
+inv_simpson(counts, norm = "percent", margin = 1L, cpus = n_cpus())
 
-margalef(counts, cpus = n_cpus())
+margalef(counts, margin = 1L, cpus = n_cpus())
 
-mcintosh(counts, cpus = n_cpus())
+mcintosh(counts, margin = 1L, cpus = n_cpus())
 
-menhinick(counts, cpus = n_cpus())
+menhinick(counts, margin = 1L, cpus = n_cpus())
 
-observed(counts, cpus = n_cpus())
+observed(counts, margin = 1L, cpus = n_cpus())
 
-shannon(counts, norm = "percent", cpus = n_cpus())
+shannon(counts, norm = "percent", margin = 1L, cpus = n_cpus())
 
-simpson(counts, norm = "percent", cpus = n_cpus())
+simpson(counts, norm = "percent", margin = 1L, cpus = n_cpus())
 
-squares(counts, cpus = n_cpus())
+squares(counts, margin = 1L, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{A numeric matrix of count data where each column is a
@@ -54,6 +54,11 @@ feature, and each row is a sample. Any object coercible with
 
 \item{cutoff}{The maximum number of observations to consider "rare".
 Default: \code{10}.}
+
+\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
+your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
+\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
+\code{TreeSummarizedExperiment} object. Default: \code{1L}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

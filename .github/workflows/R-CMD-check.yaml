@@ -26,28 +26,22 @@ jobs:
           - {os: macos-latest,     r: 'devel'}
           - {os: macos-latest,     r: 'release'}
           - {os: macos-latest,     r: 'oldrel-1'}
-          - {os: macos-latest,     r: 'oldrel-4'}
-          - {os: macos-13,         r: 'release'}
-          - {os: macos-15,         r: 'release'}
-
+          - {os: macos-14,         r: 'release'}
+          
           - {os: windows-latest,   r: 'devel'}
           - {os: windows-latest,   r: 'release'}
           - {os: windows-latest,   r: 'oldrel-1'}
-          - {os: windows-latest,   r: '3.6.3'}
-          - {os: windows-2025,     r: 'release'}
           - {os: windows-2022,     r: 'release'}
-
+          
           - {os: ubuntu-latest,    r: 'devel' }
           - {os: ubuntu-latest,    r: 'release'}
           - {os: ubuntu-latest,    r: 'oldrel-1'}
-          - {os: ubuntu-latest,    r: '3.6.3'}
           - {os: ubuntu-22.04,     r: 'release'}
           - {os: ubuntu-22.04-arm, r: 'release' }
           - {os: ubuntu-24.04-arm, r: 'release' }
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
       NOT_CRAN: true
 
     steps:

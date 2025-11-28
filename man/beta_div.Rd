@@ -13,6 +13,7 @@ beta_div(
   alpha = 0.5,
   tree = NULL,
   pairs = NULL,
+  margin = 1L,
   cpus = n_cpus()
 )
 }
@@ -55,6 +56,11 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
 Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.}
+
+\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
+your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
+\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
+\code{TreeSummarizedExperiment} object. Default: \code{1L}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

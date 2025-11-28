@@ -4,10 +4,11 @@
 
 #include <R.h>
 #include <Rinternals.h>
-#include <math.h>   // fabs, pow
-#include <stdlib.h> // calloc, free
-#include <string.h> // memset
-#include "get.h"
+#include <math.h>     // fabs, pow
+#include <string.h>   // memset
+#include "ecomatrix.h"
+#include "ecotree.h"
+#include "memory.h"
 
 // Detect if pthread is available.
 #if defined __has_include
@@ -24,159 +25,251 @@
 #define V_UNIFRAC 5
 
 
-typedef struct {
-  int    edge;
-  int    parent;
-  double length;
-} node_t;
-
-
 //======================================================
 // Variables shared between main and worker threads.
 //======================================================
-static int     algorithm;
-static double *otu_mtx;
-static int     n_otus;
+
 static int     n_samples;
+static int     n_otus;
 static int     n_edges;
+static int     n_pairs;
+static int     n_dist;
+static int     n_threads;
+static int    *pos_vec;
+static int    *otu_vec;
+static double *val_vec;
+static node_t *node_vec;
 static double *edge_lengths;
 static int    *pairs_vec;
-static int     n_pairs;
-static char    all_pairs;
-static double *weight_mtx;
-static node_t *nodes;
-static double *total_vec;
-static int     n_threads;
-static double *dist_vec;
 static SEXP   *sexp_extra;
+static double *weight_mtx;
+static double *sample_norm_vec;
+static double *dist_vec;
 
 
-
+  
+  
 /*
- * START_SAMPLE_LOOP and END_SAMPLE_LOOP define a simple loop 
- * for iterating over all samples, ensuring that each is 
- * assigned to only a single thread. Provides the `sample` 
- * index and `weight_vec` for each sample.
+ * Macro to loop over each sample based on current threading 
+ * setup. Sets sam (sample index), weight_vec, offset and nnz.
+ * `expression` may assign to *sample_norm.
  */
-
-#define START_SAMPLE_LOOP                                                \
-  int thread_i = *((int *) arg);                                         \
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) { \
-    double *weight_vec = weight_mtx + (sample * n_edges);                \
-
-
-#define END_SAMPLE_LOOP                                        \
-  }                                                            \
-  return NULL;                                                 \
+#define FOREACH_SAMPLE(expression)                             \
+  do {                                                         \
+    int sam = *((int *) arg);                                  \
+    for (; sam < n_samples; sam += n_threads) {                \
+      double *sample_norm = sample_norm_vec + sam;             \
+      double *weight_vec  = weight_mtx + (sam * n_edges);      \
+      int     offset      = pos_vec[sam];                      \
+      int     nnz         = pos_vec[sam + 1] - offset;         \
+                                                               \
+      expression;                                              \
+                                                               \
+      (void)sample_norm;                                       \
+    }                                                          \
+  } while (0)
 
 
 
 /*
- * The START_PAIR_LOOP and END_PAIR_LOOP macros efficiently 
- * loop through all combinations of samples. Skips unwanted 
- * pairings and pairings not assigned to the current thread. 
- * Ensures all threads process the same number of pairs.
+ * Macro to loop over each value for the current sample.
+ * Sets otu and val to point to each value in otu_vec and 
+ * val_vec in turn, respectively.
+ */
+#define FOREACH_OTU_VAL(expression)                            \
+  do {                                                         \
+    int    *otu = otu_vec + offset;                            \
+    double *val = val_vec + offset;                            \
+    for (int i = 0; i < nnz; i++) {                            \
+                                                               \
+      expression;                                              \
+                                                               \
+      otu++;                                                   \
+      val++;                                                   \
+    }                                                          \
+  } while (0)
+
+
+
+/*
+ * Macro to traverse the phylogenetic tree from a leaf to the
+ * root. It starts from the leaf node index given by *otu.
  * 
- * After calling START_PAIR_LOOP the code can expect 
- * `x_weight_vec` and `y_weight_vec` to point to the two 
- * samples' columns in `weight_mtx`.  The code should assign 
- * to `distance` before calling END_PAIR_LOOP.
+ * * In each iteration, it provides:
+ * - `*node`:   A pointer to the current node_t struct.
+ * - `*weight`: A pointer to the sample's weight for the 
+ *              current node's edge.
  * 
- * START_PAIR_TOTAL_LOOP is identical to START_PAIR_LOOP, but
- * also assigns `x_total` and `y_total` from `total_vec`.
+ * * The expression is expected to read `*node` and assign a 
+ *   value to `*weight`.
+ */
+#define FOREACH_NODE_WEIGHT(expression)                        \
+  do {                                                         \
+    int node_i = *otu;                                         \
+    while (node_i > -1) {                                      \
+      node_t *node   = node_vec + node_i;                      \
+      double *weight = weight_vec + node->edge;                \
+                                                               \
+      expression;                                              \
+                                                               \
+      node_i = node->parent;                                   \
+    }                                                          \
+  } while (0)
+  
+
+
+/*
+ * FOREACH_SAMPLE_PAIR runs `expression` on all unique sample 
+ * pairs, dividing the workload evenly across multiple CPU 
+ * threads. When `pairs_vec == NULL`, a simpler algorithm is used
+ * to iterate all-vs-all pairs.
+ * 
+ * In all cases, FOREACH_SAMPLE_PAIR provides:
+ *   - `*x_weight_vec` and `*y_weight_vec`   (from `weight_mtx`)
+ *   - `*x_sample_norm` and `*y_sample_norm` (from `sample_norm_vec`)
+ *   
+ * And FOREACH_SAMPLE_PAIR expects `expression` to set:
+ *   - `*distance`
  * 
  * Implemented as macros to avoid the overhead of a function
  * call or the messiness of duplicated code.
  */
 
-
-#define START_PAIR_LOOP                                        \
-  int thread_i = *((int *) arg);                               \
-  int pair_idx = 0;                                            \
-  int dist_idx = 0;                                            \
-  for (int i = 0; i < n_samples - 1; i++) {                    \
-    double *x_weight_vec = weight_mtx + (i * n_edges);         \
-    for (int j = i + 1; j < n_samples; j++) {                  \
-      if (all_pairs || pairs_vec[pair_idx] == dist_idx) {      \
-        if (pair_idx % n_threads == thread_i) {                \
-          double *y_weight_vec = weight_mtx + (j * n_edges);   \
-          double distance = 0;                                 \
-
-
-#define START_PAIR_TOTAL_LOOP                                  \
-  int thread_i = *((int *) arg);                               \
-  int pair_idx = 0;                                            \
-  int dist_idx = 0;                                            \
-  for (int i = 0; i < n_samples - 1; i++) {                    \
-    double  x_total      = total_vec[i];                       \
-    double *x_weight_vec = weight_mtx + (i * n_edges);         \
-    for (int j = i + 1; j < n_samples; j++) {                  \
-      if (all_pairs || pairs_vec[pair_idx] == dist_idx) {      \
-        if (pair_idx % n_threads == thread_i) {                \
-          double  y_total      = total_vec[j];                 \
-          double *y_weight_vec = weight_mtx + (j * n_edges);   \
-          double  distance     = 0;                            \
-
-
-#define END_PAIR_LOOP                                          \
-          dist_vec[dist_idx] = distance;                       \
+#define FOREACH_SAMPLE_PAIR(expression)                        \
+  do {                                                         \
+    int     thread_i = *((int *) arg);                         \
+    int     dist_idx = 0;                                      \
+    double *x_weight_vec, *x_sample_norm;                      \
+    double *y_weight_vec, *y_sample_norm;                      \
+                                                               \
+    if (pairs_vec == NULL) { /* All vs All */                  \
+                                                               \
+      for (int i = 0; i < n_samples - 1; i++) {                \
+        x_weight_vec  = weight_mtx + (i * n_edges);            \
+        x_sample_norm = sample_norm_vec + i;                   \
+                                                               \
+        for (int j = i + 1; j < n_samples; j++) {              \
+                                                               \
+          if (dist_idx % n_threads == thread_i) {              \
+            y_weight_vec  = weight_mtx + (j * n_edges);        \
+            y_sample_norm = sample_norm_vec + j;               \
+                                                               \
+            double *distance = dist_vec + dist_idx;            \
+            *distance = 0;                                     \
+                                                               \
+            expression;                                        \
+          }                                                    \
+          dist_idx++;                                          \
         }                                                      \
-        pair_idx++;                                            \
-        if (pair_idx == n_pairs) return NULL;                  \
       }                                                        \
-      dist_idx++;                                              \
+                                                               \
+    } else { /* Specific Pairs of Samples */                   \
+                                                               \
+      int pair_idx = thread_i;                                 \
+      for (; pair_idx < n_pairs; pair_idx += n_threads) {      \
+                                                               \
+        dist_idx = pairs_vec[pair_idx]; /* 1-based */          \
+                                                               \
+        int sam_i          = 0;                                \
+        int sam_j          = dist_idx;                         \
+        int pairs_in_block = n_samples - 1;                    \
+                                                               \
+        while (sam_j > pairs_in_block) {                       \
+          sam_i++;                                             \
+          sam_j -= pairs_in_block;                             \
+          pairs_in_block--;                                    \
+        }                                                      \
+                                                               \
+        sam_j += sam_i;                                        \
+                                                               \
+        x_sample_norm = sample_norm_vec + sam_i;               \
+        y_sample_norm = sample_norm_vec + sam_j;               \
+        x_weight_vec  = weight_mtx + (sam_i * n_edges);        \
+        y_weight_vec  = weight_mtx + (sam_j * n_edges);        \
+                                                               \
+        double *distance = dist_vec + (dist_idx - 1);          \
+        *distance = 0;                                         \
+                                                               \
+        expression;                                            \
+      }                                                        \
     }                                                          \
-  }                                                            \
-  return NULL;                                                 \
+                                                               \
+    (void)x_sample_norm;                                       \
+    (void)y_sample_norm;                                       \
+                                                               \
+  } while (0)
 
 
 
+/*
+ * FOREACH_WEIGHT_PAIR iterates through all edges, providing
+ * the corresponding weights for the two samples being compared.
+ * 
+ * * In each iteration, it provides:
+ * - `*x_weight` and `*y_weight` (from `weight_mtx`)
+ * - `*edge_length` (from `edge_lengths`)
+ * 
+ * * `expression` is expected to accumulate its result into 
+ *   `*distance` to satisfy the parent FOREACH_SAMPLE_PAIR macro.
+ */
+
+#define FOREACH_WEIGHT_PAIR(expression)                        \
+  do {                                                         \
+    double *x_weight    = x_weight_vec;                        \
+    double *y_weight    = y_weight_vec;                        \
+    double *edge_length = edge_lengths;                        \
+                                                               \
+    for (int edge = 0; edge < n_edges; edge++) {               \
+                                                               \
+      if (*x_weight || *y_weight) {                            \
+        expression;                                            \
+      }                                                        \
+                                                               \
+      x_weight++;                                              \
+      y_weight++;                                              \
+      edge_length++;                                           \
+    }                                                          \
+  } while (0)
+
+
+  
 
 
 //======================================================
 // Unweighted UniFrac.
 //======================================================
 static void *unweighted_mtx (void *arg) {
-  START_SAMPLE_LOOP
-    
-  for (int otu = 0; otu < n_otus; otu++) {
-    
-    double abundance = otu_mtx[sample + otu * n_samples];
-    if (abundance == 0) continue; // OTU not present in sample
-    
-    int node = otu;     // start at OTU tip/leaf in tree
-    while (node > -1) { // traverse until we hit the tree's root
-      int edge = nodes[node].edge;
-      if (weight_vec[edge]) break; // already traversed
-      weight_vec[edge] = 1;
-      node = nodes[node].parent;   // proceed on up the tree
-    }
-    
-  }
   
-  END_SAMPLE_LOOP
+  FOREACH_SAMPLE(
+    FOREACH_OTU_VAL(
+      FOREACH_NODE_WEIGHT(
+
+        if (*weight) break; // already traversed
+        *weight = 1;
+
+      );
+    );
+  );
+  return NULL;
 }
 
 
 static void *unweighted_dist (void *arg) {
-  START_PAIR_LOOP
-    
-  double shared = 0;
   
-  for (int edge = 0; edge < n_edges; edge++) {
-    
-    double x = x_weight_vec[edge];
-    double y = y_weight_vec[edge];
-    
-    if (x || y) {
-      if (x && y) { shared   += edge_lengths[edge]; }
-      else        { distance += edge_lengths[edge]; }
-    }
-  }
-  
-  distance = distance / (distance + shared);
-  
-  END_PAIR_LOOP
+  FOREACH_SAMPLE_PAIR(
+
+    double shared = 0;
+
+    FOREACH_WEIGHT_PAIR(
+
+      if (*x_weight && *y_weight) {  shared   += *edge_length; }
+      else                        { *distance += *edge_length; }
+
+    );
+
+    *distance /= *distance + shared;
+  );
+  return NULL;
 }
 
 
@@ -186,51 +279,37 @@ static void *unweighted_dist (void *arg) {
 // Weighted UniFrac.
 //======================================================
 static void *weighted_mtx (void *arg) {
-  START_SAMPLE_LOOP
-    
-  double sample_depth = 0;
-  for (int otu = 0; otu < n_otus; otu++)
-    sample_depth += otu_mtx[sample + otu * n_samples];
   
-  for (int otu = 0; otu < n_otus; otu++) {
+  FOREACH_SAMPLE(
     
-    double abundance = otu_mtx[sample + otu * n_samples];
-    if (abundance == 0) continue; // OTU not present in sample
+    double sample_depth = 0;
     
-    int node = otu;     // start at OTU tip/leaf in tree
-    while (node > -1) { // traverse until we hit the tree's root
-      
-      int    edge   = nodes[node].edge;
-      double length = nodes[node].length;
-      
-      // relative abundance, weighted by branch length
-      double relative_abundance = abundance / sample_depth;
-      double weighted_abundance = length * relative_abundance;
-      weight_vec[edge] += weighted_abundance;
-      
-      node = nodes[node].parent; // proceed on up the tree
-    }
+    FOREACH_OTU_VAL(sample_depth += *val);
     
-  }
+    FOREACH_OTU_VAL(
+      FOREACH_NODE_WEIGHT(
+        
+        // relative abundance, weighted by branch length
+        *weight += node->length * (*val / sample_depth);
+    
+      );
+    );
+  );
   
-  END_SAMPLE_LOOP
+  return NULL;
 }
 
 static void *weighted_dist (void *arg) {
-  START_PAIR_LOOP
-    
-  for (int edge = 0; edge < n_edges; edge++) {
-    
-    double x = x_weight_vec[edge];
-    double y = y_weight_vec[edge];
-    
-    if (x || y) {
-      if (x > y) { distance += x - y; }
-      else       { distance += y - x; }
-    }
-  }
   
-  END_PAIR_LOOP
+  FOREACH_SAMPLE_PAIR(
+    FOREACH_WEIGHT_PAIR(
+      
+      *distance += fabs(*x_weight - *y_weight);
+      
+    );
+  );
+  
+  return NULL;
 }
 
 
@@ -240,54 +319,43 @@ static void *weighted_dist (void *arg) {
 // Normalized Weighted UniFrac.
 //======================================================
 static void *normalized_mtx (void *arg) {
-  START_SAMPLE_LOOP
-    
-  double sample_depth = 0;
-  for (int otu = 0; otu < n_otus; otu++)
-    sample_depth += otu_mtx[sample + otu * n_samples];
   
-  for (int otu = 0; otu < n_otus; otu++) {
+  FOREACH_SAMPLE(
     
-    double abundance = otu_mtx[sample + otu * n_samples];
-    if (abundance == 0) continue; // OTU not present in sample
+    double sample_depth = 0;
     
-    int node = otu;  // start at OTU tip/leaf in tree
-    while (node > -1) { // traverse until we hit the tree's root
-      
-      int    edge   = nodes[node].edge;
-      double length = nodes[node].length;
-      
-      // relative abundance, weighted by branch length
-      double relative_abundance = abundance / sample_depth;
-      double weighted_abundance = length * relative_abundance;
-      weight_vec[edge]  += weighted_abundance;
-      total_vec[sample] += weighted_abundance;
-      
-      node = nodes[node].parent; // proceed on up the tree
-    }
+    FOREACH_OTU_VAL(sample_depth += *val);
     
-  }
+    FOREACH_OTU_VAL(
+      FOREACH_NODE_WEIGHT(
+        
+        // relative abundance, weighted by branch length
+        double abund = node->length * (*val / sample_depth);
+        *weight      += abund;
+        *sample_norm += abund;
+        
+      );
+    );
+  );
   
-  END_SAMPLE_LOOP
+  return NULL;
 }
 
 static void *normalized_dist (void *arg) {
-  START_PAIR_TOTAL_LOOP
   
-  for (int edge = 0; edge < n_edges; edge++) {
+  
+  FOREACH_SAMPLE_PAIR(
+    FOREACH_WEIGHT_PAIR(
+      
+      *distance += fabs(*x_weight - *y_weight);
+  
+    );
     
-    double x = x_weight_vec[edge];
-    double y = y_weight_vec[edge];
+    *distance /= *x_sample_norm + *y_sample_norm;
     
-    if (x || y) {
-      if (x > y) { distance += x - y; }
-      else       { distance += y - x; }
-    }
-  }
+  );
   
-  distance /= x_total + y_total;
-  
-  END_PAIR_LOOP
+  return NULL;
 }
 
 
@@ -297,56 +365,49 @@ static void *normalized_dist (void *arg) {
 // Generalized UniFrac.
 //======================================================
 static void *generalized_mtx (void *arg) {
-  START_SAMPLE_LOOP
-    
-  double sample_depth = 0;
-  for (int otu = 0; otu < n_otus; otu++)
-    sample_depth += otu_mtx[sample + otu * n_samples];
   
-  for (int otu = 0; otu < n_otus; otu++) {
+  FOREACH_SAMPLE(
     
-    double abundance = otu_mtx[sample + otu * n_samples];
-    if (abundance == 0) continue; // OTU not present in sample
-    
-    int node = otu;     // start at OTU tip/leaf in tree
-    while (node > -1) { // traverse until we hit the tree's root
-      int edge = nodes[node].edge;
-      weight_vec[edge] += abundance / sample_depth;
-      node = nodes[node].parent; // proceed on up the tree
-    }
-    
-  }
+    double sample_depth = 0;
   
-  END_SAMPLE_LOOP
+    FOREACH_OTU_VAL(sample_depth += *val);
+    
+    FOREACH_OTU_VAL(
+      FOREACH_NODE_WEIGHT(
+        
+        *weight += *val / sample_depth; // relative abundance
+    
+      );
+    );
+  );
+  
+  return NULL;
 }
 
 static void *generalized_dist (void *arg) {
   
   double alpha = asReal(*sexp_extra);
   
-  START_PAIR_LOOP
-  
-  double denominator = 0;
-  
-  for (int edge = 0; edge < n_edges; edge++) {
-  
-    double x = x_weight_vec[edge];
-    double y = y_weight_vec[edge];
+  FOREACH_SAMPLE_PAIR(
     
-    if (x || y) {
-      
-      double sum  = x + y;
-      double frac = fabs((x - y) / sum);
-      double norm = edge_lengths[edge] * pow(sum, alpha);
-      
-      distance    += norm * frac;
-      denominator += norm;
-    }
-  }
+    double denominator = 0;
   
-  distance = distance / denominator;
-
-  END_PAIR_LOOP
+    FOREACH_WEIGHT_PAIR(
+      
+      double sum  = *x_weight + *y_weight;
+      double frac = fabs((*x_weight - *y_weight) / sum);
+      double norm = *edge_length * pow(sum, alpha);
+      
+      *distance   += norm * frac;
+      denominator += norm;
+  
+    );
+  
+    *distance /= denominator;
+  
+  );
+  
+  return NULL;
 }
 
 
@@ -356,55 +417,52 @@ static void *generalized_dist (void *arg) {
 // Variance Adjusted Weighted UniFrac.
 //======================================================
 static void *var_adjusted_mtx (void *arg) {
-  START_SAMPLE_LOOP
   
-  double sample_depth = 0;
+  FOREACH_SAMPLE(
+    FOREACH_OTU_VAL(
+      
+      *sample_norm += *val;
+      
+      FOREACH_NODE_WEIGHT(
+        *weight += *val; // absolute abundance
+      );
+    );
+  );
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    
-    double abundance = otu_mtx[sample + otu * n_samples];
-    if (abundance == 0) continue; // OTU not present in sample
-    sample_depth += abundance;
-    
-    int node = otu;     // start at OTU tip/leaf in tree
-    while (node > -1) { // traverse until we hit the tree's root
-      int edge = nodes[node].edge;
-      weight_vec[edge] += abundance;
-      node = nodes[node].parent; // proceed on up the tree
-    }
-  }
-  
-  total_vec[sample] = sample_depth;
-  
-  END_SAMPLE_LOOP
+  return NULL;
 }
 
 static void *var_adjusted_dist (void *arg) {
-  START_PAIR_TOTAL_LOOP
   
-  double denominator = 0;
-  
-  for (int edge = 0; edge < n_edges; edge++) {
+  FOREACH_SAMPLE_PAIR(
     
-    double x = x_weight_vec[edge];
-    double y = y_weight_vec[edge];
-    
-    if (x || y) {
+    double norm;
+    double denominator = 0;
   
-      double norm = (x + y) * (x_total + y_total - x - y);
-             norm = edge_lengths[edge] / sqrt(norm);
+    FOREACH_WEIGHT_PAIR(
       
-      x /= x_total;
-      y /= y_total;
+      norm  = *x_sample_norm + *y_sample_norm;
+      norm -= *x_weight + *y_weight;
+      norm *= *x_weight + *y_weight;
       
-      distance    += fabs(x - y) * norm;
+      // Check for div-by-zero
+      // Contribution is 0 if variance is 0
+      if (norm > 0) { norm = *edge_length / sqrt(norm); }
+      else          { norm = 0;                         }
+      
+      double x = *x_weight / *x_sample_norm;
+      double y = *y_weight / *y_sample_norm;
+      
+      *distance   += fabs(x - y) * norm;
       denominator +=     (x + y) * norm;
-    }
-  }
+      
+    );
     
-  distance = distance / denominator;
+    *distance /= denominator;
   
-  END_PAIR_LOOP
+  );
+  
+  return NULL;
 }
 
 
@@ -414,19 +472,26 @@ static void *var_adjusted_dist (void *arg) {
 // R interface. Dispatches threads on unifrac variants.
 //======================================================
 SEXP C_unifrac(
-    SEXP sexp_algorithm,  SEXP sexp_otu_mtx, 
-    SEXP sexp_phylo_tree, SEXP sexp_pairs_vec, 
-    SEXP sexp_n_threads,  SEXP sexp_extra_args ) {
+    SEXP sexp_algorithm, SEXP sexp_otu_mtx,   SEXP sexp_phylo_tree, 
+    SEXP sexp_margin,    SEXP sexp_pairs_vec, SEXP sexp_n_threads,  
+    SEXP sexp_extra_args ) {
   
-  algorithm     = asInteger(sexp_algorithm);
-  otu_mtx       = REAL( sexp_otu_mtx);
-  n_otus        = ncols(sexp_otu_mtx);
-  n_samples     = nrows(sexp_otu_mtx);
-  int *edge_mtx = INTEGER(get(sexp_phylo_tree, "edge"));
-  n_edges       = nrows(  get(sexp_phylo_tree, "edge"));
-  edge_lengths  = REAL(   get(sexp_phylo_tree, "edge.length"));
-  n_threads     = asInteger(sexp_n_threads);
-  sexp_extra    = &sexp_extra_args;
+  sexp_extra = &sexp_extra_args;
+  n_threads  = asInteger(sexp_n_threads);
+  init_n_ptrs(n_threads + 10);
+  
+  
+  ecomatrix_t *em = new_ecomatrix(sexp_otu_mtx, sexp_margin);
+  ecotree_t   *et = new_ecotree(sexp_phylo_tree);
+  
+  n_samples    = em->n_samples;
+  n_otus       = em->n_otus;
+  pos_vec      = em->pos_vec;
+  otu_vec      = em->otu_vec;
+  val_vec      = em->val_vec;
+  n_edges      = et->n_edges;
+  edge_lengths = et->edge_lengths;
+  node_vec     = et->node_vec;
   
   
   // branch_weight/depth for each (sample,edge) combo.
@@ -435,7 +500,7 @@ SEXP C_unifrac(
   // Calculate distance between pairs, using weight_mtx.
   void * (*calc_dist_vec)(void *) = NULL;
   
-  switch (algorithm) {
+  switch (asInteger(sexp_algorithm)) {
     case U_UNIFRAC:
       calc_weight_mtx = unweighted_mtx;
       calc_dist_vec   = unweighted_dist;
@@ -456,71 +521,39 @@ SEXP C_unifrac(
       calc_weight_mtx = var_adjusted_mtx;
       calc_dist_vec   = var_adjusted_dist;
       break;
+    default:                                // # nocov
+      free_all();                           // # nocov
+      error("Invalid UniFrac algorithm.");  // # nocov
   }
-  
-  if (calc_weight_mtx == NULL || calc_dist_vec == NULL) { // # nocov start
-    error("Invalid UniFrac algorithm.");
-    return R_NilValue;
-  } // # nocov end
   
   
   // intermediary values
-  weight_mtx = calloc(n_samples * n_edges, sizeof(double));
-  total_vec  = calloc(n_samples,           sizeof(double));
-  nodes      = calloc(n_edges,             sizeof(node_t));
+  weight_mtx      = (double *)safe_malloc(n_samples * n_edges * sizeof(double));
+  sample_norm_vec = (double *)safe_malloc(n_samples           * sizeof(double));
   
-  if (weight_mtx == NULL || total_vec == NULL || nodes == NULL) { // # nocov start
-    free(weight_mtx); free(total_vec); free(nodes);
-    error("Insufficient memory for UniFrac calculation.");
-    return R_NilValue;
-  } // # nocov end
-  
-  memset(weight_mtx, 0, n_samples * n_edges * sizeof(double));
-  memset(total_vec,  0, n_samples           * sizeof(double));
-  
-  
-  // sort edge data by child node
-  for (int edge = 0; edge < n_edges; edge++) {
-    
-    int parent = edge_mtx[0 * n_edges + edge] - 2;
-    int child  = edge_mtx[1 * n_edges + edge] - 1;
-    
-    if (child  > n_otus) child--;
-    if (parent < n_otus) parent = -1;
-    
-    nodes[child].edge   = edge;
-    nodes[child].parent = parent;
-    nodes[child].length = edge_lengths[edge];
-  }
-  
+  memset(weight_mtx,      0, n_samples * n_edges * sizeof(double));
+  memset(sample_norm_vec, 0, n_samples           * sizeof(double));
   
   
   // Create the dist object to return
-  int n_dist            = n_samples * (n_samples - 1) / 2;
+  n_dist                = n_samples * (n_samples - 1) / 2;
   SEXP sexp_result_dist = PROTECT(allocVector(REALSXP, n_dist));
   dist_vec              = REAL(sexp_result_dist);
-  setAttrib(sexp_result_dist, R_ClassSymbol,     mkString("dist"));
-  setAttrib(sexp_result_dist, mkString("Size"),  ScalarInteger(n_samples));
-  setAttrib(sexp_result_dist, mkString("Diag"),  ScalarLogical(0));
-  setAttrib(sexp_result_dist, mkString("Upper"), ScalarLogical(0));
-  SEXP sexp_mtx_dimnames = getAttrib(sexp_otu_mtx, R_DimNamesSymbol);
-  if (sexp_mtx_dimnames != R_NilValue) {
-    SEXP sexp_mtx_rownames = VECTOR_ELT(sexp_mtx_dimnames, 0);
-    if (sexp_mtx_rownames != R_NilValue) {
-      setAttrib(sexp_result_dist, mkString("Labels"), sexp_mtx_rownames);
-    }
-  }
+  setAttrib(sexp_result_dist, R_ClassSymbol,      mkString("dist"));
+  setAttrib(sexp_result_dist, mkString("Size"),   ScalarInteger(n_samples));
+  setAttrib(sexp_result_dist, mkString("Diag"),   ScalarLogical(0));
+  setAttrib(sexp_result_dist, mkString("Upper"),  ScalarLogical(0));
+  setAttrib(sexp_result_dist, mkString("Labels"), em->sexp_sample_names);
   
   
   // Avoid allocating pairs_vec for common all-vs-all case
   if (isNull(sexp_pairs_vec)) {
-    all_pairs = 1;
+    
     pairs_vec = NULL;
     n_pairs   = n_dist;
-  }
-  else {
     
-    all_pairs = 0;
+  } else {
+    
     pairs_vec = INTEGER(sexp_pairs_vec);
     n_pairs   = LENGTH(sexp_pairs_vec);
     
@@ -528,6 +561,7 @@ SEXP C_unifrac(
       dist_vec[i] = R_NaReal;
     
     if (n_pairs == 0) {
+      free_all();
       UNPROTECT(1);
       return sexp_result_dist;
     }
@@ -539,15 +573,8 @@ SEXP C_unifrac(
     if (n_threads > 1 && n_pairs > 100) {
       
       // threads and their thread_i arguments
-      pthread_t *tids = calloc(n_threads, sizeof(pthread_t));
-      int       *args = calloc(n_threads, sizeof(int));
-      
-      if (tids == NULL || args == NULL) { // # nocov start
-        free(tids); free(args);
-        free(weight_mtx); free(total_vec); free(nodes);
-        error("Insufficient memory for parallel UniFrac calculation.");
-        return R_NilValue;
-      } // # nocov end
+      pthread_t *tids = (pthread_t*) R_alloc(n_threads, sizeof(pthread_t));
+      int       *args = (int*)       R_alloc(n_threads, sizeof(int));
       
       int i, n = n_threads;
       for (i = 0; i < n; i++) args[i] = i;
@@ -556,9 +583,7 @@ SEXP C_unifrac(
       for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, calc_dist_vec, &args[i]);
       for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
       
-      free(tids); free(args);
-      free(weight_mtx); free(total_vec); free(nodes);
-      
+      free_all();
       UNPROTECT(1);
       return sexp_result_dist;
     }
@@ -571,8 +596,7 @@ SEXP C_unifrac(
   calc_weight_mtx(&thread_i);
   calc_dist_vec(&thread_i);
   
-  free(weight_mtx); free(total_vec); free(nodes);
-  
+  free_all();
   UNPROTECT(1);
   return sexp_result_dist;
 }

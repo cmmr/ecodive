@@ -7,15 +7,16 @@ ADIV_ACE         <-  1L
 ADIV_BERGER      <-  2L
 ADIV_BRILLOUIN   <-  3L
 ADIV_CHAO1       <-  4L
-ADIV_FISHER      <-  5L
-ADIV_INV_SIMPSON <-  6L
-ADIV_MARGALEF    <-  7L
-ADIV_MCINTOSH    <-  8L
-ADIV_MENHINICK   <-  9L
-ADIV_OBSERVED    <- 10L
-ADIV_SHANNON     <- 11L
-ADIV_SIMPSON     <- 12L
-ADIV_SQUARES     <- 13L
+ADIV_FAITH       <-  5L
+ADIV_FISHER      <-  6L
+ADIV_INV_SIMPSON <-  7L
+ADIV_MARGALEF    <-  8L
+ADIV_MCINTOSH    <-  9L
+ADIV_MENHINICK   <- 10L
+ADIV_OBSERVED    <- 11L
+ADIV_SHANNON     <- 12L
+ADIV_SIMPSON     <- 13L
+ADIV_SQUARES     <- 14L
 
 
 #' Alpha Diversity Wrapper Function
@@ -83,11 +84,12 @@ ADIV_SQUARES     <- 13L
 alpha_div <- function (
     counts, 
     metric, 
-    norm = 'percent', 
-    cutoff  = 10, 
-    digits  = 3L, 
-    tree    = NULL, 
-    cpus    = n_cpus() ) {
+    norm   = 'percent', 
+    cutoff = 10L, 
+    digits = 3L, 
+    tree   = NULL, 
+    margin = 1L,
+    cpus   = n_cpus() ) {
   
   metric <- match_metric(metric, div = 'alpha')
   args   <- mget(metric$params, environment())
@@ -189,12 +191,13 @@ NULL
 #  Abundance-based Coverage Estimator (ACE)
 #' @export
 #' @rdname adiv_functions
-ace <- function (counts, cutoff = 10, cpus = n_cpus()) {
+ace <- function (counts, cutoff = 10L, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_ACE, counts, cpus, cutoff)
+  .Call(C_alpha_div, ADIV_ACE, counts, margin, norm, cpus, cutoff)
 }
 
 
@@ -202,10 +205,10 @@ ace <- function (counts, cutoff = 10, cpus = n_cpus()) {
 #  max(x / sum(x))
 #' @export
 #' @rdname adiv_functions
-berger <- function (counts, norm = 'percent', cpus = n_cpus()) {
+berger <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_alpha_div, ADIV_BERGER, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_BERGER, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -214,12 +217,13 @@ berger <- function (counts, norm = 'percent', cpus = n_cpus()) {
 #  (lgamma(sum(x) + 1) - sum(lgamma(x + 1))) / sum(x)
 #' @export
 #' @rdname adiv_functions
-brillouin <- function (counts, cpus = n_cpus()) {
+brillouin <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_BRILLOUIN, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_BRILLOUIN, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -227,34 +231,38 @@ brillouin <- function (counts, cpus = n_cpus()) {
 #  sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
 #' @export
 #' @rdname adiv_functions
-chao1 <- function (counts, cpus = n_cpus()) {
+chao1 <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_CHAO1, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_CHAO1, counts, margin, norm, cpus, NULL)
 }
 
 
 #  Faith's Phylogenetic Diversity
 #' @export
 #' @rdname adiv_functions
-faith <- function (counts, tree = NULL, cpus = n_cpus()) {
+faith <- function (counts, tree = NULL, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
-  .Call(C_faith, counts, tree, cpus)
+  
+  .Call(C_alpha_div, ADIV_FAITH, counts, margin, norm, cpus, tree)
 }
 
 
 #  Fisher's Alpha
 #' @export
 #' @rdname adiv_functions
-fisher <- function (counts, digits = 3L, cpus = n_cpus()) {
+fisher <- function (counts, digits = 3L, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_FISHER, counts, cpus, digits)
+  .Call(C_alpha_div, ADIV_FISHER, counts, margin, norm, cpus, digits)
 }
 
 
@@ -263,10 +271,10 @@ fisher <- function (counts, digits = 3L, cpus = n_cpus()) {
 #  1 / sum(p ** 2)
 #' @export
 #' @rdname adiv_functions
-inv_simpson <- function (counts, norm = 'percent', cpus = n_cpus()) {
+inv_simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_alpha_div, ADIV_INV_SIMPSON, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_INV_SIMPSON, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -274,12 +282,13 @@ inv_simpson <- function (counts, norm = 'percent', cpus = n_cpus()) {
 #  (sum(x > 0) - 1) / log(sum(x))
 #' @export
 #' @rdname adiv_functions
-margalef <- function (counts, cpus = n_cpus()) {
+margalef <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_MARGALEF, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_MARGALEF, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -287,12 +296,13 @@ margalef <- function (counts, cpus = n_cpus()) {
 #  (sum(x) - sqrt(sum(x^2))) / (sum(x) - sqrt(sum(x)))
 #' @export
 #' @rdname adiv_functions
-mcintosh <- function (counts, cpus = n_cpus()) {
+mcintosh <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_MCINTOSH, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_MCINTOSH, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -300,12 +310,13 @@ mcintosh <- function (counts, cpus = n_cpus()) {
 #  sum(x > 0) / sqrt(sum(x))
 #' @export
 #' @rdname adiv_functions
-menhinick <- function (counts, cpus = n_cpus()) {
+menhinick <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_MENHINICK, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_MENHINICK, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -313,10 +324,12 @@ menhinick <- function (counts, cpus = n_cpus()) {
 #  sum(x>0)
 #' @export
 #' @rdname adiv_functions
-observed <- function (counts, cpus = n_cpus()) {
+observed <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
-  .Call(C_alpha_div, ADIV_OBSERVED, counts, cpus, NULL)
+  
+  .Call(C_alpha_div, ADIV_OBSERVED, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -325,10 +338,10 @@ observed <- function (counts, cpus = n_cpus()) {
 #  -sum(p * log(p))
 #' @export
 #' @rdname adiv_functions
-shannon <- function (counts, norm = 'percent', cpus = n_cpus()) {
+shannon <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_alpha_div, ADIV_SHANNON, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_SHANNON, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -337,10 +350,10 @@ shannon <- function (counts, norm = 'percent', cpus = n_cpus()) {
 #  1 - sum(p ** 2)
 #' @export
 #' @rdname adiv_functions
-simpson <- function (counts, norm = 'percent', cpus = n_cpus()) {
+simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_alpha_div, ADIV_SIMPSON, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_SIMPSON, counts, margin, norm, cpus, NULL)
 }
 
 
@@ -351,10 +364,11 @@ simpson <- function (counts, norm = 'percent', cpus = n_cpus()) {
 #  S + ((sum(x^2) * (F1^2)) / ((N^2) - F1 * S))
 #' @export
 #' @rdname adiv_functions
-squares <- function (counts, cpus = n_cpus()) {
+squares <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- NULL
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_SQUARES, counts, cpus, NULL)
+  .Call(C_alpha_div, ADIV_SQUARES, counts, margin, norm, cpus, NULL)
 }

@@ -1,8 +1,7 @@
 Package: ecodive
 Type: Package
 Title: Parallel and Memory-Efficient Ecological Diversity Metrics
-Version: 2.1.0
-Date: 2025-09-25
+Version: 2.2.0
 Authors@R: c(
     person(
       "Daniel P.", "Smith",
@@ -32,7 +31,9 @@ Imports:
     utils
 Suggests:
     knitr,
+    Matrix,
     parallelly,
     rmarkdown,
+    slam,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr

@@ -2,6 +2,11 @@
 # Licensed under the MIT License: https://opensource.org/license/mit
 
 
+NORM_PERCENT <- 1L
+NORM_CLR     <- 2L
+NORM_CHORD   <- 3L
+NORM_BINARY  <- 4L
+
 
 validate_args <- function () {
   env  <- parent.frame()
@@ -55,39 +60,41 @@ validate_counts <- function (env = parent.frame()) {
       }
       
       # Derive matrix from simple vector or complex object.
-      if (!is.matrix(counts)) {
+      if (!inherits(counts, c('matrix', 'dgCMatrix', 'dgTMatrix', 'dgeMatrix', 'simple_triplet_matrix'))) {
         
-        if (is.vector(counts)) {
-          counts <- matrix(data = counts, nrow = 1)
+        if (inherits(counts, 'rbiom')) {
+          counts <- counts$counts # simple_triplet_matrix
+          margin <- 2L
         }
+        
         else if (inherits(counts, 'phyloseq')) {
-          counts <- t(as.matrix(counts@otu_table))
+          margin <- ifelse(counts@otu_table@taxa_are_rows, 2L, 1L)
+          counts <- counts@otu_table@.Data
         }
-        else if (inherits(counts, 'rbiom')) {
-          counts <- as.matrix(t(counts$counts))
-        }
+        
         else if (inherits(counts, 'TreeSummarizedExperiment')) {
-          counts <- t(as.matrix(counts@assays@data[[1]]))
+          counts <- counts@assays@data[[1]]
+          margin <- 2L
         }
+        
         else if (inherits(counts, 'SummarizedExperiment')) {
-          counts <- t(as.matrix(counts@assays@data[[1]]))
+          counts <- counts@assays@data[[1]]
+          margin <- 2L
         }
+        
+        else if (is.vector(counts)) {
+          counts <- matrix(data = counts, ncol = 1)
+          margin <- 2L
+        }
+        
         else {
           counts <- as.matrix(counts)
         }
         
       }
       
-      stopifnot(length(dim(counts)) == 2)
       stopifnot(nrow(counts) > 0)
       stopifnot(ncol(counts) > 0)
-      
-      if (typeof(counts) != 'double')
-        counts <- matrix(
-          data     = as.numeric(counts), 
-          nrow     = nrow(counts), 
-          ncol     = ncol(counts),
-          dimnames = dimnames(counts) )
     }),
     
     error = function (e) 
@@ -146,11 +153,7 @@ validate_depth <- function (env = parent.frame()) {
       stopifnot(depth > 0)
       stopifnot(depth %% 1 == 0 || depth < 1)
       
-      if (depth %% 1 == 0) {
-        stopifnot(depth <= max(colSums(counts)))
-        depth <- as.integer(depth)
-      }
-      
+      depth <- as.double(depth)
     }),
     
     error = function (e) 
@@ -180,6 +183,17 @@ validate_digits <- function (env = parent.frame()) {
 }
 
 
+validate_drop <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      stopifnot(identical(drop, TRUE) || identical(drop, FALSE))
+    }),
+    error = function (e) 
+      stop(e$message, '\n`drop` must be either TRUE or FALSE.')
+  )
+}
+
+
 validate_n_samples <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
@@ -193,7 +207,7 @@ validate_n_samples <- function (env = parent.frame()) {
         if (n_samples %% 1 == 0) {
           stopifnot(n_samples <= ncol(counts))
           stopifnot(n_samples > -ncol(counts))
-          n_samples <- as.integer(n_samples)
+          n_samples <- as.double(n_samples)
         }
         else {
           stopifnot(n_samples > 0 && n_samples < 1)
@@ -252,16 +266,17 @@ validate_pairs <- function (env = parent.frame()) {
           pairs <- which(pairs)
         }
         else if (is.numeric(pairs)) {
-          if (any(pairs %% 1 > 0)) stop('non-integer values')
+          if (is.double(pairs)) {
+            if (any(pairs %% 1 > 0)) stop('non-integer values')
+            pairs <- as.integer(pairs)
+          }
           if (!all(pairs >= 1 & pairs <= n_distances))
             stop('expected `pairs` values between 1 and ', n_distances)
-          pairs <- sort(unique(as.integer(pairs)))
         }
         else {
           stop('cannot be ', typeof(pairs))
         }
         
-        pairs <- pairs - 1L
         remove('n_samples', 'n_distances')
       }
     }),
@@ -293,15 +308,13 @@ validate_pseudocount <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
-      if (is.null(pseudocount))
-        pseudocount <- min(counts[counts > 0])
+      if (!is.null(pseudocount)) {
+        pseudocount <- as.double(pseudocount)
+        stopifnot(length(pseudocount) == 1)
+        stopifnot(!is.na(pseudocount))
+        stopifnot(pseudocount >= 0)
+      }
       
-      if (!inherits(pseudocount, 'numeric'))
-        pseudocount <- as.numeric(pseudocount)
-      
-      stopifnot(length(pseudocount) == 1)
-      stopifnot(!is.na(pseudocount))
-      stopifnot(pseudocount >= 0)
     }),
     
     error = function (e) 
@@ -310,15 +323,43 @@ validate_pseudocount <- function (env = parent.frame()) {
 }
 
 
+validate_margin <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      margin <- as.integer(margin)
+      stopifnot(identical(margin, 1L) || identical(margin, 2L))
+    }),
+    
+    error = function (e) 
+      stop(e$message, '\n`margin` must be 1 or 2.')
+  )
+}
+
+
 validate_norm <- function (env = parent.frame()) {
   with(env, {
     
-    if (is.null(norm)) norm <- 'none'
-    norm <- match.arg(tolower(norm), choices = c('percent', 'binary', 'clr', 'none'))
-    
-    if      (norm == 'percent') { counts   <- transform_pct(counts)  }
-    else if (norm == 'binary')  { counts[] <- as.numeric(counts > 0) }
-    else if (norm == 'clr')     { counts   <- transform_clr(counts)  }
+    if (!is.null(norm)) {
+      
+      pseudocount <- attr(norm, 'pseudocount')
+      
+      norm <- switch(
+        EXPR = match.arg(
+          arg     = tolower(norm), 
+          choices = c('none', 'percent', 'chord', 'binary', 'clr') ),
+        'none'    = NULL,
+        'percent' = NORM_PERCENT,
+        'chord'   = NORM_CHORD,
+        'binary'  = NORM_BINARY,
+        'clr'     = NORM_CLR )
+      
+      if (identical(norm, NORM_CLR)) {
+        validate_pseudocount()
+        attr(norm, 'pseudocount') <- pseudocount
+      }
+      
+      remove('pseudocount')
+    }
     
   })
 }
@@ -433,7 +474,19 @@ validate_underscores <- function (env = parent.frame()) {
 
 assert_integer_counts <- function (env = parent.frame()) {
   with(env, {
-    if (!all(counts %% 1 == 0))
-      stop('`counts` must be whole numbers (integers).')
+    
+    if (is.matrix(counts)) {
+      if (!all(counts %% 1 == 0))
+        stop('`counts` must be whole numbers (integers).')
+      
+    } else if (inherits(counts, 'simple_triplet_matrix')) {
+      if (!all(counts$v %% 1 == 0))
+        stop('`counts` must be whole numbers (integers).')
+      
+    } else {
+      if (!all(counts@x %% 1 == 0))
+        stop('`counts` must be whole numbers (integers).')
+    }
+    
   })
 }

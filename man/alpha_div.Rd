@@ -8,9 +8,10 @@ alpha_div(
   counts,
   metric,
   norm = "percent",
-  cutoff = 10,
+  cutoff = 10L,
   digits = 3L,
   tree = NULL,
+  margin = 1L,
   cpus = n_cpus()
 )
 }
@@ -42,6 +43,11 @@ places. E.g. the default \code{digits=3} could return \code{6.392}.}
 the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
 must be present in \code{tree}. Can be omitted if a tree is embedded with
 the \code{counts} object or as \code{attr(counts, 'tree')}.}
+
+\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
+your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
+\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
+\code{TreeSummarizedExperiment} object. Default: \code{1L}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

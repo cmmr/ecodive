@@ -46,6 +46,11 @@
 #'        }
 #'        Default: `'percent'`, which is the expected input for these formulas.
 #' 
+#' @param margin   If your samples are in the matrix's rows, set to `1L`. If 
+#'        your samples are in columns, set to `2L`. Ignored when `counts` is a 
+#'        `phyloseq`, `rbiom`, `SummarizedExperiment`, or 
+#'        `TreeSummarizedExperiment` object. Default: `1L`
+#' 
 #' @param tree   A `phylo`-class object representing the phylogenetic tree for 
 #'        the OTUs in `counts`. The OTU identifiers given by `colnames(counts)` 
 #'        must be present in `tree`. Can be omitted if a tree is embedded with

@@ -9,5 +9,6 @@
 #define GET_H_INCLUDED
 
 SEXP get(SEXP, const char *);
+void set(SEXP, const char *, SEXP);
 
 #endif

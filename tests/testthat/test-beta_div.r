@@ -148,7 +148,7 @@ test_that("beta diversity", {
   
   # Gower ====
   
-  expect_equal( # vegan(counts_p, 'gower')
+  expect_equal( # vegan(counts_p, 'gower'); cluster::daisy(counts_p, 'gower')
     object   = as.vector(gower(counts)), 
     expected = c(0.558796296296296,  0.584126984126984, 0.67, 
                  0.0830026455026455, 0.26287037037037,  0.345873015873016 ))

@@ -23,81 +23,100 @@
 #'     
 #' @param seed   An integer seed for randomizing which observations to keep or 
 #'        drop. If you need to create different random rarefactions of the same 
-#'        data, set the seed to a different number each time.
+#'        data, set the seed to a different number each time. Default: `0`
 #'     
 #' @param times   How many independent rarefactions to perform. If set, 
 #'        `rarefy()` will return a list of matrices. The seeds for each matrix
-#'        will be sequential, starting from `seed`.
+#'        will be sequential, starting from `seed`. Default: `NULL`
+#'     
+#' @param drop   Drop rows and columns with zero observations after rarefying.
+#'        Default: `TRUE`
 #' 
 #' 
-#' @return An integer matrix.
+#' @return A rarefied matrix. `Matrix` and `slam` objects will be returned with 
+#'         the same type; otherwise a base R `matrix` will be returned.
 #' 
 #' @export
 #' @examples
-#'     # Create an OTU matrix with 4 samples (A-D) and 5 OTUs.
-#'     counts <- matrix(
-#'       data     = c(4,0,3,2,6,0,8,0,0,5,0,9,0,0,7,0,10,0,0,1),
-#'       nrow     = 5,
-#'       dimnames = list(paste0('OTU', 1:5), LETTERS[1:4]) )
+#'     # A 4-sample x 5-OTU matrix with samples in rows.
+#'     counts <- matrix(c(0,0,0,0,0,8,9,10,5,5,5,5,2,0,0,0,6,5,7,0), 4, 5,
+#'       dimnames = list(LETTERS[1:4], paste0('OTU', 1:5)))
 #'     counts
-#'     colSums(counts)
+#'     rowSums(counts)
 #'     
-#'     counts <- rarefy(counts, depth = 14)
-#'     counts
-#'     colSums(counts)
+#'     # Rarefy all samples to a depth of 13.
+#'     # Note that sample 'A' has 0 counts and is dropped.
+#'     r_mtx <- rarefy(counts, depth = 13, seed = 1)
+#'     r_mtx
+#'     rowSums(r_mtx)
+#'     
+#'     # Keep zero-sum rows and columns by setting `drop = FALSE`.
+#'     rarefy(counts, depth = 13, drop = FALSE, seed = 1)
+#'     
+#'     # Rarefy to the depth of the 2nd most abundant sample (B, depth=22).
+#'     rarefy(counts, n_samples = 2, seed = 1)
+#'     
+#'     # Perform 3 independent rarefactions.
+#'     r_list <- rarefy(counts, depth = 13, times = 3, seed = 1)
+#'     length(r_list)
+#'     r_list[[1]]
+#'     
+#'     # The class of the input matrix is preserved.
+#'     if (requireNamespace('Matrix', quietly = TRUE)) {
+#'       counts_dgC <- Matrix::Matrix(counts, sparse = TRUE)
+#'       class(counts_dgC)
+#'       r_dgC <- rarefy(counts_dgC, depth = 13, seed = 1)
+#'       class(r_dgC)
+#'     }
 #' 
 rarefy <- function (
     counts, 
     depth     = 0.1, 
     n_samples = NULL, 
     seed      = 0, 
-    times     = NULL,
+    times     = NULL, 
+    drop      = TRUE, 
+    margin    = 1L, 
     cpus      = n_cpus() ) {
   
   validate_args()
   assert_integer_counts()
   
-  
-  
-  
-  # Set target depth according to number/pct of samples to keep/drop.
-  if (!is.null(n_samples)) {
-    if (n_samples == 0)     n_samples <- nrow(counts)             # Keep all
-    if (abs(n_samples) < 1) n_samples <- n_samples * nrow(counts) # Keep/drop percentage
-    if (n_samples <= -1)    n_samples <- nrow(counts) + n_samples # Drop n_samples
-    n_samples   <- max(1, floor(n_samples))                       # Keep at least one
-    curr_depths <- rowSums(counts)
-    target      <- rev(sort(curr_depths))[[n_samples]]
-  }
-  
-  # Depth is given as minimum percent of observations to keep.
-  else if (depth < 1) {
-    curr_depths <- rowSums(counts)
-    target      <- (sum(curr_depths) * depth) / length(curr_depths)
-    target      <- min(curr_depths[curr_depths >= target])
-  }
-  
-  # Depth is given as observations per sample to keep.
-  else {
-    target <- depth
-  }
-  
-  target <- as.integer(target)
-  
-  
   if (is.null(times)) {
     
-    .Call(C_rarefy, counts, target, seed, cpus)
-    
+    result <- .Call(C_rarefy, counts, depth, n_samples, seed, margin, cpus)
+
   } else {
     
     seeds <- ((seed + 2**31 - 1 + seq_len(times)) %% 2**32) - 2**31
     
-    lapply(seeds, function (seed) {
-      .Call(C_rarefy, counts, target, seed, cpus)
+    result <- lapply(seeds, function (seed) {
+      .Call(C_rarefy, counts, depth, n_samples, seed, margin, cpus)
     })
   }
   
+  if (drop) {
+    
+    # Generic function to drop zero-sum rows/cols from any matrix type.
+    dropper <- function (m) {
+
+      if (is.matrix(m)) {
+        row_sums <- rowSums(m)
+        col_sums <- colSums(m)
+      } else if (inherits(m, "simple_triplet_matrix")) {
+        row_sums <- slam::row_sums(m)
+        col_sums <- slam::col_sums(m)
+      } else {
+        row_sums <- Matrix::rowSums(m)
+        col_sums <- Matrix::colSums(m)
+      }
+
+      m[row_sums > 0, col_sums > 0, drop = FALSE]
+    }
+    
+    if (is.null(times)) result <- dropper(result)
+    else                result <- lapply(result, dropper)
+  }
+  
+  return (result)
 }
-
-

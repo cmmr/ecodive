@@ -5,8 +5,11 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <math.h>   // log, lgamma, pow, round, sqrt
-#include <stdlib.h> // calloc, free
 #include <string.h> // memset
+#include "ecomatrix.h"
+#include "ecotree.h"
+#include "normalize.h"
+#include "memory.h"
 
 // Detect if pthread is available.
 #if defined __has_include
@@ -16,91 +19,122 @@
 #  endif
 #endif
 
+typedef void *(*pthread_func_t)(void *);
+
 #define ADIV_ACE          1
 #define ADIV_BERGER       2
 #define ADIV_BRILLOUIN    3
 #define ADIV_CHAO1        4
-#define ADIV_FISHER       5
-#define ADIV_INV_SIMPSON  6
-#define ADIV_MARGALEF     7
-#define ADIV_MCINTOSH     8
-#define ADIV_MENHINICK    9
-#define ADIV_OBSERVED    10
-#define ADIV_SHANNON     11
-#define ADIV_SIMPSON     12
-#define ADIV_SQUARES     13
+#define ADIV_FAITH        5
+#define ADIV_FISHER       6
+#define ADIV_INV_SIMPSON  7
+#define ADIV_MARGALEF     8
+#define ADIV_MCINTOSH     9
+#define ADIV_MENHINICK   10
+#define ADIV_OBSERVED    11
+#define ADIV_SHANNON     12
+#define ADIV_SIMPSON     13
+#define ADIV_SQUARES     14
 
-static int     algorithm;
-static double *otu_mtx;
-static int     n_otus;
 static int     n_samples;
+static int    *pos_vec;
+static int    *otu_vec;
+static double *val_vec;
 static int     n_threads;
 static SEXP   *sexp_extra;
 static double *result_vec;
-static int     mtx_len;
-
 
 /*
- * START_SAMPLE_LOOP and END_SAMPLE_LOOP define a simple loop 
- * for iterating over all samples, ensuring that each is 
- * assigned to only a single thread. Provides `sample`, and 
- * `result` initialized to 0; expects `result` at the end.
+ * FOREACH_SAMPLE iterates over all samples, ensuring that each 
+ * is assigned to only a single thread. Provides `sample`, `nnz`, 
+ * and `result` initialized to 0; expects `result` at the end.
  */
+#define FOREACH_SAMPLE(expression)                             \
+  do {                                                         \
+    int sample = *((int *) arg);                               \
+    for (; sample < n_samples; sample += n_threads) {          \
+      double *val_begin = val_vec + pos_vec[sample];           \
+      double *val_end   = val_vec + pos_vec[sample + 1];       \
+      int     nnz       = val_end - val_begin;                 \
+      double result     = 0;                                   \
+      if (nnz) {                                               \
+        expression;                                            \
+      }                                                        \
+      else {                                                   \
+        result = NA_REAL;                                      \
+      }                                                        \
+      result_vec[sample] = result;                             \
+    }                                                          \
+  } while (0)
 
-#define START_SAMPLE_LOOP                                                 \
-  int thread_i = *((int *) arg);                                          \
-  for (int sample = thread_i; sample < n_samples; sample += n_threads) {  \
-    double result = 0;
+/*
+ * FOREACH_VAL iterates over each value for the current sample.
+ * Sets val to point to each value in val_vec in turn.
+ */
+#define FOREACH_VAL(expression)                                \
+  do {                                                         \
+    double *val = val_begin;                                   \
+    for (; val != val_end; val++) {                            \
+      expression;                                              \
+    }                                                          \
+  } while (0)
 
-#define END_SAMPLE_LOOP                                        \
-    result_vec[sample] = result;                               \
-  }
 
 
 //======================================================
 // Abundance-based Coverage Estimator (Chao & Lee 1992)
 //======================================================
+
+static int     ace_cutoff;
+static double *ace_rare_nnz_k_mtx;
+
 static void *ace(void *arg) {
   
-  int cutoff         = asInteger(*sexp_extra) + 1;
-  double *rare_nnz_k = calloc(cutoff, sizeof(double));
+  int     thread_i       = *((int *) arg);
+  int     cutoff         = ace_cutoff;
+  double *rare_nnz_k_vec = ace_rare_nnz_k_mtx + (thread_i * cutoff);
   
-  START_SAMPLE_LOOP
-  
-  double abund_nnz = 0;
-  double rare_sum  = 0;
-  double rare_nnz  = 0;
-  
-  memset(rare_nnz_k, 0, cutoff * sizeof(double));
-  
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) {
-      if (x < cutoff) {
-        int x_int = (int)(ceil(x));
+  FOREACH_SAMPLE(
+    
+    double abund_nnz = 0;
+    double rare_sum  = 0;
+    double rare_nnz  = 0;
+    
+    memset(rare_nnz_k_vec, 0, cutoff * sizeof(double));
+    
+    FOREACH_VAL(
+      if (*val < cutoff) {
+        int x_int = (int)(ceil(*val));
         rare_sum += x_int;
         rare_nnz++;
-        rare_nnz_k[x_int]++;
+        rare_nnz_k_vec[x_int]++;
       }
       else {
         abund_nnz++;
       }
-    }
-  }
+    ); // FOREACH_VAL
+    
+    for (int k = 1; k < cutoff; k++)
+      result += k * (k - 1) * rare_nnz_k_vec[k];
+    
+    double p = (1 - (rare_nnz_k_vec[1] / rare_sum));
+    
+    result = result * rare_nnz/(p * rare_sum * (rare_sum - 1)) - 1;
+    if (result < 0) result = 0;
+    result = abund_nnz + rare_nnz/p + result * rare_nnz_k_vec[1]/p;
+    
+  ); // FOREACH_SAMPLE
   
-  for (int k = 1; k < cutoff; k++)
-    result += k * (k - 1) * rare_nnz_k[k];
-  
-  double p = (1 - (rare_nnz_k[1] / rare_sum));
-  
-  result = result * rare_nnz/(p * rare_sum * (rare_sum - 1)) - 1;
-  if (result < 0) result = 0;
-  result = abund_nnz + rare_nnz/p + result * rare_nnz_k[1]/p;
-  
-  END_SAMPLE_LOOP
-  
-  free(rare_nnz_k);
   return NULL;
+}
+
+static pthread_func_t ace_setup () {
+  
+  ace_cutoff         = asInteger(*sexp_extra) + 1;
+  otu_vec            = maybe_free_one(otu_vec);
+  ace_rare_nnz_k_mtx = safe_malloc(n_threads * ace_cutoff * sizeof(double));
+  
+  return ace;
 }
   
   
@@ -109,14 +143,12 @@ static void *ace(void *arg) {
 // max(x) / sum(x)
 //======================================================
 static void *berger(void *arg) {
-  START_SAMPLE_LOOP
+  FOREACH_SAMPLE(
+    FOREACH_VAL(
+      if (*val > result) result = *val;
+    );
+  );
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x > result) result = x;
-  }
-  
-  END_SAMPLE_LOOP
   return NULL;
 }
   
@@ -127,21 +159,18 @@ static void *berger(void *arg) {
 // note: lgamma(x + 1) == log(x!)
 //======================================================
 static void *brillouin(void *arg) {
-  START_SAMPLE_LOOP
+  FOREACH_SAMPLE(
+    
+    double depth = 0;
   
-  double depth = 0;
+    FOREACH_VAL(
+      depth  += *val;
+      result += lgamma(*val + 1);
+    );
+    
+    result = (lgamma(depth + 1) - result) / depth;
+  );
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) {
-      depth  += x;
-      result += lgamma(x + 1);
-    }
-  }
-  
-  result = (lgamma(depth + 1) - result) / depth;
-  
-  END_SAMPLE_LOOP
   return NULL;
 }
   
@@ -152,23 +181,74 @@ static void *brillouin(void *arg) {
 // sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
 //======================================================
 static void *chao1(void *arg) {
-  START_SAMPLE_LOOP
+  FOREACH_SAMPLE(
     
-  double nnz = 0, ones = 0, twos = 0;
+    double ones = 0;
+    double twos = 0;
+    
+    FOREACH_VAL(
+      if      (*val == 1) ones++;
+      else if (*val == 2) twos++;
+    );
+    
+    result = nnz + ((ones * ones) / (2 * twos));
+  );
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) {
-      nnz++;
-      if      (x <= 1) ones++;
-      else if (x <= 2) twos++;
-    }
-  }
-  
-  result = nnz + ((ones * ones) / (2 * twos));
-  
-  END_SAMPLE_LOOP
   return NULL;
+}
+
+
+
+//======================================================
+// Faith's Phylogenetic Diversity
+// Find the edges that an otu passes through.
+//======================================================
+
+static ecotree_t *faith_et;
+static char      *faith_has_edge_mtx;
+
+static void *faith(void *arg) {
+  
+  int     thread_i     = *((int *) arg);
+  int     n_edges      = faith_et->n_edges;
+  node_t *node_vec     = faith_et->node_vec;
+  char   *has_edge_vec = faith_has_edge_mtx + (thread_i * n_edges);
+  
+  FOREACH_SAMPLE(
+    
+    memset(has_edge_vec, 0, n_edges * sizeof(char));
+    
+    int *otu_begin = otu_vec + pos_vec[sample];
+    int *otu_end   = otu_vec + pos_vec[sample + 1];
+    
+    for (int *otu = otu_begin; otu != otu_end; otu++) {
+      
+      int node_i = *otu;    // start at OTU tip/leaf in tree
+      while (node_i > -1) { // traverse until we hit the tree's root
+        
+        node_t *node   = node_vec + node_i;
+        char *has_edge = has_edge_vec + node->edge;
+        
+        if (*has_edge) break; // already traversed
+        *has_edge = 1;
+        
+        result += node->length;
+        node_i  = node->parent;
+      }
+    }
+    
+  );
+  
+  return NULL;
+}
+
+static pthread_func_t faith_setup () {
+  
+  faith_et           = new_ecotree(*sexp_extra);
+  val_vec            = maybe_free_one(val_vec);
+  faith_has_edge_mtx = safe_malloc(n_threads * faith_et->n_edges * sizeof(char));
+  
+  return faith;
 }
 
 
@@ -181,21 +261,14 @@ static void *fisher(void *arg) {
   int    digits = asInteger(*sexp_extra);
   double mult   = pow(10, digits);
   
-  START_SAMPLE_LOOP
-  
-  double nnz = 0, depth = 0;
-  
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) {
-      nnz++;
-      depth += x;
-    }
-  }
-  
-  if (nnz) {
+  FOREACH_SAMPLE(
     
-    double alpha, lo = 2, hi = 16;
+    double depth = 0;
+    FOREACH_VAL(depth += *val);
+    
+    double alpha;
+    double lo = 2;
+    double hi = 16;
     
     // Sometimes the result will be less than 2 or greater than 16.
     while (lo * log(1 + depth/lo) > nnz) { hi = lo; lo /= 2; }
@@ -214,10 +287,8 @@ static void *fisher(void *arg) {
     }
     
     result = round(hi * mult) / mult;
-  }
+  );
   
-  
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -228,16 +299,14 @@ static void *fisher(void *arg) {
 // 1 / sum(p ** 2)
 //======================================================
 static void *inv_simpson(void *arg) {
-  START_SAMPLE_LOOP
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) result += x * x;
-  }
+  FOREACH_SAMPLE(
+    
+    FOREACH_VAL(result += *val * *val);
   
-  if (result) result = 1 / result;
+    result = 1 / result;
+  );
   
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -247,21 +316,16 @@ static void *inv_simpson(void *arg) {
 // (sum(x > 0) - 1) / log(sum(x))
 //======================================================
 static void *margalef(void *arg) {
-  START_SAMPLE_LOOP
   
-  double nnz = 0, depth = 0;
+  FOREACH_SAMPLE(
+    
+    double depth = 0;
+    
+    FOREACH_VAL(depth += *val);
+    
+    result = (nnz - 1) / log(depth);
+  );
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) {
-      nnz++;
-      depth += x;
-    }
-  }
-  
-  result = (nnz - 1) / log(depth);
-  
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -271,21 +335,19 @@ static void *margalef(void *arg) {
 // (sum(x) - sqrt(sum(x^2))) / (sum(x) - sqrt(sum(x)))
 //======================================================
 static void *mcintosh(void *arg) {
-  START_SAMPLE_LOOP
   
-  double depth = 0;
+  FOREACH_SAMPLE(
+    
+    double depth = 0;
+    
+    FOREACH_VAL(
+      depth  += *val;
+      result += *val * *val;
+    );
+    
+    result = (depth - sqrt(result)) / (depth - sqrt(depth));
+  );
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) {
-      depth  += x;
-      result += x * x;
-    }
-  }
-  
-  result = (depth - sqrt(result)) / (depth - sqrt(depth));
-  
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -295,21 +357,16 @@ static void *mcintosh(void *arg) {
 // sum(x > 0) / sqrt(sum(x))
 //======================================================
 static void *menhinick(void *arg) {
-  START_SAMPLE_LOOP
   
-  double depth = 0;
+  FOREACH_SAMPLE(
+    
+    double depth = 0;
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) {
-      depth += x;
-      result++;
-    }
-  }
+    FOREACH_VAL(depth += *val);
+    
+    result = nnz / sqrt(depth);
+  );
   
-  result /= sqrt(depth);
-  
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -319,13 +376,9 @@ static void *menhinick(void *arg) {
 // sum(x > 0)
 //======================================================
 static void *observed(void *arg) {
-  START_SAMPLE_LOOP
   
-  for (int i = sample; i < mtx_len; i += n_samples)
-    if (otu_mtx[i])
-      result++;
+  FOREACH_SAMPLE(result = nnz);
   
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -336,16 +389,14 @@ static void *observed(void *arg) {
 // -sum(p * log(p))
 //======================================================
 static void *shannon(void *arg) {
-  START_SAMPLE_LOOP
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) result += x * log(x);
-  }
+  FOREACH_SAMPLE(
+    
+    FOREACH_VAL(result += *val * log(*val));
   
-  result *= -1;
+    result *= -1;
+  );
   
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -356,16 +407,14 @@ static void *shannon(void *arg) {
 // 1 - sum(p ** 2)
 //======================================================
 static void *simpson(void *arg) {
-  START_SAMPLE_LOOP
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) result += x * x;
-  }
+  FOREACH_SAMPLE(
+    
+    FOREACH_VAL(result += *val * *val);
   
-  result = 1 - result;
+    result = 1 - result;
+  );
   
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -378,25 +427,23 @@ static void *simpson(void *arg) {
 // ((sum(x^2) * (F1^2)) / ((N^2) - F1 * S)) + S
 //======================================================
 static void *squares(void *arg) {
-  START_SAMPLE_LOOP
   
-  double nnz = 0, depth = 0, singletons = 0;
+  FOREACH_SAMPLE(
+    
+    double depth      = 0;
+    double singletons = 0;
+    
+    FOREACH_VAL(
+      depth  += *val;
+      result += *val * *val;
+      if (*val == 1) singletons++;
+    );
+    
+    result *= (singletons * singletons);
+    result /= (depth * depth) - singletons * nnz;
+    result += nnz;
+  );
   
-  for (int i = sample; i < mtx_len; i += n_samples) {
-    double x = otu_mtx[i];
-    if (x) {
-      nnz++;
-      depth  += x;
-      result += x * x;
-      if (x == 1) singletons++;
-    }
-  }
-  
-  result *= (singletons * singletons);
-  result /= (depth * depth) - singletons * nnz;
-  result += nnz;
-  
-  END_SAMPLE_LOOP
   return NULL;
 }
 
@@ -407,34 +454,41 @@ static void *squares(void *arg) {
 //======================================================
 SEXP C_alpha_div(
     SEXP sexp_algorithm, SEXP sexp_otu_mtx, 
+    SEXP sexp_margin,    SEXP sexp_norm, 
     SEXP sexp_n_threads, SEXP sexp_extra_args ) {
   
-  algorithm  = asInteger(sexp_algorithm);
-  otu_mtx    = REAL(sexp_otu_mtx);
-  n_otus     = ncols(sexp_otu_mtx);
-  n_samples  = nrows(sexp_otu_mtx);
+  init_n_ptrs(10);
+  
   n_threads  = asInteger(sexp_n_threads);
   sexp_extra = &sexp_extra_args;
   
-  mtx_len = n_otus * n_samples;
+  ecomatrix_t *em = new_ecomatrix(sexp_otu_mtx, sexp_margin);
+  if (!isNull(sexp_norm)) normalize(em, sexp_norm, n_threads);
+  
+  n_samples = em->n_samples;
+  pos_vec   = em->pos_vec;
+  otu_vec   = em->otu_vec;
+  val_vec   = em->val_vec;
   
   
   // function to run
-  void * (*adiv_func)(void *) = NULL;
-  switch (algorithm) {
-    case ADIV_ACE:         adiv_func = ace;         break;
-    case ADIV_BERGER:      adiv_func = berger;      break;
-    case ADIV_BRILLOUIN:   adiv_func = brillouin;   break;
-    case ADIV_CHAO1:       adiv_func = chao1;       break;
-    case ADIV_FISHER:      adiv_func = fisher;      break;
-    case ADIV_INV_SIMPSON: adiv_func = inv_simpson; break;
-    case ADIV_MARGALEF:    adiv_func = margalef;    break;
-    case ADIV_MCINTOSH:    adiv_func = mcintosh;    break;
-    case ADIV_MENHINICK:   adiv_func = menhinick;   break;
-    case ADIV_OBSERVED:    adiv_func = observed;    break;
-    case ADIV_SHANNON:     adiv_func = shannon;     break;
-    case ADIV_SIMPSON:     adiv_func = simpson;     break;
-    case ADIV_SQUARES:     adiv_func = squares;     break;
+  // void * (*adiv_func)(void *) = NULL;
+  pthread_func_t adiv_func = NULL;
+  switch (asInteger(sexp_algorithm)) {
+    case ADIV_ACE:         adiv_func = ace_setup();   break;
+    case ADIV_BERGER:      adiv_func = berger;        break;
+    case ADIV_BRILLOUIN:   adiv_func = brillouin;     break;
+    case ADIV_CHAO1:       adiv_func = chao1;         break;
+    case ADIV_FAITH:       adiv_func = faith_setup(); break;
+    case ADIV_FISHER:      adiv_func = fisher;        break;
+    case ADIV_INV_SIMPSON: adiv_func = inv_simpson;   break;
+    case ADIV_MARGALEF:    adiv_func = margalef;      break;
+    case ADIV_MCINTOSH:    adiv_func = mcintosh;      break;
+    case ADIV_MENHINICK:   adiv_func = menhinick;     break;
+    case ADIV_OBSERVED:    adiv_func = observed;      break;
+    case ADIV_SHANNON:     adiv_func = shannon;       break;
+    case ADIV_SIMPSON:     adiv_func = simpson;       break;
+    case ADIV_SQUARES:     adiv_func = squares;       break;
   }
   
   if (adiv_func == NULL) { // # nocov start
@@ -446,13 +500,7 @@ SEXP C_alpha_div(
   // Create the diversity vector to return
   SEXP sexp_result_vec = PROTECT(allocVector(REALSXP, n_samples));
   result_vec           = REAL(sexp_result_vec);
-  SEXP sexp_mtx_dimnames = getAttrib(sexp_otu_mtx, R_DimNamesSymbol);
-  if (sexp_mtx_dimnames != R_NilValue) {
-    SEXP sexp_mtx_rownames = VECTOR_ELT(sexp_mtx_dimnames, 0);
-    if (sexp_mtx_rownames != R_NilValue) {
-      setAttrib(sexp_result_vec, R_NamesSymbol, sexp_mtx_rownames);
-    }
-  }
+  setAttrib(sexp_result_vec, R_NamesSymbol, em->sexp_sample_names);
   
   
   // Run WITH multithreading
@@ -460,22 +508,15 @@ SEXP C_alpha_div(
     if (n_threads > 1 && n_samples > 100) {
       
       // threads and their thread_i arguments
-      pthread_t *tids = calloc(n_threads, sizeof(pthread_t));
-      int       *args = calloc(n_threads, sizeof(int));
-      
-      if (tids == NULL || args == NULL) { // # nocov start
-        free(tids); free(args);
-        error("Insufficient memory for parallel alpha diversity calculation.");
-        return R_NilValue;
-      } // # nocov end
+      pthread_t *tids = (pthread_t*) R_alloc(n_threads, sizeof(pthread_t));
+      int       *args = (int*)       R_alloc(n_threads, sizeof(int));
       
       int i, n = n_threads;
       for (i = 0; i < n; i++) args[i] = i;
       for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, adiv_func, &args[i]);
       for (i = 0; i < n; i++) pthread_join(tids[i], NULL);
       
-      free(tids); free(args);
-      
+      free_all();
       UNPROTECT(1);
       return sexp_result_vec;
     }
@@ -487,6 +528,7 @@ SEXP C_alpha_div(
   int thread_i = 0;
   adiv_func(&thread_i);
   
+  free_all();
   UNPROTECT(1);
   return sexp_result_vec;
 }

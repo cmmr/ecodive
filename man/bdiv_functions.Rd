@@ -40,83 +40,169 @@
 \alias{variance_adjusted_unifrac}
 \title{Beta Diversity Metrics}
 \usage{
-aitchison(counts, pseudocount = NULL, pairs = NULL, cpus = n_cpus())
+aitchison(
+  counts,
+  pseudocount = NULL,
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-bhattacharyya(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+bhattacharyya(
+  counts,
+  norm = "percent",
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-bray(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+bray(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-canberra(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+canberra(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-chebyshev(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+chebyshev(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-chord(counts, pairs = NULL, cpus = n_cpus())
+chord(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 
-clark(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+clark(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-divergence(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+divergence(
+  counts,
+  norm = "percent",
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-euclidean(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+euclidean(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-gower(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+gower(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-hellinger(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+hellinger(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-horn(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+horn(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-jensen(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+jensen(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-jsd(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+jsd(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-lorentzian(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+lorentzian(
+  counts,
+  norm = "percent",
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-manhattan(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+manhattan(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-matusita(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+matusita(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-minkowski(counts, norm = "percent", power = 1.5, pairs = NULL, cpus = n_cpus())
+minkowski(
+  counts,
+  norm = "percent",
+  power = 1.5,
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-morisita(counts, pairs = NULL, cpus = n_cpus())
+morisita(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 
-motyka(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+motyka(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-psym_chisq(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+psym_chisq(
+  counts,
+  norm = "percent",
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-soergel(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+soergel(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-squared_chisq(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+squared_chisq(
+  counts,
+  norm = "percent",
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-squared_chord(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+squared_chord(
+  counts,
+  norm = "percent",
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-squared_euclidean(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+squared_euclidean(
+  counts,
+  norm = "percent",
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-topsoe(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+topsoe(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
-wave_hedges(counts, norm = "percent", pairs = NULL, cpus = n_cpus())
+wave_hedges(
+  counts,
+  norm = "percent",
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-hamming(counts, pairs = NULL, cpus = n_cpus())
+hamming(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 
-jaccard(counts, pairs = NULL, cpus = n_cpus())
+jaccard(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 
-ochiai(counts, pairs = NULL, cpus = n_cpus())
+ochiai(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 
-sorensen(counts, pairs = NULL, cpus = n_cpus())
+sorensen(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 
-unweighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
+unweighted_unifrac(
+  counts,
+  tree = NULL,
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-weighted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
+weighted_unifrac(
+  counts,
+  tree = NULL,
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
-normalized_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
+normalized_unifrac(
+  counts,
+  tree = NULL,
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 
 generalized_unifrac(
   counts,
   tree = NULL,
   alpha = 0.5,
+  margin = 1L,
   pairs = NULL,
   cpus = n_cpus()
 )
 
-variance_adjusted_unifrac(counts, tree = NULL, pairs = NULL, cpus = n_cpus())
+variance_adjusted_unifrac(
+  counts,
+  tree = NULL,
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 }
 \arguments{
 \item{counts}{A numeric matrix of count data where each column is a
@@ -127,6 +213,11 @@ feature, and each row is a sample. Any object coercible with
 \item{pseudocount}{The value to add to all counts in \code{counts} to prevent
 taking \code{log(0)} for unobserved features. The default, \code{NULL}, selects
 the smallest non-zero value in \code{counts}.}
+
+\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
+your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
+\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
+\code{TreeSummarizedExperiment} object. Default: \code{1L}}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.

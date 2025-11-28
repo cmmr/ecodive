@@ -14,3 +14,4 @@ nz_counts_p <- t(apply(nz_counts, 1L, function (x) x / sum(x)))
 
 tree_str <- "((OTU4:0.676,(('OTU2':0.548,OTU3:0.629):0.25,OTU1:0.751):0.276):0.056,OTU5:0.432);"
 tree     <- read_tree(tree_str)
+

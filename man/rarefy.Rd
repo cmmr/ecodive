@@ -10,6 +10,8 @@ rarefy(
   n_samples = NULL,
   seed = 0,
   times = NULL,
+  drop = TRUE,
+  margin = 1L,
   cpus = n_cpus()
 )
 }
@@ -31,17 +33,26 @@ If \code{NULL}, then \code{depth} is used instead. Default: \code{NULL}}
 
 \item{seed}{An integer seed for randomizing which observations to keep or
 drop. If you need to create different random rarefactions of the same
-data, set the seed to a different number each time.}
+data, set the seed to a different number each time. Default: \code{0}}
 
 \item{times}{How many independent rarefactions to perform. If set,
 \code{rarefy()} will return a list of matrices. The seeds for each matrix
-will be sequential, starting from \code{seed}.}
+will be sequential, starting from \code{seed}. Default: \code{NULL}}
+
+\item{drop}{Drop rows and columns with zero observations after rarefying.
+Default: \code{TRUE}}
+
+\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
+your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
+\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
+\code{TreeSummarizedExperiment} object. Default: \code{1L}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
-An integer matrix.
+A rarefied matrix. \code{Matrix} and \code{slam} objects will be returned with
+the same type; otherwise a base R \code{matrix} will be returned.
 }
 \description{
 Sub-sample OTU observations such that all samples have an equal number.
@@ -49,16 +60,35 @@ If called on data with non-integer abundances, values will be re-scaled to
 integers between 1 and \code{depth} such that they sum to \code{depth}.
 }
 \examples{
-    # Create an OTU matrix with 4 samples (A-D) and 5 OTUs.
-    counts <- matrix(
-      data     = c(4,0,3,2,6,0,8,0,0,5,0,9,0,0,7,0,10,0,0,1),
-      nrow     = 5,
-      dimnames = list(paste0('OTU', 1:5), LETTERS[1:4]) )
+    # A 4-sample x 5-OTU matrix with samples in rows.
+    counts <- matrix(c(0,0,0,0,0,8,9,10,5,5,5,5,2,0,0,0,6,5,7,0), 4, 5,
+      dimnames = list(LETTERS[1:4], paste0('OTU', 1:5)))
     counts
-    colSums(counts)
+    rowSums(counts)
     
-    counts <- rarefy(counts, depth = 14)
-    counts
-    colSums(counts)
+    # Rarefy all samples to a depth of 13.
+    # Note that sample 'A' has 0 counts and is dropped.
+    r_mtx <- rarefy(counts, depth = 13, seed = 1)
+    r_mtx
+    rowSums(r_mtx)
+    
+    # Keep zero-sum rows and columns by setting `drop = FALSE`.
+    rarefy(counts, depth = 13, drop = FALSE, seed = 1)
+    
+    # Rarefy to the depth of the 2nd most abundant sample (B, depth=22).
+    rarefy(counts, n_samples = 2, seed = 1)
+    
+    # Perform 3 independent rarefactions.
+    r_list <- rarefy(counts, depth = 13, times = 3, seed = 1)
+    length(r_list)
+    r_list[[1]]
+    
+    # The class of the input matrix is preserved.
+    if (requireNamespace('Matrix', quietly = TRUE)) {
+      counts_dgC <- Matrix::Matrix(counts, sparse = TRUE)
+      class(counts_dgC)
+      r_dgC <- rarefy(counts_dgC, depth = 13, seed = 1)
+      class(r_dgC)
+    }
 
 }
