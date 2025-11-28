@@ -1,0 +1,181 @@
+# Selecting a Beta Diversity Metric
+
+## A Practical Guide to Metric Selection: Aligning Method with Research Question
+
+The theoretical and mathematical properties of the various beta
+diversity metrics provide the foundation for making an informed choice.
+However, the ultimate decision must be driven by the specific research
+question and the nature of the dataset. This vignette provides a
+practical framework, including a decision tree and illustrative case
+studies, to guide researchers from their scientific question to an
+appropriate metric.
+
+### A Decision Tree for Metric Selection
+
+This decision tree presents a series of questions to help a researcher
+systematically narrow the field of 37 metrics to a small, relevant
+subset.
+
+#### 1. Do you have a reliable phylogenetic tree relating your taxa (e.g., ASVs/OTUs)?
+
+- **YES:** Your analysis can and likely should leverage phylogenetic
+  information.
+
+  - Are you primarily interested in the presence/absence of entire
+    evolutionary lineages (e.g., detecting the invasion of a novel
+    phylum)? -\> Start with *Unweighted UniFrac*.
+
+  - Are you primarily interested in shifts in the abundance of major,
+    well-established lineages (e.g., the Firmicutes/Bacteroidetes
+    ratio)? -\> Start with *Weighted UniFrac*.
+
+  - Are you interested in a robust analysis that captures changes across
+    rare, moderate, and abundant lineages, or are you unsure? -\> Use
+    *Generalized UniFrac* (with α=0.5) as a powerful and balanced
+    primary choice. Consider using *Variance-Adjusted Weighted UniFrac*
+    for increased statistical power if you have uneven sample sizes.
+
+- **NO:** You must use a Non-Phylogenetic Metric. Proceed to Question 2.
+
+#### 2. Is your data compositional (i.e., relative abundances from high-throughput sequencing)?
+
+- **YES:** You must account for the relative nature of your data.
+
+  - The most statistically rigorous approach is to use a compositional
+    metric. -\> Your primary choice should be *Aitchison* distance. Be
+    prepared to handle zeros using a pseudocount or other imputation
+    method.
+
+  - If you choose to use a non-compositional metric, select one that is
+    robust to transformations to proportions and less sensitive to
+    extreme values. -\> Good secondary choices include *Hellinger*,
+    *Jensen-Shannon Divergence*, or *Horn-Morisita*. Note that these do
+    not fully address the compositionality issue but are often better
+    behaved than Bray-Curtis or Euclidean on relative data.
+
+- **NO:** Your data represents absolute counts or measurements (e.g.,
+  from microscopy or quantitative PCR). Proceed to Question 3.
+
+#### 3. What is the primary ecological signal you want to detect?
+
+- Presence/Absence of specific taxa (Community Membership): You are
+  interested in which species are present, regardless of their
+  abundance.
+
+  - -\> Choose a Qualitative (Binary) Metric. Your best options are
+    *Jaccard* (the standard for turnover) or *Dice-Sorensen* (which
+    gives more weight to shared species).
+
+- Shifts in the abundance of taxa (Community Structure): You are
+  interested in which species are dominant and how their abundances
+  change.
+
+  - -\> Choose a Quantitative Metric.
+
+    - If you want a robust, widely understood standard that is sensitive
+      to dominant taxa -\> Use *Bray-Curtis*.
+
+    - If your data consists of raw integer counts and you are concerned
+      about sample size effects -\> Use the *Morisita index*.
+
+    - If you want to down-weight the influence of hyper-dominant species
+      for a more balanced view of abundance changes -\> Use the
+      *Hellinger distance*.
+
+    - If you are concerned about small changes in very rare taxa being
+      amplified -\> Avoid the Canberra distance.
+
+### Case Studies: Matching Metrics to Microbiome Research Questions
+
+The following case studies illustrate how the choice of metric directly
+influences the ability to answer a specific biological question.
+
+#### Case Study 1: Does antibiotic treatment eliminate specific rare, potentially pathogenic taxa?
+
+- **Research Question:** This question is explicitly about the presence
+  or absence of key organisms, which are likely to be rare in the
+  overall community. The massive shifts in abundant, commensal bacteria
+  are secondary to the primary question of pathogen eradication.
+
+- **Recommended Metric:** *Jaccard* or *Unweighted UniFrac*.
+
+- **Justification:** A quantitative metric like Bray-Curtis would be
+  dominated by the large-scale disruption of dominant taxa like
+  Bacteroides or Faecalibacterium. The signal of the rare pathogen’s
+  disappearance could be completely lost. In contrast, a qualitative
+  metric like Jaccard treats the disappearance of the pathogen (a change
+  from 1 to 0) as a significant event, directly addressing the research
+  question. If a phylogenetic tree is available, Unweighted UniFrac is
+  even better, as it would capture the loss of an entire evolutionary
+  lineage, which might be more biologically meaningful than the loss of
+  a single ASV.
+
+#### Case Study 2: How does a high-fiber vs. high-fat diet alter the overall gut microbiome structure?
+
+- **Research Question:** This question concerns broad, systemic shifts
+  in the community’s metabolic capacity. The expected signal is a change
+  in the abundance of major functional guilds—for example, an increase
+  in fiber-degrading Firmicutes and a decrease in bile-acid-metabolizing
+  bacteria.
+
+- **Recommended Metrics:** *Bray-Curtis* and *Hellinger*.
+
+- **Justification:** This question is about community structure and the
+  abundance of major players. Bray-Curtis is an excellent choice as it
+  is sensitive to these shifts in dominant and abundant taxa. Using
+  Hellinger as a complementary metric is a robust strategy. The
+  Hellinger distance, by using a square-root transformation, will
+  down-weight the influence of the most hyper-dominant taxa, providing a
+  slightly different and potentially more stable view of the overall
+  structural change. If both metrics show a significant difference
+  between diet groups, the conclusion is very strong.
+
+#### Case Study 3: Comparing gut communities with vastly different dominant phyla (e.g., Bacteroidetes-dominant vs. Firmicutes-dominant).
+
+- **Research Question:** The goal is to understand what other, more
+  subtle structural differences exist between these two community types,
+  beyond the obvious phylum-level dominance. Are the relative
+  proportions of less abundant genera within the Proteobacteria
+  different, for example?
+
+- **Recommended Metric:** *Aitchison distance*.
+
+- **Justification:** This is a classic compositionality problem. In a
+  Bray-Curtis analysis, the massive difference in the abundance of
+  Firmicutes vs. Bacteroidetes would create such a large distance
+  between the two sample types that all other variation would be
+  rendered invisible. The ordination plot would likely show two tight,
+  distant clusters, but reveal nothing about the internal structure of
+  those clusters. Aitchison distance, by using log-ratios, effectively
+  normalizes for the dominant phylum and calculates the distance based
+  on the relative proportions of all other taxa to one another. This
+  allows the researcher to “see through” the dominance effect and
+  investigate the more subtle structural differences that directly
+  address the research question.
+
+#### Case Study 4: Are the microbial communities in two soil types different due to the loss of a deep evolutionary lineage or due to shifts within the same major families?
+
+- **Research Question:** This question is explicitly phylogenetic and
+  hierarchical. It seeks to distinguish between two distinct types of
+  evolutionary change.
+
+- **Recommended Metrics:** *Generalized UniFrac (GUniFrac)* with varying
+  alpha values, and comparison of *Unweighted and Weighted UniFrac*.
+
+- **Justification:** A non-phylogenetic metric cannot answer this
+  question. The best approach is to use the GUniFrac framework. The
+  researcher would calculate the distance matrix using multiple values
+  of α (e.g., 0, 0.5, and 1). If the separation between soil types is
+  most significant when α=0 (Unweighted UniFrac), it suggests the
+  difference is driven by the presence/absence of entire clades (a deep
+  evolutionary change). If the separation is strongest when α=1
+  (Weighted UniFrac), it suggests the difference is due to abundance
+  shifts within lineages that are present in both soils (a shallow
+  change). If the signal is strongest at α=0.5, it points to changes in
+  moderately abundant taxa as the key drivers, providing the most
+  nuanced answer.
+
+------------------------------------------------------------------------
+
+Content generated by Google Gemini. Verified and formatted by Daniel
+Smith. Sept. 5th, 2025.

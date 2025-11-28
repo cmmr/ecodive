@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Beta Diversity Metrics</h1>
-      <small class="dont-index">Source: <a href="https://github.com/cmmr/ecodive/blob/v2.1.0/R/beta_div.r" class="external-link"><code>R/beta_div.r</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/cmmr/ecodive/blob/main/R/beta_div.r" class="external-link"><code>R/beta_div.r</code></a></small>
       <div class="d-none name"><code>bdiv_functions.Rd</code></div>
     </div>
 
@@ -47,83 +47,169 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aitchison</span><span class="op">(</span><span class="va">counts</span>, pseudocount <span class="op">=</span> <span class="cn">NULL</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aitchison</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  pseudocount <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">bhattacharyya</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">bhattacharyya</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">bray</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">bray</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">canberra</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">canberra</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">chebyshev</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">chebyshev</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">chord</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">chord</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">clark</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">clark</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">divergence</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">divergence</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">euclidean</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">euclidean</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">gower</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">gower</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">hellinger</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">hellinger</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">horn</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">horn</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">jensen</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">jensen</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">jsd</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">jsd</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">lorentzian</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">lorentzian</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">manhattan</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">manhattan</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">matusita</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">matusita</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">minkowski</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, power <span class="op">=</span> <span class="fl">1.5</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">minkowski</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  power <span class="op">=</span> <span class="fl">1.5</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">morisita</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">morisita</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">motyka</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">motyka</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">psym_chisq</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">psym_chisq</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">soergel</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">soergel</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">squared_chisq</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">squared_chisq</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">squared_chord</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">squared_chord</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">squared_euclidean</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">squared_euclidean</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">topsoe</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">topsoe</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">wave_hedges</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">wave_hedges</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  norm <span class="op">=</span> <span class="st">"percent"</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">hamming</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">hamming</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">jaccard</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">jaccard</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ochiai</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">ochiai</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">sorensen</span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">sorensen</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">unweighted_unifrac</span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="cn">NULL</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">unweighted_unifrac</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">weighted_unifrac</span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="cn">NULL</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">weighted_unifrac</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">normalized_unifrac</span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="cn">NULL</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">normalized_unifrac</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">generalized_unifrac</span><span class="op">(</span></span>
 <span>  <span class="va">counts</span>,</span>
 <span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">variance_adjusted_unifrac</span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="cn">NULL</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">variance_adjusted_unifrac</span><span class="op">(</span></span>
+<span>  <span class="va">counts</span>,</span>
+<span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -141,6 +227,13 @@ feature, and each row is a sample. Any object coercible with
 <dd><p>The value to add to all counts in <code>counts</code> to prevent
 taking <code>log(0)</code> for unobserved features. The default, <code>NULL</code>, selects
 the smallest non-zero value in <code>counts</code>.</p></dd>
+
+
+<dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
+<dd><p>If your samples are in the matrix's rows, set to <code>1L</code>. If
+your samples are in columns, set to <code>2L</code>. Ignored when <code>counts</code> is a
+<code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, or
+<code>TreeSummarizedExperiment</code> object. Default: <code>1L</code></p></dd>
 
 
 <dt id="arg-pairs">pairs<a class="anchor" aria-label="anchor" href="#arg-pairs"></a></dt>
@@ -280,7 +373,7 @@ Models and Methods in Applied Sciences</em>, 1(4), 300–307.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

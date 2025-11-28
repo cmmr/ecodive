@@ -1,0 +1,565 @@
+# Benchmarks
+
+## Introduction
+
+#### State of the Field
+
+This analysis provides a comparative benchmark of R packages designed
+for calculating standard and phylogenetic metrics of alpha and beta
+diversity. The primary objective is to evaluate their computational
+efficiency, with a focus on processing speed and memory allocation.
+Packages that rely on these foundational libraries as dependencies have
+been omitted from this study to isolate the performance of the core
+implementations.
+
+| R Package                                                          | Classic alpha/beta   | Phylogenetic alpha/beta |
+|:-------------------------------------------------------------------|:---------------------|:------------------------|
+| [abdiv](https://doi.org/10.32614/CRAN.package.abdiv)               | ***Serial R***       | *none*                  |
+| [adiv](https://doi.org/10.32614/CRAN.package.adiv)                 | ***Serial R***       | ***Serial R***          |
+| [ampvis2](https://github.com/KasperSkytte/ampvis2)                 | vegan                | ***Serial R***          |
+| [ecodist](https://doi.org/10.32614/CRAN.package.ecodist)           | ***Serial C/R***     | *none*                  |
+| [ecodive](https://doi.org/10.32614/CRAN.package.ecodive)           | ***Parallel C***     | ***Parallel C***        |
+| [entropart](https://doi.org/10.32614/CRAN.package.entropart)       | ***Serial R***       | *none*                  |
+| [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)         | *none*               | ***Serial C***          |
+| [labdsv](https://doi.org/10.32614/CRAN.package.labdsv)             | ***Serial FORTRAN*** | *none*                  |
+| [parallelDist](https://doi.org/10.32614/CRAN.package.parallelDist) | *none*               | ***Parallel C++***      |
+| [philentropy](https://doi.org/10.32614/CRAN.package.philentropy)   | ***Serial C++***     | *none*                  |
+| [phyloregion](https://doi.org/10.32614/CRAN.package.phyloregion)   | vegan                | ***Serial R***          |
+| [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)          | vegan                | ***Parallel R***        |
+| [picante](https://doi.org/10.32614/CRAN.package.picante)           | vegan                | ***Serial R***          |
+| [tabula](https://doi.org/10.32614/CRAN.package.tabula)             | ***Serial R***       | *none*                  |
+| [vegan](https://doi.org/10.32614/CRAN.package.vegan)               | ***Serial C***       | *none*                  |
+
+#### Methodology
+
+The `bench` R package was employed to quantify the computational runtime
+and memory allocation for the diversity algorithms within each of the 15
+selected packages. All benchmarks were executed on a host system with
+the following hardware and software configuration:
+
+    CPU: 6-Core Intel i5-9600K @ 3.70GHz
+    RAM: 64.0 GB
+    OS: Windows 11 Pro (64-bit, Version 24H2, Build 26100.4652)
+
+Furthermore, the `bench::mark()` function was utilized to verify that
+the outputs from all benchmarked expressions were numerically
+equivalent, ensuring the consistency and comparability of the results.
+
+  
+
+## Setup
+
+Two standard datasets from the `rbiom` R package, `hmp50` and `gems`,
+were selected for this evaluation. The `hmp50` dataset, which includes
+50 samples and an associated phylogenetic tree, was used to benchmark
+the computationally intensive phylogenetic metrics, such as UniFrac and
+Faith’s PD. For the traditional diversity metrics, which are
+significantly less demanding, the larger `gems` dataset, comprising
+1,006 samples, was employed.
+
+To account for the heterogeneous input and output formats across the 15
+R packages, necessary data transformations were performed. To ensure
+that the benchmarks exclusively measured the performance of the
+diversity calculations, these data conversion steps were executed
+outside of the timed code blocks whenever possible.
+
+Click to reveal R code.
+
+``` r
+install.packages('pak')
+
+# Tools and Datasets for Benchmarking Report
+pak::pkg_install(pkg = c(
+  'bench', 'dplyr', 'ggplot2', 'ggrepel', 'rbiom', 'svglite' ))
+
+# Diversity Metric Implementations
+pak::pkg_install(pkg = c(
+  'abdiv', 'adiv', 'ecodist', 'ecodive', 'entropart', 'GUniFrac', 
+  'kasperskytte/ampvis2', 'labdsv', 'parallelDist', 'philentropy', 
+  'phyloregion', 'phyloseq', 'picante', 'tabula', 'vegan' ))
+
+
+# Software Versions
+
+version$version.string
+#> [1] "R version 4.5.1 (2025-06-13 ucrt)"
+
+data.frame(ver = sapply(FUN = packageDescription, fields = 'Version', c(
+  'bench', 'dplyr', 'ggplot2', 'ggrepel', 'rbiom',
+  'abdiv', 'adiv', 'ecodist', 'ecodive', 'entropart', 'GUniFrac', 
+  'ampvis2', 'labdsv', 'parallelDist', 'philentropy', 
+  'phyloregion', 'phyloseq', 'picante', 'tabula', 'vegan' )))
+#>                     ver
+#> bench             1.1.4
+#> dplyr             1.1.4
+#> ggplot2           3.5.2
+#> ggrepel           0.9.6
+#> rbiom             2.2.1
+#> abdiv             0.2.0
+#> adiv              2.2.1
+#> ecodist           2.1.3
+#> ecodive           2.0.0
+#> entropart        1.6-16
+#> GUniFrac            1.8
+#> ampvis2           2.8.9
+#> labdsv            2.1-2
+#> parallelDist      0.2.6
+#> philentropy       0.9.0
+#> phyloregion       1.0.9
+#> phyloseq         1.52.0
+#> picante           1.8.2
+#> tabula            3.3.1
+#> vegan             2.7-1
+
+library(bench)
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+
+(n_cpus <- ecodive::n_cpus())
+#> [1] 6
+
+# abdiv only accepts two samples at a time
+pairwise <- function (f, data, ...) {
+  pairs <- utils::combn(nrow(data), 2)
+  structure(
+    mapply(
+      FUN = function (i, j) f(data[i,], data[j,], ...), 
+      i   = pairs[1,], j = pairs[2,] ),
+    class  = 'dist',
+    Labels = rownames(data),
+    Size   = nrow(data),
+    Diag   = FALSE,
+    Upper  = FALSE )
+}
+
+
+# Remove any extraneous attributes from dist objects,
+# allowing them to be compared with `all.equal()`.
+cleanup <- function (x) {
+  for (i in setdiff(names(attributes(x)), c('class', 'Labels', 'Size', 'Diag', 'Upper')))
+    attr(x, i) <- NULL
+  return (x)
+}
+
+
+# HMP50 dataset has 50 samples; convert to relative abundances
+hmp50      <- rbiom::hmp50
+hmp50_phy  <- rbiom::convert_to_phyloseq(hmp50)
+hmp50_mtx  <- t(apply(as.matrix(hmp50), 2L, function (x) x / sum(x)))
+hmp50_tree <- hmp50$tree
+
+
+# GEMS dataset has 1006 samples; convert to relative abundances
+gems_mtx <- t(apply(as.matrix(rbiom::gems), 2L, function (x) x / sum(x)))
+
+
+## Bray-Curtis Dissimilarity
+bray_curtis_res <- bench::mark(
+  iterations = 10,
+  'abdiv'        = cleanup(pairwise(abdiv::bray_curtis, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::bcdist(gems_mtx)),
+  'ecodive'      = cleanup(ecodive::bray(gems_mtx, norm = 'none')),
+  'labdsv'       = cleanup(labdsv::dsvdis(gems_mtx, 'bray/curtis')),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'bray')),
+  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'sorensen', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'tabula'       = cleanup(1 - pairwise(tabula::index_bray, gems_mtx)),
+  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'bray')) )
+
+
+## Jaccard Distance
+jaccard_res <- bench::mark(
+  iterations = 10,
+  'abdiv'        = cleanup(pairwise(abdiv::jaccard, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'jaccard')),
+  'ecodive'      = cleanup(ecodive::jaccard(gems_mtx)),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'binary')),
+  'philentropy'  = cleanup(philentropy::distance(gems_mtx > 0, 'jaccard', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'phyloregion'  = cleanup(phyloregion::beta_diss(gems_mtx, 'jaccard')$beta.jac),
+  'stats'        = cleanup(stats::dist(gems_mtx, 'binary')),
+  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'jaccard', binary = TRUE)) )
+
+
+## Manhattan Distance
+manhattan_res <- bench::mark(
+  iterations = 10,
+  'abdiv'        = cleanup(pairwise(abdiv::manhattan, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'manhattan')),
+  'ecodive'      = cleanup(ecodive::manhattan(gems_mtx, norm = 'none')),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'manhattan')),
+  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'manhattan', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'stats'        = cleanup(stats::dist(gems_mtx, 'manhattan')),
+  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'manhattan')) )
+
+
+## Euclidean Distance
+euclidean_res <- bench::mark(
+  iterations = 10,
+  'abdiv'        = cleanup(pairwise(abdiv::euclidean, gems_mtx)),
+  'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'euclidean')),
+  'ecodive'      = cleanup(ecodive::euclidean(gems_mtx, norm = 'none')),
+  'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'euclidean')),
+  'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'euclidean', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'stats'        = cleanup(stats::dist(gems_mtx, 'euclidean')),
+  'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'euclidean')) )
+
+
+## Shannon Diversity Index
+shannon_res <- bench::mark(
+  iterations  = 10,
+  'abdiv'       = apply(gems_mtx, 1L, abdiv::shannon),
+  'adiv'        = adiv::speciesdiv(gems_mtx, 'Shannon')[,1],
+  'ecodive'     = ecodive::shannon(gems_mtx),
+  'entropart'   = apply(gems_mtx, 1L, entropart::Shannon, CheckArguments = FALSE),
+  'philentropy' = apply(gems_mtx, 1L, philentropy::H, unit = 'log'),
+  'tabula'      = apply(gems_mtx, 1L, tabula::index_shannon),
+  'vegan'       = vegan::diversity(gems_mtx, 'shannon') )
+
+
+## Gini-Simpson Index
+simpson_res <- bench::mark(
+  iterations  = 10,
+  'abdiv'     = apply(gems_mtx, 1L, abdiv::simpson),
+  'adiv'      = adiv::speciesdiv(gems_mtx, 'GiniSimpson')[,1],
+  'ecodive'   = ecodive::simpson(gems_mtx),
+  'entropart' = apply(gems_mtx, 1L, entropart::Simpson, CheckArguments = FALSE),
+  'tabula'    = 1 - apply(gems_mtx, 1L, tabula::index_simpson),
+  'vegan'     = vegan::diversity(gems_mtx, 'simpson') )
+
+
+## Faith's Phylogenetic Diversity
+faith_res <- bench::mark(
+  iterations    = 10,
+  check         = FALSE, # entropart has incorrect output on non-ultrametric tree
+  'abdiv'       = apply(hmp50_mtx, 1L, abdiv::faith_pd, hmp50_tree),
+  'adiv'        = apply(hmp50_mtx, 1L, \(x) adiv::EH(hmp50_tree, colnames(hmp50_mtx)[x > 0])),
+  'ecodive'     = ecodive::faith(hmp50_mtx, hmp50_tree),
+  'entropart'   = apply(hmp50_mtx, 1L, entropart::PDFD, hmp50_tree, CheckArguments = FALSE),
+  'phyloregion' = phyloregion::PD(hmp50_mtx, hmp50_tree),
+  'picante'     = as.matrix(picante::pd(hmp50_mtx, hmp50_tree))[,'PD'] )
+  
+
+## Unweighted UniFrac
+u_unifrac_res <- rbind(
+  
+  local({
+    # cluster for phyloseq
+    cl <- parallel::makeCluster(n_cpus)
+    doParallel::registerDoParallel(cl)
+    on.exit(parallel::stopCluster(cl))
+    
+    bench::mark(
+      iterations    = 10,
+      'abdiv'       = cleanup(pairwise(abdiv::unweighted_unifrac, hmp50_mtx, hmp50_tree)),
+      'ecodive'     = cleanup(ecodive::unweighted_unifrac(hmp50_mtx, hmp50_tree)),
+      'GUniFrac'    = cleanup(as.dist(GUniFrac::GUniFrac(hmp50_mtx, hmp50_tree, alpha=1, verbose=FALSE)[[1]][,,2])),
+      'phyloregion' = cleanup(phyloregion::unifrac(hmp50_mtx, hmp50_tree)),
+      'phyloseq'    = cleanup(phyloseq::UniFrac(hmp50_phy, weighted=FALSE, normalized=FALSE, parallel=TRUE)),
+      'picante'     = cleanup(picante::unifrac(hmp50_mtx, hmp50_tree)) )
+  }),
+  
+  # ampvis2 conflicts with phyloseq cluster, so run separately
+  local({
+    t_hmp50_mtx <- t(hmp50_mtx)
+    bench::mark(
+      iterations = 10,
+      'ampvis2'  = {
+        cleanup(ampvis2:::dist.unifrac(t_hmp50_mtx, hmp50_tree, weighted=FALSE, normalise=FALSE, num_threads=n_cpus))
+        doParallel::stopImplicitCluster() } )
+  })
+)
+  
+  
+## Weighted UniFrac
+w_unifrac_res <- rbind(
+  
+  local({
+    # cluster for phyloseq
+    cl <- parallel::makeCluster(n_cpus)
+    doParallel::registerDoParallel(cl)
+    on.exit(parallel::stopCluster(cl))
+    
+    bench::mark(
+      iterations = 10,
+      'abdiv'    = cleanup(pairwise(abdiv::weighted_unifrac, hmp50_mtx, hmp50_tree)),
+      'ecodive'  = cleanup(ecodive::weighted_unifrac(hmp50_mtx, hmp50_tree)),
+      'phyloseq' = cleanup(phyloseq::UniFrac(hmp50_phy, weighted=TRUE, normalized=FALSE, parallel=TRUE)) )
+  }),
+  
+  # ampvis2 conflicts with phyloseq cluster, so run separately
+  local({
+    t_hmp50_mtx <- t(hmp50_mtx)
+    bench::mark(
+      iterations = 10,
+      'ampvis2'  = {
+        cleanup(ampvis2:::dist.unifrac(t_hmp50_mtx, hmp50_tree, weighted=TRUE, normalise=FALSE, num_threads=n_cpus))
+        doParallel::stopImplicitCluster() } )
+  })
+)
+
+
+## Weighted Normalized UniFrac
+wn_unifrac_res <- rbind(
+  
+  local({
+    # cluster for phyloseq
+    cl <- parallel::makeCluster(n_cpus)
+    doParallel::registerDoParallel(cl)
+    on.exit(parallel::stopCluster(cl))
+    
+    bench::mark(
+      iterations = 10,
+      'abdiv'    = cleanup(pairwise(abdiv::weighted_normalized_unifrac, hmp50_mtx, hmp50_tree)),
+      'ecodive'  = cleanup(ecodive::normalized_unifrac(hmp50_mtx, hmp50_tree)),
+      'GUniFrac' = cleanup(as.dist(GUniFrac::GUniFrac(hmp50_mtx, hmp50_tree, alpha=1, verbose=FALSE)[[1]][,,1])),
+      'phyloseq' = cleanup(phyloseq::UniFrac(hmp50_phy, weighted=TRUE, normalized=TRUE, parallel=TRUE)) )
+  }),
+  
+  # ampvis2 conflicts with phyloseq cluster, so run separately
+  local({
+    t_hmp50_mtx <- t(hmp50_mtx)
+    bench::mark(
+      iterations = 10,
+      'ampvis2'  = {
+        cleanup(ampvis2:::dist.unifrac(t_hmp50_mtx, hmp50_tree, weighted=TRUE, normalise=TRUE, num_threads=n_cpus))
+        doParallel::stopImplicitCluster() } )
+  })
+)
+
+
+## Weighted Normalized UniFrac
+g_unifrac_res <- rbind(
+  
+  local({
+    # cluster for phyloseq
+    cl <- parallel::makeCluster(n_cpus)
+    doParallel::registerDoParallel(cl)
+    on.exit(parallel::stopCluster(cl))
+    
+    bench::mark(
+      iterations = 10,
+      'abdiv'    = cleanup(pairwise(abdiv::generalized_unifrac, hmp50_mtx, hmp50_tree, alpha=0.5)),
+      'ecodive'  = cleanup(ecodive::generalized_unifrac(hmp50_mtx, hmp50_tree, alpha=0.5)),
+      'GUniFrac' = cleanup(as.dist(GUniFrac::GUniFrac(hmp50_mtx, hmp50_tree, alpha=0.5, verbose=FALSE)[[1]][,,1])) )
+  })
+)
+
+
+## Variance Adjusted UniFrac
+va_unifrac_res <- rbind(
+  
+  local({
+    # cluster for phyloseq
+    cl <- parallel::makeCluster(n_cpus)
+    doParallel::registerDoParallel(cl)
+    on.exit(parallel::stopCluster(cl))
+    
+    bench::mark(
+      iterations = 10,
+      'abdiv'    = cleanup(pairwise(abdiv::variance_adjusted_unifrac, hmp50_mtx, hmp50_tree)),
+      'ecodive'  = cleanup(ecodive::variance_adjusted_unifrac(hmp50_mtx, hmp50_tree)) )
+  })
+)
+  
+
+## Data frame for Figure 1A
+Fig1A_data <- bind_rows(
+    mutate(bray_curtis_res, Metric = 'bray'),
+    mutate(shannon_res,     Metric = 'shannon'),
+    mutate(faith_res,       Metric = 'faith') ) %>%
+  mutate(Package = as.character(expression)) %>%
+  select(Package, Metric, median, mem_alloc) %>%
+  arrange(Metric, median)
+
+Fig1A_data$Title <- factor(
+  x      = Fig1A_data$Metric, 
+  levels = c("shannon", "bray", "faith"), 
+  labels = c(
+    "**Shannon Diversity Index**<br>1006 samples", 
+    "**Bray-Curtis Dissimilarity**<br>1006 samples", 
+    "**Faith's Phylogenetic Diversity**<br>50 samples") )
+
+
+## ggplot for Figure 1A
+Fig1A <- ggplot(Fig1A_data, aes(x = median, y = mem_alloc)) +
+    facet_wrap('Title', nrow = 1, scales = 'free_x') + 
+    geom_point() +
+    geom_label_repel(aes(
+        label    = Package,
+        alpha    = ifelse(Package == 'ecodive', 1, 0.6),
+        fontface = ifelse(Package == 'ecodive', 2, 1),
+        size     = ifelse(Package == 'ecodive', 3.2, 3) ), 
+      box.padding        = .4,
+      point.padding      = .5,
+      min.segment.length = 0 ) + 
+    scale_alpha_identity(guide = 'none') +
+    scale_size_identity(guide = 'none') +
+    bench::scale_x_bench_time() +
+    scale_y_log10(labels = scales::label_bytes()) +
+    labs(
+      tag = 'A',
+      x   = 'Median Calculation Time (log scale; n=10)', 
+      y   = 'Memory Allocated\n(log scale; n=1)' ) +
+    theme_bw(base_size = 12) +
+    theme(
+      strip.text   = ggtext::element_markdown(hjust = 0, lineheight = 1.2),
+      axis.title.x = element_text(margin = margin(t = 10)))
+      
+
+## Data frame for Figure 1B
+Fig1B_data <- bind_rows(
+    mutate(u_unifrac_res,  `UniFrac Variant` = 'Unweighted'),
+    mutate(w_unifrac_res,  `UniFrac Variant` = 'Weighted'),
+    mutate(wn_unifrac_res, `UniFrac Variant` = 'Weighted Normalized'),
+    mutate(g_unifrac_res,  `UniFrac Variant` = 'Generalized'),
+    mutate(va_unifrac_res, `UniFrac Variant` = 'Variance Adjusted') ) %>%
+  mutate(Package = as.character(expression)) %>%
+  select(Package, `UniFrac Variant`, median, mem_alloc) %>%
+  arrange(Package)
+
+Fig1B_data$Title <- "**UniFrac Family**<br>50 samples"
+Fig1B_data$`UniFrac Variant` <- factor(
+  x      = Fig1B_data$`UniFrac Variant`, 
+  levels = c("Unweighted", "Weighted", "Weighted Normalized", "Generalized", "Variance Adjusted") )
+
+
+## ggplot for Figure 1B
+Fig1B <- ggplot(Fig1B_data, aes(x = median, y = mem_alloc)) +
+  facet_wrap('Title') + 
+  geom_point(aes(shape = `UniFrac Variant`), size = 2) +
+  geom_label_repel(aes(
+      label    = Package, 
+      alpha    = ifelse(Package == 'ecodive', 1, 0.6),
+      fontface = ifelse(Package == 'ecodive', 2, 1),
+      size     = ifelse(Package == 'ecodive', 3.2, 3) ),
+    data          = ~subset(., `UniFrac Variant` == 'Unweighted'),
+    direction     = 'y', 
+    box.padding   = 0.4,
+    point.padding = 10,
+    min.segment.length = Inf ) + 
+  scale_shape(solid = FALSE) + 
+  scale_alpha_identity(guide = 'none') +
+  scale_size_identity(guide = 'none') +
+  bench::scale_x_bench_time() +
+  scale_y_log10(labels = scales::label_bytes()) +
+  labs(
+    tag = 'B',
+    x   = 'Median Calculation Time (log scale; n=10)', 
+    y   = 'Memory Allocated\n(log scale; n=1)' ) +
+  theme_bw(base_size = 12) +
+  theme(
+    strip.text   = ggtext::element_markdown(hjust = 0, lineheight = 1.2),
+    axis.title.x = element_text(margin = margin(t = 10)) )
+
+
+## Combined Figure 1
+Fig1 <- patchwork::wrap_plots(
+  Fig1A, 
+  Fig1B, 
+  patchwork::guide_area(), 
+  design = "111\n223", 
+  guides = 'collect' )
+```
+
+## Results
+
+``` r
+print(Fig1)
+```
+
+![](../reference/figures/JOSS_Fig1A.svg)
+
+### How much faster and more memory efficient is ecodive?
+
+``` r
+plyr::ddply(Fig1A_data, as.name('Metric'), function (x) {
+  x[['median']]    <- as.numeric(x[['median']])
+  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
+  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
+  x       <- x[x[['Package']] != 'ecodive',]
+  data.frame(
+    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
+    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
+})
+#>    Metric      speed       memory
+#> 1    bray   1 - 166x    2 - 5312x
+#> 2   faith 1 - 10413x 212 - 74389x
+#> 3 shannon   2 - 113x      6 - 22x
+
+
+plyr::ddply(Fig1B_data, as.name('UniFrac Variant'), function (x) {
+  x[['median']]    <- as.numeric(x[['median']])
+  x[['mem_alloc']] <- as.numeric(x[['mem_alloc']])
+  ecodive <- as.list(x[x[['Package']] == 'ecodive',])
+  x       <- x[x[['Package']] != 'ecodive',]
+  data.frame(
+    speed  = paste0(paste(collapse=' - ', round(range(x$median    / ecodive$median))), 'x'),
+    memory = paste0(paste(collapse=' - ', round(range(x$mem_alloc / ecodive$mem_alloc))), 'x') )
+})
+#>       UniFrac Variant        speed         memory
+#> 1          Unweighted    1 - 2251x    98 - 39485x
+#> 2            Weighted   44 - 2094x   178 - 74013x
+#> 3 Weighted Normalized   11 - 1991x   178 - 74049x
+#> 4         Generalized   10 - 1814x   310 - 69563x
+#> 5   Variance Adjusted 2353 - 2353x 90421 - 90421x
+```
+
+### Raw Data for Figure 1 Panel A
+
+``` r
+print(Fig1A_data[,1:4], n = Inf)
+#> # A tibble: 21 × 4
+#>    Package      Metric    median mem_alloc
+#>    <chr>        <chr>   <bch:tm> <bch:byt>
+#>  1 ecodive      bray    149.79ms    3.94MB
+#>  2 parallelDist bray    187.72ms    7.88MB
+#>  3 ecodist      bray    398.33ms   29.43MB
+#>  4 labdsv       bray    726.73ms   68.16MB
+#>  5 vegan        bray       1.69s   16.45MB
+#>  6 philentropy  bray      10.31s   14.66GB
+#>  7 abdiv        bray      13.75s   20.43GB
+#>  8 tabula       bray      24.89s   20.43GB
+#>  9 ecodive      faith     2.62ms  337.58KB
+#> 10 phyloregion  faith     3.08ms  141.47MB
+#> 11 picante      faith       77ms   69.86MB
+#> 12 abdiv        faith   476.24ms  651.64MB
+#> 13 adiv         faith      1.72s  489.05MB
+#> 14 entropart    faith     27.27s   23.95GB
+#> 15 ecodive      shannon  11.16ms    6.06MB
+#> 16 tabula       shannon  25.34ms    36.6MB
+#> 17 entropart    shannon  40.73ms   41.77MB
+#> 18 adiv         shannon   46.8ms  131.49MB
+#> 19 vegan        shannon  68.58ms   68.08MB
+#> 20 abdiv        shannon  85.22ms   95.41MB
+#> 21 philentropy  shannon    1.26s   52.78MB
+```
+
+### Raw Data for Figure 1 Panel B
+
+``` r
+print(Fig1B_data[,1:4], n = Inf)
+#> # A tibble: 21 × 4
+#>    Package     `UniFrac Variant`     median mem_alloc
+#>    <chr>       <fct>               <bch:tm> <bch:byt>
+#>  1 GUniFrac    Unweighted           86.15ms   113.4MB
+#>  2 GUniFrac    Weighted Normalized  78.51ms    92.1MB
+#>  3 GUniFrac    Generalized           75.7ms    92.1MB
+#>  4 abdiv       Unweighted               15s    20.1GB
+#>  5 abdiv       Weighted              13.67s      20GB
+#>  6 abdiv       Weighted Normalized   13.78s      20GB
+#>  7 abdiv       Generalized           13.78s    20.2GB
+#>  8 abdiv       Variance Adjusted     15.81s    24.5GB
+#>  9 ampvis2     Unweighted             3.64s    53.7MB
+#> 10 ampvis2     Weighted                3.2s    49.2MB
+#> 11 ampvis2     Weighted Normalized    3.33s    49.3MB
+#> 12 ecodive     Unweighted            6.66ms   532.6KB
+#> 13 ecodive     Weighted              6.53ms   283.7KB
+#> 14 ecodive     Weighted Normalized   6.92ms   283.7KB
+#> 15 ecodive     Generalized           7.59ms   304.3KB
+#> 16 ecodive     Variance Adjusted     6.72ms   283.7KB
+#> 17 phyloregion Unweighted             7.1ms   145.9MB
+#> 18 phyloseq    Unweighted          325.11ms    50.9MB
+#> 19 phyloseq    Weighted            288.33ms    49.4MB
+#> 20 phyloseq    Weighted Normalized 296.54ms    49.5MB
+#> 21 picante     Unweighted             2.56s     1.8GB
+```
