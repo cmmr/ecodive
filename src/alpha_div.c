@@ -103,8 +103,8 @@ static void *ace(void *arg) {
     memset(rare_nnz_k_vec, 0, cutoff * sizeof(double));
     
     FOREACH_VAL(
-      if (*val < cutoff) {
-        int x_int = (int)(ceil(*val));
+      int x_int = (int)(ceil(*val));
+      if (x_int < cutoff) {
         rare_sum += x_int;
         rare_nnz++;
         rare_nnz_k_vec[x_int]++;
@@ -266,27 +266,33 @@ static void *fisher(void *arg) {
     double depth = 0;
     FOREACH_VAL(depth += *val);
     
-    double alpha;
-    double lo = 2;
-    double hi = 16;
-    
-    // Sometimes the result will be less than 2 or greater than 16.
-    while (lo * log(1 + depth/lo) > nnz) { hi = lo; lo /= 2; }
-    while (hi * log(1 + depth/hi) < nnz) { lo = hi; hi *= 2; }
-    
-    // Check if range has converged to same value after rounding.
-    while (round(hi * mult) != round(lo * mult)) {
-      
-      // This loop's guess for the alpha term.
-      alpha = (lo + hi) / 2;
-      
-      // Update the range we need to examine.
-      if (alpha * log(1 + depth/alpha) > nnz) { hi = alpha; }
-      else                                    { lo = alpha; }
-      
+    if (depth == nnz) {
+      result = R_PosInf;  // All singletons -> infinite loop
     }
-    
-    result = round(hi * mult) / mult;
+    else {
+      
+      double alpha;
+      double lo = 2;
+      double hi = 16;
+      
+      // Sometimes the result will be less than 2 or greater than 16.
+      while (lo * log(1 + depth/lo) > nnz) { hi = lo; lo /= 2; }
+      while (hi * log(1 + depth/hi) < nnz) { lo = hi; hi *= 2; }
+      
+      // Check if range has converged to same value after rounding.
+      while (round(hi * mult) != round(lo * mult)) {
+        
+        // This loop's guess for the alpha term.
+        alpha = (lo + hi) / 2;
+        
+        // Update the range we need to examine.
+        if (alpha * log(1 + depth/alpha) > nnz) { hi = alpha; }
+        else                                    { lo = alpha; }
+        
+      }
+      
+      result = round(hi * mult) / mult;
+    }
   );
   
   return NULL;
@@ -439,9 +445,15 @@ static void *squares(void *arg) {
       if (*val == 1) singletons++;
     );
     
-    result *= (singletons * singletons);
-    result /= (depth * depth) - singletons * nnz;
-    result += nnz;
+    double denominator = (depth * depth) - (singletons * nnz);
+    
+    if (denominator == 0) {
+      result = R_PosInf; // All singletons
+    } else {
+      result *= (singletons * singletons);
+      result /= denominator;
+      result += nnz;
+    }
   );
   
   return NULL;

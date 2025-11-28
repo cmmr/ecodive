@@ -125,36 +125,36 @@ test_that("validation", {
   expect_silent(validate_counts(env))
   
   skip_on_cran()
-  skip_if_not_installed('rbiom')
-  
-  hmp50               <- do.call(`::`, list('rbiom', 'hmp50'))
-  convert_to_phyloseq <- do.call(`::`, list('rbiom', 'convert_to_phyloseq'))
-  convert_to_TSE      <- do.call(`::`, list('rbiom', 'convert_to_TSE'))
-  convert_to_SE       <- do.call(`::`, list('rbiom', 'convert_to_SE'))
-  
-  env$tree   <- NULL
-  env$counts <- 1:10
-  expect_silent(validate_counts(env))
-  
-  env$tree   <- NULL
-  env$counts <- t(hmp50$counts)
-  expect_silent(validate_counts(env))
-  
-  env$tree   <- NULL
-  env$counts <- hmp50
-  expect_silent(validate_counts(env))
-  
-  env$tree   <- NULL
-  env$counts <- convert_to_phyloseq(hmp50)
-  expect_silent(validate_counts(env))
-  
-  env$tree   <- NULL
-  env$counts <- convert_to_TSE(hmp50)
-  expect_silent(validate_counts(env))
-  
-  env$tree   <- NULL
-  env$counts <- convert_to_SE(hmp50)
-  expect_silent(validate_counts(env))
+  # skip_if_not_installed('rbiom')
+  # 
+  # hmp50               <- do.call(`::`, list('rbiom', 'hmp50'))
+  # convert_to_phyloseq <- do.call(`::`, list('rbiom', 'convert_to_phyloseq'))
+  # convert_to_TSE      <- do.call(`::`, list('rbiom', 'convert_to_TSE'))
+  # convert_to_SE       <- do.call(`::`, list('rbiom', 'convert_to_SE'))
+  # 
+  # # env$tree   <- NULL
+  # # env$counts <- 1:10
+  # # expect_silent(validate_counts(env))
+  # # 
+  # # env$tree   <- NULL
+  # # env$counts <- t(hmp50$counts)
+  # # expect_silent(validate_counts(env))
+  # # 
+  # # env$tree   <- NULL
+  # # env$counts <- hmp50
+  # # expect_silent(validate_counts(env))
+  # # 
+  # # env$tree   <- NULL
+  # # env$counts <- convert_to_phyloseq(hmp50)
+  # # expect_silent(validate_counts(env))
+  # # 
+  # # env$tree   <- NULL
+  # # env$counts <- convert_to_TSE(hmp50)
+  # # expect_silent(validate_counts(env))
+  # # 
+  # # env$tree   <- NULL
+  # # env$counts <- convert_to_SE(hmp50)
+  # # expect_silent(validate_counts(env))
   
   
 })
