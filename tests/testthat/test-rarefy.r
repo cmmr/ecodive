@@ -63,6 +63,10 @@ test_that("rarefaction", {
   # Ensure Matrix and slam packages are available for testing
   skip_if_not_installed('Matrix')
   skip_if_not_installed('slam')
+  
+  # Test error on non-integer counts
+  expect_error(rarefy(as(counts * 1.5, 'dgCMatrix')))
+  expect_error(rarefy(slam::as.simple_triplet_matrix(counts * 1.5)))
 
   # Test with different matrix types
   counts_dgC  <- as(counts, 'dgCMatrix')

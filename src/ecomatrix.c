@@ -12,6 +12,59 @@
 #include "memory.h"
 
 
+// For C-level debugging
+void debug_ecomatrix(ecomatrix_t *em, const char *msg) {
+  
+  Rprintf("--- DEBUG: %s ---\n", msg);
+  Rprintf("n_samples: %d\n", em->n_samples);
+  Rprintf("n_otus: %d\n", em->n_otus);
+  Rprintf("nnz: %d\n", em->nnz);
+  
+  if (em->sam_vec) {
+    Rprintf("sam_vec (safe=%d):", is_safe_ptr(em->sam_vec));
+    for (int i = 0; i < em->nnz; i++) {
+      Rprintf("  %d", em->sam_vec[i]);
+    }
+    Rprintf("\n");
+  } else {
+    Rprintf("sam_vec: NULL\n");
+  }
+  
+  if (em->pos_vec) {
+    Rprintf("pos_vec (safe=%d):", is_safe_ptr(em->pos_vec));
+    for (int i = 0; i < em->n_samples + 1; i++) {
+      Rprintf("  %d", em->pos_vec[i]);
+    }
+    Rprintf("\n");
+  } else {
+    Rprintf("pos_vec: NULL\n");
+  }
+  
+  if (em->otu_vec) {
+    Rprintf("otu_vec (safe=%d):", is_safe_ptr(em->otu_vec));
+    for (int i = 0; i < em->nnz; i++) {
+      Rprintf("  %d", em->otu_vec[i]);
+    }
+    Rprintf("\n");
+  } else {
+    Rprintf("otu_vec: NULL\n");
+  }
+  
+  if (em->val_vec) {
+    Rprintf("val_vec (safe=%d):", is_safe_ptr(em->val_vec));
+    for (int i = 0; i < em->nnz; i++) {
+      Rprintf("  %d", (int)em->val_vec[i]);
+    }
+    Rprintf("\n");
+  } else {
+    Rprintf("val_vec: NULL\n");
+  }
+  
+  free_all();
+  error("Halting execution after debug print.");
+}
+
+
 //=========================================================
 // Ensure we don't overwrite values in other R objects.
 //=========================================================
@@ -248,7 +301,6 @@ static void sort_triplet_q (int *sam_vec, int *otu_vec, double *val_vec, int lo,
   sam = sam_vec[i]; sam_vec[i] = sam_vec[hi]; sam_vec[hi] = sam;
   otu = otu_vec[i]; otu_vec[i] = otu_vec[hi]; otu_vec[hi] = otu;
   val = val_vec[i]; val_vec[i] = val_vec[hi]; val_vec[hi] = val;
-  i++;
   
   if (lo < i - 1) sort_triplet_q(sam_vec, otu_vec, val_vec, lo, i - 1);
   if (i + 1 < hi) sort_triplet_q(sam_vec, otu_vec, val_vec, i + 1, hi);
@@ -317,7 +369,7 @@ static void compress_triplet (ecomatrix_t *em) {
   }
   pos_vec[n_samples] = nnz;
   
-  em->sam_vec = free_one(em->sam_vec);
+  em->sam_vec = maybe_free_one(em->sam_vec);
 }
 
 
@@ -338,7 +390,7 @@ static void inflate_triplet_otus (ecomatrix_t *em) {
     }
   }
   
-  em->pos_vec = free_one(em->pos_vec);
+  em->pos_vec = maybe_free_one(em->pos_vec);
 }
 
 
@@ -424,8 +476,8 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
   SEXP sexp_slam_i = get(sexp_slam_mtx, "i");
   SEXP sexp_slam_j = get(sexp_slam_mtx, "j");
   SEXP sexp_slam_v = get(sexp_slam_mtx, "v");
-  int  n_rows      = asInteger(get(sexp_slam_mtx, "n_rows"));
-  int  n_cols      = asInteger(get(sexp_slam_mtx, "n_cols"));
+  int  n_rows      = asInteger(get(sexp_slam_mtx, "nrow"));
+  int  n_cols      = asInteger(get(sexp_slam_mtx, "ncol"));
   int  nnz         = length(sexp_slam_v);
   
   
@@ -463,6 +515,8 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
       em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 1);
   }
   
+
+  // debug_ecomatrix(em, "Before ingest");
   
   
   // Slam indices are 1-based. Convert to 0-based.
@@ -592,9 +646,9 @@ ecomatrix_t* new_ecomatrix(SEXP sexp_matrix, SEXP sexp_margin) {
   
   if      (isMatrix(sexp_matrix))                          { parse_func = parse_matrix;    }
   else if (inherits(sexp_matrix, "simple_triplet_matrix")) { parse_func = parse_slam;      }
-  else if (inherits(sexp_matrix, "dgCMatrix"))             { parse_func = parse_dgTMatrix; }
-  else if (inherits(sexp_matrix, "dgTMatrix"))             { parse_func = parse_dgeMatrix; }
-  else if (inherits(sexp_matrix, "dgeMatrix"))             { parse_func = parse_dgCMatrix; }
+  else if (inherits(sexp_matrix, "dgCMatrix"))             { parse_func = parse_dgCMatrix; }
+  else if (inherits(sexp_matrix, "dgTMatrix"))             { parse_func = parse_dgTMatrix; }
+  else if (inherits(sexp_matrix, "dgeMatrix"))             { parse_func = parse_dgeMatrix; }
   else    { error("Unrecognized matrix format."); }
   
   
@@ -613,5 +667,3 @@ ecomatrix_t* new_ecomatrix(SEXP sexp_matrix, SEXP sexp_margin) {
   
   return em;
 }
-
-

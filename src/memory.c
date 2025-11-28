@@ -33,13 +33,13 @@ static int    n_ptrs = 0;
 void init_n_ptrs (int n) {
   
   if (n_ptrs || ptr_vec) {
-    free_all();
+    free_all(); // # nocov
   }
   
   n_ptrs  = n;
   ptr_vec = malloc(sizeof(void*) * n);
   if (!ptr_vec) {
-    error("Insufficient memory.");
+    error("Insufficient memory."); // # nocov
   }
   
   for (int i = 0; i < n_ptrs; i++) {
@@ -60,15 +60,15 @@ void* safe_malloc (size_t n_bytes) {
   
   // No slots available
   if (i == n_ptrs) {
-    free_all();
-    error("Insufficient n_ptrs");
+    free_all(); // # nocov
+    error("Insufficient n_ptrs"); // # nocov
   }
   
   // Allocate the requested memory
   ptr_vec[i] = malloc(n_bytes);
   if (!ptr_vec[i]) {
-    free_all();
-    error("Insufficient memory.");
+    free_all(); // # nocov
+    error("Insufficient memory."); // # nocov
   }
   
   return ptr_vec[i];
@@ -106,7 +106,7 @@ int is_safe_ptr (void *ptr) {
     }
   }
   
-  return 0;
+  return 0; // # nocov
 }
 
 
@@ -126,8 +126,8 @@ void* free_one (void *ptr) {
   
   // ptr is not tracked here
   if (i == n_ptrs) {
-    free_all();
-    error("free_one() cannot free that pointer");
+    free_all(); // # nocov
+    error("free_one() cannot free that pointer"); // # nocov
   }
   
   // Free the given memory address
@@ -147,7 +147,7 @@ void* maybe_free_one (void *ptr) {
     return free_one(ptr);
   }
   
-  return NULL;
+  return NULL; // # nocov
 }
 
 

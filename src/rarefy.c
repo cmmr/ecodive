@@ -217,7 +217,7 @@ static void *rarefy_triplet(void *arg) {
       }
       
       // Insufficient sequences - set all abundances to zero.
-      else if (depth == target) {
+      else if (depth < target) {
         *res = 0;
       }
       
@@ -319,11 +319,11 @@ static pthread_func_t setup_slam () {
   
   if (margin == 1) {
     sam_vec = INTEGER(get(sexp_res_mtx, "i"));
-    n_sams  = INTEGER(get(sexp_res_mtx, "nrow"))[0] + 1;
+    n_sams  = INTEGER(get(sexp_res_mtx, "nrow"))[0];
   }
   else {
     sam_vec = INTEGER(get(sexp_res_mtx, "j"));
-    n_sams  = INTEGER(get(sexp_res_mtx, "ncol"))[0] + 1;
+    n_sams  = INTEGER(get(sexp_res_mtx, "ncol"))[0];
   }
   
   return setup_triplet();
@@ -444,7 +444,11 @@ static pthread_func_t setup_dgCMatrix () {
     
     depth_vec = (uint32_t*) safe_malloc(n_sams * sizeof(uint32_t));
     for (int sam = 0; sam < n_sams; sam++) {
-      depth_vec[sam] = (uint32_t) (pos_vec[sam + 1] - pos_vec[sam]);
+      depth_vec[sam] = 0;
+      int pos_begin = pos_vec[sam];
+      int pos_end   = pos_vec[sam + 1];
+      for (int i = pos_begin; i < pos_end; i++)
+        depth_vec[sam] += (uint32_t) val_vec[i];
     }
     
     return rarefy_compressed;
@@ -549,7 +553,7 @@ SEXP C_rarefy(
   else if (inherits(sexp_otu_mtx, "dgCMatrix"))             { rarefy_func = setup_dgCMatrix(); }
   else if (inherits(sexp_otu_mtx, "dgTMatrix"))             { rarefy_func = setup_dgTMatrix(); }
   else if (inherits(sexp_otu_mtx, "dgeMatrix"))             { rarefy_func = setup_dgeMatrix(); }
-  else   { error("Unrecognized matrix format."); }
+  else   { error("Unrecognized matrix format."); } // # nocov
   
   // Get the target rarefaction depth.
   // Note that `n_samples` isn't `n_sams`
