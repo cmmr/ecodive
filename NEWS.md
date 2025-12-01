@@ -1,4 +1,11 @@
 
+# ecodive 2.2.0
+
+* Dedicated rarefaction backends for dense and sparse matrices.
+* Auto-conversion to col-major sparse matrix for distance/diversity calculations.
+
+
+
 # ecodive 2.1.0
 
 ## Breaking Changes
