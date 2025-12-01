@@ -12,59 +12,6 @@
 #include "memory.h"
 
 
-// For C-level debugging
-void debug_ecomatrix(ecomatrix_t *em, const char *msg) {
-  
-  Rprintf("--- DEBUG: %s ---\n", msg);
-  Rprintf("n_samples: %d\n", em->n_samples);
-  Rprintf("n_otus: %d\n", em->n_otus);
-  Rprintf("nnz: %d\n", em->nnz);
-  
-  if (em->sam_vec) {
-    Rprintf("sam_vec (safe=%d):", is_safe_ptr(em->sam_vec));
-    for (int i = 0; i < em->nnz; i++) {
-      Rprintf("  %d", em->sam_vec[i]);
-    }
-    Rprintf("\n");
-  } else {
-    Rprintf("sam_vec: NULL\n");
-  }
-  
-  if (em->pos_vec) {
-    Rprintf("pos_vec (safe=%d):", is_safe_ptr(em->pos_vec));
-    for (int i = 0; i < em->n_samples + 1; i++) {
-      Rprintf("  %d", em->pos_vec[i]);
-    }
-    Rprintf("\n");
-  } else {
-    Rprintf("pos_vec: NULL\n");
-  }
-  
-  if (em->otu_vec) {
-    Rprintf("otu_vec (safe=%d):", is_safe_ptr(em->otu_vec));
-    for (int i = 0; i < em->nnz; i++) {
-      Rprintf("  %d", em->otu_vec[i]);
-    }
-    Rprintf("\n");
-  } else {
-    Rprintf("otu_vec: NULL\n");
-  }
-  
-  if (em->val_vec) {
-    Rprintf("val_vec (safe=%d):", is_safe_ptr(em->val_vec));
-    for (int i = 0; i < em->nnz; i++) {
-      Rprintf("  %d", (int)em->val_vec[i]);
-    }
-    Rprintf("\n");
-  } else {
-    Rprintf("val_vec: NULL\n");
-  }
-  
-  free_all();
-  error("Halting execution after debug print.");
-}
-
-
 //=========================================================
 // Ensure we don't overwrite values in other R objects.
 //=========================================================
@@ -128,7 +75,7 @@ static void assign_sparse_vals(ecomatrix_t *em, SEXP sexp_vals) {
   }
   
   else {
-    error("Input must be numeric");
+    error("Input must be numeric"); // # nocov
   }
   
 }
@@ -649,7 +596,7 @@ ecomatrix_t* new_ecomatrix(SEXP sexp_matrix, SEXP sexp_margin) {
   else if (inherits(sexp_matrix, "dgCMatrix"))             { parse_func = parse_dgCMatrix; }
   else if (inherits(sexp_matrix, "dgTMatrix"))             { parse_func = parse_dgTMatrix; }
   else if (inherits(sexp_matrix, "dgeMatrix"))             { parse_func = parse_dgeMatrix; }
-  else    { error("Unrecognized matrix format."); }
+  else    { error("Unrecognized matrix format."); } // # nocov
   
   
   ecomatrix_t *em       = (ecomatrix_t*) safe_malloc(sizeof(ecomatrix_t));
@@ -666,31 +613,5 @@ ecomatrix_t* new_ecomatrix(SEXP sexp_matrix, SEXP sexp_margin) {
   parse_func(em, sexp_matrix, margin);
   
   return em;
-}
-
-
-
-int count_samples(SEXP mtx, SEXP sexp_margin) {
-  
-  int margin = asInteger(sexp_margin);
-  
-  if (margin == 1) {
-    if      (isMatrix(mtx))                          { return nrows(mtx);                                 }
-    else if (inherits(mtx, "simple_triplet_matrix")) { return asInteger(get(mtx, "nrow"));                }
-    else if (inherits(mtx, "dgCMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[0]; }
-    else if (inherits(mtx, "dgTMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[0]; }
-    else if (inherits(mtx, "dgeMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[0]; }
-    else    { free_all(); error("Unrecognized matrix format."); }
-  }
-  else {
-    if      (isMatrix(mtx))                          { return ncols(mtx);                                 }
-    else if (inherits(mtx, "simple_triplet_matrix")) { return asInteger(get(mtx, "ncol"));                }
-    else if (inherits(mtx, "dgCMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[1]; }
-    else if (inherits(mtx, "dgTMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[1]; }
-    else if (inherits(mtx, "dgeMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[1]; }
-    else    { free_all(); error("Unrecognized matrix format."); }
-  }
-  
-  return 0;
 }
 

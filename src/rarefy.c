@@ -191,28 +191,28 @@ static void *rarefy_triplet(void *arg) {
     // Only work on samples assigned to this thread.
     if (sam % n_threads == thread_i) {
       
-      knuth_t   knuth = knuth_vec[sam]; // Tracks: tried, kept, and rng.
-      uint32_t  depth = depth_vec[sam]; // Total observations in sample
-      double    val   = val_vec[i];     // Current OTU # of observations
-      double   *res   = res_vec + i;    // Rarefied OTU # of observations
+      knuth_t  *knuth = &knuth_vec[sam]; // Tracks: tried, kept, and rng.
+      uint32_t  depth = depth_vec[sam];  // Total observations in sample
+      double    val   = val_vec[i];      // Current OTU # of observations
+      double   *res   = res_vec + i;     // Rarefied OTU # of observations
       
       // Sample can be be rarefied.
       if (depth > target) {
         *res = 0;
         
         // Knuth algorithm for choosing target seqs from depth.
-        for (int seq = 0; seq < val && knuth.kept < target; seq++) {
+        for (int seq = 0; seq < val && knuth->kept < target; seq++) {
           
-          uint32_t not_tried  = depth - knuth.tried;
-          uint32_t still_need = target - knuth.kept;
-          uint32_t rand_int   = pcg32_random_r(&(knuth.rng));
+          uint32_t not_tried  = depth - knuth->tried;
+          uint32_t still_need = target - knuth->kept;
+          uint32_t rand_int   = pcg32_random_r(&(knuth->rng));
           
           if (rand_int % not_tried < still_need) {
             (*res)++; // retain this observation
-            knuth.kept++;
+            knuth->kept++;
           }
           
-          knuth.tried++;
+          knuth->tried++;
         }
       }
       
@@ -386,21 +386,21 @@ static void *rarefy_compressed (void *arg) {
       pcg32_srandom_r(&rng, seed, sam);
       
       // Knuth algorithm for choosing target seqs from depth.
-      uint32_t tried = 0, kept = 0;
+      uint32_t tried = 0, kept = 0; // These are local to the sample
       for (int pos = pos_begin; pos < pos_end; pos++) {
         
         double  val = val_vec[pos];  // Current # of observations
         double *res = res_vec + pos; // Rarefied # of observations
         
         *res = 0;
-        for (int seq = 0; seq < val && kept < target; seq++) {
+        for (uint32_t seq = 0; seq < val && kept < target; seq++) {
           
           uint32_t not_tried  = depth - tried;
           uint32_t still_need = target - kept;
           uint32_t rand_int   = pcg32_random_r(&rng);
           
           if (rand_int % not_tried < still_need) {
-            (*res)++; // retain this observation
+            (*res)++;
             kept++;
           }
           

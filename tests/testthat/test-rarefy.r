@@ -103,4 +103,26 @@ test_that("rarefaction", {
   expect_silent(rarefy(counts_t_dge,  margin = 2L, seed = 1))
   expect_silent(rarefy(counts_t_slam, margin = 2L, seed = 1))
   
+  # Test that samples with depth < target are zeroed out
+  # This covers the `else if (depth < target)` branches in C
+  r_depth_20 <- rarefy(counts, depth = 20, drop = FALSE)
+  expect_equal(unname(rowSums(r_depth_20)), c(0, 0, 20, 0))
+  
+  # Test for triplet matrices (dgTMatrix, slam, dgCMatrix margin=1)
+  # which use rarefy_triplet()
+  r_dgT_20 <- rarefy(counts_dgT, depth = 20, drop = FALSE)
+  expect_s4_class(r_dgT_20, "dgTMatrix")
+  expect_equal(unname(Matrix::rowSums(r_dgT_20)), c(0, 0, 20, 0))
+  
+  r_slam_20 <- rarefy(counts_slam, depth = 20, drop = FALSE)
+  expect_s3_class(r_slam_20, "simple_triplet_matrix")
+  expect_equal(unname(slam::row_sums(r_slam_20)), c(0, 0, 20, 0))
+  
+  # Test for compressed sparse matrix (dgCMatrix margin=2)
+  # which uses rarefy_compressed()
+  r_t_dgC_20 <- rarefy(counts_t_dgC, depth = 20, margin = 2L, drop = FALSE)
+  expect_s4_class(r_t_dgC_20, "dgCMatrix")
+  expected_t_20 <- t(rarefy(counts, depth = 20, drop = FALSE))
+  expect_equal(unname(Matrix::colSums(r_t_dgC_20)), c(0, 0, 20, 0))
+  
 })
