@@ -126,6 +126,8 @@ test_that("validation", {
 
   skip_on_cran()
   skip_if_not_installed('rbiom')
+  skip_if_not_installed('phyloseq')
+  skip_if_not_installed('TreeSummarizedExperiment')
 
   hmp50               <- do.call(`::`, list('rbiom', 'hmp50'))
   convert_to_phyloseq <- do.call(`::`, list('rbiom', 'convert_to_phyloseq'))

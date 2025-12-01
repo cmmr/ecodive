@@ -372,12 +372,10 @@ static void *rarefy_compressed (void *arg) {
   
   for (int sam = thread_i; sam < n_sams; sam += n_threads) {
     
-    uint32_t  depth     = depth_vec[sam];
-    int       pos_begin = pos_vec[sam];
-    int       pos_end   = pos_vec[sam + 1];
-    int       sam_nnz   = pos_end - pos_begin;
-    double   *val_begin = val_vec + pos_begin;
-    double   *res_begin = res_vec + pos_begin;
+    uint32_t depth     = depth_vec[sam];
+    int      pos_begin = pos_vec[sam];
+    int      pos_end   = pos_vec[sam + 1];
+    int      sam_nnz   = pos_end - pos_begin;
     
     
     // Sample can be be rarefied.
@@ -391,8 +389,8 @@ static void *rarefy_compressed (void *arg) {
       uint32_t tried = 0, kept = 0;
       for (int pos = pos_begin; pos < pos_end; pos++) {
         
-        double  val = val_begin[pos];  // Current # of observations
-        double *res = res_begin + pos; // Rarefied # of observations
+        double  val = val_vec[pos];  // Current # of observations
+        double *res = res_vec + pos; // Rarefied # of observations
         
         *res = 0;
         for (int seq = 0; seq < val && kept < target; seq++) {
@@ -413,7 +411,7 @@ static void *rarefy_compressed (void *arg) {
     
     // Insufficient sequences - set all abundances to zero.
     else if (depth < target) {
-      memset(res_begin, 0, sam_nnz * sizeof(double));
+      memset(res_vec + pos_begin, 0, sam_nnz * sizeof(double));
     }
     
   }
