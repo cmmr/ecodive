@@ -23,7 +23,7 @@ arrays. Values for L are drawn from the input phylogenetic tree. Values
 for A and B are the total number of species observations descending from
 that branch; A for Sample_A, and B for Sample_B.
 
-![](../reference/figures/unifrac-weights.png)
+![](figures/unifrac-weights.png)
 
   
 

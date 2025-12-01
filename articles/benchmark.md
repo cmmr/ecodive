@@ -467,7 +467,7 @@ Fig1 <- patchwork::wrap_plots(
 print(Fig1)
 ```
 
-![](../reference/figures/JOSS_Fig1A.svg)
+![](figures/JOSS_Fig1A.svg)
 
 ### How much faster and more memory efficient is ecodive?
 

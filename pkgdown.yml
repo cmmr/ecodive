@@ -5,10 +5,10 @@ articles:
   adiv: adiv.html
   bdiv_guide: bdiv_guide.html
   bdiv: bdiv.html
-  benchmark: benchmark.html
+  articles/benchmark: benchmark.html
   ecodive: ecodive.html
-  unifrac: unifrac.html
-last_built: 2025-11-28T20:25Z
+  articles/unifrac: unifrac.html
+last_built: 2025-12-01T19:26Z
 urls:
   reference: https://cmmr.github.io/ecodive/reference
   article: https://cmmr.github.io/ecodive/articles

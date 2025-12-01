@@ -291,9 +291,7 @@ of those branches.
 
 [TABLE]
 
-See
-[`vignette('unifrac')`](https://cmmr.github.io/ecodive/articles/unifrac.md)
-for detailed example UniFrac calculations.
+See `vignette('unifrac')` for detailed example UniFrac calculations.
 
 ## References
 
