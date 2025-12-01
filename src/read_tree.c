@@ -29,7 +29,7 @@ static size_t next_leaf_index;
 
 
 
-static char* extract_name(size_t x1, size_t x2) {
+static SEXP extract_name(size_t x1, size_t x2) {
   
   char quoted = tree_str[x1] == '\'' && tree_str[x2] == '\'';
   
@@ -50,7 +50,10 @@ static char* extract_name(size_t x1, size_t x2) {
     }
   }
   
-  return node_name_str;
+  SEXP sexp_node_name = mkChar(node_name_str);
+  free(node_name_str);
+  
+  return sexp_node_name;
 }
 
 
@@ -89,7 +92,7 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
     if (tree_str[i] == ')') {
       
       if (i < x2)
-        SET_STRING_ELT(sexp_node_label_vec, next_node_index, mkChar(extract_name(i + 1, x2)));
+        SET_STRING_ELT(sexp_node_label_vec, next_node_index, extract_name(i + 1, x2));
       
       if (next_edge_index > 0) {
         size_t mtx_row_i = next_edge_index - 1;
@@ -112,7 +115,7 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
   if (i <= x1) {
     
     if (x1 <= x2)
-      SET_STRING_ELT(sexp_leaf_label_vec, next_leaf_index, mkChar(extract_name(x1, x2)));
+      SET_STRING_ELT(sexp_leaf_label_vec, next_leaf_index, extract_name(x1, x2));
     
     if (next_edge_index > 0) {
       size_t mtx_row_i = next_edge_index - 1;

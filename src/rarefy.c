@@ -192,7 +192,7 @@ static void *rarefy_triplet(void *arg) {
     if (sam % n_threads == thread_i) {
       
       knuth_t   knuth = knuth_vec[sam]; // Tracks: tried, kept, and rng.
-      uint32_t  depth = depth_vec[i];   // Total observations in sample
+      uint32_t  depth = depth_vec[sam]; // Total observations in sample
       double    val   = val_vec[i];     // Current OTU # of observations
       double   *res   = res_vec + i;    // Rarefied OTU # of observations
       
@@ -319,11 +319,11 @@ static pthread_func_t setup_slam () {
   
   if (margin == 1) {
     sam_vec = INTEGER(get(sexp_res_mtx, "i"));
-    n_sams  = INTEGER(get(sexp_res_mtx, "nrow"))[0];
+    n_sams  = INTEGER(get(sexp_res_mtx, "nrow"))[0] + 1;
   }
   else {
     sam_vec = INTEGER(get(sexp_res_mtx, "j"));
-    n_sams  = INTEGER(get(sexp_res_mtx, "ncol"))[0];
+    n_sams  = INTEGER(get(sexp_res_mtx, "ncol"))[0] + 1;
   }
   
   return setup_triplet();

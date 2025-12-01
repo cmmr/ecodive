@@ -87,6 +87,8 @@ static double *dist_vec;
       otu++;                                                   \
       val++;                                                   \
     }                                                          \
+    (void)otu;                                                 \
+    (void)val;                                                 \
   } while (0)
 
 
@@ -229,6 +231,7 @@ static double *dist_vec;
       y_weight++;                                              \
       edge_length++;                                           \
     }                                                          \
+    (void)edge_length;                                         \
   } while (0)
 
 

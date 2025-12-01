@@ -667,3 +667,30 @@ ecomatrix_t* new_ecomatrix(SEXP sexp_matrix, SEXP sexp_margin) {
   
   return em;
 }
+
+
+
+int count_samples(SEXP mtx, SEXP sexp_margin) {
+  
+  int margin = asInteger(sexp_margin);
+  
+  if (margin == 1) {
+    if      (isMatrix(mtx))                          { return nrows(mtx);                                 }
+    else if (inherits(mtx, "simple_triplet_matrix")) { return asInteger(get(mtx, "nrow"));                }
+    else if (inherits(mtx, "dgCMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[0]; }
+    else if (inherits(mtx, "dgTMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[0]; }
+    else if (inherits(mtx, "dgeMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[0]; }
+    else    { free_all(); error("Unrecognized matrix format."); }
+  }
+  else {
+    if      (isMatrix(mtx))                          { return ncols(mtx);                                 }
+    else if (inherits(mtx, "simple_triplet_matrix")) { return asInteger(get(mtx, "ncol"));                }
+    else if (inherits(mtx, "dgCMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[1]; }
+    else if (inherits(mtx, "dgTMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[1]; }
+    else if (inherits(mtx, "dgeMatrix"))             { return INTEGER(R_do_slot(mtx, install("Dim")))[1]; }
+    else    { free_all(); error("Unrecognized matrix format."); }
+  }
+  
+  return 0;
+}
+

@@ -18,3 +18,4 @@ tmp/
 /docs/
 /Meta/
 /refs/
+valgrind_log.txt

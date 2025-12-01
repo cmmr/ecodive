@@ -25,6 +25,8 @@ typedef struct {
 // ecomatrix constructor
 ecomatrix_t* new_ecomatrix(SEXP sexp_matrix, SEXP sexp_margin);
 
+// Quickly get the number of samples.
+int count_samples(SEXP mtx, SEXP sexp_margin);
 
 // avoid overwriting R object data
 double* rw_val_vec(ecomatrix_t *em);
