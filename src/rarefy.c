@@ -28,7 +28,6 @@ static int       margin;
 static int       n_threads;
 static SEXP      sexp_val_mtx;
 static SEXP      sexp_res_mtx;
-static int       n_protected;
 static int      *sam_vec;
 static int      *pos_vec;
 static double   *val_vec;
@@ -121,7 +120,7 @@ static void *rarefy_dense(void *arg) {
   return NULL;
 }
 
-static pthread_func_t setup_dense () {
+static pthread_func_t setup_dense(void) {
   
   depth_vec = (uint32_t*) safe_malloc(n_sams * sizeof(uint32_t));
   memset(depth_vec, 0, n_sams * sizeof(uint32_t));
@@ -227,7 +226,7 @@ static void *rarefy_triplet(void *arg) {
   return NULL;
 }
 
-static pthread_func_t setup_triplet () {
+static pthread_func_t setup_triplet(void) {
   
   rarefy_triplet_knuth_vec = (knuth_t*)  safe_malloc(n_sams * sizeof(knuth_t));
   depth_vec                = (uint32_t*) safe_malloc(n_sams * sizeof(uint32_t));
@@ -250,7 +249,7 @@ static pthread_func_t setup_triplet () {
  */
 
 
-static pthread_func_t setup_matrix () {
+static pthread_func_t setup_matrix(void) {
   
   val_vec = REAL(sexp_val_mtx);
   res_vec = REAL(sexp_res_mtx);
@@ -275,13 +274,13 @@ static pthread_func_t setup_matrix () {
  * 
  */
 
-static pthread_func_t setup_dgeMatrix () {
+static pthread_func_t setup_dgeMatrix(void) {
   
   SEXP sexp_dim_vec = R_do_slot(sexp_res_mtx, install("Dim"));
   SEXP sexp_val_vec = R_do_slot(sexp_res_mtx, install("x"));
   SEXP sexp_res_vec = PROTECT(duplicate(sexp_val_vec));
-  n_protected++;
   R_do_slot_assign(sexp_res_mtx, install("x"), sexp_res_vec);
+  UNPROTECT(1);
   
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
@@ -306,12 +305,12 @@ static pthread_func_t setup_dgeMatrix () {
  * 
  */
 
-static pthread_func_t setup_slam () {
+static pthread_func_t setup_slam(void) {
   
   SEXP sexp_val_vec = get(sexp_res_mtx, "v");
   SEXP sexp_res_vec = PROTECT(duplicate(sexp_val_vec));
-  n_protected++;
   set(sexp_res_mtx, "v", sexp_res_vec);
+  UNPROTECT(1);
   
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
@@ -336,12 +335,12 @@ static pthread_func_t setup_slam () {
  * 
  */
 
-static pthread_func_t setup_dgTMatrix () {
+static pthread_func_t setup_dgTMatrix(void) {
   
   SEXP sexp_val_vec = R_do_slot(sexp_res_mtx, install("x"));
   SEXP sexp_res_vec = PROTECT(duplicate(sexp_val_vec));
-  n_protected++;
   R_do_slot_assign(sexp_res_mtx, install("x"), sexp_res_vec);
+  UNPROTECT(1);
   
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
@@ -419,12 +418,12 @@ static void *rarefy_compressed (void *arg) {
   return NULL;
 }
 
-static pthread_func_t setup_dgCMatrix () {
+static pthread_func_t setup_dgCMatrix(void) {
   
   SEXP sexp_val_vec = R_do_slot(sexp_res_mtx, install("x"));
   SEXP sexp_res_vec = PROTECT(duplicate(sexp_val_vec));
-  n_protected++;
   R_do_slot_assign(sexp_res_mtx, install("x"), sexp_res_vec);
+  UNPROTECT(1);
   
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
@@ -537,7 +536,6 @@ SEXP C_rarefy(
    */
   sexp_val_mtx = sexp_otu_mtx;
   sexp_res_mtx = PROTECT(duplicate(sexp_otu_mtx));
-  n_protected  = 1;
   
   
   // function to run
@@ -557,10 +555,7 @@ SEXP C_rarefy(
   // Note that `n_samples` isn't `n_sams`
   set_target(sexp_depth, sexp_n_samples);
   
-  // free_all();
-  // UNPROTECT(n_protected);
-  // return ScalarInteger((int)target);
-  
+
   // Run WITH multithreading
   #ifdef HAVE_PTHREAD
     if (n_threads > 1 && n_sams > 100) {
@@ -575,7 +570,7 @@ SEXP C_rarefy(
       for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
       
       free_all();
-      UNPROTECT(n_protected);
+      UNPROTECT(1);
       return sexp_res_mtx;
     }
   #endif
@@ -587,6 +582,6 @@ SEXP C_rarefy(
   rarefy_func(&thread_i);
   
   free_all();
-  UNPROTECT(n_protected);
+  UNPROTECT(1);
   return sexp_res_mtx;
 }

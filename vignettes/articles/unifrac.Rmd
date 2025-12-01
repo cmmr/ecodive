@@ -1,13 +1,5 @@
 ---
 title: "UniFrac Calculations"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{UniFrac Calculations}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-resource_files:
-  - '../man/figures/unifrac-tree.png'
-  - '../man/figures/unifrac-weights.png'
 figures:
   fig.width: 6
   fig.height: 2.75
@@ -94,7 +86,7 @@ B <- c(7,5,1,4,2,8,8,0)
 </td><td>
 
 ```{r input_data_tree, out.width = "100%", echo=FALSE}
-  knitr::include_graphics('../man/figures/unifrac-tree.png')
+  knitr::include_graphics('figures/unifrac-tree.png')
 ```
 
 </td></tr></table>
@@ -107,7 +99,7 @@ B <- c(7,5,1,4,2,8,8,0)
 The branch indices (green circles) are used for ordering the $L$, $A$, and $B$ arrays. Values for $L$ are drawn from the input phylogenetic tree. Values for $A$ and $B$ are the total number of species observations descending from that branch; $A$ for Sample_A, and $B$ for Sample_B.
 
 ```{r definitions, fig.align = 'center', out.width = "75%", echo=FALSE}
-knitr::include_graphics('../man/figures/unifrac-weights.png')
+knitr::include_graphics('figures/unifrac-weights.png')
 ```
 
 <br>

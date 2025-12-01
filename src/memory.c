@@ -76,7 +76,7 @@ void* safe_malloc (size_t n_bytes) {
 
 
 
-void free_all () {
+void free_all(void) {
   
   if (!ptr_vec) return;
   
@@ -149,5 +149,3 @@ void* maybe_free_one (void *ptr) {
   
   return NULL; // # nocov
 }
-
-

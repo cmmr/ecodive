@@ -128,7 +128,7 @@ static void *ace(void *arg) {
   return NULL;
 }
 
-static pthread_func_t ace_setup () {
+static pthread_func_t ace_setup(void) {
   
   ace_cutoff         = asInteger(*sexp_extra) + 1;
   otu_vec            = maybe_free_one(otu_vec);
@@ -242,7 +242,7 @@ static void *faith(void *arg) {
   return NULL;
 }
 
-static pthread_func_t faith_setup () {
+static pthread_func_t faith_setup(void) {
   
   faith_et           = new_ecotree(*sexp_extra);
   val_vec            = maybe_free_one(val_vec);

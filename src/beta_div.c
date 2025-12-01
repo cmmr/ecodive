@@ -359,7 +359,7 @@ static void *gower(void *arg) {
   return NULL;
 }
 
-static pthread_func_t gower_setup() {
+static pthread_func_t gower_setup(void) {
   
   gower_range_vec = (double*) safe_malloc(n_otus * sizeof(double));
   double *min_vec = (double*) safe_malloc(n_otus * sizeof(double));
@@ -808,6 +808,3 @@ SEXP C_beta_div(
   UNPROTECT(1);
   return sexp_result_dist;
 }
-
-
-

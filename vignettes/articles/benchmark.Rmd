@@ -1,12 +1,5 @@
 ---
 title: "Benchmarks"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Benchmarks}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-resource_files:
-  - '../man/figures/JOSS_Fig1A.svg'
 ---
 
 ```{r, include = FALSE}
@@ -492,7 +485,7 @@ print(Fig1)
 ```
 
 ```{r out.width = "98%", echo=FALSE}
-  knitr::include_graphics('../man/figures/JOSS_Fig1A.svg')
+  knitr::include_graphics('figures/JOSS_Fig1A.svg')
 ```
 
 
