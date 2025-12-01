@@ -1,5 +1,8 @@
 ---
 title: "UniFrac Calculations"
+resource_files:
+  - "figures/unifrac-tree.png"
+  - "figures/unifrac-weights.png"
 figures:
   fig.width: 6
   fig.height: 2.75
@@ -344,5 +347,3 @@ V &= \displaystyle \frac{4.09389}{4.174402}  \\ \\
 V &= 0.9807128
 
 \end{align*}
-
-

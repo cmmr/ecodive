@@ -17,26 +17,23 @@ reference:
   contents: 
   - alpha_div
   - has_concept('adiv_functions')
-  
 
 - title: Beta Diversity
   contents: 
   - beta_div
   - has_concept('bdiv_functions')
 
-  
 - title: Programmatic Access
   contents:
   - match_metric
   - list_metrics
-  
-  
+
 - title: Utility
   contents:
   - read_tree
   - rarefy
   - n_cpus
-  
+
 - title: Datasets
   contents:
   - ex_counts

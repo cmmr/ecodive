@@ -1,5 +1,7 @@
 ---
 title: "Benchmarks"
+resource_files:
+  - "figures/JOSS_Fig1A.svg"
 ---
 
 ```{r, include = FALSE}
@@ -585,6 +587,3 @@ print(Fig1B_data[,1:4], n = Inf)
 #> 20 phyloseq    Weighted Normalized 296.54ms    49.5MB
 #> 21 picante     Unweighted             2.56s     1.8GB
 ```
-
-
-

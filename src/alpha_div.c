@@ -245,7 +245,6 @@ static void *faith(void *arg) {
 static pthread_func_t faith_setup(void) {
   
   faith_et           = new_ecotree(*sexp_extra);
-  val_vec            = maybe_free_one(val_vec);
   faith_has_edge_mtx = safe_malloc(n_threads * faith_et->n_edges * sizeof(char));
   
   return faith;
