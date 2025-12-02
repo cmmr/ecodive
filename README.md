@@ -17,7 +17,7 @@ datasets, such as those common in microbiome research.
 Analyzing ecological diversity is often a computational bottleneck, especially
 with large datasets. `ecodive` addresses this by providing:
 
-* **High Performance:** `ecodive` is written in C and parallelized using pthreads, making it dramatically faster than other R packages. [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html) show it can be up to **10,000x faster** and use up to **90,000x less memory**.
+* **High Performance:** `ecodive` is written in C and parallelized using pthreads, making it dramatically faster than other R packages. [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html) show it can be up to **9,000x faster** and use up to **200,000x less memory**.
 
 * **Zero Dependencies:** The package has no external R dependencies, making it lightweight, stable, and easy to install. This also makes it an ideal and secure backend for other R packages.
 
