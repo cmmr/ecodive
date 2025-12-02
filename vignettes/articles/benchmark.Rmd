@@ -1,7 +1,7 @@
 ---
 title: "Benchmarks"
 resource_files:
-  - "figures/JOSS_Fig1A.svg"
+  - "figures/benchmarks.svg"
 ---
 
 ```{r, include = FALSE}
