@@ -3,6 +3,16 @@ test_that("ecomatrix.c parsing logic is covered", {
   # Ensure Matrix and slam packages are available for testing
   skip_if_not_installed('Matrix')
   skip_if_not_installed('slam')
+  
+  if (packageVersion("Matrix") >= "1.5") {
+    COMPRESSED <- "sparseMatrix"
+    TRIPLET    <- "TsparseMatrix"
+    UNPACKED   <- "unpackedMatrix"
+  } else {
+    COMPRESSED <- "dgCMatrix"
+    TRIPLET    <- "dgTMatrix"
+    UNPACKED   <- "dgeMatrix"
+  }
 
   # Define a test function that calls an internal C function
   # We will test an alpha diversity metric which uses the ecomatrix parsing
@@ -32,12 +42,12 @@ test_that("ecomatrix.c parsing logic is covered", {
 
   # === Test with Matrix package types ===
   m_base_t <- t(m_base)
-  m_dgC    <- as(m_base, "dgCMatrix")
-  m_dgC_t  <- as(m_base_t, "dgCMatrix")
-  m_dgT    <- as(m_base, "TsparseMatrix")
-  m_dgT_t  <- as(m_base_t, "TsparseMatrix")
-  m_dge    <- as(m_base, "unpackedMatrix")
-  m_dge_t  <- as(m_base_t, "unpackedMatrix")
+  m_dgC    <- as(m_base,   COMPRESSED)
+  m_dgC_t  <- as(m_base_t, COMPRESSED)
+  m_dgT    <- as(m_base,   TRIPLET)
+  m_dgT_t  <- as(m_base_t, TRIPLET)
+  m_dge    <- as(m_base,   UNPACKED)
+  m_dge_t  <- as(m_base_t, UNPACKED)
 
   # dgCMatrix
   expect_equal(test_parsing(m_dgC, margin = 1L), expected_margin1, info = "dgCMatrix margin 1")
@@ -53,10 +63,10 @@ test_that("ecomatrix.c parsing logic is covered", {
 
   # Test with logical Matrix types
   m_logical_t <- t(m_logical)
-  m_lgC       <- as(m_logical, "dgCMatrix")
-  m_lgC_t     <- as(m_logical_t, "dgCMatrix")
-  m_lgT       <- as(m_logical, "TsparseMatrix")
-  m_lge       <- as(m_logical, "unpackedMatrix")
+  m_lgC       <- as(m_logical,   COMPRESSED)
+  m_lgC_t     <- as(m_logical_t, COMPRESSED)
+  m_lgT       <- as(m_logical,   TRIPLET)
+  m_lge       <- as(m_logical,   UNPACKED)
   expect_equal(test_parsing(m_lgC, margin = 1L), expected_margin1, info = "lgCMatrix margin 1")
   expect_equal(test_parsing(m_lgC_t, margin = 2L), expected_margin1, info = "lgCMatrix margin 2")
   expect_equal(test_parsing(m_lgT, margin = 1L), expected_margin1, info = "lgTMatrix margin 1")
@@ -96,8 +106,8 @@ test_that("ecomatrix.c parsing logic is covered", {
   expect_equal(test_parsing(unsorted_m_slam, margin = 1L), expected_margin1, info = "unsorted slam")
 
   # Test already sorted triplet
-  sorted_m_dgT <- as(m_dgC, "TsparseMatrix") # dgC is sorted by column, then row
-  sorted_m_dgT_t <- as(m_dgC_t, "TsparseMatrix")
+  sorted_m_dgT   <- as(m_dgC, TRIPLET) # dgC is sorted by column, then row
+  sorted_m_dgT_t <- as(m_dgC_t, TRIPLET)
   expect_equal(test_parsing(sorted_m_dgT_t, margin = 2L), expected_margin1, info = "sorted dgTMatrix")
 
 
