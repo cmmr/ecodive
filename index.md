@@ -12,7 +12,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 - **High Performance:** `ecodive` is written in C and parallelized using
   pthreads, making it dramatically faster than other R packages.
   [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html)
-  show it can be up to **10,000x faster** and use up to **90,000x less
+  show it can be up to **9,000x faster** and use up to **200,000x less
   memory**.
 
 - **Zero Dependencies:** The package has no external R dependencies,
