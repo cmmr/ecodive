@@ -199,13 +199,13 @@ the observed richness.</p>
 samples have the same number of observations. Rarefying randomly removes
 observations from samples with more observations.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
 <span><span class="co">#&gt;    345    886   1011    615 </span></span>
 <span></span>
 <span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rarefy.html">rarefy</a></span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
 <span><span class="co">#&gt;    345    345    345    345 </span></span>
 <span></span>
