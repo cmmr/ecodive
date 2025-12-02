@@ -100,6 +100,7 @@ test_that("validation", {
   # validate_tree() ====
 
   env$counts <- counts[1:3,,drop=FALSE]
+  env$margin <- 1L
   tree2      <- tree
   tree2$edge.length <- as.integer(tree$edge.length * 100)
   tree2$edge <- matrix(
@@ -109,11 +110,22 @@ test_that("validation", {
     dimnames = dimnames(tree$edge) )
   env$tree <- tree2
   expect_silent(validate_tree(env))
-
-  env$counts <- counts[,1:4,drop=FALSE]
-  env$tree   <- tree
+  
+  env$counts <- t(counts[1:3,,drop=FALSE])
+  env$margin <- 2L
   expect_silent(validate_tree(env))
 
+  
+  env$counts <- counts[,1:4,drop=FALSE]
+  env$margin <- 1L
+  env$tree   <- tree
+  expect_silent(validate_tree(env))
+  
+  env$counts <- t(counts[,1:4,drop=FALSE])
+  env$margin <- 2L
+  expect_silent(validate_tree(env))
+
+  
 
 
 
@@ -121,6 +133,7 @@ test_that("validation", {
 
   env$tree   <- NULL
   env$counts <- counts
+  env$margin <- 1L
   attr(env$counts, 'tree') <- tree
   expect_silent(validate_counts(env))
 

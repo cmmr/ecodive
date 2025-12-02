@@ -12,8 +12,8 @@ validate_args <- function () {
   env  <- parent.frame()
   args <- ls(env)
   
-  # move counts and pseudocount to head of the line
-  args <- unique(c(intersect(c('counts', 'pseudocount'), args), sort(args)))
+  # move counts, pseudocount, and margin to head of the line
+  args <- unique(c(intersect(c('counts', 'pseudocount', 'margin'), args), sort(args)))
   
   for (arg in args)
     do.call(paste0('validate_', arg), list(env))
@@ -63,7 +63,7 @@ validate_counts <- function (env = parent.frame()) {
       if (!inherits(counts, c('matrix', 'dgCMatrix', 'dgTMatrix', 'dgeMatrix', 'simple_triplet_matrix'))) {
         
         if (inherits(counts, 'rbiom')) {
-          counts <- counts$counts # simple_triplet_matrix
+          counts <- counts$counts # dgCMatrix
           margin <- 2L
         }
         
@@ -430,21 +430,43 @@ validate_tree <- function (env = parent.frame()) {
         tree$edge.length <- as.numeric(tree$edge.length)
       
       stopifnot(hasName(tree, 'tip.label'))
-      stopifnot(!is.null(colnames(counts)))
-      stopifnot(all(colnames(counts) %in% tree$tip.label))
       
-      missing <- setdiff(tree$tip.label, colnames(counts))
-      if (length(missing))
-        counts <- cbind(
-          counts, 
-          matrix(
-            data     = 0, 
-            nrow     = nrow(counts),
-            ncol     = length(missing), 
-            dimnames = list(rownames(counts), missing) ))
-      remove('missing')
-      
-      counts <- counts[,as.character(tree$tip.label),drop=FALSE]
+      if (margin == 1L) {
+        
+        stopifnot(!is.null(colnames(counts)))
+        stopifnot(all(colnames(counts) %in% tree$tip.label))
+        
+        missing <- setdiff(tree$tip.label, colnames(counts))
+        if (length(missing))
+          counts <- cbind(
+            counts, 
+            matrix(
+              data     = 0, 
+              nrow     = nrow(counts),
+              ncol     = length(missing), 
+              dimnames = list(rownames(counts), missing) ))
+        remove('missing')
+        
+        counts <- counts[,as.character(tree$tip.label),drop=FALSE]
+      }
+      else {
+        
+        stopifnot(!is.null(rownames(counts)))
+        stopifnot(all(rownames(counts) %in% tree$tip.label))
+        
+        missing <- setdiff(tree$tip.label, rownames(counts))
+        if (length(missing))
+          counts <- rbind(
+            counts, 
+            matrix(
+              data     = 0, 
+              nrow     = length(missing), 
+              ncol     = ncol(counts),
+              dimnames = list(missing, rownames(counts)) ))
+        remove('missing')
+        
+        counts <- counts[as.character(tree$tip.label),,drop=FALSE]
+      }
     }),
     
     error = function (e) 

@@ -151,14 +151,18 @@ articles on alpha/beta diversity, and reference pages for each function.
 
 
 
-## Automated tests
+## Testing
 
-The following commands will check if ecodive passes the bundled testing
-suite.
+`ecodive` has a comprehensive test suite using the `testthat` package. All
+code is automatically tested via GitHub Actions upon each push to the
+repository to ensure functionality and stability.
+
+For users who have cloned the source repository, the tests can be run
+locally with the following commands in an R session:
 
 ``` r
 install.packages('testthat')
-testthat::test_check('ecodive')
+devtools::test()
 ```
 
 
