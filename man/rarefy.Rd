@@ -19,7 +19,9 @@ rarefy(
 \item{counts}{A numeric matrix of count data where each column is a
 feature, and each row is a sample. Any object coercible with
 \code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
+\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
+optimal performance with very large datasets, see the guide in
+\code{vignette('performance')}.}
 
 \item{depth}{How many observations to keep per sample. When
 \verb{0 < depth < 1}, it is taken as the minimum percentage of the

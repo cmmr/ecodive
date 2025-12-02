@@ -19,7 +19,9 @@ alpha_div(
 \item{counts}{A numeric matrix of count data where each column is a
 feature, and each row is a sample. Any object coercible with
 \code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
+\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
+optimal performance with very large datasets, see the guide in
+\code{vignette('performance')}.}
 
 \item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson', 'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson', 'squares')}. Case-insensitive and partial name matching is supported.
 Programmatic access via \code{list_metrics('alpha')}.}

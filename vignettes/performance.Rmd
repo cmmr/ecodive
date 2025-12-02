@@ -1,0 +1,103 @@
+---
+title: "Performance Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Performance Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Optimizing `ecodive` for Large Datasets
+
+`ecodive` is engineered for high performance, using parallelized C code to deliver results quickly and with minimal memory usage. For most use cases, you can pass your data in any standard R format (like a `matrix` or `data.frame`) and get fast results.
+
+However, when working with very large datasets—such as those with thousands of samples or hundreds of thousands of features—you can achieve noticeably better performance by paying attention to the format of your input data. These optimizations minimize the internal data conversion steps that `ecodive` has to perform.
+
+
+### The Optimal Input: Compressed Sparse Matrices
+
+`ecodive` is highly efficient at reformatting data internally for one-off calculations. You do not need to manually format your data for single function calls.
+
+However, if you plan to run **multiple `ecodive` functions** on the same large dataset, you will see a performance benefit by converting your data into the optimal format first. This format is a **column-compressed sparse matrix (`dgCMatrix`)** from the `Matrix` package, with **samples arranged in columns**.
+
+By doing the conversion once, you prevent `ecodive` from having to reformat the data for each subsequent function call.
+
+```r
+library(ecodive)
+library(Matrix)
+
+# Assume 'my_counts' is a standard matrix with samples in rows
+my_counts <- as.matrix(ex_counts)
+
+# Convert once to the optimal format
+optimal_counts <- as(t(my_counts), "dgCMatrix")
+
+# Now, run multiple analyses on the pre-formatted object.
+# Remember to specify margin = 2L since samples are in columns.
+shannon_vals <- shannon(optimal_counts, margin = 2L)
+simpson_vals <- simpson(optimal_counts, margin = 2L)
+observed_vals <- observed(optimal_counts, margin = 2L)
+```
+
+#### Why Sparse Matrices?
+
+Ecological datasets, particularly from amplicon sequencing (16S, ITS) or shotgun metagenomics, are typically "sparse." This means that for any given sample, the vast majority of species in the full dataset have a count of zero.
+
+A standard R `matrix` stores every single value, including all the zeros. For a large dataset, this can consume a massive amount of memory. A sparse matrix, on the other hand, only stores the non-zero values and their locations. This dramatically reduces the memory footprint.
+
+By providing a `dgCMatrix` with samples in columns, you are feeding `ecodive` data in its preferred native format, allowing it to skip any internal conversion and proceed directly to calculations.
+
+
+#### `rbiom` Users
+
+If you use the `rbiom` package to manage your data, you're already taking advantage of this! `rbiom` objects store their count tables internally as a `dgCMatrix` with samples in columns. When you pass an `rbiom` object to an `ecodive` function, it is passed in this optimal format automatically.
+
+
+### Handling Data Transformations
+
+Many diversity metrics operate on transformed data, most commonly relative abundances (`norm = 'percent'`). When you specify a transformation like `norm = 'percent'`, `ecodive` performs this conversion internally. This adds a small amount of computational overhead.
+
+If you plan to run many different analyses on the same transformed data, it is more efficient to perform the transformation once yourself and then pass the pre-transformed data to `ecodive`, specifying `norm = 'none'`.
+
+```r
+# Inefficient: Transforming the data twice
+shannon_vals <- shannon(optimal_counts, norm = 'percent', margin = 2L)
+simpson_vals <- simpson(optimal_counts, norm = 'percent', margin = 2L)
+
+# More Efficient: Transform once
+rel_abund <- t(apply(t(optimal_counts), 1, function(x) x / sum(x)))
+rel_abund <- as(rel_abund, "dgCMatrix")
+
+shannon_vals <- shannon(rel_abund, norm = 'none', margin = 2L)
+simpson_vals <- simpson(rel_abund, norm = 'none', margin = 2L)
+```
+
+#### The Exception: Centered Log-Ratio (CLR)
+
+The one exception to this rule is the centered log-ratio transformation (`norm = 'clr'`), used for calculating Aitchison distance. A standard CLR transformation turns a sparse matrix into a "dense" matrix (where all zeros become non-zero values), which dramatically increases memory consumption.
+
+`ecodive`'s internal CLR implementation uses special techniques to calculate the result while preserving the sparse matrix structure as much as possible. Therefore, for CLR-based metrics, you will achieve better performance and lower memory usage by letting `ecodive` handle the transformation.
+
+**Do this:**
+```r
+# Best for CLR: Let ecodive handle the transformation
+aitchison_dist <- aitchison(optimal_counts, margin = 2L)
+```
+
+**Not this:**
+```r
+# Inefficient for CLR: Pre-transforming creates a dense matrix
+library(compositions)
+dense_matrix <- clr(t(as.matrix(optimal_counts)) + 1) # Becomes dense
+aitchison_dist <- euclidean(dense_matrix, norm = 'none')
+```
+
+### Summary
+
+For the best performance with **very large datasets**:
+
+1.  Store your count data as a `dgCMatrix` with samples in columns.
+2.  Use `margin = 2L` in `ecodive` function calls.
+3.  For repeated calculations, pre-transform your data (e.g., to relative abundance) and use `norm = 'none'`.
+4.  **Exception**: Always let `ecodive` handle CLR transformations by using `norm='clr'`.
+

@@ -208,7 +208,9 @@ variance_adjusted_unifrac(
 \item{counts}{A numeric matrix of count data where each column is a
 feature, and each row is a sample. Any object coercible with
 \code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects.}
+\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
+optimal performance with very large datasets, see the guide in
+\code{vignette('performance')}.}
 
 \item{pseudocount}{The value to add to all counts in \code{counts} to prevent
 taking \code{log(0)} for unobserved features. The default, \code{NULL}, selects

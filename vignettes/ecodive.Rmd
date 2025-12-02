@@ -237,3 +237,12 @@ mtx
 mtx['Saliva', 'Nose']
 #> [1] 0.5
 ```
+
+
+## Performance with Large Datasets
+
+`ecodive` is designed to be fast out-of-the-box. However, if you are working
+with very large datasets (e.g., thousands of samples), you can gain additional
+performance by following the recommendations in our performance guide.
+
+* Further reading: `vignette('performance')`

@@ -14,7 +14,9 @@
 #' @param counts   A numeric matrix of count data where each column is a 
 #'        feature, and each row is a sample. Any object coercible with 
 #'        `as.matrix()` can be given here, as well as `phyloseq`, `rbiom`, 
-#'        `SummarizedExperiment`, and `TreeSummarizedExperiment` objects. 
+#'        `SummarizedExperiment`, and `TreeSummarizedExperiment` objects. For
+#'        optimal performance with very large datasets, see the guide in
+#'        `vignette('performance')`.
 #' 
 #' @param cpus   How many parallel processing threads should be used. The
 #'        default, `n_cpus()`, will use all logical CPU cores.

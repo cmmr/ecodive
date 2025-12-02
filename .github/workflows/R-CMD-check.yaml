@@ -6,6 +6,12 @@ name: R CMD check
 on:
   push:
     branches: [main]
+    paths:
+      - man/**
+      - R/**
+      - src/**
+      - tests/**
+      - .github/workflows/R-CMD-check.yaml
   pull_request:
 
 permissions: read-all
