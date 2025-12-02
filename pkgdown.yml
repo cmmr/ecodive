@@ -7,8 +7,9 @@ articles:
   bdiv: bdiv.html
   articles/benchmark: benchmark.html
   ecodive: ecodive.html
+  performance: performance.html
   articles/unifrac: unifrac.html
-last_built: 2025-12-02T20:13Z
+last_built: 2025-12-02T21:15Z
 urls:
   reference: https://cmmr.github.io/ecodive/reference
   article: https://cmmr.github.io/ecodive/articles

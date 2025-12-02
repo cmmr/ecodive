@@ -16,7 +16,9 @@ documentation
   each row is a sample. Any object coercible with
   [`as.matrix()`](https://rdrr.io/r/base/matrix.html) can be given here,
   as well as `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects.
+  `TreeSummarizedExperiment` objects. For optimal performance with very
+  large datasets, see the guide in
+  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md).
 
 - cpus:
 

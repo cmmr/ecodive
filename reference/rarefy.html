@@ -27,6 +27,7 @@ integers between 1 and depth such that they sum to depth."><meta property="og:im
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
     <li><a class="dropdown-item" href="../articles/unifrac.html">UniFrac Calculations</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -73,7 +74,9 @@ integers between 1 and <code>depth</code> such that they sum to <code>depth</cod
 <dd><p>A numeric matrix of count data where each column is a
 feature, and each row is a sample. Any object coercible with
 <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> can be given here, as well as <code>phyloseq</code>, <code>rbiom</code>,
-<code>SummarizedExperiment</code>, and <code>TreeSummarizedExperiment</code> objects.</p></dd>
+<code>SummarizedExperiment</code>, and <code>TreeSummarizedExperiment</code> objects. For
+optimal performance with very large datasets, see the guide in
+<code><a href="../articles/performance.html">vignette('performance')</a></code>.</p></dd>
 
 
 <dt id="arg-depth">depth<a class="anchor" aria-label="anchor" href="#arg-depth"></a></dt>
