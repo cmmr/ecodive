@@ -152,7 +152,7 @@ test_that("validation", {
   expect_silent(validate_counts(env))
 
   env$tree   <- NULL
-  env$counts <- t(hmp50$counts)
+  env$counts <- Matrix::t(hmp50$counts)
   expect_silent(validate_counts(env))
 
   env$tree   <- NULL

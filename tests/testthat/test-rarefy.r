@@ -64,14 +64,24 @@ test_that("rarefaction", {
   skip_if_not_installed('Matrix')
   skip_if_not_installed('slam')
   
+  if (packageVersion("Matrix") >= "1.5") {
+    COMPRESSED <- "sparseMatrix"
+    TRIPLET    <- "TsparseMatrix"
+    UNPACKED   <- "unpackedMatrix"
+  } else {
+    COMPRESSED <- "dgCMatrix"
+    TRIPLET    <- "dgTMatrix"
+    UNPACKED   <- "dgeMatrix"
+  }
+  
   # Test error on non-integer counts
-  expect_error(rarefy(as(counts * 1.5, 'dgCMatrix')))
+  expect_error(rarefy(as(counts * 1.5, COMPRESSED)))
   expect_error(rarefy(slam::as.simple_triplet_matrix(counts * 1.5)))
 
   # Test with different matrix types
-  counts_dgC  <- as(counts, 'dgCMatrix')
-  counts_dgT  <- as(counts, 'TsparseMatrix')
-  counts_dge  <- as(counts, 'unpackedMatrix')
+  counts_dgC  <- as(counts, COMPRESSED)
+  counts_dgT  <- as(counts, TRIPLET)
+  counts_dge  <- as(counts, UNPACKED)
   counts_slam <- slam::as.simple_triplet_matrix(counts)
   
   # rarefy with different matrix types
@@ -92,9 +102,9 @@ test_that("rarefaction", {
   expect_equal(sum(colSums(r_t_nsamples) > 0), 2)
   
   # Test different matrix types with margin = 2
-  counts_t_dgC  <- as(counts_t, 'dgCMatrix')
-  counts_t_dgT  <- as(counts_t, 'TsparseMatrix')
-  counts_t_dge  <- as(counts_t, 'unpackedMatrix')
+  counts_t_dgC  <- as(counts_t, COMPRESSED)
+  counts_t_dgT  <- as(counts_t, TRIPLET)
+  counts_t_dge  <- as(counts_t, UNPACKED)
   counts_t_slam <- slam::as.simple_triplet_matrix(counts_t)
   
   expect_silent(rarefy(counts_t,      margin = 2L, seed = 1))
@@ -111,7 +121,7 @@ test_that("rarefaction", {
   # Test for triplet matrices (dgTMatrix, slam, dgCMatrix margin=1)
   # which use rarefy_triplet()
   r_dgT_20 <- rarefy(counts_dgT, depth = 20, drop = FALSE)
-  expect_s4_class(r_dgT_20, "dgTMatrix")
+  expect_s4_class(r_dgT_20, TRIPLET)
   expect_equal(unname(Matrix::rowSums(r_dgT_20)), c(0, 0, 20, 0))
   
   r_slam_20 <- rarefy(counts_slam, depth = 20, drop = FALSE)
@@ -121,7 +131,7 @@ test_that("rarefaction", {
   # Test for compressed sparse matrix (dgCMatrix margin=2)
   # which uses rarefy_compressed()
   r_t_dgC_20 <- rarefy(counts_t_dgC, depth = 20, margin = 2L, drop = FALSE)
-  expect_s4_class(r_t_dgC_20, "dgCMatrix")
+  expect_s4_class(r_t_dgC_20, COMPRESSED)
   expected_t_20 <- t(rarefy(counts, depth = 20, drop = FALSE))
   expect_equal(unname(Matrix::colSums(r_t_dgC_20)), c(0, 0, 20, 0))
   
