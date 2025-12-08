@@ -1,6 +1,6 @@
 # ecodive 2.2.1
 
-* Changes needed to satisfy CRAN rchk.
+* Corrected CRAN `rchk` issue.
 
 
 
