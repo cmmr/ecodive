@@ -64,7 +64,7 @@ jobs:
           errors <- errors[nzchar(errors)]
           
           if (length(errors) > 0) {
-            stop("rchk failed! Errors detected in analysis logs.")
+            stop("rchk failed! Errors detected in analysis logs:\n", paste(errors, collapse = "\n"))
           } else {
             cat("\nSUCCESS: No memory protection errors found by rchk.\n")
           }
