@@ -20,3 +20,4 @@
 ^CRAN-SUBMISSION$
 ^valgrind_log\.txt$
 ^rhub_check\.r$
+^rchk$
