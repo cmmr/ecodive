@@ -1,3 +1,8 @@
+# ecodive 2.2.1
+
+* Changes needed to satisfy CRAN rchk.
+
+
 
 # ecodive 2.2.0
 

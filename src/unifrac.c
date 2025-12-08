@@ -542,11 +542,11 @@ SEXP C_unifrac(
   n_dist                = n_samples * (n_samples - 1) / 2;
   SEXP sexp_result_dist = PROTECT(allocVector(REALSXP, n_dist));
   dist_vec              = REAL(sexp_result_dist);
-  setAttrib(sexp_result_dist, R_ClassSymbol,      mkString("dist"));
-  setAttrib(sexp_result_dist, mkString("Size"),   ScalarInteger(n_samples));
-  setAttrib(sexp_result_dist, mkString("Diag"),   ScalarLogical(0));
-  setAttrib(sexp_result_dist, mkString("Upper"),  ScalarLogical(0));
-  setAttrib(sexp_result_dist, mkString("Labels"), em->sexp_sample_names);
+  setAttrib(sexp_result_dist, R_ClassSymbol,     mkString("dist"));
+  setAttrib(sexp_result_dist, install("Size"),   ScalarInteger(n_samples));
+  setAttrib(sexp_result_dist, install("Diag"),   ScalarLogical(0));
+  setAttrib(sexp_result_dist, install("Upper"),  ScalarLogical(0));
+  setAttrib(sexp_result_dist, install("Labels"), em->sexp_sample_names);
   
   
   // Avoid allocating pairs_vec for common all-vs-all case

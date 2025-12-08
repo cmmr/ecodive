@@ -19,3 +19,4 @@ tmp/
 /Meta/
 /refs/
 valgrind_log.txt
+rhub_check.r
