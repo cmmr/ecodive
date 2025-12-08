@@ -68,8 +68,3 @@ jobs:
           } else {
             cat("\nSUCCESS: No memory protection errors found by rchk.\n")
           }
-
-      - name: Show install log
-        if: always()
-        run: find . -name '00install.out' -exec cat {} +
-        shell: bash

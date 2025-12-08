@@ -751,17 +751,17 @@ SEXP C_beta_div(
   SEXP sexp_result_dist = PROTECT(allocVector(REALSXP, n_dist)); // PROTECT(1)
   dist_vec              = REAL(sexp_result_dist);
   
-  // SEXP sexp_dist_class = PROTECT(mkString("dist")); // PROTECT(2)
-  // SEXP sexp_size_val   = PROTECT(ScalarInteger(n_samples)); // PROTECT(3)
-  // SEXP sexp_diag_val   = PROTECT(ScalarLogical(0)); // PROTECT(4)
-  // SEXP sexp_upper_val  = PROTECT(ScalarLogical(0)); // PROTECT(5)
+  SEXP sexp_dist_class = PROTECT(mkString("dist")); // PROTECT(2)
+  SEXP sexp_size_val   = PROTECT(ScalarInteger(n_samples)); // PROTECT(3)
+  SEXP sexp_diag_val   = PROTECT(ScalarLogical(0)); // PROTECT(4)
+  SEXP sexp_upper_val  = PROTECT(ScalarLogical(0)); // PROTECT(5)
   
   setAttrib(sexp_result_dist, R_ClassSymbol,     mkString("dist"));
   setAttrib(sexp_result_dist, install("Size"),   ScalarInteger(n_samples));
   setAttrib(sexp_result_dist, install("Diag"),   ScalarLogical(0));
   setAttrib(sexp_result_dist, install("Upper"),  ScalarLogical(0));
   setAttrib(sexp_result_dist, install("Labels"), em->sexp_sample_names);
-  // UNPROTECT(4); // sexp_dist_class, sexp_size_val, sexp_diag_val, sexp_upper_val
+  UNPROTECT(4); // sexp_dist_class, sexp_size_val, sexp_diag_val, sexp_upper_val
   
   
   // Avoid allocating pairs_vec for common all-vs-all case
