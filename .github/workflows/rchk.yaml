@@ -23,7 +23,7 @@ jobs:
 
       - name: Build Package
         run: |
-          R CMD build .
+          R CMD build --no-manual --no-build-vignettes .
           mkdir packages
           PKG_TAR=$(ls -1 *.tar.gz | head -n 1)
           mv "$PKG_TAR" packages/
