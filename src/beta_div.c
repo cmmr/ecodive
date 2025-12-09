@@ -762,12 +762,6 @@ SEXP C_beta_div(
   setAttrib(sexp_result_dist, install("Upper"),  sexp_upper_val);
   setAttrib(sexp_result_dist, install("Labels"), em->sexp_sample_names);
   
-  setAttrib(sexp_result_dist, R_ClassSymbol,     mkString("dist"));
-  setAttrib(sexp_result_dist, install("Size"),   ScalarInteger(n_samples));
-  setAttrib(sexp_result_dist, install("Diag"),   ScalarLogical(0));
-  setAttrib(sexp_result_dist, install("Upper"),  ScalarLogical(0));
-  setAttrib(sexp_result_dist, install("Labels"), em->sexp_sample_names);
-  
   
   // Avoid allocating pairs_vec for common all-vs-all case
   if (isNull(sexp_pairs_vec)) {
