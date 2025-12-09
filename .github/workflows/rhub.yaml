@@ -69,6 +69,44 @@ jobs:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
 
+      - name: Verify rchk results (Enhanced)
+        if: ${{ always() && matrix.config.label == 'rchk' }}
+        shell: Rscript {0}
+        run: |
+          # Define paths used by the r-hub rchk container
+          pkg           <- read.dcf("DESCRIPTION", "Package")[[1]]
+          libs_dir      <- file.path("/opt/R/devel-rchk/packages/lib", pkg, "libs")
+          bcheck_file   <- file.path(libs_dir, paste0(pkg, ".so.bcheck"))
+          maacheck_file <- file.path(libs_dir, paste0(pkg, ".so.maacheck"))
+
+          errors <- character(0)
+
+          # 1. Check bcheck (using custom logic)
+          cat("Looking for bcheck file at ", bcheck_file, "\n")
+          if (file.exists(bcheck_file)) {
+            cat("Reading bcheck file\n")
+            b_lines <- readLines(bcheck_file)
+            b_lines <- b_lines[!grepl("too many states", b_lines)]
+            b_lines <- b_lines[!grepl("^Analyzed [0-9]+ functions", b_lines)]
+            errors <- c(errors, b_lines)
+          }
+
+          # 2. Check maacheck (missing in standard rhub check)
+          cat("Looking for maacheck file at ", maacheck_file, "\n")
+          if (file.exists(maacheck_file)) {
+            cat("Reading maacheck file\n")
+            m_lines <- readLines(maacheck_file)
+            errors  <- c(errors, m_lines)
+          }
+
+          # 3. Fail if errors exist
+          errors <- errors[nzchar(errors)]
+          if (length(errors) > 0) {
+            stop("rchk failed (enhanced check)! Errors detected:\n", paste(errors, collapse = "\n"))
+          } else {
+            cat("SUCCESS: No memory protection errors found by enhanced rchk.\n")
+          }
+
       - name: Show install log
         if: always()
         run: find . -name '00install.out' -exec cat {} +
