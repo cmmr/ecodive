@@ -31,7 +31,7 @@ runs:
 
             echo "--- Installing System Dependencies ---"
             # Use the environment variable passed from inputs
-            apk add --no-cache gcc g++ gfortran musl-dev R-dev linux-headers curl-dev libxml2-dev checkbashisms $SYSTEM_DEPS
+            apk add --no-cache gcc g++ gfortran musl-dev R-dev linux-headers curl-dev libxml2-dev pandoc checkbashisms $SYSTEM_DEPS
 
             echo "--- Installing pak ---"
             # Installing from the specific Musl URL you provided
@@ -39,11 +39,11 @@ runs:
 
             echo "--- Installing R Dependencies ---"
             R -q -e "pak::local_install_dev_deps()"
-            R -q -e "pak::pak(\"rcmdcheck\")"
+            R -q -e "pak::pak(c(\"rcmdcheck\", \"pandoc\"))"
 
             echo "--- Running R CMD check ---"
             # Capture exit status instead of failing immediately (due to set -e)
-            if R -q -e "rcmdcheck::rcmdcheck(args = c(\"--as-cran\", \"--no-manual\", \"--no-vignettes\"), build_args = c(\"--no-manual\", \"--no-build-vignettes\"))"; then
+            if R -q -e "rcmdcheck::rcmdcheck(args = c(\"--as-cran\", \"--no-manual\", \"--no-vignettes\"))"; then
               STATUS=0
               echo "✅ Check Succeeded"
             else

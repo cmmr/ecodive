@@ -1,6 +1,4 @@
-useDynLib(ecodive, 
-  C_rarefy,    C_read_tree, C_pthreads, 
-  C_alpha_div, C_beta_div,  C_unifrac )
+useDynLib(ecodive, .registration = TRUE)
 
 importFrom(parallel, detectCores)
 importFrom(utils, combn)
