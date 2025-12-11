@@ -9,6 +9,7 @@ on:
       - src/**
       - tests/**
       - .Rbuildignore
+      - .github/actions/alpine-musl-check/action.yaml
       - .github/workflows/alpine-musl-check.yaml
 
 jobs:
