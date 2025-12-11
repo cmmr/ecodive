@@ -1,0 +1,60 @@
+name: 'Alpine Musl Check'
+description: 'Runs R CMD check on Alpine Linux (musl) using a Docker container'
+author: 'Your Name'
+
+inputs:
+  error-on:
+    description: 'The condition on which to fail the check (error, warning, note)'
+    required: false
+    default: 'warning'
+  system-deps:
+    description: 'Space-separated list of Alpine system packages to install (apk)'
+    required: false
+    default: ''
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run Check in Docker
+      shell: bash
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e RCMDCHECK_ERROR_ON="${{ inputs.error-on }}" \
+          -e SYSTEM_DEPS="${{ inputs.system-deps }}" \
+          -e NOT_CRAN=true \
+          -e _R_CHECK_CRAN_INCOMING_=false \
+          rhub/r-minimal \
+          sh -c '
+            set -e # Fail immediately if setup commands fail
+
+            echo "--- Installing System Dependencies ---"
+            # Use the environment variable passed from inputs
+            apk add --no-cache gcc g++ gfortran musl-dev R-dev linux-headers curl-dev libxml2-dev checkbashisms $SYSTEM_DEPS
+
+            echo "--- Installing pak ---"
+            # Installing from the specific Musl URL you provided
+            R -q -e "install.packages(\"pak\", repos=\"https://r-lib.github.io/p/pak/stable/source/linux-musl/x86_64\")"
+
+            echo "--- Installing R Dependencies ---"
+            R -q -e "pak::local_install_dev_deps()"
+            R -q -e "pak::pak(\"rcmdcheck\")"
+
+            echo "--- Running R CMD check ---"
+            # Capture exit status instead of failing immediately (due to set -e)
+            if R -q -e "rcmdcheck::rcmdcheck(args = c(\"--no-manual\", \"--as-cran\", \"--no-vignettes\"))"; then
+              STATUS=0
+              echo "✅ Check Succeeded"
+            else
+              STATUS=1
+              echo "❌ Check Failed"
+            fi
+
+            echo "--- Dumping install logs (00install.out) ---"
+            # Always run this, regardless of check status
+            find . -name "00install.out" -exec cat {} + || true
+
+            # Exit with the saved status code
+            exit $STATUS
+          '
