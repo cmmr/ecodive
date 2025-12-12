@@ -4,6 +4,8 @@
 name: R CMD check
 
 on:
+  workflow_dispatch:
+  pull_request:
   push:
     branches: [main]
     paths:
@@ -11,8 +13,9 @@ on:
       - R/**
       - src/**
       - tests/**
+      - DESCRIPTION
+      - NAMESPACE
       - .github/workflows/R-CMD-check.yaml
-  pull_request:
 
 permissions: read-all
 

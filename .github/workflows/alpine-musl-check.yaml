@@ -8,7 +8,8 @@ on:
       - R/**
       - src/**
       - tests/**
-      - .Rbuildignore
+      - DESCRIPTION
+      - NAMESPACE
       - .github/actions/alpine-musl-check/action.yaml
       - .github/workflows/alpine-musl-check.yaml
 

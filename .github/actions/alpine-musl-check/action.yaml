@@ -31,7 +31,7 @@ runs:
 
             echo "--- Installing System Dependencies ---"
             # Use the environment variable passed from inputs
-            apk add --no-cache gcc g++ gfortran musl-dev R-dev linux-headers curl-dev libxml2-dev pandoc checkbashisms $SYSTEM_DEPS
+            apk add --no-cache gcc g++ gfortran musl-dev R-dev linux-headers curl-dev libxml2-dev pandoc qpdf checkbashisms $SYSTEM_DEPS
 
             echo "--- Installing pak ---"
             # Installing from the specific Musl URL you provided
