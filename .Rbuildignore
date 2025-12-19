@@ -9,7 +9,7 @@
 ^conda$
 ^doc$
 ^docs$
-^joss$
+^paper$
 ^logo$
 ^man/figures/.*\.rds$
 ^Meta$
