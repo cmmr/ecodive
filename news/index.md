@@ -1,6 +1,14 @@
 # Changelog
 
+## ecodive 2.2.1
+
+CRAN release: 2025-12-12
+
+- Corrected CRAN `rchk` issue.
+
 ## ecodive 2.2.0
+
+CRAN release: 2025-12-03
 
 - Dedicated rarefaction backends for dense and sparse matrices.
 - Auto-conversion to col-major sparse matrix for distance/diversity

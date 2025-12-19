@@ -11,16 +11,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/cmmr/ecodive/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/cmmr/ecodive/blob/v2.2.1/DESCRIPTION)
 
 Smith D (2025). *ecodive: Parallel and Memory-Efficient Ecological
-Diversity Metrics*. R package version 2.2.0,
+Diversity Metrics*. R package version 2.2.1,
 <https://cmmr.github.io/ecodive/>.
 
     @Manual{,
       title = {ecodive: Parallel and Memory-Efficient Ecological Diversity Metrics},
       author = {Daniel P. Smith},
       year = {2025},
-      note = {R package version 2.2.0},
+      note = {R package version 2.2.1},
       url = {https://cmmr.github.io/ecodive/},
     }
