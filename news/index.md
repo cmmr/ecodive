@@ -1,5 +1,9 @@
 # Changelog
 
+## ecodive 2.2.2
+
+- Drop explicit zeroes from sparse matrices after rarefaction.
+
 ## ecodive 2.2.1
 
 CRAN release: 2025-12-12
