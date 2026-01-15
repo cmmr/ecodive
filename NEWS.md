@@ -1,3 +1,9 @@
+# ecodive 2.2.2
+
+* Drop explicit zeroes from sparse matrices after rarefaction.
+
+
+
 # ecodive 2.2.1
 
 * Corrected CRAN `rchk` issue.

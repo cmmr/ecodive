@@ -512,6 +512,172 @@ static void set_target (SEXP sexp_depth, SEXP sexp_n_samples) {
 }
 
 
+/*
+ * Compacts a slam::simple_triplet_matrix (S3 object)
+ * uses "v", "i", "j" components.
+ */
+static void compact_slam(SEXP sexp_mtx) {
+    SEXP sexp_v = get(sexp_mtx, "v");
+    SEXP sexp_i = get(sexp_mtx, "i");
+    SEXP sexp_j = get(sexp_mtx, "j");
+    
+    double *v     = REAL(sexp_v);
+    int    *i     = INTEGER(sexp_i);
+    int    *j     = INTEGER(sexp_j);
+    int     n_all = LENGTH(sexp_v);
+    
+    // 1. Count new non-zeros
+    int nnz_new = 0;
+    for (int k = 0; k < n_all; k++) {
+        if (v[k] != 0.0) nnz_new++;
+    }
+    
+    if (nnz_new == n_all) return;
+    
+    // 2. Allocate new vectors
+    SEXP sexp_new_v = PROTECT(allocVector(REALSXP, nnz_new));
+    SEXP sexp_new_i = PROTECT(allocVector(INTSXP,  nnz_new));
+    SEXP sexp_new_j = PROTECT(allocVector(INTSXP,  nnz_new));
+    
+    double *new_v = REAL(sexp_new_v);
+    int    *new_i = INTEGER(sexp_new_i);
+    int    *new_j = INTEGER(sexp_new_j);
+    
+    // 3. Filter data
+    int idx = 0;
+    for (int k = 0; k < n_all; k++) {
+        if (v[k] != 0.0) {
+            new_v[idx] = v[k];
+            new_i[idx] = i[k];
+            new_j[idx] = j[k];
+            idx++;
+        }
+    }
+    
+    // 4. Update the list components
+    set(sexp_mtx, "v", sexp_new_v);
+    set(sexp_mtx, "i", sexp_new_i);
+    set(sexp_mtx, "j", sexp_new_j);
+    
+    UNPROTECT(3);
+}
+
+
+/*
+ * Compacts a dgCMatrix by removing explicit zeros (0.0) from the
+ * x and i slots and updating the p slot.
+ */
+static void compact_dgCMatrix(SEXP sexp_mtx) {
+    // 1. Access the slots
+    SEXP sexp_p = R_do_slot(sexp_mtx, install("p"));
+    SEXP sexp_i = R_do_slot(sexp_mtx, install("i"));
+    SEXP sexp_x = R_do_slot(sexp_mtx, install("x"));
+
+    int    *p    = INTEGER(sexp_p);
+    int    *i    = INTEGER(sexp_i);
+    double *x    = REAL(sexp_x);
+    int     ncol = LENGTH(sexp_p) - 1;
+    int     nnz_old = p[ncol];
+
+    // 2. Pass 1: Count new non-zeros (nnz)
+    int nnz_new = 0;
+    for (int k = 0; k < nnz_old; k++) {
+        if (x[k] != 0.0) nnz_new++;
+    }
+
+    // Optimization: If no zeros were created, do nothing.
+    if (nnz_new == nnz_old) return;
+
+    // 3. Allocate new x and i vectors of the correct size
+    SEXP sexp_new_i = PROTECT(allocVector(INTSXP, nnz_new));
+    SEXP sexp_new_x = PROTECT(allocVector(REALSXP, nnz_new));
+    int    *new_i = INTEGER(sexp_new_i);
+    double *new_x = REAL(sexp_new_x);
+
+    // 4. Pass 2: Compact data and update 'p'
+    // We must be careful updating 'p' in-place because it defines 
+    // the boundaries of the data we are currently reading.
+    
+    int write_idx = 0;
+    int col_start = p[0]; // Always 0
+    
+    for (int col = 0; col < ncol; col++) {
+        int col_end = p[col + 1]; // Save old end before overwriting
+
+        for (int k = col_start; k < col_end; k++) {
+            if (x[k] != 0.0) {
+                new_x[write_idx] = x[k];
+                new_i[write_idx] = i[k];
+                write_idx++;
+            }
+        }
+        
+        // Update p for the *next* column boundary
+        p[col + 1] = write_idx; 
+        
+        // Move to next column
+        col_start = col_end; 
+    }
+
+    // 5. Assign new slots back to the matrix
+    R_do_slot_assign(sexp_mtx, install("i"), sexp_new_i);
+    R_do_slot_assign(sexp_mtx, install("x"), sexp_new_x);
+
+    UNPROTECT(2); // Unprotect new_i and new_x
+}
+
+
+/*
+ * Compacts a Matrix::dgTMatrix (S4 object)
+ * uses "x", "i", "j" slots.
+ */
+static void compact_dgTMatrix(SEXP sexp_mtx) {
+    SEXP sexp_x = R_do_slot(sexp_mtx, install("x"));
+    SEXP sexp_i = R_do_slot(sexp_mtx, install("i"));
+    SEXP sexp_j = R_do_slot(sexp_mtx, install("j"));
+    
+    double *x     = REAL(sexp_x);
+    int    *i     = INTEGER(sexp_i);
+    int    *j     = INTEGER(sexp_j);
+    int     n_all = LENGTH(sexp_x);
+    
+    // 1. Count new non-zeros
+    int nnz_new = 0;
+    for (int k = 0; k < n_all; k++) {
+        if (x[k] != 0.0) nnz_new++;
+    }
+    
+    if (nnz_new == n_all) return;
+    
+    // 2. Allocate new vectors
+    SEXP sexp_new_x = PROTECT(allocVector(REALSXP, nnz_new));
+    SEXP sexp_new_i = PROTECT(allocVector(INTSXP,  nnz_new));
+    SEXP sexp_new_j = PROTECT(allocVector(INTSXP,  nnz_new));
+    
+    double *new_x = REAL(sexp_new_x);
+    int    *new_i = INTEGER(sexp_new_i);
+    int    *new_j = INTEGER(sexp_new_j);
+    
+    // 3. Filter data
+    int idx = 0;
+    for (int k = 0; k < n_all; k++) {
+        if (x[k] != 0.0) {
+            new_x[idx] = x[k];
+            new_i[idx] = i[k];
+            new_j[idx] = j[k];
+            idx++;
+        }
+    }
+    
+    // 4. Update the S4 slots
+    R_do_slot_assign(sexp_mtx, install("x"), sexp_new_x);
+    R_do_slot_assign(sexp_mtx, install("i"), sexp_new_i);
+    R_do_slot_assign(sexp_mtx, install("j"), sexp_new_j);
+    
+    UNPROTECT(3);
+}
+
+
 
 //======================================================
 // R interface. Assigns samples to worker threads.
@@ -568,6 +734,11 @@ SEXP C_rarefy(
       for (i = 0; i < n; i++) args[i] = i;
       for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, rarefy_func, &args[i]);
       for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
+  
+      // Post-process: Remove explicit zeros to restore sparsity
+      if      (inherits(sexp_res_mtx, "simple_triplet_matrix")) { compact_slam(sexp_res_mtx);      }
+      else if (inherits(sexp_res_mtx, "dgCMatrix"))             { compact_dgCMatrix(sexp_res_mtx); }
+      else if (inherits(sexp_res_mtx, "dgTMatrix"))             { compact_dgTMatrix(sexp_res_mtx); }
       
       free_all();
       UNPROTECT(1);
@@ -580,6 +751,11 @@ SEXP C_rarefy(
   n_threads    = 1;
   int thread_i = 0;
   rarefy_func(&thread_i);
+  
+  // Post-process: Remove explicit zeros to restore sparsity
+  if      (inherits(sexp_res_mtx, "simple_triplet_matrix")) { compact_slam(sexp_res_mtx);      }
+  else if (inherits(sexp_res_mtx, "dgCMatrix"))             { compact_dgCMatrix(sexp_res_mtx); }
+  else if (inherits(sexp_res_mtx, "dgTMatrix"))             { compact_dgTMatrix(sexp_res_mtx); }
   
   free_all();
   UNPROTECT(1);
