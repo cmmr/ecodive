@@ -1,9 +1,8 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
+#include "ecodive.h"
 
-#include <R.h>
-#include <Rinternals.h>
 
 //======================================================
 // Extract list elements by name.

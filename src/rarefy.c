@@ -1,24 +1,8 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
+#include "ecodive.h"
 
-#include <R.h>
-#include <Rinternals.h>
-#include <inttypes.h> // uint32_t, uint64_t
-#include <math.h>     // fabs, floor
-#include <string.h>   // memcpy, memset
-#include <stdlib.h>   // qsort
-#include "get.h"
-#include "memory.h"
-#include "pcg_basic.h"
-
-// Detect if pthread is available.
-#if defined __has_include
-#  if __has_include (<pthread.h>)
-#    include <pthread.h>
-#    define HAVE_PTHREAD
-#  endif
-#endif
 
 typedef void *(*pthread_func_t)(void *);
 
@@ -276,11 +260,10 @@ static pthread_func_t setup_matrix(void) {
 
 static pthread_func_t setup_dgeMatrix(void) {
   
-  SEXP sexp_dim_vec = R_do_slot(sexp_res_mtx, install("Dim"));
-  SEXP sexp_val_vec = R_do_slot(sexp_res_mtx, install("x"));
+  SEXP sexp_dim_vec = PROTECT(R_do_slot(sexp_res_mtx, install("Dim")));
+  SEXP sexp_val_vec = PROTECT(R_do_slot(sexp_res_mtx, install("x")));
   SEXP sexp_res_vec = PROTECT(duplicate(sexp_val_vec));
   R_do_slot_assign(sexp_res_mtx, install("x"), sexp_res_vec);
-  UNPROTECT(1);
   
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
@@ -295,7 +278,10 @@ static pthread_func_t setup_dgeMatrix(void) {
     n_otus  = INTEGER(sexp_dim_vec)[0];
   }
   
-  return setup_dense();
+  pthread_func_t rarefy_func = setup_dense();
+
+  UNPROTECT(3);
+  return rarefy_func;
 }
 
 
@@ -307,25 +293,32 @@ static pthread_func_t setup_dgeMatrix(void) {
 
 static pthread_func_t setup_slam(void) {
   
-  SEXP sexp_val_vec = get(sexp_res_mtx, "v");
+  SEXP sexp_val_vec = PROTECT(get(sexp_res_mtx, "v"));
+  SEXP sexp_i       = PROTECT(get(sexp_res_mtx, "i"));
+  SEXP sexp_j       = PROTECT(get(sexp_res_mtx, "j"));
+  SEXP sexp_nrow    = PROTECT(get(sexp_res_mtx, "nrow"));
+  SEXP sexp_ncol    = PROTECT(get(sexp_res_mtx, "ncol"));
+
   SEXP sexp_res_vec = PROTECT(duplicate(sexp_val_vec));
   set(sexp_res_mtx, "v", sexp_res_vec);
-  UNPROTECT(1);
   
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
   n_vals  = LENGTH(sexp_val_vec);
   
   if (margin == 1) {
-    sam_vec = INTEGER(get(sexp_res_mtx, "i"));
-    n_sams  = INTEGER(get(sexp_res_mtx, "nrow"))[0] + 1;
+    sam_vec = INTEGER(sexp_i);
+    n_sams  = INTEGER(sexp_nrow)[0] + 1;
   }
   else {
-    sam_vec = INTEGER(get(sexp_res_mtx, "j"));
-    n_sams  = INTEGER(get(sexp_res_mtx, "ncol"))[0] + 1;
+    sam_vec = INTEGER(sexp_j);
+    n_sams  = INTEGER(sexp_ncol)[0] + 1;
   }
   
-  return setup_triplet();
+  pthread_func_t rarefy_func = setup_triplet();
+  
+  UNPROTECT(6);
+  return rarefy_func;
 }
 
 
@@ -337,25 +330,31 @@ static pthread_func_t setup_slam(void) {
 
 static pthread_func_t setup_dgTMatrix(void) {
   
-  SEXP sexp_val_vec = R_do_slot(sexp_res_mtx, install("x"));
+  SEXP sexp_val_vec = PROTECT(R_do_slot(sexp_res_mtx, install("x")));
+  SEXP sexp_i       = PROTECT(R_do_slot(sexp_res_mtx, install("i")));
+  SEXP sexp_j       = PROTECT(R_do_slot(sexp_res_mtx, install("j")));
+  SEXP sexp_dim     = PROTECT(R_do_slot(sexp_res_mtx, install("Dim")));
+
   SEXP sexp_res_vec = PROTECT(duplicate(sexp_val_vec));
   R_do_slot_assign(sexp_res_mtx, install("x"), sexp_res_vec);
-  UNPROTECT(1);
   
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
   n_vals  = LENGTH(sexp_val_vec);
   
   if (margin == 1) {
-    sam_vec = INTEGER(R_do_slot(sexp_res_mtx, install("i")));
-    n_sams  = INTEGER(R_do_slot(sexp_res_mtx, install("Dim")))[0];
+    sam_vec = INTEGER(sexp_i);
+    n_sams  = INTEGER(sexp_dim)[0];
   }
   else {
-    sam_vec = INTEGER(R_do_slot(sexp_res_mtx, install("j")));
-    n_sams  = INTEGER(R_do_slot(sexp_res_mtx, install("Dim")))[1];
+    sam_vec = INTEGER(sexp_j);
+    n_sams  = INTEGER(sexp_dim)[1];
   }
   
-  return setup_triplet();
+  pthread_func_t rarefy_func = setup_triplet();
+  
+  UNPROTECT(5);
+  return rarefy_func;
 }
 
 
@@ -420,24 +419,29 @@ static void *rarefy_compressed (void *arg) {
 
 static pthread_func_t setup_dgCMatrix(void) {
   
-  SEXP sexp_val_vec = R_do_slot(sexp_res_mtx, install("x"));
+  pthread_func_t rarefy_func = NULL;
+
+  SEXP sexp_val_vec = PROTECT(R_do_slot(sexp_res_mtx, install("x")));
+  SEXP sexp_i       = PROTECT(R_do_slot(sexp_res_mtx, install("i")));
+  SEXP sexp_p       = PROTECT(R_do_slot(sexp_res_mtx, install("p")));
+  SEXP sexp_dim     = PROTECT(R_do_slot(sexp_res_mtx, install("Dim")));
+
   SEXP sexp_res_vec = PROTECT(duplicate(sexp_val_vec));
   R_do_slot_assign(sexp_res_mtx, install("x"), sexp_res_vec);
-  UNPROTECT(1);
   
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
   n_vals  = LENGTH(sexp_val_vec);
   
   if (margin == 1) {
-    sam_vec = INTEGER(R_do_slot(sexp_res_mtx, install("i")));
-    n_sams  = INTEGER(R_do_slot(sexp_res_mtx, install("Dim")))[0];
-    return setup_triplet();
+    sam_vec     = INTEGER(sexp_i);
+    n_sams      = INTEGER(sexp_dim)[0];
+    rarefy_func = setup_triplet();
   }
   
   else {
-    pos_vec = INTEGER(R_do_slot(sexp_res_mtx, install("p")));
-    n_sams  = INTEGER(R_do_slot(sexp_res_mtx, install("Dim")))[1];
+    pos_vec = INTEGER(sexp_p);
+    n_sams  = INTEGER(sexp_dim)[1];
     
     depth_vec = (uint32_t*) safe_malloc(n_sams * sizeof(uint32_t));
     for (int sam = 0; sam < n_sams; sam++) {
@@ -448,8 +452,11 @@ static pthread_func_t setup_dgCMatrix(void) {
         depth_vec[sam] += (uint32_t) val_vec[i];
     }
     
-    return rarefy_compressed;
+    rarefy_func = rarefy_compressed;
   }
+
+  UNPROTECT(5);
+  return rarefy_func;
 }
 
 
@@ -517,9 +524,9 @@ static void set_target (SEXP sexp_depth, SEXP sexp_n_samples) {
  * uses "v", "i", "j" components.
  */
 static void compact_slam(SEXP sexp_mtx) {
-    SEXP sexp_v = get(sexp_mtx, "v");
-    SEXP sexp_i = get(sexp_mtx, "i");
-    SEXP sexp_j = get(sexp_mtx, "j");
+    SEXP sexp_v = PROTECT(get(sexp_mtx, "v"));
+    SEXP sexp_i = PROTECT(get(sexp_mtx, "i"));
+    SEXP sexp_j = PROTECT(get(sexp_mtx, "j"));
     
     double *v     = REAL(sexp_v);
     int    *i     = INTEGER(sexp_i);
@@ -532,7 +539,7 @@ static void compact_slam(SEXP sexp_mtx) {
         if (v[k] != 0.0) nnz_new++;
     }
     
-    if (nnz_new == n_all) return;
+    if (nnz_new == n_all) { UNPROTECT(3); return; }
     
     // 2. Allocate new vectors
     SEXP sexp_new_v = PROTECT(allocVector(REALSXP, nnz_new));
@@ -559,7 +566,7 @@ static void compact_slam(SEXP sexp_mtx) {
     set(sexp_mtx, "i", sexp_new_i);
     set(sexp_mtx, "j", sexp_new_j);
     
-    UNPROTECT(3);
+    UNPROTECT(6);
 }
 
 
@@ -569,9 +576,9 @@ static void compact_slam(SEXP sexp_mtx) {
  */
 static void compact_dgCMatrix(SEXP sexp_mtx) {
     // 1. Access the slots
-    SEXP sexp_p = R_do_slot(sexp_mtx, install("p"));
-    SEXP sexp_i = R_do_slot(sexp_mtx, install("i"));
-    SEXP sexp_x = R_do_slot(sexp_mtx, install("x"));
+    SEXP sexp_p = PROTECT(R_do_slot(sexp_mtx, install("p")));
+    SEXP sexp_i = PROTECT(R_do_slot(sexp_mtx, install("i")));
+    SEXP sexp_x = PROTECT(R_do_slot(sexp_mtx, install("x")));
 
     int    *p    = INTEGER(sexp_p);
     int    *i    = INTEGER(sexp_i);
@@ -586,7 +593,7 @@ static void compact_dgCMatrix(SEXP sexp_mtx) {
     }
 
     // Optimization: If no zeros were created, do nothing.
-    if (nnz_new == nnz_old) return;
+    if (nnz_new == nnz_old) { UNPROTECT(3); return; }
 
     // 3. Allocate new x and i vectors of the correct size
     SEXP sexp_new_i = PROTECT(allocVector(INTSXP, nnz_new));
@@ -623,7 +630,7 @@ static void compact_dgCMatrix(SEXP sexp_mtx) {
     R_do_slot_assign(sexp_mtx, install("i"), sexp_new_i);
     R_do_slot_assign(sexp_mtx, install("x"), sexp_new_x);
 
-    UNPROTECT(2); // Unprotect new_i and new_x
+    UNPROTECT(5); // Unprotect new_i and new_x
 }
 
 
@@ -632,9 +639,9 @@ static void compact_dgCMatrix(SEXP sexp_mtx) {
  * uses "x", "i", "j" slots.
  */
 static void compact_dgTMatrix(SEXP sexp_mtx) {
-    SEXP sexp_x = R_do_slot(sexp_mtx, install("x"));
-    SEXP sexp_i = R_do_slot(sexp_mtx, install("i"));
-    SEXP sexp_j = R_do_slot(sexp_mtx, install("j"));
+    SEXP sexp_x = PROTECT(R_do_slot(sexp_mtx, install("x")));
+    SEXP sexp_i = PROTECT(R_do_slot(sexp_mtx, install("i")));
+    SEXP sexp_j = PROTECT(R_do_slot(sexp_mtx, install("j")));
     
     double *x     = REAL(sexp_x);
     int    *i     = INTEGER(sexp_i);
@@ -647,7 +654,7 @@ static void compact_dgTMatrix(SEXP sexp_mtx) {
         if (x[k] != 0.0) nnz_new++;
     }
     
-    if (nnz_new == n_all) return;
+    if (nnz_new == n_all) { UNPROTECT(3); return; }
     
     // 2. Allocate new vectors
     SEXP sexp_new_x = PROTECT(allocVector(REALSXP, nnz_new));
@@ -674,7 +681,7 @@ static void compact_dgTMatrix(SEXP sexp_mtx) {
     R_do_slot_assign(sexp_mtx, install("i"), sexp_new_i);
     R_do_slot_assign(sexp_mtx, install("j"), sexp_new_j);
     
-    UNPROTECT(3);
+    UNPROTECT(6);
 }
 
 

@@ -1,12 +1,7 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
-
-#include <R.h>
-#include <Rinternals.h>
-#include <stddef.h>   // size_t
-#include <stdlib.h>   // calloc, strtod
-#include <string.h>   // memset, strlen, strncpy
+#include "ecodive.h"
 
 
 static const char *tree_str;

@@ -3,21 +3,8 @@
 
 // https://pdodds.w3.uvm.edu/research/papers/others/everything/cha2007a.pdf
 
-#include <R.h>
-#include <Rinternals.h>
-#include <math.h>   // fabs, log, pow, sqrt
-#include <string.h> // memset
-#include "ecomatrix.h"
-#include "normalize.h"
-#include "memory.h"
+#include "ecodive.h"
 
-// Detect if pthread is available.
-#if defined __has_include
-#  if __has_include (<pthread.h>)
-#    include <pthread.h>
-#    define HAVE_PTHREAD
-#  endif
-#endif
 
 typedef void *(*pthread_func_t)(void *);
 

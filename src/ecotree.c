@@ -1,12 +1,7 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
-
-#include <R.h>
-#include <Rinternals.h>
-#include "ecotree.h"
-#include "get.h"
-#include "memory.h"
+#include "ecodive.h"
 
 
 /*
@@ -39,10 +34,14 @@ static void print_ecotree(ecotree_t *et) {
 // ecotree constructor
 ecotree_t* new_ecotree(SEXP sexp_phylo_tree) {
   
-  int    *edge_mtx      = INTEGER(   get(sexp_phylo_tree, "edge"));
-  int     n_edges       = nrows(     get(sexp_phylo_tree, "edge"));
-  double *edge_lengths  = REAL(      get(sexp_phylo_tree, "edge.length"));
-  int     n_internal    = asInteger( get(sexp_phylo_tree, "Nnode"));
+  SEXP sexp_edge_mtx     = PROTECT(get(sexp_phylo_tree, "edge"));
+  SEXP sexp_edge_lengths = PROTECT(get(sexp_phylo_tree, "edge.length"));
+  SEXP sexp_nnode        = PROTECT(get(sexp_phylo_tree, "Nnode"));
+
+  int    *edge_mtx      = INTEGER(sexp_edge_mtx);
+  int     n_edges       = nrows(sexp_edge_mtx);
+  double *edge_lengths  = REAL(sexp_edge_lengths);
+  int     n_internal    = asInteger(sexp_nnode);
   
   ecotree_t *et       = (ecotree_t*) safe_malloc(sizeof(ecotree_t));
   node_t    *node_vec = (node_t*)    safe_malloc(sizeof(node_t) * n_edges);
@@ -69,5 +68,6 @@ ecotree_t* new_ecotree(SEXP sexp_phylo_tree) {
     node_vec[child].length = edge_lengths[edge];
   }
   
+  UNPROTECT(3);
   return et;
 }

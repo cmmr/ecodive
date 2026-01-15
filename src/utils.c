@@ -1,16 +1,7 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
-
-#include <R.h>
-#include <Rinternals.h>
-
-// Detect if pthread is available.
-#if defined __has_include
-#  if __has_include (<pthread.h>)
-#    define HAVE_PTHREAD
-#  endif
-#endif
+#include "ecodive.h"
 
 
 //======================================================

@@ -4,18 +4,16 @@
 
 /* Generated with tools::package_native_routine_registration_skeleton('.',,,FALSE) */
 
-#include <R.h>
-#include <Rinternals.h>
-#include <stdlib.h> // for NULL
-#include <R_ext/Rdynload.h>
+#include "ecodive.h"
 
-/* .Call calls */
+
 extern SEXP C_alpha_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_beta_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pthreads(void);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_unifrac(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+
 
 static const R_CallMethodDef CallEntries[] = {
   {"C_alpha_div", (DL_FUNC) &C_alpha_div, 6},
@@ -29,8 +27,7 @@ static const R_CallMethodDef CallEntries[] = {
 
 
 // # nocov start
-void R_init_ecodive(DllInfo *dll)
-{
+void R_init_ecodive(DllInfo *dll) {
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
 }

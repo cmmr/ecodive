@@ -1,23 +1,8 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
+#include "ecodive.h"
 
-#include <R.h>
-#include <Rinternals.h>
-#include <math.h>   // log, lgamma, pow, round, sqrt
-#include <string.h> // memset
-#include "ecomatrix.h"
-#include "ecotree.h"
-#include "normalize.h"
-#include "memory.h"
-
-// Detect if pthread is available.
-#if defined __has_include
-#  if __has_include (<pthread.h>)
-#    include <pthread.h>
-#    define HAVE_PTHREAD
-#  endif
-#endif
 
 typedef void *(*pthread_func_t)(void *);
 

@@ -1,15 +1,7 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
-
-
-#include <R.h>
-#include <Rinternals.h>
-#include <string.h> // memcpy
-#include "get.h"
-#include "ecomatrix.h"
-#include "normalize.h"
-#include "memory.h"
+#include "ecodive.h"
 
 
 //=========================================================
@@ -382,9 +374,9 @@ static void parse_matrix (ecomatrix_t *em, SEXP sexp_matrix, int margin) {
 
 static void parse_dgeMatrix (ecomatrix_t *em, SEXP sexp_dgeMatrix, int margin) {
   
-  SEXP sexp_dge_x    = R_do_slot(sexp_dgeMatrix, install("x"));
-  SEXP sexp_dim      = R_do_slot(sexp_dgeMatrix, install("Dim"));
-  SEXP sexp_dimnames = R_do_slot(sexp_dgeMatrix, install("Dimnames"));
+  SEXP sexp_dge_x    = PROTECT(R_do_slot(sexp_dgeMatrix, install("x")));
+  SEXP sexp_dim      = PROTECT(R_do_slot(sexp_dgeMatrix, install("Dim")));
+  SEXP sexp_dimnames = PROTECT(R_do_slot(sexp_dgeMatrix, install("Dimnames")));
   int  n_rows        = INTEGER(sexp_dim)[0];
   int  n_cols        = INTEGER(sexp_dim)[1];
   
@@ -409,6 +401,7 @@ static void parse_dgeMatrix (ecomatrix_t *em, SEXP sexp_dgeMatrix, int margin) {
   }
   
   assign_dense_vals(em, sexp_dge_x, margin);
+  UNPROTECT(3);
 }
 
 
@@ -420,21 +413,18 @@ static void parse_dgeMatrix (ecomatrix_t *em, SEXP sexp_dgeMatrix, int margin) {
 
 static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
   
-  SEXP sexp_slam_i = get(sexp_slam_mtx, "i");
-  SEXP sexp_slam_j = get(sexp_slam_mtx, "j");
-  SEXP sexp_slam_v = get(sexp_slam_mtx, "v");
-  int  n_rows      = asInteger(get(sexp_slam_mtx, "nrow"));
-  int  n_cols      = asInteger(get(sexp_slam_mtx, "ncol"));
-  int  nnz         = length(sexp_slam_v);
+  SEXP sexp_slam_i   = PROTECT(get(sexp_slam_mtx, "i"));
+  SEXP sexp_slam_j   = PROTECT(get(sexp_slam_mtx, "j"));
+  SEXP sexp_slam_v   = PROTECT(get(sexp_slam_mtx, "v"));
+  SEXP sexp_dimnames = PROTECT(get(sexp_slam_mtx, "dimnames"));
+  int  n_rows        = asInteger(get(sexp_slam_mtx, "nrow"));
+  int  n_cols        = asInteger(get(sexp_slam_mtx, "ncol"));
+  int  nnz           = length(sexp_slam_v);
   
   
   // Import values as double precision
   em->nnz = nnz;
   assign_sparse_vals(em, sexp_slam_v);
-  
-  
-  // The sample names will be the 1st or 2nd element of dimnames.
-  SEXP sexp_dimnames = get(sexp_slam_mtx, "dimnames");
   
   
   // Accept samples in either rows or columns.
@@ -448,7 +438,7 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
     em->otu_vec   = INTEGER(sexp_slam_j);
     
     if (!isNull(sexp_dimnames))
-      em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 0);
+      em->sexp_sample_names = PROTECT(VECTOR_ELT(sexp_dimnames, 0));
   }
   
   else {
@@ -459,7 +449,7 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
     em->otu_vec   = INTEGER(sexp_slam_i);
     
     if (!isNull(sexp_dimnames))
-      em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 1);
+      em->sexp_sample_names = PROTECT(VECTOR_ELT(sexp_dimnames, 1));
   }
   
 
@@ -480,6 +470,9 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
   
   // Compress and cleanup
   compress_triplet(em);
+  
+  if (!isNull(sexp_dimnames)) UNPROTECT(1);
+  UNPROTECT(4);
 }
 
 
@@ -492,11 +485,11 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
 
 static void parse_dgTMatrix (ecomatrix_t *em, SEXP sexp_dgTMatrix, int margin) {
   
-  SEXP sexp_dgt_i    = R_do_slot(sexp_dgTMatrix, install("i"));
-  SEXP sexp_dgt_j    = R_do_slot(sexp_dgTMatrix, install("j"));
-  SEXP sexp_dgt_x    = R_do_slot(sexp_dgTMatrix, install("x"));
-  SEXP sexp_dim      = R_do_slot(sexp_dgTMatrix, install("Dim"));
-  SEXP sexp_dimnames = R_do_slot(sexp_dgTMatrix, install("Dimnames"));
+  SEXP sexp_dgt_i    = PROTECT(R_do_slot(sexp_dgTMatrix, install("i")));
+  SEXP sexp_dgt_j    = PROTECT(R_do_slot(sexp_dgTMatrix, install("j")));
+  SEXP sexp_dgt_x    = PROTECT(R_do_slot(sexp_dgTMatrix, install("x")));
+  SEXP sexp_dim      = PROTECT(R_do_slot(sexp_dgTMatrix, install("Dim")));
+  SEXP sexp_dimnames = PROTECT(R_do_slot(sexp_dgTMatrix, install("Dimnames")));
   int  n_rows        = INTEGER(sexp_dim)[0];
   int  n_cols        = INTEGER(sexp_dim)[1];
   int  nnz           = length(sexp_dgt_x);
@@ -528,7 +521,8 @@ static void parse_dgTMatrix (ecomatrix_t *em, SEXP sexp_dgTMatrix, int margin) {
   
   
   compress_triplet(em);
-}
+  UNPROTECT(5);
+} 
 
 
 
@@ -539,11 +533,11 @@ static void parse_dgTMatrix (ecomatrix_t *em, SEXP sexp_dgTMatrix, int margin) {
 
 static void parse_dgCMatrix (ecomatrix_t *em, SEXP sexp_dgCMatrix, int margin) {
   
-  SEXP sexp_dgc_i    = R_do_slot(sexp_dgCMatrix, install("i"));
-  SEXP sexp_dgc_p    = R_do_slot(sexp_dgCMatrix, install("p"));
-  SEXP sexp_dgc_x    = R_do_slot(sexp_dgCMatrix, install("x"));
-  SEXP sexp_dim      = R_do_slot(sexp_dgCMatrix, install("Dim"));
-  SEXP sexp_dimnames = R_do_slot(sexp_dgCMatrix, install("Dimnames"));
+  SEXP sexp_dgc_i    = PROTECT(R_do_slot(sexp_dgCMatrix, install("i")));
+  SEXP sexp_dgc_p    = PROTECT(R_do_slot(sexp_dgCMatrix, install("p")));
+  SEXP sexp_dgc_x    = PROTECT(R_do_slot(sexp_dgCMatrix, install("x")));
+  SEXP sexp_dim      = PROTECT(R_do_slot(sexp_dgCMatrix, install("Dim")));
+  SEXP sexp_dimnames = PROTECT(R_do_slot(sexp_dgCMatrix, install("Dimnames")));
   int  n_rows        = INTEGER(sexp_dim)[0];
   int  n_cols        = INTEGER(sexp_dim)[1];
   int  nnz           = length(sexp_dgc_x);
@@ -576,6 +570,7 @@ static void parse_dgCMatrix (ecomatrix_t *em, SEXP sexp_dgCMatrix, int margin) {
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 1);
   }
   
+  UNPROTECT(5);
 }
 
 

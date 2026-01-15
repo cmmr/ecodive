@@ -1,21 +1,7 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
-
-#include <R.h>
-#include <Rinternals.h>
-#include <math.h> // exp, log, sqrt
-#include "ecomatrix.h"
-#include "memory.h"
-
-
-// Detect if pthread is available.
-#if defined __has_include
-#  if __has_include (<pthread.h>)
-#    include <pthread.h>
-#    define HAVE_PTHREAD
-#  endif
-#endif
+#include "ecodive.h"
 
 
 #define NORM_PERCENT 1

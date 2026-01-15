@@ -1,22 +1,8 @@
 // Copyright (c) 2025 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
 
+#include "ecodive.h"
 
-#include <R.h>
-#include <Rinternals.h>
-#include <math.h>     // fabs, pow
-#include <string.h>   // memset
-#include "ecomatrix.h"
-#include "ecotree.h"
-#include "memory.h"
-
-// Detect if pthread is available.
-#if defined __has_include
-#  if __has_include (<pthread.h>)
-#    include <pthread.h>
-#    define HAVE_PTHREAD
-#  endif
-#endif
 
 #define U_UNIFRAC 1
 #define W_UNIFRAC 2

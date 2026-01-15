@@ -20,11 +20,8 @@
  * C functions.
  */
 
+#include "ecodive.h"
 
-#include <R.h>
-#include <Rinternals.h>
-#include <stdlib.h> // free, malloc
-#include "memory.h"
 
 static void **ptr_vec;
 static int    n_ptrs = 0;

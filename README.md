@@ -50,8 +50,9 @@ pak::pak('cmmr/ecodive')
 
 ### With `phyloseq` or `rbiom` objects
 
-The easiest way to use `ecodive` is with a `phyloseq` or `rbiom` object. These
-objects conveniently bundle the count data and phylogenetic tree.
+The easiest way to use `ecodive` is with a `phyloseq`, `rbiom`, or 
+`TreeSummarizedExperiment` object. These objects conveniently bundle 
+the count data and phylogenetic tree.
 
 ``` r
 library(ecodive)
@@ -192,4 +193,4 @@ to this project, you agree to abide by its terms.
 
 ## License
 
-[MIT License](https://opensource.org/license/mit) &copy; 2025 ecodive authors
+[MIT License](https://opensource.org/license/mit) &copy; 2026 ecodive authors
