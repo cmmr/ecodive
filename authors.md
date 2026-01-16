@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/cmmr/ecodive/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/cmmr/ecodive/blob/v2.2.2/DESCRIPTION)
 
 Smith D (2026). *ecodive: Parallel and Memory-Efficient Ecological
 Diversity Metrics*. R package version 2.2.2,
