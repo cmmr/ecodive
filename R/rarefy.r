@@ -82,19 +82,28 @@ rarefy <- function (
   validate_args()
   assert_integer_counts()
   
-  if (is.null(times)) {
-    
-    result <- .Call(C_rarefy, counts, depth, n_samples, seed, margin, cpus)
 
+  # Ensure counts are double
+  if (is.matrix(counts)) {
+    if (!is.double(counts)) counts[] <- as.double(counts)
+  }
+  else if (inherits(counts, "simple_triplet_matrix")) {
+    if (!is.double(counts$v)) counts$v <- as.double(counts$v)
+  }
+
+
+  # Call C function
+  if (is.null(times)) {
+    result <- .Call(C_rarefy, counts, depth, n_samples, seed, margin, cpus)
   } else {
-    
-    seeds <- ((seed + 2**31 - 1 + seq_len(times)) %% 2**32) - 2**31
-    
+    seeds  <- ((seed + 2**31 - 1 + seq_len(times)) %% 2**32) - 2**31
     result <- lapply(seeds, function (seed) {
       .Call(C_rarefy, counts, depth, n_samples, seed, margin, cpus)
     })
   }
   
+  
+  # Drop zero-sum rows/cols
   if (drop) {
     
     # Generic function to drop zero-sum rows/cols from any matrix type.

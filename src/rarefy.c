@@ -460,7 +460,7 @@ static pthread_func_t setup_dgCMatrix(void) {
 }
 
 
-static void set_target (SEXP sexp_depth, SEXP sexp_n_samples) {
+static void set_target(SEXP sexp_depth, SEXP sexp_n_samples) {
   
   double depth = asReal(sexp_depth);
   

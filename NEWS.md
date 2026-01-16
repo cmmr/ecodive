@@ -1,3 +1,9 @@
+# ecodive 2.2.3
+
+* Coerce counts to double before rarefaction.
+
+
+
 # ecodive 2.2.2
 
 * Drop explicit zeroes from sparse matrices after rarefaction.
