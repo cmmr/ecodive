@@ -93,7 +93,7 @@ the other packages. Beyond its computational advantages, `ecodive` has zero
 external R dependencies. This makes it a lightweight, stable, and secure
 backend, minimizing installation conflicts and simplifying long-term maintenance
 for developers who build upon it. The complete benchmark code and results are
-available in the package vignette (`vignette('benchmark')`) and online.
+available in the package vignette (`vignette('performance')`) and online.
 
 
 # Implemented Metrics
