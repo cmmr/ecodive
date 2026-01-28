@@ -44,9 +44,9 @@ that branch; A for Sample_A, and B for Sample_B.
   2005](https://doi.org/10.1128/AEM.71.12.8228-8235.2005): Unweighted
   UniFrac
 - R Package [ecodive](https://cran.r-project.org/package=ecodive):
-  [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md)
+  [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md)
 - R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv):
-  [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md)
+  [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md)
 - R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq):
   `UniFrac(weighted=FALSE)`
 - [qiime2](https://qiime2.org/)
@@ -79,9 +79,9 @@ L_2(max(A'\_2,B'\_2)) + \cdots + L_n(max(A'\_n,B'\_n))} \\ \\ U &=
 - [Lozupone et al, 2007](https://doi.org/10.1128/AEM.01996-06): Raw
   Weighted UniFrac
 - R Package [ecodive](https://cran.r-project.org/package=ecodive):
-  [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md)
+  [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/weighted_unifrac.md)
 - R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv):
-  [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md)
+  [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/weighted_unifrac.md)
 - R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq):
   `UniFrac(weighted=TRUE, normalized=FALSE)`
 - [qiime2](https://qiime2.org/)
@@ -101,7 +101,7 @@ L_n\|\frac{A_n}{A_T} - \frac{B_n}{B_T}\| \\ \\ W &= 0.2\|\frac{9}{15} -
 - [Lozupone et al, 2007](https://doi.org/10.1128/AEM.01996-06):
   Normalized Weighted UniFrac
 - R Package [ecodive](https://cran.r-project.org/package=ecodive):
-  [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md)
+  [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/normalized_unifrac.md)
 - R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv):
   `weighted_normalized_unifrac()`
 - R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq):
@@ -166,9 +166,9 @@ L_n(\frac{A_n}{A_T} + \frac{B_n}{B_T})^{0.5} \|\displaystyle \frac
 - [Chang et al, 2011](https://doi.org/10.1186/1471-2105-12-118):
   Variance Adjusted Weighted (VAW) UniFrac
 - R Package [ecodive](https://cran.r-project.org/package=ecodive):
-  [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md)
+  [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.md)
 - R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv):
-  [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md)
+  [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.md)
 - [qiime2](https://qiime2.org/)
   `qiime diversity beta-phylogenetic --p-metric weighted_normalized_unifrac --p-variance-adjusted`
 

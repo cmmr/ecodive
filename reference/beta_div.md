@@ -75,7 +75,7 @@ beta_div(
 
   How much weight to give to relative abundances; a value between 0 and
   1, inclusive. Setting `alpha=1` is equivalent to
-  [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md).
+  [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/normalized_unifrac.md).
 
 - tree:
 

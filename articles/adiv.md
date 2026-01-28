@@ -2,10 +2,8 @@
 
 ## Input Matrix
 
-Here we’ll use the `ex_counts` feature table included with ecodive. It
-contains the number of observations of each bacterial genera in each
-sample. In the text below, you can substitute the word ‘genera’ for the
-feature of interest in your own data.
+We will use the `ex_counts` dataset included with ecodive. This feature
+table contains counts of bacterial genera across various samples.
 
 ``` r
 library(ecodive)
@@ -23,31 +21,27 @@ t(counts)
 
 ## Alpha Diversity
 
-Alpha diversity is a measure of diversity within a single sample.
+Alpha diversity measures diversity within a single sample. In `ecodive`,
+metrics are grouped into four categories based on the aspect of
+diversity they quantify.
 
-Depending on the metric, it may measure **richness** and/or
-**evenness**.
+### Richness Metrics
 
-### Richness
-
-Richness is how many genera are present in a sample. The simplest metric
-is to count the non-zero genera. You can do this with base R’s
-[`rowSums()`](https://rdrr.io/r/base/colSums.html) or with ecodive’s
-[`observed()`](https://cmmr.github.io/ecodive/reference/adiv_functions.md).
+Richness metrics estimate the number of distinct features (e.g., genera)
+in a sample. The simplest metric,
+[`observed()`](https://cmmr.github.io/ecodive/reference/observed.md),
+counts features with non-zero abundance.
 
 ``` r
-rowSums(counts > 0)
-#> Saliva   Gums   Nose  Stool 
-#>      4      3      4      5 
-
+# Equivalent to rowSums(counts > 0)
 observed(counts)
 #> Saliva   Gums   Nose  Stool 
 #>      4      3      4      5 
 ```
 
-The Chao1 metric takes this a step further by including unobserved low
-abundance genera, inferred using the number of times `counts == 1` vs
-`counts == 2`.
+The **Chao1** estimator extends this by inferring the number of
+unobserved, low-abundance features based on the ratio of singletons
+(`counts == 1`) to doubletons (`counts == 2`).
 
 ``` r
 # Infers 8 unobserved genera
@@ -64,17 +58,19 @@ chao1(counts)
 #>    4.5    3.0    NaN    Inf 
 ```
 
-### Evenness
+### Diversity Metrics
 
-Evenness is how equally distributed genera are within a sample. The
-Simpson metric is a good measure of evenness.
+Diversity metrics account for both richness and evenness (how equally
+abundances are distributed).
+
+**Simpson’s index** is often used as a measure of evenness, representing
+the probability that two randomly selected individuals belong to
+different species.
 
 ``` r
-# High Evenness
+# High Evenness (0.8) vs Low Evenness (0.07)
 simpson(c(20, 20, 20, 20, 20))
 #> [1] 0.8
-
-# Low Evenness
 simpson(c(100, 1, 1, 1, 1))
 #> [1] 0.07507396
 
@@ -84,23 +80,10 @@ sort(simpson(counts))
 #> 0.02302037 0.18806133 0.50725478 0.63539593 
 ```
 
-### Richness and Evenness
-
-The Shannon diversity index weights both richness and evenness.
+The **Shannon diversity index** (entropy) is another common metric that
+weights both richness and evenness.
 
 ``` r
-# Low richness, Low evenness
-shannon(c(1, 1, 100))
-#> [1] 0.1101001
-
-# Low richness, High evenness
-shannon(c(100, 100, 100))
-#> [1] 1.098612
-
-# High richness, Low evenness
-shannon(1:100)
-#> [1] 4.416898
-
 # High richness, High evenness
 shannon(rep(100, 100))
 #> [1] 4.60517
@@ -111,11 +94,25 @@ sort(shannon(counts))
 #> 0.07927797 0.35692121 0.74119910 1.10615349 
 ```
 
-### Phylogenetic Alpha Diversity
+### Dominance Metrics
 
-Faith’s phylogenetic diversity index incorporates a phylogenetic tree of
-the genera in order to measure how many of the tree’s branches are
-represented by each sample.
+Dominance metrics focus on the abundance of the most common species. The
+**Berger-Parker** index is the proportional abundance of the single most
+abundant feature.
+
+``` r
+# Stool is dominated by Bacteroides (341/345 counts -> ~0.99)
+# Nose is more balanced; Corynebacterium is max (171/345 counts -> ~0.49)
+sort(berger(counts))
+#>      Nose    Saliva      Gums     Stool 
+#> 0.4956522 0.5217391 0.8956522 0.9884058 
+```
+
+### Phylogenetic Metrics
+
+Phylogenetic metrics use a phylogenetic tree to incorporate evolutionary
+distance. **Faith’s Phylogenetic Diversity (PD)** calculates the total
+branch length spanned by the features present in a sample.
 
 ``` r
 # ex_tree:
@@ -144,3 +141,44 @@ sort(faith(counts, tree = ex_tree))
 #>   Nose   Gums Saliva  Stool 
 #>    101    155    180    202 
 ```
+
+## Formulas
+
+Given:
+
+- n : Number of features (e.g. species, OTUs, ASVs).
+- X_i : Integer count of the i-th feature.
+- X_T : Total of all counts (sequencing depth). X_T = \sum\_{i=1}^{n}
+  X_i
+- P_i : Proportional abundance of the i-th feature. P_i = X_i / X_T
+- F_1 : Number of singletons (X_i = 1).
+- F_2 : Number of doubletons (X_i = 2).
+
+[TABLE]
+
+### Abundance-based Coverage Estimator (ACE)
+
+Given:
+
+- r : Rare cutoff (features with \le r counts are considered rare).
+- F\_{rare} : Number of rare features.
+- F\_{abund} : Number of abundant features (\> r counts).
+- X\_{rare} : Total counts belonging to rare features.
+- C\_{ace} : Sample abundance coverage estimator.
+- \gamma\_{ace}^2 : Estimated coefficient of variation.
+
+C\_{ace} = 1 - \frac{F_1}{X\_{rare}}
+
+\gamma\_{ace}^2 = \max\left\[\frac{F\_{rare}
+\sum\_{i=1}^{r}i(i-1)F_i}{C\_{ace}X\_{rare}(X\_{rare} - 1)} - 1,
+0\right\]
+
+D\_{ace} = F\_{abund} + \frac{F\_{rare}}{C\_{ace}} +
+\frac{F_1}{C\_{ace}}\gamma\_{ace}^2
+
+### Faith’s Phylogenetic Diversity (Faith’s PD)
+
+Given n branches with lengths L and a binary vector A indicating
+presence (1) or absence (0) of descendants on each branch:
+
+\sum\_{i = 1}^{n} L_i A_i

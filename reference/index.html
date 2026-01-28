@@ -43,7 +43,7 @@
     <div class="section level2">
       <h2 id="alpha-diversity">Alpha Diversity<a class="anchor" aria-label="anchor" href="#alpha-diversity"></a></h2>
 
-
+      <div class="section-desc"><p>Calculate within-sample diversity using various indices.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -56,17 +56,144 @@
 
         </dt>
         <dd>Alpha Diversity Wrapper Function</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="richness-metrics">Richness metrics<a class="anchor" aria-label="anchor" href="#richness-metrics"></a></h3>
+      <div class="section-desc"><p>Estimators focused on the number of species (richness).</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="ace.html">ace()</a></code>
+
+        </dt>
+        <dd>Abundance-based Coverage Estimator (ACE)</dd>
 
         <dt>
 
-          <code><a href="adiv_functions.html">ace()</a></code> <code><a href="adiv_functions.html">berger()</a></code> <code><a href="adiv_functions.html">brillouin()</a></code> <code><a href="adiv_functions.html">chao1()</a></code> <code><a href="adiv_functions.html">faith()</a></code> <code><a href="adiv_functions.html">fisher()</a></code> <code><a href="adiv_functions.html">inv_simpson()</a></code> <code><a href="adiv_functions.html">margalef()</a></code> <code><a href="adiv_functions.html">mcintosh()</a></code> <code><a href="adiv_functions.html">menhinick()</a></code> <code><a href="adiv_functions.html">observed()</a></code> <code><a href="adiv_functions.html">shannon()</a></code> <code><a href="adiv_functions.html">simpson()</a></code> <code><a href="adiv_functions.html">squares()</a></code>
+          <code><a href="chao1.html">chao1()</a></code>
 
         </dt>
-        <dd>Alpha Diversity Metrics</dd>
+        <dd>Chao1 Richness Estimator</dd>
+
+        <dt>
+
+          <code><a href="margalef.html">margalef()</a></code>
+
+        </dt>
+        <dd>Margalef's Richness Index</dd>
+
+        <dt>
+
+          <code><a href="menhinick.html">menhinick()</a></code>
+
+        </dt>
+        <dd>Menhinick's Richness Index</dd>
+
+        <dt>
+
+          <code><a href="observed.html">observed()</a></code>
+
+        </dt>
+        <dd>Observed Features</dd>
+
+        <dt>
+
+          <code><a href="squares.html">squares()</a></code>
+
+        </dt>
+        <dd>Squares Richness Estimator</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="diversity-metrics">Diversity metrics<a class="anchor" aria-label="anchor" href="#diversity-metrics"></a></h3>
+      <div class="section-desc"><p>Indices accounting for both richness and evenness.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="brillouin.html">brillouin()</a></code>
+
+        </dt>
+        <dd>Brillouin Index</dd>
+
+        <dt>
+
+          <code><a href="fisher.html">fisher()</a></code>
+
+        </dt>
+        <dd>Fisher's Alpha</dd>
+
+        <dt>
+
+          <code><a href="inv_simpson.html">inv_simpson()</a></code>
+
+        </dt>
+        <dd>Inverse Simpson Index</dd>
+
+        <dt>
+
+          <code><a href="shannon.html">shannon()</a></code>
+
+        </dt>
+        <dd>Shannon Diversity Index</dd>
+
+        <dt>
+
+          <code><a href="simpson.html">simpson()</a></code>
+
+        </dt>
+        <dd>Gini-Simpson Index</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="dominance-metrics">Dominance metrics<a class="anchor" aria-label="anchor" href="#dominance-metrics"></a></h3>
+      <div class="section-desc"><p>Indices focused on the abundance of the most dominant species.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="berger.html">berger()</a></code>
+
+        </dt>
+        <dd>Berger-Parker Index</dd>
+
+        <dt>
+
+          <code><a href="mcintosh.html">mcintosh()</a></code>
+
+        </dt>
+        <dd>McIntosh Index</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="phylogenetic-metrics">Phylogenetic metrics<a class="anchor" aria-label="anchor" href="#phylogenetic-metrics"></a></h3>
+      <div class="section-desc"><p>Diversity based on phylogenetic branch lengths.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="faith.html">faith()</a></code>
+
+        </dt>
+        <dd>Faith's Phylogenetic Diversity (PD)</dd>
       </dl></div><div class="section level2">
       <h2 id="beta-diversity">Beta Diversity<a class="anchor" aria-label="anchor" href="#beta-diversity"></a></h2>
 
-
+      <div class="section-desc"><p>Calculate between-sample similarity or distance.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -79,17 +206,289 @@
 
         </dt>
         <dd>Beta Diversity Wrapper Function</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="abundance-metrics">Abundance metrics<a class="anchor" aria-label="anchor" href="#abundance-metrics"></a></h3>
+      <div class="section-desc"><p>Distance measures using quantitative abundance data.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="aitchison.html">aitchison()</a></code>
+
+        </dt>
+        <dd>Aitchison distance</dd>
 
         <dt>
 
-          <code><a href="bdiv_functions.html">aitchison()</a></code> <code><a href="bdiv_functions.html">bhattacharyya()</a></code> <code><a href="bdiv_functions.html">bray()</a></code> <code><a href="bdiv_functions.html">canberra()</a></code> <code><a href="bdiv_functions.html">chebyshev()</a></code> <code><a href="bdiv_functions.html">chord()</a></code> <code><a href="bdiv_functions.html">clark()</a></code> <code><a href="bdiv_functions.html">divergence()</a></code> <code><a href="bdiv_functions.html">euclidean()</a></code> <code><a href="bdiv_functions.html">gower()</a></code> <code><a href="bdiv_functions.html">hellinger()</a></code> <code><a href="bdiv_functions.html">horn()</a></code> <code><a href="bdiv_functions.html">jensen()</a></code> <code><a href="bdiv_functions.html">jsd()</a></code> <code><a href="bdiv_functions.html">lorentzian()</a></code> <code><a href="bdiv_functions.html">manhattan()</a></code> <code><a href="bdiv_functions.html">matusita()</a></code> <code><a href="bdiv_functions.html">minkowski()</a></code> <code><a href="bdiv_functions.html">morisita()</a></code> <code><a href="bdiv_functions.html">motyka()</a></code> <code><a href="bdiv_functions.html">psym_chisq()</a></code> <code><a href="bdiv_functions.html">soergel()</a></code> <code><a href="bdiv_functions.html">squared_chisq()</a></code> <code><a href="bdiv_functions.html">squared_chord()</a></code> <code><a href="bdiv_functions.html">squared_euclidean()</a></code> <code><a href="bdiv_functions.html">topsoe()</a></code> <code><a href="bdiv_functions.html">wave_hedges()</a></code> <code><a href="bdiv_functions.html">hamming()</a></code> <code><a href="bdiv_functions.html">jaccard()</a></code> <code><a href="bdiv_functions.html">ochiai()</a></code> <code><a href="bdiv_functions.html">sorensen()</a></code> <code><a href="bdiv_functions.html">unweighted_unifrac()</a></code> <code><a href="bdiv_functions.html">weighted_unifrac()</a></code> <code><a href="bdiv_functions.html">normalized_unifrac()</a></code> <code><a href="bdiv_functions.html">generalized_unifrac()</a></code> <code><a href="bdiv_functions.html">variance_adjusted_unifrac()</a></code>
+          <code><a href="bhattacharyya.html">bhattacharyya()</a></code>
 
         </dt>
-        <dd>Beta Diversity Metrics</dd>
+        <dd>Bhattacharyya distance</dd>
+
+        <dt>
+
+          <code><a href="bray.html">bray()</a></code>
+
+        </dt>
+        <dd>Bray-Curtis dissimilarity</dd>
+
+        <dt>
+
+          <code><a href="canberra.html">canberra()</a></code>
+
+        </dt>
+        <dd>Canberra distance</dd>
+
+        <dt>
+
+          <code><a href="chebyshev.html">chebyshev()</a></code>
+
+        </dt>
+        <dd>Chebyshev distance</dd>
+
+        <dt>
+
+          <code><a href="chord.html">chord()</a></code>
+
+        </dt>
+        <dd>Chord distance</dd>
+
+        <dt>
+
+          <code><a href="clark.html">clark()</a></code>
+
+        </dt>
+        <dd>Clark's divergence distance</dd>
+
+        <dt>
+
+          <code><a href="divergence.html">divergence()</a></code>
+
+        </dt>
+        <dd>Divergence</dd>
+
+        <dt>
+
+          <code><a href="euclidean.html">euclidean()</a></code>
+
+        </dt>
+        <dd>Euclidean distance</dd>
+
+        <dt>
+
+          <code><a href="gower.html">gower()</a></code>
+
+        </dt>
+        <dd>Gower distance</dd>
+
+        <dt>
+
+          <code><a href="hellinger.html">hellinger()</a></code>
+
+        </dt>
+        <dd>Hellinger distance</dd>
+
+        <dt>
+
+          <code><a href="horn.html">horn()</a></code>
+
+        </dt>
+        <dd>Horn-Morisita dissimilarity</dd>
+
+        <dt>
+
+          <code><a href="jensen.html">jensen()</a></code>
+
+        </dt>
+        <dd>Jensen-Shannon distance</dd>
+
+        <dt>
+
+          <code><a href="jsd.html">jsd()</a></code>
+
+        </dt>
+        <dd>Jensen-Shannon divergence (JSD)</dd>
+
+        <dt>
+
+          <code><a href="lorentzian.html">lorentzian()</a></code>
+
+        </dt>
+        <dd>Lorentzian distance</dd>
+
+        <dt>
+
+          <code><a href="manhattan.html">manhattan()</a></code>
+
+        </dt>
+        <dd>Manhattan distance</dd>
+
+        <dt>
+
+          <code><a href="matusita.html">matusita()</a></code>
+
+        </dt>
+        <dd>Matusita distance</dd>
+
+        <dt>
+
+          <code><a href="minkowski.html">minkowski()</a></code>
+
+        </dt>
+        <dd>Minkowski distance</dd>
+
+        <dt>
+
+          <code><a href="morisita.html">morisita()</a></code>
+
+        </dt>
+        <dd>Morisita dissimilarity</dd>
+
+        <dt>
+
+          <code><a href="motyka.html">motyka()</a></code>
+
+        </dt>
+        <dd>Motyka dissimilarity</dd>
+
+        <dt>
+
+          <code><a href="psym_chisq.html">psym_chisq()</a></code>
+
+        </dt>
+        <dd>Probabilistic Symmetric Chi-Squared distance</dd>
+
+        <dt>
+
+          <code><a href="soergel.html">soergel()</a></code>
+
+        </dt>
+        <dd>Soergel distance</dd>
+
+        <dt>
+
+          <code><a href="squared_chisq.html">squared_chisq()</a></code>
+
+        </dt>
+        <dd>Squared Chi-Squared distance</dd>
+
+        <dt>
+
+          <code><a href="squared_chord.html">squared_chord()</a></code>
+
+        </dt>
+        <dd>Squared Chord distance</dd>
+
+        <dt>
+
+          <code><a href="squared_euclidean.html">squared_euclidean()</a></code>
+
+        </dt>
+        <dd>Squared Euclidean distance</dd>
+
+        <dt>
+
+          <code><a href="topsoe.html">topsoe()</a></code>
+
+        </dt>
+        <dd>Topsoe distance</dd>
+
+        <dt>
+
+          <code><a href="wave_hedges.html">wave_hedges()</a></code>
+
+        </dt>
+        <dd>Wave Hedges distance</dd>
       </dl></div><div class="section level2">
-      <h2 id="programmatic-access">Programmatic Access<a class="anchor" aria-label="anchor" href="#programmatic-access"></a></h2>
+
+      <h3 id="presence-absence-metrics">Presence/Absence metrics<a class="anchor" aria-label="anchor" href="#presence-absence-metrics"></a></h3>
+      <div class="section-desc"><p>Distance measures using binary (presence/absence) data.</p></div>
+
+      <dl></dl></div><div class="section level2">
 
 
+
+
+      <dl><dt>
+
+          <code><a href="hamming.html">hamming()</a></code>
+
+        </dt>
+        <dd>Hamming distance</dd>
+
+        <dt>
+
+          <code><a href="jaccard.html">jaccard()</a></code>
+
+        </dt>
+        <dd>Jaccard distance</dd>
+
+        <dt>
+
+          <code><a href="ochiai.html">ochiai()</a></code>
+
+        </dt>
+        <dd>Otsuka-Ochiai dissimilarity</dd>
+
+        <dt>
+
+          <code><a href="sorensen.html">sorensen()</a></code>
+
+        </dt>
+        <dd>Dice-Sorensen dissimilarity</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="phylogenetic-metrics-1">Phylogenetic metrics<a class="anchor" aria-label="anchor" href="#phylogenetic-metrics-1"></a></h3>
+      <div class="section-desc"><p>Distance measures based on phylogenetic branch lengths (UniFrac family).</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="unweighted_unifrac.html">unweighted_unifrac()</a></code>
+
+        </dt>
+        <dd>Unweighted UniFrac</dd>
+
+        <dt>
+
+          <code><a href="weighted_unifrac.html">weighted_unifrac()</a></code>
+
+        </dt>
+        <dd>Weighted UniFrac</dd>
+
+        <dt>
+
+          <code><a href="normalized_unifrac.html">normalized_unifrac()</a></code>
+
+        </dt>
+        <dd>Normalized Weighted UniFrac</dd>
+
+        <dt>
+
+          <code><a href="generalized_unifrac.html">generalized_unifrac()</a></code>
+
+        </dt>
+        <dd>Generalized UniFrac (GUniFrac)</dd>
+
+        <dt>
+
+          <code><a href="variance_adjusted_unifrac.html">variance_adjusted_unifrac()</a></code>
+
+        </dt>
+        <dd>Variance-Adjusted Weighted UniFrac</dd>
+      </dl></div><div class="section level2">
+      <h2 id="utilities-helpers">Utilities &amp; Helpers<a class="anchor" aria-label="anchor" href="#utilities-helpers"></a></h2>
+
+      <div class="section-desc"><p>Tools for programmatic access, data manipulation, and configuration.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -102,17 +501,8 @@
 
         </dt>
         <dd>Find and Browse Available Metrics</dd>
-      </dl></div><div class="section level2">
-      <h2 id="utility">Utility<a class="anchor" aria-label="anchor" href="#utility"></a></h2>
 
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
+        <dt>
 
           <code><a href="read_tree.html">read_tree()</a></code>
 
@@ -135,7 +525,7 @@
       </dl></div><div class="section level2">
       <h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a></h2>
 
-
+      <div class="section-desc"><p>Example data provided with the package.</p></div>
 
       <dl></dl></div><div class="section level2">
 

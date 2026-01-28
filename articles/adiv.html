@@ -81,10 +81,9 @@
 <div class="section level2">
 <h2 id="input-matrix">Input Matrix<a class="anchor" aria-label="anchor" href="#input-matrix"></a>
 </h2>
-<p>Here we’ll use the <code>ex_counts</code> feature table included with
-ecodive. It contains the number of observations of each bacterial genera
-in each sample. In the text below, you can substitute the word ‘genera’
-for the feature of interest in your own data.</p>
+<p>We will use the <code>ex_counts</code> dataset included with ecodive.
+This feature table contains counts of bacterial genera across various
+samples.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cmmr.github.io/ecodive/">ecodive</a></span><span class="op">)</span></span>
 <span></span>
@@ -101,92 +100,90 @@ for the feature of interest in your own data.</p>
 <div class="section level2">
 <h2 id="alpha-diversity">Alpha Diversity<a class="anchor" aria-label="anchor" href="#alpha-diversity"></a>
 </h2>
-<p>Alpha diversity is a measure of diversity within a single sample.</p>
-<p>Depending on the metric, it may measure <strong>richness</strong>
-and/or <strong>evenness</strong>.</p>
+<p>Alpha diversity measures diversity within a single sample. In
+<code>ecodive</code>, metrics are grouped into four categories based on
+the aspect of diversity they quantify.</p>
 <div class="section level3">
-<h3 id="richness">Richness<a class="anchor" aria-label="anchor" href="#richness"></a>
+<h3 id="richness-metrics">Richness Metrics<a class="anchor" aria-label="anchor" href="#richness-metrics"></a>
 </h3>
-<p>Richness is how many genera are present in a sample. The simplest
-metric is to count the non-zero genera. You can do this with base R’s
-<code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums()</a></code> or with ecodive’s <code><a href="../reference/adiv_functions.html">observed()</a></code>.</p>
+<p>Richness metrics estimate the number of distinct features (e.g.,
+genera) in a sample. The simplest metric, <code><a href="../reference/observed.html">observed()</a></code>,
+counts features with non-zero abundance.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">counts</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
-<span><span class="co">#&gt;      4      3      4      5 </span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">observed</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Equivalent to rowSums(counts &gt; 0)</span></span>
+<span><span class="fu"><a href="../reference/observed.html">observed</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
 <span><span class="co">#&gt;      4      3      4      5 </span></span></code></pre></div>
-<p>The Chao1 metric takes this a step further by including unobserved
-low abundance genera, inferred using the number of times
-<code>counts == 1</code> vs <code>counts == 2</code>.</p>
+<p>The <strong>Chao1</strong> estimator extends this by inferring the
+number of unobserved, low-abundance features based on the ratio of
+singletons (<code>counts == 1</code>) to doubletons
+(<code>counts == 2</code>).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Infers 8 unobserved genera</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/chao1.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 16</span></span>
 <span></span>
 <span><span class="co"># Infers less than 1 unobserved genera</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/chao1.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 8.125</span></span>
 <span></span>
 <span><span class="co"># Datasets without 1s and 2s give Inf or NaN</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">chao1</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/chao1.html">chao1</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
 <span><span class="co">#&gt;    4.5    3.0    NaN    Inf </span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="evenness">Evenness<a class="anchor" aria-label="anchor" href="#evenness"></a>
+<h3 id="diversity-metrics">Diversity Metrics<a class="anchor" aria-label="anchor" href="#diversity-metrics"></a>
 </h3>
-<p>Evenness is how equally distributed genera are within a sample. The
-Simpson metric is a good measure of evenness.</p>
+<p>Diversity metrics account for both richness and evenness (how equally
+abundances are distributed).</p>
+<p><strong>Simpson’s index</strong> is often used as a measure of
+evenness, representing the probability that two randomly selected
+individuals belong to different species.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># High Evenness</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">simpson</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># High Evenness (0.8) vs Low Evenness (0.07)</span></span>
+<span><span class="fu"><a href="../reference/simpson.html">simpson</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.8</span></span>
-<span></span>
-<span><span class="co"># Low Evenness</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">simpson</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/simpson.html">simpson</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.07507396</span></span>
 <span></span>
 <span><span class="co"># Stool &lt; Gums &lt; Saliva &lt; Nose</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/adiv_functions.html">simpson</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/simpson.html">simpson</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      Stool       Gums     Saliva       Nose </span></span>
 <span><span class="co">#&gt; 0.02302037 0.18806133 0.50725478 0.63539593 </span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="richness-and-evenness">Richness and Evenness<a class="anchor" aria-label="anchor" href="#richness-and-evenness"></a>
-</h3>
-<p>The Shannon diversity index weights both richness and evenness.</p>
+<p>The <strong>Shannon diversity index</strong> (entropy) is another
+common metric that weights both richness and evenness.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Low richness, Low evenness</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.1101001</span></span>
-<span></span>
-<span><span class="co"># Low richness, High evenness</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1.098612</span></span>
-<span></span>
-<span><span class="co"># High richness, Low evenness</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4.416898</span></span>
-<span></span>
-<span><span class="co"># High richness, High evenness</span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># High richness, High evenness</span></span>
+<span><span class="fu"><a href="../reference/shannon.html">shannon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4.60517</span></span>
 <span></span>
 <span><span class="co"># Stool &lt; Gums &lt; Saliva &lt; Nose</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/shannon.html">shannon</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      Stool       Gums     Saliva       Nose </span></span>
 <span><span class="co">#&gt; 0.07927797 0.35692121 0.74119910 1.10615349 </span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="phylogenetic-alpha-diversity">Phylogenetic Alpha Diversity<a class="anchor" aria-label="anchor" href="#phylogenetic-alpha-diversity"></a>
+<h3 id="dominance-metrics">Dominance Metrics<a class="anchor" aria-label="anchor" href="#dominance-metrics"></a>
 </h3>
-<p>Faith’s phylogenetic diversity index incorporates a phylogenetic tree
-of the genera in order to measure how many of the tree’s branches are
-represented by each sample.</p>
+<p>Dominance metrics focus on the abundance of the most common species.
+The <strong>Berger-Parker</strong> index is the proportional abundance
+of the single most abundant feature.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Stool is dominated by Bacteroides (341/345 counts -&gt; ~0.99)</span></span>
+<span><span class="co"># Nose is more balanced; Corynebacterium is max (171/345 counts -&gt; ~0.49)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/berger.html">berger</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      Nose    Saliva      Gums     Stool </span></span>
+<span><span class="co">#&gt; 0.4956522 0.5217391 0.8956522 0.9884058 </span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="phylogenetic-metrics">Phylogenetic Metrics<a class="anchor" aria-label="anchor" href="#phylogenetic-metrics"></a>
+</h3>
+<p>Phylogenetic metrics use a phylogenetic tree to incorporate
+evolutionary distance. <strong>Faith’s Phylogenetic Diversity
+(PD)</strong> calculates the total branch length spanned by the features
+present in a sample.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># ex_tree:</span></span>
 <span><span class="co">#</span></span>
 <span><span class="co">#       +----------44---------- Haemophilus</span></span>
@@ -202,16 +199,162 @@ represented by each sample.</p>
 <span><span class="co">#                 +--13-- Propionibacterium</span></span>
 <span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Propionibacterium <span class="op">=</span> <span class="fl">1</span>, Corynebacterium <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/faith.html">faith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Propionibacterium <span class="op">=</span> <span class="fl">1</span>, Corynebacterium <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 60</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Propionibacterium <span class="op">=</span> <span class="fl">1</span>, Haemophilus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/faith.html">faith</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Propionibacterium <span class="op">=</span> <span class="fl">1</span>, Haemophilus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 82</span></span>
 <span></span>
 <span><span class="co"># Nose &lt; Gums &lt; Saliva &lt; Stool</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/faith.html">faith</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Nose   Gums Saliva  Stool </span></span>
 <span><span class="co">#&gt;    101    155    180    202 </span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="formulas">Formulas<a class="anchor" aria-label="anchor" href="#formulas"></a>
+</h2>
+<p>Given:</p>
+<ul>
+<li>
+<span class="math inline">n</span> : Number of features
+(e.g. species, OTUs, ASVs).</li>
+<li>
+<span class="math inline">X_i</span> : Integer count of the <span class="math inline">i</span>-th feature.</li>
+<li>
+<span class="math inline">X_T</span> : Total of all counts
+(sequencing depth). <span class="math inline">X_T = \sum_{i=1}^{n}
+X_i</span>
+</li>
+<li>
+<span class="math inline">P_i</span> : Proportional abundance of the
+<span class="math inline">i</span>-th feature. <span class="math inline">P_i = X_i / X_T</span>
+</li>
+<li>
+<span class="math inline">F_1</span> : Number of singletons (<span class="math inline">X_i = 1</span>).</li>
+<li>
+<span class="math inline">F_2</span> : Number of doubletons (<span class="math inline">X_i = 2</span>).</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="46%">
+<col width="53%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Metric</th>
+<th align="left">Formula</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong>Abundance-based Coverage Estimator
+(ACE)</strong></td>
+<td align="left">See below.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Berger-Parker Index</strong></td>
+<td align="left"><span class="math inline">\max(P_i)</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Brillouin Index</strong></td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{\ln{[(\sum_{i = 1}^{n} X_i)!]} - \sum_{i = 1}^{n}
+\ln{(X_i!)}}{\sum_{i = 1}^{n} X_i}</span></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Chao1</strong></td>
+<td align="left"><span class="math inline">\displaystyle n +
+\frac{(F_1)^2}{2 F_2}</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Faith’s Phylogenetic Diversity</strong></td>
+<td align="left">See below.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Fisher’s Alpha (<span class="math inline">\alpha</span>)</strong></td>
+<td align="left">
+<span class="math inline">\displaystyle
+\frac{n}{\alpha} = \ln{\left(1 + \frac{X_T}{\alpha}\right)}</span> <br>
+(<span class="math inline">\alpha</span> is solved for iteratively)</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Gini-Simpson Index</strong></td>
+<td align="left"><span class="math inline">1 - \sum_{i = 1}^{n}
+P_i^2</span></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Inverse Simpson Index</strong></td>
+<td align="left"><span class="math inline">1 / \sum_{i = 1}^{n}
+P_i^2</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Margalef’s Richness Index</strong></td>
+<td align="left"><span class="math inline">\displaystyle \frac{n -
+1}{\ln{X_T}}</span></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>McIntosh Index</strong></td>
+<td align="left"><span class="math inline">\displaystyle \frac{X_T -
+\sqrt{\sum_{i = 1}^{n} (X_i)^2}}{X_T - \sqrt{X_T}}</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Menhinick’s Richness Index</strong></td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{n}{\sqrt{X_T}}</span></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Observed Features</strong></td>
+<td align="left"><span class="math inline">n</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Shannon Diversity Index</strong></td>
+<td align="left"><span class="math inline">-\sum_{i = 1}^{n} P_i \times
+\ln(P_i)</span></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Squares Richness Estimator</strong></td>
+<td align="left"><span class="math inline">\displaystyle n +
+\frac{(F_1)^2 \sum_{i=1}^{n} (X_i)^2}{X_T^2 - nF_1}</span></td>
+</tr>
+</tbody>
+</table>
+<div class="section level3">
+<h3 id="abundance-based-coverage-estimator-ace">Abundance-based Coverage Estimator (ACE)<a class="anchor" aria-label="anchor" href="#abundance-based-coverage-estimator-ace"></a>
+</h3>
+<p>Given:</p>
+<ul>
+<li>
+<span class="math inline">r</span> : Rare cutoff (features with
+<span class="math inline">\le r</span> counts are considered rare).</li>
+<li>
+<span class="math inline">F_{rare}</span> : Number of rare
+features.</li>
+<li>
+<span class="math inline">F_{abund}</span> : Number of abundant
+features (<span class="math inline">&gt; r</span> counts).</li>
+<li>
+<span class="math inline">X_{rare}</span> : Total counts belonging
+to rare features.</li>
+<li>
+<span class="math inline">C_{ace}</span> : Sample abundance coverage
+estimator.</li>
+<li>
+<span class="math inline">\gamma_{ace}^2</span> : Estimated
+coefficient of variation.</li>
+</ul>
+<p><span class="math display">C_{ace} = 1 -
+\frac{F_1}{X_{rare}}</span></p>
+<p><span class="math display">\gamma_{ace}^2 = \max\left[\frac{F_{rare}
+\sum_{i=1}^{r}i(i-1)F_i}{C_{ace}X_{rare}(X_{rare} - 1)} - 1,
+0\right]</span></p>
+<p><span class="math display">D_{ace} = F_{abund} +
+\frac{F_{rare}}{C_{ace}} + \frac{F_1}{C_{ace}}\gamma_{ace}^2</span></p>
+</div>
+<div class="section level3">
+<h3 id="faiths-phylogenetic-diversity-faiths-pd">Faith’s Phylogenetic Diversity (Faith’s PD)<a class="anchor" aria-label="anchor" href="#faiths-phylogenetic-diversity-faiths-pd"></a>
+</h3>
+<p>Given <span class="math inline">n</span> branches with lengths <span class="math inline">L</span> and a binary vector <span class="math inline">A</span> indicating presence (1) or absence (0) of
+descendants on each branch:</p>
+<p><span class="math inline">\sum_{i = 1}^{n} L_i A_i</span></p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -109,7 +109,7 @@ Supports partial matching. All non-alpha characters are ignored.</p></dd>
 <li><p><code>weighted</code> : <code>TRUE</code> if metric takes relative abundance into account; <code>FALSE</code> if it only uses presence/absence.</p></li>
 <li><p><code>int_only</code> : <code>TRUE</code> if metric requires integer counts; <code>FALSE</code> otherwise.</p></li>
 <li><p><code>true_metric</code> : <code>TRUE</code> if metric is a true metric and satisfies the triangle inequality; <code>FALSE</code> if it is a non-metric dissimilarity; <code>NA</code> for alpha diversity metrics.</p></li>
-<li><p><code>func</code> : The function for this metric, e.g. <code><a href="adiv_functions.html">ecodive::faith</a></code></p></li>
+<li><p><code>func</code> : The function for this metric, e.g. <code><a href="faith.html">ecodive::faith</a></code></p></li>
 <li><p><code>params</code> : Formal args for <code>func</code>, e.g. <code>c("counts", "tree", "cpus")</code></p></li>
 </ul><p><strong><code>list_metrics()</code></strong></p>
 <p>The returned object's type and values are controlled with the <code>val</code> and <code>nm</code> arguments.</p><ul><li><p><code>val = "data.frame"</code> : The data.frame from which the below options are sourced.</p></li>

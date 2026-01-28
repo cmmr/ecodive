@@ -79,9 +79,17 @@
     
     
 <div class="section level2">
-<h2 id="input-matrix">Input Matrix<a class="anchor" aria-label="anchor" href="#input-matrix"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Here we’ll use the <code>ex_counts</code> feature table included with
+<p>Beta diversity is a measure of how different two samples are. The
+different metrics described in this vignette quantify that difference,
+referred to as the “distance” or “dissimilarity” between a pair of
+samples. The distance is typically <code>0</code> for identical samples
+and <code>1</code> for completely different samples.</p>
+<div class="section level3">
+<h3 id="input-data">Input Data<a class="anchor" aria-label="anchor" href="#input-data"></a>
+</h3>
+<p>We will use the <code>ex_counts</code> feature table included with
 ecodive. It contains the number of observations of each bacterial genera
 in each sample. In the text below, you can substitute the word ‘genera’
 for the feature of interest in your own data.</p>
@@ -97,24 +105,26 @@ for the feature of interest in your own data.</p>
 <span><span class="co">#&gt; Haemophilus          180   34    0     1</span></span>
 <span><span class="co">#&gt; Propionibacterium      1    0   82     0</span></span>
 <span><span class="co">#&gt; Staphylococcus         0    0   86     1</span></span></code></pre></div>
+<p>Looking at the matrix above, you can see that saliva and gums are
+similar, while saliva and stool are quite different.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="beta-diversity">Beta Diversity<a class="anchor" aria-label="anchor" href="#beta-diversity"></a>
+<h2 id="weighted-vs-unweighted-metrics">Weighted vs Unweighted Metrics<a class="anchor" aria-label="anchor" href="#weighted-vs-unweighted-metrics"></a>
 </h2>
-<p>Beta diversity is a measure of how different two samples are.</p>
-<p>Looking at the <code>counts</code> matrix above, you can easily see
-that saliva and gums are similar, while saliva and stool are different.
-The different metrics described below quantify that difference, referred
-to as the “distance” or “dissimilarity” between a pair of samples. The
-distance is <code>0</code> for identical samples and <code>1</code> for
-completely different samples.</p>
-<div class="section level3">
-<h3 id="weighted-vs-unweighted">Weighted vs Unweighted<a class="anchor" aria-label="anchor" href="#weighted-vs-unweighted"></a>
-</h3>
-<p>Weighted metrics take relative abundances into account, whereas
-unweighted metrics only consider presence/absence. To determine which
-metrics are weighted or unweighted, consult
-<code><a href="../reference/metrics.html">list_metrics()</a></code>.</p>
+<p>Before selecting a formula, it is important to distinguish between
+<strong>weighted</strong> and <strong>unweighted</strong> metrics.</p>
+<ul>
+<li>
+<strong>Weighted metrics</strong> take relative abundances into
+account.</li>
+<li>
+<strong>Unweighted metrics</strong> only consider presence/absence
+(binary data).</li>
+</ul>
+<p>You can consult <code><a href="../reference/metrics.html">list_metrics()</a></code> to see which category a
+specific metric falls into or to list all available options
+programmatically.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "sorensen"  "hamming"  "jaccard"  "ochiai"  "unweighted_unifrac"</span></span>
@@ -131,9 +141,362 @@ metrics are weighted or unweighted, consult
 <span><span class="co">#&gt; [25] "squared_chisq"        "squared_chord"              "squared_euclidean"        </span></span>
 <span><span class="co">#&gt; [28] "topsoe"               "variance_adjusted_unifrac"  "wave_hedges"</span></span>
 <span><span class="co">#&gt; [31] "weighted_unifrac"</span></span></code></pre></div>
-<p>Note that <code>sorsensen()</code> is equivalent to
-<code>bray(norm = 'binary')</code>, and <code><a href="../reference/bdiv_functions.html">jaccard()</a></code> is
+</div>
+<div class="section level2">
+<h2 id="formulas">Formulas<a class="anchor" aria-label="anchor" href="#formulas"></a>
+</h2>
+<p>The following tables detail the mathematical definitions for the
+metrics available in <code>ecodive</code>.</p>
+<div class="section level3">
+<h3 id="abundance-based-weighted">Abundance-Based (Weighted)<a class="anchor" aria-label="anchor" href="#abundance-based-weighted"></a>
+</h3>
+<p>Given:</p>
+<ul>
+<li>
+<span class="math inline">n</span> : The number of features.</li>
+<li>
+<span class="math inline">X_i</span>, <span class="math inline">Y_i</span> : Absolute counts for the <span class="math inline">i</span>-th feature in samples <span class="math inline">X</span> and <span class="math inline">Y</span>.</li>
+<li>
+<span class="math inline">X_T</span>, <span class="math inline">Y_T</span> : Total counts in each sample. <span class="math inline">X_T = \sum_{i=1}^{n} X_i</span>
+</li>
+<li>
+<span class="math inline">P_i</span>, <span class="math inline">Q_i</span> : Proportional abundances of <span class="math inline">X_i</span> and <span class="math inline">Y_i</span>.
+<span class="math inline">P_i = X_i / X_T</span>
+</li>
+<li>
+<span class="math inline">X_L</span>, <span class="math inline">Y_L</span> : Mean log of abundances. <span class="math inline">X_L = \frac{1}{n}\sum_{i=1}^{n} \ln{X_i}</span>
+</li>
+<li>
+<span class="math inline">R_i</span> : The range of the <span class="math inline">i</span>-th feature across all samples (max -
+min).</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="32%">
+<col width="68%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="left">
+<strong>Aitchison distance</strong> <br><code><a href="../reference/aitchison.html">aitchison()</a></code>
+</td>
+<td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n}
+[(\ln{X_i} - X_L) - (\ln{Y_i} - Y_L)]^2}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Bhattacharyya distance</strong> <br><code><a href="../reference/bhattacharyya.html">bhattacharyya()</a></code>
+</td>
+<td align="left"><span class="math inline">-\ln{\sum_{i=1}^{n}\sqrt{P_{i}Q_{i}}}</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Bray-Curtis dissimilarity</strong> <br><code><a href="../reference/bray.html">bray()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} (P_i +
+Q_i)}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Canberra distance</strong> <br><code><a href="../reference/canberra.html">canberra()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle \sum_{i=1}^{n}
+\frac{|P_i - Q_i|}{P_i + Q_i}</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Chebyshev distance</strong> <br><code><a href="../reference/chebyshev.html">chebyshev()</a></code>
+</td>
+<td align="left"><span class="math inline">\max(|P_i - Q_i|)</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Chord distance</strong> <br><code><a href="../reference/chord.html">chord()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\sqrt{\sum_{i=1}^{n} \left(\frac{X_i}{\sqrt{\sum_{j=1}^{n} X_j^2}} -
+\frac{Y_i}{\sqrt{\sum_{j=1}^{n} Y_j^2}}\right)^2}</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Clark’s divergence distance</strong> <br><code><a href="../reference/clark.html">clark()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\sqrt{\sum_{i=1}^{n}\left(\frac{P_i - Q_i}{P_i +
+Q_i}\right)^{2}}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Divergence</strong> <br><code><a href="../reference/divergence.html">divergence()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle 2\sum_{i=1}^{n}
+\frac{(P_i - Q_i)^2}{(P_i + Q_i)^2}</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Euclidean distance</strong> <br><code><a href="../reference/euclidean.html">euclidean()</a></code>
+</td>
+<td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n} (P_i -
+Q_i)^2}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Gower distance</strong> <br><code><a href="../reference/gower.html">gower()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{1}{n}\sum_{i=1}^{n}\frac{|P_i - Q_i|}{R_i}</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Hellinger distance</strong> <br><code><a href="../reference/hellinger.html">hellinger()</a></code>
+</td>
+<td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n}(\sqrt{P_i} -
+\sqrt{Q_i})^{2}}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Horn-Morisita dissimilarity</strong> <br><code><a href="../reference/horn.html">horn()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle 1 -
+\frac{2\sum_{i=1}^{n}P_{i}Q_{i}}{\sum_{i=1}^{n}P_i^2 +
+\sum_{i=1}^{n}Q_i^2}</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Jensen-Shannon distance</strong> <br><code><a href="../reference/jensen.html">jensen()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\sqrt{\frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i +
+Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i +
+Q_i}\right)\right]}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Jensen-Shannon divergence (JSD)</strong> <br><code><a href="../reference/jsd.html">jsd()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right)
++ \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i +
+Q_i}\right)\right]</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Lorentzian distance</strong> <br><code><a href="../reference/lorentzian.html">lorentzian()</a></code>
+</td>
+<td align="left"><span class="math inline">\sum_{i=1}^{n}\ln{(1 + |P_i -
+Q_i|)}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Manhattan distance</strong> <br><code><a href="../reference/manhattan.html">manhattan()</a></code>
+</td>
+<td align="left"><span class="math inline">\sum_{i=1}^{n} |P_i -
+Q_i|</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Matusita distance</strong> <br><code><a href="../reference/matusita.html">matusita()</a></code>
+</td>
+<td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n}\left(\sqrt{P_i} -
+\sqrt{Q_i}\right)^2}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Minkowski distance</strong> <br><code><a href="../reference/minkowski.html">minkowski()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\sqrt[p]{\sum_{i=1}^{n} (P_i
+- Q_i)^p}</span> <br> Where <span class="math inline">p</span> is the
+geometry of the space.</td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Morisita dissimilarity</strong> <br> (integers
+only) <br><code><a href="../reference/morisita.html">morisita()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle 1 -
+\frac{2\sum_{i=1}^{n}X_{i}Y_{i}}{\displaystyle
+\left(\frac{\sum_{i=1}^{n}X_i(X_i - 1)}{X_T(X_T - 1)} +
+\frac{\sum_{i=1}^{n}Y_i(Y_i - 1)}{Y_T(Y_T -
+1)}\right)X_{T}Y_{T}}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Motyka dissimilarity</strong> <br><code><a href="../reference/motyka.html">motyka()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{\sum_{i=1}^{n} \max(P_i, Q_i)}{\sum_{i=1}^{n} (P_i +
+Q_i)}</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Probabilistic Symmetric <span class="math inline">\chi^2</span> distance</strong> <br><code><a href="../reference/psym_chisq.html">psym_chisq()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+2\sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Soergel distance</strong> <br><code><a href="../reference/soergel.html">soergel()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i,
+Q_i)}</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Squared <span class="math inline">\chi^2</span>
+distance</strong> <br><code><a href="../reference/squared_chisq.html">squared_chisq()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Squared Chord distance</strong> <br><code><a href="../reference/squared_chord.html">squared_chord()</a></code>
+</td>
+<td align="left"><span class="math inline">\sum_{i=1}^{n}\left(\sqrt{P_i} -
+\sqrt{Q_i}\right)^2</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Squared Euclidean distance</strong> <br><code><a href="../reference/squared_euclidean.html">squared_euclidean()</a></code>
+</td>
+<td align="left"><span class="math inline">\sum_{i=1}^{n} (P_i -
+Q_i)^2</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Topsoe distance</strong> <br><code><a href="../reference/topsoe.html">topsoe()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) +
+\sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Wave Hedges distance</strong> <br><code><a href="../reference/wave_hedges.html">wave_hedges()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i,
+Q_i)}</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="presence-absence-unweighted">Presence / Absence (Unweighted)<a class="anchor" aria-label="anchor" href="#presence-absence-unweighted"></a>
+</h3>
+<p>Given:</p>
+<ul>
+<li>
+<span class="math inline">A</span>, <span class="math inline">B</span> : Number of features in each sample.</li>
+<li>
+<span class="math inline">J</span> : Number of features in
+common.</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="38%">
+<col width="61%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="left">
+<strong>Dice-Sorensen dissimilarity</strong> <br><code><a href="../reference/sorensen.html">sorensen()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle \frac{2J}{(A +
+B)}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Hamming distance</strong> <br><code><a href="../reference/hamming.html">hamming()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle (A + B) -
+2J</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Jaccard distance</strong> <br><code><a href="../reference/jaccard.html">jaccard()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle 1 - \frac{J}{(A
++ B - J)}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Otsuka-Ochiai dissimilarity</strong> <br><code><a href="../reference/ochiai.html">ochiai()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle 1 -
+\frac{J}{\sqrt{AB}}</span></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note:</strong> <code>sorsensen()</code> is equivalent to
+<code>bray(norm = 'binary')</code>, and <code><a href="../reference/jaccard.html">jaccard()</a></code> is
 equivalent to <code>soergel(norm = 'binary')</code>.</p>
+</blockquote>
+</div>
+<div class="section level3">
+<h3 id="phylogenetic">Phylogenetic<a class="anchor" aria-label="anchor" href="#phylogenetic"></a>
+</h3>
+<p>Given <span class="math inline">n</span> branches with lengths <span class="math inline">L</span> and a pair of samples’ binary (<span class="math inline">A</span> and <span class="math inline">B</span>) or
+proportional abundances (<span class="math inline">P</span> and <span class="math inline">Q</span>) on each of those branches.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="left">
+<strong>Unweighted UniFrac</strong> <br><code><a href="../reference/unweighted_unifrac.html">unweighted_unifrac()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{1}{n}\sum_{i=1}^{n} L_i|A_i - B_i|</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Weighted UniFrac</strong> <br><code><a href="../reference/weighted_unifrac.html">weighted_unifrac()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle \sum_{i=1}^{n}
+L_i|P_i - Q_i|</span></td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Normalized Weighted UniFrac</strong> <br><code><a href="../reference/normalized_unifrac.html">normalized_unifrac()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{\sum_{i=1}^{n} L_i|P_i - Q_i|}{\sum_{i=1}^{n} L_i(P_i +
+Q_i)}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Generalized UniFrac (GUniFrac)</strong> <br><code><a href="../reference/generalized_unifrac.html">generalized_unifrac()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\displaystyle
+\frac{\sum_{i=1}^{n} L_i(P_i + Q_i)^{\alpha}\left|\displaystyle
+\frac{P_i - Q_i}{P_i + Q_i}\right|}{\sum_{i=1}^{n} L_i(P_i +
+Q_i)^{\alpha}}</span> <br> Where <span class="math inline">\alpha</span>
+is a scalable weighting factor.</td>
+</tr>
+<tr class="odd">
+<td align="left">
+<strong>Variance-Adjusted Weighted UniFrac</strong>
+<br><code><a href="../reference/variance_adjusted_unifrac.html">variance_adjusted_unifrac()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{\displaystyle \sum_{i=1}^{n} L_i\displaystyle \frac{|P_i -
+Q_i|}{\sqrt{(P_i + Q_i)(2 - P_i - Q_i)}} }{\displaystyle \sum_{i=1}^{n}
+L_i\displaystyle \frac{P_i + Q_i}{\sqrt{(P_i + Q_i)(2 - P_i - Q_i)}}
+}</span></td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="https://cmmr.github.io/ecodive/articles/unifrac.html" class="uri">https://cmmr.github.io/ecodive/articles/unifrac.html</a> for
+detailed example UniFrac calculations.</p>
 </div>
 </div>
 <div class="section level2">
@@ -143,7 +506,7 @@ equivalent to <code>soergel(norm = 'binary')</code>.</p>
 diversity functions results in the returned all-vs-all distance matrix
 being completely filled in.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4260870                    </span></span>
 <span><span class="co">#&gt; Nose  0.9797101 0.9826087          </span></span>
@@ -153,7 +516,7 @@ being completely filled in.</p>
 CPU time. The larger the dataset, the more noticeable the improvement
 will be.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4260870                    </span></span>
 <span><span class="co">#&gt; Nose  0.9797101        NA          </span></span>
@@ -169,9 +532,9 @@ result.</li>
 </ul>
 <p>Therefore, all of the following are equivalent:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="kw">function</span> <span class="op">(</span><span class="va">i</span>, <span class="va">j</span><span class="op">)</span> <span class="va">i</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="kw">function</span> <span class="op">(</span><span class="va">i</span>, <span class="va">j</span><span class="op">)</span> <span class="va">i</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>The ordering of <code>pairs</code> follows the pairings produced by
 <code><a href="https://rdrr.io/r/utils/combn.html" class="external-link">combn()</a></code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -194,11 +557,21 @@ result.</li>
 <span><span class="va">my_pairs</span></span>
 <span><span class="co">#&gt; [1]  TRUE FALSE FALSE  TRUE  TRUE FALSE</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="va">my_pairs</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span>, pairs <span class="op">=</span> <span class="va">my_pairs</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4260870                    </span></span>
 <span><span class="co">#&gt; Nose         NA 0.9826087          </span></span>
 <span><span class="co">#&gt; Stool        NA 0.9884058        NA</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Levy, A., Shalom, B. R., &amp; Chalamish, M. (2024). A guide to
+similarity measures. <em>arXiv</em>.</p>
+<p>Cha, S.-H. (2007). Comprehensive survey on distance/similarity
+measures between probability density functions. <em>International
+Journal of Mathematical Models and Methods in Applied Sciences</em>,
+1(4), 300–307.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

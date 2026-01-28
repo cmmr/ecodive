@@ -229,14 +229,14 @@ presence/absence information instead of relative abundances.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Alpha Diversity -------------------</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">shannon</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/shannon.html">shannon</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Saliva       Gums       Nose      Stool </span></span>
 <span><span class="co">#&gt; 0.74119910 0.35692121 1.10615349 0.07927797 </span></span>
 <span></span>
 <span></span>
 <span><span class="co">## Beta Diversity --------------------</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4260870                    </span></span>
 <span><span class="co">#&gt; Nose  0.9797101 0.9826087          </span></span>
@@ -257,14 +257,14 @@ import a phylogenetic tree from a newick formatted string or file.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Alpha Diversity -------------------</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/adiv_functions.html">faith</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/faith.html">faith</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
 <span><span class="co">#&gt;    180    155    101    202 </span></span>
 <span></span>
 <span></span>
 <span><span class="co">## Beta Diversity --------------------</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/bdiv_functions.html">normalized_unifrac</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/normalized_unifrac.html">normalized_unifrac</a></span><span class="op">(</span><span class="va">counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.4328662                    </span></span>
 <span><span class="co">#&gt; Nose  0.7928701 0.6767840          </span></span>
@@ -277,7 +277,7 @@ import a phylogenetic tree from a newick formatted string or file.</p>
 convert this to a standard R matrix with the <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>
 function.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bdiv_functions.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="va">dm</span></span>
 <span><span class="co">#&gt;          Saliva      Gums      Nose</span></span>
 <span><span class="co">#&gt; Gums  0.1428571                    </span></span>

@@ -1,8 +1,16 @@
 # Beta Diversity
 
-## Input Matrix
+## Introduction
 
-Here we’ll use the `ex_counts` feature table included with ecodive. It
+Beta diversity is a measure of how different two samples are. The
+different metrics described in this vignette quantify that difference,
+referred to as the “distance” or “dissimilarity” between a pair of
+samples. The distance is typically `0` for identical samples and `1` for
+completely different samples.
+
+### Input Data
+
+We will use the `ex_counts` feature table included with ecodive. It
 contains the number of observations of each bacterial genera in each
 sample. In the text below, you can substitute the word ‘genera’ for the
 feature of interest in your own data.
@@ -21,22 +29,21 @@ t(counts)
 #> Staphylococcus         0    0   86     1
 ```
 
-## Beta Diversity
+Looking at the matrix above, you can see that saliva and gums are
+similar, while saliva and stool are quite different.
 
-Beta diversity is a measure of how different two samples are.
+## Weighted vs Unweighted Metrics
 
-Looking at the `counts` matrix above, you can easily see that saliva and
-gums are similar, while saliva and stool are different. The different
-metrics described below quantify that difference, referred to as the
-“distance” or “dissimilarity” between a pair of samples. The distance is
-`0` for identical samples and `1` for completely different samples.
+Before selecting a formula, it is important to distinguish between
+**weighted** and **unweighted** metrics.
 
-### Weighted vs Unweighted
+- **Weighted metrics** take relative abundances into account.
+- **Unweighted metrics** only consider presence/absence (binary data).
 
-Weighted metrics take relative abundances into account, whereas
-unweighted metrics only consider presence/absence. To determine which
-metrics are weighted or unweighted, consult
-[`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md).
+You can consult
+[`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md)
+to see which category a specific metric falls into or to list all
+available options programmatically.
 
 ``` r
 list_metrics('beta', 'id', weighted = FALSE)
@@ -56,9 +63,47 @@ list_metrics('beta', 'id', weighted = TRUE)
 #> [31] "weighted_unifrac"
 ```
 
-Note that `sorsensen()` is equivalent to `bray(norm = 'binary')`, and
-[`jaccard()`](https://cmmr.github.io/ecodive/reference/bdiv_functions.md)
-is equivalent to `soergel(norm = 'binary')`.
+## Formulas
+
+The following tables detail the mathematical definitions for the metrics
+available in `ecodive`.
+
+### Abundance-Based (Weighted)
+
+Given:
+
+- n : The number of features.
+- X_i, Y_i : Absolute counts for the i-th feature in samples X and Y.
+- X_T, Y_T : Total counts in each sample. X_T = \sum\_{i=1}^{n} X_i
+- P_i, Q_i : Proportional abundances of X_i and Y_i. P_i = X_i / X_T
+- X_L, Y_L : Mean log of abundances. X_L = \frac{1}{n}\sum\_{i=1}^{n}
+  \ln{X_i}
+- R_i : The range of the i-th feature across all samples (max - min).
+
+[TABLE]
+
+### Presence / Absence (Unweighted)
+
+Given:
+
+- A, B : Number of features in each sample.
+- J : Number of features in common.
+
+[TABLE]
+
+> **Note:** `sorsensen()` is equivalent to `bray(norm = 'binary')`, and
+> [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md) is
+> equivalent to `soergel(norm = 'binary')`.
+
+### Phylogenetic
+
+Given n branches with lengths L and a pair of samples’ binary (A and B)
+or proportional abundances (P and Q) on each of those branches.
+
+[TABLE]
+
+See <https://cmmr.github.io/ecodive/articles/unifrac.html> for detailed
+example UniFrac calculations.
 
 ## Partial Calculation
 
@@ -134,3 +179,12 @@ bray(counts, pairs = my_pairs)
 #> Nose         NA 0.9826087          
 #> Stool        NA 0.9884058        NA
 ```
+
+## References
+
+Levy, A., Shalom, B. R., & Chalamish, M. (2024). A guide to similarity
+measures. *arXiv*.
+
+Cha, S.-H. (2007). Comprehensive survey on distance/similarity measures
+between probability density functions. *International Journal of
+Mathematical Models and Methods in Applied Sciences*, 1(4), 300–307.

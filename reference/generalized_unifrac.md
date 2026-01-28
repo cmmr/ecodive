@@ -1,0 +1,112 @@
+# Generalized UniFrac (GUniFrac)
+
+A unified UniFrac distance that balances the weight of abundant and rare
+lineages.
+
+## Usage
+
+``` r
+generalized_unifrac(
+  counts,
+  tree = NULL,
+  alpha = 0.5,
+  margin = 1L,
+  pairs = NULL,
+  cpus = n_cpus()
+)
+```
+
+## Arguments
+
+- counts:
+
+  A numeric matrix of count data where each column is a feature, and
+  each row is a sample. Any object coercible with
+  [`as.matrix()`](https://rdrr.io/r/base/matrix.html) can be given here,
+  as well as `phyloseq`, `rbiom`, `SummarizedExperiment`, and
+  `TreeSummarizedExperiment` objects. For optimal performance with very
+  large datasets, see the guide in
+  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md).
+
+- tree:
+
+  A `phylo`-class object representing the phylogenetic tree for the OTUs
+  in `counts`. The OTU identifiers given by `colnames(counts)` must be
+  present in `tree`. Can be omitted if a tree is embedded with the
+  `counts` object or as `attr(counts, 'tree')`.
+
+- alpha:
+
+  How much weight to give to relative abundances; a value between 0 and
+  1, inclusive. Setting `alpha=1` is equivalent to
+  [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/normalized_unifrac.md).
+
+- margin:
+
+  If your samples are in the matrix's rows, set to `1L`. If your samples
+  are in columns, set to `2L`. Ignored when `counts` is a `phyloseq`,
+  `rbiom`, `SummarizedExperiment`, or `TreeSummarizedExperiment` object.
+  Default: `1L`
+
+- pairs:
+
+  Which combinations of samples should distances be calculated for? The
+  default value (`NULL`) calculates all-vs-all. Provide a numeric or
+  logical vector specifying positions in the distance matrix to
+  calculate. See examples.
+
+- cpus:
+
+  How many parallel processing threads should be used. The default,
+  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), will
+  use all logical CPU cores.
+
+## Details
+
+The Generalized UniFrac distance is defined as:
+\$\$\frac{\sum\_{i=1}^{n} L_i(P_i + Q_i)^{\alpha}\left\|\frac{P_i -
+Q_i}{P_i + Q_i}\right\|}{\sum\_{i=1}^{n} L_i(P_i + Q_i)^{\alpha}}\$\$
+
+Where:
+
+- \\n\\ : The number of branches in the tree.
+
+- \\L_i\\ : The length of the \\i\\-th branch.
+
+- \\P_i\\, \\Q_i\\ : The proportion of the community descending from
+  branch \\i\\ in sample P and Q.
+
+- \\\alpha\\ : A scalable weighting factor.
+
+**Parameter: alpha** The `alpha` parameter controls the weight given to
+abundant lineages. \\\alpha = 1\\ corresponds to Weighted UniFrac, while
+\\\alpha = 0\\ corresponds to Unweighted UniFrac.
+
+## References
+
+Chen, J., Bittinger, K., Charlson, E. S., Hoffmann, C., Lewis, J., Wu,
+G. D., ... & Li, H. (2012). Associating microbiome composition with
+environmental covariates using generalized UniFrac distances.
+*Bioinformatics*, 28(16), 2106-2113.
+[doi:10.1093/bioinformatics/bts342](https://doi.org/10.1093/bioinformatics/bts342)
+
+## See also
+
+beta_div
+
+Other Phylogenetic metrics:
+[`faith()`](https://cmmr.github.io/ecodive/reference/faith.md),
+[`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/normalized_unifrac.md),
+[`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md),
+[`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.md),
+[`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/weighted_unifrac.md)
+
+## Examples
+
+``` r
+    generalized_unifrac(ex_counts, tree = ex_tree, alpha = 0.5)
+#>          Saliva      Gums      Nose
+#> Gums  0.4471644                    
+#> Nose  0.8215129 0.7607876          
+#> Stool 0.9727827 0.9784242 0.9730332
+```

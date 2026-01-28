@@ -77,7 +77,7 @@ A `list` with the following elements.
   for alpha diversity metrics.
 
 - `func` : The function for this metric, e.g.
-  [`ecodive::faith`](https://cmmr.github.io/ecodive/reference/adiv_functions.md)
+  [`ecodive::faith`](https://cmmr.github.io/ecodive/reference/faith.md)
 
 - `params` : Formal args for `func`, e.g. `c("counts", "tree", "cpus")`
 
