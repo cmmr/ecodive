@@ -1,5 +1,9 @@
 # Changelog
 
+## ecodive 2.2.3
+
+- Coerce counts to double before rarefaction.
+
 ## ecodive 2.2.2
 
 CRAN release: 2026-01-16

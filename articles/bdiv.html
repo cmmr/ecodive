@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Beta Diversity</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/cmmr/ecodive/blob/v2.2.2/vignettes/bdiv.Rmd" class="external-link"><code>vignettes/bdiv.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/cmmr/ecodive/blob/main/vignettes/bdiv.Rmd" class="external-link"><code>vignettes/bdiv.Rmd</code></a></small>
       <div class="d-none name"><code>bdiv.Rmd</code></div>
     </div>
 
@@ -117,20 +117,20 @@ metrics are weighted or unweighted, consult
 <code><a href="../reference/metrics.html">list_metrics()</a></code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "sorensen" "hamming"  "jaccard"  "ochiai"</span></span>
+<span><span class="co">#&gt; [1] "sorensen"  "hamming"  "jaccard"  "ochiai"  "unweighted_unifrac"</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "aitchison"                 "bhattacharyya"             "bray"                     </span></span>
-<span><span class="co">#&gt;  [4] "canberra"                  "chebyshev"                 "chord"                    </span></span>
-<span><span class="co">#&gt;  [7] "clark"                     "divergence"                "euclidean"                </span></span>
-<span><span class="co">#&gt; [10] "generalized_unifrac"       "gower"                     "hellinger"                </span></span>
-<span><span class="co">#&gt; [13] "horn"                      "jensen"                    "jsd"                      </span></span>
-<span><span class="co">#&gt; [16] "lorentzian"                "manhattan"                 "matusita"                 </span></span>
-<span><span class="co">#&gt; [19] "minkowski"                 "morisita"                  "motyka"                   </span></span>
-<span><span class="co">#&gt; [22] "normalized_unifrac"        "psym_chisq"                "soergel"                  </span></span>
-<span><span class="co">#&gt; [25] "squared_chisq"             "squared_chord"             "squared_euclidean"        </span></span>
-<span><span class="co">#&gt; [28] "topsoe"                    "unweighted_unifrac"        "variance_adjusted_unifrac"</span></span>
-<span><span class="co">#&gt; [31] "wave_hedges"               "weighted_unifrac"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "aitchison"            "bhattacharyya"              "bray"                     </span></span>
+<span><span class="co">#&gt;  [4] "canberra"             "chebyshev"                  "chord"                    </span></span>
+<span><span class="co">#&gt;  [7] "clark"                "divergence"                 "euclidean"                </span></span>
+<span><span class="co">#&gt; [10] "generalized_unifrac"  "gower"                      "hellinger"                </span></span>
+<span><span class="co">#&gt; [13] "horn"                 "jensen"                     "jsd"                      </span></span>
+<span><span class="co">#&gt; [16] "lorentzian"           "manhattan"                  "matusita"                 </span></span>
+<span><span class="co">#&gt; [19] "minkowski"            "morisita"                   "motyka"                   </span></span>
+<span><span class="co">#&gt; [22] "normalized_unifrac"   "psym_chisq"                 "soergel"                  </span></span>
+<span><span class="co">#&gt; [25] "squared_chisq"        "squared_chord"              "squared_euclidean"        </span></span>
+<span><span class="co">#&gt; [28] "topsoe"               "variance_adjusted_unifrac"  "wave_hedges"</span></span>
+<span><span class="co">#&gt; [31] "weighted_unifrac"</span></span></code></pre></div>
 <p>Note that <code>sorsensen()</code> is equivalent to
 <code>bray(norm = 'binary')</code>, and <code><a href="../reference/bdiv_functions.html">jaccard()</a></code> is
 equivalent to <code>soergel(norm = 'binary')</code>.</p>
