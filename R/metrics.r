@@ -61,7 +61,7 @@ METRICS <- local({
       Squared Euclidean Distance,                    squared_euclidean,         NO,    YES,      NO,       NO,          beta,  
       Squares Richness Estimator,                    squares,                   NO,    YES,      YES,      NA,          alpha, 
       Topsoe Distance,                               topsoe,                    NO,    YES,      NO,       YES,         beta,  
-      Unweighted UniFrac,                            unweighted_unifrac,        YES,   YES,      NO,       YES,         beta,  uunifrac
+      Unweighted UniFrac,                            unweighted_unifrac,        YES,   NO,       NO,       YES,         beta,  uunifrac
       Variance-Adjusted Weighted UniFrac,            variance_adjusted_unifrac, YES,   YES,      NO,       YES,         beta,  vunifrac
       Wave Hedges Distance,                          wave_hedges,               NO,    YES,      NO,       NO,          beta,  
       Weighted UniFrac,                              weighted_unifrac,          YES,   YES,      NO,       YES,         beta,  wunifrac

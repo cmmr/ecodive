@@ -49,20 +49,20 @@ or unweighted, consult `list_metrics()`.
 
 ``` r
 list_metrics('beta', 'id', weighted = FALSE)
-#> [1] "sorensen" "hamming"  "jaccard"  "ochiai"
+#> [1] "sorensen"  "hamming"  "jaccard"  "ochiai"  "unweighted_unifrac"
 
 list_metrics('beta', 'id', weighted = TRUE)
-#>  [1] "aitchison"                 "bhattacharyya"             "bray"                     
-#>  [4] "canberra"                  "chebyshev"                 "chord"                    
-#>  [7] "clark"                     "divergence"                "euclidean"                
-#> [10] "generalized_unifrac"       "gower"                     "hellinger"                
-#> [13] "horn"                      "jensen"                    "jsd"                      
-#> [16] "lorentzian"                "manhattan"                 "matusita"                 
-#> [19] "minkowski"                 "morisita"                  "motyka"                   
-#> [22] "normalized_unifrac"        "psym_chisq"                "soergel"                  
-#> [25] "squared_chisq"             "squared_chord"             "squared_euclidean"        
-#> [28] "topsoe"                    "unweighted_unifrac"        "variance_adjusted_unifrac"
-#> [31] "wave_hedges"               "weighted_unifrac"
+#>  [1] "aitchison"            "bhattacharyya"              "bray"                     
+#>  [4] "canberra"             "chebyshev"                  "chord"                    
+#>  [7] "clark"                "divergence"                 "euclidean"                
+#> [10] "generalized_unifrac"  "gower"                      "hellinger"                
+#> [13] "horn"                 "jensen"                     "jsd"                      
+#> [16] "lorentzian"           "manhattan"                  "matusita"                 
+#> [19] "minkowski"            "morisita"                   "motyka"                   
+#> [22] "normalized_unifrac"   "psym_chisq"                 "soergel"                  
+#> [25] "squared_chisq"        "squared_chord"              "squared_euclidean"        
+#> [28] "topsoe"               "variance_adjusted_unifrac"  "wave_hedges"
+#> [31] "weighted_unifrac"
 ```
 
 Note that `sorsensen()` is equivalent to `bray(norm = 'binary')`, and
