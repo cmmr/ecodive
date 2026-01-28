@@ -12,29 +12,59 @@ template:
 
 
 reference:
-
 - title: Alpha Diversity
-  contents: 
+  desc: Calculate within-sample diversity using various indices.
+  contents:
   - alpha_div
-  - has_concept('adiv_functions')
+- subtitle: Richness metrics
+  desc: Estimators focused on the number of species (richness).
+  contents:
+  - has_concept('Richness metrics')
+- subtitle: Diversity metrics
+  desc: Indices accounting for both richness and evenness.
+  contents:
+  - has_concept('Diversity metrics')
+- subtitle: Dominance metrics
+  desc: Indices focused on the abundance of the most dominant species.
+  contents:
+  - has_concept('Dominance metrics')
+- subtitle: Phylogenetic metrics
+  desc: Diversity based on phylogenetic branch lengths.
+  contents:
+  - faith
 
 - title: Beta Diversity
-  contents: 
+  desc: Calculate between-sample similarity or distance.
+  contents:
   - beta_div
-  - has_concept('bdiv_functions')
+- subtitle: Abundance metrics
+  desc: Distance measures using quantitative abundance data.
+  contents:
+  - has_concept('Abundance metrics')
+- subtitle: Presence/Absence metrics
+  desc: Distance measures using binary (presence/absence) data.
+  contents:
+  - has_concept('Presence/Absence metrics')
+- subtitle: Phylogenetic metrics
+  desc: Distance measures based on phylogenetic branch lengths (UniFrac family).
+  contents:
+  - unweighted_unifrac
+  - weighted_unifrac
+  - normalized_unifrac
+  - generalized_unifrac
+  - variance_adjusted_unifrac
 
-- title: Programmatic Access
+- title: Utilities & Helpers
+  desc: Tools for programmatic access, data manipulation, and configuration.
   contents:
   - match_metric
   - list_metrics
-
-- title: Utility
-  contents:
   - read_tree
   - rarefy
   - n_cpus
 
 - title: Datasets
+  desc: Example data provided with the package.
   contents:
   - ex_counts
   - ex_tree

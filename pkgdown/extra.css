@@ -24,4 +24,39 @@ th>.eg {
   margin-top: 50px; 
 }
 
-math[display="block"] { font-size: 22px; }
+
+/* Restore two-column layout for reference index on large screens */
+/* Target the specific container for the reference index */
+.template-reference-index dl {
+  display: grid !important;
+  /* 1st col: fits content (function name), 2nd col: takes remaining space */
+  grid-template-columns: max-content auto !important; 
+  column-gap: 3rem;
+  row-gap: 0.5rem;
+  align-items: baseline; /* Aligns the text baselines of name and description */
+}
+
+.template-reference-index dt {
+  grid-column: 1;
+  float: none !important; /* Reset any floats from legacy styles */
+  width: auto !important;
+  font-weight: bold;
+}
+
+.template-reference-index dd {
+  grid-column: 2;
+  margin-left: 0 !important; /* Reset browser default indentation */
+  margin-bottom: 0 !important; /* Let the grid row-gap handle spacing */
+  padding-left: 0 !important;
+}
+
+/* Optional: Stack them again on mobile screens for readability */
+@media (max-width: 768px) {
+  .template-reference-index dl {
+    display: block !important;
+  }
+  .template-reference-index dt {
+    margin-top: 1rem;
+  }
+}
+

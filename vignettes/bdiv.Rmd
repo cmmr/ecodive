@@ -7,9 +7,16 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-# Input Matrix
+# Introduction
 
-Here we'll use the `ex_counts` feature table included with ecodive. It contains
+Beta diversity is a measure of how different two samples are. The different
+metrics described in this vignette quantify that difference, referred to as the
+"distance" or "dissimilarity" between a pair of samples. The distance is
+typically `0` for identical samples and `1` for completely different samples.
+
+## Input Data
+
+We will use the `ex_counts` feature table included with ecodive. It contains
 the number of observations of each bacterial genera in each sample. In the text
 below, you can substitute the word 'genera' for the feature of interest in your
 own data.
@@ -28,24 +35,20 @@ t(counts)
 #> Staphylococcus         0    0   86     1
 ```
 
-
-# Beta Diversity
-
-Beta diversity is a measure of how different two samples are.
-
-Looking at the `counts` matrix above, you can easily see that saliva and gums
-are similar, while saliva and stool are different. The different metrics
-described below quantify that difference, referred to as the "distance" or
-"dissimilarity" between a pair of samples. The distance is `0` for identical
-samples and `1` for completely different samples.
+Looking at the matrix above, you can see that saliva and gums are similar, while
+saliva and stool are quite different.
 
 
+# Weighted vs Unweighted Metrics
 
-## Weighted vs Unweighted
+Before selecting a formula, it is important to distinguish between **weighted**
+and **unweighted** metrics.
 
-Weighted metrics take relative abundances into account, whereas unweighted
-metrics only consider presence/absence. To determine which metrics are weighted
-or unweighted, consult `list_metrics()`.
+* **Weighted metrics** take relative abundances into account.
+* **Unweighted metrics** only consider presence/absence (binary data).
+
+You can consult `list_metrics()` to see which category a specific metric falls
+into or to list all available options programmatically.
 
 ``` r
 list_metrics('beta', 'id', weighted = FALSE)
@@ -65,8 +68,85 @@ list_metrics('beta', 'id', weighted = TRUE)
 #> [31] "weighted_unifrac"
 ```
 
-Note that `sorsensen()` is equivalent to `bray(norm = 'binary')`, and
-`jaccard()` is equivalent to `soergel(norm = 'binary')`.
+
+# Formulas
+
+The following tables detail the mathematical definitions for the metrics available in `ecodive`.
+
+## Abundance-Based (Weighted)
+
+Given:
+
+* $n$ : The number of features.
+* $X_i$, $Y_i$ : Absolute counts for the $i$-th feature in samples $X$ and $Y$.
+* $X_T$, $Y_T$ : Total counts in each sample. $X_T = \sum_{i=1}^{n} X_i$
+* $P_i$, $Q_i$ : Proportional abundances of $X_i$ and $Y_i$. $P_i = X_i / X_T$
+* $X_L$, $Y_L$ : Mean log of abundances. $X_L = \frac{1}{n}\sum_{i=1}^{n} \ln{X_i}$
+* $R_i$ : The range of the $i$-th feature across all samples (max - min).
+
+|                  |                                    |
+| :--------------- | :--------------------------------- |
+| **Aitchison distance**                          <br> `aitchison()`         | $\sqrt{\sum_{i=1}^{n} [(\ln{X_i} - X_L) - (\ln{Y_i} - Y_L)]^2}$ |
+| **Bhattacharyya distance**                      <br> `bhattacharyya()`     | $-\ln{\sum_{i=1}^{n}\sqrt{P_{i}Q_{i}}}$ |
+| **Bray-Curtis dissimilarity**                   <br> `bray()`              | $\displaystyle \frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} (P_i + Q_i)}$ |
+| **Canberra distance**                           <br> `canberra()`          | $\displaystyle \sum_{i=1}^{n} \frac{|P_i - Q_i|}{P_i + Q_i}$ |
+| **Chebyshev distance**                          <br> `chebyshev()`         | $\max(|P_i - Q_i|)$ |
+| **Chord distance**                              <br> `chord()`             | $\displaystyle \sqrt{\sum_{i=1}^{n} \left(\frac{X_i}{\sqrt{\sum_{j=1}^{n} X_j^2}} - \frac{Y_i}{\sqrt{\sum_{j=1}^{n} Y_j^2}}\right)^2}$ |
+| **Clark's divergence distance**                 <br> `clark()`             | $\displaystyle \sqrt{\sum_{i=1}^{n}\left(\frac{P_i - Q_i}{P_i + Q_i}\right)^{2}}$ |
+| **Divergence**                                  <br> `divergence()`        | $\displaystyle 2\sum_{i=1}^{n} \frac{(P_i - Q_i)^2}{(P_i + Q_i)^2}$ |
+| **Euclidean distance**                          <br> `euclidean()`         | $\sqrt{\sum_{i=1}^{n} (P_i - Q_i)^2}$ |
+| **Gower distance**                              <br> `gower()`             | $\displaystyle \frac{1}{n}\sum_{i=1}^{n}\frac{|P_i - Q_i|}{R_i}$ |
+| **Hellinger distance**                          <br> `hellinger()`         | $\sqrt{\sum_{i=1}^{n}(\sqrt{P_i} - \sqrt{Q_i})^{2}}$ |
+| **Horn-Morisita dissimilarity**                 <br> `horn()`              | $\displaystyle 1 - \frac{2\sum_{i=1}^{n}P_{i}Q_{i}}{\sum_{i=1}^{n}P_i^2 + \sum_{i=1}^{n}Q_i^2}$ |
+| **Jensen-Shannon distance**                     <br> `jensen()`            | $\displaystyle \sqrt{\frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)\right]}$ |
+| **Jensen-Shannon divergence (JSD)**             <br> `jsd()`               | $\displaystyle \frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)\right]$ |
+| **Lorentzian distance**                         <br> `lorentzian()`        | $\sum_{i=1}^{n}\ln{(1 + |P_i - Q_i|)}$ |
+| **Manhattan distance**                          <br> `manhattan()`         | $\sum_{i=1}^{n} |P_i - Q_i|$ |
+| **Matusita distance**                           <br> `matusita()`          | $\sqrt{\sum_{i=1}^{n}\left(\sqrt{P_i} - \sqrt{Q_i}\right)^2}$ |
+| **Minkowski distance**                          <br> `minkowski()`         | $\sqrt[p]{\sum_{i=1}^{n} (P_i - Q_i)^p}$ <br> Where $p$ is the geometry of the space. |
+| **Morisita dissimilarity** <br> (integers only) <br> `morisita()`          | $\displaystyle 1 - \frac{2\sum_{i=1}^{n}X_{i}Y_{i}}{\displaystyle \left(\frac{\sum_{i=1}^{n}X_i(X_i - 1)}{X_T(X_T - 1)} + \frac{\sum_{i=1}^{n}Y_i(Y_i - 1)}{Y_T(Y_T - 1)}\right)X_{T}Y_{T}}$ |
+| **Motyka dissimilarity**                        <br> `motyka()`            | $\displaystyle \frac{\sum_{i=1}^{n} \max(P_i, Q_i)}{\sum_{i=1}^{n} (P_i + Q_i)}$ |
+| **Probabilistic Symmetric $\chi^2$ distance**   <br> `psym_chisq()`        | $\displaystyle 2\sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}$ |
+| **Soergel distance**                            <br> `soergel()`           | $\displaystyle \frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i, Q_i)}$ |
+| **Squared $\chi^2$ distance**                   <br> `squared_chisq()`     | $\displaystyle \sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}$ |
+| **Squared Chord distance**                      <br> `squared_chord()`     | $\sum_{i=1}^{n}\left(\sqrt{P_i} - \sqrt{Q_i}\right)^2$ |
+| **Squared Euclidean distance**                  <br> `squared_euclidean()` | $\sum_{i=1}^{n} (P_i - Q_i)^2$ |
+| **Topsoe distance**                             <br> `topsoe()`            | $\displaystyle \sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)$ |
+| **Wave Hedges distance**                        <br> `wave_hedges()`       | $\displaystyle \frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i, Q_i)}$ |
+
+
+## Presence / Absence (Unweighted)
+
+Given:
+
+* $A$, $B$ : Number of features in each sample.
+* $J$ : Number of features in common.
+
+|                   |                             |
+| :---------------- | :-------------------------- |
+| **Dice-Sorensen dissimilarity** <br> `sorensen()` | $\displaystyle \frac{2J}{(A + B)}$        |
+| **Hamming distance**            <br> `hamming()`  | $\displaystyle (A + B) - 2J$              |
+| **Jaccard distance**            <br> `jaccard()`  | $\displaystyle 1 - \frac{J}{(A + B - J)}$ |
+| **Otsuka-Ochiai dissimilarity** <br> `ochiai()`   | $\displaystyle 1 - \frac{J}{\sqrt{AB}}$   |
+
+> **Note:** `sorsensen()` is equivalent to `bray(norm = 'binary')`, and `jaccard()` is equivalent to `soergel(norm = 'binary')`.
+
+
+## Phylogenetic
+
+Given $n$ branches with lengths $L$ and a pair of samples' binary
+($A$ and $B$) or proportional abundances ($P$ and $Q$) on
+each of those branches.
+
+|              |              |
+| :----------- | :----------- |
+| **Unweighted UniFrac**                  <br> `unweighted_unifrac()`        | $\displaystyle \frac{1}{n}\sum_{i=1}^{n} L_i|A_i - B_i|$ |
+| **Weighted UniFrac**                    <br> `weighted_unifrac()`          | $\displaystyle \sum_{i=1}^{n} L_i|P_i - Q_i|$ |
+| **Normalized Weighted UniFrac**         <br> `normalized_unifrac()`        | $\displaystyle \frac{\sum_{i=1}^{n} L_i|P_i - Q_i|}{\sum_{i=1}^{n} L_i(P_i + Q_i)}$ |
+| **Generalized UniFrac (GUniFrac)**      <br> `generalized_unifrac()`       | $\displaystyle \frac{\sum_{i=1}^{n} L_i(P_i + Q_i)^{\alpha}\left|\displaystyle \frac{P_i - Q_i}{P_i + Q_i}\right|}{\sum_{i=1}^{n} L_i(P_i + Q_i)^{\alpha}}$ <br> Where $\alpha$ is a scalable weighting factor. |
+| **Variance-Adjusted Weighted UniFrac**  <br> `variance_adjusted_unifrac()` | $\displaystyle \frac{\displaystyle \sum_{i=1}^{n} L_i\displaystyle \frac{|P_i - Q_i|}{\sqrt{(P_i + Q_i)(2 - P_i - Q_i)}} }{\displaystyle \sum_{i=1}^{n} L_i\displaystyle \frac{P_i + Q_i}{\sqrt{(P_i + Q_i)(2 - P_i - Q_i)}} }$ |
+
+See https://cmmr.github.io/ecodive/articles/unifrac.html for detailed example UniFrac calculations.
 
 
 # Partial Calculation
@@ -108,7 +188,6 @@ bray(counts, pairs = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
 bray(counts, pairs = function (i, j) i == 1)
 ```
 
-
 The ordering of `pairs` follows the pairings produced by `combn()`.
 
 ```r
@@ -141,3 +220,11 @@ bray(counts, pairs = my_pairs)
 #> Stool        NA 0.9884058        NA
 ```
 
+# References
+
+Levy, A., Shalom, B. R., & Chalamish, M. (2024). A guide to similarity
+measures. *arXiv*.
+
+Cha, S.-H. (2007). Comprehensive survey on distance/similarity measures
+between probability density functions. *International Journal of Mathematical
+Models and Methods in Applied Sciences*, 1(4), 300–307.
