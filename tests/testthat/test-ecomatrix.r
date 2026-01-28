@@ -38,6 +38,12 @@ test_that("ecomatrix.c parsing logic is covered", {
   m_double <- m_base * 1.1
   expect_equal(test_parsing(m_double, margin = 1L), expected_margin1)
   expect_equal(test_parsing(t(m_double), margin = 2L), expected_margin1)
+  
+  # Test with integer matrix
+  m_int   <- m_base
+  m_int[] <- as.integer(m_int)
+  expect_equal(test_parsing(m_int, margin = 1L), expected_margin1)
+  expect_equal(test_parsing(t(m_int), margin = 2L), expected_margin1)
 
 
   # === Test with Matrix package types ===
@@ -86,6 +92,10 @@ test_that("ecomatrix.c parsing logic is covered", {
   # Test with double slam
   m_slam_double <- slam::as.simple_triplet_matrix(m_double)
   expect_equal(test_parsing(m_slam_double, margin = 1L), expected_margin1, info = "slam double margin 1")
+  
+  # Test with integer slam
+  m_slam_int <- slam::as.simple_triplet_matrix(m_int)
+  expect_equal(test_parsing(m_slam_int, margin = 1L), expected_margin1, info = "slam int margin 1")
 
 
   # === Test sorting logic for sparse matrices ===

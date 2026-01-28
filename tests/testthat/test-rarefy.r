@@ -90,6 +90,20 @@ test_that("rarefaction", {
   expect_silent(rarefy(counts_dgT,  seed = 1))
   expect_silent(rarefy(counts_dge,  seed = 1))
   expect_silent(rarefy(counts_slam, seed = 1))
+
+  # Test with integer class data
+  counts_int        <- counts
+  counts_int[]      <- as.integer(counts)
+  counts_slam_int   <- counts_slam
+  counts_slam_int$v <- as.integer(counts_slam_int$v)
+  expect_equal(
+    rarefy(counts_int, seed = 1),
+    rarefy(counts,     seed = 1)
+  )
+  expect_equal(
+    rarefy(counts_slam_int, seed = 1),
+    rarefy(counts_slam,     seed = 1)
+  )
   
   # Test margin = 2 (samples in columns)
   counts_t  <- t(counts)
