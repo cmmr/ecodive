@@ -1,4 +1,4 @@
-# Copyright (c) 2025 ecodive authors
+# Copyright (c) 2026 ecodive authors
 # Licensed under the MIT License: https://opensource.org/license/mit
 
 
@@ -210,7 +210,7 @@ beta_div <- function (
 #' | :---------------- | :-------------------------- |
 #' | **Dice-Sorensen dissimilarity** <br> `sorensen()` | \eqn{\displaystyle \frac{2J}{(A + B)}}         |
 #' | **Hamming distance**            <br> `hamming()`  | \eqn{\displaystyle (A + B) - 2J}               |
-#' | **Jaccard distance**            <br> `jaccard()`  | \eqn{\displaystyle 1 - \frac{J}{(A + B - J)]}} |
+#' | **Jaccard distance**            <br> `jaccard()`  | \eqn{\displaystyle 1 - \frac{J}{(A + B - J)}} |
 #' | **Otsuka-Ochiai dissimilarity** <br> `ochiai()`   | \eqn{\displaystyle 1 - \frac{J}{\sqrt{AB}}}   |
 #' 
 #' 

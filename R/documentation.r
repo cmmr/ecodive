@@ -1,4 +1,4 @@
-# Copyright (c) 2025 ecodive authors
+# Copyright (c) 2026 ecodive authors
 # Licensed under the MIT License: https://opensource.org/license/mit
 
 
