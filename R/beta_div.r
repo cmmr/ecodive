@@ -773,6 +773,12 @@ matusita <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' **Parameter: power**
 #' The `power` parameter (default 1.5) determines the value of \eqn{p} in the equation.
 #' 
+#' **Special Cases**
+#' 
+#' * **Manhattan distance**: When \eqn{p = 1}, the formula reduces to the sum of absolute differences.
+#' * **Euclidean distance**: When \eqn{p = 2}, the formula reduces to the standard straight-line distance.
+#' * **Chebyshev distance**: When \eqn{p \to \infty}, the formula reduces to the maximum absolute difference.
+#'
 #' Base R Equivalent: 
 #' ```r
 #' p <- 1.5

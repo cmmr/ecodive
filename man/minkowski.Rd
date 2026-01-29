@@ -61,6 +61,13 @@ Where:
 \strong{Parameter: power}
 The \code{power} parameter (default 1.5) determines the value of \eqn{p} in the equation.
 
+\strong{Special Cases}
+\itemize{
+\item \strong{Manhattan distance}: When \eqn{p = 1}, the formula reduces to the sum of absolute differences.
+\item \strong{Euclidean distance}: When \eqn{p = 2}, the formula reduces to the standard straight-line distance.
+\item \strong{Chebyshev distance}: When \eqn{p \to \infty}, the formula reduces to the maximum absolute difference.
+}
+
 Base R Equivalent:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{p <- 1.5
