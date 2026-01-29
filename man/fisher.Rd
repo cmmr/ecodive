@@ -38,6 +38,7 @@ Where:
 The value of \eqn{\alpha} is solved for iteratively.
 
 \strong{Parameter: digits}
+
 The precision (number of decimal places) to use when solving the equation.
 }
 \examples{

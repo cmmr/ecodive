@@ -59,6 +59,7 @@ Where:
 }
 
 \strong{Parameter: power}
+
 The \code{power} parameter (default 1.5) determines the value of \eqn{p} in the equation.
 
 \strong{Special Cases}

@@ -56,6 +56,7 @@ Where:
 }
 
 \strong{Parameter: alpha}
+
 The \code{alpha} parameter controls the weight given to abundant lineages. \eqn{\alpha = 1} corresponds to Weighted UniFrac, while \eqn{\alpha = 0} corresponds to Unweighted UniFrac.
 }
 \examples{

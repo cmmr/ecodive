@@ -49,6 +49,7 @@ Where:
 }
 
 \strong{Parameter: pseudocount}
+
 Because the formula uses logarithms, zeros in the data must be handled.
 The \code{pseudocount} argument adds a small value to all counts prior to calculation.
 

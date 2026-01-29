@@ -163,6 +163,7 @@ beta_div <- function (
 #' * \eqn{n} : The number of features.
 #' 
 #' **Parameter: pseudocount**
+#' 
 #' Because the formula uses logarithms, zeros in the data must be handled. 
 #' The `pseudocount` argument adds a small value to all counts prior to calculation.
 #' 
@@ -771,6 +772,7 @@ matusita <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' * \eqn{p} : The geometry of the space (power parameter).
 #' 
 #' **Parameter: power**
+#' 
 #' The `power` parameter (default 1.5) determines the value of \eqn{p} in the equation.
 #' 
 #' **Special Cases**
@@ -1391,6 +1393,7 @@ normalized_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
 #' * \eqn{\alpha} : A scalable weighting factor.
 #' 
 #' **Parameter: alpha**
+#' 
 #' The `alpha` parameter controls the weight given to abundant lineages. \eqn{\alpha = 1} corresponds to Weighted UniFrac, while \eqn{\alpha = 0} corresponds to Unweighted UniFrac.
 #' 
 #' @references
