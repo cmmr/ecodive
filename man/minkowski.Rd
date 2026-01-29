@@ -20,13 +20,14 @@ Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
 optimizing large datasets.}
 
 \item{norm}{Normalize the incoming counts. Options are:
-* \code{'percent'}: Relative abundance (sample abundances sum to 1).
-* \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
-* \code{'clr'}: Centered log ratio.
-* \code{'none'}: No transformation.
+\itemize{
+\item \code{'percent'}: Relative abundance (sample abundances sum to 1).
+\item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
+\item \code{'clr'}: Centered log ratio.
+\item \code{'none'}: No transformation.
+}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{   Default: `'percent'`, which is the expected input for these formulas.
-}\if{html}{\out{</div>}}}
+Default: \code{'percent'}, which is the expected input for these formulas.}
 
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
