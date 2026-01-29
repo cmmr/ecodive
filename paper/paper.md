@@ -11,7 +11,7 @@ authors:
 - name: Joseph F Petrosino
   orcid: "0000-0002-4046-6898"
   affiliation: "1, 2"
-date: "19 September 2025"
+date: "29 January 2026"
 output:
   word_document: default
   pdf_document: default
@@ -31,110 +31,51 @@ affiliations:
 bibliography: paper.bib
 ---
 
-
-
 # Summary
 
-Characterizing the composition of biological communities is a fundamental task
-in ecology, but the calculations involved can be computationally prohibitive
-when applied to large datasets. `ecodive` is an R package that addresses this
-challenge by providing highly optimized implementations of 50 ecological
-metrics for alpha-diversity (within-sample richness and evenness) and
-beta-diversity (between-sample dissimilarity). These metrics can incorporate
-species counts, relative abundances, and evolutionary relationships, providing a
-multi-faceted view of ecological structure. By leveraging a compiled C library
-with pthreads for parallelization, `ecodive` delivers substantial performance
-gains in both speed and memory usage, enabling researchers to analyze large
-datasets quickly and efficiently.
-
-
+Understanding the complexity of biological communities—whether bacteria in the human gut, trees in a forest, or plankton in the ocean—is a central goal of ecology. Researchers quantify this complexity using "diversity metrics," which describe the variety of species within a single site (alpha diversity) or the differences in composition between two sites (beta diversity). `ecodive` is an R package designed to calculate these metrics efficiently. It bridges the gap between complex ecological theory and practical data analysis, providing researchers with a unified toolset to process large-scale datasets that were previously computationally prohibitive. By leveraging parallel processing and optimized memory management, `ecodive` enables rapid, high-throughput analysis of microbial and macro-ecological communities.
 
 # Statement of Need
 
-A primary challenge in large-scale ecological analysis is the computational
-complexity of beta diversity calculations. These algorithms exhibit $O(n^2)$
-complexity, meaning their computational cost scales quadratically with the
-number of samples ($n$). As microbiome and ecological studies grow to include
-thousands of samples, this quadratic scaling creates a significant bottleneck,
-demanding immense processing time and memory.
+A primary challenge in modern ecological analysis is the management of high-dimensional data. As sequencing technologies improve, datasets are growing to include thousands of samples and tens of thousands of unique taxa. Beta diversity calculations, which involve comparing every sample to every other sample, exhibit $O(n^2)$ complexity. This quadratic scaling creates a significant bottleneck; a dataset that doubles in size requires four times the processing power, often overwhelming standard desktop computers.
 
-A second challenge is the fragmentation of diversity metrics across numerous R
-packages. Researchers often need to install and manage a suite of dependencies
-to access the full range of metrics required for a comprehensive analysis,
-leading to potential version conflicts and a disjointed workflow.
+Furthermore, the software landscape for ecological metrics is fragmented. A researcher needing to calculate a specific set of indices—for example, Faith's Phylogenetic Diversity, Bray-Curtis dissimilarity, and UniFrac distances—often must install and manage multiple R packages (`picante`, `vegan`, `GUniFrac`), each with different dependencies, input formats, and performance limitations.
 
-`ecodive` addresses both of these critical needs. First, it provides a highly
-optimized, parallelized C-based engine that dramatically reduces the time and
-memory required by these algorithms, enabling the analysis of much larger
-datasets. Second, it consolidates a vast collection of alpha and beta diversity
-metrics into a single, dependency-free package. By solving the dual problems of
-computational inefficiency and methodological fragmentation, `ecodive` empowers
-researchers to push the boundaries of large-scale ecological analysis.
+`ecodive` solves these problems by providing a centralized, high-performance library. It targets ecologists, microbiologists, and bioinformaticians who require a robust, dependency-free solution for diversity analysis. By consolidating 50 standard metrics into a single, optimized framework, it eliminates the need for "package hopping" and enables the analysis of massive datasets on standard hardware.
 
+# State of the Field
 
+Several R packages exist for diversity analysis, but `ecodive` offers a unique contribution through its scope and performance. The standard package for community ecology, `vegan` [@vegan], provides excellent implementations of non-phylogenetic metrics (e.g., Bray-Curtis) but lacks phylogenetic awareness (e.g., UniFrac). Conversely, packages like `picante` [@picante] and `GUniFrac` [@GUniFrac] specialize in phylogenetic metrics but do not offer a comprehensive suite of general-purpose indices. The `phyloseq` [@phyloseq] package wraps many of these tools but relies on their underlying, often serial, implementations.
 
-# Comparison to Existing Packages
+More generalized packages like `philentropy` [@philentropy] offer an impressive breadth of 46 distinct distance measures. However, `philentropy` focuses on information theory and general probability distributions rather than ecology. Critically, it includes many asymmetric divergences (where distance $A \to B \neq B \to A$) which, while mathematically valuable, are unsuitable for standard ecological ordination methods like PCoA that require symmetric distance matrices. Furthermore, `philentropy` lacks critical domain-specific metrics such as the UniFrac family and alpha diversity richness estimators like Chao1.
 
-To evaluate its performance, ecodive was benchmarked against numerous R packages
-that provide their own implementations of diversity metrics, including `abdiv`
-[@abdiv], `adiv` [@adiv], `ampvis2` [@ampvis2], `ecodist` [@ecodist],
-`entropart` [@entropart], `GUniFrac` [@GUniFrac], `labdsv` [@labdsv],
-`parallelDist` [@parallelDist], `philentropy` [@philentropy], `phyloregion`
-[@phyloregion], `phyloseq` [@phyloseq], `picante` [@picante], `tabula`
-[@tabula], and `vegan` [@vegan]. The results, conducted using the `bench` R
-package, are summarized in Figure 1 and demonstrate `ecodive`'s superior speed
-and memory efficiency for each of the metrics tested.
+`ecodive` builds upon this landscape by unifying these distinct domains. It implements 50 symmetric metrics chosen specifically for their relevance to ecological ordination and analysis. Crucially, unlike the serial R or C implementations found in most peer packages (see **Research Impact**), `ecodive` is built entirely on a parallelized C engine, providing orders-of-magnitude faster performance while ensuring numerical identity with established tools.
 
-![Figure 1: `ecodive` performance benchmarks. Each point represents an R package, plotted by median calculation time (x-axis) and memory consumption (y-axis) from ten trials. (A) Benchmarks for Shannon Diversity Index, Bray-Curtis Dissimilarity, and Faith's Phylogenetic Diversity. (B) Benchmarks for the UniFrac family of metrics, with different variants distinguished by point shape. Not all packages implement every metric, but `ecodive` is consistently the fastest and most memory-efficient across all tested metrics, often by several orders of magnitude.](figures/fig1.svg){width="100%"}
+# Software Design
 
-Crucially, the benchmark suite also confirms these performance gains do not come
-at the cost of accuracy, as `ecodive` produces numerically identical output to
-the other packages. Beyond its computational advantages, `ecodive` has zero
-external R dependencies. This makes it a lightweight, stable, and secure
-backend, minimizing installation conflicts and simplifying long-term maintenance
-for developers who build upon it. The complete benchmark code and results are
-available in `vignettes/articles/benchmark.Rmd` and online at
-<https://cmmr.github.io/ecodive/articles/benchmark.html>.
+The architecture of `ecodive` balances the user-friendly conventions of R with the raw performance of C. A critical design trade-off centered on data representation.
 
+Most R users work with dense matrices where samples are rows and features are columns. Standard R functions like `dist()` expect this format. However, ecological matrices are typically 90-99% zeros (sparse). Storing them as dense matrices wastes gigabytes of RAM, and processing them row-by-row is cache-inefficient for many distance algorithms.
 
-# Implemented Metrics
+To address this, `ecodive` maintains the standard R interface (samples-as-rows) but fundamentally alters the backend data structure:
 
-`ecodive` stands out by offering an extensive and diverse collection of 50
-metrics for both alpha and beta diversity analysis, making it a uniquely
-comprehensive tool. It provides researchers with a wide array of both
-traditional and phylogeny-aware algorithms in a single, high-performance
-package. The suite of alpha diversity metrics includes staples like the Shannon
-Diversity Index [@Shannon1948] and Chao1 [@Chao1984], important estimators such
-as the Abundance-based Coverage Estimator (ACE) [@Chao1992] and Fisher's Alpha
-[@Fisher1943], and key phylogeny-aware metrics like Faith's Phylogenetic
-Diversity [@Faith1992], offering robust ways to assess within-sample richness
-and evenness. For assessing between-sample dissimilarity, `ecodive` implements
-essential beta diversity metrics widely used in microbial ecology, including
-Bray-Curtis Dissimilarity [@Bray1957; @Sorenson1948], the complete UniFrac
-family [@Lozupone2005; @Lozupone2007; @Chen2012; @Chang2011], and the Aitchison
-distance [@Aitchison1982] for compositional data analysis. This extensive
-collection allows for a thorough and multi-faceted analysis of community
-structure.
+1.  **Transparent Transformation:** When a standard matrix is passed to `ecodive`, it is internally converted into a column-compressed sparse matrix (`dgCMatrix`) with samples transposed to columns. This incurs a one-time overhead but allows the C engine to skip zeros entirely and access memory in a cache-friendly, column-major pattern.
+2.  **Power User Bypass:** For extremely large datasets where the overhead of this transformation is non-trivial, users can manually provide data in the native `dgCMatrix` format (samples as columns). `ecodive` detects this optimized state and bypasses the transformation step, operating directly on the existing C pointers. This allows for "zero-copy" analysis of massive datasets.
+3.  **Parallelization Strategy:** `ecodive` employs a direct implementation using the standard POSIX threads (`pthreads`) library, avoiding the memory duplication overhead of forking processes found in R's `parallel` package. This design enables fine-grained, dynamic load balancing, ensuring efficient execution even when calculating partial distance matrices.
 
-For the most up-to-date list and detailed descriptions, please refer to the
-official `ecodive` documentation at <https://cmmr.github.io/ecodive>.
+# Research Impact Statement
 
+`ecodive` has demonstrated immediate utility in high-dimensional microbiome studies. The core C algorithms in `ecodive` were originally developed for and deployed in the `rbiom` package [@rbiom]. As part of `rbiom`, these optimized metrics have already been utilized in diverse microbial ecology studies, including research on preterm infant microbiomes [@AhearnFord2025], dietary interventions [@DiMattia2025], and relationship satisfaction [@Cheng2023]. `ecodive` extracts these proven, high-performance components into a standalone, lightweight library to make them accessible to the broader R ecosystem without `rbiom`'s specific visualization and data structure dependencies.
 
+In [benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html) comparing 15 ecological R packages, `ecodive` consistently ranked as the fastest and most memory-efficient solution:
 
-# Programmatic Use and API
+* **Speed:** For the widely-used Unweighted UniFrac metric ($N=50$), `ecodive` completed calculations in 6.4ms, compared to 2.5s for `picante` (396x faster) and 297ms for `phyloseq` (46x faster).
+* **Scalability:** For standard Bray-Curtis dissimilarity ($N=1006$), `ecodive` processed the matrix in ~20ms, whereas `vegan` required 1.68s.
+* **Memory:** `ecodive`'s sparse architecture reduced memory allocation for large operations from gigabytes (in `abdiv` or `tabula`) to megabytes, enabling analyses on laptops that previously required clusters.
 
-Beyond interactive analysis, `ecodive` is engineered for programmatic use,
-making it an ideal backend for applications like R Shiny web apps [@shiny]. The
-package includes a `list_metrics()` function that allows developers to
-dynamically filter and present available diversity metrics based on specific
-criteria. For instance, metrics can be programmatically selected if they are
-phylogeny-aware, abundance-weighted, capable of handling non-integer counts, or
-are "true metrics" that satisfy the triangle inequality. This powerful API
-simplifies the integration of `ecodive` into other software, enabling developers
-to build sophisticated tools that offer users tailored diversity analysis
-options based on their dataset and analytical needs.
+![**Benchmarking results.** Execution time (x-axis) vs. peak memory usage (y-axis) for various diversity metrics across 15 R packages. `ecodive` (highlighted) consistently occupies the bottom-left quadrant, indicating high speed and low memory footprint. Note the log scale on both axes.](figures/fig1.svg)
 
-
+The package is fully documented with vignettes covering performance tuning and metric selection, and is available for installation with zero external R dependencies, ensuring high community readiness and long-term stability.
 
 # Example Usage
 
@@ -150,13 +91,12 @@ ecodive::weighted_unifrac(esophagus)
 #> D 0.1401124 0.1422409
 ```
 
+# AI Usage Disclosure
 
+Generative AI tools (Google Gemini) were used to assist in the drafting and revision of this manuscript and the generation of documentation. No AI tools were used to write the functional source code (R or C) of the software. All AI-generated text was critically reviewed, verified for accuracy, and edited by the authors.
 
 # Acknowledgements
 
-This study was supported by NIH/NIAD (Grant number U19 AI144297), and Baylor
-College of Medicine and Alkek Foundation Seed. The authors also acknowledge the
-use of Google's Gemini for assistance in refining this manuscript.
-
+This study was supported by NIH/NIAD (Grant number U19 AI144297), and Baylor College of Medicine and Alkek Foundation Seed.
 
 # References
