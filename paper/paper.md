@@ -33,7 +33,7 @@ bibliography: paper.bib
 
 # Summary
 
-Understanding the complexity of biological communities—whether bacteria in the human gut, trees in a forest, or plankton in the ocean—is a central goal of ecology. Researchers quantify this complexity using "diversity metrics," which describe the variety of species within a single site (alpha diversity) or the differences in composition between two sites (beta diversity). `ecodive` is an R package designed to calculate these metrics efficiently. It bridges the gap between complex ecological theory and practical data analysis, providing researchers with a unified toolset to process large-scale datasets that were previously computationally prohibitive. By leveraging parallel processing and optimized memory management, `ecodive` enables rapid, high-throughput analysis of microbial and macro-ecological communities.
+Understanding the complexity of biological communities - whether bacteria in the human gut, trees in a forest, or plankton in the ocean - is a central goal of ecology. Researchers quantify this complexity using "diversity metrics," which describe the variety of species within a single site (alpha diversity) or the differences in composition between two sites (beta diversity). `ecodive` is an R package designed to calculate these metrics efficiently. It bridges the gap between complex ecological theory and practical data analysis, providing researchers with a unified toolset to process large-scale datasets that were previously computationally prohibitive. By leveraging parallel processing and optimized memory management, `ecodive` enables rapid, high-throughput analysis of microbial and macro-ecological communities.
 
 # Statement of Need
 
