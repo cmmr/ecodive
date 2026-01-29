@@ -13,12 +13,10 @@ aitchison(
 )
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
-optimal performance with very large datasets, see the guide in
-\code{vignette('performance')}.}
+\item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
+Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
+\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
+optimizing large datasets.}
 
 \item{pseudocount}{The value to add to all counts in \code{counts} to prevent
 taking \code{log(0)} for unobserved features. The default, \code{NULL}, selects
@@ -26,8 +24,7 @@ the smallest non-zero value in \code{counts}.}
 
 \item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
 your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
-\code{TreeSummarizedExperiment} object. Default: \code{1L}}
+special object class (e.g. \code{phyloseq}). Default: \code{1L}}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -67,9 +64,11 @@ sqrt(sum((x-y)^2)) # Euclidean distance
 }
 \references{
 Aitchison, J. (1986). The statistical analysis of compositional data. Chapman and Hall. \doi{10.1007/978-94-009-4109-3}
+
+Aitchison, J. (1982). The statistical analysis of compositional data. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 44(2), 139-160. \doi{10.1111/j.2517-6161.1982.tb01195.x}
 }
 \seealso{
-beta_div
+\code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
 Other Abundance metrics: 
 \code{\link{bhattacharyya}()},

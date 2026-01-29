@@ -7,20 +7,17 @@
 ace(counts, cutoff = 10L, margin = 1L, cpus = n_cpus())
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
-optimal performance with very large datasets, see the guide in
-\code{vignette('performance')}.}
+\item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
+Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
+\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
+optimizing large datasets.}
 
 \item{cutoff}{The maximum number of observations to consider "rare".
 Default: \code{10}.}
 
 \item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
 your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
-\code{TreeSummarizedExperiment} object. Default: \code{1L}}
+special object class (e.g. \code{phyloseq}). Default: \code{1L}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -61,7 +58,7 @@ The integer threshold distinguishing rare from abundant species. Standard practi
 Chao, A., & Lee, S. M. (1992). Estimating the number of classes via sample coverage. \emph{Journal of the American Statistical Association}, 87(417), 210-217. \doi{10.1080/01621459.1992.10475194}
 }
 \seealso{
-alpha_div
+\code{alpha_div()}, \code{vignette('adiv')}
 
 Other Richness metrics: 
 \code{\link{chao1}()},

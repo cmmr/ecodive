@@ -7,17 +7,14 @@
 jaccard(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
-optimal performance with very large datasets, see the guide in
-\code{vignette('performance')}.}
+\item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
+Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
+\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
+optimizing large datasets.}
 
 \item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
 your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
-\code{TreeSummarizedExperiment} object. Default: \code{1L}}
+special object class (e.g. \code{phyloseq}). Default: \code{1L}}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -50,9 +47,11 @@ Base R Equivalent:
 }
 \references{
 Jaccard, P. (1912). The distribution of the flora in the alpine zone. \emph{New Phytologist}, 11(2), 37-50. \doi{10.1111/j.1469-8137.1912.tb05611.x}
+
+Jaccard, P. (1908). Nouvelles recherches sur la distribution florale. \emph{Bulletin de la Societe Vaudoise des Sciences Naturelles}, 44(163), 223-270. \doi{10.5169/seals-268384}
 }
 \seealso{
-beta_div
+\code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
 Other Presence/Absence metrics: 
 \code{\link{hamming}()},

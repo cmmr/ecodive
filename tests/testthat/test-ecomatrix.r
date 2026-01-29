@@ -40,10 +40,8 @@ test_that("ecomatrix.c parsing logic is covered", {
   expect_equal(test_parsing(t(m_double), margin = 2L), expected_margin1)
   
   # Test with integer matrix
-  m_int   <- m_base
-  m_int[] <- as.integer(m_int)
-  expect_equal(test_parsing(m_int, margin = 1L), expected_margin1)
-  expect_equal(test_parsing(t(m_int), margin = 2L), expected_margin1)
+  expect_equal(test_parsing(counts_int, margin = 1L), expected_margin1)
+  expect_equal(test_parsing(t(counts_int), margin = 2L), expected_margin1)
 
 
   # === Test with Matrix package types ===
@@ -86,15 +84,18 @@ test_that("ecomatrix.c parsing logic is covered", {
   expect_equal(test_parsing(m_slam_t, margin = 2L), expected_margin1, info = "slam margin 2")
 
   # Test with logical slam
-  m_slam_logical <- slam::as.simple_triplet_matrix(m_logical)
+  m_slam_logical   <- m_slam
+  m_slam_logical$v <- as.logical(m_slam_logical$v)
   expect_equal(test_parsing(m_slam_logical, margin = 1L), expected_margin1, info = "slam logical margin 1")
 
   # Test with double slam
-  m_slam_double <- slam::as.simple_triplet_matrix(m_double)
+  m_slam_double   <- m_slam
+  m_slam_double$v <- as.double(m_slam_double$v)
   expect_equal(test_parsing(m_slam_double, margin = 1L), expected_margin1, info = "slam double margin 1")
   
   # Test with integer slam
-  m_slam_int <- slam::as.simple_triplet_matrix(m_int)
+  m_slam_int   <- m_slam
+  m_slam_int$v <- as.integer(m_slam_int$v)
   expect_equal(test_parsing(m_slam_int, margin = 1L), expected_margin1, info = "slam int margin 1")
 
 

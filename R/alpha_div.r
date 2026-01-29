@@ -104,7 +104,7 @@ alpha_div <- function (
 #' 
 #' @inherit documentation
 #' @family Richness metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The ACE metric separates features into "abundant" and "rare" groups based on a cutoff (usually 10 counts). It assumes that the presence of abundant species is certain, while the true number of rare species must be estimated.
@@ -152,7 +152,7 @@ ace <- function (counts, cutoff = 10L, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Dominance metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The Berger-Parker index is defined as the proportional abundance of the most dominant feature:
@@ -185,7 +185,7 @@ berger <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Diversity metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The Brillouin index is defined as:
@@ -223,7 +223,7 @@ brillouin <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Richness metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The Chao1 estimator uses the ratio of singletons to doubletons to estimate the number of missing species:
@@ -261,7 +261,7 @@ chao1 <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Phylogenetic metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' Faith's PD is defined as:
@@ -293,7 +293,7 @@ faith <- function (counts, tree = NULL, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Diversity metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' Fisher's Alpha (\eqn{\alpha}) is the parameter in the equation:
@@ -330,7 +330,7 @@ fisher <- function (counts, digits = 3L, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Diversity metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The Inverse Simpson index is defined as:
@@ -364,7 +364,7 @@ inv_simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus())
 #' 
 #' @inherit documentation
 #' @family Richness metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' Margalef's index is defined as:
@@ -381,6 +381,8 @@ inv_simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus())
 #' 
 #' @references
 #' Margalef, R. (1958). Information theory in ecology. *General Systems*, 3, 36-71.
+#' 
+#' Gamito, S. (2010). Caution is needed when applying Margalef diversity index. *Ecological Indicators*, 10(2), 550-551. \doi{10.1016/j.ecolind.2009.07.006}
 #' 
 #' @export
 #' @examples
@@ -401,7 +403,7 @@ margalef <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Dominance metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The McIntosh index is defined as:
@@ -438,7 +440,7 @@ mcintosh <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Richness metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' Menhinick's index is defined as:
@@ -475,7 +477,7 @@ menhinick <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Richness metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' Observed features is defined simply as the number of features with non-zero abundance:
@@ -504,7 +506,7 @@ observed <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Diversity metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The Shannon index (entropy) is defined as:
@@ -522,6 +524,8 @@ observed <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' @references
 #' Shannon, C. E. (1948). A mathematical theory of communication. *Bell System Technical Journal*, 27, 379-423.
 #' 
+#' Shannon, C. E., & Weaver, W. (1949). *The Mathematical Theory of Communication*. University of Illinois Press.
+#'
 #' @export
 #' @examples
 #'     shannon(ex_counts)
@@ -538,7 +542,7 @@ shannon <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Diversity metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The Gini-Simpson index is defined as:
@@ -572,7 +576,7 @@ simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Richness metrics
-#' @seealso alpha_div
+#' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
 #' The Squares estimator is defined as:

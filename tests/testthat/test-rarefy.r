@@ -92,8 +92,6 @@ test_that("rarefaction", {
   expect_silent(rarefy(counts_slam, seed = 1))
 
   # Test with integer class data
-  counts_int        <- counts
-  counts_int[]      <- as.integer(counts)
   counts_slam_int   <- counts_slam
   counts_slam_int$v <- as.integer(counts_slam_int$v)
   expect_equal(

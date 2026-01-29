@@ -7,17 +7,14 @@
 squares(counts, margin = 1L, cpus = n_cpus())
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
-optimal performance with very large datasets, see the guide in
-\code{vignette('performance')}.}
+\item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
+Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
+\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
+optimizing large datasets.}
 
 \item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
 your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
-\code{TreeSummarizedExperiment} object. Default: \code{1L}}
+special object class (e.g. \code{phyloseq}). Default: \code{1L}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -52,7 +49,7 @@ S + ((sum(x^2) * (F1^2)) / ((N^2) - F1 * S))
 Alroy, J. (2018). Limits to species richness estimates based on subsampling. \emph{Paleobiology}, 44(2), 177-194. \doi{10.1017/pab.2017.38}
 }
 \seealso{
-alpha_div
+\code{alpha_div()}, \code{vignette('adiv')}
 
 Other Richness metrics: 
 \code{\link{ace}()},

@@ -7,26 +7,23 @@
 jsd(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
-optimal performance with very large datasets, see the guide in
-\code{vignette('performance')}.}
+\item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
+Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
+\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
+optimizing large datasets.}
 
 \item{norm}{Normalize the incoming counts. Options are:
-\describe{
-\item{\code{norm = "percent"} - }{ Relative abundance (sample abundances sum to 1). }
-\item{\code{norm = "binary"}  - }{ Unweighted presence/absence (each count is either 0 or 1). }
-\item{\code{norm = "clr"}     - }{ Centered log ratio. }
-\item{\code{norm = "none"}    - }{ No transformation. }
-}
-Default: \code{'percent'}, which is the expected input for these formulas.}
+* \code{'percent'}: Relative abundance (sample abundances sum to 1).
+* \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
+* \code{'clr'}: Centered log ratio.
+* \code{'none'}: No transformation.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{   Default: `'percent'`, which is the expected input for these formulas.
+}\if{html}{\out{</div>}}}
 
 \item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
 your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
-\code{TreeSummarizedExperiment} object. Default: \code{1L}}
+special object class (e.g. \code{phyloseq}). Default: \code{1L}}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -61,7 +58,7 @@ Base R Equivalent:
 Lin, J. (1991). Divergence measures based on the Shannon entropy. \emph{IEEE Transactions on Information Theory}, 37(1), 145-151. \doi{10.1109/18.61115}
 }
 \seealso{
-beta_div
+\code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
 Other Abundance metrics: 
 \code{\link{aitchison}()},

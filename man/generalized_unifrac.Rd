@@ -14,12 +14,10 @@ generalized_unifrac(
 )
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
-optimal performance with very large datasets, see the guide in
-\code{vignette('performance')}.}
+\item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
+Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
+\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
+optimizing large datasets.}
 
 \item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
 the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
@@ -32,8 +30,7 @@ between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
 
 \item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
 your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
-\code{TreeSummarizedExperiment} object. Default: \code{1L}}
+special object class (e.g. \code{phyloseq}). Default: \code{1L}}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -68,7 +65,7 @@ The \code{alpha} parameter controls the weight given to abundant lineages. \eqn{
 Chen, J., Bittinger, K., Charlson, E. S., Hoffmann, C., Lewis, J., Wu, G. D., ... & Li, H. (2012). Associating microbiome composition with environmental covariates using generalized UniFrac distances. \emph{Bioinformatics}, 28(16), 2106-2113. \doi{10.1093/bioinformatics/bts342}
 }
 \seealso{
-beta_div
+\code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
 Other Phylogenetic metrics: 
 \code{\link{faith}()},

@@ -65,7 +65,8 @@ METRICS <- local({
       Variance-Adjusted Weighted UniFrac,            variance_adjusted_unifrac, YES,   YES,      NO,       YES,         beta,  vunifrac
       Wave Hedges Distance,                          wave_hedges,               NO,    YES,      NO,       NO,          beta,  
       Weighted UniFrac,                              weighted_unifrac,          YES,   YES,      NO,       YES,         beta,  wunifrac
-  ")
+  "
+  )
   
   # R 3.6.3 doesn't offer read.table(tryLogical) parameter
   for (i in c('int_only', 'phylo', 'weighted', 'true_metric'))
@@ -110,10 +111,24 @@ ENV <- environment()
 #'        Default is `"id"` when `val` is `"list"` or `"func"`, otherwise the 
 #'        default is `NA` (no name).
 #'   
-#' @param div,phylo,weighted,int_only,true_metric   Consider only metrics 
-#'        matching specific criteria. For example, `div = "alpha"` will only 
-#'        return alpha diversity metrics.
-#'        Default: `NULL`
+#' @param div   Filter by diversity type. One of `"alpha"` or `"beta"`. 
+#'        Default: `NA` (no filtering).
+#' 
+#' @param phylo   Filter by whether a phylogenetic tree is required. 
+#'        `TRUE` returns only phylogenetic metrics. `FALSE` returns only 
+#'        non-phylogenetic metrics. Default: `NULL` (no filtering).
+#'        
+#' @param weighted   Filter by whether relative abundance is used. `TRUE` returns 
+#'        quantitative metrics. `FALSE` returns qualitative (presence/absence) 
+#'        metrics. Default: `NULL` (no filtering).
+#'        
+#' @param int_only   Filter by whether integer counts are required. `TRUE` 
+#'        returns metrics requiring integers (e.g. richness estimators). `FALSE` 
+#'        returns metrics that accept proportions. Default: `NULL` (no filtering).
+#'        
+#' @param true_metric   Filter by whether the metric satisfies the triangle 
+#'        inequality. `TRUE` returns proper distance metrics. `FALSE` returns 
+#'        dissimilarities. Default: `NULL` (no filtering).
 #' 
 #' @return 
 #' 
@@ -287,5 +302,3 @@ match_metric <- function (
   
   return (metric)
 }
-
-

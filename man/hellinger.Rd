@@ -7,26 +7,23 @@
 hellinger(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 }
 \arguments{
-\item{counts}{A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-\code{as.matrix()} can be given here, as well as \code{phyloseq}, \code{rbiom},
-\code{SummarizedExperiment}, and \code{TreeSummarizedExperiment} objects. For
-optimal performance with very large datasets, see the guide in
-\code{vignette('performance')}.}
+\item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
+Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
+\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
+optimizing large datasets.}
 
 \item{norm}{Normalize the incoming counts. Options are:
-\describe{
-\item{\code{norm = "percent"} - }{ Relative abundance (sample abundances sum to 1). }
-\item{\code{norm = "binary"}  - }{ Unweighted presence/absence (each count is either 0 or 1). }
-\item{\code{norm = "clr"}     - }{ Centered log ratio. }
-\item{\code{norm = "none"}    - }{ No transformation. }
-}
-Default: \code{'percent'}, which is the expected input for these formulas.}
+* \code{'percent'}: Relative abundance (sample abundances sum to 1).
+* \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
+* \code{'clr'}: Centered log ratio.
+* \code{'none'}: No transformation.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{   Default: `'percent'`, which is the expected input for these formulas.
+}\if{html}{\out{</div>}}}
 
 \item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
 your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-\code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, or
-\code{TreeSummarizedExperiment} object. Default: \code{1L}}
+special object class (e.g. \code{phyloseq}). Default: \code{1L}}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -59,9 +56,11 @@ Base R Equivalent:
 }
 \references{
 Rao, C. R. (1995). A review of canonical coordinates and an alternative to correspondence analysis using Hellinger distance. \emph{Qüestiió}, 19, 23-63.
+
+Hellinger, E. (1909). Neue Begründung der Theorie quadratischer Formen von unendlichvielen Veränderlichen. \emph{Journal für die reine und angewandte Mathematik}, 136, 210–271. \doi{10.1515/crll.1909.136.210}
 }
 \seealso{
-beta_div
+\code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
 Other Abundance metrics: 
 \code{\link{aitchison}()},

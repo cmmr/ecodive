@@ -26,10 +26,8 @@ match_metric(
 )
 }
 \arguments{
-\item{div, phylo, weighted, int_only, true_metric}{Consider only metrics
-matching specific criteria. For example, \code{div = "alpha"} will only
-return alpha diversity metrics.
-Default: \code{NULL}}
+\item{div}{Filter by diversity type. One of \code{"alpha"} or \code{"beta"}.
+Default: \code{NA} (no filtering).}
 
 \item{val}{Sets the return value for this function call. See "Value"
 section below. Default: \code{"data.frame"}}
@@ -37,6 +35,22 @@ section below. Default: \code{"data.frame"}}
 \item{nm}{What value to use for the names of the returned object.
 Default is \code{"id"} when \code{val} is \code{"list"} or \code{"func"}, otherwise the
 default is \code{NA} (no name).}
+
+\item{phylo}{Filter by whether a phylogenetic tree is required.
+\code{TRUE} returns only phylogenetic metrics. \code{FALSE} returns only
+non-phylogenetic metrics. Default: \code{NULL} (no filtering).}
+
+\item{weighted}{Filter by whether relative abundance is used. \code{TRUE} returns
+quantitative metrics. \code{FALSE} returns qualitative (presence/absence)
+metrics. Default: \code{NULL} (no filtering).}
+
+\item{int_only}{Filter by whether integer counts are required. \code{TRUE}
+returns metrics requiring integers (e.g. richness estimators). \code{FALSE}
+returns metrics that accept proportions. Default: \code{NULL} (no filtering).}
+
+\item{true_metric}{Filter by whether the metric satisfies the triangle
+inequality. \code{TRUE} returns proper distance metrics. \code{FALSE} returns
+dissimilarities. Default: \code{NULL} (no filtering).}
 
 \item{metric}{The name of an alpha/beta diversity metric to search for.
 Supports partial matching. All non-alpha characters are ignored.}

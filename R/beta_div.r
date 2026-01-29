@@ -151,7 +151,7 @@ beta_div <- function (
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Aitchison distance is defined as:
@@ -176,6 +176,8 @@ beta_div <- function (
 #' @references
 #' Aitchison, J. (1986). The statistical analysis of compositional data. Chapman and Hall. \doi{10.1007/978-94-009-4109-3}
 #' 
+#' Aitchison, J. (1982). The statistical analysis of compositional data. *Journal of the Royal Statistical Society: Series B (Methodological)*, 44(2), 139-160. \doi{10.1111/j.2517-6161.1982.tb01195.x}
+#'
 #' @export
 #' @examples
 #'     aitchison(ex_counts, pseudocount = 1)
@@ -194,7 +196,7 @@ aitchison <- function (counts, pseudocount = NULL, margin = 1L, pairs = NULL, cp
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Bhattacharyya distance is defined as:
@@ -228,7 +230,7 @@ bhattacharyya <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Bray-Curtis dissimilarity is defined as:
@@ -262,7 +264,7 @@ bray <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Canberra distance is defined as:
@@ -296,7 +298,7 @@ canberra <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Chebyshev distance is defined as:
@@ -329,7 +331,7 @@ chebyshev <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Chord distance is defined as:
@@ -365,7 +367,7 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' Clark's divergence distance is defined as:
@@ -399,7 +401,7 @@ clark <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' Divergence is defined as:
@@ -433,7 +435,7 @@ divergence <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Euclidean distance is defined as:
@@ -467,7 +469,7 @@ euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Gower distance is defined as:
@@ -507,7 +509,7 @@ gower <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Hellinger distance is defined as:
@@ -525,6 +527,8 @@ gower <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' @references
 #' Rao, C. R. (1995). A review of canonical coordinates and an alternative to correspondence analysis using Hellinger distance. *Qüestiió*, 19, 23-63.
 #' 
+#' Hellinger, E. (1909). Neue Begründung der Theorie quadratischer Formen von unendlichvielen Veränderlichen. *Journal für die reine und angewandte Mathematik*, 136, 210–271. \doi{10.1515/crll.1909.136.210}
+#'
 #' @export
 #' @examples
 #'     hellinger(ex_counts)
@@ -544,7 +548,7 @@ hellinger <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Horn-Morisita dissimilarity is defined as:
@@ -579,7 +583,7 @@ horn <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Jensen-Shannon distance is defined as:
@@ -616,7 +620,7 @@ jensen <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Jensen-Shannon divergence (JSD) is defined as:
@@ -650,7 +654,7 @@ jsd <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_c
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Lorentzian distance is defined as:
@@ -684,7 +688,7 @@ lorentzian <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Manhattan distance is defined as:
@@ -718,7 +722,7 @@ manhattan <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Matusita distance is defined as:
@@ -755,7 +759,7 @@ matusita <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Minkowski distance is defined as:
@@ -778,6 +782,8 @@ matusita <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' @references
 #' Deza, M. M., & Deza, E. (2009). Encyclopedia of distances. Springer.
 #' 
+#' Minkowski, H. (1896). *Geometrie der Zahlen*. Teubner.
+#'
 #' @export
 #' @examples
 #'     minkowski(ex_counts, power = 2) # Equivalent to Euclidean
@@ -794,7 +800,7 @@ minkowski <- function (counts, norm = 'percent', power = 1.5, margin = 1L, pairs
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Morisita dissimilarity is defined as:
@@ -835,7 +841,7 @@ morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Motyka dissimilarity is defined as:
@@ -869,7 +875,7 @@ motyka <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Probabilistic Symmetric \eqn{\chi^2} distance is defined as:
@@ -906,7 +912,7 @@ psym_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Soergel distance is defined as:
@@ -940,7 +946,7 @@ soergel <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus =
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Squared \eqn{\chi^2} distance is defined as:
@@ -974,7 +980,7 @@ squared_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Squared Chord distance is defined as:
@@ -1008,7 +1014,7 @@ squared_chord <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Squared Euclidean distance is defined as:
@@ -1045,7 +1051,7 @@ squared_euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NU
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Topsoe distance is defined as:
@@ -1082,7 +1088,7 @@ topsoe <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' 
 #' @inherit documentation
 #' @family Abundance metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Wave Hedges distance is defined as:
@@ -1121,7 +1127,7 @@ wave_hedges <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cp
 #' 
 #' @inherit documentation
 #' @family Presence/Absence metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Hamming distance is defined as:
@@ -1157,7 +1163,7 @@ hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Presence/Absence metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Jaccard distance is defined as:
@@ -1175,6 +1181,8 @@ hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @references
 #' Jaccard, P. (1912). The distribution of the flora in the alpine zone. *New Phytologist*, 11(2), 37-50. \doi{10.1111/j.1469-8137.1912.tb05611.x}
 #' 
+#' Jaccard, P. (1908). Nouvelles recherches sur la distribution florale. *Bulletin de la Societe Vaudoise des Sciences Naturelles*, 44(163), 223-270. \doi{10.5169/seals-268384}
+#'
 #' @export
 #' @examples
 #'     jaccard(ex_counts)
@@ -1193,7 +1201,7 @@ jaccard <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Presence/Absence metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Otsuka-Ochiai dissimilarity is defined as:
@@ -1229,7 +1237,7 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Presence/Absence metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Dice-Sorensen dissimilarity is defined as:
@@ -1247,6 +1255,8 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @references
 #' Sørensen, T. (1948). A method of establishing groups of equal amplitude in plant sociology based on similarity of species content. *Kongelige Danske Videnskabernes Selskab, Biologiske Skrifter*, 5, 1-34.
 #' 
+#' Dice, L. R. (1945). Measures of the amount of ecologic association between species. *Ecology*, 26(3), 297–302. \doi{10.2307/1932409}
+#'
 #' @export
 #' @examples
 #'     sorensen(ex_counts)
@@ -1269,7 +1279,7 @@ sorensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' @inherit documentation
 #' @family Phylogenetic metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Unweighted UniFrac distance is defined as:
@@ -1300,7 +1310,7 @@ unweighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
 #' 
 #' @inherit documentation
 #' @family Phylogenetic metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Weighted UniFrac distance is defined as:
@@ -1331,7 +1341,7 @@ weighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, cp
 #' 
 #' @inherit documentation
 #' @family Phylogenetic metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Normalized Weighted UniFrac distance is defined as:
@@ -1362,7 +1372,7 @@ normalized_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
 #' 
 #' @inherit documentation
 #' @family Phylogenetic metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Generalized UniFrac distance is defined as:
@@ -1397,7 +1407,7 @@ generalized_unifrac <- function (counts, tree = NULL, alpha = 0.5, margin = 1L, 
 #' 
 #' @inherit documentation
 #' @family Phylogenetic metrics
-#' @seealso beta_div
+#' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Variance-Adjusted Weighted UniFrac distance is defined as:
