@@ -99,8 +99,8 @@ $$\sqrt{\sum_{i=1}^{n} [(\ln{X_i} - X_L) - (\ln{Y_i} - Y_L)]^2}$$</p>
 <p>Where:</p><ul><li><p>\(X_i\), \(Y_i\) : Absolute counts for the \(i\)-th feature.</p></li>
 <li><p>\(X_L\), \(Y_L\) : Mean log of abundances. \(X_L = \frac{1}{n}\sum_{i=1}^{n} \ln{X_i}\).</p></li>
 <li><p>\(n\) : The number of features.</p></li>
-</ul><p><strong>Parameter: pseudocount</strong>
-Because the formula uses logarithms, zeros in the data must be handled.
+</ul><p><strong>Parameter: pseudocount</strong></p>
+<p>Because the formula uses logarithms, zeros in the data must be handled.
 The <code>pseudocount</code> argument adds a small value to all counts prior to calculation.</p>
 <p>Base R Equivalent:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>

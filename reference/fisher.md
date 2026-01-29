@@ -49,8 +49,10 @@ Where:
 
 The value of \\\alpha\\ is solved for iteratively.
 
-**Parameter: digits** The precision (number of decimal places) to use
-when solving the equation.
+**Parameter: digits**
+
+The precision (number of decimal places) to use when solving the
+equation.
 
 ## References
 

@@ -75,9 +75,11 @@ Where:
 
 - \\\alpha\\ : A scalable weighting factor.
 
-**Parameter: alpha** The `alpha` parameter controls the weight given to
-abundant lineages. \\\alpha = 1\\ corresponds to Weighted UniFrac, while
-\\\alpha = 0\\ corresponds to Unweighted UniFrac.
+**Parameter: alpha**
+
+The `alpha` parameter controls the weight given to abundant lineages.
+\\\alpha = 1\\ corresponds to Weighted UniFrac, while \\\alpha = 0\\
+corresponds to Unweighted UniFrac.
 
 ## References
 

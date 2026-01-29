@@ -64,9 +64,11 @@ Where:
 
 - \\n\\ : The number of features.
 
-**Parameter: pseudocount** Because the formula uses logarithms, zeros in
-the data must be handled. The `pseudocount` argument adds a small value
-to all counts prior to calculation.
+**Parameter: pseudocount**
+
+Because the formula uses logarithms, zeros in the data must be handled.
+The `pseudocount` argument adds a small value to all counts prior to
+calculation.
 
 Base R Equivalent:
 

@@ -78,8 +78,10 @@ Where:
 
 - \\p\\ : The geometry of the space (power parameter).
 
-**Parameter: power** The `power` parameter (default 1.5) determines the
-value of \\p\\ in the equation.
+**Parameter: power**
+
+The `power` parameter (default 1.5) determines the value of \\p\\ in the
+equation.
 
 **Special Cases**
 
