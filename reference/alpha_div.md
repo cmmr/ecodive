@@ -36,12 +36,18 @@ alpha_div(
 
 - norm:
 
-  Normalize the incoming counts. Options are: \* `'percent'`: Relative
-  abundance (sample abundances sum to 1). \* `'binary'`: Unweighted
-  presence/absence (each count is either 0 or 1). \* `'clr'`: Centered
-  log ratio. \* `'none'`: No transformation.
+  Normalize the incoming counts. Options are:
 
-         Default: `'percent'`, which is the expected input for these formulas.
+  - `'percent'`: Relative abundance (sample abundances sum to 1).
+
+  - `'binary'`: Unweighted presence/absence (each count is either 0 or
+    1).
+
+  - `'clr'`: Centered log ratio.
+
+  - `'none'`: No transformation.
+
+  Default: `'percent'`, which is the expected input for these formulas.
 
 - cutoff:
 
