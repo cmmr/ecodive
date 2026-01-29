@@ -56,19 +56,16 @@
 
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
-<dd><p>A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-<code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> can be given here, as well as <code>phyloseq</code>, <code>rbiom</code>,
-<code>SummarizedExperiment</code>, and <code>TreeSummarizedExperiment</code> objects. For
-optimal performance with very large datasets, see the guide in
-<code><a href="../articles/performance.html">vignette('performance')</a></code>.</p></dd>
+<dd><p>A numeric matrix of count data (samples \(\times\) features).
+Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
+<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
+optimizing large datasets.</p></dd>
 
 
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
 <dd><p>If your samples are in the matrix's rows, set to <code>1L</code>. If
 your samples are in columns, set to <code>2L</code>. Ignored when <code>counts</code> is a
-<code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, or
-<code>TreeSummarizedExperiment</code> object. Default: <code>1L</code></p></dd>
+special object class (e.g. <code>phyloseq</code>). Default: <code>1L</code></p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
@@ -88,10 +85,11 @@ $$\frac{n - 1}{\ln{X_T}}$$</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Margalef, R. (1958). Information theory in ecology. <em>General Systems</em>, 3, 36-71.</p>
+<p>Gamito, S. (2010). Caution is needed when applying Margalef diversity index. <em>Ecological Indicators</em>, 10(2), 550-551. <a href="https://doi.org/10.1016/j.ecolind.2009.07.006" class="external-link">doi:10.1016/j.ecolind.2009.07.006</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>alpha_div</p>
+    <div class="dont-index"><p><code><a href="alpha_div.html">alpha_div()</a></code>, <code><a href="../articles/adiv.html">vignette('adiv')</a></code></p>
 <p>Other Richness metrics:
 <code><a href="ace.html">ace()</a></code>,
 <code><a href="chao1.html">chao1()</a></code>,

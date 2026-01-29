@@ -13,13 +13,11 @@ fisher(counts, digits = 3L, margin = 1L, cpus = n_cpus())
 
 - counts:
 
-  A numeric matrix of count data where each column is a feature, and
-  each row is a sample. Any object coercible with
-  [`as.matrix()`](https://rdrr.io/r/base/matrix.html) can be given here,
-  as well as `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. For optimal performance with very
-  large datasets, see the guide in
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md).
+  A numeric matrix of count data (samples \\\times\\ features). Also
+  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
+  `TreeSummarizedExperiment` objects. See
+  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+  for optimizing large datasets.
 
 - digits:
 
@@ -29,9 +27,8 @@ fisher(counts, digits = 3L, margin = 1L, cpus = n_cpus())
 - margin:
 
   If your samples are in the matrix's rows, set to `1L`. If your samples
-  are in columns, set to `2L`. Ignored when `counts` is a `phyloseq`,
-  `rbiom`, `SummarizedExperiment`, or `TreeSummarizedExperiment` object.
-  Default: `1L`
+  are in columns, set to `2L`. Ignored when `counts` is a special object
+  class (e.g. `phyloseq`). Default: `1L`
 
 - cpus:
 
@@ -64,7 +61,8 @@ sample of an animal population. *Journal of Animal Ecology*, 12, 42-58.
 
 ## See also
 
-alpha_div
+[`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md),
+[`vignette('adiv')`](https://cmmr.github.io/ecodive/articles/adiv.md)
 
 Other Diversity metrics:
 [`brillouin()`](https://cmmr.github.io/ecodive/reference/brillouin.md),

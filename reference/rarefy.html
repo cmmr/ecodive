@@ -71,12 +71,10 @@ integers between 1 and <code>depth</code> such that they sum to <code>depth</cod
 
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
-<dd><p>A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-<code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> can be given here, as well as <code>phyloseq</code>, <code>rbiom</code>,
-<code>SummarizedExperiment</code>, and <code>TreeSummarizedExperiment</code> objects. For
-optimal performance with very large datasets, see the guide in
-<code><a href="../articles/performance.html">vignette('performance')</a></code>.</p></dd>
+<dd><p>A numeric matrix of count data (samples \(\times\) features).
+Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
+<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
+optimizing large datasets.</p></dd>
 
 
 <dt id="arg-depth">depth<a class="anchor" aria-label="anchor" href="#arg-depth"></a></dt>
@@ -113,8 +111,7 @@ Default: <code>TRUE</code></p></dd>
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
 <dd><p>If your samples are in the matrix's rows, set to <code>1L</code>. If
 your samples are in columns, set to <code>2L</code>. Ignored when <code>counts</code> is a
-<code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, or
-<code>TreeSummarizedExperiment</code> object. Default: <code>1L</code></p></dd>
+special object class (e.g. <code>phyloseq</code>). Default: <code>1L</code></p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>

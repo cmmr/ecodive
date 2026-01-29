@@ -62,12 +62,10 @@
 
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
-<dd><p>A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-<code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> can be given here, as well as <code>phyloseq</code>, <code>rbiom</code>,
-<code>SummarizedExperiment</code>, and <code>TreeSummarizedExperiment</code> objects. For
-optimal performance with very large datasets, see the guide in
-<code><a href="../articles/performance.html">vignette('performance')</a></code>.</p></dd>
+<dd><p>A numeric matrix of count data (samples \(\times\) features).
+Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
+<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
+optimizing large datasets.</p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
@@ -80,8 +78,7 @@ the <code>counts</code> object or as <code>attr(counts, 'tree')</code>.</p></dd>
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
 <dd><p>If your samples are in the matrix's rows, set to <code>1L</code>. If
 your samples are in columns, set to <code>2L</code>. Ignored when <code>counts</code> is a
-<code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, or
-<code>TreeSummarizedExperiment</code> object. Default: <code>1L</code></p></dd>
+special object class (e.g. <code>phyloseq</code>). Default: <code>1L</code></p></dd>
 
 
 <dt id="arg-pairs">pairs<a class="anchor" aria-label="anchor" href="#arg-pairs"></a></dt>
@@ -110,7 +107,7 @@ $$\frac{\sum_{i=1}^{n} L_i|P_i - Q_i|}{\sum_{i=1}^{n} L_i(P_i + Q_i)}$$</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>beta_div</p>
+    <div class="dont-index"><p><code><a href="beta_div.html">beta_div()</a></code>, <code><a href="../articles/bdiv.html">vignette('bdiv')</a></code>, <code><a href="../articles/bdiv_guide.html">vignette('bdiv_guide')</a></code></p>
 <p>Other Phylogenetic metrics:
 <code><a href="faith.html">faith()</a></code>,
 <code><a href="generalized_unifrac.html">generalized_unifrac()</a></code>,

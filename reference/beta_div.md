@@ -23,13 +23,11 @@ beta_div(
 
 - counts:
 
-  A numeric matrix of count data where each column is a feature, and
-  each row is a sample. Any object coercible with
-  [`as.matrix()`](https://rdrr.io/r/base/matrix.html) can be given here,
-  as well as `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. For optimal performance with very
-  large datasets, see the guide in
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md).
+  A numeric matrix of count data (samples \\\times\\ features). Also
+  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
+  `TreeSummarizedExperiment` objects. See
+  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+  for optimizing large datasets.
 
 - metric:
 
@@ -40,25 +38,12 @@ beta_div(
 
 - norm:
 
-  Normalize the incoming counts. Options are:
+  Normalize the incoming counts. Options are: \* `'percent'`: Relative
+  abundance (sample abundances sum to 1). \* `'binary'`: Unweighted
+  presence/absence (each count is either 0 or 1). \* `'clr'`: Centered
+  log ratio. \* `'none'`: No transformation.
 
-  `norm = "percent"` -
-
-  :   Relative abundance (sample abundances sum to 1).
-
-  `norm = "binary"` -
-
-  :   Unweighted presence/absence (each count is either 0 or 1).
-
-  `norm = "clr"` -
-
-  :   Centered log ratio.
-
-  `norm = "none"` -
-
-  :   No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+         Default: `'percent'`, which is the expected input for these formulas.
 
 - power:
 
@@ -94,9 +79,8 @@ beta_div(
 - margin:
 
   If your samples are in the matrix's rows, set to `1L`. If your samples
-  are in columns, set to `2L`. Ignored when `counts` is a `phyloseq`,
-  `rbiom`, `SummarizedExperiment`, or `TreeSummarizedExperiment` object.
-  Default: `1L`
+  are in columns, set to `2L`. Ignored when `counts` is a special object
+  class (e.g. `phyloseq`). Default: `1L`
 
 - cpus:
 

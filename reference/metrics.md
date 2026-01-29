@@ -29,11 +29,10 @@ match_metric(
 
 ## Arguments
 
-- div, phylo, weighted, int_only, true_metric:
+- div:
 
-  Consider only metrics matching specific criteria. For example,
-  `div = "alpha"` will only return alpha diversity metrics. Default:
-  `NULL`
+  Filter by diversity type. One of `"alpha"` or `"beta"`. Default: `NA`
+  (no filtering).
 
 - val:
 
@@ -45,6 +44,30 @@ match_metric(
   What value to use for the names of the returned object. Default is
   `"id"` when `val` is `"list"` or `"func"`, otherwise the default is
   `NA` (no name).
+
+- phylo:
+
+  Filter by whether a phylogenetic tree is required. `TRUE` returns only
+  phylogenetic metrics. `FALSE` returns only non-phylogenetic metrics.
+  Default: `NULL` (no filtering).
+
+- weighted:
+
+  Filter by whether relative abundance is used. `TRUE` returns
+  quantitative metrics. `FALSE` returns qualitative (presence/absence)
+  metrics. Default: `NULL` (no filtering).
+
+- int_only:
+
+  Filter by whether integer counts are required. `TRUE` returns metrics
+  requiring integers (e.g. richness estimators). `FALSE` returns metrics
+  that accept proportions. Default: `NULL` (no filtering).
+
+- true_metric:
+
+  Filter by whether the metric satisfies the triangle inequality. `TRUE`
+  returns proper distance metrics. `FALSE` returns dissimilarities.
+  Default: `NULL` (no filtering).
 
 - metric:
 

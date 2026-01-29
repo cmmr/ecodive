@@ -56,36 +56,25 @@
 
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
-<dd><p>A numeric matrix of count data where each column is a
-feature, and each row is a sample. Any object coercible with
-<code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> can be given here, as well as <code>phyloseq</code>, <code>rbiom</code>,
-<code>SummarizedExperiment</code>, and <code>TreeSummarizedExperiment</code> objects. For
-optimal performance with very large datasets, see the guide in
-<code><a href="../articles/performance.html">vignette('performance')</a></code>.</p></dd>
+<dd><p>A numeric matrix of count data (samples \(\times\) features).
+Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
+<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
+optimizing large datasets.</p></dd>
 
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
-<dd><p>Normalize the incoming counts. Options are:</p><dl><dt><code>norm = "percent"</code> - </dt>
-<dd><p>Relative abundance (sample abundances sum to 1).</p></dd>
-
-<dt><code>norm = "binary"</code>  - </dt>
-<dd><p>Unweighted presence/absence (each count is either 0 or 1).</p></dd>
-
-<dt><code>norm = "clr"</code>     - </dt>
-<dd><p>Centered log ratio.</p></dd>
-
-<dt><code>norm = "none"</code>    - </dt>
-<dd><p>No transformation.</p></dd>
-
-
-</dl><p>Default: <code>'percent'</code>, which is the expected input for these formulas.</p></dd>
+<dd><p>Normalize the incoming counts. Options are:
+* <code>'percent'</code>: Relative abundance (sample abundances sum to 1).
+* <code>'binary'</code>: Unweighted presence/absence (each count is either 0 or 1).
+* <code>'clr'</code>: Centered log ratio.
+* <code>'none'</code>: No transformation.</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>   Default<span class="sc">:</span> <span class="st">`</span><span class="at">'percent'</span><span class="st">`</span>, which is the expected input <span class="cf">for</span> these formulas.</span></code></pre><p></p></div></dd>
 
 
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
 <dd><p>If your samples are in the matrix's rows, set to <code>1L</code>. If
 your samples are in columns, set to <code>2L</code>. Ignored when <code>counts</code> is a
-<code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, or
-<code>TreeSummarizedExperiment</code> object. Default: <code>1L</code></p></dd>
+special object class (e.g. <code>phyloseq</code>). Default: <code>1L</code></p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
@@ -108,7 +97,7 @@ $$1 - \sum_{i = 1}^{n} P_i^2$$</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>alpha_div</p>
+    <div class="dont-index"><p><code><a href="alpha_div.html">alpha_div()</a></code>, <code><a href="../articles/adiv.html">vignette('adiv')</a></code></p>
 <p>Other Diversity metrics:
 <code><a href="brillouin.html">brillouin()</a></code>,
 <code><a href="fisher.html">fisher()</a></code>,

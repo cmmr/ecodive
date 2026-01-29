@@ -76,11 +76,9 @@ functions.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-div-phylo-weighted-int-only-true-metric">div, phylo, weighted, int_only, true_metric<a class="anchor" aria-label="anchor" href="#arg-div-phylo-weighted-int-only-true-metric"></a></dt>
-<dd><p>Consider only metrics
-matching specific criteria. For example, <code>div = "alpha"</code> will only
-return alpha diversity metrics.
-Default: <code>NULL</code></p></dd>
+<dl><dt id="arg-div">div<a class="anchor" aria-label="anchor" href="#arg-div"></a></dt>
+<dd><p>Filter by diversity type. One of <code>"alpha"</code> or <code>"beta"</code>.
+Default: <code>NA</code> (no filtering).</p></dd>
 
 
 <dt id="arg-val">val<a class="anchor" aria-label="anchor" href="#arg-val"></a></dt>
@@ -92,6 +90,30 @@ section below. Default: <code>"data.frame"</code></p></dd>
 <dd><p>What value to use for the names of the returned object.
 Default is <code>"id"</code> when <code>val</code> is <code>"list"</code> or <code>"func"</code>, otherwise the
 default is <code>NA</code> (no name).</p></dd>
+
+
+<dt id="arg-phylo">phylo<a class="anchor" aria-label="anchor" href="#arg-phylo"></a></dt>
+<dd><p>Filter by whether a phylogenetic tree is required.
+<code>TRUE</code> returns only phylogenetic metrics. <code>FALSE</code> returns only
+non-phylogenetic metrics. Default: <code>NULL</code> (no filtering).</p></dd>
+
+
+<dt id="arg-weighted">weighted<a class="anchor" aria-label="anchor" href="#arg-weighted"></a></dt>
+<dd><p>Filter by whether relative abundance is used. <code>TRUE</code> returns
+quantitative metrics. <code>FALSE</code> returns qualitative (presence/absence)
+metrics. Default: <code>NULL</code> (no filtering).</p></dd>
+
+
+<dt id="arg-int-only">int_only<a class="anchor" aria-label="anchor" href="#arg-int-only"></a></dt>
+<dd><p>Filter by whether integer counts are required. <code>TRUE</code>
+returns metrics requiring integers (e.g. richness estimators). <code>FALSE</code>
+returns metrics that accept proportions. Default: <code>NULL</code> (no filtering).</p></dd>
+
+
+<dt id="arg-true-metric">true_metric<a class="anchor" aria-label="anchor" href="#arg-true-metric"></a></dt>
+<dd><p>Filter by whether the metric satisfies the triangle
+inequality. <code>TRUE</code> returns proper distance metrics. <code>FALSE</code> returns
+dissimilarities. Default: <code>NULL</code> (no filtering).</p></dd>
 
 
 <dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>

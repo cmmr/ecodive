@@ -13,20 +13,17 @@ margalef(counts, margin = 1L, cpus = n_cpus())
 
 - counts:
 
-  A numeric matrix of count data where each column is a feature, and
-  each row is a sample. Any object coercible with
-  [`as.matrix()`](https://rdrr.io/r/base/matrix.html) can be given here,
-  as well as `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. For optimal performance with very
-  large datasets, see the guide in
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md).
+  A numeric matrix of count data (samples \\\times\\ features). Also
+  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
+  `TreeSummarizedExperiment` objects. See
+  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+  for optimizing large datasets.
 
 - margin:
 
   If your samples are in the matrix's rows, set to `1L`. If your samples
-  are in columns, set to `2L`. Ignored when `counts` is a `phyloseq`,
-  `rbiom`, `SummarizedExperiment`, or `TreeSummarizedExperiment` object.
-  Default: `1L`
+  are in columns, set to `2L`. Ignored when `counts` is a special object
+  class (e.g. `phyloseq`). Default: `1L`
 
 - cpus:
 
@@ -53,9 +50,14 @@ Where:
 Margalef, R. (1958). Information theory in ecology. *General Systems*,
 3, 36-71.
 
+Gamito, S. (2010). Caution is needed when applying Margalef diversity
+index. *Ecological Indicators*, 10(2), 550-551.
+[doi:10.1016/j.ecolind.2009.07.006](https://doi.org/10.1016/j.ecolind.2009.07.006)
+
 ## See also
 
-alpha_div
+[`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md),
+[`vignette('adiv')`](https://cmmr.github.io/ecodive/articles/adiv.md)
 
 Other Richness metrics:
 [`ace()`](https://cmmr.github.io/ecodive/reference/ace.md),

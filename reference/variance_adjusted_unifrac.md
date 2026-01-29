@@ -18,13 +18,11 @@ variance_adjusted_unifrac(
 
 - counts:
 
-  A numeric matrix of count data where each column is a feature, and
-  each row is a sample. Any object coercible with
-  [`as.matrix()`](https://rdrr.io/r/base/matrix.html) can be given here,
-  as well as `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. For optimal performance with very
-  large datasets, see the guide in
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md).
+  A numeric matrix of count data (samples \\\times\\ features). Also
+  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
+  `TreeSummarizedExperiment` objects. See
+  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+  for optimizing large datasets.
 
 - tree:
 
@@ -36,9 +34,8 @@ variance_adjusted_unifrac(
 - margin:
 
   If your samples are in the matrix's rows, set to `1L`. If your samples
-  are in columns, set to `2L`. Ignored when `counts` is a `phyloseq`,
-  `rbiom`, `SummarizedExperiment`, or `TreeSummarizedExperiment` object.
-  Default: `1L`
+  are in columns, set to `2L`. Ignored when `counts` is a special object
+  class (e.g. `phyloseq`). Default: `1L`
 
 - pairs:
 
@@ -78,7 +75,9 @@ based on phylogeny. *BMC Bioinformatics*, 12, 118.
 
 ## See also
 
-beta_div
+[`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
+[`vignette('bdiv')`](https://cmmr.github.io/ecodive/articles/bdiv.md),
+[`vignette('bdiv_guide')`](https://cmmr.github.io/ecodive/articles/bdiv_guide.md)
 
 Other Phylogenetic metrics:
 [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md),

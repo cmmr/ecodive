@@ -23,13 +23,11 @@ rarefy(
 
 - counts:
 
-  A numeric matrix of count data where each column is a feature, and
-  each row is a sample. Any object coercible with
-  [`as.matrix()`](https://rdrr.io/r/base/matrix.html) can be given here,
-  as well as `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. For optimal performance with very
-  large datasets, see the guide in
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md).
+  A numeric matrix of count data (samples \\\times\\ features). Also
+  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
+  `TreeSummarizedExperiment` objects. See
+  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+  for optimizing large datasets.
 
 - depth:
 
@@ -64,9 +62,8 @@ rarefy(
 - margin:
 
   If your samples are in the matrix's rows, set to `1L`. If your samples
-  are in columns, set to `2L`. Ignored when `counts` is a `phyloseq`,
-  `rbiom`, `SummarizedExperiment`, or `TreeSummarizedExperiment` object.
-  Default: `1L`
+  are in columns, set to `2L`. Ignored when `counts` is a special object
+  class (e.g. `phyloseq`). Default: `1L`
 
 - cpus:
 
