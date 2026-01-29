@@ -81,6 +81,17 @@ Where:
 **Parameter: power** The `power` parameter (default 1.5) determines the
 value of \\p\\ in the equation.
 
+**Special Cases**
+
+- **Manhattan distance**: When \\p = 1\\, the formula reduces to the sum
+  of absolute differences.
+
+- **Euclidean distance**: When \\p = 2\\, the formula reduces to the
+  standard straight-line distance.
+
+- **Chebyshev distance**: When \\p \to \infty\\, the formula reduces to
+  the maximum absolute difference.
+
 Base R Equivalent:
 
     p <- 1.5

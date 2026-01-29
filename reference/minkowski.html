@@ -109,7 +109,10 @@ $$\sqrt[p]{\sum_{i=1}^{n} (P_i - Q_i)^p}$$</p>
 <li><p>\(p\) : The geometry of the space (power parameter).</p></li>
 </ul><p><strong>Parameter: power</strong>
 The <code>power</code> parameter (default 1.5) determines the value of \(p\) in the equation.</p>
-<p>Base R Equivalent:</p>
+<p><strong>Special Cases</strong></p><ul><li><p><strong>Manhattan distance</strong>: When \(p = 1\), the formula reduces to the sum of absolute differences.</p></li>
+<li><p><strong>Euclidean distance</strong>: When \(p = 2\), the formula reduces to the standard straight-line distance.</p></li>
+<li><p><strong>Chebyshev distance</strong>: When \(p \to \infty\), the formula reduces to the maximum absolute difference.</p></li>
+</ul><p>Base R Equivalent:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">1.5</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="va">y</span><span class="op">)</span><span class="op">^</span><span class="va">p</span><span class="op">)</span> <span class="op">^</span> <span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="va">p</span><span class="op">)</span></span></code></pre><p></p></div>
     </div>
