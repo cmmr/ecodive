@@ -28,9 +28,9 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
 \code{normalized_unifrac()}.}
 
-\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
-your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-special object class (e.g. \code{phyloseq}). Default: \code{1L}}
+\item{margin}{The margin containing samples. \code{1} if samples are rows,
+\code{2} if samples are columns. Ignored when \code{counts} is a special object
+class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.

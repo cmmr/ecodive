@@ -2,61 +2,74 @@
 % Please edit documentation in R/rarefy.r
 \name{rarefy}
 \alias{rarefy}
-\title{Rarefy OTU counts.}
+\title{Rarefy Observation Counts}
 \usage{
 rarefy(
   counts,
-  depth = 0.1,
-  n_samples = NULL,
+  depth = NULL,
   seed = 0,
   times = NULL,
   drop = TRUE,
   margin = 1L,
-  cpus = n_cpus()
+  cpus = n_cpus(),
+  warn = interactive()
 )
 }
 \arguments{
-\item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
+\item{counts}{A numeric matrix or sparse matrix object (e.g., \code{dgCMatrix}).
+Counts must be integers (non-integer counts will be cast to integers).}
 
-\item{depth}{How many observations to keep per sample. When
-\verb{0 < depth < 1}, it is taken as the minimum percentage of the
-dataset's observations to keep. Ignored when \code{n_samples} is
-specified. Default: \code{0.1}}
+\item{depth}{The number of observations to keep per sample. If \code{NULL}
+(the default), a depth is auto-selected to maximize data retention.}
 
-\item{n_samples}{The number of samples to keep. When \verb{0 < n_samples < 1},
-it is taken as the percentage of samples to keep. If negative, that
-number of samples is dropped. If \code{0}, all samples are kept.
-If \code{NULL}, then \code{depth} is used instead. Default: \code{NULL}}
+\item{seed}{An integer seed for the random number generator. Providing
+the same seed guarantees reproducible results. Default: \code{0}}
 
-\item{seed}{An integer seed for randomizing which observations to keep or
-drop. If you need to create different random rarefactions of the same
-data, set the seed to a different number each time. Default: \code{0}}
+\item{times}{The number of independent rarefactions to perform. If set,
+returns a list of matrices. Seeds for subsequent iterations are
+sequential (\code{seed}, \code{seed + 1}, ...). Default: \code{NULL}}
 
-\item{times}{How many independent rarefactions to perform. If set,
-\code{rarefy()} will return a list of matrices. The seeds for each matrix
-will be sequential, starting from \code{seed}. Default: \code{NULL}}
+\item{drop}{Logical. If \code{TRUE}, samples with fewer than \code{depth}
+observations are discarded. If \code{FALSE}, they are kept with their
+original counts. Default: \code{TRUE}}
 
-\item{drop}{Drop rows and columns with zero observations after rarefying.
-Default: \code{TRUE}}
-
-\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
-your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-special object class (e.g. \code{phyloseq}). Default: \code{1L}}
+\item{margin}{The margin containing samples. \code{1} if samples are rows,
+\code{2} if samples are columns. Ignored when \code{counts} is a special object
+class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
+
+\item{warn}{Logical. If \code{TRUE}, emits a warning when samples are dropped
+or returned unrarefied due to insufficient depth.
+Default: \code{interactive()}}
 }
 \value{
-A rarefied matrix. \code{Matrix} and \code{slam} objects will be returned with
-the same type; otherwise a base R \code{matrix} will be returned.
+A rarefied matrix. The output class (\code{matrix}, \code{dgCMatrix}, etc.)
+matches the input class.
 }
 \description{
-Sub-sample OTU observations such that all samples have an equal number.
-If called on data with non-integer abundances, values will be re-scaled to
-integers between 1 and \code{depth} such that they sum to \code{depth}.
+Sub-sample observations from a feature table such that all samples have the
+same library size (depth). This is performed via random sampling without
+replacement.
+}
+\details{
+\strong{Auto-Depth Selection}\cr
+If \code{depth} is \code{NULL}, the function defaults to the highest depth that retains
+at least 10\% of the total observations in the dataset.
+
+\strong{Dropping vs. Retaining Samples}\cr
+If a sample has fewer observations than the specified \code{depth}:
+\itemize{
+\item \code{drop = TRUE} (Default): The sample is removed from the output matrix.
+\item \code{drop = FALSE}: The sample is returned \strong{unmodified} (with its original
+counts). It is \emph{not} rarefied or zeroed out.
+}
+
+\strong{Zero-Sum Features}\cr
+Features (OTUs, ASVs, Genes) that lose all observations during rarefaction
+are \strong{always retained} as columns/rows of zeros. This ensures the output
+matrix dimensions remain consistent with the input (barring dropped samples).
 }
 \examples{
     # A 4-sample x 5-OTU matrix with samples in rows.
@@ -66,28 +79,23 @@ integers between 1 and \code{depth} such that they sum to \code{depth}.
     rowSums(counts)
     
     # Rarefy all samples to a depth of 13.
-    # Note that sample 'A' has 0 counts and is dropped.
+    # Sample 'A' (0 counts) and 'D' (12 counts) will be dropped.
     r_mtx <- rarefy(counts, depth = 13, seed = 1)
     r_mtx
     rowSums(r_mtx)
     
-    # Keep zero-sum rows and columns by setting `drop = FALSE`.
+    # Keep under-sampled samples by setting `drop = FALSE`.
+    # Samples 'A' and 'D' are returned with their original counts.
     rarefy(counts, depth = 13, drop = FALSE, seed = 1)
-    
-    # Rarefy to the depth of the 2nd most abundant sample (B, depth=22).
-    rarefy(counts, n_samples = 2, seed = 1)
     
     # Perform 3 independent rarefactions.
     r_list <- rarefy(counts, depth = 13, times = 3, seed = 1)
     length(r_list)
-    r_list[[1]]
     
-    # The class of the input matrix is preserved.
+    # Sparse matrices are supported and their class is preserved.
     if (requireNamespace('Matrix', quietly = TRUE)) {
       counts_dgC <- Matrix::Matrix(counts, sparse = TRUE)
-      class(counts_dgC)
-      r_dgC <- rarefy(counts_dgC, depth = 13, seed = 1)
-      class(r_dgC)
+      class(rarefy(counts_dgC, depth = 13))
     }
 
 }

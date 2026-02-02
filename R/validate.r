@@ -147,17 +147,21 @@ validate_depth <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
       
-      stopifnot(is.numeric(depth))
-      stopifnot(length(depth) == 1)
-      stopifnot(!is.na(depth))
-      stopifnot(depth > 0)
-      stopifnot(depth %% 1 == 0 || depth < 1)
+      if (!is.null(depth)) {
+        
+        stopifnot(is.numeric(depth))
+        stopifnot(length(depth) == 1)
+        stopifnot(!is.na(depth))
+        stopifnot(depth > 0)
+        stopifnot(depth %% 1 == 0)
+        
+        depth <- as.integer(depth)
+      }
       
-      depth <- as.double(depth)
     }),
     
     error = function (e) 
-      stop(e$message, '\n`depth` must be a positive integer or be between 0 and 1.')
+      stop(e$message, '\n`depth` must be a positive integer or NULL.')
   )
 }
 
@@ -190,34 +194,6 @@ validate_drop <- function (env = parent.frame()) {
     }),
     error = function (e) 
       stop(e$message, '\n`drop` must be either TRUE or FALSE.')
-  )
-}
-
-
-validate_n_samples <- function (env = parent.frame()) {
-  tryCatch(
-    with(env, {
-      
-      if (!is.null(n_samples)) {
-        
-        stopifnot(is.numeric(n_samples))
-        stopifnot(length(n_samples) == 1)
-        stopifnot(!is.na(n_samples))
-        
-        if (n_samples %% 1 == 0) {
-          stopifnot(n_samples <= ncol(counts))
-          stopifnot(n_samples > -ncol(counts))
-          n_samples <- as.double(n_samples)
-        }
-        else {
-          stopifnot(n_samples > 0 && n_samples < 1)
-        }
-      }
-      
-    }),
-    
-    error = function (e) 
-      stop(e$message, '\n`n_samples` must be an integer or be between 0 and 1.')
   )
 }
 
@@ -488,6 +464,17 @@ validate_underscores <- function (env = parent.frame()) {
     
     error = function (e) 
       stop(e$message, '\n`underscores` must be TRUE or FALSE.')
+  )
+}
+
+
+validate_warn <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      stopifnot(identical(warn, TRUE) || identical(warn, FALSE))
+    }),
+    error = function (e) 
+      stop(e$message, '\n`warn` must be either TRUE or FALSE.')
   )
 }
 

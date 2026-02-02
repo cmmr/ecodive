@@ -15,9 +15,9 @@ optimizing large datasets.}
 \item{digits}{Precision of the returned values, in number of decimal
 places. E.g. the default \code{digits=3} could return \code{6.392}.}
 
-\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
-your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-special object class (e.g. \code{phyloseq}). Default: \code{1L}}
+\item{margin}{The margin containing samples. \code{1} if samples are rows,
+\code{2} if samples are columns. Ignored when \code{counts} is a special object
+class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

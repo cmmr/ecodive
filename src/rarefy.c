@@ -46,14 +46,13 @@ static void *rarefy_dense(void *arg) {
   
   int     otu_step    = (margin == 1) ? n_sams : 1;
   int     sam_step    = (margin == 1) ? 1 : n_otus;
-  int     end_step    = otu_step * n_otus;
   int     thread_step = n_threads * sam_step;
   double *val_begin   = val_vec + thread_i * sam_step;
   double *res_begin   = res_vec + thread_i * sam_step;
   
   for (int sam = thread_i; sam < n_sams; sam += n_threads) {
     
-    uint32_t  depth   = depth_vec[sam];
+    uint32_t depth = depth_vec[sam];
     
     // Sample can be be rarefied.
     if (depth > target) {
@@ -86,14 +85,6 @@ static void *rarefy_dense(void *arg) {
         
         val += otu_step;
         res += otu_step;
-      }
-    }
-    
-    // Insufficient sequences - set all abundances to zero.
-    else if (depth < target) {
-      double *res_end = res_begin + end_step;
-      for (double *res = res_begin; res < res_end; res += otu_step) {
-        *res = 0;
       }
     }
     
@@ -197,11 +188,6 @@ static void *rarefy_triplet(void *arg) {
           
           knuth->tried++;
         }
-      }
-      
-      // Insufficient sequences - set all abundances to zero.
-      else if (depth < target) {
-        *res = 0;
       }
       
     }
@@ -373,7 +359,6 @@ static void *rarefy_compressed (void *arg) {
     uint32_t depth     = depth_vec[sam];
     int      pos_begin = pos_vec[sam];
     int      pos_end   = pos_vec[sam + 1];
-    int      sam_nnz   = pos_end - pos_begin;
     
     
     // Sample can be be rarefied.
@@ -405,11 +390,6 @@ static void *rarefy_compressed (void *arg) {
           tried++;
         }
       }
-    }
-    
-    // Insufficient sequences - set all abundances to zero.
-    else if (depth < target) {
-      memset(res_vec + pos_begin, 0, sam_nnz * sizeof(double));
     }
     
   }
@@ -457,65 +437,6 @@ static pthread_func_t setup_dgCMatrix(void) {
 
   UNPROTECT(5);
   return rarefy_func;
-}
-
-
-static void set_target(SEXP sexp_depth, SEXP sexp_n_samples) {
-  
-  double depth = asReal(sexp_depth);
-  
-  // Set target depth according to number/pct of samples to keep/drop.
-  if (!isNull(sexp_n_samples)) {
-    
-    double n_samples = asReal(sexp_n_samples);
-    
-    if (n_samples == 0)      n_samples = n_sams;             // Keep all
-    if (n_samples > n_sams)  n_samples = n_sams;             // Keep all
-    if (fabs(n_samples) < 1) n_samples = n_sams * n_samples; // Keep/drop percentage
-    if (n_samples <= -1)     n_samples = n_sams + n_samples; // Drop n_samples
-    n_samples = (n_samples <= 1) ? 1.0 : floor(n_samples);   // Keep at least one
-    
-    int k = (int)(n_sams - n_samples);
-    
-    // Partially sort a copy of depth_vec in ascending order: only [k] is needed.
-    int *quickselect_vec = (int*) safe_malloc(n_sams * sizeof(int));
-    for (int sam = 0; sam < n_sams; sam++) {
-      quickselect_vec[sam] = (int) (depth_vec[sam]);
-    }
-    iPsort(quickselect_vec, n_sams, k);
-    
-    target = (uint32_t) quickselect_vec[k];
-    free_one(quickselect_vec);
-  }
-  
-  // Depth is given as minimum percent of observations to keep.
-  else if (depth < 1) {
-    
-    double depth_sum = 0;
-    for (int sam = 0; sam < n_sams; sam++) {
-      depth_sum += depth_vec[sam];
-    }
-    uint32_t min_depth_sum = (uint32_t) (depth_sum * depth);
-    
-    // Sort a copy of depth_vec in ascending order
-    int *sorted_vec = (int*) safe_malloc(n_sams * sizeof(int));
-    for (int sam = 0; sam < n_sams; sam++) {
-      sorted_vec[sam] = (int) (depth_vec[sam]);
-    }
-    R_isort(sorted_vec, n_sams);
-    
-    for (int sam = 0; sam < n_sams; sam++) {
-      target = (uint32_t) (sorted_vec[sam]);
-      if (target * n_sams >= min_depth_sum) break;
-    }
-    free_one(sorted_vec);
-  }
-  
-  // Depth is given as observations per sample to keep.
-  else {
-    target = (uint32_t) depth;
-  }
-  
 }
 
 
@@ -690,15 +611,16 @@ static void compact_dgTMatrix(SEXP sexp_mtx) {
 // R interface. Assigns samples to worker threads.
 //======================================================
 SEXP C_rarefy(
-    SEXP sexp_otu_mtx,   SEXP sexp_depth,
-    SEXP sexp_n_samples, SEXP sexp_seed,
-    SEXP sexp_margin,    SEXP sexp_n_threads ) {
+    SEXP sexp_otu_mtx, SEXP sexp_depth,
+    SEXP sexp_seed,    SEXP sexp_margin,
+    SEXP sexp_n_threads ) {
   
   init_n_ptrs(10);
   
-  seed       = (uint64_t) asInteger(sexp_seed);
-  margin     = asInteger(sexp_margin);
-  n_threads  = asInteger(sexp_n_threads);
+  target    = (uint32_t) asInteger(sexp_depth);
+  seed      = (uint64_t) asInteger(sexp_seed);
+  margin    = asInteger(sexp_margin);
+  n_threads = asInteger(sexp_n_threads);
   
   
   /*
@@ -723,10 +645,6 @@ SEXP C_rarefy(
   else if (inherits(sexp_otu_mtx, "dgTMatrix"))             { rarefy_func = setup_dgTMatrix(); }
   else if (inherits(sexp_otu_mtx, "dgeMatrix"))             { rarefy_func = setup_dgeMatrix(); }
   else   { error("Unrecognized matrix format."); } // # nocov
-  
-  // Get the target rarefaction depth.
-  // Note that `n_samples` isn't `n_sams`
-  set_target(sexp_depth, sexp_n_samples);
   
 
   // Run WITH multithreading

@@ -17,9 +17,9 @@ the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
 must be present in \code{tree}. Can be omitted if a tree is embedded with
 the \code{counts} object or as \code{attr(counts, 'tree')}.}
 
-\item{margin}{If your samples are in the matrix's rows, set to \code{1L}. If
-your samples are in columns, set to \code{2L}. Ignored when \code{counts} is a
-special object class (e.g. \code{phyloseq}). Default: \code{1L}}
+\item{margin}{The margin containing samples. \code{1} if samples are rows,
+\code{2} if samples are columns. Ignored when \code{counts} is a special object
+class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

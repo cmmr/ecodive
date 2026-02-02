@@ -1,7 +1,7 @@
 Package: ecodive
 Type: Package
 Title: Parallel and Memory-Efficient Ecological Diversity Metrics
-Version: 2.2.3
+Version: 2.2.4
 Authors@R: c(
     person(
       "Daniel P.", "Smith",
