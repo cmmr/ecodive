@@ -14,13 +14,13 @@ Source:
 [`DESCRIPTION`](https://github.com/cmmr/ecodive/blob/main/DESCRIPTION)
 
 Smith D (2026). *ecodive: Parallel and Memory-Efficient Ecological
-Diversity Metrics*. R package version 2.2.3,
+Diversity Metrics*. R package version 2.2.4,
 <https://cmmr.github.io/ecodive/>.
 
     @Manual{,
       title = {ecodive: Parallel and Memory-Efficient Ecological Diversity Metrics},
       author = {Daniel P. Smith},
       year = {2026},
-      note = {R package version 2.2.3},
+      note = {R package version 2.2.4},
       url = {https://cmmr.github.io/ecodive/},
     }

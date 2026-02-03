@@ -1,5 +1,20 @@
 # Changelog
 
+## ecodive 2.2.4
+
+### Breaking Changes
+
+- The [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md)
+  function has been simplified:
+
+  - `drop = FALSE` now returns samples with original counts when sum \<
+    depth.
+  - `drop = TRUE` no longer drops zero-sum features - only zero-sum
+    samples.
+  - `depth` can no longer be a fraction (only positive integers now).
+  - `n_samples` parameter has been removed.
+  - `warn` parameter has been added.
+
 ## ecodive 2.2.3
 
 - Coerce counts to double before rarefaction.

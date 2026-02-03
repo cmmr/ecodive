@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,25 @@
       <small>Source: <a href="https://github.com/cmmr/ecodive/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.2.4" id="ecodive-224">ecodive 2.2.4<a class="anchor" aria-label="anchor" href="#ecodive-224"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-2-2-4">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-2-2-4"></a></h3>
+<ul><li>
+<p>The <code><a href="../reference/rarefy.html">rarefy()</a></code> function has been simplified:</p>
+<ul><li>
+<code>drop = FALSE</code> now returns samples with original counts when sum &lt; depth.</li>
+<li>
+<code>drop = TRUE</code> no longer drops zero-sum features - only zero-sum samples.</li>
+<li>
+<code>depth</code> can no longer be a fraction (only positive integers now).</li>
+<li>
+<code>n_samples</code> parameter has been removed.</li>
+<li>
+<code>warn</code> parameter has been added.</li>
+</ul></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.3" id="ecodive-223">ecodive 2.2.3<a class="anchor" aria-label="anchor" href="#ecodive-223"></a></h2>
 <ul><li>Coerce counts to double before rarefaction.</li>

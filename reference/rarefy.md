@@ -1,21 +1,21 @@
-# Rarefy OTU counts.
+# Rarefy Observation Counts
 
-Sub-sample OTU observations such that all samples have an equal number.
-If called on data with non-integer abundances, values will be re-scaled
-to integers between 1 and `depth` such that they sum to `depth`.
+Sub-sample observations from a feature table such that all samples have
+the same library size (depth). This is performed via random sampling
+without replacement.
 
 ## Usage
 
 ``` r
 rarefy(
   counts,
-  depth = 0.1,
-  n_samples = NULL,
+  depth = NULL,
   seed = 0,
   times = NULL,
   drop = TRUE,
   margin = 1L,
-  cpus = n_cpus()
+  cpus = n_cpus(),
+  warn = interactive()
 )
 ```
 
@@ -23,47 +23,36 @@ rarefy(
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix or sparse matrix object (e.g., `dgCMatrix`). Counts
+  must be integers (non-integer counts will be cast to integers).
 
 - depth:
 
-  How many observations to keep per sample. When `0 < depth < 1`, it is
-  taken as the minimum percentage of the dataset's observations to keep.
-  Ignored when `n_samples` is specified. Default: `0.1`
-
-- n_samples:
-
-  The number of samples to keep. When `0 < n_samples < 1`, it is taken
-  as the percentage of samples to keep. If negative, that number of
-  samples is dropped. If `0`, all samples are kept. If `NULL`, then
-  `depth` is used instead. Default: `NULL`
+  The number of observations to keep per sample. If `NULL` (the
+  default), a depth is auto-selected to maximize data retention.
 
 - seed:
 
-  An integer seed for randomizing which observations to keep or drop. If
-  you need to create different random rarefactions of the same data, set
-  the seed to a different number each time. Default: `0`
+  An integer seed for the random number generator. Providing the same
+  seed guarantees reproducible results. Default: `0`
 
 - times:
 
-  How many independent rarefactions to perform. If set, `rarefy()` will
-  return a list of matrices. The seeds for each matrix will be
-  sequential, starting from `seed`. Default: `NULL`
+  The number of independent rarefactions to perform. If set, returns a
+  list of matrices. Seeds for subsequent iterations are sequential
+  (`seed`, `seed + 1`, ...). Default: `NULL`
 
 - drop:
 
-  Drop rows and columns with zero observations after rarefying. Default:
-  `TRUE`
+  Logical. If `TRUE`, samples with fewer than `depth` observations are
+  discarded. If `FALSE`, they are kept with their original counts.
+  Default: `TRUE`
 
 - margin:
 
-  If your samples are in the matrix's rows, set to `1L`. If your samples
-  are in columns, set to `2L`. Ignored when `counts` is a special object
-  class (e.g. `phyloseq`). Default: `1L`
+  The margin containing samples. `1` if samples are rows, `2` if samples
+  are columns. Ignored when `counts` is a special object class (e.g.
+  `phyloseq`). Default: `1`
 
 - cpus:
 
@@ -71,10 +60,36 @@ rarefy(
   [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), will
   use all logical CPU cores.
 
+- warn:
+
+  Logical. If `TRUE`, emits a warning when samples are dropped or
+  returned unrarefied due to insufficient depth. Default:
+  [`interactive()`](https://rdrr.io/r/base/interactive.html)
+
 ## Value
 
-A rarefied matrix. `Matrix` and `slam` objects will be returned with the
-same type; otherwise a base R `matrix` will be returned.
+A rarefied matrix. The output class (`matrix`, `dgCMatrix`, etc.)
+matches the input class.
+
+## Details
+
+**Auto-Depth Selection**  
+If `depth` is `NULL`, the function defaults to the highest depth that
+retains at least 10% of the total observations in the dataset.
+
+**Dropping vs. Retaining Samples**  
+If a sample has fewer observations than the specified `depth`:
+
+- `drop = TRUE` (Default): The sample is removed from the output matrix.
+
+- `drop = FALSE`: The sample is returned **unmodified** (with its
+  original counts). It is *not* rarefied or zeroed out.
+
+**Zero-Sum Features**  
+Features (OTUs, ASVs, Genes) that lose all observations during
+rarefaction are **always retained** as columns/rows of zeros. This
+ensures the output matrix dimensions remain consistent with the input
+(barring dropped samples).
 
 ## Examples
 
@@ -93,19 +108,20 @@ same type; otherwise a base R `matrix` will be returned.
 #> 13 18 21 15 
     
     # Rarefy all samples to a depth of 13.
-    # Note that sample 'A' has 0 counts and is dropped.
+    # Sample 'A' (0 counts) and 'D' (12 counts) will be dropped.
     r_mtx <- rarefy(counts, depth = 13, seed = 1)
     r_mtx
-#>   OTU2 OTU3 OTU4 OTU5
-#> A    0    5    2    6
-#> B    4    4    0    5
-#> C    3    5    0    5
-#> D   10    3    0    0
+#>   OTU1 OTU2 OTU3 OTU4 OTU5
+#> A    0    0    5    2    6
+#> B    0    4    4    0    5
+#> C    0    3    5    0    5
+#> D    0   10    3    0    0
     rowSums(r_mtx)
 #>  A  B  C  D 
 #> 13 13 13 13 
     
-    # Keep zero-sum rows and columns by setting `drop = FALSE`.
+    # Keep under-sampled samples by setting `drop = FALSE`.
+    # Samples 'A' and 'D' are returned with their original counts.
     rarefy(counts, depth = 13, drop = FALSE, seed = 1)
 #>   OTU1 OTU2 OTU3 OTU4 OTU5
 #> A    0    0    5    2    6
@@ -113,29 +129,15 @@ same type; otherwise a base R `matrix` will be returned.
 #> C    0    3    5    0    5
 #> D    0   10    3    0    0
     
-    # Rarefy to the depth of the 2nd most abundant sample (B, depth=22).
-    rarefy(counts, n_samples = 2, seed = 1)
-#>   OTU2 OTU3 OTU5
-#> B    8    5    5
-#> C    6    5    7
-    
     # Perform 3 independent rarefactions.
     r_list <- rarefy(counts, depth = 13, times = 3, seed = 1)
     length(r_list)
 #> [1] 3
-    r_list[[1]]
-#>   OTU2 OTU3 OTU4 OTU5
-#> A    0    5    2    6
-#> B    4    4    0    5
-#> C    3    5    0    5
-#> D   10    3    0    0
     
-    # The class of the input matrix is preserved.
+    # Sparse matrices are supported and their class is preserved.
     if (requireNamespace('Matrix', quietly = TRUE)) {
       counts_dgC <- Matrix::Matrix(counts, sparse = TRUE)
-      class(counts_dgC)
-      r_dgC <- rarefy(counts_dgC, depth = 13, seed = 1)
-      class(r_dgC)
+      class(rarefy(counts_dgC, depth = 13))
     }
 #> [1] "dgCMatrix"
 #> attr(,"package")

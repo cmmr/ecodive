@@ -348,7 +348,7 @@ Tools for programmatic access, data manipulation, and configuration.
 - [`read_tree()`](https://cmmr.github.io/ecodive/reference/read_tree.md)
   : Read a newick formatted phylogenetic tree.
 - [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md) :
-  Rarefy OTU counts.
+  Rarefy Observation Counts
 - [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md) :
   Number of CPU Cores
 

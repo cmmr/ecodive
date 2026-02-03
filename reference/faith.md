@@ -28,9 +28,9 @@ faith(counts, tree = NULL, margin = 1L, cpus = n_cpus())
 
 - margin:
 
-  If your samples are in the matrix's rows, set to `1L`. If your samples
-  are in columns, set to `2L`. Ignored when `counts` is a special object
-  class (e.g. `phyloseq`). Default: `1L`
+  The margin containing samples. `1` if samples are rows, `2` if samples
+  are columns. Ignored when `counts` is a special object class (e.g.
+  `phyloseq`). Default: `1`
 
 - cpus:
 
