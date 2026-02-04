@@ -48,6 +48,18 @@ rarefy(
   discarded. If `FALSE`, they are kept with their original counts.
   Default: `TRUE`
 
+- margin:
+
+  The margin containing samples. `1` if samples are rows, `2` if samples
+  are columns. Ignored when `counts` is a special object class (e.g.
+  `phyloseq`). Default: `1`
+
+- cpus:
+
+  How many parallel processing threads should be used. The default,
+  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), will
+  use all logical CPU cores.
+
 - warn:
 
   Logical. If `TRUE`, emits a warning when samples are dropped or
@@ -79,6 +91,25 @@ Features (OTUs, ASVs, Genes) that lose all observations during
 rarefaction are **always retained** as columns/rows of zeros. This
 ensures the output matrix dimensions remain consistent with the input
 (barring dropped samples).
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## Examples
 

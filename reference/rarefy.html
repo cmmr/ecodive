@@ -97,6 +97,17 @@ observations are discarded. If <code>FALSE</code>, they are kept with their
 original counts. Default: <code>TRUE</code></p></dd>
 
 
+<dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
+<dd><p>The margin containing samples. <code>1</code> if samples are rows,
+<code>2</code> if samples are columns. Ignored when <code>counts</code> is a special object
+class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
+
+
+<dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
+<dd><p>How many parallel processing threads should be used. The
+default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical CPU cores.</p></dd>
+
+
 <dt id="arg-warn">warn<a class="anchor" aria-label="anchor" href="#arg-warn"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, emits a warning when samples are dropped
 or returned unrarefied due to insufficient depth.
@@ -130,6 +141,20 @@ counts). It is <em>not</em> rarefied or zeroed out.</p></li>
 <p>Features (OTUs, ASVs, Genes) that lose all observations during rarefaction
 are <strong>always retained</strong> as columns/rows of zeros. This ensures the output
 matrix dimensions remain consistent with the input (barring dropped samples).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
+
+
+
+<p>The <code>counts</code> parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:</p><ul><li><p><code>phyloseq</code></p></li>
+<li><p><code>rbiom</code></p></li>
+<li><p><code>SummarizedExperiment</code></p></li>
+<li><p><code>TreeSummarizedExperiment</code></p></li>
+</ul><p>For large datasets, standard matrix operations may be slow. See
+<code><a href="../articles/performance.html">vignette('performance')</a></code> for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.</p>
     </div>
 
     <div class="section level2">
