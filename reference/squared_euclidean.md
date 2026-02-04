@@ -7,7 +7,7 @@ The squared Euclidean distance between two vectors.
 ``` r
 squared_euclidean(
   counts,
-  norm = "percent",
+  norm = "none",
   margin = 1L,
   pairs = NULL,
   cpus = n_cpus()
@@ -18,15 +18,15 @@ squared_euclidean(
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - norm:
 
   Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
@@ -35,9 +35,7 @@ squared_euclidean(
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - margin:
 
@@ -60,18 +58,37 @@ squared_euclidean(
 
 ## Details
 
-The Squared Euclidean distance is defined as: \$\$\sum\_{i=1}^{n} (P_i -
-Q_i)^2\$\$
+The Squared Euclidean distance is defined as: \$\$\sum\_{i=1}^{n} (X_i -
+Y_i)^2\$\$
 
 Where:
 
-- \\P_i\\, \\Q_i\\ : Proportional abundances of the \\i\\-th feature.
+- \\X_i\\, \\Y_i\\ : Absolute abundances of the \\i\\-th feature.
 
 - \\n\\ : The number of features.
 
 Base R Equivalent:
 
     sum((x-y)^2)
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 
@@ -115,8 +132,8 @@ Other Abundance metrics:
 
 ``` r
     squared_euclidean(ex_counts)
-#>          Saliva      Gums      Nose
-#> Gums  0.3604200                    
-#> Nose  0.8280288 1.1295500          
-#> Stool 1.4650474 1.7855911 1.3399219
+#>        Saliva    Gums    Nose
+#> Gums   406815                
+#> Nose   417484  967399        
+#> Stool  428846 1003111  736558
 ```

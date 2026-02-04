@@ -12,11 +12,9 @@ documentation
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - cpus:
 
@@ -32,6 +30,21 @@ documentation
 
   Precision of the returned values, in number of decimal places. E.g.
   the default `digits=3` could return `6.392`.
+
+- norm:
+
+  Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
+
+  - `'percent'`: Relative abundance (sample abundances sum to 1).
+
+  - `'binary'`: Unweighted presence/absence (each count is either 0 or
+    1).
+
+  - `'clr'`: Centered log ratio.
+
+  Default: `'none'`.
 
 - pairs:
 
@@ -51,21 +64,6 @@ documentation
   for unobserved features. The default, `NULL`, selects the smallest
   non-zero value in `counts`.
 
-- norm:
-
-  Normalize the incoming counts. Options are:
-
-  - `'percent'`: Relative abundance (sample abundances sum to 1).
-
-  - `'binary'`: Unweighted presence/absence (each count is either 0 or
-    1).
-
-  - `'clr'`: Centered log ratio.
-
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
-
 - margin:
 
   The margin containing samples. `1` if samples are rows, `2` if samples
@@ -78,3 +76,22 @@ documentation
   in `counts`. The OTU identifiers given by `colnames(counts)` must be
   present in `tree`. Can be omitted if a tree is embedded with the
   `counts` object or as `attr(counts, 'tree')`.
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.

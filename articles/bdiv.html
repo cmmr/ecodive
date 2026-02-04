@@ -194,21 +194,21 @@ min).</li>
 <strong>Bray-Curtis dissimilarity</strong> <br><code><a href="../reference/bray.html">bray()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
-\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} (P_i +
-Q_i)}</span></td>
+\frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} (X_i +
+Y_i)}</span></td>
 </tr>
 <tr class="even">
 <td align="left">
 <strong>Canberra distance</strong> <br><code><a href="../reference/canberra.html">canberra()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle \sum_{i=1}^{n}
-\frac{|P_i - Q_i|}{P_i + Q_i}</span></td>
+\frac{|X_i - Y_i|}{X_i + Y_i}</span></td>
 </tr>
 <tr class="odd">
 <td align="left">
 <strong>Chebyshev distance</strong> <br><code><a href="../reference/chebyshev.html">chebyshev()</a></code>
 </td>
-<td align="left"><span class="math inline">\max(|P_i - Q_i|)</span></td>
+<td align="left"><span class="math inline">\max(|X_i - Y_i|)</span></td>
 </tr>
 <tr class="even">
 <td align="left">
@@ -223,8 +223,8 @@ Q_i)}</span></td>
 <strong>Clark’s divergence distance</strong> <br><code><a href="../reference/clark.html">clark()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
-\sqrt{\sum_{i=1}^{n}\left(\frac{P_i - Q_i}{P_i +
-Q_i}\right)^{2}}</span></td>
+\sqrt{\sum_{i=1}^{n}\left(\frac{X_i - Y_i}{X_i +
+Y_i}\right)^{2}}</span></td>
 </tr>
 <tr class="even">
 <td align="left">
@@ -237,15 +237,15 @@ Q_i}\right)^{2}}</span></td>
 <td align="left">
 <strong>Euclidean distance</strong> <br><code><a href="../reference/euclidean.html">euclidean()</a></code>
 </td>
-<td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n} (P_i -
-Q_i)^2}</span></td>
+<td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n} (X_i -
+Y_i)^2}</span></td>
 </tr>
 <tr class="even">
 <td align="left">
 <strong>Gower distance</strong> <br><code><a href="../reference/gower.html">gower()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
-\frac{1}{n}\sum_{i=1}^{n}\frac{|P_i - Q_i|}{R_i}</span></td>
+\frac{1}{n}\sum_{i=1}^{n}\frac{|X_i - Y_i|}{R_i}</span></td>
 </tr>
 <tr class="odd">
 <td align="left">
@@ -284,15 +284,15 @@ Q_i}\right)\right]</span></td>
 <td align="left">
 <strong>Lorentzian distance</strong> <br><code><a href="../reference/lorentzian.html">lorentzian()</a></code>
 </td>
-<td align="left"><span class="math inline">\sum_{i=1}^{n}\ln{(1 + |P_i -
-Q_i|)}</span></td>
+<td align="left"><span class="math inline">\sum_{i=1}^{n}\ln{(1 + |X_i -
+Y_i|)}</span></td>
 </tr>
 <tr class="even">
 <td align="left">
 <strong>Manhattan distance</strong> <br><code><a href="../reference/manhattan.html">manhattan()</a></code>
 </td>
-<td align="left"><span class="math inline">\sum_{i=1}^{n} |P_i -
-Q_i|</span></td>
+<td align="left"><span class="math inline">\sum_{i=1}^{n} |X_i -
+Y_i|</span></td>
 </tr>
 <tr class="odd">
 <td align="left">
@@ -306,8 +306,8 @@ Q_i|</span></td>
 <strong>Minkowski distance</strong> <br><code><a href="../reference/minkowski.html">minkowski()</a></code>
 </td>
 <td align="left">
-<span class="math inline">\sqrt[p]{\sum_{i=1}^{n} (P_i
-- Q_i)^p}</span> <br> Where <span class="math inline">p</span> is the
+<span class="math inline">\sqrt[p]{\sum_{i=1}^{n} (X_i
+- Y_i)^p}</span> <br> Where <span class="math inline">p</span> is the
 geometry of the space.</td>
 </tr>
 <tr class="odd">
@@ -326,8 +326,8 @@ only) <br><code><a href="../reference/morisita.html">morisita()</a></code>
 <strong>Motyka dissimilarity</strong> <br><code><a href="../reference/motyka.html">motyka()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
-\frac{\sum_{i=1}^{n} \max(P_i, Q_i)}{\sum_{i=1}^{n} (P_i +
-Q_i)}</span></td>
+\frac{\sum_{i=1}^{n} \max(X_i, Y_i)}{\sum_{i=1}^{n} (X_i +
+Y_i)}</span></td>
 </tr>
 <tr class="odd">
 <td align="left">
@@ -341,8 +341,8 @@ Q_i)}</span></td>
 <strong>Soergel distance</strong> <br><code><a href="../reference/soergel.html">soergel()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
-\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i,
-Q_i)}</span></td>
+\frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} \max(X_i,
+Y_i)}</span></td>
 </tr>
 <tr class="odd">
 <td align="left">
@@ -363,8 +363,8 @@ distance</strong> <br><code><a href="../reference/squared_chisq.html">squared_ch
 <td align="left">
 <strong>Squared Euclidean distance</strong> <br><code><a href="../reference/squared_euclidean.html">squared_euclidean()</a></code>
 </td>
-<td align="left"><span class="math inline">\sum_{i=1}^{n} (P_i -
-Q_i)^2</span></td>
+<td align="left"><span class="math inline">\sum_{i=1}^{n} (X_i -
+Y_i)^2</span></td>
 </tr>
 <tr class="even">
 <td align="left">
@@ -379,8 +379,7 @@ Q_i)^2</span></td>
 <strong>Wave Hedges distance</strong> <br><code><a href="../reference/wave_hedges.html">wave_hedges()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
-\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i,
-Q_i)}</span></td>
+\sum_{i=1}^{n}\frac{|X_i - Y_i|}{\max(X_i, Y_i)}</span></td>
 </tr>
 </tbody>
 </table>
@@ -433,7 +432,7 @@ B)}</span></td>
 </tbody>
 </table>
 <blockquote>
-<p><strong>Note:</strong> <code>sorsensen()</code> is equivalent to
+<p><strong>Note:</strong> <code><a href="../reference/sorensen.html">sorensen()</a></code> is equivalent to
 <code>bray(norm = 'binary')</code>, and <code><a href="../reference/jaccard.html">jaccard()</a></code> is
 equivalent to <code>soergel(norm = 'binary')</code>.</p>
 </blockquote>

@@ -66,9 +66,8 @@
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
 <dd><p>A numeric matrix of count data (samples \(\times\) features).
-Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
-<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
-optimizing large datasets.</p></dd>
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.</p></dd>
 
 
 <dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
@@ -77,11 +76,11 @@ Programmatic access via <code>list_metrics('alpha')</code>.</p></dd>
 
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
-<dd><p>Normalize the incoming counts. Options are:</p><ul><li><p><code>'percent'</code>: Relative abundance (sample abundances sum to 1).</p></li>
+<dd><p>Normalize the incoming counts. Options are:</p><ul><li><p><code>'none'</code>: No transformation.</p></li>
+<li><p><code>'percent'</code>: Relative abundance (sample abundances sum to 1).</p></li>
 <li><p><code>'binary'</code>: Unweighted presence/absence (each count is either 0 or 1).</p></li>
 <li><p><code>'clr'</code>: Centered log ratio.</p></li>
-<li><p><code>'none'</code>: No transformation.</p></li>
-</ul><p>Default: <code>'percent'</code>, which is the expected input for these formulas.</p></dd>
+</ul><p>Default: <code>'none'</code>.</p></dd>
 
 
 <dt id="arg-cutoff">cutoff<a class="anchor" aria-label="anchor" href="#arg-cutoff"></a></dt>
@@ -156,6 +155,20 @@ integer counts will return an error message.</p><div class="section">
 
 </div>
 
+    </div>
+    <div class="section level2">
+    <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
+
+
+
+<p>The <code>counts</code> parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:</p><ul><li><p><code>phyloseq</code></p></li>
+<li><p><code>rbiom</code></p></li>
+<li><p><code>SummarizedExperiment</code></p></li>
+<li><p><code>TreeSummarizedExperiment</code></p></li>
+</ul><p>For large datasets, standard matrix operations may be slow. See
+<code><a href="../articles/performance.html">vignette('performance')</a></code> for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.</p>
     </div>
 
     <div class="section level2">

@@ -5,28 +5,22 @@ A distance metric derived from the Hedges' distance.
 ## Usage
 
 ``` r
-wave_hedges(
-  counts,
-  norm = "percent",
-  margin = 1L,
-  pairs = NULL,
-  cpus = n_cpus()
-)
+wave_hedges(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - norm:
 
   Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
@@ -35,9 +29,7 @@ wave_hedges(
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - margin:
 
@@ -60,18 +52,37 @@ wave_hedges(
 
 ## Details
 
-The Wave Hedges distance is defined as: \$\$\frac{\sum\_{i=1}^{n}
-\|P_i - Q_i\|}{\sum\_{i=1}^{n} \max(P_i, Q_i)}\$\$
+The Wave Hedges distance is defined as: \$\$\sum\_{i=1}^{n}\frac{\|X_i -
+Y_i\|}{\max(X_i, Y_i)}\$\$
 
 Where:
 
-- \\P_i\\, \\Q_i\\ : Proportional abundances of the \\i\\-th feature.
+- \\X_i\\, \\Y_i\\ : Absolute abundances of the \\i\\-th feature.
 
 - \\n\\ : The number of features.
 
 Base R Equivalent:
 
     sum(abs(x - y) / pmax(x, y))
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 
@@ -118,7 +129,7 @@ Other Abundance metrics:
 ``` r
     wave_hedges(ex_counts)
 #>         Saliva     Gums     Nose
-#> Gums  3.118989                  
-#> Nose  5.596945 5.507980         
-#> Stool 5.987586 5.282949 5.091068
+#> Gums  2.812379                  
+#> Nose  4.849102 5.441047         
+#> Stool 5.984998 4.980698 5.445027
 ```

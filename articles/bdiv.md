@@ -91,7 +91,9 @@ Given:
 
 [TABLE]
 
-> **Note:** `sorsensen()` is equivalent to `bray(norm = 'binary')`, and
+> **Note:**
+> [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md)
+> is equivalent to `bray(norm = 'binary')`, and
 > [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md) is
 > equivalent to `soergel(norm = 'binary')`.
 

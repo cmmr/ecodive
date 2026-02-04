@@ -5,22 +5,22 @@ The maximum difference between any single feature across two samples.
 ## Usage
 
 ``` r
-chebyshev(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
+chebyshev(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - norm:
 
   Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
@@ -29,9 +29,7 @@ chebyshev(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - margin:
 
@@ -54,15 +52,34 @@ chebyshev(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
 ## Details
 
-The Chebyshev distance is defined as: \$\$\max(\|P_i - Q_i\|)\$\$
+The Chebyshev distance is defined as: \$\$\max(\|X_i - Y_i\|)\$\$
 
 Where:
 
-- \\P_i\\, \\Q_i\\ : Proportional abundances of the \\i\\-th feature.
+- \\X_i\\, \\Y_i\\ : Absolute abundances of the \\i\\-th feature.
 
 Base R Equivalent:
 
     max(abs(x-y))
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 
@@ -107,8 +124,8 @@ Other Abundance metrics:
 
 ``` r
     chebyshev(ex_counts)
-#>          Saliva      Gums      Nose
-#> Gums  0.4254686                    
-#> Nose  0.5197609 0.8732732          
-#> Stool 0.9876988 0.9889813 0.9915177
+#>       Saliva Gums Nose
+#> Gums     631          
+#> Nose     498  771     
+#> Stool    609  792  609
 ```

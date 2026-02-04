@@ -6,33 +6,16 @@ evenness.
 ## Usage
 
 ``` r
-shannon(counts, norm = "percent", margin = 1L, cpus = n_cpus())
+shannon(counts, margin = 1L, cpus = n_cpus())
 ```
 
 ## Arguments
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
-
-- norm:
-
-  Normalize the incoming counts. Options are:
-
-  - `'percent'`: Relative abundance (sample abundances sum to 1).
-
-  - `'binary'`: Unweighted presence/absence (each count is either 0 or
-    1).
-
-  - `'clr'`: Centered log ratio.
-
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - margin:
 
@@ -53,12 +36,33 @@ The Shannon index (entropy) is defined as: \$\$-\sum\_{i = 1}^{n} P_i
 
 Where:
 
+- \\n\\ : The number of features.
+
 - \\P_i\\ : Proportional abundance of the \\i\\-th feature.
 
 **Base R Equivalent:**
 
     p <- x / sum(x)
     -sum(p * log(p))
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 

@@ -64,9 +64,8 @@
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
 <dd><p>A numeric matrix of count data (samples \(\times\) features).
-Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
-<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
-optimizing large datasets.</p></dd>
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.</p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
@@ -110,6 +109,20 @@ $$\frac{\sum_{i=1}^{n} L_i(P_i + Q_i)^{\alpha}\left|\frac{P_i - Q_i}{P_i + Q_i}\
 <li><p>\(\alpha\) : A scalable weighting factor.</p></li>
 </ul><p><strong>Parameter: alpha</strong></p>
 <p>The <code>alpha</code> parameter controls the weight given to abundant lineages. \(\alpha = 1\) corresponds to Weighted UniFrac, while \(\alpha = 0\) corresponds to Unweighted UniFrac.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
+
+
+
+<p>The <code>counts</code> parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:</p><ul><li><p><code>phyloseq</code></p></li>
+<li><p><code>rbiom</code></p></li>
+<li><p><code>SummarizedExperiment</code></p></li>
+<li><p><code>TreeSummarizedExperiment</code></p></li>
+</ul><p>For large datasets, standard matrix operations may be slow. See
+<code><a href="../articles/performance.html">vignette('performance')</a></code> for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

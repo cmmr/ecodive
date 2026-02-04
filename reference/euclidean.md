@@ -5,22 +5,22 @@ The straight-line distance between two points in multidimensional space.
 ## Usage
 
 ``` r
-euclidean(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
+euclidean(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - norm:
 
   Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
@@ -29,9 +29,7 @@ euclidean(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - margin:
 
@@ -54,18 +52,37 @@ euclidean(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
 ## Details
 
-The Euclidean distance is defined as: \$\$\sqrt{\sum\_{i=1}^{n} (P_i -
-Q_i)^2}\$\$
+The Euclidean distance is defined as: \$\$\sqrt{\sum\_{i=1}^{n} (X_i -
+Y_i)^2}\$\$
 
 Where:
 
-- \\P_i\\, \\Q_i\\ : Proportional abundances of the \\i\\-th feature.
+- \\X_i\\, \\Y_i\\ : Absolute abundances of the \\i\\-th feature.
 
 - \\n\\ : The number of features.
 
 Base R Equivalent:
 
     sqrt(sum((x-y)^2))
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 
@@ -110,7 +127,7 @@ Other Abundance metrics:
 ``` r
     euclidean(ex_counts)
 #>          Saliva      Gums      Nose
-#> Gums  0.6003499                    
-#> Nose  0.9099609 1.0628029          
-#> Stool 1.2103914 1.3362601 1.1575500
+#> Gums   637.8205                    
+#> Nose   646.1300  983.5644          
+#> Stool  654.8633 1001.5543  858.2296
 ```

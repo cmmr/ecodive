@@ -63,9 +63,8 @@
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
 <dd><p>A numeric matrix of count data (samples \(\times\) features).
-Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
-<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
-optimizing large datasets.</p></dd>
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.</p></dd>
 
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
@@ -106,6 +105,20 @@ The <code>pseudocount</code> argument adds a small value to all counts prior to 
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">(</span><span class="va">y</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">y</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span><span class="op">-</span><span class="va">y</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># Euclidean distance</span></span></code></pre><p></p></div>
+    </div>
+    <div class="section level2">
+    <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
+
+
+
+<p>The <code>counts</code> parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:</p><ul><li><p><code>phyloseq</code></p></li>
+<li><p><code>rbiom</code></p></li>
+<li><p><code>SummarizedExperiment</code></p></li>
+<li><p><code>TreeSummarizedExperiment</code></p></li>
+</ul><p>For large datasets, standard matrix operations may be slow. See
+<code><a href="../articles/performance.html">vignette('performance')</a></code> for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

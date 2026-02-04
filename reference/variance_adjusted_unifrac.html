@@ -63,9 +63,8 @@
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
 <dd><p>A numeric matrix of count data (samples \(\times\) features).
-Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
-<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
-optimizing large datasets.</p></dd>
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.</p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
@@ -101,6 +100,20 @@ $$\frac{\sum_{i=1}^{n} L_i\frac{|P_i - Q_i|}{\sqrt{(P_i + Q_i)(2 - P_i - Q_i)}} 
 <li><p>\(L_i\) : The length of the \(i\)-th branch.</p></li>
 <li><p>\(P_i\), \(Q_i\) : The proportion of the community descending from branch \(i\) in sample P and Q.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
+
+
+
+<p>The <code>counts</code> parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:</p><ul><li><p><code>phyloseq</code></p></li>
+<li><p><code>rbiom</code></p></li>
+<li><p><code>SummarizedExperiment</code></p></li>
+<li><p><code>TreeSummarizedExperiment</code></p></li>
+</ul><p>For large datasets, standard matrix operations may be slow. See
+<code><a href="../articles/performance.html">vignette('performance')</a></code> for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Chang, Q., Luan, Y., &amp; Sun, F. (2011). Variance adjusted weighted UniFrac: a powerful beta diversity measure for comparing communities based on phylogeny. <em>BMC Bioinformatics</em>, 12, 118. <a href="https://doi.org/10.1186/1471-2105-12-118" class="external-link">doi:10.1186/1471-2105-12-118</a></p>

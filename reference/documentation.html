@@ -59,9 +59,8 @@ between 0 and 1, inclusive. Setting <code>alpha=1</code> is equivalent to
 
 <dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
 <dd><p>A numeric matrix of count data (samples \(\times\) features).
-Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
-<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
-optimizing large datasets.</p></dd>
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.</p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
@@ -77,6 +76,14 @@ Default: <code>10</code>.</p></dd>
 <dt id="arg-digits">digits<a class="anchor" aria-label="anchor" href="#arg-digits"></a></dt>
 <dd><p>Precision of the returned values, in number of decimal
 places. E.g. the default <code>digits=3</code> could return <code>6.392</code>.</p></dd>
+
+
+<dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
+<dd><p>Normalize the incoming counts. Options are:</p><ul><li><p><code>'none'</code>: No transformation.</p></li>
+<li><p><code>'percent'</code>: Relative abundance (sample abundances sum to 1).</p></li>
+<li><p><code>'binary'</code>: Unweighted presence/absence (each count is either 0 or 1).</p></li>
+<li><p><code>'clr'</code>: Centered log ratio.</p></li>
+</ul><p>Default: <code>'none'</code>.</p></dd>
 
 
 <dt id="arg-pairs">pairs<a class="anchor" aria-label="anchor" href="#arg-pairs"></a></dt>
@@ -97,14 +104,6 @@ taking <code>log(0)</code> for unobserved features. The default, <code>NULL</cod
 the smallest non-zero value in <code>counts</code>.</p></dd>
 
 
-<dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
-<dd><p>Normalize the incoming counts. Options are:</p><ul><li><p><code>'percent'</code>: Relative abundance (sample abundances sum to 1).</p></li>
-<li><p><code>'binary'</code>: Unweighted presence/absence (each count is either 0 or 1).</p></li>
-<li><p><code>'clr'</code>: Centered log ratio.</p></li>
-<li><p><code>'none'</code>: No transformation.</p></li>
-</ul><p>Default: <code>'percent'</code>, which is the expected input for these formulas.</p></dd>
-
-
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
 <dd><p>The margin containing samples. <code>1</code> if samples are rows,
 <code>2</code> if samples are columns. Ignored when <code>counts</code> is a special object
@@ -118,8 +117,23 @@ must be present in <code>tree</code>. Can be omitted if a tree is embedded with
 the <code>counts</code> object or as <code>attr(counts, 'tree')</code>.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
 
-  </main></div>
+
+
+<p>The <code>counts</code> parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:</p><ul><li><p><code>phyloseq</code></p></li>
+<li><p><code>rbiom</code></p></li>
+<li><p><code>SummarizedExperiment</code></p></li>
+<li><p><code>TreeSummarizedExperiment</code></p></li>
+</ul><p>For large datasets, standard matrix operations may be slow. See
+<code><a href="../articles/performance.html">vignette('performance')</a></code> for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.</p>
+    </div>
+
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

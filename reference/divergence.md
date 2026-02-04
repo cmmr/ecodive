@@ -5,28 +5,22 @@ A probabilistic divergence metric.
 ## Usage
 
 ``` r
-divergence(
-  counts,
-  norm = "percent",
-  margin = 1L,
-  pairs = NULL,
-  cpus = n_cpus()
-)
+divergence(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - norm:
 
   Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
@@ -35,9 +29,7 @@ divergence(
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - margin:
 
@@ -71,7 +63,28 @@ Where:
 
 Base R Equivalent:
 
-    2 * sum((x - y)^2 / (x + y)^2)
+    p <- x / sum(x)
+    q <- y / sum(y)
+    2 * sum((p - q)^2 / (p + q)^2)
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 

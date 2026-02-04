@@ -102,7 +102,8 @@ A `list` with the following elements.
 - `func` : The function for this metric, e.g.
   [`ecodive::faith`](https://cmmr.github.io/ecodive/reference/faith.md)
 
-- `params` : Formal args for `func`, e.g. `c("counts", "tree", "cpus")`
+- `params` : Formal args for `func`, e.g.
+  `c("counts", "norm", "tree", "cpus")`
 
 **`list_metrics()`**
 

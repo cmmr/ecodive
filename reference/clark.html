@@ -48,7 +48,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">clark</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"percent"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">clark</span><span class="op">(</span><span class="va">counts</span>, norm <span class="op">=</span> <span class="st">"none"</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -57,17 +57,16 @@
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
 <dd><p>A numeric matrix of count data (samples \(\times\) features).
-Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
-<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
-optimizing large datasets.</p></dd>
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.</p></dd>
 
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
-<dd><p>Normalize the incoming counts. Options are:</p><ul><li><p><code>'percent'</code>: Relative abundance (sample abundances sum to 1).</p></li>
+<dd><p>Normalize the incoming counts. Options are:</p><ul><li><p><code>'none'</code>: No transformation.</p></li>
+<li><p><code>'percent'</code>: Relative abundance (sample abundances sum to 1).</p></li>
 <li><p><code>'binary'</code>: Unweighted presence/absence (each count is either 0 or 1).</p></li>
 <li><p><code>'clr'</code>: Centered log ratio.</p></li>
-<li><p><code>'none'</code>: No transformation.</p></li>
-</ul><p>Default: <code>'percent'</code>, which is the expected input for these formulas.</p></dd>
+</ul><p>Default: <code>'none'</code>.</p></dd>
 
 
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
@@ -91,11 +90,25 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Clark's divergence distance is defined as:
-$$\sqrt{\sum_{i=1}^{n}\left(\frac{P_i - Q_i}{P_i + Q_i}\right)^{2}}$$</p>
-<p>Where:</p><ul><li><p>\(P_i\), \(Q_i\) : Proportional abundances of the \(i\)-th feature.</p></li>
+$$\sqrt{\sum_{i=1}^{n}\left(\frac{X_i - Y_i}{X_i + Y_i}\right)^{2}}$$</p>
+<p>Where:</p><ul><li><p>\(X_i\), \(Y_i\) : Absolute abundances of the \(i\)-th feature.</p></li>
 <li><p>\(n\) : The number of features.</p></li>
 </ul><p>Base R Equivalent:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="va">y</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">^</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre><p></p></div>
+    </div>
+    <div class="section level2">
+    <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
+
+
+
+<p>The <code>counts</code> parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:</p><ul><li><p><code>phyloseq</code></p></li>
+<li><p><code>rbiom</code></p></li>
+<li><p><code>SummarizedExperiment</code></p></li>
+<li><p><code>TreeSummarizedExperiment</code></p></li>
+</ul><p>For large datasets, standard matrix operations may be slow. See
+<code><a href="../articles/performance.html">vignette('performance')</a></code> for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -137,9 +150,9 @@ $$\sqrt{\sum_{i=1}^{n}\left(\frac{P_i - Q_i}{P_i + Q_i}\right)^{2}}$$</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="fu">clark</span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         Saliva     Gums     Nose</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gums  1.331390                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Nose  2.238579 2.223805         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Stool 2.439423 2.223341 2.168467</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums  1.291899                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose  2.125944 2.210332         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool 2.437340 2.219050 2.215163</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

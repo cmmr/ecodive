@@ -5,22 +5,22 @@ Also known as the coefficient of divergence.
 ## Usage
 
 ``` r
-clark(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
+clark(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - norm:
 
   Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
@@ -29,9 +29,7 @@ clark(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - margin:
 
@@ -55,18 +53,37 @@ clark(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 ## Details
 
 Clark's divergence distance is defined as:
-\$\$\sqrt{\sum\_{i=1}^{n}\left(\frac{P_i - Q_i}{P_i +
-Q_i}\right)^{2}}\$\$
+\$\$\sqrt{\sum\_{i=1}^{n}\left(\frac{X_i - Y_i}{X_i +
+Y_i}\right)^{2}}\$\$
 
 Where:
 
-- \\P_i\\, \\Q_i\\ : Proportional abundances of the \\i\\-th feature.
+- \\X_i\\, \\Y_i\\ : Absolute abundances of the \\i\\-th feature.
 
 - \\n\\ : The number of features.
 
 Base R Equivalent:
 
     sqrt(sum((abs(x - y) / (x + y)) ^ 2))
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 
@@ -113,7 +130,7 @@ Other Abundance metrics:
 ``` r
     clark(ex_counts)
 #>         Saliva     Gums     Nose
-#> Gums  1.331390                  
-#> Nose  2.238579 2.223805         
-#> Stool 2.439423 2.223341 2.168467
+#> Gums  1.291899                  
+#> Nose  2.125944 2.210332         
+#> Stool 2.437340 2.219050 2.215163
 ```

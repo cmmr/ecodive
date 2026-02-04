@@ -6,22 +6,22 @@ communities.
 ## Usage
 
 ``` r
-bray(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
+bray(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - norm:
 
   Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
@@ -30,9 +30,7 @@ bray(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - margin:
 
@@ -56,17 +54,36 @@ bray(counts, norm = "percent", margin = 1L, pairs = NULL, cpus = n_cpus())
 ## Details
 
 The Bray-Curtis dissimilarity is defined as: \$\$\frac{\sum\_{i=1}^{n}
-\|P_i - Q_i\|}{\sum\_{i=1}^{n} (P_i + Q_i)}\$\$
+\|X_i - Y_i\|}{\sum\_{i=1}^{n} (X_i + Y_i)}\$\$
 
 Where:
 
-- \\P_i\\, \\Q_i\\ : Proportional abundances of the \\i\\-th feature.
+- \\X_i\\, \\Y_i\\ : Absolute abundances of the \\i\\-th feature.
 
 - \\n\\ : The number of features.
 
 Base R Equivalent:
 
     sum(abs(x-y)) / sum(x+y)
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 
@@ -113,7 +130,7 @@ Other Abundance metrics:
 ``` r
     bray(ex_counts)
 #>          Saliva      Gums      Nose
-#> Gums  0.4265973                    
-#> Nose  0.9713843 0.9720256          
-#> Stool 0.9909509 0.9911046 0.9915177
+#> Gums  0.5905768                    
+#> Nose  0.9601770 0.9704797          
+#> Stool 0.9916667 0.9906729 0.9926199
 ```

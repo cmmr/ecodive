@@ -5,28 +5,22 @@ A log-based distance metric that is robust to outliers.
 ## Usage
 
 ``` r
-lorentzian(
-  counts,
-  norm = "percent",
-  margin = 1L,
-  pairs = NULL,
-  cpus = n_cpus()
-)
+lorentzian(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted.
 
 - norm:
 
   Normalize the incoming counts. Options are:
+
+  - `'none'`: No transformation.
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
@@ -35,9 +29,7 @@ lorentzian(
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - margin:
 
@@ -61,17 +53,36 @@ lorentzian(
 ## Details
 
 The Lorentzian distance is defined as: \$\$\sum\_{i=1}^{n}\ln{(1 +
-\|P_i - Q_i\|)}\$\$
+\|X_i - Y_i\|)}\$\$
 
 Where:
 
-- \\P_i\\, \\Q_i\\ : Proportional abundances of the \\i\\-th feature.
+- \\X_i\\, \\Y_i\\ : Absolute abundances of the \\i\\-th feature.
 
 - \\n\\ : The number of features.
 
 Base R Equivalent:
 
     sum(log(1 + abs(x - y)))
+
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
 
 ## References
 
@@ -117,8 +128,8 @@ Other Abundance metrics:
 
 ``` r
     lorentzian(ex_counts)
-#>          Saliva      Gums      Nose
-#> Gums  0.7118288                    
-#> Nose  1.6221540 1.5523304          
-#> Stool 1.4957656 1.4214362 1.5388404
+#>         Saliva     Gums     Nose
+#> Gums  12.78394                  
+#> Nose  27.34226 29.40383         
+#> Stool 18.77345 18.93820 27.40151
 ```

@@ -63,9 +63,8 @@
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
 <dd><p>A numeric matrix of count data (samples \(\times\) features).
-Also supports <code>phyloseq</code>, <code>rbiom</code>, <code>SummarizedExperiment</code>, and
-<code>TreeSummarizedExperiment</code> objects. See <code><a href="../articles/performance.html">vignette('performance')</a></code> for
-optimizing large datasets.</p></dd>
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.</p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
@@ -101,6 +100,20 @@ $$\frac{1}{n}\sum_{i=1}^{n} L_i|A_i - B_i|$$</p>
 <li><p>\(L_i\) : The length of the \(i\)-th branch.</p></li>
 <li><p>\(A_i\), \(B_i\) : Binary values (0 or 1) indicating if descendants of branch \(i\) are present in sample A or B.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
+
+
+
+<p>The <code>counts</code> parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:</p><ul><li><p><code>phyloseq</code></p></li>
+<li><p><code>rbiom</code></p></li>
+<li><p><code>SummarizedExperiment</code></p></li>
+<li><p><code>TreeSummarizedExperiment</code></p></li>
+</ul><p>For large datasets, standard matrix operations may be slow. See
+<code><a href="../articles/performance.html">vignette('performance')</a></code> for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Lozupone, C., &amp; Knight, R. (2005). UniFrac: a new phylogenetic method for comparing microbial communities. <em>Applied and Environmental Microbiology</em>, 71(12), 8228-8235. <a href="https://doi.org/10.1128/AEM.71.12.8228-8235.2005" class="external-link">doi:10.1128/AEM.71.12.8228-8235.2005</a></p>

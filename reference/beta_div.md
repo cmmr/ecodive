@@ -8,7 +8,7 @@ Beta Diversity Wrapper Function
 beta_div(
   counts,
   metric,
-  norm = "percent",
+  norm = "none",
   power = 1.5,
   pseudocount = NULL,
   alpha = 0.5,
@@ -23,11 +23,9 @@ beta_div(
 
 - counts:
 
-  A numeric matrix of count data (samples \\\times\\ features). Also
-  supports `phyloseq`, `rbiom`, `SummarizedExperiment`, and
-  `TreeSummarizedExperiment` objects. See
-  [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
-  for optimizing large datasets.
+  A numeric matrix of count data (samples \\\times\\ features).
+  Typically contains absolute abundances (integer counts), though
+  proportions are also accepted by some diversity metrics.
 
 - metric:
 
@@ -40,6 +38,8 @@ beta_div(
 
   Normalize the incoming counts. Options are:
 
+  - `'none'`: No transformation.
+
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
   - `'binary'`: Unweighted presence/absence (each count is either 0 or
@@ -47,9 +47,7 @@ beta_div(
 
   - `'clr'`: Centered log ratio.
 
-  - `'none'`: No transformation.
-
-  Default: `'percent'`, which is the expected input for these formulas.
+  Default: `'none'`.
 
 - power:
 
@@ -155,6 +153,25 @@ matching.
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the metrics list.
 
+## Input Types
+
+The `counts` parameter is designed to accept a simple numeric matrix,
+but seamlessly supports objects from the following biological data
+packages:
+
+- `phyloseq`
+
+- `rbiom`
+
+- `SummarizedExperiment`
+
+- `TreeSummarizedExperiment`
+
+For large datasets, standard matrix operations may be slow. See
+[`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
+for details on using optimized formats (e.g. sparse matrices) and
+parallel processing.
+
 ## Examples
 
 ``` r
@@ -174,9 +191,9 @@ ambiguity with future additions to the metrics list.
     # Bray-Curtis distances
     beta_div(ex_counts, 'bray')
 #>          Saliva      Gums      Nose
-#> Gums  0.4265973                    
-#> Nose  0.9713843 0.9720256          
-#> Stool 0.9909509 0.9911046 0.9915177
+#> Gums  0.5905768                    
+#> Nose  0.9601770 0.9704797          
+#> Stool 0.9916667 0.9906729 0.9926199
     
     # Generalized UniFrac distances
     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)
