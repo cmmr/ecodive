@@ -33,6 +33,13 @@ sequential (\code{seed}, \code{seed + 1}, ...). Default: \code{NULL}}
 observations are discarded. If \code{FALSE}, they are kept with their
 original counts. Default: \code{TRUE}}
 
+\item{margin}{The margin containing samples. \code{1} if samples are rows,
+\code{2} if samples are columns. Ignored when \code{counts} is a special object
+class (e.g. \code{phyloseq}). Default: \code{1}}
+
+\item{cpus}{How many parallel processing threads should be used. The
+default, \code{n_cpus()}, will use all logical CPU cores.}
+
 \item{warn}{Logical. If \code{TRUE}, emits a warning when samples are dropped
 or returned unrarefied due to insufficient depth.
 Default: \code{interactive()}}
@@ -67,6 +74,23 @@ counts). It is \emph{not} rarefied or zeroed out.
 Features (OTUs, ASVs, Genes) that lose all observations during rarefaction
 are \strong{always retained} as columns/rows of zeros. This ensures the output
 matrix dimensions remain consistent with the input (barring dropped samples).
+}
+
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
 }
 
 \examples{

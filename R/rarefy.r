@@ -9,6 +9,8 @@
 #' same library size (depth). This is performed via random sampling without 
 #' replacement.
 #' 
+#' @inherit documentation
+#' 
 #' @param counts  A numeric matrix or sparse matrix object (e.g., `dgCMatrix`).
 #'        Counts must be integers.
 #' 
