@@ -15,9 +15,8 @@ generalized_unifrac(
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.}
 
 \item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
 the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
@@ -59,6 +58,23 @@ Where:
 
 The \code{alpha} parameter controls the weight given to abundant lineages. \eqn{\alpha = 1} corresponds to Weighted UniFrac, while \eqn{\alpha = 0} corresponds to Unweighted UniFrac.
 }
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
+}
+
 \examples{
     generalized_unifrac(ex_counts, tree = ex_tree, alpha = 0.5)
 }

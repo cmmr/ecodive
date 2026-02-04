@@ -144,7 +144,7 @@ ENV <- environment()
 #' * `int_only` : `TRUE` if metric requires integer counts; `FALSE` otherwise.
 #' * `true_metric` : `TRUE` if metric is a true metric and satisfies the triangle inequality; `FALSE` if it is a non-metric dissimilarity; `NA` for alpha diversity metrics.
 #' * `func` : The function for this metric, e.g. `ecodive::faith`
-#' * `params` : Formal args for `func`, e.g. `c("counts", "tree", "cpus")`
+#' * `params` : Formal args for `func`, e.g. `c("counts", "norm", "tree", "cpus")`
 #' 
 #' 
 #' **`list_metrics()`**

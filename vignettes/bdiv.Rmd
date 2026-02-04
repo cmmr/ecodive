@@ -88,31 +88,31 @@ Given:
 | :--------------- | :--------------------------------- |
 | **Aitchison distance**                          <br> `aitchison()`         | $\sqrt{\sum_{i=1}^{n} [(\ln{X_i} - X_L) - (\ln{Y_i} - Y_L)]^2}$ |
 | **Bhattacharyya distance**                      <br> `bhattacharyya()`     | $-\ln{\sum_{i=1}^{n}\sqrt{P_{i}Q_{i}}}$ |
-| **Bray-Curtis dissimilarity**                   <br> `bray()`              | $\displaystyle \frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} (P_i + Q_i)}$ |
-| **Canberra distance**                           <br> `canberra()`          | $\displaystyle \sum_{i=1}^{n} \frac{|P_i - Q_i|}{P_i + Q_i}$ |
-| **Chebyshev distance**                          <br> `chebyshev()`         | $\max(|P_i - Q_i|)$ |
+| **Bray-Curtis dissimilarity**                   <br> `bray()`              | $\displaystyle \frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} (X_i + Y_i)}$ |
+| **Canberra distance**                           <br> `canberra()`          | $\displaystyle \sum_{i=1}^{n} \frac{|X_i - Y_i|}{X_i + Y_i}$ |
+| **Chebyshev distance**                          <br> `chebyshev()`         | $\max(|X_i - Y_i|)$ |
 | **Chord distance**                              <br> `chord()`             | $\displaystyle \sqrt{\sum_{i=1}^{n} \left(\frac{X_i}{\sqrt{\sum_{j=1}^{n} X_j^2}} - \frac{Y_i}{\sqrt{\sum_{j=1}^{n} Y_j^2}}\right)^2}$ |
-| **Clark's divergence distance**                 <br> `clark()`             | $\displaystyle \sqrt{\sum_{i=1}^{n}\left(\frac{P_i - Q_i}{P_i + Q_i}\right)^{2}}$ |
+| **Clark's divergence distance**                 <br> `clark()`             | $\displaystyle \sqrt{\sum_{i=1}^{n}\left(\frac{X_i - Y_i}{X_i + Y_i}\right)^{2}}$ |
 | **Divergence**                                  <br> `divergence()`        | $\displaystyle 2\sum_{i=1}^{n} \frac{(P_i - Q_i)^2}{(P_i + Q_i)^2}$ |
-| **Euclidean distance**                          <br> `euclidean()`         | $\sqrt{\sum_{i=1}^{n} (P_i - Q_i)^2}$ |
-| **Gower distance**                              <br> `gower()`             | $\displaystyle \frac{1}{n}\sum_{i=1}^{n}\frac{|P_i - Q_i|}{R_i}$ |
+| **Euclidean distance**                          <br> `euclidean()`         | $\sqrt{\sum_{i=1}^{n} (X_i - Y_i)^2}$ |
+| **Gower distance**                              <br> `gower()`             | $\displaystyle \frac{1}{n}\sum_{i=1}^{n}\frac{|X_i - Y_i|}{R_i}$ |
 | **Hellinger distance**                          <br> `hellinger()`         | $\sqrt{\sum_{i=1}^{n}(\sqrt{P_i} - \sqrt{Q_i})^{2}}$ |
 | **Horn-Morisita dissimilarity**                 <br> `horn()`              | $\displaystyle 1 - \frac{2\sum_{i=1}^{n}P_{i}Q_{i}}{\sum_{i=1}^{n}P_i^2 + \sum_{i=1}^{n}Q_i^2}$ |
 | **Jensen-Shannon distance**                     <br> `jensen()`            | $\displaystyle \sqrt{\frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)\right]}$ |
 | **Jensen-Shannon divergence (JSD)**             <br> `jsd()`               | $\displaystyle \frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)\right]$ |
-| **Lorentzian distance**                         <br> `lorentzian()`        | $\sum_{i=1}^{n}\ln{(1 + |P_i - Q_i|)}$ |
-| **Manhattan distance**                          <br> `manhattan()`         | $\sum_{i=1}^{n} |P_i - Q_i|$ |
+| **Lorentzian distance**                         <br> `lorentzian()`        | $\sum_{i=1}^{n}\ln{(1 + |X_i - Y_i|)}$ |
+| **Manhattan distance**                          <br> `manhattan()`         | $\sum_{i=1}^{n} |X_i - Y_i|$ |
 | **Matusita distance**                           <br> `matusita()`          | $\sqrt{\sum_{i=1}^{n}\left(\sqrt{P_i} - \sqrt{Q_i}\right)^2}$ |
-| **Minkowski distance**                          <br> `minkowski()`         | $\sqrt[p]{\sum_{i=1}^{n} (P_i - Q_i)^p}$ <br> Where $p$ is the geometry of the space. |
+| **Minkowski distance**                          <br> `minkowski()`         | $\sqrt[p]{\sum_{i=1}^{n} (X_i - Y_i)^p}$ <br> Where $p$ is the geometry of the space. |
 | **Morisita dissimilarity** <br> (integers only) <br> `morisita()`          | $\displaystyle 1 - \frac{2\sum_{i=1}^{n}X_{i}Y_{i}}{\displaystyle \left(\frac{\sum_{i=1}^{n}X_i(X_i - 1)}{X_T(X_T - 1)} + \frac{\sum_{i=1}^{n}Y_i(Y_i - 1)}{Y_T(Y_T - 1)}\right)X_{T}Y_{T}}$ |
-| **Motyka dissimilarity**                        <br> `motyka()`            | $\displaystyle \frac{\sum_{i=1}^{n} \max(P_i, Q_i)}{\sum_{i=1}^{n} (P_i + Q_i)}$ |
+| **Motyka dissimilarity**                        <br> `motyka()`            | $\displaystyle \frac{\sum_{i=1}^{n} \max(X_i, Y_i)}{\sum_{i=1}^{n} (X_i + Y_i)}$ |
 | **Probabilistic Symmetric $\chi^2$ distance**   <br> `psym_chisq()`        | $\displaystyle 2\sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}$ |
-| **Soergel distance**                            <br> `soergel()`           | $\displaystyle \frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i, Q_i)}$ |
+| **Soergel distance**                            <br> `soergel()`           | $\displaystyle \frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} \max(X_i, Y_i)}$ |
 | **Squared $\chi^2$ distance**                   <br> `squared_chisq()`     | $\displaystyle \sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}$ |
 | **Squared Chord distance**                      <br> `squared_chord()`     | $\sum_{i=1}^{n}\left(\sqrt{P_i} - \sqrt{Q_i}\right)^2$ |
-| **Squared Euclidean distance**                  <br> `squared_euclidean()` | $\sum_{i=1}^{n} (P_i - Q_i)^2$ |
+| **Squared Euclidean distance**                  <br> `squared_euclidean()` | $\sum_{i=1}^{n} (X_i - Y_i)^2$ |
 | **Topsoe distance**                             <br> `topsoe()`            | $\displaystyle \sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)$ |
-| **Wave Hedges distance**                        <br> `wave_hedges()`       | $\displaystyle \frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i, Q_i)}$ |
+| **Wave Hedges distance**                        <br> `wave_hedges()`       | $\displaystyle \sum_{i=1}^{n}\frac{|X_i - Y_i|}{\max(X_i, Y_i)}$ |
 
 
 ## Presence / Absence (Unweighted)
@@ -129,7 +129,7 @@ Given:
 | **Jaccard distance**            <br> `jaccard()`  | $\displaystyle 1 - \frac{J}{(A + B - J)}$ |
 | **Otsuka-Ochiai dissimilarity** <br> `ochiai()`   | $\displaystyle 1 - \frac{J}{\sqrt{AB}}$   |
 
-> **Note:** `sorsensen()` is equivalent to `bray(norm = 'binary')`, and `jaccard()` is equivalent to `soergel(norm = 'binary')`.
+> **Note:** `sorensen()` is equivalent to `bray(norm = 'binary')`, and `jaccard()` is equivalent to `soergel(norm = 'binary')`.
 
 
 ## Phylogenetic

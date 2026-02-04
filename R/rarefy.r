@@ -9,27 +9,8 @@
 #' same library size (depth). This is performed via random sampling without 
 #' replacement.
 #' 
-#' @details
-#' **Auto-Depth Selection**\cr
-#' If `depth` is `NULL`, the function defaults to the highest depth that retains 
-#' at least 10% of the total observations in the dataset.
-#' 
-#' **Dropping vs. Retaining Samples**\cr
-#' If a sample has fewer observations than the specified `depth`:
-#' 
-#' * `drop = TRUE` (Default): The sample is removed from the output matrix.
-#' * `drop = FALSE`: The sample is returned **unmodified** (with its original 
-#'   counts). It is *not* rarefied or zeroed out.
-#' 
-#' **Zero-Sum Features**\cr
-#' Features (OTUs, ASVs, Genes) that lose all observations during rarefaction 
-#' are **always retained** as columns/rows of zeros. This ensures the output 
-#' matrix dimensions remain consistent with the input (barring dropped samples).
-#' 
-#' @inherit documentation
-#' 
 #' @param counts  A numeric matrix or sparse matrix object (e.g., `dgCMatrix`).
-#'        Counts must be integers (non-integer counts will be cast to integers).
+#'        Counts must be integers.
 #' 
 #' @param depth   The number of observations to keep per sample. If `NULL` 
 #'        (the default), a depth is auto-selected to maximize data retention.
@@ -52,6 +33,22 @@
 #' @return A rarefied matrix. The output class (`matrix`, `dgCMatrix`, etc.) 
 #'         matches the input class.
 #' 
+#' @section Auto-Depth Selection:
+#'   If `depth` is `NULL`, the function defaults to the highest depth that retains 
+#'   at least 10% of the total observations in the dataset.
+#' 
+#' @section Dropping vs. Retaining Samples:
+#'   If a sample has fewer observations than the specified `depth`:
+#'   
+#'   * `drop = TRUE` (Default): The sample is removed from the output matrix.
+#'   * `drop = FALSE`: The sample is returned **unmodified** (with its original 
+#'     counts). It is *not* rarefied or zeroed out.
+#' 
+#' @section Zero-Sum Features:
+#'   Features (OTUs, ASVs, Genes) that lose all observations during rarefaction 
+#'   are **always retained** as columns/rows of zeros. This ensures the output 
+#'   matrix dimensions remain consistent with the input (barring dropped samples).
+#' 
 #' @export
 #' @examples
 #'     # A 4-sample x 5-OTU matrix with samples in rows.
@@ -60,24 +57,26 @@
 #'     counts
 #'     rowSums(counts)
 #'     
-#'     # Rarefy all samples to a depth of 13.
-#'     # Sample 'A' (0 counts) and 'D' (12 counts) will be dropped.
-#'     r_mtx <- rarefy(counts, depth = 13, seed = 1)
+#'     # Rarefy all samples to a depth of 18.
+#'     # Sample 'A' (13 counts) and 'D' (15 counts) will be dropped.
+#'     r_mtx <- rarefy(counts, depth = 18)
 #'     r_mtx
 #'     rowSums(r_mtx)
 #'     
 #'     # Keep under-sampled samples by setting `drop = FALSE`.
 #'     # Samples 'A' and 'D' are returned with their original counts.
-#'     rarefy(counts, depth = 13, drop = FALSE, seed = 1)
+#'     r_mtx <- rarefy(counts, depth = 18, drop = FALSE)
+#'     r_mtx
+#'     rowSums(r_mtx)
 #'     
 #'     # Perform 3 independent rarefactions.
-#'     r_list <- rarefy(counts, depth = 13, times = 3, seed = 1)
+#'     r_list <- rarefy(counts, times = 3)
 #'     length(r_list)
 #'     
 #'     # Sparse matrices are supported and their class is preserved.
 #'     if (requireNamespace('Matrix', quietly = TRUE)) {
 #'       counts_dgC <- Matrix::Matrix(counts, sparse = TRUE)
-#'       class(rarefy(counts_dgC, depth = 13))
+#'       str(rarefy(counts_dgC))
 #'     }
 #' 
 rarefy <- function (

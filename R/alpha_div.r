@@ -103,6 +103,8 @@ alpha_div <- function (
 #' A non-parametric estimator of species richness that separates features into abundant and rare groups.
 #' 
 #' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
 #' @family Richness metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -151,6 +153,8 @@ ace <- function (counts, cutoff = 10L, margin = 1L, cpus = n_cpus()) {
 #' A measure of the numerical importance of the most abundant species.
 #' 
 #' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
 #' @family Dominance metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -163,7 +167,8 @@ ace <- function (counts, cutoff = 10L, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
-#' max(x / sum(x))
+#' p <- x / sum(x)
+#' max(p)
 #' ```
 #' 
 #' @references
@@ -172,9 +177,11 @@ ace <- function (counts, cutoff = 10L, margin = 1L, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     berger(ex_counts)
-berger <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
+berger <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_alpha_div, ADIV_BERGER, counts, margin, norm, cpus, NULL)
 }
 
@@ -184,6 +191,8 @@ berger <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
 #' A diversity index derived from information theory, appropriate for fully censused communities.
 #' 
 #' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
 #' @family Diversity metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -222,6 +231,8 @@ brillouin <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' A non-parametric estimator of the lower bound of species richness.
 #' 
 #' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
 #' @family Richness metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -260,6 +271,8 @@ chao1 <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' Calculates the sum of the branch lengths for all species present in a sample.
 #' 
 #' @inherit documentation
+#' @inherit adiv_binary_normalized
+#' 
 #' @family Phylogenetic metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -292,6 +305,8 @@ faith <- function (counts, tree = NULL, margin = 1L, cpus = n_cpus()) {
 #' A parametric diversity index assuming species abundances follow a log-series distribution.
 #' 
 #' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
 #' @family Diversity metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -330,6 +345,8 @@ fisher <- function (counts, digits = 3L, margin = 1L, cpus = n_cpus()) {
 #' A transformation of the Simpson index that represents the "effective number of species".
 #' 
 #' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
 #' @family Diversity metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -338,6 +355,7 @@ fisher <- function (counts, digits = 3L, margin = 1L, cpus = n_cpus()) {
 #' \deqn{1 / \sum_{i = 1}^{n} P_i^2}
 #' 
 #' Where:
+#' * \eqn{n} : The number of features.
 #' * \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
 #' 
 #' **Base R Equivalent:**
@@ -352,9 +370,11 @@ fisher <- function (counts, digits = 3L, margin = 1L, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     inv_simpson(ex_counts)
-inv_simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
+inv_simpson <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_alpha_div, ADIV_INV_SIMPSON, counts, margin, norm, cpus, NULL)
 }
 
@@ -364,6 +384,8 @@ inv_simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus())
 #' A richness metric that normalizes the number of species by the log of the total sample size.
 #' 
 #' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
 #' @family Richness metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -403,6 +425,8 @@ margalef <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' A dominance index based on the Euclidean distance from the origin.
 #' 
 #' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
 #' @family Dominance metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -411,6 +435,7 @@ margalef <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' \deqn{\frac{X_T - \sqrt{\sum_{i = 1}^{n} (X_i)^2}}{X_T - \sqrt{X_T}}}
 #' 
 #' Where:
+#' * \eqn{n} : The number of features.
 #' * \eqn{X_i} : Integer count of the \eqn{i}-th feature.
 #' * \eqn{X_T} : Total of all counts.
 #' 
@@ -440,6 +465,8 @@ mcintosh <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' A richness metric that normalizes the number of species by the square root of the total sample size.
 #' 
 #' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
 #' @family Richness metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -477,6 +504,8 @@ menhinick <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' The count of unique features (richness) in a sample.
 #' 
 #' @inherit documentation
+#' @inherit adiv_binary_normalized
+#' 
 #' @family Richness metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -506,6 +535,8 @@ observed <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' A commonly used diversity index accounting for both abundance and evenness.
 #' 
 #' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
 #' @family Diversity metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -514,6 +545,7 @@ observed <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' \deqn{-\sum_{i = 1}^{n} P_i \times \ln(P_i)}
 #' 
 #' Where:
+#' * \eqn{n} : The number of features.
 #' * \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
 #' 
 #' **Base R Equivalent:**
@@ -530,9 +562,11 @@ observed <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     shannon(ex_counts)
-shannon <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
+shannon <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_alpha_div, ADIV_SHANNON, counts, margin, norm, cpus, NULL)
 }
 
@@ -542,6 +576,8 @@ shannon <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
 #' The probability that two entities taken at random from the dataset represent different types.
 #' 
 #' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
 #' @family Diversity metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
@@ -550,6 +586,7 @@ shannon <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
 #' \deqn{1 - \sum_{i = 1}^{n} P_i^2}
 #' 
 #' Where:
+#' * \eqn{n} : The number of features.
 #' * \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
 #' 
 #' **Base R Equivalent:**
@@ -564,9 +601,11 @@ shannon <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     simpson(ex_counts)
-simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
+simpson <- function (counts, margin = 1L, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_alpha_div, ADIV_SIMPSON, counts, margin, norm, cpus, NULL)
 }
 
@@ -576,6 +615,8 @@ simpson <- function (counts, norm = 'percent', margin = 1L, cpus = n_cpus()) {
 #' A richness estimator based on the concept of "squares" (counts of species observed once or twice).
 #' 
 #' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
 #' @family Richness metrics
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 

@@ -8,9 +8,8 @@ morisita(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.}
 
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
@@ -45,6 +44,23 @@ simp_y <- sum(y * (y - 1)) / (sum(y) * (sum(y) - 1))
 1 - ((2 * sum(x * y)) / ((simp_x + simp_y) * sum(x) * sum(y)))
 }\if{html}{\out{</div>}}
 }
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
+}
+
 \examples{
     morisita(ex_counts)
 }

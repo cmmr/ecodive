@@ -68,7 +68,7 @@ A \code{list} with the following elements.
 \item \code{int_only} : \code{TRUE} if metric requires integer counts; \code{FALSE} otherwise.
 \item \code{true_metric} : \code{TRUE} if metric is a true metric and satisfies the triangle inequality; \code{FALSE} if it is a non-metric dissimilarity; \code{NA} for alpha diversity metrics.
 \item \code{func} : The function for this metric, e.g. \code{ecodive::faith}
-\item \code{params} : Formal args for \code{func}, e.g. \code{c("counts", "tree", "cpus")}
+\item \code{params} : Formal args for \code{func}, e.g. \code{c("counts", "norm", "tree", "cpus")}
 }
 
 \strong{\code{list_metrics()}}

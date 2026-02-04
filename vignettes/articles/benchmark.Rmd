@@ -133,7 +133,9 @@ library(ggrepel)
 library(dplyr)
 library(Matrix)
 
-(n_cpus <- ecodive::n_cpus())
+n_cpus <- ecodive::n_cpus()
+Sys.setenv(RCPP_PARALLEL_NUM_THREADS = n_cpus) # for philentropy
+print(n_cpus)
 #> [1] 6
 
 # abdiv only accepts two samples at a time

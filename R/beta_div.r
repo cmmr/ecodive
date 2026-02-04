@@ -38,7 +38,12 @@ V_UNIFRAC <- 5L
 #' Beta Diversity Wrapper Function
 #' 
 #' @inherit documentation
+#' 
 #' @name beta_div
+#'        
+#' @param counts   A numeric matrix of count data (samples \eqn{\times} features). 
+#'        Typically contains absolute abundances (integer counts), though 
+#'        proportions are also accepted by some diversity metrics.
 #' 
 #' @param metric   The name of a beta diversity metric. One of `c('aitchison',
 #'   'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark',
@@ -99,9 +104,6 @@ V_UNIFRAC <- 5L
 #' 
 #' 
 #' 
-#' 
-#' 
-#' 
 #' **Flexible name matching**
 #' 
 #' Case insensitive and partial matching. Any runs of non-alpha characters are
@@ -129,7 +131,7 @@ V_UNIFRAC <- 5L
 beta_div <- function (
     counts, 
     metric, 
-    norm        = 'percent', 
+    norm        = 'none', 
     power       = 1.5, 
     pseudocount = NULL, 
     alpha       = 0.5, 
@@ -150,6 +152,7 @@ beta_div <- function (
 #' Calculates the Euclidean distance between centered log-ratio (CLR) transformed abundances.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -196,6 +199,8 @@ aitchison <- function (counts, pseudocount = NULL, margin = 1L, pairs = NULL, cp
 #' Measures the similarity of two probability distributions.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -209,7 +214,9 @@ aitchison <- function (counts, pseudocount = NULL, margin = 1L, pairs = NULL, cp
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' -log(sum(sqrt(x * y)))
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' -log(sum(sqrt(p * q)))
 #' ```
 #' 
 #' @references
@@ -218,9 +225,11 @@ aitchison <- function (counts, pseudocount = NULL, margin = 1L, pairs = NULL, cp
 #' @export
 #' @examples
 #'     bhattacharyya(ex_counts)
-bhattacharyya <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+bhattacharyya <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, NULL)
 }
 
@@ -230,15 +239,16 @@ bhattacharyya <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' A standard ecological metric quantifying the dissimilarity between communities.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Bray-Curtis dissimilarity is defined as:
-#' \deqn{\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} (P_i + Q_i)}}
+#' \deqn{\frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} (X_i + Y_i)}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -252,7 +262,7 @@ bhattacharyya <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' @export
 #' @examples
 #'     bray(ex_counts)
-bray <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+bray <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_BRAY, counts, margin, norm, pairs, cpus, NULL)
@@ -264,15 +274,16 @@ bray <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_
 #' A weighted version of the Manhattan distance, sensitive to differences when both values are small.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Canberra distance is defined as:
-#' \deqn{\sum_{i=1}^{n} \frac{|P_i - Q_i|}{P_i + Q_i}}
+#' \deqn{\sum_{i=1}^{n} \frac{|X_i - Y_i|}{X_i + Y_i}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -286,7 +297,7 @@ bray <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_
 #' @export
 #' @examples
 #'     canberra(ex_counts)
-canberra <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+canberra <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_CANBERRA, counts, margin, norm, pairs, cpus, NULL)
@@ -298,15 +309,16 @@ canberra <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' The maximum difference between any single feature across two samples.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Chebyshev distance is defined as:
-#' \deqn{\max(|P_i - Q_i|)}
+#' \deqn{\max(|X_i - Y_i|)}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' 
 #' Base R Equivalent: 
 #' ```r
@@ -319,7 +331,7 @@ canberra <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' @export
 #' @examples
 #'     chebyshev(ex_counts)
-chebyshev <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+chebyshev <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_CHEBYSHEV, counts, margin, norm, pairs, cpus, NULL)
@@ -331,6 +343,7 @@ chebyshev <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' Euclidean distance between normalized vectors.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -367,15 +380,16 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' Also known as the coefficient of divergence.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' Clark's divergence distance is defined as:
-#' \deqn{\sqrt{\sum_{i=1}^{n}\left(\frac{P_i - Q_i}{P_i + Q_i}\right)^{2}}}
+#' \deqn{\sqrt{\sum_{i=1}^{n}\left(\frac{X_i - Y_i}{X_i + Y_i}\right)^{2}}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -389,7 +403,7 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     clark(ex_counts)
-clark <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+clark <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_CLARK, counts, margin, norm, pairs, cpus, NULL)
@@ -401,6 +415,8 @@ clark <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' A probabilistic divergence metric.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -414,7 +430,9 @@ clark <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' 2 * sum((x - y)^2 / (x + y)^2)
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' 2 * sum((p - q)^2 / (p + q)^2)
 #' ```
 #' 
 #' @references
@@ -423,9 +441,11 @@ clark <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' @export
 #' @examples
 #'     divergence(ex_counts)
-divergence <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+divergence <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_beta_div, BDIV_DIVERGENCE, counts, margin, norm, pairs, cpus, NULL)
 }
 
@@ -435,15 +455,16 @@ divergence <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' The straight-line distance between two points in multidimensional space.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Euclidean distance is defined as:
-#' \deqn{\sqrt{\sum_{i=1}^{n} (P_i - Q_i)^2}}
+#' \deqn{\sqrt{\sum_{i=1}^{n} (X_i - Y_i)^2}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -457,7 +478,7 @@ divergence <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' @export
 #' @examples
 #'     euclidean(ex_counts)
-euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+euclidean <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, NULL)
@@ -469,15 +490,16 @@ euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' A distance metric that normalizes differences by the range of the feature.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Gower distance is defined as:
-#' \deqn{\frac{1}{n}\sum_{i=1}^{n}\frac{|P_i - Q_i|}{R_i}}
+#' \deqn{\frac{1}{n}\sum_{i=1}^{n}\frac{|X_i - Y_i|}{R_i}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{R_i} : The range of the \eqn{i}-th feature across all samples (max - min).
 #' * \eqn{n} : The number of features.
 #' 
@@ -494,7 +516,7 @@ euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' @export
 #' @examples
 #'     gower(ex_counts)
-gower <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+gower <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -509,6 +531,8 @@ gower <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' A distance metric related to the Bhattacharyya distance, often used for community data with many zeros.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -522,7 +546,9 @@ gower <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' sqrt(sum((sqrt(x) - sqrt(y)) ^ 2))
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' sqrt(sum((sqrt(p) - sqrt(q)) ^ 2))
 #' ```
 #' 
 #' @references
@@ -533,8 +559,9 @@ gower <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n
 #' @export
 #' @examples
 #'     hellinger(ex_counts)
-hellinger <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+hellinger <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
   
   sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL)
@@ -548,6 +575,7 @@ hellinger <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' A similarity index based on Simpson's diversity index, suitable for abundance data.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -571,7 +599,7 @@ hellinger <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' @export
 #' @examples
 #'     horn(ex_counts)
-horn <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+horn <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_HORN, counts, margin, norm, pairs, cpus, NULL)
@@ -583,6 +611,8 @@ horn <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_
 #' The square root of the Jensen-Shannon divergence.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -596,7 +626,9 @@ horn <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' sqrt(sum(x * log(2 * x / (x+y)), y * log(2 * y / (x+y))) / 2)
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' sqrt(sum(p * log(2 * p / (p+q)), q * log(2 * q / (p+q))) / 2)
 #' ```
 #' 
 #' @references
@@ -605,8 +637,9 @@ horn <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_
 #' @export
 #' @examples
 #'     jensen(ex_counts)
-jensen <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+jensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
   
   jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL)
@@ -620,6 +653,8 @@ jensen <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' A symmetrized and smoothed version of the Kullback-Leibler divergence.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -633,7 +668,9 @@ jensen <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' sum(x * log(2 * x / (x+y)), y * log(2 * y / (x+y))) / 2
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' sum(p * log(2 * p / (p+q)), q * log(2 * q / (p+q))) / 2
 #' ```
 #' 
 #' @references
@@ -642,9 +679,11 @@ jensen <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' @export
 #' @examples
 #'     jsd(ex_counts)
-jsd <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+jsd <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL)
 }
 
@@ -654,15 +693,16 @@ jsd <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_c
 #' A log-based distance metric that is robust to outliers.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Lorentzian distance is defined as:
-#' \deqn{\sum_{i=1}^{n}\ln{(1 + |P_i - Q_i|)}}
+#' \deqn{\sum_{i=1}^{n}\ln{(1 + |X_i - Y_i|)}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -676,7 +716,7 @@ jsd <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_c
 #' @export
 #' @examples
 #'     lorentzian(ex_counts)
-lorentzian <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+lorentzian <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_LORENTZIAN, counts, margin, norm, pairs, cpus, NULL)
@@ -688,15 +728,16 @@ lorentzian <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' The sum of absolute differences, also known as the taxicab geometry.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Manhattan distance is defined as:
-#' \deqn{\sum_{i=1}^{n} |P_i - Q_i|}
+#' \deqn{\sum_{i=1}^{n} |X_i - Y_i|}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -710,7 +751,7 @@ lorentzian <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' @export
 #' @examples
 #'     manhattan(ex_counts)
-manhattan <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+manhattan <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_MANHATTAN, counts, margin, norm, pairs, cpus, NULL)
@@ -722,6 +763,8 @@ manhattan <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' A distance measure closely related to the Hellinger distance.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -735,7 +778,9 @@ manhattan <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' sqrt(sum((sqrt(x) - sqrt(y)) ^ 2))
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' sqrt(sum((sqrt(p) - sqrt(q)) ^ 2))
 #' ```
 #' 
 #' @references
@@ -744,8 +789,9 @@ manhattan <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus
 #' @export
 #' @examples
 #'     matusita(ex_counts)
-matusita <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+matusita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
   
   sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL)
@@ -759,15 +805,16 @@ matusita <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' A generalized metric that includes Euclidean and Manhattan distance as special cases.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Minkowski distance is defined as:
-#' \deqn{\sqrt[p]{\sum_{i=1}^{n} (P_i - Q_i)^p}}
+#' \deqn{\sqrt[p]{\sum_{i=1}^{n} (X_i - Y_i)^p}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' * \eqn{p} : The geometry of the space (power parameter).
 #' 
@@ -795,7 +842,7 @@ matusita <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus 
 #' @export
 #' @examples
 #'     minkowski(ex_counts, power = 2) # Equivalent to Euclidean
-minkowski <- function (counts, norm = 'percent', power = 1.5, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+minkowski <- function (counts, norm = 'none', power = 1.5, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_MINKOWSKI, counts, margin, norm, pairs, cpus, power)
@@ -807,6 +854,8 @@ minkowski <- function (counts, norm = 'percent', power = 1.5, margin = 1L, pairs
 #' A measure of overlap between samples that is independent of sample size. Requires integer counts.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_assert_integer
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -848,15 +897,16 @@ morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' Also known as the Bray-Curtis dissimilarity when applied to abundance data, but formulated slightly differently.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Motyka dissimilarity is defined as:
-#' \deqn{\frac{\sum_{i=1}^{n} \max(P_i, Q_i)}{\sum_{i=1}^{n} (P_i + Q_i)}}
+#' \deqn{\frac{\sum_{i=1}^{n} \max(X_i, Y_i)}{\sum_{i=1}^{n} (X_i + Y_i)}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -870,7 +920,7 @@ morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     motyka(ex_counts)
-motyka <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+motyka <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_MOTYKA, counts, margin, norm, pairs, cpus, NULL)
@@ -882,6 +932,8 @@ motyka <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' A chi-squared based distance metric for comparing probability distributions.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -895,7 +947,9 @@ motyka <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' 2 * sum((x - y)^2 / (x + y))
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' 2 * sum((p - q)^2 / (p + q))
 #' ```
 #' 
 #' @references
@@ -904,8 +958,9 @@ motyka <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' @export
 #' @examples
 #'     psym_chisq(ex_counts)
-psym_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
   
   scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, NULL)
@@ -919,15 +974,16 @@ psym_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' A distance metric related to the Bray-Curtis and Jaccard indices.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Soergel distance is defined as:
-#' \deqn{\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i, Q_i)}}
+#' \deqn{\frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} \max(X_i, Y_i)}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -941,7 +997,7 @@ psym_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpu
 #' @export
 #' @examples
 #'     soergel(ex_counts)
-soergel <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+soergel <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_SOERGEL, counts, margin, norm, pairs, cpus, NULL)
@@ -953,6 +1009,8 @@ soergel <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus =
 #' The squared version of the Chi-Squared distance.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -966,7 +1024,9 @@ soergel <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus =
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' sum((x - y)^2 / (x + y))
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' sum((p - q)^2 / (p + q))
 #' ```
 #' 
 #' @references
@@ -975,9 +1035,11 @@ soergel <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus =
 #' @export
 #' @examples
 #'     squared_chisq(ex_counts)
-squared_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+squared_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, NULL)
 }
 
@@ -987,6 +1049,8 @@ squared_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' The squared version of the Chord distance.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1000,6 +1064,8 @@ squared_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' p <- x / sum(x)
+#' q <- y / sum(y)
 #' sum((sqrt(x) - sqrt(y)) ^ 2)
 #' ```
 #' 
@@ -1009,9 +1075,11 @@ squared_chisq <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' @export
 #' @examples
 #'     squared_chord(ex_counts)
-squared_chord <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+squared_chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
+  
   .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL)
 }
 
@@ -1021,15 +1089,16 @@ squared_chord <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' The squared Euclidean distance between two vectors.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Squared Euclidean distance is defined as:
-#' \deqn{\sum_{i=1}^{n} (P_i - Q_i)^2}
+#' \deqn{\sum_{i=1}^{n} (X_i - Y_i)^2}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -1043,7 +1112,7 @@ squared_chord <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, 
 #' @export
 #' @examples
 #'     squared_euclidean(ex_counts)
-squared_euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+squared_euclidean <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
@@ -1058,6 +1127,8 @@ squared_euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NU
 #' A symmetric divergence measure based on the Jensen-Shannon divergence.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1071,7 +1142,9 @@ squared_euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NU
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' sum(x * log(2 * x / (x+y)), y * log(2 * y / (x+y)))
+#' p <- x / sum(x)
+#' q <- y / sum(y)
+#' sum(p * log(2 * p / (p+q)), q * log(2 * y / (p+q)))
 #' ```
 #' 
 #' @references
@@ -1080,8 +1153,9 @@ squared_euclidean <- function (counts, norm = 'percent', margin = 1L, pairs = NU
 #' @export
 #' @examples
 #'     topsoe(ex_counts)
-topsoe <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+topsoe <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
+  norm <- 'percent'
   validate_args()
   
   jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL)
@@ -1095,15 +1169,16 @@ topsoe <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' A distance metric derived from the Hedges' distance.
 #' 
 #' @inherit documentation
+#' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
 #' @details
 #' The Wave Hedges distance is defined as:
-#' \deqn{\frac{\sum_{i=1}^{n} |P_i - Q_i|}{\sum_{i=1}^{n} \max(P_i, Q_i)}}
+#' \deqn{\sum_{i=1}^{n}\frac{|X_i - Y_i|}{\max(X_i, Y_i)}}
 #' 
 #' Where:
-#' * \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+#' * \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 #' * \eqn{n} : The number of features.
 #' 
 #' Base R Equivalent: 
@@ -1117,7 +1192,7 @@ topsoe <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = 
 #' @export
 #' @examples
 #'     wave_hedges(ex_counts)
-wave_hedges <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+wave_hedges <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   .Call(C_beta_div, BDIV_WAVE_HEDGES, counts, margin, norm, pairs, cpus, NULL)
@@ -1134,6 +1209,8 @@ wave_hedges <- function (counts, norm = 'percent', margin = 1L, pairs = NULL, cp
 #' Measures the minimum number of substitutions required to change one string into the other.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_binary_normalized
+#' 
 #' @family Presence/Absence metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1170,6 +1247,8 @@ hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' Measures dissimilarity between sample sets.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_binary_normalized
+#' 
 #' @family Presence/Absence metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1208,6 +1287,8 @@ jaccard <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' Also known as the cosine similarity for binary data.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_binary_normalized
+#' 
 #' @family Presence/Absence metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1244,6 +1325,8 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' A statistic used for comparing the similarity of two samples.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_binary_normalized
+#' 
 #' @family Presence/Absence metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1286,6 +1369,8 @@ sorensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' A phylogenetic distance metric that accounts for the presence/absence of lineages.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_binary_normalized
+#' 
 #' @family Phylogenetic metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1317,6 +1402,8 @@ unweighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
 #' A phylogenetic distance metric that accounts for the relative abundance of lineages.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Phylogenetic metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1348,6 +1435,8 @@ weighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, cp
 #' Weighted UniFrac normalized by the tree length to allow comparison between trees.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Phylogenetic metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1379,6 +1468,8 @@ normalized_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
 #' A unified UniFrac distance that balances the weight of abundant and rare lineages.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Phylogenetic metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 
@@ -1415,6 +1506,8 @@ generalized_unifrac <- function (counts, tree = NULL, alpha = 0.5, margin = 1L, 
 #' A weighted UniFrac that adjusts for the expected variance of the metric.
 #' 
 #' @inherit documentation
+#' @inherit bdiv_percent_normalized
+#' 
 #' @family Phylogenetic metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
 #' 

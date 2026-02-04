@@ -9,9 +9,8 @@ between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
 \code{normalized_unifrac()}.}
 
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -21,6 +20,16 @@ Default: \code{10}.}
 
 \item{digits}{Precision of the returned values, in number of decimal
 places. E.g. the default \code{digits=3} could return \code{6.392}.}
+
+\item{norm}{Normalize the incoming counts. Options are:
+\itemize{
+\item \code{'none'}: No transformation.
+\item \code{'percent'}: Relative abundance (sample abundances sum to 1).
+\item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
+\item \code{'clr'}: Centered log ratio.
+}
+
+Default: \code{'none'}.}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -34,16 +43,6 @@ communities (\eqn{p}). Default: \code{1.5}}
 taking \code{log(0)} for unobserved features. The default, \code{NULL}, selects
 the smallest non-zero value in \code{counts}.}
 
-\item{norm}{Normalize the incoming counts. Options are:
-\itemize{
-\item \code{'percent'}: Relative abundance (sample abundances sum to 1).
-\item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
-\item \code{'clr'}: Centered log ratio.
-\item \code{'none'}: No transformation.
-}
-
-Default: \code{'percent'}, which is the expected input for these formulas.}
-
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
 class (e.g. \code{phyloseq}). Default: \code{1}}
@@ -56,4 +55,21 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 \description{
 documentation
 }
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
+}
+
 \keyword{internal}

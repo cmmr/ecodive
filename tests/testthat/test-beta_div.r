@@ -28,7 +28,7 @@ test_that("beta diversity", {
   
   expect_equal(
     object   = as.vector(bray(counts, pairs = 1:2)), 
-    expected = c(0.444444444444444,  0.428571428571429, NA, NA, NA, NA) )
+    expected = c(0.354838709677419, 0.352941176470588, NA, NA, NA, NA) )
   
   expect_equal(
     object   = as.vector(unweighted_unifrac(counts, tree, pairs = 1:2)), 
@@ -72,10 +72,10 @@ test_that("beta diversity", {
   
   # Bray-Curtis ====
   
-  expect_equal( # vegan(counts_p, 'bray')
+  expect_equal( # vegan(counts, 'bray')
     object   = as.vector(bray(counts)), 
-    expected = c(0.444444444444444,  0.428571428571429, 0.666666666666667, 
-                 0.0555555555555556, 0.277777777777778, 0.333333333333333 ))
+    expected = c(0.354838709677419,  0.352941176470588, 0.642857142857143, 
+                 0.0769230769230769, 0.212121212121212, 0.222222222222222 ))
   
   expect_equal( # binary bray == sorensen
     object   = as.vector(bray(counts, norm = 'binary')), 
@@ -85,19 +85,18 @@ test_that("beta diversity", {
   
   # Canberra ====
   
-  expect_equal( # philentropy(counts_p, 'canberra')
+  expect_equal( # philentropy(counts, 'canberra')
     object   = as.vector(canberra(counts)), 
-    expected = c(2.40984523587544,  2.3965844402277,  3.07142857142857, 
-                 0.186013986013986, 1.29090909090909, 1.38405797101449 ))
+    expected = c(2.09090909090909,  2.07692307692308, 3, 
+                 0.225490196078431, 1.11111111111111, 1.05263157894737 ))
   
   
   
   # Chebyshev ====
   
-  expect_equal( # philentropy(counts_p, 'chebyshev')
+  expect_equal( # philentropy(counts, 'chebyshev')
     object   = as.vector(chebyshev(counts)), 
-    expected = c(0.444444444444444, 0.428571428571429, 0.666666666666667, 
-                 0.0555555555555555, 0.277777777777778, 0.333333333333333 ))
+    expected = c(8, 9, 10, 2, 5, 7) )
   
   
   
@@ -112,10 +111,10 @@ test_that("beta diversity", {
   
   # Clark ====
   
-  expect_equal( # philentropy(counts_p, 'clark')
+  expect_equal( # philentropy(counts, 'clark')
     object   = as.vector(clark(counts)), 
-    expected = c(1.44492010612392,  1.44269812849309, 1.73352301421594, 
-                 0.120466597385448, 1.02384787093099, 1.03683979330648 ))
+    expected = c(1.41713247891999,  1.416304049194,   1.73205080756888, 
+                 0.176742709581568, 1.00615390423749, 1.00138408370739 ))
   
   
   
@@ -130,10 +129,10 @@ test_that("beta diversity", {
   
   # Euclidean ====
   
-  expect_equal( # vegan(counts_p, 'euclidean')
+  expect_equal( # vegan(counts, 'euclidean')
     object   = as.vector(euclidean(counts)), 
-    expected = c(0.516121852261427,  0.495224006562069, 0.826898230594723, 
-                 0.0700933402089512, 0.360041149911548, 0.420560041253707 ))
+    expected = c(8.30662386291807, 9.2736184954957, 11.8321595661992, 
+                 2.23606797749979, 5.3851648071345,  7.07106781186548 ))
   
   
   
@@ -148,10 +147,10 @@ test_that("beta diversity", {
   
   # Gower ====
   
-  expect_equal( # vegan(counts_p, 'gower'); cluster::daisy(counts_p, 'gower')
+  expect_equal( # vegan(counts, 'gower'); cluster::daisy(counts, 'gower')
     object   = as.vector(gower(counts)), 
-    expected = c(0.558796296296296,  0.584126984126984, 0.67, 
-                 0.0830026455026455, 0.26287037037037,  0.345873015873016 ))
+    expected = c(0.388571428571429,  0.408571428571429, 0.571428571428571, 
+                 0.0771428571428571, 0.182857142857143, 0.22))
   
   
   
@@ -209,19 +208,18 @@ test_that("beta diversity", {
   
   # Lorentzian ====
   
-  expect_equal( # philentropy(counts_p, 'lorentzian')
+  expect_equal( # philentropy(counts, 'lorentzian')
     object   = as.vector(lorentzian(counts)), 
-    expected = c(0.781028960937464, 0.757135170723214, 1.08342650968623, 
-                 0.108730994488089, 0.499860374765412, 0.592227950955567 ))
+    expected = c(3.98898404656427, 4.0943445622221,  5.44241771052179, 
+                 1.79175946922805, 2.89037175789616, 2.77258872223978))
   
   
   
   # Manhattan ====
   
-  expect_equal( # vegan(counts_p, 'manhattan')
+  expect_equal( # vegan(counts, 'manhattan')
     object   = as.vector(manhattan(counts)), 
-    expected = c(0.888888888888889, 0.857142857142857, 1.33333333333333, 
-                 0.111111111111111, 0.555555555555556, 0.666666666666667 ))
+    expected = c(11, 12, 18, 3, 7, 8) )
   
   
   
@@ -236,10 +234,10 @@ test_that("beta diversity", {
   
   # Minkowski ====
   
-  expect_equal( # philentropy(counts_p, 'minkowski', p = 1.5)
+  expect_equal( # philentropy(counts, 'minkowski', p = 1.5)
     object   = as.vector(minkowski(counts, power = 1.5)), 
-    expected = c(0.604789476468175,  0.581036116909551, 0.952662775454783, 
-                 0.0808742307794622, 0.411793808581902, 0.485245384676773 ))
+    expected = c(8.87866660953074, 9.83182738119092, 13.417493822195, 
+                 2.44726081477148, 5.81121051366182,  7.24976150371949 ))
   
   
   
@@ -254,10 +252,10 @@ test_that("beta diversity", {
   
   # Motyka ====
   
-  expect_equal( # philentropy(counts_p, 'motyka')
+  expect_equal( # philentropy(counts, 'motyka')
     object   = as.vector(motyka(counts)), 
-    expected = c(0.722222222222222, 0.714285714285714, 0.833333333333333, 
-                 0.527777777777778, 0.638888888888889, 0.666666666666667 ))
+    expected = c(0.67741935483871,  0.676470588235294, 0.821428571428571, 
+                 0.538461538461538, 0.606060606060606, 0.611111111111111))
   
   
   
@@ -290,10 +288,10 @@ test_that("beta diversity", {
   
   # Soergel ====
   
-  expect_equal( # philentropy(counts_p, 'soergel')
+  expect_equal( # philentropy(counts, 'soergel')
     object   = as.vector(soergel(counts)), 
-    expected = c(0.615384615384615, 0.6,               0.8, 
-                 0.105263157894737, 0.434782608695652, 0.5 ))
+    expected = c(0.523809523809524, 0.521739130434783, 0.782608695652174, 
+                 0.142857142857143, 0.35,              0.363636363636364 ))
   
   expect_equal( # binary soergel == jaccard
     object   = as.vector(soergel(counts, norm = 'binary')), 
@@ -329,10 +327,9 @@ test_that("beta diversity", {
   
   # Squared Euclidean ====
   
-  expect_equal( # philentropy(counts_p, 'squared_euclidean')
+  expect_equal( # philentropy(counts, 'squared_euclidean')
     object   = as.vector(squared_euclidean(counts)), 
-    expected = c(0.266381766381766,   0.245246816675388, 0.683760683760684, 
-                 0.00491307634164777, 0.12962962962963,  0.17687074829932 ))
+    expected = c(69, 86, 140, 5, 29, 50) )
   
   
   
@@ -365,10 +362,10 @@ test_that("beta diversity", {
   
   # Wave Hedges ====
   
-  expect_equal( # philentropy(counts_p, 'wavehedges')
+  expect_equal( # philentropy(counts, 'wavehedges')
     object   = as.vector(wave_hedges(counts)), 
-    expected = c(2.67592592592593,  2.65873015873016, 3.13333333333333, 
-                 0.345238095238095, 1.5,              1.64285714285714 ))
+    expected = c(2.16666666666667,  2.14285714285714, 3, 
+                 0.396825396825397, 1.2,              1.1 ))
   
   
   

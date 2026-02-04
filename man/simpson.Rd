@@ -4,23 +4,12 @@
 \alias{simpson}
 \title{Gini-Simpson Index}
 \usage{
-simpson(counts, norm = "percent", margin = 1L, cpus = n_cpus())
+simpson(counts, margin = 1L, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
-
-\item{norm}{Normalize the incoming counts. Options are:
-\itemize{
-\item \code{'percent'}: Relative abundance (sample abundances sum to 1).
-\item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
-\item \code{'clr'}: Centered log ratio.
-\item \code{'none'}: No transformation.
-}
-
-Default: \code{'percent'}, which is the expected input for these formulas.}
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.}
 
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
@@ -38,6 +27,7 @@ The Gini-Simpson index is defined as:
 
 Where:
 \itemize{
+\item \eqn{n} : The number of features.
 \item \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
 }
 
@@ -47,6 +37,23 @@ Where:
 1 - sum(p ** 2)
 }\if{html}{\out{</div>}}
 }
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
+}
+
 \examples{
     simpson(ex_counts)
 }

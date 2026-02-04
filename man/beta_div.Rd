@@ -7,7 +7,7 @@
 beta_div(
   counts,
   metric,
-  norm = "percent",
+  norm = "none",
   power = 1.5,
   pseudocount = NULL,
   alpha = 0.5,
@@ -19,9 +19,8 @@ beta_div(
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted by some diversity metrics.}
 
 \item{metric}{The name of a beta diversity metric. One of \code{c('aitchison', 'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'psym_chisq', 'soergel', 'sorensen', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')}. Flexible
 matching is supported (see below). Programmatic access via
@@ -29,13 +28,13 @@ matching is supported (see below). Programmatic access via
 
 \item{norm}{Normalize the incoming counts. Options are:
 \itemize{
+\item \code{'none'}: No transformation.
 \item \code{'percent'}: Relative abundance (sample abundances sum to 1).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
-\item \code{'none'}: No transformation.
 }
 
-Default: \code{'percent'}, which is the expected input for these formulas.}
+Default: \code{'none'}.}
 
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
@@ -125,6 +124,23 @@ UniFrac names can be shortened to the first letter plus "unifrac". E.g.
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the metrics list.
 }
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
+}
+
 \examples{
     # Example counts matrix
     ex_counts

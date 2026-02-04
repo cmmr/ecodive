@@ -8,9 +8,8 @@ fisher(counts, digits = 3L, margin = 1L, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.}
 
 \item{digits}{Precision of the returned values, in number of decimal
 places. E.g. the default \code{digits=3} could return \code{6.392}.}
@@ -41,6 +40,23 @@ The value of \eqn{\alpha} is solved for iteratively.
 
 The precision (number of decimal places) to use when solving the equation.
 }
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
+}
+
 \examples{
     fisher(ex_counts)
 }

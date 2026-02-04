@@ -17,22 +17,21 @@ alpha_div(
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.}
 
 \item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson', 'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson', 'squares')}. Case-insensitive and partial name matching is supported.
 Programmatic access via \code{list_metrics('alpha')}.}
 
 \item{norm}{Normalize the incoming counts. Options are:
 \itemize{
+\item \code{'none'}: No transformation.
 \item \code{'percent'}: Relative abundance (sample abundances sum to 1).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
-\item \code{'none'}: No transformation.
 }
 
-Default: \code{'percent'}, which is the expected input for these formulas.}
+Default: \code{'none'}.}
 
 \item{cutoff}{The maximum number of observations to consider "rare".
 Default: \code{10}.}
@@ -94,6 +93,23 @@ integer counts will return an error message.
 
 }
 }
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
+}
+
 \examples{
     # Example counts matrix
     ex_counts

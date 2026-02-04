@@ -6,7 +6,7 @@
 \usage{
 minkowski(
   counts,
-  norm = "percent",
+  norm = "none",
   power = 1.5,
   margin = 1L,
   pairs = NULL,
@@ -15,19 +15,18 @@ minkowski(
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
-Also supports \code{phyloseq}, \code{rbiom}, \code{SummarizedExperiment}, and
-\code{TreeSummarizedExperiment} objects. See \code{vignette('performance')} for
-optimizing large datasets.}
+Typically contains absolute abundances (integer counts), though
+proportions are also accepted.}
 
 \item{norm}{Normalize the incoming counts. Options are:
 \itemize{
+\item \code{'none'}: No transformation.
 \item \code{'percent'}: Relative abundance (sample abundances sum to 1).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
-\item \code{'none'}: No transformation.
 }
 
-Default: \code{'percent'}, which is the expected input for these formulas.}
+Default: \code{'none'}.}
 
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
@@ -49,11 +48,11 @@ A generalized metric that includes Euclidean and Manhattan distance as special c
 }
 \details{
 The Minkowski distance is defined as:
-\deqn{\sqrt[p]{\sum_{i=1}^{n} (P_i - Q_i)^p}}
+\deqn{\sqrt[p]{\sum_{i=1}^{n} (X_i - Y_i)^p}}
 
 Where:
 \itemize{
-\item \eqn{P_i}, \eqn{Q_i} : Proportional abundances of the \eqn{i}-th feature.
+\item \eqn{X_i}, \eqn{Y_i} : Absolute abundances of the \eqn{i}-th feature.
 \item \eqn{n} : The number of features.
 \item \eqn{p} : The geometry of the space (power parameter).
 }
@@ -75,6 +74,23 @@ Base R Equivalent:
 sum(abs(x - y)^p) ^ (1/p)
 }\if{html}{\out{</div>}}
 }
+\section{Input Types}{
+
+
+The \code{counts} parameter is designed to accept a simple numeric matrix, but
+seamlessly supports objects from the following biological data packages:
+\itemize{
+\item \code{phyloseq}
+\item \code{rbiom}
+\item \code{SummarizedExperiment}
+\item \code{TreeSummarizedExperiment}
+}
+
+For large datasets, standard matrix operations may be slow. See
+\code{vignette('performance')} for details on using optimized formats
+(e.g. sparse matrices) and parallel processing.
+}
+
 \examples{
     minkowski(ex_counts, power = 2) # Equivalent to Euclidean
 }
