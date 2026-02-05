@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,8 +50,8 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aitchison</span><span class="op">(</span></span>
 <span>  <span class="va">counts</span>,</span>
-<span>  pseudocount <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  pseudocount <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -67,16 +67,16 @@ Typically contains absolute abundances (integer counts), though
 proportions are also accepted.</p></dd>
 
 
-<dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
-<dd><p>The value to add to all counts in <code>counts</code> to prevent
-taking <code>log(0)</code> for unobserved features. The default, <code>NULL</code>, selects
-the smallest non-zero value in <code>counts</code>.</p></dd>
-
-
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
 <dd><p>The margin containing samples. <code>1</code> if samples are rows,
 <code>2</code> if samples are columns. Ignored when <code>counts</code> is a special object
 class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
+
+
+<dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
+<dd><p>Value added to counts to handle zeros when
+<code>norm = 'clr'</code>. Ignored for other normalization methods. See
+<strong>Pseudocount</strong> section.</p></dd>
 
 
 <dt id="arg-pairs">pairs<a class="anchor" aria-label="anchor" href="#arg-pairs"></a></dt>
@@ -98,13 +98,26 @@ $$\sqrt{\sum_{i=1}^{n} [(\ln{X_i} - X_L) - (\ln{Y_i} - Y_L)]^2}$$</p>
 <p>Where:</p><ul><li><p>\(X_i\), \(Y_i\) : Absolute counts for the \(i\)-th feature.</p></li>
 <li><p>\(X_L\), \(Y_L\) : Mean log of abundances. \(X_L = \frac{1}{n}\sum_{i=1}^{n} \ln{X_i}\).</p></li>
 <li><p>\(n\) : The number of features.</p></li>
-</ul><p><strong>Parameter: pseudocount</strong></p>
-<p>Because the formula uses logarithms, zeros in the data must be handled.
-The <code>pseudocount</code> argument adds a small value to all counts prior to calculation.</p>
-<p>Base R Equivalent:</p>
+</ul><p>Base R Equivalent:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">(</span><span class="va">y</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">y</span> <span class="op">+</span> <span class="va">pseudocount</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span><span class="op">-</span><span class="va">y</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="co"># Euclidean distance</span></span></code></pre><p></p></div>
+    </div>
+    <div class="section level2">
+    <h2 id="pseudocount">Pseudocount<a class="anchor" aria-label="anchor" href="#pseudocount"></a></h2>
+
+
+
+<p>Zeros are undefined in the Aitchison (CLR) transformation. If
+<code>pseudocount</code> is <code>NULL</code> (the default) and zeros are detected,
+the function uses half the minimum non-zero value (<code>min(x[x&gt;0]) / 2</code>)
+and issues a warning.</p>
+<p>To suppress the warning, provide an explicit value (e.g., <code>1</code>).</p>
+<p><strong>Why this matters:</strong> The choice of pseudocount is not neutral; it acts as
+a weighting factor that can significantly distort downstream results,
+especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.
+(2017) for open-access discussions on the mathematical implications, or
+Costea et al. (2014) for the impact on community clustering.</p>
     </div>
     <div class="section level2">
     <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
@@ -124,6 +137,9 @@ seamlessly supports objects from the following biological data packages:</p><ul>
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Aitchison, J. (1986). The statistical analysis of compositional data. Chapman and Hall. <a href="https://doi.org/10.1007/978-94-009-4109-3" class="external-link">doi:10.1007/978-94-009-4109-3</a></p>
 <p>Aitchison, J. (1982). The statistical analysis of compositional data. <em>Journal of the Royal Statistical Society: Series B (Methodological)</em>, 44(2), 139-160. <a href="https://doi.org/10.1111/j.2517-6161.1982.tb01195.x" class="external-link">doi:10.1111/j.2517-6161.1982.tb01195.x</a></p>
+<p>Costea, P. I., Zeller, G., Sunagawa, S., &amp; Bork, P. (2014). A fair comparison. <em>Nature Methods</em>, 11(4), 359. <a href="https://doi.org/10.1038/nmeth.2897" class="external-link">doi:10.1038/nmeth.2897</a></p>
+<p>Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., &amp; Egozcue, J. J. (2017). Microbiome datasets are compositional: and this is not optional. <em>Frontiers in Microbiology</em>, 8, 2224. <a href="https://doi.org/10.3389/fmicb.2017.02224" class="external-link">doi:10.3389/fmicb.2017.02224</a></p>
+<p>Kaul, A., Mandal, S., Davidov, O., &amp; Peddada, S. D. (2017). Analysis of microbiome data in the presence of excess zeros. <em>Frontiers in Microbiology</em>, 8, 2114. <a href="https://doi.org/10.3389/fmicb.2017.02114" class="external-link">doi:10.3389/fmicb.2017.02114</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

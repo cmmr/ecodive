@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,9 +99,9 @@ communities (\(p\)). Default: <code>1.5</code></p></dd>
 
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
-<dd><p>The value to add to all counts in <code>counts</code> to prevent
-taking <code>log(0)</code> for unobserved features. The default, <code>NULL</code>, selects
-the smallest non-zero value in <code>counts</code>.</p></dd>
+<dd><p>Value added to counts to handle zeros when
+<code>norm = 'clr'</code>. Ignored for other normalization methods. See
+<strong>Pseudocount</strong> section.</p></dd>
 
 
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>

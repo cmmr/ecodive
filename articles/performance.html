@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -177,23 +177,31 @@ specifying <code>norm = 'none'</code>.</p>
 </h4>
 <p>The one exception to this rule is the centered log-ratio
 transformation (<code>norm = 'clr'</code>), used for calculating
-Aitchison distance. A standard CLR transformation turns a sparse matrix
-into a “dense” matrix (where all zeros become non-zero values), which
-dramatically increases memory consumption.</p>
-<p><code>ecodive</code>’s internal CLR implementation uses special
-techniques to calculate the result while preserving the sparse matrix
-structure as much as possible. Therefore, for CLR-based metrics, you
-will achieve better performance and lower memory usage by letting
+Aitchison distance.</p>
+<p>A standard CLR workflow requires replacing all zeros with a small
+pseudocount before transformation (since <code>log(0)</code> is
+undefined). This replacement step instantly turns a sparse matrix
+(mostly zeros) into a fully dense matrix (no zeros), which dramatically
+increases memory consumption.</p>
+<p><code>ecodive</code>’s implementation of CLR-compatible beta
+diversity metrics is <strong>pseudocount-aware</strong>. Instead of
+modifying the entire matrix in memory, the C engine applies the
+pseudocount dynamically <em>during</em> the distance calculation. This
+allows the input matrix to remain sparse and enables the algorithm to
+work directly on the original data pointer without creating a massive,
+dense copy of the matrix object.</p>
+<p>Therefore, for CLR-based metrics, you will achieve significantly
+better performance and lower memory usage by letting
 <code>ecodive</code> handle the transformation.</p>
 <p><strong>Do this:</strong></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Best for CLR: Let ecodive handle the transformation</span></span>
-<span><span class="va">aitchison_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/aitchison.html">aitchison</a></span><span class="op">(</span><span class="va">optimal_counts</span>, margin <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Best for CLR: Let ecodive handle the transformation dynamically</span></span>
+<span><span class="va">aitchison_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/aitchison.html">aitchison</a></span><span class="op">(</span><span class="va">optimal_counts</span>, margin <span class="op">=</span> <span class="fl">2L</span>, pseudocount <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Not this:</strong></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Inefficient for CLR: Pre-transforming creates a dense matrix</span></span>
+<code class="sourceCode R"><span><span class="co"># Inefficient for CLR: Adding pseudocounts creates a dense matrix</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stat.boogaart.de/compositions/" class="external-link">compositions</a></span><span class="op">)</span></span>
-<span><span class="va">dense_matrix</span> <span class="op">&lt;-</span> <span class="fu">clr</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">optimal_counts</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># Becomes dense</span></span>
+<span><span class="va">dense_matrix</span>   <span class="op">&lt;-</span> <span class="fu">clr</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">optimal_counts</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span> <span class="co"># Becomes dense</span></span>
 <span><span class="va">aitchison_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/euclidean.html">euclidean</a></span><span class="op">(</span><span class="va">dense_matrix</span>, norm <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>

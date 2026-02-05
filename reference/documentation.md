@@ -60,9 +60,8 @@ documentation
 
 - pseudocount:
 
-  The value to add to all counts in `counts` to prevent taking `log(0)`
-  for unobserved features. The default, `NULL`, selects the smallest
-  non-zero value in `counts`.
+  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
+  other normalization methods. See **Pseudocount** section.
 
 - margin:
 

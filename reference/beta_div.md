@@ -8,13 +8,13 @@ Beta Diversity Wrapper Function
 beta_div(
   counts,
   metric,
+  margin = 1L,
   norm = "none",
-  power = 1.5,
   pseudocount = NULL,
+  power = 1.5,
   alpha = 0.5,
   tree = NULL,
   pairs = NULL,
-  margin = 1L,
   cpus = n_cpus()
 )
 ```
@@ -34,6 +34,12 @@ beta_div(
   Flexible matching is supported (see below). Programmatic access via
   `list_metrics('beta')`.
 
+- margin:
+
+  The margin containing samples. `1` if samples are rows, `2` if samples
+  are columns. Ignored when `counts` is a special object class (e.g.
+  `phyloseq`). Default: `1`
+
 - norm:
 
   Normalize the incoming counts. Options are:
@@ -49,16 +55,15 @@ beta_div(
 
   Default: `'none'`.
 
+- pseudocount:
+
+  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
+  other normalization methods. See **Pseudocount** section.
+
 - power:
 
   Scaling factor for the magnitude of differences between communities
   (\\p\\). Default: `1.5`
-
-- pseudocount:
-
-  The value to add to all counts in `counts` to prevent taking `log(0)`
-  for unobserved features. The default, `NULL`, selects the smallest
-  non-zero value in `counts`.
 
 - alpha:
 
@@ -79,12 +84,6 @@ beta_div(
   default value (`NULL`) calculates all-vs-all. Provide a numeric or
   logical vector specifying positions in the distance matrix to
   calculate. See examples.
-
-- margin:
-
-  The margin containing samples. `1` if samples are rows, `2` if samples
-  are columns. Ignored when `counts` is a special object class (e.g.
-  `phyloseq`). Default: `1`
 
 - cpus:
 
@@ -171,6 +170,26 @@ For large datasets, standard matrix operations may be slow. See
 [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
 for details on using optimized formats (e.g. sparse matrices) and
 parallel processing.
+
+## Pseudocount
+
+The `pseudocount` parameter is only relevant when `norm = 'clr'`.
+
+Zeros are undefined in the centered log-ratio (CLR) transformation. If
+`norm = 'clr'`, `pseudocount` is `NULL` (the default), and zeros are
+detected, the function uses half the minimum non-zero value
+(`min(x[x>0]) / 2`) and issues a warning.
+
+To suppress the warning, provide an explicit value (e.g., `1`).
+
+**Why this matters:** The choice of pseudocount is not neutral; it acts
+as a weighting factor that can significantly distort downstream results,
+especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.
+(2017) for open-access discussions on the mathematical implications, or
+Costea et al. (2014) for the impact on community clustering.
+
+See [`aitchison`](https://cmmr.github.io/ecodive/reference/aitchison.md)
+for references.
 
 ## Examples
 

@@ -5,7 +5,14 @@ A probabilistic divergence metric.
 ## Usage
 
 ``` r
-divergence(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
+divergence(
+  counts,
+  margin = 1L,
+  norm = "none",
+  pseudocount = NULL,
+  pairs = NULL,
+  cpus = n_cpus()
+)
 ```
 
 ## Arguments
@@ -15,6 +22,12 @@ divergence(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
   A numeric matrix of count data (samples \\\times\\ features).
   Typically contains absolute abundances (integer counts), though
   proportions are also accepted.
+
+- margin:
+
+  The margin containing samples. `1` if samples are rows, `2` if samples
+  are columns. Ignored when `counts` is a special object class (e.g.
+  `phyloseq`). Default: `1`
 
 - norm:
 
@@ -31,11 +44,10 @@ divergence(counts, norm = "none", margin = 1L, pairs = NULL, cpus = n_cpus())
 
   Default: `'none'`.
 
-- margin:
+- pseudocount:
 
-  The margin containing samples. `1` if samples are rows, `2` if samples
-  are columns. Ignored when `counts` is a special object class (e.g.
-  `phyloseq`). Default: `1`
+  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
+  other normalization methods. See **Pseudocount** section.
 
 - pairs:
 
@@ -85,6 +97,26 @@ For large datasets, standard matrix operations may be slow. See
 [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
 for details on using optimized formats (e.g. sparse matrices) and
 parallel processing.
+
+## Pseudocount
+
+The `pseudocount` parameter is only relevant when `norm = 'clr'`.
+
+Zeros are undefined in the centered log-ratio (CLR) transformation. If
+`norm = 'clr'`, `pseudocount` is `NULL` (the default), and zeros are
+detected, the function uses half the minimum non-zero value
+(`min(x[x>0]) / 2`) and issues a warning.
+
+To suppress the warning, provide an explicit value (e.g., `1`).
+
+**Why this matters:** The choice of pseudocount is not neutral; it acts
+as a weighting factor that can significantly distort downstream results,
+especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.
+(2017) for open-access discussions on the mathematical implications, or
+Costea et al. (2014) for the impact on community clustering.
+
+See [`aitchison`](https://cmmr.github.io/ecodive/reference/aitchison.md)
+for references.
 
 ## References
 
