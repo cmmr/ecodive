@@ -77,8 +77,13 @@ Where:
 
 - \\n\\ : The number of features.
 
-Base R Equivalent: “\`r r \<- abs(x - y) n \<- length(x) \# \<– not
-`sum(x|y)` sum(abs(x-y) / r) / n
+Base R Equivalent:
+
+    x <- ex_counts[1,]
+    y <- ex_counts[2,]
+    r <- abs(x - y)
+    n <- length(x)
+    sum(abs(x-y) / r) / n
 
 ## Input Types
 

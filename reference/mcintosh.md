@@ -43,6 +43,7 @@ Where:
 
 **Base R Equivalent:**
 
+    x <- ex_counts[1,]
     (sum(x) - sqrt(sum(x^2))) / (sum(x) - sqrt(sum(x)))
 
 ## Input Types

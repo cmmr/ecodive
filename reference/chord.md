@@ -49,6 +49,8 @@ Where:
 
 Base R Equivalent:
 
+    x <- ex_counts[1,]
+    y <- ex_counts[2,]
     sqrt(sum(((x / sqrt(sum(x ^ 2))) - (y / sqrt(sum(y ^ 2))))^2))
 
 ## Input Types

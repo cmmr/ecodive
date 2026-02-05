@@ -48,6 +48,8 @@ Where:
 
 Base R Equivalent:
 
+    x <- ex_counts[1,]
+    y <- ex_counts[2,]
     1 - sum(x & y) / sqrt(sum(x>0) * sum(y>0))
 
 ## Input Types

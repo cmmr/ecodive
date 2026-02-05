@@ -41,6 +41,7 @@ Where:
 
 **Base R Equivalent:**
 
+    x <- ex_counts[1,]
     sum(x > 0) / sqrt(sum(x))
 
 ## Input Types

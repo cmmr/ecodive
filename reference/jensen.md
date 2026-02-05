@@ -50,8 +50,8 @@ Where:
 
 Base R Equivalent:
 
-    p <- x / sum(x)
-    q <- y / sum(y)
+    x <- ex_counts[1,]; p <- x / sum(x)
+    y <- ex_counts[2,]; q <- y / sum(y)
     sqrt(sum(p * log(2 * p / (p+q)), q * log(2 * q / (p+q))) / 2)
 
 ## Input Types

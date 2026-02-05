@@ -42,6 +42,21 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.2.5" id="ecodive-225">ecodive 2.2.5<a class="anchor" aria-label="anchor" href="#ecodive-225"></a></h2>
+<ul><li>
+<p>When using CLR normalization:</p>
+<ul><li>Warns when zeros are detected and <code>pseudocount</code> is <code>NULL</code>.</li>
+<li>Then continues with <code>pseudocount &lt;- min(counts[counts&gt;0]) / 2</code>.</li>
+</ul></li>
+</ul><div class="section level3">
+<h3 id="breaking-changes-2-2-5">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-2-2-5"></a></h3>
+<ul><li>
+<code>norm</code> now defaults to <code>"none"</code> instead of <code>"percent"</code>.</li>
+<li>
+<code>norm</code> parameter was removed from some beta diversity functions.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.4" id="ecodive-224">ecodive 2.2.4<a class="anchor" aria-label="anchor" href="#ecodive-224"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-2-2-4">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-2-2-4"></a></h3>
@@ -66,7 +81,7 @@
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.2" id="ecodive-222">ecodive 2.2.2<a class="anchor" aria-label="anchor" href="#ecodive-222"></a></h2><p class="text-muted">CRAN release: 2026-01-16</p>
-<ul><li>Drop explicit zeroes from sparse matrices after rarefaction.</li>
+<ul><li>Drop explicit zeros from sparse matrices after rarefaction.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.1" id="ecodive-221">ecodive 2.2.1<a class="anchor" aria-label="anchor" href="#ecodive-221"></a></h2><p class="text-muted">CRAN release: 2025-12-12</p>

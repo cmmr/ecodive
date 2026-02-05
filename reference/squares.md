@@ -46,6 +46,7 @@ Where:
 
 **Base R Equivalent:**
 
+    x  <- ex_counts[1,]
     N  <- sum(x)      # sampling depth
     S  <- sum(x > 0)  # observed features
     F1 <- sum(x == 1) # singletons

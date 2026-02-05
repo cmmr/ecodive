@@ -75,6 +75,8 @@ Where:
 
 Base R Equivalent:
 
+    x <- ex_counts[1,]
+    y <- ex_counts[2,]
     sum((x-y)^2)
 
 ## Input Types

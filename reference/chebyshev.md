@@ -72,6 +72,8 @@ Where:
 
 Base R Equivalent:
 
+    x <- ex_counts[1,]
+    y <- ex_counts[2,]
     max(abs(x-y))
 
 ## Input Types

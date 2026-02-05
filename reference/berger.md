@@ -39,6 +39,7 @@ Where:
 
 **Base R Equivalent:**
 
+    x <- ex_counts[1,]
     p <- x / sum(x)
     max(p)
 

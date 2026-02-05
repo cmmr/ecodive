@@ -35,6 +35,7 @@ non-zero abundance: \$\$n\$\$
 
 **Base R Equivalent:**
 
+    x <- ex_counts[1,]
     sum(x > 0)
 
 ## Input Types

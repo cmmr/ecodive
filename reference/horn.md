@@ -77,6 +77,8 @@ Where:
 
 Base R Equivalent:
 
+    x <- ex_counts[1,]
+    y <- ex_counts[2,]
     z <- sum(x^2) / sum(x)^2 + sum(y^2) / sum(y)^2
     1 - ((2 * sum(x * y)) / (z * sum(x) * sum(y)))
 

@@ -44,6 +44,7 @@ Where:
 
 **Base R Equivalent:**
 
+    x <- ex_counts[1,]
     sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
 
 ## Input Types

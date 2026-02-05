@@ -101,6 +101,8 @@ equation.
 Base R Equivalent:
 
     p <- 1.5
+    x <- ex_counts[1,]
+    y <- ex_counts[2,]
     sum(abs(x - y)^p) ^ (1/p)
 
 ## Input Types

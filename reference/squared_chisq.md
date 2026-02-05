@@ -48,8 +48,8 @@ Where:
 
 Base R Equivalent:
 
-    p <- x / sum(x)
-    q <- y / sum(y)
+    x <- ex_counts[1,]; p <- x / sum(x)
+    y <- ex_counts[2,]; q <- y / sum(y)
     sum((p - q)^2 / (p + q))
 
 ## Input Types

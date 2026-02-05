@@ -78,7 +78,8 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
 $$\max(P_i)$$</p>
 <p>Where:</p><ul><li><p>\(P_i\) : Proportional abundance of the \(i\)-th feature.</p></li>
 </ul><p><strong>Base R Equivalent:</strong></p>
-<p></p><div class="sourceCode r"><pre><code><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">x</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<p></p><div class="sourceCode r"><pre><code><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">ex_counts</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">x</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></code></pre><p></p></div>
     </div>
     <div class="section level2">

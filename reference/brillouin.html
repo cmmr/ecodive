@@ -79,7 +79,8 @@ $$\frac{\ln{[(\sum_{i = 1}^{n} X_i)!]} - \sum_{i = 1}^{n} \ln{(X_i!)}}{\sum_{i =
 <p>Where:</p><ul><li><p>\(n\) : The number of features.</p></li>
 <li><p>\(X_i\) : Integer count of the \(i\)-th feature.</p></li>
 </ul><p><strong>Base R Equivalent:</strong></p>
-<p></p><div class="sourceCode r"><pre><code><span><span class="co"># note: lgamma(x + 1) == log(x!)</span></span>
+<p></p><div class="sourceCode r"><pre><code><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">ex_counts</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span>
+<span><span class="co"># note: lgamma(x + 1) == log(x!)</span></span>
 <span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">lgamma</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">lgamma</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre><p></p></div>
     </div>
     <div class="section level2">
