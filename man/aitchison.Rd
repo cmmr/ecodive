@@ -6,8 +6,8 @@
 \usage{
 aitchison(
   counts,
-  pseudocount = NULL,
   margin = 1L,
+  pseudocount = NULL,
   pairs = NULL,
   cpus = n_cpus()
 )
@@ -17,13 +17,13 @@ aitchison(
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
 
-\item{pseudocount}{The value to add to all counts in \code{counts} to prevent
-taking \code{log(0)} for unobserved features. The default, \code{NULL}, selects
-the smallest non-zero value in \code{counts}.}
-
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
 class (e.g. \code{phyloseq}). Default: \code{1}}
+
+\item{pseudocount}{Value added to counts to handle zeros when
+\code{norm = 'clr'}. Ignored for other normalization methods. See
+\strong{Pseudocount} section.}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -47,11 +47,6 @@ Where:
 \item \eqn{n} : The number of features.
 }
 
-\strong{Parameter: pseudocount}
-
-Because the formula uses logarithms, zeros in the data must be handled.
-The \code{pseudocount} argument adds a small value to all counts prior to calculation.
-
 Base R Equivalent:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- log((x + pseudocount) / exp(mean(log(x + pseudocount))))
@@ -59,6 +54,23 @@ y <- log((y + pseudocount) / exp(mean(log(y + pseudocount))))
 sqrt(sum((x-y)^2)) # Euclidean distance
 }\if{html}{\out{</div>}}
 }
+\section{Pseudocount}{
+
+
+Zeros are undefined in the Aitchison (CLR) transformation. If
+\code{pseudocount} is \code{NULL} (the default) and zeros are detected,
+the function uses half the minimum non-zero value (\code{min(x[x>0]) / 2})
+and issues a warning.
+
+To suppress the warning, provide an explicit value (e.g., \code{1}).
+
+\strong{Why this matters:} The choice of pseudocount is not neutral; it acts as
+a weighting factor that can significantly distort downstream results,
+especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.
+(2017) for open-access discussions on the mathematical implications, or
+Costea et al. (2014) for the impact on community clustering.
+}
+
 \section{Input Types}{
 
 
@@ -83,6 +95,12 @@ For large datasets, standard matrix operations may be slow. See
 Aitchison, J. (1986). The statistical analysis of compositional data. Chapman and Hall. \doi{10.1007/978-94-009-4109-3}
 
 Aitchison, J. (1982). The statistical analysis of compositional data. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 44(2), 139-160. \doi{10.1111/j.2517-6161.1982.tb01195.x}
+
+Costea, P. I., Zeller, G., Sunagawa, S., & Bork, P. (2014). A fair comparison. \emph{Nature Methods}, 11(4), 359. \doi{10.1038/nmeth.2897}
+
+Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J. (2017). Microbiome datasets are compositional: and this is not optional. \emph{Frontiers in Microbiology}, 8, 2224. \doi{10.3389/fmicb.2017.02224}
+
+Kaul, A., Mandal, S., Davidov, O., & Peddada, S. D. (2017). Analysis of microbiome data in the presence of excess zeros. \emph{Frontiers in Microbiology}, 8, 2114. \doi{10.3389/fmicb.2017.02114}
 }
 \seealso{
 \code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}

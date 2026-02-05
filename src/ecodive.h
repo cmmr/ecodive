@@ -74,7 +74,7 @@ void* free_one(void *ptr);
 void* maybe_free_one(void *ptr);
 
 /* --- normalize.c --- */
-void normalize(ecomatrix_t *em, SEXP norm, int n_threads_);
+void normalize(ecomatrix_t *em, SEXP norm, int n_threads_, SEXP sexp_pseudocount);
 
 
 #endif

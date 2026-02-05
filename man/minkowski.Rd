@@ -6,9 +6,10 @@
 \usage{
 minkowski(
   counts,
-  norm = "none",
-  power = 1.5,
   margin = 1L,
+  power = 1.5,
+  norm = "none",
+  pseudocount = NULL,
   pairs = NULL,
   cpus = n_cpus()
 )
@@ -17,6 +18,13 @@ minkowski(
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
+
+\item{margin}{The margin containing samples. \code{1} if samples are rows,
+\code{2} if samples are columns. Ignored when \code{counts} is a special object
+class (e.g. \code{phyloseq}). Default: \code{1}}
+
+\item{power}{Scaling factor for the magnitude of differences between
+communities (\eqn{p}). Default: \code{1.5}}
 
 \item{norm}{Normalize the incoming counts. Options are:
 \itemize{
@@ -28,12 +36,9 @@ proportions are also accepted.}
 
 Default: \code{'none'}.}
 
-\item{power}{Scaling factor for the magnitude of differences between
-communities (\eqn{p}). Default: \code{1.5}}
-
-\item{margin}{The margin containing samples. \code{1} if samples are rows,
-\code{2} if samples are columns. Ignored when \code{counts} is a special object
-class (e.g. \code{phyloseq}). Default: \code{1}}
+\item{pseudocount}{Value added to counts to handle zeros when
+\code{norm = 'clr'}. Ignored for other normalization methods. See
+\strong{Pseudocount} section.}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
@@ -89,6 +94,26 @@ seamlessly supports objects from the following biological data packages:
 For large datasets, standard matrix operations may be slow. See
 \code{vignette('performance')} for details on using optimized formats
 (e.g. sparse matrices) and parallel processing.
+}
+
+\section{Pseudocount}{
+
+The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}.
+
+Zeros are undefined in the centered log-ratio (CLR) transformation. If
+\code{norm = 'clr'}, \code{pseudocount} is \code{NULL} (the default), and
+zeros are detected, the function uses half the minimum non-zero value
+(\code{min(x[x>0]) / 2}) and issues a warning.
+
+To suppress the warning, provide an explicit value (e.g., \code{1}).
+
+\strong{Why this matters:} The choice of pseudocount is not neutral; it acts as
+a weighting factor that can significantly distort downstream results,
+especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.
+(2017) for open-access discussions on the mathematical implications, or
+Costea et al. (2014) for the impact on community clustering.
+
+See \code{\link{aitchison}} for references.
 }
 
 \examples{

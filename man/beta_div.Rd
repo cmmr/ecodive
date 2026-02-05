@@ -7,13 +7,13 @@
 beta_div(
   counts,
   metric,
+  margin = 1L,
   norm = "none",
-  power = 1.5,
   pseudocount = NULL,
+  power = 1.5,
   alpha = 0.5,
   tree = NULL,
   pairs = NULL,
-  margin = 1L,
   cpus = n_cpus()
 )
 }
@@ -26,6 +26,10 @@ proportions are also accepted by some diversity metrics.}
 matching is supported (see below). Programmatic access via
 \code{list_metrics('beta')}.}
 
+\item{margin}{The margin containing samples. \code{1} if samples are rows,
+\code{2} if samples are columns. Ignored when \code{counts} is a special object
+class (e.g. \code{phyloseq}). Default: \code{1}}
+
 \item{norm}{Normalize the incoming counts. Options are:
 \itemize{
 \item \code{'none'}: No transformation.
@@ -36,12 +40,12 @@ matching is supported (see below). Programmatic access via
 
 Default: \code{'none'}.}
 
+\item{pseudocount}{Value added to counts to handle zeros when
+\code{norm = 'clr'}. Ignored for other normalization methods. See
+\strong{Pseudocount} section.}
+
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
-
-\item{pseudocount}{The value to add to all counts in \code{counts} to prevent
-taking \code{log(0)} for unobserved features. The default, \code{NULL}, selects
-the smallest non-zero value in \code{counts}.}
 
 \item{alpha}{How much weight to give to relative abundances; a value
 between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
@@ -56,10 +60,6 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
 Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.}
-
-\item{margin}{The margin containing samples. \code{1} if samples are rows,
-\code{2} if samples are columns. Ignored when \code{counts} is a special object
-class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -139,6 +139,26 @@ seamlessly supports objects from the following biological data packages:
 For large datasets, standard matrix operations may be slow. See
 \code{vignette('performance')} for details on using optimized formats
 (e.g. sparse matrices) and parallel processing.
+}
+
+\section{Pseudocount}{
+
+The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}.
+
+Zeros are undefined in the centered log-ratio (CLR) transformation. If
+\code{norm = 'clr'}, \code{pseudocount} is \code{NULL} (the default), and
+zeros are detected, the function uses half the minimum non-zero value
+(\code{min(x[x>0]) / 2}) and issues a warning.
+
+To suppress the warning, provide an explicit value (e.g., \code{1}).
+
+\strong{Why this matters:} The choice of pseudocount is not neutral; it acts as
+a weighting factor that can significantly distort downstream results,
+especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.
+(2017) for open-access discussions on the mathematical implications, or
+Costea et al. (2014) for the impact on community clustering.
+
+See \code{\link{aitchison}} for references.
 }
 
 \examples{

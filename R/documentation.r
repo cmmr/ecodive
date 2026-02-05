@@ -41,9 +41,9 @@
 #' @param power   Scaling factor for the magnitude of differences between
 #'        communities (\eqn{p}). Default: `1.5`
 #' 
-#' @param pseudocount   The value to add to all counts in `counts` to prevent 
-#'        taking `log(0)` for unobserved features. The default, `NULL`, selects 
-#'        the smallest non-zero value in `counts`.
+#' @param pseudocount Value added to counts to handle zeros when 
+#'        \code{norm = 'clr'}. Ignored for other normalization methods. See 
+#'        **Pseudocount** section.
 #' 
 #' @param margin  The margin containing samples. `1` if samples are rows, 
 #'        `2` if samples are columns. Ignored when `counts` is a special object 
@@ -68,6 +68,31 @@
 #'   `vignette('performance')` for details on using optimized formats 
 #'   (e.g. sparse matrices) and parallel processing.
 #'   
+NULL
+
+
+#' documentation
+#' 
+#' @name pseudocount_section
+#' @keywords internal
+#' 
+#' @section Pseudocount:
+#'   The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}.
+#'   
+#'   Zeros are undefined in the centered log-ratio (CLR) transformation. If
+#'   \code{norm = 'clr'}, \code{pseudocount} is \code{NULL} (the default), and 
+#'   zeros are detected, the function uses half the minimum non-zero value 
+#'   (\code{min(x[x>0]) / 2}) and issues a warning.
+#'   
+#'   To suppress the warning, provide an explicit value (e.g., \code{1}).
+#'   
+#'   **Why this matters:** The choice of pseudocount is not neutral; it acts as
+#'   a weighting factor that can significantly distort downstream results, 
+#'   especially for sparse datasets. See Gloor et al. (2017) and Kaul et al. 
+#'   (2017) for open-access discussions on the mathematical implications, or 
+#'   Costea et al. (2014) for the impact on community clustering.
+#'   
+#'   See \code{\link{aitchison}} for references.
 NULL
 
 

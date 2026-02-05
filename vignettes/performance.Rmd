@@ -74,21 +74,25 @@ simpson_vals <- simpson(rel_abund, norm = 'none', margin = 2L)
 
 #### The Exception: Centered Log-Ratio (CLR)
 
-The one exception to this rule is the centered log-ratio transformation (`norm = 'clr'`), used for calculating Aitchison distance. A standard CLR transformation turns a sparse matrix into a "dense" matrix (where all zeros become non-zero values), which dramatically increases memory consumption.
+The one exception to this rule is the centered log-ratio transformation (`norm = 'clr'`), used for calculating Aitchison distance.
 
-`ecodive`'s internal CLR implementation uses special techniques to calculate the result while preserving the sparse matrix structure as much as possible. Therefore, for CLR-based metrics, you will achieve better performance and lower memory usage by letting `ecodive` handle the transformation.
+A standard CLR workflow requires replacing all zeros with a small pseudocount before transformation (since `log(0)` is undefined). This replacement step instantly turns a sparse matrix (mostly zeros) into a fully dense matrix (no zeros), which dramatically increases memory consumption.
+
+`ecodive`'s implementation of CLR-compatible beta diversity metrics is **pseudocount-aware**. Instead of modifying the entire matrix in memory, the C engine applies the pseudocount dynamically *during* the distance calculation. This allows the input matrix to remain sparse and enables the algorithm to work directly on the original data pointer without creating a massive, dense copy of the matrix object.
+
+Therefore, for CLR-based metrics, you will achieve significantly better performance and lower memory usage by letting `ecodive` handle the transformation.
 
 **Do this:**
 ```r
-# Best for CLR: Let ecodive handle the transformation
-aitchison_dist <- aitchison(optimal_counts, margin = 2L)
+# Best for CLR: Let ecodive handle the transformation dynamically
+aitchison_dist <- aitchison(optimal_counts, margin = 2L, pseudocount = 0.5)
 ```
 
 **Not this:**
 ```r
-# Inefficient for CLR: Pre-transforming creates a dense matrix
+# Inefficient for CLR: Adding pseudocounts creates a dense matrix
 library(compositions)
-dense_matrix <- clr(t(as.matrix(optimal_counts)) + 1) # Becomes dense
+dense_matrix   <- clr(t(as.matrix(optimal_counts)) + 0.5) # Becomes dense
 aitchison_dist <- euclidean(dense_matrix, norm = 'none')
 ```
 

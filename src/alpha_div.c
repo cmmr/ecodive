@@ -459,7 +459,7 @@ SEXP C_alpha_div(
   sexp_extra = &sexp_extra_args;
   
   ecomatrix_t *em = new_ecomatrix(sexp_otu_mtx, sexp_margin);
-  if (!isNull(sexp_norm)) normalize(em, sexp_norm, n_threads);
+  if (!isNull(sexp_norm)) normalize(em, sexp_norm, n_threads, R_NilValue);
   
   n_samples = em->n_samples;
   pos_vec   = em->pos_vec;

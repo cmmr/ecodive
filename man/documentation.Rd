@@ -39,9 +39,9 @@ distance matrix to calculate. See examples.}
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
 
-\item{pseudocount}{The value to add to all counts in \code{counts} to prevent
-taking \code{log(0)} for unobserved features. The default, \code{NULL}, selects
-the smallest non-zero value in \code{counts}.}
+\item{pseudocount}{Value added to counts to handle zeros when
+\code{norm = 'clr'}. Ignored for other normalization methods. See
+\strong{Pseudocount} section.}
 
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object

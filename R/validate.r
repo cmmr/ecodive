@@ -12,8 +12,8 @@ validate_args <- function () {
   env  <- parent.frame()
   args <- ls(env)
   
-  # move counts, pseudocount, and margin to head of the line
-  args <- unique(c(intersect(c('counts', 'pseudocount', 'margin'), args), sort(args)))
+  # move counts, norm, pseudocount, and margin to head of the line
+  args <- unique(c(intersect(c('counts', 'norm', 'pseudocount', 'margin'), args), sort(args)))
   
   for (arg in args)
     do.call(paste0('validate_', arg), list(env))
@@ -281,21 +281,95 @@ validate_power <- function (env = parent.frame()) {
 
 
 validate_pseudocount <- function (env = parent.frame()) {
-  tryCatch(
-    with(env, {
+  with(env, {
+    
+    if (!identical(norm, NORM_CLR)) {
+      pseudocount <- NULL
+    }
+    
+    else {
+      
+      mtx_pkg <- get_matrix_package(counts)
+      
+      val_range <- switch(
+        mtx_pkg,
+        'base'   = range(counts),
+        'slam'   = range(counts$v),
+        'Matrix' = range(counts@x) )
+      
+      if (length(val_range) == 2 && !all(is.finite(val_range)))
+        stop('`counts` contains non-finite values; cannot perform CLR normalization.')
+      
+      min_val <- val_range[1]
+      max_val <- val_range[2]
+      
+      if (min_val < 0)
+        stop('`counts` contains negative values; cannot perform CLR normalization.')
+      
+      if (max_val == 0)
+        stop('`counts` contains only zeros; cannot perform CLR normalization.')
+      
+      if (min_val == max_val)
+        stop('`counts` contains a single unique value; cannot perform CLR normalization.')
+      
       
       if (!is.null(pseudocount)) {
-        pseudocount <- as.double(pseudocount)
-        stopifnot(length(pseudocount) == 1)
-        stopifnot(!is.na(pseudocount))
-        stopifnot(pseudocount >= 0)
+        
+        tryCatch(
+          expr = {
+            stopifnot(is.numeric(pseudocount))
+            pseudocount <- as.double(pseudocount)
+            stopifnot(length(pseudocount) == 1)
+            stopifnot(!is.na(pseudocount))
+            stopifnot(pseudocount > 0)
+          },
+          error = function (e) {
+            stop('`pseudocount` must be a single positive number.')
+        })
+        
+      }
+      else {
+        
+        has_zeros <- min_val == 0
+        
+        # Check for zeros in sparse matrices
+        if (!has_zeros && mtx_pkg != 'base')
+          has_zeros <- switch(
+            mtx_pkg,
+            'slam'   = length(counts$v) < counts$nrow * counts$ncol,
+            'Matrix' = length(counts@x) < prod(dim(counts)) )
+        
+        
+        if (!has_zeros) {
+          
+          pseudocount <- NULL
+          
+        } else {
+          
+          # Calculate a "smart" default (half the smallest non-zero value)
+          # This is generally safer than '1' for proportional data.
+          pseudocount <- switch(
+            mtx_pkg,
+            'base'   = min(counts[counts > 0]),
+            'slam'   = min(counts$v[counts$v > 0]),
+            'Matrix' = min(counts@x[counts@x > 0]) )
+          
+          pseudocount <- pseudocount / 2
+          
+          warning(
+            call. = FALSE, 
+            paste0(
+              "Zeros detected in data. Using pseudocount = ", format(pseudocount, digits = 3), "\n",
+              "Calculated using formula: min(counts[counts > 0]) / 2.\n",
+              "To suppress this warning, provide an explicit `pseudocount` argument." ))
+        }
+        
+        remove('has_zeros')
       }
       
-    }),
-    
-    error = function (e) 
-      stop(e$message, '\n`pseudocount` must be a single positive number.')
-  )
+      remove('mtx_pkg', 'val_range', 'min_val')
+    }
+  })
 }
 
 
@@ -315,10 +389,7 @@ validate_margin <- function (env = parent.frame()) {
 validate_norm <- function (env = parent.frame()) {
   with(env, {
     
-    if (!is.null(norm)) {
-      
-      pseudocount <- attr(norm, 'pseudocount')
-      
+    if (!is.null(norm))
       norm <- switch(
         EXPR = match.arg(
           arg     = tolower(norm), 
@@ -328,14 +399,6 @@ validate_norm <- function (env = parent.frame()) {
         'chord'   = NORM_CHORD,
         'binary'  = NORM_BINARY,
         'clr'     = NORM_CLR )
-      
-      if (identical(norm, NORM_CLR)) {
-        validate_pseudocount()
-        attr(norm, 'pseudocount') <- pseudocount
-      }
-      
-      remove('pseudocount')
-    }
     
   })
 }
@@ -484,18 +547,27 @@ validate_warn <- function (env = parent.frame()) {
 assert_integer_counts <- function (env = parent.frame()) {
   with(env, {
     
-    if (is.matrix(counts)) {
-      if (!all(counts %% 1 == 0))
-        stop('`counts` must be whole numbers (integers).')
-      
-    } else if (inherits(counts, 'simple_triplet_matrix')) {
-      if (!all(counts$v %% 1 == 0))
-        stop('`counts` must be whole numbers (integers).')
-      
-    } else {
-      if (!all(counts@x %% 1 == 0))
-        stop('`counts` must be whole numbers (integers).')
-    }
+    all_ints <- switch(
+      get_matrix_package(counts),
+      'base'   = all(counts   %% 1 == 0),
+      'slam'   = all(counts$v %% 1 == 0),
+      'Matrix' = all(counts@x %% 1 == 0) )
     
+    if (!isTRUE(all_ints))
+      stop('`counts` must be whole numbers (integers).')
+    
+    remove('all_ints')
   })
 }
+
+get_matrix_package <- function (counts) {
+  
+  if (is.matrix(counts)) {
+    return ('base')
+  } else if (inherits(counts, 'simple_triplet_matrix')) {
+    return ('slam')
+  } else {
+    return ('Matrix')
+  }
+}
+

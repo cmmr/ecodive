@@ -56,9 +56,11 @@ test_that("beta diversity", {
                  0.250928909965064, 1.6566104027154,  1.88303098843395 ))
   
   expect_equal( # clr euclidean == aitchison
-    object   = as.vector(euclidean(counts, norm = 'clr')), 
-    expected = as.vector(aitchison(counts)) )
+    object   = as.vector(euclidean(counts, norm = 'clr', pseudocount = 1)), 
+    expected = as.vector(aitchison(counts, pseudocount = 1)) )
   
+  expect_warning(aitchison(counts))
+  expect_error(aitchison(counts - 1))
   
   
   # Bhattacharyya ====

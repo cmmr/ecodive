@@ -38,6 +38,7 @@ V_UNIFRAC <- 5L
 #' Beta Diversity Wrapper Function
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @name beta_div
 #'        
@@ -131,13 +132,13 @@ V_UNIFRAC <- 5L
 beta_div <- function (
     counts, 
     metric, 
+    margin      = 1L, 
     norm        = 'none', 
-    power       = 1.5, 
     pseudocount = NULL, 
+    power       = 1.5, 
     alpha       = 0.5, 
     tree        = NULL, 
     pairs       = NULL, 
-    margin      = 1L, 
     cpus        = n_cpus() ) {
   
   metric <- match_metric(metric, div = 'beta')
@@ -165,11 +166,6 @@ beta_div <- function (
 #' * \eqn{X_L}, \eqn{Y_L} : Mean log of abundances. \eqn{X_L = \frac{1}{n}\sum_{i=1}^{n} \ln{X_i}}.
 #' * \eqn{n} : The number of features.
 #' 
-#' **Parameter: pseudocount**
-#' 
-#' Because the formula uses logarithms, zeros in the data must be handled. 
-#' The `pseudocount` argument adds a small value to all counts prior to calculation.
-#' 
 #' Base R Equivalent: 
 #' ```r
 #' x <- log((x + pseudocount) / exp(mean(log(x + pseudocount))))
@@ -177,20 +173,41 @@ beta_div <- function (
 #' sqrt(sum((x-y)^2)) # Euclidean distance
 #' ```
 #' 
+#' @section Pseudocount:
+#' 
+#'   Zeros are undefined in the Aitchison (CLR) transformation. If
+#'   \code{pseudocount} is \code{NULL} (the default) and zeros are detected,
+#'   the function uses half the minimum non-zero value (\code{min(x[x>0]) / 2})
+#'   and issues a warning.
+#'   
+#'   To suppress the warning, provide an explicit value (e.g., \code{1}).
+#'   
+#'   **Why this matters:** The choice of pseudocount is not neutral; it acts as
+#'   a weighting factor that can significantly distort downstream results, 
+#'   especially for sparse datasets. See Gloor et al. (2017) and Kaul et al. 
+#'   (2017) for open-access discussions on the mathematical implications, or 
+#'   Costea et al. (2014) for the impact on community clustering.
+#' 
 #' @references
 #' Aitchison, J. (1986). The statistical analysis of compositional data. Chapman and Hall. \doi{10.1007/978-94-009-4109-3}
 #' 
 #' Aitchison, J. (1982). The statistical analysis of compositional data. *Journal of the Royal Statistical Society: Series B (Methodological)*, 44(2), 139-160. \doi{10.1111/j.2517-6161.1982.tb01195.x}
-#'
+#' 
+#' Costea, P. I., Zeller, G., Sunagawa, S., & Bork, P. (2014). A fair comparison. *Nature Methods*, 11(4), 359. \doi{10.1038/nmeth.2897}
+#' 
+#' Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J. (2017). Microbiome datasets are compositional: and this is not optional. *Frontiers in Microbiology*, 8, 2224. \doi{10.3389/fmicb.2017.02224}
+#' 
+#' Kaul, A., Mandal, S., Davidov, O., & Peddada, S. D. (2017). Analysis of microbiome data in the presence of excess zeros. *Frontiers in Microbiology*, 8, 2114. \doi{10.3389/fmicb.2017.02114}
+#' 
 #' @export
 #' @examples
 #'     aitchison(ex_counts, pseudocount = 1)
-aitchison <- function (counts, pseudocount = NULL, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+aitchison <- function (counts, margin = 1L, pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
-  norm <- structure('clr', pseudocount = pseudocount)
+  norm <- 'clr'
   validate_args()
   
-  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -230,7 +247,7 @@ bhattacharyya <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -239,6 +256,7 @@ bhattacharyya <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' A standard ecological metric quantifying the dissimilarity between communities.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -262,10 +280,10 @@ bhattacharyya <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     bray(ex_counts)
-bray <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+bray <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_BRAY, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_BRAY, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -274,6 +292,7 @@ bray <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpu
 #' A weighted version of the Manhattan distance, sensitive to differences when both values are small.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -297,10 +316,10 @@ bray <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpu
 #' @export
 #' @examples
 #'     canberra(ex_counts)
-canberra <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+canberra <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_CANBERRA, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_CANBERRA, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -309,6 +328,7 @@ canberra <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n
 #' The maximum difference between any single feature across two samples.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -331,10 +351,10 @@ canberra <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n
 #' @export
 #' @examples
 #'     chebyshev(ex_counts)
-chebyshev <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+chebyshev <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_CHEBYSHEV, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_CHEBYSHEV, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -371,7 +391,7 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'chord'
   validate_args()
   
-  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -380,6 +400,7 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' Also known as the coefficient of divergence.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -403,10 +424,10 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     clark(ex_counts)
-clark <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+clark <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_CLARK, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_CLARK, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -416,6 +437,7 @@ clark <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cp
 #' 
 #' @inherit documentation
 #' @inherit bdiv_percent_normalized
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -441,12 +463,12 @@ clark <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cp
 #' @export
 #' @examples
 #'     divergence(ex_counts)
-divergence <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+divergence <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_DIVERGENCE, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_DIVERGENCE, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -455,6 +477,7 @@ divergence <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus =
 #' The straight-line distance between two points in multidimensional space.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -478,10 +501,10 @@ divergence <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus =
 #' @export
 #' @examples
 #'     euclidean(ex_counts)
-euclidean <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -490,6 +513,7 @@ euclidean <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = 
 #' A distance metric that normalizes differences by the range of the feature.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -516,13 +540,13 @@ euclidean <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = 
 #' @export
 #' @examples
 #'     gower(ex_counts)
-gower <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+gower <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
   # range_vec <- apply(counts, 2L, function (x) diff(range(x)))
   
-  .Call(C_beta_div, BDIV_GOWER, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_GOWER, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -564,7 +588,7 @@ hellinger <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL)
+  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL, NULL)
   
   sqrt(sqc)
 }
@@ -575,6 +599,7 @@ hellinger <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' A similarity index based on Simpson's diversity index, suitable for abundance data.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -599,10 +624,10 @@ hellinger <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     horn(ex_counts)
-horn <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+horn <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_HORN, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_HORN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -642,7 +667,7 @@ jensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL)
+  jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL, NULL)
   
   sqrt(jsd)
 }
@@ -684,7 +709,7 @@ jsd <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -693,6 +718,7 @@ jsd <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' A log-based distance metric that is robust to outliers.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -716,10 +742,10 @@ jsd <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     lorentzian(ex_counts)
-lorentzian <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+lorentzian <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_LORENTZIAN, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_LORENTZIAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -728,6 +754,7 @@ lorentzian <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus =
 #' The sum of absolute differences, also known as the taxicab geometry.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -751,10 +778,10 @@ lorentzian <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus =
 #' @export
 #' @examples
 #'     manhattan(ex_counts)
-manhattan <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+manhattan <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_MANHATTAN, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_MANHATTAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -794,7 +821,7 @@ matusita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL)
+  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL, NULL)
   
   sqrt(sqc)
 }
@@ -805,6 +832,7 @@ matusita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' A generalized metric that includes Euclidean and Manhattan distance as special cases.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -842,10 +870,10 @@ matusita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     minkowski(ex_counts, power = 2) # Equivalent to Euclidean
-minkowski <- function (counts, norm = 'none', power = 1.5, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+minkowski <- function (counts, margin = 1L, power = 1.5, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_MINKOWSKI, counts, margin, norm, pairs, cpus, power)
+  .Call(C_beta_div, BDIV_MINKOWSKI, counts, margin, norm, pairs, cpus, pseudocount, power)
 }
 
 
@@ -883,12 +911,12 @@ minkowski <- function (counts, norm = 'none', power = 1.5, margin = 1L, pairs = 
 #'     morisita(ex_counts)
 morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   
   assert_integer_counts()
   
-  .Call(C_beta_div, BDIV_MORISITA, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_MORISITA, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -897,6 +925,7 @@ morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' Also known as the Bray-Curtis dissimilarity when applied to abundance data, but formulated slightly differently.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -920,10 +949,10 @@ morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     motyka(ex_counts)
-motyka <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+motyka <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_MOTYKA, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_MOTYKA, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -963,7 +992,7 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, NULL)
+  scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, NULL, NULL)
   
   2 * scs
 }
@@ -974,6 +1003,7 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' A distance metric related to the Bray-Curtis and Jaccard indices.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -997,10 +1027,10 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     soergel(ex_counts)
-soergel <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+soergel <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_SOERGEL, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_SOERGEL, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -1040,7 +1070,7 @@ squared_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -1080,7 +1110,7 @@ squared_chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -1089,6 +1119,7 @@ squared_chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' The squared Euclidean distance between two vectors.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -1112,11 +1143,11 @@ squared_chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     squared_euclidean(ex_counts)
-squared_euclidean <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+squared_euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
   
-  euc <- .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, NULL)
+  euc <- .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
   
   euc ^ 2
 }
@@ -1158,7 +1189,7 @@ topsoe <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL)
+  jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL, NULL)
   
   2 * jsd
 }
@@ -1169,6 +1200,7 @@ topsoe <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' A distance metric derived from the Hedges' distance.
 #' 
 #' @inherit documentation
+#' @inherit pseudocount_section
 #' 
 #' @family Abundance metrics
 #' @seealso `beta_div()`, `vignette('bdiv')`, `vignette('bdiv_guide')`
@@ -1192,10 +1224,10 @@ topsoe <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     wave_hedges(ex_counts)
-wave_hedges <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus = n_cpus()) {
+wave_hedges <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_WAVE_HEDGES, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_WAVE_HEDGES, counts, margin, norm, pairs, cpus, pseudocount, NULL)
 }
 
 
@@ -1235,10 +1267,10 @@ wave_hedges <- function (counts, norm = 'none', margin = 1L, pairs = NULL, cpus 
 #'     hamming(ex_counts)
 hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_HAMMING, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_HAMMING, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -1275,10 +1307,10 @@ hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #'     jaccard(ex_counts)
 jaccard <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_JACCARD, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_JACCARD, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -1313,10 +1345,10 @@ jaccard <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #'     ochiai(ex_counts)
 ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_OCHIAI, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_OCHIAI, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 
@@ -1353,10 +1385,10 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #'     sorensen(ex_counts)
 sorensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SORENSEN, counts, margin, norm, pairs, cpus, NULL)
+  .Call(C_beta_div, BDIV_SORENSEN, counts, margin, norm, pairs, cpus, NULL, NULL)
 }
 
 

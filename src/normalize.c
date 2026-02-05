@@ -111,7 +111,9 @@ static void *norm_binary(void *arg) {
 
 
 
-void normalize(ecomatrix_t *em, SEXP sexp_norm, int n_threads_) {
+void normalize(
+    ecomatrix_t *em, SEXP sexp_norm, 
+    int n_threads_,  SEXP sexp_pseudocount ) {
   
   int norm  = asInteger(sexp_norm);
   n_threads = n_threads_;
@@ -124,22 +126,8 @@ void normalize(ecomatrix_t *em, SEXP sexp_norm, int n_threads_) {
   
   // CLR's pseudocounts need special handling
   if (norm == NORM_CLR) {
-    
-    clr_vec = rw_clr_vec(em);
-    
-    SEXP sexp_pseudocount = getAttrib(sexp_norm, install("pseudocount"));
-    
-    // Default to the lowest nonzero value in val_vec
-    if (isNull(sexp_pseudocount)) {
-      pseudocount = val_vec[0];
-      double *vp_end  = val_vec + em->nnz;
-      for (double *vp = val_vec + 1; vp < vp_end; vp++)
-        if (*vp < pseudocount)
-          pseudocount = *vp;
-    }
-    else {
-      pseudocount = asReal(sexp_pseudocount);
-    }
+    clr_vec     = rw_clr_vec(em);
+    pseudocount = asReal(sexp_pseudocount);
   }
   
   
