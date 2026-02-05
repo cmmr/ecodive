@@ -38,8 +38,8 @@ Where:
 
 Base R Equivalent:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{p <- x / sum(x)
-q <- y / sum(y)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]; p <- x / sum(x)
+y <- ex_counts[2,]; q <- y / sum(y)
 -log(sum(sqrt(p * q)))
 }\if{html}{\out{</div>}}
 }

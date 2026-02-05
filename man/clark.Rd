@@ -59,7 +59,9 @@ Where:
 
 Base R Equivalent:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{sqrt(sum((abs(x - y) / (x + y)) ^ 2))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+y <- ex_counts[2,]
+sqrt(sum((abs(x - y) / (x + y)) ^ 2))
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{

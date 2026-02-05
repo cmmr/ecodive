@@ -39,9 +39,11 @@ Where:
 
 Base R Equivalent:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{simp_x <- sum(x * (x - 1)) / (sum(x) * (sum(x) - 1))
-simp_y <- sum(y * (y - 1)) / (sum(y) * (sum(y) - 1))
-1 - ((2 * sum(x * y)) / ((simp_x + simp_y) * sum(x) * sum(y)))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+y <- ex_counts[2,]
+simpson_x <- sum(x * (x - 1)) / (sum(x) * (sum(x) - 1))
+simpson_y <- sum(y * (y - 1)) / (sum(y) * (sum(y) - 1))
+1 - ((2 * sum(x * y)) / ((simpson_x + simpson_y) * sum(x) * sum(y)))
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{

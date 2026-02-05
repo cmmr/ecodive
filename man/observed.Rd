@@ -27,7 +27,8 @@ Observed features is defined simply as the number of features with non-zero abun
 
 \strong{Base R Equivalent:}
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{sum(x > 0)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+sum(x > 0)
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{

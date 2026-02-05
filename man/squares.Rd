@@ -35,7 +35,8 @@ Where:
 
 \strong{Base R Equivalent:}
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{N  <- sum(x)      # sampling depth
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x  <- ex_counts[1,]
+N  <- sum(x)      # sampling depth
 S  <- sum(x > 0)  # observed features
 F1 <- sum(x == 1) # singletons
 S + ((sum(x^2) * (F1^2)) / ((N^2) - F1 * S))

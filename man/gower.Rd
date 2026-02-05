@@ -58,12 +58,14 @@ Where:
 \item \eqn{n} : The number of features.
 }
 
-Base R Equivalent: ```r
-r <- abs(x - y)
-n <- length(x) # <-- not \code{sum(x|y)}
-sum(abs(x-y) / r) / n
+Base R Equivalent:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+y <- ex_counts[2,]
+r <- abs(x - y)
+n <- length(x)
+sum(abs(x-y) / r) / n
+}\if{html}{\out{</div>}}
 }
 \section{Input Types}{
 

@@ -38,7 +38,9 @@ Where:
 
 Base R Equivalent:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{sum(xor(x, y))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+y <- ex_counts[2,]
+sum(xor(x, y))
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{

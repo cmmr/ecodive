@@ -34,7 +34,8 @@ Where:
 
 \strong{Base R Equivalent:}
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{(sum(x) - sqrt(sum(x^2))) / (sum(x) - sqrt(sum(x)))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+(sum(x) - sqrt(sum(x^2))) / (sum(x) - sqrt(sum(x)))
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{

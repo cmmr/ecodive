@@ -76,6 +76,8 @@ The \code{power} parameter (default 1.5) determines the value of \eqn{p} in the 
 Base R Equivalent:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{p <- 1.5
+x <- ex_counts[1,]
+y <- ex_counts[2,]
 sum(abs(x - y)^p) ^ (1/p)
 }\if{html}{\out{</div>}}
 }

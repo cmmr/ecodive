@@ -167,6 +167,7 @@ ace <- function (counts, cutoff = 10L, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' p <- x / sum(x)
 #' max(p)
 #' ```
@@ -206,6 +207,7 @@ berger <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' # note: lgamma(x + 1) == log(x!)
 #' (lgamma(sum(x) + 1) - sum(lgamma(x + 1))) / sum(x)
 #' ```
@@ -247,6 +249,7 @@ brillouin <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
 #' ```
 #' 
@@ -360,6 +363,7 @@ fisher <- function (counts, digits = 3L, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' p <- x / sum(x)
 #' 1 / sum(p ** 2)
 #' ```
@@ -399,6 +403,7 @@ inv_simpson <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' (sum(x > 0) - 1) / log(sum(x))
 #' ```
 #' 
@@ -441,6 +446,7 @@ margalef <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' (sum(x) - sqrt(sum(x^2))) / (sum(x) - sqrt(sum(x)))
 #' ```
 #' 
@@ -480,6 +486,7 @@ mcintosh <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' sum(x > 0) / sqrt(sum(x))
 #' ```
 #' 
@@ -515,6 +522,7 @@ menhinick <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' sum(x > 0)
 #' ```
 #' 
@@ -550,6 +558,7 @@ observed <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' p <- x / sum(x)
 #' -sum(p * log(p))
 #' ```
@@ -591,6 +600,7 @@ shannon <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x <- ex_counts[1,]
 #' p <- x / sum(x)
 #' 1 - sum(p ** 2)
 #' ```
@@ -632,6 +642,7 @@ simpson <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' 
 #' **Base R Equivalent:**
 #' ```r
+#' x  <- ex_counts[1,]
 #' N  <- sum(x)      # sampling depth
 #' S  <- sum(x > 0)  # observed features
 #' F1 <- sum(x == 1) # singletons

@@ -360,7 +360,7 @@ validate_pseudocount <- function (env = parent.frame()) {
             call. = FALSE, 
             paste0(
               "Zeros detected in data. Using pseudocount = ", format(pseudocount, digits = 3), "\n",
-              "Calculated using formula: min(counts[counts > 0]) / 2.\n",
+              "Calculated using formula: min(counts[counts > 0]) / 2\n",
               "To suppress this warning, provide an explicit `pseudocount` argument." ))
         }
         

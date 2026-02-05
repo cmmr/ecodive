@@ -58,7 +58,9 @@ Where:
 
 Base R Equivalent:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{max(abs(x-y))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+y <- ex_counts[2,]
+max(abs(x-y))
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{

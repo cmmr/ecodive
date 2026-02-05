@@ -33,7 +33,8 @@ Where:
 
 \strong{Base R Equivalent:}
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{(sum(x > 0) - 1) / log(sum(x))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+(sum(x > 0) - 1) / log(sum(x))
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{

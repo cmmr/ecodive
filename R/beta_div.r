@@ -231,8 +231,8 @@ aitchison <- function (counts, margin = 1L, pseudocount = NULL, pairs = NULL, cp
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' -log(sum(sqrt(p * q)))
 #' ```
 #' 
@@ -271,6 +271,8 @@ bhattacharyya <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(abs(x-y)) / sum(x+y)
 #' ```
 #' 
@@ -307,6 +309,8 @@ bray <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs 
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(abs(x-y) / (x+y))
 #' ```
 #' 
@@ -342,6 +346,8 @@ canberra <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pa
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' max(abs(x-y))
 #' ```
 #' 
@@ -377,6 +383,8 @@ chebyshev <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, p
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sqrt(sum(((x / sqrt(sum(x ^ 2))) - (y / sqrt(sum(y ^ 2))))^2))
 #' ```
 #' 
@@ -415,6 +423,8 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sqrt(sum((abs(x - y) / (x + y)) ^ 2))
 #' ```
 #' 
@@ -452,8 +462,8 @@ clark <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' 2 * sum((p - q)^2 / (p + q)^2)
 #' ```
 #' 
@@ -492,6 +502,8 @@ divergence <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, 
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sqrt(sum((x-y)^2))
 #' ```
 #' 
@@ -529,8 +541,10 @@ euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, p
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' r <- abs(x - y)
-#' n <- length(x) # <-- not `sum(x|y)`
+#' n <- length(x)
 #' sum(abs(x-y) / r) / n
 #' ```
 #' 
@@ -570,8 +584,8 @@ gower <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' sqrt(sum((sqrt(p) - sqrt(q)) ^ 2))
 #' ```
 #' 
@@ -614,6 +628,8 @@ hellinger <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' z <- sum(x^2) / sum(x)^2 + sum(y^2) / sum(y)^2
 #' 1 - ((2 * sum(x * y)) / (z * sum(x) * sum(y)))
 #' ```
@@ -651,8 +667,8 @@ horn <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs 
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' sqrt(sum(p * log(2 * p / (p+q)), q * log(2 * q / (p+q))) / 2)
 #' ```
 #' 
@@ -693,8 +709,8 @@ jensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' sum(p * log(2 * p / (p+q)), q * log(2 * q / (p+q))) / 2
 #' ```
 #' 
@@ -733,6 +749,8 @@ jsd <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(log(1 + abs(x - y)))
 #' ```
 #' 
@@ -769,6 +787,8 @@ lorentzian <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, 
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(abs(x-y))
 #' ```
 #' 
@@ -805,8 +825,8 @@ manhattan <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, p
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' sqrt(sum((sqrt(p) - sqrt(q)) ^ 2))
 #' ```
 #' 
@@ -859,6 +879,8 @@ matusita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' Base R Equivalent: 
 #' ```r
 #' p <- 1.5
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(abs(x - y)^p) ^ (1/p)
 #' ```
 #' 
@@ -898,9 +920,11 @@ minkowski <- function (counts, margin = 1L, power = 1.5, norm = 'none', pseudoco
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' simp_x <- sum(x * (x - 1)) / (sum(x) * (sum(x) - 1))
-#' simp_y <- sum(y * (y - 1)) / (sum(y) * (sum(y) - 1))
-#' 1 - ((2 * sum(x * y)) / ((simp_x + simp_y) * sum(x) * sum(y)))
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
+#' simpson_x <- sum(x * (x - 1)) / (sum(x) * (sum(x) - 1))
+#' simpson_y <- sum(y * (y - 1)) / (sum(y) * (sum(y) - 1))
+#' 1 - ((2 * sum(x * y)) / ((simpson_x + simpson_y) * sum(x) * sum(y)))
 #' ```
 #' 
 #' @references
@@ -940,6 +964,8 @@ morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(pmax(x, y)) / sum(x, y)
 #' ```
 #' 
@@ -976,8 +1002,8 @@ motyka <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pair
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' 2 * sum((p - q)^2 / (p + q))
 #' ```
 #' 
@@ -1018,6 +1044,8 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(abs(x - y)) / sum(pmax(x, y))
 #' ```
 #' 
@@ -1054,8 +1082,8 @@ soergel <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pai
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' sum((p - q)^2 / (p + q))
 #' ```
 #' 
@@ -1094,8 +1122,8 @@ squared_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' sum((sqrt(x) - sqrt(y)) ^ 2)
 #' ```
 #' 
@@ -1134,6 +1162,8 @@ squared_chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum((x-y)^2)
 #' ```
 #' 
@@ -1173,8 +1203,8 @@ squared_euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount =
 #' 
 #' Base R Equivalent: 
 #' ```r
-#' p <- x / sum(x)
-#' q <- y / sum(y)
+#' x <- ex_counts[1,]; p <- x / sum(x)
+#' y <- ex_counts[2,]; q <- y / sum(y)
 #' sum(p * log(2 * p / (p+q)), q * log(2 * y / (p+q)))
 #' ```
 #' 
@@ -1215,6 +1245,8 @@ topsoe <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(abs(x - y) / pmax(x, y))
 #' ```
 #' 
@@ -1256,6 +1288,8 @@ wave_hedges <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL,
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' sum(xor(x, y))
 #' ```
 #' 
@@ -1294,6 +1328,8 @@ hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' 1 - sum(x & y) / sum(x | y)
 #' ```
 #' 
@@ -1334,6 +1370,8 @@ jaccard <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' 1 - sum(x & y) / sqrt(sum(x>0) * sum(y>0)) 
 #' ```
 #' 
@@ -1372,6 +1410,8 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' 
 #' Base R Equivalent: 
 #' ```r
+#' x <- ex_counts[1,]
+#' y <- ex_counts[2,]
 #' 2 * sum(x & y) / sum(x>0, y>0)
 #' ```
 #' 

@@ -33,7 +33,8 @@ Where:
 
 \strong{Base R Equivalent:}
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{p <- x / sum(x)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+p <- x / sum(x)
 1 - sum(p ** 2)
 }\if{html}{\out{</div>}}
 }

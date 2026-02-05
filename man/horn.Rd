@@ -59,7 +59,9 @@ Where:
 
 Base R Equivalent:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{z <- sum(x^2) / sum(x)^2 + sum(y^2) / sum(y)^2
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+y <- ex_counts[2,]
+z <- sum(x^2) / sum(x)^2 + sum(y^2) / sum(y)^2
 1 - ((2 * sum(x * y)) / (z * sum(x) * sum(y)))
 }\if{html}{\out{</div>}}
 }

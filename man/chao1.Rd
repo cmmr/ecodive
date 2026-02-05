@@ -34,7 +34,8 @@ Where:
 
 \strong{Base R Equivalent:}
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{

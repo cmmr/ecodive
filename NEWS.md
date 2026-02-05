@@ -1,3 +1,17 @@
+# ecodive 2.2.5
+
+* When using CLR normalization:
+
+    - Warns when zeros are detected and `pseudocount` is `NULL`.
+    - Then continues with `pseudocount <- min(counts[counts>0]) / 2`.
+
+## Breaking Changes
+
+* `norm` now defaults to `"none"` instead of `"percent"`.
+* `norm` parameter was removed from some beta diversity functions.
+
+
+
 # ecodive 2.2.4
 
 ## Breaking Changes
@@ -20,7 +34,7 @@
 
 # ecodive 2.2.2
 
-* Drop explicit zeroes from sparse matrices after rarefaction.
+* Drop explicit zeros from sparse matrices after rarefaction.
 
 
 

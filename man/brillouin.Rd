@@ -33,7 +33,8 @@ Where:
 
 \strong{Base R Equivalent:}
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{# note: lgamma(x + 1) == log(x!)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
+# note: lgamma(x + 1) == log(x!)
 (lgamma(sum(x) + 1) - sum(lgamma(x + 1))) / sum(x)
 }\if{html}{\out{</div>}}
 }
