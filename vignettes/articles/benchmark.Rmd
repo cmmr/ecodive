@@ -35,7 +35,7 @@ performance of the core implementations.
 | [GUniFrac](https://doi.org/10.32614/CRAN.package.GUniFrac)         | *none*               | ***Serial C***     |
 | [labdsv](https://doi.org/10.32614/CRAN.package.labdsv)             | ***Serial FORTRAN*** | *none*             |
 | [parallelDist](https://doi.org/10.32614/CRAN.package.parallelDist) | ***Parallel C++***   | *none*             |
-| [philentropy](https://doi.org/10.32614/CRAN.package.philentropy)   | ***Serial C++***     | *none*             |
+| [philentropy](https://doi.org/10.32614/CRAN.package.philentropy)   | ***Parallel C++***   | *none*             |
 | [phyloregion](https://doi.org/10.32614/CRAN.package.phyloregion)   | vegan                | ***Serial R***     |
 | [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq)          | vegan                | ***Parallel R***   |
 | [picante](https://doi.org/10.32614/CRAN.package.picante)           | vegan                | ***Serial R***     |
@@ -105,16 +105,16 @@ data.frame(ver = sapply(FUN = packageDescription, fields = 'Version', c(
   'abdiv', 'adiv', 'ecodist', 'ecodive', 'entropart', 'GUniFrac', 
   'ampvis2', 'labdsv', 'parallelDist', 'philentropy', 
   'phyloregion', 'phyloseq', 'picante', 'tabula', 'vegan' )))
-#>                 ver
+#>                 ver                   ver
 #> bench         1.1.4
-#> dplyr         1.1.4
-#> ggplot2       4.0.1
+#> dplyr         1.2.0
+#> ggplot2       4.0.2
 #> ggrepel       0.9.6
-#> rbiom         2.2.1
+#> rbiom         3.0.1
 #> abdiv         0.2.0
 #> adiv          2.2.1
 #> ecodist       2.1.3
-#> ecodive       2.2.0
+#> ecodive       2.2.5
 #> entropart    1.6-16
 #> GUniFrac        1.9
 #> ampvis2      2.8.11
@@ -162,27 +162,35 @@ cleanup <- function (x) {
 }
 
 
-# HMP50 dataset has 50 samples; convert to relative abundances
-hmp50       <- rbiom::hmp50
-hmp50_phy   <- rbiom::convert_to_phyloseq(hmp50)
-hmp50_mtx   <- t(apply(as.matrix(hmp50), 2L, function (x) x / sum(x)))
-hmp50_mtx_t <- t(hmp50_mtx)
-hmp50_dgC   <- as(hmp50_mtx, 'dgCMatrix')
-hmp50_dgC_t <- t(hmp50_dgC)
-hmp50_tree  <- hmp50$tree
+# HMP50 dataset has 50 samples
+hmp50        <- rbiom::hmp50
+hmp50_phy    <- rbiom::convert_to_phyloseq(hmp50)
+hmp50_mtx_t  <- as.matrix(hmp50)
+hmp50_mtx    <- t(hmp50_mtx_t)
+hmp50_mtx_pt <- apply(hmp50_mtx, 1L, function (x) x / sum(x))
+hmp50_mtx_p  <- t(hmp50_mtx_pt)
+hmp50_dgC    <- as(hmp50_mtx,    'dgCMatrix')
+hmp50_dgC_t  <- as(hmp50_mtx_t,  'dgCMatrix')
+hmp50_dgC_pt <- as(hmp50_mtx_pt, 'dgCMatrix')
+hmp50_tree   <- hmp50$tree
 
 
-# GEMS dataset has 1006 samples; convert to relative abundances
-gems_mtx   <- t(apply(as.matrix(rbiom::gems), 2L, function (x) x / sum(x)))
-gems_dgC   <- as(gems_mtx, 'dgCMatrix')
-gems_dgC_t <- t(gems_dgC)
+# GEMS dataset has 1006 samples
+gems_mtx_t  <- as.matrix(rbiom::gems)
+gems_mtx    <- t(gems_mtx_t)
+gems_mtx_pt <- apply(gems_mtx, 1L, function (x) x / sum(x))
+gems_mtx_p  <- t(gems_mtx_pt)
+gems_dgC_t  <- as(gems_mtx_t,  'dgCMatrix')
+gems_dgC_pt <- as(gems_mtx_pt, 'dgCMatrix')
+gems_bool   <- gems_mtx > 0
+
 
 ## Bray-Curtis Dissimilarity
 bray_curtis_res <- bench::mark(
   iterations = 10,
   'abdiv'        = cleanup(pairwise(abdiv::bray_curtis, gems_mtx)),
   'ecodist'      = cleanup(ecodist::bcdist(gems_mtx)),
-  'ecodive'      = cleanup(ecodive::bray(gems_dgC_t, norm = 'none', margin = 2)),
+  'ecodive'      = cleanup(ecodive::bray(gems_dgC_t, margin = 2)),
   'labdsv'       = cleanup(labdsv::dsvdis(gems_mtx, 'bray/curtis')),
   'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'bray')),
   'philentropy'  = cleanup(philentropy::distance(gems_mtx, 'sorensen', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
@@ -197,7 +205,7 @@ jaccard_res <- bench::mark(
   'ecodist'      = cleanup(ecodist::distance(gems_mtx, 'jaccard')),
   'ecodive'      = cleanup(ecodive::jaccard(gems_dgC_t, margin = 2)),
   'parallelDist' = cleanup(parallelDist::parallelDist(gems_mtx, 'binary')),
-  'philentropy'  = cleanup(philentropy::distance(gems_mtx > 0, 'jaccard', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
+  'philentropy'  = cleanup(philentropy::distance(gems_bool, 'jaccard', test.na = FALSE, use.row.names = TRUE, as.dist.obj = TRUE, mute.message = TRUE)),
   'phyloregion'  = cleanup(phyloregion::beta_diss(gems_mtx, 'jaccard')$beta.jac),
   'stats'        = cleanup(stats::dist(gems_mtx, 'binary')),
   'vegan'        = cleanup(vegan::vegdist(gems_mtx, 'jaccard', binary = TRUE)) )
@@ -229,30 +237,30 @@ euclidean_res <- bench::mark(
 
 ## Shannon Diversity Index
 shannon_res <- bench::mark(
-  iterations  = 10,
-  'abdiv'       = apply(gems_mtx, 1L, abdiv::shannon),
-  'adiv'        = adiv::speciesdiv(gems_mtx, 'Shannon')[,1],
-  'ecodive'     = ecodive::shannon(gems_dgC_t, margin = 2),
-  'entropart'   = apply(gems_mtx, 1L, entropart::Shannon, CheckArguments = FALSE),
-  'philentropy' = apply(gems_mtx, 1L, philentropy::H, unit = 'log'),
-  'tabula'      = apply(gems_mtx, 1L, tabula::index_shannon),
-  'vegan'       = vegan::diversity(gems_mtx, 'shannon') )
+  iterations = 10,
+  'abdiv'       = apply(gems_mtx_p, 1L, abdiv::shannon),
+  'adiv'        = adiv::speciesdiv(gems_mtx_p, 'Shannon')[,1],
+  'ecodive'     = ecodive::shannon(gems_dgC_pt, margin = 2),
+  'entropart'   = apply(gems_mtx_p, 1L, entropart::Shannon, CheckArguments = FALSE),
+  'philentropy' = apply(gems_mtx_p, 1L, philentropy::H, unit = 'log'),
+  'tabula'      = apply(gems_mtx_p, 1L, tabula::index_shannon),
+  'vegan'       = vegan::diversity(gems_mtx_p, 'shannon') )
 
 
 ## Gini-Simpson Index
 simpson_res <- bench::mark(
-  iterations  = 10,
-  'abdiv'     = apply(gems_mtx, 1L, abdiv::simpson),
-  'adiv'      = adiv::speciesdiv(gems_mtx, 'GiniSimpson')[,1],
-  'ecodive'   = ecodive::simpson(gems_dgC_t, margin = 2),
-  'entropart' = apply(gems_mtx, 1L, entropart::Simpson, CheckArguments = FALSE),
-  'tabula'    = 1 - apply(gems_mtx, 1L, tabula::index_simpson),
-  'vegan'     = vegan::diversity(gems_mtx, 'simpson') )
+  iterations = 10,
+  'abdiv'     = apply(gems_mtx_p, 1L, abdiv::simpson),
+  'adiv'      = adiv::speciesdiv(gems_mtx_p, 'GiniSimpson')[,1],
+  'ecodive'   = ecodive::simpson(gems_dgC_pt, margin = 2),
+  'entropart' = apply(gems_mtx_p, 1L, entropart::Simpson, CheckArguments = FALSE),
+  'tabula'    = 1 - apply(gems_mtx_p, 1L, tabula::index_simpson),
+  'vegan'     = vegan::diversity(gems_mtx_p, 'simpson') )
 
 
 ## Faith's Phylogenetic Diversity
 faith_res <- bench::mark(
-  iterations    = 10,
+  iterations = 10,
   check         = FALSE, # entropart has incorrect output on non-ultrametric tree
   'abdiv'       = apply(hmp50_mtx, 1L, abdiv::faith_pd, hmp50_tree),
   'adiv'        = apply(hmp50_mtx, 1L, \(x) adiv::EH(hmp50_tree, colnames(hmp50_mtx)[x > 0])),
