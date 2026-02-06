@@ -24,6 +24,9 @@
 #  endif
 #endif
 
+typedef void *(*pthread_func_t)(void *);
+
+
 // ecomatrix data structure
 typedef struct {
   int     n_samples;
@@ -50,16 +53,19 @@ typedef struct {
   node_t *node_vec;
 } ecotree_t;
 
+typedef struct {
+  int i;
+  int n;
+} worker_t;
+
 
 /* --- ecomatrix.c --- */
 ecomatrix_t* new_ecomatrix(SEXP sexp_matrix, SEXP sexp_margin);
 double* rw_val_vec(ecomatrix_t *em);
 double* rw_clr_vec(ecomatrix_t *em);
 
-
 /* --- ecotree.c --- */
 ecotree_t* new_ecotree(SEXP sexp_phylo_tree);
-
 
 /* --- get.c --- */
 SEXP get(SEXP, const char *);
@@ -74,7 +80,10 @@ void* free_one(void *ptr);
 void* maybe_free_one(void *ptr);
 
 /* --- normalize.c --- */
-void normalize(ecomatrix_t *em, int norm, int n_threads_, int pseudocount_);
+void normalize(ecomatrix_t *em, int norm, int n_threads, int pseudocount_);
+
+/* --- parallel.c --- */
+void run_parallel(pthread_func_t func, int n_threads, int n_tasks);
 
 
 #endif

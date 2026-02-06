@@ -3,13 +3,9 @@
 
 #include "ecodive.h"
 
-
-typedef void *(*pthread_func_t)(void *);
-
 static uint32_t  target;
 static uint64_t  seed;
 static int       margin;
-static int       n_threads;
 static SEXP      sexp_val_mtx;
 static SEXP      sexp_res_mtx;
 static int      *sam_vec;
@@ -42,7 +38,8 @@ typedef struct {
 
 static void *rarefy_dense(void *arg) {
   
-  int thread_i = *((int *) arg);
+  int thread_i  = ((worker_t *)arg)->i;
+  int n_threads = ((worker_t *)arg)->n;
   
   int     otu_step    = (margin == 1) ? n_sams : 1;
   int     sam_step    = (margin == 1) ? 1 : n_otus;
@@ -146,7 +143,8 @@ static knuth_t *rarefy_triplet_knuth_vec;
 
 static void *rarefy_triplet(void *arg) {
   
-  int      thread_i = *((int *) arg);
+  int      thread_i  = ((worker_t *)arg)->i;
+  int      n_threads = ((worker_t *)arg)->n;
   knuth_t *knuth_vec = rarefy_triplet_knuth_vec;
   
   // Initialize RNGs for this thread's samples.
@@ -352,7 +350,8 @@ static pthread_func_t setup_dgTMatrix(void) {
 
 static void *rarefy_compressed (void *arg) {
   
-  int thread_i = *((int *) arg);
+  int thread_i  = ((worker_t *)arg)->i;
+  int n_threads = ((worker_t *)arg)->n;
   
   for (int sam = thread_i; sam < n_sams; sam += n_threads) {
     
@@ -617,10 +616,11 @@ SEXP C_rarefy(
   
   init_n_ptrs(10);
   
-  target    = (uint32_t) asInteger(sexp_depth);
-  seed      = (uint64_t) asInteger(sexp_seed);
-  margin    = asInteger(sexp_margin);
-  n_threads = asInteger(sexp_n_threads);
+  target = (uint32_t) asInteger(sexp_depth);
+  seed   = (uint64_t) asInteger(sexp_seed);
+  margin = asInteger(sexp_margin);
+  
+  int n_threads = asInteger(sexp_n_threads);
   
   
   /*
@@ -646,36 +646,9 @@ SEXP C_rarefy(
   else if (inherits(sexp_otu_mtx, "dgeMatrix"))             { rarefy_func = setup_dgeMatrix(); }
   else   { error("Unrecognized matrix format."); } // # nocov
   
-
-  // Run WITH multithreading
-  #ifdef HAVE_PTHREAD
-    if (n_threads > 1 && n_sams > 100) {
-      
-      // threads and their thread_i arguments
-      pthread_t *tids = (pthread_t*) R_alloc(n_threads, sizeof(pthread_t));
-      int       *args = (int*)       R_alloc(n_threads, sizeof(int));
-      
-      int i, n = n_threads;
-      for (i = 0; i < n; i++) args[i] = i;
-      for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, rarefy_func, &args[i]);
-      for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
   
-      // Post-process: Remove explicit zeros to restore sparsity
-      if      (inherits(sexp_res_mtx, "simple_triplet_matrix")) { compact_slam(sexp_res_mtx);      }
-      else if (inherits(sexp_res_mtx, "dgCMatrix"))             { compact_dgCMatrix(sexp_res_mtx); }
-      else if (inherits(sexp_res_mtx, "dgTMatrix"))             { compact_dgTMatrix(sexp_res_mtx); }
-      
-      free_all();
-      UNPROTECT(1);
-      return sexp_res_mtx;
-    }
-  #endif
+  run_parallel(rarefy_func, n_threads, n_sams);
   
-  
-  // Run WITHOUT multithreading
-  n_threads    = 1;
-  int thread_i = 0;
-  rarefy_func(&thread_i);
   
   // Post-process: Remove explicit zeros to restore sparsity
   if      (inherits(sexp_res_mtx, "simple_triplet_matrix")) { compact_slam(sexp_res_mtx);      }

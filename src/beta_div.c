@@ -5,9 +5,6 @@
 
 #include "ecodive.h"
 
-
-typedef void *(*pthread_func_t)(void *);
-
 #define BDIV_BHATTACHARYYA  1
 #define BDIV_BRAY           2
 #define BDIV_CANBERRA       3
@@ -36,7 +33,6 @@ static int     n_samples;
 static int     n_otus;
 static int     n_dist;
 static int     n_pairs;
-static int     n_threads;
 static int    *pos_vec;
 static int    *otu_vec;
 static double *val_vec;
@@ -60,8 +56,9 @@ static SEXP   *sexp_extra;
  */
 #define FOREACH_PAIR(expression)                               \
   do {                                                         \
-    int thread_i = *((int *) arg);                             \
-    int dist_idx = 0;                                          \
+    int thread_i  = ((worker_t *)arg)->i;                      \
+    int n_threads = ((worker_t *)arg)->n;                      \
+    int dist_idx  = 0;                                         \
                                                                \
     if (pairs_vec == NULL) { /* All vs All */                  \
                                                                \
@@ -684,7 +681,7 @@ SEXP C_beta_div(
   
   int norm        = asInteger(sexp_norm);
   int pseudocount = asReal(sexp_pseudocount);
-  n_threads       = asInteger(sexp_n_threads);
+  int n_threads   = asInteger(sexp_n_threads);
   sexp_extra      = &sexp_extra_args;
   init_n_ptrs(10);
   
@@ -774,30 +771,7 @@ SEXP C_beta_div(
   }
   
   
-  // Run WITH multithreading
-  #ifdef HAVE_PTHREAD
-    if (n_threads > 1 && n_pairs > 100) {
-      
-      // threads and their thread_i arguments
-      pthread_t *tids = (pthread_t*) R_alloc(n_threads, sizeof(pthread_t));
-      int       *args = (int*)       R_alloc(n_threads, sizeof(int));
-      
-      int i, n = n_threads;
-      for (i = 0; i < n; i++) args[i] = i;
-      for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, bdiv_func, &args[i]);
-      for (i = 0; i < n; i++) pthread_join(tids[i], NULL);
-      
-      free_all();
-      UNPROTECT(5);
-      return sexp_result_dist;
-    }
-  #endif
-  
-  
-  // Run WITHOUT multithreading
-  n_threads     = 1;
-  int thread_i  = 0;
-  bdiv_func(&thread_i);
+  run_parallel(bdiv_func, n_threads, n_pairs);
   
   free_all();
   UNPROTECT(5);

@@ -10,13 +10,13 @@
 #define NORM_CHORD   3
 #define NORM_BINARY  4
 
-static int     n_threads;
 static int     n_samples;
 static int     n_otus;
 static int    *pos_vec;
 static double *val_vec;
 static double *clr_vec;
 static double  pseudocount;
+static int     is_percent_normalized;
 
 
 // Macro to loop over each sample based on current threading setup.
@@ -24,7 +24,8 @@ static double  pseudocount;
 // for this sample's first value and the next sample's first value).
 #define FOREACH_SAMPLE(expression)                                  \
   do {                                                              \
-    int thread_i = *((int *) arg);                                  \
+    int thread_i  = ((worker_t *)arg)->i;                           \
+    int n_threads = ((worker_t *)arg)->n;                           \
     for (int sam = thread_i; sam < n_samples; sam += n_threads) {   \
       double *val_begin = val_vec + pos_vec[sam];                   \
       double *val_end   = val_vec + pos_vec[sam + 1];               \
@@ -55,22 +56,23 @@ static void *norm_percent(void *arg) {
   );
   return NULL;
 }
-  
-static int already_percent() {
-  
-  n_threads    = 1;
-  int thread_i = 0;
-  void *arg = (void *)&thread_i;
-  
+
+static void *check_percent_normalized(void *arg) {
   FOREACH_SAMPLE(
     double depth = 0;
     FOREACH_VAL(
-      if (*val < 0 || *val > 1) return 0;
+      if (*val < 0 || *val > 1) {
+        is_percent_normalized = 0;
+        return NULL;
+      }
       depth += *val
     );
-    if (fabs(depth - 1) > 1e-6) return 0;
+    if (fabs(depth - 1) > 1e-6) {
+      is_percent_normalized = 0;
+      return NULL;
+    }
   );
-  return 1;
+  return NULL;
 }
 
 
@@ -129,15 +131,24 @@ static void *norm_binary(void *arg) {
 
 
 
-void normalize(ecomatrix_t *em, int norm, int n_threads_, int pseudocount_) {
+void normalize(ecomatrix_t *em, int norm, int n_threads, int pseudocount_) {
   
   n_samples = em->n_samples;
   n_otus    = em->n_otus;
   pos_vec   = em->pos_vec;
   val_vec   = em->val_vec;
   
-  if      (norm == NORM_PERCENT) { if (already_percent()) return; }
-  else if (norm == NORM_CLR)     { clr_vec = rw_clr_vec(em);      }
+  if (norm == NORM_PERCENT) {
+    // Check if it's already normalized to percent. If so, skip.
+    if (*val_vec <= 1) {
+      is_percent_normalized = 1;
+      run_parallel(check_percent_normalized, n_threads, n_samples);
+      if (is_percent_normalized) return;
+    }
+  }
+  else if (norm == NORM_CLR) {
+    clr_vec = rw_clr_vec(em);
+  }
   
   // function to run
   void * (*norm_func)(void *) = NULL;
@@ -148,31 +159,8 @@ void normalize(ecomatrix_t *em, int norm, int n_threads_, int pseudocount_) {
     case NORM_BINARY:  norm_func = norm_binary;  break;
   }
   
-  n_threads   = n_threads_;
   pseudocount = pseudocount_;
   val_vec     = rw_val_vec(em);
   
-  
-  // Run WITH multithreading
-  #ifdef HAVE_PTHREAD
-    if (n_threads > 1 && n_samples > 100) {
-      
-      // threads and their thread_i arguments
-      pthread_t *tids = (pthread_t*) R_alloc(n_threads, sizeof(pthread_t));
-      int       *args = (int*)       R_alloc(n_threads, sizeof(int));
-      
-      int i, n = n_threads;
-      for (i = 0; i < n; i++) args[i] = i;
-      for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, norm_func, &args[i]);
-      for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
-      
-      return;
-    }
-  #endif
-  
-  
-  // Run WITHOUT multithreading
-  n_threads    = 1;
-  int thread_i = 0;
-  norm_func(&thread_i);
+  run_parallel(norm_func, n_threads, n_samples);
 }

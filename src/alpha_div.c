@@ -3,9 +3,6 @@
 
 #include "ecodive.h"
 
-
-typedef void *(*pthread_func_t)(void *);
-
 #define ADIV_ACE          1
 #define ADIV_BERGER       2
 #define ADIV_BRILLOUIN    3
@@ -25,7 +22,6 @@ static int     n_samples;
 static int    *pos_vec;
 static int    *otu_vec;
 static double *val_vec;
-static int     n_threads;
 static SEXP   *sexp_extra;
 static double *result_vec;
 
@@ -36,7 +32,9 @@ static double *result_vec;
  */
 #define FOREACH_SAMPLE(expression)                             \
   do {                                                         \
-    int sample = *((int *) arg);                               \
+    int sample    = ((worker_t *)arg)->i;                      \
+    int n_threads = ((worker_t *)arg)->n;                      \
+                                                               \
     for (; sample < n_samples; sample += n_threads) {          \
       double *val_begin = val_vec + pos_vec[sample];           \
       double *val_end   = val_vec + pos_vec[sample + 1];       \
@@ -75,7 +73,7 @@ static double *ace_rare_nnz_k_mtx;
 
 static void *ace(void *arg) {
   
-  int     thread_i       = *((int *) arg);
+  int     thread_i       = ((worker_t *)arg)->i;
   int     cutoff         = ace_cutoff;
   double *rare_nnz_k_vec = ace_rare_nnz_k_mtx + (thread_i * cutoff);
   
@@ -113,7 +111,7 @@ static void *ace(void *arg) {
   return NULL;
 }
 
-static pthread_func_t ace_setup(void) {
+static pthread_func_t ace_setup(int n_threads) {
   
   ace_cutoff         = asInteger(*sexp_extra) + 1;
   otu_vec            = maybe_free_one(otu_vec);
@@ -194,7 +192,7 @@ static char      *faith_has_edge_mtx;
 
 static void *faith(void *arg) {
   
-  int     thread_i     = *((int *) arg);
+  int     thread_i     = ((worker_t *)arg)->i;
   int     n_edges      = faith_et->n_edges;
   node_t *node_vec     = faith_et->node_vec;
   char   *has_edge_vec = faith_has_edge_mtx + (thread_i * n_edges);
@@ -227,7 +225,7 @@ static void *faith(void *arg) {
   return NULL;
 }
 
-static pthread_func_t faith_setup(void) {
+static pthread_func_t faith_setup(int n_threads) {
   
   faith_et           = new_ecotree(*sexp_extra);
   faith_has_edge_mtx = safe_malloc(n_threads * faith_et->n_edges * sizeof(char));
@@ -455,9 +453,9 @@ SEXP C_alpha_div(
   
   init_n_ptrs(10);
   
-  int norm   = asInteger(sexp_norm);
-  n_threads  = asInteger(sexp_n_threads);
-  sexp_extra = &sexp_extra_args;
+  int norm       = asInteger(sexp_norm);
+  int n_threads  = asInteger(sexp_n_threads);
+  sexp_extra     = &sexp_extra_args;
   
   ecomatrix_t *em = new_ecomatrix(sexp_otu_mtx, sexp_margin);
   if (norm) normalize(em, norm, n_threads, 0);
@@ -472,20 +470,20 @@ SEXP C_alpha_div(
   // void * (*adiv_func)(void *) = NULL;
   pthread_func_t adiv_func = NULL;
   switch (asInteger(sexp_algorithm)) {
-    case ADIV_ACE:         adiv_func = ace_setup();   break;
-    case ADIV_BERGER:      adiv_func = berger;        break;
-    case ADIV_BRILLOUIN:   adiv_func = brillouin;     break;
-    case ADIV_CHAO1:       adiv_func = chao1;         break;
-    case ADIV_FAITH:       adiv_func = faith_setup(); break;
-    case ADIV_FISHER:      adiv_func = fisher;        break;
-    case ADIV_INV_SIMPSON: adiv_func = inv_simpson;   break;
-    case ADIV_MARGALEF:    adiv_func = margalef;      break;
-    case ADIV_MCINTOSH:    adiv_func = mcintosh;      break;
-    case ADIV_MENHINICK:   adiv_func = menhinick;     break;
-    case ADIV_OBSERVED:    adiv_func = observed;      break;
-    case ADIV_SHANNON:     adiv_func = shannon;       break;
-    case ADIV_SIMPSON:     adiv_func = simpson;       break;
-    case ADIV_SQUARES:     adiv_func = squares;       break;
+    case ADIV_ACE:         adiv_func = ace_setup(n_threads);   break;
+    case ADIV_BERGER:      adiv_func = berger;                 break;
+    case ADIV_BRILLOUIN:   adiv_func = brillouin;              break;
+    case ADIV_CHAO1:       adiv_func = chao1;                  break;
+    case ADIV_FAITH:       adiv_func = faith_setup(n_threads); break;
+    case ADIV_FISHER:      adiv_func = fisher;                 break;
+    case ADIV_INV_SIMPSON: adiv_func = inv_simpson;            break;
+    case ADIV_MARGALEF:    adiv_func = margalef;               break;
+    case ADIV_MCINTOSH:    adiv_func = mcintosh;               break;
+    case ADIV_MENHINICK:   adiv_func = menhinick;              break;
+    case ADIV_OBSERVED:    adiv_func = observed;               break;
+    case ADIV_SHANNON:     adiv_func = shannon;                break;
+    case ADIV_SIMPSON:     adiv_func = simpson;                break;
+    case ADIV_SQUARES:     adiv_func = squares;                break;
   }
   
   if (adiv_func == NULL) { // # nocov start
@@ -500,30 +498,7 @@ SEXP C_alpha_div(
   setAttrib(sexp_result_vec, R_NamesSymbol, em->sexp_sample_names);
   
   
-  // Run WITH multithreading
-  #ifdef HAVE_PTHREAD
-    if (n_threads > 1 && n_samples > 100) {
-      
-      // threads and their thread_i arguments
-      pthread_t *tids = (pthread_t*) R_alloc(n_threads, sizeof(pthread_t));
-      int       *args = (int*)       R_alloc(n_threads, sizeof(int));
-      
-      int i, n = n_threads;
-      for (i = 0; i < n; i++) args[i] = i;
-      for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, adiv_func, &args[i]);
-      for (i = 0; i < n; i++) pthread_join(tids[i], NULL);
-      
-      free_all();
-      UNPROTECT(1);
-      return sexp_result_vec;
-    }
-  #endif
-  
-  
-  // Run WITHOUT multithreading
-  n_threads    = 1;
-  int thread_i = 0;
-  adiv_func(&thread_i);
+  run_parallel(adiv_func, n_threads, n_samples);
   
   free_all();
   UNPROTECT(1);

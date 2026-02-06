@@ -20,7 +20,6 @@ static int     n_otus;
 static int     n_edges;
 static int     n_pairs;
 static int     n_dist;
-static int     n_threads;
 static int    *pos_vec;
 static int    *otu_vec;
 static double *val_vec;
@@ -42,7 +41,9 @@ static double *dist_vec;
  */
 #define FOREACH_SAMPLE(expression)                             \
   do {                                                         \
-    int sam = *((int *) arg);                                  \
+    int sam       = ((worker_t *)arg)->i;                      \
+    int n_threads = ((worker_t *)arg)->n;                      \
+                                                               \
     for (; sam < n_samples; sam += n_threads) {                \
       double *sample_norm = sample_norm_vec + sam;             \
       double *weight_vec  = weight_mtx + (sam * n_edges);      \
@@ -125,8 +126,9 @@ static double *dist_vec;
 
 #define FOREACH_SAMPLE_PAIR(expression)                        \
   do {                                                         \
-    int     thread_i = *((int *) arg);                         \
-    int     dist_idx = 0;                                      \
+    int     thread_i  = ((worker_t *)arg)->i;                  \
+    int     n_threads = ((worker_t *)arg)->n;                  \
+    int     dist_idx  = 0;                                     \
     double *x_weight_vec, *x_sample_norm;                      \
     double *y_weight_vec, *y_sample_norm;                      \
                                                                \
@@ -465,8 +467,8 @@ SEXP C_unifrac(
     SEXP sexp_margin,    SEXP sexp_pairs_vec, SEXP sexp_n_threads,  
     SEXP sexp_extra_args ) {
   
-  sexp_extra = &sexp_extra_args;
-  n_threads  = asInteger(sexp_n_threads);
+  sexp_extra     = &sexp_extra_args;
+  int n_threads  = asInteger(sexp_n_threads);
   init_n_ptrs(n_threads + 10);
   
   
@@ -563,33 +565,9 @@ SEXP C_unifrac(
   }
   
   
-  // Run WITH multithreading
-  #ifdef HAVE_PTHREAD
-    if (n_threads > 1 && n_pairs > 100) {
-      
-      // threads and their thread_i arguments
-      pthread_t *tids = (pthread_t*) R_alloc(n_threads, sizeof(pthread_t));
-      int       *args = (int*)       R_alloc(n_threads, sizeof(int));
-      
-      int i, n = n_threads;
-      for (i = 0; i < n; i++) args[i] = i;
-      for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, calc_weight_mtx, &args[i]);
-      for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
-      for (i = 0; i < n; i++) pthread_create(&tids[i], NULL, calc_dist_vec, &args[i]);
-      for (i = 0; i < n; i++) pthread_join(   tids[i], NULL);
-      
-      free_all();
-      UNPROTECT(5);
-      return sexp_result_dist;
-    }
-  #endif
+  run_parallel(calc_weight_mtx, n_threads, n_pairs);
+  run_parallel(calc_dist_vec,   n_threads, n_pairs);
   
-  
-  // Run WITHOUT multithreading
-  n_threads    = 1;
-  int thread_i = 0;
-  calc_weight_mtx(&thread_i);
-  calc_dist_vec(&thread_i);
   
   free_all();
   UNPROTECT(5);
