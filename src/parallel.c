@@ -86,8 +86,9 @@ void run_parallel(pthread_func_t func, int n_threads, int n_tasks) {
   // 5. Thread creation failed (partial or total).
   
   single_thread_fallback:
-    
-  // Arguments for processing the whole dataset
-  worker_t args = { .i = 0, .n = 1 };
-  func((void*)&args);
+  {
+    // Arguments for processing the whole dataset
+    worker_t args = { .i = 0, .n = 1 };
+    func((void*)&args);
+  }
 }
