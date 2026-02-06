@@ -247,7 +247,7 @@ bhattacharyya <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -399,7 +399,7 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'chord'
   validate_args()
   
-  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -602,7 +602,7 @@ hellinger <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL, NULL)
+  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL)
   
   sqrt(sqc)
 }
@@ -683,7 +683,7 @@ jensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL, NULL)
+  jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL)
   
   sqrt(jsd)
 }
@@ -725,7 +725,7 @@ jsd <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -841,7 +841,7 @@ matusita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL, NULL)
+  sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL)
   
   sqrt(sqc)
 }
@@ -940,7 +940,7 @@ morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   
   assert_integer_counts()
   
-  .Call(C_beta_div, BDIV_MORISITA, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_MORISITA, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -1018,7 +1018,7 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, NULL, NULL)
+  scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL)
   
   2 * scs
 }
@@ -1098,7 +1098,7 @@ squared_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -1138,7 +1138,7 @@ squared_chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -1219,7 +1219,7 @@ topsoe <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'percent'
   validate_args()
   
-  jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, NULL, NULL)
+  jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL)
   
   2 * jsd
 }
@@ -1304,7 +1304,7 @@ hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_HAMMING, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_HAMMING, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -1346,7 +1346,7 @@ jaccard <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_JACCARD, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_JACCARD, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -1386,7 +1386,7 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_OCHIAI, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_OCHIAI, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 
@@ -1428,7 +1428,7 @@ sorensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SORENSEN, counts, margin, norm, pairs, cpus, NULL, NULL)
+  .Call(C_beta_div, BDIV_SORENSEN, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 

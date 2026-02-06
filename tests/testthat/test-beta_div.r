@@ -20,6 +20,8 @@ test_that("beta diversity", {
   # Matrix with > 100 columns to trigger pthreading ====
   
   expect_silent(bray(big_mtx))
+  expect_silent(jsd(big_mtx))
+  expect_silent(jsd(counts_p))
   expect_silent(unweighted_unifrac(big_mtx, tree))
   
   

@@ -4,6 +4,7 @@
 #include "ecodive.h"
 
 
+#define NORM_NONE    0
 #define NORM_PERCENT 1
 #define NORM_CLR     2
 #define NORM_CHORD   3
@@ -21,22 +22,22 @@ static double  pseudocount;
 // Macro to loop over each sample based on current threading setup.
 // Sets sam (sample index), val_begin, and val_end (pointers to val_vec 
 // for this sample's first value and the next sample's first value).
-#define FOREACH_SAMPLE(block)                                       \
+#define FOREACH_SAMPLE(expression)                                  \
   do {                                                              \
     int thread_i = *((int *) arg);                                  \
     for (int sam = thread_i; sam < n_samples; sam += n_threads) {   \
       double *val_begin = val_vec + pos_vec[sam];                   \
       double *val_end   = val_vec + pos_vec[sam + 1];               \
-      block                                                         \
+      expression                                                    \
     }                                                               \
   } while (0)
 
 // Marco to loop over each value for the current sample.
 // Sets val to point to each value in val_vec in turn.
-#define FOREACH_VAL(block)                                          \
+#define FOREACH_VAL(expression)                                     \
   do {                                                              \
     for (double *val = val_begin; val != val_end; val++) {          \
-      block;                                                        \
+      expression;                                                   \
     }                                                               \
   } while (0)
 
@@ -53,6 +54,23 @@ static void *norm_percent(void *arg) {
     FOREACH_VAL(*val /= depth);
   );
   return NULL;
+}
+  
+static int already_percent() {
+  
+  n_threads    = 1;
+  int thread_i = 0;
+  void *arg = (void *)&thread_i;
+  
+  FOREACH_SAMPLE(
+    double depth = 0;
+    FOREACH_VAL(
+      if (*val < 0 || *val > 1) return 0;
+      depth += *val
+    );
+    if (fabs(depth - 1) > 1e-6) return 0;
+  );
+  return 1;
 }
 
 
@@ -111,25 +129,15 @@ static void *norm_binary(void *arg) {
 
 
 
-void normalize(
-    ecomatrix_t *em, SEXP sexp_norm, 
-    int n_threads_,  SEXP sexp_pseudocount ) {
-  
-  int norm  = asInteger(sexp_norm);
-  n_threads = n_threads_;
+void normalize(ecomatrix_t *em, int norm, int n_threads_, int pseudocount_) {
   
   n_samples = em->n_samples;
   n_otus    = em->n_otus;
   pos_vec   = em->pos_vec;
-  val_vec   = rw_val_vec(em);
+  val_vec   = em->val_vec;
   
-  
-  // CLR's pseudocounts need special handling
-  if (norm == NORM_CLR) {
-    clr_vec     = rw_clr_vec(em);
-    pseudocount = asReal(sexp_pseudocount);
-  }
-  
+  if      (norm == NORM_PERCENT) { if (already_percent()) return; }
+  else if (norm == NORM_CLR)     { clr_vec = rw_clr_vec(em);      }
   
   // function to run
   void * (*norm_func)(void *) = NULL;
@@ -139,6 +147,10 @@ void normalize(
     case NORM_CHORD:   norm_func = norm_chord;   break;
     case NORM_BINARY:  norm_func = norm_binary;  break;
   }
+  
+  n_threads   = n_threads_;
+  pseudocount = pseudocount_;
+  val_vec     = rw_val_vec(em);
   
   
   // Run WITH multithreading

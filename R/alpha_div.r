@@ -140,7 +140,7 @@ alpha_div <- function (
 #'     ace(ex_counts)
 ace <- function (counts, cutoff = 10L, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   assert_integer_counts()
   
@@ -220,7 +220,7 @@ berger <- function (counts, margin = 1L, cpus = n_cpus()) {
 #'     brillouin(ex_counts)
 brillouin <- function (counts, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   assert_integer_counts()
   
@@ -261,7 +261,7 @@ brillouin <- function (counts, margin = 1L, cpus = n_cpus()) {
 #'     chao1(ex_counts)
 chao1 <- function (counts, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   assert_integer_counts()
   
@@ -296,7 +296,7 @@ chao1 <- function (counts, margin = 1L, cpus = n_cpus()) {
 #'     faith(ex_counts, tree = ex_tree)
 faith <- function (counts, tree = NULL, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   
   .Call(C_alpha_div, ADIV_FAITH, counts, margin, norm, cpus, tree)
@@ -335,7 +335,7 @@ faith <- function (counts, tree = NULL, margin = 1L, cpus = n_cpus()) {
 #'     fisher(ex_counts)
 fisher <- function (counts, digits = 3L, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   assert_integer_counts()
   
@@ -417,7 +417,7 @@ inv_simpson <- function (counts, margin = 1L, cpus = n_cpus()) {
 #'     margalef(ex_counts)
 margalef <- function (counts, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   assert_integer_counts()
   
@@ -458,7 +458,7 @@ margalef <- function (counts, margin = 1L, cpus = n_cpus()) {
 #'     mcintosh(ex_counts)
 mcintosh <- function (counts, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   assert_integer_counts()
   
@@ -498,7 +498,7 @@ mcintosh <- function (counts, margin = 1L, cpus = n_cpus()) {
 #'     menhinick(ex_counts)
 menhinick <- function (counts, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   assert_integer_counts()
   
@@ -531,7 +531,7 @@ menhinick <- function (counts, margin = 1L, cpus = n_cpus()) {
 #'     observed(ex_counts)
 observed <- function (counts, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   
   .Call(C_alpha_div, ADIV_OBSERVED, counts, margin, norm, cpus, NULL)
@@ -657,7 +657,7 @@ simpson <- function (counts, margin = 1L, cpus = n_cpus()) {
 #'     squares(ex_counts)
 squares <- function (counts, margin = 1L, cpus = n_cpus()) {
   
-  norm <- NULL
+  norm <- 'none'
   validate_args()
   assert_integer_counts()
   

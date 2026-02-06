@@ -682,14 +682,14 @@ SEXP C_beta_div(
     SEXP sexp_pairs_vec,   SEXP sexp_n_threads, 
     SEXP sexp_pseudocount, SEXP sexp_extra_args ) {
   
-  sexp_extra = &sexp_extra_args;
-  n_threads  = asInteger(sexp_n_threads);
+  int norm        = asInteger(sexp_norm);
+  int pseudocount = asReal(sexp_pseudocount);
+  n_threads       = asInteger(sexp_n_threads);
+  sexp_extra      = &sexp_extra_args;
   init_n_ptrs(10);
   
   ecomatrix_t *em = new_ecomatrix(sexp_otu_mtx, sexp_margin);
-  
-  if (!isNull(sexp_norm))
-    normalize(em, sexp_norm, n_threads, sexp_pseudocount);
+  if (norm) normalize(em, norm, n_threads, pseudocount);
   
   n_samples = em->n_samples;
   n_otus    = em->n_otus;

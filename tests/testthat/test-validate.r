@@ -65,7 +65,7 @@ test_that("validation", {
   env$norm <- 'badoption'
   expect_error(validate_norm(env))
 
-  env$norm <- NULL
+  env$norm <- 'chord'
   expect_silent(validate_norm(env))
 
   env$counts <- counts

@@ -2,6 +2,7 @@
 # Licensed under the MIT License: https://opensource.org/license/mit
 
 
+NORM_NONE    <- 0L
 NORM_PERCENT <- 1L
 NORM_CLR     <- 2L
 NORM_CHORD   <- 3L
@@ -389,16 +390,15 @@ validate_margin <- function (env = parent.frame()) {
 validate_norm <- function (env = parent.frame()) {
   with(env, {
     
-    if (!is.null(norm))
-      norm <- switch(
-        EXPR = match.arg(
-          arg     = tolower(norm), 
-          choices = c('none', 'percent', 'chord', 'binary', 'clr') ),
-        'none'    = NULL,
-        'percent' = NORM_PERCENT,
-        'chord'   = NORM_CHORD,
-        'binary'  = NORM_BINARY,
-        'clr'     = NORM_CLR )
+    norm <- switch(
+      EXPR = match.arg(
+        arg     = tolower(norm), 
+        choices = c('none', 'percent', 'chord', 'binary', 'clr') ),
+      'none'    = NORM_NONE,
+      'percent' = NORM_PERCENT,
+      'chord'   = NORM_CHORD,
+      'binary'  = NORM_BINARY,
+      'clr'     = NORM_CLR )
     
   })
 }
