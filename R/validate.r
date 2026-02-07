@@ -285,7 +285,7 @@ validate_pseudocount <- function (env = parent.frame()) {
   with(env, {
     
     if (!identical(norm, NORM_CLR)) {
-      pseudocount <- NULL
+      pseudocount <- 0
     }
     
     else {
@@ -322,7 +322,7 @@ validate_pseudocount <- function (env = parent.frame()) {
             pseudocount <- as.double(pseudocount)
             stopifnot(length(pseudocount) == 1)
             stopifnot(!is.na(pseudocount))
-            stopifnot(pseudocount > 0)
+            stopifnot(isTRUE(pseudocount > 0))
           },
           error = function (e) {
             stop('`pseudocount` must be a single positive number.')
@@ -343,7 +343,7 @@ validate_pseudocount <- function (env = parent.frame()) {
         
         if (!has_zeros) {
           
-          pseudocount <- NULL
+          pseudocount <- 0
           
         } else {
           

@@ -175,7 +175,7 @@ test_that("validation", {
   env$pseudocount <- 999
   env$counts      <- matrix(1:4, 2, 2)
   expect_silent(validate_pseudocount(env))
-  expect_null(env$pseudocount)
+  expect_equal(env$pseudocount, 0)
   
   
   # 2. Explicit Pseudocount (Valid)
@@ -229,7 +229,7 @@ test_that("validation", {
   env$counts      <- matrix(1:4, 2, 2)
   env$pseudocount <- NULL
   expect_silent(validate_pseudocount(env))
-  expect_null(env$pseudocount)
+  expect_equal(env$pseudocount, 0)
   
   # Case: Zeros present -> Warning + Default (min/2)
   env$counts      <- matrix(c(0, 10, 20, 30), 2, 2) # min non-zero is 10
@@ -289,7 +289,7 @@ test_that("validation", {
   env$counts      <- dgc_full
   env$pseudocount <- NULL
   expect_silent(validate_pseudocount(env))
-  expect_null(env$pseudocount)
+  expect_equal(env$pseudocount, 0)
   
   
 })
