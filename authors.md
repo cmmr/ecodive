@@ -5,6 +5,9 @@
 - **Daniel P. Smith**. Author, maintainer.
   [](https://orcid.org/0000-0002-2479-2044)
 
+- **Melissa O'Neill**. Contributor, copyright holder.  
+  Author of PCG random number generator
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

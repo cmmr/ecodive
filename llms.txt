@@ -185,7 +185,18 @@ By contributing to this project, you agree to abide by its terms.
 
 ## License
 
-[MIT License](https://opensource.org/license/mit) © 2026 ecodive authors
+`ecodive` is licensed under the [MIT
+License](https://opensource.org/license/mit) © 2026 ecodive authors.
+
+This package also contains third-party code:
+
+- **PCG Random Number Generation for C**: Licensed under the [Apache
+  License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+Detailed copyright and licensing information for all components can be
+found in the
+[`inst/COPYRIGHTS`](https://github.com/cmmr/ecodive/blob/main/inst/COPYRIGHTS)
+file.
 
 # Package index
 
