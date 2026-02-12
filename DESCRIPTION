@@ -9,6 +9,10 @@ Authors@R: c(
       role    = c("aut", "cre"),
       comment = c(ORCID = "0000-0002-2479-2044")),
     person(
+      "Melissa", "O'Neill",
+      role    = c("ctb", "cph"),
+      comment = "Author of PCG random number generator"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description:
