@@ -197,6 +197,6 @@ to this project, you agree to abide by its terms.
 
 This package also contains third-party code:
 
-* **PCG Random Number Generation for C**: Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+* [**PCG Random Number Generation for C**](https://www.pcg-random.org): Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 Detailed copyright and licensing information for all components can be found in the [`inst/COPYRIGHTS`](https://github.com/cmmr/ecodive/blob/main/inst/COPYRIGHTS) file.
