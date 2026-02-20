@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,21 +99,22 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 
 
 <dt id="arg-power">power<a class="anchor" aria-label="anchor" href="#arg-power"></a></dt>
-<dd><p>Scaling factor for the magnitude of differences between
-communities (\(p\)). Default: <code>1.5</code></p></dd>
+<dd><p>Only used when <code>metric = 'minkowski'</code>. Scaling factor for the
+magnitude of differences between communities (\(p\)). Default: <code>1.5</code></p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>How much weight to give to relative abundances; a value
-between 0 and 1, inclusive. Setting <code>alpha=1</code> is equivalent to
-<code><a href="normalized_unifrac.html">normalized_unifrac()</a></code>.</p></dd>
+<dd><p>Only used when <code>metric = 'generalized_unifrac'</code>. How much
+weight to give to relative abundances; a value between 0 and 1,
+inclusive. Setting <code>alpha=1</code> is equivalent to <code><a href="normalized_unifrac.html">normalized_unifrac()</a></code>.</p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
-<dd><p>A <code>phylo</code>-class object representing the phylogenetic tree for
-the OTUs in <code>counts</code>. The OTU identifiers given by <code>colnames(counts)</code>
-must be present in <code>tree</code>. Can be omitted if a tree is embedded with
-the <code>counts</code> object or as <code>attr(counts, 'tree')</code>.</p></dd>
+<dd><p>Only used by phylogeny-aware metrics. A <code>phylo</code>-class object
+representing the phylogenetic tree for the OTUs in <code>counts</code>. The OTU
+identifiers given by <code>colnames(counts)</code> must be present in <code>tree</code>. Can
+be omitted if a tree is embedded with the <code>counts</code> object or as
+<code>attr(counts, 'tree')</code>.</p></dd>
 
 
 <dt id="arg-pairs">pairs<a class="anchor" aria-label="anchor" href="#arg-pairs"></a></dt>

@@ -62,21 +62,23 @@ beta_div(
 
 - power:
 
-  Scaling factor for the magnitude of differences between communities
-  (\\p\\). Default: `1.5`
+  Only used when `metric = 'minkowski'`. Scaling factor for the
+  magnitude of differences between communities (\\p\\). Default: `1.5`
 
 - alpha:
 
-  How much weight to give to relative abundances; a value between 0 and
-  1, inclusive. Setting `alpha=1` is equivalent to
+  Only used when `metric = 'generalized_unifrac'`. How much weight to
+  give to relative abundances; a value between 0 and 1, inclusive.
+  Setting `alpha=1` is equivalent to
   [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/normalized_unifrac.md).
 
 - tree:
 
-  A `phylo`-class object representing the phylogenetic tree for the OTUs
-  in `counts`. The OTU identifiers given by `colnames(counts)` must be
-  present in `tree`. Can be omitted if a tree is embedded with the
-  `counts` object or as `attr(counts, 'tree')`.
+  Only used by phylogeny-aware metrics. A `phylo`-class object
+  representing the phylogenetic tree for the OTUs in `counts`. The OTU
+  identifiers given by `colnames(counts)` must be present in `tree`. Can
+  be omitted if a tree is embedded with the `counts` object or as
+  `attr(counts, 'tree')`.
 
 - pairs:
 
