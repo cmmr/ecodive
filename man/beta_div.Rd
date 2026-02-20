@@ -44,17 +44,18 @@ Default: \code{'none'}.}
 \code{norm = 'clr'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
-\item{power}{Scaling factor for the magnitude of differences between
-communities (\eqn{p}). Default: \code{1.5}}
+\item{power}{Only used when \code{metric = 'minkowski'}. Scaling factor for the
+magnitude of differences between communities (\eqn{p}). Default: \code{1.5}}
 
-\item{alpha}{How much weight to give to relative abundances; a value
-between 0 and 1, inclusive. Setting \code{alpha=1} is equivalent to
-\code{normalized_unifrac()}.}
+\item{alpha}{Only used when \code{metric = 'generalized_unifrac'}. How much
+weight to give to relative abundances; a value between 0 and 1,
+inclusive. Setting \code{alpha=1} is equivalent to \code{normalized_unifrac()}.}
 
-\item{tree}{A \code{phylo}-class object representing the phylogenetic tree for
-the OTUs in \code{counts}. The OTU identifiers given by \code{colnames(counts)}
-must be present in \code{tree}. Can be omitted if a tree is embedded with
-the \code{counts} object or as \code{attr(counts, 'tree')}.}
+\item{tree}{Only used by phylogeny-aware metrics. A \code{phylo}-class object
+representing the phylogenetic tree for the OTUs in \code{counts}. The OTU
+identifiers given by \code{colnames(counts)} must be present in \code{tree}. Can
+be omitted if a tree is embedded with the \code{counts} object or as
+\code{attr(counts, 'tree')}.}
 
 \item{pairs}{Which combinations of samples should distances be
 calculated for? The default value (\code{NULL}) calculates all-vs-all.

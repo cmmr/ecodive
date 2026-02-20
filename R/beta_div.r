@@ -56,6 +56,19 @@ V_UNIFRAC <- 5L
 #'   'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')`. Flexible
 #'   matching is supported (see below). Programmatic access via
 #'   `list_metrics('beta')`.
+#'   
+#' @param power   Only used when `metric = 'minkowski'`. Scaling factor for the 
+#'        magnitude of differences between communities (\eqn{p}). Default: `1.5`
+#' 
+#' @param alpha   Only used when `metric = 'generalized_unifrac'`. How much 
+#'        weight to give to relative abundances; a value between 0 and 1, 
+#'        inclusive. Setting `alpha=1` is equivalent to `normalized_unifrac()`.
+#' 
+#' @param tree   Only used by phylogeny-aware metrics. A `phylo`-class object 
+#'        representing the phylogenetic tree for the OTUs in `counts`. The OTU 
+#'        identifiers given by `colnames(counts)` must be present in `tree`. Can 
+#'        be omitted if a tree is embedded with the `counts` object or as 
+#'        `attr(counts, 'tree')`.
 #' 
 #' @return A numeric vector.
 #' 
