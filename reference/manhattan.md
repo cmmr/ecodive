@@ -127,7 +127,7 @@ geometry. Dover Publications.
 
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
 [`vignette('bdiv')`](https://cmmr.github.io/ecodive/articles/bdiv.md),
-[`vignette('bdiv_guide')`](https://cmmr.github.io/ecodive/articles/bdiv_guide.md)
+`vignette('bdiv_guide')`
 
 Other Abundance metrics:
 [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md),

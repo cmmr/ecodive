@@ -94,7 +94,7 @@ based on phylogeny. *BMC Bioinformatics*, 12, 118.
 
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
 [`vignette('bdiv')`](https://cmmr.github.io/ecodive/articles/bdiv.md),
-[`vignette('bdiv_guide')`](https://cmmr.github.io/ecodive/articles/bdiv_guide.md)
+`vignette('bdiv_guide')`
 
 Other Phylogenetic metrics:
 [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md),

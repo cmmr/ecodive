@@ -192,7 +192,7 @@ This package also contains third-party code:
 
 - [**PCG Random Number Generation for C**](https://www.pcg-random.org):
   Licensed under the [Apache License, Version
-  2.0](http://www.apache.org/licenses/LICENSE-2.0).
+  2.0](https://opensource.org/license/apache-2.0).
 
 Detailed copyright and licensing information for all components can be
 found in the

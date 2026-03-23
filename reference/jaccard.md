@@ -85,7 +85,7 @@ Jaccard, P. (1908). Nouvelles recherches sur la distribution florale.
 
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
 [`vignette('bdiv')`](https://cmmr.github.io/ecodive/articles/bdiv.md),
-[`vignette('bdiv_guide')`](https://cmmr.github.io/ecodive/articles/bdiv_guide.md)
+`vignette('bdiv_guide')`
 
 Other Presence/Absence metrics:
 [`hamming()`](https://cmmr.github.io/ecodive/reference/hamming.md),

@@ -78,9 +78,9 @@ systematically narrow the field of metrics to a small, relevant subset.
     demonstrated that Hellinger and JSD captured compositional changes
     in low-abundance elements more efficiently than other standard
     metrics. Similarly, **[Cordier et
-    al. (2024)](https://academic.oup.com/ismecommun/article/5/1/ycaf230/8373278)**
-    found Hellinger to be one of the top performers in handling noisy,
-    sparse count data.
+    al. (2024)](https://doi.org/10.1093/ismeco/ycaf230)** found
+    Hellinger to be one of the top performers in handling noisy, sparse
+    count data.
 
 - **NO:** Your data represents absolute counts or measurements (e.g.,
   from microscopy or quantitative PCR). Proceed to Question 3.
@@ -97,9 +97,9 @@ systematically narrow the field of metrics to a small, relevant subset.
     confirm that beta diversity metrics focusing on membership can
     reveal differences that abundance-weighted metrics miss. **Note:**
     Be cautious if your sampling depth is low; **[Schroeder et
-    al. (2018)](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecs2.2100)**
-    warn that richness-based metrics like Jaccard are highly sensitive
-    to undersampling error.
+    al. (2018)](https://doi.org/10.1002/ecs2.2100)** warn that
+    richness-based metrics like Jaccard are highly sensitive to
+    undersampling error.
 
 - Shifts in the abundance of taxa (Community Structure): You are
   interested in which species are dominant and how their abundances
