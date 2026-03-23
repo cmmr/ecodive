@@ -9,7 +9,6 @@ A matrix of 4 samples (columns) x 6 genera (rows).
 }
 \source{
 Derived from The Human Microbiome Project dataset.
-\url{https://commonfund.nih.gov/hmp}
 }
 \usage{
 ex_counts
