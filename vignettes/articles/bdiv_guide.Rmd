@@ -39,7 +39,7 @@ This decision tree presents a series of questions to help a researcher systemati
 
     * The most statistically rigorous approach is to use a compositional metric. -> Your primary choice should be <u>Aitchison</u> distance (Euclidean distance on Centered Log-Ratio transformed data). **[Gloor et al. (2017)](https://doi.org/10.3389/fmicb.2017.02224)** argue this approach is essential to avoid spurious correlations and "false positives" common in standard ecological metrics when applied to relative abundance data.
     
-    * If you choose to use a non-compositional metric, select one that is robust to sparsity. -> Good secondary choices include <u>Hellinger</u> or <u>Jensen-Shannon Divergence (JSD)</u>. In a rigorous benchmarking of 13 metrics on high-dimensional data, **[Chen et al. (2021)](https://doi.org/10.1371/journal.pone.0246893)** demonstrated that Hellinger and JSD captured compositional changes in low-abundance elements more efficiently than other standard metrics. Similarly, **[Cordier et al. (2024)](https://academic.oup.com/ismecommun/article/5/1/ycaf230/8373278)** found Hellinger to be one of the top performers in handling noisy, sparse count data.
+    * If you choose to use a non-compositional metric, select one that is robust to sparsity. -> Good secondary choices include <u>Hellinger</u> or <u>Jensen-Shannon Divergence (JSD)</u>. In a rigorous benchmarking of 13 metrics on high-dimensional data, **[Chen et al. (2021)](https://doi.org/10.1371/journal.pone.0246893)** demonstrated that Hellinger and JSD captured compositional changes in low-abundance elements more efficiently than other standard metrics. Similarly, **[Cordier et al. (2024)](https://doi.org/10.1093/ismeco/ycaf230)** found Hellinger to be one of the top performers in handling noisy, sparse count data.
 
 * **NO:** Your data represents absolute counts or measurements (e.g., from microscopy or quantitative PCR). Proceed to Question 3.
 
@@ -47,7 +47,7 @@ This decision tree presents a series of questions to help a researcher systemati
 
 * Presence/Absence of specific taxa (Community Membership): You are interested in which species are present, regardless of their abundance.
 
-    * -> Choose a Qualitative (Binary) Metric. Your best options are <u>Jaccard</u> (the standard for turnover) or <u>Sorensen-Dice</u>. **[Kers and Saccenti (2022)](https://doi.org/10.3389/fmicb.2021.796025)** confirm that beta diversity metrics focusing on membership can reveal differences that abundance-weighted metrics miss. **Note:** Be cautious if your sampling depth is low; **[Schroeder et al. (2018)](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecs2.2100)** warn that richness-based metrics like Jaccard are highly sensitive to undersampling error.
+    * -> Choose a Qualitative (Binary) Metric. Your best options are <u>Jaccard</u> (the standard for turnover) or <u>Sorensen-Dice</u>. **[Kers and Saccenti (2022)](https://doi.org/10.3389/fmicb.2021.796025)** confirm that beta diversity metrics focusing on membership can reveal differences that abundance-weighted metrics miss. **Note:** Be cautious if your sampling depth is low; **[Schroeder et al. (2018)](https://doi.org/10.1002/ecs2.2100)** warn that richness-based metrics like Jaccard are highly sensitive to undersampling error.
 
 * Shifts in the abundance of taxa (Community Structure): You are interested in which species are dominant and how their abundances change.
 
