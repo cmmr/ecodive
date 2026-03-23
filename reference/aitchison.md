@@ -105,7 +105,7 @@ parallel processing.
 
 Aitchison, J. (1986). The statistical analysis of compositional data.
 Chapman and Hall.
-[doi:10.1007/978-94-009-4109-3](https://doi.org/10.1007/978-94-009-4109-3)
+[doi:10.1002/bimj.4710300705](https://doi.org/10.1002/bimj.4710300705)
 
 Aitchison, J. (1982). The statistical analysis of compositional data.
 *Journal of the Royal Statistical Society: Series B (Methodological)*,
