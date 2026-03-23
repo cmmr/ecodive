@@ -202,7 +202,7 @@ beta_div <- function (
 #'   Costea et al. (2014) for the impact on community clustering.
 #' 
 #' @references
-#' Aitchison, J. (1986). The statistical analysis of compositional data. Chapman and Hall. \doi{10.1007/978-94-009-4109-3}
+#' Aitchison, J. (1986). The statistical analysis of compositional data. Chapman and Hall. \doi{10.1002/bimj.4710300705}
 #' 
 #' Aitchison, J. (1982). The statistical analysis of compositional data. *Journal of the Royal Statistical Society: Series B (Methodological)*, 44(2), 139-160. \doi{10.1111/j.2517-6161.1982.tb01195.x}
 #' 
