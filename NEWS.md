@@ -1,4 +1,4 @@
-# ecodive 2.2.5
+# ecodive 2.2.6
 
 * When using CLR normalization:
 
