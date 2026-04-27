@@ -1,17 +1,17 @@
-test_that("read tree", {
+#test_that("read tree", {
   
   tree_file <- tempfile()
   on.exit({ if (file.exists(tree_file)) unlink(tree_file) })
   writeLines(text = tree_str, con = tree_file)
   
-  x <- expect_silent(read_tree(tree_str))
-  y <- expect_silent(read_tree(tree_file))
+  expect_silent(x <- read_tree(tree_str))
+  expect_silent(y <- read_tree(tree_file))
   
   expect_identical(x, y)
   
   expect_identical(
-    object   = x, 
-    expected = structure(
+    current = x, 
+    target  = structure(
       list(
         edge = structure(
           .Data = as.integer(c(6,7,7,8,9,9,8,6,7,1,8,9,2,3,4,5)), 
@@ -27,5 +27,5 @@ test_that("read tree", {
   
   
   tree <- "(t9,((t5,t2),(((t10,(t7,t4)),(t6,(t3,t1))),t8)));"
-  tree <- expect_s3_class(read_tree(tree), 'phylo')
-})
+  expect_inherits(tree <- read_tree(tree), 'phylo')
+#})

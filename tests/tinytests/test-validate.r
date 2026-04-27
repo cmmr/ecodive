@@ -1,4 +1,4 @@
-test_that("validation", {
+#test_that("validation", {
   
   env <- new.env()
   
@@ -125,11 +125,15 @@ test_that("validation", {
   env$margin <- 1L
   attr(env$counts, 'tree') <- tree
   expect_silent(validate_counts(env))
-
-  skip_on_cran()
-  skip_if_not_installed('rbiom')
-  skip_if_not_installed('phyloseq')
-  skip_if_not_installed('TreeSummarizedExperiment')
+  
+  exit_if_not(at_home())
+  exit_if_not(requireNamespace("rbiom",                    quietly=TRUE))
+  exit_if_not(requireNamespace("phyloseq",                 quietly=TRUE))
+  exit_if_not(requireNamespace("TreeSummarizedExperiment", quietly=TRUE))
+  # skip_on_cran()
+  # skip_if_not_installed('rbiom')
+  # skip_if_not_installed('phyloseq')
+  # skip_if_not_installed('TreeSummarizedExperiment')
 
   hmp50               <- do.call(`::`, list('rbiom', 'hmp50'))
   convert_to_phyloseq <- do.call(`::`, list('rbiom', 'convert_to_phyloseq'))
@@ -250,7 +254,9 @@ test_that("validation", {
   
   # 6. Auto-detection: Sparse Matrix (slam::simple_triplet_matrix)
   # ----------------------------------------------------------------
-  skip_if_not_installed('slam')
+  
+  exit_if_not(requireNamespace("slam", quietly=TRUE))
+  # skip_if_not_installed('slam')
   
   # Case: Implicit zeros (v has length < nrow*ncol)
   # Matrix: 10  0
@@ -273,7 +279,8 @@ test_that("validation", {
   
   # 7. Auto-detection: Sparse Matrix (Matrix::dgCMatrix)
   # ----------------------------------------------------------------
-  skip_if_not_installed('Matrix')
+  exit_if_not(requireNamespace("Matrix", quietly=TRUE))
+  # skip_if_not_installed('Matrix')
   
   # Case: Implicit zeros
   dgc <- Matrix::Matrix(c(10, 0, 0, 20), 2, 2, sparse=TRUE)
@@ -292,4 +299,4 @@ test_that("validation", {
   expect_equal(env$pseudocount, 0)
   
   
-})
+#})

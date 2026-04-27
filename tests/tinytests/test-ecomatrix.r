@@ -1,8 +1,10 @@
-test_that("ecomatrix.c parsing logic is covered", {
+#test_that("ecomatrix.c parsing logic is covered", {
 
   # Ensure Matrix and slam packages are available for testing
-  skip_if_not_installed('Matrix')
-  skip_if_not_installed('slam')
+  exit_if_not(requireNamespace("Matrix", quietly=TRUE))
+  exit_if_not(requireNamespace("slam",   quietly=TRUE))
+  #skip_if_not_installed('Matrix')
+  #skip_if_not_installed('slam')
   
   if (packageVersion("Matrix") >= "1.5") {
     COMPRESSED <- "sparseMatrix"
@@ -143,4 +145,4 @@ test_that("ecomatrix.c parsing logic is covered", {
   expect_null(names(res_slam_no_dimnames))
   expect_equal(unname(res_slam_no_dimnames), unname(expected_margin1))
 
-})
+#})
