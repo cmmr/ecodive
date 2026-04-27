@@ -10,11 +10,13 @@ static int         underscores;
 static size_t n_leafs;
 static size_t n_edges;
 
-// Output arrays
+// Output arrays (R-managed handles)
 static SEXP    sexp_node_label_vec;
 static SEXP    sexp_leaf_label_vec;
-static int    *edge_mtx;
-static double *edge_length_vec;
+
+// Native C arrays to avoid R garbage collection relocation issues
+static int    *c_edge_mtx;
+static double *c_edge_length_vec;
 
 // Track next open indices in output arrays
 static size_t next_edge_index;
@@ -22,18 +24,20 @@ static size_t next_node_index;
 static size_t next_leaf_index;
 
 
-
-
 static SEXP extract_name(size_t x1, size_t x2) {
+  
+  if (x1 > x2) return mkChar(""); // Safety net for empty ranges
   
   char quoted = tree_str[x1] == '\'' && tree_str[x2] == '\'';
   
   // Quoted Name ==> Strip off quote marks
   if (quoted) {
+    if (x2 - x1 < 2) return mkChar(""); // e.g. ''
     x1++;
     x2--;
   }
   
+  // Standard calloc (heap), completely invisible to R's memory tracker
   char* node_name_str = calloc(x2 - x1 + 2, sizeof(char));
   strncpy(node_name_str, tree_str + x1, x2 - x1 + 1);
   node_name_str[x2 - x1 + 1] = '\0';
@@ -46,12 +50,12 @@ static SEXP extract_name(size_t x1, size_t x2) {
   }
   
   SEXP sexp_node_name = mkChar(node_name_str);
+  
+  // Free immediately! Prevents massive numbers of tiny heap allocations from piling up
   free(node_name_str);
   
   return sexp_node_name;
 }
-
-
 
 
 static void recurse_tree(size_t x1, size_t x2, size_t parent) {
@@ -75,9 +79,9 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
     // Text after the colon is the branch length
     if (tree_str[i] == ':') {
       
-      if (next_edge_index > 0) {
+      if (next_edge_index > 0 && next_edge_index <= n_edges) {
         char *junk_ptr;
-        edge_length_vec[next_edge_index - 1] = strtod(tree_str + i + 1, &junk_ptr);
+        c_edge_length_vec[next_edge_index - 1] = strtod(tree_str + i + 1, &junk_ptr);
       }
       
       x2 = i - 1;
@@ -89,10 +93,10 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
       if (i < x2)
         SET_STRING_ELT(sexp_node_label_vec, next_node_index, extract_name(i + 1, x2));
       
-      if (next_edge_index > 0) {
+      if (next_edge_index > 0 && next_edge_index <= n_edges) {
         size_t mtx_row_i = next_edge_index - 1;
-        edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
-        edge_mtx[mtx_row_i + n_edges] = next_node_index + n_leafs + 1;
+        c_edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
+        c_edge_mtx[mtx_row_i + n_edges] = next_node_index + n_leafs + 1;
       }
       next_node_index++;
       next_edge_index++;
@@ -112,10 +116,10 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
     if (x1 <= x2)
       SET_STRING_ELT(sexp_leaf_label_vec, next_leaf_index, extract_name(x1, x2));
     
-    if (next_edge_index > 0) {
+    if (next_edge_index > 0 && next_edge_index <= n_edges) {
       size_t mtx_row_i = next_edge_index - 1;
-      edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
-      edge_mtx[mtx_row_i + n_edges] = next_leaf_index + 1;
+      c_edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
+      c_edge_mtx[mtx_row_i + n_edges] = next_leaf_index + 1;
     }
     next_leaf_index++;
     next_edge_index++;
@@ -152,9 +156,6 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
 }
 
 
-
-
-
 SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
   
   tree_str    = CHAR(asChar(sexp_tree_str));
@@ -166,7 +167,7 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
   
   // Determine how many nodes are in this tree
   size_t n_nodes = 0;
-         n_leafs = 1;
+  n_leafs = 1;
   
   for (size_t i = x1; i <= x2; i++) {
     
@@ -192,8 +193,12 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
   SEXP sexp_result          = PROTECT(allocVector(VECSXP, 5));
   SEXP sexp_edge_mtx        = PROTECT(allocMatrix(INTSXP,  n_edges, 2));
   SEXP sexp_edge_length_vec = PROTECT(allocVector(REALSXP, n_edges));
-       sexp_node_label_vec  = PROTECT(allocVector(STRSXP,  n_nodes));
-       sexp_leaf_label_vec  = PROTECT(allocVector(STRSXP,  n_leafs));
+  sexp_node_label_vec  = PROTECT(allocVector(STRSXP,  n_nodes));
+  sexp_leaf_label_vec  = PROTECT(allocVector(STRSXP,  n_leafs));
+  
+  // Initialize strings to ""
+  for (size_t i = 0; i < n_nodes; i++) SET_STRING_ELT(sexp_node_label_vec, i, R_BlankString);
+  for (size_t i = 0; i < n_leafs; i++) SET_STRING_ELT(sexp_leaf_label_vec, i, R_BlankString);
   
   SET_VECTOR_ELT(sexp_result, 0, sexp_edge_mtx);
   SET_VECTOR_ELT(sexp_result, 1, ScalarInteger(n_nodes));
@@ -201,9 +206,13 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
   SET_VECTOR_ELT(sexp_result, 3, sexp_edge_length_vec);
   SET_VECTOR_ELT(sexp_result, 4, sexp_node_label_vec);
   
-  edge_mtx        = INTEGER(sexp_edge_mtx);
-  edge_length_vec = REAL(sexp_edge_length_vec);
-  memset(edge_length_vec, 0, n_edges * sizeof(double));
+  // Use R_Calloc for the large contiguous arrays. 
+  // This explicitly uses the heap and avoids R's transient memory pool entirely.
+  c_edge_mtx        = R_Calloc(n_edges * 2, int);
+  c_edge_length_vec = R_Calloc(n_edges,     double);
+  
+  memset(c_edge_mtx,        0, n_edges * 2 * sizeof(int));
+  memset(c_edge_length_vec, 0, n_edges * sizeof(double));
   
   next_edge_index = 0;
   next_node_index = 0;
@@ -212,13 +221,15 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
   // Start recursing at the highest level of parentheses; i.e. the whole tree
   recurse_tree(x1, x2, 0);
   
+  // Copy the populated C-memory back into the PROTECT'ed R objects
+  memcpy(INTEGER(sexp_edge_mtx),     c_edge_mtx,        n_edges * 2 * sizeof(int));
+  memcpy(REAL(sexp_edge_length_vec), c_edge_length_vec, n_edges * sizeof(double));
+  
+  // Clean up the heap memory
+  R_Free(c_edge_mtx);
+  R_Free(c_edge_length_vec);
+  
   UNPROTECT(5);
   
   return sexp_result;
 }
-
-
-
-
-
-

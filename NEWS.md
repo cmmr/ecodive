@@ -1,3 +1,9 @@
+# ecodive 2.2.7
+
+* `read_tree` now properly protects against garbage collections.
+
+
+
 # ecodive 2.2.6
 
 * When using CLR normalization:

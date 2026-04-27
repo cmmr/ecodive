@@ -58,8 +58,8 @@ read_tree <- function (newick, underscores = FALSE) {
   attr(tree, 'class') <- 'phylo'
   attr(tree, 'order') <- 'cladewise'
   
-  if (all(nchar(tree$node.label) == 0)) tree$node.label  <- NULL
-  if (all(tree$edge.length == 0))       tree$edge.length <- NULL
+  if (isTRUE(all(nchar(tree$node.label) == 0, na.rm = TRUE))) tree$node.label  <- NULL
+  if (isTRUE(all(tree$edge.length == 0,       na.rm = TRUE))) tree$edge.length <- NULL
   
   return (tree)
 }

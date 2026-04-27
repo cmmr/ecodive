@@ -24,4 +24,8 @@ test_that("read tree", {
   
   newick <- "((OTU4,(('OTU2',OTU3),OTU1)),OTU5)ROOT;"
   expect_silent(read_tree(newick = newick, underscores = 0))
+  
+  
+  tree <- "(t9,((t5,t2),(((t10,(t7,t4)),(t6,(t3,t1))),t8)));"
+  tree <- expect_s3_class(read_tree(tree), 'phylo')
 })
