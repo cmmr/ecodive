@@ -11,12 +11,12 @@ static size_t n_leafs;
 static size_t n_edges;
 
 // Output arrays (R-managed handles)
-static SEXP    sexp_node_label_vec;
-static SEXP    sexp_leaf_label_vec;
+static SEXP sexp_node_label_vec;
+static SEXP sexp_leaf_label_vec;
 
 // Native C arrays to avoid R garbage collection relocation issues
-static int    *c_edge_mtx;
-static double *c_edge_length_vec;
+static int    *edge_mtx;
+static double *edge_length_vec;
 
 // Track next open indices in output arrays
 static size_t next_edge_index;
@@ -81,7 +81,7 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
       
       if (next_edge_index > 0 && next_edge_index <= n_edges) {
         char *junk_ptr;
-        c_edge_length_vec[next_edge_index - 1] = strtod(tree_str + i + 1, &junk_ptr);
+        edge_length_vec[next_edge_index - 1] = strtod(tree_str + i + 1, &junk_ptr);
       }
       
       x2 = i - 1;
@@ -95,8 +95,8 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
       
       if (next_edge_index > 0 && next_edge_index <= n_edges) {
         size_t mtx_row_i = next_edge_index - 1;
-        c_edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
-        c_edge_mtx[mtx_row_i + n_edges] = next_node_index + n_leafs + 1;
+        edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
+        edge_mtx[mtx_row_i + n_edges] = next_node_index + n_leafs + 1;
       }
       next_node_index++;
       next_edge_index++;
@@ -118,8 +118,8 @@ static void recurse_tree(size_t x1, size_t x2, size_t parent) {
     
     if (next_edge_index > 0 && next_edge_index <= n_edges) {
       size_t mtx_row_i = next_edge_index - 1;
-      c_edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
-      c_edge_mtx[mtx_row_i + n_edges] = next_leaf_index + 1;
+      edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
+      edge_mtx[mtx_row_i + n_edges] = next_leaf_index + 1;
     }
     next_leaf_index++;
     next_edge_index++;
@@ -193,8 +193,8 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
   SEXP sexp_result          = PROTECT(allocVector(VECSXP, 5));
   SEXP sexp_edge_mtx        = PROTECT(allocMatrix(INTSXP,  n_edges, 2));
   SEXP sexp_edge_length_vec = PROTECT(allocVector(REALSXP, n_edges));
-  sexp_node_label_vec  = PROTECT(allocVector(STRSXP,  n_nodes));
-  sexp_leaf_label_vec  = PROTECT(allocVector(STRSXP,  n_leafs));
+       sexp_node_label_vec  = PROTECT(allocVector(STRSXP,  n_nodes));
+       sexp_leaf_label_vec  = PROTECT(allocVector(STRSXP,  n_leafs));
   
   // Initialize strings to ""
   for (size_t i = 0; i < n_nodes; i++) SET_STRING_ELT(sexp_node_label_vec, i, R_BlankString);
@@ -206,30 +206,21 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
   SET_VECTOR_ELT(sexp_result, 3, sexp_edge_length_vec);
   SET_VECTOR_ELT(sexp_result, 4, sexp_node_label_vec);
   
-  // Use R_Calloc for the large contiguous arrays. 
-  // This explicitly uses the heap and avoids R's transient memory pool entirely.
-  c_edge_mtx        = R_Calloc(n_edges * 2, int);
-  c_edge_length_vec = R_Calloc(n_edges,     double);
-  
-  memset(c_edge_mtx,        0, n_edges * 2 * sizeof(int));
-  memset(c_edge_length_vec, 0, n_edges * sizeof(double));
+  // Initialize result object values to zero.
+  edge_mtx        = INTEGER(sexp_edge_mtx);
+  edge_length_vec = REAL(sexp_edge_length_vec);
+  memset(edge_mtx,        0, n_edges * 2 * sizeof(int));
+  memset(edge_length_vec, 0, n_edges * sizeof(double));
   
   next_edge_index = 0;
   next_node_index = 0;
   next_leaf_index = 0;
   
   // Start recursing at the highest level of parentheses; i.e. the whole tree
+  // This function will mutate edge_mtx and edge_length_vec, which are 
+  // now directly modifying the R objects!
   recurse_tree(x1, x2, 0);
   
-  // Copy the populated C-memory back into the PROTECT'ed R objects
-  memcpy(INTEGER(sexp_edge_mtx),     c_edge_mtx,        n_edges * 2 * sizeof(int));
-  memcpy(REAL(sexp_edge_length_vec), c_edge_length_vec, n_edges * sizeof(double));
-  
-  // Clean up the heap memory
-  R_Free(c_edge_mtx);
-  R_Free(c_edge_length_vec);
-  
   UNPROTECT(5);
-  
   return sexp_result;
 }

@@ -1,6 +1,7 @@
 # ecodive 2.2.7
 
-* `read_tree` now properly protects against garbage collections.
+* Switch from `testthat` to dependency-free `tinytest` for test suite.
+* `read_tree` fixes for edge cases.
 
 
 
