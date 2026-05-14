@@ -45,7 +45,7 @@ Furthermore, the software landscape for ecological metrics is fragmented. A rese
 
 # State of the Field
 
-While several R packages support diversity analysis, ecodive offers a unique scholarly contribution by bridging the gap between specialized high-performance tools and comprehensive ecological libraries. As shown in Table @table:metrics, the current landscape is defined by three primary trade-offs: analytical breadth, computational efficiency, and infrastructure overhead.
+While several R packages support diversity analysis, ecodive offers a unique scholarly contribution by bridging the gap between specialized high-performance tools and comprehensive ecological libraries. As shown in Table 1, the current landscape is defined by three primary trade-offs: analytical breadth, computational efficiency, and infrastructure overhead.
 
 | R Package      | Alpha | Beta |      Uni     |      Par     |      Cmp     | Dep  | Citation               |
 |:----------     |   ---:|  ---:|          ---:|          ---:|          ---:|  ---:|:-----------------------|
@@ -65,11 +65,11 @@ While several R packages support diversity analysis, ecodive offers a unique sch
 | `picante`      |    14 |    9 | $\checkmark$ | $-$          | $-$          |   11 | @picante               |
 | `tabula`       |    16 |   12 | $-$          | $-$          | $-$          |    2 | @tabula                |
 | `vegan`        |    17 |   52 | $-$          | $-$          | $\checkmark$ |    7 | @vegan                 |
-Table: Comparison of community diversity metrics and architectural features across 16 R packages. Metrics were identified via an unbiased review of package reference manuals using a large language model to categorize metrics and filter for symmetry and ecological relevance. Alpha: Number of alpha diversity metrics; Beta: Number of beta diversity metrics; Uni: $\checkmark$ indicates UniFrac support; Par: Parallelized calculation of metrics; Cmp: Implementation uses compiled code (e.g. C/C++); Dep: Transitive count of hard R dependencies. Full methodology and LLM prompts are available in `ecodive`'s benchmarking documentation. {@table:metrics}
+Table: Comparison of community diversity metrics and architectural features across 16 R packages. Metrics were identified via an unbiased review of package reference manuals using a large language model to categorize metrics and filter for symmetry and ecological relevance. Alpha: Number of alpha diversity metrics; Beta: Number of beta diversity metrics; Uni: $\checkmark$ indicates UniFrac support; Par: Parallelized calculation of metrics; Cmp: Implementation uses compiled code (e.g. C/C++); Dep: Transitive count of hard R dependencies. Full methodology and LLM prompts are available in `ecodive`'s benchmarking documentation.
 
 ## 1. Analytical Breadth vs. Computational Scalability
 
-The ecological software landscape often requires researchers to choose between a wide variety of metrics and the speed necessary for high-dimensional community data. As shown in Table @table:metrics, packages like `adiv` and `abdiv` offer significant analytical breadth, providing 100 and 65 total metrics, respectively. However, both lack parallelized execution (Par) and compiled backend implementations (Cmp), which limits their utility for large-scale datasets. `ecodive` overcomes this limitation by providing a comprehensive suite of 50 metrics - comparable in scope to the foundational `vegan` package (69 metrics) - while utilizing a parallelized C engine to ensure scalability.
+The ecological software landscape often requires researchers to choose between a wide variety of metrics and the speed necessary for high-dimensional community data. As shown in Table 1, packages like `adiv` and `abdiv` offer significant analytical breadth, providing 100 and 65 total metrics, respectively. However, both lack parallelized execution (Par) and compiled backend implementations (Cmp), which limits their utility for large-scale datasets. `ecodive` overcomes this limitation by providing a comprehensive suite of 50 metrics - comparable in scope to the foundational `vegan` package (69 metrics) - while utilizing a parallelized C engine to ensure scalability.
 
 ## 2. Domain-Specific Functionality and UniFrac Support
 
@@ -77,7 +77,7 @@ General-purpose high-performance libraries often fail to address specific ecolog
 
 ## 3. Infrastructure Stability and Dependency Management
 
-A critical but often overlooked limitation in existing software is the "transitive burden" of recursive dependencies. Table @table:metrics reveals significant infrastructure overhead across the field: `adiv` requires 97 hard dependencies, `OmicFlow` requires 90, and `phyloregion` requires 64. Such high counts increase maintenance complexity and supply chain vulnerability for research pipelines. `ecodive` addresses this by delivering its full feature set - including parallelization and compiled performance - with zero external R dependencies. This "zero-dependency" architecture ensures high community readiness and long-term stability for ecological research.
+A critical but often overlooked limitation in existing software is the "transitive burden" of recursive dependencies. Table 1 reveals significant infrastructure overhead across the field: `adiv` requires 97 hard dependencies, `OmicFlow` requires 90, and `phyloregion` requires 64. Such high counts increase maintenance complexity and supply chain vulnerability for research pipelines. `ecodive` addresses this by delivering its full feature set - including parallelization and compiled performance - with zero external R dependencies. This "zero-dependency" architecture ensures high community readiness and long-term stability for ecological research.
 
 ## The `ecodive` Contribution
 
@@ -101,8 +101,8 @@ To address this, `ecodive` maintains the standard R interface (samples-as-rows) 
 
 To reflect realistic modern research conditions, comprehensive [benchmarking](https://cmmr.github.io/ecodive/articles/benchmark.html) was conducted on a workstation with a 6-core Intel i5-9600K (3.70GHz) CPU and 64GB RAM running Windows 11. While `ecodive`, `parallelDist`, `philentropy`, `phyloseq`, `OmicFlow`, and `ampvis2` leveraged all six available CPU cores, the results show that parallelization is not the sole determinant for performance. In several metrics, specialized serial implementations outperformed parallel-capable packages - for example, the serial `phyloregion` was significantly faster than the parallelized `ampvis2` for UniFrac calculations - indicating that efficient data handling and core algorithms are as critical as raw multi-threading.
 
-* **Speed:** For the widely-used Unweighted UniFrac metric ($N=50 samples$), `ecodive` completed calculations in 6.9ms, compared to 2.6s for `picante` (377x faster) and 318ms for `phyloseq` (46x faster).
-* **Scalability:** For standard Bray-Curtis dissimilarity ($N=1006 samples$), `ecodive` processed the matrix in ~19.3ms, whereas `vegan` required 1.97s.
+* **Speed:** For the widely-used Unweighted UniFrac metric ($N=50$ samples), `ecodive` completed calculations in 6.9ms, compared to 2.6s for `picante` (377x faster) and 318ms for `phyloseq` (46x faster).
+* **Scalability:** For standard Bray-Curtis dissimilarity ($N=1006$ samples), `ecodive` processed the matrix in ~19.3ms, whereas `vegan` required 1.97s.
 * **Memory:** `ecodive`'s sparse architecture reduced memory allocation for large operations from gigabytes (in `abdiv` or `tabula`) to megabytes, enabling analyses on laptops that previously required clusters.
 
 ![**Benchmarking results.** Execution time (x-axis) vs. peak memory usage (y-axis) for various diversity metrics across 16 R packages. `ecodive` (highlighted) consistently occupies the bottom-left quadrant, indicating high speed and low memory footprint. Note the log scale on both axes.](figures/fig1.svg)
