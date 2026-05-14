@@ -126,6 +126,7 @@ knitr::include_graphics('figures/unifrac-weights.png')
 * R Package [ecodive](https://cran.r-project.org/package=ecodive): `unweighted_unifrac()`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `unweighted_unifrac()`
 * R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=FALSE)`
+* R Package [OmicFlow](https://doi.org/10.32614/CRAN.package.OmicFlow): `unifrac(weighted=FALSE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric unweighted_unifrac`
 * [mothur](https://mothur.org/): `unifrac.unweighted()`
 
@@ -168,6 +169,7 @@ U &= 0.4545455
 * R Package [ecodive](https://cran.r-project.org/package=ecodive): `weighted_unifrac()`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `weighted_unifrac()`
 * R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=TRUE, normalized=FALSE)`
+* R Package [OmicFlow](https://doi.org/10.32614/CRAN.package.OmicFlow): `unifrac(weighted=TRUE, normalized=FALSE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric weighted_unifrac`
 
 \begin{align*}
@@ -185,6 +187,7 @@ W &= 1.14
 * R Package [ecodive](https://cran.r-project.org/package=ecodive): `normalized_unifrac()`
 * R Package [abdiv](https://doi.org/10.32614/CRAN.package.abdiv): `weighted_normalized_unifrac()`
 * R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq): `UniFrac(weighted=TRUE, normalized=TRUE)`
+* R Package [OmicFlow](https://doi.org/10.32614/CRAN.package.OmicFlow): `unifrac(weighted=TRUE, normalized=TRUE)`
 * [qiime2](https://qiime2.org/) `qiime diversity beta-phylogenetic --p-metric weighted_normalized_unifrac`
 * [mothur](https://mothur.org/): `unifrac.weighted()`
 
