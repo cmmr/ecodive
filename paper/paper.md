@@ -99,15 +99,19 @@ To address this, `ecodive` maintains the standard R interface (samples-as-rows) 
 
 `ecodive` has demonstrated immediate utility in high-dimensional microbiome studies. The core C algorithms in `ecodive` were originally developed for and deployed in the `rbiom` package [@rbiom]. As part of `rbiom`, these optimized metrics have already been utilized in diverse microbial ecology studies, including research on preterm infant microbiomes [@AhearnFord2025], dietary interventions [@DiMattia2025], and relationship satisfaction [@Cheng2023]. `ecodive` extracts these proven, high-performance components into a standalone, lightweight library to make them accessible to the broader R ecosystem without `rbiom`'s specific visualization and data structure dependencies.
 
-To reflect realistic modern research conditions, comprehensive [benchmarking](https://cmmr.github.io/ecodive/articles/benchmark.html) was conducted on a workstation with a 6-core Intel i5-9600K (3.70GHz) CPU and 64GB RAM running Windows 11. While `ecodive`, `parallelDist`, `philentropy`, `phyloseq`, `OmicFlow`, and `ampvis2` leveraged all six available CPU cores, the results show that parallelization is not the sole determinant for performance. In several metrics, specialized serial implementations outperformed parallel-capable packages - for example, the serial `phyloregion` was significantly faster than the parallelized `ampvis2` for UniFrac calculations - indicating that efficient data handling and core algorithms are as critical as raw multi-threading.
+To evaluate `ecodive` under realistic research conditions, we conducted [benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html) on a workstation with a 6-core Intel i5-9600K CPU and 64GB RAM running Windows 11. While several packages leveraged all six cores, our results demonstrate that algorithmic efficiency and sparse data handling are as critical as raw multi-threading.
 
 ![**Benchmarking results.** Execution time (x-axis) vs. peak memory usage (y-axis) for various diversity metrics across 16 R packages. `ecodive` (highlighted) consistently occupies the bottom-left quadrant, indicating high speed and low memory footprint. Note the log scale on both axes.](figures/fig1.svg)
 
-* **Speed:** For the widely-used Unweighted UniFrac metric ($N=50$ samples), `ecodive` completed calculations in 6.9ms, compared to 2.6s for `picante` (~400x faster) and 320ms for `phyloseq` (~50x faster).
-* **Scalability:** For standard Bray-Curtis dissimilarity ($N=1006$ samples), `ecodive` processed the matrix in 19ms, whereas `vegan` required 2.0s (~100x faster).
-* **Memory:** `ecodive`'s sparse architecture reduced memory allocation for large operations from gigabytes (in `abdiv` or `tabula`) to megabytes, enabling analyses on laptops that previously required clusters.
+As illustrated in Figure 1, `ecodive` consistently occupies the bottom-left quadrant across all metrics, indicating a simultaneous optimization of execution time and memory footprint:
 
-`ecodive` is available for installation via CRAN and Conda-Forge, supported by comprehensive vignettes that guide users through metric selection and performance tuning to ensure immediate utility in diverse research environments.
+* **Performance:** For the widely-used Unweighted UniFrac metric ($N=50$ samples), `ecodive` completed calculations in 6.9ms, approximately 400x faster than `picante` (2.6s) and 50x faster than `phyloseq` (320ms).
+* **Scalability:** When processing Bray-Curtis dissimilarity for large datasets ($N=1006$ samples), `ecodive` required only 19ms, whereas `vegan` required 2.0s (~100x faster).
+* **Memory Efficiency:** The sparse architecture reduces memory allocation from gigabytes to megabytes, enabling the analysis of massive UniFrac matrices on standard laptops that would otherwise require high-performance computing clusters.
+
+By operationalizing these performance gains within a stable, high-performance framework, `ecodive` bridges the gap between specialized high-performance computing and everyday ecological research workflows.
+
+The package is available for installation via CRAN and Conda-Forge, supported by comprehensive vignettes that guide users through metric selection and performance tuning. This distribution model, combined with a zero-dependency architecture, ensures high community readiness and long-term stability for ecological software pipelines.
 
 # Example Usage
 
