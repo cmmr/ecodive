@@ -47,24 +47,24 @@ Furthermore, the software landscape for ecological metrics is fragmented. A rese
 
 While several R packages support diversity analysis, ecodive offers a unique scholarly contribution by bridging the gap between specialized high-performance tools and comprehensive ecological libraries. As shown in Table @table:metrics, the current landscape is defined by three primary trade-offs: analytical breadth, computational efficiency, and infrastructure overhead.
 
-| R Package      | Alpha |  Beta |      Uni     |      Par     |      Cmp     |  Dep  | Citation      |
-|:---------------|------:|------:|--------------|--------------|--------------|------:|:--------------|
-| `ecodive`      |    14 |    36 | $\checkmark$ | $\checkmark$ | $\checkmark$ |     0 | This work     |
-| `abdiv`        |    17 |    48 | $\checkmark$ | $-$          | $-$          |     5 | @abdiv        |
-| `adiv`         |    42 |    58 | $-$          | $-$          | $-$          |    97 | @adiv         |
-| `ampvis2`      |     6 |    25 | $\checkmark$ | $-$          | $-$          |    75 | @ampvis2      |
-| `ecodist`      |     0 |     9 | $-$          | $-$          | $\checkmark$ |    10 | @ecodist      |
-| `entropart`    |    11 |     9 | $-$          | $-$          | $-$          |    82 | @entropart    |
-| `GUniFrac`     |     0 |     4 | $\checkmark$ | $-$          | $\checkmark$ |    47 | @GUniFrac     |
-| `labdsv`       |     2 |     7 | $-$          | $-$          | $\checkmark$ |     8 | @labdsv       |
-| `OmicFlow`     |     6 |     9 | $\checkmark$ | $\checkmark$ | $\checkmark$ |    90 | @OmicFlow     |
-| `parallelDist` |     0 |    26 | $-$          | $\checkmark$ | $\checkmark$ |     2 | @parallelDist |
-| `philentropy`  |     1 |    43 | $-$          | $\checkmark$ | $\checkmark$ |     4 | @philentropy  |
-| `phyloregion`  |     9 |    10 | $\checkmark$ | $-$          | $-$          |    64 | @phyloregion  |
-| `phyloseq`     |     7 |    43 | $\checkmark$ | $\checkmark$ | $-$          |    54 | @phyloseq     |
-| `picante`      |    14 |     9 | $\checkmark$ | $-$          | $-$          |    11 | @picante      |
-| `tabula`       |    16 |    12 | $-$          | $-$          | $-$          |     2 | @tabula       |
-| `vegan`        |    17 |    52 | $-$          | $-$          | $\checkmark$ |     7 | @vegan        |
+| R Package      | Alpha | Beta |      Uni     |      Par     |      Cmp     | Dep  | Citation             |
+|:-----------    |  ----:| ----:|     -----    |     -----    |     -----    | ----:|:---------------------|
+| `ecodive`      |    14 |   36 | $\checkmark$ | $\checkmark$ | $\checkmark$ |    0 | This work            |
+| `abdiv`        |    17 |   48 | $\checkmark$ | $-$          | $-$          |    5 | @abdiv               |
+| `adiv`         |    42 |   58 | $-$          | $-$          | $-$          |   97 | @adiv                |
+| `ampvis2`      |     6 |   25 | $\checkmark$ | $-$          | $-$          |   75 | @ampvis2             |
+| `ecodist`      |     0 |    9 | $-$          | $-$          | $\checkmark$ |   10 | @ecodist             |
+| `entropart`    |    11 |    9 | $-$          | $-$          | $-$          |   82 | @entropart           |
+| `GUniFrac`     |     0 |    4 | $\checkmark$ | $-$          | $\checkmark$ |   47 | @GUniFrac            |
+| `labdsv`       |     2 |    7 | $-$          | $-$          | $\checkmark$ |    8 | @labdsv              |
+| `OmicFlow`     |     6 |    9 | $\checkmark$ | $\checkmark$ | $\checkmark$ |   90 | @OmicFlow            |
+| `parallelDist` |     0 |   26 | $-$          | $\checkmark$ | $\checkmark$ |    2 | @parallelDist        |
+| `philentropy`  |     1 |   43 | $-$          | $\checkmark$ | $\checkmark$ |    4 | @philentropy         |
+| `phyloregion`  |     9 |   10 | $\checkmark$ | $-$          | $-$          |   64 | @phyloregion         |
+| `phyloseq`     |     7 |   43 | $\checkmark$ | $\checkmark$ | $-$          |   54 | @phyloseq            |
+| `picante`      |    14 |    9 | $\checkmark$ | $-$          | $-$          |   11 | @picante             |
+| `tabula`       |    16 |   12 | $-$          | $-$          | $-$          |    2 | @tabula              |
+| `vegan`        |    17 |   52 | $-$          | $-$          | $\checkmark$ |    7 | @vegan               |
 Table: Comparison of community diversity metrics and architectural features across 16 R packages. Metrics were identified via an unbiased review of package reference manuals using a large language model to categorize metrics and filter for symmetry and ecological relevance. Alpha: Number of alpha diversity metrics; Beta: Number of beta diversity metrics; Uni: $\checkmark$ indicates UniFrac support; Par: Parallelized calculation of metrics; Cmp: Implementation uses compiled code (e.g. C/C++); Dep: Transitive count of hard R dependencies. Full methodology and LLM prompts are available in `ecodive`'s benchmarking documentation. {#table:metrics}
 
 ## 1. Analytical Breadth vs. Computational Scalability
