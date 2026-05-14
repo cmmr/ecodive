@@ -12,7 +12,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 - **High Performance:** `ecodive` is written in C and parallelized using
   pthreads, making it dramatically faster than other R packages.
   [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.html)
-  show it can be up to **9,000x faster** and use up to **200,000x less
+  show it can be up to **14,000x faster** and use up to **200,000x less
   memory**.
 
 - **Zero Dependencies:** The package has no external R dependencies,
@@ -33,12 +33,14 @@ especially with large datasets. `ecodive` addresses this by providing:
 The latest stable version can be installed from CRAN.
 
 ``` r
+
 install.packages('ecodive')
 ```
 
 The development version is available on GitHub.
 
 ``` r
+
 install.packages('pak')
 pak::pak('cmmr/ecodive')
 ```
@@ -54,6 +56,7 @@ The easiest way to use `ecodive` is with a `phyloseq`, `rbiom`, or
 count data and phylogenetic tree.
 
 ``` r
+
 library(ecodive)
 data(esophagus, package = 'phyloseq')
 data(hmp50,     package = 'rbiom')
@@ -80,6 +83,7 @@ objects.
 The `ex_counts` and `ex_tree` objects are included with `ecodive`.
 
 ``` r
+
 ## Example Data ----------------------
 counts <- rarefy(ex_counts)
 counts[,1:4]
@@ -121,6 +125,7 @@ Use
 to browse the metrics available for calculating diversity.
 
 ``` r
+
 # Alpha Diversity
 list_metrics('alpha', 'id')
 #>  [1] "ace"         "berger"      "brillouin"   "chao1"       "faith"      
@@ -159,6 +164,7 @@ For users who have cloned the source repository, the tests can be run
 locally with the following commands in an R session:
 
 ``` r
+
 install.packages('testthat')
 devtools::test()
 ```

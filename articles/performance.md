@@ -29,6 +29,7 @@ By doing the conversion once, you prevent `ecodive` from having to
 reformat the data for each subsequent function call.
 
 ``` r
+
 library(ecodive)
 library(Matrix)
 
@@ -83,6 +84,7 @@ then pass the pre-transformed data to `ecodive`, specifying
 `norm = 'none'`.
 
 ``` r
+
 # Inefficient: Transforming the data twice
 shannon_vals <- shannon(optimal_counts, norm = 'percent', margin = 2L)
 simpson_vals <- simpson(optimal_counts, norm = 'percent', margin = 2L)
@@ -120,6 +122,7 @@ transformation.
 **Do this:**
 
 ``` r
+
 # Best for CLR: Let ecodive handle the transformation dynamically
 aitchison_dist <- aitchison(optimal_counts, margin = 2L, pseudocount = 0.5)
 ```
@@ -127,6 +130,7 @@ aitchison_dist <- aitchison(optimal_counts, margin = 2L, pseudocount = 0.5)
 **Not this:**
 
 ``` r
+
 # Inefficient for CLR: Adding pseudocounts creates a dense matrix
 library(compositions)
 dense_matrix   <- clr(t(as.matrix(optimal_counts)) + 0.5) # Becomes dense

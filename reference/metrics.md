@@ -146,6 +146,7 @@ will be applied to the
 ## Examples
 
 ``` r
+
     # A data.frame of all available metrics.
     head(list_metrics())
 #>                                       name            id phylo weighted

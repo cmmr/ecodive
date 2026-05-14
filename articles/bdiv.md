@@ -16,6 +16,7 @@ sample. In the text below, you can substitute the word ‘genera’ for the
 feature of interest in your own data.
 
 ``` r
+
 library(ecodive)
 
 counts <- rarefy(ex_counts)
@@ -46,6 +47,7 @@ to see which category a specific metric falls into or to list all
 available options programmatically.
 
 ``` r
+
 list_metrics('beta', 'id', weighted = FALSE)
 #> [1] "sorensen"  "hamming"  "jaccard"  "ochiai"  "unweighted_unifrac"
 
@@ -114,6 +116,7 @@ results in the returned all-vs-all distance matrix being completely
 filled in.
 
 ``` r
+
 bray(counts)
 #>          Saliva      Gums      Nose
 #> Gums  0.4260870                    
@@ -126,6 +129,7 @@ parameter to skip unwanted calculations and save some CPU time. The
 larger the dataset, the more noticeable the improvement will be.
 
 ``` r
+
 bray(counts, pairs = 1:3)
 #>          Saliva      Gums      Nose
 #> Gums  0.4260870                    
@@ -144,6 +148,7 @@ The `pairs` argument can be:
 Therefore, all of the following are equivalent:
 
 ``` r
+
 bray(counts, pairs = 1:3)
 bray(counts, pairs = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
 bray(counts, pairs = function (i, j) i == 1)
@@ -153,6 +158,7 @@ The ordering of `pairs` follows the pairings produced by
 [`combn()`](https://rdrr.io/r/utils/combn.html).
 
 ``` r
+
 # Column index pairings
 combn(nrow(counts), 2)
 #>      [,1] [,2] [,3] [,4] [,5] [,6]
@@ -169,6 +175,7 @@ combn(rownames(counts), 2)
 So, for instance, to use gums as the reference sample:
 
 ``` r
+
 my_combn <- combn(rownames(counts), 2)
 my_pairs <- my_combn[1,] == 'Gums' | my_combn[2,] == 'Gums'
 

@@ -6,6 +6,7 @@ We will use the `ex_counts` dataset included with ecodive. This feature
 table contains counts of bacterial genera across various samples.
 
 ``` r
+
 library(ecodive)
 
 counts <- rarefy(ex_counts)
@@ -33,6 +34,7 @@ in a sample. The simplest metric,
 counts features with non-zero abundance.
 
 ``` r
+
 # Equivalent to rowSums(counts > 0)
 observed(counts)
 #> Saliva   Gums   Nose  Stool 
@@ -44,6 +46,7 @@ unobserved, low-abundance features based on the ratio of singletons
 (`counts == 1`) to doubletons (`counts == 2`).
 
 ``` r
+
 # Infers 8 unobserved genera
 chao1(c(1, 1, 1, 1, 2, 5, 5, 5))
 #> [1] 16
@@ -68,6 +71,7 @@ the probability that two randomly selected individuals belong to
 different species.
 
 ``` r
+
 # High Evenness (0.8) vs Low Evenness (0.07)
 simpson(c(20, 20, 20, 20, 20))
 #> [1] 0.8
@@ -84,6 +88,7 @@ The **Shannon diversity index** (entropy) is another common metric that
 weights both richness and evenness.
 
 ``` r
+
 # High richness, High evenness
 shannon(rep(100, 100))
 #> [1] 4.60517
@@ -101,6 +106,7 @@ Dominance metrics focus on the abundance of the most common species. The
 abundant feature.
 
 ``` r
+
 # Stool is dominated by Bacteroides (341/345 counts -> ~0.99)
 # Nose is more balanced; Corynebacterium is max (171/345 counts -> ~0.49)
 sort(berger(counts))
@@ -115,6 +121,7 @@ distance. **Faith’s Phylogenetic Diversity (PD)** calculates the total
 branch length spanned by the features present in a sample.
 
 ``` r
+
 # ex_tree:
 #
 #       +----------44---------- Haemophilus

@@ -27,14 +27,14 @@ that branch; A for Sample_A, and B for Sample_B.
 
   
 
-|                                                |                                  |
-|------------------------------------------------|----------------------------------|
-| n = 8                                          | Number of branches               |
-| A = \\9, 0, 0, 0, 9, 6, 3, 3\\                 | Branch **weights** for Sample_A. |
-| B = \\7, 5, 1, 4, 2, 8, 8, 0\\                 | Branch **weights** for Sample_B. |
-| A_T = 15                                       | Total observations for Sample_A. |
-| B_T = 15                                       | Total observations for Sample_B. |
-| L = \\0.2, 0.4, 0.8, 0.5, 0.9, 0.6, 0.7, 0.3\\ | The branch **lengths**.          |
+|  |  |
+|----|----|
+| n = 8 | Number of branches |
+| A = \\9, 0, 0, 0, 9, 6, 3, 3\\ | Branch **weights** for Sample_A. |
+| B = \\7, 5, 1, 4, 2, 8, 8, 0\\ | Branch **weights** for Sample_B. |
+| A_T = 15 | Total observations for Sample_A. |
+| B_T = 15 | Total observations for Sample_B. |
+| L = \\0.2, 0.4, 0.8, 0.5, 0.9, 0.6, 0.7, 0.3\\ | The branch **lengths**. |
 
   
 
@@ -49,14 +49,16 @@ that branch; A for Sample_A, and B for Sample_B.
   [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md)
 - R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq):
   `UniFrac(weighted=FALSE)`
+- R Package [OmicFlow](https://doi.org/10.32614/CRAN.package.OmicFlow):
+  `unifrac(weighted=FALSE)`
 - [qiime2](https://qiime2.org/)
   `qiime diversity beta-phylogenetic --p-metric unweighted_unifrac`
 - [mothur](https://mothur.org/): `unifrac.unweighted()`
 
 First, transform A and B into presence (1) and absence (0) indicators.
 
-|                                                                                                   |                                                                                                   |
-|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+|  |  |
+|----|----|
 | \begin{align\*} A &= \\9, 0, 0, 0, 9, 6, 3, 3\\ \\ A' &= \\1, 0, 0, 0, 1, 1, 1, 1\\ \end{align\*} | \begin{align\*} B &= \\7, 5, 1, 4, 2, 8, 8, 0\\ \\ B' &= \\1, 1, 1, 1, 1, 1, 1, 0\\ \end{align\*} |
 
 Then apply the formula:
@@ -84,6 +86,8 @@ L_2(max(A'\_2,B'\_2)) + \cdots + L_n(max(A'\_n,B'\_n))} \\ \\ U &=
   [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/weighted_unifrac.md)
 - R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq):
   `UniFrac(weighted=TRUE, normalized=FALSE)`
+- R Package [OmicFlow](https://doi.org/10.32614/CRAN.package.OmicFlow):
+  `unifrac(weighted=TRUE, normalized=FALSE)`
 - [qiime2](https://qiime2.org/)
   `qiime diversity beta-phylogenetic --p-metric weighted_unifrac`
 
@@ -106,6 +110,8 @@ L_n\|\frac{A_n}{A_T} - \frac{B_n}{B_T}\| \\ \\ W &= 0.2\|\frac{9}{15} -
   `weighted_normalized_unifrac()`
 - R Package [phyloseq](https://doi.org/doi:10.18129/B9.bioc.phyloseq):
   `UniFrac(weighted=TRUE, normalized=TRUE)`
+- R Package [OmicFlow](https://doi.org/10.32614/CRAN.package.OmicFlow):
+  `unifrac(weighted=TRUE, normalized=TRUE)`
 - [qiime2](https://qiime2.org/)
   `qiime diversity beta-phylogenetic --p-metric weighted_normalized_unifrac`
 - [mothur](https://mothur.org/): `unifrac.weighted()`

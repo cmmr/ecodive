@@ -101,45 +101,45 @@ A numeric vector.
 
 **List of Beta Diversity Metrics**
 
-|                             |                                                  |
-|-----------------------------|--------------------------------------------------|
-| Option / Function Name      | Metric Name                                      |
-| `aitchison`                 | Aitchison distance                               |
-| `bhattacharyya`             | Bhattacharyya distance                           |
-| `bray`                      | Bray-Curtis dissimilarity                        |
-| `canberra`                  | Canberra distance                                |
-| `chebyshev`                 | Chebyshev distance                               |
-| `chord`                     | Chord distance                                   |
-| `clark`                     | Clark's divergence distance                      |
-| `divergence`                | Divergence                                       |
-| `euclidean`                 | Euclidean distance                               |
-| `generalized_unifrac`       | Generalized UniFrac (GUniFrac)                   |
-| `gower`                     | Gower distance                                   |
-| `hamming`                   | Hamming distance                                 |
-| `hellinger`                 | Hellinger distance                               |
-| `horn`                      | Horn-Morisita dissimilarity                      |
-| `jaccard`                   | Jaccard distance                                 |
-| `jensen`                    | Jensen-Shannon distance                          |
-| `jsd`                       | Jesen-Shannon divergence (JSD)                   |
-| `lorentzian`                | Lorentzian distance                              |
-| `manhattan`                 | Manhattan distance                               |
-| `matusita`                  | Matusita distance                                |
-| `minkowski`                 | Minkowski distance                               |
-| `morisita`                  | Morisita dissimilarity                           |
-| `motyka`                    | Motyka dissimilarity                             |
-| `normalized_unifrac`        | Normalized Weighted UniFrac                      |
-| `ochiai`                    | Otsuka-Ochiai dissimilarity                      |
-| `psym_chisq`                | Probabilistic Symmetric Chi-Squared distance     |
-| `soergel`                   | Soergel distance                                 |
-| `sorensen`                  | Dice-Sorensen dissimilarity                      |
-| `squared_chisq`             | Squared Chi-Squared distance                     |
-| `squared_chord`             | Squared Chord distance                           |
-| `squared_euclidean`         | Squared Euclidean distance                       |
-| `topsoe`                    | Topsoe distance                                  |
-| `unweighted_unifrac`        | Unweighted UniFrac                               |
+|  |  |
+|----|----|
+| Option / Function Name | Metric Name |
+| `aitchison` | Aitchison distance |
+| `bhattacharyya` | Bhattacharyya distance |
+| `bray` | Bray-Curtis dissimilarity |
+| `canberra` | Canberra distance |
+| `chebyshev` | Chebyshev distance |
+| `chord` | Chord distance |
+| `clark` | Clark's divergence distance |
+| `divergence` | Divergence |
+| `euclidean` | Euclidean distance |
+| `generalized_unifrac` | Generalized UniFrac (GUniFrac) |
+| `gower` | Gower distance |
+| `hamming` | Hamming distance |
+| `hellinger` | Hellinger distance |
+| `horn` | Horn-Morisita dissimilarity |
+| `jaccard` | Jaccard distance |
+| `jensen` | Jensen-Shannon distance |
+| `jsd` | Jesen-Shannon divergence (JSD) |
+| `lorentzian` | Lorentzian distance |
+| `manhattan` | Manhattan distance |
+| `matusita` | Matusita distance |
+| `minkowski` | Minkowski distance |
+| `morisita` | Morisita dissimilarity |
+| `motyka` | Motyka dissimilarity |
+| `normalized_unifrac` | Normalized Weighted UniFrac |
+| `ochiai` | Otsuka-Ochiai dissimilarity |
+| `psym_chisq` | Probabilistic Symmetric Chi-Squared distance |
+| `soergel` | Soergel distance |
+| `sorensen` | Dice-Sorensen dissimilarity |
+| `squared_chisq` | Squared Chi-Squared distance |
+| `squared_chord` | Squared Chord distance |
+| `squared_euclidean` | Squared Euclidean distance |
+| `topsoe` | Topsoe distance |
+| `unweighted_unifrac` | Unweighted UniFrac |
 | `variance_adjusted_unifrac` | Variance-Adjusted Weighted UniFrac (VAW-UniFrac) |
-| `wave_hedges`               | Wave Hedges distance                             |
-| `weighted_unifrac`          | Weighted UniFrac                                 |
+| `wave_hedges` | Wave Hedges distance |
+| `weighted_unifrac` | Weighted UniFrac |
 
 **Flexible name matching**
 

@@ -1,6 +1,13 @@
 # Changelog
 
-## ecodive 2.2.5
+## ecodive 2.2.7
+
+- Switch from `testthat` to dependency-free `tinytest` for test suite.
+- `read_tree` fixes for edge cases.
+
+## ecodive 2.2.6
+
+CRAN release: 2026-04-14
 
 - When using CLR normalization:
 

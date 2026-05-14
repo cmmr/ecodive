@@ -12,6 +12,7 @@ In this guide, we’ll use the `ex_counts` dataset included with ecodive.
 bacterial genera was observed on different body sites.
 
 ``` r
+
 library(ecodive)
 
 t(ex_counts)
@@ -40,6 +41,7 @@ The available alpha diversity metrics can be listed using
 [`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md).
 
 ``` r
+
 list_metrics('alpha')[,1:5]
 #>                                        name          id phylo weighted int_only
 #> 1  Abundance-based Coverage Estimator (ACE)         ace FALSE     TRUE     TRUE
@@ -71,6 +73,7 @@ The available alpha diversity metrics can be listed using
 [`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md).
 
 ``` r
+
 list_metrics('beta')[,2:6]
 #>                           id phylo weighted int_only true_metric
 #> 2                  aitchison FALSE     TRUE    FALSE        TRUE
@@ -126,6 +129,7 @@ the same number of observations. Rarefying randomly removes observations
 from samples with more observations.
 
 ``` r
+
 rowSums(ex_counts)
 #> Saliva   Gums   Nose  Stool 
 #>    345    886   1011    615 
@@ -154,6 +158,7 @@ take a `weighted = FALSE` argument to use only presence/absence
 information instead of relative abundances.
 
 ``` r
+
 ## Alpha Diversity -------------------
 
 shannon(counts)
@@ -186,6 +191,7 @@ function to import a phylogenetic tree from a newick formatted string or
 file.
 
 ``` r
+
 ## Alpha Diversity -------------------
 
 faith(counts, tree = ex_tree)
@@ -209,6 +215,7 @@ a standard R matrix with the
 [`as.matrix()`](https://rdrr.io/r/base/matrix.html) function.
 
 ``` r
+
 dm <- bray(counts)
 dm
 #>          Saliva      Gums      Nose
