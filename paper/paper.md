@@ -48,7 +48,7 @@ Furthermore, the software landscape for ecological metrics is fragmented. A rese
 While several R packages support diversity analysis, ecodive offers a unique scholarly contribution by bridging the gap between specialized high-performance tools and comprehensive ecological libraries. As shown in Table @table:metrics, the current landscape is defined by three primary trade-offs: analytical breadth, computational efficiency, and infrastructure overhead.
 
 | R Package      | Alpha | Beta |      Uni     |      Par     |      Cmp     | Dep  | Citation             |
-|:-----------    |  ----:| ----:|     -----    |     -----    |     -----    | ----:|:---------------------|
+|:-----------    |   ---:|  ---:|      ----    |      ----    |      ----    |  ---:|:---------------------|
 | `ecodive`      |    14 |   36 | $\checkmark$ | $\checkmark$ | $\checkmark$ |    0 | This work            |
 | `abdiv`        |    17 |   48 | $\checkmark$ | $-$          | $-$          |    5 | @abdiv               |
 | `adiv`         |    42 |   58 | $-$          | $-$          | $-$          |   97 | @adiv                |
