@@ -20,6 +20,8 @@ Description:
     Metrics include 'UniFrac', Faith's phylogenetic diversity, Bray-Curtis
     dissimilarity, Shannon diversity index, and many others.
     Also parses newick trees into 'phylo' objects and rarefies feature tables.
+    Parallel and memory-efficient algorithms are described in Smith et al.
+    (2026) <doi:10.21105/joss.09777>.
 URL: https://cmmr.github.io/ecodive/, https://github.com/cmmr/ecodive
 BugReports: https://github.com/cmmr/ecodive/issues
 License: MIT + file LICENSE

@@ -1,0 +1,22 @@
+bibentry(
+  bibtype = "Article",
+  title = "ecodive: Parallel and Memory-Efficient R Package for Ecological Diversity Analysis",
+  author = c(
+    person("Daniel P.", "Smith"),
+    person("Sara J. Javornik", "Cregeen"),
+    person("Joseph F.", "Petrosino")
+  ),
+  journal = "Journal of Open Source Software",
+  year = "2026",
+  volume = "11",
+  number = "121",
+  pages = "9777",
+  doi = "10.21105/joss.09777",
+  url = "https://joss.theoj.org/papers/10.21105/joss.09777",
+  
+  textVersion = paste0(
+    "Smith, D. P., Cregeen, S. J. J., & Petrosino, J. F. (2026). ",
+    "ecodive: Parallel and Memory-Efficient R Package for Ecological Diversity Analysis. ",
+    "Journal of Open Source Software, 11(121), 9777. https://doi.org/10.21105/joss.09777"
+  )
+)

@@ -4,7 +4,7 @@
 [![cran](https://img.shields.io/cran/v/ecodive?logo=r&label=CRAN)](https://CRAN.R-project.org/package=ecodive)
 [![conda](https://img.shields.io/conda/v/conda-forge/r-ecodive?logo=anaconda&label=conda)](https://anaconda.org/conda-forge/r-ecodive)
 [![covr](https://img.shields.io/codecov/c/gh/cmmr/ecodive?logo=codecov)](https://app.codecov.io/gh/cmmr/ecodive)
-[![joss](https://joss.theoj.org/papers/a93132f1a403729a2973a8fcc2be3685/status.svg)](https://joss.theoj.org/papers/a93132f1a403729a2973a8fcc2be3685)
+[![joss](https://joss.theoj.org/papers/10.21105/joss.09777/status.svg)](https://doi.org/10.21105/joss.09777)
 <!-- badges: end -->
 
 `ecodive` is an R package for calculating ecological diversity metrics in a
@@ -189,6 +189,12 @@ Please note that the ecodive project is released with a [Contributor Code of
 Conduct](https://cmmr.github.io/ecodive/CODE_OF_CONDUCT.html). By contributing
 to this project, you agree to abide by its terms.
 
+
+## Citation
+
+If you use `ecodive` in your research, please cite our paper:
+
+Smith et al., (2026). ecodive: Parallel and Memory-Efficient R Package for Ecological Diversity Analysis. *Journal of Open Source Software*, 11(121), 9777, https://doi.org/10.21105/joss.09777
 
 
 ## License

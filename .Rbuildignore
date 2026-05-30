@@ -15,6 +15,7 @@
 ^Meta$
 ^pkgdown$
 ^refs
+^CITATION\.cff$
 ^CODE_OF_CONDUCT\.md$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
