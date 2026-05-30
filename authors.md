@@ -14,16 +14,21 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/cmmr/ecodive/blob/main/DESCRIPTION)
+[`inst/CITATION`](https://github.com/cmmr/ecodive/blob/main/inst/CITATION)
 
-Smith D (2026). *ecodive: Parallel and Memory-Efficient Ecological
-Diversity Metrics*. R package version 2.2.7,
-<https://cmmr.github.io/ecodive/>.
+Smith, D. P., Cregeen, S. J. J., & Petrosino, J. F. (2026). ecodive:
+Parallel and Memory-Efficient R Package for Ecological Diversity
+Analysis. Journal of Open Source Software, 11(121), 9777.
+https://doi.org/10.21105/joss.09777
 
-    @Manual{,
-      title = {ecodive: Parallel and Memory-Efficient Ecological Diversity Metrics},
-      author = {Daniel P. Smith},
+    @Article{,
+      title = {ecodive: Parallel and Memory-Efficient R Package for Ecological Diversity Analysis},
+      author = {Daniel P. Smith and Sara J. Javornik Cregeen and Joseph F. Petrosino},
+      journal = {Journal of Open Source Software},
       year = {2026},
-      note = {R package version 2.2.7},
-      url = {https://cmmr.github.io/ecodive/},
+      volume = {11},
+      number = {121},
+      pages = {9777},
+      doi = {10.21105/joss.09777},
+      url = {https://joss.theoj.org/papers/10.21105/joss.09777},
     }

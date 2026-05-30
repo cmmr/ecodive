@@ -189,6 +189,14 @@ Please note that the ecodive project is released with a [Contributor
 Code of Conduct](https://cmmr.github.io/ecodive/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.
 
+## Citation
+
+If you use `ecodive` in your research, please cite our paper:
+
+Smith et al., (2026). ecodive: Parallel and Memory-Efficient R Package
+for Ecological Diversity Analysis. *Journal of Open Source Software*,
+11(121), 9777, <https://doi.org/10.21105/joss.09777>
+
 ## License
 
 `ecodive` is licensed under the [MIT
