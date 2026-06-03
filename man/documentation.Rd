@@ -27,6 +27,7 @@ places. E.g. the default \code{digits=3} could return \code{6.392}.}
 \item \code{'percent'}: Relative abundance (sample abundances sum to 1).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
+\item \code{'rclr'}: Robust centered log ratio.
 }
 
 Default: \code{'none'}.}

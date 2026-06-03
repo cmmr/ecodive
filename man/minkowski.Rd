@@ -32,6 +32,7 @@ communities (\eqn{p}). Default: \code{1.5}}
 \item \code{'percent'}: Relative abundance (sample abundances sum to 1).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
+\item \code{'rclr'}: Robust centered log ratio.
 }
 
 Default: \code{'none'}.}
@@ -150,6 +151,7 @@ Other Abundance metrics:
 \code{\link{morisita}()},
 \code{\link{motyka}()},
 \code{\link{psym_chisq}()},
+\code{\link{robust_aitchison}()},
 \code{\link{soergel}()},
 \code{\link{squared_chisq}()},
 \code{\link{squared_chord}()},

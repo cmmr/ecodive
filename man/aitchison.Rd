@@ -126,6 +126,7 @@ Other Abundance metrics:
 \code{\link{morisita}()},
 \code{\link{motyka}()},
 \code{\link{psym_chisq}()},
+\code{\link{robust_aitchison}()},
 \code{\link{soergel}()},
 \code{\link{squared_chisq}()},
 \code{\link{squared_chord}()},

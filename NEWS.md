@@ -1,5 +1,7 @@
-# ecodive 2.2.7
+# ecodive 2.3.0
 
+* Added `ecodive` JOSS citation information.
+* New `robust_aitchison()` beta diversity function.
 * Switch from `testthat` to dependency-free `tinytest` for test suite.
 * `read_tree` fixes for edge cases.
 

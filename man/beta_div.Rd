@@ -36,6 +36,7 @@ class (e.g. \code{phyloseq}). Default: \code{1}}
 \item \code{'percent'}: Relative abundance (sample abundances sum to 1).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
+\item \code{'rclr'}: Robust centered log ratio.
 }
 
 Default: \code{'none'}.}

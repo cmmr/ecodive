@@ -122,6 +122,14 @@
   
   
   
+  # Dice-Sorensen ====
+  
+  expect_equal( # abdiv(counts, 'sorenson')
+    current = as.vector(sorensen(counts)), 
+    target  = c(0.333333333333333, 0.333333333333333, 0.6, 0, 0.2, 0.2) )
+  
+  
+  
   # Divergence ====
   
   expect_equal( # philentropy(counts_p, 'divergence')
@@ -303,11 +311,16 @@
   
   
   
-  # Dice-Sorensen ====
+  # Robust Aitchison ====
   
-  expect_equal( # abdiv(counts, 'sorenson')
-    current = as.vector(sorensen(counts)), 
-    target  = c(0.333333333333333, 0.333333333333333, 0.6, 0, 0.2, 0.2) )
+  expect_equal( # vegan(counts, 'robust.aitchison')
+    current = as.vector(robust_aitchison(counts)), 
+    target  = c(1.0251710091546,   0.99685759106427,  1.05027091765329, 
+                0.241461781740541, 0.248422538223191, 0.0822135097377287 ))
+  
+  expect_equal( # rclr euclidean == robust_aitchison
+    current = as.vector(euclidean(counts, norm = 'rclr')), 
+    target  = as.vector(robust_aitchison(counts)) )
   
   
   

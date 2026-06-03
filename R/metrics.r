@@ -54,6 +54,7 @@ METRICS <- local({
       Observed Features,                             observed,                  NO,    NO,       NO,       NA,          alpha, otus asvs
       Otsuka-Ochiai Dissimilarity,                   ochiai,                    NO,    NO,       NO,       NO,          beta,  
       Probabilistic Symmetric Chi-Squared Distance,  psym_chisq,                NO,    YES,      NO,       NO,          beta,  
+      Robust Aitchison Distance,                     robust_aitchison,          NO,    YES,      NO,       YES,         beta,  raitchison
       Shannon Diversity Index,                       shannon,                   NO,    YES,      NO,       NA,          alpha, 
       Soergel Distance,                              soergel,                   NO,    YES,      NO,       YES,         beta,  
       Squared Chi-Squared Distance,                  squared_chisq,             NO,    YES,      NO,       NO,          beta,  

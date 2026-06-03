@@ -9,6 +9,7 @@
 #define NORM_CLR     2
 #define NORM_CHORD   3
 #define NORM_BINARY  4
+#define NORM_RCLR    5
 
 static int     n_samples;
 static int     n_otus;
@@ -130,6 +131,32 @@ static void *norm_binary(void *arg) {
 }
 
 
+//======================================================
+// Robust Centered Log Ratio (rclr)
+// log(x) - mean(log(x[x>0]))
+//======================================================
+static void *norm_rclr(void *arg) {
+  FOREACH_SAMPLE(
+    
+    int count = val_end - val_begin;
+  
+    if (count > 0) {
+      double logsum = 0;
+      
+      // 1. Sum of logs for strictly positive elements
+      FOREACH_VAL(logsum += log(*val));
+      
+      // 2. Log of the robust geometric mean
+      double log_mean = logsum / count;
+      
+      // 3. Apply rclr transformation
+      FOREACH_VAL(*val = log(*val) - log_mean);
+    }
+  
+  );
+  return NULL;
+}
+
 
 void normalize(ecomatrix_t *em, int norm, int n_threads, int pseudocount_) {
   
@@ -157,6 +184,7 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, int pseudocount_) {
     case NORM_CLR:     norm_func = norm_clr;     break;
     case NORM_CHORD:   norm_func = norm_chord;   break;
     case NORM_BINARY:  norm_func = norm_binary;  break;
+    case NORM_RCLR:    norm_func = norm_rclr;    break;
   }
   
   pseudocount = pseudocount_;

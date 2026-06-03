@@ -7,6 +7,7 @@ NORM_PERCENT <- 1L
 NORM_CLR     <- 2L
 NORM_CHORD   <- 3L
 NORM_BINARY  <- 4L
+NORM_RCLR    <- 5L
 
 
 validate_args <- function () {
@@ -393,12 +394,13 @@ validate_norm <- function (env = parent.frame()) {
     norm <- switch(
       EXPR = match.arg(
         arg     = tolower(norm), 
-        choices = c('none', 'percent', 'chord', 'binary', 'clr') ),
+        choices = c('none', 'percent', 'chord', 'binary', 'clr', 'rclr') ),
       'none'    = NORM_NONE,
       'percent' = NORM_PERCENT,
       'chord'   = NORM_CHORD,
       'binary'  = NORM_BINARY,
-      'clr'     = NORM_CLR )
+      'clr'     = NORM_CLR,
+      'rclr'    = NORM_RCLR )
     
   })
 }

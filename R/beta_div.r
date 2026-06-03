@@ -185,7 +185,7 @@ beta_div <- function (
 #' y <- log((y + pseudocount) / exp(mean(log(y + pseudocount))))
 #' sqrt(sum((x-y)^2)) # Euclidean distance
 #' ```
-#' 
+#'  
 #' @section Pseudocount:
 #' 
 #'   Zeros are undefined in the Aitchison (CLR) transformation. If
@@ -1034,6 +1034,53 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
   scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL)
   
   2 * scs
+}
+
+
+#' Robust Aitchison distance
+#' 
+#' Calculates the pairwise Robust Aitchison distance for compositional data. 
+#' This method is specifically engineered for sparse datasets—such as microbiome 
+#' OTU/ASV tables—by calculating distances based only on observed positive abundances, 
+#' entirely avoiding the need for arbitrary pseudo-counts.
+#' 
+#' @inherit documentation
+#' 
+#' @family Abundance metrics
+#' @seealso `beta_div()`, `aitchison()`
+#' @seealso `vignette('bdiv')`, `vignette('bdiv_guide')`
+#' 
+#' @details
+#' The Robust Aitchison distance is defined as:
+#' \deqn{\sqrt{\sum_{i=1}^{n} (X^*_i - Y^*_i)^2}}
+#' 
+#' Where:
+#' * \eqn{X^*_i}, \eqn{Y^*_i} : The rclr-transformed counts for the \eqn{i}-th feature.
+#'   For a given sample \eqn{X}, \eqn{X^*_i = \ln(X_i) - X_L} if \eqn{X_i > 0}, and \eqn{0} otherwise.
+#' * \eqn{X_L}, \eqn{Y_L} : Mean log of strictly positive abundances. 
+#'   \eqn{X_L = \frac{1}{|P_X|}\sum_{j \in P_X} \ln{X_j}}, where \eqn{P_X} is the set of indices where \eqn{X > 0}.
+#' * \eqn{|P_X|}, \eqn{|P_Y|} : The number of strictly positive features in the respective samples.
+#' * \eqn{n} : The total number of features.
+#' 
+#' Base R Equivalent: 
+#' ```r
+#' x <- ifelse(x > 0, log(x) - mean(log(x[x > 0])), 0)
+#' y <- ifelse(y > 0, log(y) - mean(log(y[y > 0])), 0)
+#' sqrt(sum((x-y)^2)) # Euclidean distance
+#' ```
+#' 
+#' @references
+#' Martino, C., Morton, J. T., Marotz, C. A., Thompson, L. R., Tripathi, A., Knight, R., and Zengler, K. (2019). A novel sparse compositional technique reveals microbial perturbations. *mSystems*, 4(1), e00016-19. \doi{10.1128/mSystems.00016-19}
+#' 
+#' @export
+#' @examples
+#'     robust_aitchison(ex_counts)
+robust_aitchison <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+  
+  norm <- 'rclr'
+  validate_args()
+  
+  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL)
 }
 
 

@@ -90,6 +90,7 @@ Other Abundance metrics:
 \code{\link{minkowski}()},
 \code{\link{morisita}()},
 \code{\link{motyka}()},
+\code{\link{robust_aitchison}()},
 \code{\link{soergel}()},
 \code{\link{squared_chisq}()},
 \code{\link{squared_chord}()},

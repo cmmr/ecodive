@@ -30,6 +30,7 @@
 #'   * `'percent'`: Relative abundance (sample abundances sum to 1).
 #'   * `'binary'`: Unweighted presence/absence (each count is either 0 or 1).
 #'   * `'clr'`: Centered log ratio.
+#'   * `'rclr'`: Robust centered log ratio.
 #'   
 #'   Default: `'none'`.
 #' 
