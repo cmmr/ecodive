@@ -53,6 +53,8 @@ beta_div(
 
   - `'clr'`: Centered log ratio.
 
+  - `'rclr'`: Robust centered log ratio.
+
   Default: `'none'`.
 
 - pseudocount:

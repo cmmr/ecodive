@@ -63,12 +63,16 @@ systematically narrow the field of metrics to a small, relevant subset.
   “constant sum” constraint).
 
   - The most statistically rigorous approach is to use a compositional
-    metric. -\> Your primary choice should be *Aitchison* distance
-    (Euclidean distance on Centered Log-Ratio transformed data).
-    **[Gloor et al. (2017)](https://doi.org/10.3389/fmicb.2017.02224)**
-    argue this approach is essential to avoid spurious correlations and
-    “false positives” common in standard ecological metrics when applied
-    to relative abundance data.
+    metric. -\> Your primary choice should be Robust Aitchison distance.
+    While the standard Aitchison metric requires adding arbitrary
+    pseudo-counts to handle the zeroes inherent in microbiome data, the
+    robust version natively calculates distances using only observed
+    positive abundances (**[Martino et
+    al. (2019)](https://doi.org/10.1128/mSystems.00016-19)**). **[Gloor
+    et al. (2017)](https://doi.org/10.3389/fmicb.2017.02224)** argue
+    this compositional approach is essential to avoid the “false
+    positives” common in standard ecological metrics, and the robust
+    adaptation makes it ideal for highly sparse sequencing datasets.
 
   - If you choose to use a non-compositional metric, select one that is
     robust to sparsity. -\> Good secondary choices include *Hellinger*
@@ -161,15 +165,23 @@ influences the ability to answer a specific biological question.
 - **Research Question:** The goal is to understand structural
   differences beyond the obvious phylum-level dominance.
 
-- **Recommended Metric:** *Aitchison distance*.
+- **Recommended Metric:** *Robust Aitchison distance*.
 
 - **Justification:** This is a compositionality problem. In a
   Bray-Curtis analysis, the massive difference in the dominant phylum
-  would obscure all other variation. **[Gloor et
-  al. (2017)](https://doi.org/10.3389/fmicb.2017.02224)** demonstrate
-  that Aitchison distance uses log-ratios to normalize for the dominant
-  components, allowing the researcher to investigate the
-  “sub-compositional” structure.
+  would obscure all other variation. As demonstrated by **[Martino et
+  al. (2019)](https://doi.org/10.1128/mSystems.00016-19)** and **[Gloor
+  et al. (2017)](https://doi.org/10.3389/fmicb.2017.02224)**, the robust
+  Aitchison distance uses log-ratios to normalize for the dominant
+  components. Crucially, it handles the zeros common in these datasets
+  without the distortion of pseudo-counts, allowing you to investigate
+  the “sub-compositional” structure cleanly.
+
+This is a compositionality problem. In a Bray-Curtis analysis, the
+massive difference in the dominant phylum would obscure all other
+variation. demonstrate that Aitchison distance uses log-ratios to
+normalize for the dominant components, allowing the researcher to
+investigate the “sub-compositional” structure.
 
 ------------------------------------------------------------------------
 

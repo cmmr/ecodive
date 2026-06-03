@@ -108,6 +108,8 @@ Distance measures using quantitative abundance data.
   Motyka dissimilarity
 - [`psym_chisq()`](https://cmmr.github.io/ecodive/reference/psym_chisq.md)
   : Probabilistic Symmetric Chi-Squared distance
+- [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md)
+  : Robust Aitchison distance
 - [`soergel()`](https://cmmr.github.io/ecodive/reference/soergel.md) :
   Soergel distance
 - [`squared_chisq()`](https://cmmr.github.io/ecodive/reference/squared_chisq.md)

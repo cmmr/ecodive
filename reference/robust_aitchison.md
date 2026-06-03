@@ -1,18 +1,15 @@
-# Aitchison distance
+# Robust Aitchison distance
 
-Calculates the Euclidean distance between centered log-ratio (CLR)
-transformed abundances.
+Calculates the pairwise Robust Aitchison distance for compositional
+data. This method is specifically engineered for sparse datasets—such as
+microbiome OTU/ASV tables—by calculating distances based only on
+observed positive abundances, entirely avoiding the need for arbitrary
+pseudo-counts.
 
 ## Usage
 
 ``` r
-aitchison(
-  counts,
-  margin = 1L,
-  pseudocount = NULL,
-  pairs = NULL,
-  cpus = n_cpus()
-)
+robust_aitchison(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
@@ -29,11 +26,6 @@ aitchison(
   are columns. Ignored when `counts` is a special object class (e.g.
   `phyloseq`). Default: `1`
 
-- pseudocount:
-
-  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
-  other normalization methods. See **Pseudocount** section.
-
 - pairs:
 
   Which combinations of samples should distances be calculated for? The
@@ -49,38 +41,29 @@ aitchison(
 
 ## Details
 
-The Aitchison distance is defined as: \$\$\sqrt{\sum\_{i=1}^{n}
-\[(\ln{X_i} - X_L) - (\ln{Y_i} - Y_L)\]^2}\$\$
+The Robust Aitchison distance is defined as: \$\$\sqrt{\sum\_{i=1}^{n}
+(X^\*\_i - Y^\*\_i)^2}\$\$
 
 Where:
 
-- \\X_i\\, \\Y_i\\ : Absolute counts for the \\i\\-th feature.
+- \\X^\*\_i\\, \\Y^\*\_i\\ : The rclr-transformed counts for the
+  \\i\\-th feature. For a given sample \\X\\, \\X^\*\_i = \ln(X_i) -
+  X_L\\ if \\X_i \> 0\\, and \\0\\ otherwise.
 
-- \\X_L\\, \\Y_L\\ : Mean log of abundances. \\X_L =
-  \frac{1}{n}\sum\_{i=1}^{n} \ln{X_i}\\.
+- \\X_L\\, \\Y_L\\ : Mean log of strictly positive abundances. \\X_L =
+  \frac{1}{\|P_X\|}\sum\_{j \in P_X} \ln{X_j}\\, where \\P_X\\ is the
+  set of indices where \\X \> 0\\.
 
-- \\n\\ : The number of features.
+- \\\|P_X\|\\, \\\|P_Y\|\\ : The number of strictly positive features in
+  the respective samples.
+
+- \\n\\ : The total number of features.
 
 Base R Equivalent:
 
-    x <- log((x + pseudocount) / exp(mean(log(x + pseudocount))))
-    y <- log((y + pseudocount) / exp(mean(log(y + pseudocount))))
+    x <- ifelse(x > 0, log(x) - mean(log(x[x > 0])), 0)
+    y <- ifelse(y > 0, log(y) - mean(log(y[y > 0])), 0)
     sqrt(sum((x-y)^2)) # Euclidean distance
-
-## Pseudocount
-
-Zeros are undefined in the Aitchison (CLR) transformation. If
-`pseudocount` is `NULL` (the default) and zeros are detected, the
-function uses half the minimum non-zero value (`min(x[x>0]) / 2`) and
-issues a warning.
-
-To suppress the warning, provide an explicit value (e.g., `1`).
-
-**Why this matters:** The choice of pseudocount is not neutral; it acts
-as a weighting factor that can significantly distort downstream results,
-especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.
-(2017) for open-access discussions on the mathematical implications, or
-Costea et al. (2014) for the impact on community clustering.
 
 ## Input Types
 
@@ -103,36 +86,21 @@ parallel processing.
 
 ## References
 
-Aitchison, J. (1986). The statistical analysis of compositional data.
-Chapman and Hall.
-[doi:10.1002/bimj.4710300705](https://doi.org/10.1002/bimj.4710300705)
-
-Aitchison, J. (1982). The statistical analysis of compositional data.
-*Journal of the Royal Statistical Society: Series B (Methodological)*,
-44(2), 139-160.
-[doi:10.1111/j.2517-6161.1982.tb01195.x](https://doi.org/10.1111/j.2517-6161.1982.tb01195.x)
-
-Costea, P. I., Zeller, G., Sunagawa, S., & Bork, P. (2014). A fair
-comparison. *Nature Methods*, 11(4), 359.
-[doi:10.1038/nmeth.2897](https://doi.org/10.1038/nmeth.2897)
-
-Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J.
-(2017). Microbiome datasets are compositional: and this is not optional.
-*Frontiers in Microbiology*, 8, 2224.
-[doi:10.3389/fmicb.2017.02224](https://doi.org/10.3389/fmicb.2017.02224)
-
-Kaul, A., Mandal, S., Davidov, O., & Peddada, S. D. (2017). Analysis of
-microbiome data in the presence of excess zeros. *Frontiers in
-Microbiology*, 8, 2114.
-[doi:10.3389/fmicb.2017.02114](https://doi.org/10.3389/fmicb.2017.02114)
+Martino, C., Morton, J. T., Marotz, C. A., Thompson, L. R., Tripathi,
+A., Knight, R., and Zengler, K. (2019). A novel sparse compositional
+technique reveals microbial perturbations. *mSystems*, 4(1), e00016-19.
+[doi:10.1128/mSystems.00016-19](https://doi.org/10.1128/mSystems.00016-19)
 
 ## See also
 
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
+[`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md)
+
 [`vignette('bdiv')`](https://cmmr.github.io/ecodive/articles/bdiv.md),
 `vignette('bdiv_guide')`
 
 Other Abundance metrics:
+[`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md),
 [`bhattacharyya()`](https://cmmr.github.io/ecodive/reference/bhattacharyya.md),
 [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md),
 [`canberra()`](https://cmmr.github.io/ecodive/reference/canberra.md),
@@ -153,7 +121,6 @@ Other Abundance metrics:
 [`morisita()`](https://cmmr.github.io/ecodive/reference/morisita.md),
 [`motyka()`](https://cmmr.github.io/ecodive/reference/motyka.md),
 [`psym_chisq()`](https://cmmr.github.io/ecodive/reference/psym_chisq.md),
-[`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md),
 [`soergel()`](https://cmmr.github.io/ecodive/reference/soergel.md),
 [`squared_chisq()`](https://cmmr.github.io/ecodive/reference/squared_chisq.md),
 [`squared_chord()`](https://cmmr.github.io/ecodive/reference/squared_chord.md),
@@ -164,9 +131,9 @@ Other Abundance metrics:
 ## Examples
 
 ``` r
-    aitchison(ex_counts, pseudocount = 1)
+    robust_aitchison(ex_counts)
 #>         Saliva     Gums     Nose
-#> Gums  1.748405                  
-#> Nose  9.710741 9.862353         
-#> Stool 8.245648 8.372391 9.409111
+#> Gums  3.282546                  
+#> Nose  8.345744 9.711832         
+#> Stool 9.460092 9.421025 9.830042
 ```

@@ -42,6 +42,8 @@ euclidean(
 
   - `'clr'`: Centered log ratio.
 
+  - `'rclr'`: Robust centered log ratio.
+
   Default: `'none'`.
 
 - pseudocount:
@@ -149,6 +151,7 @@ Other Abundance metrics:
 [`morisita()`](https://cmmr.github.io/ecodive/reference/morisita.md),
 [`motyka()`](https://cmmr.github.io/ecodive/reference/motyka.md),
 [`psym_chisq()`](https://cmmr.github.io/ecodive/reference/psym_chisq.md),
+[`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md),
 [`soergel()`](https://cmmr.github.io/ecodive/reference/soergel.md),
 [`squared_chisq()`](https://cmmr.github.io/ecodive/reference/squared_chisq.md),
 [`squared_chord()`](https://cmmr.github.io/ecodive/reference/squared_chord.md),

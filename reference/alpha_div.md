@@ -45,6 +45,8 @@ alpha_div(
 
   - `'clr'`: Centered log ratio.
 
+  - `'rclr'`: Robust centered log ratio.
+
   Default: `'none'`.
 
 - cutoff:

@@ -44,6 +44,8 @@ documentation
 
   - `'clr'`: Centered log ratio.
 
+  - `'rclr'`: Robust centered log ratio.
+
   Default: `'none'`.
 
 - pairs:
