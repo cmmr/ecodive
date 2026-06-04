@@ -25,9 +25,9 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \description{
 Calculates the pairwise Robust Aitchison distance for compositional data.
-This method is specifically engineered for sparse datasets—such as microbiome
-OTU/ASV tables—by calculating distances based only on observed positive abundances,
-entirely avoiding the need for arbitrary pseudo-counts.
+This method is specifically engineered for sparse datasets - such as microbiome
+OTU/ASV tables - by calculating distances based only on observed positive
+abundances, avoiding the need for pseudo-counts.
 }
 \details{
 The Robust Aitchison distance is defined as:

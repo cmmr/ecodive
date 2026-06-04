@@ -11,21 +11,23 @@ Authors@R: c(
     person(
       "Melissa", "O'Neill",
       role    = c("ctb", "cph"),
-      comment = "Author of PCG random number generator"),
+      comment = "PCG random number generator"),
     person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
-Description:
-    Computes alpha and beta diversity metrics using concurrent 'C' threads.
-    Metrics include 'UniFrac', Faith's phylogenetic diversity, Bray-Curtis
-    dissimilarity, Shannon diversity index, and many others.
-    Also parses newick trees into 'phylo' objects and rarefies feature tables.
-    Parallel and memory-efficient algorithms are described in Smith et al.
-    (2026) <doi:10.21105/joss.09777>.
+Description: Computes alpha and beta diversity metrics in a parallel,
+    memory-efficient manner using 'C' and 'pthreads'. Implements 51 classic,
+    compositional, and phylogenetic indices including Shannon, Bray-Curtis,
+    Faith, JSD, Hellinger, Robust Aitchison, and the UniFrac family.
+    Provides random sub-sampling for table rarefaction and parses Newick
+    trees into 'phylo' objects. Integrates with data structures from
+    'phyloseq', 'rbiom', and other common bioinformatics packages.
+    Algorithms are described in Smith et al. (2026) <doi:10.21105/joss.09777>.
 URL: https://cmmr.github.io/ecodive/, https://github.com/cmmr/ecodive
 BugReports: https://github.com/cmmr/ecodive/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 Depends: R (>= 3.6.0)
 Roxygen: list(markdown = TRUE)

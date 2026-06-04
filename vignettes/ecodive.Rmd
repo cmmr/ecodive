@@ -106,15 +106,16 @@ list_metrics('beta')[,2:6]
 #> 36        normalized_unifrac  TRUE     TRUE    FALSE        TRUE
 #> 38                    ochiai FALSE    FALSE    FALSE       FALSE
 #> 39                psym_chisq FALSE     TRUE    FALSE       FALSE
-#> 41                   soergel FALSE     TRUE    FALSE        TRUE
-#> 42             squared_chisq FALSE     TRUE    FALSE       FALSE
-#> 43             squared_chord FALSE     TRUE    FALSE       FALSE
-#> 44         squared_euclidean FALSE     TRUE    FALSE       FALSE
-#> 46                    topsoe FALSE     TRUE    FALSE        TRUE
-#> 47        unweighted_unifrac  TRUE     TRUE    FALSE        TRUE
-#> 48 variance_adjusted_unifrac  TRUE     TRUE    FALSE        TRUE
-#> 49               wave_hedges FALSE     TRUE    FALSE       FALSE
-#> 50          weighted_unifrac  TRUE     TRUE    FALSE        TRUE
+#> 40          robust_aitchison FALSE     TRUE    FALSE        TRUE
+#> 42                   soergel FALSE     TRUE    FALSE        TRUE
+#> 43             squared_chisq FALSE     TRUE    FALSE       FALSE
+#> 44             squared_chord FALSE     TRUE    FALSE       FALSE
+#> 45         squared_euclidean FALSE     TRUE    FALSE       FALSE
+#> 47                    topsoe FALSE     TRUE    FALSE        TRUE
+#> 48        unweighted_unifrac  TRUE    FALSE    FALSE        TRUE
+#> 49 variance_adjusted_unifrac  TRUE     TRUE    FALSE        TRUE
+#> 50               wave_hedges FALSE     TRUE    FALSE       FALSE
+#> 51          weighted_unifrac  TRUE     TRUE    FALSE        TRUE
 ```
 
 

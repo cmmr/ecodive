@@ -82,6 +82,7 @@ Given:
 * $X_T$, $Y_T$ : Total counts in each sample. $X_T = \sum_{i=1}^{n} X_i$
 * $P_i$, $Q_i$ : Proportional abundances of $X_i$ and $Y_i$. $P_i = X_i / X_T$
 * $X_L$, $Y_L$ : Mean log of abundances. $X_L = \frac{1}{n}\sum_{i=1}^{n} \ln{X_i}$
+* $X*_i$, $Y*_i$ : Rclr-transformed abundances of $X_i$ and $Y_i$ (see `robust_aitchison()` documentation).
 * $R_i$ : The range of the $i$-th feature across all samples (max - min).
 
 |                  |                                    |
@@ -107,6 +108,7 @@ Given:
 | **Morisita dissimilarity** <br> (integers only) <br> `morisita()`          | $\displaystyle 1 - \frac{2\sum_{i=1}^{n}X_{i}Y_{i}}{\displaystyle \left(\frac{\sum_{i=1}^{n}X_i(X_i - 1)}{X_T(X_T - 1)} + \frac{\sum_{i=1}^{n}Y_i(Y_i - 1)}{Y_T(Y_T - 1)}\right)X_{T}Y_{T}}$ |
 | **Motyka dissimilarity**                        <br> `motyka()`            | $\displaystyle \frac{\sum_{i=1}^{n} \max(X_i, Y_i)}{\sum_{i=1}^{n} (X_i + Y_i)}$ |
 | **Probabilistic Symmetric $\chi^2$ distance**   <br> `psym_chisq()`        | $\displaystyle 2\sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}$ |
+| **Robust Aitchison distance**                   <br> `robust_aitchison()`  | $\displaystyle \sqrt{\sum_{i=1}^{n} (X^*_i - Y^*_i)^2}$ |
 | **Soergel distance**                            <br> `soergel()`           | $\displaystyle \frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} \max(X_i, Y_i)}$ |
 | **Squared $\chi^2$ distance**                   <br> `squared_chisq()`     | $\displaystyle \sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}$ |
 | **Squared Chord distance**                      <br> `squared_chord()`     | $\sum_{i=1}^{n}\left(\sqrt{P_i} - \sqrt{Q_i}\right)^2$ |
