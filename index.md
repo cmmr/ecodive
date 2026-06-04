@@ -143,9 +143,10 @@ list_metrics('beta', 'id')
 #> [19] "lorentzian"                "manhattan"                 "matusita"                 
 #> [22] "minkowski"                 "morisita"                  "motyka"                   
 #> [25] "normalized_unifrac"        "ochiai"                    "psym_chisq"               
-#> [28] "soergel"                   "squared_chisq"             "squared_chord"            
-#> [31] "squared_euclidean"         "topsoe"                    "unweighted_unifrac"       
-#> [34] "variance_adjusted_unifrac" "wave_hedges"               "weighted_unifrac"   
+#> [28] "robust_aitchison"          "soergel"                   "squared_chisq"            
+#> [31] "squared_chord"             "squared_euclidean"         "topsoe"                   
+#> [34] "unweighted_unifrac"        "variance_adjusted_unifrac" "wave_hedges"              
+#> [37] "weighted_unifrac" 
 ```
 
 ## Documentation

@@ -1,10 +1,9 @@
 # Robust Aitchison distance
 
 Calculates the pairwise Robust Aitchison distance for compositional
-data. This method is specifically engineered for sparse datasets—such as
-microbiome OTU/ASV tables—by calculating distances based only on
-observed positive abundances, entirely avoiding the need for arbitrary
-pseudo-counts.
+data. This method is specifically engineered for sparse datasets - such
+as microbiome OTU/ASV tables - by calculating distances based only on
+observed positive abundances, avoiding the need for pseudo-counts.
 
 ## Usage
 

@@ -63,11 +63,11 @@ systematically narrow the field of metrics to a small, relevant subset.
   “constant sum” constraint).
 
   - The most statistically rigorous approach is to use a compositional
-    metric. -\> Your primary choice should be Robust Aitchison distance.
-    While the standard Aitchison metric requires adding arbitrary
-    pseudo-counts to handle the zeroes inherent in microbiome data, the
-    robust version natively calculates distances using only observed
-    positive abundances (**[Martino et
+    metric. -\> Your primary choice should be *Robust Aitchison*
+    distance. While the standard Aitchison metric requires adding
+    arbitrary pseudo-counts to handle the zeroes inherent in microbiome
+    data, the robust version natively calculates distances using only
+    observed positive abundances (**[Martino et
     al. (2019)](https://doi.org/10.1128/mSystems.00016-19)**). **[Gloor
     et al. (2017)](https://doi.org/10.3389/fmicb.2017.02224)** argue
     this compositional approach is essential to avoid the “false

@@ -80,6 +80,9 @@ Given:
 - P_i, Q_i : Proportional abundances of X_i and Y_i. P_i = X_i / X_T
 - X_L, Y_L : Mean log of abundances. X_L = \frac{1}{n}\sum\_{i=1}^{n}
   \ln{X_i}
+- X\*\_i, Y\*\_i : Rclr-transformed abundances of X_i and Y_i (see
+  [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md)
+  documentation).
 - R_i : The range of the i-th feature across all samples (max - min).
 
 [TABLE]
