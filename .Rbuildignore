@@ -13,3 +13,4 @@
 ^LICENSE\.md$
 ^rhub_check\.r$
 ^vignettes/articles$
+^\.Rproj\.user$
