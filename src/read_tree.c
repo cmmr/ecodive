@@ -93,7 +93,7 @@ static inline int is_newline (char c) { return c == '\n' || c == '\r'; }
 // the longest possible token, so this check should never fail.
 static inline void buf_push(parser_t *p, char c) {
   if (p->len >= p->cap)
-    parse_error(p, p->pos, "internal parser error (label buffer overflow)");
+    parse_error(p, p->pos, "internal parser error (label buffer overflow)"); // # nocov
   p->buf[p->len++] = c;
 }
 
@@ -172,7 +172,8 @@ static void read_unquoted(parser_t *p) {
       skip_comment(p);
     }
     else if (c == ']') {
-      parse_error(p, p->pos, "']' without a matching '['");
+      // Already rejected by count_tree(), which scans the same text first.
+      parse_error(p, p->pos, "']' without a matching '['"); // # nocov
     }
     else if (is_newline(c)) {
       while (p->len > 0 && is_blank(p->buf[p->len - 1])) p->len--;
@@ -287,7 +288,7 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
 
   if (!isString(sexp_tree_str) || XLENGTH(sexp_tree_str) != 1 ||
       STRING_ELT(sexp_tree_str, 0) == NA_STRING)
-    Rf_error("Newick tree must be a single, non-NA character string.");
+    Rf_error("Newick tree must be a single, non-NA character string."); // # nocov
 
   SEXP sexp_tree_chr = STRING_ELT(sexp_tree_str, 0);
   int  underscores   = asLogical(sexp_underscores) == TRUE;
@@ -315,8 +316,9 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
   size_t n_nodes, n_leafs, max_depth, max_token;
   count_tree(&p, &n_nodes, &n_leafs, &max_depth, &max_token);
 
+  // R strings are at most INT_MAX bytes, which is too short to trigger this.
   if (n_nodes + n_leafs > INT_MAX)
-    parse_error(&p, root_pos, "too many nodes");
+    parse_error(&p, root_pos, "too many nodes"); // # nocov
 
   size_t n_edges = n_nodes + n_leafs - 1;
 
@@ -368,7 +370,7 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
 
         if (next_node >= n_nodes || depth >= max_depth ||
             (depth > 0 && next_edge >= n_edges))
-          parse_error(&p, p.pos, "internal parser error");
+          parse_error(&p, p.pos, "internal parser error"); // # nocov
 
         size_t node = next_node++;
         size_t edge = NO_EDGE;
@@ -390,7 +392,7 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
       // Anything else is a leaf, possibly with an empty label.
 
       if (next_leaf >= n_leafs || next_edge >= n_edges)
-        parse_error(&p, p.pos, "internal parser error");
+        parse_error(&p, p.pos, "internal parser error"); // # nocov
 
       size_t leaf = next_leaf++;
       size_t edge = next_edge++;
@@ -420,7 +422,7 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
       // Close the current internal node, then read its label and length.
 
       if (depth == 0)
-        parse_error(&p, p.pos, "internal parser error");
+        parse_error(&p, p.pos, "internal parser error"); // # nocov
 
       depth--;
       size_t node = stack[depth].node;
@@ -441,7 +443,7 @@ SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
 
     // Unreachable for input that passed count_tree(), but be defensive.
     if (p.pos >= p.n || c == ';')
-      parse_error(&p, p.pos, "unexpected end of tree");
+      parse_error(&p, p.pos, "unexpected end of tree"); // # nocov
 
     if (c == '\'')
       parse_error(&p, p.pos, "unexpected quote; quotes must enclose an entire label");

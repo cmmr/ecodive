@@ -98,6 +98,12 @@ expect_identical(x$node.label, "e_f")
 x <- read_tree("('naïve':1,café:2);")
 expect_identical(x$tip.label, c("naïve", "café"))
 
+# Line breaks, and any blanks touching them, are removed from unquoted text.
+x <- read_tree("(ab\ncd:0.1\n2,ef  \n  gh:0.3\r\n  4);")
+expect_identical(x$tip.label,   c("abcd", "efgh"))
+expect_identical(x$edge.length, c(0.12, 0.34))
+expect_identical(read_tree("(a \n ,b \n );")$tip.label, c("a", "b"))
+
 
 
 #________________________________________________________
@@ -119,6 +125,9 @@ expect_error(read_tree("(A:1:2,B);"),      "only one branch length")
 expect_error(read_tree("(A:x,B);"),        "invalid branch length")
 expect_error(read_tree("(A:,B);"),         "missing branch length")
 expect_error(read_tree("[only a comment]"), "no tree found")
+expect_error(read_tree("[a comment] A,B;"), "must begin with")
+expect_error(read_tree("(A(B),C);"),        "unexpected '\\('")
+expect_error(read_tree("((A)(B),C);"),      "unexpected '\\('")
 
 
 
