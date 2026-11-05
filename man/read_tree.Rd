@@ -10,9 +10,10 @@ read_tree(newick, underscores = FALSE)
 \item{newick}{Input data as either a file path, URL, or Newick string.
 Compressed (gzip or bzip2) files are also supported.}
 
-\item{underscores}{If \code{TRUE}, underscores in unquoted names will remain
-underscores. If \code{FALSE}, underscores in unquoted named will be
-converted to spaces.}
+\item{underscores}{If \code{TRUE}, underscores in unquoted labels will remain
+underscores. If \code{FALSE}, underscores in unquoted labels will be
+converted to spaces, as specified by the Newick standard. Quoted
+labels are never altered, regardless of this setting.}
 }
 \value{
 A \code{phylo} class object representing the tree.
@@ -23,11 +24,40 @@ You can load a tree from a file or by providing the tree string directly.
 This tree must be in Newick format, also known as parenthetic format and
 New Hampshire format.
 }
+\details{
+Parsing follows the Newick standard described at
+\url{https://evolution.genetics.washington.edu/phylip/newick_doc.html}.
+
+\strong{Quoted labels.} Any tip, internal node, or root label may be enclosed
+in single quotes. Everything inside the quotes is taken literally,
+including parentheses, square brackets, colons, semicolons, commas,
+underscores, blanks, and newlines. The one exception is that two adjacent
+single quotes stand for one literal apostrophe: \verb{'it''s'} is read as
+\verb{it's}, and \code{''} is an empty label.
+
+\strong{Comments.} Outside of quotes, any text in square brackets (for
+example \verb{[&rate=0.5]}) is a comment and is ignored. Inside quotes, square
+brackets are ordinary characters.
+
+\strong{Whitespace.} Outside of quotes, blanks around labels and branch
+lengths are ignored. A line break, together with any blanks touching it,
+is removed entirely, so that a label or branch length wrapped across two
+lines is rejoined.
+
+Only the first tree (up to the first \verb{;}) is read. A branch length on the
+root is accepted but discarded. Malformed input, such as an unclosed
+quote, comment, or parenthesis, raises an error giving the position of
+the problem.
+}
 \examples{
     tree <- read_tree("
         (A:0.99,((B:0.87,C:0.89):0.51,(((D:0.16,(E:0.83,F:0.96)
         :0.94):0.69,(G:0.92,(H:0.62,I:0.85):0.54):0.23):0.74,J:0.1
         2):0.43):0.67);")
     class(tree)
+
+    # Quoted labels can contain any character.
+    tree <- read_tree("('it''s':1,'x[1]':2,b_c[a comment]:3);")
+    tree$tip.label
 
 }

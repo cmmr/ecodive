@@ -2,225 +2,468 @@
 // Licensed under the MIT License: https://opensource.org/license/mit
 
 #include "ecodive.h"
+#include <limits.h>   // INT_MAX
+#include <stdarg.h>   // va_list
+#include <stdio.h>    // vsnprintf
+
+#ifndef NORET
+#  define NORET
+#endif
 
 
-static const char *tree_str;
-static int         underscores;
+/*
+ * Newick parser
+ * =============
+ *
+ * The string is scanned twice, front to back, so run time is linear in its
+ * length regardless of the tree's shape:
+ *
+ *   1. count_tree() counts '(' (internal nodes) and ',' (leaves - 1), and
+ *      checks that quotes, comments, and parentheses are balanced.
+ *
+ *   2. C_read_tree() walks the string with an explicit stack (no recursion,
+ *      so arbitrarily deep trees are fine), filling in the edge matrix,
+ *      edge lengths, and labels.
+ *
+ * Nodes, leaves, and edges are numbered in the order they are encountered,
+ * i.e. pre-order / "cladewise", the same as ape::read.tree().
+ *
+ * Lexical rules:
+ *
+ *   - A label may be enclosed in single quotes. Inside quotes every byte is
+ *     literal - including ( ) [ ] : ; , ' _ blanks and newlines - except that
+ *     two adjacent single quotes ('') represent one literal apostrophe.
+ *
+ *   - Outside of quotes:
+ *       * [...] is a comment and is ignored. Comments may nest, and quotes
+ *         inside a comment have no special meaning.
+ *       * Blanks around labels and branch lengths are ignored.
+ *       * A line break, together with any blanks touching it, is removed
+ *         entirely, so a label or number wrapped onto the next line is
+ *         rejoined (e.g. "0.1\n  2" is read as "0.12").
+ *       * Underscores in labels become spaces, unless `underscores` is TRUE.
+ *
+ *   - Only the first tree (up to the first ';') is read. A length on the
+ *     root edge is accepted but discarded.
+ */
 
-static size_t n_leafs;
-static size_t n_edges;
 
-// Output arrays (R-managed handles)
-static SEXP sexp_node_label_vec;
-static SEXP sexp_leaf_label_vec;
-
-// Native C arrays to avoid R garbage collection relocation issues
-static int    *edge_mtx;
-static double *edge_length_vec;
-
-// Track next open indices in output arrays
-static size_t next_edge_index;
-static size_t next_node_index;
-static size_t next_leaf_index;
+typedef struct {
+  const char *str;  // the Newick string (not NUL-terminated in our usage)
+  size_t      n;    // its length in bytes
+  size_t      pos;  // current read position
+  cetype_t    ce;   // encoding of str; also used for the output labels
+  char       *buf;  // scratch space for the current label or branch length
+  size_t      cap;  // capacity of buf, not counting a terminating NUL
+  size_t      len;  // number of bytes currently in buf
+} parser_t;
 
 
-static SEXP extract_name(size_t x1, size_t x2) {
-  
-  if (x1 > x2) return mkChar(""); // Safety net for empty ranges
-  
-  char quoted = tree_str[x1] == '\'' && tree_str[x2] == '\'';
-  
-  // Quoted Name ==> Strip off quote marks
-  if (quoted) {
-    if (x2 - x1 < 2) return mkChar(""); // e.g. ''
-    x1++;
-    x2--;
-  }
-  
-  // Standard calloc (heap), completely invisible to R's memory tracker
-  char* node_name_str = calloc(x2 - x1 + 2, sizeof(char));
-  strncpy(node_name_str, tree_str + x1, x2 - x1 + 1);
-  node_name_str[x2 - x1 + 1] = '\0';
-  
-  // Unquoted Name ==> Replace underscores with spaces
-  if (!quoted && !underscores) {
-    for (size_t j = 0; j <= x2 - x1; j++) {
-      if (node_name_str[j] == '_') node_name_str[j] = ' ';
-    }
-  }
-  
-  SEXP sexp_node_name = mkChar(node_name_str);
-  
-  // Free immediately! Prevents massive numbers of tiny heap allocations from piling up
-  free(node_name_str);
-  
-  return sexp_node_name;
+#define NO_EDGE ((size_t) -1)
+
+typedef struct {
+  size_t node;  // 0-based index of an open internal node
+  size_t edge;  // row of the edge leading into it (NO_EDGE for the root)
+} frame_t;
+
+
+NORET static void parse_error(const parser_t *p, size_t pos, const char *fmt, ...) {
+
+  char msg[256];
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(msg, sizeof(msg), fmt, args);
+  va_end(args);
+
+  // Report a 1-based character position rather than a byte offset.
+  int    utf8 = p->ce != CE_LATIN1 && p->ce != CE_BYTES;
+  double chr  = 1;
+  for (size_t i = 0; i < pos && i < p->n; i++)
+    if (!utf8 || ((unsigned char) p->str[i] & 0xC0) != 0x80) chr++;
+
+  Rf_error("Invalid Newick string: %s (at character %.0f).", msg, chr);
 }
 
 
-static void recurse_tree(size_t x1, size_t x2, size_t parent) {
-  
-  
-  size_t i, level;
-  
-  // Trim off whitespace from beginning and end of string section
-  while ((tree_str[x1] == ' ' || tree_str[x1] == '\t') && x1 <= x2) x1++;
-  while ((tree_str[x2] == ' ' || tree_str[x2] == '\t') && x1 <= x2) x2--;
-  
-  // Read backwards, extracting name and length if present
-  for (i = x2; i >= x1; i--) {
-    
-    // Ignore special characters inside single quotes
-    if (tree_str[i] == '\'') {
-      do { i--; } while (tree_str[i] != '\'' && i >= x1);
-      continue;
+static inline int is_blank   (char c) { return c == ' '  || c == '\t'; }
+static inline int is_newline (char c) { return c == '\n' || c == '\r'; }
+
+
+// Append one byte to the label buffer. count_tree() sizes the buffer to
+// the longest possible token, so this check should never fail.
+static inline void buf_push(parser_t *p, char c) {
+  if (p->len >= p->cap)
+    parse_error(p, p->pos, "internal parser error (label buffer overflow)");
+  p->buf[p->len++] = c;
+}
+
+
+// p->pos is at a '['. Advance past the matching ']'.
+static void skip_comment(parser_t *p) {
+
+  size_t start = p->pos;
+  size_t depth = 0;
+
+  do {
+    if (p->pos >= p->n)
+      parse_error(p, start, "'[' comment is never closed with ']'");
+    char c = p->str[p->pos++];
+    if      (c == '[') depth++;
+    else if (c == ']') depth--;
+  } while (depth > 0);
+}
+
+
+// Advance past any blanks, newlines, and comments.
+static void skip_ignorable(parser_t *p) {
+
+  while (p->pos < p->n) {
+    char c = p->str[p->pos];
+    if      (is_blank(c) || is_newline(c)) p->pos++;
+    else if (c == '[')                     skip_comment(p);
+    else                                   break;
+  }
+}
+
+
+// p->pos is at an opening single quote. Advance past the closing quote,
+// decoding the label into p->buf when `store` is true.
+static void read_quoted(parser_t *p, int store) {
+
+  size_t start = p->pos++;
+  p->len = 0;
+
+  for (;;) {
+
+    if (p->pos >= p->n)
+      parse_error(
+        p, start,
+        "quoted label is never closed (write a literal apostrophe "
+        "as '' inside a quoted label)" );
+
+    char c = p->str[p->pos++];
+
+    if (c == '\'') {
+      if (p->pos < p->n && p->str[p->pos] == '\'') p->pos++; // '' ==> '
+      else                                         return;   // closing quote
     }
-    
-    // Text after the colon is the branch length
-    if (tree_str[i] == ':') {
-      
-      if (next_edge_index > 0 && next_edge_index <= n_edges) {
-        char *junk_ptr;
-        edge_length_vec[next_edge_index - 1] = strtod(tree_str + i + 1, &junk_ptr);
-      }
-      
-      x2 = i - 1;
-    }
-    
-    // Text after the end-parentheses is the node name
-    if (tree_str[i] == ')') {
-      
-      if (i < x2)
-        SET_STRING_ELT(sexp_node_label_vec, next_node_index, extract_name(i + 1, x2));
-      
-      if (next_edge_index > 0 && next_edge_index <= n_edges) {
-        size_t mtx_row_i = next_edge_index - 1;
-        edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
-        edge_mtx[mtx_row_i + n_edges] = next_node_index + n_leafs + 1;
-      }
-      next_node_index++;
-      next_edge_index++;
-      
-      // Peel off parentheses
-      x1++;
-      x2 = i - 1;
-      
+
+    if (store) buf_push(p, c);
+  }
+}
+
+
+// Read an unquoted label or branch length into p->buf, stopping at the next
+// Newick punctuation mark. Comments are dropped, line breaks (and blanks
+// touching them) are removed, and trailing blanks are trimmed. The caller
+// has already skipped any leading blanks.
+static void read_unquoted(parser_t *p) {
+
+  p->len = 0;
+
+  while (p->pos < p->n) {
+
+    char c = p->str[p->pos];
+
+    if (c == '(' || c == ')' || c == ',' || c == ':' || c == ';' || c == '\'')
       break;
+
+    if (c == '[') {
+      skip_comment(p);
+    }
+    else if (c == ']') {
+      parse_error(p, p->pos, "']' without a matching '['");
+    }
+    else if (is_newline(c)) {
+      while (p->len > 0 && is_blank(p->buf[p->len - 1])) p->len--;
+      while (p->pos < p->n && (is_blank(p->str[p->pos]) || is_newline(p->str[p->pos])))
+        p->pos++;
+    }
+    else {
+      buf_push(p, c);
+      p->pos++;
     }
   }
-  
-  
-  // No parens means we're at a leaf
-  if (i <= x1) {
-    
-    if (x1 <= x2)
-      SET_STRING_ELT(sexp_leaf_label_vec, next_leaf_index, extract_name(x1, x2));
-    
-    if (next_edge_index > 0 && next_edge_index <= n_edges) {
-      size_t mtx_row_i = next_edge_index - 1;
-      edge_mtx[mtx_row_i + 0]       = parent + n_leafs;
-      edge_mtx[mtx_row_i + n_edges] = next_leaf_index + 1;
-    }
-    next_leaf_index++;
-    next_edge_index++;
-    
-    return;
+
+  while (p->len > 0 && is_blank(p->buf[p->len - 1])) p->len--;
+}
+
+
+// Read an optional label into p->buf (p->len is 0 when there's no label).
+static void read_label(parser_t *p, int underscores) {
+
+  skip_ignorable(p);
+
+  if (p->pos < p->n && p->str[p->pos] == '\'') {
+    read_quoted(p, 1); // Quoted labels are never altered.
   }
-  
-  
-  // Recurse into each of the subtrees
-  level  = 0;
-  parent = next_node_index;
-  for (i = x1; i <= x2; i++) {
-    
-    // Ignore special characters inside single quotes
-    if (tree_str[i] == '\'') {
-      do { i++; } while (tree_str[i] != '\'' && i <= x2);
-      continue;
-    }
-    
-    // Find the other end of the current subclade
-    if (tree_str[i] == '(') {
-      level++;
-    } else if (tree_str[i] == ')') {
-      level--;
-    } else if (tree_str[i] == ',' && level == 0) {
-      recurse_tree(x1, i - 1, parent);
-      x1 = i + 1;
-    }
-    
+  else {
+    read_unquoted(p);
+    if (!underscores)
+      for (size_t i = 0; i < p->len; i++)
+        if (p->buf[i] == '_') p->buf[i] = ' ';
   }
-  recurse_tree(x1, x2, parent);
-  
-  return;
+}
+
+
+// Read an optional ":length". Returns 0 when there is no branch length.
+static double read_length(parser_t *p) {
+
+  skip_ignorable(p);
+  if (p->pos >= p->n || p->str[p->pos] != ':') return 0;
+
+  size_t start = p->pos++;
+  skip_ignorable(p);
+  read_unquoted(p);
+
+  if (p->len == 0)
+    parse_error(p, start, "missing branch length after ':'");
+
+  p->buf[p->len] = '\0';
+  char  *end;
+  double x = strtod(p->buf, &end);
+
+  if (end != p->buf + p->len)
+    parse_error(p, start + 1, "invalid branch length '%.40s'", p->buf);
+
+  return x;
+}
+
+
+// Pass 1: count internal nodes and leaves in the first tree, and make sure
+// that quotes, comments, and parentheses are all properly closed. Also
+// finds the deepest nesting of parentheses, and the longest stretch of text
+// between two of ( ) , : ; since no label or branch length can be longer.
+static void count_tree(
+    parser_t *p, size_t *n_nodes, size_t *n_leafs,
+    size_t *max_depth, size_t *max_token ) {
+
+  size_t depth = 0, n_open = 0, n_comma = 0, deepest = 0;
+  size_t seg_start = p->pos, max_seg = 0;
+
+  while (p->pos < p->n) {
+
+    char c = p->str[p->pos];
+
+    if (c == '\'') { read_quoted(p, 0); continue; }
+    if (c == '[')  { skip_comment(p);   continue; }
+    if (c == ']')  parse_error(p, p->pos, "']' without a matching '['");
+    if (c == ';')  break;
+
+    if (c == '(' || c == ')' || c == ',' || c == ':') {
+      if (p->pos - seg_start > max_seg) max_seg = p->pos - seg_start;
+      seg_start = p->pos + 1;
+    }
+
+    if (c == '(') {
+      n_open++;
+      if (++depth > deepest) deepest = depth;
+    }
+    if (c == ',') n_comma++;
+    if (c == ')') {
+      if (depth == 0)
+        parse_error(p, p->pos, "unbalanced parentheses; ')' without a matching '('");
+      depth--;
+    }
+
+    p->pos++;
+  }
+
+  if (depth > 0)
+    parse_error(
+      p, p->pos, "unbalanced parentheses; %.0f '(' never closed with ')'",
+      (double) depth );
+
+  if (p->pos - seg_start > max_seg) max_seg = p->pos - seg_start;
+
+  *n_nodes   = n_open;
+  *n_leafs   = n_comma + 1;
+  *max_depth = deepest;
+  *max_token = max_seg;
 }
 
 
 SEXP C_read_tree(SEXP sexp_tree_str, SEXP sexp_underscores) {
-  
-  tree_str    = CHAR(asChar(sexp_tree_str));
-  underscores = asLogical(sexp_underscores);
-  
-  // Start and End positions of the newick string
-  size_t x1 = 0; 
-  size_t x2 = strlen(tree_str) - 1;
-  
-  // Determine how many nodes are in this tree
-  size_t n_nodes = 0;
-  n_leafs = 1;
-  
-  for (size_t i = x1; i <= x2; i++) {
-    
-    // Ignore special characters inside single quotes
-    if (tree_str[i] == '\'') {
-      do { i++; } while (tree_str[i] != '\'' && i <= x2);
-      continue;
-    }
-    
-    // Only consider the first tree in the file
-    if (tree_str[i] == ';') {
-      x2 = i - 1;
-      break;
-    }
-    
-    if (tree_str[i] == '(') n_nodes++;
-    if (tree_str[i] == ',') n_leafs++;
-  }
-  n_edges = n_nodes + n_leafs - 1;
-  
-  
-  // Prepare a phylo-compatible data structure to return to R
+
+  if (!isString(sexp_tree_str) || XLENGTH(sexp_tree_str) != 1 ||
+      STRING_ELT(sexp_tree_str, 0) == NA_STRING)
+    Rf_error("Newick tree must be a single, non-NA character string.");
+
+  SEXP sexp_tree_chr = STRING_ELT(sexp_tree_str, 0);
+  int  underscores   = asLogical(sexp_underscores) == TRUE;
+
+  parser_t p;
+  p.str = CHAR(sexp_tree_chr);
+  p.n   = (size_t) LENGTH(sexp_tree_chr);
+  p.pos = 0;
+  p.ce  = getCharCE(sexp_tree_chr);
+  p.buf = NULL;
+  p.cap = 0;
+  p.len = 0;
+
+
+  // The tree proper must begin with '(', optionally preceded by comments.
+  skip_ignorable(&p);
+  if (p.pos >= p.n)
+    parse_error(&p, p.pos, "no tree found");
+  if (p.str[p.pos] != '(')
+    parse_error(&p, p.pos, "a tree must begin with '('");
+
+
+  // Pass 1: size the output.
+  size_t root_pos = p.pos;
+  size_t n_nodes, n_leafs, max_depth, max_token;
+  count_tree(&p, &n_nodes, &n_leafs, &max_depth, &max_token);
+
+  if (n_nodes + n_leafs > INT_MAX)
+    parse_error(&p, root_pos, "too many nodes");
+
+  size_t n_edges = n_nodes + n_leafs - 1;
+
+
+  // Prepare a phylo-compatible data structure to return to R.
   SEXP sexp_result          = PROTECT(allocVector(VECSXP, 5));
-  SEXP sexp_edge_mtx        = PROTECT(allocMatrix(INTSXP,  n_edges, 2));
-  SEXP sexp_edge_length_vec = PROTECT(allocVector(REALSXP, n_edges));
-       sexp_node_label_vec  = PROTECT(allocVector(STRSXP,  n_nodes));
-       sexp_leaf_label_vec  = PROTECT(allocVector(STRSXP,  n_leafs));
-  
-  // Initialize strings to ""
-  for (size_t i = 0; i < n_nodes; i++) SET_STRING_ELT(sexp_node_label_vec, i, R_BlankString);
-  for (size_t i = 0; i < n_leafs; i++) SET_STRING_ELT(sexp_leaf_label_vec, i, R_BlankString);
-  
+  SEXP sexp_edge_mtx        = PROTECT(allocMatrix(INTSXP,  (int) n_edges, 2));
+  SEXP sexp_edge_length_vec = PROTECT(allocVector(REALSXP, (R_xlen_t) n_edges));
+  SEXP sexp_node_label_vec  = PROTECT(allocVector(STRSXP,  (R_xlen_t) n_nodes));
+  SEXP sexp_leaf_label_vec  = PROTECT(allocVector(STRSXP,  (R_xlen_t) n_leafs));
+
   SET_VECTOR_ELT(sexp_result, 0, sexp_edge_mtx);
-  SET_VECTOR_ELT(sexp_result, 1, ScalarInteger(n_nodes));
+  SET_VECTOR_ELT(sexp_result, 1, ScalarInteger((int) n_nodes));
   SET_VECTOR_ELT(sexp_result, 2, sexp_leaf_label_vec);
   SET_VECTOR_ELT(sexp_result, 3, sexp_edge_length_vec);
   SET_VECTOR_ELT(sexp_result, 4, sexp_node_label_vec);
-  
-  // Initialize result object values to zero.
-  edge_mtx        = INTEGER(sexp_edge_mtx);
-  edge_length_vec = REAL(sexp_edge_length_vec);
+
+  // Labels default to "". Only non-empty labels are written below.
+  for (size_t i = 0; i < n_nodes; i++) SET_STRING_ELT(sexp_node_label_vec, i, R_BlankString);
+  for (size_t i = 0; i < n_leafs; i++) SET_STRING_ELT(sexp_leaf_label_vec, i, R_BlankString);
+
+  int    *edge_mtx        = INTEGER(sexp_edge_mtx);
+  double *edge_length_vec = REAL(sexp_edge_length_vec);
   memset(edge_mtx,        0, n_edges * 2 * sizeof(int));
   memset(edge_length_vec, 0, n_edges * sizeof(double));
-  
-  next_edge_index = 0;
-  next_node_index = 0;
-  next_leaf_index = 0;
-  
-  // Start recursing at the highest level of parentheses; i.e. the whole tree
-  // This function will mutate edge_mtx and edge_length_vec, which are 
-  // now directly modifying the R objects!
-  recurse_tree(x1, x2, 0);
-  
+
+  // Scratch memory; R_alloc is released automatically, even on error.
+  p.cap          = max_token;
+  p.buf          = R_alloc(max_token + 1, sizeof(char));
+  frame_t *stack = (frame_t *) R_alloc(max_depth, sizeof(frame_t));
+
+
+  // Pass 2: build the tree.
+  size_t next_node = 0, next_leaf = 0, next_edge = 0, depth = 0;
+  int    expect_child = 1;
+
+  p.pos = root_pos;
+
+  for (;;) {
+
+    skip_ignorable(&p);
+    char c = (p.pos < p.n) ? p.str[p.pos] : '\0';
+
+
+    if (expect_child) {
+
+      if (c == '(') {
+        // Open a new internal node.
+
+        if (next_node >= n_nodes || depth >= max_depth ||
+            (depth > 0 && next_edge >= n_edges))
+          parse_error(&p, p.pos, "internal parser error");
+
+        size_t node = next_node++;
+        size_t edge = NO_EDGE;
+
+        if (depth > 0) {
+          edge = next_edge++;
+          edge_mtx[edge]           = (int) (n_leafs + stack[depth - 1].node + 1);
+          edge_mtx[edge + n_edges] = (int) (n_leafs + node + 1);
+        }
+
+        stack[depth].node = node;
+        stack[depth].edge = edge;
+        depth++;
+        p.pos++;
+
+        continue; // The first child of this node comes next.
+      }
+
+      // Anything else is a leaf, possibly with an empty label.
+
+      if (next_leaf >= n_leafs || next_edge >= n_edges)
+        parse_error(&p, p.pos, "internal parser error");
+
+      size_t leaf = next_leaf++;
+      size_t edge = next_edge++;
+      edge_mtx[edge]           = (int) (n_leafs + stack[depth - 1].node + 1);
+      edge_mtx[edge + n_edges] = (int) (leaf + 1);
+
+      read_label(&p, underscores);
+      if (p.len > 0)
+        SET_STRING_ELT(sexp_leaf_label_vec, leaf, mkCharLenCE(p.buf, (int) p.len, p.ce));
+
+      edge_length_vec[edge] = read_length(&p);
+
+      expect_child = 0;
+      continue;
+    }
+
+
+    if (c == ',') {
+      // Another child of the current internal node follows.
+      p.pos++;
+      expect_child = 1;
+      continue;
+    }
+
+
+    if (c == ')') {
+      // Close the current internal node, then read its label and length.
+
+      if (depth == 0)
+        parse_error(&p, p.pos, "internal parser error");
+
+      depth--;
+      size_t node = stack[depth].node;
+      size_t edge = stack[depth].edge;
+      p.pos++;
+
+      read_label(&p, underscores);
+      if (p.len > 0)
+        SET_STRING_ELT(sexp_node_label_vec, node, mkCharLenCE(p.buf, (int) p.len, p.ce));
+
+      double length = read_length(&p);
+      if (edge != NO_EDGE) edge_length_vec[edge] = length;
+
+      if (depth == 0) break; // Closed the root.
+      continue;
+    }
+
+
+    // Unreachable for input that passed count_tree(), but be defensive.
+    if (p.pos >= p.n || c == ';')
+      parse_error(&p, p.pos, "unexpected end of tree");
+
+    if (c == '\'')
+      parse_error(&p, p.pos, "unexpected quote; quotes must enclose an entire label");
+    if (c == ':')
+      parse_error(&p, p.pos, "unexpected ':'; only one branch length is allowed per node");
+    if (c == '(')
+      parse_error(&p, p.pos, "unexpected '('; expected ',' or ')' first");
+
+    parse_error(&p, p.pos, "unexpected text after a label; expected ',' or ')'");
+  }
+
+
+  // Nothing but comments/whitespace may separate the root from ';'.
+  skip_ignorable(&p);
+  if (p.pos < p.n && p.str[p.pos] != ';') {
+    if (p.str[p.pos] == ',')
+      parse_error(
+        &p, p.pos,
+        "unexpected ',' after the root node; is the tree missing its outermost parentheses?" );
+    parse_error(&p, p.pos, "unexpected text after the root node; expected ';'");
+  }
+
   UNPROTECT(5);
   return sexp_result;
 }

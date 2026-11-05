@@ -1,3 +1,24 @@
+# ecodive 2.3.1
+
+* `read_tree()` now handles quoted labels per the Newick standard:
+
+    - `''` inside a quoted label is decoded as one literal apostrophe, so
+      `'it''s'` is read as `it's`.
+    - Square brackets inside quotes are literal characters rather than
+      comments, so labels like `'o__[Saprospirales]'` are no longer truncated.
+    - Newlines and whitespace inside quotes are preserved.
+    - Comments (`[...]`) outside of quotes may contain apostrophes.
+
+* `read_tree()` raises an informative error, with the position of the
+  problem, for malformed input such as an unclosed quote, comment, or
+  parenthesis. Previously these could return a garbled tree.
+
+* `read_tree()`'s parser is now linear-time and non-recursive, making it
+  about 4x faster on a typical 100,000-tip tree and much faster on very deep
+  trees.
+
+
+
 # ecodive 2.3.0
 
 * Added `ecodive` JOSS citation information.
