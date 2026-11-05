@@ -14,7 +14,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/cmmr/ecodive/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/cmmr/ecodive/blob/v2.3.1/inst/CITATION)
 
 Smith, D. P., Cregeen, S. J. J., & Petrosino, J. F. (2026). ecodive:
 Parallel and Memory-Efficient R Package for Ecological Diversity
