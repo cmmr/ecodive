@@ -22,7 +22,7 @@ permissions: read-all
 jobs:
   R-CMD-check:
     
-    timeout-minutes: 15
+    timeout-minutes: 60
     
     runs-on: ${{ matrix.config.os }}
 
@@ -54,7 +54,7 @@ jobs:
       NOT_CRAN: true
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -63,6 +63,43 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+
+      # R >= 4.7 on macOS links Fortran/LAPACK packages against the flang
+      # runtime in /opt/R/flang-23, and no repository serves R 4.7 macOS
+      # binaries yet, so packages build from source and need CRAN's static
+      # system libraries in /opt/R/<arch>: e.g. libintl.h (gettext) for
+      # Matrix. Same step as cmmr/rbiom.
+      - name: Install macOS build tools
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          libdir="/opt/R/$(uname -m)"
+          echo "FLIBS: $(R CMD config FLIBS)"
+          ls -d /opt/R/* 2>/dev/null || echo "/opt/R is empty"
+
+          install_tarball() {
+            echo "Installing $1"
+            curl -fsSL "$1" | sudo tar -xJf - -C /
+          }
+
+          if R CMD config FLIBS | grep -q '/opt/R/flang-23'; then
+            # flang needs SDKROOT set, even when the image already provides it.
+            echo "SDKROOT=$(xcrun --show-sdk-path)" >> "$GITHUB_ENV"
+            [ -d /opt/R/flang-23 ] ||
+              install_tarball https://mac.r-project.org/tools/flang-23.1.0-darwin23.tar.xz
+          fi
+
+          headers="jpeglib.h png.h libintl.h"
+          for h in $headers; do
+            if [ ! -f "$libdir/include/$h" ]; then
+              urls=$(SILENT_INSTALL_R=1 Rscript -e 'source("https://mac.r-project.org/bin/install.R"); cat(install.libs(c("jpeg", "libpng", "gettext"), action = "list", quiet = TRUE), sep = "\n")')
+              for url in $urls; do install_tarball "$url"; done
+              break
+            fi
+          done
+
+          # Fail here rather than midway through building dependencies.
+          for h in $headers; do ls -l "$libdir/include/$h"; done
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
