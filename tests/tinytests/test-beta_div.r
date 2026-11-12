@@ -63,6 +63,108 @@
   
   expect_warning(aitchison(counts))
   expect_error(aitchison(counts - 1))
+
+
+  # Aitchison vs hand-computed CLR + Euclidean ====
+  # Regression: 2.3.1 and earlier returned NaN when there were no
+  # zeros, and truncated non-integer pseudocounts (0.5 -> 0).
+
+  hand_clr <- function (x, pseudocount = 0, margin = 1L) {
+    if (margin == 2L) x <- t(x)
+    clr <- log(x + pseudocount)
+    clr - rowMeans(clr)
+  }
+  hand_aitchison <- function (...) as.vector(dist(hand_clr(...)))
+
+  pos_mtx <- matrix(c(1,2,3,4,5,6,7,8,9), 3)
+
+  # No zeros: no pseudocount, no warning.
+  expect_silent(aitchison(pos_mtx))
+  expect_equal(as.vector(aitchison(pos_mtx)), hand_aitchison(pos_mtx))
+  expect_equal(as.vector(aitchison(nz_counts)), hand_aitchison(nz_counts))
+  expect_equal(as.vector(aitchison(counts_int + 1L)), hand_aitchison(nz_counts))
+  expect_equal(as.vector(aitchison(nz_counts_p)), hand_aitchison(nz_counts_p))
+  expect_equal(
+    current = as.vector(aitchison(pos_mtx, margin = 2L)),
+    target  = hand_aitchison(pos_mtx, margin = 2L) )
+  expect_equal(
+    current = as.vector(aitchison(nz_counts, margin = 2L)),
+    target  = hand_aitchison(nz_counts, margin = 2L) )
+
+  # Zeros with explicit, non-integer pseudocounts.
+  for (pc in c(0.5, 1.5, 1e-3)) {
+    expect_equal(
+      current = as.vector(aitchison(counts, pseudocount = pc)),
+      target  = hand_aitchison(counts, pc) )
+    expect_equal(
+      current = as.vector(aitchison(counts_int, pseudocount = pc)),
+      target  = hand_aitchison(counts, pc) )
+    expect_equal(
+      current = as.vector(aitchison(counts, margin = 2L, pseudocount = pc)),
+      target  = hand_aitchison(counts, pc, margin = 2L) )
+  }
+
+  # Zeros with the default pseudocount, min(counts[counts > 0]) / 2.
+  expect_warning(aitchison(counts_p), 'Zeros detected')
+  expect_equal(
+    current = as.vector(suppressWarnings(aitchison(counts_p))),
+    target  = hand_aitchison(counts_p, min(counts_p[counts_p > 0]) / 2) )
+  expect_equal(
+    current = as.vector(suppressWarnings(aitchison(counts, margin = 2L))),
+    target  = hand_aitchison(counts, 1, margin = 2L) )
+
+  # Through beta_div()
+  expect_equal(
+    current = as.vector(beta_div(counts, 'aitchison', pseudocount = 0.5)),
+    target  = hand_aitchison(counts, 0.5) )
+  expect_equal(
+    current = as.vector(beta_div(pos_mtx, 'aitchison', margin = 2L)),
+    target  = hand_aitchison(pos_mtx, margin = 2L) )
+
+  # Specific pairs
+  expect_equal(
+    current = as.vector(aitchison(counts, pseudocount = 0.5, pairs = c(1, 3, 6))),
+    target  = replace(hand_aitchison(counts, 0.5), c(2, 4, 5), NA) )
+  expect_equal(
+    current = as.vector(aitchison(pos_mtx, pairs = 2:3)),
+    target  = replace(hand_aitchison(pos_mtx), 1, NA) )
+  expect_equal(
+    current = as.vector(aitchison(counts, margin = 2L, pseudocount = 0.5, pairs = 1:4)),
+    target  = replace(hand_aitchison(counts, 0.5, margin = 2L), 5:10, NA) )
+
+  # Sparse input
+  if (requireNamespace('Matrix', quietly = TRUE)) {
+    expect_equal(
+      current = as.vector(aitchison(Matrix::Matrix(counts, sparse = TRUE), pseudocount = 0.5)),
+      target  = hand_aitchison(counts, 0.5) )
+  }
+
+
+  # Other metrics with norm = 'clr' ====
+  # Same normalization code path as aitchison().
+
+  # bray and motyka are omitted: they divide by sum(x + y), which is ~0
+  # for CLR data, so their results are dominated by rounding error.
+  for (f in c('canberra', 'chebyshev', 'clark', 'euclidean',
+              'gower', 'lorentzian', 'manhattan', 'minkowski',
+              'soergel', 'squared_euclidean', 'wave_hedges')) {
+    fn <- get(f)
+    expect_equal(
+      current = as.vector(fn(counts, norm = 'clr', pseudocount = 0.5)),
+      target  = as.vector(fn(hand_clr(counts, 0.5), norm = 'none')),
+      info    = paste(f, "with zeros") )
+    expect_equal(
+      current = as.vector(fn(pos_mtx, norm = 'clr')),
+      target  = as.vector(fn(hand_clr(pos_mtx), norm = 'none')),
+      info    = paste(f, "without zeros") )
+  }
+
+  # Gower's per-feature range must use the CLR value of absent features.
+  clr_mtx <- hand_clr(counts, 0.5)
+  clr_rng <- apply(clr_mtx, 2L, function (x) diff(range(x)))
+  expect_equal(
+    current = as.vector(gower(counts, norm = 'clr', pseudocount = 0.5)),
+    target  = as.vector(dist(sweep(clr_mtx, 2L, clr_rng, '/'), 'manhattan')) / ncol(counts) )
   
   
   # Bhattacharyya ====

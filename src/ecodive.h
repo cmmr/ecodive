@@ -80,7 +80,7 @@ void* free_one(void *ptr);
 void* maybe_free_one(void *ptr);
 
 /* --- normalize.c --- */
-void normalize(ecomatrix_t *em, int norm, int n_threads, int pseudocount_);
+void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_);
 
 /* --- parallel.c --- */
 void run_parallel(pthread_func_t func, int n_threads, int n_tasks);

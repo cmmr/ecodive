@@ -1,3 +1,21 @@
+# ecodive 2.3.2
+
+* Fixed `aitchison()`, and every beta metric called with `norm = 'clr'`,
+  returning `NaN` (or, for `chebyshev()`, wrong values) for every sample
+  pair. Two bugs were involved:
+
+    - Data with no zeros (pseudocount 0) hit `log(0) * 0`, which is `NaN`.
+    - The pseudocount was truncated to an integer in C, so values below 1,
+      including the automatic `min(counts[counts > 0]) / 2`, became 0, and
+      values like 1.5 were silently rounded down.
+
+* `gower()` with `norm = 'clr'` now computes each feature's range, and the
+  distance for features absent from both samples, from that feature's CLR
+  values instead of treating absent features as 0. `gower()` with negative
+  inputs (e.g. `norm = 'rclr'`) now also uses the full min-to-max range.
+
+
+
 # ecodive 2.3.1
 
 * `read_tree()` now handles quoted labels per the Newick standard:

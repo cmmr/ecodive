@@ -79,23 +79,27 @@ static void *check_percent_normalized(void *arg) {
 
 //======================================================
 // Centered Log Ratio
-// log(x / exp(mean(log(x))))
+// log(x) - mean(log(x)), where x = counts + pseudocount
 //======================================================
 static void *norm_clr(void *arg) {
   FOREACH_SAMPLE(
-    
+
+    int n_zeros = n_otus - (int)(val_end - val_begin);
+
     double logsum = 0;
     FOREACH_VAL(logsum += log(*val + pseudocount));
-    
-    // Add in all the zero abundances
-    logsum += log(pseudocount) * (n_otus - (val_end - val_begin));
-    
-    double denominator = exp(logsum / n_otus);
-    FOREACH_VAL(*val = log((*val + pseudocount) / denominator));
-    
-    // CLR value for zero abundance OTUs
-    clr_vec[sam] = log(pseudocount / denominator);
-    
+
+    // Add in all the zero abundances. Skip when there are none:
+    // pseudocount is 0 for zero-free data, and log(0) * 0 is NaN.
+    if (n_zeros > 0)
+      logsum += log(pseudocount) * n_zeros;
+
+    double log_mean = logsum / n_otus;
+    FOREACH_VAL(*val = log(*val + pseudocount) - log_mean);
+
+    // CLR value for zero abundance OTUs (unused when n_zeros is 0)
+    clr_vec[sam] = (n_zeros > 0) ? log(pseudocount) - log_mean : 0;
+
   );
   return NULL;
 }
@@ -158,7 +162,7 @@ static void *norm_rclr(void *arg) {
 }
 
 
-void normalize(ecomatrix_t *em, int norm, int n_threads, int pseudocount_) {
+void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
   
   n_samples = em->n_samples;
   n_otus    = em->n_otus;

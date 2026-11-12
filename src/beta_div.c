@@ -327,16 +327,41 @@ static double *gower_range_vec;
 static void *gower(void *arg) {
   
   FOREACH_PAIR(
-    
-    FOREACH_OTU(
-      
-      double range = gower_range_vec[otu];
-      
-      if (range) {
-        distance += fabs(x - y) / range;
+
+    if (clr_vec) {
+
+      // FOREACH_OTU doesn't track `otu` for double zeros, which are
+      // non-zero after CLR. Walk every OTU so each gets its own range.
+      int    *i     = otu_vec + pos_vec[sam_i];
+      int    *j     = otu_vec + pos_vec[sam_j];
+      int    *i_end = otu_vec + pos_vec[sam_i + 1];
+      int    *j_end = otu_vec + pos_vec[sam_j + 1];
+      double *val_i = val_vec + pos_vec[sam_i];
+      double *val_j = val_vec + pos_vec[sam_j];
+
+      for (int otu = 0; otu < n_otus; otu++) {
+
+        double x = clr_vec[sam_i];
+        double y = clr_vec[sam_j];
+        if (i != i_end && *i == otu) { x = *val_i; i++; val_i++; }
+        if (j != j_end && *j == otu) { y = *val_j; j++; val_j++; }
+
+        double range = gower_range_vec[otu];
+        if (range) distance += fabs(x - y) / range;
       }
-    );
-  
+    }
+
+    else {
+      FOREACH_OTU(
+
+        double range = gower_range_vec[otu];
+
+        if (range) {
+          distance += fabs(x - y) / range;
+        }
+      );
+    }
+
     distance /= n_otus;
   );
   
@@ -348,39 +373,34 @@ static pthread_func_t gower_setup(void) {
   gower_range_vec = (double*) safe_malloc(n_otus * sizeof(double));
   double *min_vec = (double*) safe_malloc(n_otus * sizeof(double));
   double *max_vec = (double*) safe_malloc(n_otus * sizeof(double));
-  int    *obs_vec = (int*)    safe_malloc(n_otus * sizeof(int));
-  
-  memset(min_vec, 0, n_otus * sizeof(double));
-  memset(max_vec, 0, n_otus * sizeof(double));
-  memset(obs_vec, 0, n_otus * sizeof(int));
-  
-  
-  // Initialize min to first sample's values.
-  for (int i = 0; i < pos_vec[1]; i++) {
-    min_vec[otu_vec[i]] = val_vec[i];
-  }
-  
-  // Search for min/max values across all samples.
-  for (int i = 0; i < pos_vec[n_samples]; i++) {
-    int    otu = otu_vec[i];
-    double val = val_vec[i];
-    obs_vec[otu]++;
-    if (val < min_vec[otu]) min_vec[otu] = val;
-    if (val > max_vec[otu]) max_vec[otu] = val;
-  }
-  
-  // Assign final range values
-  for (int otu = 0; otu < n_otus; otu++) {
-    if (obs_vec[otu] < n_samples) {
-      gower_range_vec[otu] = max_vec[otu];
-    } else {
-      gower_range_vec[otu] = max_vec[otu] - min_vec[otu];
+
+
+  // Search for min/max values across all samples, including the
+  // implicit values of absent OTUs. Those are 0, except after CLR
+  // normalization, where they are clr_vec[sam].
+  for (int sam = 0; sam < n_samples; sam++) {
+
+    double zero = clr_vec ? clr_vec[sam] : 0;
+    int    i    = pos_vec[sam];
+    int    end  = pos_vec[sam + 1];
+
+    for (int otu = 0; otu < n_otus; otu++) {
+
+      double val = zero;
+      if (i < end && otu_vec[i] == otu) { val = val_vec[i]; i++; }
+
+      if (sam == 0 || val < min_vec[otu]) min_vec[otu] = val;
+      if (sam == 0 || val > max_vec[otu]) max_vec[otu] = val;
     }
   }
-  
+
+  // Assign final range values
+  for (int otu = 0; otu < n_otus; otu++) {
+    gower_range_vec[otu] = max_vec[otu] - min_vec[otu];
+  }
+
   free_one(min_vec);
   free_one(max_vec);
-  free_one(obs_vec);
   
   return gower;
 }
@@ -680,7 +700,7 @@ SEXP C_beta_div(
     SEXP sexp_pseudocount, SEXP sexp_extra_args ) {
   
   int norm        = asInteger(sexp_norm);
-  int pseudocount = asReal(sexp_pseudocount);
+  double pseudocount = asReal(sexp_pseudocount);
   int n_threads   = asInteger(sexp_n_threads);
   sexp_extra      = &sexp_extra_args;
   init_n_ptrs(10);
