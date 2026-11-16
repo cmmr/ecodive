@@ -15,6 +15,16 @@
 #include <stddef.h>   // size_t
 #include "pcg_basic.h"
 
+// A uniform integer in 0 .. bound - 1, without modulo bias: pcg-cpp's
+// bounded draw, which uwot uses for negative samples.
+static inline uint32_t pcg32_bounded(pcg32_random_t *rng, uint32_t bound) {
+  uint32_t threshold = (0u - bound) % bound;
+  for (;;) {
+    uint32_t r = pcg32_random_r(rng);
+    if (r >= threshold) return r % bound;
+  }
+}
+
 
 // Detect if pthread is available.
 #if defined __has_include

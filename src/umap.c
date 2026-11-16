@@ -612,21 +612,12 @@ SEXP C_umap_spectral(SEXP sexp_graph, SEXP sexp_k, SEXP sexp_n_threads) {
 // start-of-epoch coordinates and its own seeds, and is
 // written only by the task that owns the vertex, so the
 // result is the same for any number of threads. Tasks are
-// idempotent (they read the sampling schedule from one
-// buffer and write it to another), as run_parallel() may
-// rerun the work on one thread.
+// independent of each other (they read the sampling
+// schedule from one buffer and write it to another).
 //======================================================
 
 // Vertices per SGD task.
 #define UMAP_SGD_ROWS 64
-
-static inline uint32_t pcg_bounded(pcg32_random_t *rng, uint32_t bound) {
-  uint32_t threshold = (uint32_t) (-bound) % bound;
-  for (;;) {
-    uint32_t r = pcg32_random_r(rng);
-    if (r >= threshold) return r % bound;
-  }
-}
 
 static inline float clamp4(float g) {
   return (g < -4.0f) ? -4.0f : (4.0f < g) ? 4.0f : g;
@@ -712,7 +703,7 @@ static void *sgd_worker(void *arg) {
 
         for (size_t q = 0; q < n_neg; q++) {
 
-          size_t dkn = (size_t) pcg_bounded(&rng, (uint32_t) n) * ndim;
+          size_t dkn = (size_t) pcg32_bounded(&rng, (uint32_t) n) * ndim;
           if (dj == dkn) continue;
 
           d2 = 0.0f;
