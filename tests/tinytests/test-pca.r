@@ -61,6 +61,52 @@
       # Constant features, left out with `scale = TRUE`, have no loading.
       expect_true(all(load[setdiff(colnames(cs$counts), feat), ] == 0))
     }
+
+    # Sparse input with samples in columns, constant features with
+    # `scale = TRUE` on both solver sides, and k larger than the rank.
+    for (cs in readRDS('expected/pca.rds')$more_cases) {
+
+      counts <- cs$counts
+      margin <- 1L
+      if (cs$sparse) {
+        if (!requireNamespace('Matrix', quietly = TRUE)) next
+        counts <- Matrix::Matrix(t(counts), sparse = TRUE)
+        margin <- 2L
+      }
+
+      run <- function () pca(
+        counts      = counts,
+        margin      = margin,
+        norm        = cs$norm,
+        pseudocount = cs$pseudocount,
+        scale       = cs$scale,
+        k           = cs$k,
+        cpus        = 2 )
+
+      info <- paste(dim(cs$counts), cs$norm, cs$scale, cs$k, cs$sparse, collapse = ' ')
+      if (is.null(cs$warn)) {
+        ord <- run()
+      } else {
+        expect_warning(ord <- run(), cs$warn, info = info)
+      }
+
+      ex   <- cs$expected
+      k    <- cs$k_ret
+      feat <- rownames(ex$rotation)
+      load <- attr(ord, 'loadings')
+
+      expect_identical(dim(ord), c(nrow(cs$counts), k), info = info)
+      expect_identical(dimnames(ord), list(rownames(cs$counts), paste0('PC', seq_len(k))), info = info)
+      expect_identical(dimnames(load), list(colnames(cs$counts), paste0('PC', seq_len(k))), info = info)
+
+      expect_true(axis_diff(ord, ex$x) < 1e-10, info = info)
+      expect_true(axis_diff(load[feat, , drop = FALSE], ex$rotation) < 1e-10, info = info)
+      expect_equal(attr(ord, 'eig'),   ex$sdev[1:k]^2,                  tolerance = 1e-10, info = info)
+      expect_equal(attr(ord, 'prop'),  ex$sdev[1:k]^2 / sum(ex$sdev^2), tolerance = 1e-10, info = info)
+      expect_equal(attr(ord, 'trace'), sum(ex$sdev^2),                  tolerance = 1e-10, info = info)
+      expect_true(all(sign(colSums(ord * ex$x)) == sign(colSums(load[feat, , drop = FALSE] * ex$rotation))), info = info)
+      expect_true(all(load[setdiff(colnames(cs$counts), feat), ] == 0), info = info)
+    }
   }
 
 
