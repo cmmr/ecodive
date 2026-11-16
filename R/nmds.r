@@ -203,7 +203,7 @@ nmds <- function (
 
 
   # Pairs sorted by distance, shared by all starts.
-  prep <- .Call(C_nmds_prep, dm, n)
+  prep <- .Call(C_nmds_prep, dm, n, weakties)
 
   opts <- function (first, m)
     as.integer(c(max_iter, weakties, stress, cpus, seed, first, m))

@@ -24,7 +24,7 @@
   engine <- function (d, init, weakties = TRUE, stress = 1L, maxit = 200L, cpus = 1L) {
     n    <- attr(d, 'Size')
     k    <- dim(init)[2]
-    prep <- .Call(C_nmds_prep, as.double(d), n)
+    prep <- .Call(C_nmds_prep, as.double(d), n, weakties)
     opts <- as.integer(c(maxit, weakties, stress, cpus, 0, 0, 1))
     res  <- .Call(C_nmds_run, prep, n, k, init, opts, c(1e-4, 1e-7, 0.999999))
     res$points <- array(res$points, dim(init))

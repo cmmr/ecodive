@@ -12,7 +12,7 @@ extern SEXP C_beta_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_blas_settable(void);
 extern SEXP C_blas_threads(SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP C_nmds_prep(SEXP, SEXP);
+extern SEXP C_nmds_prep(SEXP, SEXP, SEXP);
 extern SEXP C_nmds_run(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_nmds_scale(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -38,7 +38,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_blas_settable", (DL_FUNC) &C_blas_settable, 0},
   {"C_blas_threads",  (DL_FUNC) &C_blas_threads,  1},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     7},
-  {"C_nmds_prep", (DL_FUNC) &C_nmds_prep, 2},
+  {"C_nmds_prep", (DL_FUNC) &C_nmds_prep, 3},
   {"C_nmds_run",  (DL_FUNC) &C_nmds_run,  6},
   {"C_nmds_scale", (DL_FUNC) &C_nmds_scale, 4},
   {"C_pca",       (DL_FUNC) &C_pca,       7},
