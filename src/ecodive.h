@@ -123,6 +123,10 @@ typedef struct {
 double gower_init(gower_t *g, const double *dist, int n, int max_m, int n_threads);
 void   gower_mult(const double *V, double *W, int m, void *ctx);
 
+/* --- knn.c --- */
+void knn_from_dist(const double *dist, int n, int k, int include_self,
+                   int *idx, double *dd, int n_threads);
+
 /* --- memory.c --- */
 void  init_n_ptrs(int n);
 void* safe_malloc(size_t bytes);

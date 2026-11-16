@@ -48,8 +48,8 @@ static int           ts_K;      // Neighbours per point (Barnes-Hut).
 static const double *ts_dist;   // Packed lower triangle, as R's dist.
 static double        ts_perp;   // Perplexity.
 static double        ts_theta;  // Barnes-Hut accuracy.
-static double       *ts_buf;    // n doubles of work space per thread.
-static int          *ts_ibuf;   // K ints of work space per thread.
+static double       *ts_buf;    // n doubles of work space per thread (exact).
+
 
 static double *ts_beta;  // n: each point's Gaussian precision ...
 static double *ts_zsum;  // n: ... and its kernel's row sum.
@@ -285,66 +285,21 @@ static void exact_affinities(int n_threads) {
 // Input similarities (P), Barnes-Hut mode.
 //======================================================
 
-// Max-heap on (distance, index), for the K nearest.
-static inline int nn_less(double da, int ia, double db, int ib) {
-  return da < db || (da == db && ia < ib);
-}
-
-static void heap_down(double *d, int *idx, int len, int at) {
-  while (1) {
-    int big = at, l = 2 * at + 1, r = l + 1;
-    if (l < len && nn_less(d[idx[big]], idx[big], d[idx[l]], idx[l])) big = l;
-    if (r < len && nn_less(d[idx[big]], idx[big], d[idx[r]], idx[r])) big = r;
-    if (big == at) return;
-    int t = idx[at]; idx[at] = idx[big]; idx[big] = t;
-    at = big;
-  }
-}
-
-// Each point's K nearest neighbours, nearest first, and
-// their conditional probabilities p(j|i).
+// Each point's conditional probabilities p(j|i) for its K
+// nearest neighbours, which knn_from_dist() has put in
+// ts_col and (their distances) ts_val, nearest first, ties
+// to the lower index, as bhtsne orders them.
 static void *sparse_calib_worker(void *arg) {
 
-  int     t   = ((worker_t *) arg)->i;
-  double *row = ts_buf  + (size_t) t * ts_n;
-  int    *idx = ts_ibuf + (size_t) t * ts_K;
-  int     K   = ts_K;
-  int     lo, hi;
+  (void) arg;
+  int K = ts_K;
+  int lo, hi;
 
   while (next_chunk(&lo, &hi)) {
     for (int i = lo; i < hi; i++) {
 
-      dist_row(i, row);
-
-      // Select the K nearest, excluding i itself.
-      int len = 0;
-      for (int m = 0; m < ts_n; m++) {
-        if (m == i) continue;
-        if (len < K) {
-          idx[len++] = m;
-          if (len == K)
-            for (int a = K / 2 - 1; a >= 0; a--) heap_down(row, idx, K, a);
-        }
-        else if (nn_less(row[m], m, row[idx[0]], idx[0])) {
-          idx[0] = m;
-          heap_down(row, idx, K, 0);
-        }
-      }
-
-      // Heap sort: nearest first.
-      for (int end = K - 1; end > 0; end--) {
-        int tmp = idx[0]; idx[0] = idx[end]; idx[end] = tmp;
-        heap_down(row, idx, end, 0);
-      }
-
       size_t  off = (size_t) i * K;
       double *val = ts_val + off;
-      int    *col = ts_col + off;
-
-      for (int m = 0; m < K; m++) {
-        col[m] = idx[m];
-        val[m] = row[idx[m]];
-      }
 
       double beta, sum_P;
       calibrate(val, K, -1, 0, &beta, &sum_P);
@@ -389,6 +344,7 @@ static size_t sparse_affinities(int n_threads) {
   int    K   = ts_K;
   size_t nnz = (size_t) n * K;
 
+  knn_from_dist(ts_dist, n, K, 0, ts_col, ts_val, n_threads); // knn.c
   run_points(sparse_calib_worker, n_threads);
   run_points(sparse_mate_worker,  n_threads);
 
@@ -970,7 +926,7 @@ static void setup(SEXP sexp_dist, int n, double perp, int exact, int n_threads) 
 
   ts_beta = (double *) R_alloc(n, sizeof(double));
   ts_zsum = (double *) R_alloc(n, sizeof(double));
-  ts_buf  = (double *) R_alloc((size_t) n_threads * n, sizeof(double));
+  ts_buf  = exact ? (double *) R_alloc((size_t) n_threads * n, sizeof(double)) : NULL;
 
   if (exact) {
     ts_P = (double *) R_alloc((size_t) n * (n - 1) / 2, sizeof(double));
@@ -978,7 +934,6 @@ static void setup(SEXP sexp_dist, int n, double perp, int exact, int n_threads) 
   }
   else {
     size_t nnz = (size_t) n * ts_K;
-    ts_ibuf = (int *)    R_alloc((size_t) n_threads * ts_K, sizeof(int));
     ts_col  = (int *)    R_alloc(nnz, sizeof(int));
     ts_val  = (double *) R_alloc(nnz, sizeof(double));
     ts_mate = (int *)    R_alloc(nnz, sizeof(int));
