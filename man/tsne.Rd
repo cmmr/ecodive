@@ -29,8 +29,9 @@ symmetric numeric matrix of distances. Must not contain \code{NA}s.}
 \code{theta = 0}. Default: \code{2}}
 
 \item{perplexity}{Roughly, how many close neighbors each sample has.
-Must be at most \eqn{(n - 1) / 3} for \eqn{n} samples. Default:
-\code{30}, or \eqn{(n - 1) / 3} if that is smaller.}
+At least \code{1}, and at most \eqn{(n - 1) / 3} for \eqn{n} samples:
+larger values are reduced to that, with a warning if given.
+Default: \code{30}, or \eqn{(n - 1) / 3} if that is smaller.}
 
 \item{theta}{Speed/accuracy trade-off for the Barnes-Hut
 approximation, from \code{0} to \code{1}. \code{0} computes t-SNE exactly, which
@@ -51,8 +52,8 @@ samples, and larger steps for more, which need them to converge in
 \code{maxit} iterations.}
 
 \item{momentum, final_momentum}{The momentum of the gradient descent
-before and after iteration \code{mom_switch_iter}. Defaults: \code{0.5} and
-\code{0.8}}
+before and after iteration \code{mom_switch_iter}, from \code{0} to less than
+\code{1}. Defaults: \code{0.5} and \code{0.8}}
 
 \item{mom_switch_iter}{The iteration from which \code{final_momentum} is
 used. \code{NULL}, the default, means \code{250}, or \code{0} when \code{init} is a

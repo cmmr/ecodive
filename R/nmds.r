@@ -307,7 +307,7 @@ nmds <- function (
 # Validate a numeric scalar argument; return it as an integer if `whole`.
 nmds_arg <- function (x, msg, whole = FALSE, lo = 0, hi = Inf) {
 
-  ok <- is.numeric(x) && length(x) == 1 && !is.na(x) && x >= lo && x <= hi &&
+  ok <- is.numeric(x) && length(x) == 1 && is.finite(x) && x >= lo && x <= hi &&
     (!whole || x %% 1 == 0)
 
   if (!ok) stop(msg, call. = FALSE)

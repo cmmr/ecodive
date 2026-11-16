@@ -492,7 +492,30 @@
   
   expect_equal( # abdiv(counts, 'weighted_unifrac', tree)
     current = as.vector(weighted_unifrac(counts, tree)), 
-    target  = c(0.682012820512821,  0.641941391941392, 1.05051282051282, 
+    target  = c(0.682012820512821,  0.641941391941392, 1.05051282051282,
                  0.0899920634920635, 0.438388888888889, 0.528380952380952 ))
-  
+
+
+  # Regression: `pairs` was checked against the number of columns even
+  # when samples are rows (margin = 1), so out-of-range pairs reached C and
+  # wrote past the end of the result.
+  wide <- matrix(rpois(300, 5), 3, 100)
+  expect_error(bray(wide, margin = 1L, pairs = 4000L), 'between 1 and 3')
+  expect_identical(length(bray(wide, margin = 1L, pairs = 2:3)), 3L)
+  tall <- matrix(rpois(300, 5), 300, 1)
+  expect_identical(attr(bray(tall, margin = 1L), 'Size'), 300L)
+  expect_error(bray(t(tall), margin = 1L), 'at least two samples')
+  expect_error(bray(counts, pairs = c(1, NA)), '`pairs` must be')
+
+
+  # Regression: an integer NA was read as -2147483648; it must give the
+  # same result as a double NA.
+  x_int <- matrix(rpois(1200, 5), 60, 20)
+  x_int[1] <- NA
+  x_dbl <- x_int
+  storage.mode(x_dbl) <- 'double'
+  expect_identical(bray(x_int), bray(x_dbl))
+  expect_identical(euclidean(x_int), euclidean(x_dbl))
+  expect_true(all(is.na(as.matrix(bray(x_int))[1, -1])))
+
 #})

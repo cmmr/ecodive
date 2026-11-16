@@ -835,7 +835,10 @@ static void *sgd_worker(void *arg) {
           grad[d] = (float) (grad[d] + 2.0 * clamp4(coeff * disp[d]));
 
         // Repulsion from negative samples.
-        size_t n_neg = (size_t) ((fepoch - sg_eonn0[e]) / sg_epns[e]);
+        // For extreme rates the quotient can round to -1 or be NaN;
+        // converting that to size_t would loop without end.
+        float  q_neg = (fepoch - sg_eonn0[e]) / sg_epns[e];
+        size_t n_neg = q_neg > 0 ? (size_t) q_neg : 0;
 
         for (size_t q = 0; q < n_neg; q++) {
 

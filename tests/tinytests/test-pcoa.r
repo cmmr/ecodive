@@ -182,5 +182,6 @@
   expect_error(pcoa(matrix(c(0, 1, 2, 0), 2)),     'symmetric')
   expect_error(pcoa(matrix(letters[1:4], 2)),      'symmetric')
   expect_error(pcoa(structure(1:2, class = 'dist', Size = 3L)), 'valid dist')
+  expect_error(pcoa(structure(1, class = 'dist', Size = -1L)),  'valid dist')
 
 #})

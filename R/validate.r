@@ -113,6 +113,7 @@ validate_cpus <- function (env = parent.frame()) {
       stopifnot(length(cpus) == 1)
       stopifnot(!is.na(cpus))
       stopifnot(cpus > 0)
+      stopifnot(cpus <= .Machine$integer.max)
       stopifnot(cpus %% 1 == 0)
       
       if (!is.integer(cpus))
@@ -219,17 +220,19 @@ validate_newick <- function (env = parent.frame()) {
 
 validate_pairs <- function (env = parent.frame()) {
   
-  with(env, {
-    if (ncol(counts) < 2)
-      stop('`counts` must have at least two samples.')
-  })
-  
+  # Samples are rows when margin = 1, columns when margin = 2.
+  n_samples <- with(env, if (margin == 1L) nrow(counts) else ncol(counts))
+
+  if (n_samples < 2)
+    stop('`counts` must have at least two samples.')
+
+  env$n_samples <- n_samples
+
   tryCatch(
     with(env, {
-      
+
       if (!is.null(pairs)) {
-        
-        n_samples   <- ncol(counts)
+
         n_distances <- n_samples * (n_samples - 1) / 2
         
         if (is.function(pairs))
@@ -248,15 +251,17 @@ validate_pairs <- function (env = parent.frame()) {
             if (any(pairs %% 1 > 0)) stop('non-integer values')
             pairs <- as.integer(pairs)
           }
-          if (!all(pairs >= 1 & pairs <= n_distances))
+          if (!isTRUE(all(pairs >= 1 & pairs <= n_distances)))
             stop('expected `pairs` values between 1 and ', n_distances)
         }
         else {
           stop('cannot be ', typeof(pairs))
         }
-        
-        remove('n_samples', 'n_distances')
+
+        remove('n_distances')
       }
+
+      remove('n_samples')
     }),
     
     error = function (e) 
@@ -413,16 +418,16 @@ validate_seed <- function (env = parent.frame()) {
       stopifnot(is.numeric(seed))
       stopifnot(length(seed) == 1)
       stopifnot(!is.na(seed))
-      stopifnot(seed >= 2**31 * -1)
+      stopifnot(seed >= -(2**31 - 1)) # -2^31 is NA_integer_
       stopifnot(seed <= 2**31 - 1)
       stopifnot(seed %% 1 == 0)
-      
+
       if (!is.integer(seed))
         seed <- as.integer(seed)
     }),
-    
-    error = function (e) 
-      stop(e$message, '\n`seed` must be an integer between -2147483648 and 2147483647.')
+
+    error = function (e)
+      stop(e$message, '\n`seed` must be an integer between -2147483647 and 2147483647.')
   )
 }
 

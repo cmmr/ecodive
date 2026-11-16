@@ -129,7 +129,14 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
   # Parse the formula; split off Condition() terms.
   #--------------------------------------------------------
   if (is.null(formula)) formula <- ~ .
-  if (is.character(formula)) formula <- stats::as.formula(formula, env = parent.frame(2))
+  if (is.character(formula)) {
+    # Parse without evaluating: R 3.6's as.formula('trt') evaluates `trt`.
+    f <- tryCatch(str2lang(formula), error = function (e) NULL)
+    if (!is.call(f) || !identical(f[[1]], as.name('~')))
+      stop('`formula` must be a formula, such as `~ treatment + ph`.', call. = FALSE)
+    formula <- eval(f)
+    environment(formula) <- parent.frame(2)
+  }
   if (!inherits(formula, 'formula'))
     stop('`formula` must be a formula, such as `~ treatment + ph`.', call. = FALSE)
 
@@ -296,7 +303,8 @@ perm_matrix <- function (permutations, n) {
   if (is.matrix(permutations)) {
 
     p <- permutations
-    if (!is.numeric(p) || anyNA(p) || ncol(p) != n || any(p != round(p)))
+    if (!is.numeric(p) || anyNA(p) || ncol(p) != n || any(p != round(p)) ||
+        any(p < 1 | p > n))
       stop('A `permutations` matrix must have ', n, ' columns (one per sample) ',
            'of whole numbers, with one permutation of 1 to ', n, ' per row.', call. = FALSE)
 

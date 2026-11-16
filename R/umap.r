@@ -261,6 +261,10 @@ umap <- function (
 
   result <- function (x, init) {
     x <- unname(x)
+    if (!all(is.finite(x)))
+      stop(
+        'UMAP diverged: coordinates became infinite or NaN. ',
+        'Try a smaller `learning_rate` or `repulsion_strength`.', call. = FALSE )
     if (n > 0) x <- scale(x, center = TRUE, scale = FALSE)
     for (j in seq_len(k)) {
       v <- x[, j]

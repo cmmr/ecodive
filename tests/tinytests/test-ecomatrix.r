@@ -221,4 +221,17 @@
   expect_null(names(res_slam_no_dimnames))
   expect_equal(unname(res_slam_no_dimnames), unname(expected_margin1))
 
+  # Regression: integer NA in a sparse triplet matrix was read as
+  # -2147483648, not NA. Both import orders: by sample and by feature.
+  m_na <- matrix(rpois(200, 2) + 1L, 20, 10)
+  m_na[3, 2] <- NA
+  m_na_dbl <- m_na
+  storage.mode(m_na_dbl) <- 'double'
+  for (mg in 1:2) {
+    x <- if (mg == 1) m_na else t(m_na)
+    s <- slam::as.simple_triplet_matrix(x)
+    expect_true(is.integer(s$v))
+    expect_identical(bray(s, margin = mg), bray(m_na_dbl))
+  }
+
 #})

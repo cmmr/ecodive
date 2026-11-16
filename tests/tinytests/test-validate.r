@@ -14,6 +14,9 @@
 
   # validate_pairs() ====
 
+  # Samples in columns: counts has 5, so 10 pairs.
+  env$margin <- 2L
+
   env$counts <- matrix(nrow = 5, ncol = 0)
   expect_error(validate_pairs(env))
 
@@ -48,6 +51,23 @@
 
   env$cpus <- 1
   expect_silent(validate_cpus(env))
+
+  # Beyond the integer range: a clear error, not a failure inside C.
+  env$cpus <- 1e10
+  expect_error(validate_cpus(env), '`cpus` must be')
+  env$cpus <- Inf
+  expect_error(validate_cpus(env), '`cpus` must be')
+  env$cpus <- 1
+
+
+  # validate_seed() ====
+
+  # -2^31 is NA_integer_.
+  env$seed <- -2^31
+  expect_error(validate_seed(env), '`seed` must be')
+  env$seed <- -2^31 + 1
+  expect_silent(validate_seed(env))
+  expect_identical(env$seed, -.Machine$integer.max)
 
 
 

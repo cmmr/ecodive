@@ -964,6 +964,10 @@ static void setup(SEXP sexp_dist, int n, double perp, int exact, int n_threads) 
   ts_perp = perp;
   ts_K    = (int) (3 * perp);
 
+  // Barnes-Hut needs at least one neighbor per point.
+  if (!exact && ts_K < 1)
+    error("Barnes-Hut t-SNE needs a perplexity of at least 1/3.");
+
   ts_beta = (double *) R_alloc(n, sizeof(double));
   ts_zsum = (double *) R_alloc(n, sizeof(double));
   ts_buf  = (double *) R_alloc((size_t) n_threads * n, sizeof(double));
@@ -1126,6 +1130,18 @@ SEXP C_tsne(
     for (int i = 0; i < n; i++)
       for (int d = 0; d < k; d++) mean[d] += Y[(size_t) i * k + d];
     for (int d = 0; d < k; d++) mean[d] /= (double) n;
+
+    // If a sum is not finite, some coordinate is not: the optimization
+    // diverged. (NaN coordinates would also make the Barnes-Hut tree
+    // subdivide without end.)
+    for (int d = 0; d < k; d++)
+      if (!R_FINITE(mean[d])) {
+        tree_free();
+        error(
+          "t-SNE diverged: coordinates became infinite or NaN. Try a "
+          "smaller `learning_rate`, `momentum`, or `exaggeration_factor`." );
+      }
+
     for (int i = 0; i < n; i++)
       for (int d = 0; d < k; d++) Y[(size_t) i * k + d] -= mean[d];
 

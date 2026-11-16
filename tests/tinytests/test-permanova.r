@@ -219,4 +219,17 @@
   expect_warning(res <- permanova(d, sat, ~ id, permutations = 9), 'no residual')
   expect_true(is.na(res$F[[1]]))
 
+  # Regression: values beyond the integer range became NA and slipped past
+  # the per-row check into C as sample indices (a segfault).
+  nd <- attr(d, 'Size')
+  expect_error(permanova(d, meta, ~ trt, permutations = matrix(1e10, 1, nd)), 'one permutation of 1 to')
+  expect_error(permanova(d, meta, ~ trt, permutations = matrix(0:(nd - 1), 1, nd)), 'one permutation of 1 to')
+
+  # A character formula is parsed, not evaluated (R 3.6 evaluated it).
+  expect_error(permanova(d, meta, 'trt'),       '`formula` must be a formula')
+  expect_error(permanova(d, meta, c('~ a', '~ b')), '`formula` must be a formula')
+  expect_identical(
+    permanova(d, meta, '~ trt + ph', permutations = 19, cpus = 1),
+    permanova(d, meta,  ~ trt + ph,  permutations = 19, cpus = 1) )
+
 #})

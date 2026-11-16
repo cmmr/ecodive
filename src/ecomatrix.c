@@ -3,6 +3,9 @@
 
 #include "ecodive.h"
 
+// An integer or logical value as a double, keeping NA as NA, as R does.
+#define INT_TO_DBL(x) ((x) == NA_INTEGER ? NA_REAL : (double)(x))
+
 
 //=========================================================
 // Ensure we don't overwrite values in other R objects.
@@ -57,7 +60,7 @@ static void assign_sparse_vals(ecomatrix_t *em, SEXP sexp_vals) {
     int  nnz = em->nnz;
     int *tmp = INTEGER(sexp_vals);
     for (int i = 0; i < nnz; i++) {
-      val_vec[i] = (double)(tmp[i]);
+      val_vec[i] = INT_TO_DBL(tmp[i]);
     }
   }
   
@@ -155,7 +158,7 @@ static void assign_dense_vals(ecomatrix_t *em, SEXP sexp_vals, int margin) {
           int v = int_vals[row + n_rows * col];
           if (v) {
             otu_vec[i] = col;
-            val_vec[i] = (double)v;
+            val_vec[i] = INT_TO_DBL(v);
             i++;
           }
         }
@@ -192,7 +195,7 @@ static void assign_dense_vals(ecomatrix_t *em, SEXP sexp_vals, int margin) {
           int v = int_vals[row + n_rows * col];
           if (v) {
             otu_vec[i] = row;
-            val_vec[i] = (double)v;
+            val_vec[i] = INT_TO_DBL(v);
             i++;
           }
         }
@@ -296,7 +299,7 @@ static void scatter_by_sample (
     for (int i = col_ptr[otu]; i < end; i++) {
       int dst = pos_vec[sam_in[i] - base]++;
       otu_vec[dst] = otu;
-      val_vec[dst] = dbl_in ? dbl_in[i] : (double)(int_in[i]);
+      val_vec[dst] = dbl_in ? dbl_in[i] : INT_TO_DBL(int_in[i]);
     }
   }
   
@@ -396,7 +399,7 @@ static void import_triplet (ecomatrix_t *em, int *sam_in, int *otu_in, SEXP sexp
     for (int i = 0; i < nnz; i++) {
       int dst = col_ptr[otu_in[i] - base]++;
       csc_sam[dst] = sam_in[i] - base;
-      csc_val[dst] = dbl_in ? dbl_in[i] : (double)(int_in[i]);
+      csc_val[dst] = dbl_in ? dbl_in[i] : INT_TO_DBL(int_in[i]);
     }
     unshift_ptrs(col_ptr, n_otus);
     

@@ -106,8 +106,10 @@
   #--------------------------------------------------
   # Curve parameters.
   #--------------------------------------------------
-  expect_equal(umap_ab(1, 0.01),    c1$ab,      tolerance = 1e-10)
-  expect_equal(umap_ab(1.5, 0.3),   c1$sgd2$ab, tolerance = 1e-10)
+  # A nonlinear least-squares fit, which stops at a relative tolerance of
+  # 1e-5: last-bit differences in the math library move it by ~3e-10.
+  expect_equal(umap_ab(1, 0.01),    c1$ab,      tolerance = 1e-6)
+  expect_equal(umap_ab(1.5, 0.3),   c1$sgd2$ab, tolerance = 1e-6)
   expect_error(umap_ab(1, 1e10))
 
 
@@ -130,12 +132,13 @@
   # made). Elsewhere, powf() and FMA contraction can
   # differ in the last bit: a 5-epoch layout must still
   # agree to 1e-5, but over 60-100 epochs SGD amplifies
-  # such differences, so long layouts are only compared
-  # loosely there. Results across `cpus` are always
+  # such differences (to a mean relative difference of
+  # 0.6 on arm64), so long layouts are compared only on
+  # the same platform; the quality checks below run
+  # everywhere. Results across `cpus` are always
   # exactly identical.
   #--------------------------------------------------
   same_platform <- .Platform$OS.type == 'windows' && R.version$arch == 'x86_64'
-  layout_tol    <- if (same_platform) 0 else 0.5
   short_tol     <- if (same_platform) 0 else 1e-5
 
   s1    <- c1$sgd1
@@ -148,7 +151,7 @@
   x1    <- .Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, 1L)
   expect_identical(.Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, 4L), x1)
   x1 <- center_like(x1, s1$embedding)
-  expect_equal(x1, s1$embedding, tolerance = layout_tol)
+  if (same_platform) expect_equal(x1, s1$embedding, tolerance = 0)
 
   s2    <- c1$sgd2
   a2    <- s2$args
@@ -157,7 +160,7 @@
   seeds <- batch_seeds(s2$seed, n1, a2$n_epochs)
   x2    <- .Call(C_umap_sgd, g12, s2$init, as.integer(a2$n_epochs), opt2, seeds, 2L)
   x2    <- center_like(x2, s2$embedding)
-  expect_equal(x2, s2$embedding, tolerance = layout_tol)
+  if (same_platform) expect_equal(x2, s2$embedding, tolerance = 0)
 
   # umap() with init = matrix runs the same layout, from its own seeds.
   u2 <- do.call(umap, c(list(dm = c1$d, k = 3, init = s2$init, seed = 9), a2))
@@ -271,5 +274,14 @@
   bad <- c1$d
   bad[1] <- -1
   expect_error(umap(bad))
+  expect_error(umap(c1$d, negative_sample_rate = Inf), '`negative_sample_rate` must be')
+  expect_error(umap(c1$d, n_epochs = Inf), '`n_epochs` must be')
+
+  # Regressions: a tiny negative_sample_rate made the number of negative
+  # samples (size_t) -1, a loop without end; a diverged layout failed in
+  # which.max() instead of with a clear error.
+  un <- umap(c2$d, n_neighbors = 10, n_epochs = 5, negative_sample_rate = 1e-9)
+  expect_true(all(is.finite(un)))
+  expect_error(umap(c2$d, n_neighbors = 10, n_epochs = 5, learning_rate = 1e300), 'UMAP diverged')
 
 #})

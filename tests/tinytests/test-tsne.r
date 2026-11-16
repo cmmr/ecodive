@@ -25,18 +25,20 @@
 
   # Same coordinates and cost as the reference, from the same start. ====
 
-  # The first 20 iterations are compared everywhere.
+  # The first 20 iterations are compared everywhere. (Other math libraries
+  # and fused multiply-adds change the result by up to 2e-7 there.)
   for (a in ex$cases) {
     x <- run(a, maxit = 20L)
-    expect_equal(matrix(x, nrow(x)), a$Y20, tolerance = 1e-8)
-    expect_equal(attr(x, 'kl_divergence'), a$cost20, tolerance = 1e-8)
+    expect_equal(matrix(x, nrow(x)), a$Y20, tolerance = 1e-6)
+    expect_equal(attr(x, 'kl_divergence'), a$cost20, tolerance = 1e-6)
   }
 
   # All iterations. t-SNE amplifies rounding differences, so after many
   # iterations it can settle in a different local minimum. Barnes-Hut
   # computes everything in the reference's order, which gives exactly its
-  # result on the platform the expected results came from (x86-64, without
-  # fused multiply-adds). Exact mode sums Q in parallel, so only the quality
+  # result on the platform the expected results came from (Windows x86-64:
+  # elsewhere, last-bit differences in exp() and log(), or fused
+  # multiply-adds, lead to another minimum). Exact mode sums Q in parallel, so only the quality
   # of the result is compared: its cost, and how many of each point's 10
   # nearest neighbours stay among its 10 nearest on the plot.
   nn_kept <- function (y) {
@@ -52,7 +54,7 @@
       expect_true(attr(x, 'kl_divergence') < 1.2 * a$cost)
       expect_true(nn_kept(x) > nn_kept(a$Y) - 0.05)
     }
-    else if (identical(R.version$arch, 'x86_64')) {
+    else if (.Platform$OS.type == 'windows' && identical(R.version$arch, 'x86_64')) {
       expect_equal(matrix(x, nrow(x)), a$Y, tolerance = 1e-8)
       expect_equal(attr(x, 'kl_divergence'), a$cost, tolerance = 1e-8)
     }
@@ -250,5 +252,19 @@
   expect_error(tsne(bad), 'must not contain NA')
   bad[[1]] <- -1
   expect_error(tsne(bad), 'negative')
+
+  # Regressions: these crashed R. Below a perplexity of 1/3, Barnes-Hut had
+  # no neighbors per point; with momentum >= 1 or huge steps, coordinates
+  # became NaN and the Barnes-Hut tree subdivided without end.
+  expect_error(tsne(b40, perplexity = 0.3),    '`perplexity` must be a number of at least 1')
+  expect_error(tsne(b40, perplexity = 0.9, theta = 0), '`perplexity` must be a number of at least 1')
+  expect_error(tsne(b40, momentum = 1),        '`momentum` must be a number from 0 to less than 1')
+  expect_error(tsne(b40, final_momentum = 3),  '`final_momentum` must be a number from 0 to less than 1')
+  expect_error(tsne(b40, learning_rate = Inf), '`learning_rate` must be "auto" or a number')
+  expect_error(tsne(b40, perplexity = 5, maxit = 50, learning_rate = 1e300), 't-SNE diverged')
+  expect_error(tsne(b40, perplexity = 5, maxit = 50, learning_rate = 1e300, theta = 0), 't-SNE diverged')
+  expect_error(.Call(C_tsne_affinity, as.double(b40), 40L, 0.3, FALSE, 1L), 'perplexity of at least 1/3')
+  # The smallest perplexity that `n` samples allow still runs.
+  expect_identical(dim(tsne(dist(1:2), cpus = 1)), c(2L, 2L))
 
 #})

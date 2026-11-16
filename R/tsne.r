@@ -20,8 +20,9 @@
 #'        `theta = 0`. Default: `2`
 #'
 #' @param perplexity   Roughly, how many close neighbors each sample has.
-#'        Must be at most \eqn{(n - 1) / 3} for \eqn{n} samples. Default:
-#'        `30`, or \eqn{(n - 1) / 3} if that is smaller.
+#'        At least `1`, and at most \eqn{(n - 1) / 3} for \eqn{n} samples:
+#'        larger values are reduced to that, with a warning if given.
+#'        Default: `30`, or \eqn{(n - 1) / 3} if that is smaller.
 #'
 #' @param theta   Speed/accuracy trade-off for the Barnes-Hut
 #'        approximation, from `0` to `1`. `0` computes t-SNE exactly, which
@@ -42,8 +43,8 @@
 #'        `maxit` iterations.
 #'
 #' @param momentum,final_momentum   The momentum of the gradient descent
-#'        before and after iteration `mom_switch_iter`. Defaults: `0.5` and
-#'        `0.8`
+#'        before and after iteration `mom_switch_iter`, from `0` to less than
+#'        `1`. Defaults: `0.5` and `0.8`
 #'
 #' @param mom_switch_iter   The iteration from which `final_momentum` is
 #'        used. `NULL`, the default, means `250`, or `0` when `init` is a
@@ -211,19 +212,26 @@ tsne <- function (
 
   k               <- nmds_arg(k,               '`k` must be a whole number of at least 1.', whole = TRUE, lo = 1)
   perp_given      <- !missing(perplexity)
-  perplexity      <- nmds_arg(perplexity,      '`perplexity` must be a number greater than 0.')
+  perplexity      <- nmds_arg(perplexity,      '`perplexity` must be a number of at least 1.')
   theta           <- nmds_arg(theta,           '`theta` must be a number from 0 to 1.', hi = 1)
   maxit           <- nmds_arg(maxit,           '`maxit` must be a whole number of at least 0.', whole = TRUE)
   if (!identical(learning_rate, 'auto'))
     learning_rate <- nmds_arg(learning_rate, '`learning_rate` must be "auto" or a number greater than 0.')
-  momentum        <- nmds_arg(momentum,        '`momentum` must be a number of at least 0.')
-  final_momentum  <- nmds_arg(final_momentum,  '`final_momentum` must be a number of at least 0.')
+  momentum        <- nmds_arg(momentum,        '`momentum` must be a number from 0 to less than 1.')
+  final_momentum  <- nmds_arg(final_momentum,  '`final_momentum` must be a number from 0 to less than 1.')
   mom_switch_iter <- nmds_arg(mom_switch_iter, '`mom_switch_iter` must be a whole number of at least 0.', whole = TRUE)
   exaggeration_factor <- nmds_arg(exaggeration_factor, '`exaggeration_factor` must be a number greater than 0.')
   stop_lying_iter <- nmds_arg(stop_lying_iter, '`stop_lying_iter` must be a whole number of at least 0.', whole = TRUE)
 
-  if (perplexity <= 0)
-    stop('`perplexity` must be a number greater than 0.', call. = FALSE)
+  # Below 1, no Gaussian can reach the perplexity, and Barnes-Hut would
+  # have no neighbors (floor(3 * perplexity) = 0).
+  if (perplexity < 1)
+    stop('`perplexity` must be a number of at least 1.', call. = FALSE)
+  # Momentum of 1 or more makes the updates grow without bound.
+  if (momentum >= 1)
+    stop('`momentum` must be a number from 0 to less than 1.', call. = FALSE)
+  if (final_momentum >= 1)
+    stop('`final_momentum` must be a number from 0 to less than 1.', call. = FALSE)
   if (is.numeric(learning_rate) && learning_rate <= 0)
     stop('`learning_rate` must be "auto" or a number greater than 0.', call. = FALSE)
   if (exaggeration_factor <= 0)

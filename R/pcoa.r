@@ -173,7 +173,7 @@ dist_vector <- function (dm) {
     labels  <- attr(dm, 'Labels', exact = TRUE)
     maxdist <- attr(dm, 'maxdist', exact = TRUE)
 
-    if (length(n) != 1 || is.na(n) || length(dm) != n * (n - 1) / 2)
+    if (length(n) != 1 || is.na(n) || n < 0 || length(dm) != n * (n - 1) / 2)
       stop('`dm` is not a valid dist object.', call. = FALSE)
   }
   else {
