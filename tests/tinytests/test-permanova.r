@@ -34,6 +34,32 @@
       if (!is.null(cs$f_perm))
         expect_equal(unname(attr(res, 'f_perm')), cs$f_perm, tolerance = 1e-10, info = info)
     }
+
+    # Ordered factors, poly(), character and logical columns, unbalanced
+    # and unused levels, permutations within blocks, and the one-factor
+    # path with 500 samples.
+    sets <- list(
+      meta2  = list(d = d,                  data = ex$meta2,   perms = ex$perms),
+      blocks = list(d = d,                  data = meta,       perms = ex$block_perms),
+      n500   = list(d = bray(ex$counts500), data = ex$meta500, perms = ex$perms500) )
+
+    for (cs in ex$more_cases) {
+
+      s   <- sets[[cs$set]]
+      res <- permanova(
+        s$d, s$data, stats::as.formula(cs$formula), by = cs$by,
+        permutations = s$perms, cpus = 2 )
+
+      info <- paste(cs$set, cs$formula, cs$by)
+      tbl  <- unname(as.matrix(res))
+
+      expect_identical(rownames(res), cs$rows, info = info)
+      expect_equal(tbl[, -ncol(tbl)], cs$table[, -ncol(tbl)], tolerance = 1e-10, info = info)
+      expect_identical(tbl[, ncol(tbl)], cs$table[, ncol(tbl)], info = info)
+
+      if (!is.null(cs$f_perm))
+        expect_equal(unname(attr(res, 'f_perm')), cs$f_perm, tolerance = 1e-10, info = info)
+    }
   }
 
 
