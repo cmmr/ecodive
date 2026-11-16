@@ -68,7 +68,7 @@ A list of class \code{c('ecodive_mantel', 'ecodive_test')}, with:
 \item \code{method}: The correlation coefficient: \code{'pearson'}, \code{'spearman'}, or
 \code{'kendall'}.
 \item \code{alternative}: \code{'greater'}, \code{'less'}, or \code{'two.sided'}.
-\item \code{partial}: Whether it is a partial Mantel test (\code{given} was given).
+\item \code{partial}: Whether it is a partial Mantel test (with \code{given}).
 \item \code{n}: The number of samples.
 \item \code{permutation}: How samples were permuted: \code{'free'}, \code{'within strata'},
 or \code{'supplied matrix'}.
