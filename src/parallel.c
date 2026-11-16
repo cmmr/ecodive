@@ -136,18 +136,6 @@ void init_blas_threads(void) {
 
 
 //------------------------------------------------------
-// Whether counts may be set from this process.
-//------------------------------------------------------
-static int blas_can_set_here(void) {
-  #ifdef _WIN32
-    return 1; // No fork() on Windows.
-  #else
-    return blas_pid != 0 && getpid() == blas_pid;
-  #endif
-}
-
-
-//------------------------------------------------------
 // Look up a function by name, or NULL if not found.
 //------------------------------------------------------
 static sym_t find_sym(void *handle, const char *name) {
@@ -166,6 +154,28 @@ static sym_t find_sym(void *handle, const char *name) {
   #endif
 
   return fn;
+}
+
+
+//------------------------------------------------------
+// The functions from here to the end marker only run
+// when an optimized BLAS library is found. The coverage
+// runner has R's reference BLAS, so they are left out
+// of coverage. test-blas_threads.r tests them wherever
+// such a library is present.
+//------------------------------------------------------
+// # nocov start
+
+
+//------------------------------------------------------
+// Whether counts may be set from this process.
+//------------------------------------------------------
+static int blas_can_set_here(void) {
+  #ifdef _WIN32
+    return 1; // No fork() on Windows.
+  #else
+    return blas_pid != 0 && getpid() == blas_pid;
+  #endif
 }
 
 
@@ -294,6 +304,41 @@ static int blis_int_type(void *handle) {
 
 
 //------------------------------------------------------
+// Read a library's count, or NA, and keep its highest.
+//------------------------------------------------------
+static int blas_get(blas_lib_t *lib) {
+
+  int64_t n = (lib->type == BLAS_I64)
+    ? ((get_i64_t) lib->get)()
+    : ((get_int_t) lib->get)();
+
+  // BLIS returns -1 when its count was never set.
+  if (n < 1 || n > INT_MAX) return NA_INTEGER;
+
+  if (n > lib->max) lib->max = (int) n;
+
+  return (int) n;
+}
+
+
+//------------------------------------------------------
+// Set a library's count to `n`, but never above the
+// highest count read, and only to 1 if none was read.
+//------------------------------------------------------
+static void blas_set(const blas_lib_t *lib, int n) {
+
+  if (!lib->set || !blas_can_set_here() || !flexiblas_unswitched()) return;
+
+  if (lib->max == 0 && n != 1) return;
+  if (lib->max >  0 && n > lib->max) n = lib->max;
+
+  if (lib->type == BLAS_I64) { ((set_i64_t) lib->set)((int64_t) n); }
+  else                       { ((set_int_t) lib->set)(n);           }
+}
+// # nocov end
+
+
+//------------------------------------------------------
 // Add the thread functions exported by `handle`'s
 // library, if any, to blas_libs.
 //------------------------------------------------------
@@ -306,6 +351,7 @@ static void add_blas_lib(void *handle) {
     sym_t get = find_sym(handle, blas_apis[i].get);
     if (!get) continue;
 
+    // # nocov start (only with an optimized BLAS; see above)
     blas_lib_t lib = { get, find_sym(handle, blas_apis[i].set), BLAS_INT, 0 };
 
     if (blas_apis[i].api == API_FLEX && !flexiblas_can_set(handle))
@@ -327,6 +373,7 @@ static void add_blas_lib(void *handle) {
     if (n_blas_libs < 2) blas_libs[n_blas_libs++] = lib;
 
     return;
+    // # nocov end
   }
 }
 
@@ -372,40 +419,6 @@ static void find_blas_libs(void) {
 }
 
 
-//------------------------------------------------------
-// Read a library's count, or NA, and keep its highest.
-//------------------------------------------------------
-static int blas_get(blas_lib_t *lib) {
-
-  int64_t n = (lib->type == BLAS_I64)
-    ? ((get_i64_t) lib->get)()
-    : ((get_int_t) lib->get)();
-
-  // BLIS returns -1 when its count was never set.
-  if (n < 1 || n > INT_MAX) return NA_INTEGER;
-
-  if (n > lib->max) lib->max = (int) n;
-
-  return (int) n;
-}
-
-
-//------------------------------------------------------
-// Set a library's count to `n`, but never above the
-// highest count read, and only to 1 if none was read.
-//------------------------------------------------------
-static void blas_set(const blas_lib_t *lib, int n) {
-
-  if (!lib->set || !blas_can_set_here() || !flexiblas_unswitched()) return;
-
-  if (lib->max == 0 && n != 1) return;
-  if (lib->max >  0 && n > lib->max) n = lib->max;
-
-  if (lib->type == BLAS_I64) { ((set_i64_t) lib->set)((int64_t) n); }
-  else                       { ((set_int_t) lib->set)(n);           }
-}
-
-
 //======================================================
 // R interface. Returns the BLAS thread count, or NA if
 // it can't be read. If there is more than one library,
@@ -420,15 +433,15 @@ SEXP C_blas_threads(SEXP sexp_n) {
 
   int prev = NA_INTEGER;
   for (int i = 0; i < n_blas_libs; i++) {
-    int n = blas_get(&blas_libs[i]);
-    if (n != NA_INTEGER && (prev == NA_INTEGER || n > prev)) prev = n;
+    int n = blas_get(&blas_libs[i]);                                   // # nocov
+    if (n != NA_INTEGER && (prev == NA_INTEGER || n > prev)) prev = n; // # nocov
   }
 
   if (TYPEOF(sexp_n) == INTSXP && XLENGTH(sexp_n) == 1) {
     int n = INTEGER(sexp_n)[0];
     if (n != NA_INTEGER && n >= 1)
       for (int i = 0; i < n_blas_libs; i++)
-        blas_set(&blas_libs[i], n);
+        blas_set(&blas_libs[i], n); // # nocov
   }
 
   return ScalarInteger(prev);
@@ -444,11 +457,12 @@ SEXP C_blas_settable(void) {
 
   find_blas_libs();
 
+  int settable = 0;
   for (int i = 0; i < n_blas_libs; i++)
-    if (blas_libs[i].set && blas_can_set_here() && flexiblas_unswitched())
-      return ScalarLogical(1);
+    if (blas_libs[i].set && blas_can_set_here() && flexiblas_unswitched()) // # nocov
+      settable = 1;                                                      // # nocov
 
-  return ScalarLogical(0);
+  return ScalarLogical(settable);
 }
 
 //======================================================

@@ -25,17 +25,23 @@ n_cpus <- function () {
   # variables that can change during a session, such as `mc.cores`, which
   # the future package sets to 1 inside its workers.
   
-  if (!pthreads()) return (1L)
+  cpus <- 1L
   
-  if (nzchar(system.file(package = 'parallelly'))) {
-    n <- do.call(`::`, list('parallelly', 'availableCores'))()
-    n <- unname(n)
-  }
-  else {
-    n <- parallel::detectCores(all.tests = TRUE, logical = TRUE) # nocov
+  if (pthreads()) {
+    
+    if (nzchar(system.file(package = 'parallelly'))) {
+      n <- do.call(`::`, list('parallelly', 'availableCores'))()
+      n <- unname(n)
+    }
+    else {
+      n <- parallel::detectCores(all.tests = TRUE, logical = TRUE) # nocov
+    }
+    
+    if (isTRUE(n > 0))
+      cpus <- n
   }
   
-  return (if (isTRUE(n > 0)) n else 1L)
+  return (cpus)
 }
 
 
@@ -110,7 +116,7 @@ blas_threads <- function (n = NULL) {
   # Rlapack.dll is only loaded when R first needs LAPACK. Load it now, so
   # that a copy of an optimized library there is found too.
   if (.Platform$OS.type == 'windows')
-    tryCatch(La_version(), error = function (e) NULL, warning = function (w) NULL)
+    tryCatch(La_version(), error = function (e) NULL, warning = function (w) NULL) # nocov
 
   if (is.null(n))
     return (.Call(C_blas_threads, NULL))
