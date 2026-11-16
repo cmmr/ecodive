@@ -50,6 +50,9 @@
   expect_identical(m('monoMDS'),             'nmds')
   expect_identical(m('dbRDA'),               'dbrda')
   expect_identical(m('distance-based RDA'),  'dbrda')
+  expect_identical(m('t-SNE'),               'tsne')
+  expect_identical(m('Rtsne'),               'tsne')
+  expect_identical(m('Barnes-Hut t-SNE'),    'tsne')
   expect_identical(match_ordination('nmds', input = 'dist')$id, 'nmds')
 
   info <- match_ordination('pcoa')

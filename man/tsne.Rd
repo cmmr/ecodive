@@ -178,7 +178,7 @@ coordinates are centered on 0, but not otherwise rotated or flipped.
 }
 \section{Ordination result}{
 
-Every ordination method (\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, and \code{\link[=ordination]{ordination()}}) returns
+Every ordination method (\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pca]{pca()}}, and \code{\link[=ordination]{ordination()}}) returns
 the same kind of object: a plain numeric matrix with one row per sample
 (named after the samples) and one column per axis (named \code{"PCoA1"},
 \code{"NMDS1"}, etc.), so that it can go straight into \code{plot()} or a data
