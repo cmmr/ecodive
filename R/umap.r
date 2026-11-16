@@ -227,14 +227,9 @@ umap <- function (
   if (!is.null(n_epochs))
     n_epochs <- ord_arg(n_epochs, '`n_epochs` must be NULL or a whole number of at least 0.', whole = TRUE)
 
-  init_mtx <- NULL
-  if (is.matrix(init) || is.data.frame(init)) {
-    init_mtx <- init
-    init     <- 'matrix'
-  }
-  else if (!is.character(init) || length(init) != 1 || !init %in% c('spectral', 'pcoa', 'random')) {
-    stop('`init` must be "spectral", "pcoa", "random", or a numeric matrix.', call. = FALSE)
-  }
+  ia       <- ord_init_arg(init, c('spectral', 'pcoa', 'random'))
+  init     <- ia$init
+  init_mtx <- ia$mtx
 
 
   dv     <- dist_vector(dm)
@@ -242,13 +237,7 @@ umap <- function (
   n      <- dv$n
   labels <- dv$labels
 
-  if (!is.null(init_mtx)) {
-    init_mtx <- unname(as.matrix(init_mtx))
-    if (!is.numeric(init_mtx) || !identical(dim(init_mtx), c(n, k)) || !all(is.finite(init_mtx)))
-      stop('`init` must be a numeric matrix with ', n, ' rows and ', k,
-           ' columns, without NA or infinite values.', call. = FALSE)
-    storage.mode(init_mtx) <- 'double'
-  }
+  if (!is.null(init_mtx)) init_mtx <- ord_init_matrix(init_mtx, n, k)
 
   # Coordinates (n x k) and the graph's edges (up to 2n(n_neighbors - 1))
   # are indexed with ints in C.
@@ -368,14 +357,7 @@ umap_ab <- function (spread, min_dist) {
 # PCoA starting coordinates, each axis centered and scaled to standard
 # deviation `sdev`, as uwot's "spca". NULL if there are fewer than k axes.
 umap_pcoa_init <- function (dm, n, k, sdev, cpus) {
-
-  if (k > n - 1) return (NULL)
-
-  res <- .Call(C_pcoa, dm, n, k, cpus)
-  eig <- res$eig
-  if (length(eig) < k || !all(eig > max(0, sqrt(.Machine$double.eps) * eig[[1]])))
-    return (NULL)
-
-  x <- res$points
+  x <- pcoa_start(dm, n, k, cpus)
+  if (is.null(x)) return (NULL)
   scale(x, scale = apply(x, 2, stats::sd) / sdev)
 }

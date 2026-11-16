@@ -215,14 +215,9 @@ tsne <- function (
   validate_cpus()
   validate_seed()
 
-  init_mtx <- NULL
-  if (is.matrix(init) || is.data.frame(init)) {
-    init_mtx <- init
-    init     <- 'matrix'
-  }
-  else if (!is.character(init) || length(init) != 1 || !init %in% c('random', 'pcoa')) {
-    stop('`init` must be "random", "pcoa", or a numeric matrix.', call. = FALSE)
-  }
+  ia       <- ord_init_arg(init, c('random', 'pcoa'))
+  init     <- ia$init
+  init_mtx <- ia$mtx
 
   # As in Rtsne, a given start skips early exaggeration and low momentum.
   if (is.null(mom_switch_iter)) mom_switch_iter <- if (init == 'matrix') 0L else 250L
@@ -267,13 +262,7 @@ tsne <- function (
     stop('`k` is too large: ', n, ' samples times `k` dimensions must be ',
          'at most ', .Machine$integer.max, '.', call. = FALSE)
 
-  if (!is.null(init_mtx)) {
-    init_mtx <- unname(as.matrix(init_mtx))
-    if (!is.numeric(init_mtx) || !identical(dim(init_mtx), c(n, k)) || !all(is.finite(init_mtx)))
-      stop('`init` must be a numeric matrix with ', n, ' rows and ', k,
-           ' columns, without NA or infinite values.', call. = FALSE)
-    storage.mode(init_mtx) <- 'double'
-  }
+  if (!is.null(init_mtx)) init_mtx <- ord_init_matrix(init_mtx, n, k)
 
   result <- function (x, kl_divergence) {
     # Each axis's largest absolute coordinate is positive.
@@ -305,9 +294,12 @@ tsne <- function (
   if (identical(learning_rate, 'auto'))
     learning_rate <- max(n / exaggeration_factor, 200)
 
+  # The PCoA start, scaled so that the first axis has standard deviation
+  # 1e-4, as openTSNE and scikit-learn scale their PCA starts.
   if (init == 'pcoa') {
-    init_mtx <- tsne_pcoa_init(dm, n, k, cpus)
+    init_mtx <- pcoa_start(dm, n, k, cpus)
     if (is.null(init_mtx)) init <- 'random'
+    else init_mtx <- init_mtx / stats::sd(init_mtx[, 1]) * 1e-4
   }
 
   res <- .Call(
@@ -316,22 +308,4 @@ tsne <- function (
     c(perplexity, theta, learning_rate, momentum, final_momentum, exaggeration_factor) )
 
   result(res$points, res$kl_divergence)
-}
-
-
-
-# PCoA starting coordinates, scaled so that the first axis has standard
-# deviation 1e-4, as openTSNE and scikit-learn scale their PCA starts. NULL
-# if there are fewer than k axes with positive eigenvalues.
-tsne_pcoa_init <- function (dm, n, k, cpus) {
-
-  if (k > n - 1) return (NULL)
-
-  res <- .Call(C_pcoa, dm, n, k, cpus)
-  eig <- res$eig
-  if (length(eig) < k || !all(eig > max(0, sqrt(.Machine$double.eps) * eig[[1]])))
-    return (NULL)
-
-  x <- res$points
-  x / stats::sd(x[, 1]) * 1e-4
 }

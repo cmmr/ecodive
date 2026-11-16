@@ -140,6 +140,53 @@ ord_keep <- function (eig, k = length(eig)) {
 
 
 
+# tsne() and umap()'s `init`: one of `choices`, or a numeric matrix (or data
+# frame). Returns list(init = the choice, or 'matrix'; mtx = the matrix, or
+# NULL).
+ord_init_arg <- function (init, choices) {
+
+  if (is.matrix(init) || is.data.frame(init))
+    return (list(init = 'matrix', mtx = init))
+
+  if (!is.character(init) || length(init) != 1 || !init %in% choices)
+    stop('`init` must be ', paste0('"', choices, '"', collapse = ', '),
+         ', or a numeric matrix.', call. = FALSE)
+
+  list(init = init, mtx = NULL)
+}
+
+
+# A given matrix of starting coordinates, checked to be finite and n x k.
+# Returns a plain double matrix.
+ord_init_matrix <- function (mtx, n, k) {
+
+  mtx <- unname(as.matrix(mtx))
+  if (!is.numeric(mtx) || !identical(dim(mtx), c(n, k)) || !all(is.finite(mtx)))
+    stop('`init` must be a numeric matrix with ', n, ' rows and ', k,
+         ' columns, without NA or infinite values.', call. = FALSE)
+
+  storage.mode(mtx) <- 'double'
+  mtx
+}
+
+
+# The first k PCoA axes of `dm` (packed, n samples), as starting coordinates
+# for tsne() and umap(), which scale them their own ways. NULL if there are
+# fewer than k axes with positive eigenvalues.
+pcoa_start <- function (dm, n, k, cpus) {
+
+  if (k > n - 1) return (NULL)
+
+  res <- .Call(C_pcoa, dm, n, k, cpus)
+  eig <- res$eig
+  if (length(eig) < k || !all(eig > max(0, sqrt(.Machine$double.eps) * eig[[1]])))
+    return (NULL)
+
+  res$points
+}
+
+
+
 # Flips each column of `x` so that its first element whose magnitude is
 # within a relative 1e-8 of the largest is positive, as lz_sign_index() does
 # in C. Allowing for rounding keeps last-bit differences between platforms

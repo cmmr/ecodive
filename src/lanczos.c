@@ -392,7 +392,7 @@ void lanczos(lanczos_t *lz) {
 
   double *V   = (double *) R_alloc((size_t) n * M, sizeof(double));
   double *W   = (double *) R_alloc((size_t) n * M, sizeof(double));
-  double *T   = (double *) R_alloc((size_t) n * M, sizeof(double));
+  double *T   = (double *) R_alloc((size_t) n * q, sizeof(double)); // restarts keep <= q
   double *R   = (double *) R_alloc((size_t) n * p, sizeof(double));
   double *H   = (double *) R_alloc((size_t) M * M, sizeof(double));
   double *Hc  = (double *) R_alloc((size_t) M * M, sizeof(double));

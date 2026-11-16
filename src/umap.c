@@ -969,7 +969,7 @@ SEXP C_umap_sgd(
 
   pcg32_random_t master;
   if (!given)
-    pcg32_srandom_r(&master, (uint64_t) (uint32_t) asInteger(sexp_seeds), UMAP_STREAM_EPOCH);
+    pcg32_srandom_r(&master, (uint64_t) asInteger(sexp_seeds) /* sign-extended, as elsewhere */, UMAP_STREAM_EPOCH);
 
   // Adam, as uwot's: debiasing folded into ad_scale and epsc.
   float beta11   = (float) (1.0 - beta1);
@@ -1058,7 +1058,7 @@ SEXP C_umap_rand(SEXP sexp_len, SEXP sexp_kind, SEXP sexp_seed) {
 
   pcg32_random_t rng;
   pcg32_srandom_r(
-    &rng, (uint64_t) (uint32_t) asInteger(sexp_seed),
+    &rng, (uint64_t) asInteger(sexp_seed), // sign-extended, as elsewhere
     kind == 0 ? UMAP_STREAM_UNIF : UMAP_STREAM_NORM );
 
   for (R_xlen_t i = 0; i < len; i++) {
