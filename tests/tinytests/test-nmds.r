@@ -6,7 +6,10 @@
   d_bray <- bray(ex$inputs$bray)
   d_jacc <- jaccard(ex$inputs$jacc)  # Many tied distances.
   d_pln  <- dist(ex$inputs$plane)    # Points near a plane: a clear solution.
-  dists  <- list(bray = d_bray, jacc = d_jacc, plane = d_pln)
+  dists  <- list(
+    bray  = d_bray, jacc = d_jacc, plane = d_pln,
+    ties  = bray(ex$inputs$ties),     # Few distinct distances; duplicates.
+    big   = bray(ex$inputs$big) )     # 300 samples.
 
   # Largest absolute difference between two coordinate matrices, relative to
   # the largest coordinate, after matching each axis's sign.
@@ -43,7 +46,7 @@
     # sqrt() can grow over hundreds of iterations, e.g. stopping an iteration
     # sooner or later, so long runs are only compared approximately.
 
-    for (cs in ex$monomds) {
+    for (cs in c(ex$monomds, ex$monomds_more)) {
 
       d    <- dists[[cs$data]]
       init <- cs$init
@@ -69,6 +72,31 @@
     expect_equal(res$iters,  vg$iters)
     expect_equal(res$icause, vg$icause)
     expect_equal(res$points[, , 1], vg$points, tolerance = 1e-12)
+
+    # 300 samples, in large groups of tied distances: 25 iterations.
+    vg  <- ex$monomds_big
+    res <- engine(dists$big, array(vg$init, c(dim(vg$init), 1)), maxit = 25L)
+    expect_equal(res$stress, vg$stress, tolerance = 1e-8)
+    expect_equal(res$iters,  vg$iters)
+    expect_equal(res$icause, vg$icause)
+    expect_true(pro_rmse(res$points[, , 1], vg$points) < 1e-6)
+
+    # Only the PCoA start: monoMDS() from it, then postMDS()'s half-change
+    # scaling for a `maxdist` attribute. After 25 iterations, everywhere;
+    # after up to 200, as closely only on the platform the expected results
+    # came from (Windows x86-64).
+    d <- d_bray
+    attr(d, 'maxdist') <- 1
+    for (vg in ex$postmds_hc) {
+      ord <- nmds(d, try = 0, trymax = 0, max_iter = vg$maxit, cpus = 1)
+      if (vg$maxit <= 25 || (.Platform$OS.type == 'windows' && identical(R.version$arch, 'x86_64'))) {
+        expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-8)
+        expect_true(coord_diff(ord, vg$points) < 1e-6)
+      } else {
+        expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 0.01)
+      }
+      expect_identical(attr(ord, 'tries'), 0L)
+    }
 
 
 

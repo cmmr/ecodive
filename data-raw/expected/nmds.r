@@ -1,5 +1,6 @@
 # Expected results for tests/tinytests/test-nmds.r, from vegan::monoMDS(),
-# vegan::metaMDS() and MASS::isoMDS(). Run from the package root:
+# vegan::postMDS(), vegan::metaMDS() and MASS::isoMDS(). Run from the package
+# root:
 #
 #     Rscript data-raw/expected/nmds.r
 #
@@ -83,6 +84,43 @@ meta_hc <- vegan::metaMDS(d_hc, trace = 0)
 iso <- MASS::isoMDS(dists$plane, trace = FALSE)
 
 
+# More monoMDS() cases. `ties` has counts of 0 to 2 and duplicate samples:
+# few distinct Bray-Curtis distances, in large tied groups. `big` has 300
+# samples, whose 44,850 distances fall into tied groups of up to hundreds.
+set.seed(3)
+inputs$ties <- pmin(rand_counts(40, 6), 2L)
+inputs$ties[c(5, 17, 30), ] <- inputs$ties[rep(3, 3), ]
+inputs$ties[22, ]           <- inputs$ties[9, ]
+inputs$big  <- rand_counts(300, 40)
+
+dists$ties <- bray(inputs$ties)
+dists$big  <- bray(inputs$big)
+
+monomds_more <- list(
+  monomds('ties', k = 2, weakties = FALSE),
+  monomds('ties', k = 2),
+  monomds('bray', k = 3, stress = 2) )
+
+# 300 samples: one start, 25 iterations.
+init_big <- matrix(runif(300 * 2), 300, 2)
+mono_big <- vegan::monoMDS(dists$big, y = init_big, k = 2, pc = FALSE, maxit = 25)
+
+
+# nmds(try = 0, trymax = 0) runs only from the PCoA start. From the same
+# start, monoMDS() and postMDS(), with half-change scaling for a `maxdist`
+# attribute, after 25 iterations and after up to 200.
+d_hc2 <- dists$bray
+attr(d_hc2, 'maxdist') <- 1
+init_hc2 <- unname(unclass(pcoa(d_hc2, k = 2, cpus = 1))[, 1:2])
+
+post_hc <- lapply(c(25, 200), function (maxit) {
+  m <- vegan::monoMDS(d_hc2, y = init_hc2, k = 2, maxit = maxit)
+  p <- vegan::postMDS(m$points, d_hc2)
+  stopifnot(isTRUE(attr(p, 'halfchange')))
+  list(maxit = maxit, points = plain(p), stress = m$stress, iters = m$iters)
+})
+
+
 expected <- list(
 
   versions = list(
@@ -106,7 +144,21 @@ expected <- list(
   metamds_plane = list(points = plain(meta_plane$points), stress = meta_plane$stress),
   metamds_hc    = list(points = plain(meta_hc$points),    stress = meta_hc$stress),
 
-  isomds_plane = list(points = plain(iso$points), stress = iso$stress) )
+  isomds_plane = list(points = plain(iso$points), stress = iso$stress),
+
+  # As `monomds`.
+  monomds_more = monomds_more,
+
+  monomds_big = list(
+    init   = init_big,
+    points = plain(mono_big$points),
+    stress = mono_big$stress,
+    iters  = mono_big$iters,
+    icause = mono_big$icause ),
+
+  # nmds(bray(inputs$bray) with maxdist = 1, try = 0, trymax = 0), as
+  # monoMDS() from the PCoA start, then postMDS().
+  postmds_hc = post_hc )
 
 dir.create('tests/tinytests/expected', showWarnings = FALSE)
 saveRDS(expected, 'tests/tinytests/expected/nmds.rds', version = 2)
