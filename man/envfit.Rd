@@ -6,7 +6,8 @@
 \usage{
 envfit(
   ord,
-  data,
+  data = NULL,
+  counts = NULL,
   axes = NULL,
   permutations = 999L,
   strata = NULL,
@@ -24,23 +25,23 @@ one column per axis, such as from \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]
 \code{\link[=dbrda]{dbrda()}}, \code{\link[=tsne]{tsne()}}, or \code{\link[=umap]{umap()}}. A data frame of numeric columns
 also works.}
 
-\item{data}{The variables to fit. Either:
-\itemize{
-\item A data frame of sample metadata, with one row per sample. Numeric
-columns are fitted as vectors (arrows), and factor, character, and
-logical columns as factors (centroids). Rows are matched to the
-samples in \code{ord} by row name, and rows for other samples are ignored;
-without row names, they must be in the same order as \code{ord}. A single
-vector or factor is also accepted.
-\item A table of counts or abundances, with samples in rows (\code{margin = 1})
-or columns (\code{margin = 2}), to fit each feature (such as each taxon)
-as a vector. Accepts the same objects as \code{\link[=beta_div]{beta_div()}}: a numeric
-matrix, a sparse matrix from \pkg{Matrix} or \pkg{slam}, or a
-\code{phyloseq}, \code{rbiom}, or \code{SummarizedExperiment} object. Sparse tables
-are never made dense. Samples are matched by name to \code{ord}'s row
-names, and samples not in \code{ord} are ignored; without names, they
-must be in the same order as \code{ord}.
-}}
+\item{data}{Sample metadata to fit: a data frame with one row per
+sample. Numeric columns are fitted as vectors (arrows), and factor,
+character, and logical columns as factors (centroids). Rows are
+matched to the samples in \code{ord} by row name, and rows for other
+samples are ignored; without row names, they must be in the same
+order as \code{ord}. A matrix, or a single vector or factor (named
+\code{group}), is also accepted.}
+
+\item{counts}{A feature table to fit, such as taxa abundances: each
+feature is fitted as a vector. Accepts the same objects as
+\code{\link[=beta_div]{beta_div()}}: a numeric matrix (samples in rows, or in columns with
+\code{margin = 2}), a sparse matrix from \pkg{Matrix} or \pkg{slam}, or
+a \code{phyloseq}, \code{rbiom}, or \code{SummarizedExperiment} object. Sparse
+tables are never made dense. Samples are matched by name to \code{ord}'s
+row names, and samples not in \code{ord} are ignored; without names,
+they must be in the same order as \code{ord}. Give \code{data}, \code{counts}, or
+both.}
 
 \item{axes}{Which columns of \code{ord} to fit onto: indices or column names.
 The default, \code{NULL}, uses every column. \code{vegan::envfit()} uses the
@@ -51,9 +52,9 @@ Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones.}
 
 \item{strata}{Permute samples only within these groups (blocks): the
-name of a column of \code{data} (when \code{data} is a data frame, which is
-then not fitted), or a vector with one value per row of \code{ord}, in
-the same order. Default: \code{NULL} (free permutation).}
+name of a column of \code{data} (which is then not fitted), or a vector
+with one value per row of \code{ord}, in the same order. Default: \code{NULL}
+(free permutation).}
 
 \item{seed}{An integer seed for the random permutations. The same seed
 gives the same p-values. Default: \code{0}}
@@ -62,25 +63,27 @@ gives the same p-values. Default: \code{0}}
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
 class (e.g. \code{phyloseq}). Default: \code{1}}
 
-\item{norm}{Normalize a count table in \code{data} before fitting it, as in
+\item{norm}{Normalize \code{counts} before fitting them, as in
 \code{\link[=beta_div]{beta_div()}}: \code{'none'}, \code{'percent'}, \code{'chord'}, \code{'binary'},
-\code{'clr'}, or \code{'rclr'}. Default: \code{'none'}. Only for count tables.}
+\code{'clr'}, or \code{'rclr'}. Default: \code{'none'}. \code{margin}, \code{norm}, and
+\code{pseudocount} apply only to \code{counts}.}
 
 \item{pseudocount}{Value added to counts to handle zeros when
 \code{norm = 'clr'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
 \item{na.rm}{Leave out samples with missing values (\code{NA}) in \code{ord} or in
-any variable of a data frame \code{data}, as \code{vegan::envfit()} does.
+any column of \code{data}, as \code{vegan::envfit()} does. \code{counts} must not
+have any.
 Default: \code{FALSE}, which stops with an error if there are any.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
-A data frame with one row per numeric variable (or feature) and
-one row per level of each factor, in the order of \code{data}'s columns. Its
-columns are:
+A data frame with one row per numeric variable and per level of
+each factor of \code{data}, in the order of its columns, followed by one row
+per feature of \code{counts}. Its columns are:
 \itemize{
 \item \code{variable}: The variable's name.
 \item \code{level}: The factor level, or \code{NA} for numeric variables.
@@ -191,7 +194,7 @@ random permutations.
     envfit(ord, meta)
 
     # Each genus's relative abundance as an arrow.
-    fit <- envfit(ord, counts, norm = 'percent')
+    fit <- envfit(ord, counts = counts, norm = 'percent')
     head(fit[order(fit$p_value), ])
 
     # A biplot of the genera with p <= 0.05.

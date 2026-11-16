@@ -14,9 +14,10 @@
       data  <- ex[[cs$data]]
       perms <- if (isTRUE(cs$args$na.rm)) ex$perms_na else ex$perms
 
-      res <- do.call(envfit, c(
-        list(ex[[cs$ord]], data, axes = cs$axes, permutations = perms, cpus = 1),
-        cs$args ))
+      input <- if (cs$data == 'counts') list(counts = data) else list(data = data)
+      res   <- do.call(envfit, c(
+        list(ex[[cs$ord]]), input,
+        list(axes = cs$axes, permutations = perms, cpus = 1), cs$args ))
 
       vec <- is.na(res$level)
 
@@ -150,7 +151,7 @@
   # Count tables: dense, sparse (Matrix, slam), samples in columns. ====
 
   cnt <- ex$counts
-  r1  <- envfit(ord, cnt, permutations = 99, cpus = 1)
+  r1  <- envfit(ord, counts = cnt, permutations = 99, cpus = 1)
 
   expect_identical(r1$variable, colnames(cnt))
   expect_identical(rownames(r1), colnames(cnt))
@@ -170,36 +171,58 @@
 
   if (requireNamespace('Matrix', quietly = TRUE)) {
     sp <- Matrix::Matrix(cnt, sparse = TRUE)
-    expect_equal(envfit(ord, sp, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
-    expect_equal(envfit(ord, Matrix::t(sp), margin = 2, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
+    expect_equal(envfit(ord, counts = sp, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
+    expect_equal(envfit(ord, counts = Matrix::t(sp), margin = 2, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
   }
   if (requireNamespace('slam', quietly = TRUE)) {
     st <- slam::as.simple_triplet_matrix(cnt)
-    expect_equal(envfit(ord, st, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
+    expect_equal(envfit(ord, counts = st, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
   }
 
   # Samples in other orders, and extra samples, are matched by name.
   cnt2 <- rbind(cnt[24:1, ], extra = seq_len(ncol(cnt)))
-  expect_equal(envfit(ord, cnt2, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
-  expect_equal(envfit(ord, t(cnt2), margin = 2, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
+  expect_equal(envfit(ord, counts = cnt2, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
+  expect_equal(envfit(ord, counts = t(cnt2), margin = 2, permutations = 99, cpus = 1), r1, tolerance = 1e-12)
 
   # norm = 'percent' equals fitting the proportions.
   expect_equal(
-    envfit(ord, cnt, norm = 'percent', permutations = 99, cpus = 1),
-    envfit(ord, cnt / rowSums(cnt), permutations = 99, cpus = 1), tolerance = 1e-10 )
+    envfit(ord, counts = cnt, norm = 'percent', permutations = 99, cpus = 1),
+    envfit(ord, counts = cnt / rowSums(cnt), permutations = 99, cpus = 1), tolerance = 1e-10 )
 
   # norm = 'clr': zeros are log(pseudocount) - mean log.
   clr <- log(cnt + 1)
   clr <- clr - rowMeans(clr)
   expect_equal(
-    envfit(ord, cnt, norm = 'clr', pseudocount = 1, permutations = 99, cpus = 1)[-2],
-    envfit(ord, clr, permutations = 99, cpus = 1)[-2], tolerance = 1e-10 )
+    envfit(ord, counts = cnt, norm = 'clr', pseudocount = 1, permutations = 99, cpus = 1)[-2],
+    envfit(ord, counts = clr, permutations = 99, cpus = 1)[-2], tolerance = 1e-10 )
 
-  expect_error(envfit(ord, env, norm = 'percent'), 'table of counts')
-  expect_error(envfit(ord, env, margin = 2), 'table of counts')
+  expect_error(envfit(ord, env, norm = 'percent'), 'only apply to `counts`')
+  expect_error(envfit(ord, env, margin = 2), 'only apply to `counts`')
+  expect_error(envfit(ord, env, pseudocount = 1), 'only apply to `counts`')
   cntn <- cnt
   rownames(cntn) <- rownames(named)
-  expect_error(envfit(named, cntn[-1, ]), 'no match')
+  expect_error(envfit(named, counts = cntn[-1, ]), 'no match')
+
+
+
+  # data and counts together: metadata rows, then feature rows, with the
+  # same permutations as each alone.
+  both <- envfit(ord, env, cnt, permutations = 99, cpus = 1)
+  md   <- envfit(ord, env, permutations = 99, cpus = 1)
+  expect_identical(nrow(both), nrow(md) + nrow(r1))
+  expect_identical(rownames(both), c(rownames(md), rownames(r1)))
+  expect_equal(unname(as.matrix(both[3:8])), unname(rbind(as.matrix(md[3:8]), as.matrix(r1[3:8]))))
+  expect_identical(
+    attr(both, 'r2_perm'), cbind(attr(md, 'r2_perm'), attr(r1, 'r2_perm')) )
+  expect_identical(attr(both, 'n_perm'), 99L)
+
+  # na.rm with both: the samples left out of `data` are left out of
+  # `counts` too.
+  bna <- envfit(ord, ex$env_na, cnt, na.rm = TRUE, permutations = 9, cpus = 1)
+  ok  <- stats::complete.cases(ex$env_na)
+  expect_equal(
+    unname(as.matrix(bna[bna$variable %in% colnames(cnt), 3:6])),
+    unname(as.matrix(envfit(ord[ok, ], counts = cnt[ok, ], permutations = 9, cpus = 1)[3:6])) )
 
 
 
@@ -216,9 +239,9 @@
     set.seed(2)
     big  <- matrix(rpois(300 * 400, 0.4), 300, 400)
     bord <- matrix(rnorm(600), 300)
-    b1 <- envfit(bord, big, permutations = 999, cpus = 1)
+    b1 <- envfit(bord, counts = big, permutations = 999, cpus = 1)
     for (cp in c(3, 4, 7))
-      expect_identical(b1, envfit(bord, big, permutations = 999, cpus = cp), info = cp)
+      expect_identical(b1, envfit(bord, counts = big, permutations = 999, cpus = cp), info = cp)
     bf <- data.frame(g = sample(letters[1:5], 300, TRUE), x = rnorm(300))
     expect_identical(
       envfit(bord, bf, permutations = 999, cpus = 1),
@@ -269,10 +292,10 @@
   expect_identical(nrow(rn), nrow(res))
   ord_na <- ord
   ord_na[5, 1] <- NA
-  expect_error(envfit(ord_na, cnt), 'na.rm')
+  expect_error(envfit(ord_na, counts = cnt), 'na.rm')
   expect_identical(
-    envfit(ord_na, cnt, na.rm = TRUE, permutations = 9, cpus = 1),
-    envfit(ord[-5, ], cnt, permutations = 9, cpus = 1) )
+    envfit(ord_na, counts = cnt, na.rm = TRUE, permutations = 9, cpus = 1),
+    envfit(ord[-5, ], counts = cnt, permutations = 9, cpus = 1) )
 
 
 
@@ -289,7 +312,7 @@
   expect_identical(one$r2, 0)
   expect_true(is.na(one$p_value))
 
-  expect_error(envfit(ord), 'required')
+  expect_error(envfit(ord), 'or both')
   expect_error(envfit(matrix(1, 5, 2), data.frame(x = 1:5)), 'same coordinates')
   expect_error(envfit('a', env), 'numeric matrix')
   expect_error(envfit(ord, env, axes = 4), 'axes')

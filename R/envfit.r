@@ -22,22 +22,23 @@
 #'        [dbrda()], [tsne()], or [umap()]. A data frame of numeric columns
 #'        also works.
 #'
-#' @param data  The variables to fit. Either:
+#' @param data  Sample metadata to fit: a data frame with one row per
+#'        sample. Numeric columns are fitted as vectors (arrows), and factor,
+#'        character, and logical columns as factors (centroids). Rows are
+#'        matched to the samples in `ord` by row name, and rows for other
+#'        samples are ignored; without row names, they must be in the same
+#'        order as `ord`. A matrix, or a single vector or factor (named
+#'        `group`), is also accepted.
 #'
-#'   * A data frame of sample metadata, with one row per sample. Numeric
-#'     columns are fitted as vectors (arrows), and factor, character, and
-#'     logical columns as factors (centroids). Rows are matched to the
-#'     samples in `ord` by row name, and rows for other samples are ignored;
-#'     without row names, they must be in the same order as `ord`. A single
-#'     vector or factor is also accepted.
-#'   * A table of counts or abundances, with samples in rows (`margin = 1`)
-#'     or columns (`margin = 2`), to fit each feature (such as each taxon)
-#'     as a vector. Accepts the same objects as [beta_div()]: a numeric
-#'     matrix, a sparse matrix from \pkg{Matrix} or \pkg{slam}, or a
-#'     `phyloseq`, `rbiom`, or `SummarizedExperiment` object. Sparse tables
-#'     are never made dense. Samples are matched by name to `ord`'s row
-#'     names, and samples not in `ord` are ignored; without names, they
-#'     must be in the same order as `ord`.
+#' @param counts  A feature table to fit, such as taxa abundances: each
+#'        feature is fitted as a vector. Accepts the same objects as
+#'        [beta_div()]: a numeric matrix (samples in rows, or in columns with
+#'        `margin = 2`), a sparse matrix from \pkg{Matrix} or \pkg{slam}, or
+#'        a `phyloseq`, `rbiom`, or `SummarizedExperiment` object. Sparse
+#'        tables are never made dense. Samples are matched by name to `ord`'s
+#'        row names, and samples not in `ord` are ignored; without names,
+#'        they must be in the same order as `ord`. Give `data`, `counts`, or
+#'        both.
 #'
 #' @param axes  Which columns of `ord` to fit onto: indices or column names.
 #'        The default, `NULL`, uses every column. `vegan::envfit()` uses the
@@ -49,24 +50,26 @@
 #'        from `permute::shuffleSet()`, to use instead of random ones.
 #'
 #' @param strata  Permute samples only within these groups (blocks): the
-#'        name of a column of `data` (when `data` is a data frame, which is
-#'        then not fitted), or a vector with one value per row of `ord`, in
-#'        the same order. Default: `NULL` (free permutation).
+#'        name of a column of `data` (which is then not fitted), or a vector
+#'        with one value per row of `ord`, in the same order. Default: `NULL`
+#'        (free permutation).
 #'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
 #'
-#' @param norm  Normalize a count table in `data` before fitting it, as in
+#' @param norm  Normalize `counts` before fitting them, as in
 #'        [beta_div()]: `'none'`, `'percent'`, `'chord'`, `'binary'`,
-#'        `'clr'`, or `'rclr'`. Default: `'none'`. Only for count tables.
+#'        `'clr'`, or `'rclr'`. Default: `'none'`. `margin`, `norm`, and
+#'        `pseudocount` apply only to `counts`.
 #'
 #' @param na.rm  Leave out samples with missing values (`NA`) in `ord` or in
-#'        any variable of a data frame `data`, as `vegan::envfit()` does.
+#'        any column of `data`, as `vegan::envfit()` does. `counts` must not
+#'        have any.
 #'        Default: `FALSE`, which stops with an error if there are any.
 #'
-#' @return A data frame with one row per numeric variable (or feature) and
-#'   one row per level of each factor, in the order of `data`'s columns. Its
-#'   columns are:
+#' @return A data frame with one row per numeric variable and per level of
+#'   each factor of `data`, in the order of its columns, followed by one row
+#'   per feature of `counts`. Its columns are:
 #'
 #'   * `variable`: The variable's name.
 #'   * `level`: The factor level, or `NA` for numeric variables.
@@ -180,7 +183,7 @@
 #'     envfit(ord, meta)
 #'
 #'     # Each genus's relative abundance as an arrow.
-#'     fit <- envfit(ord, counts, norm = 'percent')
+#'     fit <- envfit(ord, counts = counts, norm = 'percent')
 #'     head(fit[order(fit$p_value), ])
 #'
 #'     # A biplot of the genera with p <= 0.05.
@@ -189,9 +192,9 @@
 #'     arrows(0, 0, top$PCoA1 * sqrt(top$r2) * 0.3, top$PCoA2 * sqrt(top$r2) * 0.3)
 #'
 envfit <- function (
-    ord, data, axes = NULL, permutations = 999L, strata = NULL, seed = 0L,
-    margin = 1L, norm = 'none', pseudocount = NULL, na.rm = FALSE,
-    cpus = n_cpus() ) {
+    ord, data = NULL, counts = NULL, axes = NULL, permutations = 999L,
+    strata = NULL, seed = 0L, margin = 1L, norm = 'none', pseudocount = NULL,
+    na.rm = FALSE, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
@@ -199,35 +202,39 @@ envfit <- function (
   if (!isTRUE(na.rm) && !isFALSE(na.rm))
     stop('`na.rm` must be TRUE or FALSE.', call. = FALSE)
 
-  if (missing(data) || is.null(data))
-    stop('`data` is required: a data frame of variables, or a table of counts.', call. = FALSE)
+  if (is.null(data) && is.null(counts))
+    stop('Give `data` (sample metadata), `counts` (a feature table), or both.', call. = FALSE)
+
+  if (is.null(counts) && (!identical(norm, 'none') || !identical(as.numeric(margin), 1) ||
+                          !is.null(pseudocount)))
+    stop('`margin`, `norm`, and `pseudocount` only apply to `counts`.', call. = FALSE)
 
 
   #--------------------------------------------------------
-  # The ordination's coordinates.
+  # The ordination's coordinates, and the metadata aligned
+  # with its rows.
   #--------------------------------------------------------
-  x <- envfit_ord(ord, axes)
-  n <- nrow(x)
+  x    <- envfit_ord(ord, axes)
+  n0   <- nrow(x)
+  lab0 <- rownames(x)
+  keep <- stats::complete.cases(x)
 
+  env <- NULL
+  if (!is.null(data)) {
+    env  <- envfit_env(data, x, strata)
+    keep <- keep & stats::complete.cases(env$data)
+    if (!is.null(env$strata_col)) strata <- env$strata_col
+  }
 
-  #--------------------------------------------------------
-  # Count table or data frame?
-  #--------------------------------------------------------
-  is_tbl <- !is.data.frame(data) && !(is.null(dim(data)) && is.atomic(data)) &&
-    !(is.matrix(data) && !is.numeric(data) && !is.logical(data))
-
-  if (!is_tbl && (!identical(norm, 'none') || !identical(as.numeric(margin), 1)))
-    stop('`norm` and `margin` only apply when `data` is a table of counts.', call. = FALSE)
-
-  res  <- if (is_tbl) envfit_table(data, x, margin, norm, pseudocount, na.rm)
-          else        envfit_env(data, x, strata, na.rm)
-  vars <- res$vars
-  x    <- res$x
-  keep <- res$keep
-
-  if (!is.null(res$strata_col)) strata <- res$strata_col
-  else if (is.character(strata) && length(strata) == 1 && length(keep) > 1)
+  if (is.character(strata) && length(strata) == 1 && is.null(env$strata_col) && n0 > 1)
     stop('`strata` names no column of `data`.', call. = FALSE)
+
+  if (!all(keep)) {
+    if (!na.rm)
+      stop('Missing values (NA) in `ord`', if (!is.null(data)) ' or `data`',
+           '; use na.rm = TRUE to leave out those samples.', call. = FALSE)
+    x <- x[keep, , drop = FALSE]
+  }
 
   n <- nrow(x)
   if (n < 2)
@@ -238,9 +245,9 @@ envfit <- function (
   # Strata, parallel to ord's rows (before dropping NAs).
   #--------------------------------------------------------
   if (!is.null(strata)) {
-    if (length(strata) != length(keep) || !is.null(dim(strata)))
-      stop('`strata` must have one value per row of `ord` (', length(keep),
-           ')', if (!is_tbl) ', or name a column of `data`', '.', call. = FALSE)
+    if (length(strata) != n0 || !is.null(dim(strata)))
+      stop('`strata` must have one value per row of `ord` (', n0,
+           '), or name a column of `data`.', call. = FALSE)
     strata <- strata[keep]
     if (anyNA(strata)) stop('`strata` must not contain NAs.', call. = FALSE)
     strata <- as.integer(factor(strata)) - 1L
@@ -264,10 +271,50 @@ envfit <- function (
     stop('All samples have the same coordinates in `ord`.', call. = FALSE)
   q  <- qr.Q(qx)[, seq_len(rk), drop = FALSE]
 
+  fit <- list(
+    x = x, xc = xc, q = q, qx = qx, pm = pm, strata = strata,
+    seed = seed, cpus = cpus )
+
 
   #--------------------------------------------------------
-  # Factors: 0-based level codes.
+  # Metadata rows, then feature rows. Both use the same
+  # permutations (same seed or matrix, same samples).
   #--------------------------------------------------------
+  parts <- list()
+
+  if (!is.null(env))
+    parts[[1]] <- envfit_fit(envfit_vars(env$data[keep, , drop = FALSE]), fit)
+
+  if (!is.null(counts))
+    parts[[length(parts) + 1]] <- envfit_fit(
+      envfit_table(counts, lab0, n0, keep, margin, norm, pseudocount), fit )
+
+  out     <- do.call(rbind, lapply(parts, `[[`, 'out'))
+  rn      <- unlist(lapply(parts, `[[`, 'rn'))
+  r2_perm <- do.call(cbind, lapply(parts, `[[`, 'r2_perm'))
+
+  rownames(out) <- make.unique(as.character(rn))
+  attr(out, 'r2_perm') <- r2_perm
+  attr(out, 'n_perm')  <- pm$n_perm
+  class(out) <- c('ecodive_envfit', 'data.frame')
+  out
+}
+
+
+
+#------------------------------------------------------------------------------
+# Fits one set of variables (from envfit_vars() or envfit_table()). `fit`
+# holds the coordinates, their basis, and the permutations. Returns
+# list(out = data frame, rn = its row names, r2_perm).
+#------------------------------------------------------------------------------
+envfit_fit <- function (vars, fit) {
+
+  x  <- fit$x
+  n  <- nrow(x)
+  qx <- fit$qx
+  rk <- qx$rank
+  pm <- fit$pm
+
   facs <- vars$factors
   grp  <- NULL
   nlev <- integer(0)
@@ -285,15 +332,15 @@ envfit <- function (
 
   res <- .Call(
     C_envfit,
-    if (has_vec) q,
+    if (has_vec) fit$q,
     vars$counts,
     as.integer(vars$margin),
     as.integer(vars$norm),
     as.double(vars$pseudocount),
     as.integer(vars$map),
-    xc, grp, as.integer(nlev),
-    pm$perms, strata,
-    as.integer(c(pm$n_perm, seed, cpus)) )
+    fit$xc, grp, as.integer(nlev),
+    pm$perms, fit$strata,
+    as.integer(c(pm$n_perm, fit$seed, fit$cpus)) )
 
   eps <- sqrt(.Machine$double.eps)
 
@@ -408,13 +455,9 @@ envfit <- function (
     r2_perm <- cbind(vec$perm, fac$perm)[, cols, drop = FALSE]
   }
 
-  rownames(out) <- make.unique(as.character(rn))
-  dimnames(r2_perm) <- list(NULL, vapply(vars$order, `[[`, character(1), 'name'))
+  colnames(r2_perm) <- vapply(vars$order, `[[`, character(1), 'name')
 
-  attr(out, 'r2_perm') <- r2_perm
-  attr(out, 'n_perm')  <- pm$n_perm
-  class(out) <- c('ecodive_envfit', 'data.frame')
-  out
+  list(out = out, rn = rn, r2_perm = r2_perm)
 }
 
 
@@ -515,21 +558,26 @@ envfit_match <- function (labels, n, data_names, n_data, what = '`data`') {
 
 
 #------------------------------------------------------------------------------
-# A data frame (or vector) of variables. Returns list(vars, x, keep,
-# strata_col): `vars` as for C_envfit, `x` the coordinates of the samples
-# kept, `keep` which of ord's rows are kept (na.rm).
+# Metadata (a data frame, matrix, vector, or factor), with its rows aligned to
+# ord's rows. Returns list(data, strata_col): `strata_col` holds the values of
+# the column that `strata` names (which is dropped from `data`), or NULL.
 #------------------------------------------------------------------------------
-envfit_env <- function (data, x, strata, na.rm) {
+envfit_env <- function (data, x, strata) {
 
   n <- nrow(x)
 
   if (is.null(dim(data))) {
+    if (!is.atomic(data))
+      stop('`data` must be a data frame, matrix, vector, or factor.', call. = FALSE)
     nms  <- names(data)
     data <- data.frame(group = data, stringsAsFactors = FALSE)
     if (!is.null(nms) && !anyDuplicated(nms)) rownames(data) <- nms
   }
-  if (!is.data.frame(data))
+  if (!is.data.frame(data)) {
+    if (!is.matrix(data))
+      stop('`data` must be a data frame, matrix, vector, or factor.', call. = FALSE)
     data <- as.data.frame(data, stringsAsFactors = FALSE)
+  }
 
   # `strata` as a column name: its values, and no longer a variable.
   strata_col <- NULL
@@ -538,12 +586,12 @@ envfit_env <- function (data, x, strata, na.rm) {
     data[[strata]] <- NULL
   }
 
+  if (ncol(data) == 0)
+    stop('`data` has no variables to fit.', call. = FALSE)
+
   dn  <- if (.row_names_info(data) > 0) rownames(data) else NULL
   idx <- envfit_match(rownames(x), n, dn, nrow(data))
   if (!is.null(strata_col)) strata_col <- strata_col[idx]
-
-  if (ncol(data) == 0)
-    stop('`data` has no variables to fit.', call. = FALSE)
 
   data <- data[idx, , drop = FALSE]
 
@@ -558,18 +606,20 @@ envfit_env <- function (data, x, strata, na.rm) {
     stop('Infinite values in `data` column', if (length(inf) > 1) 's', ': ',
          name_list(inf), call. = FALSE)
 
-  keep <- stats::complete.cases(x) & stats::complete.cases(data)
-  if (!all(keep)) {
-    if (!na.rm)
-      stop('Missing values (NA) in `ord` or `data`; use na.rm = TRUE to leave out those samples.',
-           call. = FALSE)
-    x    <- x[keep, , drop = FALSE]
-    data <- data[keep, , drop = FALSE]
-  }
+  list(data = data, strata_col = strata_col)
+}
+
+
+
+#------------------------------------------------------------------------------
+# The variables of aligned, complete metadata, for envfit_fit(): numeric
+# columns as a dense table of vectors, the others as factors.
+#------------------------------------------------------------------------------
+envfit_vars <- function (data) {
 
   num  <- vapply(data, is.numeric, logical(1))
   vnms <- names(data)
-  if (is.null(vnms) || any(vnms == '')) vnms <- paste0('V', seq_along(data))
+  if (is.null(vnms) || any(is.na(vnms) | vnms == '')) vnms <- paste0('V', seq_along(data))
 
   order <- vector('list', length(data))
   iv <- 0L; jf <- 0L
@@ -581,13 +631,12 @@ envfit_env <- function (data, x, strata, na.rm) {
   vars <- list(order = order, factors = NULL, counts = NULL)
 
   if (any(num)) {
-    mtx <- matrix(as.double(unlist(data[num], use.names = FALSE)), nrow = nrow(data))
-    vars$counts    <- mtx
-    vars$margin    <- 1L
-    vars$norm      <- 0L
+    vars$counts      <- matrix(as.double(unlist(data[num], use.names = FALSE)), nrow = nrow(data))
+    vars$margin      <- 1L
+    vars$norm        <- 0L
     vars$pseudocount <- 0
-    vars$map       <- seq_len(nrow(data)) - 1L
-    vars$vec_names <- vnms[num]
+    vars$map         <- seq_len(nrow(data)) - 1L
+    vars$vec_names   <- vnms[num]
   }
 
   if (any(!num)) {
@@ -596,17 +645,18 @@ envfit_env <- function (data, x, strata, na.rm) {
     vars$factors <- facs
   }
 
-  list(vars = vars, x = x, keep = keep, strata_col = strata_col)
+  vars
 }
 
 
 
 #------------------------------------------------------------------------------
-# A table of counts: every feature is a vector. Returns list(vars, x, keep).
+# A feature table: every feature is a vector. `labels` and `n` are ord's row
+# names and rows; `keep` which rows are fitted. Returns the vars for
+# envfit_fit().
 #------------------------------------------------------------------------------
-envfit_table <- function (counts, x, margin, norm, pseudocount, na.rm) {
+envfit_table <- function (counts, labels, n, keep, margin, norm, pseudocount) {
 
-  n <- nrow(x)
   validate_counts()
   validate_margin()
   validate_norm()
@@ -622,16 +672,7 @@ envfit_table <- function (counts, x, margin, norm, pseudocount, na.rm) {
   if (margin == 2L) { dims <- rev(dims); dn <- rev(dn) }
 
   ns  <- as.integer(dims[[1]])
-  idx <- envfit_match(rownames(x), n, dn[[1]], ns, '`data`')
-
-  keep <- stats::complete.cases(x)
-  if (!all(keep)) {
-    if (!na.rm)
-      stop('Missing values (NA) in `ord`; use na.rm = TRUE to leave out those samples.',
-           call. = FALSE)
-    x   <- x[keep, , drop = FALSE]
-    idx <- idx[keep]
-  }
+  idx <- envfit_match(labels, n, dn[[1]], ns, '`counts`')[keep]
 
   if (is.logical(counts) && is.matrix(counts)) storage.mode(counts) <- 'double'
 
@@ -641,10 +682,8 @@ envfit_table <- function (counts, x, margin, norm, pseudocount, na.rm) {
   vnms <- dn[[2]]
   if (is.null(vnms)) vnms <- paste0('V', seq_len(dims[[2]]))
 
-  order <- lapply(seq_along(vnms), function (i) list(type = 'vector', index = i, name = vnms[[i]]))
-
-  vars <- list(
-    order       = order,
+  list(
+    order       = lapply(seq_along(vnms), function (i) list(type = 'vector', index = i, name = vnms[[i]])),
     factors     = NULL,
     counts      = counts,
     margin      = margin,
@@ -652,6 +691,4 @@ envfit_table <- function (counts, x, margin, norm, pseudocount, na.rm) {
     pseudocount = pseudocount,
     map         = map,
     vec_names   = vnms )
-
-  list(vars = vars, x = x, keep = keep)
 }
