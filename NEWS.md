@@ -7,6 +7,16 @@
   first few axes (`k = 3` by default), in parallel C, without forming an
   n-by-n matrix. Its results are identical for any number of `cpus`.
 
+* New `nmds()` runs a non-metric multidimensional scaling, following
+  `vegan::metaMDS()` with its `monoMDS()` engine: a start from the PCoA
+  solution, then random starts until the best solution is found again, then
+  centering, rotation to principal components, and scaling. Its C port of
+  `monoMDS` gives the same result as `vegan::monoMDS()` from the same starting
+  configuration. Random starts run in parallel, one per thread, and share one
+  sorted copy of the distances, so memory use is a fraction of `metaMDS()`'s.
+  Random starts come from a `seed` argument, and results are identical for
+  any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference

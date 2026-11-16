@@ -58,6 +58,7 @@ reference:
   desc: Plot samples by their beta diversity distances.
   contents:
   - pcoa
+  - nmds
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.

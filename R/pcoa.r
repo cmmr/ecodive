@@ -107,29 +107,10 @@ pcoa <- function (dm, k = 3L, cpus = n_cpus()) {
   )
 
 
-  # The packed lower triangle of the distance matrix, as in `dist` objects.
-  if (inherits(dm, 'dist')) {
-
-    n      <- as.integer(attr(dm, 'Size', exact = TRUE))
-    labels <- attr(dm, 'Labels', exact = TRUE)
-
-    if (length(n) != 1 || is.na(n) || length(dm) != n * (n - 1) / 2)
-      stop('`dm` is not a valid dist object.', call. = FALSE)
-  }
-  else {
-
-    dm <- as.matrix(dm)
-    n  <- nrow(dm)
-
-    if (!is.numeric(dm) || n != ncol(dm) || !isSymmetric(unname(dm)))
-      stop('`dm` must be a dist object or a symmetric numeric matrix.', call. = FALSE)
-
-    labels <- if (is.null(rownames(dm))) colnames(dm) else rownames(dm)
-    dm     <- dm[lower.tri(dm)]
-  }
-
-  if (!is.double(dm)) storage.mode(dm) <- 'double'
-
+  dv     <- dist_vector(dm)
+  dm     <- dv$dm
+  n      <- dv$n
+  labels <- dv$labels
 
   k <- min(k, n - 1L)
 
@@ -170,4 +151,39 @@ pcoa <- function (dm, k = 3L, cpus = n_cpus()) {
     eig   = eig,
     prop  = if (trace > 0) eig / trace else eig,
     trace = trace )
+}
+
+
+
+# The packed lower triangle of a dist object or symmetric matrix, as a
+# double vector `dm`, with the number of samples `n`, their `labels`, and
+# the dist object's `maxdist` attribute (from vegan::vegdist()), if any.
+dist_vector <- function (dm) {
+
+  maxdist <- NULL
+
+  if (inherits(dm, 'dist')) {
+
+    n       <- as.integer(attr(dm, 'Size', exact = TRUE))
+    labels  <- attr(dm, 'Labels', exact = TRUE)
+    maxdist <- attr(dm, 'maxdist', exact = TRUE)
+
+    if (length(n) != 1 || is.na(n) || length(dm) != n * (n - 1) / 2)
+      stop('`dm` is not a valid dist object.', call. = FALSE)
+  }
+  else {
+
+    dm <- as.matrix(dm)
+    n  <- nrow(dm)
+
+    if (!is.numeric(dm) || n != ncol(dm) || !isSymmetric(unname(dm)))
+      stop('`dm` must be a dist object or a symmetric numeric matrix.', call. = FALSE)
+
+    labels <- if (is.null(rownames(dm))) colnames(dm) else rownames(dm)
+    dm     <- dm[lower.tri(dm)]
+  }
+
+  if (!is.double(dm)) storage.mode(dm) <- 'double'
+
+  list(dm = dm, n = n, labels = labels, maxdist = maxdist)
 }

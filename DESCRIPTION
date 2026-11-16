@@ -20,10 +20,10 @@ Description: Computes alpha and beta diversity metrics in a parallel,
     compositional, and phylogenetic indices including 'Shannon', 'Bray-Curtis',
     'Faith', 'JSD', 'Hellinger', 'Robust Aitchison', and the 'UniFrac' family.
     Runs principal coordinates analysis (classical multidimensional scaling)
-    on beta diversity distances. Provides random sub-sampling for table
-    rarefaction and parses 'Newick' trees into 'phylo' objects. Integrates
-    with data structures from 'phyloseq', 'rbiom', and other common
-    'bioinformatics' packages.
+    and non-metric multidimensional scaling on beta diversity distances.
+    Provides random sub-sampling for table rarefaction and parses 'Newick'
+    trees into 'phylo' objects. Integrates with data structures from
+    'phyloseq', 'rbiom', and other common 'bioinformatics' packages.
     Algorithms are described in Smith 'et al.' (2026) <doi:10.21105/joss.09777>.
 URL: https://cmmr.github.io/ecodive/, https://github.com/cmmr/ecodive
 BugReports: https://github.com/cmmr/ecodive/issues
@@ -36,5 +36,6 @@ RoxygenNote: 7.3.3
 Config/Needs/website: rmarkdown
 Config/testthat/edition: 3
 Imports: parallel, utils
-Suggests: knitr, Matrix, parallelly, rmarkdown, slam, tinytest
+Suggests: ape, knitr, MASS, Matrix, parallelly, rmarkdown, slam, tinytest,
+    vegan
 VignetteBuilder: knitr
