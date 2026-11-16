@@ -168,6 +168,17 @@
   extra$ph[nrow(extra)] <- NA
   expect_identical(permanova(d, extra, ~ trt + ph, permutations = 19, cpus = 1), ref)
 
+  # ... and factor levels found only in those rows are dropped.
+  lv <- extra
+  levels(lv$trt) <- c(levels(lv$trt), 'only_x')
+  lv$trt[nrow(lv)] <- 'only_x'
+  des <- model_design(lv, ~ trt, attr(d, 'Labels'), attr(d, 'Size'))
+  expect_identical(levels(des$data$trt), levels(meta$trt))
+  expect_identical(colnames(des$x), c('trtlow', 'trthigh'))
+  expect_identical(
+    permanova(d, lv, ~ trt, by = 'onedf', permutations = 19, cpus = 1),
+    permanova(d, meta, ~ trt, by = 'onedf', permutations = 19, cpus = 1) )
+
   # ... including NAs in `strata`, as a column or as a vector.
   extra$block[nrow(extra)] <- NA
   sref <- permanova(d, meta, ~ ph, permutations = 19, strata = 'block', cpus = 1)

@@ -113,7 +113,9 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
     idx <- seq_len(n)
   }
 
-  data <- data[idx, , drop = FALSE]
+  # Factor levels with no samples left (e.g. only in rows left out) would
+  # give all-zero, aliased model matrix columns.
+  data <- droplevels(data[idx, , drop = FALSE])
   if (!is.null(labels)) rownames(data) <- labels
 
   if (!is.null(strata)) {
