@@ -218,7 +218,7 @@ anosim <- function (
   eps <- sqrt(.Machine$double.eps)
   p   <- if (pm$n_perm > 0) (1 + sum(r_prm >= r_obs - eps)) / (1 + pm$n_perm) else NA_real_
 
-  # TODO: use shared perm_z() after Batch C (from R/ecodive_test.r).
+  # TODO: use perm_z() once mrpp is merged (R/ecodive_test.r).
   z <- NA_real_
   if (pm$n_perm > 1) {
     z <- (r_obs - mean(r_prm)) / stats::sd(r_prm)
@@ -242,7 +242,7 @@ anosim <- function (
     else if (!is.null(grp$strata)) 'within strata'
     else                           'free'
 
-  # TODO: use new_ecodive_test() after Batch C (from R/ecodive_test.r).
+  # TODO: use new_ecodive_test() once mrpp is merged (R/ecodive_test.r).
   structure(
     .Data = list(
       statistic   = c(R = r_obs),
@@ -361,7 +361,6 @@ anosim_groups <- function (groups, data, labels, n, strata) {
   names(df) <- name
   if (!is.null(rn)) rownames(df) <- rn
 
-  # TODO: use shared helper after Batch C, if model_design() is split.
   des <- model_design(
     data    = df,
     formula = stats::as.formula(call('~', as.name(name)), env = globalenv()),

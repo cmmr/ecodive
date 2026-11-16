@@ -64,33 +64,9 @@ static size_t        an_iwlen;   // ... of this many ints.
 
 
 //------------------------------------------------------
-// Offset of element (j + 1, j) in a dist vector. Column
-// j's elements, rows j + 1 to n - 1, follow it in order.
-// TODO: use shared helper after Batch C
-//------------------------------------------------------
-static inline size_t col_start(int j, int n) {
-  return (size_t) j * (size_t) n - (size_t) j * (size_t) (j + 1) / 2;
-}
-
-
-//------------------------------------------------------
-// Uniform integer in 0 .. bound - 1, without modulo bias.
-// TODO: use shared helper after Batch C
-//------------------------------------------------------
-static inline uint32_t bounded_rand(pcg32_random_t *rng, uint32_t bound) {
-  uint32_t threshold = (0u - bound) % bound;
-  while (1) {
-    uint32_t r = pcg32_random_r(rng);
-    if (r >= threshold) return r % bound;
-  }
-}
-
-
-//------------------------------------------------------
 // Permutation k into p. k = 0 is the identity. The same
-// streams as permanova(), so the same seed draws the same
-// permutations.
-// TODO: use shared helper after Batch C
+// streams as permanova()'s get_perm(), so the same seed
+// draws the same permutations.
 //------------------------------------------------------
 static void get_perm(int k, int *p) {
 
@@ -116,7 +92,7 @@ static void get_perm(int k, int *p) {
     const int *idx = an_order + an_sbeg[s];
     int        len = an_sbeg[s + 1] - an_sbeg[s];
     for (int t = len - 1; t > 0; t--) {
-      int u   = (int) bounded_rand(&rng, (uint32_t) t + 1);
+      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
       int tmp = p[idx[t]];
       p[idx[t]] = p[idx[u]];
       p[idx[u]] = tmp;
@@ -134,8 +110,9 @@ static void get_perm(int k, int *p) {
 // per pass, skipping digits that every value shares.
 // Equal values have equal keys, so the order within ties
 // doesn't matter. O(M) time; 24 bytes per value of
-// scratch space, released before returning.
-// TODO: use the shared sort after Batch C, if it fits.
+// scratch space, released before returning. (nmds.c's
+// radix_sort() is the same idea, but always makes four
+// 16-bit passes and writes the sorted values back.)
 //------------------------------------------------------
 #define RDX_BITS   11
 #define RDX_SIZE   (1 << RDX_BITS)
@@ -344,8 +321,8 @@ static void *within_worker(void *arg) {
 
       // Pairs of columns that span the whole tile.
       for (; j + 1 < i0; j += 2) {
-        const double *r0 = an_rk + col_start(j,     n) + (i0 - j - 1);
-        const double *r1 = an_rk + col_start(j + 1, n) + (i0 - j - 2);
+        const double *r0 = an_rk + dist_col_start(j,     n) + (i0 - j - 1);
+        const double *r1 = an_rk + dist_col_start(j + 1, n) + (i0 - j - 2);
         for (int h = 0; h < nc; h++) {
           const double *vc = L + (size_t) h * n * PERM_W;
           within_chunk2(
@@ -358,7 +335,7 @@ static void *within_worker(void *arg) {
       // The rest: rows max(i0, j + 1) to i1 - 1 of column j.
       for (; j < i1 - 1; j++) {
         int start = (j + 1 > i0) ? j + 1 : i0;
-        const double *r0 = an_rk + col_start(j, n) + (start - j - 1);
+        const double *r0 = an_rk + dist_col_start(j, n) + (start - j - 1);
         for (int h = 0; h < nc; h++) {
           const double *vc = L + (size_t) h * n * PERM_W;
           within_chunk(
@@ -438,7 +415,7 @@ SEXP C_anosim(
   for (int c = 0; c < g; c++) gsw[c] = gnp[c] = 0;
 
   for (int j = 0; j < n - 1; j++) {
-    const double *r  = rk + col_start(j, n);
+    const double *r  = rk + dist_col_start(j, n);
     int           gj = an_grp[j];
     for (int i = j + 1; i < n; i++) {
       if (an_grp[i] == gj) {
@@ -485,7 +462,7 @@ SEXP C_anosim(
   //--------------------------------------------------
   // Blocks, and workspace for each thread.
   //--------------------------------------------------
-  int n_blocks = (an_total + PERM_FW - 1) / PERM_FW;
+  int n_blocks = (int) (((size_t) an_total + PERM_FW - 1) / PERM_FW);
   if (n_threads > n_blocks) n_threads = n_blocks;
 
   an_wlen  = (size_t) n * PERM_FW + PERM_FW;
@@ -500,24 +477,25 @@ SEXP C_anosim(
   //--------------------------------------------------
   // Rounds of blocks, checking for interrupts between
   // them. Each round has at least ~1e8 pair visits per
-  // thread, or every remaining block.
-  // TODO: use parallel_for after Batch C
+  // thread, or every remaining block. Each share of a
+  // round (one per thread) takes every nt-th block, and
+  // has its own workspace.
   //--------------------------------------------------
   double blk_work  = (double) M * PERM_FW + 1;
-  int    per_round = (int) (1e8 * n_threads / blk_work);
+  double rounds    = 1e8 * n_threads / blk_work;
+  int    per_round = (rounds < n_blocks) ? (int) rounds : n_blocks; // no overflow
   if (per_round < n_threads) per_round = n_threads;
-
-  // run_parallel() starts threads only when told of at
-  // least 100 tasks.
-  int tasks_hint = (blk_work > 1e5) ? 100 : 1;
 
   for (an_blk0 = 0; an_blk0 < n_blocks; an_blk0 = an_blk1) {
 
-    an_blk1 = an_blk0 + per_round;
-    if (an_blk1 > n_blocks) an_blk1 = n_blocks;
+    an_blk1 = (n_blocks - an_blk0 > per_round) ? an_blk0 + per_round : n_blocks;
 
-    int nt = (an_blk1 - an_blk0 < n_threads) ? an_blk1 - an_blk0 : n_threads;
-    run_parallel(within_worker, nt, (an_blk1 - an_blk0 > 1) ? tasks_hint : 1);
+    int nb = an_blk1 - an_blk0;
+    int nt = threads_for(nb < n_threads ? nb : n_threads, nb * blk_work, 1e6);
+
+    // run_parallel() starts threads only when told of at
+    // least 100 tasks.
+    run_parallel(within_worker, nt, nt > 1 ? 100 : 1);
 
     if (an_blk1 < n_blocks) R_CheckUserInterrupt();
   }

@@ -83,6 +83,16 @@
   `as.data.frame()` turns it into one row with the same columns for every
   test.
 
+* New `anosim()` runs an analysis of similarities (ANOSIM) on a `dist`
+  object and each sample's group, given as a vector or as a column of sample
+  metadata, with optional `strata`. Given the same permutation matrix, its R
+  statistic, permuted R values and p-value match `vegan::anosim()`'s. It
+  ranks the distances once, with a radix sort, and then each permutation
+  needs only one pass over the ranks, without the n-by-n matrices
+  `vegan::anosim()` builds; permutations run in parallel. With 300 samples
+  and 999 permutations it takes under a tenth of a second, against about
+  seven for `vegan::anosim()`. Results are identical for any number of `cpus`.
+
 * New `dbrda()` runs a distance-based redundancy analysis (db-RDA): the axes
   of a `dist` object that sample metadata explain, given as a formula such as
   `~ treatment + Condition(site)`. It gives the same eigenvalues, inertia,
