@@ -164,7 +164,9 @@
   expect_error(permanova(d, meta[-(1:2), ], ~ trt), '2 samples')
   extra <- rbind(meta, meta[1, ])
   rownames(extra)[nrow(extra)] <- 'X'
-  expect_error(permanova(d, extra, ~ trt), "row of `data` is not in `dm`: 'X'")
+  # Rows for other samples are ignored, even with NAs.
+  extra$ph[nrow(extra)] <- NA
+  expect_identical(permanova(d, extra, ~ trt + ph, permutations = 19, cpus = 1), ref)
   expect_error(permanova(d, unnamed[-1, ], ~ trt), 'has 35 rows')
   expect_error(permanova(d, meta, ~ nothere), "Not found in `data`: 'nothere'")
   na <- meta

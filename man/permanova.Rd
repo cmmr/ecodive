@@ -20,9 +20,10 @@ permanova(
 symmetric numeric matrix of distances. Must not contain \code{NA}s.}
 
 \item{data}{The sample metadata: a data frame with one row per sample.
-Rows are matched to the samples in \code{dm} by row name; without row
-names, they must be in the same order as \code{dm}. A single vector or
-factor is also accepted, as one variable named \code{group}.}
+Rows are matched to the samples in \code{dm} by row name, and rows for
+other samples are ignored; without row names, they must be in the
+same order as \code{dm}. A single vector or factor is also accepted, as
+one variable named \code{group}.}
 
 \item{formula}{A one-sided formula naming the variables in \code{data} to
 test, such as \code{~ treatment} or \code{~ treatment * site + ph}. Factors,

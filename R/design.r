@@ -29,8 +29,9 @@
 #   strata   NULL, the name of a column of `data`, or a vector with one
 #            value per row of `data`, in the same order.
 #
-# Rows of `data` are matched to `labels` by row name. Unnamed rows (or an
-# unlabelled dist) are matched by position instead.
+# Rows of `data` are matched to `labels` by row name; rows for other samples
+# are left out (so their NAs don't matter). Unnamed rows (or an unlabelled
+# dist) are matched by position instead, and must be one per sample.
 #
 # Returns a list:
 #   x            n x p centred model matrix, without the intercept.
@@ -102,15 +103,7 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
         call. = FALSE )
     }
 
-    if (nrow(data) > n) {
-      extra <- setdiff(rownames(data), labels)
-      stop(
-        sprintf('%d row%s of `data` %s not in `dm`: %s\n',
-          length(extra), if (length(extra) == 1) '' else 's',
-          if (length(extra) == 1) 'is' else 'are', name_list(extra) ),
-        'Subset `data` to the samples in `dm` first.',
-        call. = FALSE )
-    }
+    # Rows for samples not in `dm` (e.g. dropped by rarefying) are left out.
   }
   else {
     if (nrow(data) != n)
