@@ -21,28 +21,22 @@
 #' 
 n_cpus <- function () {
   
-  if (!n_cpus_cached) {
-    n_cpus_cached <- 1L
-    
-    if (pthreads()) {
-      
-      if (nzchar(system.file(package = 'parallelly'))) {
-        n <- do.call(`::`, list('parallelly', 'availableCores'))()
-        n <- unname(n)
-      }
-      else {
-        n <- parallel::detectCores(all.tests = TRUE, logical = TRUE) # nocov
-      }
-      
-      if (isTRUE(n > 0))
-        n_cpus_cached <- n
-    }
+  # Not cached: parallelly::availableCores() follows options and environment
+  # variables that can change during a session, such as `mc.cores`, which
+  # the future package sets to 1 inside its workers.
+  
+  if (!pthreads()) return (1L)
+  
+  if (nzchar(system.file(package = 'parallelly'))) {
+    n <- do.call(`::`, list('parallelly', 'availableCores'))()
+    n <- unname(n)
+  }
+  else {
+    n <- parallel::detectCores(all.tests = TRUE, logical = TRUE) # nocov
   }
   
-  return (n_cpus_cached)
+  return (if (isTRUE(n > 0)) n else 1L)
 }
-
-n_cpus_cached <- 0
 
 
 pthreads <- function () {
