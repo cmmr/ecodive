@@ -8,7 +8,10 @@ dbrda(dm, data, formula = NULL, k = 3L, cpus = n_cpus())
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
-symmetric numeric matrix of distances. Must not contain \code{NA}s.}
+symmetric numeric matrix of distances. Must not contain \code{NA}s or
+negative values. Alternatively, as in \code{vegan::dbrda()}, a formula
+with the distances on its left-hand side and the constraints on its
+right, such as \code{dm ~ treatment}, in place of \code{dm} and \code{formula}.}
 
 \item{data}{The sample metadata: a data frame with one row per sample.
 Rows are matched to the samples in \code{dm} by row name, and rows for
@@ -21,10 +24,13 @@ constrain the ordination, such as \code{~ treatment + ph}. Factors,
 numeric covariates, and interactions are all allowed. Wrap
 variables in \code{Condition()} to remove their effect first (a partial
 db-RDA), as in \code{vegan::dbrda()}: \code{~ treatment + Condition(site)}.
-A left-hand side, if any, is ignored. Default: \code{NULL}, for every
+With only \code{Condition()} terms, the result is the unconstrained
+ordination after removing their effect. Default: \code{NULL}, for every
 column of \code{data}.}
 
-\item{k}{The number of axes to return. Default: \code{3}}
+\item{k}{The number of axes to return. Default: \code{3}. Reduced, with a
+warning, to the number of axes with positive eigenvalues, which is
+at most \eqn{n - 1} for \eqn{n} samples.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -124,19 +130,33 @@ number of \code{cpus}.
 }
 \section{Ordination result}{
 
-Every ordination method (\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pca]{pca()}}, and \code{\link[=ordination]{ordination()}}) returns
-the same kind of object: a plain numeric matrix with one row per sample
-(named after the samples) and one column per axis (named \code{"PCoA1"},
-\code{"NMDS1"}, etc.), so that it can go straight into \code{plot()} or a data
-frame. Its attributes always begin with these three, in this order:
+Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}},
+\code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so \code{\link[=ordination]{ordination()}}) returns the same kind of
+object: a numeric matrix with one row per sample and one column per
+axis, so that it can go straight into \code{plot()} or a data frame. Rows are
+named after the samples, when the input has names. Columns are named
+after the method: \code{"PCoA1"}, \code{"PC1"}, \code{"dbRDA1"} (then \code{"MDS1"} for
+unconstrained axes), \code{"NMDS1"}, \code{"TSNE1"}, \code{"UMAP1"}, and so on.
+
+Its attributes always begin with these three, in this order, each with
+one value per column:
 \itemize{
 \item \code{method}: The method's ID, e.g. \code{"pcoa"} or \code{"nmds"}.
-\item \code{eig}: Each axis's eigenvalue, or \code{NA} for methods without them.
-\item \code{prop}: The proportion of the total variance that each axis explains,
-or \code{NA} where that isn't defined.
+\item \code{eig}: Each axis's eigenvalue, on the method's own scale: \code{\link[=pcoa]{pcoa()}}
+gives the eigenvalues of Gower's centered matrix (sums of squares);
+\code{\link[=pca]{pca()}} gives variances, which are \code{\link[=pcoa]{pcoa()}}'s divided by \eqn{n - 1}
+for \eqn{n} samples; and \code{\link[=dbrda]{dbrda()}} follows \code{vegan}, which also divides
+by \eqn{n - 1} when any distance is 4 or more. \code{NA} for \code{\link[=nmds]{nmds()}},
+\code{\link[=tsne]{tsne()}}, and \code{\link[=umap]{umap()}}, which have no eigenvalues.
+\item \code{prop}: The proportion of the total variance (or inertia) that each
+axis explains. Unlike \code{eig}, it is comparable between methods, so use
+it to label axes. \code{NA} where it isn't defined.
 }
 
-Attributes particular to the method follow them.
+Attributes particular to the method follow them. The matrix has class
+\code{"ecodive_ord"} (as well as \code{"matrix"}), only so that \code{print()} lists the
+other attributes by name rather than in full. Subsetting with \code{[}, or
+\code{as.data.frame()}, gives a plain matrix or data frame without them.
 }
 
 \examples{
@@ -147,6 +167,9 @@ Attributes particular to the method follow them.
 
     ord <- dbrda(d, meta, ~ treated)
     ord
+
+    # The same, in vegan's style.
+    dbrda(d ~ treated, meta)
 
     # Percent of the inertia explained by each axis.
     round(100 * attr(ord, 'prop'), 1)
@@ -165,5 +188,5 @@ experiments. \emph{Ecological Monographs}, 69(1), 1-24.
 \doi{10.1890/0012-9615(1999)069[0001:DBRATM]2.0.CO;2}
 }
 \seealso{
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}}
 }

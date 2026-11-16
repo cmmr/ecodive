@@ -29,7 +29,7 @@
 #'        takes time proportional to \eqn{n^2} per iteration. Larger values
 #'        approximate it faster. Default: `0.5`
 #'
-#' @param maxit   The number of iterations. Default: `1000`
+#' @param n_iter   The number of iterations: exactly this many are run. Default: `1000`
 #'
 #' @param init   The starting coordinates: `"pcoa"` (the default),
 #'        `"random"`, or a numeric matrix with one row per sample, in the same
@@ -40,7 +40,7 @@
 #'        `max(n / exaggeration_factor, 200)` for `n` samples, as
 #'        scikit-learn and FIt-SNE do: `Rtsne()`'s fixed `200` for up to 2400
 #'        samples, and larger steps for more, which need them to converge in
-#'        `maxit` iterations.
+#'        `n_iter` iterations.
 #'
 #' @param momentum,final_momentum   The momentum of the gradient descent
 #'        before and after iteration `mom_switch_iter`, from `0` to less than
@@ -72,7 +72,8 @@
 #'     t-SNE minimizes. As in `Rtsne()`, it is approximate when `theta > 0`.
 #'   * `perplexity`: The perplexity used.
 #'   * `init`: How the starting coordinates were chosen: `"random"`,
-#'     `"pcoa"`, or `"matrix"` (given in `init`).
+#'     `"pcoa"`, or `"matrix"` (given in `init`); `"none"` for fewer than 2
+#'     samples, which are all placed at 0.
 #'
 #' @details
 #'
@@ -139,7 +140,10 @@
 #' * Nearest neighbors are found exactly, by scanning `dm`. `Rtsne()` finds
 #'   them with a vantage-point tree, which can miss some when the distances
 #'   aren't metric (e.g. Bray-Curtis), so its results can then differ. Ties
-#'   between neighbors' distances are broken by sample order.
+#'   between neighbors' distances are broken by sample order, which
+#'   `Rtsne()`'s tree doesn't do, so results also differ when distances tie
+#'   at the last neighbor, as they often do for integer data or duplicate
+#'   samples.
 #' * `perplexity` too large for the number of samples is reduced (with a
 #'   warning, if it was given), not an error.
 #'
@@ -157,18 +161,32 @@
 #' **Reproducibility**
 #'
 #' Results are identical from run to run and for any number of `cpus`. The
-#' coordinates are centered on 0, but not otherwise rotated or flipped.
+#' coordinates are centered on 0, and each axis is flipped so that its
+#' largest coordinate in absolute value is positive, as the other ordination
+#' methods do; so they equal `Rtsne()`'s up to the sign of each axis.
 #'
 #' @references
 #' van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE.
 #' *Journal of Machine Learning Research*, 9, 2579-2605.
+#' <https://jmlr.org/papers/v9/vandermaaten08a.html>
 #'
 #' van der Maaten, L. (2014). Accelerating t-SNE using tree-based
 #' algorithms. *Journal of Machine Learning Research*, 15, 3221-3245.
+#' <https://jmlr.org/papers/v15/vandermaaten14a.html>
+#'
+#' Belkina, A. C., Ciccolella, C. O., Anno, R., Halpert, R., Spidlen, J., &
+#' Snyder-Cappione, J. E. (2019). Automated optimized parameters for
+#' T-distributed stochastic neighbor embedding improve visualization and
+#' analysis of large datasets. *Nature Communications*, 10, 5415.
+#' \doi{10.1038/s41467-019-13055-y}
+#'
+#' Kobak, D., & Berens, P. (2019). The art of using t-SNE for single-cell
+#' transcriptomics. *Nature Communications*, 10, 5416.
+#' \doi{10.1038/s41467-019-13056-x}
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pcoa()], [nmds()], [beta_div()]
+#' @seealso [umap()], [pcoa()], [nmds()], [ordination()], [beta_div()]
 #'
 #' @export
 #' @examples
@@ -187,7 +205,7 @@
 #'     ord <- tsne(d, perplexity = 20, init = 'random', theta = 0)
 #'
 tsne <- function (
-    dm, k = 2L, perplexity = 30, theta = 0.5, maxit = 1000L, init = 'pcoa',
+    dm, k = 2L, perplexity = 30, theta = 0.5, n_iter = 1000L, init = 'pcoa',
     learning_rate = 'auto', momentum = 0.5, final_momentum = 0.8,
     mom_switch_iter = NULL,
     exaggeration_factor = 12,
@@ -210,18 +228,18 @@ tsne <- function (
   if (is.null(mom_switch_iter)) mom_switch_iter <- if (init == 'matrix') 0L else 250L
   if (is.null(stop_lying_iter)) stop_lying_iter <- if (init == 'matrix') 0L else 250L
 
-  k               <- nmds_arg(k,               '`k` must be a whole number of at least 1.', whole = TRUE, lo = 1)
+  k               <- ord_k(k)
   perp_given      <- !missing(perplexity)
-  perplexity      <- nmds_arg(perplexity,      '`perplexity` must be a number of at least 1.')
-  theta           <- nmds_arg(theta,           '`theta` must be a number from 0 to 1.', hi = 1)
-  maxit           <- nmds_arg(maxit,           '`maxit` must be a whole number of at least 0.', whole = TRUE)
+  perplexity      <- ord_arg(perplexity,      '`perplexity` must be a number of at least 1.')
+  theta           <- ord_arg(theta,           '`theta` must be a number from 0 to 1.', hi = 1)
+  n_iter          <- ord_arg(n_iter,          '`n_iter` must be a whole number of at least 0.', whole = TRUE)
   if (!identical(learning_rate, 'auto'))
-    learning_rate <- nmds_arg(learning_rate, '`learning_rate` must be "auto" or a number greater than 0.')
-  momentum        <- nmds_arg(momentum,        '`momentum` must be a number from 0 to less than 1.')
-  final_momentum  <- nmds_arg(final_momentum,  '`final_momentum` must be a number from 0 to less than 1.')
-  mom_switch_iter <- nmds_arg(mom_switch_iter, '`mom_switch_iter` must be a whole number of at least 0.', whole = TRUE)
-  exaggeration_factor <- nmds_arg(exaggeration_factor, '`exaggeration_factor` must be a number greater than 0.')
-  stop_lying_iter <- nmds_arg(stop_lying_iter, '`stop_lying_iter` must be a whole number of at least 0.', whole = TRUE)
+    learning_rate <- ord_arg(learning_rate, '`learning_rate` must be "auto" or a number greater than 0.')
+  momentum        <- ord_arg(momentum,        '`momentum` must be a number from 0 to less than 1.')
+  final_momentum  <- ord_arg(final_momentum,  '`final_momentum` must be a number from 0 to less than 1.')
+  mom_switch_iter <- ord_arg(mom_switch_iter, '`mom_switch_iter` must be a whole number of at least 0.', whole = TRUE)
+  exaggeration_factor <- ord_arg(exaggeration_factor, '`exaggeration_factor` must be a number greater than 0.')
+  stop_lying_iter <- ord_arg(stop_lying_iter, '`stop_lying_iter` must be a whole number of at least 0.', whole = TRUE)
 
   # Below 1, no Gaussian can reach the perplexity, and Barnes-Hut would
   # have no neighbors (floor(3 * perplexity) = 0).
@@ -245,6 +263,10 @@ tsne <- function (
   n      <- dv$n
   labels <- dv$labels
 
+  if (as.double(n) * k > .Machine$integer.max)
+    stop('`k` is too large: ', n, ' samples times `k` dimensions must be ',
+         'at most ', .Machine$integer.max, '.', call. = FALSE)
+
   if (!is.null(init_mtx)) {
     init_mtx <- unname(as.matrix(init_mtx))
     if (!is.numeric(init_mtx) || !identical(dim(init_mtx), c(n, k)) || !all(is.finite(init_mtx)))
@@ -254,12 +276,13 @@ tsne <- function (
   }
 
   result <- function (x, kl_divergence) {
-    dimnames(x) <- list(labels, paste0('TSNE', seq_len(k)))
-    structure(
-      .Data         = x,
-      method        = 'tsne',
-      eig           = rep(NA_real_, k),
-      prop          = rep(NA_real_, k),
+    # Each axis's largest absolute coordinate is positive.
+    for (j in seq_len(ncol(x))) {
+      v <- x[, j]
+      if (length(v) && v[[which.max(abs(v))]] < 0) x[, j] <- -v
+    }
+    ord_result(
+      x, 'tsne', labels, prefix = 'TSNE',
       kl_divergence = kl_divergence,
       perplexity    = perplexity,
       init          = init )
@@ -267,13 +290,9 @@ tsne <- function (
 
   if (n < 2) {
     # One sample or none: nothing to embed.
+    if (init != 'matrix') init <- 'none'
     return (result(matrix(0, n, k), 0))
   }
-
-  if (!all(is.finite(dm)))
-    stop('`dm` must not contain NA, NaN, or infinite values.', call. = FALSE)
-  if (any(dm < 0))
-    stop('`dm` must not contain negative distances.', call. = FALSE)
 
 
   # Each point needs floor(3 * perplexity) neighbors.
@@ -296,7 +315,7 @@ tsne <- function (
 
   res <- .Call(
     C_tsne, dm, n, k, init_mtx,
-    as.integer(c(maxit, stop_lying_iter, mom_switch_iter, cpus, seed)),
+    as.integer(c(n_iter, stop_lying_iter, mom_switch_iter, cpus, seed)),
     c(perplexity, theta, learning_rate, momentum, final_momentum, exaggeration_factor) )
 
   result(res$points, res$kl_divergence)

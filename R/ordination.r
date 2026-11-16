@@ -35,32 +35,42 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' Runs any of ecodive's ordination methods by name, as [beta_div()] does for
 #' beta diversity metrics.
 #'
-#' @param x   The data to ordinate: for `"pcoa"`, `"nmds"`, `"tsne"`, and `"umap"`, a
-#'        `dist` object such as from [beta_div()], or a symmetric matrix of
-#'        distances. See `list_ordinations()` for what each method takes.
+#' @param dm   The distances to ordinate: a `dist` object such as from
+#'        [beta_div()], or a symmetric matrix of distances. Every method
+#'        listed by `list_ordinations()` takes distances.
 #'
-#' @param method   The name of an ordination method: `"nmds"`, `"pcoa"`,
-#'        `"tsne"`, or `"umap"`. Flexible matching is supported (see below). Programmatic access via
-#'        `list_ordinations()`.
+#' @param method   The name of an ordination method: `"dbrda"`, `"nmds"`,
+#'        `"pcoa"`, `"tsne"`, or `"umap"`. Flexible matching is supported
+#'        (see below). Programmatic access via `list_ordinations()`.
 #'
-#' @param ...   Further arguments for the method's function, such as `k` or
-#'        `cpus`. Each method keeps its own defaults; see [pcoa()],
-#'        [nmds()], [tsne()], and [umap()].
+#' @param ...   Further arguments for the method's function, such as `k`,
+#'        `seed`, or `cpus`. Each method keeps its own defaults; see
+#'        [dbrda()] (which also needs `data`), [nmds()], [pcoa()], [tsne()],
+#'        and [umap()]. `seed` is ignored by the methods that have no random
+#'        parts (`dbrda` and `pcoa`), so the same arguments can be given to
+#'        every method.
 #'
 #' @return The method's result, as described in "Ordination result" below.
-#'   `ordination(x, 'pcoa', ...)` is the same as `pcoa(x, ...)`.
+#'   `ordination(dm, 'pcoa', ...)` is the same as `pcoa(dm, ...)`.
 #'
 #' @details
 #'
 #' **List of Ordination Methods**
 #'
-#' | Option / Function Name | Method Name                                    |
-#' | :--------------------- | :--------------------------------------------- |
-#' | `dbrda`                | Distance-based Redundancy Analysis (db-RDA)    |
-#' | `nmds`                 | Non-metric Multidimensional Scaling (NMDS)     |
-#' | `pcoa`                 | Principal Coordinates Analysis (PCoA)          |
-#' | `tsne`                 | t-distributed Stochastic Neighbor Embedding    |
-#' | `umap`                 | Uniform Manifold Approximation and Projection  |
+#' | Option / Function Name | Method Name                                           |
+#' | :--------------------- | :---------------------------------------------------- |
+#' | `dbrda`                | Distance-based Redundancy Analysis (db-RDA)           |
+#' | `nmds`                 | Non-metric Multidimensional Scaling (NMDS)            |
+#' | `pcoa`                 | Principal Coordinates Analysis (PCoA)                 |
+#' | `tsne`                 | t-distributed Stochastic Neighbor Embedding (t-SNE)   |
+#' | `umap`                 | Uniform Manifold Approximation and Projection (UMAP)  |
+#'
+#' [pca()] ordinates a count table rather than distances, so it is called
+#' directly, not through `ordination()`. [permanova()] is a test, not an
+#' ordination.
+#'
+#' Default numbers of axes differ: `k = 3` for `dbrda`, `pcoa` (and
+#' [pca()]), and `k = 2` for `nmds`, `tsne`, and `umap`.
 #'
 #'
 #' **Flexible name matching**
@@ -68,30 +78,53 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' Case insensitive and partial matching, ignoring anything but letters. E.g.
 #' `method = 'PCoA'` or `'principal coord'` selects `pcoa`. Common other names
 #' also work: `'MDS'`, `'PCO'`, `'cmdscale'`, or `'classical MDS'` for
-#' `pcoa`, and `'non-metric MDS'`, `'metaMDS'`, or `'monoMDS'` for `nmds`.
-#' `'dbRDA'` or `'distance-based RDA'` select `dbrda`, which also needs
-#' `data` (see [dbrda()]).
+#' `pcoa`; `'non-metric MDS'`, `'metaMDS'`, or `'monoMDS'` for `nmds`;
+#' `'Rtsne'`, `'bhtsne'`, or `'Barnes-Hut t-SNE'` for `tsne`; and `'uwot'`
+#' for `umap`. `'dbRDA'` or `'distance-based RDA'` select `dbrda`.
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
 #'
+#'
+#' **Same names in other packages**
+#'
+#' `ape::pcoa()`, `vegan::pca()`, `vegan::dbrda()`, and `uwot::umap()` share
+#' names with ecodive's functions, and whichever package was attached last
+#' masks the other's. Write `ecodive::pcoa()` and so on, or use
+#' `ordination()`, which always runs ecodive's, to be sure.
+#'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pcoa()], [nmds()], [tsne()], [umap()], [list_ordinations()]
+#' @seealso [dbrda()], [nmds()], [pcoa()], [tsne()], [umap()],
+#'   [list_ordinations()]; [pca()] and [permanova()], which are called
+#'   directly.
 #'
 #' @export
 #' @examples
-#'     d <- bray(ex_counts)
+#'     # 30 samples in three groups.
+#'     set.seed(1)
+#'     counts <- matrix(rpois(30 * 20, 5), 30, 20)
+#'     counts[11:20, 1:5] <- counts[11:20, 1:5] + 5
+#'     counts[21:30, 6:10] <- counts[21:30, 6:10] + 5
+#'     d <- bray(counts)
 #'
 #'     ordination(d, 'pcoa')
 #'
 #'     ordination(d, 'NMDS', k = 2)
 #'
-ordination <- function (x, method, ...) {
+#'     # The same arguments for every method.
+#'     ords <- lapply(c('pcoa', 'nmds', 'umap'), function (m)
+#'       ordination(d, m, k = 2, seed = 1, cpus = 1) )
+#'
+ordination <- function (dm, method, ...) {
 
   method <- match_ordination(method)
 
-  method$func(x, ...)
+  args <- list(...)
+  if (!'seed' %in% method$params) args$seed <- NULL
+
+  # quote(dm), so that a large `dm` isn't copied into the call.
+  do.call(method$func, c(list(quote(dm)), args))
 }
 
 
@@ -211,6 +244,7 @@ match_ordination <- function (method, input = NULL) {
 
   if (!is.character(method)) stop('`method` must be a character vector')
   if (length(method) != 1)   stop('`method` must be length 1')
+  if (is.na(method))         stop('`method` must not be NA')
 
   df <- list_ordinations(input = input)
 
@@ -221,6 +255,12 @@ match_ordination <- function (method, input = NULL) {
   # Use partial matching
   needle <- gsub('[^a-z]', '', tolower(method))
   if (nchar(needle) == 0) stop('`method` must contain alphabetic characters')
+
+  # Close relatives that are called directly.
+  if (needle %in% c('pca', 'principalcomponents', 'principalcomponentanalysis', 'prcomp'))
+    stop('`method = "', method, '"`: call pca() directly; it takes a count table, not distances.')
+  if (needle %in% c('permanova', 'adonis', 'adonis2'))
+    stop('`method = "', method, '"`: call permanova() directly; it is a test, not an ordination.')
 
   opts  <- ORD_HAYSTACK[unname(ORD_HAYSTACK) %in% df$id]
   match <- unique(unname(opts[startsWith(names(opts), needle)]))

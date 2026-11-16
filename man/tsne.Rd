@@ -9,7 +9,7 @@ tsne(
   k = 2L,
   perplexity = 30,
   theta = 0.5,
-  maxit = 1000L,
+  n_iter = 1000L,
   init = "pcoa",
   learning_rate = "auto",
   momentum = 0.5,
@@ -38,7 +38,7 @@ approximation, from \code{0} to \code{1}. \code{0} computes t-SNE exactly, which
 takes time proportional to \eqn{n^2} per iteration. Larger values
 approximate it faster. Default: \code{0.5}}
 
-\item{maxit}{The number of iterations. Default: \code{1000}}
+\item{n_iter}{The number of iterations: exactly this many are run. Default: \code{1000}}
 
 \item{init}{The starting coordinates: \code{"pcoa"} (the default),
 \code{"random"}, or a numeric matrix with one row per sample, in the same
@@ -49,7 +49,7 @@ order as \code{dm}, and \code{k} columns. See "Starting coordinates" below.}
 \code{max(n / exaggeration_factor, 200)} for \code{n} samples, as
 scikit-learn and FIt-SNE do: \code{Rtsne()}'s fixed \code{200} for up to 2400
 samples, and larger steps for more, which need them to converge in
-\code{maxit} iterations.}
+\code{n_iter} iterations.}
 
 \item{momentum, final_momentum}{The momentum of the gradient descent
 before and after iteration \code{mom_switch_iter}, from \code{0} to less than
@@ -85,7 +85,8 @@ similarities from the input similarities at the end: the cost that
 t-SNE minimizes. As in \code{Rtsne()}, it is approximate when \code{theta > 0}.
 \item \code{perplexity}: The perplexity used.
 \item \code{init}: How the starting coordinates were chosen: \code{"random"},
-\code{"pcoa"}, or \code{"matrix"} (given in \code{init}).
+\code{"pcoa"}, or \code{"matrix"} (given in \code{init}); \code{"none"} for fewer than 2
+samples, which are all placed at 0.
 }
 }
 \description{
@@ -157,7 +158,10 @@ stream is left untouched. They have the same distribution as
 \item Nearest neighbors are found exactly, by scanning \code{dm}. \code{Rtsne()} finds
 them with a vantage-point tree, which can miss some when the distances
 aren't metric (e.g. Bray-Curtis), so its results can then differ. Ties
-between neighbors' distances are broken by sample order.
+between neighbors' distances are broken by sample order, which
+\code{Rtsne()}'s tree doesn't do, so results also differ when distances tie
+at the last neighbor, as they often do for integer data or duplicate
+samples.
 \item \code{perplexity} too large for the number of samples is reduced (with a
 warning, if it was given), not an error.
 }
@@ -175,23 +179,39 @@ different, equally good, local minima. The same can happen with
 \strong{Reproducibility}
 
 Results are identical from run to run and for any number of \code{cpus}. The
-coordinates are centered on 0, but not otherwise rotated or flipped.
+coordinates are centered on 0, and each axis is flipped so that its
+largest coordinate in absolute value is positive, as the other ordination
+methods do; so they equal \code{Rtsne()}'s up to the sign of each axis.
 }
 \section{Ordination result}{
 
-Every ordination method (\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pca]{pca()}}, and \code{\link[=ordination]{ordination()}}) returns
-the same kind of object: a plain numeric matrix with one row per sample
-(named after the samples) and one column per axis (named \code{"PCoA1"},
-\code{"NMDS1"}, etc.), so that it can go straight into \code{plot()} or a data
-frame. Its attributes always begin with these three, in this order:
+Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}},
+\code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so \code{\link[=ordination]{ordination()}}) returns the same kind of
+object: a numeric matrix with one row per sample and one column per
+axis, so that it can go straight into \code{plot()} or a data frame. Rows are
+named after the samples, when the input has names. Columns are named
+after the method: \code{"PCoA1"}, \code{"PC1"}, \code{"dbRDA1"} (then \code{"MDS1"} for
+unconstrained axes), \code{"NMDS1"}, \code{"TSNE1"}, \code{"UMAP1"}, and so on.
+
+Its attributes always begin with these three, in this order, each with
+one value per column:
 \itemize{
 \item \code{method}: The method's ID, e.g. \code{"pcoa"} or \code{"nmds"}.
-\item \code{eig}: Each axis's eigenvalue, or \code{NA} for methods without them.
-\item \code{prop}: The proportion of the total variance that each axis explains,
-or \code{NA} where that isn't defined.
+\item \code{eig}: Each axis's eigenvalue, on the method's own scale: \code{\link[=pcoa]{pcoa()}}
+gives the eigenvalues of Gower's centered matrix (sums of squares);
+\code{\link[=pca]{pca()}} gives variances, which are \code{\link[=pcoa]{pcoa()}}'s divided by \eqn{n - 1}
+for \eqn{n} samples; and \code{\link[=dbrda]{dbrda()}} follows \code{vegan}, which also divides
+by \eqn{n - 1} when any distance is 4 or more. \code{NA} for \code{\link[=nmds]{nmds()}},
+\code{\link[=tsne]{tsne()}}, and \code{\link[=umap]{umap()}}, which have no eigenvalues.
+\item \code{prop}: The proportion of the total variance (or inertia) that each
+axis explains. Unlike \code{eig}, it is comparable between methods, so use
+it to label axes. \code{NA} where it isn't defined.
 }
 
-Attributes particular to the method follow them.
+Attributes particular to the method follow them. The matrix has class
+\code{"ecodive_ord"} (as well as \code{"matrix"}), only so that \code{print()} lists the
+other attributes by name rather than in full. Subsetting with \code{[}, or
+\code{as.data.frame()}, gives a plain matrix or data frame without them.
 }
 
 \examples{
@@ -213,10 +233,22 @@ Attributes particular to the method follow them.
 \references{
 van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE.
 \emph{Journal of Machine Learning Research}, 9, 2579-2605.
+\url{https://jmlr.org/papers/v9/vandermaaten08a.html}
 
 van der Maaten, L. (2014). Accelerating t-SNE using tree-based
 algorithms. \emph{Journal of Machine Learning Research}, 15, 3221-3245.
+\url{https://jmlr.org/papers/v15/vandermaaten14a.html}
+
+Belkina, A. C., Ciccolella, C. O., Anno, R., Halpert, R., Spidlen, J., &
+Snyder-Cappione, J. E. (2019). Automated optimized parameters for
+T-distributed stochastic neighbor embedding improve visualization and
+analysis of large datasets. \emph{Nature Communications}, 10, 5415.
+\doi{10.1038/s41467-019-13055-y}
+
+Kobak, D., & Berens, P. (2019). The art of using t-SNE for single-cell
+transcriptomics. \emph{Nature Communications}, 10, 5416.
+\doi{10.1038/s41467-019-13056-x}
 }
 \seealso{
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=umap]{umap()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}}
 }

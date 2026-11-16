@@ -15,7 +15,11 @@
 #' @inheritParams documentation
 #'
 #' @param dm  A `dist` object, such as from [beta_div()] or [bray()], or a
-#'        symmetric numeric matrix of distances. Must not contain `NA`s.
+#'        symmetric numeric matrix of distances. Must not contain `NA`s or
+#'        negative values. Alternatively, as in `vegan::adonis2()`, a formula
+#'        with the distances on its left-hand side and the terms to test on
+#'        its right, such as `dm ~ treatment`, in place of `dm` and
+#'        `formula`.
 #'
 #' @param data  The sample metadata: a data frame with one row per sample.
 #'        Rows are matched to the samples in `dm` by row name, and rows for
@@ -50,9 +54,9 @@
 #'        from `permute::shuffleSet()`, to use instead of random ones.
 #'
 #' @param strata  Permute samples only within these groups (blocks), for
-#'        designs such as repeated measures. The name of a column of `data`,
-#'        or a vector with one value per row of `data`. Default: `NULL`
-#'        (free permutation).
+#'        designs such as repeated measures. The name of a column of `data`
+#'        (which the default `formula` then leaves out), or a vector with one
+#'        value per row of `data`. Default: `NULL` (free permutation).
 #'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
@@ -127,8 +131,15 @@
 #'
 #' **Differences from adonis2()**
 #'
-#' * `permanova()` takes a `dist` object, not a formula with one on the
-#'   left-hand side; use [beta_div()] or a metric function to compute it.
+#' * `permanova()` takes distances, not a community table: compute them first
+#'   with [beta_div()] or a metric function such as [bray()]. Both
+#'   `permanova(dm, data, ~ terms)` and `adonis2()`'s style,
+#'   `permanova(dm ~ terms, data)`, work.
+#' * The permuted \eqn{F} statistics are attribute `f_perm`, where
+#'   `adonis2()` has `F.perm`.
+#' * A term with no degrees of freedom left (aliased with the terms before
+#'   it) has no \eqn{F} or p-value (`NA`), where `adonis2()` reports an
+#'   infinite or undefined \eqn{F}.
 #' * `strata` permutes freely within strata. For other restricted designs,
 #'   pass a `permutations` matrix from `permute::shuffleSet()`.
 #' * When there are fewer possible permutations than requested, `adonis2()`
@@ -149,7 +160,7 @@
 #' *Ecology*, 82(1), 290-297.
 #' \doi{10.1890/0012-9658(2001)082[0290:FMMTCD]2.0.CO;2}
 #'
-#' @seealso [beta_div()], [pcoa()]
+#' @seealso [dbrda()], [beta_div()], [pcoa()]
 #'
 #' @export
 #' @examples
@@ -170,6 +181,9 @@
 #'     # Do treatment and pH explain differences in community composition?
 #'     permanova(dm, meta, ~ treatment + ph)
 #'
+#'     # The same, in adonis2()'s style.
+#'     permanova(dm ~ treatment + ph, meta)
+#'
 #'     # Each term in turn, after the ones before it.
 #'     permanova(dm, meta, ~ treatment + ph, by = 'terms')
 #'
@@ -185,9 +199,10 @@ permanova <- function (
 
   by <- match.arg(by, c('overall', 'terms', 'margin', 'onedf'))
 
-  dv  <- dist_vector(dm)
+  fd  <- formula_dm(dm, formula)
+  dv  <- dist_vector(fd$dm)
   n   <- dv$n
-  des <- model_design(data, formula, dv$labels, n, strata)
+  des <- model_design(data, fd$formula, dv$labels, n, strata, env = parent.frame())
   pm  <- perm_matrix(permutations, n)
 
   if (n < 2)
@@ -310,18 +325,27 @@ permanova <- function (
   #--------------------------------------------------------
   f_all <- sweep(num, 2, dfs, '/') / (ss_res / df_res)
   f_all <- matrix(f_all, nrow = pm$n_perm + 1L, dimnames = list(NULL, colnames(num)))
+
+  # Untestable: no residual degrees of freedom, no variation at all, or a
+  # term with no degrees of freedom left (aliased).
+  if (total <= 0)
+    warning('All distances are 0, so there is nothing to test.', call. = FALSE)
+  else if (df_res <= 0)
+    warning('The model has no residual degrees of freedom, so it cannot be tested.', call. = FALSE)
+  else if (full$rank == 0)
+    warning('No terms to test: every column of the model is constant or aliased.', call. = FALSE)
+
+  if (total <= 0 || df_res <= 0) f_all[] <- NA_real_
+  f_all[, dfs == 0] <- NA_real_
+
   f_obs <- f_all[1, ]
   f_prm <- f_all[-1, , drop = FALSE]
 
-  if (df_res <= 0) {
-    warning('The model has no residual degrees of freedom, so it cannot be tested.', call. = FALSE)
-    f_obs[] <- NA_real_
-  }
-
   eps <- sqrt(.Machine$double.eps)
-  p   <- if (pm$n_perm > 0 && df_res > 0)
+  p   <- if (pm$n_perm > 0)
     (colSums(sweep(f_prm, 2, f_obs - eps, '>=')) + 1) / (pm$n_perm + 1)
   else rep(NA_real_, ncol(num))
+  p[is.na(f_obs)] <- NA_real_
 
 
   #--------------------------------------------------------
@@ -339,7 +363,7 @@ permanova <- function (
   tbl <- data.frame(
     Df       = as.double(tbl_df),
     SumOfSqs = tbl_ss,
-    R2       = tbl_ss / total,
+    R2       = if (total > 0) tbl_ss / total else NA_real_,
     F        = unname(tbl_f),
     P        = unname(tbl_p),
     row.names   = rows,

@@ -4,24 +4,27 @@
 \alias{ordination}
 \title{Ordination Wrapper Function}
 \usage{
-ordination(x, method, ...)
+ordination(dm, method, ...)
 }
 \arguments{
-\item{x}{The data to ordinate: for \code{"pcoa"}, \code{"nmds"}, \code{"tsne"}, and \code{"umap"}, a
-\code{dist} object such as from \code{\link[=beta_div]{beta_div()}}, or a symmetric matrix of
-distances. See \code{list_ordinations()} for what each method takes.}
+\item{dm}{The distances to ordinate: a \code{dist} object such as from
+\code{\link[=beta_div]{beta_div()}}, or a symmetric matrix of distances. Every method
+listed by \code{list_ordinations()} takes distances.}
 
-\item{method}{The name of an ordination method: \code{"nmds"}, \code{"pcoa"},
-\code{"tsne"}, or \code{"umap"}. Flexible matching is supported (see below). Programmatic access via
-\code{list_ordinations()}.}
+\item{method}{The name of an ordination method: \code{"dbrda"}, \code{"nmds"},
+\code{"pcoa"}, \code{"tsne"}, or \code{"umap"}. Flexible matching is supported
+(see below). Programmatic access via \code{list_ordinations()}.}
 
-\item{...}{Further arguments for the method's function, such as \code{k} or
-\code{cpus}. Each method keeps its own defaults; see \code{\link[=pcoa]{pcoa()}},
-\code{\link[=nmds]{nmds()}}, \code{\link[=tsne]{tsne()}}, and \code{\link[=umap]{umap()}}.}
+\item{...}{Further arguments for the method's function, such as \code{k},
+\code{seed}, or \code{cpus}. Each method keeps its own defaults; see
+\code{\link[=dbrda]{dbrda()}} (which also needs \code{data}), \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}},
+and \code{\link[=umap]{umap()}}. \code{seed} is ignored by the methods that have no random
+parts (\code{dbrda} and \code{pcoa}), so the same arguments can be given to
+every method.}
 }
 \value{
 The method's result, as described in "Ordination result" below.
-\code{ordination(x, 'pcoa', ...)} is the same as \code{pcoa(x, ...)}.
+\code{ordination(dm, 'pcoa', ...)} is the same as \code{pcoa(dm, ...)}.
 }
 \description{
 Runs any of ecodive's ordination methods by name, as \code{\link[=beta_div]{beta_div()}} does for
@@ -33,48 +36,87 @@ beta diversity metrics.
    \code{dbrda} \tab Distance-based Redundancy Analysis (db-RDA) \cr
    \code{nmds} \tab Non-metric Multidimensional Scaling (NMDS) \cr
    \code{pcoa} \tab Principal Coordinates Analysis (PCoA) \cr
-   \code{tsne} \tab t-distributed Stochastic Neighbor Embedding \cr
-   \code{umap} \tab Uniform Manifold Approximation and Projection \cr
+   \code{tsne} \tab t-distributed Stochastic Neighbor Embedding (t-SNE) \cr
+   \code{umap} \tab Uniform Manifold Approximation and Projection (UMAP) \cr
 }
 
+
+\code{\link[=pca]{pca()}} ordinates a count table rather than distances, so it is called
+directly, not through \code{ordination()}. \code{\link[=permanova]{permanova()}} is a test, not an
+ordination.
+
+Default numbers of axes differ: \code{k = 3} for \code{dbrda}, \code{pcoa} (and
+\code{\link[=pca]{pca()}}), and \code{k = 2} for \code{nmds}, \code{tsne}, and \code{umap}.
 
 \strong{Flexible name matching}
 
 Case insensitive and partial matching, ignoring anything but letters. E.g.
 \code{method = 'PCoA'} or \code{'principal coord'} selects \code{pcoa}. Common other names
 also work: \code{'MDS'}, \code{'PCO'}, \code{'cmdscale'}, or \code{'classical MDS'} for
-\code{pcoa}, and \code{'non-metric MDS'}, \code{'metaMDS'}, or \code{'monoMDS'} for \code{nmds}.
-\code{'dbRDA'} or \code{'distance-based RDA'} select \code{dbrda}, which also needs
-\code{data} (see \code{\link[=dbrda]{dbrda()}}).
+\code{pcoa}; \code{'non-metric MDS'}, \code{'metaMDS'}, or \code{'monoMDS'} for \code{nmds};
+\code{'Rtsne'}, \code{'bhtsne'}, or \code{'Barnes-Hut t-SNE'} for \code{tsne}; and \code{'uwot'}
+for \code{umap}. \code{'dbRDA'} or \code{'distance-based RDA'} select \code{dbrda}.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
+
+\strong{Same names in other packages}
+
+\code{ape::pcoa()}, \code{vegan::pca()}, \code{vegan::dbrda()}, and \code{uwot::umap()} share
+names with ecodive's functions, and whichever package was attached last
+masks the other's. Write \code{ecodive::pcoa()} and so on, or use
+\code{ordination()}, which always runs ecodive's, to be sure.
 }
 \section{Ordination result}{
 
-Every ordination method (\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pca]{pca()}}, and \code{\link[=ordination]{ordination()}}) returns
-the same kind of object: a plain numeric matrix with one row per sample
-(named after the samples) and one column per axis (named \code{"PCoA1"},
-\code{"NMDS1"}, etc.), so that it can go straight into \code{plot()} or a data
-frame. Its attributes always begin with these three, in this order:
+Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}},
+\code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so \code{\link[=ordination]{ordination()}}) returns the same kind of
+object: a numeric matrix with one row per sample and one column per
+axis, so that it can go straight into \code{plot()} or a data frame. Rows are
+named after the samples, when the input has names. Columns are named
+after the method: \code{"PCoA1"}, \code{"PC1"}, \code{"dbRDA1"} (then \code{"MDS1"} for
+unconstrained axes), \code{"NMDS1"}, \code{"TSNE1"}, \code{"UMAP1"}, and so on.
+
+Its attributes always begin with these three, in this order, each with
+one value per column:
 \itemize{
 \item \code{method}: The method's ID, e.g. \code{"pcoa"} or \code{"nmds"}.
-\item \code{eig}: Each axis's eigenvalue, or \code{NA} for methods without them.
-\item \code{prop}: The proportion of the total variance that each axis explains,
-or \code{NA} where that isn't defined.
+\item \code{eig}: Each axis's eigenvalue, on the method's own scale: \code{\link[=pcoa]{pcoa()}}
+gives the eigenvalues of Gower's centered matrix (sums of squares);
+\code{\link[=pca]{pca()}} gives variances, which are \code{\link[=pcoa]{pcoa()}}'s divided by \eqn{n - 1}
+for \eqn{n} samples; and \code{\link[=dbrda]{dbrda()}} follows \code{vegan}, which also divides
+by \eqn{n - 1} when any distance is 4 or more. \code{NA} for \code{\link[=nmds]{nmds()}},
+\code{\link[=tsne]{tsne()}}, and \code{\link[=umap]{umap()}}, which have no eigenvalues.
+\item \code{prop}: The proportion of the total variance (or inertia) that each
+axis explains. Unlike \code{eig}, it is comparable between methods, so use
+it to label axes. \code{NA} where it isn't defined.
 }
 
-Attributes particular to the method follow them.
+Attributes particular to the method follow them. The matrix has class
+\code{"ecodive_ord"} (as well as \code{"matrix"}), only so that \code{print()} lists the
+other attributes by name rather than in full. Subsetting with \code{[}, or
+\code{as.data.frame()}, gives a plain matrix or data frame without them.
 }
 
 \examples{
-    d <- bray(ex_counts)
+    # 30 samples in three groups.
+    set.seed(1)
+    counts <- matrix(rpois(30 * 20, 5), 30, 20)
+    counts[11:20, 1:5] <- counts[11:20, 1:5] + 5
+    counts[21:30, 6:10] <- counts[21:30, 6:10] + 5
+    d <- bray(counts)
 
     ordination(d, 'pcoa')
 
     ordination(d, 'NMDS', k = 2)
 
+    # The same arguments for every method.
+    ords <- lapply(c('pcoa', 'nmds', 'umap'), function (m)
+      ordination(d, m, k = 2, seed = 1, cpus = 1) )
+
 }
 \seealso{
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, \code{\link[=list_ordinations]{list_ordinations()}}
+\code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}},
+\code{\link[=list_ordinations]{list_ordinations()}}; \code{\link[=pca]{pca()}} and \code{\link[=permanova]{permanova()}}, which are called
+directly.
 }

@@ -23,7 +23,7 @@
 #'        Random starts continue past `try` until the best solution is found
 #'        again, or `trymax` is reached. Default: `20` and `20`
 #'
-#' @param maxit   The maximum number of iterations for each start.
+#' @param max_iter   The maximum number of iterations for each start.
 #'        Default: `200`
 #'
 #' @param weakties   How to treat tied distances in `dm`. `TRUE`, the default,
@@ -135,11 +135,17 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pcoa()], [beta_div()]
+#' @seealso [pcoa()], [tsne()], [umap()], [ordination()], [beta_div()]
 #'
 #' @export
 #' @examples
-#'     ord <- nmds(bray(ex_counts))
+#'     # 30 samples in three groups.
+#'     set.seed(1)
+#'     counts <- matrix(rpois(30 * 20, 5), 30, 20)
+#'     counts[11:20, 1:5] <- counts[11:20, 1:5] + 5
+#'     counts[21:30, 6:10] <- counts[21:30, 6:10] + 5
+#'
+#'     ord <- nmds(bray(counts))
 #'     ord
 #'
 #'     attr(ord, 'stress')
@@ -147,20 +153,20 @@
 #'     plot(ord, asp = 1)
 #'
 nmds <- function (
-    dm, k = 2L, try = 20L, trymax = 20L, maxit = 200L, weakties = TRUE,
+    dm, k = 2L, try = 20L, trymax = 20L, max_iter = 200L, weakties = TRUE,
     stress = 1L, smin = 1e-4, sfgrmin = 1e-7, sratmax = 0.999999,
     seed = 0L, cpus = n_cpus() ) {
 
   validate_cpus()
   validate_seed()
 
-  k       <- nmds_arg(k,       '`k` must be a whole number of at least 1.',  whole = TRUE, lo = 1)
-  try     <- nmds_arg(try,     '`try` must be a whole number of at least 0.', whole = TRUE)
-  trymax  <- nmds_arg(trymax,  '`trymax` must be a whole number of at least 0.', whole = TRUE)
-  maxit   <- nmds_arg(maxit,   '`maxit` must be a whole number of at least 0.', whole = TRUE)
-  smin    <- nmds_arg(smin,    '`smin` must be a number of at least 0.')
-  sfgrmin <- nmds_arg(sfgrmin, '`sfgrmin` must be a number of at least 0.')
-  sratmax <- nmds_arg(sratmax, '`sratmax` must be a number from 0 to 1.', hi = 1)
+  k       <- ord_k(k)
+  try    <- ord_arg(try,     '`try` must be a whole number of at least 0.', whole = TRUE)
+  trymax  <- ord_arg(trymax,  '`trymax` must be a whole number of at least 0.', whole = TRUE)
+  max_iter <- ord_arg(max_iter, '`max_iter` must be a whole number of at least 0.', whole = TRUE)
+  smin    <- ord_arg(smin,    '`smin` must be a number of at least 0.')
+  sfgrmin <- ord_arg(sfgrmin, '`sfgrmin` must be a number of at least 0.')
+  sratmax <- ord_arg(sratmax, '`sratmax` must be a number from 0 to 1.', hi = 1)
 
   if (!isTRUE(weakties) && !isFALSE(weakties))
     stop('`weakties` must be TRUE or FALSE.', call. = FALSE)
@@ -180,11 +186,8 @@ nmds <- function (
 
   if (k < 1) {
     # One sample or none: no dimensions.
-    return(structure(
-      .Data     = matrix(numeric(0), nrow = n, ncol = 0, dimnames = list(labels, NULL)),
-      method    = 'nmds',
-      eig       = numeric(0),
-      prop      = numeric(0),
+    return(ord_result(
+      matrix(numeric(0), nrow = n, ncol = 0), 'nmds', labels,
       stress    = 0,
       converged = FALSE,
       tries     = 0L,
@@ -195,19 +198,15 @@ nmds <- function (
     stop('nmds() supports at most 65,536 samples.', call. = FALSE) # nocov
 
   rng <- range(dm)
-  if (!all(is.finite(rng)))
-    stop('`dm` must not contain NA, NaN, or infinite values.', call. = FALSE)
   if (rng[[2]] <= 0)
     stop('`dm` must have at least one distance greater than 0.', call. = FALSE)
-  if (rng[[1]] < -sqrt(.Machine$double.eps))
-    warning('`dm` has negative distances.', call. = FALSE)
 
 
   # Pairs sorted by distance, shared by all starts.
   prep <- .Call(C_nmds_prep, dm, n)
 
   opts <- function (first, m)
-    as.integer(c(maxit, weakties, stress, cpus, seed, first, m))
+    as.integer(c(max_iter, weakties, stress, cpus, seed, first, m))
   tols <- c(smin, sfgrmin, sratmax)
 
   points <- function (res, i)
@@ -289,30 +288,12 @@ nmds <- function (
     if (v[[which.max(abs(v))]] < 0) x[, j] <- -v
   }
 
-  dimnames(x) <- list(labels, paste0('NMDS', seq_len(k)))
-
-  structure(
-    .Data     = x,
-    method    = 'nmds',
-    eig       = rep(NA_real_, k),
-    prop      = rep(NA_real_, k),
+  ord_result(
+    x, 'nmds', labels, prefix = 'NMDS',
     stress    = best$stress,
     converged = converged > 0,
     tries     = tries,
     best_try  = best_try )
-}
-
-
-
-# Validate a numeric scalar argument; return it as an integer if `whole`.
-nmds_arg <- function (x, msg, whole = FALSE, lo = 0, hi = Inf) {
-
-  ok <- is.numeric(x) && length(x) == 1 && is.finite(x) && x >= lo && x <= hi &&
-    (!whole || x %% 1 == 0)
-
-  if (!ok) stop(msg, call. = FALSE)
-
-  if (whole) as.integer(min(x, .Machine$integer.max)) else as.double(x)
 }
 
 

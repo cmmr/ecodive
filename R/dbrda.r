@@ -14,7 +14,10 @@
 #' @inheritParams documentation
 #'
 #' @param dm  A `dist` object, such as from [beta_div()] or [bray()], or a
-#'        symmetric numeric matrix of distances. Must not contain `NA`s.
+#'        symmetric numeric matrix of distances. Must not contain `NA`s or
+#'        negative values. Alternatively, as in `vegan::dbrda()`, a formula
+#'        with the distances on its left-hand side and the constraints on its
+#'        right, such as `dm ~ treatment`, in place of `dm` and `formula`.
 #'
 #' @param data  The sample metadata: a data frame with one row per sample.
 #'        Rows are matched to the samples in `dm` by row name, and rows for
@@ -27,10 +30,13 @@
 #'        numeric covariates, and interactions are all allowed. Wrap
 #'        variables in `Condition()` to remove their effect first (a partial
 #'        db-RDA), as in `vegan::dbrda()`: `~ treatment + Condition(site)`.
-#'        A left-hand side, if any, is ignored. Default: `NULL`, for every
+#'        With only `Condition()` terms, the result is the unconstrained
+#'        ordination after removing their effect. Default: `NULL`, for every
 #'        column of `data`.
 #'
-#' @param k   The number of axes to return. Default: `3`
+#' @param k   The number of axes to return. Default: `3`. Reduced, with a
+#'        warning, to the number of axes with positive eigenvalues, which is
+#'        at most \eqn{n - 1} for \eqn{n} samples.
 #'
 #' @return A numeric matrix with one row per sample and one column per axis,
 #'   as described in "Ordination result" below. Constrained axes come first,
@@ -130,7 +136,7 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pcoa()], [permanova()], [beta_div()]
+#' @seealso [pcoa()], [pca()], [permanova()], [ordination()], [beta_div()]
 #'
 #' @export
 #' @examples
@@ -142,6 +148,9 @@
 #'     ord <- dbrda(d, meta, ~ treated)
 #'     ord
 #'
+#'     # The same, in vegan's style.
+#'     dbrda(d ~ treated, meta)
+#'
 #'     # Percent of the inertia explained by each axis.
 #'     round(100 * attr(ord, 'prop'), 1)
 #'
@@ -150,23 +159,23 @@
 dbrda <- function (dm, data, formula = NULL, k = 3L, cpus = n_cpus()) {
 
   validate_cpus()
+  k <- ord_k(k)
 
-  tryCatch(
-    expr = {
-      stopifnot(is.numeric(k), length(k) == 1, !is.na(k), k >= 1, k %% 1 == 0)
-      k <- as.integer(min(k, .Machine$integer.max))
-    },
-    error = function (e)
-      stop(e$message, '\n`k` must be a whole number of at least 1.', call. = FALSE)
-  )
+  fd      <- formula_dm(dm, formula)
+  formula <- fd$formula
 
-  dv     <- dist_vector(dm)
-  design <- model_design(data, formula, labels = dv$labels, n = dv$n)
+  dv     <- dist_vector(fd$dm)
+  design <- model_design(
+    data, formula, labels = dv$labels, n = dv$n, allow_empty = TRUE,
+    env = parent.frame() )
 
   # The constraints' variables, for factor-level centroids (vegan leaves out
   # the conditions' variables).
-  mf <- stats::model.frame(design$terms, design$data, na.action = stats::na.fail)
-  attr(mf, 'terms') <- NULL
+  mf <- NULL
+  if (!is.null(design$terms)) {
+    mf <- stats::model.frame(design$terms, design$data, na.action = stats::na.fail)
+    attr(mf, 'terms') <- NULL
+  }
 
   dbrda_core(dv, design$x, design$z, mf, k, cpus)
 }
@@ -225,31 +234,37 @@ dbrda_core <- function (dv, x, z = NULL, mf = NULL, k = 3L, cpus = n_cpus()) {
   m     <- ncol(res$scores)
   scale <- sqrt(sqrt((n - 1) * total)) # vegan's scores() constant
 
-  points <- res$scores * scale
-  dimnames(points) <- list(labels, c(
-    sprintf('dbRDA%d', seq_len(kc)),
-    sprintf('MDS%d',   seq_len(m - kc)) ))
+  # Axes with eigenvalues that aren't positive have no coordinates.
+  if (m < min(k, n - 1L))
+    warning(sprintf('only %d of the first %d eigenvalues are > 0', m, min(k, n - 1L)), call. = FALSE)
+
+  cols <- c(sprintf('dbRDA%d', seq_len(kc)), sprintf('MDS%d', seq_len(m - kc)))
 
   biplot <- matrix(0, nrow(res$biplot), m, dimnames = list(
     colnames(x)[res$kept[ncol(z) + seq_len(ncol(x))]],
-    colnames(points) ))
+    if (m) cols ))
   biplot[, seq_len(kc)] <- res$biplot
+
+  # Rounding can leave a tiny negative remainder.
+  unconstrained <- total - res$conditional - res$constrained
+  if (abs(unconstrained) < sqrt(.Machine$double.eps) * abs(total)) unconstrained <- 0
 
   inertia <- c(
     conditional   = res$conditional,
     constrained   = res$constrained,
-    unconstrained = total - res$conditional - res$constrained )
+    unconstrained = unconstrained )
 
-  structure(
-    .Data           = points,
-    method          = 'dbrda',
+  centroids <- dbrda_centroids(res$u, mf, kc, m, scale, cols)
+
+  ord_result(
+    res$scores * scale, 'dbrda', labels, cols = cols,
     eig             = res$eig,
     prop            = res$eig / (total - res$conditional),
     trace           = total,
     inertia         = inertia,
     constrained_eig = res$con_eig,
     biplot          = biplot,
-    centroids       = dbrda_centroids(res$u, mf, kc, m, scale, colnames(points)) )
+    centroids       = centroids )
 }
 
 

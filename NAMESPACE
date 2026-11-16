@@ -1,5 +1,6 @@
 useDynLib(ecodive, .registration = TRUE)
 
+S3method(print, ecodive_ord)
 importFrom(parallel, detectCores)
 importFrom(utils, combn)
 

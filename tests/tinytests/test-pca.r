@@ -22,41 +22,45 @@
 
 
 
-  # Same as prcomp() on the normalized table, up to sign. ====
-  # Expected values: data-raw/expected/pca.r
+  # Same as prcomp() on the normalized table, up to sign: stored results,
+  # so at home only. ====
 
-  expected <- readRDS('expected/pca.rds')$cases
+  if (at_home()) {
 
-  for (cs in expected) {
+    # Expected values: data-raw/expected/pca.r
+    expected <- readRDS('expected/pca.rds')$cases
 
-    ord <- pca(
-      counts      = cs$counts,
-      norm        = cs$norm,
-      pseudocount = cs$pseudocount,
-      scale       = cs$scale,
-      k           = cs$k,
-      cpus        = 1 )
+    for (cs in expected) {
 
-    ex   <- cs$expected
-    k    <- cs$k
-    feat <- rownames(ex$rotation)
-    load <- attr(ord, 'loadings')
+      ord <- pca(
+        counts      = cs$counts,
+        norm        = cs$norm,
+        pseudocount = cs$pseudocount,
+        scale       = cs$scale,
+        k           = cs$k,
+        cpus        = 1 )
 
-    expect_identical(dim(ord), c(nrow(cs$counts), k))
-    expect_identical(dimnames(ord), list(rownames(cs$counts), paste0('PC', 1:k)))
-    expect_identical(dimnames(load), list(colnames(cs$counts), paste0('PC', 1:k)))
+      ex   <- cs$expected
+      k    <- cs$k
+      feat <- rownames(ex$rotation)
+      load <- attr(ord, 'loadings')
 
-    expect_true(axis_diff(ord, ex$x) < 1e-10)
-    expect_true(axis_diff(load[feat, ], ex$rotation) < 1e-10)
-    expect_equal(attr(ord, 'eig'),   ex$sdev[1:k]^2,                tolerance = 1e-10)
-    expect_equal(attr(ord, 'prop'),  ex$sdev[1:k]^2 / sum(ex$sdev^2), tolerance = 1e-10)
-    expect_equal(attr(ord, 'trace'), sum(ex$sdev^2),                tolerance = 1e-10)
+      expect_identical(dim(ord), c(nrow(cs$counts), k))
+      expect_identical(dimnames(ord), list(rownames(cs$counts), paste0('PC', 1:k)))
+      expect_identical(dimnames(load), list(colnames(cs$counts), paste0('PC', 1:k)))
 
-    # Loadings and scores are signed alike: scores = centered data %*% loadings.
-    expect_true(all(sign(colSums(ord * ex$x)) == sign(colSums(load[feat, ] * ex$rotation))))
+      expect_true(axis_diff(ord, ex$x) < 1e-10)
+      expect_true(axis_diff(load[feat, ], ex$rotation) < 1e-10)
+      expect_equal(attr(ord, 'eig'),   ex$sdev[1:k]^2,                tolerance = 1e-10)
+      expect_equal(attr(ord, 'prop'),  ex$sdev[1:k]^2 / sum(ex$sdev^2), tolerance = 1e-10)
+      expect_equal(attr(ord, 'trace'), sum(ex$sdev^2),                tolerance = 1e-10)
 
-    # Constant features, left out with `scale = TRUE`, have no loading.
-    expect_true(all(load[setdiff(colnames(cs$counts), feat), ] == 0))
+      # Loadings and scores are signed alike: scores = centered data %*% loadings.
+      expect_true(all(sign(colSums(ord * ex$x)) == sign(colSums(load[feat, ] * ex$rotation))))
+
+      # Constant features, left out with `scale = TRUE`, have no loading.
+      expect_true(all(load[setdiff(colnames(cs$counts), feat), ] == 0))
+    }
   }
 
 
@@ -136,7 +140,10 @@
   # The shared ordination result format.
   expect_identical(
     names(attributes(x)),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings') )
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings', 'class') )
+  expect_identical(class(x), c('ecodive_ord', 'matrix', 'array'))
+  # print() lists the loadings by name instead of printing them.
+  expect_true(length(capture.output(print(x))) < nrow(x) + 5)
   expect_identical(attr(x, 'method'), 'pca')
 
   # Each axis's largest absolute score is positive.
@@ -197,14 +204,16 @@
 
   # Same output as pcoa() had before. (The last bits depend on the compiler
   # and its optimization level, so the comparison allows for rounding.)
-  # Expected values: data-raw/expected/pcoa_lanczos.r
+  # Expected values: data-raw/expected/pcoa_lanczos.r. Stored results, so
+  # at home only.
 
-  expected <- readRDS('expected/pcoa_lanczos.rds')
-
-  for (cs in expected$cases) {
-    d   <- beta_div(cs$counts, cs$metric, pseudocount = 1)
-    ord <- pcoa(d, k = cs$k, cpus = 2)
-    expect_equal(ord, cs$expected, tolerance = 1e-12)
+  if (at_home()) {
+    expected <- readRDS('expected/pcoa_lanczos.rds')
+    for (cs in expected$cases) {
+      d   <- beta_div(cs$counts, cs$metric, pseudocount = 1)
+      ord <- pcoa(d, k = cs$k, cpus = 2)
+      expect_equal(unclass(ord), cs$expected, tolerance = 1e-12)
+    }
   }
 
 #})

@@ -6,31 +6,34 @@
 
 
 
-  # Same tables as the reference, given the same permutations. ====
-  # Every permuted F, and so every p-value, matches exactly.
+  # Same tables as the reference, given the same permutations: stored
+  # results, so at home only. Every permuted F, and so every p-value,
+  # matches exactly. ====
 
-  for (cs in ex$cases) {
+  if (at_home()) {
+    for (cs in ex$cases) {
 
-    res <- permanova(
-      d, meta, stats::as.formula(cs$formula), by = cs$by,
-      permutations = ex$perms, cpus = 1 )
+      res <- permanova(
+        d, meta, stats::as.formula(cs$formula), by = cs$by,
+        permutations = ex$perms, cpus = 1 )
 
-    info <- paste(cs$formula, cs$by)
-    tbl  <- unname(as.matrix(res))
-    rows <- rownames(res)
+      info <- paste(cs$formula, cs$by)
+      tbl  <- unname(as.matrix(res))
+      rows <- rownames(res)
 
-    if (cs$ref == 'dbrda') { # No Total row or R2 column.
-      keep <- !rows %in% c('Conditional', 'Total')
-      tbl  <- tbl[keep, -3, drop = FALSE]
-      rows <- rows[keep]
+      if (cs$ref == 'dbrda') { # No Total row or R2 column.
+        keep <- !rows %in% c('Conditional', 'Total')
+        tbl  <- tbl[keep, -3, drop = FALSE]
+        rows <- rows[keep]
+      }
+
+      expect_identical(rows, cs$rows, info = info)
+      expect_equal(tbl[, -ncol(tbl)], cs$table[, -ncol(tbl)], tolerance = 1e-10, info = info)
+      expect_identical(tbl[, ncol(tbl)], cs$table[, ncol(tbl)], info = info)
+
+      if (!is.null(cs$f_perm))
+        expect_equal(unname(attr(res, 'f_perm')), cs$f_perm, tolerance = 1e-10, info = info)
     }
-
-    expect_identical(rows, cs$rows, info = info)
-    expect_equal(tbl[, -ncol(tbl)], cs$table[, -ncol(tbl)], tolerance = 1e-10, info = info)
-    expect_identical(tbl[, ncol(tbl)], cs$table[, ncol(tbl)], info = info)
-
-    if (!is.null(cs$f_perm))
-      expect_equal(unname(attr(res, 'f_perm')), cs$f_perm, tolerance = 1e-10, info = info)
   }
 
 
@@ -115,9 +118,17 @@
   expect_identical(res[['Pr(>F)']][[1]], 1)
   expect_equal(as.vector(attr(res, 'f_perm')), rep(res$F[[1]], 99), tolerance = 1e-10)
 
-  # The same p-value as the reference, up to sampling error.
-  res <- permanova(d, meta, ~ ph, permutations = 9999, strata = meta$block, cpus = 1)
-  expect_true(abs(res[['Pr(>F)']][[1]] - ex$strata_p) < 0.02)
+  # The same p-value as the reference, up to sampling error (stored, so at
+  # home only).
+  if (at_home()) {
+    res <- permanova(d, meta, ~ ph, permutations = 9999, strata = meta$block, cpus = 1)
+    expect_true(abs(res[['Pr(>F)']][[1]] - ex$strata_p) < 0.02)
+  }
+
+  # A strata column is not a term of the default formula.
+  sb <- permanova(d, meta[c('ph', 'block')], strata = 'block', permutations = 19, cpus = 1)
+  expect_identical(rownames(sb), c('Model', 'Residual', 'Total'))
+  expect_identical(sb, permanova(d, meta, ~ ph, strata = 'block', permutations = 19, cpus = 1))
 
   expect_error(permanova(d, meta, ~ ph, permutations = ex$perms, strata = 'block'), 'not both')
   expect_error(permanova(d, meta, ~ ph, strata = 1:3), 'strata')
@@ -224,6 +235,37 @@
   nd <- attr(d, 'Size')
   expect_error(permanova(d, meta, ~ trt, permutations = matrix(1e10, 1, nd)), 'one permutation of 1 to')
   expect_error(permanova(d, meta, ~ trt, permutations = matrix(0:(nd - 1), 1, nd)), 'one permutation of 1 to')
+
+  # adonis2()'s style: the distances on the formula's left-hand side.
+  expect_identical(permanova(d ~ trt + ph, meta, permutations = 19, cpus = 1), ref)
+  expect_identical(permanova(d ~ trt + ph, data = meta, permutations = 19, cpus = 1), ref)
+  expect_error(permanova(d ~ trt, meta, ~ ph), 'not both')
+
+  # Degenerate tables.
+  expect_warning(z <- permanova(d * 0, meta, ~ trt, permutations = 9, cpus = 1), 'All distances are 0')
+  expect_true(all(is.na(z$F)) && all(is.na(z$R2)) && all(is.na(attr(z, 'f_perm'))))
+  const <- data.frame(row.names = rownames(meta), k = rep(1, nrow(meta)))
+  expect_warning(z <- permanova(d, const, ~ k, permutations = 9, cpus = 1), 'No terms to test')
+  expect_identical(rownames(z), c('Residual', 'Total'))
+  expect_warning(res <- permanova(d, sat, ~ id, permutations = 9), 'no residual')
+  expect_true(all(is.na(attr(res, 'f_perm'))))
+  al <- meta
+  al$ph2 <- 2 * al$ph
+  z <- suppressMessages(permanova(d, al, ~ trt + ph + ph2, by = 'margin', permutations = 9, cpus = 1))
+  zero_df <- z$Df == 0 & !rownames(z) %in% c('Residual', 'Total')
+  expect_true(all(is.na(z$F[zero_df])) && all(is.na(z[['Pr(>F)']][zero_df])))
+
+  # Infinite values in a term.
+  inf <- meta
+  inf$ph[3] <- Inf
+  expect_error(permanova(d, inf, ~ ph), 'Infinite values')
+
+  # Duplicate sample names, with `data` matched by position.
+  dd <- d
+  attr(dd, 'Labels')[2] <- attr(dd, 'Labels')[1]
+  expect_identical(
+    permanova(dd, unnamed, ~ trt, permutations = 19, cpus = 1)[, 1:4],
+    permanova(d,  unnamed, ~ trt, permutations = 19, cpus = 1)[, 1:4] )
 
   # A character formula is parsed, not evaluated (R 3.6 evaluated it).
   expect_error(permanova(d, meta, 'trt'),       '`formula` must be a formula')

@@ -12,9 +12,13 @@ A scalar integer, guaranteed to be at least \code{1}.
 \description{
 A thin wrapper around \code{parallely::availableCores()}. If the \code{parallely}
 package is not installed, then it falls back to
-\code{parallel::detectCores(all.tests = TRUE, logical = TRUE)}. Returns \code{1} if
-\code{pthread} support is unavailable or when the number of cpus cannot be
-determined.
+\code{parallel::detectCores(all.tests = TRUE, logical = TRUE)}, limited to 2
+under \verb{R CMD check --as-cran} (when \verb{_R_CHECK_LIMIT_CORES_} is set), as
+\code{parallelly} does. Returns \code{1} if \code{pthread} support is unavailable or when
+the number of cpus cannot be determined.
+}
+\details{
+Every function's \code{cpus} argument is capped at \code{n_cpus()}.
 }
 \examples{
     n_cpus()

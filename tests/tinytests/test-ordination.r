@@ -11,10 +11,13 @@
   expect_identical(ordination(d, 'pcoa', k = 2, cpus = 1), pcoa(d, k = 2, cpus = 1))
   expect_identical(ordination(d, 'nmds', trymax = 3),      nmds(d, trymax = 3))
   expect_identical(ordination(d, 'nmds', k = 3, seed = 2, trymax = 2), nmds(d, k = 3, seed = 2, trymax = 2))
-  expect_identical(ordination(d, 'tsne', perplexity = 5, maxit = 100), tsne(d, perplexity = 5, maxit = 100))
+  expect_identical(ordination(d, 'tsne', perplexity = 5, n_iter = 100), tsne(d, perplexity = 5, n_iter = 100))
 
-  # Arguments the method doesn't take.
+  # Arguments the method doesn't take are an error, except `seed`, which is
+  # dropped for methods without random parts.
   expect_error(ordination(d, 'pcoa', trymax = 3), 'unused argument')
+  expect_identical(ordination(d, 'pcoa', seed = 1, cpus = 1), pcoa(d, cpus = 1))
+  expect_identical(ordination(dm = d, method = 'pcoa'), pcoa(d))
 
 
   # Every method returns the common attributes first, in the same order. ====
@@ -24,13 +27,18 @@
   args <- list(dbrda = list(data = meta))
 
   for (id in list_ordinations(val = 'id')) {
-    ord <- do.call(ordination, c(list(d, id, cpus = 1), args[[id]]))
+    # The same arguments, `seed` included, work for every method.
+    ord <- do.call(ordination, c(list(d, id, k = 2, seed = 1, cpus = 1), args[[id]]))
     expect_true(is.matrix(ord) && is.double(ord))
     expect_identical(rownames(ord), attr(d, 'Labels'))
     expect_identical(names(attributes(ord))[1:5], c('dim', 'dimnames', 'method', 'eig', 'prop'))
     expect_identical(attr(ord, 'method'), id)
+    expect_identical(class(ord), c('ecodive_ord', 'matrix', 'array'))
+    expect_identical(ncol(ord), 2L)
     expect_identical(length(attr(ord, 'eig')),  ncol(ord))
     expect_identical(length(attr(ord, 'prop')), ncol(ord))
+    expect_true(is.double(attr(ord, 'eig')) && is.double(attr(ord, 'prop')))
+    expect_identical(names(attributes(unclass(ord)[, ])), c('dim', 'dimnames'))
   }
 
 
@@ -87,6 +95,9 @@
   expect_error(ordination(d, 123),     'character')
   expect_error(ordination(d, c('pcoa', 'nmds')), 'length 1')
   expect_error(ordination(d, '-'),     'alphabetic')
+  expect_error(ordination(d, NA_character_), 'NA')
+  expect_error(ordination(d, 'PCA'),       'call pca\\(\\) directly')
+  expect_error(ordination(d, 'adonis2'),   'call permanova\\(\\) directly')
   expect_error(list_ordinations(input = 'counts'), 'Options are: NULL, dist')
   expect_error(list_ordinations(val = 'xyz'))
 

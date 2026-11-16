@@ -15,41 +15,45 @@
 
 
 
-  # Same as the reference, up to the sign of each axis. ====
+  # Same as the reference, up to the sign of each axis: stored results, so
+  # at home only. ====
 
-  for (cs in ref$cases) {
+  if (at_home()) {
 
-    ord <- fit_case(cs)
-    exp <- cs$expected
-    k   <- ncol(exp$sites)
-    lbl <- cs$name
+    for (cs in ref$cases) {
 
-    expect_identical(dim(ord), c(attr(cs$dm, 'Size'), k), info = lbl)
-    expect_identical(dimnames(ord), dimnames(exp$sites), info = lbl)
+      ord <- fit_case(cs)
+      exp <- cs$expected
+      k   <- ncol(exp$sites)
+      lbl <- cs$name
 
-    # Flip axes to match the reference.
-    s <- sign(colSums(unclass(ord) * exp$sites))
-    expect_equal(sweep(unclass(ord), 2, s, '*'), exp$sites, check.attributes = FALSE, tolerance = 1e-10, info = lbl)
+      expect_identical(dim(ord), c(attr(cs$dm, 'Size'), k), info = lbl)
+      expect_identical(dimnames(ord), dimnames(exp$sites), info = lbl)
 
-    expect_equal(attr(ord, 'eig'),             exp$eig,             tolerance = 1e-10, info = lbl)
-    expect_equal(attr(ord, 'prop'),            exp$prop,            tolerance = 1e-10, info = lbl)
-    expect_equal(attr(ord, 'trace'),           exp$trace,           tolerance = 1e-10, info = lbl)
-    expect_equal(
-      attr(ord, 'inertia'),
-      c(conditional = exp$conditional, constrained = exp$constrained, unconstrained = exp$unconstrained),
-      tolerance = 1e-10, info = lbl )
-    expect_equal(attr(ord, 'constrained_eig'), exp$constrained_eig, tolerance = 1e-10, info = lbl)
+      # Flip axes to match the reference.
+      s <- sign(colSums(unclass(ord) * exp$sites))
+      expect_equal(sweep(unclass(ord), 2, s, '*'), exp$sites, check.attributes = FALSE, tolerance = 1e-10, info = lbl)
 
-    bp <- attr(ord, 'biplot')
-    expect_identical(dimnames(bp), dimnames(exp$biplot), info = lbl)
-    expect_equal(sweep(bp, 2, s, '*'), exp$biplot, tolerance = 1e-10, info = lbl)
+      expect_equal(attr(ord, 'eig'),             exp$eig,             tolerance = 1e-10, info = lbl)
+      expect_equal(attr(ord, 'prop'),            exp$prop,            tolerance = 1e-10, info = lbl)
+      expect_equal(attr(ord, 'trace'),           exp$trace,           tolerance = 1e-10, info = lbl)
+      expect_equal(
+        attr(ord, 'inertia'),
+        c(conditional = exp$conditional, constrained = exp$constrained, unconstrained = exp$unconstrained),
+        tolerance = 1e-10, info = lbl )
+      expect_equal(attr(ord, 'constrained_eig'), exp$constrained_eig, tolerance = 1e-10, info = lbl)
 
-    cn <- attr(ord, 'centroids')
-    if (is.null(exp$centroids)) {
-      expect_null(cn, info = lbl)
-    } else {
-      expect_identical(dimnames(cn), dimnames(exp$centroids), info = lbl)
-      expect_equal(sweep(cn, 2, s, '*'), exp$centroids, tolerance = 1e-10, info = lbl)
+      bp <- attr(ord, 'biplot')
+      expect_identical(dimnames(bp), dimnames(exp$biplot), info = lbl)
+      expect_equal(sweep(bp, 2, s, '*'), exp$biplot, tolerance = 1e-10, info = lbl)
+
+      cn <- attr(ord, 'centroids')
+      if (is.null(exp$centroids)) {
+        expect_null(cn, info = lbl)
+      } else {
+        expect_identical(dimnames(cn), dimnames(exp$centroids), info = lbl)
+        expect_equal(sweep(cn, 2, s, '*'), exp$centroids, tolerance = 1e-10, info = lbl)
+      }
     }
   }
 
@@ -63,7 +67,7 @@
   expect_identical(
     names(attributes(ord)),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'inertia',
-      'constrained_eig', 'biplot', 'centroids') )
+      'constrained_eig', 'biplot', 'centroids', 'class') )
   expect_identical(attr(ord, 'method'), 'dbrda')
 
   # Inertia components add up.
@@ -105,6 +109,21 @@
   expect_identical(dbrda(cs$dm, vars, cpus = 1), ord)
   expect_identical(ordination(cs$dm, 'dbrda', data = vars, cpus = 1), ord)
   expect_identical(match_ordination('distance-based RDA')$id, 'dbrda')
+
+  # ordination() drops `seed` for dbrda, which has no random parts.
+  expect_identical(ordination(cs$dm, 'dbrda', data = vars, seed = 1, cpus = 1), ord)
+
+  # vegan's style: the distances on the formula's left-hand side.
+  dmx <- cs$dm
+  expect_identical(dbrda(dmx ~ Management + A1, cs$data, cpus = 1), ord)
+  expect_error(dbrda(dmx ~ A1, cs$data, ~ A1), 'not both')
+
+  # Only conditions: the unconstrained ordination after removing them.
+  oc <- dbrda(cs$dm, cs$data, ~ Condition(A1), cpus = 1)
+  expect_true(all(startsWith(colnames(oc), 'MDS')))
+  expect_true(attr(oc, 'inertia')[['conditional']] > 0)
+  expect_equal(attr(oc, 'inertia')[['constrained']], 0)
+  expect_equal(attr(oc, 'trace'), sum(attr(oc, 'inertia')))
 
   # Not capscale, whose results differ for non-Euclidean distances.
   expect_error(match_ordination('capscale'), 'does not match')
@@ -173,8 +192,17 @@
   expect_equal(attr(ord, 'inertia')[['unconstrained']], attr(ord, 'trace'))
 
   # More axes than exist.
-  ord <- dbrda_core(dist_vector(as.dist(as.matrix(d)[1:4, 1:4])), cs$x[1:4, 'A1', drop = FALSE], k = 10, cpus = 1)
+  ord <- suppressWarnings(dbrda_core(dist_vector(as.dist(as.matrix(d)[1:4, 1:4])), cs$x[1:4, 'A1', drop = FALSE], k = 10, cpus = 1))
   expect_true(ncol(ord) <= 3)
+
+  # Axes without positive eigenvalues are dropped with a warning.
+  pts <- cbind(x = sin(1:40), y = cos(1:40 / 2) * 3)
+  expect_warning(ord <- dbrda_core(dist_vector(dist(pts)), NULL, k = 3, cpus = 1), 'only 2 of the first 3')
+  expect_identical(colnames(ord), c('MDS1', 'MDS2'))
+
+  # Two samples: no tiny negative inertia from rounding.
+  ord <- suppressWarnings(dbrda(dist(c(a = 1, b = 3)), c(a = 1, b = 2), cpus = 1))
+  expect_true(all(attr(ord, 'inertia') >= 0))
 
   # One sample.
   ord <- dbrda_core(dist_vector(as.dist(matrix(0, 1, 1))), matrix(1, 1, 1), k = 3, cpus = 1)

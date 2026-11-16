@@ -73,7 +73,8 @@
 #'     \eqn{1 / (1 + a d^{2b})} that turns plot distances \eqn{d} into
 #'     similarities, fitted from `min_dist` and `spread`.
 #'   * `init`: How the starting coordinates were chosen: `"spectral"`,
-#'     `"pcoa"`, `"random"`, or `"matrix"` (given in `init`).
+#'     `"pcoa"`, `"random"`, or `"matrix"` (given in `init`); `"none"` for
+#'     fewer than 2 samples, which are placed at 0.
 #'   * `n_epochs`: The number of optimization epochs run.
 #'
 #' @details
@@ -188,7 +189,7 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pcoa()], [nmds()], [beta_div()]
+#' @seealso [tsne()], [pcoa()], [nmds()], [ordination()], [beta_div()]
 #'
 #' @export
 #' @examples
@@ -212,19 +213,19 @@ umap <- function (
   validate_cpus()
   validate_seed()
 
-  k           <- nmds_arg(k, '`k` must be a whole number of at least 1.', whole = TRUE, lo = 1)
-  n_neighbors <- nmds_arg(n_neighbors, '`n_neighbors` must be a whole number of at least 2.', whole = TRUE, lo = 2)
-  min_dist    <- nmds_arg(min_dist, '`min_dist` must be a number of at least 0.')
-  spread      <- nmds_arg(spread, '`spread` must be a number greater than 0.', lo = .Machine$double.xmin)
-  learning_rate <- nmds_arg(learning_rate, '`learning_rate` must be a number greater than 0.', lo = .Machine$double.xmin)
-  negative_sample_rate <- nmds_arg(negative_sample_rate, '`negative_sample_rate` must be a number greater than 0.', lo = .Machine$double.xmin)
-  repulsion_strength   <- nmds_arg(repulsion_strength, '`repulsion_strength` must be a number of at least 0.')
-  set_op_mix_ratio     <- nmds_arg(set_op_mix_ratio, '`set_op_mix_ratio` must be a number from 0 to 1.', hi = 1)
-  local_connectivity   <- nmds_arg(local_connectivity, '`local_connectivity` must be a number of at least 1.', lo = 1)
-  bandwidth            <- nmds_arg(bandwidth, '`bandwidth` must be a number greater than 0.', lo = .Machine$double.xmin)
+  k           <- ord_k(k)
+  n_neighbors <- ord_arg(n_neighbors, '`n_neighbors` must be a whole number of at least 2.', whole = TRUE, lo = 2)
+  min_dist    <- ord_arg(min_dist, '`min_dist` must be a number of at least 0.')
+  spread      <- ord_arg(spread, '`spread` must be a number greater than 0.', lo = .Machine$double.xmin)
+  learning_rate <- ord_arg(learning_rate, '`learning_rate` must be a number greater than 0.', lo = .Machine$double.xmin)
+  negative_sample_rate <- ord_arg(negative_sample_rate, '`negative_sample_rate` must be a number greater than 0.', lo = .Machine$double.xmin)
+  repulsion_strength   <- ord_arg(repulsion_strength, '`repulsion_strength` must be a number of at least 0.')
+  set_op_mix_ratio     <- ord_arg(set_op_mix_ratio, '`set_op_mix_ratio` must be a number from 0 to 1.', hi = 1)
+  local_connectivity   <- ord_arg(local_connectivity, '`local_connectivity` must be a number of at least 1.', lo = 1)
+  bandwidth            <- ord_arg(bandwidth, '`bandwidth` must be a number greater than 0.', lo = .Machine$double.xmin)
 
   if (!is.null(n_epochs))
-    n_epochs <- nmds_arg(n_epochs, '`n_epochs` must be NULL or a whole number of at least 0.', whole = TRUE)
+    n_epochs <- ord_arg(n_epochs, '`n_epochs` must be NULL or a whole number of at least 0.', whole = TRUE)
 
   init_mtx <- NULL
   if (is.matrix(init) || is.data.frame(init)) {
@@ -249,10 +250,13 @@ umap <- function (
     storage.mode(init_mtx) <- 'double'
   }
 
-  if (!all(is.finite(dm)))
-    stop('`dm` must not contain NA, NaN, or infinite values.', call. = FALSE)
-  if (any(dm < 0))
-    stop('`dm` must not contain negative distances.', call. = FALSE)
+  # Coordinates (n x k) and the graph's edges (up to 2n(n_neighbors - 1))
+  # are indexed with ints in C.
+  if (as.double(n) * k > .Machine$integer.max)
+    stop('`k` is too large: ', n, ' samples times `k` dimensions must be ',
+         'at most ', .Machine$integer.max, '.', call. = FALSE)
+  if (2 * as.double(n) * (min(n_neighbors, n) - 1) > .Machine$integer.max)
+    stop('`n_neighbors` is too large for ', n, ' samples.', call. = FALSE)
 
   if (is.null(n_epochs))
     n_epochs <- if (n <= 10000) 500L else 200L
@@ -270,12 +274,8 @@ umap <- function (
       v <- x[, j]
       if (n > 0 && v[[which.max(abs(v))]] < 0) x[, j] <- -v
     }
-    x <- matrix(as.double(x), n, k, dimnames = list(labels, paste0('UMAP', seq_len(k))))
-    structure(
-      .Data    = x,
-      method   = 'umap',
-      eig      = rep(NA_real_, k),
-      prop     = rep(NA_real_, k),
+    ord_result(
+      matrix(x, n, k), 'umap', labels, prefix = 'UMAP',
       a        = ab[['a']],
       b        = ab[['b']],
       init     = init,
@@ -285,7 +285,7 @@ umap <- function (
   if (n < 2) {
     # One sample or none: nothing to arrange.
     x <- if (is.null(init_mtx)) matrix(0, n, k) else init_mtx
-    return (result(x, init))
+    return (result(x, if (init == 'matrix') init else 'none'))
   }
 
   n_neighbors <- min(n_neighbors, n)

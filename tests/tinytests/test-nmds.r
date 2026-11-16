@@ -33,60 +33,64 @@
 
 
 
-  # Each start matches vegan::monoMDS() from the same configuration. ====
+  # Stored results from vegan and MASS, so at home only. ====
 
-  # Built with the same compiler and optimization as vegan, the results are
-  # identical. Elsewhere, last-bit differences in library functions such as
-  # sqrt() can grow over hundreds of iterations, e.g. stopping an iteration
-  # sooner or later, so long runs are only compared approximately.
+  if (at_home()) {
 
-  for (cs in ex$monomds) {
+    # Each start matches vegan::monoMDS() from the same configuration.
+    # Built with the same compiler and optimization as vegan, the results are
+    # identical. Elsewhere, last-bit differences in library functions such as
+    # sqrt() can grow over hundreds of iterations, e.g. stopping an iteration
+    # sooner or later, so long runs are only compared approximately.
 
-    d    <- dists[[cs$data]]
-    init <- cs$init
+    for (cs in ex$monomds) {
 
-    # Up to 25 iterations.
-    res <- engine(d, init, cs$weakties, cs$stress, maxit = 25L)
-    vg  <- cs$maxit25
-    expect_equal(res$stress, vg$stress, tolerance = 1e-8)
+      d    <- dists[[cs$data]]
+      init <- cs$init
+
+      # Up to 25 iterations.
+      res <- engine(d, init, cs$weakties, cs$stress, maxit = 25L)
+      vg  <- cs$maxit25
+      expect_equal(res$stress, vg$stress, tolerance = 1e-8)
+      expect_equal(res$iters,  vg$iters)
+      expect_equal(res$icause, vg$icause)
+      for (i in seq_len(dim(init)[3]))
+        expect_true(pro_rmse(res$points[, , i], vg$points[, , i]) < 1e-6)
+
+      # Up to 200 iterations.
+      res <- engine(d, init, cs$weakties, cs$stress, maxit = 200L)
+      expect_equal(res$stress, cs$maxit200$stress, tolerance = 0.01)
+    }
+
+    # Few iterations: no chance for rounding differences to grow.
+    vg  <- ex$monomds5
+    res <- engine(d_bray, array(vg$init, c(dim(vg$init), 1)), maxit = 5L)
+    expect_equal(res$stress, vg$stress, tolerance = 1e-12)
     expect_equal(res$iters,  vg$iters)
     expect_equal(res$icause, vg$icause)
-    for (i in seq_len(dim(init)[3]))
-      expect_true(pro_rmse(res$points[, , i], vg$points[, , i]) < 1e-6)
+    expect_equal(res$points[, , 1], vg$points, tolerance = 1e-12)
 
-    # Up to 200 iterations.
-    res <- engine(d, init, cs$weakties, cs$stress, maxit = 200L)
-    expect_equal(res$stress, cs$maxit200$stress, tolerance = 0.01)
+
+
+    # Same solution as vegan::metaMDS() and MASS::isoMDS().
+
+    ord <- nmds(d_pln)
+    vg  <- ex$metamds_plane # set.seed(2); metaMDS(d_pln, trace = 0)
+    expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-4)
+    expect_true(coord_diff(ord, vg$points) < 0.01)
+
+    iso <- ex$isomds_plane # isoMDS(d_pln, trace = FALSE)
+    expect_equal(attr(ord, 'stress'), iso$stress / 100, tolerance = 0.01)
+    expect_true(pro_rmse(ord, iso$points) < 0.01)
+
+    # With a `maxdist` attribute: half-change scaling.
+    d   <- d_pln / max(d_pln)
+    attr(d, 'maxdist') <- 1
+    ord <- nmds(d)
+    vg  <- ex$metamds_hc # set.seed(2); metaMDS(d, trace = 0)
+    expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-3)
+    expect_true(coord_diff(ord, vg$points) < 0.05)
   }
-
-  # Few iterations: no chance for rounding differences to grow.
-  vg  <- ex$monomds5
-  res <- engine(d_bray, array(vg$init, c(dim(vg$init), 1)), maxit = 5L)
-  expect_equal(res$stress, vg$stress, tolerance = 1e-12)
-  expect_equal(res$iters,  vg$iters)
-  expect_equal(res$icause, vg$icause)
-  expect_equal(res$points[, , 1], vg$points, tolerance = 1e-12)
-
-
-
-  # Same solution as vegan::metaMDS() and MASS::isoMDS(). ====
-
-  ord <- nmds(d_pln)
-  vg  <- ex$metamds_plane # set.seed(2); metaMDS(d_pln, trace = 0)
-  expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-4)
-  expect_true(coord_diff(ord, vg$points) < 0.01)
-
-  iso <- ex$isomds_plane # isoMDS(d_pln, trace = FALSE)
-  expect_equal(attr(ord, 'stress'), iso$stress / 100, tolerance = 0.01)
-  expect_true(pro_rmse(ord, iso$points) < 0.01)
-
-  # With a `maxdist` attribute: half-change scaling.
-  d   <- d_pln / max(d_pln)
-  attr(d, 'maxdist') <- 1
-  ord <- nmds(d)
-  vg  <- ex$metamds_hc # set.seed(2); metaMDS(d, trace = 0)
-  expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-3)
-  expect_true(coord_diff(ord, vg$points) < 0.05)
 
 
 
@@ -97,7 +101,7 @@
   expect_identical(dimnames(ord), list(attr(d_bray, 'Labels'), c('NMDS1', 'NMDS2')))
   expect_identical(
     names(attributes(ord)),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged', 'tries', 'best_try') )
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged', 'tries', 'best_try', 'class') )
   expect_identical(attr(ord, 'method'), 'nmds')
   expect_identical(attr(ord, 'eig'),  c(NA_real_, NA_real_))
   expect_identical(attr(ord, 'prop'), c(NA_real_, NA_real_))
@@ -202,7 +206,8 @@
 
   # Negative distances.
   d <- d_bray; d[1] <- -0.1
-  expect_warning(nmds(d, trymax = 1), 'negative')
+  expect_error(nmds(d, trymax = 1), 'must not contain negative distances')
+  expect_error(nmds(d_bray, max_iter = Inf), '`max_iter`')
 
   # Half-change scaling's warnings.
   d <- d_bray
@@ -226,7 +231,7 @@
   expect_error(nmds(d_bray, k = NA),        '`k`')
   expect_error(nmds(d_bray, try = -1),      '`try`')
   expect_error(nmds(d_bray, trymax = 'a'),  '`trymax`')
-  expect_error(nmds(d_bray, maxit = 1:2),   '`maxit`')
+  expect_error(nmds(d_bray, max_iter = 1:2), '`max_iter`')
   expect_error(nmds(d_bray, smin = -1),     '`smin`')
   expect_error(nmds(d_bray, sfgrmin = NA),  '`sfgrmin`')
   expect_error(nmds(d_bray, sratmax = 2),   '`sratmax`')

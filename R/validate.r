@@ -119,10 +119,13 @@ validate_cpus <- function (env = parent.frame()) {
       if (!is.integer(cpus))
         cpus <- as.integer(cpus)
     }),
-    
-    error = function (e) 
+
+    error = function (e)
       stop(e$message, '\n`cpus` must be an integer greater than 0.')
   )
+
+  # No more threads than cores. Results are the same for any `cpus`.
+  env$cpus <- min(env$cpus, n_cpus())
 }
 
 

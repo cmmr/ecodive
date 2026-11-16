@@ -55,7 +55,7 @@ reference:
   - variance_adjusted_unifrac
 
 - title: Ordination
-  desc: Plot samples by their beta diversity distances.
+  desc: Plot samples by their beta diversity distances, or (pca) by their feature abundances.
   contents:
   - ordination
   - pcoa

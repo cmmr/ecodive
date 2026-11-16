@@ -111,8 +111,9 @@
 #' *Biometrika*, 70(1), 57-65. \doi{10.1093/biomet/70.1.57}
 #'
 #' @inheritSection ordination_section Ordination result
+#' @inheritSection documentation Input Types
 #'
-#' @seealso [pcoa()], [aitchison()], `stats::prcomp()`
+#' @seealso [pcoa()], [dbrda()], [ordination()], [aitchison()], `stats::prcomp()`
 #'
 #' @export
 #' @examples
@@ -123,7 +124,7 @@
 #'     round(100 * attr(ord, 'prop'), 1)
 #'
 #'     # Features contributing most to the first axis.
-#'     head(sort(attr(ord, 'loadings')[, 1]))
+#'     head(sort(abs(attr(ord, 'loadings')[, 1]), decreasing = TRUE))
 #'
 #'     # Same scores as prcomp(), up to the sign of each axis.
 #'     clr <- log(ex_counts + 1)
@@ -146,15 +147,7 @@ pca <- function (
   validate_pseudocount()
   validate_margin()
   validate_cpus()
-
-  tryCatch(
-    expr = {
-      stopifnot(is.numeric(k), length(k) == 1, !is.na(k), k >= 1, k %% 1 == 0)
-      k <- as.integer(min(k, .Machine$integer.max))
-    },
-    error = function (e)
-      stop(e$message, '\n`k` must be a whole number of at least 1.', call. = FALSE)
-  )
+  k <- ord_k(k)
 
   if (!isTRUE(scale) && !isFALSE(scale))
     stop('`scale` must be TRUE or FALSE.', call. = FALSE)
@@ -191,28 +184,20 @@ pca <- function (
       warning('PCA did not converge; results may be inexact.', call. = FALSE)
     # nocov end
 
-    # Keep the positive eigenvalues, ignoring rounding-error ones.
-    eig  <- res$eig
-    keep <- eig > max(0, sqrt(.Machine$double.eps) * eig[[1]])
-
-    if (!all(keep))
-      warning(sprintf('only %d of the first %d eigenvalues are > 0', sum(keep), k), call. = FALSE)
-
+    keep     <- ord_keep(res$eig, k)
     scores   <- res$scores[, keep, drop = FALSE]
     loadings <- res$loadings[, keep, drop = FALSE]
-    eig      <- eig[keep]
+    eig      <- res$eig[keep]
     total    <- res$total
   }
 
   axes <- if (ncol(scores) > 0) paste0('PC', seq_len(ncol(scores))) else NULL
-  dimnames(scores)   <- list(dn[[1]], axes)
   dimnames(loadings) <- list(dn[[2]], axes)
 
   denom <- max(1L, n - 1L)
 
-  structure(
-    .Data    = scores,
-    method   = 'pca',
+  ord_result(
+    scores, 'pca', dn[[1]], prefix = 'PC',
     eig      = eig / denom,
     prop     = if (total > 0) eig / total else eig,
     trace    = total / denom,

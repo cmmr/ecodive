@@ -14,16 +14,22 @@
 #' @inheritParams documentation
 #'
 #' @param dm  A `dist` object, such as from [beta_div()] or [bray()], or a
-#'        symmetric numeric matrix of distances. Must not contain `NA`s.
+#'        symmetric numeric matrix of distances. Must not contain `NA`s or
+#'        negative values.
 #'
-#' @param k   The number of axes to compute. Default: `3`
+#' @param k   The number of axes to compute. Default: `3`. Reduced, with a
+#'        warning, to the number of axes with positive eigenvalues, which is
+#'        at most \eqn{n - 1} for \eqn{n} samples.
 #'
 #' @return A numeric matrix with one row per sample and one column per axis,
 #'   named `"PCoA1"`, `"PCoA2"`, etc., as described in "Ordination result"
 #'   below. Its attributes are:
 #'
 #'   * `method`: `"pcoa"`.
-#'   * `eig`: The eigenvalue of each axis.
+#'   * `eig`: The eigenvalue of each axis: of Gower's centered matrix, so on
+#'     the scale of sums of squares. [pca()]'s `eig` are variances, these
+#'     divided by \eqn{n - 1}; [dbrda()]'s are too when any distance is 4 or
+#'     more.
 #'   * `prop`: The proportion of the total variance that each axis explains,
 #'     `eig / trace`.
 #'   * `trace`: The total variance: the sum of all eigenvalues, including
@@ -82,7 +88,8 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [nmds()], [beta_div()], `stats::cmdscale()`
+#' @seealso [pca()], [dbrda()], [nmds()], [ordination()], [beta_div()],
+#'   `stats::cmdscale()`
 #'
 #' @export
 #' @examples
@@ -100,16 +107,7 @@
 pcoa <- function (dm, k = 3L, cpus = n_cpus()) {
 
   validate_cpus()
-
-  tryCatch(
-    expr = {
-      stopifnot(is.numeric(k), length(k) == 1, !is.na(k), k >= 1, k %% 1 == 0)
-      k <- as.integer(min(k, .Machine$integer.max))
-    },
-    error = function (e)
-      stop(e$message, '\n`k` must be a whole number of at least 1.', call. = FALSE)
-  )
-
+  k <- ord_k(k)
 
   dv     <- dist_vector(dm)
   dm     <- dv$dm
@@ -121,7 +119,7 @@ pcoa <- function (dm, k = 3L, cpus = n_cpus()) {
   if (k < 1) {
 
     # One sample or none: no axes.
-    points <- matrix(numeric(0), nrow = n, ncol = 0, dimnames = list(labels, NULL))
+    points <- matrix(numeric(0), nrow = n, ncol = 0)
     eig    <- numeric(0)
     trace  <- 0
 
@@ -133,62 +131,15 @@ pcoa <- function (dm, k = 3L, cpus = n_cpus()) {
       warning('PCoA did not converge; coordinates may be inexact.', call. = FALSE)
     # nocov end
 
-    # Keep the positive eigenvalues, ignoring rounding-error ones.
-    eig  <- res$eig
-    keep <- eig > max(0, sqrt(.Machine$double.eps) * eig[[1]])
-
-    if (!all(keep))
-      warning(sprintf('only %d of the first %d eigenvalues are > 0', sum(keep), k), call. = FALSE)
-
+    keep   <- ord_keep(res$eig, k)
     points <- res$points[, keep, drop = FALSE]
-    eig    <- eig[keep]
+    eig    <- res$eig[keep]
     trace  <- res$trace
-
-    dimnames(points) <- list(labels, NULL)
   }
 
-  if (ncol(points) > 0)
-    colnames(points) <- paste0('PCoA', seq_len(ncol(points)))
-
-  structure(
-    .Data  = points,
-    method = 'pcoa',
-    eig    = eig,
-    prop   = if (trace > 0) eig / trace else eig,
-    trace  = trace )
-}
-
-
-
-# The packed lower triangle of a dist object or symmetric matrix, as a
-# double vector `dm`, with the number of samples `n`, their `labels`, and
-# the dist object's `maxdist` attribute (from vegan::vegdist()), if any.
-dist_vector <- function (dm) {
-
-  maxdist <- NULL
-
-  if (inherits(dm, 'dist')) {
-
-    n       <- as.integer(attr(dm, 'Size', exact = TRUE))
-    labels  <- attr(dm, 'Labels', exact = TRUE)
-    maxdist <- attr(dm, 'maxdist', exact = TRUE)
-
-    if (length(n) != 1 || is.na(n) || n < 0 || length(dm) != n * (n - 1) / 2)
-      stop('`dm` is not a valid dist object.', call. = FALSE)
-  }
-  else {
-
-    dm <- as.matrix(dm)
-    n  <- nrow(dm)
-
-    if (!is.numeric(dm) || n != ncol(dm) || !isSymmetric(unname(dm)))
-      stop('`dm` must be a dist object or a symmetric numeric matrix.', call. = FALSE)
-
-    labels <- if (is.null(rownames(dm))) colnames(dm) else rownames(dm)
-    dm     <- dm[lower.tri(dm)]
-  }
-
-  if (!is.double(dm)) storage.mode(dm) <- 'double'
-
-  list(dm = dm, n = n, labels = labels, maxdist = maxdist)
+  ord_result(
+    points, 'pcoa', labels, prefix = 'PCoA',
+    eig   = eig,
+    prop  = if (trace > 0) eig / trace else eig,
+    trace = trace )
 }

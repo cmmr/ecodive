@@ -68,18 +68,25 @@
   adam <- c(0.5, 0.9, 1e-7)
 
 
+  # Comparisons with uwot's stored results run at home only; the stored
+  # distances are also used as inputs everywhere.
+  home <- at_home()
+
+
   #--------------------------------------------------
   # Neighbours, smooth kNN, and fuzzy graph: exact.
   #--------------------------------------------------
   g1 <- graph(c1$d, c1$n_neighbors)
 
-  expect_identical(g1$idx,   c1$nn_idx)
-  expect_identical(g1$dist,  c1$nn_dist)
-  expect_identical(g1$sigma, c1$sigma)
-  expect_identical(g1$rho,   c1$rho)
-  expect_identical(g1$p,     c1$graph$p)
-  expect_identical(g1$j,     c1$graph$i)
-  expect_identical(g1$x,     c1$graph$x)
+  if (home) {
+    expect_identical(g1$idx,   c1$nn_idx)
+    expect_identical(g1$dist,  c1$nn_dist)
+    expect_identical(g1$sigma, c1$sigma)
+    expect_identical(g1$rho,   c1$rho)
+    expect_identical(g1$p,     c1$graph$p)
+    expect_identical(g1$j,     c1$graph$i)
+    expect_identical(g1$x,     c1$graph$x)
+  }
   expect_identical(g1$n_failures,   0L)
   expect_identical(g1$n_components, 1L)
 
@@ -89,13 +96,15 @@
   # Ties, duplicate samples, partial local connectivity, mixed union.
   g2 <- graph(c2$d, c2$n_neighbors, local = c2$local_connectivity, mix = c2$set_op_mix_ratio)
 
-  expect_identical(g2$idx,   c2$nn_idx)
-  expect_identical(g2$dist,  c2$nn_dist)
-  expect_identical(g2$sigma, c2$sigma)
-  expect_identical(g2$rho,   c2$rho)
-  expect_identical(g2$p,     c2$graph$p)
-  expect_identical(g2$j,     c2$graph$i)
-  expect_identical(g2$x,     c2$graph$x)
+  if (home) {
+    expect_identical(g2$idx,   c2$nn_idx)
+    expect_identical(g2$dist,  c2$nn_dist)
+    expect_identical(g2$sigma, c2$sigma)
+    expect_identical(g2$rho,   c2$rho)
+    expect_identical(g2$p,     c2$graph$p)
+    expect_identical(g2$j,     c2$graph$i)
+    expect_identical(g2$x,     c2$graph$x)
+  }
 
   # Pure fuzzy intersection keeps only mutual neighbours.
   g3 <- graph(c2$d, c2$n_neighbors, mix = 0)
@@ -108,8 +117,10 @@
   #--------------------------------------------------
   # A nonlinear least-squares fit, which stops at a relative tolerance of
   # 1e-5: last-bit differences in the math library move it by ~3e-10.
-  expect_equal(umap_ab(1, 0.01),    c1$ab,      tolerance = 1e-6)
-  expect_equal(umap_ab(1.5, 0.3),   c1$sgd2$ab, tolerance = 1e-6)
+  if (home) {
+    expect_equal(umap_ab(1, 0.01),    c1$ab,      tolerance = 1e-6)
+    expect_equal(umap_ab(1.5, 0.3),   c1$sgd2$ab, tolerance = 1e-6)
+  }
   expect_error(umap_ab(1, 1e10))
 
 
@@ -119,8 +130,10 @@
   #--------------------------------------------------
   sp <- .Call(C_umap_spectral, g1, 2L, 1L)
   expect_true(sp$converged)
-  expect_equal(sp$vectors, c1$spectral$vectors, tolerance = 1e-8)
-  expect_equal(sp$values,  c1$spectral$values,  tolerance = 1e-8)
+  if (home) {
+    expect_equal(sp$vectors, c1$spectral$vectors, tolerance = 1e-8)
+    expect_equal(sp$values,  c1$spectral$values,  tolerance = 1e-8)
+  }
   expect_identical(.Call(C_umap_spectral, g1, 2L, 4L), sp)
 
 
@@ -138,14 +151,14 @@
   # everywhere. Results across `cpus` are always
   # exactly identical.
   #--------------------------------------------------
-  same_platform <- .Platform$OS.type == 'windows' && R.version$arch == 'x86_64'
+  same_platform <- home && .Platform$OS.type == 'windows' && R.version$arch == 'x86_64'
   short_tol     <- if (same_platform) 0 else 1e-5
 
   s1    <- c1$sgd1
   seeds <- batch_seeds(s1$seed, n1, 5)
   xs    <- .Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, 1L)
   expect_identical(.Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, 4L), xs)
-  expect_equal(center_like(xs, s1$short), s1$short, tolerance = short_tol)
+  if (home) expect_equal(center_like(xs, s1$short), s1$short, tolerance = short_tol)
 
   seeds <- batch_seeds(s1$seed, n1, s1$n_epochs)
   x1    <- .Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, 1L)
@@ -175,24 +188,26 @@
   # uwot's batch mode at preserving neighbours, and
   # with a similar cross-entropy.
   #--------------------------------------------------
-  uq <- umap(c1$d, init = c1$init_q, min_dist = 0.01)
   qb <- c1$quality['batch', ]
-  expect_true(nn_preservation(c1$d, uq) > qb[['preservation']] - 0.05)
-  expect_true(trustworthiness(c1$d, uq) > qb[['trustworthiness']] - 0.02)
-  expect_true(cross_entropy(c1$graph, uq, c1$ab) < qb[['cross_entropy']] * 1.1)
+  if (home) {
+    uq <- umap(c1$d, init = c1$init_q, min_dist = 0.01)
+    expect_true(nn_preservation(c1$d, uq) > qb[['preservation']] - 0.05)
+    expect_true(trustworthiness(c1$d, uq) > qb[['trustworthiness']] - 0.02)
+    expect_true(cross_entropy(c1$graph, uq, c1$ab) < qb[['cross_entropy']] * 1.1)
+  }
 
 
   #--------------------------------------------------
   # Defaults.
   #--------------------------------------------------
   u <- umap(c1$d)
-  expect_true(nn_preservation(c1$d, u) > qb[['preservation']] - 0.1)
+  if (home) expect_true(nn_preservation(c1$d, u) > qb[['preservation']] - 0.1)
 
   expect_identical(dim(u), c(n1, 2L))
   expect_identical(colnames(u), c('UMAP1', 'UMAP2'))
   expect_identical(
     names(attributes(u)),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'a', 'b', 'init', 'n_epochs') )
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'a', 'b', 'init', 'n_epochs', 'class') )
   expect_identical(attr(u, 'method'), 'umap')
   expect_identical(attr(u, 'eig'),  c(NA_real_, NA_real_))
   expect_identical(attr(u, 'prop'), c(NA_real_, NA_real_))
@@ -251,6 +266,8 @@
   expect_identical(dim(umap(d3, k = 1, n_epochs = 10)), c(3L, 1L))
   expect_identical(dim(umap(dist(1:2), n_epochs = 10)), c(2L, 2L))
   expect_identical(dim(umap(dist(1))), c(1L, 2L))
+  expect_identical(attr(umap(dist(1)), 'init'), 'none')
+  expect_identical(attr(umap(dist(1), init = matrix(5, 1, 2)), 'init'), 'matrix')
   expect_identical(dim(umap(structure(numeric(0), Size = 0L, class = 'dist'))), c(0L, 2L))
 
 

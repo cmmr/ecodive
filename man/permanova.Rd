@@ -17,7 +17,11 @@ permanova(
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
-symmetric numeric matrix of distances. Must not contain \code{NA}s.}
+symmetric numeric matrix of distances. Must not contain \code{NA}s or
+negative values. Alternatively, as in \code{vegan::adonis2()}, a formula
+with the distances on its left-hand side and the terms to test on
+its right, such as \code{dm ~ treatment}, in place of \code{dm} and
+\code{formula}.}
 
 \item{data}{The sample metadata: a data frame with one row per sample.
 Rows are matched to the samples in \code{dm} by row name, and rows for
@@ -53,9 +57,9 @@ Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones.}
 
 \item{strata}{Permute samples only within these groups (blocks), for
-designs such as repeated measures. The name of a column of \code{data},
-or a vector with one value per row of \code{data}. Default: \code{NULL}
-(free permutation).}
+designs such as repeated measures. The name of a column of \code{data}
+(which the default \code{formula} then leaves out), or a vector with one
+value per row of \code{data}. Default: \code{NULL} (free permutation).}
 
 \item{seed}{An integer seed for the random permutations. The same seed
 gives the same p-values. Default: \code{0}}
@@ -139,8 +143,15 @@ p-values agree with it only up to sampling error, unless the same
 
 \strong{Differences from adonis2()}
 \itemize{
-\item \code{permanova()} takes a \code{dist} object, not a formula with one on the
-left-hand side; use \code{\link[=beta_div]{beta_div()}} or a metric function to compute it.
+\item \code{permanova()} takes distances, not a community table: compute them first
+with \code{\link[=beta_div]{beta_div()}} or a metric function such as \code{\link[=bray]{bray()}}. Both
+\code{permanova(dm, data, ~ terms)} and \code{adonis2()}'s style,
+\code{permanova(dm ~ terms, data)}, work.
+\item The permuted \eqn{F} statistics are attribute \code{f_perm}, where
+\code{adonis2()} has \code{F.perm}.
+\item A term with no degrees of freedom left (aliased with the terms before
+it) has no \eqn{F} or p-value (\code{NA}), where \code{adonis2()} reports an
+infinite or undefined \eqn{F}.
 \item \code{strata} permutes freely within strata. For other restricted designs,
 pass a \code{permutations} matrix from \code{permute::shuffleSet()}.
 \item When there are fewer possible permutations than requested, \code{adonis2()}
@@ -166,6 +177,9 @@ draws random permutations.
     # Do treatment and pH explain differences in community composition?
     permanova(dm, meta, ~ treatment + ph)
 
+    # The same, in adonis2()'s style.
+    permanova(dm ~ treatment + ph, meta)
+
     # Each term in turn, after the ones before it.
     permanova(dm, meta, ~ treatment + ph, by = 'terms')
 
@@ -188,5 +202,5 @@ community data: a comment on distance-based redundancy analysis.
 \doi{10.1890/0012-9658(2001)082[0290:FMMTCD]2.0.CO;2}
 }
 \seealso{
-\code{\link[=beta_div]{beta_div()}}, \code{\link[=pcoa]{pcoa()}}
+\code{\link[=dbrda]{dbrda()}}, \code{\link[=beta_div]{beta_div()}}, \code{\link[=pcoa]{pcoa()}}
 }

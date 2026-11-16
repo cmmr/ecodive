@@ -11,7 +11,10 @@
   does for beta diversity metrics, with the method's own arguments.
   `list_ordinations()` and `match_ordination()` list and look up the methods.
   Every ordination method returns the same kind of result: a sample-by-axis
-  matrix whose attributes start with `method`, `eig`, and `prop`.
+  matrix (of class `"ecodive_ord"`, which prints its attributes' names
+  rather than their contents) whose attributes start with `method`, `eig`,
+  and `prop`. Every method rejects negative distances (beyond rounding
+  error), and `seed` can be given to any of them through `ordination()`.
 
 * New `nmds()` runs a non-metric multidimensional scaling, following
   `vegan::metaMDS()` with its `monoMDS()` engine: a start from the PCoA
@@ -21,13 +24,14 @@
   configuration. Random starts run in parallel, one per thread, and share one
   sorted copy of the distances, so memory use is a fraction of `metaMDS()`'s.
   Random starts come from a `seed` argument, and results are identical for
-  any number of `cpus`.
+  any number of `cpus`. Each start runs at most `max_iter` iterations.
 
 * New `tsne()` runs t-distributed stochastic neighbor embedding (t-SNE) on a
   `dist` object, exactly (`theta = 0`) or with the Barnes-Hut approximation
   (`theta > 0`, the default). It follows `Rtsne::Rtsne()` given distances,
   and from the same starting coordinates gives exactly the same Barnes-Hut
-  coordinates and KL divergence. It works straight from the distances, without an
+  coordinates (up to each axis's sign) and KL divergence. The number of
+  iterations is `n_iter`. It works straight from the distances, without an
   n-by-n matrix (Barnes-Hut keeps only each sample's nearest neighbors), and
   runs the neighbor search, perplexity calibration, and gradients in
   parallel C. As scikit-learn, openTSNE and FIt-SNE do, it starts from PCoA
@@ -59,7 +63,8 @@
   parallel. On one thread it is 25 to 50 times faster than `adonis2()` with
   200 samples, and 100 to 300 times faster with 1,000.
   Permutations come from a `seed` argument, and results are identical for
-  any number of `cpus`.
+  any number of `cpus`. Like `adonis2()`, it also takes the distances on the
+  left-hand side of the formula: `permanova(dm ~ treatment, data)`.
 
 * New `dbrda()` runs a distance-based redundancy analysis (db-RDA): the axes
   of a `dist` object that sample metadata explain, given as a formula such as
@@ -69,7 +74,9 @@
   distances), without forming an n-by-n matrix: the constrained axes come from
   a small eigenproblem, and unconstrained axes (`MDS1`, ...) are only computed
   when the constraints give fewer than `k` axes. Its results are identical for
-  any number of `cpus`.
+  any number of `cpus`. As in `vegan`, `dbrda(dm ~ treatment, data)` works
+  too, and a formula of only `Condition()` terms gives the unconstrained
+  ordination after removing their effect.
 
 * New `pca()` runs a principal component analysis of a count table, after
   any of `beta_div()`'s normalizations (e.g. `norm = 'clr'` for an Aitchison
@@ -96,6 +103,11 @@
   26 s became 0.3 s for 9.4 million. Every alpha and beta diversity function
   benefits, and results are unchanged. Out-of-range indices in these inputs
   are now an error.
+
+* Every function's `cpus` is now capped at `n_cpus()`, the cores available,
+  so that asking for more threads than that costs nothing. Results are the
+  same for any `cpus`. Without the parallelly package, `n_cpus()` now
+  returns at most 2 under `R CMD check --as-cran`, as parallelly's does.
 
 * Fixed `NA` in an integer or logical count table being read as
   -2147483648: every alpha and beta diversity function now treats it as

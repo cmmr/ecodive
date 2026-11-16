@@ -56,24 +56,27 @@
 
 
 
-  # Same as ape and vegan, up to sign. ====
+  # Same as ape and vegan, up to sign: stored results, so at home only. ====
 
-  # Expected results from data-raw/expected/pcoa.r.
-  ex <- readRDS('expected/pcoa.rds')
-  ord <- pcoa(bray(ex$counts))
+  if (at_home()) {
 
-  # ape::pcoa(). Bray-Curtis has negative eigenvalues; prop matches
-  # Relative_eig.
-  expect_true(ex$ape$min_eig < 0)
-  expect_true(coord_diff(ord, ex$ape$vectors) < 1e-9)
-  expect_equal(attr(ord, 'eig'),   ex$ape$eig,          tolerance = 1e-10)
-  expect_equal(attr(ord, 'prop'),  ex$ape$relative_eig, tolerance = 1e-10)
-  expect_equal(attr(ord, 'trace'), ex$ape$trace,        tolerance = 1e-10)
+    # Expected results from data-raw/expected/pcoa.r.
+    ex <- readRDS('expected/pcoa.rds')
+    ord <- pcoa(bray(ex$counts))
 
-  # vegan::wcmdscale() and its "Proportion Explained".
-  expect_true(coord_diff(ord, ex$vegan$points) < 1e-9)
-  expect_equal(attr(ord, 'eig'),  ex$vegan$eig,  tolerance = 1e-10)
-  expect_equal(attr(ord, 'prop'), ex$vegan$prop, tolerance = 1e-10)
+    # ape::pcoa(). Bray-Curtis has negative eigenvalues; prop matches
+    # Relative_eig.
+    expect_true(ex$ape$min_eig < 0)
+    expect_true(coord_diff(ord, ex$ape$vectors) < 1e-9)
+    expect_equal(attr(ord, 'eig'),   ex$ape$eig,          tolerance = 1e-10)
+    expect_equal(attr(ord, 'prop'),  ex$ape$relative_eig, tolerance = 1e-10)
+    expect_equal(attr(ord, 'trace'), ex$ape$trace,        tolerance = 1e-10)
+
+    # vegan::wcmdscale() and its "Proportion Explained".
+    expect_true(coord_diff(ord, ex$vegan$points) < 1e-9)
+      expect_equal(attr(ord, 'eig'),  ex$vegan$eig,  tolerance = 1e-10)
+    expect_equal(attr(ord, 'prop'), ex$vegan$prop, tolerance = 1e-10)
+  }
 
 
 
@@ -88,8 +91,23 @@
   # The shared ordination result format.
   expect_identical(
     names(attributes(x)),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace') )
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'class') )
   expect_identical(attr(x, 'method'), 'pcoa')
+  expect_identical(class(x), c('ecodive_ord', 'matrix', 'array'))
+  expect_true(is.matrix(x) && is.numeric(x))
+
+  # Subsetting and data frames give plain objects; print() names the
+  # attributes instead of showing them.
+  expect_identical(attributes(x[, 1:2]), list(dim = c(150L, 2L), dimnames = list(rownames(x), c('PCoA1', 'PCoA2'))))
+  expect_identical(class(as.data.frame(x)), 'data.frame')
+  expect_identical(dim(as.data.frame(x)), c(150L, 3L))
+  out <- capture.output(print(x))
+  expect_true(any(grepl('^pcoa: 150 samples, 3 axes; % of variance: ', out)))
+  expect_true(any(grepl('^Attributes: method, eig, prop, trace$', out)))
+  expect_identical(capture.output(print(x)), out)
+  invisible(capture.output(v <- withVisible(print(x))))
+  expect_identical(v$visible, FALSE)
+  expect_identical(v$value, x)
 
   # Each axis's largest absolute coordinate is positive.
   expect_true(all(apply(x, 2, function (v) v[which.max(abs(v))] > 0)))
@@ -183,5 +201,18 @@
   expect_error(pcoa(matrix(letters[1:4], 2)),      'symmetric')
   expect_error(pcoa(structure(1:2, class = 'dist', Size = 3L)), 'valid dist')
   expect_error(pcoa(structure(1, class = 'dist', Size = -1L)),  'valid dist')
+
+  # Negative distances: an error, beyond rounding error, which is set to 0.
+  d_neg <- d; d_neg[2] <- -0.1
+  expect_error(pcoa(d_neg), 'must not contain negative distances')
+  d_neg[2] <- -1e-15
+  d_0 <- d; d_0[2] <- 0
+  expect_identical(pcoa(d_neg, k = 2, cpus = 1), pcoa(d_0, k = 2, cpus = 1))
+
+  # Distances too large to square.
+  expect_error(pcoa(d * 1e160), 'too large to square')
+
+  # A formula is not distances.
+  expect_error(pcoa(d ~ x), 'not a formula')
 
 #})

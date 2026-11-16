@@ -27,7 +27,12 @@
 #   labels   The dist's sample names, or NULL.
 #   n        The number of samples.
 #   strata   NULL, the name of a column of `data`, or a vector with one
-#            value per row of `data`, in the same order.
+#            value per row of `data`, in the same order. A column named
+#            here is left out of the default formula (`~ .`).
+#   allow_empty  Whether a formula with no terms to test (only Condition()
+#            terms) is allowed: dbrda() then gives the unconstrained
+#            ordination of the conditioned distances.
+#   env      Where a character `formula`'s variables are looked up.
 #
 # Rows of `data` are matched to `labels` by row name; rows for other samples
 # are left out (so their NAs don't matter). Unnamed rows (or an unlabelled
@@ -42,7 +47,9 @@
 #   strata       Integer codes 0 .. n_strata - 1, or NULL.
 #   data         `data`, with rows aligned to the samples.
 #------------------------------------------------------------------------------
-model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL) {
+model_design <- function (
+    data, formula = NULL, labels = NULL, n, strata = NULL,
+    allow_empty = FALSE, env = parent.frame(2) ) {
 
   if (missing(data) || is.null(data))
     stop('`data` is required: a data.frame of sample metadata.', call. = FALSE)
@@ -63,9 +70,11 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
 
 
   # `strata` as a column name, or a vector parallel to the rows of `data`.
+  strata_col <- NULL
   if (!is.null(strata)) {
     if (is.character(strata) && length(strata) == 1 && strata %in% names(data)) {
-      strata <- data[[strata]]
+      strata_col <- strata
+      strata     <- data[[strata]]
     }
     else if (length(strata) != nrow(data) || !is.null(dim(strata))) {
       stop(
@@ -116,7 +125,8 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
   # Factor levels with no samples left (e.g. only in rows left out) would
   # give all-zero, aliased model matrix columns.
   data <- droplevels(data[idx, , drop = FALSE])
-  if (!is.null(labels)) rownames(data) <- labels
+  if (!is.null(labels) && !anyNA(labels) && !anyDuplicated(labels))
+    rownames(data) <- labels
 
   if (!is.null(strata)) {
     strata <- strata[idx]
@@ -128,14 +138,19 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
   #--------------------------------------------------------
   # Parse the formula; split off Condition() terms.
   #--------------------------------------------------------
-  if (is.null(formula)) formula <- ~ .
+  if (is.null(formula)) {
+    formula <- ~ .
+    # A strata column is a blocking factor, not a term to test.
+    if (!is.null(strata_col))
+      formula <- stats::as.formula(call('~', call('-', quote(.), as.name(strata_col))))
+  }
   if (is.character(formula)) {
     # Parse without evaluating: R 3.6's as.formula('trt') evaluates `trt`.
     f <- tryCatch(str2lang(formula), error = function (e) NULL)
     if (!is.call(f) || !identical(f[[1]], as.name('~')))
       stop('`formula` must be a formula, such as `~ treatment + ph`.', call. = FALSE)
     formula <- eval(f)
-    environment(formula) <- parent.frame(2)
+    environment(formula) <- env
   }
   if (!inherits(formula, 'formula'))
     stop('`formula` must be a formula, such as `~ treatment + ph`.', call. = FALSE)
@@ -167,6 +182,11 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
     stop('Missing values (NA) in `data` column', if (length(na) > 1) 's', ': ',
          name_list(na), call. = FALSE)
 
+  inf <- used[vapply(data[used], function (v) is.numeric(v) && !all(is.finite(v)), logical(1))]
+  if (length(inf))
+    stop('Infinite values in `data` column', if (length(inf) > 1) 's', ': ',
+         name_list(inf), call. = FALSE)
+
   term_labels <- attr(tt, 'term.labels')
   cond_vars   <- attr(tt, 'specials')$Condition  # rows of attr(tt, 'factors')
   cond_terms  <- integer(0)
@@ -190,8 +210,21 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
     if (ncol(z) == 0) z <- NULL
   }
 
-  if (length(cond_terms) == length(term_labels))
-    stop('`formula` has no terms to test.', call. = FALSE)
+  if (length(cond_terms) == length(term_labels)) {
+
+    if (!allow_empty)
+      stop('`formula` has no terms to test.', call. = FALSE)
+
+    # Only conditions: nothing to constrain.
+    return (list(
+      x           = matrix(0, nrow(data), 0, dimnames = list(rownames(data), NULL)),
+      assign      = integer(0),
+      term_labels = character(0),
+      terms       = NULL,
+      z           = z,
+      strata      = strata,
+      data        = data ))
+  }
 
   xt <- if (length(cond_terms)) stats::drop.terms(tt, cond_terms) else tt
   attr(xt, 'specials') <- NULL
