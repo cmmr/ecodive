@@ -8,7 +8,7 @@ umap(
   dm,
   k = 2L,
   n_neighbors = 15L,
-  min_dist = 0.01,
+  min_dist = 0.1,
   spread = 1,
   n_epochs = NULL,
   learning_rate = 1,
@@ -34,7 +34,8 @@ global structure; smaller ones more of the local detail. Values
 larger than the number of samples are reduced to it. Default: \code{15}}
 
 \item{min_dist}{How close samples can be packed together on the plot,
-relative to \code{spread}. Default: \code{0.01}}
+relative to \code{spread}. Default: \code{0.1}, as in umap-learn (uwot's is
+\code{0.01}).}
 
 \item{spread}{The scale of the plot's distances, together with
 \code{min_dist}. Default: \code{1}}
@@ -43,8 +44,9 @@ relative to \code{spread}. Default: \code{0.01}}
 default, uses 500 for up to 10,000 samples and 200 for more, as
 \code{uwot::umap()} does.}
 
-\item{learning_rate}{The initial learning rate of the optimization. It
-decreases linearly to 0 over the epochs. Default: \code{1}}
+\item{learning_rate}{The initial learning rate (step size) of the
+optimization. It decreases linearly to 0 over the epochs.
+Default: \code{1}}
 
 \item{negative_sample_rate}{How many non-neighbours (negative samples)
 to push away for each neighbour pulled closer. Default: \code{5}}
@@ -91,10 +93,10 @@ similarities, fitted from \code{min_dist} and \code{spread}.
 \description{
 Ordinates samples from their distances, for plotting beta diversity, by
 placing samples that are near neighbours in \code{dm} near each other on the
-plot. Follows the same procedure, with the same defaults, as
-\code{uwot::umap()} given a \code{dist} object, and gives the same layout from the
-same starting coordinates and random seeds, but finds the neighbours in
-parallel C, without ever copying \code{dm} into an \eqn{n \times n} matrix.
+plot. Follows the same procedure as \code{uwot::umap(batch = TRUE)} given a
+\code{dist} object, and gives the same layout from the same settings, starting
+coordinates and random seeds, but runs in parallel C, without ever copying
+\code{dm} into an \eqn{n \times n} matrix.
 }
 \details{
 \strong{Method}
@@ -119,9 +121,25 @@ exponentially, with scale \code{spread}, beyond it.
 \item \strong{Layout.} Starting from \code{init}, stochastic gradient descent pulls
 the two samples of each edge together, sampling each edge in proportion
 to its weight, and pushes each sample away from \code{negative_sample_rate}
-randomly chosen samples per edge sampled. Finally, the coordinates are
-centered.
+randomly chosen samples per edge sampled. As in \code{uwot::umap()}'s batch
+mode, each epoch computes every sample's gradient from the coordinates
+at the start of the epoch, then moves all samples at once by the Adam
+optimizer (\eqn{\beta_1 = 0.5}, \eqn{\beta_2 = 0.9},
+\eqn{\epsilon = 10^{-7}}, uwot's settings for batch mode). Finally, the
+coordinates are centered.
 }
+
+\strong{Why batch mode}
+
+\code{uwot::umap()}'s default optimization moves samples one edge at a time,
+each move seeing the ones before it. That can only run on one thread if
+it is to be reproducible, and it takes nearly all of the run time. In
+batch mode, the samples' gradients within an epoch don't depend on each
+other, so \code{umap()} computes them on \code{cpus} threads, and still gets the
+same result for any number of threads. The layouts differ from those of
+uwot's default mode only as different random draws would: neighbour
+preservation, trustworthiness, and the final cross-entropy are about the
+same.
 
 \strong{Starting coordinates}
 \itemize{
@@ -139,14 +157,20 @@ standard deviation 0.0001 (\code{uwot::umap()}'s \code{"spca"}).
 
 \strong{Differences from \code{uwot::umap()}}
 \itemize{
+\item \code{umap()} always optimizes in batch mode, so its layouts are those of
+\code{uwot::umap(batch = TRUE)}, not of uwot's default.
+\item \code{min_dist} defaults to \code{0.1}, the canonical value used by umap-learn and
+most other implementations, rather than uwot's \code{0.01}. Other defaults
+are the same.
 \item The random numbers come from \code{seed}, not from R's random number
 generator, so \code{set.seed()} has no effect, and R's random number stream
-is left untouched. \code{uwot::umap()} draws from R's generator a 32-bit seed
-for each epoch's stream of negative samples, and the jitter of spectral
-starts. \code{umap()} makes those from \code{seed} instead, with the same stream
-of negative samples (PCG) from the same per-epoch seeds; given the same
-seeds and starting coordinates, the two give the same coordinates (to
-the last bit, for the same compiler and math library).
+is left untouched. In batch mode, \code{uwot::umap()} draws from R's
+generator two 32-bit seeds per sample per epoch, for each sample's
+stream of negative samples, and the jitter of spectral starts. \code{umap()}
+makes those from \code{seed} instead, with the same streams of negative
+samples (PCG) from the same seeds; given the same seeds and starting
+coordinates, the two give the same coordinates (to the last bit, for
+the same compiler and math library).
 \item The spectral start's eigenvectors are computed to a tolerance of about
 \eqn{10^{-10}} by Lanczos iteration, rather than \code{RSpectra}'s
 \eqn{10^{-4}}, and each one's sign is fixed (its largest absolute
@@ -154,10 +178,6 @@ coordinate is positive).
 \item The \code{"pcoa"} start, and the fallback for unconnected graphs, come from
 \code{\link[=pcoa]{pcoa()}} rather than \code{cmdscale()}; they differ only by rounding and the
 signs of the axes.
-\item The optimization runs on one thread, as \code{uwot::umap()}'s does by
-default (\code{n_sgd_threads = 0}), so that the result is the same for any
-number of \code{cpus}. \code{cpus} threads find the neighbours, the graph, and
-the spectral start.
 \item Finally, each axis is flipped so that its largest absolute coordinate
 is positive.
 }
@@ -167,8 +187,9 @@ is positive.
 \code{uwot::umap()} given a \code{dist} object copies it into an \eqn{n \times n}
 matrix and sorts each of its columns in R. \code{umap()} reads the packed
 triangle of \code{dm} directly, keeping only the \code{n_neighbors} closest of each
-sample, in parallel. Beyond \code{dm} itself, memory use is proportional to
-\eqn{n} times \code{n_neighbors}.
+sample. Beyond \code{dm} itself, memory use is proportional to \eqn{n} times
+\code{n_neighbors}. \code{cpus} threads find the neighbours, build the graph,
+compute the spectral start, and compute each epoch's gradients.
 
 \strong{Reproducibility}
 

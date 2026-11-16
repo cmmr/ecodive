@@ -14,12 +14,13 @@
  *                      union, as a symmetric sparse matrix.
  *   C_umap_spectral()  Eigenvectors of the graph's normalized
  *                      Laplacian, by thick-restart Lanczos.
- *   C_umap_sgd()       The layout optimization: uwot's single-
- *                      threaded SGD, with the same arithmetic
+ *   C_umap_sgd()       The layout optimization: uwot's batch
+ *                      mode (gradients from each epoch's start,
+ *                      then Adam), with the same arithmetic
  *                      (single precision coordinates) and the
  *                      same random number scheme, so that given
- *                      the same per-epoch seeds the result is
- *                      the same as uwot's.
+ *                      the same seeds the result is the same as
+ *                      uwot's batch = TRUE.
  *   C_umap_rand()      Uniform or normal deviates from PCG,
  *                      for random starts and jitter.
  *
@@ -27,8 +28,9 @@
  * products are split into fixed tasks (per point or block of
  * points), each written by one thread with no shared
  * accumulators; reductions run on the main thread in a fixed
- * order. The SGD runs on the main thread. Results are thus
- * identical for any number of threads.
+ * order. The SGD sums each vertex's gradient within the task
+ * that owns the vertex. Results are thus identical for any
+ * number of threads.
  */
 
 #include "ecodive.h"
@@ -871,20 +873,37 @@ SEXP C_umap_spectral(SEXP sexp_graph, SEXP sexp_k, SEXP sexp_n_threads) {
 //======================================================
 // Stage 5: layout optimization.
 //
-// uwot's optimize_layout() with its defaults: in-place
-// SGD, both ends of each positive edge moved, only the
-// head moved by negative samples, gradients clipped to
-// [-4, 4], and a learning rate that decays linearly. The
-// arithmetic follows uwot's: coordinates, gradients and
-// sampling schedules in single precision, and the same
-// mixed float/double expressions.
+// uwot's optimize_layout() in batch mode (uwot::umap(...,
+// batch = TRUE)), with its defaults. Each epoch, every
+// vertex sums the gradient of its own edges, computed from
+// the coordinates as they were at the start of the epoch:
+// attraction along each sampled edge (twice its gradient,
+// as the graph is symmetric and each edge is listed under
+// both of its ends) and repulsion from negative samples.
+// Gradients are clipped to [-4, 4]. At the end of the
+// epoch, Adam moves every coordinate, with a learning rate
+// that decays linearly. The arithmetic follows uwot's:
+// coordinates, gradients and sampling schedules in single
+// precision, and the same mixed float/double expressions.
 //
-// uwot's single-threaded RNG: each epoch, one pcg32
-// stream seeded from ((seed1 << 32) | n_edges) on pcg-cpp's
-// default stream, where seed1 is a new 32-bit seed per
-// epoch (uwot draws it from R's RNG; here it comes from
-// `seed` via PCG, or is given).
+// Random numbers, as uwot's batch mode: each epoch draws
+// two 32-bit seeds per vertex, and each vertex draws its
+// negative samples from its own pcg32 stream, seeded with
+// ((seed[2i] << 32) | seed[2i + 1]) on pcg-cpp's default
+// stream. uwot draws the seeds from R's RNG; here they come
+// from `seed` via PCG, or are given.
+//
+// Determinism: a vertex's gradient depends only on the
+// start-of-epoch coordinates and its own seeds, and is
+// written only by the task that owns the vertex, so the
+// result is the same for any number of threads. Tasks are
+// idempotent (they read the sampling schedule from one
+// buffer and write it to another), as run_parallel() may
+// rerun the work on one thread.
 //======================================================
+
+// Vertices per SGD task.
+#define UMAP_SGD_ROWS 64
 
 static inline uint32_t pcg_bounded(pcg32_random_t *rng, uint32_t bound) {
   uint32_t threshold = (uint32_t) (-bound) % bound;
@@ -899,42 +918,152 @@ static inline float clamp4(float g) {
 }
 
 
+static int             sg_n;
+static int             sg_ndim;
+static const int      *sg_ptr;    // n + 1 edge offsets, by head.
+static const int      *sg_tail;   // Each edge's tail.
+static const float    *sg_eps;    // Epochs per sample.
+static const float    *sg_epns;   // Epochs per negative sample.
+static const float    *sg_eons0;  // Epoch of next sample (in).
+static const float    *sg_eonn0;  // Epoch of next negative sample (in).
+static float          *sg_eons1;  // (out)
+static float          *sg_eonn1;  // (out)
+static const uint32_t *sg_seeds;  // 2 per vertex.
+static const float    *sg_x;      // n x ndim, point-major.
+static float          *sg_grad;   // n x ndim, point-major.
+static float          *sg_disp;   // ndim per thread.
+static float           sg_epoch;
+static float           sg_a, sg_b, sg_a_b_m2, sg_gamma_b_2;
+
+
+static void *sgd_worker(void *arg) {
+
+  int thread_i  = ((worker_t *) arg)->i;
+  int n_threads = ((worker_t *) arg)->n;
+  int n         = sg_n;
+  int ndim      = sg_ndim;
+  int n_tasks   = (n + UMAP_SGD_ROWS - 1) / UMAP_SGD_ROWS;
+
+  const float *x    = sg_x;
+  float       *disp = sg_disp + (size_t) thread_i * ndim;
+  float        a    = sg_a, b = sg_b, fepoch = sg_epoch;
+
+  for (int task = thread_i; task < n_tasks; task += n_threads) {
+
+    int p1 = (task + 1) * UMAP_SGD_ROWS;
+    if (p1 > n) p1 = n;
+
+    for (int p = task * UMAP_SGD_ROWS; p < p1; p++) {
+
+      size_t dj   = (size_t) ndim * p;
+      float *grad = sg_grad + dj;
+      for (int d = 0; d < ndim; d++) grad[d] = 0.0f;
+
+      pcg32_random_t rng;
+      pcg32_srandom_r(
+        &rng, ((uint64_t) sg_seeds[2 * (size_t) p] << 32) | sg_seeds[2 * (size_t) p + 1],
+        UWOT_PCG_STREAM );
+
+      for (int e = sg_ptr[p]; e < sg_ptr[p + 1]; e++) {
+
+        if (!(sg_eons0[e] <= fepoch)) {
+          sg_eons1[e] = sg_eons0[e];
+          sg_eonn1[e] = sg_eonn0[e];
+          continue;
+        }
+
+        size_t dk = (size_t) ndim * sg_tail[e];
+
+        // Attraction.
+        float d2 = 0.0f;
+        for (int d = 0; d < ndim; d++) {
+          float diff = x[dj + d] - x[dk + d];
+          disp[d] = diff;
+          d2 += diff * diff;
+        }
+        if (!(FLT_EPSILON < d2)) d2 = FLT_EPSILON;
+
+        float pd2b  = powf(d2, b);
+        float coeff = (float) ((sg_a_b_m2 * pd2b) / (d2 * (a * pd2b + 1.0)));
+
+        for (int d = 0; d < ndim; d++)
+          grad[d] = (float) (grad[d] + 2.0 * clamp4(coeff * disp[d]));
+
+        // Repulsion from negative samples.
+        size_t n_neg = (size_t) ((fepoch - sg_eonn0[e]) / sg_epns[e]);
+
+        for (size_t q = 0; q < n_neg; q++) {
+
+          size_t dkn = (size_t) pcg_bounded(&rng, (uint32_t) n) * ndim;
+          if (dj == dkn) continue;
+
+          d2 = 0.0f;
+          for (int d = 0; d < ndim; d++) {
+            float diff = x[dj + d] - x[dkn + d];
+            disp[d] = diff;
+            d2 += diff * diff;
+          }
+          if (!(FLT_EPSILON < d2)) d2 = FLT_EPSILON;
+
+          coeff = (float) (sg_gamma_b_2 / ((0.001 + d2) * (a * powf(d2, b) + 1.0)));
+
+          for (int d = 0; d < ndim; d++)
+            grad[d] += clamp4(coeff * disp[d]);
+        }
+
+        sg_eons1[e] = sg_eons0[e] + sg_eps[e];
+        sg_eonn1[e] = sg_eonn0[e] + (float) n_neg * sg_epns[e];
+      }
+    }
+  }
+
+  return NULL;
+}
+
+
 //======================================================
 // R interface. `sexp_graph` is C_umap_graph()'s result,
 // `sexp_init` the n x k starting coordinates, `sexp_dbl`
-// c(a, b, gamma, learning_rate, negative_sample_rate),
-// `sexp_seeds` either an integer seed or n_epochs
-// per-epoch seeds (doubles in [0, 2^32)). Returns the
-// n x k coordinates (not centered).
+// c(a, b, gamma, learning_rate, negative_sample_rate,
+// beta1, beta2, eps) (the last three for Adam),
+// `sexp_seeds` either an integer seed or the
+// 2 * n * n_epochs per-vertex seeds (doubles in
+// [0, 2^32)), epoch by epoch. Returns the n x k
+// coordinates (not centered).
 //======================================================
-SEXP C_umap_sgd(SEXP sexp_graph, SEXP sexp_init, SEXP sexp_n_epochs, SEXP sexp_dbl, SEXP sexp_seeds) {
+SEXP C_umap_sgd(
+    SEXP sexp_graph, SEXP sexp_init, SEXP sexp_n_epochs, SEXP sexp_dbl,
+    SEXP sexp_seeds, SEXP sexp_n_threads ) {
 
   SEXP sexp_p = VECTOR_ELT(sexp_graph, 5);
   const int    *gp = INTEGER(sexp_p);
   const int    *gj = INTEGER(VECTOR_ELT(sexp_graph, 6));
   const double *gx = REAL(VECTOR_ELT(sexp_graph, 7));
 
-  int n        = (int) XLENGTH(sexp_p) - 1;
-  int n_epochs = asInteger(sexp_n_epochs);
-  int ndim     = (n > 0) ? (int) (XLENGTH(sexp_init) / n) : 0;
+  int n         = (int) XLENGTH(sexp_p) - 1;
+  int n_epochs  = asInteger(sexp_n_epochs);
+  int n_threads = asInteger(sexp_n_threads);
+  int ndim      = (n > 0) ? (int) (XLENGTH(sexp_init) / n) : 0;
 
-  if (n < 1 || ndim < 1 || n_epochs < 0 || (size_t) XLENGTH(sexp_init) != (size_t) n * ndim ||
-      (isReal(sexp_seeds) && XLENGTH(sexp_seeds) != n_epochs))
+  if (n < 1 || ndim < 1 || n_epochs < 0 || n_threads < 1 ||
+      (size_t) XLENGTH(sexp_init) != (size_t) n * ndim ||
+      (isReal(sexp_seeds) && (size_t) XLENGTH(sexp_seeds) != 2 * (size_t) n * n_epochs))
     error("Invalid arguments to C_umap_sgd()."); // # nocov
 
-  float a     = (float) REAL(sexp_dbl)[0];
-  float b     = (float) REAL(sexp_dbl)[1];
-  float gamma = (float) REAL(sexp_dbl)[2];
+  float a      = (float) REAL(sexp_dbl)[0];
+  float b      = (float) REAL(sexp_dbl)[1];
+  float gamma  = (float) REAL(sexp_dbl)[2];
   float alpha0 = (float) REAL(sexp_dbl)[3];
   float nsr_in = (float) REAL(sexp_dbl)[4];
-
-  float a_b_m2    = (float) (-2.0 * a * b);
-  float gamma_b_2 = (float) (2.0 * gamma * b);
+  float beta1  = (float) REAL(sexp_dbl)[5];
+  float beta2  = (float) REAL(sexp_dbl)[6];
+  float eps    = (float) REAL(sexp_dbl)[7];
 
 
   //--------------------------------------------------
-  // Edges, as uwot: drop weights below max / n_epochs;
-  // epochs_per_sample = n_epochs / (n_epochs * w / max).
+  // Edges, by head, as uwot: drop weights below
+  // max / n_epochs; epochs_per_sample =
+  // n_epochs / (n_epochs * w / max).
   //--------------------------------------------------
   int nnz = gp[n];
   double wmax = 0;
@@ -944,107 +1073,108 @@ SEXP C_umap_sgd(SEXP sexp_graph, SEXP sexp_init, SEXP sexp_n_epochs, SEXP sexp_d
   for (int e = 0; e < nnz; e++)
     if (!(gx[e] < wmax / n_epochs)) n_edges++;
 
-  int   *head = (int *)   R_alloc(n_edges > 0 ? n_edges : 1, sizeof(int));
-  int   *tail = (int *)   R_alloc(n_edges > 0 ? n_edges : 1, sizeof(int));
-  float *eps  = (float *) R_alloc(n_edges > 0 ? n_edges : 1, sizeof(float));
-  float *eons = (float *) R_alloc(n_edges > 0 ? n_edges : 1, sizeof(float));
-  float *epns = (float *) R_alloc(n_edges > 0 ? n_edges : 1, sizeof(float));
-  float *eonn = (float *) R_alloc(n_edges > 0 ? n_edges : 1, sizeof(float));
+  size_t ea = n_edges > 0 ? n_edges : 1;
+  int   *ptr  = (int *)   R_alloc(n + 1, sizeof(int));
+  int   *tail = (int *)   R_alloc(ea, sizeof(int));
+  float *eps_ = (float *) R_alloc(ea, sizeof(float));
+  float *epns = (float *) R_alloc(ea, sizeof(float));
+  float *eons[2], *eonn[2];
+  for (int t = 0; t < 2; t++) {
+    eons[t] = (float *) R_alloc(ea, sizeof(float));
+    eonn[t] = (float *) R_alloc(ea, sizeof(float));
+  }
 
   float nsr = (float) (1.0 / nsr_in);
 
-  size_t ne = 0;
-  for (int r = 0; r < n; r++)
+  int ne = 0;
+  ptr[0] = 0;
+  for (int r = 0; r < n; r++) {
     for (int e = gp[r]; e < gp[r + 1]; e++) {
       if (gx[e] < wmax / n_epochs) continue;
       double n_samples = n_epochs * (gx[e] / wmax);
-      head[ne] = gj[e];
-      tail[ne] = r;
-      eps[ne]  = (float) (n_epochs / n_samples);
-      eons[ne] = eps[ne];
-      epns[ne] = eps[ne] * nsr;
-      eonn[ne] = epns[ne];
+      tail[ne]    = gj[e];
+      eps_[ne]    = (float) (n_epochs / n_samples);
+      epns[ne]    = eps_[ne] * nsr;
+      eons[0][ne] = eps_[ne];
+      eonn[0][ne] = epns[ne];
       ne++;
     }
+    ptr[r + 1] = ne;
+  }
 
 
   //--------------------------------------------------
-  // Coordinates: point-major, single precision.
+  // Coordinates and Adam's state: point-major, single
+  // precision.
   //--------------------------------------------------
+  size_t nk = (size_t) n * ndim;
+
   const double *init = REAL(sexp_init);
-  float *x = (float *) R_alloc((size_t) n * ndim, sizeof(float));
+  float *x    = (float *) R_alloc(nk, sizeof(float));
+  float *grad = (float *) R_alloc(nk, sizeof(float));
+  float *mt   = (float *) R_alloc(nk, sizeof(float));
+  float *vt   = (float *) R_alloc(nk, sizeof(float));
   for (int i = 0; i < n; i++)
     for (int d = 0; d < ndim; d++)
       x[(size_t) i * ndim + d] = (float) init[i + (size_t) d * n];
+  memset(mt, 0, nk * sizeof(float));
+  memset(vt, 0, nk * sizeof(float));
 
-  float *disp = (float *) R_alloc(ndim, sizeof(float));
+  uint32_t *seeds = (uint32_t *) R_alloc(2 * (size_t) n, sizeof(uint32_t));
+  const double *given = isReal(sexp_seeds) ? REAL(sexp_seeds) : NULL;
 
-  pcg32_random_t master, rng;
-  const double  *epoch_seeds = isReal(sexp_seeds) ? REAL(sexp_seeds) : NULL;
-  if (!epoch_seeds)
+  pcg32_random_t master;
+  if (!given)
     pcg32_srandom_r(&master, (uint64_t) (uint32_t) asInteger(sexp_seeds), UMAP_STREAM_EPOCH);
 
-  float alpha = alpha0;
+  // Adam, as uwot's: debiasing folded into ad_scale and epsc.
+  float beta11   = (float) (1.0 - beta1);
+  float beta21   = (float) (1.0 - beta2);
+  float beta1t   = beta1;
+  float beta2t   = beta2;
+  float epsc     = eps * sqrtf(beta21);
+  float ad_scale = alpha0 * sqrtf(beta21) / beta11;
+
+  sg_n         = n;
+  sg_ndim      = ndim;
+  sg_ptr       = ptr;
+  sg_tail      = tail;
+  sg_eps       = eps_;
+  sg_epns      = epns;
+  sg_seeds     = seeds;
+  sg_x         = x;
+  sg_grad      = grad;
+  sg_disp      = (float *) R_alloc((size_t) n_threads * ndim, sizeof(float));
+  sg_a         = a;
+  sg_b         = b;
+  sg_a_b_m2    = (float) (-2.0 * a * b);
+  sg_gamma_b_2 = (float) (2.0 * gamma * b);
 
   for (int epoch = 0; epoch < n_epochs; epoch++) {
 
-    uint32_t seed1 = epoch_seeds ? (uint32_t) epoch_seeds[epoch] : pcg32_random_r(&master);
-    pcg32_srandom_r(&rng, ((uint64_t) seed1 << 32) | (uint32_t) n_edges, UWOT_PCG_STREAM);
+    for (size_t i = 0; i < 2 * (size_t) n; i++)
+      seeds[i] = given
+        ? (uint32_t) given[(size_t) epoch * 2 * n + i]
+        : pcg32_random_r(&master);
 
-    float fepoch = (float) epoch;
+    sg_epoch = (float) epoch;
+    sg_eons0 = eons[epoch & 1]; sg_eons1 = eons[(epoch + 1) & 1];
+    sg_eonn0 = eonn[epoch & 1]; sg_eonn1 = eonn[(epoch + 1) & 1];
 
-    for (size_t e = 0; e < n_edges; e++) {
+    run_parallel(sgd_worker, n_threads, n);
 
-      if (!(eons[e] <= fepoch)) continue;
-
-      size_t dj = (size_t) ndim * head[e];
-      size_t dk = (size_t) ndim * tail[e];
-
-      // Attraction: move both ends.
-      float d2 = 0.0f;
-      for (int d = 0; d < ndim; d++) {
-        float diff = x[dj + d] - x[dk + d];
-        disp[d] = diff;
-        d2 += diff * diff;
-      }
-      if (!(FLT_EPSILON < d2)) d2 = FLT_EPSILON;
-
-      float pd2b  = powf(d2, b);
-      float coeff = (float) ((a_b_m2 * pd2b) / (d2 * (a * pd2b + 1.0)));
-
-      for (int d = 0; d < ndim; d++) {
-        float upd = alpha * clamp4(coeff * disp[d]);
-        x[dj + d] += upd;
-        x[dk + d] += -upd;
-      }
-
-      // Repulsion from negative samples: move the head.
-      size_t n_neg = (size_t) ((fepoch - eonn[e]) / epns[e]);
-
-      for (size_t q = 0; q < n_neg; q++) {
-
-        size_t dkn = (size_t) pcg_bounded(&rng, (uint32_t) n) * ndim;
-        if (dj == dkn) continue;
-
-        d2 = 0.0f;
-        for (int d = 0; d < ndim; d++) {
-          float diff = x[dj + d] - x[dkn + d];
-          disp[d] = diff;
-          d2 += diff * diff;
-        }
-        if (!(FLT_EPSILON < d2)) d2 = FLT_EPSILON;
-
-        coeff = (float) (gamma_b_2 / ((0.001 + d2) * (a * powf(d2, b) + 1.0)));
-
-        for (int d = 0; d < ndim; d++)
-          x[dj + d] += alpha * clamp4(coeff * disp[d]);
-      }
-
-      eons[e] += eps[e];
-      eonn[e] += (float) n_neg * epns[e];
+    for (size_t i = 0; i < nk; i++) {
+      vt[i] += beta21 * (grad[i] * grad[i] - vt[i]);
+      mt[i] += beta11 * (grad[i] - mt[i]);
+      x[i]  += ad_scale * mt[i] / (sqrtf(vt[i]) + epsc);
     }
 
-    alpha = (float) (alpha0 * (1.0 - ((float) epoch / (float) n_epochs)));
+    float alpha = (float) (alpha0 * (1.0 - ((float) epoch / (float) n_epochs)));
+    beta1t *= beta1;
+    beta2t *= beta2;
+    float sqrt_b2t1 = (float) sqrt(1.0 - beta2t);
+    ad_scale = (float) (alpha * sqrt_b2t1 / (1.0 - beta1t));
+    epsc     = sqrt_b2t1 * eps;
 
     if (epoch % 10 == 9) R_CheckUserInterrupt();
   }

@@ -3,23 +3,18 @@
 #
 # Run from the package root:  Rscript data-raw/expected/umap.r
 #
-# Needs uwot, Matrix and RSpectra. Every stage that uwot computes
-# deterministically is recorded; so is a full layout from given starting
-# coordinates and per-epoch seeds (uwot's single-threaded SGD draws one
-# 32-bit seed per epoch from R's RNG, after one draw at setup).
+# Needs uwot, Matrix, RSpectra and vegan. Every stage that uwot computes
+# deterministically is recorded; so are full layouts by uwot's batch mode
+# (batch = TRUE, which ecodive's umap() always uses) from given starting
+# coordinates and seeds, and quality measures of a default-settings layout.
+# In batch mode, uwot draws two 32-bit seeds per vertex per epoch from R's
+# RNG, each as static_cast<uint32_t>(runif(1) * UINT32_MAX); test-umap.r
+# regenerates them from the seed recorded here.
 
 library(uwot)
 
 stopifnot(requireNamespace('Matrix'), requireNamespace('RSpectra'))
 
-
-# uwot's per-epoch seeds for set.seed(seed): its pcg_factory draws one
-# (unused) at setup, then one per epoch, each as
-# static_cast<uint32_t>(runif(1) * UINT32_MAX).
-epoch_seeds <- function (seed, n_epochs) {
-  set.seed(seed)
-  floor(runif(n_epochs + 1) * 4294967295)[-1]
-}
 
 # A plain matrix, without dimnames or scale()'s attributes.
 strip <- function (x) matrix(as.double(x), nrow(x))
@@ -44,13 +39,44 @@ spectral <- function (u, k) {
   list(vectors = vec, values = sort(ev$values)[seq_len(k) + 1])
 }
 
-# Fraction of each sample's 10 nearest neighbours in `d` that are among its
-# 10 nearest in the embedding.
+
+# Layout quality (the same functions are in test-umap.r).
+
+# Fraction of each sample's m nearest neighbours in `d` that are among its
+# m nearest in the embedding `x`.
 nn_preservation <- function (d, x, m = 10) {
   dm <- as.matrix(d)
   de <- as.matrix(dist(x))
   mean(sapply(seq_len(nrow(dm)), function (i)
     length(intersect(order(dm[, i])[2:(m + 1)], order(de[, i])[2:(m + 1)])) / m ))
+}
+
+# Trustworthiness (Venna & Kaski 2001) of the embedding's m nearest
+# neighbours.
+trustworthiness <- function (d, x, m = 10) {
+  dm <- as.matrix(d)
+  de <- as.matrix(dist(x))
+  n  <- nrow(dm)
+  s  <- sum(sapply(seq_len(n), function (i) {
+    rk <- integer(n)
+    rk[order(dm[, i])] <- 0:(n - 1)          # 0 = self
+    nn <- order(de[, i])[2:(m + 1)]
+    sum(pmax(rk[nn] - m, 0))
+  }))
+  1 - 2 * s / (n * m * (2 * n - 3 * m - 1))
+}
+
+# UMAP's fuzzy cross-entropy between the graph (0-based column pointers p,
+# rows i, values x) and the embedding's similarities 1 / (1 + a d^(2b)),
+# over all pairs.
+cross_entropy <- function (graph, x, ab) {
+  n <- nrow(x)
+  v <- matrix(0, n, n)
+  v[cbind(graph$i + 1, rep(seq_len(n), diff(graph$p)))] <- graph$x
+  q <- 1 / (1 + ab[[1]] * as.matrix(dist(x))^(2 * ab[[2]]))
+  q <- pmin(pmax(q, 1e-12), 1 - 1e-12)
+  ce <- -(v * log(q) + (1 - v) * log(1 - q))
+  sum(ce[lower.tri(ce)])
 }
 
 
@@ -70,16 +96,22 @@ attr(d1, 'call') <- NULL
 u1 <- umap(
   d1, n_neighbors = 15, n_epochs = 0, init = 'random',
   ret_extra = c('sigma', 'nn', 'fgraph'), verbose = FALSE )
+ab1 <- uwot:::find_ab_params(spread = 1, min_dist = 0.01)
 
-# A full layout from given starting coordinates and seed.
+# Batch-mode layouts from given starting coordinates and seed.
 set.seed(2)
 init1 <- matrix(runif(n * 2, -10, 10), n)
 sgd1  <- list(
   init = init1, seed = 3, n_epochs = 100,
   embedding = strip(umap(
     d1, n_neighbors = 15, init = init1, seed = 3, n_epochs = 100,
-    n_sgd_threads = 0, verbose = FALSE )))
-sgd1$epoch_seeds <- epoch_seeds(3, 100)
+    batch = TRUE, n_sgd_threads = 0, verbose = FALSE )))
+
+# The same, but only 5 epochs: too few for rounding differences between
+# platforms to grow, so it can be compared tightly everywhere.
+sgd1$short <- strip(umap(
+  d1, n_neighbors = 15, init = init1, seed = 3, n_epochs = 5,
+  batch = TRUE, n_sgd_threads = 0, verbose = FALSE ))
 
 # Non-default settings, 3 dimensions.
 set.seed(4)
@@ -90,27 +122,37 @@ args2 <- list(
 sgd2 <- list(
   init = init2, seed = 5, args = args2,
   embedding = strip(do.call(umap, c(list(
-    X = d1, n_components = 3, init = init2, seed = 5,
+    X = d1, n_components = 3, init = init2, seed = 5, batch = TRUE,
     n_sgd_threads = 0, verbose = FALSE), args2))) )
-sgd2$epoch_seeds <- epoch_seeds(5, 60)
 sgd2$ab <- uwot:::find_ab_params(spread = 1.5, min_dist = 0.3)
 
-# uwot's default run (spectral init), for quality measures.
-u_def <- umap(d1, seed = 6, verbose = FALSE)
+# Quality of default-settings layouts from uwot's spectral start: batch mode
+# (what ecodive does) and uwot's default in-place SGD, for comparison.
+set.seed(6)
+init_q <- strip(uwot:::spectral_init(u1$fgraph, ndim = 2))
+quality <- function (x) c(
+  preservation    = nn_preservation(d1, x),
+  trustworthiness = trustworthiness(d1, x),
+  cross_entropy   = cross_entropy(fgraph(u1), x, ab1) )
+u_batch  <- umap(d1, init = init_q, seed = 7, batch = TRUE, verbose = FALSE)
+u_serial <- umap(d1, init = init_q, seed = 7, verbose = FALSE)
 
 case1 <- list(
-  d            = d1,
-  n_neighbors  = 15,
-  nn_idx       = u1$nn[[1]]$idx,
-  nn_dist      = u1$nn[[1]]$dist,
-  sigma        = u1$sigma,
-  rho          = u1$rho,
-  graph        = fgraph(u1),
-  ab           = uwot:::find_ab_params(spread = 1, min_dist = 0.01),
-  spectral     = spectral(u1, 2),
-  sgd1         = sgd1,
-  sgd2         = sgd2,
-  preservation = nn_preservation(d1, u_def) )
+  d           = d1,
+  n_neighbors = 15,
+  nn_idx      = u1$nn[[1]]$idx,
+  nn_dist     = u1$nn[[1]]$dist,
+  sigma       = u1$sigma,
+  rho         = u1$rho,
+  graph       = fgraph(u1),
+  ab          = ab1,
+  spectral    = spectral(u1, 2),
+  sgd1        = sgd1,
+  sgd2        = sgd2,
+  init_q      = init_q,
+  quality     = rbind(batch = quality(u_batch), serial = quality(u_serial)) )
+
+print(case1$quality)
 
 
 #--------------------------------------------------

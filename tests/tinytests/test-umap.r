@@ -19,14 +19,53 @@
     sweep(x, 2, sign(colSums(x * y)), '*')
   }
 
-  # Fraction of each sample's 10 nearest neighbours in `d` that are among
-  # its 10 nearest in the embedding.
+  # The per-vertex seeds that uwot's batch mode draws from R's RNG after
+  # set.seed(seed): two per vertex per epoch.
+  batch_seeds <- function (seed, n, n_epochs) {
+    set.seed(seed)
+    floor(runif(2 * n * n_epochs) * 4294967295)
+  }
+
+  # Layout quality, as in data-raw/expected/umap.r.
+
+  # Fraction of each sample's m nearest neighbours in `d` that are among
+  # its m nearest in the embedding `x`.
   nn_preservation <- function (d, x, m = 10) {
     dm <- as.matrix(d)
     de <- as.matrix(dist(x))
     mean(sapply(seq_len(nrow(dm)), function (i)
       length(intersect(order(dm[, i])[2:(m + 1)], order(de[, i])[2:(m + 1)])) / m ))
   }
+
+  # Trustworthiness (Venna & Kaski 2001) of the embedding's m nearest
+  # neighbours.
+  trustworthiness <- function (d, x, m = 10) {
+    dm <- as.matrix(d)
+    de <- as.matrix(dist(x))
+    n  <- nrow(dm)
+    s  <- sum(sapply(seq_len(n), function (i) {
+      rk <- integer(n)
+      rk[order(dm[, i])] <- 0:(n - 1)
+      nn <- order(de[, i])[2:(m + 1)]
+      sum(pmax(rk[nn] - m, 0))
+    }))
+    1 - 2 * s / (n * m * (2 * n - 3 * m - 1))
+  }
+
+  # UMAP's fuzzy cross-entropy between the graph and the embedding's
+  # similarities 1 / (1 + a d^(2b)), over all pairs.
+  cross_entropy <- function (graph, x, ab) {
+    n <- nrow(x)
+    v <- matrix(0, n, n)
+    v[cbind(graph$i + 1, rep(seq_len(n), diff(graph$p)))] <- graph$x
+    q <- 1 / (1 + ab[[1]] * as.matrix(dist(x))^(2 * ab[[2]]))
+    q <- pmin(pmax(q, 1e-12), 1 - 1e-12)
+    ce <- -(v * log(q) + (1 - v) * log(1 - q))
+    sum(ce[lower.tri(ce)])
+  }
+
+  # Adam's settings in uwot's batch mode.
+  adam <- c(0.5, 0.9, 1e-7)
 
 
   #--------------------------------------------------
@@ -84,46 +123,67 @@
 
 
   #--------------------------------------------------
-  # Layout: from the same start and per-epoch seeds,
-  # uwot's single-threaded SGD gives the same result.
+  # Layout: from the same start and seeds, uwot's batch
+  # mode (batch = TRUE) gives the same result.
   # Bit-identical with the same compiler and math
-  # library; other platforms' powf() can differ in the
-  # last bit, and SGD amplifies that.
+  # library (Windows x86_64, where the fixture was
+  # made). Elsewhere, powf() and FMA contraction can
+  # differ in the last bit: a 5-epoch layout must still
+  # agree to 1e-5, but over 60-100 epochs SGD amplifies
+  # such differences, so long layouts are only compared
+  # loosely there. Results across `cpus` are always
+  # exactly identical.
   #--------------------------------------------------
   same_platform <- .Platform$OS.type == 'windows' && R.version$arch == 'x86_64'
   layout_tol    <- if (same_platform) 0 else 0.5
+  short_tol     <- if (same_platform) 0 else 1e-5
 
-  s1 <- c1$sgd1
-  x1 <- .Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5), s1$epoch_seeds)
+  s1    <- c1$sgd1
+  seeds <- batch_seeds(s1$seed, n1, 5)
+  xs    <- .Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, 1L)
+  expect_identical(.Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, 4L), xs)
+  expect_equal(center_like(xs, s1$short), s1$short, tolerance = short_tol)
+
+  seeds <- batch_seeds(s1$seed, n1, s1$n_epochs)
+  x1    <- .Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, 1L)
+  expect_identical(.Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, 4L), x1)
   x1 <- center_like(x1, s1$embedding)
   expect_equal(x1, s1$embedding, tolerance = layout_tol)
 
-  s2 <- c1$sgd2
-  a2 <- s2$args
-  g12 <- graph(c1$d, a2$n_neighbors)
-  x2  <- .Call(
-    C_umap_sgd, g12, s2$init, as.integer(a2$n_epochs),
-    c(s2$ab, a2$repulsion_strength, a2$learning_rate, a2$negative_sample_rate),
-    s2$epoch_seeds )
-  x2 <- center_like(x2, s2$embedding)
+  s2    <- c1$sgd2
+  a2    <- s2$args
+  g12   <- graph(c1$d, a2$n_neighbors)
+  opt2  <- c(s2$ab, a2$repulsion_strength, a2$learning_rate, a2$negative_sample_rate, adam)
+  seeds <- batch_seeds(s2$seed, n1, a2$n_epochs)
+  x2    <- .Call(C_umap_sgd, g12, s2$init, as.integer(a2$n_epochs), opt2, seeds, 2L)
+  x2    <- center_like(x2, s2$embedding)
   expect_equal(x2, s2$embedding, tolerance = layout_tol)
 
   # umap() with init = matrix runs the same layout, from its own seeds.
   u2 <- do.call(umap, c(list(dm = c1$d, k = 3, init = s2$init, seed = 9), a2))
-  x9 <- .Call(
-    C_umap_sgd, g12, s2$init, as.integer(a2$n_epochs),
-    c(s2$ab, a2$repulsion_strength, a2$learning_rate, a2$negative_sample_rate), 9L )
+  x9 <- .Call(C_umap_sgd, g12, s2$init, as.integer(a2$n_epochs), opt2, 9L, 1L)
   x9 <- center_like(x9, unclass(u2)[, ])
   expect_equal(unname(unclass(u2)[, ]), x9, tolerance = 0)
   expect_identical(attr(u2, 'init'), 'matrix')
 
 
   #--------------------------------------------------
-  # Defaults: as good as uwot's at preserving
-  # neighbours.
+  # Quality: from uwot's spectral start, as good as
+  # uwot's batch mode at preserving neighbours, and
+  # with a similar cross-entropy.
+  #--------------------------------------------------
+  uq <- umap(c1$d, init = c1$init_q, min_dist = 0.01)
+  qb <- c1$quality['batch', ]
+  expect_true(nn_preservation(c1$d, uq) > qb[['preservation']] - 0.05)
+  expect_true(trustworthiness(c1$d, uq) > qb[['trustworthiness']] - 0.02)
+  expect_true(cross_entropy(c1$graph, uq, c1$ab) < qb[['cross_entropy']] * 1.1)
+
+
+  #--------------------------------------------------
+  # Defaults.
   #--------------------------------------------------
   u <- umap(c1$d)
-  expect_true(nn_preservation(c1$d, u) > c1$preservation - 0.05)
+  expect_true(nn_preservation(c1$d, u) > qb[['preservation']] - 0.1)
 
   expect_identical(dim(u), c(n1, 2L))
   expect_identical(colnames(u), c('UMAP1', 'UMAP2'))
@@ -135,7 +195,7 @@
   expect_identical(attr(u, 'prop'), c(NA_real_, NA_real_))
   expect_identical(attr(u, 'init'), 'spectral')
   expect_identical(attr(u, 'n_epochs'), 500L)
-  expect_equal(c(a = attr(u, 'a'), b = attr(u, 'b')), c1$ab)
+  expect_equal(c(a = attr(u, 'a'), b = attr(u, 'b')), umap_ab(1, 0.1))
   expect_equal(unname(colMeans(u)), c(0, 0))
 
   # Deterministic, for any number of cpus, and R's RNG untouched.
@@ -145,6 +205,13 @@
   expect_identical(umap(c1$d, cpus = 4), u)
   expect_identical(.Random.seed, rs)
   expect_false(identical(umap(c1$d, seed = 1), u))
+
+  # With enough samples for several threads to share the work.
+  set.seed(2)
+  d5 <- dist(matrix(rnorm(700 * 4), 700))
+  u5 <- umap(d5, n_epochs = 30, cpus = 1)
+  expect_identical(umap(d5, n_epochs = 30, cpus = 3), u5)
+  expect_identical(umap(d5, n_epochs = 30, cpus = 8), u5)
 
   # Through ordination(), and from a matrix.
   expect_identical(ordination(c1$d, 'umap'), u)

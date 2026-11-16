@@ -23,7 +23,7 @@ extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_umap_graph(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_rand(SEXP, SEXP, SEXP);
-extern SEXP C_umap_sgd(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_umap_sgd(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_spectral(SEXP, SEXP, SEXP);
 extern SEXP C_unifrac(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
@@ -47,7 +47,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
   {"C_umap_graph",    (DL_FUNC) &C_umap_graph,    5},
   {"C_umap_rand",     (DL_FUNC) &C_umap_rand,     3},
-  {"C_umap_sgd",      (DL_FUNC) &C_umap_sgd,      5},
+  {"C_umap_sgd",      (DL_FUNC) &C_umap_sgd,      6},
   {"C_umap_spectral", (DL_FUNC) &C_umap_spectral, 3},
   {"C_unifrac",   (DL_FUNC) &C_unifrac,   7},
   {NULL, NULL, 0}

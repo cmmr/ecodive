@@ -7,10 +7,10 @@
 #'
 #' Ordinates samples from their distances, for plotting beta diversity, by
 #' placing samples that are near neighbours in `dm` near each other on the
-#' plot. Follows the same procedure, with the same defaults, as
-#' `uwot::umap()` given a `dist` object, and gives the same layout from the
-#' same starting coordinates and random seeds, but finds the neighbours in
-#' parallel C, without ever copying `dm` into an \eqn{n \times n} matrix.
+#' plot. Follows the same procedure as `uwot::umap(batch = TRUE)` given a
+#' `dist` object, and gives the same layout from the same settings, starting
+#' coordinates and random seeds, but runs in parallel C, without ever copying
+#' `dm` into an \eqn{n \times n} matrix.
 #'
 #' @inheritParams documentation
 #'
@@ -25,7 +25,8 @@
 #'        larger than the number of samples are reduced to it. Default: `15`
 #'
 #' @param min_dist   How close samples can be packed together on the plot,
-#'        relative to `spread`. Default: `0.01`
+#'        relative to `spread`. Default: `0.1`, as in umap-learn (uwot's is
+#'        `0.01`).
 #'
 #' @param spread   The scale of the plot's distances, together with
 #'        `min_dist`. Default: `1`
@@ -34,8 +35,9 @@
 #'        default, uses 500 for up to 10,000 samples and 200 for more, as
 #'        `uwot::umap()` does.
 #'
-#' @param learning_rate   The initial learning rate of the optimization. It
-#'        decreases linearly to 0 over the epochs. Default: `1`
+#' @param learning_rate   The initial learning rate (step size) of the
+#'        optimization. It decreases linearly to 0 over the epochs.
+#'        Default: `1`
 #'
 #' @param negative_sample_rate   How many non-neighbours (negative samples)
 #'        to push away for each neighbour pulled closer. Default: `5`
@@ -98,8 +100,25 @@
 #' 4. **Layout.** Starting from `init`, stochastic gradient descent pulls
 #'    the two samples of each edge together, sampling each edge in proportion
 #'    to its weight, and pushes each sample away from `negative_sample_rate`
-#'    randomly chosen samples per edge sampled. Finally, the coordinates are
-#'    centered.
+#'    randomly chosen samples per edge sampled. As in `uwot::umap()`'s batch
+#'    mode, each epoch computes every sample's gradient from the coordinates
+#'    at the start of the epoch, then moves all samples at once by the Adam
+#'    optimizer (\eqn{\beta_1 = 0.5}, \eqn{\beta_2 = 0.9},
+#'    \eqn{\epsilon = 10^{-7}}, uwot's settings for batch mode). Finally, the
+#'    coordinates are centered.
+#'
+#'
+#' **Why batch mode**
+#'
+#' `uwot::umap()`'s default optimization moves samples one edge at a time,
+#' each move seeing the ones before it. That can only run on one thread if
+#' it is to be reproducible, and it takes nearly all of the run time. In
+#' batch mode, the samples' gradients within an epoch don't depend on each
+#' other, so `umap()` computes them on `cpus` threads, and still gets the
+#' same result for any number of threads. The layouts differ from those of
+#' uwot's default mode only as different random draws would: neighbour
+#' preservation, trustworthiness, and the final cross-entropy are about the
+#' same.
 #'
 #'
 #' **Starting coordinates**
@@ -118,14 +137,20 @@
 #'
 #' **Differences from `uwot::umap()`**
 #'
+#' * `umap()` always optimizes in batch mode, so its layouts are those of
+#'   `uwot::umap(batch = TRUE)`, not of uwot's default.
+#' * `min_dist` defaults to `0.1`, the canonical value used by umap-learn and
+#'   most other implementations, rather than uwot's `0.01`. Other defaults
+#'   are the same.
 #' * The random numbers come from `seed`, not from R's random number
 #'   generator, so `set.seed()` has no effect, and R's random number stream
-#'   is left untouched. `uwot::umap()` draws from R's generator a 32-bit seed
-#'   for each epoch's stream of negative samples, and the jitter of spectral
-#'   starts. `umap()` makes those from `seed` instead, with the same stream
-#'   of negative samples (PCG) from the same per-epoch seeds; given the same
-#'   seeds and starting coordinates, the two give the same coordinates (to
-#'   the last bit, for the same compiler and math library).
+#'   is left untouched. In batch mode, `uwot::umap()` draws from R's
+#'   generator two 32-bit seeds per sample per epoch, for each sample's
+#'   stream of negative samples, and the jitter of spectral starts. `umap()`
+#'   makes those from `seed` instead, with the same streams of negative
+#'   samples (PCG) from the same seeds; given the same seeds and starting
+#'   coordinates, the two give the same coordinates (to the last bit, for
+#'   the same compiler and math library).
 #' * The spectral start's eigenvectors are computed to a tolerance of about
 #'   \eqn{10^{-10}} by Lanczos iteration, rather than `RSpectra`'s
 #'   \eqn{10^{-4}}, and each one's sign is fixed (its largest absolute
@@ -133,10 +158,6 @@
 #' * The `"pcoa"` start, and the fallback for unconnected graphs, come from
 #'   [pcoa()] rather than `cmdscale()`; they differ only by rounding and the
 #'   signs of the axes.
-#' * The optimization runs on one thread, as `uwot::umap()`'s does by
-#'   default (`n_sgd_threads = 0`), so that the result is the same for any
-#'   number of `cpus`. `cpus` threads find the neighbours, the graph, and
-#'   the spectral start.
 #' * Finally, each axis is flipped so that its largest absolute coordinate
 #'   is positive.
 #'
@@ -146,8 +167,9 @@
 #' `uwot::umap()` given a `dist` object copies it into an \eqn{n \times n}
 #' matrix and sorts each of its columns in R. `umap()` reads the packed
 #' triangle of `dm` directly, keeping only the `n_neighbors` closest of each
-#' sample, in parallel. Beyond `dm` itself, memory use is proportional to
-#' \eqn{n} times `n_neighbors`.
+#' sample. Beyond `dm` itself, memory use is proportional to \eqn{n} times
+#' `n_neighbors`. `cpus` threads find the neighbours, build the graph,
+#' compute the spectral start, and compute each epoch's gradients.
 #'
 #'
 #' **Reproducibility**
@@ -181,7 +203,7 @@
 #'     plot(ord, col = rep(1:3, each = 20), asp = 1)
 #'
 umap <- function (
-    dm, k = 2L, n_neighbors = 15L, min_dist = 0.01, spread = 1,
+    dm, k = 2L, n_neighbors = 15L, min_dist = 0.1, spread = 1,
     n_epochs = NULL, learning_rate = 1, negative_sample_rate = 5,
     repulsion_strength = 1, set_op_mix_ratio = 1, local_connectivity = 1,
     bandwidth = 1, init = 'spectral', seed = 0L, cpus = n_cpus() ) {
@@ -305,13 +327,15 @@ umap <- function (
 
 
   #--------------------------------------------------
-  # Layout.
+  # Layout: uwot's batch mode, with Adam's defaults
+  # there (beta1 = 0.5, beta2 = 0.9, eps = 1e-7).
   #--------------------------------------------------
   if (n_epochs > 0)
     x <- .Call(
       C_umap_sgd, graph, x, n_epochs,
-      c(ab[['a']], ab[['b']], repulsion_strength, learning_rate, negative_sample_rate),
-      seed )
+      c(ab[['a']], ab[['b']], repulsion_strength, learning_rate,
+        negative_sample_rate, 0.5, 0.9, 1e-7),
+      seed, cpus )
 
   result(x, init)
 }

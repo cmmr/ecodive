@@ -26,12 +26,13 @@
 * New `umap()` runs a uniform manifold approximation and projection (UMAP)
   on a `dist` object, following `uwot::umap()` and its defaults: exact
   nearest neighbours, smooth-kNN calibration and fuzzy union (identical to
-  uwot's), a spectral start from the normalized graph Laplacian, and uwot's
-  single-threaded stochastic gradient descent, which gives uwot's coordinates
-  from the same start and per-epoch seeds. The neighbours are found in
-  parallel C straight from the dist triangle, without an n-by-n matrix.
-  Random numbers come from a `seed` argument, and results are identical for
-  any number of `cpus`.
+  uwot's), a spectral start from the normalized graph Laplacian, and the
+  layout optimization of uwot's batch mode (`batch = TRUE`: per-epoch
+  gradients, then Adam), which gives uwot's coordinates from the same start
+  and seeds. Every stage runs in parallel C, the neighbours straight from
+  the dist triangle without an n-by-n matrix. Random numbers come from a
+  `seed` argument, and results are identical for any number of `cpus`.
+  `min_dist` defaults to the canonical 0.1 (umap-learn's), not uwot's 0.01.
 
 * New `permanova()` runs a permutational multivariate analysis of variance
   on a `dist` object and sample metadata, with a model formula: factors,
