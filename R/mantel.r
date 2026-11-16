@@ -1,0 +1,452 @@
+# Copyright (c) 2026 ecodive authors
+# Licensed under the MIT License: https://opensource.org/license/mit
+
+
+
+#' Mantel Test
+#'
+#' Tests whether two distance matrices are correlated: for instance, whether
+#' samples with more different communities are also further apart, or more
+#' different in pH. Gives the same statistic as `vegan::mantel()` (Pearson,
+#' Spearman, or Kendall correlation), and as `vegan::mantel.partial()` with
+#' `given`, with permutation p-values. Computes them in parallel C,
+#' straight from the distances, without the \eqn{n \times n} matrices that
+#' `mantel()` builds for every permutation.
+#'
+#' @inheritParams documentation
+#'
+#' @param dm  A `dist` object, such as from [beta_div()] or [bray()], or a
+#'        symmetric numeric matrix of distances. Must not contain `NA`s or
+#'        negative values. Its samples are the ones permuted.
+#'
+#' @param y  The distances to correlate with `dm`: a `dist` object or a
+#'        symmetric numeric matrix, like `dm`. Or a numeric vector with one
+#'        value per sample, such as age or pH, whose absolute differences
+#'        (`stats::dist(y)`) are the distances. Samples are matched to `dm`'s
+#'        by name when both have names; otherwise they must be in the same
+#'        order.
+#'
+#' @param method  The correlation coefficient: `'pearson'`, `'spearman'`,
+#'        or `'kendall'` (tau-b), as in [stats::cor()]. Default:
+#'        `'pearson'`.
+#'
+#' @param permutations  The number of permutations. Default: `999`.
+#'        Alternatively, a matrix with one permutation of `1:n` per row, as
+#'        from `permute::shuffleSet()`, to use instead of random ones.
+#'
+#' @param strata  Permute samples only within these groups (blocks), for
+#'        designs such as repeated measures. A vector with one value per
+#'        sample, matched to `dm`'s samples by name when it has names,
+#'        otherwise in the same order. Default: `NULL` (free permutation).
+#'
+#' @param given  For a partial Mantel test: distances whose effect is removed
+#'        from the correlation of `dm` and `y`, given like `y`. Default:
+#'        `NULL` (a simple Mantel test).
+#'
+#' @param alternative  Which correlations count as more extreme than the
+#'        observed one: `'greater'` (more positive, as in `vegan::mantel()`),
+#'        `'less'` (more negative), or `'two.sided'` (larger in absolute
+#'        value). Default: `'greater'`.
+#'
+#' @param seed  An integer seed for the random permutations. The same seed
+#'        gives the same p-values. Default: `0`
+#'
+#' @return A list of class `c('ecodive_mantel', 'ecodive_test')`, with:
+#'
+#'   * `statistic`: The Mantel statistic, `c(r = ...)`: the correlation of
+#'     `dm` and `y`, or their partial correlation with `given`.
+#'     `vegan::mantel()`'s `statistic`.
+#'   * `p_value`: The permutation p-value.
+#'   * `z`: The standardized effect size, `(r - mean(r_perm)) / sd(r_perm)`.
+#'   * `n_perm`: The number of permutations.
+#'   * `method`: The correlation coefficient: `'pearson'`, `'spearman'`, or
+#'     `'kendall'`.
+#'   * `alternative`: `'greater'`, `'less'`, or `'two.sided'`.
+#'   * `partial`: Whether it is a partial Mantel test (with `given`).
+#'   * `n`: The number of samples.
+#'   * `permutation`: How samples were permuted: `'free'`, `'within strata'`,
+#'     or `'supplied matrix'`.
+#'
+#'   Attribute `r_perm` is a vector of the statistics of the permutations, as
+#'   `vegan::mantel()`'s `perm`. `as.data.frame()` gives the main results as
+#'   one row.
+#'
+#' @details
+#'
+#' **Method**
+#'
+#' The Mantel test (Mantel 1967; Legendre & Legendre 2012) correlates the
+#' \eqn{n(n-1)/2} distances of `dm` with the matching distances of `y`. The
+#' distances aren't independent of one another, so the p-value comes from
+#' permutations of the samples: the rows and columns of `dm` are shuffled
+#' together, `y` is held fixed, and the correlation is recomputed. The
+#' p-value is the proportion of permutations, counting the observed one,
+#' with a correlation at least as extreme:
+#' \eqn{(1 + \#\{r_{perm} \ge r\}) / (1 + permutations)} for
+#' `alternative = 'greater'`. As in `vegan::mantel()`, permuted statistics
+#' within `sqrt(.Machine$double.eps)` of the observed one count as ties.
+#'
+#' The partial Mantel test (Smouse et al. 1986) correlates `dm` and `y`
+#' after removing the effect of `given`, as the partial correlation
+#' \deqn{r_{xy.z} = \frac{r_{xy} - r_{xz} r_{yz}}{\sqrt{1 - r_{xz}^2}
+#'   \sqrt{1 - r_{yz}^2}}}
+#' with the samples of `dm` permuted, as in `vegan::mantel.partial()`. Its
+#' p-values can be too small when the distances are spatially autocorrelated
+#' (Legendre & Fortin 2010; Guillot & Rousset 2013).
+#'
+#'
+#' **Speed and memory**
+#'
+#' `dm` and `y` are centred and scaled once (after ranking them, for
+#' Spearman), so each permuted correlation is one pass over the distances,
+#' reading `dm` through the permutation: \eqn{O(n^2)} per permutation, with
+#' no \eqn{n \times n} matrix. Kendall's tau-b is counted with Knight's (1966)
+#' merge sort, in \eqn{O(n^2 \log n)} per permutation, where
+#' `stats::cor()` takes \eqn{O(n^4)}. Permutations run in parallel.
+#'
+#'
+#' **Reproducibility**
+#'
+#' The permutations come from `seed`, not from R's random number generator,
+#' so `set.seed()` has no effect, and each permutation has a random number
+#' stream of its own. P-values are identical from run to run and for any
+#' number of `cpus`. The random permutations differ from `vegan::mantel()`'s,
+#' so p-values agree with it only up to sampling error, unless the same
+#' `permutations` matrix is given to both.
+#'
+#'
+#' **Differences from vegan::mantel()**
+#'
+#' * One function does both the simple and the partial test.
+#' * `y` and `given` may also be numeric vectors, one value per sample.
+#' * Samples are matched by name between `dm`, `y`, `given`, and `strata`.
+#' * `alternative` adds lower-tail and two-sided tests.
+#' * There's no `na.rm`: distances must not be `NA`.
+#' * When there are fewer possible permutations than requested,
+#'   `vegan::mantel()` (via `permute`) runs each of them once instead.
+#'   `mantel()` always draws random permutations.
+#'
+#' @references
+#' Guillot, G., & Rousset, F. (2013). Dismantling the Mantel tests.
+#' *Methods in Ecology and Evolution*, 4(4), 336-344.
+#' \doi{10.1111/2041-210x.12018}
+#'
+#' Knight, W. R. (1966). A computer method for calculating Kendall's tau
+#' with ungrouped data. *Journal of the American Statistical Association*,
+#' 61(314), 436-439. \doi{10.1080/01621459.1966.10480879}
+#'
+#' Legendre, P., & Fortin, M.-J. (2010). Comparison of the Mantel test and
+#' alternative approaches for detecting complex multivariate relationships
+#' in the spatial analysis of genetic data. *Molecular Ecology Resources*,
+#' 10(5), 831-844. \doi{10.1111/j.1755-0998.2010.02866.x}
+#'
+#' Legendre, P., & Legendre, L. (2012). *Numerical Ecology* (3rd ed.),
+#' section 10.5. Elsevier.
+#'
+#' Mantel, N. (1967). The detection of disease clustering and a generalized
+#' regression approach. *Cancer Research*, 27(2), 209-220.
+#'
+#' Smouse, P. E., Long, J. C., & Sokal, R. R. (1986). Multiple regression
+#' and correlation extensions of the Mantel test of matrix correspondence.
+#' *Systematic Zoology*, 35(4), 627-632. \doi{10.2307/2413122}
+#'
+#' @seealso [permanova()], [beta_div()]
+#'
+#' @export
+#' @examples
+#'     # 30 samples along a pH gradient, which shifts the first five genera.
+#'     set.seed(1)
+#'     counts <- matrix(rpois(30 * 20, 5), 30, 20)
+#'     rownames(counts) <- paste0('S', 1:30)
+#'     ph  <- setNames(round(runif(30, 6, 8), 1), rownames(counts))
+#'     geo <- dist(cbind(lat = runif(30, 30, 35), lon = runif(30, -100, -95)))
+#'     counts[, 1:5] <- counts[, 1:5] + round(4 * (ph - 6))
+#'
+#'     dm <- bray(counts)
+#'
+#'     # Are samples that differ more in pH also more different in
+#'     # community composition?
+#'     mantel(dm, ph)
+#'
+#'     # With rank correlation.
+#'     mantel(dm, ph, method = 'spearman')
+#'
+#'     # After removing the effect of geographic distance.
+#'     mantel(dm, ph, given = geo)
+#'
+mantel <- function (
+    dm, y, method = 'pearson', permutations = 999L, strata = NULL,
+    given = NULL, alternative = 'greater', seed = 0L, cpus = n_cpus() ) {
+
+  validate_seed()
+  validate_cpus()
+
+  method      <- match.arg(method, c('pearson', 'spearman', 'kendall'))
+  alternative <- match.arg(alternative, c('greater', 'less', 'two.sided'))
+
+  x <- mantel_dist(dm, 'dm')
+  n <- x$n
+
+  if (n < 3)
+    stop('`dm` must have at least 3 samples.', call. = FALSE)
+
+  y <- mantel_align(mantel_dist(y, 'y'), 'y', x$labels, n)
+  g <- if (is.null(given)) NULL else mantel_align(mantel_dist(given, 'given'), 'given', x$labels, n)
+
+  pm     <- perm_matrix(permutations, n)
+  strata <- mantel_strata(strata, x$labels, n)
+
+  if (!is.null(pm$perms) && !is.null(strata))
+    stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
+
+  x <- x$dm
+
+  result <- function (r_all) mantel_result(
+    r_all, method, alternative, partial = !is.null(g), n = n,
+    permutation = if (!is.null(pm$perms)) 'supplied matrix'
+                  else if (!is.null(strata)) 'within strata'
+                  else 'free' )
+
+  undefined <- rep(NA_real_, pm$n_perm + 1L)
+
+
+  #--------------------------------------------------------
+  # Constant distances have no correlation.
+  #--------------------------------------------------------
+  for (v in list(list(x, 'dm'), list(y, 'y'), list(g, 'given')))
+    if (!is.null(v[[1]]) && all(v[[1]] == v[[1]][[1]])) {
+      warning('`', v[[2]], '` has the same distance between every pair of ',
+              'samples, so it has no correlation with anything.', call. = FALSE)
+      return (result(undefined))
+    }
+
+
+  #--------------------------------------------------------
+  # Correlations of permuted x with y (and the given
+  # distances, g), and of y with g.
+  #--------------------------------------------------------
+  targets <- if (is.null(g)) list(y) else list(y, g)
+  r_all   <- mantel_cor(x, targets, method, pm, strata, seed, cpus)
+
+  if (is.null(g)) {
+    r_all <- r_all[1, ]
+  }
+  else {
+    ryg <- mantel_cor(y, list(g), method, perm_matrix(0L, n), NULL, seed, 1L)[[1]]
+    if (abs(ryg) >= 1 - 1e-12) {
+      warning('`y` and `given` are perfectly correlated, so there is no ',
+              'partial correlation.', call. = FALSE)
+      return (result(undefined))
+    }
+    rxy   <- r_all[1, ]
+    rxg   <- r_all[2, ]
+    r_all <- (rxy - rxg * ryg) / sqrt(1 - rxg * rxg) / sqrt(1 - ryg * ryg)  # as vegan
+    r_all[!is.finite(r_all)] <- NA_real_
+  }
+
+  result(r_all)
+}
+
+
+
+#------------------------------------------------------------------------------
+# Lines added to print.ecodive_test()'s printout.
+#------------------------------------------------------------------------------
+#' @exportS3Method test_details ecodive_mantel
+test_details.ecodive_mantel <- function (x, digits) {
+  c(
+    paste0('Correlation: ', switch(x$method,
+      pearson  = "Pearson's product-moment correlation",
+      spearman = "Spearman's rank correlation rho",
+      kendall  = "Kendall's rank correlation tau-b" )),
+    paste0('Alternative: ', switch(x$alternative,
+      greater   = 'greater (r is more positive than by chance)',
+      less      = 'less (r is more negative than by chance)',
+      two.sided = 'two-sided (|r| is larger than by chance)' )),
+    paste0('Samples: ', x$n) )
+}
+
+
+
+#------------------------------------------------------------------------------
+# A dist object, symmetric matrix, or (except for dm) a numeric vector of
+# values per sample, as dist_vector()'s list(dm, n, labels).
+#------------------------------------------------------------------------------
+mantel_dist <- function (v, arg) {
+
+  if (arg != 'dm' && is.numeric(v) && is.null(dim(v)) && !inherits(v, 'dist')) {
+
+    if (!all(is.finite(v)))
+      stop('`', arg, '` must not contain NA, NaN, or infinite values.', call. = FALSE)
+
+    # As stats::dist(v) computes it, which vegan users pass.
+    d <- stats::dist(unname(as.double(v)))
+    return (list(dm = as.vector(d), n = length(v), labels = names(v)))
+  }
+
+  # dist_vector()'s errors name `dm`.
+  tryCatch(
+    dist_vector(v),
+    error = function (e) {
+      msg <- gsub('`dm`', paste0('`', arg, '`'), conditionMessage(e), fixed = TRUE)
+      if (arg != 'dm')
+        msg <- sub(
+          'a symmetric numeric matrix.',
+          'a symmetric numeric matrix, or a numeric vector with one value per sample.',
+          msg, fixed = TRUE )
+      stop(msg, call. = FALSE)
+    })
+}
+
+
+
+#------------------------------------------------------------------------------
+# v's packed distances in the order of dm's samples, matched by label when
+# both have labels.
+#------------------------------------------------------------------------------
+mantel_align <- function (v, arg, labels, n) {
+
+  if (v$n != n)
+    stop('`', arg, '` has ', v$n, ' samples, but `dm` has ', n, '.', call. = FALSE)
+
+  if (is.null(labels) || is.null(v$labels) || identical(labels, v$labels))
+    return (v$dm)
+
+  if (anyDuplicated(labels))
+    stop('`dm` has duplicate sample names.', call. = FALSE)
+  if (anyDuplicated(v$labels))
+    stop('`', arg, '` has duplicate sample names.', call. = FALSE)
+
+  idx <- match(labels, v$labels)
+  if (anyNA(idx))
+    stop('`', arg, '` has no samples named ',
+         paste0('"', utils::head(labels[is.na(idx)], 5), '"', collapse = ', '),
+         if (sum(is.na(idx)) > 5) ', ...', '.', call. = FALSE)
+
+  # Pair (i, j), i > j, of dm is pair (idx[i], idx[j]) of v.
+  j  <- rep.int(seq_len(n - 1L), (n - 1L):1)
+  i  <- j + sequence((n - 1L):1)
+  a  <- idx[i]
+  b  <- idx[j]
+  hi <- as.double(pmax(a, b))
+  lo <- as.double(pmin(a, b))
+
+  v$dm[(lo - 1) * n - (lo - 1) * lo / 2 + hi - lo]
+}
+
+
+
+#------------------------------------------------------------------------------
+# `strata` as 0-based integer codes in dm's sample order, or NULL.
+#------------------------------------------------------------------------------
+mantel_strata <- function (strata, labels, n) {
+
+  if (is.null(strata)) return (NULL)
+
+  if (!is.atomic(strata) || !is.null(dim(strata)) || length(strata) != n)
+    stop('`strata` must be a vector with one value per sample (', n, ').', call. = FALSE)
+
+  if (!is.null(labels) && !is.null(names(strata))) {
+    idx <- match(labels, names(strata))
+    if (anyNA(idx) || anyDuplicated(names(strata)))
+      stop("`strata`'s names must be `dm`'s sample names.", call. = FALSE)
+    strata <- strata[idx]
+  }
+
+  if (anyNA(strata))
+    stop('`strata` must not contain NA values.', call. = FALSE)
+
+  as.integer(factor(strata)) - 1L
+}
+
+
+
+#------------------------------------------------------------------------------
+# Correlations of x, permuted, with each of `targets` (packed distances, in
+# the same sample order): an m x (n_perm + 1) matrix, column 1 observed.
+#------------------------------------------------------------------------------
+mantel_cor <- function (x, targets, method, pm, strata, seed, cpus) {
+
+  n <- (1 + sqrt(1 + 8 * length(x))) / 2
+
+  if (method == 'kendall') {
+
+    # Integer codes of the distinct values, and tied pairs.
+    codes <- function (v) match(v, sort.int(unique(v))) - 1L
+    tied  <- function (cnt) sum(cnt * (cnt - 1) / 2)
+
+    # x's pairs in order, with its tie groups; the targets' codes.
+    xc  <- codes(x)
+    cnt <- tabulate(xc + 1L)
+    tcs <- lapply(targets, codes)
+
+    args <- list(
+      order(xc, method = 'radix') - 1L,
+      tcs,
+      as.integer(c(0, cumsum(cnt))),
+      c(tied(as.double(cnt)), vapply(tcs, function (tc) tied(as.double(tabulate(tc + 1L))), 0)) )
+    meth <- 1L
+  }
+  else {
+
+    # Centred and scaled to unit length, after ranking for Spearman.
+    std <- function (v) {
+      if (method == 'spearman') v <- rank(v)
+      v <- v - mean(v)
+      v / sqrt(sum(v * v))
+    }
+
+    args <- list(std(x), lapply(targets, std), NULL, NULL)
+    meth <- 0L
+  }
+
+  .Call(
+    C_mantel, args[[1]], args[[2]], args[[3]], args[[4]], pm$perms, strata,
+    as.integer(c(n, meth, pm$n_perm, seed, cpus)) )
+}
+
+
+
+#------------------------------------------------------------------------------
+# The result, from the observed and permuted statistics (r_all[1] and
+# r_all[-1]). As new_ecodive_test() (on the mrpp branch) builds it.
+# TODO: use new_ecodive_test() and perm_z() after the mrpp merge.
+#------------------------------------------------------------------------------
+mantel_result <- function (r_all, method, alternative, partial, n, permutation) {
+
+  r      <- r_all[[1]]
+  r_perm <- r_all[-1]
+  n_perm <- length(r_perm)
+  eps    <- sqrt(.Machine$double.eps)
+
+  p <- if (n_perm == 0 || is.na(r)) NA_real_ else switch(alternative,
+    greater   = (sum(r_perm >= r - eps) + 1) / (n_perm + 1),
+    less      = (sum(r_perm <= r + eps) + 1) / (n_perm + 1),
+    two.sided = (sum(abs(r_perm) >= abs(r) - eps) + 1) / (n_perm + 1) )
+
+  # perm_z()
+  z <- NA_real_
+  if (n_perm >= 2 && !is.na(r)) {
+    z <- (r - mean(r_perm)) / stats::sd(r_perm)
+    if (!is.finite(z)) z <- NA_real_
+  }
+
+  title <- paste0(
+    if (partial) 'Partial Mantel test (' else 'Mantel test (',
+    switch(method, pearson = 'Pearson', spearman = 'Spearman', kendall = 'Kendall'), ')' )
+
+  structure(
+    .Data = list(
+      statistic   = c(r = r),
+      p_value     = as.double(p),
+      z           = as.double(z),
+      n_perm      = as.integer(n_perm),
+      method      = method,
+      alternative = alternative,
+      partial     = partial,
+      n           = as.integer(n),
+      permutation = permutation ),
+    r_perm = as.double(r_perm),
+    title  = title,
+    class  = c('ecodive_mantel', 'ecodive_test') )
+}
