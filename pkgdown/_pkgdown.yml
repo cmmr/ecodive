@@ -61,6 +61,7 @@ reference:
   - pcoa
   - nmds
   - umap
+  - dbrda
   - list_ordinations
 
 - title: Hypothesis Tests

@@ -30,6 +30,7 @@ beta diversity metrics.
 \details{
 \strong{List of Ordination Methods}\tabular{ll}{
    Option / Function Name \tab Method Name \cr
+   \code{dbrda} \tab Distance-based Redundancy Analysis (db-RDA) \cr
    \code{nmds} \tab Non-metric Multidimensional Scaling (NMDS) \cr
    \code{pcoa} \tab Principal Coordinates Analysis (PCoA) \cr
    \code{umap} \tab Uniform Manifold Approximation and Projection \cr
@@ -42,6 +43,8 @@ Case insensitive and partial matching, ignoring anything but letters. E.g.
 \code{method = 'PCoA'} or \code{'principal coord'} selects \code{pcoa}. Common other names
 also work: \code{'MDS'}, \code{'PCO'}, \code{'cmdscale'}, or \code{'classical MDS'} for
 \code{pcoa}, and \code{'non-metric MDS'}, \code{'metaMDS'}, or \code{'monoMDS'} for \code{nmds}.
+\code{'CAP'}, \code{'capscale'}, or \code{'distance-based RDA'} select \code{dbrda}, which
+also needs \code{data} (see \code{\link[=dbrda]{dbrda()}}).
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.

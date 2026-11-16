@@ -47,6 +47,16 @@
   Permutations come from a `seed` argument, and results are identical for
   any number of `cpus`.
 
+* New `dbrda()` runs a distance-based redundancy analysis (db-RDA, also
+  known as constrained analysis of principal coordinates, CAP): the axes of a
+  `dist` object that sample metadata explain, given as a formula such as
+  `~ treatment + Condition(site)`. It gives the same eigenvalues, inertia,
+  site scores, biplot scores and centroids as `vegan::dbrda()` (up to each
+  axis's sign), without forming an n-by-n matrix: the constrained axes come
+  from a small eigenproblem, and unconstrained axes (`MDS1`, ...) are only
+  computed when the constraints give fewer than `k` axes. Its results are
+  identical for any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference
