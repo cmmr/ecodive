@@ -67,6 +67,19 @@
   # Adam's settings in uwot's batch mode.
   adam <- c(0.5, 0.9, 1e-7)
 
+  # Large graphs' reference results are fingerprints of each part, as in
+  # data-raw/expected/umap.r.
+  fingerprint <- function (x) {
+    x <- as.double(x)
+    c(length(x), sum(x), sum(x * x), sum(x * cos(seq_along(x))))
+  }
+
+  graph_matches <- function (g, ref, info) {
+    parts <- c(nn_idx = 'idx', nn_dist = 'dist', sigma = 'sigma', rho = 'rho', p = 'p', i = 'j', x = 'x')
+    for (nm in names(parts))
+      expect_equal(fingerprint(g[[parts[[nm]]]]), ref[[nm]], tolerance = 1e-12, info = paste(info, nm))
+  }
+
 
   # Comparisons with uwot's stored results run at home only; the stored
   # distances are also used as inputs everywhere.
@@ -110,6 +123,22 @@
   g3 <- graph(c2$d, c2$n_neighbors, mix = 0)
   expect_true(length(g3$x) < length(graph(c2$d, c2$n_neighbors)$x))
   expect_true(all(g3$x > 0))
+
+
+  # Other numbers of neighbours, bandwidths and local connectivity; and
+  # Bray-Curtis distances between 600 samples.
+  if (home) {
+    for (ref_g in ref$more$graphs) {
+      a <- ref_g$args
+      g <- graph(
+        c1$d, ref_g$n_neighbors,
+        local = if (is.null(a$local_connectivity)) 1 else a$local_connectivity,
+        bw    = if (is.null(a$bandwidth)) 1 else a$bandwidth )
+      graph_matches(g, ref_g, paste(ref_g$n_neighbors, unlist(a), collapse = ' '))
+    }
+    g600 <- graph(bray(ref$more$counts600), 15L, cpus = 2L)
+    graph_matches(g600, ref$more$graph600, 'bray 600')
+  }
 
 
   #--------------------------------------------------
@@ -174,6 +203,15 @@
   x2    <- .Call(C_umap_sgd, g12, s2$init, as.integer(a2$n_epochs), opt2, seeds, 2L)
   x2    <- center_like(x2, s2$embedding)
   if (same_platform) expect_equal(x2, s2$embedding, tolerance = 0)
+
+  # 3 dimensions, on case 2's Bray-Curtis graph.
+  s3    <- ref$more$sgd3
+  seeds <- batch_seeds(s3$seed, 40L, 5L)
+  x3    <- .Call(C_umap_sgd, g2, s3$init, 5L, c(s3$ab, 1, 1, 5, adam), seeds, 1L)
+  if (home) expect_equal(center_like(x3, s3$epochs5), s3$epochs5, tolerance = short_tol)
+  seeds <- batch_seeds(s3$seed, 40L, 50L)
+  x3    <- .Call(C_umap_sgd, g2, s3$init, 50L, c(s3$ab, 1, 1, 5, adam), seeds, 2L)
+  if (same_platform) expect_equal(center_like(x3, s3$epochs50), s3$epochs50, tolerance = 0)
 
   # umap() with init = matrix runs the same layout, from its own seeds.
   u2 <- do.call(umap, c(list(dm = c1$d, k = 3, init = s2$init, seed = 9), a2))
@@ -252,6 +290,14 @@
   uf  <- umap(far, n_neighbors = 5, n_epochs = 10)
   expect_identical(attr(uf, 'init'), 'pcoa')
   expect_true(all(is.finite(uf)))
+
+  # The PCoA start scaled to standard deviation 1: uwot's "spca" fallback.
+  uf <- umap(dist(ref$more$far), n_neighbors = 5, n_epochs = 0)
+  expect_identical(attr(uf, 'init'), 'pcoa')
+  if (home) {
+    y <- unname(scale(ref$more$far0, scale = FALSE)[, ])
+    expect_true(max(abs(center_like(unclass(uf)[, ], y) - y)) / max(abs(y)) < 1e-9)
+  }
 
   # No optimization: the (centered) start.
   u0 <- umap(c1$d, init = s1$init, n_epochs = 0)

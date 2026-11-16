@@ -3,10 +3,11 @@
 #
 # Run from the package root:  Rscript data-raw/expected/umap.r
 #
-# Needs uwot, Matrix, RSpectra and vegan. Every stage that uwot computes
-# deterministically is recorded; so are full layouts by uwot's batch mode
-# (batch = TRUE, which ecodive's umap() always uses) from given starting
-# coordinates and seeds, and quality measures of a default-settings layout.
+# Needs uwot, Matrix, RSpectra, vegan and ecodive (for bray()). Every stage
+# that uwot computes deterministically is recorded; so are full layouts by
+# uwot's batch mode (batch = TRUE, which ecodive's umap() always uses) from
+# given starting coordinates and seeds, and quality measures of a
+# default-settings layout.
 # In batch mode, uwot draws two 32-bit seeds per vertex per epoch from R's
 # RNG, each as static_cast<uint32_t>(runif(1) * UINT32_MAX); test-umap.r
 # regenerates them from the seed recorded here.
@@ -186,9 +187,81 @@ case2 <- list(
   graph              = fgraph(u2) )
 
 
+#--------------------------------------------------
+# More cases.
+#--------------------------------------------------
+
+# Large graphs are recorded by fingerprints rather than in full, to keep
+# this file small: the same function is in test-umap.r.
+fingerprint <- function (x) {
+  x <- as.double(x)
+  c(length(x), sum(x), sum(x * x), sum(x * cos(seq_along(x))))
+}
+
+# uwot's neighbours, smooth kNN, and fuzzy graph, as fingerprints.
+graph_fp <- function (d, n_neighbors, ...) {
+  u <- umap(
+    d, n_neighbors = n_neighbors, n_epochs = 0, init = 'random',
+    ret_extra = c('sigma', 'nn', 'fgraph'), verbose = FALSE, ... )
+  g <- fgraph(u)
+  list(
+    n_neighbors = n_neighbors, args = list(...),
+    nn_idx = fingerprint(u$nn[[1]]$idx), nn_dist = fingerprint(u$nn[[1]]$dist),
+    sigma  = fingerprint(u$sigma),       rho     = fingerprint(u$rho),
+    p      = fingerprint(g$p), i = fingerprint(g$i), x = fingerprint(g$x) )
+}
+
+# Case 1's distances, with other numbers of neighbours, and with a
+# bandwidth other than 1.
+more_graphs <- list(
+  graph_fp(d1, 5),
+  graph_fp(d1, 30),
+  graph_fp(d1, 15, bandwidth = 2),
+  graph_fp(d1, 10, bandwidth = 0.5, local_connectivity = 2) )
+
+# Bray-Curtis distances between 600 samples of overdispersed counts.
+set.seed(8)
+mu        <- rlnorm(20, 1, 1)
+counts600 <- matrix(rnbinom(600 * 20, mu = rep(mu, each = 600), size = 0.5), 600, 20)
+counts600[rowSums(counts600) == 0, 1] <- 1L
+storage.mode(counts600) <- 'integer'
+d600       <- ecodive::bray(counts600)
+graph600   <- graph_fp(d600, 15)
+
+# Three groups far apart: a graph of 3 components, so uwot's spectral start
+# falls back to "spca", scaled classical MDS. With no epochs, that is the
+# result.
+set.seed(9)
+grp  <- matrix(rnorm(20 * 3), 20, 3)
+far  <- rbind(grp, grp[, 3:1] + 100, grp[, c(2, 1, 3)] * 0.5 + 300)
+set.seed(10)
+far0 <- strip(umap(dist(far), n_neighbors = 5, n_epochs = 0, verbose = FALSE))
+
+# A 3-dimensional batch-mode layout on case 2's Bray-Curtis graph: 5 epochs,
+# and 50.
+set.seed(11)
+init3 <- matrix(runif(40 * 3, -10, 10), 40)
+sgd3  <- list(init = init3, seed = 12, ab = uwot:::find_ab_params(spread = 1, min_dist = 0.1))
+for (ep in c(5, 50))
+  sgd3[[paste0('epochs', ep)]] <- strip(umap(
+    d2, n_neighbors = case2$n_neighbors, set_op_mix_ratio = case2$set_op_mix_ratio,
+    local_connectivity = case2$local_connectivity, n_components = 3,
+    init = init3, seed = 12, n_epochs = ep, min_dist = 0.1,
+    batch = TRUE, n_sgd_threads = 0, verbose = FALSE ))
+
+more <- list(
+  graphs    = more_graphs,
+  counts600 = counts600,
+  graph600  = graph600,
+  far       = far,
+  far0      = far0,
+  sgd3      = sgd3 )
+
+
 expected <- list(
   case1    = case1,
   case2    = case2,
+  more     = more,
   versions = list(
     uwot     = as.character(packageVersion('uwot')),
     RSpectra = as.character(packageVersion('RSpectra')),
