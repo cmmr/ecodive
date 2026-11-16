@@ -72,7 +72,6 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
         '`strata` must be the name of a column of `data`, or have one value ',
         'per row of `data` (', nrow(data), ').', call. = FALSE )
     }
-    if (anyNA(strata)) stop('`strata` must not contain NAs.', call. = FALSE)
   }
 
 
@@ -117,8 +116,11 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
   data <- data[idx, , drop = FALSE]
   if (!is.null(labels)) rownames(data) <- labels
 
-  if (!is.null(strata))
-    strata <- as.integer(factor(strata[idx])) - 1L
+  if (!is.null(strata)) {
+    strata <- strata[idx]
+    if (anyNA(strata)) stop('`strata` must not contain NAs.', call. = FALSE)
+    strata <- as.integer(factor(strata)) - 1L
+  }
 
 
   #--------------------------------------------------------

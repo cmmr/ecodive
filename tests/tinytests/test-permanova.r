@@ -167,6 +167,13 @@
   # Rows for other samples are ignored, even with NAs.
   extra$ph[nrow(extra)] <- NA
   expect_identical(permanova(d, extra, ~ trt + ph, permutations = 19, cpus = 1), ref)
+
+  # ... including NAs in `strata`, as a column or as a vector.
+  extra$block[nrow(extra)] <- NA
+  sref <- permanova(d, meta, ~ ph, permutations = 19, strata = 'block', cpus = 1)
+  expect_identical(permanova(d, extra, ~ ph, permutations = 19, strata = 'block', cpus = 1), sref)
+  expect_identical(permanova(d, extra, ~ ph, permutations = 19, strata = extra$block, cpus = 1), sref)
+  expect_error(permanova(d, extra[c(2:36, 1, 37), ], ~ ph, strata = c(NA, extra$block[-1])), 'NA')
   expect_error(permanova(d, unnamed[-1, ], ~ trt), 'has 35 rows')
   expect_error(permanova(d, meta, ~ nothere), "Not found in `data`: 'nothere'")
   na <- meta
