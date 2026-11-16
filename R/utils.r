@@ -2,6 +2,10 @@
 # Licensed under the MIT License: https://opensource.org/license/mit
 
 
+# Values worth computing once per session.
+CACHE <- new.env(parent = emptyenv())
+
+
 
 #' Number of CPU Cores
 #' 
@@ -21,7 +25,7 @@
 #' 
 #' @examples
 #'     n_cpus()
-#' 
+#'
 n_cpus <- function () {
   
   # Not cached: parallelly::availableCores() follows options and environment
@@ -37,7 +41,11 @@ n_cpus <- function () {
       n <- unname(n)
     }
     else { # nocov start
-      n <- parallel::detectCores(all.tests = TRUE, logical = TRUE)
+      # The machine's cores don't change, and counting them can run a
+      # shell command (on Linux), so they are counted once.
+      if (is.null(CACHE$cores))
+        CACHE$cores <- parallel::detectCores(all.tests = TRUE, logical = TRUE)
+      n <- CACHE$cores
       # R CMD check --as-cran allows at most 2 cores, as parallelly knows.
       lim <- tolower(Sys.getenv('_R_CHECK_LIMIT_CORES_', ''))
       if (nzchar(lim) && lim != 'false') n <- min(n, 2L)

@@ -10,6 +10,7 @@
 #else
 #  include <dlfcn.h>   // dlopen, dlsym, dlclose, dlerror
 #  include <unistd.h>  // getpid
+#  include <signal.h>  // pthread_sigmask, sigfillset
 #endif
 
 #include "ecodive.h"
@@ -570,15 +571,22 @@ static void *pool_thread (void *arg) {
 
 
 // A forked child (e.g., from parallel::mclapply()) has only
-// the thread that forked: start over with an empty pool.
+// the thread that forked, and copies of the pool's state:
+// start over with an empty pool. Noticed by the process ID,
+// as for BLAS above, rather than with pthread_atfork(),
+// whose handler can't be removed if the DLL is unloaded.
 #ifndef _WIN32
-static void pool_after_fork (void) {
-  pthread_mutex_init(&pl_mutex, NULL);
-  pthread_cond_init(&pl_wake, NULL);
-  pthread_cond_init(&pl_done, NULL);
-  pl_tids = NULL; // The parent's; not ours to free.
-  pl_size = 0;
-  pl_stop = 0;
+static pid_t pl_pid = 0; // The process the pool's threads belong to.
+
+static void pool_check_fork (void) {
+  if (pl_size > 0 && getpid() != pl_pid) {
+    pthread_mutex_init(&pl_mutex, NULL);
+    pthread_cond_init(&pl_wake, NULL);
+    pthread_cond_init(&pl_done, NULL);
+    pl_tids = NULL; // The parent's; not ours to free.
+    pl_size = 0;
+    pl_stop = 0;
+  }
 }
 #endif
 
@@ -587,31 +595,46 @@ static void pool_after_fork (void) {
 // allows. Main thread only, between jobs.
 static void pool_grow (int size) {
 
-  if (size <= pl_size) return;
-
   #ifndef _WIN32
-    static int registered = 0;
-    if (!registered) {
-      pthread_atfork(NULL, NULL, pool_after_fork);
-      registered = 1;
-    }
+    pool_check_fork();
   #endif
+
+  if (size <= pl_size) return;
 
   pthread_t *tids = realloc(pl_tids, (size_t) size * sizeof(pthread_t));
   if (!tids) return; // # nocov
   pl_tids = tids;
+
+  // The threads live as long as the package, so they block
+  // every signal: process-wide signals such as SIGCHLD must
+  // go to R's own thread, not run R's handlers on one of
+  // these. (New threads inherit the creating thread's mask.)
+  #ifndef _WIN32
+    sigset_t all, old;
+    sigfillset(&all);
+    pthread_sigmask(SIG_SETMASK, &all, &old);
+    pl_pid = getpid();
+  #endif
 
   while (pl_size < size) {
     if (pthread_create(&pl_tids[pl_size], NULL, pool_thread, NULL) != 0)
       break; // # nocov: shares are done by the threads there are.
     pl_size++;
   }
+
+  #ifndef _WIN32
+    pthread_sigmask(SIG_SETMASK, &old, NULL);
+  #endif
 }
 
 
-// Stop and join the pool's threads (when the package is
-// unloaded).
+// Stop and join the pool's threads. Called from .onUnload(),
+// before the DLL is unloaded: the threads run its code.
 void stop_thread_pool (void) {
+
+  #ifndef _WIN32
+    pool_check_fork();
+  #endif
 
   if (pl_size == 0) return;
 
@@ -691,4 +714,13 @@ static void check_interrupt_fn(void *dummy) {
 
 int user_interrupted(void) {
   return R_ToplevelExec(check_interrupt_fn, NULL) == FALSE;
+}
+
+
+//======================================================
+// R interface: stop the thread pool (from .onUnload()).
+//======================================================
+SEXP C_stop_thread_pool(void) {
+  stop_thread_pool();
+  return R_NilValue;
 }

@@ -19,6 +19,7 @@ extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_permanova(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pthreads(void);
+extern SEXP C_stop_thread_pool(void);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_tsne(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -45,6 +46,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_pcoa",      (DL_FUNC) &C_pcoa,      4},
   {"C_permanova", (DL_FUNC) &C_permanova, 9},
   {"C_pthreads",  (DL_FUNC) &C_pthreads,  0},
+  {"C_stop_thread_pool", (DL_FUNC) &C_stop_thread_pool, 0},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
   {"C_tsne",      (DL_FUNC) &C_tsne,      6},
@@ -63,13 +65,5 @@ void R_init_ecodive(DllInfo *dll) {
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
   init_blas_threads();
-}
-// # nocov end
-
-
-// # nocov start
-void R_unload_ecodive(DllInfo *dll) {
-  (void) dll;
-  stop_thread_pool();
 }
 // # nocov end

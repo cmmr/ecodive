@@ -125,7 +125,7 @@ validate_cpus <- function (env = parent.frame()) {
   )
 
   # No more threads than cores. Results are the same for any `cpus`.
-  env$cpus <- min(env$cpus, n_cpus())
+  if (env$cpus > 1L) env$cpus <- min(env$cpus, n_cpus())
 }
 
 
