@@ -97,6 +97,16 @@
   benefits, and results are unchanged. Out-of-range indices in these inputs
   are now an error.
 
+* Fixed `NA` in an integer or logical count table being read as
+  -2147483648: every alpha and beta diversity function now treats it as
+  `NA`, as it does in a double table. Before, `bray()` returned -1 for every
+  pair with that sample.
+
+* Fixed the `pairs` argument of the beta diversity functions, which counted
+  the columns of `counts` as samples even when samples are rows
+  (`margin = 1`, the default). Out-of-range pairs could crash R, and a table
+  with one feature was rejected as having fewer than two samples.
+
 
 
 # ecodive 2.3.2
