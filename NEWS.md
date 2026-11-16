@@ -57,6 +57,16 @@
   when the constraints give fewer than `k` axes. Its results are identical for
   any number of `cpus`.
 
+* New `pca()` runs a principal component analysis of a count table, after
+  any of `beta_div()`'s normalizations (e.g. `norm = 'clr'` for an Aitchison
+  PCA), optionally scaling features to unit variance (`scale = TRUE`). It
+  gives the same scores, loadings, and variances as `prcomp()` on the
+  normalized table (up to each axis's sign), but computes only the first few
+  axes, in parallel C, straight from sparse input without making it dense.
+  Its scores equal `pcoa()`'s on the matching Euclidean or Aitchison
+  distances; its `loadings` attribute holds the features' weights. Results
+  are identical for any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference

@@ -542,6 +542,12 @@ SEXP C_pca(
 
     for (int i = 0; i < n; i++) x[i] *= xmult;
     for (int i = 0; i < p; i++) l[i] *= lmult;
+
+    // Features left out by `scale` have no loading. (On the
+    // feature side, the starting vectors leave a trace.)
+    if (w_feat)
+      for (int i = 0; i < p; i++)
+        if (w_feat[i] == 0) l[i] = 0;
   }
 
   free_all();
