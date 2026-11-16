@@ -1,6 +1,42 @@
 # Changelog
 
+## ecodive 2.4.0
+
+- New
+  [`blas_threads()`](https://cmmr.github.io/ecodive/reference/blas_threads.md)
+  gets or sets how many threads R’s BLAS/LAPACK library uses, while R is
+  running. It works with OpenBLAS, Intel MKL, BLIS, and FlexiBLAS,
+  returns `NA` where the count can’t be read (e.g. R’s reference BLAS or
+  Apple’s Accelerate), and never raises an error, warning, or message.
+  Setting is limited to what is safe: the count is never raised above
+  the library’s own, and OpenMP’s thread count is left as it is. No
+  other ecodive function calls it.
+
+## ecodive 2.3.2
+
+- Fixed
+  [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md),
+  and every beta metric called with `norm = 'clr'`, returning `NaN` (or,
+  for
+  [`chebyshev()`](https://cmmr.github.io/ecodive/reference/chebyshev.md),
+  wrong values) for every sample pair. Two bugs were involved:
+
+  - Data with no zeros (pseudocount 0) hit `log(0) * 0`, which is `NaN`.
+  - The pseudocount was truncated to an integer in C, so values below 1,
+    including the automatic `min(counts[counts > 0]) / 2`, became 0, and
+    values like 1.5 were silently rounded down.
+
+- [`gower()`](https://cmmr.github.io/ecodive/reference/gower.md) with
+  `norm = 'clr'` now computes each feature’s range, and the distance for
+  features absent from both samples, from that feature’s CLR values
+  instead of treating absent features as 0.
+  [`gower()`](https://cmmr.github.io/ecodive/reference/gower.md) with
+  negative inputs (e.g. `norm = 'rclr'`) now also uses the full
+  min-to-max range.
+
 ## ecodive 2.3.1
+
+CRAN release: 2026-11-05
 
 - [`read_tree()`](https://cmmr.github.io/ecodive/reference/read_tree.md)
   now handles quoted labels per the Newick standard:

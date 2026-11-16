@@ -164,6 +164,8 @@ Tools for programmatic access, data manipulation, and configuration.
   Rarefy Observation Counts
 - [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md) :
   Number of CPU Cores
+- [`blas_threads()`](https://cmmr.github.io/ecodive/reference/blas_threads.md)
+  : Threads of the BLAS Library
 
 ## Datasets
 

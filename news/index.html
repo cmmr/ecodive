@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ecodive</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,11 +38,24 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/cmmr/ecodive/blob/v2.3.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/cmmr/ecodive/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="2.3.1" id="ecodive-231">ecodive 2.3.1<a class="anchor" aria-label="anchor" href="#ecodive-231"></a></h2>
+<h2 class="pkg-version" data-toc-text="2.4.0" id="ecodive-240">ecodive 2.4.0<a class="anchor" aria-label="anchor" href="#ecodive-240"></a></h2>
+<ul><li>New <code><a href="../reference/blas_threads.html">blas_threads()</a></code> gets or sets how many threads R’s BLAS/LAPACK library uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and FlexiBLAS, returns <code>NA</code> where the count can’t be read (e.g. R’s reference BLAS or Apple’s Accelerate), and never raises an error, warning, or message. Setting is limited to what is safe: the count is never raised above the library’s own, and OpenMP’s thread count is left as it is. No other ecodive function calls it.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.3.2" id="ecodive-232">ecodive 2.3.2<a class="anchor" aria-label="anchor" href="#ecodive-232"></a></h2>
+<ul><li>
+<p>Fixed <code><a href="../reference/aitchison.html">aitchison()</a></code>, and every beta metric called with <code>norm = 'clr'</code>, returning <code>NaN</code> (or, for <code><a href="../reference/chebyshev.html">chebyshev()</a></code>, wrong values) for every sample pair. Two bugs were involved:</p>
+<ul><li>Data with no zeros (pseudocount 0) hit <code>log(0) * 0</code>, which is <code>NaN</code>.</li>
+<li>The pseudocount was truncated to an integer in C, so values below 1, including the automatic <code>min(counts[counts &gt; 0]) / 2</code>, became 0, and values like 1.5 were silently rounded down.</li>
+</ul></li>
+<li><p><code><a href="../reference/gower.html">gower()</a></code> with <code>norm = 'clr'</code> now computes each feature’s range, and the distance for features absent from both samples, from that feature’s CLR values instead of treating absent features as 0. <code><a href="../reference/gower.html">gower()</a></code> with negative inputs (e.g. <code>norm = 'rclr'</code>) now also uses the full min-to-max range.</p></li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.3.1" id="ecodive-231">ecodive 2.3.1<a class="anchor" aria-label="anchor" href="#ecodive-231"></a></h2><p class="text-muted">CRAN release: 2026-11-05</p>
 <ul><li>
 <p><code><a href="../reference/read_tree.html">read_tree()</a></code> now handles quoted labels per the Newick standard:</p>
 <ul><li>
