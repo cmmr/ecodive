@@ -188,22 +188,189 @@ static int orthonormalize(double *v, const double *basis, int nb, int n) {
 
 //------------------------------------------------------
 // General designs. Each task is one block of permutations.
-// Its vectors are laid out row-major in V (n x M), so one
-// pass over D's triangle computes all their quadratic
-// forms, each in a fixed order.
+// Their vectors (permutations x columns) go in chunks of
+// PERM_W: chunk h is V + h * n * PERM_W, row-major
+// (n x PERM_W), zero-padded. One pass over D's triangle
+// computes the quadratic forms of every vector in the
+// block, each summed in a fixed order.
 //------------------------------------------------------
+
+// Repeat F(k) for k = 0 to PERM_W - 1.
+#define PERM_W 8
+#define PERM_REP(F) F(0) F(1) F(2) F(3) F(4) F(5) F(6) F(7)
+
+
+//------------------------------------------------------
+// The inner loops, for one chunk of PERM_W vectors and one
+// column j of D's triangle (nd = n - j - 1 rows below it).
+// GCC and clang get explicit two-lane vectors: compilers
+// don't vectorize these loops at R's default -O2. Each lane
+// does the same operations in the same order as the scalar
+// fallback, so results don't depend on which is used.
+//
+// quad_chunk:  s[k] += vj[k] * sum_t dsq[t] * vi[t, k]
+// group_chunk: s[k] += inv_ng[lj[k]] *
+//                      sum_t dsq[t] * (li[t, k] == lj[k])
+//------------------------------------------------------
+#if defined(__GNUC__) || defined(__clang__)
+
+typedef double    v2d __attribute__((vector_size(16)));
+typedef long long v2l __attribute__((vector_size(16)));
+
+static inline v2d load2(const double *p) { v2d x; memcpy(&x, p, sizeof(x)); return x; }
+
+#define V2_REP(F) F(0) F(1) F(2) F(3)
+
+static inline void quad_chunk(
+    const double *dsq, const double *vi, const double *vj, int nd, double *s) {
+
+  #define Q_INIT(h) v2d acc##h = { 0, 0 };
+  #define Q_STEP(h) acc##h += a * load2(vi + 2 * h);
+  #define Q_DONE(h) s[2 * h] += vj[2 * h] * acc##h[0]; s[2 * h + 1] += vj[2 * h + 1] * acc##h[1];
+
+  V2_REP(Q_INIT)
+  for (int t = 0; t < nd; t++, vi += PERM_W) {
+    v2d a = { dsq[t], dsq[t] };
+    V2_REP(Q_STEP)
+  }
+  V2_REP(Q_DONE)
+}
+
+static inline void group_chunk(
+    const double *dsq, const double *li, const double *lj, int nd, double *s,
+    const double *inv_ng) {
+
+  #define G_INIT(h) v2d acc##h = { 0, 0 }, g##h = load2(lj + 2 * h);
+  #define G_STEP(h) acc##h += (v2d) ((v2l) a & (v2l) (load2(li + 2 * h) == g##h));
+  #define G_DONE(h) s[2 * h]     += acc##h[0] * inv_ng[(int) lj[2 * h]]; \
+                    s[2 * h + 1] += acc##h[1] * inv_ng[(int) lj[2 * h + 1]];
+
+  V2_REP(G_INIT)
+  for (int t = 0; t < nd; t++, li += PERM_W) {
+    v2d a = { dsq[t], dsq[t] };
+    V2_REP(G_STEP)
+  }
+  V2_REP(G_DONE)
+}
+
+// Two columns, j and j + 1, at once: each row's vectors are
+// loaded once for both, and the eight sums are independent,
+// so they don't wait on each other. Row j + 1 is column j's
+// alone. Every sum runs in the same order as with one column
+// at a time.
+static inline void quad_chunk2(
+    const double *dsq0, const double *dsq1, const double *vi,
+    const double *vj0, const double *vj1, int nd, double *s) {
+
+  #define Q2_INIT(h) v2d acc##h = { 0, 0 }, bcc##h = { 0, 0 };
+  #define Q2_FIRST(h) acc##h += a * load2(vi + 2 * h);
+  #define Q2_STEP(h) { v2d x = load2(vi + 2 * h); acc##h += a * x; bcc##h += b * x; }
+  #define Q2_DONE(h) \
+    s[2 * h]     += vj0[2 * h]     * acc##h[0]; s[2 * h + 1] += vj0[2 * h + 1] * acc##h[1]; \
+    s[2 * h]     += vj1[2 * h]     * bcc##h[0]; s[2 * h + 1] += vj1[2 * h + 1] * bcc##h[1];
+
+  V2_REP(Q2_INIT)
+  { v2d a = { dsq0[0], dsq0[0] }; V2_REP(Q2_FIRST) }
+  vi += PERM_W;
+  for (int t = 1; t < nd; t++, vi += PERM_W) {
+    v2d a = { dsq0[t],     dsq0[t]     };
+    v2d b = { dsq1[t - 1], dsq1[t - 1] };
+    V2_REP(Q2_STEP)
+  }
+  V2_REP(Q2_DONE)
+}
+
+static inline void group_chunk2(
+    const double *dsq0, const double *dsq1, const double *li,
+    const double *lj0, const double *lj1, int nd, double *s,
+    const double *inv_ng) {
+
+  #define G2_INIT(h) v2d acc##h = { 0, 0 }, bcc##h = { 0, 0 }, \
+                     g##h = load2(lj0 + 2 * h), k##h = load2(lj1 + 2 * h);
+  #define G2_FIRST(h) acc##h += (v2d) ((v2l) a & (v2l) (load2(li + 2 * h) == g##h));
+  #define G2_STEP(h) { v2d x = load2(li + 2 * h); \
+                       acc##h += (v2d) ((v2l) a & (v2l) (x == g##h)); \
+                       bcc##h += (v2d) ((v2l) b & (v2l) (x == k##h)); }
+  #define G2_DONE(h) \
+    s[2 * h]     += acc##h[0] * inv_ng[(int) lj0[2 * h]];     \
+    s[2 * h + 1] += acc##h[1] * inv_ng[(int) lj0[2 * h + 1]]; \
+    s[2 * h]     += bcc##h[0] * inv_ng[(int) lj1[2 * h]];     \
+    s[2 * h + 1] += bcc##h[1] * inv_ng[(int) lj1[2 * h + 1]];
+
+  V2_REP(G2_INIT)
+  { v2d a = { dsq0[0], dsq0[0] }; V2_REP(G2_FIRST) }
+  li += PERM_W;
+  for (int t = 1; t < nd; t++, li += PERM_W) {
+    v2d a = { dsq0[t],     dsq0[t]     };
+    v2d b = { dsq1[t - 1], dsq1[t - 1] };
+    V2_REP(G2_STEP)
+  }
+  V2_REP(G2_DONE)
+}
+
+#else
+
+static inline void quad_chunk(
+    const double *dsq, const double *vi, const double *vj, int nd, double *s) {
+
+  #define Q_INIT(k) double acc##k = 0;
+  #define Q_STEP(k) acc##k += a * vi[k];
+  #define Q_DONE(k) s[k] += vj[k] * acc##k;
+
+  PERM_REP(Q_INIT)
+  for (int t = 0; t < nd; t++, vi += PERM_W) {
+    double a = dsq[t];
+    PERM_REP(Q_STEP)
+  }
+  PERM_REP(Q_DONE)
+}
+
+static inline void group_chunk(
+    const double *dsq, const double *li, const double *lj, int nd, double *s,
+    const double *inv_ng) {
+
+  #define G_INIT(k) double acc##k = 0, g##k = lj[k];
+  #define G_STEP(k) acc##k += (li[k] == g##k) ? a : 0.0;
+  #define G_DONE(k) s[k] += acc##k * inv_ng[(int) g##k];
+
+  PERM_REP(G_INIT)
+  for (int t = 0; t < nd; t++, li += PERM_W) {
+    double a = dsq[t];
+    PERM_REP(G_STEP)
+  }
+  PERM_REP(G_DONE)
+}
+
+static inline void quad_chunk2(
+    const double *dsq0, const double *dsq1, const double *vi,
+    const double *vj0, const double *vj1, int nd, double *s) {
+  quad_chunk(dsq0, vi, vj0, nd, s);
+  quad_chunk(dsq1, vi + PERM_W, vj1, nd - 1, s);
+}
+
+static inline void group_chunk2(
+    const double *dsq0, const double *dsq1, const double *li,
+    const double *lj0, const double *lj1, int nd, double *s,
+    const double *inv_ng) {
+  group_chunk(dsq0, li, lj0, nd, s, inv_ng);
+  group_chunk(dsq1, li + PERM_W, lj1, nd - 1, s, inv_ng);
+}
+
+#endif
+
 static void *quad_worker(void *arg) {
 
   int thread_i  = ((worker_t *) arg)->i;
   int n_threads = ((worker_t *) arg)->n;
   int n         = pm_n;
   int m         = pm_m;
+  int max_ch    = (pm_bsize * m + PERM_W - 1) / PERM_W;
 
-  double *V    = pm_work + (size_t) thread_i * pm_wlen;   // n x M
-  double *acc  = V + (size_t) n * pm_bsize * m;            // M
-  double *s    = acc + (size_t) pm_bsize * m;              // M
-  double *cols = s + (size_t) pm_bsize * m;                // n x m (partial only)
-  int    *p    = pm_iwork + (size_t) thread_i * pm_iwlen;  // n
+  double *V    = pm_work + (size_t) thread_i * pm_wlen;   // max_ch x n x W
+  double *s    = V + (size_t) max_ch * n * PERM_W;        // max_ch x W
+  double *dsq  = s + (size_t) max_ch * PERM_W;            // 2 x n
+  double *cols = dsq + 2 * (size_t) n;                                 // n x m (partial only)
+  int    *p    = pm_iwork + (size_t) thread_i * pm_iwlen; // n
 
   for (int blk = pm_blk0 + thread_i; blk < pm_blk1; blk += n_threads) {
 
@@ -211,9 +378,14 @@ static void *quad_worker(void *arg) {
     int nb = pm_total - k0;
     if (nb > pm_bsize) nb = pm_bsize;
     int M  = nb * m;
+    int nc = (M + PERM_W - 1) / PERM_W;
+
+    if (M % PERM_W)
+      memset(V + (size_t) (nc - 1) * n * PERM_W, 0, (size_t) n * PERM_W * sizeof(double));
 
     //--------------------------------------------------
     // Scatter each permutation's design rows into V.
+    // Vector v = b * m + c is lane v % W of chunk v / W.
     //--------------------------------------------------
     for (int b = 0; b < nb; b++) {
 
@@ -234,39 +406,57 @@ static void *quad_worker(void *arg) {
           orthonormalize(v, cols + (size_t) set_start * n, c - set_start, n);
         }
         for (int c = 0; c < m; c++) {
-          const double *v = cols + (size_t) c * n;
-          for (int i = 0; i < n; i++)
-            V[(size_t) i * M + b * m + c] = v[i];
+          int           v  = b * m + c;
+          double       *vc = V + (size_t) (v / PERM_W) * n * PERM_W + v % PERM_W;
+          const double *y  = cols + (size_t) c * n;
+          for (int i = 0; i < n; i++) vc[(size_t) i * PERM_W] = y[i];
         }
       }
       else {
         for (int c = 0; c < m; c++) {
-          const double *x = pm_x + (size_t) c * n;
-          for (int a = 0; a < n; a++)
-            V[(size_t) p[a] * M + b * m + c] = x[a];
+          int           v  = b * m + c;
+          double       *vc = V + (size_t) (v / PERM_W) * n * PERM_W + v % PERM_W;
+          const double *x  = pm_x + (size_t) c * n;
+          for (int a = 0; a < n; a++) vc[(size_t) p[a] * PERM_W] = x[a];
         }
       }
     }
 
     //--------------------------------------------------
-    // s[c] = sum_j V[j, c] * sum_{i > j} d_ij^2 V[i, c]
+    // s[v] = sum_j V[j, v] * sum_{i > j} d_ij^2 V[i, v]
     //--------------------------------------------------
-    for (int c = 0; c < M; c++) s[c] = 0;
+    for (int v = 0; v < nc * PERM_W; v++) s[v] = 0;
 
-    for (int j = 0; j < n - 1; j++) {
+    for (int j = 0; j < n - 1; ) {
 
-      const double *d  = pm_d + col_start(j, n);
-      const double *vj = V + (size_t) j * M;
+      int nd = n - j - 1;
+      const double *d0 = pm_d + col_start(j, n);
+      for (int t = 0; t < nd; t++) dsq[t] = d0[t] * d0[t];
 
-      for (int c = 0; c < M; c++) acc[c] = 0;
+      if (nd >= 2) {
 
-      for (int i = j + 1, t = 0; i < n; i++, t++) {
-        double        a  = d[t] * d[t];
-        const double *vi = V + (size_t) i * M;
-        for (int c = 0; c < M; c++) acc[c] += a * vi[c];
+        // Columns j and j + 1.
+        const double *d1 = pm_d + col_start(j + 1, n);
+        for (int t = 0; t < nd - 1; t++) dsq[n + t] = d1[t] * d1[t];
+
+        for (int h = 0; h < nc; h++) {
+          const double *vc = V + (size_t) h * n * PERM_W;
+          quad_chunk2(
+            dsq, dsq + n, vc + (size_t) (j + 1) * PERM_W,
+            vc + (size_t) j * PERM_W, vc + (size_t) (j + 1) * PERM_W,
+            nd, s + h * PERM_W );
+        }
+        j += 2;
       }
-
-      for (int c = 0; c < M; c++) s[c] += vj[c] * acc[c];
+      else {
+        for (int h = 0; h < nc; h++) {
+          const double *vc = V + (size_t) h * n * PERM_W;
+          quad_chunk(
+            dsq, vc + (size_t) (j + 1) * PERM_W, vc + (size_t) j * PERM_W,
+            nd, s + h * PERM_W );
+        }
+        j += 1;
+      }
     }
 
     for (int b = 0; b < nb; b++)
@@ -279,50 +469,73 @@ static void *quad_worker(void *arg) {
 
 
 //------------------------------------------------------
-// One factor. L (n x nb, row-major) holds each sample's
-// group under each permutation of the block.
+// One factor. Each task is one block of PERM_FW
+// permutations. L holds each sample's group (as a double,
+// so comparisons vectorize alongside the sums) under each
+// permutation: chunk h is L + h * n * PERM_W, row-major
+// (n x PERM_W). Unused lanes are group 0, and ignored.
 //------------------------------------------------------
+#define PERM_FW (4 * PERM_W)
+
 static void *factor_worker(void *arg) {
 
   int thread_i  = ((worker_t *) arg)->i;
   int n_threads = ((worker_t *) arg)->n;
   int n         = pm_n;
-  int B         = pm_bsize;
+  int nc        = PERM_FW / PERM_W;
 
-  double *acc = pm_work  + (size_t) thread_i * pm_wlen;  // B
-  double *s   = acc + B;                                 // B
+  double *L   = pm_work + (size_t) thread_i * pm_wlen;   // nc x n x W
+  double *s   = L + (size_t) n * PERM_FW;                // PERM_FW
+  double *dsq = s + PERM_FW;                             // 2 x n
   int    *p   = pm_iwork + (size_t) thread_i * pm_iwlen; // n
-  int    *L   = p + n;                                   // n x B
 
   for (int blk = pm_blk0 + thread_i; blk < pm_blk1; blk += n_threads) {
 
-    int k0 = blk * B;
+    int k0 = blk * PERM_FW;
     int nb = pm_total - k0;
-    if (nb > B) nb = B;
+    if (nb > PERM_FW) nb = PERM_FW;
+
+    memset(L, 0, (size_t) n * PERM_FW * sizeof(double));
 
     for (int b = 0; b < nb; b++) {
+      double *lc = L + (size_t) (b / PERM_W) * n * PERM_W + b % PERM_W;
       get_perm(k0 + b, p);
       for (int a = 0; a < n; a++)
-        L[(size_t) p[a] * nb + b] = pm_grp[a];
+        lc[(size_t) p[a] * PERM_W] = pm_grp[a];
     }
 
-    for (int b = 0; b < nb; b++) s[b] = 0;
+    for (int b = 0; b < PERM_FW; b++) s[b] = 0;
 
-    for (int j = 0; j < n - 1; j++) {
+    for (int j = 0; j < n - 1; ) {
 
-      const double *d  = pm_d + col_start(j, n);
-      const int    *lj = L + (size_t) j * nb;
+      int nd = n - j - 1;
+      const double *d0 = pm_d + col_start(j, n);
+      for (int t = 0; t < nd; t++) dsq[t] = d0[t] * d0[t];
 
-      for (int b = 0; b < nb; b++) acc[b] = 0;
+      if (nd >= 2) {
 
-      for (int i = j + 1, t = 0; i < n; i++, t++) {
-        double     a  = d[t] * d[t];
-        const int *li = L + (size_t) i * nb;
-        for (int b = 0; b < nb; b++)
-          acc[b] += (li[b] == lj[b]) ? a : 0.0;
+        // Columns j and j + 1.
+        const double *d1 = pm_d + col_start(j + 1, n);
+        for (int t = 0; t < nd - 1; t++) dsq[n + t] = d1[t] * d1[t];
+
+        for (int h = 0; h < nc; h++) {
+          const double *vc = L + (size_t) h * n * PERM_W;
+          group_chunk2(
+            dsq, dsq + n, vc + (size_t) (j + 1) * PERM_W,
+            vc + (size_t) j * PERM_W, vc + (size_t) (j + 1) * PERM_W,
+            nd, s + h * PERM_W, pm_inv_ng );
+        }
+        j += 2;
       }
-
-      for (int b = 0; b < nb; b++) s[b] += acc[b] * pm_inv_ng[lj[b]];
+      else {
+        for (int h = 0; h < nc; h++) {
+          const double *vc = L + (size_t) h * n * PERM_W;
+          group_chunk(
+            dsq, vc + (size_t) (j + 1) * PERM_W, vc + (size_t) j * PERM_W,
+            nd, s + h * PERM_W, pm_inv_ng );
+        }
+        j += 1;
+      }
     }
 
     for (int b = 0; b < nb; b++)
@@ -492,19 +705,18 @@ SEXP C_permanova(
   int m    = (pm_m > 0) ? pm_m : 1;
   pm_bsize = PERM_VECS / m;
   if (pm_bsize < 1)  pm_bsize = 1;
-  if (pm_grp)        pm_bsize = PERM_VECS;
+  if (pm_grp)        pm_bsize = PERM_FW;
 
   int n_blocks = (pm_total + pm_bsize - 1) / pm_bsize;
   if (n_threads > n_blocks) n_threads = n_blocks;
 
+  pm_iwlen = (size_t) n;
   if (pm_grp) {
-    pm_wlen  = (size_t) 2 * pm_bsize;
-    pm_iwlen = (size_t) n + (size_t) n * pm_bsize;
+    pm_wlen = (size_t) n * PERM_FW + PERM_FW + 2 * (size_t) n;
   }
   else {
-    size_t M = (size_t) pm_bsize * pm_m;
-    pm_wlen  = (size_t) n * M + 2 * M + (pm_qz ? (size_t) n * pm_m : 0);
-    pm_iwlen = (size_t) n;
+    size_t W = (size_t) ((pm_bsize * pm_m + PERM_W - 1) / PERM_W) * PERM_W;
+    pm_wlen  = (size_t) n * W + W + 2 * (size_t) n + (pm_qz ? (size_t) n * pm_m : 0);
   }
   pm_work  = (double *) R_alloc(pm_wlen  * n_threads, sizeof(double));
   pm_iwork = (int *)    R_alloc(pm_iwlen * n_threads, sizeof(int));
