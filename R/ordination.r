@@ -19,6 +19,7 @@ ORDINATIONS <- local({
       Distance-based Redundancy Analysis,  dbrda, dist, distancebasedrda
       Non-metric Multidimensional Scaling, nmds, dist,  nonmetricmds metamds monomds
       Principal Coordinates Analysis,      pcoa, dist,  pco mds cmdscale classicalmds metricmds
+      t-distributed Stochastic Neighbor Embedding, tsne, dist, rtsne bhtsne barneshuttsne
       Uniform Manifold Approximation and Projection, umap, dist, uwot
   " )
 
@@ -34,17 +35,17 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' Runs any of ecodive's ordination methods by name, as [beta_div()] does for
 #' beta diversity metrics.
 #'
-#' @param x   The data to ordinate: for `"pcoa"`, `"nmds"`, and `"umap"`, a
+#' @param x   The data to ordinate: for `"pcoa"`, `"nmds"`, `"tsne"`, and `"umap"`, a
 #'        `dist` object such as from [beta_div()], or a symmetric matrix of
 #'        distances. See `list_ordinations()` for what each method takes.
 #'
-#' @param method   The name of an ordination method: `"nmds"`, `"pcoa"`, or
-#'        `"umap"`. Flexible matching is supported (see below). Programmatic access via
+#' @param method   The name of an ordination method: `"nmds"`, `"pcoa"`,
+#'        `"tsne"`, or `"umap"`. Flexible matching is supported (see below). Programmatic access via
 #'        `list_ordinations()`.
 #'
 #' @param ...   Further arguments for the method's function, such as `k` or
 #'        `cpus`. Each method keeps its own defaults; see [pcoa()],
-#'        [nmds()], and [umap()].
+#'        [nmds()], [tsne()], and [umap()].
 #'
 #' @return The method's result, as described in "Ordination result" below.
 #'   `ordination(x, 'pcoa', ...)` is the same as `pcoa(x, ...)`.
@@ -58,6 +59,7 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' | `dbrda`                | Distance-based Redundancy Analysis (db-RDA)    |
 #' | `nmds`                 | Non-metric Multidimensional Scaling (NMDS)     |
 #' | `pcoa`                 | Principal Coordinates Analysis (PCoA)          |
+#' | `tsne`                 | t-distributed Stochastic Neighbor Embedding    |
 #' | `umap`                 | Uniform Manifold Approximation and Projection  |
 #'
 #'
@@ -75,7 +77,7 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pcoa()], [nmds()], [umap()], [list_ordinations()]
+#' @seealso [pcoa()], [nmds()], [tsne()], [umap()], [list_ordinations()]
 #'
 #' @export
 #' @examples

@@ -23,6 +23,19 @@
   Random starts come from a `seed` argument, and results are identical for
   any number of `cpus`.
 
+* New `tsne()` runs t-distributed stochastic neighbor embedding (t-SNE) on a
+  `dist` object, exactly (`theta = 0`) or with the Barnes-Hut approximation
+  (`theta > 0`, the default). It follows `Rtsne::Rtsne()` given distances,
+  and from the same starting coordinates gives exactly the same Barnes-Hut
+  coordinates and KL divergence. It works straight from the distances, without an
+  n-by-n matrix (Barnes-Hut keeps only each sample's nearest neighbors), and
+  runs the neighbor search, perplexity calibration, and gradients in
+  parallel C. As scikit-learn, openTSNE and FIt-SNE do, it starts from PCoA
+  coordinates and sets the learning rate from the number of samples by
+  default (`init = "random", learning_rate = 200` gives Rtsne's procedure).
+  Random starts come from a `seed` argument, and results are identical for
+  any number of `cpus`.
+
 * New `umap()` runs a uniform manifold approximation and projection (UMAP)
   on a `dist` object, following `uwot::umap()` and its defaults: exact
   nearest neighbours, smooth-kNN calibration and fuzzy union (identical to

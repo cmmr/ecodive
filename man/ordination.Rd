@@ -7,17 +7,17 @@
 ordination(x, method, ...)
 }
 \arguments{
-\item{x}{The data to ordinate: for \code{"pcoa"}, \code{"nmds"}, and \code{"umap"}, a
+\item{x}{The data to ordinate: for \code{"pcoa"}, \code{"nmds"}, \code{"tsne"}, and \code{"umap"}, a
 \code{dist} object such as from \code{\link[=beta_div]{beta_div()}}, or a symmetric matrix of
 distances. See \code{list_ordinations()} for what each method takes.}
 
-\item{method}{The name of an ordination method: \code{"nmds"}, \code{"pcoa"}, or
-\code{"umap"}. Flexible matching is supported (see below). Programmatic access via
+\item{method}{The name of an ordination method: \code{"nmds"}, \code{"pcoa"},
+\code{"tsne"}, or \code{"umap"}. Flexible matching is supported (see below). Programmatic access via
 \code{list_ordinations()}.}
 
 \item{...}{Further arguments for the method's function, such as \code{k} or
 \code{cpus}. Each method keeps its own defaults; see \code{\link[=pcoa]{pcoa()}},
-\code{\link[=nmds]{nmds()}}, and \code{\link[=umap]{umap()}}.}
+\code{\link[=nmds]{nmds()}}, \code{\link[=tsne]{tsne()}}, and \code{\link[=umap]{umap()}}.}
 }
 \value{
 The method's result, as described in "Ordination result" below.
@@ -33,6 +33,7 @@ beta diversity metrics.
    \code{dbrda} \tab Distance-based Redundancy Analysis (db-RDA) \cr
    \code{nmds} \tab Non-metric Multidimensional Scaling (NMDS) \cr
    \code{pcoa} \tab Principal Coordinates Analysis (PCoA) \cr
+   \code{tsne} \tab t-distributed Stochastic Neighbor Embedding \cr
    \code{umap} \tab Uniform Manifold Approximation and Projection \cr
 }
 
@@ -75,5 +76,5 @@ Attributes particular to the method follow them.
 
 }
 \seealso{
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=umap]{umap()}}, \code{\link[=list_ordinations]{list_ordinations()}}
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, \code{\link[=list_ordinations]{list_ordinations()}}
 }

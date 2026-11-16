@@ -60,6 +60,7 @@ reference:
   - ordination
   - pcoa
   - nmds
+  - tsne
   - umap
   - dbrda
   - pca
