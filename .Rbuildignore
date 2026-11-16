@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.
 ^benchmark$
+^data-raw$
 ^doc$
 ^paper$
 ^logo$
