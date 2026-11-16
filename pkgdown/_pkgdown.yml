@@ -62,6 +62,7 @@ reference:
   - read_tree
   - rarefy
   - n_cpus
+  - blas_threads
 
 - title: Datasets
   desc: Example data provided with the package.

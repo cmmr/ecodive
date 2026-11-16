@@ -61,6 +61,7 @@ export(weighted_unifrac)
 export(list_metrics)
 export(match_metric)
 
+export(blas_threads)
 export(n_cpus)
 export(rarefy)
 export(read_tree)

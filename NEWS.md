@@ -1,3 +1,15 @@
+# ecodive 2.4.0
+
+* New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
+  uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
+  FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference
+  BLAS or Apple's Accelerate), and never raises an error, warning, or
+  message. Setting is limited to what is safe: the count is never raised
+  above the library's own, and OpenMP's thread count is left as it is. No
+  other ecodive function calls it.
+
+
+
 # ecodive 2.3.2
 
 * Fixed `aitchison()`, and every beta metric called with `norm = 'clr'`,
