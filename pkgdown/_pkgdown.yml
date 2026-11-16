@@ -63,6 +63,11 @@ reference:
   - umap
   - list_ordinations
 
+- title: Hypothesis Tests
+  desc: Test whether sample metadata explain beta diversity distances.
+  contents:
+  - permanova
+
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.
   contents:

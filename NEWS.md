@@ -33,6 +33,20 @@
   Random numbers come from a `seed` argument, and results are identical for
   any number of `cpus`.
 
+* New `permanova()` runs a permutational multivariate analysis of variance
+  on a `dist` object and sample metadata, with a model formula: factors,
+  covariates, interactions, and `Condition()` terms. It returns the same
+  table as `vegan::adonis2()` (Df, sums of squares, R2, F, and p-values),
+  testing the model as a whole or each term sequentially, marginally, or by
+  contrast, with optional `strata`. Given the same permutation matrix, its
+  permuted F statistics and p-values are identical to `adonis2()`'s. The sums
+  of squares come straight from the dist triangle, without the n-by-n
+  matrices `adonis2()` builds for each permutation, and permutations run in
+  parallel. On one thread it is 25 to 50 times faster than `adonis2()` with
+  200 samples, and 100 to 300 times faster with 1,000.
+  Permutations come from a `seed` argument, and results are identical for
+  any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference

@@ -36,9 +36,9 @@
 #'     `adonis2()`).
 #'   * `'terms'`: Each term in turn, after the ones before it (sequential, or
 #'     type I, sums of squares). Their order in `formula` matters.
-#'   * `'margin'`: Each term after all the others (type III), for the terms
-#'     that can be dropped without breaking marginality: in `~ a * b`, only
-#'     `a:b`.
+#'   * `'margin'`: Each term after all the others (marginal sums of
+#'     squares), for the terms that can be dropped without breaking
+#'     marginality: in `~ a * b`, only `a:b`.
 #'   * `'onedf'`: Each column of the model matrix in turn, such as each
 #'     contrast of a factor.
 #'
@@ -140,15 +140,28 @@
 #'
 #' @export
 #' @examples
-#'     # Does the treatment explain differences in community composition?
-#'     counts <- t(ex_counts)
-#'     dm     <- bray(ex_counts)
-#'     meta   <- data.frame(
-#'       row.names = rownames(ex_counts),
-#'       body_site = c('Saliva', 'Gums', 'Nose', 'Stool',
-#'                     'Saliva', 'Gums', 'Nose', 'Stool')[seq_len(nrow(ex_counts))] )
+#'     # 30 samples in three treatment groups. The 'high' group has more
+#'     # of the first five genera.
+#'     set.seed(1)
+#'     counts <- matrix(rpois(30 * 20, 5), 30, 20)
+#'     rownames(counts) <- paste0('S', 1:30)
+#'     meta <- data.frame(
+#'       row.names = rownames(counts),
+#'       treatment = rep(c('ctrl', 'low', 'high'), each = 10),
+#'       ph        = round(rnorm(30, 7, 0.3), 1) )
+#'     high <- meta$treatment == 'high'
+#'     counts[high, 1:5] <- counts[high, 1:5] + 5
 #'
-#'     permanova(dm, meta, ~ body_site)
+#'     dm <- bray(counts)
+#'
+#'     # Do treatment and pH explain differences in community composition?
+#'     permanova(dm, meta, ~ treatment + ph)
+#'
+#'     # Each term in turn, after the ones before it.
+#'     permanova(dm, meta, ~ treatment + ph, by = 'terms')
+#'
+#'     # pH, after removing the effect of treatment.
+#'     permanova(dm, meta, ~ ph + Condition(treatment))
 #'
 permanova <- function (
     dm, data, formula = NULL, by = 'overall', permutations = 999L,
