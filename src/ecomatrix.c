@@ -17,11 +17,6 @@ static void rw_vec (void **ptr, int n_bytes) {
   *ptr = new_ptr;
 }
 
-static int* rw_sam_vec (ecomatrix_t *em) {
-  rw_vec((void**)&(em->sam_vec), em->nnz * sizeof(int));
-  return em->sam_vec;
-}
-
 static int* rw_pos_vec (ecomatrix_t *em) {
   int vec_len = em->n_samples + 1;
   rw_vec((void**)&(em->pos_vec), vec_len * sizeof(int));
@@ -213,123 +208,235 @@ static void assign_dense_vals(ecomatrix_t *em, SEXP sexp_vals, int margin) {
 
 
 //=========================================================
-// Sorts an uncompressed sparse matrix's vectors.
+// Sparse input that isn't already sample-major (dgCMatrix
+// with margin = 1, dgTMatrix, slam) is reordered so each
+// sample's entries are contiguous with otus increasing.
+//
+// Stable counting sorts make this O(nnz + n_samples +
+// n_otus). Since (sample, otu) pairs are unique, the order
+// is fully determined. Duplicate pairs, if any, are kept
+// as separate entries, adjacent and in input order.
 //=========================================================
 
-static void sort_triplet_q (int *sam_vec, int *otu_vec, double *val_vec, int lo, int hi) {
-  
-  int    sam, otu;
-  double val;
-  
-  int pivot_sam = sam_vec[hi];
-  int pivot_otu = otu_vec[hi];
-  int i = lo;
-  
-  for (int j = lo; j <= hi - 1; j++) {
-    
-    sam = sam_vec[j];
-    
-    if (sam < pivot_sam || (sam == pivot_sam && otu_vec[j] < pivot_otu)) {
-      sam = sam_vec[i]; sam_vec[i] = sam_vec[j]; sam_vec[j] = sam;
-      otu = otu_vec[i]; otu_vec[i] = otu_vec[j]; otu_vec[j] = otu;
-      val = val_vec[i]; val_vec[i] = val_vec[j]; val_vec[j] = val;
-      i++;
-    }
-  }
-  
-  sam = sam_vec[i]; sam_vec[i] = sam_vec[hi]; sam_vec[hi] = sam;
-  otu = otu_vec[i]; otu_vec[i] = otu_vec[hi]; otu_vec[hi] = otu;
-  val = val_vec[i]; val_vec[i] = val_vec[hi]; val_vec[hi] = val;
-  
-  if (lo < i - 1) sort_triplet_q(sam_vec, otu_vec, val_vec, lo, i - 1);
-  if (i + 1 < hi) sort_triplet_q(sam_vec, otu_vec, val_vec, i + 1, hi);
-  
-}
 
-static void sort_triplet (ecomatrix_t *em) {
+// Values may be stored as doubles, integers, or logicals.
+static void sparse_val_ptrs (SEXP sexp_vals, double **dbl_in, int **int_in) {
   
-  int     nnz     = em->nnz;
-  int    *sam_vec = em->sam_vec;
-  int    *otu_vec = em->otu_vec;
-  double *val_vec = em->val_vec;
+  *dbl_in = NULL;
+  *int_in = NULL;
   
-  
-  // Check if it's already sorted
-  // --------------------------------------------
-  
-  if (nnz < 2) return;
-  
-  int sorted = 1;
-  for (int i = 1; i < nnz; i++) {
-    int s1 = sam_vec[i-1];
-    int s2 = sam_vec[i];
-    if (s1 == s2) {
-      if (otu_vec[i-1] > otu_vec[i]) {
-        sorted = 0;
-        break;
-      }
-    }
-    else if (s1 > s2) {
-      sorted = 0;
-      break;
-    }
-  }
-  
-  if (sorted) return;
-  
-  
-  // Make sure we're not modifying original data.
-  // --------------------------------------------
-  sam_vec = rw_sam_vec(em);
-  otu_vec = rw_otu_vec(em);
-  val_vec = rw_val_vec(em);
-  
-  sort_triplet_q(sam_vec, otu_vec, val_vec, 0, nnz - 1);
+  if      (isReal(sexp_vals))                            { *dbl_in = REAL(sexp_vals);    }
+  else if (isInteger(sexp_vals) || isLogical(sexp_vals)) { *int_in = INTEGER(sexp_vals); }
+  else    { error("Input must be numeric"); } // # nocov
 }
 
 
-
-//=========================================================
-// Reorder sam/otu/val by sam/otu, then populate pos.
-//=========================================================
-static void compress_triplet (ecomatrix_t *em) {
+// Every index must be in [base, base + n). Indices become
+// memory offsets below, so out-of-range ones are fatal.
+static void check_indices (int *idx_vec, int nnz, int n, int base) {
   
-  sort_triplet(em);
+  for (int i = 0; i < nnz; i++) {
+    int idx = idx_vec[i];
+    if (idx < base || idx - base >= n) {
+      free_all();
+      error("Sparse matrix has an index out of range.");
+    }
+  }
+}
+
+
+// Allocate pos_vec and set pos_vec[s] to where sample s's
+// entries start; pos_vec[n_samples] = nnz.
+static int* count_samples (ecomatrix_t *em, int *sam_in, int base) {
   
   int  n_samples = em->n_samples;
   int  nnz       = em->nnz;
-  int *sam_vec   = em->sam_vec;
   int *pos_vec   = rw_pos_vec(em);
   
-  int p = 0;
-  for (int i = 0; i < n_samples; i++) {
-    pos_vec[i] = p;
-    while (p < nnz && sam_vec[p] == i) p++;
-  }
-  pos_vec[n_samples] = nnz;
+  memset(pos_vec, 0, (n_samples + 1) * sizeof(int));
   
-  em->sam_vec = maybe_free_one(em->sam_vec);
+  for (int i = 0; i < nnz; i++)
+    pos_vec[sam_in[i] - base + 1]++;
+  
+  for (int sam = 0; sam < n_samples; sam++)
+    pos_vec[sam + 1] += pos_vec[sam];
+  
+  return pos_vec;
+}
+
+
+// Scattering with ptr_vec[b]++ as bucket b's write cursor
+// leaves ptr_vec[b] at bucket b + 1's start. Shift back.
+static void unshift_ptrs (int *ptr_vec, int n_buckets) {
+  
+  for (int b = n_buckets; b > 0; b--)
+    ptr_vec[b] = ptr_vec[b - 1];
+  
+  ptr_vec[0] = 0;
+}
+
+
+// Entries grouped by otu (column-compressed: col_ptr[otu]
+// is where otu's entries start) are scattered by sample.
+// Visiting otus in increasing order and keeping each
+// otu's entries in order makes the scatter stable.
+static void scatter_by_sample (
+    ecomatrix_t *em, int *sam_in, int base, int *col_ptr, 
+    double *dbl_in, int *int_in ) {
+  
+  int n_samples = em->n_samples;
+  int n_otus    = em->n_otus;
+  
+  int    *pos_vec = count_samples(em, sam_in, base);
+  int    *otu_vec = rw_otu_vec(em);
+  double *val_vec = rw_val_vec(em);
+  
+  for (int otu = 0; otu < n_otus; otu++) {
+    int end = col_ptr[otu + 1];
+    for (int i = col_ptr[otu]; i < end; i++) {
+      int dst = pos_vec[sam_in[i] - base]++;
+      otu_vec[dst] = otu;
+      val_vec[dst] = dbl_in ? dbl_in[i] : (double)(int_in[i]);
+    }
+  }
+  
+  unshift_ptrs(pos_vec, n_samples);
 }
 
 
 
 //=========================================================
-// Convert pos_vec to otu_vec.
+// Import (sample, otu, value) triplets given in any order.
+// Indices are 0-based (Matrix) or 1-based (slam).
 //=========================================================
-static void inflate_triplet_otus (ecomatrix_t *em) {
+
+static void import_triplet (ecomatrix_t *em, int *sam_in, int *otu_in, SEXP sexp_vals, int base) {
   
-  int  n_otus  = em->n_otus;
-  int *pos_vec = em->pos_vec;
-  int *otu_vec = rw_otu_vec(em);
+  int n_samples = em->n_samples;
+  int n_otus    = em->n_otus;
+  int nnz       = em->nnz;
   
-  for (int otu = 0; otu < n_otus; otu++) {
-    int end = pos_vec[otu + 1];
-    for (int i = pos_vec[otu]; i < end; i++) {
-      otu_vec[i] = otu;
+  double *dbl_in;
+  int    *int_in;
+  sparse_val_ptrs(sexp_vals, &dbl_in, &int_in);
+  
+  check_indices(sam_in, nnz, n_samples, base);
+  check_indices(otu_in, nnz, n_otus,    base);
+  
+  
+  // Note how the input is already ordered.
+  // --------------------------------------------
+  
+  int sam_sorted = 1; // by sample, then otu
+  int otu_sorted = 1; // by otu
+  
+  for (int i = 1; i < nnz; i++) {
+    int prev_sam = sam_in[i - 1], sam = sam_in[i];
+    int prev_otu = otu_in[i - 1], otu = otu_in[i];
+    if (prev_otu > otu) {
+      otu_sorted = 0;
+      if (prev_sam == sam) sam_sorted = 0;
     }
+    if (prev_sam > sam) sam_sorted = 0;
   }
   
-  em->pos_vec = maybe_free_one(em->pos_vec);
+  
+  // Already in (sample, otu) order.
+  // --------------------------------------------
+  
+  if (sam_sorted) {
+    
+    count_samples(em, sam_in, base);
+    
+    if (base == 0) {
+      em->otu_vec = otu_in;
+    }
+    else {
+      int *otu_vec = rw_otu_vec(em);
+      for (int i = 0; i < nnz; i++)
+        otu_vec[i] = otu_in[i] - base;
+    }
+    
+    assign_sparse_vals(em, sexp_vals);
+    return;
+  }
+  
+  
+  // Where each otu's entries start, once grouped by otu.
+  // --------------------------------------------
+  
+  int *col_ptr = (int*) safe_malloc((n_otus + 1) * sizeof(int));
+  memset(col_ptr, 0, (n_otus + 1) * sizeof(int));
+  
+  for (int i = 0; i < nnz; i++)
+    col_ptr[otu_in[i] - base + 1]++;
+  
+  for (int otu = 0; otu < n_otus; otu++)
+    col_ptr[otu + 1] += col_ptr[otu];
+  
+  
+  // Already grouped by otu, in order. Matrix and slam
+  // build triplets this way (column-major).
+  // --------------------------------------------
+  
+  if (otu_sorted) {
+    scatter_by_sample(em, sam_in, base, col_ptr, dbl_in, int_in);
+  }
+  
+  
+  // Otherwise, a stable counting sort by otu moves the
+  // (sample, value) pairs into column-compressed order.
+  // --------------------------------------------
+  
+  else {
+    
+    int    *csc_sam = (int*)    safe_malloc(nnz * sizeof(int));
+    double *csc_val = (double*) safe_malloc(nnz * sizeof(double));
+    
+    for (int i = 0; i < nnz; i++) {
+      int dst = col_ptr[otu_in[i] - base]++;
+      csc_sam[dst] = sam_in[i] - base;
+      csc_val[dst] = dbl_in ? dbl_in[i] : (double)(int_in[i]);
+    }
+    unshift_ptrs(col_ptr, n_otus);
+    
+    scatter_by_sample(em, csc_sam, 0, col_ptr, csc_val, NULL);
+    
+    free_one(csc_sam);
+    free_one(csc_val);
+  }
+  
+  free_one(col_ptr);
+}
+
+
+
+//=========================================================
+// Import a column-compressed matrix whose rows are samples.
+//=========================================================
+
+static void import_csc_by_row (ecomatrix_t *em, int *row_in, int *col_ptr, SEXP sexp_vals) {
+  
+  int n_samples = em->n_samples;
+  int n_otus    = em->n_otus;
+  int nnz       = em->nnz;
+  
+  double *dbl_in;
+  int    *int_in;
+  sparse_val_ptrs(sexp_vals, &dbl_in, &int_in);
+  
+  // Each entry must belong to exactly one column.
+  int bad_ptr = col_ptr[0] != 0 || col_ptr[n_otus] != nnz;
+  for (int otu = 0; otu < n_otus && !bad_ptr; otu++)
+    if (col_ptr[otu] > col_ptr[otu + 1]) bad_ptr = 1;
+  if (bad_ptr) {
+    free_all();
+    error("Sparse matrix has invalid column pointers.");
+  }
+  
+  check_indices(row_in, nnz, n_samples, 0);
+  
+  scatter_by_sample(em, row_in, 0, col_ptr, dbl_in, int_in);
 }
 
 
@@ -420,57 +527,40 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
   int  n_rows        = asInteger(get(sexp_slam_mtx, "nrow"));
   int  n_cols        = asInteger(get(sexp_slam_mtx, "ncol"));
   int  nnz           = length(sexp_slam_v);
-  
-  
-  // Import values as double precision
+  int *sam_in, *otu_in;
+
   em->nnz = nnz;
-  assign_sparse_vals(em, sexp_slam_v);
-  
-  
+
+
   // Accept samples in either rows or columns.
   //-------------------------------------------------------
-  
+
   if (margin == 1) {
-    
+
     em->n_samples = n_rows; // samples are in rows
     em->n_otus    = n_cols; // OTUs are in columns
-    em->sam_vec   = INTEGER(sexp_slam_i);
-    em->otu_vec   = INTEGER(sexp_slam_j);
-    
+    sam_in        = INTEGER(sexp_slam_i);
+    otu_in        = INTEGER(sexp_slam_j);
+
     if (!isNull(sexp_dimnames))
       em->sexp_sample_names = PROTECT(VECTOR_ELT(sexp_dimnames, 0));
   }
-  
+
   else {
-    
+
     em->n_samples = n_cols; // samples are in columns
     em->n_otus    = n_rows; // OTUs are in rows
-    em->sam_vec   = INTEGER(sexp_slam_j);
-    em->otu_vec   = INTEGER(sexp_slam_i);
-    
+    sam_in        = INTEGER(sexp_slam_j);
+    otu_in        = INTEGER(sexp_slam_i);
+
     if (!isNull(sexp_dimnames))
       em->sexp_sample_names = PROTECT(VECTOR_ELT(sexp_dimnames, 1));
   }
-  
 
-  // debug_ecomatrix(em, "Before ingest");
-  
-  
-  // Slam indices are 1-based. Convert to 0-based.
-  //-------------------------------------------------------
-  
-  int *sam_vec = rw_sam_vec(em);
-  int *otu_vec = rw_otu_vec(em);
-  
-  for (int i = 0; i < nnz; i++) {
-    sam_vec[i]--;
-    otu_vec[i]--;
-  }
-  
-  
-  // Compress and cleanup
-  compress_triplet(em);
-  
+
+  // Slam indices are 1-based.
+  import_triplet(em, sam_in, otu_in, sexp_slam_v, 1);
+
   if (!isNull(sexp_dimnames)) UNPROTECT(1);
   UNPROTECT(4);
 }
@@ -493,34 +583,32 @@ static void parse_dgTMatrix (ecomatrix_t *em, SEXP sexp_dgTMatrix, int margin) {
   int  n_rows        = INTEGER(sexp_dim)[0];
   int  n_cols        = INTEGER(sexp_dim)[1];
   int  nnz           = length(sexp_dgt_x);
-  
-  
-  // Import values as double precision
+  int *sam_in, *otu_in;
+
   em->nnz = nnz;
-  assign_sparse_vals(em, sexp_dgt_x);
-  
-  
+
+
   // Transpose if needed
   if (margin == 1) {
-    
+
     em->n_samples         = n_rows; // samples are in rows
     em->n_otus            = n_cols; // OTUs are in columns
-    em->sam_vec           = INTEGER(sexp_dgt_i);
-    em->otu_vec           = INTEGER(sexp_dgt_j);
+    sam_in                = INTEGER(sexp_dgt_i);
+    otu_in                = INTEGER(sexp_dgt_j);
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 0);
   }
-  
+
   else { // margin == 2
-    
+
     em->n_samples         = n_cols; // samples are in columns
     em->n_otus            = n_rows; // OTUs are in rows
-    em->sam_vec           = INTEGER(sexp_dgt_j);
-    em->otu_vec           = INTEGER(sexp_dgt_i);
+    sam_in                = INTEGER(sexp_dgt_j);
+    otu_in                = INTEGER(sexp_dgt_i);
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 1);
   }
-  
-  
-  compress_triplet(em);
+
+
+  import_triplet(em, sam_in, otu_in, sexp_dgt_x, 0);
   UNPROTECT(5);
 } 
 
@@ -541,33 +629,29 @@ static void parse_dgCMatrix (ecomatrix_t *em, SEXP sexp_dgCMatrix, int margin) {
   int  n_rows        = INTEGER(sexp_dim)[0];
   int  n_cols        = INTEGER(sexp_dim)[1];
   int  nnz           = length(sexp_dgc_x);
-  
-  
-  // Import values as double precision
+
   em->nnz = nnz;
-  assign_sparse_vals(em, sexp_dgc_x);
-  
-  
+
+
   // Transpose if needed
   if (margin == 1) {
-    
+
     em->n_samples         = n_rows; // samples are in rows
     em->n_otus            = n_cols; // OTUs are in columns
-    em->sam_vec           = INTEGER(sexp_dgc_i);
-    em->pos_vec           = INTEGER(sexp_dgc_p);
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 0);
-    
-    inflate_triplet_otus(em);
-    compress_triplet(em);
+
+    import_csc_by_row(em, INTEGER(sexp_dgc_i), INTEGER(sexp_dgc_p), sexp_dgc_x);
   }
-  
+
   else { // margin == 2
-    
+
     em->n_samples         = n_cols; // samples are in columns
     em->n_otus            = n_rows; // OTUs are in rows
     em->pos_vec           = INTEGER(sexp_dgc_p);
     em->otu_vec           = INTEGER(sexp_dgc_i);
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 1);
+
+    assign_sparse_vals(em, sexp_dgc_x);
   }
   
   UNPROTECT(5);

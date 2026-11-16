@@ -76,6 +76,14 @@
   above the library's own, and OpenMP's thread count is left as it is. No
   other ecodive function calls it.
 
+* Sparse counts with samples in rows (a `dgCMatrix` with `margin = 1`), or as
+  triplets (`dgTMatrix`, slam's `simple_triplet_matrix`), are now imported
+  with counting sorts in linear time, instead of a quicksort: 4 s became
+  0.06 s for a 5000 x 4000 `dgCMatrix` with 2.5 million non-zero values, and
+  26 s became 0.3 s for 9.4 million. Every alpha and beta diversity function
+  benefits, and results are unchanged. Out-of-range indices in these inputs
+  are now an error.
+
 
 
 # ecodive 2.3.2

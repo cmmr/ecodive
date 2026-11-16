@@ -124,6 +124,82 @@
   expect_equal(test_parsing(sorted_m_dgT_t, margin = 2L), expected_margin1, info = "sorted dgTMatrix")
 
 
+  # === Every input format gives identical results ===
+  # Matrix and slam emit triplets column-major, which needs only the
+  # scatter by sample; shuffled triplets also need the sort by otu.
+  rand_tree <- function (tips) {
+    nodes <- paste0(tips, ':', round(runif(length(tips), 0.1, 1), 3))
+    while (length(nodes) > 1) {
+      k     <- sample(length(nodes), 2)
+      nodes <- c(nodes[-k], sprintf('(%s,%s):%.3f', nodes[k[1]], nodes[k[2]], runif(1, 0.1, 1)))
+    }
+    read_tree(paste0(sub(':[0-9.]+$', '', nodes), ';'))
+  }
+  shuffle <- function (x, idx) {
+    if (inherits(x, 'dgTMatrix')) { x@i <- x@i[idx]; x@j <- x@j[idx]; x@x <- x@x[idx] }
+    else                          { x$i <- x$i[idx]; x$j <- x$j[idx]; x$v <- x$v[idx] }
+    x
+  }
+  alpha_ids <- list_metrics('alpha', val = 'id')
+  beta_ids  <- list_metrics('beta',  val = 'id')
+  all_divs  <- function (x, margin, tree) list(
+    alpha = lapply(alpha_ids, function (id) alpha_div(x, id, tree = tree, margin = margin, cpus = 1L)),
+    beta  = lapply(beta_ids,  function (id) beta_div( x, id, tree = tree, margin = margin, cpus = 1L, pseudocount = 0.5)) )
+
+  set.seed(3)
+  for (dims in list(c(12, 30, 0.3), c(25, 8, 0.7))) {
+    n <- dims[[1]]; p <- dims[[2]]
+    m <- matrix(rpois(n * p, 20) * rbinom(n * p, 1, dims[[3]]), n, p,
+                dimnames = list(paste0('S', 1:n), paste0('OTU', 1:p)))
+    m[,1] <- m[,1] + 1 # no empty samples
+    storage.mode(m) <- 'integer'
+    tr    <- rand_tree(colnames(m))
+    ref   <- all_divs(m, 1L, tr)
+
+    dgT   <- as(as(m,    COMPRESSED), TRIPLET)
+    dgT_t <- as(as(t(m), COMPRESSED), TRIPLET)
+    stm   <- slam::as.simple_triplet_matrix(m)
+    stm_t <- slam::as.simple_triplet_matrix(t(m))
+    stm_d <- stm; stm_d$v <- stm_d$v * 1.0 # double-valued slam
+    idx   <- sample(length(stm$v))
+
+    inputs <- list(
+      matrix_2      = list(t(m),                 2L),
+      dgC_1         = list(as(m,    COMPRESSED), 1L),
+      dgC_2         = list(as(t(m), COMPRESSED), 2L),
+      dgT_1         = list(dgT,                  1L),
+      dgT_2         = list(dgT_t,                2L),
+      dgT_1_shuf    = list(shuffle(dgT,   idx),  1L),
+      dgT_2_shuf    = list(shuffle(dgT_t, idx),  2L),
+      slam_1        = list(stm,                  1L),
+      slam_2        = list(stm_t,                2L),
+      slam_1_dbl    = list(stm_d,                1L),
+      slam_1_shuf   = list(shuffle(stm,   idx),  1L),
+      slam_2_shuf   = list(shuffle(stm_t, idx),  2L),
+      slam_1_dblshf = list(shuffle(stm_d, idx),  1L) )
+
+    for (nm in names(inputs))
+      expect_identical(
+        all_divs(inputs[[nm]][[1]], inputs[[nm]][[2]], tr), ref,
+        info = paste(nm, n, 'x', p) )
+  }
+
+
+  # === Out-of-range sparse indices are errors ===
+  bad <- m_slam;  bad$i[1] <- 99L
+  expect_error(test_parsing(bad, margin = 1L), 'out of range', info = "slam i")
+  bad <- m_slam;  bad$j[1] <- 0L
+  expect_error(test_parsing(bad, margin = 1L), 'out of range', info = "slam j")
+  bad <- m_dgT;   bad@i[1] <- -1L
+  expect_error(test_parsing(bad, margin = 1L), 'out of range', info = "dgT i")
+  bad <- m_dgT;   bad@j[1] <- 5L
+  expect_error(test_parsing(bad, margin = 1L), 'out of range', info = "dgT j")
+  bad <- m_dgC;   bad@i[1] <- 4L
+  expect_error(test_parsing(bad, margin = 1L), 'out of range', info = "dgC i")
+  bad <- m_dgC;   bad@p[3] <- bad@p[4] + 1L
+  expect_error(test_parsing(bad, margin = 1L), 'column pointers', info = "dgC p")
+
+
   # === Test error handling ===
   expect_error(test_parsing("not a matrix"))
   expect_error(test_parsing(m_base, margin = 3L))
