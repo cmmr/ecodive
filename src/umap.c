@@ -13,7 +13,8 @@
  *                      membership strengths, and their fuzzy
  *                      union, as a symmetric sparse matrix.
  *   C_umap_spectral()  Eigenvectors of the graph's normalized
- *                      Laplacian, by thick-restart Lanczos.
+ *                      Laplacian, by the shared block Lanczos
+ *                      solver (lanczos.c).
  *   C_umap_sgd()       The layout optimization: uwot's batch
  *                      mode (gradients from each epoch's start,
  *                      then Adam), with the same arithmetic
@@ -50,7 +51,6 @@
 #define UMAP_STREAM_UNIF   1
 #define UMAP_STREAM_NORM   2
 #define UMAP_STREAM_EPOCH  3
-#define UMAP_STREAM_LZ     4
 
 // pcg-cpp's default stream, which uwot's pcg32 uses:
 // increment 1442695040888963407 = (this << 1) | 1.
@@ -554,24 +554,31 @@ SEXP C_umap_graph(SEXP sexp_dist, SEXP sexp_n, SEXP sexp_k, SEXP sexp_dbl, SEXP 
 //
 // uwot takes the eigenvectors of the k + 1 smallest
 // eigenvalues of L = I - D^-1/2 A D^-1/2 (D = A's column
-// sums), and drops the first, constant one (its
-// eigenvector is D^1/2 1). Those are the eigenvectors of
-// the k largest eigenvalues of M = D^-1/2 A D^-1/2 in the
-// complement of D^1/2 1, which are found here by Lanczos
-// iteration with thick restarts (Wu & Simon 2000) and full
-// reorthogonalization.
+// sums), and drops the first, trivial one (eigenvalue 0,
+// eigenvector v0 = D^1/2 1, normalized). Those are the
+// eigenvectors of the k largest eigenvalues of
+// M = D^-1/2 A D^-1/2 other than v0's (which is 1).
+//
+// They are found by the shared block Lanczos solver
+// (lanczos.c), as the k largest algebraic eigenpairs of
+//
+//     B = M - 2 v0 v0'
+//
+// which has M's eigenpairs, except that v0's eigenvalue
+// moves from 1 to -1, the bottom of M's spectrum [-1, 1].
+// Products with M run in parallel, each task owning a
+// fixed block of rows, so the result is the same for any
+// number of threads.
 //======================================================
 
-#define LZ_TOL       1e-10
-#define LZ_MAX_ITER  5000   // Restarts.
-
 static int           lz_n;
+static int           lz_m;     // Columns in this product.
 static const int    *lz_p;
 static const int    *lz_j;
 static const double *lz_x;
-static const double *lz_s;    // D^-1/2
-static const double *lz_in;
-static double       *lz_out;
+static const double *lz_s;     // D^-1/2
+static const double *lz_in;    // n x lz_m, column-major.
+static double       *lz_out;   // n x lz_m, column-major.
 
 
 static void *lz_worker(void *arg) {
@@ -584,11 +591,15 @@ static void *lz_worker(void *arg) {
   for (int task = thread_i; task < n_tasks; task += n_threads) {
     int i1 = (task + 1) * UMAP_LZ_ROWS;
     if (i1 > n) i1 = n;
-    for (int i = task * UMAP_LZ_ROWS; i < i1; i++) {
-      double s = 0;
-      for (int e = lz_p[i]; e < lz_p[i + 1]; e++)
-        s += lz_x[e] * lz_s[lz_j[e]] * lz_in[lz_j[e]];
-      lz_out[i] = lz_s[i] * s;
+    for (int c = 0; c < lz_m; c++) {
+      const double *in  = lz_in  + (size_t) c * n;
+      double       *out = lz_out + (size_t) c * n;
+      for (int i = task * UMAP_LZ_ROWS; i < i1; i++) {
+        double s = 0;
+        for (int e = lz_p[i]; e < lz_p[i + 1]; e++)
+          s += lz_x[e] * lz_s[lz_j[e]] * in[lz_j[e]];
+        out[i] = lz_s[i] * s;
+      }
     }
   }
 
@@ -596,110 +607,31 @@ static void *lz_worker(void *arg) {
 }
 
 
-static void lz_mult(const double *in, double *out, int n_threads) {
-  lz_in  = in;
-  lz_out = out;
-  int n_tasks = (lz_n + UMAP_LZ_ROWS - 1) / UMAP_LZ_ROWS;
-  run_parallel(lz_worker, n_tasks >= 4 ? n_threads : 1, 100);
-}
+typedef struct {
+  const double *v0;
+  int           n_threads;
+} spectral_ctx_t;
 
 
-static double dot(const double *a, const double *b, int n) {
-  double s = 0;
-  for (int i = 0; i < n; i++) s += a[i] * b[i];
-  return s;
-}
+// W = B * V = M * V - 2 v0 (v0' V), for m columns. A
+// lanczos_op_t.
+static void spectral_op(const double *V, double *W, int m, void *ctx) {
 
+  const spectral_ctx_t *sc = (const spectral_ctx_t *) ctx;
+  int n = lz_n;
 
-// w -= (v . w) v for unit vectors v[0..nv-1] (twice, for
-// numerical orthogonality). Adds the coefficients to h, if
-// given.
-static void orthogonalize(double *w, double **v, int nv, double *h, int n) {
-  for (int pass = 0; pass < 2; pass++)
-    for (int i = 0; i < nv; i++) {
-      double c = dot(v[i], w, n);
-      for (int r = 0; r < n; r++) w[r] -= c * v[i][r];
-      if (h) h[i] += c;
-    }
-}
+  lz_m   = m;
+  lz_in  = V;
+  lz_out = W;
+  int n_tasks = (n + UMAP_LZ_ROWS - 1) / UMAP_LZ_ROWS;
+  run_parallel(lz_worker, n_tasks >= 4 ? sc->n_threads : 1, 100);
 
-
-// Eigen-decomposition of a symmetric m x m matrix `a`
-// (destroyed) by cyclic Jacobi rotations. Eigenvalues to
-// `val`, unit eigenvectors to the columns of `vec`, both
-// sorted by decreasing eigenvalue.
-static void jacobi_eigen(double *a, int m, double *val, double *vec) {
-
-  for (int i = 0; i < m * m; i++) vec[i] = 0;
-  for (int i = 0; i < m; i++) vec[i * m + i] = 1;
-
-  for (int sweep = 0; sweep < 100; sweep++) {
-
-    double off = 0, tot = 0;
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j < m; j++) {
-        tot += a[i * m + j] * a[i * m + j];
-        if (i != j) off += a[i * m + j] * a[i * m + j];
-      }
-    if (off <= 1e-30 * tot || off == 0) break;
-
-    for (int p = 0; p < m - 1; p++)
-      for (int q = p + 1; q < m; q++) {
-
-        double apq = a[p * m + q];
-        if (apq == 0) continue;
-
-        double app   = a[p * m + p], aqq = a[q * m + q];
-        double theta = (aqq - app) / (2 * apq);
-        double t     = (theta >= 0 ? 1 : -1) / (fabs(theta) + sqrt(theta * theta + 1));
-        double c     = 1 / sqrt(t * t + 1), s = t * c;
-
-        for (int r = 0; r < m; r++) {
-          double arp = a[r * m + p], arq = a[r * m + q];
-          a[r * m + p] = c * arp - s * arq;
-          a[r * m + q] = s * arp + c * arq;
-        }
-        for (int r = 0; r < m; r++) {
-          double apr = a[p * m + r], aqr = a[q * m + r];
-          a[p * m + r] = c * apr - s * aqr;
-          a[q * m + r] = s * apr + c * aqr;
-        }
-        for (int r = 0; r < m; r++) {
-          double vrp = vec[r * m + p], vrq = vec[r * m + q];
-          vec[r * m + p] = c * vrp - s * vrq;
-          vec[r * m + q] = s * vrp + c * vrq;
-        }
-      }
+  for (int c = 0; c < m; c++) {
+    const double *v = V + (size_t) c * n;
+    double       *w = W + (size_t) c * n;
+    double        h = 2 * lz_dot(sc->v0, v, n);
+    for (int i = 0; i < n; i++) w[i] -= h * sc->v0[i];
   }
-
-  for (int i = 0; i < m; i++) val[i] = a[i * m + i];
-
-  // Selection sort, decreasing, with stable ties.
-  for (int i = 0; i < m; i++) {
-    int best = i;
-    for (int j = i + 1; j < m; j++) if (val[j] > val[best]) best = j;
-    if (best != i) {
-      double t = val[i]; val[i] = val[best]; val[best] = t;
-      for (int r = 0; r < m; r++) {
-        t = vec[r * m + i]; vec[r * m + i] = vec[r * m + best]; vec[r * m + best] = t;
-      }
-    }
-  }
-}
-
-
-// A random unit vector orthogonal to v[0..nv-1].
-static void random_start(double *w, double **v, int nv, int n, pcg32_random_t *rng) {
-  for (int tries = 0; tries < 10; tries++) {
-    for (int r = 0; r < n; r++) w[r] = pcg32_random_r(rng) / 4294967296.0 - 0.5;
-    orthogonalize(w, v, nv, NULL, n);
-    double nrm = sqrt(dot(w, w, n));
-    if (nrm > 1e-8) {
-      for (int r = 0; r < n; r++) w[r] /= nrm;
-      return;
-    }
-  }
-  memset(w, 0, n * sizeof(double)); // # nocov
 }
 
 
@@ -736,133 +668,46 @@ SEXP C_umap_spectral(SEXP sexp_graph, SEXP sexp_k, SEXP sexp_n_threads) {
     v0[i] = sqrt(d);
   }
   lz_s = s;
-  double nrm0 = sqrt(dot(v0, v0, n));
+  double nrm0 = sqrt(lz_dot(v0, v0, n));
   for (int i = 0; i < n; i++) v0[i] /= nrm0;
 
-  // Basis size.
-  int m = 2 * nev + 20;
-  if (m > n - 1) m = n - 1;
-
-  // basis[0] = v0 (deflated), basis[1..m+1] = Krylov
-  // vectors V[0..m].
-  double **basis = (double **) R_alloc(m + 2, sizeof(double *));
-  basis[0] = v0;
-  for (int i = 1; i < m + 2; i++)
-    basis[i] = (double *) R_alloc(n, sizeof(double));
-  double **V = basis + 1;
-
-  double *w    = (double *) R_alloc(n, sizeof(double));
-  double *T    = (double *) R_alloc((size_t) m * m, sizeof(double));
-  double *Tc   = (double *) R_alloc((size_t) m * m, sizeof(double));
-  double *S    = (double *) R_alloc((size_t) m * m, sizeof(double));
-  double *th   = (double *) R_alloc(m, sizeof(double));
-  double *h    = (double *) R_alloc(m + 1, sizeof(double));
-  double *tmp  = (double *) R_alloc((size_t) n * m, sizeof(double));
-
-  pcg32_random_t rng;
-  pcg32_srandom_r(&rng, 0, UMAP_STREAM_LZ);
-
-  memset(T, 0, (size_t) m * m * sizeof(double));
-  random_start(V[0], basis, 1, n, &rng);
-
-  int    p         = 0; // Kept Ritz vectors.
-  int    converged = 0;
-  double beta      = 0;
-
-  for (int iter = 0; iter < LZ_MAX_ITER; iter++) {
-
-    for (int j = p; j < m; j++) {
-
-      lz_mult(V[j], w, n_threads);
-
-      // Coefficients against v0 are dropped; those against
-      // V[0..j] are column j of T = V' M V.
-      memset(h, 0, (j + 1) * sizeof(double));
-      orthogonalize(w, basis, 1, NULL, n);
-      orthogonalize(w, V, j + 1, h, n);
-      orthogonalize(w, basis, 1, NULL, n);
-
-      for (int i = 0; i <= j; i++)
-        T[i * m + j] = T[j * m + i] = h[i];
-
-      beta = sqrt(dot(w, w, n));
-
-      if (beta > 1e-12) {
-        for (int r = 0; r < n; r++) V[j + 1][r] = w[r] / beta;
-      } else {
-        // Invariant subspace: continue from a fresh vector.
-        beta = 0;
-        random_start(V[j + 1], basis, j + 2, n, &rng);
-      }
-    }
-
-    memcpy(Tc, T, (size_t) m * m * sizeof(double));
-    jacobi_eigen(Tc, m, th, S);
-
-    // Converged when each wanted residual, |beta * S[m-1, i]|,
-    // is small.
-    converged = 1;
-    for (int i = 0; i < nev; i++)
-      if (fabs(beta * S[(m - 1) * m + i]) > LZ_TOL) converged = 0;
-
-    if (converged || m >= n - 1 || iter == LZ_MAX_ITER - 1) break;
-
-    if (iter % 10 == 9) R_CheckUserInterrupt();
-
-    // Thick restart: keep the best p Ritz vectors.
-    p = nev + (m - nev) / 2;
-    if (p > m - 1) p = m - 1;
-
-    memset(tmp, 0, (size_t) n * p * sizeof(double));
-    for (int i = 0; i < p; i++)
-      for (int j = 0; j < m; j++) {
-        double c = S[j * m + i];
-        double *t = tmp + (size_t) i * n;
-        for (int r = 0; r < n; r++) t[r] += c * V[j][r];
-      }
-    for (int i = 0; i < p; i++) memcpy(V[i], tmp + (size_t) i * n, n * sizeof(double));
-    memcpy(V[p], V[m], n * sizeof(double));
-
-    memset(T, 0, (size_t) m * m * sizeof(double));
-    for (int i = 0; i < p; i++) T[i * m + i] = th[i];
-  }
-
-  if (m >= n - 1) converged = 1;
-
-
-  //--------------------------------------------------
-  // Ritz vectors, with the sign convention.
-  //--------------------------------------------------
   SEXP sexp_vec = PROTECT(allocMatrix(REALSXP, n, nev));
   SEXP sexp_val = PROTECT(allocVector(REALSXP, nev));
-  double *vec = REAL(sexp_vec);
+  double *vec   = REAL(sexp_vec);
+  double *val   = REAL(sexp_val);
 
-  for (int i = 0; i < nev; i++) {
+  spectral_ctx_t ctx = { .v0 = v0, .n_threads = n_threads };
 
-    double *out = vec + (size_t) i * n;
-    memset(out, 0, n * sizeof(double));
-    for (int j = 0; j < m; j++) {
-      double c = S[j * m + i];
-      for (int r = 0; r < n; r++) out[r] += c * V[j][r];
-    }
+  // B's eigenvalues are in [-1, 1], so its scale is 1.
+  lanczos_t lz = {
+    .n = n, .k = nev, .dims = n, .deflate = 0, .scale = 1,
+    .op = spectral_op, .ctx = &ctx,
+    .vecs = vec, .vals = val,
+    .resid = (double *) R_alloc(nev, sizeof(double)) };
 
-    double nrm = sqrt(dot(out, out, n));
-    int    big = 0;
-    for (int r = 0; r < n; r++) {
-      out[r] /= nrm;
+  lanczos(&lz);
+
+
+  //--------------------------------------------------
+  // L's eigenvalues, and each vector's sign.
+  //--------------------------------------------------
+  for (int c = 0; c < nev; c++) {
+
+    double *out = vec + (size_t) c * n;
+    int     big = 0;
+    for (int r = 1; r < n; r++)
       if (fabs(out[r]) > fabs(out[big])) big = r;
-    }
     if (out[big] < 0)
       for (int r = 0; r < n; r++) out[r] = -out[r];
 
-    REAL(sexp_val)[i] = 1 - th[i];
+    val[c] = 1 - val[c];
   }
 
   const char *names[] = { "vectors", "values", "converged", "" };
   SEXP sexp_result = PROTECT(mkNamed(VECSXP, names));
   SET_VECTOR_ELT(sexp_result, 0, sexp_vec);
   SET_VECTOR_ELT(sexp_result, 1, sexp_val);
-  SET_VECTOR_ELT(sexp_result, 2, ScalarLogical(converged));
+  SET_VECTOR_ELT(sexp_result, 2, ScalarLogical(lz.converged));
 
   UNPROTECT(3);
   return sexp_result;

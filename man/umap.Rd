@@ -171,10 +171,11 @@ makes those from \code{seed} instead, with the same streams of negative
 samples (PCG) from the same seeds; given the same seeds and starting
 coordinates, the two give the same coordinates (to the last bit, for
 the same compiler and math library).
-\item The spectral start's eigenvectors are computed to a tolerance of about
-\eqn{10^{-10}} by Lanczos iteration, rather than \code{RSpectra}'s
-\eqn{10^{-4}}, and each one's sign is fixed (its largest absolute
-coordinate is positive).
+\item The spectral start's eigenvectors are computed by block Lanczos
+iteration, the same solver as \code{\link[=pcoa]{pcoa()}}'s, to relative residuals of
+\eqn{10^{-14}} (at worst \eqn{10^{-10}}) rather than \code{RSpectra}'s
+tolerance of \eqn{10^{-4}}, and each one's sign is fixed (its largest
+absolute coordinate is positive).
 \item The \code{"pcoa"} start, and the fallback for unconnected graphs, come from
 \code{\link[=pcoa]{pcoa()}} rather than \code{cmdscale()}; they differ only by rounding and the
 signs of the axes.

@@ -151,10 +151,11 @@
 #'   samples (PCG) from the same seeds; given the same seeds and starting
 #'   coordinates, the two give the same coordinates (to the last bit, for
 #'   the same compiler and math library).
-#' * The spectral start's eigenvectors are computed to a tolerance of about
-#'   \eqn{10^{-10}} by Lanczos iteration, rather than `RSpectra`'s
-#'   \eqn{10^{-4}}, and each one's sign is fixed (its largest absolute
-#'   coordinate is positive).
+#' * The spectral start's eigenvectors are computed by block Lanczos
+#'   iteration, the same solver as [pcoa()]'s, to relative residuals of
+#'   \eqn{10^{-14}} (at worst \eqn{10^{-10}}) rather than `RSpectra`'s
+#'   tolerance of \eqn{10^{-4}}, and each one's sign is fixed (its largest
+#'   absolute coordinate is positive).
 #' * The `"pcoa"` start, and the fallback for unconnected graphs, come from
 #'   [pcoa()] rather than `cmdscale()`; they differ only by rounding and the
 #'   signs of the axes.
