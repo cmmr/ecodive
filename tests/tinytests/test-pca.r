@@ -195,18 +195,22 @@
 
 #test_that("pcoa after moving its solver to lanczos.c", {
 
-  # Same output as pcoa() had before. Bit-identical where the expected
-  # values were made (same platform, optimized build); else equal.
+  # Same output as pcoa() had before. The last bits depend on the compiler
+  # and its optimization level, so the expected values hold an optimized
+  # (O2) and an unoptimized (O0, as from load_all()) build's results. On the
+  # platform they were made on, the output must be bit-identical to one of
+  # them; elsewhere, equal.
   # Expected values: data-raw/expected/pcoa_lanczos.r
 
-  expected <- readRDS('expected/pcoa_lanczos.rds')
-  same_bits <- identical(expected$generated$platform, R.version$platform)
+  expected  <- readRDS('expected/pcoa_lanczos.rds')
+  same_plat <- identical(expected$generated$O2$platform, R.version$platform)
 
   for (cs in expected$cases) {
     d   <- beta_div(cs$counts, cs$metric, pseudocount = 1)
     ord <- pcoa(d, k = cs$k, cpus = 2)
-    if (same_bits) expect_identical(ord, cs$expected)
-    else           expect_equal(ord, cs$expected, tolerance = 1e-10)
+    expect_equal(ord, cs$expected$O2, tolerance = 1e-10)
+    if (same_plat)
+      expect_true(identical(ord, cs$expected$O2) || identical(ord, cs$expected$O0))
   }
 
 #})

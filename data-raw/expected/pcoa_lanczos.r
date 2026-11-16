@@ -2,13 +2,23 @@
 # before its block Lanczos solver moved to src/lanczos.c (shared with pca()).
 # test-pca.r checks that pcoa() still returns exactly these.
 #
-# Install ecodive from commit 66d7a80 (the last one before the move) into a
-# separate library, then run from the package root:
+# The last bit of a result depends on how the C code was compiled, so the
+# results of two builds of commit 66d7a80 (the last one before the move) are
+# kept: optimized (as installed) and unoptimized (as devtools::load_all()
+# compiles). From the package root, with that commit's source in <src>:
 #
-#   R CMD INSTALL --library=<lib> .        (at commit 66d7a80)
-#   Rscript data-raw/expected/pcoa_lanczos.r <lib>
+#   R CMD INSTALL --library=<lib> <src>
+#   Rscript data-raw/expected/pcoa_lanczos.r O2 <lib>
+#   Rscript data-raw/expected/pcoa_lanczos.r O0 <src>
+#
+# Each run adds or replaces its build's results in the file.
 
-library(ecodive, lib.loc = commandArgs(TRUE)[1])
+args  <- commandArgs(TRUE)
+build <- args[1]
+path  <- args[2]
+
+if (build == 'O2') library(ecodive, lib.loc = path)
+if (build == 'O0') devtools::load_all(path, quiet = TRUE)
 
 set.seed(1)
 
@@ -21,28 +31,33 @@ rand_counts <- function (n, p) {
 }
 
 m150 <- rand_counts(150, 40)
-m300 <- rand_counts(300, 80)
+m200 <- rand_counts(200, 60)
 
 # Distances come from ecodive's own (deterministic) beta diversity code.
 cases <- list(
   list(counts = m150, metric = 'bray',      k = 3L),
   list(counts = m150, metric = 'bray',      k = 12L),
   list(counts = m150, metric = 'jaccard',   k = 6L),
-  list(counts = m300, metric = 'euclidean', k = 3L),
-  list(counts = m300, metric = 'aitchison', k = 5L) )
+  list(counts = m200, metric = 'euclidean', k = 3L),
+  list(counts = m200, metric = 'aitchison', k = 5L) )
+
+file <- 'tests/tinytests/expected/pcoa_lanczos.rds'
+old  <- if (file.exists(file)) readRDS(file) else NULL
 
 for (i in seq_along(cases)) {
   cs <- cases[[i]]
   d  <- beta_div(cs$counts, cs$metric, pseudocount = 1)
-  cases[[i]]$expected <- pcoa(d, k = cs$k, cpus = 1)
+  cases[[i]]$expected <- old$cases[[i]]$expected
+  cases[[i]]$expected[[build]] <- pcoa(d, k = cs$k, cpus = 1)
 }
 
+generated <- old$generated
+generated[[build]] <- list(
+  ecodive  = paste(packageVersion('ecodive'), '(commit 66d7a80)'),
+  R        = R.version.string,
+  platform = R.version$platform )
+
 saveRDS(
-  file    = 'tests/tinytests/expected/pcoa_lanczos.rds',
+  file    = file,
   version = 2,
-  object  = list(
-    cases     = cases,
-    generated = list(
-      ecodive  = paste(packageVersion('ecodive'), '(commit 66d7a80)'),
-      R        = R.version.string,
-      platform = R.version$platform )))
+  object  = list(cases = cases, generated = generated) )
