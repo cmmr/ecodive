@@ -16,7 +16,6 @@
 //======================================================
 
 static int     n_samples;
-static int     n_otus;
 static int     n_edges;
 static int     n_pairs;
 static int     n_dist;
@@ -476,7 +475,6 @@ SEXP C_unifrac(
   ecotree_t   *et = new_ecotree(sexp_phylo_tree);
   
   n_samples    = em->n_samples;
-  n_otus       = em->n_otus;
   pos_vec      = em->pos_vec;
   otu_vec      = em->otu_vec;
   val_vec      = em->val_vec;
