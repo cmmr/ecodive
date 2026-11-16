@@ -74,8 +74,31 @@
 
     # vegan::wcmdscale() and its "Proportion Explained".
     expect_true(coord_diff(ord, ex$vegan$points) < 1e-9)
-      expect_equal(attr(ord, 'eig'),  ex$vegan$eig,  tolerance = 1e-10)
+    expect_equal(attr(ord, 'eig'),  ex$vegan$eig,  tolerance = 1e-10)
     expect_equal(attr(ord, 'prop'), ex$vegan$prop, tolerance = 1e-10)
+
+    # More axes than positive eigenvalues, Euclidean distances, two and
+    # three samples, duplicate samples, and 300 samples.
+    for (cs in ex$cases) {
+
+      d <- if (is.null(cs$pts)) bray(cs$counts) else dist(cs$pts)
+
+      if (is.null(cs$warn)) {
+        ord <- pcoa(d, k = cs$k, cpus = 2)
+      } else {
+        expect_warning(ord <- pcoa(d, k = cs$k, cpus = 2), cs$warn, info = cs$name)
+      }
+
+      k <- length(cs$ape$eig)
+      expect_identical(dim(ord), c(attr(d, 'Size'), k), info = cs$name)
+      expect_true(coord_diff(ord, cs$ape$vectors) < 1e-9, info = cs$name)
+      expect_equal(attr(ord, 'eig'),   cs$ape$eig,          tolerance = 1e-10, info = cs$name)
+      expect_equal(attr(ord, 'prop'),  cs$ape$relative_eig, tolerance = 1e-10, info = cs$name)
+      expect_equal(attr(ord, 'trace'), cs$ape$trace,        tolerance = 1e-10, info = cs$name)
+      expect_true(coord_diff(ord, cs$vegan$points) < 1e-9, info = cs$name)
+      expect_equal(attr(ord, 'eig'),   cs$vegan$eig,        tolerance = 1e-10, info = cs$name)
+      expect_equal(attr(ord, 'prop'),  cs$vegan$prop,       tolerance = 1e-10, info = cs$name)
+    }
   }
 
 
