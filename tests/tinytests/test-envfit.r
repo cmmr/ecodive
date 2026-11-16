@@ -138,13 +138,13 @@
 
   # Row names that are only numbers (as here) count as names only when
   # they all match; otherwise rows are matched by position.
-  expect_error(envfit(ord, env[-1, ], permutations = 9), '23 samples')
+  expect_error(envfit(ord, env[-1, ], permutations = 9), '`data` has 23 rows, but `ord` has 24 samples')
   named <- ord
   rownames(named) <- paste0('S', rownames(ord))
   envn <- env
   rownames(envn) <- rownames(named)
-  expect_error(envfit(named, envn[-1, ], permutations = 9), 'no match')
-  expect_error(envfit(named, envn[-1:-2, ], permutations = 9), '2 samples in `ord` have no match')
+  expect_error(envfit(named, envn[-1, ], permutations = 9), "1 sample in `ord` has no row in `data`: 'S18'")
+  expect_error(envfit(named, envn[-1:-2, ], permutations = 9), '2 samples in `ord` have no row in `data`')
 
 
 
@@ -201,7 +201,7 @@
   expect_error(envfit(ord, env, pseudocount = 1), 'only apply to `counts`')
   cntn <- cnt
   rownames(cntn) <- rownames(named)
-  expect_error(envfit(named, counts = cntn[-1, ]), 'no match')
+  expect_error(envfit(named, counts = cntn[-1, ]), 'has no sample in `counts`')
 
 
 

@@ -11,6 +11,7 @@
 #                    columns) of a design, with R's qr() rank decisions.
 #   condition_basis() orthonormal basis of the Condition() columns.
 #   perm_matrix()    checks a `permutations` argument.
+#   match_rows()     which row of a table holds each sample (also envfit()).
 #   perm_ss()        per-column sums of squares, trace(Q' G Q), for the
 #                    observed design and every permutation (C_permanova).
 
@@ -87,40 +88,9 @@ model_design <- function (
   #--------------------------------------------------------
   # Align the rows of `data` with the dist's samples.
   #--------------------------------------------------------
-  # Row names that are only numbers, as from subsetting a data frame without
-  # row names, count as names only when they match the labels.
-  named <- !is.null(labels) && .row_names_info(data) > 0
-  if (named && all(grepl("^[0-9]+$", rownames(data))))
-    named <- all(labels %in% rownames(data))
-
-  if (named) {
-
-    if (anyDuplicated(labels))
-      stop('`dm` has duplicate sample names, so `data` cannot be matched to them.', call. = FALSE)
-    if (anyDuplicated(rownames(data)))
-      stop('`data` has duplicate row names.', call. = FALSE)
-
-    idx <- match(labels, rownames(data))
-
-    if (anyNA(idx)) {
-      miss <- labels[is.na(idx)]
-      stop(
-        sprintf('%d sample%s in `dm` %s no row in `data`: %s',
-          length(miss), if (length(miss) == 1) '' else 's',
-          if (length(miss) == 1) 'has' else 'have', name_list(miss) ),
-        call. = FALSE )
-    }
-
-    # Rows for samples not in `dm` (e.g. dropped by rarefying) are left out.
-  }
-  else {
-    if (nrow(data) != n)
-      stop(
-        sprintf('`data` has %d rows, but `dm` has %d samples.', nrow(data), n),
-        if (!is.null(labels)) '\nGive `data` row names to match its rows to the samples by name.',
-        call. = FALSE )
-    idx <- seq_len(n)
-  }
+  # Rows for samples not in `dm` (e.g. dropped by rarefying) are left out.
+  dn  <- if (.row_names_info(data) > 0) rownames(data) else NULL
+  idx <- match_rows(labels, n, dn, nrow(data))
 
   # Factor levels with no samples left (e.g. only in rows left out) would
   # give all-zero, aliased model matrix columns.
@@ -239,6 +209,56 @@ model_design <- function (
     z           = z,
     strata      = strata,
     data        = data )
+}
+
+
+
+#------------------------------------------------------------------------------
+# Which row of a table (`what`, with row names `names` or NULL, and `n_rows`
+# rows) holds each of the n samples of `ref` (named `labels`, or NULL).
+# Returns n indices; rows for other samples are left out.
+#
+# Matched by name when both have names. Names that are only numbers, as from
+# subsetting a data frame without row names, count as names only when they
+# match every label. Otherwise matched by position, so the counts must agree.
+# `unit` is what the table's rows are called in messages.
+#------------------------------------------------------------------------------
+match_rows <- function (
+    labels, n, names, n_rows, ref = '`dm`', what = '`data`', unit = 'row' ) {
+
+  named <- !is.null(labels) && !is.null(names)
+  if (named && all(grepl("^[0-9]+$", names)))
+    named <- all(labels %in% names)
+
+  if (named) {
+
+    if (anyDuplicated(labels))
+      stop(ref, ' has duplicate sample names, so ', what, ' cannot be matched to them.', call. = FALSE)
+    if (anyDuplicated(names))
+      stop(what, ' has duplicate ', unit, ' names.', call. = FALSE)
+
+    idx <- match(labels, names)
+
+    if (anyNA(idx)) {
+      miss <- labels[is.na(idx)]
+      stop(
+        sprintf('%d sample%s in %s %s no %s in %s: %s',
+          length(miss), if (length(miss) == 1) '' else 's', ref,
+          if (length(miss) == 1) 'has' else 'have', unit, what, name_list(miss) ),
+        call. = FALSE )
+    }
+
+    return (idx)
+  }
+
+  if (n_rows != n)
+    stop(
+      sprintf('%s has %d %ss, but %s has %d samples.', what, n_rows, unit, ref, n),
+      if (!is.null(labels))
+        sprintf('\nGive %s %s names to match its %ss to the samples by name.', what, unit, unit),
+      call. = FALSE )
+
+  seq_len(n)
 }
 
 

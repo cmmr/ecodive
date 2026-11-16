@@ -64,6 +64,7 @@ reference:
   - umap
   - dbrda
   - pca
+  - envfit
   - list_ordinations
 
 - title: Hypothesis Tests

@@ -95,6 +95,18 @@
   too, and a formula of only `Condition()` terms gives the unconstrained
   ordination after removing their effect.
 
+* New `envfit()` fits sample metadata (`data`) and feature tables
+  (`counts`, such as taxa abundances) onto any ordination, for biplots: an
+  arrow and r-squared for each numeric variable or feature, the centroid of
+  each factor level, and permutation p-values. It gives the same arrows,
+  r-squared and centroids as `vegan::envfit()`, and the same p-values for the
+  same permutation matrix. Each permutation costs a few multiply-adds per
+  non-zero value of the table, with no refitting, and sparse tables are never
+  made dense, so thousands of taxa with 999 permutations take well under a
+  second (minutes in `vegan`). It fits every axis of the ordination by
+  default (`vegan` fits the first two), and its results are identical for any
+  number of `cpus`.
+
 * New `pca()` runs a principal component analysis of a count table, after
   any of `beta_div()`'s normalizations (e.g. `norm = 'clr'` for an Aitchison
   PCA), optionally scaling features to unit variance (`scale = TRUE`). It

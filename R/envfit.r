@@ -253,7 +253,7 @@ envfit <- function (
     strata <- as.integer(factor(strata)) - 1L
   }
 
-  pm <- perm_matrix(permutations, n) # TODO: use shared helper after Batch C
+  pm <- perm_matrix(permutations, n)
 
   if (!is.null(pm$perms) && !is.null(strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
@@ -516,48 +516,6 @@ envfit_ord <- function (ord, axes) {
 
 
 #------------------------------------------------------------------------------
-# For each of ord's rows, the index of its row in `data` (by name, or by
-# position). Rows of `data` for other samples are left out.
-# TODO: use shared metadata matching after Batch C.
-#------------------------------------------------------------------------------
-envfit_match <- function (labels, n, data_names, n_data, what = '`data`') {
-
-  named <- !is.null(labels) && !is.null(data_names)
-  if (named && all(grepl("^[0-9]+$", data_names)))
-    named <- all(labels %in% data_names)
-
-  if (named) {
-
-    if (anyDuplicated(labels))
-      stop('`ord` has duplicate row names, so ', what, ' cannot be matched to them.', call. = FALSE)
-    if (anyDuplicated(data_names))
-      stop(what, ' has duplicate sample names.', call. = FALSE)
-
-    idx <- match(labels, data_names)
-
-    if (anyNA(idx)) {
-      miss <- labels[is.na(idx)]
-      stop(
-        sprintf('%d sample%s in `ord` %s no match in %s: %s',
-          length(miss), if (length(miss) == 1) '' else 's',
-          if (length(miss) == 1) 'has' else 'have', what, name_list(miss) ),
-        call. = FALSE )
-    }
-    return (idx)
-  }
-
-  if (n_data != n)
-    stop(
-      sprintf('%s has %d samples, but `ord` has %d rows.', what, n_data, n),
-      if (!is.null(labels)) '\nGive them names to match them to the rows of `ord`.',
-      call. = FALSE )
-
-  seq_len(n)
-}
-
-
-
-#------------------------------------------------------------------------------
 # Metadata (a data frame, matrix, vector, or factor), with its rows aligned to
 # ord's rows. Returns list(data, strata_col): `strata_col` holds the values of
 # the column that `strata` names (which is dropped from `data`), or NULL.
@@ -590,7 +548,7 @@ envfit_env <- function (data, x, strata) {
     stop('`data` has no variables to fit.', call. = FALSE)
 
   dn  <- if (.row_names_info(data) > 0) rownames(data) else NULL
-  idx <- envfit_match(rownames(x), n, dn, nrow(data))
+  idx <- match_rows(rownames(x), n, dn, nrow(data), ref = '`ord`')
   if (!is.null(strata_col)) strata_col <- strata_col[idx]
 
   data <- data[idx, , drop = FALSE]
@@ -672,7 +630,7 @@ envfit_table <- function (counts, labels, n, keep, margin, norm, pseudocount) {
   if (margin == 2L) { dims <- rev(dims); dn <- rev(dn) }
 
   ns  <- as.integer(dims[[1]])
-  idx <- envfit_match(labels, n, dn[[1]], ns, '`counts`')[keep]
+  idx <- match_rows(labels, n, dn[[1]], ns, ref = '`ord`', what = '`counts`', unit = 'sample')[keep]
 
   if (is.logical(counts) && is.matrix(counts)) storage.mode(counts) <- 'double'
 

@@ -101,22 +101,9 @@ static size_t        ef_iwlen;   // ... this many each.
 
 
 //------------------------------------------------------
-// Uniform integer in 0 .. bound - 1, without modulo bias.
-// TODO: use shared helper after Batch C.
-//------------------------------------------------------
-static inline uint32_t ef_bounded_rand(pcg32_random_t *rng, uint32_t bound) {
-  uint32_t threshold = (0u - bound) % bound;
-  while (1) {
-    uint32_t r = pcg32_random_r(rng);
-    if (r >= threshold) return r % bound;
-  }
-}
-
-
-//------------------------------------------------------
 // Permutation k into p: permuted row a is original row
-// p[a]. k = 0 is the identity. As permanova.c's.
-// TODO: use shared helper after Batch C.
+// p[a]. k = 0 is the identity. The same permutations as
+// permanova.c's get_perm(), for the same seed and strata.
 //------------------------------------------------------
 static void ef_get_perm(int k, int *p) {
 
@@ -142,7 +129,7 @@ static void ef_get_perm(int k, int *p) {
     const int *idx = ef_order + ef_sbeg[s];
     int        len = ef_sbeg[s + 1] - ef_sbeg[s];
     for (int t = len - 1; t > 0; t--) {
-      int u   = (int) ef_bounded_rand(&rng, (uint32_t) t + 1);
+      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
       int tmp = p[idx[t]];
       p[idx[t]] = p[idx[u]];
       p[idx[u]] = tmp;
