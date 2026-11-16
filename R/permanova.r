@@ -311,7 +311,7 @@ permanova <- function (
   tbl_p  <- c(if (rz > 0) NA, p,        NA,        NA)
 
   tbl <- data.frame(
-    Df       = tbl_df,
+    Df       = as.double(tbl_df),
     SumOfSqs = tbl_ss,
     R2       = tbl_ss / total,
     F        = unname(tbl_f),

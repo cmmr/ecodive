@@ -78,7 +78,11 @@ model_design <- function (data, formula = NULL, labels = NULL, n, strata = NULL)
   #--------------------------------------------------------
   # Align the rows of `data` with the dist's samples.
   #--------------------------------------------------------
+  # Row names that are only numbers, as from subsetting a data frame without
+  # row names, count as names only when they match the labels.
   named <- !is.null(labels) && .row_names_info(data) > 0
+  if (named && all(grepl("^[0-9]+$", rownames(data))))
+    named <- all(labels %in% rownames(data))
 
   if (named) {
 
