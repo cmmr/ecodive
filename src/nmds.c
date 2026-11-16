@@ -663,6 +663,37 @@ static void *mono_worker(void *arg) {
 }
 
 
+//------------------------------------------------------
+// Groups of tied values in sorted x[0..n-1], as monoMDS
+// finds them: runs whose successive differences are at
+// most sqrt(DBL_EPSILON). (monoMDS fails to end the last
+// run when the largest value is that small; here the last
+// value always ends one.) Stores each group of two or
+// more's first position and length, unless gstart is
+// NULL, and returns how many there are.
+//------------------------------------------------------
+static int tied_groups(const double *x, size_t n, int *gstart, int *glen) {
+
+  double toler = sqrt(DBL_EPSILON);
+  int    ngrp  = 0;
+  size_t j     = 0;
+
+  for (size_t i = 1; i <= n; i++)
+    if (i == n || fabs(x[i] - x[i - 1]) > toler) {
+      if (i - j > 1) {
+        if (gstart) {
+          gstart[ngrp] = (int) j;
+          glen[ngrp]   = (int) (i - j);
+        }
+        ngrp++;
+      }
+      j = i;
+    }
+
+  return ngrp;
+}
+
+
 //======================================================
 // R interface. Sorts the pairs of a dist object's
 // packed lower triangle (`sexp_dist`, `sexp_n` samples)
@@ -695,41 +726,10 @@ SEXP C_nmds_prep(SEXP sexp_dist, SEXP sexp_n) {
   asort4(diss, codes, nd);
 
 
-  // Tied groups: runs whose successive differences are
-  // at most sqrt(DBL_EPSILON). The last value always
-  // ends a group.
-  double toler = sqrt(DBL_EPSILON);
-  int    ngrp  = 0;
-
-  {
-    size_t j = 0;
-    for (size_t i = 1; i <= nd; i++)
-      if (i == nd || fabs(diss[i] - diss[i - 1]) > toler) {
-        if (i - j > 1) ngrp++;
-        j = i;
-      }
-  }
-
+  int  ngrp        = tied_groups(diss, nd, NULL, NULL);
   SEXP sexp_gstart = PROTECT(allocVector(INTSXP, ngrp));
   SEXP sexp_glen   = PROTECT(allocVector(INTSXP, ngrp));
-  int *gstart = INTEGER(sexp_gstart);
-  int *glen   = INTEGER(sexp_glen);
-
-  {
-    size_t j = 0;
-    int    g = 0;
-    for (size_t i = 1; i <= nd; i++) {
-      int brk = (i == nd) || fabs(diss[i] - diss[i - 1]) > toler;
-      if (brk) {
-        if (i - j > 1) {
-          gstart[g] = (int) j;
-          glen[g]   = (int) (i - j);
-          g++;
-        }
-        j = i;
-      }
-    }
-  }
+  tied_groups(diss, nd, INTEGER(sexp_gstart), INTEGER(sexp_glen));
 
   const char *names[] = { "codes", "gstart", "glen", "" };
   SEXP sexp_result = PROTECT(mkNamed(VECSXP, names));

@@ -54,7 +54,9 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
 A numeric matrix with one row per sample and one column per
-dimension, named \code{"NMDS1"}, \code{"NMDS2"}, etc. Its attributes are:
+dimension, named \code{"NMDS1"}, \code{"NMDS2"}, etc., as described in "Ordination
+result" below. \code{method} is \code{"nmds"}; \code{eig} and \code{prop} are \code{NA}, as NMDS
+has no eigenvalues. Then come:
 \itemize{
 \item \code{stress}: The stress of the solution (formula \code{stress}), from 0
 (perfect) to 1.
@@ -111,12 +113,26 @@ start. \code{nmds()} sorts the pairs once, into one shared array of 4 bytes per
 pair, and each start that runs at the same time needs about 16 more bytes
 per pair. \code{cpus} starts run at once, each on its own thread.
 
+\strong{Differences from \code{metaMDS()}}
+\itemize{
+\item The random starting configurations come from \code{seed}, not from R's
+random number generator, so \code{set.seed()} has no effect, and R's random
+number stream is left untouched. They differ from the ones \code{metaMDS()}
+draws, so when there are several local minima of similar stress, the two
+can settle on different ones.
+\item The first start comes from \code{\link[=pcoa]{pcoa()}} rather than \code{cmdscale()}. The two
+differ only by rounding (about \eqn{10^{-15}}), but \code{monoMDS}'s
+stopping rule can react to that by stopping an iteration earlier or
+later, which changes the stress in about the 7th significant digit.
+\item Only \code{monoMDS}'s default "global" model is offered, not its "local",
+"linear", or "hybrid" ones.
+\item \code{metaMDS()} given a community matrix, as \code{phyloseq::ordinate()} does,
+first transforms the counts and computes the distances itself. Give
+\code{nmds()} those same distances to get the same solution.
+}
+
 \strong{Reproducibility}
 
-The random starting configurations come from \code{seed}, not from R's random
-number generator, so \code{set.seed()} has no effect, and R's random number
-stream is left untouched. They differ from the ones \code{metaMDS()} draws, so
-the two can settle on different, but equally good, local minima.
 Results are identical from run to run and for any number of \code{cpus}.
 
 Axes are flipped so that each one's coordinate with the largest absolute
@@ -126,6 +142,23 @@ value is positive.
 0.001 gives a warning, as in \code{metaMDS()}: there may be too few samples for
 \code{k} dimensions.
 }
+\section{Ordination result}{
+
+Every ordination method (\code{\link[=pcoa]{pcoa()}} and \code{\link[=nmds]{nmds()}}) returns the same
+kind of object: a plain numeric matrix with one row per sample
+(named after the samples) and one column per axis (named \code{"PCoA1"},
+\code{"NMDS1"}, etc.), so that it can go straight into \code{plot()} or a data
+frame. Its attributes always begin with these three, in this order:
+\itemize{
+\item \code{method}: The method's ID, e.g. \code{"pcoa"} or \code{"nmds"}.
+\item \code{eig}: Each axis's eigenvalue, or \code{NA} for methods without them.
+\item \code{prop}: The proportion of the total variance that each axis explains,
+or \code{NA} where that isn't defined.
+}
+
+Attributes particular to the method follow them.
+}
+
 \examples{
     ord <- nmds(bray(ex_counts))
     ord

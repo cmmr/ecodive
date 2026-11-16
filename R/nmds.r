@@ -44,7 +44,9 @@
 #'        The same seed gives the same result. Default: `0`
 #'
 #' @return A numeric matrix with one row per sample and one column per
-#'   dimension, named `"NMDS1"`, `"NMDS2"`, etc. Its attributes are:
+#'   dimension, named `"NMDS1"`, `"NMDS2"`, etc., as described in "Ordination
+#'   result" below. `method` is `"nmds"`; `eig` and `prop` are `NA`, as NMDS
+#'   has no eigenvalues. Then come:
 #'
 #'   * `stress`: The stress of the solution (formula `stress`), from 0
 #'     (perfect) to 1.
@@ -94,12 +96,26 @@
 #' per pair. `cpus` starts run at once, each on its own thread.
 #'
 #'
+#' **Differences from `metaMDS()`**
+#'
+#' * The random starting configurations come from `seed`, not from R's
+#'   random number generator, so `set.seed()` has no effect, and R's random
+#'   number stream is left untouched. They differ from the ones `metaMDS()`
+#'   draws, so when there are several local minima of similar stress, the two
+#'   can settle on different ones.
+#' * The first start comes from [pcoa()] rather than `cmdscale()`. The two
+#'   differ only by rounding (about \eqn{10^{-15}}), but `monoMDS`'s
+#'   stopping rule can react to that by stopping an iteration earlier or
+#'   later, which changes the stress in about the 7th significant digit.
+#' * Only `monoMDS`'s default "global" model is offered, not its "local",
+#'   "linear", or "hybrid" ones.
+#' * `metaMDS()` given a community matrix, as `phyloseq::ordinate()` does,
+#'   first transforms the counts and computes the distances itself. Give
+#'   `nmds()` those same distances to get the same solution.
+#'
+#'
 #' **Reproducibility**
 #'
-#' The random starting configurations come from `seed`, not from R's random
-#' number generator, so `set.seed()` has no effect, and R's random number
-#' stream is left untouched. They differ from the ones `metaMDS()` draws, so
-#' the two can settle on different, but equally good, local minima.
 #' Results are identical from run to run and for any number of `cpus`.
 #'
 #' Axes are flipped so that each one's coordinate with the largest absolute
@@ -116,6 +132,8 @@
 #' Minchin, P. R. (1987). An evaluation of the relative robustness of
 #' techniques for ecological ordination. *Vegetatio*, 69, 89-107.
 #' \doi{10.1007/BF00038690}
+#'
+#' @inheritSection ordination_section Ordination result
 #'
 #' @seealso [pcoa()], [beta_div()]
 #'
@@ -164,6 +182,9 @@ nmds <- function (
     # One sample or none: no dimensions.
     return(structure(
       .Data     = matrix(numeric(0), nrow = n, ncol = 0, dimnames = list(labels, NULL)),
+      method    = 'nmds',
+      eig       = numeric(0),
+      prop      = numeric(0),
       stress    = 0,
       converged = FALSE,
       tries     = 0L,
@@ -272,6 +293,9 @@ nmds <- function (
 
   structure(
     .Data     = x,
+    method    = 'nmds',
+    eig       = rep(NA_real_, k),
+    prop      = rep(NA_real_, k),
     stress    = best$stress,
     converged = converged > 0,
     tries     = tries,

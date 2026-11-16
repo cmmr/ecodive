@@ -47,6 +47,11 @@
 
   # Each start matches vegan::monoMDS() from the same configuration. ====
 
+  # Built with the same compiler and optimization as vegan, the results are
+  # identical. Elsewhere, last-bit differences in library functions such as
+  # sqrt() can grow over hundreds of iterations, e.g. stopping an iteration
+  # sooner or later, so long runs are only compared approximately.
+
   if (requireNamespace('vegan', quietly = TRUE)) {
 
     cases <- list(
@@ -62,14 +67,26 @@
 
       n    <- attr(cs$d, 'Size')
       init <- array(runif(n * cs$k * 3), c(n, cs$k, 3))
-      res  <- engine(cs$d, init, cs$weakties, cs$stress)
 
-      for (i in 1:3) {
-        vg <- vegan::monoMDS(
-          cs$d, y = init[, , i], k = cs$k, pc = FALSE,
-          weakties = cs$weakties, stress = cs$stress )
-        expect_equal(res$stress[[i]], vg$stress, tolerance = 1e-6)
-        expect_true(pro_rmse(res$points[, , i], vg$points) < 1e-3)
+      for (maxit in c(25L, 200L)) {
+
+        res <- engine(cs$d, init, cs$weakties, cs$stress, maxit)
+
+        for (i in 1:3) {
+
+          vg <- vegan::monoMDS(
+            cs$d, y = init[, , i], k = cs$k, pc = FALSE, maxit = maxit,
+            weakties = cs$weakties, stress = cs$stress )
+
+          if (maxit == 25L) {
+            expect_equal(res$stress[[i]], vg$stress, tolerance = 1e-8)
+            expect_equal(res$iters[[i]],  vg$iters)
+            expect_equal(res$icause[[i]], vg$icause)
+            expect_true(pro_rmse(res$points[, , i], vg$points) < 1e-6)
+          } else {
+            expect_equal(res$stress[[i]], vg$stress, tolerance = 0.01)
+          }
+        }
       }
     }
 
@@ -123,6 +140,12 @@
   ord <- nmds(d_bray, cpus = 1)
   expect_identical(dim(ord), c(60L, 2L))
   expect_identical(dimnames(ord), list(attr(d_bray, 'Labels'), c('NMDS1', 'NMDS2')))
+  expect_identical(
+    names(attributes(ord)),
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged', 'tries', 'best_try') )
+  expect_identical(attr(ord, 'method'), 'nmds')
+  expect_identical(attr(ord, 'eig'),  c(NA_real_, NA_real_))
+  expect_identical(attr(ord, 'prop'), c(NA_real_, NA_real_))
   expect_true(is.double(attr(ord, 'stress')) && attr(ord, 'stress') > 0)
   expect_true(is.logical(attr(ord, 'converged')))
   expect_true(attr(ord, 'tries') >= 20L)
@@ -204,6 +227,7 @@
   expect_identical(dim(ord), c(1L, 0L))
   expect_identical(rownames(ord), 'A')
   expect_identical(attr(ord, 'stress'), 0)
+  expect_identical(names(attributes(ord))[3:5], c('method', 'eig', 'prop'))
 
   expect_warning(ord <- nmds(dist(c(a = 1, b = 3))), 'nearly')
   expect_identical(dimnames(ord), list(c('a', 'b'), 'NMDS1'))
