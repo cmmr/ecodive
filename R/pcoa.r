@@ -19,8 +19,10 @@
 #' @param k   The number of axes to compute. Default: `3`
 #'
 #' @return A numeric matrix with one row per sample and one column per axis,
-#'   named `"PCoA1"`, `"PCoA2"`, etc. Its attributes are:
+#'   named `"PCoA1"`, `"PCoA2"`, etc., as described in "Ordination result"
+#'   below. Its attributes are:
 #'
+#'   * `method`: `"pcoa"`.
 #'   * `eig`: The eigenvalue of each axis.
 #'   * `prop`: The proportion of the total variance that each axis explains,
 #'     `eig / trace`.
@@ -78,7 +80,9 @@
 #' symmetric eigenvalue problems. *SIAM Journal on Matrix Analysis and
 #' Applications*, 22(2), 602-616. \doi{10.1137/S0895479898334605}
 #'
-#' @seealso [beta_div()], `stats::cmdscale()`
+#' @inheritSection ordination_section Ordination result
+#'
+#' @seealso [nmds()], [beta_div()], `stats::cmdscale()`
 #'
 #' @export
 #' @examples
@@ -147,10 +151,11 @@ pcoa <- function (dm, k = 3L, cpus = n_cpus()) {
     colnames(points) <- paste0('PCoA', seq_len(ncol(points)))
 
   structure(
-    .Data = points,
-    eig   = eig,
-    prop  = if (trace > 0) eig / trace else eig,
-    trace = trace )
+    .Data  = points,
+    method = 'pcoa',
+    eig    = eig,
+    prop   = if (trace > 0) eig / trace else eig,
+    trace  = trace )
 }
 
 

@@ -89,6 +89,12 @@
   expect_identical(pcoa(d, cpus = 2), x)
   expect_identical(pcoa(d, cpus = 4), x)
 
+  # The shared ordination result format.
+  expect_identical(
+    names(attributes(x)),
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace') )
+  expect_identical(attr(x, 'method'), 'pcoa')
+
   # Each axis's largest absolute coordinate is positive.
   expect_true(all(apply(x, 2, function (v) v[which.max(abs(v))] > 0)))
 

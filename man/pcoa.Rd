@@ -17,8 +17,10 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
 A numeric matrix with one row per sample and one column per axis,
-named \code{"PCoA1"}, \code{"PCoA2"}, etc. Its attributes are:
+named \code{"PCoA1"}, \code{"PCoA2"}, etc., as described in "Ordination result"
+below. Its attributes are:
 \itemize{
+\item \code{method}: \code{"pcoa"}.
 \item \code{eig}: The eigenvalue of each axis.
 \item \code{prop}: The proportion of the total variance that each axis explains,
 \code{eig / trace}.
@@ -72,6 +74,23 @@ from run to run and for any number of \code{cpus}.
 \code{k} larger than \eqn{n - 1} (the most axes possible) is reduced to
 \eqn{n - 1}.
 }
+\section{Ordination result}{
+
+Every ordination method (\code{\link[=pcoa]{pcoa()}} and \code{\link[=nmds]{nmds()}}) returns the same
+kind of object: a plain numeric matrix with one row per sample
+(named after the samples) and one column per axis (named \code{"PCoA1"},
+\code{"NMDS1"}, etc.), so that it can go straight into \code{plot()} or a data
+frame. Its attributes always begin with these three, in this order:
+\itemize{
+\item \code{method}: The method's ID, e.g. \code{"pcoa"} or \code{"nmds"}.
+\item \code{eig}: Each axis's eigenvalue, or \code{NA} for methods without them.
+\item \code{prop}: The proportion of the total variance that each axis explains,
+or \code{NA} where that isn't defined.
+}
+
+Attributes particular to the method follow them.
+}
+
 \examples{
     ord <- pcoa(bray(ex_counts))
     ord
@@ -95,5 +114,5 @@ symmetric eigenvalue problems. \emph{SIAM Journal on Matrix Analysis and
 Applications}, 22(2), 602-616. \doi{10.1137/S0895479898334605}
 }
 \seealso{
-\code{\link[=beta_div]{beta_div()}}, \code{stats::cmdscale()}
+\code{\link[=nmds]{nmds()}}, \code{\link[=beta_div]{beta_div()}}, \code{stats::cmdscale()}
 }
