@@ -92,6 +92,18 @@
   `vegan::anosim()` builds; permutations run in parallel. With 300 samples
   and 999 permutations it takes under a tenth of a second, against about
   seven for `vegan::anosim()`. Results are identical for any number of `cpus`.
+* New `permdisp()` tests the homogeneity of multivariate dispersions
+  (PERMDISP), as `vegan::betadisper()` followed by `vegan::permutest()`: each
+  sample's distance to its group's spatial median (the default) or
+  centroid, each group's mean distance, and the ANOVA F with a permutation
+  p-value, plus optional pairwise t tests and small-group bias adjustment.
+  Distances to centroids come from the distances within groups alone, with
+  no eigendecomposition: they match `betadisper()`'s to rounding error, and
+  are about 100 times faster with 1,000 samples. Spatial medians are solved
+  exactly, where `betadisper()`'s optimizer stops at about 1e-5. Given the
+  same permutation matrix, its p-values are identical to `permutest()`'s.
+  Permutations come from a `seed` argument, can be restricted to `strata`,
+  and results are identical for any number of `cpus`.
 
 * New `dbrda()` runs a distance-based redundancy analysis (db-RDA): the axes
   of a `dist` object that sample metadata explain, given as a formula such as

@@ -73,6 +73,7 @@ reference:
   - permanova
   - mrpp
   - anosim
+  - permdisp
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.

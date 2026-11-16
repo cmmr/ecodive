@@ -43,6 +43,8 @@
  * from its own PCG stream, (seed, k), or from a supplied
  * matrix; each is computed by one thread in a fixed order,
  * so results are bit-identical for any number of threads.
+ * Each pool share (i of n) owns fixed samples, tasks or
+ * permutations, and the scratch space indexed by i.
  */
 
 #include "ecodive.h"
@@ -55,29 +57,10 @@
 #define PD_MAXIT 1000
 
 
-//------------------------------------------------------
-// TODO: use shared helper after Batch C (copies of
-// permanova.c's col_start(), bounded_rand(), get_perm()).
-//------------------------------------------------------
-
-// Offset of element (j + 1, j) in a dist vector.
-static inline size_t pd_col_start(int j, int n) {
-  return (size_t) j * (size_t) n - (size_t) j * (size_t) (j + 1) / 2;
-}
-
 // d(i, j), i != j, from the packed lower triangle.
 static inline double pd_dist(const double *d, int i, int j, int n) {
   if (i > j) { int t = i; i = j; j = t; }
-  return d[pd_col_start(i, n) + (size_t) (j - i - 1)];
-}
-
-// Uniform integer in 0 .. bound - 1, without modulo bias.
-static inline uint32_t pd_bounded_rand(pcg32_random_t *rng, uint32_t bound) {
-  uint32_t threshold = (0u - bound) % bound;
-  while (1) {
-    uint32_t r = pcg32_random_r(rng);
-    if (r >= threshold) return r % bound;
-  }
+  return d[dist_col_start(i, n) + (size_t) (j - i - 1)];
 }
 
 
@@ -338,7 +321,7 @@ SEXP C_permdisp(SEXP sexp_dm, SEXP sexp_grp, SEXP sexp_opts) {
       double len = beg[g + 1] - beg[g];
       pairs += len * len;
     }
-    run_parallel(centroid_worker, n_threads, (pairs > 1e5) ? 100 : 1);
+    run_parallel(centroid_worker, threads_for(n_threads, pairs, 1e6), 100);
 
     for (int g = 0; g < ng; g++) {
       double len = beg[g + 1] - beg[g], tot = 0;
@@ -362,7 +345,7 @@ SEXP C_permdisp(SEXP sexp_dm, SEXP sexp_grp, SEXP sexp_opts) {
     for (int j = 0; j < n; j++) {
       G[(size_t) j * n + j] = 0;
       for (int i = j + 1; i < n; i++) {
-        double x = pd_d[pd_col_start(j, n) + (size_t) (i - j - 1)];
+        double x = pd_d[dist_col_start(j, n) + (size_t) (i - j - 1)];
         x *= x;
         G[(size_t) j * n + i] = x;
         rmean[i] += x;
@@ -381,8 +364,12 @@ SEXP C_permdisp(SEXP sexp_dm, SEXP sexp_grp, SEXP sexp_opts) {
     double *vecs = (double *) malloc((size_t) n * n * sizeof(double));
     if (!vecs) { free(G); error("Not enough memory for a %d x %d matrix.", n, n); } // # nocov
 
-    lz_sym_eigen(G, n, vals, vecs, tmp);
+    int ql_failed = lz_sym_eigen(G, n, vals, vecs, tmp);
     free(G);
+    if (ql_failed) { // # nocov start
+      free(vecs);
+      error("The eigendecomposition for the spatial medians did not converge.");
+    } // # nocov end
 
 
     //--------------------------------------------------
@@ -410,8 +397,10 @@ SEXP C_permdisp(SEXP sexp_dm, SEXP sexp_grp, SEXP sexp_opts) {
     for (size_t i = 0; i < 2 * (size_t) n; i++) pd_dsq[i] = 0;
     pd_failed = 0;
 
-    double work = (double) n * (n_pos + n_neg);
-    run_parallel(median_worker, n_threads, (work > 1e5) ? 100 : 1);
+    // About 30 Weiszfeld iterations per median.
+    int nt = threads_for(n_threads, 30.0 * n * (n_pos + n_neg), 1e6);
+    if (nt > 2 * ng) nt = 2 * ng;
+    run_parallel(median_worker, nt, 100);
 
     free(vecs);
     if (pd_failed) error("Out of memory in C_permdisp()."); // # nocov
@@ -482,7 +471,7 @@ static void pp_get_perm(int k, int *p) {
     const int *idx = pp_order + pp_sbeg[s];
     int        len = pp_sbeg[s + 1] - pp_sbeg[s];
     for (int t = len - 1; t > 0; t--) {
-      int u   = (int) pd_bounded_rand(&rng, (uint32_t) t + 1);
+      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
       int tmp = p[idx[t]];
       p[idx[t]] = p[idx[u]];
       p[idx[u]] = tmp;
@@ -653,7 +642,8 @@ SEXP C_permdisp_perm(
   // Rounds of permutations, checking for interrupts
   // between them: ~1e7 operations per thread each.
   double per_perm  = (double) n * (pairwise ? 4 : 2) + 1;
-  int    per_round = (int) (1e7 * n_threads / per_perm);
+  double rounds    = 1e7 * n_threads / per_perm;
+  int    per_round = (rounds < n_perm) ? (int) rounds : n_perm; // no overflow
   if (per_round < n_threads) per_round = n_threads;
 
   for (pp_k0 = 1; pp_k0 <= n_perm; pp_k0 = pp_k1) {
@@ -661,10 +651,10 @@ SEXP C_permdisp_perm(
     pp_k1 = pp_k0 + per_round;
     if (pp_k1 > n_perm + 1) pp_k1 = n_perm + 1;
 
-    int    cnt_k = pp_k1 - pp_k0;
-    double work  = per_perm * cnt_k;
-    int    nt    = (cnt_k < n_threads) ? cnt_k : n_threads;
-    run_parallel(perm_worker, nt, (work > 1e5) ? 100 : 1);
+    int cnt_k = pp_k1 - pp_k0;
+    int nt    = threads_for(n_threads, per_perm * cnt_k, 1e6);
+    if (nt > cnt_k) nt = cnt_k;
+    run_parallel(perm_worker, nt, 100);
 
     if (pp_k1 <= n_perm) R_CheckUserInterrupt();
   }

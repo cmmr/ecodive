@@ -195,20 +195,29 @@
     expect_identical(r1, permdisp(d, g, type = type, pairwise = TRUE, permutations = 199, seed = 7, cpus = 1))
   }
 
-  # Large enough for run_parallel() to start threads.
-  big <- bray(big_mtx + seq_len(104) %% 7)
-  bg  <- rep(c('a', 'b', 'c', 'd'), 26)
+  # Large enough for threads: the medians' Weiszfeld steps and the
+  # permutations (n = 400), and, at home, the centroids' sums (n = 3000).
+  sim <- function (n) {
+    m <- matrix(((seq_len(n * 12) * 7919) %% 23) * (seq_len(n * 12) %% 3 > 0), n, 12)
+    m[, 1] <- m[, 1] + 1
+    bray(m)
+  }
+  big <- sim(400)
+  bg  <- rep(c('a', 'b', 'c', 'd'), 100)
+  cpus_list <- if (at_home()) c(2L, 3L, 4L, 8L) else 2L
   for (type in c('median', 'centroid')) {
-    r1 <- permdisp(big, bg, type = type, pairwise = TRUE, permutations = 999, cpus = 1)
-    r2 <- permdisp(big, bg, type = type, pairwise = TRUE, permutations = 999, cpus = 2)
-    expect_identical(r1, r2, info = type)
-    if (at_home()) {
-      for (cpus in c(3L, 4L, 8L)) {
-        expect_identical(r1, permdisp(
-          big, bg, type = type, pairwise = TRUE, permutations = 999, cpus = cpus ),
-          info = paste(type, cpus) )
-      }
-    }
+    r1 <- permdisp(big, bg, type = type, pairwise = TRUE, permutations = 2999, cpus = 1)
+    for (cpus in cpus_list)
+      expect_identical(r1, permdisp(
+        big, bg, type = type, pairwise = TRUE, permutations = 2999, cpus = cpus ),
+        info = paste(type, cpus) )
+  }
+  if (at_home()) {
+    big <- sim(3000)
+    bg  <- rep(c('a', 'b', 'c'), 1000)
+    r1  <- permdisp(big, bg, type = 'centroid', permutations = 99, cpus = 1)
+    for (cpus in c(2L, 4L, 8L))
+      expect_identical(r1, permdisp(big, bg, type = 'centroid', permutations = 99, cpus = cpus))
   }
 
   # The seed changes the permutations, not the statistics.
