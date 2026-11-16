@@ -78,7 +78,7 @@ NULL
 #' @keywords internal
 #'
 #' @section Ordination result:
-#'   Every ordination method ([pcoa()], [nmds()], and [ordination()]) returns
+#'   Every ordination method ([pcoa()], [nmds()], [pca()], and [ordination()]) returns
 #'   the same kind of object: a plain numeric matrix with one row per sample
 #'   (named after the samples) and one column per axis (named `"PCoA1"`,
 #'   `"NMDS1"`, etc.), so that it can go straight into `plot()` or a data
