@@ -80,6 +80,8 @@ typedef struct {
   int          k;         // In: eigenpairs wanted, 1 <= k <= dims.
   int          dims;      // In: dimension of B's range, at most.
   int          deflate;   // In: keep vectors orthogonal to ones.
+  const double *basis;    // In: n x n_basis orthonormal columns to
+  int          n_basis;   //     keep vectors orthogonal to, or NULL/0.
   double       scale;     // In: trace(B), for convergence tests.
   lanczos_op_t op;        // In: product function.
   void        *ctx;       // In: passed on to op.
@@ -93,6 +95,8 @@ typedef struct {
 void   lanczos(lanczos_t *lz);
 double lz_dot(const double *x, const double *y, int n);
 void   lz_center(double *x, int n);
+void   lz_sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp);
+void   lz_combine(const double *V, int n, int s, const double *Y, int m, double *X);
 
 /* --- memory.c --- */
 void  init_n_ptrs(int n);

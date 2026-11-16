@@ -14,6 +14,11 @@
  * use it: their B is doubly centered, so the ones vector is
  * in its null space.
  *
+ * With `basis` set, every basis vector is also kept
+ * orthogonal to its `n_basis` orthonormal columns. dbrda()
+ * uses it for the unconstrained axes, which lie in the
+ * space orthogonal to the constraints.
+ *
  * Determinism: everything here runs on the main thread, in
  * a fixed order, and the starting vectors come from a fixed
  * PCG stream. The product function must be deterministic
@@ -64,8 +69,10 @@ void lz_center(double *x, int n) {
   for (int i = 0; i < n; i++) x[i] -= s;
 }
 
-#define dot    lz_dot
-#define center lz_center
+#define dot       lz_dot
+#define center    lz_center
+#define sym_eigen lz_sym_eigen
+#define combine   lz_combine
 
 
 
@@ -80,8 +87,9 @@ static void fill_random(double *x, size_t n, pcg32_random_t *rng) {
 
 //------------------------------------------------------
 // Orthonormalize the `m` columns of R against the `s`
-// columns of V, the ones vector (if `deflate`), and each
-// other, with two passes of classical Gram-Schmidt. A
+// columns of V, the ones vector (if `deflate`), the `f`
+// columns of F, and each other, with two passes of
+// classical Gram-Schmidt. A
 // column that is (numerically) in their span is replaced
 // by a random one; if that is too, the space is exhausted
 // and the column is dropped. Returns how many columns are
@@ -89,7 +97,7 @@ static void fill_random(double *x, size_t n, pcg32_random_t *rng) {
 //------------------------------------------------------
 static int orthonormalize(
     const double *V, int s, double *R, int m, int n,
-    int deflate, pcg32_random_t *rng ) {
+    int deflate, const double *F, int f, pcg32_random_t *rng ) {
 
   int kept = 0;
 
@@ -106,6 +114,11 @@ static int orthonormalize(
 
       for (int pass = 0; pass < 2; pass++) {
         if (deflate) center(r, n);
+        for (int j = 0; j < f; j++) {
+          const double *q = F + (size_t) j * n;
+          double        h = dot(q, r, n);
+          for (int i = 0; i < n; i++) r[i] -= h * q[i];
+        }
         for (int j = 0; j < s; j++) {
           const double *q = V + (size_t) j * n;
           double        h = dot(q, r, n);
@@ -142,7 +155,7 @@ static int orthonormalize(
 // matching unit eigenvectors to the columns of `vecs`.
 // `tmp` needs room for 2 * s doubles.
 //------------------------------------------------------
-static void sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) {
+void sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) {
 
   #define V(i, j) vecs[(size_t) (j) * s + (i)]
 
@@ -327,7 +340,7 @@ static void sym_eigen(const double *A, int s, double *vals, double *vecs, double
 //------------------------------------------------------
 // X = V * Y[, 0:m), for V n x s and Y s x s.
 //------------------------------------------------------
-static void combine(const double *V, int n, int s, const double *Y, int m, double *X) {
+void combine(const double *V, int n, int s, const double *Y, int m, double *X) {
   for (int c = 0; c < m; c++) {
     double       *x = X + (size_t) c * n;
     const double *y = Y + (size_t) c * s;
@@ -345,7 +358,8 @@ static void combine(const double *V, int n, int s, const double *Y, int m, doubl
 // The k largest eigenpairs of the n x n operator that
 // lz->op applies. See lanczos_t in ecodive.h. B's range
 // must have at most lz->dims dimensions (n - 1 or fewer
-// with lz->deflate), and k <= dims.
+// with lz->deflate, and n_basis fewer again with a
+// basis), and k <= dims.
 //======================================================
 void lanczos(lanczos_t *lz) {
 
@@ -354,6 +368,9 @@ void lanczos(lanczos_t *lz) {
   int    dims    = lz->dims;
   int    deflate = lz->deflate;
   double trace   = lz->scale;
+
+  const double *F = lz->basis;
+  int           f = F ? lz->n_basis : 0;
 
   //--------------------------------------------------
   // Sizes: block p >= k; basis of at most M columns;
@@ -388,7 +405,7 @@ void lanczos(lanczos_t *lz) {
   // Starting block.
   //--------------------------------------------------
   fill_random(R, (size_t) n * p, &rng);
-  int s_v = orthonormalize(V, 0, R, p, n, deflate, &rng); // columns in V
+  int s_v = orthonormalize(V, 0, R, p, n, deflate, F, f, &rng); // columns in V
   int s_w = 0;                                            // ... with W = B * V
   memcpy(V, R, (size_t) n * s_v * sizeof(double));
 
@@ -457,7 +474,7 @@ void lanczos(lanczos_t *lz) {
     // against the basis.
     //------------------------------------------------
     memcpy(R, W + (size_t) n * (s_w - m), (size_t) n * m * sizeof(double));
-    int r = orthonormalize(V, s_v, R, m, n, deflate, &rng);
+    int r = orthonormalize(V, s_v, R, m, n, deflate, F, f, &rng);
     if (r == 0) break; // # nocov (only if the space is exhausted)
 
 

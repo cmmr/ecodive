@@ -35,11 +35,9 @@
  * the unit eigenvectors (vegan's CA$u). The R side applies
  * vegan's scaling constant.
  *
- * The products with G, the small dense helpers and the
- * Lanczos iteration are adapted from src/pcoa.c, which
- * isn't to be edited while sibling methods are written.
- * TODO: consolidate with pcoa.c (and pca's Lanczos) into a
- * shared file.
+ * The Lanczos iteration and the small dense helpers are
+ * shared with pcoa() and pca() (lanczos.c). The products
+ * with G are adapted from src/pcoa.c.
  *
  * Determinism: results are bit-identical for any number of
  * threads. G * X is computed in fixed blocks of DBRDA_ROWS
@@ -59,16 +57,6 @@
 // Rows of A * X per parallel task. Fixed, so that summation
 // order never depends on the number of threads.
 #define DBRDA_ROWS 64
-
-// Lanczos: default block size, largest basis before a thick
-// restart, convergence tolerances and step limit. As in
-// pcoa.c.
-#define DBRDA_BLOCK     4
-#define DBRDA_BASIS     60
-#define DBRDA_TOL       1e-14
-#define DBRDA_TOL_STALL 1e-10
-#define DBRDA_STALL     10
-#define DBRDA_MAX_STEPS 10000
 
 // A design column is aliased (redundant) when Gram-Schmidt
 // leaves less than this fraction of its centred norm: the
@@ -226,21 +214,13 @@ static void *mult_a(void *arg) {
 
 
 //------------------------------------------------------
-// Small dense helpers. Vectors have length n; matrices
-// are column-major.
+// Small dense helpers, shared with lanczos.c. Vectors
+// have length n; matrices are column-major.
 //------------------------------------------------------
-static double dot(const double *x, const double *y, int n) {
-  double s = 0;
-  for (int i = 0; i < n; i++) s += x[i] * y[i];
-  return s;
-}
-
-static void center(double *x, int n) {
-  double s = 0;
-  for (int i = 0; i < n; i++) s += x[i];
-  s /= n;
-  for (int i = 0; i < n; i++) x[i] -= s;
-}
+#define dot       lz_dot
+#define center    lz_center
+#define sym_eigen lz_sym_eigen
+#define combine   lz_combine
 
 // x -= F * (F' x), for the f orthonormal columns of F.
 static void project_out(const double *F, int f, double *x, int n) {
@@ -253,16 +233,24 @@ static void project_out(const double *F, int f, double *x, int n) {
 
 
 //------------------------------------------------------
-// W = G * V for `m` columns of length n (column-major),
-// using xr and yr (n x DBRDA_W each) as row-major
-// scratch. If f > 0, each column of W then has its part
-// in the span of F's (orthonormal) columns removed:
-// W = (I - FF') G V.
+// W = (I - FF') G V for `m` columns of length n (column-
+// major), with F's f columns orthonormal (f may be 0).
+// A lanczos_op_t: `ctx` is a dbrda_ctx_t.
 //------------------------------------------------------
-static void mult_g(
-    const double *V, double *W, int n, int m,
-    const double *F, int f,
-    double *xr, double *yr, int n_threads ) {
+typedef struct {
+  int           n;
+  const double *F;          // n x f, or NULL.
+  int           f;
+  double       *xr, *yr;    // n x DBRDA_W row-major scratch.
+  int           n_threads;
+} dbrda_ctx_t;
+
+static void mult_g(const double *V, double *W, int m, void *ctx) {
+
+  dbrda_ctx_t *c = (dbrda_ctx_t *) ctx;
+  int     n  = c->n;
+  double *xr = c->xr;
+  double *yr = c->yr;
 
   for (int v0 = 0; v0 < m; v0 += DBRDA_W) {
 
@@ -274,7 +262,7 @@ static void mult_g(
 
     x_mtx = xr;
     y_mtx = yr;
-    run_parallel(mult_a, n_threads, n);
+    run_parallel(mult_a, c->n_threads, n);
 
     for (int v = 0; v < mc; v++) {
       double *w = W + (size_t) (v0 + v) * n;
@@ -283,399 +271,9 @@ static void mult_g(
       center(w, n);
       for (int i = 0; i < n; i++)
         w[i] *= -0.5;
-      project_out(F, f, w, n);
+      project_out(c->F, c->f, w, n);
     }
   }
-}
-
-
-//------------------------------------------------------
-// Uniform random values in [-1, 1) from a PCG stream.
-//------------------------------------------------------
-static void fill_random(double *x, size_t n, pcg32_random_t *rng) {
-  for (size_t i = 0; i < n; i++)
-    x[i] = pcg32_random_r(rng) / 2147483648.0 - 1.0;
-}
-
-
-//------------------------------------------------------
-// Orthonormalize the `m` columns of R against the ones
-// vector, the `f` columns of F, the `s` columns of V, and
-// each other, with two passes of classical Gram-Schmidt.
-// A column that is (numerically) in their span is replaced
-// by a random one; if that is too, the column is dropped.
-// Returns how many columns are kept, moved to the front.
-//------------------------------------------------------
-static int orthonormalize(
-    const double *F, int f, const double *V, int s,
-    double *R, int m, int n, pcg32_random_t *rng ) {
-
-  int kept = 0;
-
-  for (int c = 0; c < m; c++) {
-
-    double *r = R + (size_t) kept * n;
-    if (c != kept) memcpy(r, R + (size_t) c * n, (size_t) n * sizeof(double));
-
-    for (int attempt = 0; attempt < 2; attempt++) {
-
-      if (attempt) fill_random(r, n, rng);
-
-      double norm0 = sqrt(dot(r, r, n));
-
-      for (int pass = 0; pass < 2; pass++) {
-        center(r, n);
-        project_out(F, f, r, n);
-        project_out(V, s, r, n);
-        project_out(R, kept, r, n);
-      }
-
-      double norm = sqrt(dot(r, r, n));
-
-      if (norm > 1e-8 * norm0) {
-        for (int i = 0; i < n; i++) r[i] /= norm;
-        kept++;
-        break;
-      }
-    }
-  }
-
-  return kept;
-}
-
-
-//------------------------------------------------------
-// Eigen-decomposition of a symmetric s x s matrix A
-// (column-major; only its lower triangle is read), by
-// Householder tridiagonalization and QL with implicit
-// shifts (JAMA's tred2() and tql2(), after EISPACK), as in
-// pcoa.c. Eigenvalues go to `vals` in decreasing order,
-// unit eigenvectors to the columns of `vecs`. `tmp` needs
-// room for 2 * s doubles.
-//------------------------------------------------------
-static void sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) {
-
-  #define V(i, j) vecs[(size_t) (j) * s + (i)]
-
-  double *d = vals;
-  double *e = tmp;
-
-  for (int j = 0; j < s; j++)
-    for (int i = j; i < s; i++)
-      V(i, j) = V(j, i) = A[(size_t) j * s + i];
-
-  // Householder tridiagonalization (tred2).
-  for (int j = 0; j < s; j++) d[j] = V(s - 1, j);
-
-  for (int i = s - 1; i > 0; i--) {
-
-    double scale = 0, h = 0;
-    for (int k = 0; k < i; k++) scale += fabs(d[k]);
-
-    if (scale == 0) {
-      e[i] = d[i - 1];
-      for (int j = 0; j < i; j++) {
-        d[j]    = V(i - 1, j);
-        V(i, j) = 0;
-        V(j, i) = 0;
-      }
-    }
-    else {
-      for (int k = 0; k < i; k++) {
-        d[k] /= scale;
-        h    += d[k] * d[k];
-      }
-      double f = d[i - 1];
-      double g = sqrt(h);
-      if (f > 0) g = -g;
-      e[i]     = scale * g;
-      h        = h - f * g;
-      d[i - 1] = f - g;
-      for (int j = 0; j < i; j++) e[j] = 0;
-
-      for (int j = 0; j < i; j++) {
-        f       = d[j];
-        V(j, i) = f;
-        g       = e[j] + V(j, j) * f;
-        for (int k = j + 1; k <= i - 1; k++) {
-          g    += V(k, j) * d[k];
-          e[k] += V(k, j) * f;
-        }
-        e[j] = g;
-      }
-
-      f = 0;
-      for (int j = 0; j < i; j++) {
-        e[j] /= h;
-        f    += e[j] * d[j];
-      }
-      double hh = f / (h + h);
-      for (int j = 0; j < i; j++) e[j] -= hh * d[j];
-
-      for (int j = 0; j < i; j++) {
-        f = d[j];
-        g = e[j];
-        for (int k = j; k <= i - 1; k++)
-          V(k, j) -= (f * e[k] + g * d[k]);
-        d[j]    = V(i - 1, j);
-        V(i, j) = 0;
-      }
-    }
-    d[i] = h;
-  }
-
-  // Accumulate the transformations.
-  for (int i = 0; i < s - 1; i++) {
-    V(s - 1, i) = V(i, i);
-    V(i, i)     = 1;
-    double h    = d[i + 1];
-    if (h != 0) {
-      for (int k = 0; k <= i; k++) d[k] = V(k, i + 1) / h;
-      for (int j = 0; j <= i; j++) {
-        double g = 0;
-        for (int k = 0; k <= i; k++) g += V(k, i + 1) * V(k, j);
-        for (int k = 0; k <= i; k++) V(k, j) -= g * d[k];
-      }
-    }
-    for (int k = 0; k <= i; k++) V(k, i + 1) = 0;
-  }
-  for (int j = 0; j < s; j++) {
-    d[j]        = V(s - 1, j);
-    V(s - 1, j) = 0;
-  }
-  V(s - 1, s - 1) = 1;
-  e[0]            = 0;
-
-  // QL with implicit shifts (tql2).
-  for (int i = 1; i < s; i++) e[i - 1] = e[i];
-  e[s - 1] = 0;
-
-  double f = 0, tst1 = 0;
-
-  for (int l = 0; l < s; l++) {
-
-    double t = fabs(d[l]) + fabs(e[l]);
-    if (t > tst1) tst1 = t;
-    int m = l;
-    while (m < s - 1 && fabs(e[m]) > DBL_EPSILON * tst1) m++;
-
-    if (m > l) {
-      for (int iter = 0; iter < 100; iter++) {
-
-        double g = d[l];
-        double p = (d[l + 1] - g) / (2 * e[l]);
-        double r = hypot(p, 1);
-        if (p < 0) r = -r;
-        d[l]       = e[l] / (p + r);
-        d[l + 1]   = e[l] * (p + r);
-        double dl1 = d[l + 1];
-        double h   = g - d[l];
-        for (int i = l + 2; i < s; i++) d[i] -= h;
-        f += h;
-
-        p = d[m];
-        double c = 1, c2 = 1, c3 = 1, sn = 0, s2 = 0;
-        double el1 = e[l + 1];
-        for (int i = m - 1; i >= l; i--) {
-          c3 = c2;
-          c2 = c;
-          s2 = sn;
-          g  = c * e[i];
-          h  = c * p;
-          r  = hypot(p, e[i]);
-          e[i + 1] = sn * r;
-          sn = e[i] / r;
-          c  = p / r;
-          p  = c * d[i] - sn * g;
-          d[i + 1] = h + sn * (c * g + sn * d[i]);
-          for (int k = 0; k < s; k++) {
-            h           = V(k, i + 1);
-            V(k, i + 1) = sn * V(k, i) + c * h;
-            V(k, i)     = c * V(k, i) - sn * h;
-          }
-        }
-        p    = -sn * s2 * c3 * el1 * e[l] / dl1;
-        e[l] = sn * p;
-        d[l] = c * p;
-
-        if (fabs(e[l]) <= DBL_EPSILON * tst1) break;
-      }
-    }
-    d[l] = d[l] + f;
-    e[l] = 0;
-  }
-
-  // Sort by decreasing eigenvalue (selection sort).
-  for (int i = 0; i < s - 1; i++) {
-    int k = i;
-    for (int j = i + 1; j < s; j++)
-      if (d[j] > d[k]) k = j;
-    if (k != i) {
-      double t = d[k]; d[k] = d[i]; d[i] = t;
-      for (int r = 0; r < s; r++) {
-        t = V(r, i); V(r, i) = V(r, k); V(r, k) = t;
-      }
-    }
-  }
-
-  #undef V
-}
-
-
-//------------------------------------------------------
-// X = V * Y[, 0:m), for V n x s and Y s x s (or any Y
-// with leading dimension s).
-//------------------------------------------------------
-static void combine(const double *V, int n, int s, const double *Y, int m, double *X) {
-  for (int c = 0; c < m; c++) {
-    double       *x = X + (size_t) c * n;
-    const double *y = Y + (size_t) c * s;
-    memset(x, 0, (size_t) n * sizeof(double));
-    for (int j = 0; j < s; j++) {
-      const double *v = V + (size_t) j * n;
-      double        a = y[j];
-      for (int i = 0; i < n; i++) x[i] += a * v[i];
-    }
-  }
-}
-
-
-//------------------------------------------------------
-// The k largest eigenpairs of (I - FF') G (I - FF'),
-// restricted to vectors orthogonal to the ones vector,
-// by block Lanczos with thick restarts (as in pcoa.c).
-// `dims` is the dimension of that space. Writes unit
-// eigenvectors to `vecs` (n x k) and eigenvalues to
-// `vals`. `scale` (trace(G)) sets the convergence
-// tolerance. Returns 1 if converged.
-//------------------------------------------------------
-static int dbrda_lanczos(
-    int n, int k, int dims, const double *F, int f, double scale0,
-    int n_threads, double *vecs, double *vals, int *n_steps ) {
-
-  int p = (k > DBRDA_BLOCK) ? k : DBRDA_BLOCK;
-  int M = DBRDA_BASIS;
-  if (M < 2 * k + 2 * p) M = 2 * k + 2 * p;
-  if (p > dims) p = dims;
-  if (M > dims) M = dims;
-  int q = (M - p + k) / 2;
-  if (q < k) q = k;
-
-  double *V   = (double *) R_alloc((size_t) n * M, sizeof(double));
-  double *W   = (double *) R_alloc((size_t) n * M, sizeof(double));
-  double *T   = (double *) R_alloc((size_t) n * M, sizeof(double));
-  double *R   = (double *) R_alloc((size_t) n * p, sizeof(double));
-  double *xr  = (double *) R_alloc((size_t) n * DBRDA_W, sizeof(double));
-  double *yr  = (double *) R_alloc((size_t) n * DBRDA_W, sizeof(double));
-  double *H   = (double *) R_alloc((size_t) M * M, sizeof(double));
-  double *Hc  = (double *) R_alloc((size_t) M * M, sizeof(double));
-  double *Y   = (double *) R_alloc((size_t) M * M, sizeof(double));
-  double *tmp = (double *) R_alloc((size_t) 2 * M, sizeof(double));
-  double *eig = (double *) R_alloc(M, sizeof(double));
-  double *u   = (double *) R_alloc(n, sizeof(double));
-  double *bu  = (double *) R_alloc(n, sizeof(double));
-
-  pcg32_random_t rng;
-  pcg32_srandom_r(&rng, 20260116u, 54u);
-
-  fill_random(R, (size_t) n * p, &rng);
-  int s_v = orthonormalize(F, f, V, 0, R, p, n, &rng);
-  int s_w = 0;
-  memcpy(V, R, (size_t) n * s_v * sizeof(double));
-
-  int    steps = 0, converged = 0, stalled = 0;
-  double best  = INFINITY;
-
-  while (1) {
-
-    // Multiply the newest block, and extend H = V' * W.
-    int m = s_v - s_w;
-    mult_g(V + (size_t) n * s_w, W + (size_t) n * s_w, n, m, F, f, xr, yr, n_threads);
-    steps++;
-
-    for (int b = s_w; b < s_v; b++)
-      for (int a = 0; a < s_v; a++)
-        H[(size_t) b * M + a] = dot(V + (size_t) n * a, W + (size_t) n * b, n);
-
-    for (int b = s_w; b < s_v; b++) {
-      for (int a = 0; a < s_w; a++)
-        H[(size_t) a * M + b] = H[(size_t) b * M + a];
-      for (int a = s_w; a < b; a++) {
-        double avg = (H[(size_t) b * M + a] + H[(size_t) a * M + b]) / 2;
-        H[(size_t) b * M + a] = avg;
-        H[(size_t) a * M + b] = avg;
-      }
-    }
-    s_w = s_v;
-
-    // Rayleigh-Ritz.
-    for (int j = 0; j < s_w; j++)
-      memcpy(Hc + (size_t) j * s_w, H + (size_t) j * M, (size_t) s_w * sizeof(double));
-    sym_eigen(Hc, s_w, eig, Y, tmp);
-
-    double scale = scale0;
-    for (int j = 0; j < s_w; j++)
-      if (fabs(eig[j]) > scale) scale = fabs(eig[j]);
-
-    double worst = 0;
-    for (int j = 0; j < k; j++) {
-      combine(V, n, s_w, Y + (size_t) j * s_w, 1, u);
-      combine(W, n, s_w, Y + (size_t) j * s_w, 1, bu);
-      for (int i = 0; i < n; i++) bu[i] -= eig[j] * u[i];
-      double res = sqrt(dot(bu, bu, n)) / scale;
-      if (res > worst) worst = res;
-    }
-
-    if (worst < best / 2) { best = worst; stalled = 0; }
-    else                  { stalled++;                }
-
-    converged = worst <= DBRDA_TOL ||
-      (worst <= DBRDA_TOL_STALL && stalled >= DBRDA_STALL);
-
-    if (converged || s_w == dims || steps >= DBRDA_MAX_STEPS) break;
-
-    R_CheckUserInterrupt();
-
-    // Next block: the newest products, orthonormalized.
-    memcpy(R, W + (size_t) n * (s_w - m), (size_t) n * m * sizeof(double));
-    int r = orthonormalize(F, f, V, s_v, R, m, n, &rng);
-    if (r == 0) break; // # nocov (only if the space is exhausted)
-
-    // Thick restart: keep the top q Ritz vectors.
-    if (s_v + r > M) {
-
-      int keep = (q + r <= M) ? q : M - r;
-
-      combine(V, n, s_w, Y, keep, T);
-      memcpy(V, T, (size_t) n * keep * sizeof(double));
-      combine(W, n, s_w, Y, keep, T);
-      memcpy(W, T, (size_t) n * keep * sizeof(double));
-
-      for (int b = 0; b < keep; b++)
-        for (int a = 0; a <= b; a++) {
-          double h = (a == b)
-            ? dot(V + (size_t) n * a, W + (size_t) n * b, n)
-            : (dot(V + (size_t) n * a, W + (size_t) n * b, n) +
-               dot(V + (size_t) n * b, W + (size_t) n * a, n)) / 2;
-          H[(size_t) b * M + a] = h;
-          H[(size_t) a * M + b] = h;
-        }
-
-      s_v = s_w = keep;
-    }
-
-    memcpy(V + (size_t) n * s_v, R, (size_t) n * r * sizeof(double));
-    s_v += r;
-  }
-
-  // A converged run (or exhausted space) has s_w >= k.
-  if (s_w < k) k = s_w; // # nocov
-
-  combine(V, n, s_w, Y, k, vecs);
-  memcpy(vals, eig, (size_t) k * sizeof(double));
-
-  *n_steps = steps;
-  return converged || s_w == dims;
 }
 
 
@@ -800,11 +398,17 @@ SEXP C_dbrda(
   // GQ = G * Q, then the conditional inertia and the
   // constrained matrix C = Qx' G Qx.
   //--------------------------------------------------
-  double *xr = (double *) R_alloc((size_t) n * DBRDA_W, sizeof(double));
-  double *yr = (double *) R_alloc((size_t) n * DBRDA_W, sizeof(double));
+  dbrda_ctx_t ctx = {
+    .n         = n,
+    .F         = NULL,
+    .f         = 0,
+    .xr        = (double *) R_alloc((size_t) n * DBRDA_W, sizeof(double)),
+    .yr        = (double *) R_alloc((size_t) n * DBRDA_W, sizeof(double)),
+    .n_threads = n_threads };
+
   double *GQ = (double *) R_alloc((size_t) n * (rq + 1), sizeof(double));
 
-  mult_g(Q, GQ, n, rq, NULL, 0, xr, yr, n_threads);
+  mult_g(Q, GQ, rq, &ctx);
   const double *GQx = GQ + (size_t) n * rz;
 
   double conditional = 0;
@@ -867,7 +471,19 @@ SEXP C_dbrda(
     r_vecs = (double *) R_alloc((size_t) n * kr, sizeof(double));
     r_vals = (double *) R_alloc(kr, sizeof(double));
 
-    converged = dbrda_lanczos(n, kr, dims_r, Q, rq, trace_g, n_threads, r_vecs, r_vals, &steps);
+    ctx.F = Q;
+    ctx.f = rq;
+
+    lanczos_t lz = {
+      .n = n, .k = kr, .dims = dims_r, .deflate = 1,
+      .basis = Q, .n_basis = rq, .scale = trace_g,
+      .op = mult_g, .ctx = &ctx,
+      .vecs = r_vecs, .vals = r_vals,
+      .resid = (double *) R_alloc(kr, sizeof(double)) };
+
+    lanczos(&lz);
+    steps     = lz.steps;
+    converged = lz.converged;
 
     // Keep the positive, non-zero ones (vegan's ordResid).
     double res_zero = (ZERO * r_vals[0] * adj > ZERO) ? ZERO * r_vals[0] * adj : ZERO;

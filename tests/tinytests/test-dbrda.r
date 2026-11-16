@@ -116,6 +116,21 @@
 
 
 
+  # Unconstrained axes are orthogonal to the constraints, the conditions and
+  # the ones vector (the Lanczos basis is kept orthogonal to them). ====
+
+  for (cs in ref$cases[8:9]) {
+    ord <- fit_case(cs)
+    mds <- unclass(ord)[, startsWith(colnames(ord), 'MDS'), drop = FALSE]
+    des <- cbind(1, cs$x, cs$z)
+    des <- des / rep(sqrt(colSums(des ^ 2)), each = nrow(des))
+    mds <- mds / rep(sqrt(colSums(mds ^ 2)), each = nrow(mds))
+    expect_true(ncol(mds) >= 1, info = cs$name)
+    expect_true(max(abs(crossprod(des, mds))) < 1e-10, info = cs$name)
+  }
+
+
+
   # Deterministic, for any number of threads. ====
 
   for (cs in ref$cases[8:9]) {
