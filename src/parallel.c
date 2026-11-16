@@ -468,75 +468,212 @@ SEXP C_blas_settable(void) {
 //======================================================
 // run_parallel
 //
-// Runs func once for each worker index i in 0 .. n - 1,
-// where each call does its own share (worker i of n) of
-// the job. Workers 1 .. n - 1 run on new threads, and
-// worker 0 on the calling thread, which then joins them.
+// Runs func once for each share i in 0 .. n - 1 (n =
+// n_threads), where each call does its own part (share i
+// of n) of the job.
 //
-// A worker the OS refuses a thread for (e.g., a ulimit
-// or a container's pids limit) runs on the calling thread
-// instead, with the same index, so the job is split the
-// same way and done exactly once. So workers must not
-// wait on each other (no barriers).
+// Shares are claimed one at a time by whichever thread is
+// free: the calling thread, and the threads of a pool that
+// lives as long as the package is loaded, asleep between
+// jobs. The calling thread waits only for shares that
+// other threads have claimed, never for threads that
+// haven't woken up yet. So on a machine whose cores are
+// busy with other processes, a job takes at worst about as
+// long as a serial run, rather than waiting for every
+// thread to be scheduled (once for each of the hundreds of
+// products in an iterative method), and threads aren't
+// started and stopped for every job.
+//
+// So each share is done exactly once, by one thread, but
+// which thread does it, and which shares run at the same
+// time, vary. Workers may use their index i for scratch
+// space of their own, but must not wait on each other (no
+// barriers), and must not call R. Results are the same
+// whatever the split, as long as each share's work depends
+// only on (i, n).
 //======================================================
+
+#if defined(HAVE_PTHREAD) && (defined(__GNUC__) || defined(__clang__))
+#define ECODIVE_POOL 1
+#endif
+
+
+#ifdef ECODIVE_POOL
+
+static pthread_mutex_t pl_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t  pl_wake  = PTHREAD_COND_INITIALIZER; // A new job, or stop.
+static pthread_cond_t  pl_done  = PTHREAD_COND_INITIALIZER; // A job's last share is done.
+
+static pthread_t      *pl_tids  = NULL; // The pool's threads.
+static int             pl_size  = 0;
+static int             pl_stop  = 0;
+
+// The current job, set under pl_mutex.
+static uint64_t        pl_gen   = 0;    // Job number.
+static pthread_func_t  pl_func  = NULL;
+static int             pl_n     = 0;    // Shares.
+
+// Atomic: the job number (high 32 bits) and the next share
+// to claim (low 32 bits), so that a thread still holding
+// an old job can't claim a share of a newer one; and how
+// many of the current job's shares aren't done yet.
+static uint64_t        pl_claim = 0;
+static int             pl_left  = 0;
+
+
+static int claim_share (uint32_t gen, int n) {
+  uint64_t v = __atomic_load_n(&pl_claim, __ATOMIC_ACQUIRE);
+  for (;;) {
+    if ((uint32_t) (v >> 32) != gen || (int) (uint32_t) v >= n) return -1;
+    if (__atomic_compare_exchange_n(
+        &pl_claim, &v, v + 1, 0, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE ))
+      return (int) (uint32_t) v;
+  }
+}
+
+
+// Do shares of job `gen` until none are left to claim.
+static void run_shares (uint32_t gen, pthread_func_t func, int n) {
+  for (int i = claim_share(gen, n); i >= 0; i = claim_share(gen, n)) {
+    worker_t w = { .i = i, .n = n };
+    func(&w);
+    if (__atomic_sub_fetch(&pl_left, 1, __ATOMIC_ACQ_REL) == 0) {
+      pthread_mutex_lock(&pl_mutex);
+      pthread_cond_broadcast(&pl_done);
+      pthread_mutex_unlock(&pl_mutex);
+    }
+  }
+}
+
+
+static void *pool_thread (void *arg) {
+
+  (void) arg;
+  uint64_t seen = 0;
+
+  pthread_mutex_lock(&pl_mutex);
+  for (;;) {
+    while (!pl_stop && pl_gen == seen)
+      pthread_cond_wait(&pl_wake, &pl_mutex);
+    if (pl_stop) break;
+    seen = pl_gen;
+    pthread_func_t func = pl_func;
+    int            n    = pl_n;
+    pthread_mutex_unlock(&pl_mutex);
+    run_shares((uint32_t) seen, func, n);
+    pthread_mutex_lock(&pl_mutex);
+  }
+  pthread_mutex_unlock(&pl_mutex);
+
+  return NULL;
+}
+
+
+// A forked child (e.g., from parallel::mclapply()) has only
+// the thread that forked: start over with an empty pool.
+#ifndef _WIN32
+static void pool_after_fork (void) {
+  pthread_mutex_init(&pl_mutex, NULL);
+  pthread_cond_init(&pl_wake, NULL);
+  pthread_cond_init(&pl_done, NULL);
+  pl_tids = NULL; // The parent's; not ours to free.
+  pl_size = 0;
+  pl_stop = 0;
+}
+#endif
+
+
+// Grow the pool to `size` threads, or as many as the OS
+// allows. Main thread only, between jobs.
+static void pool_grow (int size) {
+
+  if (size <= pl_size) return;
+
+  #ifndef _WIN32
+    static int registered = 0;
+    if (!registered) {
+      pthread_atfork(NULL, NULL, pool_after_fork);
+      registered = 1;
+    }
+  #endif
+
+  pthread_t *tids = realloc(pl_tids, (size_t) size * sizeof(pthread_t));
+  if (!tids) return; // # nocov
+  pl_tids = tids;
+
+  while (pl_size < size) {
+    if (pthread_create(&pl_tids[pl_size], NULL, pool_thread, NULL) != 0)
+      break; // # nocov: shares are done by the threads there are.
+    pl_size++;
+  }
+}
+
+
+// Stop and join the pool's threads (when the package is
+// unloaded).
+void stop_thread_pool (void) {
+
+  if (pl_size == 0) return;
+
+  pthread_mutex_lock(&pl_mutex);
+  pl_stop = 1;
+  pthread_cond_broadcast(&pl_wake);
+  pthread_mutex_unlock(&pl_mutex);
+
+  for (int t = 0; t < pl_size; t++)
+    pthread_join(pl_tids[t], NULL);
+
+  free(pl_tids);
+  pl_tids = NULL;
+  pl_size = 0;
+  pl_stop = 0;
+}
+
+#else
+
+void stop_thread_pool (void) {}
+
+#endif
+
+
 void run_parallel(pthread_func_t func, int n_threads, int n_tasks) {
 
-  // ---------------------------------------------------
-  // Path A: Multithreading Attempt
-  // ---------------------------------------------------
-  #ifdef HAVE_PTHREAD
-    // Only attempt threading if explicitly requested and compiled in.
-    // The n_tasks check is a heuristic to avoid overhead for small workloads.
+  #ifdef ECODIVE_POOL
+    // Threads only pay off for enough work.
     if (n_threads > 1 && n_tasks >= 100) {
 
-      pthread_t *tids    = calloc(n_threads, sizeof(pthread_t));
-      worker_t  *args    = calloc(n_threads, sizeof(worker_t));
-      char      *started = calloc(n_threads, sizeof(char));
+      pool_grow(n_threads - 1);
 
-      // If out of memory, fall back to serial execution.
-      if (!tids || !args || !started) {
-        free(tids); free(args); free(started); // # nocov
-        goto single_thread_fallback;           // # nocov
+      if (pl_size > 0) {
+
+        pthread_mutex_lock(&pl_mutex);
+        uint32_t gen = (uint32_t) ++pl_gen;
+        pl_func = func;
+        pl_n    = n_threads;
+        __atomic_store_n(&pl_left,  n_threads,              __ATOMIC_RELEASE);
+        __atomic_store_n(&pl_claim, (uint64_t) gen << 32,   __ATOMIC_RELEASE);
+        pthread_cond_broadcast(&pl_wake);
+        pthread_mutex_unlock(&pl_mutex);
+
+        run_shares(gen, func, n_threads);
+
+        // Wait for shares that other threads claimed.
+        pthread_mutex_lock(&pl_mutex);
+        while (__atomic_load_n(&pl_left, __ATOMIC_ACQUIRE) > 0)
+          pthread_cond_wait(&pl_done, &pl_mutex);
+        pthread_mutex_unlock(&pl_mutex);
+
+        return;
       }
-
-      // Each worker gets its index (i) and the total count (n).
-      for (int i = 0; i < n_threads; i++) {
-        args[i] = (worker_t){ .i = i, .n = n_threads };
-      }
-
-      for (int i = 1; i < n_threads; i++)
-        started[i] = pthread_create(&tids[i], NULL, func, &args[i]) == 0;
-
-      // Worker 0, and any that didn't get a thread, run here.
-      func(&args[0]);
-      for (int i = 1; i < n_threads; i++)
-        if (!started[i]) func(&args[i]); // # nocov
-
-      for (int i = 1; i < n_threads; i++)
-        if (started[i]) pthread_join(tids[i], NULL);
-
-      free(tids);
-      free(args);
-      free(started);
-      return;
     }
   #endif
 
   // ---------------------------------------------------
-  // Path B: Single Thread Fallback
+  // Serial: one thread, or not enough work, or no threads
+  // could be started. The whole job as one share.
   // ---------------------------------------------------
-  // This runs if:
-  // 1. Pthreads are not supported on this OS.
-  // 2. n_threads <= 1.
-  // 3. n_tasks < 100.
-  // 4. Memory allocation failed.
-
-  single_thread_fallback:
-  {
-    // Arguments for processing the whole dataset
-    worker_t args = { .i = 0, .n = 1 };
-    func((void*)&args);
-  }
+  worker_t args = { .i = 0, .n = 1 };
+  func((void*)&args);
 }
 
 

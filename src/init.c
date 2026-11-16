@@ -65,3 +65,11 @@ void R_init_ecodive(DllInfo *dll) {
   init_blas_threads();
 }
 // # nocov end
+
+
+// # nocov start
+void R_unload_ecodive(DllInfo *dll) {
+  (void) dll;
+  stop_thread_pool();
+}
+// # nocov end
