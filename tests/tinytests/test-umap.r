@@ -296,7 +296,7 @@
   expect_identical(attr(uf, 'init'), 'pcoa')
   if (home) {
     y <- unname(scale(ref$more$far0, scale = FALSE)[, ])
-    expect_true(max(abs(center_like(unclass(uf)[, ], y) - y)) / max(abs(y)) < 1e-9)
+    expect_true(max(abs(center_like(unclass(uf)[, ], y) - y)) / max(abs(y)) < 1e-10)
   }
 
   # No optimization: the (centered) start.

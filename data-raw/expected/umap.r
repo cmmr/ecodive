@@ -230,10 +230,15 @@ graph600   <- graph_fp(d600, 15)
 
 # Three groups far apart: a graph of 3 components, so uwot's spectral start
 # falls back to "spca", scaled classical MDS. With no epochs, that is the
-# result.
+# result. (The groups' centres are not on a line: then the second axis would
+# be within groups, with an eigenvalue 1e-5 times the first, and known only
+# to about 1e-10.)
 set.seed(9)
 grp  <- matrix(rnorm(20 * 3), 20, 3)
-far  <- rbind(grp, grp[, 3:1] + 100, grp[, c(2, 1, 3)] * 0.5 + 300)
+far  <- rbind(
+  grp,
+  sweep(grp[, 3:1], 2, c(100, 0, 0), '+'),
+  sweep(grp[, c(2, 1, 3)] * 0.5, 2, c(0, 200, 0), '+') )
 set.seed(10)
 far0 <- strip(umap(dist(far), n_neighbors = 5, n_epochs = 0, verbose = FALSE))
 
