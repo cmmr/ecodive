@@ -234,4 +234,46 @@
     expect_identical(bray(s, margin = mg), bray(m_na_dbl))
   }
 
+
+  # Explicitly stored zeros are dropped, and repeated entries in a triplet
+  # matrix are summed, as the Matrix package defines them: the same results
+  # as the dense matrix.
+  set.seed(7)
+  dn  <- matrix(rpois(600, 1), 60, 10)
+  dgc <- as(dn, COMPRESSED)
+  dgc@x[1:3] <- 0
+  dz  <- as.matrix(dgc)
+  for (mg in 1:2) {
+    x <- if (mg == 1) dgc else Matrix::t(dgc)
+    expect_identical(bray(x, margin = mg), bray(dz))
+    expect_identical(observed(x, margin = mg), observed(dz))
+    expect_identical(pca(x, margin = mg, norm = 'binary', k = 2, cpus = 1), pca(dz, norm = 'binary', k = 2, cpus = 1))
+  }
+
+  dgt <- as(as(dn, COMPRESSED), TRIPLET)
+  dup <- dgt
+  dup@i <- c(dgt@i, dgt@i[1:2])
+  dup@j <- c(dgt@j, dgt@j[1:2])
+  dup@x <- c(dgt@x, 2, -dgt@x[2])  # the second repeat cancels its entry
+  dd <- dn
+  dd[cbind(dgt@i[1:2] + 1, dgt@j[1:2] + 1)] <- dd[cbind(dgt@i[1:2] + 1, dgt@j[1:2] + 1)] + c(2, -dgt@x[2])
+  expect_equal(as.vector(bray(dup)), as.vector(bray(dd)), tolerance = 1e-14)
+  expect_equal(as.vector(bray(Matrix::t(dup), margin = 2)), as.vector(bray(dd)), tolerance = 1e-14)
+
+
+  # Invalid sparse objects are errors, not memory errors.
+  bad <- as(dn, COMPRESSED)
+  bad@p[3] <- 1000L
+  expect_error(bray(bad, margin = 1), 'invalid column pointers')
+  expect_error(bray(bad, margin = 2), 'invalid column pointers')
+  bad <- as(dn, COMPRESSED)
+  bad@i[1] <- 500L
+  expect_error(bray(bad, margin = 2), 'out of range')
+  s <- slam::as.simple_triplet_matrix(dn)
+  s$i <- s$i[1:10]
+  expect_error(bray(s), 'invalid')
+  s <- slam::as.simple_triplet_matrix(dn)
+  s$j <- as.double(s$j)
+  expect_error(bray(s), 'invalid')
+
 #})

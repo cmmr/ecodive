@@ -11,34 +11,51 @@
 // Ensure we don't overwrite values in other R objects.
 //=========================================================
 
-static void rw_vec (void **ptr, int n_bytes) {
-  
+static void rw_vec (void **ptr, size_t n_bytes) {
+
   if (is_safe_ptr(*ptr)) return;
-  
+
   void *new_ptr = safe_malloc(n_bytes);
   if (*ptr) memcpy(new_ptr, *ptr, n_bytes);
   *ptr = new_ptr;
 }
 
 static int* rw_pos_vec (ecomatrix_t *em) {
-  int vec_len = em->n_samples + 1;
-  rw_vec((void**)&(em->pos_vec), vec_len * sizeof(int));
+  rw_vec((void**)&(em->pos_vec), ((size_t) em->n_samples + 1) * sizeof(int));
   return em->pos_vec;
 }
 
 static int* rw_otu_vec (ecomatrix_t *em) {
-  rw_vec((void**)&(em->otu_vec), em->nnz * sizeof(int));
+  rw_vec((void**)&(em->otu_vec), (size_t) em->nnz * sizeof(int));
   return em->otu_vec;
 }
 
 double* rw_val_vec (ecomatrix_t *em) {
-  rw_vec((void**)&(em->val_vec), em->nnz * sizeof(double));
+  rw_vec((void**)&(em->val_vec), (size_t) em->nnz * sizeof(double));
   return em->val_vec;
 }
 
 double* rw_clr_vec (ecomatrix_t *em) {
-  rw_vec((void**)&(em->clr_vec), em->n_samples * sizeof(double));
+  rw_vec((void**)&(em->clr_vec), (size_t) em->n_samples * sizeof(double));
   return em->clr_vec;
+}
+
+
+// Frees ecodive's allocations, then raises an R error.
+static void import_error (const char *msg) {
+  free_all();
+  error("%s", msg);
+}
+
+
+// A sparse matrix's index vector must be an integer vector of
+// the given length (that of its values).
+static int* index_vec (SEXP sexp_idx, int nnz, const char *what) {
+  if (TYPEOF(sexp_idx) != INTSXP || XLENGTH(sexp_idx) != nnz) {
+    free_all();
+    error("Sparse matrix is invalid: `%s` must be an integer vector as long as its values.", what);
+  }
+  return INTEGER(sexp_idx);
 }
 
 
@@ -256,7 +273,7 @@ static int* count_samples (ecomatrix_t *em, int *sam_in, int base) {
   int  nnz       = em->nnz;
   int *pos_vec   = rw_pos_vec(em);
   
-  memset(pos_vec, 0, (n_samples + 1) * sizeof(int));
+  memset(pos_vec, 0, ((size_t) n_samples + 1) * sizeof(int));
   
   for (int i = 0; i < nnz; i++)
     pos_vec[sam_in[i] - base + 1]++;
@@ -368,8 +385,8 @@ static void import_triplet (ecomatrix_t *em, int *sam_in, int *otu_in, SEXP sexp
   // Where each otu's entries start, once grouped by otu.
   // --------------------------------------------
   
-  int *col_ptr = (int*) safe_malloc((n_otus + 1) * sizeof(int));
-  memset(col_ptr, 0, (n_otus + 1) * sizeof(int));
+  int *col_ptr = (int*) safe_malloc(((size_t) n_otus + 1) * sizeof(int));
+  memset(col_ptr, 0, ((size_t) n_otus + 1) * sizeof(int));
   
   for (int i = 0; i < nnz; i++)
     col_ptr[otu_in[i] - base + 1]++;
@@ -393,8 +410,8 @@ static void import_triplet (ecomatrix_t *em, int *sam_in, int *otu_in, SEXP sexp
   
   else {
     
-    int    *csc_sam = (int*)    safe_malloc(nnz * sizeof(int));
-    double *csc_val = (double*) safe_malloc(nnz * sizeof(double));
+    int    *csc_sam = (int*)    safe_malloc((size_t) nnz * sizeof(int));
+    double *csc_val = (double*) safe_malloc((size_t) nnz * sizeof(double));
     
     for (int i = 0; i < nnz; i++) {
       int dst = col_ptr[otu_in[i] - base]++;
@@ -418,28 +435,100 @@ static void import_triplet (ecomatrix_t *em, int *sam_in, int *otu_in, SEXP sexp
 // Import a column-compressed matrix whose rows are samples.
 //=========================================================
 
+// Each entry must belong to exactly one column: col_ptr has
+// n_cols + 1 elements, from 0 up to nnz, never decreasing.
+static void check_col_ptr (SEXP sexp_ptr, int n_cols, int nnz) {
+
+  if (TYPEOF(sexp_ptr) != INTSXP || XLENGTH(sexp_ptr) != (R_xlen_t) n_cols + 1)
+    import_error("Sparse matrix has invalid column pointers.");
+
+  int *col_ptr = INTEGER(sexp_ptr);
+  int  bad_ptr = col_ptr[0] != 0 || col_ptr[n_cols] != nnz;
+  for (int col = 0; col < n_cols && !bad_ptr; col++)
+    if (col_ptr[col] > col_ptr[col + 1]) bad_ptr = 1;
+  if (bad_ptr)
+    import_error("Sparse matrix has invalid column pointers.");
+}
+
+
 static void import_csc_by_row (ecomatrix_t *em, int *row_in, int *col_ptr, SEXP sexp_vals) {
-  
+
   int n_samples = em->n_samples;
-  int n_otus    = em->n_otus;
   int nnz       = em->nnz;
-  
+
   double *dbl_in;
   int    *int_in;
   sparse_val_ptrs(sexp_vals, &dbl_in, &int_in);
-  
-  // Each entry must belong to exactly one column.
-  int bad_ptr = col_ptr[0] != 0 || col_ptr[n_otus] != nnz;
-  for (int otu = 0; otu < n_otus && !bad_ptr; otu++)
-    if (col_ptr[otu] > col_ptr[otu + 1]) bad_ptr = 1;
-  if (bad_ptr) {
-    free_all();
-    error("Sparse matrix has invalid column pointers.");
-  }
-  
+
   check_indices(row_in, nnz, n_samples, 0);
-  
+
   scatter_by_sample(em, row_in, 0, col_ptr, dbl_in, int_in);
+}
+
+
+
+//=========================================================
+// Explicitly stored zeros are dropped, and repeated
+// (sample, otu) entries summed, as the Matrix package
+// defines them, so that sparse input gives the same
+// results as dense input. Each sample's entries are in
+// order of otu, so repeats are adjacent.
+//=========================================================
+
+static void compact_entries (ecomatrix_t *em) {
+
+  int     n_samples = em->n_samples;
+  int    *pos_vec   = em->pos_vec;
+  int    *otu_vec   = em->otu_vec;
+  double *val_vec   = em->val_vec;
+
+  // Most inputs need nothing done: look before copying.
+  int needed = 0;
+  for (int sam = 0; sam < n_samples && !needed; sam++)
+    for (int i = pos_vec[sam]; i < pos_vec[sam + 1]; i++)
+      if (val_vec[i] == 0 || (i > pos_vec[sam] && otu_vec[i] == otu_vec[i - 1])) {
+        needed = 1;
+        break;
+      }
+  if (!needed) return;
+
+  pos_vec = rw_pos_vec(em);
+  otu_vec = rw_otu_vec(em);
+  val_vec = rw_val_vec(em);
+
+  int dst = 0;
+  for (int sam = 0; sam < n_samples; sam++) {
+
+    int start = dst;
+    int end   = pos_vec[sam + 1];
+
+    for (int i = pos_vec[sam]; i < end; i++) {
+      if (dst > start && otu_vec[dst - 1] == otu_vec[i]) {
+        val_vec[dst - 1] += val_vec[i];
+      }
+      else {
+        otu_vec[dst] = otu_vec[i];
+        val_vec[dst] = val_vec[i];
+        dst++;
+      }
+    }
+
+    // Drop zeros, including sums that cancel to zero.
+    int keep = start;
+    for (int i = start; i < dst; i++) {
+      if (val_vec[i] != 0) {
+        otu_vec[keep] = otu_vec[i];
+        val_vec[keep] = val_vec[i];
+        keep++;
+      }
+    }
+    dst = keep;
+
+    pos_vec[sam] = start;
+  }
+
+  pos_vec[n_samples] = dst;
+  em->nnz            = dst;
 }
 
 
@@ -532,6 +621,12 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
   int  nnz           = length(sexp_slam_v);
   int *sam_in, *otu_in;
 
+  if (n_rows == NA_INTEGER || n_cols == NA_INTEGER || n_rows < 0 || n_cols < 0)
+    import_error("Sparse matrix is invalid: bad `nrow` or `ncol`.");
+
+  int *i_in = index_vec(sexp_slam_i, nnz, "i");
+  int *j_in = index_vec(sexp_slam_j, nnz, "j");
+
   em->nnz = nnz;
 
 
@@ -542,8 +637,8 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
 
     em->n_samples = n_rows; // samples are in rows
     em->n_otus    = n_cols; // OTUs are in columns
-    sam_in        = INTEGER(sexp_slam_i);
-    otu_in        = INTEGER(sexp_slam_j);
+    sam_in        = i_in;
+    otu_in        = j_in;
 
     if (!isNull(sexp_dimnames))
       em->sexp_sample_names = PROTECT(VECTOR_ELT(sexp_dimnames, 0));
@@ -553,8 +648,8 @@ static void parse_slam (ecomatrix_t *em, SEXP sexp_slam_mtx, int margin) {
 
     em->n_samples = n_cols; // samples are in columns
     em->n_otus    = n_rows; // OTUs are in rows
-    sam_in        = INTEGER(sexp_slam_j);
-    otu_in        = INTEGER(sexp_slam_i);
+    sam_in        = j_in;
+    otu_in        = i_in;
 
     if (!isNull(sexp_dimnames))
       em->sexp_sample_names = PROTECT(VECTOR_ELT(sexp_dimnames, 1));
@@ -588,6 +683,9 @@ static void parse_dgTMatrix (ecomatrix_t *em, SEXP sexp_dgTMatrix, int margin) {
   int  nnz           = length(sexp_dgt_x);
   int *sam_in, *otu_in;
 
+  int *i_in = index_vec(sexp_dgt_i, nnz, "i");
+  int *j_in = index_vec(sexp_dgt_j, nnz, "j");
+
   em->nnz = nnz;
 
 
@@ -596,8 +694,8 @@ static void parse_dgTMatrix (ecomatrix_t *em, SEXP sexp_dgTMatrix, int margin) {
 
     em->n_samples         = n_rows; // samples are in rows
     em->n_otus            = n_cols; // OTUs are in columns
-    sam_in                = INTEGER(sexp_dgt_i);
-    otu_in                = INTEGER(sexp_dgt_j);
+    sam_in                = i_in;
+    otu_in                = j_in;
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 0);
   }
 
@@ -605,8 +703,8 @@ static void parse_dgTMatrix (ecomatrix_t *em, SEXP sexp_dgTMatrix, int margin) {
 
     em->n_samples         = n_cols; // samples are in columns
     em->n_otus            = n_rows; // OTUs are in rows
-    sam_in                = INTEGER(sexp_dgt_j);
-    otu_in                = INTEGER(sexp_dgt_i);
+    sam_in                = j_in;
+    otu_in                = i_in;
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 1);
   }
 
@@ -633,6 +731,10 @@ static void parse_dgCMatrix (ecomatrix_t *em, SEXP sexp_dgCMatrix, int margin) {
   int  n_cols        = INTEGER(sexp_dim)[1];
   int  nnz           = length(sexp_dgc_x);
 
+  // Pointers and indices become memory offsets: check them all.
+  int *i_in = index_vec(sexp_dgc_i, nnz, "i");
+  check_col_ptr(sexp_dgc_p, n_cols, nnz);
+
   em->nnz = nnz;
 
 
@@ -643,15 +745,17 @@ static void parse_dgCMatrix (ecomatrix_t *em, SEXP sexp_dgCMatrix, int margin) {
     em->n_otus            = n_cols; // OTUs are in columns
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 0);
 
-    import_csc_by_row(em, INTEGER(sexp_dgc_i), INTEGER(sexp_dgc_p), sexp_dgc_x);
+    import_csc_by_row(em, i_in, INTEGER(sexp_dgc_p), sexp_dgc_x);
   }
 
   else { // margin == 2
 
+    check_indices(i_in, nnz, n_rows, 0);
+
     em->n_samples         = n_cols; // samples are in columns
     em->n_otus            = n_rows; // OTUs are in rows
     em->pos_vec           = INTEGER(sexp_dgc_p);
-    em->otu_vec           = INTEGER(sexp_dgc_i);
+    em->otu_vec           = i_in;
     em->sexp_sample_names = VECTOR_ELT(sexp_dimnames, 1);
 
     assign_sparse_vals(em, sexp_dgc_x);
@@ -693,7 +797,11 @@ ecomatrix_t* new_ecomatrix(SEXP sexp_matrix, SEXP sexp_margin) {
   em->sexp_sample_names = R_NilValue;
   
   parse_func(em, sexp_matrix, margin);
-  
+
+  // Dense input has neither zeros nor repeats among its entries.
+  if (parse_func != parse_matrix && parse_func != parse_dgeMatrix)
+    compact_entries(em);
+
   return em;
 }
 
