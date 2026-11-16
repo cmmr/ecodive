@@ -16,7 +16,7 @@ ORDINATIONS <- local({
     na.strings       = "",
     text             = "
       name,                                id,   input, alt_ids
-      Distance-based Redundancy Analysis,  dbrda, dist, cap capscale distancebasedrda constrainedanalysisofprincipalcoordinates
+      Distance-based Redundancy Analysis,  dbrda, dist, distancebasedrda
       Non-metric Multidimensional Scaling, nmds, dist,  nonmetricmds metamds monomds
       Principal Coordinates Analysis,      pcoa, dist,  pco mds cmdscale classicalmds metricmds
       Uniform Manifold Approximation and Projection, umap, dist, uwot
@@ -67,8 +67,8 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' `method = 'PCoA'` or `'principal coord'` selects `pcoa`. Common other names
 #' also work: `'MDS'`, `'PCO'`, `'cmdscale'`, or `'classical MDS'` for
 #' `pcoa`, and `'non-metric MDS'`, `'metaMDS'`, or `'monoMDS'` for `nmds`.
-#' `'CAP'`, `'capscale'`, or `'distance-based RDA'` select `dbrda`, which
-#' also needs `data` (see [dbrda()]).
+#' `'dbRDA'` or `'distance-based RDA'` select `dbrda`, which also needs
+#' `data` (see [dbrda()]).
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.

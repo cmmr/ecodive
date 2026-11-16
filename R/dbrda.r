@@ -6,8 +6,8 @@
 #' Distance-based Redundancy Analysis (db-RDA)
 #'
 #' Constrained ordination of samples from their distances: the axes of beta
-#' diversity that sample metadata explain. Also known as constrained analysis
-#' of principal coordinates (CAP). Gives the same results as `vegan::dbrda()`,
+#' diversity that sample metadata explain. Gives the same results as
+#' `vegan::dbrda()` (not `vegan::capscale()`; see "Matching vegan" below),
 #' without ever forming an \eqn{n \times n}{n x n} matrix, so it takes far less
 #' time and memory for large datasets.
 #'
@@ -42,16 +42,19 @@
 #'   * `method`: `"dbrda"`.
 #'   * `eig`: The eigenvalue of each axis.
 #'   * `prop`: The proportion of the inertia that each axis explains, not
-#'     counting the conditional inertia: `eig / (trace - conditional)`.
-#'     `vegan`'s "Proportion Explained".
+#'     counting the conditional inertia:
+#'     `eig / (trace - inertia[["conditional"]])`. `vegan`'s "Proportion
+#'     Explained".
 #'   * `trace`: The total inertia: the sum of all eigenvalues of the
-#'     unconstrained ordination, including negative ones.
-#'   * `conditional`: The inertia explained by the `Condition()` variables, or
-#'     `0` if there are none.
-#'   * `constrained`: The inertia explained by the constraints (after the
-#'     conditions): the sum of all constrained eigenvalues.
-#'   * `unconstrained`: The rest of the inertia:
-#'     `trace - conditional - constrained`.
+#'     unconstrained ordination, including negative ones. On the same scale
+#'     as `eig`; see "Scale" below for how it relates to [pcoa()]'s.
+#'   * `inertia`: The total inertia split into three parts, which add up to
+#'     `trace`: a named vector of
+#'     - `conditional`: explained by the `Condition()` variables (`0` if
+#'       there are none);
+#'     - `constrained`: explained by the constraints, after the conditions
+#'       (the sum of all constrained eigenvalues);
+#'     - `unconstrained`: the rest.
 #'   * `constrained_eig`: Every non-zero constrained eigenvalue, including
 #'     negative ones.
 #'   * `biplot`: Biplot scores of the constraints: one row per column of the
@@ -85,14 +88,25 @@
 #'
 #' **Matching vegan**
 #'
-#' Like `vegan::dbrda()`, distances are divided by \eqn{\sqrt{n-1}} when any
-#' is 4 or more ("mean squared distances"), which divides every eigenvalue
-#' and inertia by \eqn{n-1}. Columns of the model matrix that are linear
-#' combinations of earlier ones (aliased) are dropped with a message.
-#' `vegan::capscale()`, which `phyloseq::ordinate(method = "CAP")` calls,
-#' first removes the negative eigenvalues, so its results differ from
-#' `dbrda()`'s for non-Euclidean distances (and are the same for Euclidean
-#' ones).
+#' `dbrda()` matches `vegan::dbrda()`. It does not match `vegan::capscale()`
+#' or `phyloseq::ordinate(method = "CAP")` (which calls `capscale()`):
+#' `capscale()` first removes the negative eigenvalues of non-Euclidean
+#' distances, such as Bray-Curtis, so its eigenvalues and scores differ from
+#' `dbrda()`'s. For Euclidean distances, the two agree.
+#'
+#' Columns of the model matrix that are linear combinations of earlier ones
+#' (aliased) are dropped with a message, as in `vegan`.
+#'
+#'
+#' **Scale**
+#'
+#' Like `vegan::dbrda()`, `dbrda()` divides the distances by
+#' \eqn{\sqrt{n-1}} when any of them is 4 or more ("mean squared
+#' distances"). That divides `trace`, `eig`, `inertia` and `constrained_eig`
+#' by \eqn{n-1}, but leaves `prop` unchanged. So for the same `dm`,
+#' `attr(dbrda(dm, ...), 'trace')` equals `attr(pcoa(dm), 'trace')` when every
+#' distance is below 4 (e.g. Bray-Curtis or Jaccard), and equals it divided
+#' by \eqn{n-1} otherwise (e.g. Euclidean distances between counts).
 #'
 #'
 #' **Axis signs and reproducibility**
@@ -220,7 +234,10 @@ dbrda_core <- function (dv, x, z = NULL, mf = NULL, k = 3L, cpus = n_cpus()) {
     colnames(points) ))
   biplot[, seq_len(kc)] <- res$biplot
 
-  unconstrained <- total - res$conditional - res$constrained
+  inertia <- c(
+    conditional   = res$conditional,
+    constrained   = res$constrained,
+    unconstrained = total - res$conditional - res$constrained )
 
   structure(
     .Data           = points,
@@ -228,9 +245,7 @@ dbrda_core <- function (dv, x, z = NULL, mf = NULL, k = 3L, cpus = n_cpus()) {
     eig             = res$eig,
     prop            = res$eig / (total - res$conditional),
     trace           = total,
-    conditional     = res$conditional,
-    constrained     = res$constrained,
-    unconstrained   = unconstrained,
+    inertia         = inertia,
     constrained_eig = res$con_eig,
     biplot          = biplot,
     centroids       = dbrda_centroids(res$u, mf, kc, m, scale, colnames(points)) )

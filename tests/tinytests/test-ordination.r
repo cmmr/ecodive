@@ -48,8 +48,6 @@
   expect_identical(m('metaMDS'),             'nmds')
   expect_identical(m('monoMDS'),             'nmds')
   expect_identical(m('dbRDA'),               'dbrda')
-  expect_identical(m('CAP'),                 'dbrda')
-  expect_identical(m('capscale'),            'dbrda')
   expect_identical(m('distance-based RDA'),  'dbrda')
   expect_identical(match_ordination('nmds', input = 'dist')$id, 'nmds')
 

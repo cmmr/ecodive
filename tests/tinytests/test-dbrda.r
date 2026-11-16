@@ -34,9 +34,10 @@
     expect_equal(attr(ord, 'eig'),             exp$eig,             tolerance = 1e-10, info = lbl)
     expect_equal(attr(ord, 'prop'),            exp$prop,            tolerance = 1e-10, info = lbl)
     expect_equal(attr(ord, 'trace'),           exp$trace,           tolerance = 1e-10, info = lbl)
-    expect_equal(attr(ord, 'conditional'),     exp$conditional,     tolerance = 1e-10, info = lbl)
-    expect_equal(attr(ord, 'constrained'),     exp$constrained,     tolerance = 1e-10, info = lbl)
-    expect_equal(attr(ord, 'unconstrained'),   exp$unconstrained,   tolerance = 1e-10, info = lbl)
+    expect_equal(
+      attr(ord, 'inertia'),
+      c(conditional = exp$conditional, constrained = exp$constrained, unconstrained = exp$unconstrained),
+      tolerance = 1e-10, info = lbl )
     expect_equal(attr(ord, 'constrained_eig'), exp$constrained_eig, tolerance = 1e-10, info = lbl)
 
     bp <- attr(ord, 'biplot')
@@ -61,14 +62,36 @@
   expect_true(is.matrix(ord) && is.double(ord))
   expect_identical(
     names(attributes(ord)),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'conditional',
-      'constrained', 'unconstrained', 'constrained_eig', 'biplot', 'centroids') )
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'inertia',
+      'constrained_eig', 'biplot', 'centroids') )
   expect_identical(attr(ord, 'method'), 'dbrda')
 
   # Inertia components add up.
-  expect_equal(
-    attr(ord, 'trace'),
-    attr(ord, 'conditional') + attr(ord, 'constrained') + attr(ord, 'unconstrained') )
+  expect_equal(attr(ord, 'trace'), sum(attr(ord, 'inertia')))
+
+
+
+  # Scale relative to pcoa(): the same, unless a distance is 4 or more. ====
+
+  # Bray-Curtis: every distance is below 4.
+  ds  <- ref$cases[[1]]$dm
+  pcs <- pcoa(ds, k = 2, cpus = 1)
+  ords <- dbrda_core(dist_vector(ds), NULL, k = 2, cpus = 1)
+  expect_true(max(ds) < 4)
+  expect_equal(attr(ords, 'trace'), attr(pcs, 'trace'), tolerance = 1e-12)
+  expect_equal(attr(ords, 'eig'),   attr(pcs, 'eig'),   tolerance = 1e-10)
+
+  # Euclidean distances between counts: dbrda's are pcoa's / (ns - 1).
+  ds  <- ref$cases[[6]]$dm
+  ns  <- attr(ds, 'Size')
+  pcs <- pcoa(ds, k = 2, cpus = 1)
+  ords <- dbrda_core(dist_vector(ds), NULL, k = 2, cpus = 1)
+  expect_true(max(ds) >= 4)
+  expect_equal(attr(ords, 'trace'), attr(pcs, 'trace') / (ns - 1), tolerance = 1e-12)
+  expect_equal(attr(ords, 'eig'),   attr(pcs, 'eig')   / (ns - 1), tolerance = 1e-10)
+  expect_equal(attr(ords, 'prop'),  attr(pcs, 'prop'),            tolerance = 1e-10)
+  ords <- fit_case(ref$cases[[6]])
+  expect_equal(attr(ords, 'trace'), attr(pcs, 'trace') / (ns - 1), tolerance = 1e-12)
 
   # A symmetric matrix gives the same result as a dist.
   expect_identical(dbrda(as.matrix(cs$dm), cs$data, case_formula(cs), cpus = 1), ord)
@@ -81,7 +104,11 @@
   vars <- cs$data[, c('Management', 'A1')]
   expect_identical(dbrda(cs$dm, vars, cpus = 1), ord)
   expect_identical(ordination(cs$dm, 'dbrda', data = vars, cpus = 1), ord)
-  expect_identical(match_ordination('CAP')$id, 'dbrda')
+  expect_identical(match_ordination('distance-based RDA')$id, 'dbrda')
+
+  # Not capscale, whose results differ for non-Euclidean distances.
+  expect_error(match_ordination('capscale'), 'does not match')
+  expect_error(match_ordination('CAP'),      'does not match')
 
   # `k` is validated.
   expect_error(dbrda(cs$dm, vars, k = 0),   '`k`')
@@ -116,7 +143,7 @@
   # Constraints entirely within the conditions leave only MDS axes.
   expect_message(ord3 <- dbrda_core(dist_vector(cs$dm), cs$x[, 'A1', drop = FALSE], z = cs$x, k = 2, cpus = 1), 'aliased')
   expect_identical(colnames(ord3), c('MDS1', 'MDS2'))
-  expect_equal(attr(ord3, 'constrained'), 0)
+  expect_equal(attr(ord3, 'inertia')[['constrained']], 0)
 
 
 
@@ -128,7 +155,7 @@
   pc  <- pcoa(d, k = 2, cpus = 1)
   expect_identical(colnames(ord), c('MDS1', 'MDS2'))
   expect_equal(attr(ord, 'eig'), attr(pc, 'eig'), tolerance = 1e-10)
-  expect_equal(attr(ord, 'unconstrained'), attr(ord, 'trace'))
+  expect_equal(attr(ord, 'inertia')[['unconstrained']], attr(ord, 'trace'))
 
   # More axes than exist.
   ord <- dbrda_core(dist_vector(as.dist(as.matrix(d)[1:4, 1:4])), cs$x[1:4, 'A1', drop = FALSE], k = 10, cpus = 1)

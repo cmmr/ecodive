@@ -40,16 +40,21 @@ values are \code{vegan}'s site scores ("wa" scores, scaling 2): what
 \item \code{method}: \code{"dbrda"}.
 \item \code{eig}: The eigenvalue of each axis.
 \item \code{prop}: The proportion of the inertia that each axis explains, not
-counting the conditional inertia: \code{eig / (trace - conditional)}.
-\code{vegan}'s "Proportion Explained".
+counting the conditional inertia:
+\code{eig / (trace - inertia[["conditional"]])}. \code{vegan}'s "Proportion
+Explained".
 \item \code{trace}: The total inertia: the sum of all eigenvalues of the
-unconstrained ordination, including negative ones.
-\item \code{conditional}: The inertia explained by the \code{Condition()} variables, or
-\code{0} if there are none.
-\item \code{constrained}: The inertia explained by the constraints (after the
-conditions): the sum of all constrained eigenvalues.
-\item \code{unconstrained}: The rest of the inertia:
-\code{trace - conditional - constrained}.
+unconstrained ordination, including negative ones. On the same scale
+as \code{eig}; see "Scale" below for how it relates to \code{\link[=pcoa]{pcoa()}}'s.
+\item \code{inertia}: The total inertia split into three parts, which add up to
+\code{trace}: a named vector of
+\itemize{
+\item \code{conditional}: explained by the \code{Condition()} variables (\code{0} if
+there are none);
+\item \code{constrained}: explained by the constraints, after the conditions
+(the sum of all constrained eigenvalues);
+\item \code{unconstrained}: the rest.
+}
 \item \code{constrained_eig}: Every non-zero constrained eigenvalue, including
 negative ones.
 \item \code{biplot}: Biplot scores of the constraints: one row per column of the
@@ -62,8 +67,8 @@ factor.
 }
 \description{
 Constrained ordination of samples from their distances: the axes of beta
-diversity that sample metadata explain. Also known as constrained analysis
-of principal coordinates (CAP). Gives the same results as \code{vegan::dbrda()},
+diversity that sample metadata explain. Gives the same results as
+\code{vegan::dbrda()} (not \code{vegan::capscale()}; see "Matching vegan" below),
 without ever forming an \eqn{n \times n}{n x n} matrix, so it takes far less
 time and memory for large datasets.
 }
@@ -89,14 +94,24 @@ needed, by block Lanczos iteration as in \code{\link[=pcoa]{pcoa()}}.
 
 \strong{Matching vegan}
 
-Like \code{vegan::dbrda()}, distances are divided by \eqn{\sqrt{n-1}} when any
-is 4 or more ("mean squared distances"), which divides every eigenvalue
-and inertia by \eqn{n-1}. Columns of the model matrix that are linear
-combinations of earlier ones (aliased) are dropped with a message.
-\code{vegan::capscale()}, which \code{phyloseq::ordinate(method = "CAP")} calls,
-first removes the negative eigenvalues, so its results differ from
-\code{dbrda()}'s for non-Euclidean distances (and are the same for Euclidean
-ones).
+\code{dbrda()} matches \code{vegan::dbrda()}. It does not match \code{vegan::capscale()}
+or \code{phyloseq::ordinate(method = "CAP")} (which calls \code{capscale()}):
+\code{capscale()} first removes the negative eigenvalues of non-Euclidean
+distances, such as Bray-Curtis, so its eigenvalues and scores differ from
+\code{dbrda()}'s. For Euclidean distances, the two agree.
+
+Columns of the model matrix that are linear combinations of earlier ones
+(aliased) are dropped with a message, as in \code{vegan}.
+
+\strong{Scale}
+
+Like \code{vegan::dbrda()}, \code{dbrda()} divides the distances by
+\eqn{\sqrt{n-1}} when any of them is 4 or more ("mean squared
+distances"). That divides \code{trace}, \code{eig}, \code{inertia} and \code{constrained_eig}
+by \eqn{n-1}, but leaves \code{prop} unchanged. So for the same \code{dm},
+\code{attr(dbrda(dm, ...), 'trace')} equals \code{attr(pcoa(dm), 'trace')} when every
+distance is below 4 (e.g. Bray-Curtis or Jaccard), and equals it divided
+by \eqn{n-1} otherwise (e.g. Euclidean distances between counts).
 
 \strong{Axis signs and reproducibility}
 

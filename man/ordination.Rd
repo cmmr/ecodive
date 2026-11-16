@@ -43,8 +43,8 @@ Case insensitive and partial matching, ignoring anything but letters. E.g.
 \code{method = 'PCoA'} or \code{'principal coord'} selects \code{pcoa}. Common other names
 also work: \code{'MDS'}, \code{'PCO'}, \code{'cmdscale'}, or \code{'classical MDS'} for
 \code{pcoa}, and \code{'non-metric MDS'}, \code{'metaMDS'}, or \code{'monoMDS'} for \code{nmds}.
-\code{'CAP'}, \code{'capscale'}, or \code{'distance-based RDA'} select \code{dbrda}, which
-also needs \code{data} (see \code{\link[=dbrda]{dbrda()}}).
+\code{'dbRDA'} or \code{'distance-based RDA'} select \code{dbrda}, which also needs
+\code{data} (see \code{\link[=dbrda]{dbrda()}}).
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
