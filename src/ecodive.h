@@ -71,6 +71,29 @@ ecotree_t* new_ecotree(SEXP sexp_phylo_tree);
 SEXP get(SEXP, const char *);
 void set(SEXP, const char *, SEXP);
 
+/* --- lanczos.c --- */
+// W = B * V for `m` column-major columns of length n.
+typedef void (*lanczos_op_t)(const double *V, double *W, int m, void *ctx);
+
+typedef struct {
+  int          n;         // In: vector length (B is n x n).
+  int          k;         // In: eigenpairs wanted, 1 <= k <= dims.
+  int          dims;      // In: dimension of B's range, at most.
+  int          deflate;   // In: keep vectors orthogonal to ones.
+  double       scale;     // In: trace(B), for convergence tests.
+  lanczos_op_t op;        // In: product function.
+  void        *ctx;       // In: passed on to op.
+  double      *vecs;      // Out: n x k unit eigenvectors.
+  double      *vals;      // Out: k eigenvalues, decreasing.
+  double      *resid;     // Out: k relative residual norms.
+  int          steps;     // Out: products with blocks.
+  int          converged; // Out: 1 if converged.
+} lanczos_t;
+
+void   lanczos(lanczos_t *lz);
+double lz_dot(const double *x, const double *y, int n);
+void   lz_center(double *x, int n);
+
 /* --- memory.c --- */
 void  init_n_ptrs(int n);
 void* safe_malloc(size_t bytes);
