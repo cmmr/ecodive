@@ -104,6 +104,22 @@
   benefits, and results are unchanged. Out-of-range indices in these inputs
   are now an error.
 
+* Sparse counts: explicitly stored zeros are now ignored, and repeated
+  entries of a `dgTMatrix` summed, as the Matrix package defines them, so
+  every function gives the same results as for the dense matrix (before,
+  `norm = 'binary'` counted a stored zero as present). Malformed sparse
+  objects (wrong index types or lengths, bad column pointers) are now an
+  error rather than read out of bounds, and tables with more than ~268
+  million non-zero values no longer overflow an internal size.
+
+* Threads now come from a pool that lasts the whole session, and jobs are
+  shared out to whichever threads are free. On a machine busy with other
+  processes, multithreaded calls are no longer much slower than
+  single-threaded ones (`pcoa()` of 2,000 samples: 0.8 s with 6 threads,
+  where restarting threads for every step took 16 s), and small jobs no
+  longer start threads at all. Results are unchanged, and still the same
+  for any `cpus`.
+
 * Every function's `cpus` is now capped at `n_cpus()`, the cores available,
   so that asking for more threads than that costs nothing. Results are the
   same for any `cpus`. Without the parallelly package, `n_cpus()` now
