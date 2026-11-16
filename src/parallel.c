@@ -467,13 +467,20 @@ SEXP C_blas_settable(void) {
 
 //======================================================
 // run_parallel
-// 
-// Orchestrates the creation, execution, and cleanup
-// of POSIX threads. Handles graceful degradation to
-// single-threaded mode on failure.
+//
+// Runs func once for each worker index i in 0 .. n - 1,
+// where each call does its own share (worker i of n) of
+// the job. Workers 1 .. n - 1 run on new threads, and
+// worker 0 on the calling thread, which then joins them.
+//
+// A worker the OS refuses a thread for (e.g., a ulimit
+// or a container's pids limit) runs on the calling thread
+// instead, with the same index, so the job is split the
+// same way and done exactly once. So workers must not
+// wait on each other (no barriers).
 //======================================================
 void run_parallel(pthread_func_t func, int n_threads, int n_tasks) {
-  
+
   // ---------------------------------------------------
   // Path A: Multithreading Attempt
   // ---------------------------------------------------
@@ -481,50 +488,40 @@ void run_parallel(pthread_func_t func, int n_threads, int n_tasks) {
     // Only attempt threading if explicitly requested and compiled in.
     // The n_tasks check is a heuristic to avoid overhead for small workloads.
     if (n_threads > 1 && n_tasks >= 100) {
-      
-      pthread_t *tids = calloc(n_threads, sizeof(pthread_t));
-      worker_t  *args = calloc(n_threads, sizeof(worker_t));
-      
+
+      pthread_t *tids    = calloc(n_threads, sizeof(pthread_t));
+      worker_t  *args    = calloc(n_threads, sizeof(worker_t));
+      char      *started = calloc(n_threads, sizeof(char));
+
       // If out of memory, fall back to serial execution.
-      if (!tids || !args) {
-        free(tids); free(args);      // # nocov
-        goto single_thread_fallback; // # nocov
+      if (!tids || !args || !started) {
+        free(tids); free(args); free(started); // # nocov
+        goto single_thread_fallback;           // # nocov
       }
-      
-      // Initialize worker arguments.
-      // Each thread gets its index (i) and total count (n).
+
+      // Each worker gets its index (i) and the total count (n).
       for (int i = 0; i < n_threads; i++) {
         args[i] = (worker_t){ .i = i, .n = n_threads };
       }
-      
-      // Create Threads.
-      // We track 'created_count' to handle cases where the OS refuses
-      // to create new threads (e.g., ulimit reached) halfway through the loop.
-      int created_count = 0;
-      for (int i = 0; i < n_threads; i++) {
-        // pthread_create returns 0 on success. Non-zero is an error.
-        if (pthread_create(&tids[i], NULL, func, &args[i]) != 0) {
-            break; // Stop creating new threads  # nocov
-        }
-        created_count++;
-      }
-      
-      // Only join threads that were actually created.
-      for (int i = 0; i < created_count; i++) {
-        pthread_join(tids[i], NULL);
-      }
-      
-      // Clean up system heap memory explicitly.
+
+      for (int i = 1; i < n_threads; i++)
+        started[i] = pthread_create(&tids[i], NULL, func, &args[i]) == 0;
+
+      // Worker 0, and any that didn't get a thread, run here.
+      func(&args[0]);
+      for (int i = 1; i < n_threads; i++)
+        if (!started[i]) func(&args[i]); // # nocov
+
+      for (int i = 1; i < n_threads; i++)
+        if (started[i]) pthread_join(tids[i], NULL);
+
       free(tids);
       free(args);
-      
-      
-      // If we failed partially (created_count < n_threads), we fall through
-      // to the fallback to ensure the job completes (by re-running it serially).
-      if (created_count == n_threads) return;
+      free(started);
+      return;
     }
   #endif
-  
+
   // ---------------------------------------------------
   // Path B: Single Thread Fallback
   // ---------------------------------------------------
@@ -533,8 +530,7 @@ void run_parallel(pthread_func_t func, int n_threads, int n_tasks) {
   // 2. n_threads <= 1.
   // 3. n_tasks < 100.
   // 4. Memory allocation failed.
-  // 5. Thread creation failed (partial or total).
-  
+
   single_thread_fallback:
   {
     // Arguments for processing the whole dataset

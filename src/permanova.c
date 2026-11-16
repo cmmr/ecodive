@@ -91,13 +91,7 @@ static int          *pm_iwork;   // Per-thread integer workspace ...
 static size_t        pm_iwlen;   // ... of this many ints.
 
 
-//------------------------------------------------------
-// Offset of element (j + 1, j) in a dist vector. Column
-// j's elements, rows j + 1 to n - 1, follow it in order.
-//------------------------------------------------------
-static inline size_t col_start(int j, int n) {
-  return (size_t) j * (size_t) n - (size_t) j * (size_t) (j + 1) / 2;
-}
+#define col_start dist_col_start // ecodive.h
 
 
 //------------------------------------------------------

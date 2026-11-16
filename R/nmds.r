@@ -283,10 +283,7 @@ nmds <- function (
   x  <- x / hc
 
   # Each axis's largest absolute coordinate is positive.
-  for (j in seq_len(k)) {
-    v <- x[, j]
-    if (v[[which.max(abs(v))]] < 0) x[, j] <- -v
-  }
+  x <- ord_flip(x)
 
   ord_result(
     x, 'nmds', labels, prefix = 'NMDS',

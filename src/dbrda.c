@@ -36,11 +36,11 @@
  * vegan's scaling constant.
  *
  * The Lanczos iteration and the small dense helpers are
- * shared with pcoa() and pca() (lanczos.c). The products
- * with G are adapted from src/pcoa.c.
+ * shared with pcoa() and pca() (lanczos.c), and the products
+ * with G with pcoa() (gower.c).
  *
  * Determinism: results are bit-identical for any number of
- * threads. G * X is computed in fixed blocks of DBRDA_ROWS
+ * threads. G * X is computed (gower.c) in fixed blocks of
  * rows, each summed by one thread in a fixed order. All else
  * runs on the main thread. Lanczos starting vectors come from
  * a fixed PCG stream.
@@ -54,163 +54,10 @@
 
 #include <float.h> // DBL_EPSILON
 
-// Rows of A * X per parallel task. Fixed, so that summation
-// order never depends on the number of threads.
-#define DBRDA_ROWS 64
-
 // A design column is aliased (redundant) when Gram-Schmidt
 // leaves less than this fraction of its centred norm: the
 // same rule and tolerance as R's qr(), which vegan uses.
 #define DBRDA_QR_TOL 1e-7
-
-// Vectors per pass over D in mult_a(), and a macro that
-// repeats F(v) for v = 0 to DBRDA_W - 1.
-#define DBRDA_W 4
-#define DBRDA_REP(F) F(0) F(1) F(2) F(3)
-
-
-//------------------------------------------------------
-// Shared with the worker threads. Read-only, except for
-// the output rows that each task owns.
-//------------------------------------------------------
-static int           n_sams;   // Samples (rows of G).
-static const double *d_vec;    // Packed lower triangle of D.
-static const double *x_mtx;    // n_sams x DBRDA_W, row-major.
-static double       *y_mtx;    // n_sams x DBRDA_W, row-major.
-static double       *ss_vec;   // Per-column sums of D^2.
-
-
-//------------------------------------------------------
-// Offset of element (j + 1, j) in a dist vector. Column
-// j's elements, rows j + 1 to n - 1, follow it in order.
-//------------------------------------------------------
-static inline size_t col_start(int j, int n) {
-  return (size_t) j * (size_t) n - (size_t) j * (size_t) (j + 1) / 2;
-}
-
-
-//------------------------------------------------------
-// Sum of squares of each column of the lower triangle.
-// Their total, divided by n, is trace(G).
-//------------------------------------------------------
-static void *sum_squares(void *arg) {
-
-  int thread_i  = ((worker_t *) arg)->i;
-  int n_threads = ((worker_t *) arg)->n;
-  int n         = n_sams;
-
-  for (int j = thread_i; j < n - 1; j += n_threads) {
-    const double *d  = d_vec + col_start(j, n);
-    int           nd = n - j - 1;
-    double        ss = 0;
-    for (int i = 0; i < nd; i++)
-      ss += d[i] * d[i];
-    ss_vec[j] = ss;
-  }
-
-  return NULL;
-}
-
-
-//------------------------------------------------------
-// Prefetch column j's run, rows i0 to i0 + nr - 1, ahead
-// of time (see pcoa.c).
-//------------------------------------------------------
-#define DBRDA_AHEAD 8
-
-static inline void prefetch_run(int j, int i0, int nr, int n) {
-#if defined(__GNUC__) || defined(__clang__)
-  if (j < i0) {
-    const char *p = (const char *) (d_vec + col_start(j, n) + (i0 - j - 1));
-    for (size_t b = 0; b < (size_t) nr * sizeof(double); b += 64)
-      __builtin_prefetch(p + b, 0, 0);
-  }
-#else
-  (void) j; (void) i0; (void) nr; (void) n;
-#endif
-}
-
-
-//------------------------------------------------------
-// Y = A * X, where A = D^2 and X has DBRDA_W columns.
-// Each task computes every element of DBRDA_ROWS rows of
-// Y, reading the parts of D's packed lower triangle that
-// those rows need as contiguous runs.
-//------------------------------------------------------
-static void *mult_a(void *arg) {
-
-  int thread_i  = ((worker_t *) arg)->i;
-  int n_threads = ((worker_t *) arg)->n;
-  int n         = n_sams;
-  int n_tasks   = (n + DBRDA_ROWS - 1) / DBRDA_ROWS;
-
-  const double *x = x_mtx;
-  double       *y = y_mtx;
-
-  #define X_J(v)  xj[v] = xc[v];
-  #define AXPY(v) yr[v] += a * xj[v];
-  #define DOT(v)  s[v]  += a * xi[v];
-  #define BOTH(v) s[v]  += a * xi[v]; yi[v] += a * xj[v];
-  #define ZERO(v) s[v]  = 0;
-  #define ADD(v)  yc[v] += s[v];
-
-  for (int task = thread_i; task < n_tasks; task += n_threads) {
-
-    int i0 = task * DBRDA_ROWS;
-    int i1 = (i0 + DBRDA_ROWS < n) ? i0 + DBRDA_ROWS : n;
-    int nr = i1 - i0;
-
-    double *yb = y + (size_t) i0 * DBRDA_W;
-    memset(yb, 0, (size_t) nr * DBRDA_W * sizeof(double));
-
-    double xj[DBRDA_W], s[DBRDA_W];
-
-    for (int j = 0; j < i0; j++) {
-      const double *d  = d_vec + col_start(j, n) + (i0 - j - 1);
-      const double *xc = x + (size_t) j * DBRDA_W;
-      prefetch_run(j + DBRDA_AHEAD, i0, nr, n);
-      DBRDA_REP(X_J)
-      for (int r = 0; r < nr; r++) {
-        double  a  = d[r] * d[r];
-        double *yr = yb + (size_t) r * DBRDA_W;
-        DBRDA_REP(AXPY)
-      }
-    }
-
-    for (int j = i0; j < i1; j++) {
-
-      const double *d  = d_vec + col_start(j, n) - (j + 1);
-      const double *xc = x + (size_t) j * DBRDA_W;
-      DBRDA_REP(X_J)
-      DBRDA_REP(ZERO)
-
-      for (int i = j + 1; i < i1; i++) {
-        double        a  = d[i] * d[i];
-        const double *xi = x + (size_t) i * DBRDA_W;
-        double       *yi = y + (size_t) i * DBRDA_W;
-        DBRDA_REP(BOTH)
-      }
-
-      for (int i = i1; i < n; i++) {
-        double        a  = d[i] * d[i];
-        const double *xi = x + (size_t) i * DBRDA_W;
-        DBRDA_REP(DOT)
-      }
-
-      double *yc = y + (size_t) j * DBRDA_W;
-      DBRDA_REP(ADD)
-    }
-  }
-
-  #undef X_J
-  #undef AXPY
-  #undef DOT
-  #undef BOTH
-  #undef ZERO
-  #undef ADD
-
-  return NULL;
-}
 
 
 //------------------------------------------------------
@@ -222,59 +69,8 @@ static void *mult_a(void *arg) {
 #define sym_eigen lz_sym_eigen
 #define combine   lz_combine
 
-// x -= F * (F' x), for the f orthonormal columns of F.
-static void project_out(const double *F, int f, double *x, int n) {
-  for (int j = 0; j < f; j++) {
-    const double *q = F + (size_t) j * n;
-    double        h = dot(q, x, n);
-    for (int i = 0; i < n; i++) x[i] -= h * q[i];
-  }
-}
+#define project_out lz_project_out
 
-
-//------------------------------------------------------
-// W = (I - FF') G V for `m` columns of length n (column-
-// major), with F's f columns orthonormal (f may be 0).
-// A lanczos_op_t: `ctx` is a dbrda_ctx_t.
-//------------------------------------------------------
-typedef struct {
-  int           n;
-  const double *F;          // n x f, or NULL.
-  int           f;
-  double       *xr, *yr;    // n x DBRDA_W row-major scratch.
-  int           n_threads;
-} dbrda_ctx_t;
-
-static void mult_g(const double *V, double *W, int m, void *ctx) {
-
-  dbrda_ctx_t *c = (dbrda_ctx_t *) ctx;
-  int     n  = c->n;
-  double *xr = c->xr;
-  double *yr = c->yr;
-
-  for (int v0 = 0; v0 < m; v0 += DBRDA_W) {
-
-    int mc = (m - v0 < DBRDA_W) ? m - v0 : DBRDA_W;
-
-    for (int i = 0; i < n; i++)
-      for (int v = 0; v < DBRDA_W; v++)
-        xr[(size_t) i * DBRDA_W + v] = (v < mc) ? V[(size_t) (v0 + v) * n + i] : 0;
-
-    x_mtx = xr;
-    y_mtx = yr;
-    run_parallel(mult_a, c->n_threads, n);
-
-    for (int v = 0; v < mc; v++) {
-      double *w = W + (size_t) (v0 + v) * n;
-      for (int i = 0; i < n; i++)
-        w[i] = yr[(size_t) i * DBRDA_W + v];
-      center(w, n);
-      for (int i = 0; i < n; i++)
-        w[i] *= -0.5;
-      project_out(c->F, c->f, w, n);
-    }
-  }
-}
 
 
 //------------------------------------------------------
@@ -282,9 +78,7 @@ static void mult_g(const double *V, double *W, int m, void *ctx) {
 // largest absolute value is positive.
 //------------------------------------------------------
 static void fix_sign(double *x, int n, double *y, int ny) {
-  int imax = 0;
-  for (int i = 1; i < n; i++)
-    if (fabs(x[i]) > fabs(x[imax])) imax = i;
+  int imax = lz_sign_index(x, n);
   if (x[imax] < 0) {
     for (int i = 0; i < n;  i++) x[i] = -x[i];
     for (int i = 0; i < ny; i++) y[i] = -y[i];
@@ -335,21 +129,12 @@ SEXP C_dbrda(
 
   const double ZERO = sqrt(DBL_EPSILON); // vegan's threshold
 
-  n_sams = n;
-  d_vec  = REAL(sexp_dist);
-
-
   //--------------------------------------------------
-  // trace(G) = (1/n) * sum_{i<j} d_ij^2.
+  // trace(G) = (1/n) * sum_{i<j} d_ij^2, and products
+  // with G (gower.c, shared with pcoa()).
   //--------------------------------------------------
-  ss_vec = (double *) R_alloc(n, sizeof(double));
-  run_parallel(sum_squares, n_threads, n);
-
-  double ss = 0;
-  for (int j = 0; j < n - 1; j++) ss += ss_vec[j];
-  if (!R_FINITE(ss))
-    error("`dm` must not contain NA, NaN, or infinite values.");
-  double trace_g = ss / n;      // unscaled
+  gower_t g;
+  double trace_g = gower_init(&g, REAL(sexp_dist), n, 16, n_threads); // unscaled
   double total   = trace_g * adj;
 
 
@@ -398,17 +183,9 @@ SEXP C_dbrda(
   // GQ = G * Q, then the conditional inertia and the
   // constrained matrix C = Qx' G Qx.
   //--------------------------------------------------
-  dbrda_ctx_t ctx = {
-    .n         = n,
-    .F         = NULL,
-    .f         = 0,
-    .xr        = (double *) R_alloc((size_t) n * DBRDA_W, sizeof(double)),
-    .yr        = (double *) R_alloc((size_t) n * DBRDA_W, sizeof(double)),
-    .n_threads = n_threads };
-
   double *GQ = (double *) R_alloc((size_t) n * (rq + 1), sizeof(double));
 
-  mult_g(Q, GQ, rq, &ctx);
+  gower_mult(Q, GQ, rq, &g);
   const double *GQx = GQ + (size_t) n * rz;
 
   double conditional = 0;
@@ -432,7 +209,8 @@ SEXP C_dbrda(
       C[(size_t) a * rx + b] = h;
     }
 
-  if (rx > 0) sym_eigen(C, rx, lam, Y, tmp);
+  if (rx > 0 && sym_eigen(C, rx, lam, Y, tmp))
+    error("The constrained eigenproblem did not converge."); // # nocov
 
 
   //--------------------------------------------------
@@ -471,13 +249,13 @@ SEXP C_dbrda(
     r_vecs = (double *) R_alloc((size_t) n * kr, sizeof(double));
     r_vals = (double *) R_alloc(kr, sizeof(double));
 
-    ctx.F = Q;
-    ctx.f = rq;
+    g.F = Q;
+    g.f = rq;
 
     lanczos_t lz = {
       .n = n, .k = kr, .dims = dims_r, .deflate = 1,
       .basis = Q, .n_basis = rq, .scale = trace_g,
-      .op = mult_g, .ctx = &ctx,
+      .op = gower_mult, .ctx = &g,
       .vecs = r_vecs, .vals = r_vals,
       .resid = (double *) R_alloc(kr, sizeof(double)) };
 

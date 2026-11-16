@@ -27,7 +27,17 @@
  *     Z' * y = S' * y + 1  * (z0' * y)
  *
  * cost O(nnz + n + p) per vector, and J is just subtracting
- * the mean. Block Lanczos (lanczos.c) then finds the top k
+ * the mean.
+ *
+ * Precision: a feature with no zeros is stored minus its
+ * mean (shift_vec), as T = S - 1 * shift', which keeps it
+ * sparse. Z * x then lacks 1 * (shift' * x), and Z' * y
+ * lacks shift * (1' * y), but every product here is either
+ * centered afterwards (Z * x) or made from a centered y
+ * (Z' * y), so both are exactly zero. Without the shift, a
+ * feature whose mean is large next to its spread (e.g.
+ * values near 1e9) loses most of its digits to
+ * cancellation. Block Lanczos (lanczos.c) then finds the top k
  * eigenpairs of the smaller of
  *
  *     A * A'  (n x n; when n - 1 <= p)  ->  U, s^2
@@ -75,7 +85,8 @@ static const double *z0_vec;   // Zeros' values per sample, or NULL.
 
 static int          *c_pos;    // CSC: feature j's non-zeros are
 static int          *c_idx;    //   c_idx/c_val[c_pos[j]..c_pos[j+1]).
-static double       *c_val;    //   Values of S.
+static double       *c_val;    //   Values of S, minus shift_vec[j].
+static double       *shift_vec; // Per-feature shift (0 if any zeros).
 
 static const double *x_mtx;    // Input, row-major, PCA_W columns.
 static double       *y_mtx;    // Output, row-major, PCA_W columns.
@@ -117,8 +128,9 @@ static void *mult_z(void *arg) {
       PCA_REP(ZERO)
 
       for (int e = r_pos[i]; e < r_pos[i + 1]; e++) {
-        double        a  = r_val[e] - z0;
-        const double *xj = x_mtx + (size_t) r_idx[e] * PCA_W;
+        int           j  = r_idx[e];
+        double        a  = r_val[e] - z0 - shift_vec[j];
+        const double *xj = x_mtx + (size_t) j * PCA_W;
         PCA_REP(DOT)
       }
 
@@ -366,6 +378,14 @@ SEXP C_pca(
   init_n_ptrs(10);
 
   ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
+
+  // Before normalizing: 'binary' would make NA a presence.
+  for (int e = 0; e < em->nnz; e++)
+    if (!R_FINITE(em->val_vec[e])) {
+      free_all();
+      error("`counts` must not contain NA, NaN, or infinite values.");
+    }
+
   if (norm) normalize(em, norm, n_threads, pseudocount);
 
   int n   = em->n_samples;
@@ -429,6 +449,18 @@ SEXP C_pca(
   amax_vec = (double *) R_alloc(p, sizeof(double));
   run_parallel(col_stats, n_threads, p);
 
+  // Features with no zeros: store S minus its column mean.
+  shift_vec = (double *) R_alloc(p, sizeof(double));
+  for (int j = 0; j < p; j++) {
+    double s = 0;
+    if (c_pos[j + 1] - c_pos[j] == n) {
+      for (int e = c_pos[j]; e < c_pos[j + 1]; e++) s += c_val[e];
+      s /= n;
+      for (int e = c_pos[j]; e < c_pos[j + 1]; e++) c_val[e] -= s;
+    }
+    shift_vec[j] = s;
+  }
+
   // Feature weights: 1 / sd (and 1 / var) when scaling.
   // Constant features get 0 and drop out, where prcomp()
   // would stop with an error.
@@ -478,7 +510,7 @@ SEXP C_pca(
     .yp        = (double *) R_alloc((size_t) p * PCA_W, sizeof(double)),
     .w_feat    = w_feat,
     .w2_feat   = w2_feat,
-    .n_threads = n_threads };
+    .n_threads = threads_for(n_threads, ((double) nnz + n + p) * PCA_W, 1e6) };
 
   SEXP sexp_scores   = PROTECT(allocMatrix(REALSXP, n, k));
   SEXP sexp_loadings = PROTECT(allocMatrix(REALSXP, p, k));
@@ -493,7 +525,18 @@ SEXP C_pca(
     .scale = total, .op = side_n ? op_samples : op_features, .ctx = &ctx,
     .vecs = side_n ? scores : loadings, .vals = eig, .resid = REAL(sexp_res) };
 
-  lanczos(&lz);
+  // No variation at all (e.g., every feature constant): no
+  // axes, rather than eigenvectors of rounding noise.
+  if (total > 0) {
+    lanczos(&lz);
+  }
+  else {
+    memset(lz.vecs, 0, (size_t) len * k * sizeof(double));
+    memset(eig,     0, (size_t) k * sizeof(double));
+    memset(REAL(sexp_res), 0, (size_t) k * sizeof(double));
+    lz.steps     = 0;
+    lz.converged = 1;
+  }
 
 
   //--------------------------------------------------
@@ -534,9 +577,7 @@ SEXP C_pca(
     double lmult = side_n ? ((s > 0) ? 1 / s : 0) : ((s > 0) ? 1 : 0);
     if (s == 0) xmult = 0;
 
-    int imax = 0;
-    for (int i = 1; i < n; i++)
-      if (fabs(x[i]) > fabs(x[imax])) imax = i;
+    int imax = lz_sign_index(x, n);
 
     if (x[imax] < 0) { xmult = -xmult; lmult = -lmult; }
 

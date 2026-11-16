@@ -188,6 +188,30 @@
   storage.mode(m) <- 'integer'
   expect_identical(pca(m), pca(m30))
 
+  # Shifting every feature changes nothing: PCA centers them. (Features
+  # far from 0 relative to their spread used to lose most of their digits.)
+  set.seed(5)
+  xn <- matrix(rnorm(1200), 60, 20)
+  p0 <- pca(xn, k = 3, cpus = 1)
+  for (off in c(1e4, 1e9)) {
+    p1 <- pca(xn + off, k = 3, cpus = 1)
+    expect_equal(attr(p1, 'eig'), attr(p0, 'eig'), tolerance = 1e-6) # x + 1e9 is itself rounded
+    expect_equal(unclass(p1)[, ], unclass(p0)[, ], tolerance = 1e-6)
+  }
+  xs <- xn
+  xs[, 1] <- 5 + xs[, 1] * 1e-6
+  expect_equal(attr(pca(xs, scale = TRUE, k = 3), 'eig'), attr(pca(xn, scale = TRUE, k = 3), 'eig'), tolerance = 1e-8)
+
+  # Constant data: no axes, not rounding noise.
+  expect_warning(ord <- pca(matrix(3, 10, 5)), 'only 0 of the first 3')
+  expect_identical(dim(ord), c(10L, 0L))
+
+  # NA is an error, whatever the normalization.
+  m_na <- m30
+  m_na[3, 3] <- NA
+  expect_error(pca(m_na, norm = 'binary'), 'must not contain NA')
+  expect_error(pca(m_na, scale = TRUE),    'must not contain NA')
+
   # Bad input.
   expect_error(pca(m30, k = 0),        '`k` must be')
   expect_error(pca(m30, k = 1.5),      '`k` must be')

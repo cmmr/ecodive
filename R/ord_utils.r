@@ -140,6 +140,23 @@ ord_keep <- function (eig, k = length(eig)) {
 
 
 
+# Flips each column of `x` so that its first element whose magnitude is
+# within a relative 1e-8 of the largest is positive, as lz_sign_index() does
+# in C. Allowing for rounding keeps last-bit differences between platforms
+# from breaking a tie the other way.
+ord_flip <- function (x) {
+  for (j in seq_len(ncol(x))) {
+    v <- x[, j]
+    if (length(v) == 0) next
+    a <- abs(v)
+    i <- which(a >= max(a) * (1 - 1e-8))[[1]]
+    if (v[[i]] < 0) x[, j] <- -v
+  }
+  x
+}
+
+
+
 # The shared ordination result: `points`, an n x k numeric matrix, with one
 # row per sample (named `labels`) and one column per axis, named `prefix`
 # followed by 1, 2, ..., or else `cols`. Of class "ecodive_ord". Attributes

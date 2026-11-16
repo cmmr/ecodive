@@ -269,11 +269,7 @@ umap <- function (
       stop(
         'UMAP diverged: coordinates became infinite or NaN. ',
         'Try a smaller `learning_rate` or `repulsion_strength`.', call. = FALSE )
-    if (n > 0) x <- scale(x, center = TRUE, scale = FALSE)
-    for (j in seq_len(k)) {
-      v <- x[, j]
-      if (n > 0 && v[[which.max(abs(v))]] < 0) x[, j] <- -v
-    }
+    if (n > 0) x <- ord_flip(scale(x, center = TRUE, scale = FALSE))
     ord_result(
       matrix(x, n, k), 'umap', labels, prefix = 'UMAP',
       a        = ab[['a']],

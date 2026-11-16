@@ -114,7 +114,7 @@ static void run_points(pthread_func_t func, int n_threads) {
 // Distances from point i to every point, into out[0..n-1].
 //------------------------------------------------------
 static inline size_t col_start(int i) {
-  return (size_t) i * ts_n - (size_t) i * (i + 1) / 2;
+  return dist_col_start(i, ts_n);
 }
 
 static void dist_row(int i, double *out) {

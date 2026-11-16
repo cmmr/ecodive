@@ -62,13 +62,7 @@
 #define SKNN_MINK   1e-3
 
 
-//------------------------------------------------------
-// Offset of element (j + 1, j) in a dist vector. Column
-// j's elements, rows j + 1 to n - 1, follow it in order.
-//------------------------------------------------------
-static inline size_t col_start(int j, int n) {
-  return (size_t) j * (size_t) n - (size_t) j * (size_t) (j + 1) / 2;
-}
+#define col_start dist_col_start // ecodive.h
 
 
 //======================================================
@@ -188,9 +182,9 @@ static void *knn_worker(void *arg) {
       heap_offer(HEAP(i), 0.0, i);
 
       // Later points: column i, contiguous.
-      const double *d = kn_d + col_start(i, n) - (i + 1);
+      const double *d = kn_d + col_start(i, n);
       for (int j = i + 1; j < n; j++)
-        heap_offer(HEAP(i), d[j], j);
+        heap_offer(HEAP(i), d[j - i - 1], j);
 
       heap_sort(kn_dist + (size_t) i * k, kn_idx + (size_t) i * k, k);
     }
@@ -694,9 +688,7 @@ SEXP C_umap_spectral(SEXP sexp_graph, SEXP sexp_k, SEXP sexp_n_threads) {
   for (int c = 0; c < nev; c++) {
 
     double *out = vec + (size_t) c * n;
-    int     big = 0;
-    for (int r = 1; r < n; r++)
-      if (fabs(out[r]) > fabs(out[big])) big = r;
+    int     big = lz_sign_index(out, n);
     if (out[big] < 0)
       for (int r = 0; r < n; r++) out[r] = -out[r];
 
@@ -920,6 +912,10 @@ SEXP C_umap_sgd(
   size_t n_edges = 0;
   for (int e = 0; e < nnz; e++)
     if (!(gx[e] < wmax / n_epochs)) n_edges++;
+
+  // Each epoch samples about every edge, and negative_sample_rate
+  // negative samples for each.
+  n_threads = threads_for(n_threads, (double) n_edges * (1 + nsr_in) * ndim * 20, 1e6);
 
   size_t ea = n_edges > 0 ? n_edges : 1;
   int   *ptr  = (int *)   R_alloc(n + 1, sizeof(int));

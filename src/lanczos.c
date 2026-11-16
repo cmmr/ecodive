@@ -153,9 +153,11 @@ static int orthonormalize(
 // JAMA routines tred2() and tql2(), which follow EISPACK.
 // Eigenvalues go to `vals` in decreasing order, and the
 // matching unit eigenvectors to the columns of `vecs`.
-// `tmp` needs room for 2 * s doubles.
+// `tmp` needs room for 2 * s doubles. Returns 0, or 1 if
+// the QL iteration failed to converge for an eigenvalue
+// (after 100 iterations; LAPACK reports this as info > 0).
 //------------------------------------------------------
-void sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) {
+int sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) {
 
   #define V(i, j) vecs[(size_t) (j) * s + (i)]
 
@@ -259,6 +261,7 @@ void sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) 
   e[s - 1] = 0;
 
   double f = 0, tst1 = 0;
+  int    failed = 0;
 
   for (int l = 0; l < s; l++) {
 
@@ -270,6 +273,7 @@ void sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) 
 
     // If m == l, d[l] is already an eigenvalue.
     if (m > l) {
+      int done = 0;
       for (int iter = 0; iter < 100; iter++) {
 
         // Compute the implicit shift.
@@ -310,8 +314,9 @@ void sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) 
         e[l] = sn * p;
         d[l] = c * p;
 
-        if (fabs(e[l]) <= DBL_EPSILON * tst1) break;
+        if (fabs(e[l]) <= DBL_EPSILON * tst1) { done = 1; break; }
       }
+      if (!done) failed = 1; // # nocov
     }
     d[l] = d[l] + f;
     e[l] = 0;
@@ -334,6 +339,7 @@ void sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) 
   }
 
   #undef V
+  return failed;
 }
 
 
@@ -443,7 +449,7 @@ void lanczos(lanczos_t *lz) {
     //------------------------------------------------
     for (int j = 0; j < s_w; j++)
       memcpy(Hc + (size_t) j * s_w, H + (size_t) j * M, (size_t) s_w * sizeof(double));
-    sym_eigen(Hc, s_w, eig, Y, tmp);
+    int ql_failed = sym_eigen(Hc, s_w, eig, Y, tmp);
 
     double scale = trace;
     for (int j = 0; j < s_w; j++)
@@ -461,8 +467,9 @@ void lanczos(lanczos_t *lz) {
     if (worst < best / 2) { best = worst; stalled = 0; }
     else                  { stalled++;                }
 
-    converged = worst <= LZ_TOL ||
-      (worst <= LZ_TOL_STALL && stalled >= LZ_STALL);
+    // A basis of the whole space makes Rayleigh-Ritz exact.
+    converged = !ql_failed && (s_w == dims || worst <= LZ_TOL ||
+      (worst <= LZ_TOL_STALL && stalled >= LZ_STALL));
 
     if (converged || s_w == dims || steps >= LZ_MAX_STEPS) break;
 
@@ -475,7 +482,10 @@ void lanczos(lanczos_t *lz) {
     //------------------------------------------------
     memcpy(R, W + (size_t) n * (s_w - m), (size_t) n * m * sizeof(double));
     int r = orthonormalize(V, s_v, R, m, n, deflate, F, f, &rng);
-    if (r == 0) break; // # nocov (only if the space is exhausted)
+    if (r == 0) { // # nocov start: only if the space is exhausted,
+      converged = !ql_failed; // which makes Rayleigh-Ritz exact.
+      break;
+    } // # nocov end
 
 
     //------------------------------------------------
@@ -516,4 +526,37 @@ void lanczos(lanczos_t *lz) {
 
   lz->steps     = steps;
   lz->converged = converged;
+}
+
+
+//------------------------------------------------------
+// Where to read an axis's sign from: the first element
+// (lowest index) whose magnitude is within a relative
+// 1e-8 of the largest. An axis is flipped so that this
+// element is positive. Allowing for rounding keeps a tie
+// (e.g., two samples symmetric about the center) from
+// being broken by the last bits of a computation, which
+// differ between compilers and platforms.
+//------------------------------------------------------
+int lz_sign_index(const double *x, int n) {
+  double amax = 0;
+  for (int i = 0; i < n; i++)
+    if (fabs(x[i]) > amax) amax = fabs(x[i]);
+  double floor_ = amax * (1 - 1e-8);
+  for (int i = 0; i < n; i++)
+    if (fabs(x[i]) >= floor_) return i;
+  return 0; // # nocov
+}
+
+
+//------------------------------------------------------
+// x -= F * (F' x), for the f orthonormal columns of F
+// (n x f, column-major; nothing if f is 0).
+//------------------------------------------------------
+void lz_project_out(const double *F, int f, double *x, int n) {
+  for (int j = 0; j < f; j++) {
+    const double *q = F + (size_t) j * n;
+    double        h = lz_dot(q, x, n);
+    for (int i = 0; i < n; i++) x[i] -= h * q[i];
+  }
 }

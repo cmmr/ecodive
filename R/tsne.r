@@ -277,10 +277,7 @@ tsne <- function (
 
   result <- function (x, kl_divergence) {
     # Each axis's largest absolute coordinate is positive.
-    for (j in seq_len(ncol(x))) {
-      v <- x[, j]
-      if (length(v) && v[[which.max(abs(v))]] < 0) x[, j] <- -v
-    }
+    x <- ord_flip(x)
     ord_result(
       x, 'tsne', labels, prefix = 'TSNE',
       kl_divergence = kl_divergence,
