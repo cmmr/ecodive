@@ -10,6 +10,7 @@ importFrom(utils, combn)
 
 export(alpha_div)
 export(ace)
+export(anosim)
 export(berger)
 export(brillouin)
 export(chao1)

@@ -8,6 +8,7 @@
 
 
 extern SEXP C_alpha_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_anosim(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_beta_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_blas_settable(void);
 extern SEXP C_blas_threads(SEXP);
@@ -38,6 +39,7 @@ extern void init_blas_threads(void);
 
 static const R_CallMethodDef CallEntries[] = {
   {"C_alpha_div", (DL_FUNC) &C_alpha_div, 6},
+  {"C_anosim",    (DL_FUNC) &C_anosim,    6},
   {"C_beta_div",  (DL_FUNC) &C_beta_div,  8},
   {"C_blas_settable", (DL_FUNC) &C_blas_settable, 0},
   {"C_blas_threads",  (DL_FUNC) &C_blas_threads,  1},
