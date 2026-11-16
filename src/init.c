@@ -22,6 +22,8 @@ extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_permanova(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_permdisp(SEXP, SEXP, SEXP);
+extern SEXP C_permdisp_perm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pthreads(void);
 extern SEXP C_stop_thread_pool(void);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -53,6 +55,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_pca",       (DL_FUNC) &C_pca,       7},
   {"C_pcoa",      (DL_FUNC) &C_pcoa,      4},
   {"C_permanova", (DL_FUNC) &C_permanova, 9},
+  {"C_permdisp",  (DL_FUNC) &C_permdisp,  3},
+  {"C_permdisp_perm", (DL_FUNC) &C_permdisp_perm, 6},
   {"C_pthreads",  (DL_FUNC) &C_pthreads,  0},
   {"C_stop_thread_pool", (DL_FUNC) &C_stop_thread_pool, 0},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
