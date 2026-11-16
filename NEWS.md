@@ -1,5 +1,12 @@
 # ecodive 2.4.0
 
+* New `pcoa()` runs a principal coordinates analysis (classical
+  multidimensional scaling) on a `dist` object, such as from `beta_div()`. It
+  gives the same coordinates and eigenvalues as `cmdscale()`, `ape::pcoa()`,
+  and `vegan::wcmdscale()` (up to each axis's sign), but computes only the
+  first few axes (`k = 3` by default), in parallel C, without forming an
+  n-by-n matrix. Its results are identical for any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference

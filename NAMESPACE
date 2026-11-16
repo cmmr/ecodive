@@ -63,5 +63,6 @@ export(match_metric)
 
 export(blas_threads)
 export(n_cpus)
+export(pcoa)
 export(rarefy)
 export(read_tree)

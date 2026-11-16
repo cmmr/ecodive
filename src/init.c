@@ -11,6 +11,7 @@ extern SEXP C_alpha_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_beta_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_blas_settable(void);
 extern SEXP C_blas_threads(SEXP);
+extern SEXP C_pcoa(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pthreads(void);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
@@ -24,6 +25,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_beta_div",  (DL_FUNC) &C_beta_div,  8},
   {"C_blas_settable", (DL_FUNC) &C_blas_settable, 0},
   {"C_blas_threads",  (DL_FUNC) &C_blas_threads,  1},
+  {"C_pcoa",      (DL_FUNC) &C_pcoa,      4},
   {"C_pthreads",  (DL_FUNC) &C_pthreads,  0},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
