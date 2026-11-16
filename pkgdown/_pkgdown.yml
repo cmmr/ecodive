@@ -60,6 +60,7 @@ reference:
   - ordination
   - pcoa
   - nmds
+  - umap
   - list_ordinations
 
 - title: Utilities & Helpers

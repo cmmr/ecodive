@@ -23,6 +23,16 @@
   Random starts come from a `seed` argument, and results are identical for
   any number of `cpus`.
 
+* New `umap()` runs a uniform manifold approximation and projection (UMAP)
+  on a `dist` object, following `uwot::umap()` and its defaults: exact
+  nearest neighbours, smooth-kNN calibration and fuzzy union (identical to
+  uwot's), a spectral start from the normalized graph Laplacian, and uwot's
+  single-threaded stochastic gradient descent, which gives uwot's coordinates
+  from the same start and per-epoch seeds. The neighbours are found in
+  parallel C straight from the dist triangle, without an n-by-n matrix.
+  Random numbers come from a `seed` argument, and results are identical for
+  any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference
