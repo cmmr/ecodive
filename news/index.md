@@ -2,6 +2,43 @@
 
 ## ecodive 2.4.0
 
+- New [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) runs
+  a principal coordinates analysis (classical multidimensional scaling)
+  on a `dist` object, such as from
+  [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md).
+  It gives the same coordinates and eigenvalues as
+  [`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html),
+  [`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html), and
+  [`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html)
+  (up to each axis’s sign), but computes only the first few axes
+  (`k = 3` by default), in parallel C, without forming an n-by-n matrix.
+  Its results are identical for any number of `cpus`.
+
+- New
+  [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md)
+  runs any ordination method by name, as
+  [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
+  does for beta diversity metrics, with the method’s own arguments.
+  [`list_ordinations()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
+  and
+  [`match_ordination()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
+  list and look up the methods. Every ordination method returns the same
+  kind of result: a sample-by-axis matrix whose attributes start with
+  `method`, `eig`, and `prop`.
+
+- New [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) runs
+  a non-metric multidimensional scaling, following
+  [`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)
+  with its `monoMDS()` engine: a start from the PCoA solution, then
+  random starts until the best solution is found again, then centering,
+  rotation to principal components, and scaling. Its C port of `monoMDS`
+  gives the same result as
+  [`vegan::monoMDS()`](https://vegandevs.github.io/vegan/reference/monoMDS.html)
+  from the same starting configuration. Random starts run in parallel,
+  one per thread, and share one sorted copy of the distances, so memory
+  use is a fraction of `metaMDS()`’s. Random starts come from a `seed`
+  argument, and results are identical for any number of `cpus`.
+
 - New
   [`blas_threads()`](https://cmmr.github.io/ecodive/reference/blas_threads.md)
   gets or sets how many threads R’s BLAS/LAPACK library uses, while R is

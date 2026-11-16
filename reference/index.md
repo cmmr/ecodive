@@ -151,6 +151,20 @@ Distance measures based on phylogenetic branch lengths (UniFrac family).
 - [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.md)
   : Variance-Adjusted Weighted UniFrac
 
+## Ordination
+
+Plot samples by their beta diversity distances.
+
+- [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md)
+  : Ordination Wrapper Function
+- [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) :
+  Principal Coordinates Analysis (PCoA)
+- [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) :
+  Non-metric Multidimensional Scaling (NMDS)
+- [`list_ordinations()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
+  [`match_ordination()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
+  : Find and Browse Ordination Methods
+
 ## Utilities & Helpers
 
 Tools for programmatic access, data manipulation, and configuration.
