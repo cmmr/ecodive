@@ -39,7 +39,7 @@
     expect_equal(attr(ord, 'prop'),  cm$eig[1:k] / sum(cm$eig), tolerance = 1e-10)
   }
 
-  # More axes than one pass over `d` computes at a time.
+  # More axes than one pass over `dm` computes at a time.
   d   <- bray(m150)
   ord <- pcoa(d, k = 6, cpus = 1)
   cm  <- cmdscale(d, k = 6, eig = TRUE)

@@ -13,7 +13,7 @@
 #'
 #' @inheritParams documentation
 #'
-#' @param d   A `dist` object, such as from [beta_div()] or [bray()], or a
+#' @param dm  A `dist` object, such as from [beta_div()] or [bray()], or a
 #'        symmetric numeric matrix of distances. Must not contain `NA`s.
 #'
 #' @param k   The number of axes to compute. Default: `3`
@@ -41,7 +41,7 @@
 #' time proportional to \eqn{n^3}. `pcoa()` finds only the largest `k`
 #' eigenvalues, by block Lanczos iteration with thick restarts. That only needs
 #' products of \eqn{B} with a few vectors at a time, which are computed in
-#' parallel straight from `d`, without ever forming \eqn{B}.
+#' parallel straight from `dm`, without ever forming \eqn{B}.
 #'
 #'
 #' **Proportion of variance**
@@ -93,7 +93,7 @@
 #'
 #'     plot(ord[, 1:2], asp = 1)
 #'
-pcoa <- function (d, k = 3L, cpus = n_cpus()) {
+pcoa <- function (dm, k = 3L, cpus = n_cpus()) {
 
   validate_cpus()
 
@@ -108,27 +108,27 @@ pcoa <- function (d, k = 3L, cpus = n_cpus()) {
 
 
   # The packed lower triangle of the distance matrix, as in `dist` objects.
-  if (inherits(d, 'dist')) {
+  if (inherits(dm, 'dist')) {
 
-    n      <- as.integer(attr(d, 'Size', exact = TRUE))
-    labels <- attr(d, 'Labels', exact = TRUE)
+    n      <- as.integer(attr(dm, 'Size', exact = TRUE))
+    labels <- attr(dm, 'Labels', exact = TRUE)
 
-    if (length(n) != 1 || is.na(n) || length(d) != n * (n - 1) / 2)
-      stop('`d` is not a valid dist object.', call. = FALSE)
+    if (length(n) != 1 || is.na(n) || length(dm) != n * (n - 1) / 2)
+      stop('`dm` is not a valid dist object.', call. = FALSE)
   }
   else {
 
-    d <- as.matrix(d)
-    n <- nrow(d)
+    dm <- as.matrix(dm)
+    n  <- nrow(dm)
 
-    if (!is.numeric(d) || n != ncol(d) || !isSymmetric(unname(d)))
-      stop('`d` must be a dist object or a symmetric numeric matrix.', call. = FALSE)
+    if (!is.numeric(dm) || n != ncol(dm) || !isSymmetric(unname(dm)))
+      stop('`dm` must be a dist object or a symmetric numeric matrix.', call. = FALSE)
 
-    labels <- if (is.null(rownames(d))) colnames(d) else rownames(d)
-    d      <- d[lower.tri(d)]
+    labels <- if (is.null(rownames(dm))) colnames(dm) else rownames(dm)
+    dm     <- dm[lower.tri(dm)]
   }
 
-  if (!is.double(d)) storage.mode(d) <- 'double'
+  if (!is.double(dm)) storage.mode(dm) <- 'double'
 
 
   k <- min(k, n - 1L)
@@ -142,7 +142,7 @@ pcoa <- function (d, k = 3L, cpus = n_cpus()) {
 
   } else {
 
-    res <- .Call(C_pcoa, d, n, k, cpus)
+    res <- .Call(C_pcoa, dm, n, k, cpus)
 
     if (!res$converged) # nocov start
       warning('PCoA did not converge; coordinates may be inexact.', call. = FALSE)

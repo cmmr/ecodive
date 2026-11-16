@@ -581,7 +581,7 @@ SEXP C_pcoa(SEXP sexp_dist, SEXP sexp_n, SEXP sexp_k, SEXP sexp_n_threads) {
   double total = 0;
   for (int j = 0; j < n - 1; j++) total += ss_vec[j];
   if (!R_FINITE(total))
-    error("`d` must not contain NA, NaN, or infinite values.");
+    error("`dm` must not contain NA, NaN, or infinite values.");
   double trace = total / n;
 
 

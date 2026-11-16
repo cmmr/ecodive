@@ -4,10 +4,10 @@
 \alias{pcoa}
 \title{Principal Coordinates Analysis (PCoA)}
 \usage{
-pcoa(d, k = 3L, cpus = n_cpus())
+pcoa(dm, k = 3L, cpus = n_cpus())
 }
 \arguments{
-\item{d}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
+\item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
 symmetric numeric matrix of distances. Must not contain \code{NA}s.}
 
 \item{k}{The number of axes to compute. Default: \code{3}}
@@ -46,7 +46,7 @@ coordinates are \eqn{u_i\sqrt{\lambda_i}}.
 time proportional to \eqn{n^3}. \code{pcoa()} finds only the largest \code{k}
 eigenvalues, by block Lanczos iteration with thick restarts. That only needs
 products of \eqn{B} with a few vectors at a time, which are computed in
-parallel straight from \code{d}, without ever forming \eqn{B}.
+parallel straight from \code{dm}, without ever forming \eqn{B}.
 
 \strong{Proportion of variance}
 
