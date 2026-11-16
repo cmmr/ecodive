@@ -17,37 +17,37 @@
         dms[[cs$dist]], meta[[cs$groups]], type = cs$type, bias_adjust = cs$bias,
         pairwise = TRUE, permutations = ex$perms, cpus = 1 )
 
-      tbl <- unname(as.matrix(res))
+      tbl <- unname(as.matrix(res$table))
 
       # Medians: betadisper()'s optimizer stops early, so compare with it
       # loosely, and with the exact spatial medians to rounding.
       tol <- if (cs$type == 'median') 1e-3 else 1e-10
 
-      expect_equal(unname(attr(res, 'distances')), cs$distances, tolerance = tol, info = info)
-      expect_equal(attr(res, 'dispersions'), c(cs$dispersions), tolerance = tol, info = info)
+      expect_equal(unname(res$distances), cs$distances, tolerance = tol, info = info)
+      expect_equal(res$dispersions, c(cs$dispersions), tolerance = tol, info = info)
       expect_equal(tbl[, 1:5], cs$table[, 1:5], tolerance = tol, info = info)
-      expect_equal(unname(attr(res, 'f_perm')[, 1]), cs$f_perm, tolerance = tol, info = info)
+      expect_equal(unname(attr(res, 'f_perm')), cs$f_perm, tolerance = tol, info = info)
 
-      pw <- attr(res, 'pairwise')
+      pw <- res$pairwise
       expect_equal(pw$t, cs$t_obs, tolerance = tol, info = info)
-      expect_equal(pw[['Pr(>|t|)']], unname(cs$pairwise$observed), tolerance = tol, info = info)
+      expect_equal(pw$p_value, unname(cs$pairwise$observed), tolerance = tol, info = info)
       if (!is.null(cs$t_perm))
         expect_equal(unname(attr(res, 't_perm')), cs$t_perm, tolerance = tol, info = info)
 
       if (is.null(cs$exact)) {
         # Exact: identical p-values.
         expect_identical(tbl[, 6], cs$table[, 6], info = info)
-        expect_identical(pw[['Pr(perm)']], unname(cs$pairwise$permuted), info = info)
+        expect_identical(pw$p_value_perm, unname(cs$pairwise$permuted), info = info)
       }
       else {
-        expect_equal(unname(attr(res, 'distances')), cs$exact, tolerance = 1e-10, info = info)
+        expect_equal(unname(res$distances), cs$exact, tolerance = 1e-10, info = info)
       }
     }
 
     # Free permutation within strata: the reference's p-value, up to
     # sampling error.
     res <- permdisp(dms$bray, 'half', meta, type = 'centroid', permutations = 9999, strata = 'block', cpus = 2)
-    expect_true(abs(res[['Pr(>F)']][[1]] - ex$strata_p) < 0.01)
+    expect_true(abs(res$p_value - ex$strata_p) < 0.01)
   }
 
 
@@ -73,22 +73,22 @@
     z2[i] <- C^2 %*% sg
   }
   res <- permdisp(d, g, type = 'centroid', permutations = 0, cpus = 1)
-  expect_equal(unname(attr(res, 'distances')), sqrt(pmax(z2, 0)), tolerance = 1e-10)
+  expect_equal(unname(res$distances), sqrt(pmax(z2, 0)), tolerance = 1e-10)
 
   # The ANOVA is lm()'s.
-  z <- attr(res, 'distances')
+  z <- res$distances
   a <- stats::anova(stats::lm(z ~ g))
-  expect_equal(res$Df, a$Df)
-  expect_equal(res[['Sum Sq']], a[['Sum Sq']], tolerance = 1e-12)
-  expect_equal(res$F[[1]], a[['F value']][[1]], tolerance = 1e-12)
-  expect_equal(unname(attr(res, 'dispersions')), as.vector(tapply(z, g, mean)), tolerance = 1e-14)
+  expect_equal(res$table$Df, a$Df)
+  expect_equal(res$table[['Sum Sq']], a[['Sum Sq']], tolerance = 1e-12)
+  expect_equal(res$statistic[['F']], a[['F value']][[1]], tolerance = 1e-12)
+  expect_equal(unname(res$dispersions), as.vector(tapply(z, g, mean)), tolerance = 1e-14)
 
   # Euclidean distances: the spatial median minimizes the summed distance,
-  # and the median of the distances themselves works.
+  # where the centroid minimizes the summed squared distance.
   de  <- dms$euclidean
   res <- permdisp(de, g, permutations = 0, cpus = 1)
-  zm  <- attr(res, 'distances')
-  zc  <- attr(permdisp(de, g, type = 'centroid', permutations = 0, cpus = 1), 'distances')
+  zm  <- res$distances
+  zc  <- permdisp(de, g, type = 'centroid', permutations = 0, cpus = 1)$distances
   for (lv in levels(g))
     expect_true(sum(zm[g == lv]) <= sum(zc[g == lv]) * (1 + 1e-12))
 
@@ -97,17 +97,18 @@
   # ones.
   id  <- matrix(seq_len(36), 5, 36, byrow = TRUE)
   res <- permdisp(d, g, permutations = id, pairwise = TRUE, cpus = 1)
-  expect_equal(unname(attr(res, 'f_perm')[, 1]), rep(0, 5), tolerance = 1e-12)
-  expect_equal(unname(attr(res, 't_perm')), matrix(attr(res, 'pairwise')$t, 5, 3, byrow = TRUE), tolerance = 1e-12)
-  expect_identical(res[['Pr(>F)']][[1]], 1 / 6)
-  expect_identical(attr(res, 'pairwise')[['Pr(perm)']], c(1, 1, 1))
+  expect_equal(unname(attr(res, 'f_perm')), rep(0, 5), tolerance = 1e-12)
+  expect_equal(unname(attr(res, 't_perm')), matrix(res$pairwise$t, 5, 3, byrow = TRUE), tolerance = 1e-12)
+  expect_identical(res$p_value, 1 / 6)
+  expect_identical(res$pairwise$p_value_perm, c(1, 1, 1))
 
   # bias_adjust scales each distance by sqrt(n / (n - 1)).
   r0 <- permdisp(d, g, type = 'centroid', permutations = 0, cpus = 1)
   r1 <- permdisp(d, g, type = 'centroid', bias_adjust = TRUE, permutations = 0, cpus = 1)
   ng <- as.vector(table(g))[as.integer(g)]
-  expect_equal(attr(r1, 'distances'), attr(r0, 'distances') * sqrt(ng / (ng - 1)), tolerance = 1e-14)
-  expect_true(grepl('small groups', attr(r1, 'heading')))
+  expect_equal(r1$distances, r0$distances * sqrt(ng / (ng - 1)), tolerance = 1e-14)
+  expect_true(r1$bias_adjust)
+  expect_true(any(grepl('small groups', test_details.ecodive_permdisp(r1, 4))))
 
 
 
@@ -115,47 +116,73 @@
 
   res <- permdisp(d, g, permutations = 99, cpus = 1)
 
-  expect_inherits(res, 'anova')
-  expect_inherits(res, 'data.frame')
-  expect_identical(names(res), c('Df', 'Sum Sq', 'Mean Sq', 'F', 'N.Perm', 'Pr(>F)'))
-  expect_identical(rownames(res), c('Groups', 'Residuals'))
-  expect_identical(res$Df, c(2, 33))
-  expect_identical(res$N.Perm, c(99, NA))
-  expect_identical(names(attr(res, 'distances')), rownames(meta))
-  expect_identical(names(attr(res, 'dispersions')), levels(g))
-  expect_identical(dim(attr(res, 'f_perm')), c(99L, 1L))
-  expect_identical(colnames(attr(res, 'f_perm')), 'Groups')
-  expect_identical(attr(res, 'type'), 'median')
-  expect_null(attr(res, 'pairwise'))
+  expect_identical(class(res), c('ecodive_permdisp', 'ecodive_test'))
+  expect_identical(names(res), c(
+    'statistic', 'p_value', 'z', 'n_perm', 'table', 'distances',
+    'dispersions', 'type', 'bias_adjust', 'pairwise', 'permutation' ))
+  expect_identical(names(res$statistic), 'F')
+  expect_identical(res$statistic[['F']], res$table$F[[1]])
+  expect_identical(res$p_value, res$table[['Pr(>F)']][[1]])
+  expect_identical(res$n_perm, 99L)
+  expect_identical(res$permutation, 'free')
+  f <- attr(res, 'f_perm')
+  expect_true(is.double(f) && is.null(dim(f)) && length(f) == 99)
+  expect_equal(res$z, (res$statistic[['F']] - mean(f)) / stats::sd(f), tolerance = 1e-14)
+  expect_identical(attr(res, 'title'), 'Homogeneity of multivariate dispersions (PERMDISP)')
+
+  tbl <- res$table
+  expect_inherits(tbl, 'anova')
+  expect_identical(names(tbl), c('Df', 'Sum Sq', 'Mean Sq', 'F', 'N.Perm', 'Pr(>F)'))
+  expect_identical(rownames(tbl), c('Groups', 'Residuals'))
+  expect_identical(tbl$Df, c(2, 33))
+  expect_identical(tbl$N.Perm, c(99, NA))
+  expect_identical(names(res$distances), rownames(meta))
+  expect_identical(names(res$dispersions), levels(g))
+  expect_identical(res$type, 'median')
+  expect_false(res$bias_adjust)
+  expect_null(res$pairwise)
   expect_null(attr(res, 't_perm'))
-  expect_true(res[['Pr(>F)']][[1]] >= 1 / 100)
-  expect_true(any(grepl('spatial medians', attr(res, 'heading'))))
-  expect_true(any(grepl('Number of permutations: 99', attr(res, 'heading'))))
+  expect_true(res$p_value >= 1 / 100)
+  expect_true(any(grepl('spatial medians', test_details.ecodive_permdisp(res, 4))))
+  if (exists('print.ecodive_test')) { # The shared print method (mrpp branch).
+    out <- utils::capture.output(print(res))
+    expect_true(any(grepl('Permutations: 99 (free)', out, fixed = TRUE)))
+    expect_true(any(grepl('spatial medians', out)))
+  }
 
   res <- permdisp(d, g, type = 'centroid', pairwise = TRUE, permutations = 19, cpus = 1)
-  pw  <- attr(res, 'pairwise')
+  pw  <- res$pairwise
   expect_identical(rownames(pw), c('ctrl-low', 'ctrl-high', 'low-high'))
-  expect_identical(names(pw), c('t', 'Df', 'Pr(>|t|)', 'Pr(perm)'))
+  expect_identical(names(pw), c('t', 'Df', 'p_value', 'p_value_perm'))
   expect_identical(pw$Df, c(24, 22, 20))
   expect_identical(dim(attr(res, 't_perm')), c(19L, 3L))
   expect_identical(colnames(attr(res, 't_perm')), rownames(pw))
-  expect_true(any(grepl('centroids', attr(res, 'heading'))))
+  out <- test_details.ecodive_permdisp(res, 4)
+  expect_true(any(grepl('centroids', out)) && any(grepl('ctrl-high', out)))
+
+  # A row for comparing tests, once as.data.frame.ecodive_test() is in.
+  if (exists('as.data.frame.ecodive_test')) {
+    df <- as.data.frame(res)
+    expect_identical(df$test, 'permdisp')
+    expect_identical(df$stat_name, 'F')
+  }
 
   # No permutations: no p-values.
   res <- permdisp(d, g, permutations = 0, pairwise = TRUE, cpus = 1)
-  expect_true(is.na(res[['Pr(>F)']][[1]]))
-  expect_identical(dim(attr(res, 'f_perm')), c(0L, 1L))
-  expect_true(all(is.na(attr(res, 'pairwise')[['Pr(perm)']])))
+  expect_true(is.na(res$p_value))
+  expect_identical(attr(res, 'f_perm'), numeric(0))
+  expect_true(is.na(res$z))
+  expect_true(all(is.na(res$pairwise$p_value_perm)))
 
   # A group of one sample: no t statistics for its pairs.
   res <- permdisp(d, meta$solo, type = 'centroid', pairwise = TRUE, permutations = 9, cpus = 1)
-  pw  <- attr(res, 'pairwise')
+  pw  <- res$pairwise
   solo <- grepl('d', rownames(pw))
   expect_true(all(is.na(pw$t[solo])) && all(!is.na(pw$t[!solo])))
   expect_true(all(is.na(attr(res, 't_perm')[, solo])))
-  expect_identical(unname(attr(res, 'distances')[36]), 0)
+  expect_identical(unname(res$distances[36]), 0)
   r1 <- permdisp(d, meta$solo, type = 'centroid', bias_adjust = TRUE, permutations = 0, cpus = 1)
-  expect_identical(unname(attr(r1, 'distances')[36]), 0)
+  expect_identical(unname(r1$distances[36]), 0)
 
 
 
@@ -187,7 +214,7 @@
   # The seed changes the permutations, not the statistics.
   r2 <- permdisp(d, g, permutations = 99, seed = 2, cpus = 1)
   r3 <- permdisp(d, g, permutations = 99, seed = 3, cpus = 1)
-  expect_identical(r2[, 1:5], r3[, 1:5])
+  expect_identical(r2$table[, 1:5], r3$table[, 1:5])
   expect_false(identical(attr(r2, 'f_perm'), attr(r3, 'f_perm')))
 
 
@@ -196,14 +223,15 @@
 
   # One stratum is free permutation.
   expect_identical(
-    permdisp(d, g, strata = rep(1, 36), permutations = 49, cpus = 1)[, 1:6],
-    permdisp(d, g, permutations = 49, cpus = 1)[, 1:6] )
+    permdisp(d, g, strata = rep(1, 36), permutations = 49, cpus = 1)[1:4],
+    permdisp(d, g, permutations = 49, cpus = 1)[1:4] )
 
   # Permuting only within the groups leaves the residuals' group means at 0:
   # every permuted F is 0.
   res <- permdisp(d, g, type = 'centroid', strata = g, permutations = 19, cpus = 1)
   expect_equal(as.vector(attr(res, 'f_perm')), rep(0, 19), tolerance = 1e-10)
-  expect_true(grepl('within strata', attr(res, 'heading')))
+  expect_identical(res$permutation, 'within strata')
+  expect_identical(permdisp(d, g, permutations = ex$perms)$permutation, 'supplied matrix')
 
   expect_error(permdisp(d, g, permutations = ex$perms, strata = meta$block), 'not both')
   expect_error(permdisp(d, g, strata = 1:3), 'strata')
@@ -220,8 +248,8 @@
 
   # Named groups are matched by name; strings and factors are the same.
   sh <- setNames(as.character(g), rownames(meta))[36:1]
-  expect_identical(permdisp(d, sh, permutations = 19, cpus = 1)[, 1:6], ref[, 1:6])
-  expect_identical(attr(permdisp(d, sh, permutations = 19, cpus = 1), 'distances'), attr(ref, 'distances'))
+  expect_identical(permdisp(d, sh, permutations = 19, cpus = 1)$table, ref$table)
+  expect_identical(permdisp(d, sh, permutations = 19, cpus = 1)$distances, ref$distances)
 
   # A symmetric matrix works like a dist.
   expect_identical(permdisp(as.matrix(d), g, permutations = 19, cpus = 1), ref)
@@ -243,16 +271,16 @@
   # Edge cases and errors. ====
 
   expect_warning(r <- permdisp(d, rep('a', 36), permutations = 9), 'only one group')
-  expect_true(is.na(r$F[[1]]) && is.na(r[['Pr(>F)']][[1]]))
+  expect_true(is.na(r$statistic[['F']]) && is.na(r$p_value))
 
   d2 <- stats::dist(matrix(c(0, 1, 3), 3))
   expect_warning(r <- permdisp(d2, c('a', 'b', 'c'), permutations = 9), 'only one sample')
-  expect_true(is.na(r$F[[1]]))
-  expect_identical(unname(attr(r, 'distances')), c(0, 0, 0))
+  expect_true(is.na(r$statistic[['F']]))
+  expect_identical(unname(r$distances), c(0, 0, 0))
 
   # Two samples per group, in one dimension.
   r <- permdisp(stats::dist(c(0, 1, 5, 7)), c('a', 'a', 'b', 'b'), permutations = 0)
-  expect_equal(unname(attr(r, 'distances')), c(0.5, 0.5, 1, 1), tolerance = 1e-14)
+  expect_equal(unname(r$distances), c(0.5, 0.5, 1, 1), tolerance = 1e-14)
 
   # Non-metric distances can put a sample closer to its centre on the
   # imaginary axes than on the real ones: its distance is then 0.
@@ -263,7 +291,7 @@
     2, 2, 2, 0 ), 4))
   for (type in c('centroid', 'median'))
     expect_warning(r <- permdisp(dn, c('a', 'a', 'a', 'b'), type = type, permutations = 0), 'negative')
-  expect_identical(unname(attr(r, 'distances')[c(1, 4)]), c(0, 0))
+  expect_identical(unname(r$distances[c(1, 4)]), c(0, 0))
 
   expect_error(permdisp(d), '`groups` is required')
   expect_error(permdisp(d, g[-1]), '35 rows')

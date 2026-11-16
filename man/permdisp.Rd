@@ -66,35 +66,37 @@ gives the same p-values. Default: \code{0}}
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
-A data frame (of class \code{"anova"}, so it prints like
-\code{stats::anova()} tables), the same table as \code{permutest()}'s: the
-one-way ANOVA of the distances on the groups, with rows \code{"Groups"} and
-\code{"Residuals"}, and columns:
+A list of class \code{c("ecodive_permdisp", "ecodive_test")}, with
+these fields:
 \itemize{
-\item \code{Df}: Degrees of freedom.
-\item \verb{Sum Sq}: Sums of squares.
-\item \verb{Mean Sq}: Mean squares.
-\item \code{F}: The \eqn{F} statistic.
-\item \code{N.Perm}: The number of permutations.
-\item \verb{Pr(>F)}: Permutation p-value.
-}
-
-Its attributes are:
-\itemize{
+\item \code{statistic}: The \eqn{F} statistic, named \code{F}.
+\item \code{p_value}: The permutation p-value (\code{NA} without permutations).
+\item \code{z}: How far \eqn{F} lies from its permuted values, in standard
+deviations: \eqn{(F - mean(F_{perm})) / sd(F_{perm})}, as
+\code{summary(vegan::permustats())}. \code{NA} with fewer than 2 permutations.
+\item \code{n_perm}: The number of permutations.
+\item \code{table}: The one-way ANOVA of the distances on the groups, as
+\code{permutest()$tab}: a data frame (of class \code{"anova"}) with rows
+\code{"Groups"} and \code{"Residuals"}, and columns \code{Df}, \verb{Sum Sq}, \verb{Mean Sq},
+\code{F}, \code{N.Perm}, and \verb{Pr(>F)}.
 \item \code{distances}: Each sample's distance to its group's centre (named by
 sample, when \code{dm} has names), as \code{betadisper()$distances}.
 \item \code{dispersions}: Each group's mean distance, as
 \code{betadisper()$group.distances}.
-\item \code{f_perm}: A one-column matrix of the \eqn{F} statistic of each
-permutation, as \code{permutest()$perm}.
 \item \code{type}: \code{'median'} or \code{'centroid'}.
-\item \code{pairwise} (with \code{pairwise = TRUE}): A data frame with one row per pair
+\item \code{bias_adjust}: \code{TRUE} or \code{FALSE}.
+\item \code{pairwise}: With \code{pairwise = TRUE}, a data frame with one row per pair
 of groups, named like \code{"a-b"}, and columns \code{t} (the \eqn{t} statistic
-of group \code{a} minus group \code{b}), \code{Df}, \verb{Pr(>|t|)} (the p-value from the
-\eqn{t} distribution), and \code{Pr(perm)} (the permutation p-value).
-\item \code{t_perm} (with \code{pairwise = TRUE}): A matrix of the \eqn{t} statistics
-of each permutation (rows) for each pair (columns).
+of group \code{a} minus group \code{b}), \code{Df}, \code{p_value} (from the \eqn{t}
+distribution), and \code{p_value_perm} (from the permutations). Otherwise
+\code{NULL}.
+\item \code{permutation}: How samples were permuted: \code{'free'}, \code{'within strata'}, or \code{'supplied matrix'}.
 }
+
+Attribute \code{f_perm} holds the \eqn{F} statistic of each permutation, as
+\code{permutest()$perm}, and, with \code{pairwise = TRUE}, attribute \code{t_perm} is a
+matrix of the \eqn{t} statistics of each permutation (rows) for each
+pair (columns).
 }
 \description{
 Tests whether groups of samples differ in how spread out they are: their
@@ -126,6 +128,24 @@ large, \eqn{(1 + \#\{F_{perm} \ge F\}) / (1 + permutations)}. Permuted
 statistics within \code{sqrt(.Machine$double.eps)} of the observed one count as
 ties. Pairwise \eqn{t} statistics permute the distances themselves, and
 count \eqn{|t_{perm}| \ge |t|}.
+
+\strong{Choosing \code{type}}
+\itemize{
+\item \code{'median'}, the default, is what \code{vegan::betadisper()} and scikit-bio's
+(and so QIIME 2's) \code{permdisp} use by default. Like the median-based
+(Brown-Forsythe) version of Levene's test, it is less affected by
+skewed distributions and outlying samples (Anderson 2006).
+\item \code{'centroid'} measures dispersion around the same centres that
+\code{\link[=permanova]{permanova()}} does: the squared distances to the centroids sum to
+PERMANOVA's within-group sum of squares. So it is the direct check of
+whether a significant PERMANOVA could come from differences in
+dispersion (Anderson 2006; Anderson et al. 2006). It is also exact and
+much faster for many samples (see below).
+}
+
+\code{betadisper()} stops its search for the spatial median early, so its
+distances to medians are accurate only to about \eqn{10^{-5}};
+\code{permdisp()} solves for the median exactly.
 
 \strong{Speed and memory}
 
@@ -188,11 +208,11 @@ first: pass \code{sqrt(dm)} instead, for instance.
     res
 
     # Each group's mean distance to its spatial median.
-    attr(res, 'dispersions')
+    res$dispersions
 
     # Distances to centroids, with each pair of groups tested.
     res <- permdisp(dm, meta$treatment, type = 'centroid', pairwise = TRUE)
-    attr(res, 'pairwise')
+    res$pairwise
 
 }
 \references{

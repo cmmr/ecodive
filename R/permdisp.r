@@ -61,33 +61,37 @@
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
 #'
-#' @return A data frame (of class `"anova"`, so it prints like
-#'   `stats::anova()` tables), the same table as `permutest()`'s: the
-#'   one-way ANOVA of the distances on the groups, with rows `"Groups"` and
-#'   `"Residuals"`, and columns:
+#' @return A list of class `c("ecodive_permdisp", "ecodive_test")`, with
+#'   these fields:
 #'
-#'   * `Df`: Degrees of freedom.
-#'   * `Sum Sq`: Sums of squares.
-#'   * `Mean Sq`: Mean squares.
-#'   * `F`: The \eqn{F} statistic.
-#'   * `N.Perm`: The number of permutations.
-#'   * `Pr(>F)`: Permutation p-value.
-#'
-#'   Its attributes are:
-#'
+#'   * `statistic`: The \eqn{F} statistic, named `F`.
+#'   * `p_value`: The permutation p-value (`NA` without permutations).
+#'   * `z`: How far \eqn{F} lies from its permuted values, in standard
+#'     deviations: \eqn{(F - mean(F_{perm})) / sd(F_{perm})}, as
+#'     `summary(vegan::permustats())`. `NA` with fewer than 2 permutations.
+#'   * `n_perm`: The number of permutations.
+#'   * `table`: The one-way ANOVA of the distances on the groups, as
+#'     `permutest()$tab`: a data frame (of class `"anova"`) with rows
+#'     `"Groups"` and `"Residuals"`, and columns `Df`, `Sum Sq`, `Mean Sq`,
+#'     `F`, `N.Perm`, and `Pr(>F)`.
 #'   * `distances`: Each sample's distance to its group's centre (named by
 #'     sample, when `dm` has names), as `betadisper()$distances`.
 #'   * `dispersions`: Each group's mean distance, as
 #'     `betadisper()$group.distances`.
-#'   * `f_perm`: A one-column matrix of the \eqn{F} statistic of each
-#'     permutation, as `permutest()$perm`.
 #'   * `type`: `'median'` or `'centroid'`.
-#'   * `pairwise` (with `pairwise = TRUE`): A data frame with one row per pair
+#'   * `bias_adjust`: `TRUE` or `FALSE`.
+#'   * `pairwise`: With `pairwise = TRUE`, a data frame with one row per pair
 #'     of groups, named like `"a-b"`, and columns `t` (the \eqn{t} statistic
-#'     of group `a` minus group `b`), `Df`, `Pr(>|t|)` (the p-value from the
-#'     \eqn{t} distribution), and `Pr(perm)` (the permutation p-value).
-#'   * `t_perm` (with `pairwise = TRUE`): A matrix of the \eqn{t} statistics
-#'     of each permutation (rows) for each pair (columns).
+#'     of group `a` minus group `b`), `Df`, `p_value` (from the \eqn{t}
+#'     distribution), and `p_value_perm` (from the permutations). Otherwise
+#'     `NULL`.
+#'   * `permutation`: How samples were permuted: `'free'`, `'within
+#'     strata'`, or `'supplied matrix'`.
+#'
+#'   Attribute `f_perm` holds the \eqn{F} statistic of each permutation, as
+#'   `permutest()$perm`, and, with `pairwise = TRUE`, attribute `t_perm` is a
+#'   matrix of the \eqn{t} statistics of each permutation (rows) for each
+#'   pair (columns).
 #'
 #' @details
 #'
@@ -109,6 +113,24 @@
 #' statistics within `sqrt(.Machine$double.eps)` of the observed one count as
 #' ties. Pairwise \eqn{t} statistics permute the distances themselves, and
 #' count \eqn{|t_{perm}| \ge |t|}.
+#'
+#'
+#' **Choosing `type`**
+#'
+#' * `'median'`, the default, is what `vegan::betadisper()` and scikit-bio's
+#'   (and so QIIME 2's) `permdisp` use by default. Like the median-based
+#'   (Brown-Forsythe) version of Levene's test, it is less affected by
+#'   skewed distributions and outlying samples (Anderson 2006).
+#' * `'centroid'` measures dispersion around the same centres that
+#'   [permanova()] does: the squared distances to the centroids sum to
+#'   PERMANOVA's within-group sum of squares. So it is the direct check of
+#'   whether a significant PERMANOVA could come from differences in
+#'   dispersion (Anderson 2006; Anderson et al. 2006). It is also exact and
+#'   much faster for many samples (see below).
+#'
+#' `betadisper()` stops its search for the spatial median early, so its
+#' distances to medians are accurate only to about \eqn{10^{-5}};
+#' `permdisp()` solves for the median exactly.
 #'
 #'
 #' **Speed and memory**
@@ -193,11 +215,11 @@
 #'     res
 #'
 #'     # Each group's mean distance to its spatial median.
-#'     attr(res, 'dispersions')
+#'     res$dispersions
 #'
 #'     # Distances to centroids, with each pair of groups tested.
 #'     res <- permdisp(dm, meta$treatment, type = 'centroid', pairwise = TRUE)
-#'     attr(res, 'pairwise')
+#'     res$pairwise
 #'
 permdisp <- function (
     dm, groups, data = NULL, type = 'median', bias_adjust = FALSE,
@@ -315,7 +337,7 @@ permdisp <- function (
     (sum(pr$f >= f_obs - eps) + 1) / (pm$n_perm + 1)
   else NA_real_
 
-  f_perm <- matrix(pr$f, ncol = 1, dimnames = list(NULL, 'Groups'))
+  f_perm <- pr$f
   if (is.na(f_obs)) f_perm[] <- NA_real_
 
 
@@ -351,13 +373,11 @@ permdisp <- function (
     else rep(NA_real_, length(labs))
 
     pw <- data.frame(
-      t     = t_obs,
-      Df    = as.double(t_df),
-      P1    = 2 * stats::pt(-abs(t_obs), t_df),
-      P2    = unname(p_t),
-      row.names   = labs,
-      check.names = FALSE )
-    names(pw)[3:4] <- c('Pr(>|t|)', 'Pr(perm)')
+      t            = t_obs,
+      Df           = as.double(t_df),
+      p_value      = 2 * stats::pt(-abs(t_obs), t_df),
+      p_value_perm = unname(p_t),
+      row.names    = labs )
   }
 
 
@@ -375,23 +395,55 @@ permdisp <- function (
     check.names = FALSE )
   names(tbl) <- c('Df', 'Sum Sq', 'Mean Sq', 'F', 'N.Perm', 'Pr(>F)')
 
-  heading <- paste0(
-    'Permutation test for homogeneity of multivariate dispersions\n',
-    'Distances to group ', if (type == 'median') 'spatial medians' else 'centroids',
-    if (bias_adjust) ', adjusted for small groups', '\n',
-    if (!is.null(pm$perms)) 'Permutation: supplied matrix\n'
-    else if (!is.null(des$strata)) 'Permutation: free, within strata\n'
-    else 'Permutation: free\n',
-    'Number of permutations: ', pm$n_perm, '\n' )
-
-  structure(
-    .Data       = tbl,
-    heading     = heading,
+  # TODO: use new_ecodive_test() after the mrpp branch is merged; this
+  # builds the same object.
+  res <- list(
+    statistic   = c(F = f_obs),
+    p_value     = as.double(p_obs),
+    z           = pd_perm_z(f_obs, f_perm),
+    n_perm      = as.integer(pm$n_perm),
+    table       = structure(tbl, class = c('anova', 'data.frame')),
     distances   = z,
     dispersions = disp,
-    f_perm      = f_perm,
     type        = type,
+    bias_adjust = bias_adjust,
     pairwise    = pw,
-    t_perm      = t_perm,
-    class       = c('anova', 'data.frame') )
+    permutation = if (!is.null(pm$perms)) 'supplied matrix'
+                  else if (!is.null(des$strata)) 'within strata'
+                  else 'free' )
+
+  attr(res, 'f_perm') <- as.double(f_perm)
+  attr(res, 'title')  <- 'Homogeneity of multivariate dispersions (PERMDISP)'
+  attr(res, 't_perm') <- t_perm
+  class(res) <- c('ecodive_permdisp', 'ecodive_test')
+
+  res
+}
+
+
+
+# TODO: use the shared perm_z() after the mrpp branch is merged.
+pd_perm_z <- function (statistic, perm) {
+  if (length(perm) < 2 || is.na(statistic)) return (NA_real_)
+  z <- (statistic - mean(perm)) / stats::sd(perm)
+  if (is.finite(z)) z else NA_real_
+}
+
+
+
+# Lines added to print.ecodive_test()'s output.
+#' @export
+test_details.ecodive_permdisp <- function (x, digits) {
+
+  out <- function (v) utils::capture.output(print(v, digits = digits))
+
+  c(
+    paste0(
+      'Distances to group ',
+      if (x$type == 'median') 'spatial medians' else 'centroids',
+      if (x$bias_adjust) ', adjusted for small groups', ':' ),
+    out(x$dispersions),
+    '',
+    out(x$table),
+    if (!is.null(x$pairwise)) c('', 'Pairwise t tests:', out(x$pairwise)) )
 }
