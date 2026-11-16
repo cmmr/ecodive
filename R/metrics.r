@@ -76,22 +76,27 @@ METRICS <- local({
   return (df)
 })
 
-HAYSTACK <- local({
+# For flexible matching: the IDs in a registry like METRICS, named by each
+# row's name, id, and alt_ids, lowercased with non-letters removed. Names
+# that only prefix one already present are left out.
+make_haystack <- function (df) {
   result        <- character(0)
   names(result) <- character(0)
-  alt_ids <- strsplit(METRICS$alt_ids, ' ', fixed = TRUE)
-  for (i in seq_len(nrow(METRICS))) {
-    ids <- c(METRICS$name[[i]], METRICS$id[[i]], na.omit(alt_ids[[i]]))
+  alt_ids <- strsplit(df$alt_ids, ' ', fixed = TRUE)
+  for (i in seq_len(nrow(df))) {
+    ids <- c(df$name[[i]], df$id[[i]], na.omit(alt_ids[[i]]))
     ids <- unique(gsub('[^a-z]', '', tolower(ids)))
     ids <- ids[order(nchar(ids), decreasing = TRUE)]
-    res <- rep_len(METRICS$id[[i]], length(ids))
+    res <- rep_len(df$id[[i]], length(ids))
     names(res) <- ids
     for (j in seq_along(res))
       if (!any(startsWith(names(result), names(res)[j])))
         result <- c(result, res[j])
   }
   return (result)
-})
+}
+
+HAYSTACK <- make_haystack(METRICS)
 
 ENV <- environment()
 

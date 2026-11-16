@@ -57,8 +57,10 @@ reference:
 - title: Ordination
   desc: Plot samples by their beta diversity distances.
   contents:
+  - ordination
   - pcoa
   - nmds
+  - list_ordinations
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.

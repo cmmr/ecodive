@@ -60,10 +60,13 @@ export(weighted_unifrac)
 
 export(list_metrics)
 export(match_metric)
+export(list_ordinations)
+export(match_ordination)
 
 export(blas_threads)
 export(n_cpus)
 export(nmds)
+export(ordination)
 export(pcoa)
 export(rarefy)
 export(read_tree)

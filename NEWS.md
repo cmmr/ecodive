@@ -7,6 +7,12 @@
   first few axes (`k = 3` by default), in parallel C, without forming an
   n-by-n matrix. Its results are identical for any number of `cpus`.
 
+* New `ordination()` runs any ordination method by name, as `beta_div()`
+  does for beta diversity metrics, with the method's own arguments.
+  `list_ordinations()` and `match_ordination()` list and look up the methods.
+  Every ordination method returns the same kind of result: a sample-by-axis
+  matrix whose attributes start with `method`, `eig`, and `prop`.
+
 * New `nmds()` runs a non-metric multidimensional scaling, following
   `vegan::metaMDS()` with its `monoMDS()` engine: a start from the PCoA
   solution, then random starts until the best solution is found again, then
