@@ -84,7 +84,7 @@ make_haystack <- function (df) {
   names(result) <- character(0)
   alt_ids <- strsplit(df$alt_ids, ' ', fixed = TRUE)
   for (i in seq_len(nrow(df))) {
-    ids <- c(df$name[[i]], df$id[[i]], na.omit(alt_ids[[i]]))
+    ids <- c(df$name[[i]], df$id[[i]], stats::na.omit(alt_ids[[i]]))
     ids <- unique(gsub('[^a-z]', '', tolower(ids)))
     ids <- ids[order(nchar(ids), decreasing = TRUE)]
     res <- rep_len(df$id[[i]], length(ids))
