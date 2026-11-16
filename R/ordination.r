@@ -18,6 +18,7 @@ ORDINATIONS <- local({
       name,                                id,   input, alt_ids
       Non-metric Multidimensional Scaling, nmds, dist,  nonmetricmds metamds monomds
       Principal Coordinates Analysis,      pcoa, dist,  pco mds cmdscale classicalmds metricmds
+      Uniform Manifold Approximation and Projection, umap, dist, uniformmanifold uwot
   " )
 
   return (df)

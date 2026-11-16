@@ -57,14 +57,15 @@
   df <- list_ordinations()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id', 'input'))
-  expect_identical(df$id, c('nmds', 'pcoa'))
-  expect_identical(rownames(list_ordinations(nm = 'id')), c('nmds', 'pcoa'))
+  expect_identical(df$id, c('nmds', 'pcoa', 'umap'))
+  expect_identical(rownames(list_ordinations(nm = 'id')), c('nmds', 'pcoa', 'umap'))
 
   expect_identical(list_ordinations(val = 'id', nm = 'name'),
-    c('Non-metric Multidimensional Scaling' = 'nmds', 'Principal Coordinates Analysis' = 'pcoa'))
-  expect_identical(list_ordinations(val = 'func'), list(nmds = nmds, pcoa = pcoa))
+    c('Non-metric Multidimensional Scaling' = 'nmds', 'Principal Coordinates Analysis' = 'pcoa',
+      'Uniform Manifold Approximation and Projection' = 'umap'))
+  expect_identical(list_ordinations(val = 'func'), list(nmds = nmds, pcoa = pcoa, umap = umap))
   expect_identical(list_ordinations(val = 'list')$pcoa, match_ordination('pcoa'))
-  expect_identical(list_ordinations(val = 'input', input = 'dist'), c('dist', 'dist'))
+  expect_identical(list_ordinations(val = 'input', input = 'dist'), c('dist', 'dist', 'dist'))
 
 
   # Invalid input. ====
