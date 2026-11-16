@@ -4,9 +4,8 @@
   ref <- readRDS(file.path('expected', 'dbrda.rds'))
 
   case_formula <- function (cs) {
-    rhs <- cs$constraints
-    if (!is.null(cs$conditions)) rhs <- paste0(rhs, ' + Condition(', cs$conditions, ')')
-    stats::as.formula(paste('~', rhs))
+    rhs <- c(cs$constraints, if (!is.null(cs$conditions)) paste0('Condition(', cs$conditions, ')'))
+    stats::as.formula(paste('~', paste(rhs, collapse = ' + ')))
   }
 
   fit_case <- function (cs, cpus = 1) {
@@ -22,10 +21,18 @@
 
     for (cs in ref$cases) {
 
-      ord <- fit_case(cs)
       exp <- cs$expected
       k   <- ncol(exp$sites)
       lbl <- cs$name
+
+      # Euclidean distances between counts, or the distances themselves.
+      if (is.null(cs$dm)) cs$dm <- dist(cs$counts)
+
+      if (is.null(cs$warn)) {
+        ord <- fit_case(cs)
+      } else {
+        expect_warning(ord <- fit_case(cs), cs$warn, info = lbl)
+      }
 
       expect_identical(dim(ord), c(attr(cs$dm, 'Size'), k), info = lbl)
       expect_identical(dimnames(ord), dimnames(exp$sites), info = lbl)
@@ -44,8 +51,12 @@
       expect_equal(attr(ord, 'constrained_eig'), exp$constrained_eig, tolerance = 1e-10, info = lbl)
 
       bp <- attr(ord, 'biplot')
-      expect_identical(dimnames(bp), dimnames(exp$biplot), info = lbl)
-      expect_equal(sweep(bp, 2, s, '*'), exp$biplot, tolerance = 1e-10, info = lbl)
+      if (is.null(exp$biplot)) { # Conditions only: no constraints.
+        expect_identical(nrow(bp), 0L, info = lbl)
+      } else {
+        expect_identical(dimnames(bp), dimnames(exp$biplot), info = lbl)
+        expect_equal(sweep(bp, 2, s, '*'), exp$biplot, tolerance = 1e-10, info = lbl)
+      }
 
       cn <- attr(ord, 'centroids')
       if (is.null(exp$centroids)) {
