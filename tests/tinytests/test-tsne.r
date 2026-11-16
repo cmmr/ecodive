@@ -69,6 +69,30 @@
         expect_equal(attr(x, 'kl_divergence'), a$cost, tolerance = 1e-8)
       }
     }
+
+    # Barnes-Hut with early exaggeration on 600 points (a deep tree), in 3
+    # dimensions (an octree), and at the largest perplexity, (n - 1) / 3.
+    # The same comparisons.
+    for (a in ex$more_cases) {
+
+      pts  <- if (is.null(a$pts)) ex$pts else a$pts
+      run2 <- function (n_iter) tsne(
+        dist(pts), k = a$k, perplexity = a$perplexity, theta = a$theta,
+        n_iter = n_iter, init = a$init, stop_lying_iter = a$stop_lying_iter,
+        mom_switch_iter = a$mom_switch_iter, cpus = 2L )
+
+      info <- paste(nrow(pts), a$k, a$perplexity)
+      x    <- run2(20L)
+      expect_identical(attr(x, 'perplexity'), a$perplexity, info = info)
+      expect_equal(matrix(x, nrow(x)), match_signs(x, a$Y20), tolerance = 1e-6, info = info)
+      expect_equal(attr(x, 'kl_divergence'), a$cost20, tolerance = 1e-6, info = info)
+
+      if (.Platform$OS.type == 'windows' && identical(R.version$arch, 'x86_64')) {
+        x <- run2(a$maxit)
+        expect_equal(matrix(x, nrow(x)), match_signs(x, a$Y), tolerance = 1e-8, info = info)
+        expect_equal(attr(x, 'kl_divergence'), a$cost, tolerance = 1e-8, info = info)
+      }
+    }
   }
 
 

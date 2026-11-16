@@ -53,6 +53,42 @@ for (i in seq_along(cases)) {
   cases[[i]]$cost20 <- tail(r$itercosts, 1)
 }
 
+# More cases, each with its own points and start: early exaggeration on 600
+# points (a deep Barnes-Hut tree), 3 dimensions on 200 points (an octree),
+# and the largest perplexity that 60 points allow, (n - 1) / 3.
+set.seed(2)
+blobs <- function (n, p, groups = 3) {
+  ctr <- matrix(rep(seq(0, by = 3, length.out = groups), length.out = n), n, p)
+  ctr + matrix(rnorm(n * p), n, p)
+}
+
+# `pts = NULL` means the points above.
+more_cases <- list(
+  list(pts = blobs(600, 2), k = 2L, perplexity = 30,     theta = 0.5, maxit = 150L, stop_lying_iter = 100L, mom_switch_iter = 100L),
+  list(pts = blobs(200, 3), k = 3L, perplexity = 15,     theta = 0.5, maxit = 150L, stop_lying_iter =  50L, mom_switch_iter =  50L),
+  list(pts = NULL,          k = 2L, perplexity = 59 / 3, theta = 0.5, maxit = 200L, stop_lying_iter =  50L, mom_switch_iter =  50L) )
+
+for (i in seq_along(more_cases)) {
+  a  <- more_cases[[i]]
+  if (is.null(a$pts)) a$pts <- pts
+  dd <- dist(a$pts)
+  n  <- nrow(a$pts)
+  more_cases[[i]]$init <- init <- matrix(rnorm(n * a$k, sd = 1e-4), n, a$k)
+  for (it in c(20L, a$maxit)) {
+    r <- Rtsne(
+      dd, dims = a$k, perplexity = a$perplexity, theta = a$theta,
+      max_iter = it, Y_init = init, pca = FALSE,
+      stop_lying_iter = a$stop_lying_iter, mom_switch_iter = a$mom_switch_iter )
+    if (it == 20L) {
+      more_cases[[i]]$Y20    <- r$Y
+      more_cases[[i]]$cost20 <- tail(r$itercosts, 1)
+    } else {
+      more_cases[[i]]$Y    <- r$Y
+      more_cases[[i]]$cost <- tail(r$itercosts, 1)
+    }
+  }
+}
+
 expected <- list(
 
   versions = list(
@@ -65,7 +101,11 @@ expected <- list(
 
   # Each case's arguments, then Rtsne's coordinates and final KL divergence
   # (the last of its `itercosts`), after `maxit` iterations and after 20.
-  cases = cases
+  cases = cases,
+
+  # The same, each case with its own start `init`, and points `pts` (NULL:
+  # the points above).
+  more_cases = more_cases
 )
 
 dir.create('tests/tinytests/expected', showWarnings = FALSE)
