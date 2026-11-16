@@ -36,6 +36,5 @@ RoxygenNote: 7.3.3
 Config/Needs/website: rmarkdown
 Config/testthat/edition: 3
 Imports: parallel, utils
-Suggests: ape, knitr, MASS, Matrix, parallelly, rmarkdown, slam, tinytest,
-    vegan
+Suggests: knitr, Matrix, parallelly, rmarkdown, slam, tinytest
 VignetteBuilder: knitr

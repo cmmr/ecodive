@@ -58,26 +58,22 @@
 
   # Same as ape and vegan, up to sign. ====
 
-  if (requireNamespace('ape', quietly = TRUE)) {
+  # Expected results from data-raw/expected/pcoa.r.
+  ex <- readRDS('expected/pcoa.rds')
+  ord <- pcoa(bray(ex$counts))
 
-    # Bray-Curtis has negative eigenvalues; prop matches Relative_eig.
-    ord <- pcoa(d)
-    ap  <- ape::pcoa(d)
-    expect_true(min(ap$values$Eigenvalues) < 0)
-    expect_true(coord_diff(ord, ap$vectors) < 1e-9)
-    expect_equal(attr(ord, 'eig'),   ap$values$Eigenvalues[1:3],  tolerance = 1e-10)
-    expect_equal(attr(ord, 'prop'),  ap$values$Relative_eig[1:3], tolerance = 1e-10)
-    expect_equal(attr(ord, 'trace'), ap$trace,                    tolerance = 1e-10)
-  }
+  # ape::pcoa(). Bray-Curtis has negative eigenvalues; prop matches
+  # Relative_eig.
+  expect_true(ex$ape$min_eig < 0)
+  expect_true(coord_diff(ord, ex$ape$vectors) < 1e-9)
+  expect_equal(attr(ord, 'eig'),   ex$ape$eig,          tolerance = 1e-10)
+  expect_equal(attr(ord, 'prop'),  ex$ape$relative_eig, tolerance = 1e-10)
+  expect_equal(attr(ord, 'trace'), ex$ape$trace,        tolerance = 1e-10)
 
-  if (requireNamespace('vegan', quietly = TRUE)) {
-
-    ord <- pcoa(d)
-    vg  <- vegan::wcmdscale(d, k = 3, eig = TRUE)
-    expect_true(coord_diff(ord, vg$points) < 1e-9)
-    expect_equal(attr(ord, 'eig'),  vg$eig[1:3], tolerance = 1e-10)
-    expect_equal(attr(ord, 'prop'), unname(summary(vegan::eigenvals(vg))[2, 1:3]), tolerance = 1e-10)
-  }
+  # vegan::wcmdscale() and its "Proportion Explained".
+  expect_true(coord_diff(ord, ex$vegan$points) < 1e-9)
+  expect_equal(attr(ord, 'eig'),  ex$vegan$eig,  tolerance = 1e-10)
+  expect_equal(attr(ord, 'prop'), ex$vegan$prop, tolerance = 1e-10)
 
 
 

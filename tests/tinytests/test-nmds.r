@@ -1,20 +1,12 @@
 #test_that("nmds", {
 
-  # Reproducible test data.
-  set.seed(1)
-  rand_counts <- function (n, p = 40) {
-    m <- matrix(rpois(n * p, 3) * rbinom(n * p, 1, 0.4), n, p)
-    m[, 1] <- m[, 1] + 1
-    dimnames(m) <- list(paste0('S', seq_len(n)), paste0('OTU', seq_len(p)))
-    m
-  }
+  # Test data and expected results, from data-raw/expected/nmds.r.
+  ex <- readRDS('expected/nmds.rds')
 
-  # Points near a plane, with noise: a clear NMDS solution.
-  plane <- function (n) {
-    pts <- cbind(runif(n), runif(n) * 0.6, rnorm(n, sd = 0.02))
-    rownames(pts) <- paste0('P', seq_len(n))
-    dist(pts)
-  }
+  d_bray <- bray(ex$inputs$bray)
+  d_jacc <- jaccard(ex$inputs$jacc)  # Many tied distances.
+  d_pln  <- dist(ex$inputs$plane)    # Points near a plane: a clear solution.
+  dists  <- list(bray = d_bray, jacc = d_jacc, plane = d_pln)
 
   # Largest absolute difference between two coordinate matrices, relative to
   # the largest coordinate, after matching each axis's sign.
@@ -39,10 +31,6 @@
     res
   }
 
-  d_bray <- bray(rand_counts(60))
-  d_jacc <- jaccard(rand_counts(50, 8))  # Many tied distances.
-  d_pln  <- plane(60)
-
 
 
   # Each start matches vegan::monoMDS() from the same configuration. ====
@@ -52,86 +40,53 @@
   # sqrt() can grow over hundreds of iterations, e.g. stopping an iteration
   # sooner or later, so long runs are only compared approximately.
 
-  if (requireNamespace('vegan', quietly = TRUE)) {
+  for (cs in ex$monomds) {
 
-    cases <- list(
-      list(d = d_bray, k = 2, weakties = TRUE,  stress = 1),
-      list(d = d_bray, k = 3, weakties = TRUE,  stress = 1),
-      list(d = d_bray, k = 1, weakties = TRUE,  stress = 1),
-      list(d = d_jacc, k = 2, weakties = TRUE,  stress = 1),
-      list(d = d_jacc, k = 2, weakties = FALSE, stress = 1),
-      list(d = d_bray, k = 2, weakties = TRUE,  stress = 2),
-      list(d = d_pln,  k = 2, weakties = TRUE,  stress = 1) )
+    d    <- dists[[cs$data]]
+    init <- cs$init
 
-    for (cs in cases) {
-
-      n    <- attr(cs$d, 'Size')
-      init <- array(runif(n * cs$k * 3), c(n, cs$k, 3))
-
-      for (maxit in c(25L, 200L)) {
-
-        res <- engine(cs$d, init, cs$weakties, cs$stress, maxit)
-
-        for (i in 1:3) {
-
-          vg <- vegan::monoMDS(
-            cs$d, y = init[, , i], k = cs$k, pc = FALSE, maxit = maxit,
-            weakties = cs$weakties, stress = cs$stress )
-
-          if (maxit == 25L) {
-            expect_equal(res$stress[[i]], vg$stress, tolerance = 1e-8)
-            expect_equal(res$iters[[i]],  vg$iters)
-            expect_equal(res$icause[[i]], vg$icause)
-            expect_true(pro_rmse(res$points[, , i], vg$points) < 1e-6)
-          } else {
-            expect_equal(res$stress[[i]], vg$stress, tolerance = 0.01)
-          }
-        }
-      }
-    }
-
-    # Few iterations: no chance for rounding differences to grow.
-    n    <- attr(d_bray, 'Size')
-    init <- array(runif(n * 2), c(n, 2, 1))
-    res  <- engine(d_bray, init, maxit = 5L)
-    vg   <- vegan::monoMDS(d_bray, y = init[, , 1], k = 2, pc = FALSE, maxit = 5)
-    expect_equal(res$stress, vg$stress, tolerance = 1e-12)
+    # Up to 25 iterations.
+    res <- engine(d, init, cs$weakties, cs$stress, maxit = 25L)
+    vg  <- cs$maxit25
+    expect_equal(res$stress, vg$stress, tolerance = 1e-8)
     expect_equal(res$iters,  vg$iters)
     expect_equal(res$icause, vg$icause)
-    expect_equal(res$points[, , 1], vg$points, tolerance = 1e-12, check.attributes = FALSE)
+    for (i in seq_len(dim(init)[3]))
+      expect_true(pro_rmse(res$points[, , i], vg$points[, , i]) < 1e-6)
+
+    # Up to 200 iterations.
+    res <- engine(d, init, cs$weakties, cs$stress, maxit = 200L)
+    expect_equal(res$stress, cs$maxit200$stress, tolerance = 0.01)
   }
+
+  # Few iterations: no chance for rounding differences to grow.
+  vg  <- ex$monomds5
+  res <- engine(d_bray, array(vg$init, c(dim(vg$init), 1)), maxit = 5L)
+  expect_equal(res$stress, vg$stress, tolerance = 1e-12)
+  expect_equal(res$iters,  vg$iters)
+  expect_equal(res$icause, vg$icause)
+  expect_equal(res$points[, , 1], vg$points, tolerance = 1e-12)
 
 
 
   # Same solution as vegan::metaMDS() and MASS::isoMDS(). ====
 
-  if (requireNamespace('vegan', quietly = TRUE)) {
+  ord <- nmds(d_pln)
+  vg  <- ex$metamds_plane # set.seed(2); metaMDS(d_pln, trace = 0)
+  expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-4)
+  expect_true(coord_diff(ord, vg$points) < 0.01)
 
-    ord <- nmds(d_pln)
-    set.seed(2)
-    vg  <- vegan::metaMDS(d_pln, trace = 0)
+  iso <- ex$isomds_plane # isoMDS(d_pln, trace = FALSE)
+  expect_equal(attr(ord, 'stress'), iso$stress / 100, tolerance = 0.01)
+  expect_true(pro_rmse(ord, iso$points) < 0.01)
 
-    expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-4)
-    expect_true(coord_diff(ord, vg$points) < 0.01)
-
-    # With a `maxdist` attribute: half-change scaling.
-    d   <- d_pln / max(d_pln)
-    attr(d, 'maxdist') <- 1
-    ord <- nmds(d)
-    set.seed(2)
-    vg  <- vegan::metaMDS(d, trace = 0)
-    expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-3)
-    expect_true(coord_diff(ord, vg$points) < 0.05)
-  }
-
-  if (requireNamespace('MASS', quietly = TRUE)) {
-
-    ord <- nmds(d_pln)
-    iso <- MASS::isoMDS(d_pln, trace = FALSE)
-
-    expect_equal(attr(ord, 'stress'), iso$stress / 100, tolerance = 0.01)
-    expect_true(pro_rmse(ord, iso$points) < 0.01)
-  }
+  # With a `maxdist` attribute: half-change scaling.
+  d   <- d_pln / max(d_pln)
+  attr(d, 'maxdist') <- 1
+  ord <- nmds(d)
+  vg  <- ex$metamds_hc # set.seed(2); metaMDS(d, trace = 0)
+  expect_equal(attr(ord, 'stress'), vg$stress, tolerance = 1e-3)
+  expect_true(coord_diff(ord, vg$points) < 0.05)
 
 
 
