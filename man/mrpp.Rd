@@ -62,10 +62,19 @@ gives the same p-values. Default: \code{0}}
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
-A list of class \code{"ecodive_mrpp"}, which prints as a summary, with:
+A list of class \code{c("ecodive_mrpp", "ecodive_test")}, which prints
+as a summary. \code{as.data.frame()} gives its first four fields as one row,
+with the same columns as ecodive's other permutation tests. Its fields:
 \itemize{
-\item \code{delta}: The observed \eqn{\delta}, the weighted mean of the groups'
-mean within-group distances.
+\item \code{statistic}: The observed \eqn{\delta}, named \code{delta}: the weighted
+mean of the groups' mean within-group distances.
+\item \code{p_value}: The permutation p-value: the proportion of permutations,
+counting the observed one, with a \eqn{\delta} as small as or smaller
+than the observed one.
+\item \code{z}: The standardized effect size,
+\code{(delta - mean(delta_perm)) / sd(delta_perm)}. Negative when samples
+are closer within groups than expected by chance.
+\item \code{n_perm}: The number of permutations.
 \item \code{expected_delta}: The expected \eqn{\delta} under the null hypothesis:
 the mean of all the distances.
 \item \code{A}: Chance-corrected within-group agreement,
@@ -74,13 +83,6 @@ the mean of all the distances.
 group of one sample).
 \item \code{class_n}: Each group's number of samples.
 \item \code{weights}: The \code{weights} used.
-\item \code{z}: The standardized effect size,
-\code{(delta - mean(delta_perm)) / sd(delta_perm)}. Negative when samples
-are closer within groups than expected by chance.
-\item \code{p_value}: The permutation p-value: the proportion of permutations,
-counting the observed one, with a \eqn{\delta} as small as or smaller
-than the observed one.
-\item \code{n_perm}: The number of permutations.
 \item \code{permutation}: How samples were permuted: \code{'free'}, \code{'within strata'},
 or \code{'supplied matrix'}.
 }
@@ -176,7 +178,7 @@ pass a \code{permutations} matrix from \code{permute::shuffleSet()}.
 
     # The same, with the groups as a vector.
     res <- mrpp(dm, meta$treatment)
-    c(delta = res$delta, z = res$z, p = res$p_value)
+    as.data.frame(res)
 
     # Permuting only within sites.
     mrpp(dm, 'treatment', meta, strata = 'site')

@@ -19,7 +19,7 @@
         d, cs$groups, meta, weights = cs$weight_type,
         permutations = ex$perms, cpus = 1 )
 
-      expect_equal(res$delta,          cs$delta,   tolerance = 1e-12, info = info)
+      expect_equal(res$statistic[['delta']],          cs$delta,   tolerance = 1e-12, info = info)
       expect_equal(res$expected_delta, cs$E_delta, tolerance = 1e-12, info = info)
       expect_equal(res$A,              cs$A,       tolerance = 1e-12, info = info)
       expect_equal(unname(res$class_delta), unname(cs$classdelta), tolerance = 1e-12, info = info)
@@ -58,7 +58,7 @@
       res <- mrpp(d, g, weights = wt, permutations = perms, cpus = 1)
       dp  <- apply(perms, 1, function (p) ref_delta(g[p], wt))
       del <- ref_delta(g, wt)
-      expect_equal(res$delta, del, tolerance = 1e-12)
+      expect_equal(res$statistic[['delta']], del, tolerance = 1e-12)
       expect_equal(attr(res, 'delta_perm'), dp, tolerance = 1e-12)
       expect_equal(res$z, (del - mean(dp)) / sd(dp), tolerance = 1e-10)
       expect_identical(res$p_value, (1 + sum(dp <= del + sqrt(.Machine$double.eps))) / 26)
@@ -85,10 +85,23 @@
   res <- mrpp(d, 'trt', meta, permutations = 99, cpus = 1)
 
   expect_inherits(res, 'ecodive_mrpp')
+  expect_inherits(res, 'ecodive_test')
   expect_identical(
     names(res),
-    c('delta', 'expected_delta', 'A', 'class_delta', 'class_n', 'weights',
-      'z', 'p_value', 'n_perm', 'permutation') )
+    c('statistic', 'p_value', 'z', 'n_perm', 'expected_delta', 'A',
+      'class_delta', 'class_n', 'weights', 'permutation') )
+  expect_identical(class(res), c('ecodive_mrpp', 'ecodive_test'))
+  expect_identical(names(res$statistic), 'delta')
+  expect_identical(attr(res, 'title'), 'Multi-response permutation procedure (MRPP)')
+
+  # One row of the shared core fields.
+  df <- as.data.frame(res)
+  expect_identical(names(df), c('test', 'stat_name', 'statistic', 'p_value', 'z', 'n_perm'))
+  expect_identical(df$test, 'mrpp')
+  expect_identical(df$stat_name, 'delta')
+  expect_identical(df$statistic, res$statistic[['delta']])
+  expect_identical(df$n_perm, 99L)
+  expect_identical(nrow(rbind(df, as.data.frame(mrpp(d, 'uneven', meta, permutations = 9, cpus = 1)))), 2L)
   expect_identical(names(res$class_delta), levels(meta$trt))
   expect_identical(res$class_n, c(ctrl = 10L, low = 10L, high = 10L))
   expect_identical(length(attr(res, 'delta_perm')), 99L)
@@ -97,20 +110,23 @@
   expect_true(res$p_value >= 1 / 100 && res$p_value <= 1)
   expect_true(res$z < 0)  # A real treatment effect.
   out <- capture.output(print(res))
-  expect_true(any(grepl('Number of permutations: 99', out)))
+  expect_identical(out[[1]], 'Multi-response permutation procedure (MRPP)')
+  expect_true(any(grepl('^delta = .*, p = .*, z = -', out)))
+  expect_true(any(grepl('Permutations: 99 (free)', out, fixed = TRUE)))
   expect_true(any(grepl('agreement A', out)))
+  expect_true(any(grepl('weights: n)', out, fixed = TRUE)))
 
   # A group of one sample has no within-group distances.
   res <- mrpp(d, 'uneven', meta, permutations = 9, cpus = 1)
   expect_true(is.na(res$class_delta[['d']]))
-  expect_false(is.na(res$delta))
+  expect_false(is.na(res$statistic[['delta']]))
 
   # No permutations: no p-value or z, but A.
   res <- mrpp(d, 'trt', meta, permutations = 0, cpus = 1)
   expect_true(is.na(res$p_value) && is.na(res$z))
   expect_false(is.na(res$A))
   expect_identical(attr(res, 'delta_perm'), numeric(0))
-  expect_false(any(grepl('Significance', capture.output(print(res)))))
+  expect_false(any(grepl('p = ', capture.output(print(res)), fixed = TRUE)))
 
   # One permutation: a p-value, but no z.
   res <- mrpp(d, 'trt', meta, permutations = 1, cpus = 1)
@@ -128,8 +144,8 @@
 
   # The seed changes the permutations, not the statistics.
   r3 <- mrpp(d, 'trt', meta, permutations = 199, seed = 8, cpus = 1)
-  expect_identical(r1[c('delta', 'expected_delta', 'A', 'class_delta')],
-                   r3[c('delta', 'expected_delta', 'A', 'class_delta')])
+  expect_identical(r1[c('statistic', 'expected_delta', 'A', 'class_delta')],
+                   r3[c('statistic', 'expected_delta', 'A', 'class_delta')])
   expect_false(identical(attr(r1, 'delta_perm'), attr(r3, 'delta_perm')))
 
   # More threads, at home only. Large enough for run_parallel() to start
@@ -153,7 +169,7 @@
   # delta equals the observed one.
   res <- mrpp(d, 'block', meta, permutations = 49, strata = 'block', cpus = 1)
   expect_identical(res$p_value, 1)
-  expect_identical(attr(res, 'delta_perm'), rep(res$delta, 49))
+  expect_identical(attr(res, 'delta_perm'), rep(res$statistic[['delta']], 49))
   expect_true(is.na(res$z))
   expect_identical(res$permutation, 'within strata')
 
@@ -186,7 +202,7 @@
   named <- setNames(meta$trt, rownames(meta))
   expect_identical(mrpp(d, rev(named), permutations = 19, cpus = 1), ref)
   chr <- mrpp(d, as.character(meta$trt), permutations = 19, cpus = 1)
-  expect_identical(chr$delta, ref$delta)  # Levels sort differently.
+  expect_identical(chr$statistic[['delta']], ref$statistic[['delta']])  # Levels sort differently.
   expect_identical(sort(chr$class_delta), sort(ref$class_delta))
 
   # A symmetric matrix works like a dist.
@@ -232,24 +248,24 @@
 
   # Every sample in its own group.
   expect_warning(res <- mrpp(d, rownames(meta), permutations = 9, cpus = 1), 'No group')
-  expect_true(is.na(res$delta) && is.na(res$A) && is.na(res$p_value) && is.na(res$z))
+  expect_true(is.na(res$statistic[['delta']]) && is.na(res$A) && is.na(res$p_value) && is.na(res$z))
   expect_true(all(is.na(res$class_delta)))
 
   # One group.
   expect_warning(res <- mrpp(d, rep('a', n), permutations = 9, cpus = 1), 'one group')
-  expect_equal(res$delta, res$expected_delta, tolerance = 1e-14)
+  expect_equal(res$statistic[['delta']], res$expected_delta, tolerance = 1e-14)
   expect_identical(res$p_value, 1)
 
   # All distances 0.
   expect_warning(res <- mrpp(d * 0, 'trt', meta, permutations = 9, cpus = 1), 'All distances are 0')
   expect_true(is.na(res$A))
-  expect_identical(res$delta, 0)
+  expect_identical(res$statistic[['delta']], 0)
 
   # Two samples.
   d2  <- as.dist(matrix(c(0, 1, 1, 0), 2))
   expect_warning(res <- mrpp(d2, c('a', 'a'), permutations = 3, cpus = 1), 'one group')
-  expect_identical(res$delta, 1)
+  expect_identical(res$statistic[['delta']], 1)
   expect_warning(res <- mrpp(d2, c('a', 'b'), permutations = 3, cpus = 1), 'No group')
-  expect_true(is.na(res$delta))
+  expect_true(is.na(res$statistic[['delta']]))
 
 #})

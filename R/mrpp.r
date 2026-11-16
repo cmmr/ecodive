@@ -57,10 +57,19 @@
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
 #'
-#' @return A list of class `"ecodive_mrpp"`, which prints as a summary, with:
+#' @return A list of class `c("ecodive_mrpp", "ecodive_test")`, which prints
+#'   as a summary. `as.data.frame()` gives its first four fields as one row,
+#'   with the same columns as ecodive's other permutation tests. Its fields:
 #'
-#'   * `delta`: The observed \eqn{\delta}, the weighted mean of the groups'
-#'     mean within-group distances.
+#'   * `statistic`: The observed \eqn{\delta}, named `delta`: the weighted
+#'     mean of the groups' mean within-group distances.
+#'   * `p_value`: The permutation p-value: the proportion of permutations,
+#'     counting the observed one, with a \eqn{\delta} as small as or smaller
+#'     than the observed one.
+#'   * `z`: The standardized effect size,
+#'     `(delta - mean(delta_perm)) / sd(delta_perm)`. Negative when samples
+#'     are closer within groups than expected by chance.
+#'   * `n_perm`: The number of permutations.
 #'   * `expected_delta`: The expected \eqn{\delta} under the null hypothesis:
 #'     the mean of all the distances.
 #'   * `A`: Chance-corrected within-group agreement,
@@ -69,13 +78,6 @@
 #'     group of one sample).
 #'   * `class_n`: Each group's number of samples.
 #'   * `weights`: The `weights` used.
-#'   * `z`: The standardized effect size,
-#'     `(delta - mean(delta_perm)) / sd(delta_perm)`. Negative when samples
-#'     are closer within groups than expected by chance.
-#'   * `p_value`: The permutation p-value: the proportion of permutations,
-#'     counting the observed one, with a \eqn{\delta} as small as or smaller
-#'     than the observed one.
-#'   * `n_perm`: The number of permutations.
 #'   * `permutation`: How samples were permuted: `'free'`, `'within strata'`,
 #'     or `'supplied matrix'`.
 #'
@@ -178,7 +180,7 @@
 #'
 #'     # The same, with the groups as a vector.
 #'     res <- mrpp(dm, meta$treatment)
-#'     c(delta = res$delta, z = res$z, p = res$p_value)
+#'     as.data.frame(res)
 #'
 #'     # Permuting only within sites.
 #'     mrpp(dm, 'treatment', meta, strata = 'site')
@@ -295,28 +297,22 @@ mrpp <- function (
     (1 + sum(delta_perm <= delta + eps)) / (pm$n_perm + 1)
   else NA_real_
 
-  z <- NA_real_
-  if (pm$n_perm > 1 && !is.na(delta)) {
-    z <- (delta - mean(delta_perm)) / stats::sd(delta_perm)
-    if (!is.finite(z)) z <- NA_real_
-  }
-
-  structure(
-    list(
-      delta          = delta,
-      expected_delta = e_delta,
-      A              = A,
-      class_delta    = class_delta,
-      class_n        = ng,
-      weights        = wt,
-      z              = z,
-      p_value        = p,
-      n_perm         = pm$n_perm,
-      permutation    = if (!is.null(pm$perms)) 'supplied matrix'
-                       else if (!is.null(des$strata)) 'within strata'
-                       else 'free' ),
-    delta_perm = delta_perm,
-    class      = 'ecodive_mrpp' )
+  new_ecodive_test(
+    class          = 'ecodive_mrpp',
+    title          = 'Multi-response permutation procedure (MRPP)',
+    statistic      = c(delta = delta),
+    p_value        = p,
+    z              = perm_z(delta, delta_perm),
+    n_perm         = pm$n_perm,
+    expected_delta = e_delta,
+    A              = A,
+    class_delta    = class_delta,
+    class_n        = ng,
+    weights        = wt,
+    perm           = delta_perm,
+    permutation    = if (!is.null(pm$perms)) 'supplied matrix'
+                     else if (!is.null(des$strata)) 'within strata'
+                     else 'free' )
 }
 
 
@@ -342,32 +338,19 @@ mrpp_weights <- function (weights) {
 
 
 
+# Printed after the core results: each group's mean distance and size, and
+# the expected delta and A.
 #' @export
-print.ecodive_mrpp <- function (x, digits = max(3L, getOption('digits') - 3L), ...) {
+test_details.ecodive_mrpp <- function (x, digits) {
 
-  fmt <- function (v) formatC(v, digits = digits, format = 'g')
+  fmt <- function (v) ifelse(is.na(v), 'NA', formatC(v, digits = digits, format = 'g'))
 
-  cat('Multi-response permutation procedure (MRPP)\n\n')
-  cat('Group weights: ', x$weights, '\n\n', sep = '')
+  tbl <- rbind(delta = fmt(x$class_delta), n = as.character(x$class_n))
 
-  cat('Within-group mean distances and counts:\n')
-  tbl <- rbind(
-    delta = ifelse(is.na(x$class_delta), 'NA', fmt(x$class_delta)),
-    n     = as.character(x$class_n) )
-  print(noquote(tbl))
-
-  cat('\n')
-  cat('Observed delta:  ', fmt(x$delta), '\n', sep = '')
-  cat('Expected delta:  ', fmt(x$expected_delta), '\n', sep = '')
-  cat('Chance-corrected within-group agreement A: ', fmt(x$A), '\n', sep = '')
-
-  if (x$n_perm > 0) {
-    cat('z (standardized effect size): ', fmt(x$z), '\n', sep = '')
-    cat('Significance of delta: ', format.pval(x$p_value, digits = digits), '\n', sep = '')
-  }
-
-  cat('\nPermutation: ', x$permutation, '\n', sep = '')
-  cat('Number of permutations: ', x$n_perm, '\n', sep = '')
-
-  invisible(x)
+  c(
+    paste0('Mean within-group distances (weights: ', x$weights, '):'),
+    utils::capture.output(print(noquote(tbl), right = TRUE)),
+    '',
+    paste0('Expected delta: ', fmt(x$expected_delta)),
+    paste0('Chance-corrected within-group agreement A: ', fmt(x$A)) )
 }
