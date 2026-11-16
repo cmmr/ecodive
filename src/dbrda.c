@@ -549,7 +549,7 @@ static void combine(const double *V, int n, int s, const double *Y, int m, doubl
 // `vals`. `scale` (trace(G)) sets the convergence
 // tolerance. Returns 1 if converged.
 //------------------------------------------------------
-static int lanczos(
+static int dbrda_lanczos(
     int n, int k, int dims, const double *F, int f, double scale0,
     int n_threads, double *vecs, double *vals, int *n_steps ) {
 
@@ -867,7 +867,7 @@ SEXP C_dbrda(
     r_vecs = (double *) R_alloc((size_t) n * kr, sizeof(double));
     r_vals = (double *) R_alloc(kr, sizeof(double));
 
-    converged = lanczos(n, kr, dims_r, Q, rq, trace_g, n_threads, r_vecs, r_vals, &steps);
+    converged = dbrda_lanczos(n, kr, dims_r, Q, rq, trace_g, n_threads, r_vecs, r_vals, &steps);
 
     // Keep the positive, non-zero ones (vegan's ordResid).
     double res_zero = (ZERO * r_vals[0] * adj > ZERO) ? ZERO * r_vals[0] * adj : ZERO;
