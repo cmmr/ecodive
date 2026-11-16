@@ -701,7 +701,7 @@ SEXP C_permanova(
   if (pm_bsize < 1)  pm_bsize = 1;
   if (pm_grp)        pm_bsize = PERM_FW;
 
-  int n_blocks = (pm_total + pm_bsize - 1) / pm_bsize;
+  int n_blocks = (int) (((size_t) pm_total + pm_bsize - 1) / pm_bsize);
   if (n_threads > n_blocks) n_threads = n_blocks;
 
   pm_iwlen = (size_t) n;
@@ -726,7 +726,8 @@ SEXP C_permanova(
   //--------------------------------------------------
   double pairs     = (double) n * (n - 1) / 2;
   double blk_work  = pairs * pm_bsize * (pm_grp ? 1 : pm_m) + 1;
-  int    per_round = (int) (1e8 * n_threads / blk_work);
+  double rounds    = 1e8 * n_threads / blk_work;
+  int    per_round = (rounds < n_blocks) ? (int) rounds : n_blocks; // no overflow
   if (per_round < n_threads) per_round = n_threads;
 
   // run_parallel() starts threads only when told of at

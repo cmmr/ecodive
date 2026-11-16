@@ -19,6 +19,15 @@ static double *clr_vec;
 static double  pseudocount;
 static int     is_percent_normalized;
 
+// Worker threads may clear the flag at the same time. They all
+// store the same value, and it is read only after they join,
+// but a plain store would still be a data race (TSan reports it).
+#if defined(__GNUC__) || defined(__clang__)
+  #define CLEAR_FLAG(f) __atomic_store_n(&(f), 0, __ATOMIC_RELAXED)
+#else
+  #define CLEAR_FLAG(f) ((f) = 0)
+#endif
+
 
 // Macro to loop over each sample based on current threading setup.
 // Sets sam (sample index), val_begin, and val_end (pointers to val_vec 
@@ -63,13 +72,13 @@ static void *check_percent_normalized(void *arg) {
     double depth = 0;
     FOREACH_VAL(
       if (*val < 0 || *val > 1) {
-        is_percent_normalized = 0;
+        CLEAR_FLAG(is_percent_normalized);
         return NULL;
       }
       depth += *val
     );
     if (fabs(depth - 1) > 1e-6) {
-      is_percent_normalized = 0;
+      CLEAR_FLAG(is_percent_normalized);
       return NULL;
     }
   );

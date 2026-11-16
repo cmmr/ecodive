@@ -1145,7 +1145,8 @@ SEXP C_tsne(
     for (int i = 0; i < n; i++)
       for (int d = 0; d < k; d++) Y[(size_t) i * k + d] -= mean[d];
 
-    if (iter % 10 == 9) R_CheckUserInterrupt();
+    // Free the Barnes-Hut tree before stopping.
+    if (iter % 10 == 9 && user_interrupted()) { tree_free(); error("Interrupted."); } // # nocov
   }
 
   double cost = kl_cost(exact, n_threads);

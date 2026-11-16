@@ -473,7 +473,8 @@ void lanczos(lanczos_t *lz) {
 
     if (converged || s_w == dims || steps >= LZ_MAX_STEPS) break;
 
-    R_CheckUserInterrupt();
+    // pca() holds malloc'd buffers (memory.c): free them first.
+    if (user_interrupted()) { free_all(); error("Interrupted."); } // # nocov
 
 
     //------------------------------------------------

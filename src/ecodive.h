@@ -136,6 +136,7 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_);
 
 /* --- parallel.c --- */
 void run_parallel(pthread_func_t func, int n_threads, int n_tasks);
+int  user_interrupted(void);
 
 // How many of n_threads are worth starting for `work` units, when each
 // thread should get at least `min_work` (about a millisecond's worth):

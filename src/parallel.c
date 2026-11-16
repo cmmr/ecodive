@@ -538,3 +538,20 @@ void run_parallel(pthread_func_t func, int n_threads, int n_tasks) {
     func((void*)&args);
   }
 }
+
+
+//======================================================
+// Whether the user has asked to interrupt (Esc, Ctrl+C).
+// Unlike R_CheckUserInterrupt(), this returns instead of
+// jumping out of the C code, so that the caller can free
+// its malloc'd memory before raising an error. Main thread
+// only.
+//======================================================
+static void check_interrupt_fn(void *dummy) {
+  (void) dummy;
+  R_CheckUserInterrupt();
+}
+
+int user_interrupted(void) {
+  return R_ToplevelExec(check_interrupt_fn, NULL) == FALSE;
+}
