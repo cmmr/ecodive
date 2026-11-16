@@ -2,11 +2,12 @@
 // Licensed under the MIT License: https://opensource.org/license/mit
 
 /*
- * Block Lanczos with thick restarts, for the k largest
- * (algebraic) eigenpairs of a symmetric positive
- * semi-definite operator B of size n x n, given only a
- * function that computes products B * V for a few vectors
- * at a time. Shared by pcoa() and pca().
+ * Block Lanczos with thick restarts, for the eigenpairs
+ * with the k largest algebraic eigenvalues of a symmetric,
+ * possibly indefinite operator B of size n x n (pcoa()'s B
+ * has negative eigenvalues for non-Euclidean distances),
+ * given only a function that computes products B * V for
+ * a few vectors at a time. Shared by pcoa() and pca().
  *
  * With `deflate` set, every basis vector is kept orthogonal
  * to the ones vector. pcoa() and the sample-side of pca()
