@@ -106,6 +106,19 @@
 
 
 
+  # validate_margin() ====
+
+  # A fractional margin was truncated to 1.
+  for (bad in list(1.5, 0, 3, NA, '1', c(1, 2))) {
+    env$margin <- bad
+    expect_error(validate_margin(env), '`margin` must be 1 or 2')
+  }
+  env$margin <- 2
+  expect_silent(validate_margin(env))
+  expect_identical(env$margin, 2L)
+
+
+
   # validate_tree() ====
 
   env$counts <- counts[1:3,,drop=FALSE]

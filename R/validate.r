@@ -386,8 +386,8 @@ validate_pseudocount <- function (env = parent.frame()) {
 validate_margin <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
+      stopifnot(is.numeric(margin), length(margin) == 1, margin %in% 1:2)
       margin <- as.integer(margin)
-      stopifnot(identical(margin, 1L) || identical(margin, 2L))
     }),
     
     error = function (e) 
