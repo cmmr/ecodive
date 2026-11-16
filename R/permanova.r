@@ -32,8 +32,10 @@
 #'
 #' @param by  How to test the terms of `formula`:
 #'
-#'   * `'overall'`: One test of all the terms together (the default, as in
-#'     `adonis2()`).
+#'   * `'overall'`: One test of all the terms together. The default, as in
+#'     `adonis2()` since vegan 2.6-8; earlier versions of `adonis2()`
+#'     defaulted to `by = "terms"`, so compare with those using
+#'     `by = 'terms'`.
 #'   * `'terms'`: Each term in turn, after the ones before it (sequential, or
 #'     type I, sums of squares). Their order in `formula` matters.
 #'   * `'margin'`: Each term after all the others (marginal sums of
@@ -93,6 +95,12 @@
 #' `vegan::anova.cca()`'s default "reduced" model: the conditions' effect is
 #' removed from the distances, and the residuals are permuted.
 #'
+#' Every term is tested with the same permutations of the (conditioned)
+#' distances, as in `adonis2()`. PERMANOVA+ for PRIMER instead permutes the
+#' residuals of a separate reduced model for each term (Freedman & Lane
+#' 1983), which can give slightly different p-values for terms after the
+#' first.
+#'
 #'
 #' **Speed and memory**
 #'
@@ -130,6 +138,10 @@
 #' Anderson, M. J. (2001). A new method for non-parametric multivariate
 #' analysis of variance. *Austral Ecology*, 26(1), 32-46.
 #' \doi{10.1111/j.1442-9993.2001.01070.pp.x}
+#'
+#' Freedman, D., & Lane, D. (1983). A nonstochastic interpretation of
+#' reported significance levels. *Journal of Business & Economic
+#' Statistics*, 1(4), 292-298. \doi{10.1080/07350015.1983.10509354}
 #'
 #' McArdle, B. H., & Anderson, M. J. (2001). Fitting multivariate models to
 #' community data: a comment on distance-based redundancy analysis.
