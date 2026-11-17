@@ -474,6 +474,7 @@ void lanczos(lanczos_t *lz) {
   double tol       = (lz->tol > 0) ? lz->tol : LZ_TOL;
   double tol_stall = (lz->tol > 0) ? lz->tol : LZ_TOL_STALL;
   int    limit     = (every == 1) ? LZ_STALL : (LZ_STALL + every - 1) / every;
+  int    max_steps = (lz->max_steps > 0) ? lz->max_steps : LZ_MAX_STEPS;
 
   //--------------------------------------------------
   // Sizes: block p >= k; basis of at most M columns;
@@ -535,7 +536,7 @@ void lanczos(lanczos_t *lz) {
     // (which needs current Ritz vectors).
     //------------------------------------------------
     fresh = (every == 1 || steps % every == 0 || s_w == dims ||
-             steps >= LZ_MAX_STEPS || s_v + m > M);
+             steps >= max_steps || s_v + m > M);
 
     if (fresh) {
 
@@ -552,7 +553,7 @@ void lanczos(lanczos_t *lz) {
       if (lz->early_stop && !ql_failed && eig[0] > lz->stop_above && res[0] <= lz->stop_tol)
         converged = 1;
 
-      if (converged || s_w == dims || steps >= LZ_MAX_STEPS) break;
+      if (converged || s_w == dims || steps >= max_steps) break;
     }
 
     // pca() holds malloc'd buffers (memory.c): free them first.

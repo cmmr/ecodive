@@ -117,6 +117,8 @@ typedef struct {
   double      *ritz;      // Out: if not NULL, up to n_ritz of the final Ritz
   int          n_ritz;    //      vectors (n x n_ritz, largest first; signs not
   int          n_ritz_out;//      fixed), and how many were written.
+  int          max_steps; // In: give up (not converged) after this many
+                          //     products with blocks (default LZ_MAX_STEPS).
 } lanczos_t;
 
 void   lanczos(lanczos_t *lz);

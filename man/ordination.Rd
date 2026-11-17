@@ -11,17 +11,18 @@ ordination(dm, method, ...)
 \code{\link[=beta_div]{beta_div()}}, or a symmetric matrix of distances. Every method
 listed by \code{list_ordinations()} takes distances.}
 
-\item{method}{The name of an ordination method: \code{"dbrda"}, \code{"nmds"},
-\code{"pcoa"}, \code{"tsne"}, or \code{"umap"}. Flexible matching is supported
-(see below). Programmatic access via \code{list_ordinations()}.}
+\item{method}{The name of an ordination method: \code{"capscale"},
+\code{"dbrda"}, \code{"nmds"}, \code{"pcoa"}, \code{"tsne"}, or \code{"umap"}. Flexible
+matching is supported (see below). Programmatic access via
+\code{list_ordinations()}.}
 
 \item{...}{Further arguments for the method's function, such as \code{k},
 \code{seed}, \code{cpus}, or \code{pcoa}'s \code{correction}. Each method keeps its own
-defaults; see
-\code{\link[=dbrda]{dbrda()}} (which also needs \code{data}), \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}},
-and \code{\link[=umap]{umap()}}. \code{seed} is ignored by the methods that have no random
-parts (\code{dbrda} and \code{pcoa}), so the same arguments can be given to
-every method.}
+defaults; see \code{\link[=capscale]{capscale()}} and \code{\link[=dbrda]{dbrda()}} (which also need \code{groups},
+or \code{data} and \code{formula}, as in \code{ordination(dm, 'dbrda', 'treatment', meta)}), \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}}, and \code{\link[=umap]{umap()}}. \code{seed} is
+ignored by the methods that have no random parts (\code{capscale},
+\code{dbrda} and \code{pcoa}), so the same arguments can be given to every
+method.}
 }
 \value{
 The method's result, as described in "Ordination result" below.
@@ -34,6 +35,7 @@ beta diversity metrics.
 \details{
 \strong{List of Ordination Methods}\tabular{ll}{
    Option / Function Name \tab Method Name \cr
+   \code{capscale} \tab Constrained Analysis of Principal Coordinates \cr
    \code{dbrda} \tab Distance-based Redundancy Analysis (db-RDA) \cr
    \code{isomap} \tab Isometric Feature Mapping (Isomap) \cr
    \code{mds} \tab Metric Multidimensional Scaling (MDS) \cr
@@ -48,7 +50,7 @@ beta diversity metrics.
 directly, not through \code{ordination()}. \code{\link[=permanova]{permanova()}} and ecodive's other
 tests are run by \code{\link[=dist_test]{dist_test()}}.
 
-Default numbers of axes differ: \code{k = 3} for \code{dbrda}, \code{pcoa} (and
+Default numbers of axes differ: \code{k = 3} for \code{capscale}, \code{dbrda}, \code{pcoa} (and
 \code{\link[=pca]{pca()}}), and \code{k = 2} for \code{nmds}, \code{tsne}, and \code{umap}.
 
 \strong{Flexible name matching}
@@ -58,14 +60,16 @@ Case insensitive and partial matching, ignoring anything but letters. E.g.
 also work: \code{'MDS'}, \code{'PCO'}, \code{'cmdscale'}, or \code{'classical MDS'} for
 \code{pcoa}; \code{'non-metric MDS'}, \code{'metaMDS'}, or \code{'monoMDS'} for \code{nmds};
 \code{'Rtsne'}, \code{'bhtsne'}, or \code{'Barnes-Hut t-SNE'} for \code{tsne}; and \code{'uwot'}
-for \code{umap}. \code{'dbRDA'} or \code{'distance-based RDA'} select \code{dbrda}.
+for \code{umap}. \code{'dbRDA'} or \code{'distance-based RDA'} select \code{dbrda}, and \code{'CAP'}
+selects \code{capscale}.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
 
 \strong{Same names in other packages}
 
-\code{ape::pcoa()}, \code{vegan::pca()}, \code{vegan::dbrda()}, and \code{uwot::umap()} share
+\code{ape::pcoa()}, \code{vegan::pca()}, \code{vegan::dbrda()}, \code{vegan::capscale()}, and
+\code{uwot::umap()} share
 names with ecodive's functions, and whichever package was attached last
 masks the other's. Write \code{ecodive::pcoa()} and so on, or use
 \code{ordination()}, which always runs ecodive's, to be sure.
@@ -119,7 +123,7 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 
 }
 \seealso{
-\code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}},
+\code{\link[=capscale]{capscale()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}},
 \code{\link[=list_ordinations]{list_ordinations()}}; \code{\link[=pca]{pca()}} and \code{\link[=permanova]{permanova()}}, which are called
 directly.
 }

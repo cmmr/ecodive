@@ -209,33 +209,40 @@ static void bop_mult(const double *V, double *W, int m, void *ctx) {
 // The largest eigenvalue of -G, by Lanczos on products
 // straight from D. A Ritz value above `limit` proves one,
 // and stops the run; otherwise it runs until -G's
-// largest eigenvalue has converged.
+// largest eigenvalue has converged, which can take many
+// steps when G's smallest eigenvalues are close together
+// (full-rank Euclidean distances). After CAP_PROBE_MIN
+// steps, or n / CAP_PROBE_DIV if more, by when the
+// eigen-decomposition would cost about as much, it gives
+// up and answers yes: pos_part() is right either way.
 //======================================================
+#define CAP_PROBE_MIN 30
+#define CAP_PROBE_DIV 10
+
 static void neg_mult(const double *V, double *W, int m, void *ctx) {
   gower_mult(V, W, m, ctx);
   size_t len = (size_t) m * ((gower_t *) ctx)->n;
   for (size_t i = 0; i < len; i++) W[i] = -W[i];
 }
 
-static int has_negative(
-    gower_t *g, int n, double trace, double limit, int *steps, int *converged ) {
+static int has_negative(gower_t *g, int n, double trace, double limit, int *steps) {
 
   double  val = 0, res = 0;
   double *vec = (double *) R_alloc(n, sizeof(double));
+  int     max = (n / CAP_PROBE_DIV > CAP_PROBE_MIN) ? n / CAP_PROBE_DIV : CAP_PROBE_MIN;
 
   lanczos_t lz = {
     .n = n, .k = 1, .dims = n - 1, .deflate = 1, .scale = trace,
     .op = neg_mult, .ctx = g, .vecs = vec, .vals = &val, .resid = &res,
     .max_basis = CAP_BASIS, .rr_every = CAP_RR_EVERY,
     .early_stop = 1, .stop_above = limit, .stop_tol = INFINITY,
-    .stream = 61u };
+    .stream = 61u, .max_steps = max };
 
   lanczos(&lz);
 
-  *steps     += lz.steps;
-  *converged &= lz.converged;
+  *steps += lz.steps;
 
-  return val > limit;
+  return val > limit || !lz.converged;
 }
 
 
@@ -920,7 +927,7 @@ SEXP C_dbrda(
     double limit = ZERO * trace_g * adj / (n - 1);
     if (limit < ZERO) limit = ZERO;
 
-    if (has_negative(&g, n, trace_g, limit / adj, &steps, &converged)) {
+    if (has_negative(&g, n, trace_g, limit / adj, &steps)) {
       dense = 1;
       pos_part(REAL(sexp_dist), n, trace_g, adj, n_threads, &B, &real_g, &imag_g);
     }

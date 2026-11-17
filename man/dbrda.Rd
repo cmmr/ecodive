@@ -4,29 +4,41 @@
 \alias{dbrda}
 \title{Distance-based Redundancy Analysis (db-RDA)}
 \usage{
-dbrda(dm, data, formula = NULL, k = 3L, cpus = n_cpus())
+dbrda(dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus())
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
 symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values. Alternatively, as in \code{vegan::dbrda()}, a formula
 with the distances on its left-hand side and the constraints on its
-right, such as \code{dm ~ treatment}, in place of \code{dm} and \code{formula}.}
+right, such as \code{dm ~ treatment}, in place of \code{dm} and \code{formula};
+the metadata may then be given second, as in
+\code{dbrda(dm ~ treatment, meta)}.}
 
-\item{data}{The sample metadata: a data frame with one row per sample.
-Rows are matched to the samples in \code{dm} by row name, and rows for
-other samples are ignored; without row names, they must be in the
-same order as \code{dm}. A single vector or factor is also accepted, as
-one variable named \code{group}.}
+\item{groups}{The one variable that constrains the ordination: a vector
+or factor with one value per sample, matched to the samples in \code{dm}
+by name when both are named, else in the same order as \code{dm}. Or,
+when \code{data} is given, the name of one of its columns (or a vector
+with one value per row of \code{data}). Categories (factor, character,
+or logical) or a numeric covariate. The same as
+\code{formula = ~ groups}. Give \code{groups} or \code{formula}, not both.}
 
-\item{formula}{A one-sided formula naming the variables in \code{data} that
-constrain the ordination, such as \code{~ treatment + ph}. Factors,
-numeric covariates, and interactions are all allowed. Wrap
-variables in \code{Condition()} to remove their effect first (a partial
-db-RDA), as in \code{vegan::dbrda()}: \code{~ treatment + Condition(site)}.
-With only \code{Condition()} terms, the result is the unconstrained
-ordination after removing their effect. Default: \code{NULL}, for every
-column of \code{data}.}
+\item{data}{Sample metadata: a data frame with one row per sample,
+holding the columns named in \code{groups} or \code{formula}. Rows are
+matched to the samples in \code{dm} by row name, and rows for other
+samples are ignored; without row names, they must be in the same
+order as \code{dm}. Default: \code{NULL}.}
+
+\item{formula}{Instead of \code{groups}, for models of several variables: a
+one-sided formula naming the variables in \code{data} that constrain the
+ordination, such as \code{~ treatment + ph}. Factors, numeric
+covariates, and interactions are all allowed. Wrap variables in
+\code{Condition()} to remove their effect first (a partial analysis), as
+in \code{vegan::dbrda()}: \code{~ treatment + Condition(site)}. With only
+\code{Condition()} terms, the result is the unconstrained ordination
+after removing their effect. A left-hand side, if given, is
+ignored. Give \code{groups} or \code{formula}: there is no default model.
+Default: \code{NULL}.}
 
 \item{k}{The number of axes to return. Default: \code{3}. Reduced, with a
 warning, to the number of axes with positive eigenvalues, which is
@@ -64,6 +76,18 @@ there are none);
 }
 \item \code{constrained_eig}: Every non-zero constrained eigenvalue, including
 negative ones.
+\item \code{r_squared}: The proportion of the total inertia that the
+constraints explain, \code{inertia[["constrained"]] / trace}: PERMANOVA's
+\eqn{R^2} for the same model (\code{\link[=permanova]{permanova()}}), and
+\code{vegan::RsquareAdj(x)$r.squared}.
+\item \code{adj_r_squared}: \code{r_squared} adjusted for the number of constraint
+columns \eqn{p} (after dropping redundant ones), as
+\code{vegan::RsquareAdj(x)$adj.r.squared}: \eqn{1 - (1 - R^2)(n - 1) /
+    (n - p - 1)}. With conditions, of \eqn{q} columns explaining a
+proportion \eqn{R^2_c} of \code{trace}, it is the adjusted \eqn{R^2} of
+constraints and conditions together less that of the conditions
+alone (Peres-Neto et al. 2006). \code{NA} when the model leaves no
+residual degrees of freedom (\eqn{n - p - q - 1 = 0}).
 \item \code{biplot}: Biplot scores of the constraints: one row per column of the
 model matrix and one column per axis (\code{0} for unconstrained axes).
 \code{vegan::scores(x, display = "bp")}.
@@ -75,9 +99,10 @@ factor.
 \description{
 Constrained ordination of samples from their distances: the axes of beta
 diversity that sample metadata explain. Gives the same results as
-\code{vegan::dbrda()} (not \code{vegan::capscale()}; see "Matching vegan" below),
-without ever forming an \eqn{n \times n}{n x n} matrix, so it takes far less
-time and memory for large datasets.
+\code{vegan::dbrda()}, without ever forming an \eqn{n \times n}{n x n} matrix,
+so it takes far less time and memory for large datasets. \code{\link[=capscale]{capscale()}} is
+the same analysis of the distances' positive eigenvalues only, as in
+\code{vegan::capscale()}.
 }
 \details{
 \strong{Method}
@@ -99,26 +124,44 @@ computed in parallel straight from \code{dm}, and a small eigenproblem with one
 row per constraint column. Unconstrained axes are only computed when
 needed, by block Lanczos iteration as in \code{\link[=pcoa]{pcoa()}}.
 
+\strong{dbrda() or capscale()?}
+
+\code{\link[=capscale]{capscale()}} analyzes \eqn{G_+}, the part of \eqn{G} with positive
+eigenvalues, where \code{dbrda()} analyzes all of \eqn{G}. For Euclidean
+distances (such as Euclidean, Hellinger, or Aitchison distances) \eqn{G}
+has no negative eigenvalues, and the two give the same results, apart
+from the axis names. For others, such as Bray-Curtis:
+\itemize{
+\item \code{dbrda()} analyzes the distances as they are. Its \code{r_squared} is
+PERMANOVA's, and it is fast for any number of samples. But some
+constrained eigenvalues can be negative, and these have no axes.
+\item \code{capscale()} analyzes the closest Euclidean configuration, the principal
+coordinates with positive eigenvalues, so every eigenvalue is a
+variance. But it ignores the negative eigenvalues' part of the
+distances, and it needs all of the eigenvalues of \eqn{G}, which takes
+time proportional to \eqn{n^3}.
+}
+
+\code{phyloseq::ordinate(method = "CAP")} calls \code{vegan::capscale()}, so its
+results match \code{\link[=capscale]{capscale()}}'s, not \code{dbrda()}'s.
+
 \strong{Matching vegan}
 
-\code{dbrda()} matches \code{vegan::dbrda()}. It does not match \code{vegan::capscale()}
-or \code{phyloseq::ordinate(method = "CAP")} (which calls \code{capscale()}):
-\code{capscale()} first removes the negative eigenvalues of non-Euclidean
-distances, such as Bray-Curtis, so its eigenvalues and scores differ from
-\code{dbrda()}'s. For Euclidean distances, the two agree.
-
+\code{dbrda()} gives the same scores, eigenvalues, inertia, \eqn{R^2}, biplot
+scores and centroids as \code{vegan::dbrda()}, up to the signs of the axes.
 Columns of the model matrix that are linear combinations of earlier ones
-(aliased) are dropped with a message, as in \code{vegan}.
+are dropped, with a message, as in \code{vegan}.
 
 \strong{Scale}
 
 Like \code{vegan::dbrda()}, \code{dbrda()} divides the distances by
 \eqn{\sqrt{n-1}} when any of them is 4 or more ("mean squared
 distances"). That divides \code{trace}, \code{eig}, \code{inertia} and \code{constrained_eig}
-by \eqn{n-1}, but leaves \code{prop} unchanged. So for the same \code{dm},
-\code{attr(dbrda(dm, ...), 'trace')} equals \code{attr(pcoa(dm), 'trace')} when every
-distance is below 4 (e.g. Bray-Curtis or Jaccard), and equals it divided
-by \eqn{n-1} otherwise (e.g. Euclidean distances between counts).
+by \eqn{n-1}, but leaves \code{prop} and \eqn{R^2} unchanged. So for the same
+\code{dm}, \code{attr(dbrda(dm, ...), 'trace')} equals \code{attr(pcoa(dm), 'trace')}
+when every distance is below 4 (e.g. Bray-Curtis or Jaccard), and equals
+it divided by \eqn{n-1} otherwise (e.g. Euclidean distances between
+counts).
 
 \strong{Axis signs and reproducibility}
 
@@ -165,14 +208,16 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
       row.names = rownames(ex_counts),
       treated   = c(TRUE, TRUE, FALSE, FALSE) )
 
-    ord <- dbrda(d, meta, ~ treated)
+    ord <- dbrda(d, 'treated', meta)
     ord
 
-    # The same, in vegan's style.
+    # The same, with a formula, and in vegan's style.
+    dbrda(d, data = meta, formula = ~ treated)
     dbrda(d ~ treated, meta)
 
-    # Percent of the inertia explained by each axis.
+    # Percent of the inertia explained by each axis, and by treatment.
     round(100 * attr(ord, 'prop'), 1)
+    attr(ord, 'r_squared')
 
     plot(ord[, 1:2])
 
@@ -186,7 +231,13 @@ Legendre, P., & Anderson, M. J. (1999). Distance-based redundancy
 analysis: testing multispecies responses in multifactorial ecological
 experiments. \emph{Ecological Monographs}, 69(1), 1-24.
 \doi{10.1890/0012-9615(1999)069[0001:DBRATM]2.0.CO;2}
+
+Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation
+partitioning of species data matrices: estimation and comparison of
+fractions. \emph{Ecology}, 87(10), 2614-2625.
+\doi{10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2}
 }
 \seealso{
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=capscale]{capscale()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=ordination]{ordination()}},
+\code{\link[=beta_div]{beta_div()}}
 }
