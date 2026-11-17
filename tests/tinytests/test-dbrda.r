@@ -3,13 +3,17 @@
   # Inputs and reference results, written by data-raw/expected/dbrda.r.
   ref <- readRDS(file.path('expected', 'dbrda.rds'))
 
+  # Threads: on CRAN, at most 2 (_R_CHECK_LIMIT_CORES_).
+  max_cpus <- if (at_home()) 4L else 2L
+
   case_formula <- function (cs) {
     rhs <- c(cs$constraints, if (!is.null(cs$conditions)) paste0('Condition(', cs$conditions, ')'))
     stats::as.formula(paste('~', paste(rhs, collapse = ' + ')))
   }
 
   fit_case <- function (cs, cpus = 1) {
-    dbrda(cs$dm, cs$data, case_formula(cs), k = cs$k, cpus = cpus)
+    if (is.null(cs$dm)) cs$dm <- dist(cs$counts)
+    suppressMessages(dbrda(cs$dm, data = cs$data, formula = case_formula(cs), k = cs$k, cpus = cpus))
   }
 
 
@@ -50,6 +54,15 @@
         tolerance = 1e-10, info = lbl )
       expect_equal(attr(ord, 'constrained_eig'), exp$constrained_eig, tolerance = 1e-10, info = lbl)
 
+      # vegan gives no R-squared without constraints; dbrda() gives 0.
+      if (length(exp$r_squared) == 0) {
+        expect_identical(attr(ord, 'r_squared'),     0, info = lbl)
+        expect_identical(attr(ord, 'adj_r_squared'), 0, info = lbl)
+      } else {
+        expect_equal(attr(ord, 'r_squared'),     exp$r_squared,     tolerance = 1e-10, info = lbl)
+        expect_equal(attr(ord, 'adj_r_squared'), exp$adj_r_squared, tolerance = 1e-10, info = lbl)
+      }
+
       bp <- attr(ord, 'biplot')
       if (is.null(exp$biplot)) { # Conditions only: no constraints.
         expect_identical(nrow(bp), 0L, info = lbl)
@@ -78,11 +91,83 @@
   expect_identical(
     names(attributes(ord)),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'inertia',
-      'constrained_eig', 'biplot', 'centroids', 'class') )
+      'constrained_eig', 'r_squared', 'adj_r_squared', 'biplot', 'centroids', 'class') )
   expect_identical(attr(ord, 'method'), 'dbrda')
 
   # Inertia components add up.
   expect_equal(attr(ord, 'trace'), sum(attr(ord, 'inertia')))
+
+  # R-squared is the constrained share of the inertia, as permanova()'s.
+  expect_equal(attr(ord, 'r_squared'), attr(ord, 'inertia')[['constrained']] / attr(ord, 'trace'))
+  pm <- permanova(cs$dm, data = cs$data, formula = ~ Management + A1, permutations = 0, cpus = 1)
+  expect_equal(attr(ord, 'r_squared'), pm$r2, tolerance = 1e-12)
+
+  # Adjusted for 4 constraint columns, 20 samples.
+  expect_equal(attr(ord, 'adj_r_squared'), 1 - (1 - attr(ord, 'r_squared')) * 19 / 15)
+
+
+
+  # Ways to give the model: as permanova(). ====
+
+  d    <- cs$dm
+  meta <- cs$data
+  one  <- dbrda(d, data = meta, formula = ~ Management, cpus = 1)
+
+  # `groups`: a column of `data`, a vector parallel to its rows, or a vector
+  # with one value per sample.
+  expect_identical(dbrda(d, 'Management', meta, cpus = 1), one)
+  expect_equal(unclass(dbrda(d, meta$Management, meta, cpus = 1))[, ], unclass(one)[, ])
+  expect_equal(unclass(dbrda(d, setNames(meta$Management, rownames(meta)), cpus = 1))[, ], unclass(one)[, ])
+  expect_equal(unclass(dbrda(d, meta$Management, cpus = 1))[, ], unclass(one)[, ])
+
+  # vegan's style: the distances on the formula's left-hand side, with the
+  # metadata second or named.
+  dmx <- d
+  expect_identical(dbrda(dmx ~ Management, meta, cpus = 1), one)
+  expect_identical(dbrda(dmx ~ Management, data = meta, cpus = 1), one)
+  expect_identical(dbrda(dmx ~ Management + A1, meta, cpus = 1), ord)
+  expect_error(dbrda(dmx ~ A1, meta, ~ A1), 'Name the formula argument')
+  expect_error(dbrda(dmx ~ A1, data = meta, formula = ~ A1), 'not both')
+
+  # ordination() passes the same arguments on.
+  expect_identical(ordination(d, 'dbrda', 'Management', meta, cpus = 1), one)
+  expect_identical(ordination(d, 'dbrda', data = meta, formula = ~ Management, cpus = 1), one)
+  expect_identical(match_ordination('distance-based RDA')$id, 'dbrda')
+
+  # ordination() drops `seed` for dbrda, which has no random parts.
+  expect_identical(ordination(d, 'dbrda', 'Management', meta, seed = 1, cpus = 1), one)
+
+  # A symmetric matrix gives the same result as a dist.
+  expect_identical(dbrda(as.matrix(d), 'Management', meta, cpus = 1), one)
+
+  # Rows of `data` are matched to the samples by name.
+  expect_identical(dbrda(d, 'Management', meta[rev(seq_len(nrow(meta))), ], cpus = 1), one)
+
+  # A model is required: no default formula, and an explicit (misspelled)
+  # NULL `groups` is an error.
+  expect_error(dbrda(d),                               '`groups` is required')
+  expect_error(dbrda(d, data = meta),                  '`groups` is required')
+  expect_error(dbrda(d, meta$Managment, meta),         '`groups` is NULL')
+  expect_error(dbrda(d, NULL, meta),                   '`groups` is NULL')
+  expect_error(dbrda(d, formula = ~ Management),       '`data` is required')
+  expect_error(dbrda(d, meta, ~ A1),                   'Name the formula argument')
+  expect_error(dbrda(d, 'Management', meta, formula = ~ A1), 'not both')
+  expect_error(dbrda(d, meta),                         '`groups` must be a vector')
+  expect_error(dbrda(d, 'Mangement', meta),            'not one')
+  expect_error(dbrda(d, 'Management'),                 'not given')
+
+  # Only conditions: the unconstrained ordination after removing them.
+  oc <- dbrda(d, data = meta, formula = ~ Condition(A1), cpus = 1)
+  expect_true(all(startsWith(colnames(oc), 'MDS')))
+  expect_true(attr(oc, 'inertia')[['conditional']] > 0)
+  expect_equal(attr(oc, 'inertia')[['constrained']], 0)
+  expect_equal(attr(oc, 'trace'), sum(attr(oc, 'inertia')))
+  expect_identical(attr(oc, 'r_squared'),     0)
+  expect_identical(attr(oc, 'adj_r_squared'), 0)
+
+  # `k` is validated.
+  expect_error(dbrda(d, 'Management', meta, k = 0),   '`k`')
+  expect_error(dbrda(d, 'Management', meta, k = 1.5), '`k`')
 
 
 
@@ -108,42 +193,6 @@
   ords <- fit_case(ref$cases[[6]])
   expect_equal(attr(ords, 'trace'), attr(pcs, 'trace') / (ns - 1), tolerance = 1e-12)
 
-  # A symmetric matrix gives the same result as a dist.
-  expect_identical(dbrda(as.matrix(cs$dm), cs$data, case_formula(cs), cpus = 1), ord)
-
-  # Rows of `data` are matched to the samples by name.
-  shuffled <- cs$data[rev(seq_len(nrow(cs$data))), ]
-  expect_identical(dbrda(cs$dm, shuffled, case_formula(cs), cpus = 1), ord)
-
-  # The default formula uses every column of `data`; ordination() runs it.
-  vars <- cs$data[, c('Management', 'A1')]
-  expect_identical(dbrda(cs$dm, vars, cpus = 1), ord)
-  expect_identical(ordination(cs$dm, 'dbrda', data = vars, cpus = 1), ord)
-  expect_identical(match_ordination('distance-based RDA')$id, 'dbrda')
-
-  # ordination() drops `seed` for dbrda, which has no random parts.
-  expect_identical(ordination(cs$dm, 'dbrda', data = vars, seed = 1, cpus = 1), ord)
-
-  # vegan's style: the distances on the formula's left-hand side.
-  dmx <- cs$dm
-  expect_identical(dbrda(dmx ~ Management + A1, cs$data, cpus = 1), ord)
-  expect_error(dbrda(dmx ~ A1, cs$data, ~ A1), 'not both')
-
-  # Only conditions: the unconstrained ordination after removing them.
-  oc <- dbrda(cs$dm, cs$data, ~ Condition(A1), cpus = 1)
-  expect_true(all(startsWith(colnames(oc), 'MDS')))
-  expect_true(attr(oc, 'inertia')[['conditional']] > 0)
-  expect_equal(attr(oc, 'inertia')[['constrained']], 0)
-  expect_equal(attr(oc, 'trace'), sum(attr(oc, 'inertia')))
-
-  # Not capscale, whose results differ for non-Euclidean distances.
-  expect_error(match_ordination('capscale'), 'does not match')
-  expect_error(match_ordination('CAP'),      'does not match')
-
-  # `k` is validated.
-  expect_error(dbrda(cs$dm, vars, k = 0),   '`k`')
-  expect_error(dbrda(cs$dm, vars, k = 1.5), '`k`')
-
 
 
   # Unconstrained axes are orthogonal to the constraints, the conditions and
@@ -165,9 +214,9 @@
 
   for (cs in ref$cases[8:9]) {
     ord <- fit_case(cs, cpus = 1)
-    expect_identical(fit_case(cs, cpus = 1), ord)
-    expect_identical(fit_case(cs, cpus = 3), ord)
-    expect_identical(fit_case(cs, cpus = 8), ord)
+    expect_identical(fit_case(cs, cpus = 1),        ord)
+    expect_identical(fit_case(cs, cpus = 2),        ord)
+    expect_identical(fit_case(cs, cpus = max_cpus), ord)
   }
 
 
@@ -176,19 +225,29 @@
 
   cs  <- ref$cases[[1]]
   dat <- cbind(cs$data, A1x2 = 2 * cs$data$A1)
-  expect_message(ord2 <- dbrda(cs$dm, dat, ~ Management + A1 + A1x2, cpus = 1), 'aliased')
+  expect_message(ord2 <- dbrda(cs$dm, data = dat, formula = ~ Management + A1 + A1x2, cpus = 1), 'linear combinations')
   ord <- fit_case(cs)
   expect_identical(rownames(attr(ord2, 'biplot')), colnames(cs$x))
   expect_equal(unclass(ord2)[, ], unclass(ord)[, ])
+  # ... and R-squared is adjusted for the columns kept.
+  expect_equal(attr(ord2, 'adj_r_squared'), attr(ord, 'adj_r_squared'))
 
   x2 <- cbind(cs$x, const = 1)
-  expect_message(ord2 <- dbrda_core(dist_vector(cs$dm), x2, k = 3, cpus = 1), 'aliased')
+  expect_message(ord2 <- dbrda_core(dist_vector(cs$dm), x2, k = 3, cpus = 1), 'linear combinations')
   expect_equal(unclass(ord2)[, ], unclass(ord)[, ])
 
   # Constraints entirely within the conditions leave only MDS axes.
-  expect_message(ord3 <- dbrda_core(dist_vector(cs$dm), cs$x[, 'A1', drop = FALSE], z = cs$x, k = 2, cpus = 1), 'aliased')
+  expect_message(ord3 <- dbrda_core(dist_vector(cs$dm), cs$x[, 'A1', drop = FALSE], z = cs$x, k = 2, cpus = 1), 'linear combinations')
   expect_identical(colnames(ord3), c('MDS1', 'MDS2'))
   expect_equal(attr(ord3, 'inertia')[['constrained']], 0)
+
+
+
+  # R-squared without residual degrees of freedom. ====
+
+  sat <- dbrda(cs$dm, factor(seq_len(20)), cpus = 1)
+  expect_equal(attr(sat, 'r_squared'), 1)
+  expect_identical(attr(sat, 'adj_r_squared'), NA_real_)
 
 
 
@@ -218,6 +277,7 @@
   # One sample.
   ord <- dbrda_core(dist_vector(as.dist(matrix(0, 1, 1))), matrix(1, 1, 1), k = 3, cpus = 1)
   expect_identical(dim(ord), c(1L, 0L))
+  expect_identical(attr(ord, 'r_squared'), NA_real_)
 
   # Non-finite values.
   bad <- d

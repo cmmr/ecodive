@@ -25,7 +25,9 @@
 
   # Sample metadata, for methods that need it.
   meta <- data.frame(row.names = rownames(m30), g = rep(c('a', 'b', 'c'), 10))
-  args <- list(dbrda = list(data = meta))
+  args <- list(
+    capscale = list(groups = 'g', data = meta),
+    dbrda    = list(groups = 'g', data = meta) )
 
   for (id in list_ordinations(val = 'id')) {
     # The same arguments, `seed` included, work for every method.
@@ -61,6 +63,8 @@
   expect_identical(m('isoMDS'),              'nmds')
   expect_identical(m('dbRDA'),               'dbrda')
   expect_identical(m('distance-based RDA'),  'dbrda')
+  expect_identical(m('capscale'),            'capscale')
+  expect_identical(m('CAP'),                 'capscale')
   expect_identical(m('t-SNE'),               'tsne')
   expect_identical(m('Rtsne'),               'tsne')
   expect_identical(m('Barnes-Hut t-SNE'),    'tsne')
@@ -80,23 +84,24 @@
   df <- list_ordinations()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id', 'input'))
-  expect_identical(df$id, c('dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
-  expect_identical(rownames(list_ordinations(nm = 'id')), c('dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
+  expect_identical(df$id, c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
+  expect_identical(rownames(list_ordinations(nm = 'id')), c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
 
   expect_identical(list_ordinations(val = 'id', nm = 'name'),
-    c('Distance-based Redundancy Analysis' = 'dbrda', 'Isometric Feature Mapping' = 'isomap',
+    c('Constrained Analysis of Principal Coordinates' = 'capscale',
+      'Distance-based Redundancy Analysis' = 'dbrda', 'Isometric Feature Mapping' = 'isomap',
       'Metric Multidimensional Scaling' = 'mds',
       'Non-metric Multidimensional Scaling' = 'nmds', 'Principal Coordinates Analysis' = 'pcoa',
       't-distributed Stochastic Neighbor Embedding' = 'tsne',
       'Uniform Manifold Approximation and Projection' = 'umap'))
-  expect_identical(list_ordinations(val = 'func'), list(dbrda = dbrda, isomap = isomap, mds = mds, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
+  expect_identical(list_ordinations(val = 'func'), list(capscale = capscale, dbrda = dbrda, isomap = isomap, mds = mds, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
   expect_identical(list_ordinations(val = 'list')$pcoa, match_ordination('pcoa'))
-  expect_identical(list_ordinations(val = 'input', input = 'dist'), rep('dist', 7))
+  expect_identical(list_ordinations(val = 'input', input = 'dist'), rep('dist', 8))
 
 
   # Invalid input. ====
 
-  expect_error(ordination(d, 'xyz'),   'does not match any option: dbrda, isomap, mds, nmds, pcoa, tsne, umap')
+  expect_error(ordination(d, 'xyz'),   'does not match any option: capscale, dbrda, isomap, mds, nmds, pcoa, tsne, umap')
   expect_error(ordination(d, 'm'),     'matches multiple options: mds, nmds')
   expect_error(ordination(d, 123),     'character')
   expect_error(ordination(d, c('pcoa', 'nmds')), 'length 1')
