@@ -97,7 +97,8 @@
   expect_error(ordination(d, '-'),     'alphabetic')
   expect_error(ordination(d, NA_character_), 'NA')
   expect_error(ordination(d, 'PCA'),       'call pca\\(\\) directly')
-  expect_error(ordination(d, 'adonis2'),   'call permanova\\(\\) directly')
+  expect_error(ordination(d, 'adonis2'),   'is a test, not an ordination: use dist_test')
+  expect_error(ordination(d, 'betadisper'), 'use dist_test')
   expect_error(list_ordinations(input = 'counts'), 'Options are: NULL, dist')
   expect_error(list_ordinations(val = 'xyz'))
 

@@ -98,6 +98,7 @@
   `vegan::anosim()` builds; permutations run in parallel. With 300 samples
   and 999 permutations it takes under a tenth of a second, against about
   seven for `vegan::anosim()`. Results are identical for any number of `cpus`.
+
 * New `permdisp()` tests the homogeneity of multivariate dispersions
   (PERMDISP), as `vegan::betadisper()` followed by `vegan::permutest()`: each
   sample's distance to its group's centroid (the default) or spatial
@@ -125,6 +126,18 @@
   `cor()`'s quadratic count), and permutations run in parallel. Permutations
   come from a `seed` argument, and results are identical for any number of
   `cpus`.
+
+* New `dist_test()` runs any of these tests by name, as `ordination()` does
+  for ordination methods: `dist_test(dm, 'treatment', meta, method =
+  'mrpp')` is `mrpp(dm, 'treatment', meta)`. It checks that the variable is
+  of a kind the test takes: categorical groups for `anosim`, `mrpp` and
+  `permdisp`, categorical or numeric for `permanova`. `list_dist_tests()`
+  and `match_dist_test()` list and look up the tests, with forgiving name
+  matching (`'adonis2'` finds `permanova`, `'betadisper'` finds
+  `permdisp`). `permanova()`, `mrpp()`, `anosim()` and `permdisp()` all take
+  the same `groups` and `data`, with the same checks and messages: one
+  value per sample (matched by name, else by position), or a column name of
+  `data`, or a vector with one value per row of `data`.
 
 * New `dbrda()` runs a distance-based redundancy analysis (db-RDA): the axes
   of a `dist` object that sample metadata explain, given as a formula such as

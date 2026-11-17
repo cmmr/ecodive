@@ -42,8 +42,8 @@ beta diversity metrics.
 
 
 \code{\link[=pca]{pca()}} ordinates a count table rather than distances, so it is called
-directly, not through \code{ordination()}. \code{\link[=permanova]{permanova()}} is a test, not an
-ordination.
+directly, not through \code{ordination()}. \code{\link[=permanova]{permanova()}} and ecodive's other
+tests are run by \code{\link[=dist_test]{dist_test()}}.
 
 Default numbers of axes differ: \code{k = 3} for \code{dbrda}, \code{pcoa} (and
 \code{\link[=pca]{pca()}}), and \code{k = 2} for \code{nmds}, \code{tsne}, and \code{umap}.

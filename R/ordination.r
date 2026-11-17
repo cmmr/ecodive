@@ -66,8 +66,8 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' | `umap`                 | Uniform Manifold Approximation and Projection (UMAP)  |
 #'
 #' [pca()] ordinates a count table rather than distances, so it is called
-#' directly, not through `ordination()`. [permanova()] is a test, not an
-#' ordination.
+#' directly, not through `ordination()`. [permanova()] and ecodive's other
+#' tests are run by [dist_test()].
 #'
 #' Default numbers of axes differ: `k = 3` for `dbrda`, `pcoa` (and
 #' [pca()]), and `k = 2` for `nmds`, `tsne`, and `umap`.
@@ -259,8 +259,8 @@ match_ordination <- function (method, input = NULL) {
   # Close relatives that are called directly.
   if (needle %in% c('pca', 'principalcomponents', 'principalcomponentanalysis', 'prcomp'))
     stop('`method = "', method, '"`: call pca() directly; it takes a count table, not distances.')
-  if (needle %in% c('permanova', 'adonis', 'adonis2'))
-    stop('`method = "', method, '"`: call permanova() directly; it is a test, not an ordination.')
+  if (needle %in% names(TEST_HAYSTACK))
+    stop('`method = "', method, '"` is a test, not an ordination: use dist_test().')
 
   opts  <- ORD_HAYSTACK[unname(ORD_HAYSTACK) %in% df$id]
   match <- unique(unname(opts[startsWith(names(opts), needle)]))

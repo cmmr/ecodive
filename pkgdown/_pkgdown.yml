@@ -70,11 +70,13 @@ reference:
 - title: Hypothesis Tests
   desc: Test whether sample metadata explain beta diversity distances.
   contents:
+  - dist_test
   - permanova
   - mantel
   - mrpp
   - anosim
   - permdisp
+  - list_dist_tests
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.
