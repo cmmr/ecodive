@@ -82,17 +82,25 @@
     kk  <- ncol(ord)
     inf <- paste(nm, corr)
 
-    expect_true(ref$const > 0, info = inf)
-    expect_equal(attr(ord, 'constant'), ref$const,               tolerance = 1e-10, info = inf)
-    expect_equal(attr(ord, 'eig'),      ref$eig[1:kk],           tolerance = 1e-10, info = inf)
-    expect_equal(attr(ord, 'trace'),    ref$trace,               tolerance = 1e-10, info = inf)
-    expect_equal(attr(ord, 'prop'),     ref$eig[1:kk] / ref$trace, tolerance = 1e-10, info = inf)
-    expect_true(coord_diff(ord, ref$vec %*% diag(sqrt(pmax(ref$eig, 0)))) < 1e-8, info = inf)
+    # pcoa()'s constant makes the distances Euclidean: the corrected
+    # matrix's smallest eigenvalue is 0.
+    expect_true(attr(ord, 'constant') > 0, info = inf)
+    expect_true(abs(corrected_min(d, ord)) < 1e-10, info = inf)
 
-    # The corrected distances are Euclidean: no negative eigenvalue, and the
-    # smallest non-trivial one is 0.
-    expect_true(min(ref$eig) > -1e-12 * ref$eig[[1]], info = inf)
-    expect_true(abs(sort(ref$eig)[[2]]) < 1e-10 * ref$eig[[1]], info = inf)
+    # The reference comes from the platform's BLAS/LAPACK, so it is used only
+    # if it passes the same test: no negative eigenvalue, and the smallest
+    # non-trivial one 0. (On R-hub, OpenBLAS 0.3.20 has given a wrong
+    # Cailliez constant on some runners' CPUs; pcoa() itself uses neither.)
+    ref_ok <- ref$const > 0 &&
+      min(ref$eig) > -1e-12 * ref$eig[[1]] &&
+      abs(sort(ref$eig)[[2]]) < 1e-10 * ref$eig[[1]]
+    if (ref_ok) {
+      expect_equal(attr(ord, 'constant'), ref$const,               tolerance = 1e-10, info = inf)
+      expect_equal(attr(ord, 'eig'),      ref$eig[1:kk],           tolerance = 1e-10, info = inf)
+      expect_equal(attr(ord, 'trace'),    ref$trace,               tolerance = 1e-10, info = inf)
+      expect_equal(attr(ord, 'prop'),     ref$eig[1:kk] / ref$trace, tolerance = 1e-10, info = inf)
+      expect_true(coord_diff(ord, ref$vec %*% diag(sqrt(pmax(ref$eig, 0)))) < 1e-8, info = inf)
+    }
 
     expect_identical(attr(ord, 'correction'), corr)
     expect_identical(
@@ -100,12 +108,17 @@
       c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'correction', 'constant', 'class') )
   }
 
-  # The same constant as cmdscale(add = TRUE), base R's Cailliez correction.
+  # The same constant as cmdscale(add = TRUE), base R's Cailliez correction,
+  # where cmdscale()'s constant (from the platform's LAPACK) makes the
+  # distances Euclidean, as above.
   for (d in list(ds$bray, ds$ties, d100, ds$jaccard)) {
     oC <- pcoa(d, correction = 'cailliez', cpus = cpus)
     cm <- cmdscale(d, k = 3, add = TRUE, eig = TRUE)
-    expect_equal(attr(oC, 'constant'), cm$ac, tolerance = 1e-10)
-    expect_true(coord_diff(oC, cm$points) < 1e-8)
+    cm_ok <- abs(corrected_min(d, structure(0, correction = 'cailliez', constant = cm$ac))) < 1e-10
+    if (cm_ok) {
+      expect_equal(attr(oC, 'constant'), cm$ac, tolerance = 1e-10)
+      expect_true(coord_diff(oC, cm$points) < 1e-8)
+    }
   }
 
 

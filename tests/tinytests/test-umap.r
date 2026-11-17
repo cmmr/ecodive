@@ -186,12 +186,15 @@
   #--------------------------------------------------
   same_platform <- home && .Platform$OS.type == 'windows' && R.version$arch == 'x86_64'
   short_tol     <- if (same_platform) 0 else 1e-5
+  # 32-bit builds compute on the x87 unit, whose rounding of exp() and pow()
+  # the SGD amplifies to ~1% within 5 epochs: compare on 64-bit only.
+  x64           <- .Machine$sizeof.pointer == 8
 
   s1    <- c1$sgd1
   seeds <- batch_seeds(s1$seed, n1, 5)
   xs    <- .Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, 1L)
   expect_identical(.Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, many), xs)
-  if (home) expect_equal(center_like(xs, s1$short), s1$short, tolerance = short_tol)
+  if (home && x64) expect_equal(center_like(xs, s1$short), s1$short, tolerance = short_tol)
 
   seeds <- batch_seeds(s1$seed, n1, s1$n_epochs)
   x1    <- .Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, 1L)
@@ -212,7 +215,7 @@
   s3    <- ref$more$sgd3
   seeds <- batch_seeds(s3$seed, 40L, 5L)
   x3    <- .Call(C_umap_sgd, g2, s3$init, 5L, c(s3$ab, 1, 1, 5, adam), seeds, 1L)
-  if (home) expect_equal(center_like(x3, s3$epochs5), s3$epochs5, tolerance = short_tol)
+  if (home && x64) expect_equal(center_like(x3, s3$epochs5), s3$epochs5, tolerance = short_tol)
   seeds <- batch_seeds(s3$seed, 40L, 50L)
   x3    <- .Call(C_umap_sgd, g2, s3$init, 50L, c(s3$ab, 1, 1, 5, adam), seeds, 2L)
   if (same_platform) expect_equal(center_like(x3, s3$epochs50), s3$epochs50, tolerance = 0)
