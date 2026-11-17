@@ -296,7 +296,7 @@ permdisp <- function (
   mu     <- disp[grp + 1L]
   df_grp <- ng - 1L
   df_res <- n - ng
-  ss_grp <- sum(cnt * (disp - mean(z))^2)
+  ss_grp <- sum((mu - mean(z))^2)  # over samples: the level order can't change it
   ss_res <- sum((z - mu)^2)
   f_obs  <- (ss_grp / df_grp) / (ss_res / df_res)
 

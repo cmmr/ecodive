@@ -120,6 +120,15 @@
   expect_identical(rownames(g), c('groupno', 'groupyes'))
   expect_equal(unique(g$r2), res$r2[7])
 
+  # The order of the levels changes nothing but the order of the rows.
+  env_rev <- env
+  for (v in names(env)) if (!is.numeric(env[[v]]))
+    env_rev[[v]] <- factor(env[[v]], rev(sort(unique(as.character(env[[v]])))))
+  rev_res <- envfit(ord, env_rev, permutations = 99, cpus = 1)
+  expect_identical(attr(rev_res, 'r2_perm'), attr(res, 'r2_perm'))
+  by_name <- function (x) { x <- x[order(x$variable, x$level), ]; rownames(x) <- NULL; x }
+  expect_identical(by_name(rev_res), by_name(res))
+
 
 
   # Matching samples by name. ====

@@ -485,10 +485,11 @@ static void *perm_worker(void *arg) {
     for (int g = 0; g < ng; g++) mu[g] /= pp_cnt[g];
     tot /= n;
 
+    // Summed over samples, not groups, so the level order can't change it.
     double mss = 0, rss = 0;
-    for (int g = 0; g < ng; g++) {
-      double t = mu[g] - tot;
-      mss += pp_cnt[g] * t * t;
+    for (int a = 0; a < n; a++) {
+      double t = mu[pp_grp[a]] - tot;
+      mss += t * t;
     }
     for (int a = 0; a < n; a++) {
       double t = pp_res[p[a]] - mu[pp_grp[a]];

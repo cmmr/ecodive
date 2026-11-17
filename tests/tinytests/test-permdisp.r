@@ -267,6 +267,14 @@
   expect_identical(permdisp(d, sh, permutations = 19, cpus = 1)$table, ref$table)
   expect_identical(permdisp(d, sh, permutations = 19, cpus = 1)$distances, ref$distances)
 
+  # The order of the levels changes nothing, not even the last bit.
+  for (ty in c('centroid', 'median')) {
+    r1 <- permdisp(d, g, type = ty, permutations = 19, cpus = 1)
+    r2 <- permdisp(d, factor(g, rev(levels(g))), type = ty, permutations = 19, cpus = 1)
+    expect_identical(r2$table, r1$table, info = ty)
+    expect_identical(attr(r2, 'f_perm'), attr(r1, 'f_perm'), info = ty)
+  }
+
   # A symmetric matrix works like a dist.
   expect_identical(permdisp(as.matrix(d), g, permutations = 19, cpus = 1), ref)
   expect_identical(

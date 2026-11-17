@@ -319,7 +319,9 @@ envfit_fit <- function (vars, fit) {
   grp  <- NULL
   nlev <- integer(0)
   if (length(facs)) {
-    grp  <- vapply(facs, function (f) as.integer(f) - 1L, integer(n))
+    # Codes by first appearance, not by level, so that sums over levels run
+    # in an order that the level order (or character vs factor) cannot change.
+    grp  <- vapply(facs, function (f) { i <- as.integer(f); match(i, unique(i)) - 1L }, integer(n))
     grp  <- matrix(grp, nrow = n)
     nlev <- vapply(facs, nlevels, integer(1))
   }
