@@ -92,7 +92,7 @@ Constrained ordination of samples from their distances, like \code{\link[=dbrda]
 but of the principal coordinates with positive eigenvalues only. Gives
 the same results as \code{vegan::capscale()} (and so as
 \code{phyloseq::ordinate(method = "CAP")}). For Euclidean distances it gives
-the same results as \code{\link[=dbrda]{dbrda()}}, as quickly.
+the same results as \code{\link[=dbrda]{dbrda()}}.
 }
 \details{
 \strong{Method}
@@ -112,15 +112,24 @@ distances), \eqn{G} has no negative eigenvalues, so \eqn{G_+ = G}.
 iteration on \eqn{-G} with products straight from \code{dm} (as \code{\link[=pcoa]{pcoa()}}
 finds the largest eigenvalues). It stops as soon as one is certain, and
 otherwise runs until the smallest eigenvalue of \eqn{G} has converged.
-Without one, the rest is exactly \code{\link[=dbrda]{dbrda()}}'s, as fast, and in as little
-memory.
+Having found none, the rest is exactly \code{\link[=dbrda]{dbrda()}}'s, in as little memory.
+That is quick when \eqn{G} has many eigenvalues at 0, such as for
+Euclidean distances between samples with fewer features than samples.
+When the smallest eigenvalues are close together, convergence can take
+many steps; after about \eqn{n/10} of them (each one pass over \code{dm}), when
+going on would cost about as much as the full eigen-decomposition,
+\code{capscale()} stops looking and decomposes \eqn{G}, as below, which gives
+the same results either way.
 
 Otherwise, \eqn{G_+} needs every eigenvalue of \eqn{G}, as in
 \code{vegan::capscale()}: \code{capscale()} forms \eqn{G} (\eqn{8n^2} bytes, such as
 200 MB for 5000 samples), reduces it to tridiagonal form, finds all of its
 eigenvalues, and then the eigenvectors of the positive ones, or of the
 others if they are fewer, by inverse iteration. That takes time
-proportional to \eqn{n^3}, though less than a full eigen-decomposition.
+proportional to \eqn{n^3}, though several times less than a full
+eigen-decomposition: for 2000 Bray-Curtis distances, about 2 seconds on
+one core, against 12 for \code{vegan::capscale()}. The reduction and the
+eigenvectors are computed in parallel on \code{cpus} threads.
 
 \strong{capscale() or dbrda()?}
 

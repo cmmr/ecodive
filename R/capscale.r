@@ -72,7 +72,7 @@
 #' That is quick when \eqn{G} has many eigenvalues at 0, such as for
 #' Euclidean distances between samples with fewer features than samples.
 #' When the smallest eigenvalues are close together, convergence can take
-#' many steps; after about \eqn{n/16} of them (each one pass over `dm`), when
+#' many steps; after about \eqn{n/10} of them (each one pass over `dm`), when
 #' going on would cost about as much as the full eigen-decomposition,
 #' `capscale()` stops looking and decomposes \eqn{G}, as below, which gives
 #' the same results either way.

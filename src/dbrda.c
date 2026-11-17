@@ -84,10 +84,11 @@
 #define DBRDA_QR_TOL 1e-7
 
 // capscale()'s probe for a negative eigenvalue: Lanczos
-// with a large basis, and Rayleigh-Ritz every few steps,
-// as pcoa() uses for G's smallest eigenvalue.
-#define CAP_BASIS    200
-#define CAP_RR_EVERY 4
+// with a large basis, and Rayleigh-Ritz every few steps
+// (cheaper per step than pcoa()'s 200 and 4, for about as
+// many steps).
+#define CAP_BASIS    120
+#define CAP_RR_EVERY 6
 
 // Inverse iteration: at most this many solves for an
 // eigenvector, and this many more once it has converged.
