@@ -21,14 +21,15 @@ method takes categorical groups, numeric values, or both: see
 sample, holding \code{groups} (and \code{strata}) as columns. Rows are matched
 to the samples in \code{dm} by row name. Default: \code{NULL}.}
 
-\item{method}{The name of a test: \code{"anosim"}, \code{"mrpp"}, \code{"permanova"},
-or \code{"permdisp"}. Flexible matching is supported (see below).
-Programmatic access via \code{list_dist_tests()}.}
+\item{method}{The name of a test: \code{"anosim"}, \code{"mantel"}, \code{"mrpp"},
+\code{"permanova"}, or \code{"permdisp"}. Flexible matching is supported (see
+below). Programmatic access via \code{list_dist_tests()}.}
 
 \item{...}{Further arguments for the method's function, such as
 \code{permutations}, \code{strata}, \code{seed}, or \code{cpus}, which every method
 takes, or a method's own, such as \code{weights} for \code{\link[=mrpp]{mrpp()}}. Each
-method keeps its own defaults.}
+method keeps its own defaults. For \code{mantel}, \code{groups} is passed as
+\code{\link[=mantel]{mantel()}}'s \code{y}.}
 }
 \value{
 The method's result: a list of class \code{"ecodive_test"} whose first
@@ -45,6 +46,7 @@ treatment groups, explain the differences between samples?
 \strong{List of Tests}\tabular{lll}{
    Option / Function Name \tab Method Name \tab Groups \cr
    \code{anosim} \tab Analysis of Similarities (ANOSIM) \tab categorical \cr
+   \code{mantel} \tab Mantel Test \tab numeric \cr
    \code{mrpp} \tab Multi-Response Permutation Procedure (MRPP) \tab categorical \cr
    \code{permanova} \tab Permutational Multivariate Analysis of Variance \tab categorical or numeric \cr
    \code{permdisp} \tab Homogeneity of Multivariate Dispersions (PERMDISP) \tab categorical \cr
@@ -53,8 +55,10 @@ treatment groups, explain the differences between samples?
 
 Categorical groups are factors, character, or logical vectors; a method
 that takes only categorical groups gives an error for numbers, and the
-reverse. To test several variables at once, call \code{\link[=permanova]{permanova()}} with a
-\code{formula}, either directly or as \code{dist_test(dm, data = meta, method = 'permanova', formula = ~ a + b)}.
+reverse. \code{mantel} correlates \code{dm} with the differences between samples'
+values; to compare two distance matrices, call \code{\link[=mantel]{mantel()}} directly. To
+test several variables at once, call \code{\link[=permanova]{permanova()}} with a \code{formula},
+either directly or as \code{dist_test(dm, data = meta, method = 'permanova', formula = ~ a + b)}.
 
 \strong{Flexible name matching}
 
@@ -69,8 +73,9 @@ ambiguity with future additions to the list of methods.
 
 \strong{Same names in other packages}
 
-\code{vegan::anosim()} and \code{vegan::mrpp()} share names with ecodive's
-functions, and whichever package was attached last masks the other's.
+\code{vegan::anosim()}, \code{vegan::mantel()}, and \code{vegan::mrpp()} share names
+with ecodive's functions, and whichever package was attached last masks
+the other's.
 Write \code{ecodive::anosim()} and so on, or use \code{dist_test()}, which always
 runs ecodive's, to be sure.
 }
@@ -98,9 +103,10 @@ runs ecodive's, to be sure.
 
     # A numeric variable.
     dist_test(dm, 'ph', meta, method = 'adonis2')
+    dist_test(dm, 'ph', meta, method = 'mantel')
 
 }
 \seealso{
-\code{\link[=anosim]{anosim()}}, \code{\link[=mrpp]{mrpp()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=permdisp]{permdisp()}},
+\code{\link[=anosim]{anosim()}}, \code{\link[=mantel]{mantel()}}, \code{\link[=mrpp]{mrpp()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=permdisp]{permdisp()}},
 \code{\link[=list_dist_tests]{list_dist_tests()}}
 }

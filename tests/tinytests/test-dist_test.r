@@ -73,8 +73,29 @@
   for (m in c('anosim', 'mrpp', 'permdisp')) {
     expect_error(dist_test(d, 'ph', meta, method = m), "column 'ph' is numeric", info = m)
     expect_error(dist_test(d, meta$ph, method = m), '`groups` is numeric', info = m)
-    expect_error(dist_test(d, meta$ph, method = m), 'use: permanova', info = m)
+    expect_error(dist_test(d, meta$ph, method = m), 'use: mantel, permanova', info = m)
   }
+
+  # mantel(): numeric values only, passed as its `y`.
+  expect_identical(
+    dist_test(d, 'ph', meta, method = 'mantel', permutations = 19, strata = 'block', cpus = 1),
+    mantel(d, 'ph', meta, permutations = 19, strata = 'block', cpus = 1) )
+  expect_identical(
+    dist_test(d, meta$ph, method = 'mantel', permutations = 19, seed = 3, cpus = 1),
+    mantel(d, meta$ph, permutations = 19, seed = 3, cpus = 1) )
+  expect_identical(
+    dist_test(d, setNames(meta$ph, rownames(meta)), method = 'mantel', permutations = 9, cpus = 1),
+    mantel(d, setNames(meta$ph, rownames(meta)), permutations = 9, cpus = 1) )
+  expect_identical(
+    dist_test(d, 'depth', meta, method = 'Mantel test', alternative = 'two.sided',
+              permutations = 9, cpus = 1),
+    mantel(d, 'depth', meta, alternative = 'two.sided', permutations = 9, cpus = 1) )
+  expect_error(dist_test(d, 'trt', meta, method = 'mantel'), "column 'trt' is categorical")
+  expect_error(dist_test(d, meta$trt, method = 'mantel'), '`groups` is categorical')
+  expect_error(
+    dist_test(d, meta$trt, method = 'mantel'),
+    'use: anosim, mrpp, permanova, permdisp' )
+  expect_error(dist_test(d, 'nothere', meta, method = 'mantel'))
 
   # Character, logical and factor groups are categorical.
   expect_identical(
@@ -100,8 +121,8 @@
 
   df <- list_dist_tests()
   expect_identical(names(df), c('name', 'id', 'groups'))
-  expect_true(all(c('anosim', 'mrpp', 'permanova', 'permdisp') %in% df$id))
-  expect_identical(list_dist_tests(val = 'id', groups = 'numeric'), 'permanova')
+  expect_identical(df$id, c('anosim', 'mantel', 'mrpp', 'permanova', 'permdisp'))
+  expect_identical(list_dist_tests(val = 'id', groups = 'numeric'), c('mantel', 'permanova'))
   expect_identical(
     list_dist_tests(val = 'id', groups = 'categorical'),
     c('anosim', 'mrpp', 'permanova', 'permdisp') )
@@ -128,6 +149,10 @@
   expect_identical(match_dist_test('Analysis of Similarities')$id, 'anosim')
   expect_identical(match_dist_test('multi-response')$id,   'mrpp')
   expect_identical(match_dist_test('MRPP')$id,             'mrpp')
+  expect_identical(match_dist_test('Mantel')$id,           'mantel')
+  expect_identical(match_dist_test('mantel test')$id,      'mantel')
+  expect_identical(match_dist_test('mantel')$params, names(formals(mantel)))
+  expect_error(match_dist_test('mantel', groups = 'categorical'), 'does not match any option')
   expect_error(match_dist_test('perm'),   'matches multiple options')
   expect_error(match_dist_test('t-test'), 'does not match any option')
   expect_identical(match_dist_test('adonis', groups = 'numeric')$id, 'permanova')

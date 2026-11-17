@@ -131,7 +131,8 @@
   for ordination methods: `dist_test(dm, 'treatment', meta, method =
   'mrpp')` is `mrpp(dm, 'treatment', meta)`. It checks that the variable is
   of a kind the test takes: categorical groups for `anosim`, `mrpp` and
-  `permdisp`, categorical or numeric for `permanova`. `list_dist_tests()`
+  `permdisp`, numeric values for `mantel` (passed as its `y`), and either
+  for `permanova`. `list_dist_tests()`
   and `match_dist_test()` list and look up the tests, with forgiving name
   matching (`'adonis2'` finds `permanova`, `'betadisper'` finds
   `permdisp`). `permanova()`, `mrpp()`, `anosim()` and `permdisp()` all take

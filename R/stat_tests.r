@@ -18,6 +18,7 @@ DIST_TESTS <- local({
     text             = "
       name,                                             id,        groups,              alt_ids
       Analysis of Similarities,                         anosim,    categorical,         analysisofsimilarity
+      Mantel Test,                                      mantel,    numeric,             manteltest
       Multi-Response Permutation Procedure,             mrpp,      categorical,         multiresponsepermutation
       Permutational Multivariate Analysis of Variance,  permanova, categorical numeric, adonis adonis2 npmanova permutationalmanova
       Homogeneity of Multivariate Dispersions,          permdisp,  categorical,         betadisper permdisp2 dispersion multivariatedispersion
@@ -50,14 +51,15 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #'        sample, holding `groups` (and `strata`) as columns. Rows are matched
 #'        to the samples in `dm` by row name. Default: `NULL`.
 #'
-#' @param method  The name of a test: `"anosim"`, `"mrpp"`, `"permanova"`,
-#'        or `"permdisp"`. Flexible matching is supported (see below).
-#'        Programmatic access via `list_dist_tests()`.
+#' @param method  The name of a test: `"anosim"`, `"mantel"`, `"mrpp"`,
+#'        `"permanova"`, or `"permdisp"`. Flexible matching is supported (see
+#'        below). Programmatic access via `list_dist_tests()`.
 #'
 #' @param ...  Further arguments for the method's function, such as
 #'        `permutations`, `strata`, `seed`, or `cpus`, which every method
 #'        takes, or a method's own, such as `weights` for [mrpp()]. Each
-#'        method keeps its own defaults.
+#'        method keeps its own defaults. For `mantel`, `groups` is passed as
+#'        [mantel()]'s `y`.
 #'
 #' @return The method's result: a list of class `"ecodive_test"` whose first
 #'   fields are `statistic`, `p_value`, `z`, and `n_perm`.
@@ -72,15 +74,18 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #' | Option / Function Name | Method Name                                       | Groups                 |
 #' | :--------------------- | :------------------------------------------------ | :--------------------- |
 #' | `anosim`               | Analysis of Similarities (ANOSIM)                 | categorical            |
+#' | `mantel`               | Mantel Test                                       | numeric                |
 #' | `mrpp`                 | Multi-Response Permutation Procedure (MRPP)       | categorical            |
 #' | `permanova`            | Permutational Multivariate Analysis of Variance   | categorical or numeric |
-#' | `permdisp`             | Homogeneity of Multivariate Dispersions (PERMDISP) | categorical           |
+#' | `permdisp`             | Homogeneity of Multivariate Dispersions (PERMDISP) | categorical            |
 #'
 #' Categorical groups are factors, character, or logical vectors; a method
 #' that takes only categorical groups gives an error for numbers, and the
-#' reverse. To test several variables at once, call [permanova()] with a
-#' `formula`, either directly or as `dist_test(dm, data = meta, method =
-#' 'permanova', formula = ~ a + b)`.
+#' reverse. `mantel` correlates `dm` with the differences between samples'
+#' values; to compare two distance matrices, call [mantel()] directly. To
+#' test several variables at once, call [permanova()] with a `formula`,
+#' either directly or as `dist_test(dm, data = meta, method = 'permanova',
+#' formula = ~ a + b)`.
 #'
 #'
 #' **Flexible name matching**
@@ -97,12 +102,13 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #'
 #' **Same names in other packages**
 #'
-#' `vegan::anosim()` and `vegan::mrpp()` share names with ecodive's
-#' functions, and whichever package was attached last masks the other's.
+#' `vegan::anosim()`, `vegan::mantel()`, and `vegan::mrpp()` share names
+#' with ecodive's functions, and whichever package was attached last masks
+#' the other's.
 #' Write `ecodive::anosim()` and so on, or use `dist_test()`, which always
 #' runs ecodive's, to be sure.
 #'
-#' @seealso [anosim()], [mrpp()], [permanova()], [permdisp()],
+#' @seealso [anosim()], [mantel()], [mrpp()], [permanova()], [permdisp()],
 #'   [list_dist_tests()]
 #'
 #' @export
@@ -130,6 +136,7 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #'
 #'     # A numeric variable.
 #'     dist_test(dm, 'ph', meta, method = 'adonis2')
+#'     dist_test(dm, 'ph', meta, method = 'mantel')
 #'
 dist_test <- function (dm, groups, data = NULL, method, ...) {
 
