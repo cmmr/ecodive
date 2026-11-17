@@ -522,6 +522,40 @@ static uint64_t        pl_claim = 0;
 static int             pl_left  = 0;
 
 
+// The calling thread's floating-point control state, which
+// the pool's threads load before each job. POSIX threads
+// inherit it when created, but Windows threads start with
+// the system's default: x87 at 53-bit precision, where
+// mingw's startup code sets R's thread to 64-bit. Math
+// functions computed with x87 instructions (all of them on
+// 32-bit Windows; exp(), log(), pow() in the msvcrt runtime
+// of R < 4.2 on 64-bit) would then round differently on the
+// pool's threads than with cpus = 1. The job's state is
+// copied as a whole, so that changes R makes later (e.g. by
+// another package) are followed too.
+#if defined(__i386__) || defined(__x86_64__)
+#define POOL_FPENV 1
+typedef struct { unsigned short x87; unsigned int mxcsr; } fpenv_t;
+static fpenv_t pl_fpenv;
+
+static void fpenv_get (fpenv_t *e) {
+  __asm__ __volatile__ ("fnstcw %0" : "=m" (e->x87));
+  #if defined(__x86_64__) || defined(__SSE__)
+    __asm__ __volatile__ ("stmxcsr %0" : "=m" (e->mxcsr));
+  #else
+    e->mxcsr = 0;
+  #endif
+}
+
+static void fpenv_set (const fpenv_t *e) {
+  __asm__ __volatile__ ("fldcw %0" : : "m" (e->x87));
+  #if defined(__x86_64__) || defined(__SSE__)
+    __asm__ __volatile__ ("ldmxcsr %0" : : "m" (e->mxcsr));
+  #endif
+}
+#endif
+
+
 static int claim_share (uint32_t gen, int n) {
   uint64_t v = __atomic_load_n(&pl_claim, __ATOMIC_ACQUIRE);
   for (;;) {
@@ -560,7 +594,13 @@ static void *pool_thread (void *arg) {
     seen = pl_gen;
     pthread_func_t func = pl_func;
     int            n    = pl_n;
+    #ifdef POOL_FPENV
+      fpenv_t env = pl_fpenv;
+    #endif
     pthread_mutex_unlock(&pl_mutex);
+    #ifdef POOL_FPENV
+      fpenv_set(&env);
+    #endif
     run_shares((uint32_t) seen, func, n);
     pthread_mutex_lock(&pl_mutex);
   }
@@ -673,6 +713,9 @@ void run_parallel(pthread_func_t func, int n_threads, int n_tasks) {
         uint32_t gen = (uint32_t) ++pl_gen;
         pl_func = func;
         pl_n    = n_threads;
+        #ifdef POOL_FPENV
+          fpenv_get(&pl_fpenv);
+        #endif
         __atomic_store_n(&pl_left,  n_threads,              __ATOMIC_RELEASE);
         __atomic_store_n(&pl_claim, (uint64_t) gen << 32,   __ATOMIC_RELEASE);
         pthread_cond_broadcast(&pl_wake);
