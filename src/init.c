@@ -17,9 +17,7 @@ extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP,
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP C_nmds_prep(SEXP, SEXP, SEXP);
-extern SEXP C_nmds_run(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP C_nmds_scale(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa(SEXP, SEXP, SEXP, SEXP);
@@ -55,9 +53,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
-  {"C_nmds_prep", (DL_FUNC) &C_nmds_prep, 3},
-  {"C_nmds_run",  (DL_FUNC) &C_nmds_run,  6},
-  {"C_nmds_scale", (DL_FUNC) &C_nmds_scale, 4},
+  {"C_nmds",      (DL_FUNC) &C_nmds,      6},
   {"C_normalize", (DL_FUNC) &C_normalize, 6},
   {"C_pca",       (DL_FUNC) &C_pca,       7},
   {"C_pcoa",      (DL_FUNC) &C_pcoa,      4},

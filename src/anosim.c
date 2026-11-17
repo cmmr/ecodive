@@ -69,9 +69,7 @@ static size_t        an_iwlen;   // ... of this many ints.
 // per pass, skipping digits that every value shares.
 // Equal values have equal keys, so the order within ties
 // doesn't matter. O(M) time; 24 bytes per value of
-// scratch space, released before returning. (nmds.c's
-// radix_sort() is the same idea, but always makes four
-// 16-bit passes and writes the sorted values back.)
+// scratch space, released before returning.
 //------------------------------------------------------
 #define RDX_BITS   11
 #define RDX_SIZE   (1 << RDX_BITS)
