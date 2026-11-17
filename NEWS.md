@@ -113,6 +113,19 @@
   can be restricted to `strata`, and results are identical for any number
   of `cpus`.
 
+* New `mantel()` runs a Mantel test of the correlation between two distance
+  matrices (Pearson, Spearman, or Kendall), or a partial Mantel test that
+  removes the effect of a third (`given`). It gives the same statistic as
+  `vegan::mantel()` and `vegan::mantel.partial()`, and, given the same
+  permutation matrix, the same permuted statistics and p-values. The second
+  matrix may also be a numeric vector, one value per sample (such as age),
+  and samples are matched by name. It adds lower-tail and two-sided tests
+  (`alternative`). Each permutation is one pass over the dist triangle, with
+  no n-by-n matrix (Kendall's tau-b by Knight's merge sort rather than
+  `cor()`'s quadratic count), and permutations run in parallel. Permutations
+  come from a `seed` argument, and results are identical for any number of
+  `cpus`.
+
 * New `dbrda()` runs a distance-based redundancy analysis (db-RDA): the axes
   of a `dist` object that sample metadata explain, given as a formula such as
   `~ treatment + Condition(site)`. It gives the same eigenvalues, inertia,

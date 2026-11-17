@@ -72,6 +72,7 @@ export(weighted_unifrac)
 export(list_metrics)
 export(match_metric)
 export(list_ordinations)
+export(mantel)
 export(match_ordination)
 
 export(blas_threads)

@@ -71,6 +71,7 @@ reference:
   desc: Test whether sample metadata explain beta diversity distances.
   contents:
   - permanova
+  - mantel
   - mrpp
   - anosim
   - permdisp

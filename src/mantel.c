@@ -70,7 +70,7 @@ static double        mt_n0;      // Pairs of pairs, N(N - 1) / 2.
 static double        mt_n1;      // ... tied in x.
 static double        mt_n2[2];   // ... tied in each target.
 
-// Permutations. TODO: use shared helper after Batch C.
+// Permutations.
 static const int    *mt_perms;   // n x n_perm, 0-based, or NULL.
 static uint64_t      mt_seed;
 static const int    *mt_order;   // Samples by stratum.
@@ -85,22 +85,9 @@ static int           mt_k1;      //   k0 .. k1 - 1.
 
 
 //------------------------------------------------------
-// Uniform integer in 0 .. bound - 1, without modulo bias.
-// TODO: use shared helper after Batch C.
-//------------------------------------------------------
-static inline uint32_t bounded_rand(pcg32_random_t *rng, uint32_t bound) {
-  uint32_t threshold = (0u - bound) % bound;
-  while (1) {
-    uint32_t r = pcg32_random_r(rng);
-    if (r >= threshold) return r % bound;
-  }
-}
-
-
-//------------------------------------------------------
 // Permutation k into p: permuted sample a is original
-// sample p[a]. k = 0 is the identity. As permanova.c.
-// TODO: use shared helper after Batch C.
+// sample p[a]. k = 0 is the identity. As permanova.c:
+// PCG stream k of `seed`, Fisher-Yates within strata.
 //------------------------------------------------------
 static void get_perm(int k, int *p) {
 
@@ -126,7 +113,7 @@ static void get_perm(int k, int *p) {
     const int *idx = mt_order + mt_sbeg[s];
     int        len = mt_sbeg[s + 1] - mt_sbeg[s];
     for (int t = len - 1; t > 0; t--) {
-      int u   = (int) bounded_rand(&rng, (uint32_t) t + 1);
+      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
       int tmp = p[idx[t]];
       p[idx[t]] = p[idx[u]];
       p[idx[u]] = tmp;
@@ -413,7 +400,7 @@ SEXP C_mantel(
 
   mt_cs1 = (ptrdiff_t *) R_alloc(n, sizeof(ptrdiff_t));
   for (int b = 0; b < n; b++)
-    mt_cs1[b] = (ptrdiff_t) b * n - (ptrdiff_t) b * (b + 1) / 2 - b - 1;
+    mt_cs1[b] = (ptrdiff_t) dist_col_start(b, n) - b - 1;
 
 
   //--------------------------------------------------
@@ -462,7 +449,6 @@ SEXP C_mantel(
 
   //--------------------------------------------------
   // Permutations: supplied, or shuffles within strata.
-  // TODO: use shared helper after Batch C.
   //--------------------------------------------------
   mt_perms = isNull(sexp_perms) ? NULL : INTEGER(sexp_perms);
 
@@ -517,17 +503,17 @@ SEXP C_mantel(
   int per_round = (int) fmin(1e8 * n_threads / per_perm, (double) mt_total);
   if (per_round < n_threads) per_round = n_threads;
 
-  // run_parallel() starts threads only when told of at
-  // least 100 tasks.
-  int tasks_hint = (per_perm > 1e4) ? 100 : 1;
-
   for (mt_k0 = 0; mt_k0 < mt_total; mt_k0 = mt_k1) {
 
     mt_k1 = mt_k0 + per_round;
     if (mt_k1 > mt_total) mt_k1 = mt_total;
 
-    int nt = (mt_k1 - mt_k0 < n_threads) ? mt_k1 - mt_k0 : n_threads;
-    run_parallel(mantel_worker, nt, (nt > 1) ? tasks_hint : 1);
+    // Threads only for enough work: at least ~1e6
+    // operations each. run_parallel() starts them only
+    // when told of at least 100 tasks.
+    int nt = threads_for(n_threads, per_perm * (mt_k1 - mt_k0), 1e6);
+    if (nt > mt_k1 - mt_k0) nt = mt_k1 - mt_k0;
+    run_parallel(mantel_worker, nt, (nt > 1) ? 100 : 1);
 
     if (mt_k1 < mt_total) R_CheckUserInterrupt();
   }
