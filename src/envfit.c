@@ -37,9 +37,9 @@
  * as in vegan's factorfit(). Permuted labels: g_p[i] = g[p[i]].
  *
  * Determinism: permutation k (k >= 1) comes from its own PCG
- * stream, seeded with (seed, k), or from a supplied matrix:
- * the same rules as permanova(), so the same seed gives the
- * same permutations. Permutation 0 is the identity. Each
+ * stream, seeded with (seed, k), or from a supplied matrix,
+ * through permute.c's perm_source_get(), as in permanova()
+ * and mrpp(), so the same seed gives the same permutations. Permutation 0 is the identity. Each
  * block of permutations is done by one thread, and every sum
  * runs in a fixed order, so results are bit-identical for any
  * number of threads.
@@ -80,11 +80,7 @@ static const int    *ef_lofs;    // Factor f's levels start at ef_lofs[f].
 static const double *ef_inl;     // 1 / level size, by ef_lofs.
 static double        ef_itot;    // 1 / SS_total of X_c.
 
-static const int    *ef_perms;   // n x n_perm supplied, or NULL.
-static const int    *ef_order;   // Samples ordered by stratum.
-static const int    *ef_sbeg;    // Stratum s: ef_order[ef_sbeg[s]] ..
-static int           ef_ns;      // ... ef_order[ef_sbeg[s + 1] - 1].
-static uint64_t      ef_seed;
+static perm_source_t ef_ps;     // Permutations (permute.c).
 
 static int           ef_total;   // Permutations, with the identity.
 static int           ef_bsize;   // Permutations per block.
@@ -98,44 +94,6 @@ static double       *ef_work;    // Per-thread doubles ...
 static size_t        ef_wlen;    // ... this many each.
 static int          *ef_iwork;   // Per-thread ints ...
 static size_t        ef_iwlen;   // ... this many each.
-
-
-//------------------------------------------------------
-// Permutation k into p: permuted row a is original row
-// p[a]. k = 0 is the identity. The same permutations as
-// permanova.c's get_perm(), for the same seed and strata.
-//------------------------------------------------------
-static void ef_get_perm(int k, int *p) {
-
-  int n = ef_n;
-
-  if (k == 0) {
-    for (int a = 0; a < n; a++) p[a] = a;
-    return;
-  }
-
-  if (ef_perms) {
-    memcpy(p, ef_perms + (size_t) (k - 1) * n, (size_t) n * sizeof(int));
-    return;
-  }
-
-  // Fisher-Yates shuffle within each stratum.
-  pcg32_random_t rng;
-  pcg32_srandom_r(&rng, ef_seed, (uint64_t) k);
-
-  for (int a = 0; a < n; a++) p[a] = a;
-
-  for (int s = 0; s < ef_ns; s++) {
-    const int *idx = ef_order + ef_sbeg[s];
-    int        len = ef_sbeg[s + 1] - ef_sbeg[s];
-    for (int t = len - 1; t > 0; t--) {
-      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
-      int tmp = p[idx[t]];
-      p[idx[t]] = p[idx[u]];
-      p[idx[u]] = tmp;
-    }
-  }
-}
 
 
 //------------------------------------------------------
@@ -231,7 +189,7 @@ static void *perm_worker(void *arg) {
     for (int b = 0; b < kb; b++) {
 
       int k = k0 + b;
-      ef_get_perm(k, p);
+      perm_source_get(&ef_ps, k, p);
 
 
       //--------------------------------------------
@@ -439,7 +397,6 @@ SEXP C_envfit(
     error("Invalid arguments to C_envfit()."); // # nocov
 
   ef_n     = n;
-  ef_seed  = (uint64_t) seed;
   ef_total = n_perm + 1;
   ef_xc    = REAL(sexp_xc);
   ef_k     = kx;
@@ -581,35 +538,11 @@ SEXP C_envfit(
 
   //--------------------------------------------------
   // Permutations: supplied, or shuffles within strata.
+  // Permuted row a is original row p[a], as vegan's
+  // P[perm[k, ], ]; the workers scatter Q's rows (see
+  // the top of this file).
   //--------------------------------------------------
-  ef_perms = isNull(sexp_perms) ? NULL : INTEGER(sexp_perms);
-
-  int *order = (int *) R_alloc(n, sizeof(int));
-  int  nst   = 1;
-  int *sbeg;
-
-  if (isNull(sexp_strata)) {
-    for (int a = 0; a < n; a++) order[a] = a;
-    sbeg    = (int *) R_alloc(2, sizeof(int));
-    sbeg[0] = 0;
-    sbeg[1] = n;
-  }
-  else {
-    const int *strata = INTEGER(sexp_strata);
-    nst = 0;
-    for (int a = 0; a < n; a++)
-      if (strata[a] + 1 > nst) nst = strata[a] + 1;
-    sbeg = (int *) R_alloc(nst + 1, sizeof(int));
-    for (int s = 0; s <= nst; s++) sbeg[s] = 0;
-    for (int a = 0; a < n; a++) sbeg[strata[a] + 1]++;
-    for (int s = 0; s < nst; s++) sbeg[s + 1] += sbeg[s];
-    int *fill = (int *) R_alloc(nst, sizeof(int));
-    memcpy(fill, sbeg, (size_t) nst * sizeof(int));
-    for (int a = 0; a < n; a++) order[fill[strata[a]]++] = a;
-  }
-  ef_order = order;
-  ef_sbeg  = sbeg;
-  ef_ns    = nst;
+  perm_source_init(&ef_ps, n, sexp_perms, sexp_strata, seed);
 
 
   //--------------------------------------------------
