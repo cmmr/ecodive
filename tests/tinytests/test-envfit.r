@@ -286,7 +286,7 @@
   expect_identical(sc$p_value[sc$variable == 'blkf'][1], 1)
 
   expect_error(envfit(ord, env, strata = blk[-1]), 'one value per row')
-  expect_error(envfit(ord, env, strata = 'nope'), 'no column')
+  expect_error(envfit(ord, env, strata = 'nope'), "'nope' is not one")
   expect_error(envfit(ord, env, strata = blk, permutations = pm), 'not both')
 
 

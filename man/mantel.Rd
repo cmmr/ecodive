@@ -23,11 +23,14 @@ symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values. Its samples are the ones permuted.}
 
 \item{y}{The distances to correlate with \code{dm}: a \code{dist} object or a
-symmetric numeric matrix, like \code{dm}. Or a numeric vector with one
-value per sample, such as age or pH, whose absolute differences
-(\code{stats::dist(y)}) are the distances. Or, with \code{data}, the name of
-one of its numeric columns. Samples are matched to \code{dm}'s by name
-when both have names; otherwise they must be in the same order.}
+symmetric numeric matrix, like \code{dm}, matched to \code{dm}'s samples by
+name when both have names, otherwise in the same order. Or numeric
+values, such as age or pH, whose absolute differences (as
+\code{stats::dist(y)}) are the distances: with \code{data}, the name of one
+of its numeric columns or a vector with one value per row of
+\code{data}; without \code{data}, a vector with one value per sample, matched
+to the samples by name when it has names, otherwise in the same
+order.}
 
 \item{data}{Optional sample metadata: a data frame with one row per
 sample, whose columns \code{y}, \code{given}, and \code{strata} can name. Rows are
@@ -49,10 +52,10 @@ Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones.}
 
 \item{strata}{Permute samples only within these groups (blocks), for
-designs such as repeated measures. Without \code{data}, a vector with
-one value per sample, matched to \code{dm}'s samples by name when it has
-names, otherwise in the same order. With \code{data}, the name of one of
-its columns, or a vector with one value per row of \code{data}. Default:
+designs such as repeated measures. With \code{data}, the name of one of
+its columns, or a vector with one value per row of \code{data}. Without
+\code{data}, a vector with one value per sample, matched to the samples
+by name when it has names, otherwise in the same order. Default:
 \code{NULL} (free permutation).}
 
 \item{alternative}{Which correlations count as more extreme than the

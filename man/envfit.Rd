@@ -51,10 +51,12 @@ first two by default (its \code{choices = c(1, 2)}), so give \code{axes = 1:2} t
 Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones.}
 
-\item{strata}{Permute samples only within these groups (blocks): the
-name of a column of \code{data} (which is then not fitted), or a vector
-with one value per row of \code{ord}, in the same order. Default: \code{NULL}
-(free permutation).}
+\item{strata}{Permute samples only within these groups (blocks). With
+\code{data}, the name of one of its columns (which is then not fitted),
+or a vector with one value per row of \code{data}. Without \code{data}, a
+vector with one value per row of \code{ord}, matched to them by name when
+it has names, otherwise in the same order. Default: \code{NULL} (free
+permutation).}
 
 \item{seed}{An integer seed for the random permutations. The same seed
 gives the same p-values. Default: \code{0}}

@@ -300,12 +300,18 @@ validate_pseudocount <- function (env = parent.frame()) {
     else {
       
       mtx_pkg <- get_matrix_package(counts)
-      
-      val_range <- switch(
+
+      # The stored values, with repeated (i, j) entries of a triplet matrix
+      # summed, as the C code sums them.
+      pc_vals <- switch(
         mtx_pkg,
-        'base'   = range(counts),
-        'slam'   = range(counts$v),
-        'Matrix' = range(counts@x) )
+        'base'   = counts,
+        'slam'   = sum_triplets(counts$i, counts$j, counts$v, counts$nrow),
+        'Matrix' = if (!is.null(attr(counts, 'j')) && is.null(attr(counts, 'p')))
+                       sum_triplets(counts@i, counts@j, counts@x, nrow(counts))
+                     else counts@x )
+
+      val_range <- range(pc_vals)
       
       if (length(val_range) == 2 && !all(is.finite(val_range)))
         stop('`counts` contains non-finite values; cannot perform CLR normalization.')
@@ -331,6 +337,7 @@ validate_pseudocount <- function (env = parent.frame()) {
             pseudocount <- as.double(pseudocount)
             stopifnot(length(pseudocount) == 1)
             stopifnot(!is.na(pseudocount))
+            stopifnot(is.finite(pseudocount))
             stopifnot(isTRUE(pseudocount > 0))
           },
           error = function (e) {
@@ -342,12 +349,12 @@ validate_pseudocount <- function (env = parent.frame()) {
         
         has_zeros <- min_val == 0
         
-        # Check for zeros in sparse matrices
+        # Check for zeros in sparse matrices: cells not stored.
         if (!has_zeros && mtx_pkg != 'base')
-          has_zeros <- switch(
+          has_zeros <- sum(pc_vals != 0) < switch(
             mtx_pkg,
-            'slam'   = length(counts$v) < counts$nrow * counts$ncol,
-            'Matrix' = length(counts@x) < prod(dim(counts)) )
+            'slam'   = as.double(counts$nrow) * counts$ncol,
+            'Matrix' = prod(as.double(dim(counts))) )
         
         
         if (!has_zeros) {
@@ -358,11 +365,7 @@ validate_pseudocount <- function (env = parent.frame()) {
           
           # Calculate a "smart" default (half the smallest non-zero value)
           # This is generally safer than '1' for proportional data.
-          pseudocount <- switch(
-            mtx_pkg,
-            'base'   = min(counts[counts > 0]),
-            'slam'   = min(counts$v[counts$v > 0]),
-            'Matrix' = min(counts@x[counts@x > 0]) )
+          pseudocount <- min(pc_vals[pc_vals > 0])
           
           pseudocount <- pseudocount / 2
           
@@ -377,7 +380,7 @@ validate_pseudocount <- function (env = parent.frame()) {
         remove('has_zeros')
       }
       
-      remove('mtx_pkg', 'val_range', 'min_val')
+      remove('mtx_pkg', 'val_range', 'min_val', 'pc_vals')
     }
   })
 }
@@ -581,3 +584,12 @@ get_matrix_package <- function (counts) {
   }
 }
 
+
+
+# The values of a triplet (i, j, x) sparse matrix with `nrow` rows, with
+# repeated (i, j) entries summed (as the C import sums them).
+sum_triplets <- function (i, j, x, nrow) {
+  key <- as.double(i) + as.double(j) * nrow
+  if (!anyDuplicated(key)) return (x)
+  as.vector(rowsum(as.double(x), key, reorder = FALSE))
+}

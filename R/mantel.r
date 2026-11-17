@@ -20,11 +20,14 @@
 #'        negative values. Its samples are the ones permuted.
 #'
 #' @param y  The distances to correlate with `dm`: a `dist` object or a
-#'        symmetric numeric matrix, like `dm`. Or a numeric vector with one
-#'        value per sample, such as age or pH, whose absolute differences
-#'        (`stats::dist(y)`) are the distances. Or, with `data`, the name of
-#'        one of its numeric columns. Samples are matched to `dm`'s by name
-#'        when both have names; otherwise they must be in the same order.
+#'        symmetric numeric matrix, like `dm`, matched to `dm`'s samples by
+#'        name when both have names, otherwise in the same order. Or numeric
+#'        values, such as age or pH, whose absolute differences (as
+#'        `stats::dist(y)`) are the distances: with `data`, the name of one
+#'        of its numeric columns or a vector with one value per row of
+#'        `data`; without `data`, a vector with one value per sample, matched
+#'        to the samples by name when it has names, otherwise in the same
+#'        order.
 #'
 #' @param data  Optional sample metadata: a data frame with one row per
 #'        sample, whose columns `y`, `given`, and `strata` can name. Rows are
@@ -44,13 +47,6 @@
 #' @param permutations  The number of permutations. Default: `999`.
 #'        Alternatively, a matrix with one permutation of `1:n` per row, as
 #'        from `permute::shuffleSet()`, to use instead of random ones.
-#'
-#' @param strata  Permute samples only within these groups (blocks), for
-#'        designs such as repeated measures. Without `data`, a vector with
-#'        one value per sample, matched to `dm`'s samples by name when it has
-#'        names, otherwise in the same order. With `data`, the name of one of
-#'        its columns, or a vector with one value per row of `data`. Default:
-#'        `NULL` (free permutation).
 #'
 #' @param alternative  Which correlations count as more extreme than the
 #'        observed one: `'greater'` (more positive, as in `vegan::mantel()`),
@@ -220,7 +216,7 @@ mantel <- function (
       if (is.character(v) && length(v) == 1)
         stop('`', arg, '` names a column, but `data` is not given.', call. = FALSE)
     }
-    strata <- mantel_strata(strata, x$labels, n)
+    strata <- strata_codes(per_sample(strata, 'strata', NULL, NULL, x$labels, n))
   }
   else {
     if (!is.data.frame(data) && !is.matrix(data))
@@ -229,6 +225,16 @@ mantel <- function (
       data, formula = ~ 1, labels = x$labels, n = n, strata = strata,
       allow_empty = TRUE )
     strata <- des$strata
+
+    # A vector has one value per row of `data` (as `groups` and `strata`).
+    df <- as.data.frame(data, stringsAsFactors = FALSE)
+    for (arg in c('y', 'given')) {
+      v <- get(arg)
+      if (is.atomic(v) && is.null(dim(v)) && !inherits(v, 'dist') &&
+          !(is.character(v) && length(v) == 1))
+        assign(arg, unname(per_sample(v, arg, df, des$idx, x$labels, n)))
+    }
+
     y      <- mantel_column(y,     'y',     des$data)
     given  <- mantel_column(given, 'given', des$data)
   }
@@ -326,9 +332,17 @@ mantel_dist <- function (v, arg) {
     if (!all(is.finite(v)))
       stop('`', arg, '` must not contain NA, NaN, or infinite values.', call. = FALSE)
 
-    # As stats::dist(v) computes it, which vegan users pass.
-    d <- stats::dist(unname(as.double(v)))
-    return (list(dm = as.vector(d), n = length(v), labels = names(v)))
+    # |v[i] - v[j]|, in stats::dist(v)'s order (which vegan users pass):
+    # the same values, without its square and root (which overflow or
+    # underflow for very large or small values).
+    nms <- names(v)
+    v   <- unname(as.double(v))
+    m <- length(v)
+    j <- rep.int(seq_len(m - 1L), (m - 1L):1)
+    d <- abs(v[j + sequence((m - 1L):1)] - v[j])
+    if (!all(is.finite(d)))
+      stop('The differences between values of `', arg, '` are too large.', call. = FALSE)
+    return (list(dm = d, n = m, labels = nms))
   }
 
   # dist_vector()'s errors name `dm`.
@@ -379,31 +393,6 @@ mantel_align <- function (v, arg, labels, n) {
   lo <- as.double(pmin(a, b))
 
   v$dm[(lo - 1) * n - (lo - 1) * lo / 2 + hi - lo]
-}
-
-
-
-#------------------------------------------------------------------------------
-# `strata` as 0-based integer codes in dm's sample order, or NULL.
-#------------------------------------------------------------------------------
-mantel_strata <- function (strata, labels, n) {
-
-  if (is.null(strata)) return (NULL)
-
-  if (!is.atomic(strata) || !is.null(dim(strata)) || length(strata) != n)
-    stop('`strata` must be a vector with one value per sample (', n, ').', call. = FALSE)
-
-  if (!is.null(labels) && !is.null(names(strata))) {
-    idx <- match(labels, names(strata))
-    if (anyNA(idx) || anyDuplicated(names(strata)))
-      stop("`strata`'s names must be `dm`'s sample names.", call. = FALSE)
-    strata <- strata[idx]
-  }
-
-  if (anyNA(strata))
-    stop('`strata` must not contain NA values.', call. = FALSE)
-
-  as.integer(factor(strata, exclude = NULL)) - 1L
 }
 
 
@@ -466,8 +455,15 @@ mantel_cor <- function (x, targets, method, pm, strata, seed, cpus) {
     # Centred and scaled to unit length, after ranking for Spearman.
     std <- function (v) {
       if (method == 'spearman') v <- rank(v)
-      v <- v - mean(v)
-      v / sqrt(sum(v * v))
+      v  <- v - mean(v)
+      ss <- sum(v * v)
+      # Very small or large values: scale first, so that the sum of squares
+      # neither underflows nor overflows.
+      if (!(is.finite(ss) && ss >= 1e-290) && max(abs(v)) > 0) {
+        v  <- v / max(abs(v))
+        ss <- sum(v * v)
+      }
+      v / sqrt(ss)
     }
 
     args <- list(std(x), lapply(targets, std), NULL, NULL)
@@ -490,12 +486,7 @@ mantel_result <- function (r_all, method, alternative, partial, n, permutation) 
   r      <- r_all[[1]]
   r_perm <- r_all[-1]
   n_perm <- length(r_perm)
-  eps    <- sqrt(.Machine$double.eps)
-
-  p <- if (n_perm == 0 || is.na(r)) NA_real_ else switch(alternative,
-    greater   = (sum(r_perm >= r - eps) + 1) / (n_perm + 1),
-    less      = (sum(r_perm <= r + eps) + 1) / (n_perm + 1),
-    two.sided = (sum(abs(r_perm) >= abs(r) - eps) + 1) / (n_perm + 1) )
+  p      <- perm_p(r, r_perm, alternative)
 
   new_ecodive_test(
     class       = 'ecodive_mantel',

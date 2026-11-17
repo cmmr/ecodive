@@ -123,7 +123,20 @@ static void *norm_chord(void *arg) {
     
     double sq_sum = 0;
     FOREACH_VAL(sq_sum += *val * *val);
-    
+
+    // Very small or large values: the sum of squares under- or
+    // overflows. Scale by the largest value first (only then, so
+    // that other results are unchanged).
+    if (!(sq_sum >= DBL_MIN && sq_sum <= DBL_MAX)) {
+      double mx = 0;
+      FOREACH_VAL(if (fabs(*val) > mx) mx = fabs(*val));
+      if (mx > 0 && mx <= DBL_MAX) {
+        FOREACH_VAL(*val /= mx);
+        sq_sum = 0;
+        FOREACH_VAL(sq_sum += *val * *val);
+      }
+    }
+
     sq_sum = sqrt(sq_sum);
     FOREACH_VAL(*val /= sq_sum);
     

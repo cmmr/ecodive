@@ -85,6 +85,13 @@ normalize <- function (
          call. = FALSE)
 
   validate_counts()
+
+  # As pca() and envfit(): NA would pass through, or become a presence.
+  vals <- switch(get_matrix_package(counts), base = counts, slam = counts$v, Matrix = counts@x)
+  if (!all(is.finite(vals)))
+    stop('`counts` must not contain NA, NaN, or infinite values.', call. = FALSE)
+  remove('vals')
+
   validate_norm()
   validate_pseudocount()
   validate_margin()

@@ -44,6 +44,13 @@ communities (\eqn{p}). Default: \code{1.5}}
 \code{norm = 'clr'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
+\item{strata}{Permute samples only within these groups (blocks), for
+designs such as repeated measures. With \code{data}, the name of one of
+its columns, or a vector with one value per row of \code{data}. Without
+\code{data}, a vector with one value per sample, matched to the samples
+by name when it has names, otherwise in the same order. Default:
+\code{NULL} (free permutation).}
+
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
 class (e.g. \code{phyloseq}). Default: \code{1}}

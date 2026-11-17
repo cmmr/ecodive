@@ -50,10 +50,11 @@ Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones.}
 
 \item{strata}{Permute samples only within these groups (blocks), for
-designs such as repeated measures. The name of a column of \code{data},
-or a vector with one value per sample (per row of \code{data}, when
-given; else in the same order as \code{groups}). Default: \code{NULL} (free
-permutation).}
+designs such as repeated measures. With \code{data}, the name of one of
+its columns, or a vector with one value per row of \code{data}. Without
+\code{data}, a vector with one value per sample, matched to the samples
+by name when it has names, otherwise in the same order. Default:
+\code{NULL} (free permutation).}
 
 \item{seed}{An integer seed for the random permutations. The same seed
 gives the same p-values. Default: \code{0}}

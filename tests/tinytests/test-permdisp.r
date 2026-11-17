@@ -299,8 +299,12 @@
 
   # Two samples per group, in one dimension.
   for (type in c('centroid', 'median')) {
-    r <- permdisp(stats::dist(c(0, 1, 5, 7)), c('a', 'a', 'b', 'b'), type = type, permutations = 0)
+    # Each group's samples are equally far from its centre: F is infinite.
+    expect_warning(
+      r <- permdisp(stats::dist(c(0, 1, 5, 7)), c('a', 'a', 'b', 'b'), type = type, permutations = 0),
+      'no residual variation', info = type )
     expect_equal(unname(r$distances), c(0.5, 0.5, 1, 1), tolerance = 1e-14, info = type)
+    expect_identical(r$statistic[['F']], Inf, info = type)
   }
 
   # Non-metric distances can put a sample closer to its centre on the

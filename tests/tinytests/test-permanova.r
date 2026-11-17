@@ -218,10 +218,9 @@
     expect_true(abs(res[['Pr(>F)']][[1]] - ex$strata_p) < 0.02)
   }
 
-  # A strata column is not a term of the default formula.
-  sb <- permanova(d, data = meta[c('ph', 'block')], strata = 'block', permutations = 19, cpus = 1)
-  expect_identical(rownames(sb$table), c('Model', 'Residual', 'Total'))
-  expect_identical(sb, permanova(d, data = meta, formula = ~ ph, strata = 'block', permutations = 19, cpus = 1))
+  # No default model (as adonis2): `groups` or a `formula` is required.
+  expect_error(permanova(d, data = meta[c('ph', 'block')], strata = 'block'), '`groups` is required')
+  expect_error(permanova(d, NULL, meta), '`groups` is NULL')
 
   expect_error(permanova(d, data = meta, formula = ~ ph, permutations = ex$perms, strata = 'block'), 'not both')
   expect_error(permanova(d, data = meta, formula = ~ ph, strata = 1:3), 'strata')
@@ -266,11 +265,11 @@
     permanova(d, meta$ph, strata = meta$block, permutations = 19, cpus = 1)$p_value,
     permanova(d, data = meta, formula = ~ ph, strata = 'block', permutations = 19, cpus = 1)$p_value )
 
-  # Give `groups` or `formula`, not both, and one of them (or `data`).
+  # Give `groups` or `formula` (with `data`), not both.
   expect_error(permanova(d, 'trt', meta, formula = ~ ph), 'not both')
   expect_error(permanova(d ~ trt, 'ph', data = meta), 'not both')
   expect_error(permanova(d), '`groups` is required')
-  expect_error(permanova(d, data = NULL, formula = ~ trt), '`groups` is required')
+  expect_error(permanova(d, data = NULL, formula = ~ trt), '`data` is required with `formula`')
   expect_error(permanova(d, meta, ~ trt), 'Name the formula argument')
   expect_error(permanova(d, ~ trt, meta), 'Name the formula argument')
   expect_error(permanova(d, meta), '`groups` must be a vector')
@@ -321,9 +320,9 @@
   expect_equal(res$table$F[[1]], permanova(d, data = meta, formula = ~ trt, permutations = 0)$table$F[[1]], tolerance = 1e-12)
   expect_identical(res, permanova(d, setNames(meta$trt, rownames(meta)), permutations = 19, cpus = 1))
 
-  # All columns by default.
+  # All columns with `formula = ~ .`, as in a model formula.
   expect_identical(
-    permanova(d, data = meta[c('trt', 'ph')], by = 'terms', permutations = 19, cpus = 1),
+    permanova(d, data = meta[c('trt', 'ph')], formula = ~ ., by = 'terms', permutations = 19, cpus = 1),
     permanova(d, data = meta, formula = ~ trt + ph, by = 'terms', permutations = 19, cpus = 1) )
 
   expect_error(permanova(d, data = meta[-1, ], formula = ~ trt), "1 sample in `dm` has no row in `data`: 'S01'")

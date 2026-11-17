@@ -49,10 +49,12 @@
 #'        Alternatively, a matrix with one permutation of `1:n` per row, as
 #'        from `permute::shuffleSet()`, to use instead of random ones.
 #'
-#' @param strata  Permute samples only within these groups (blocks): the
-#'        name of a column of `data` (which is then not fitted), or a vector
-#'        with one value per row of `ord`, in the same order. Default: `NULL`
-#'        (free permutation).
+#' @param strata  Permute samples only within these groups (blocks). With
+#'        `data`, the name of one of its columns (which is then not fitted),
+#'        or a vector with one value per row of `data`. Without `data`, a
+#'        vector with one value per row of `ord`, matched to them by name when
+#'        it has names, otherwise in the same order. Default: `NULL` (free
+#'        permutation).
 #'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
@@ -219,15 +221,22 @@ envfit <- function (
   lab0 <- rownames(x)
   keep <- stats::complete.cases(x)
 
+  # `strata`, as every per-sample argument: with `data`, a column name or
+  # one value per row of `data`; without, one value per row of `ord`,
+  # matched by name when named.
   env <- NULL
   if (!is.null(data)) {
-    env  <- envfit_env(data, x, strata)
-    keep <- keep & stats::complete.cases(env$data)
-    if (!is.null(env$strata_col)) strata <- env$strata_col
+    env    <- envfit_env(data, x, strata, has_counts = !is.null(counts))
+    strata <- env$strata
+    if (ncol(env$data) > 0) keep <- keep & stats::complete.cases(env$data)
+    else env <- NULL
+  }
+  else {
+    strata <- per_sample(strata, 'strata', NULL, NULL, lab0, n0, ref = '`ord`')
   }
 
-  if (is.character(strata) && length(strata) == 1 && is.null(env$strata_col) && n0 > 1)
-    stop('`strata` names no column of `data`.', call. = FALSE)
+  # With na.rm, a sample without a stratum is left out like any other.
+  if (!is.null(strata) && na.rm) keep <- keep & !is.na(strata)
 
   if (!all(keep)) {
     if (!na.rm)
@@ -241,17 +250,8 @@ envfit <- function (
     stop('At least 2 samples are needed.', call. = FALSE)
 
 
-  #--------------------------------------------------------
-  # Strata, parallel to ord's rows (before dropping NAs).
-  #--------------------------------------------------------
-  if (!is.null(strata)) {
-    if (length(strata) != n0 || !is.null(dim(strata)))
-      stop('`strata` must have one value per row of `ord` (', n0,
-           '), or name a column of `data`.', call. = FALSE)
-    strata <- strata[keep]
-    if (anyNA(strata)) stop('`strata` must not contain NAs.', call. = FALSE)
-    strata <- as.integer(factor(strata, exclude = NULL)) - 1L
-  }
+  # Strata codes for the samples kept.
+  if (!is.null(strata)) strata <- strata_codes(strata[keep])
 
   pm <- perm_matrix(permutations, n)
 
@@ -342,24 +342,8 @@ envfit_fit <- function (vars, fit) {
     pm$perms, fit$strata,
     as.integer(c(pm$n_perm, fit$seed, fit$cpus)) )
 
-  eps <- sqrt(.Machine$double.eps)
-
-  pvals <- function (r2) {
-    if (pm$n_perm == 0) return(rep(NA_real_, ncol(r2)))
-    obs <- r2[1, ]
-    (colSums(r2[-1, , drop = FALSE] >= rep(obs - eps, each = pm$n_perm)) + 1) / (pm$n_perm + 1)
-  }
-
-  # (r2 - mean(r2_perm)) / sd(r2_perm), as the other tests' z.
-  zvals <- function (r2) {
-    if (pm$n_perm < 2) return(rep(NA_real_, ncol(r2)))
-    prm <- r2[-1, , drop = FALSE]
-    mu  <- colMeans(prm)
-    sdv <- sqrt(colSums((prm - rep(mu, each = pm$n_perm))^2) / (pm$n_perm - 1))
-    z   <- (r2[1, ] - mu) / sdv
-    z[!is.finite(z)] <- NA_real_
-    z
-  }
+  pvals <- function (r2) perm_p(r2[1, ], r2[-1, , drop = FALSE])
+  zvals <- function (r2) perm_z(r2[1, ], r2[-1, , drop = FALSE])
 
   axis_names <- colnames(x)
 
@@ -517,10 +501,11 @@ envfit_ord <- function (ord, axes) {
 
 #------------------------------------------------------------------------------
 # Metadata (a data frame, matrix, vector, or factor), with its rows aligned to
-# ord's rows. Returns list(data, strata_col): `strata_col` holds the values of
-# the column that `strata` names (which is dropped from `data`), or NULL.
+# ord's rows. Returns list(data, strata): `strata` holds each sample's stratum
+# (per_sample()'s rule: a column of `data`, which is then dropped from it, or
+# one value per row of `data`), or NULL.
 #------------------------------------------------------------------------------
-envfit_env <- function (data, x, strata) {
+envfit_env <- function (data, x, strata, has_counts = FALSE) {
 
   n <- nrow(x)
 
@@ -537,19 +522,16 @@ envfit_env <- function (data, x, strata) {
     data <- as.data.frame(data, stringsAsFactors = FALSE)
   }
 
-  # `strata` as a column name: its values, and no longer a variable.
-  strata_col <- NULL
-  if (is.character(strata) && length(strata) == 1 && strata %in% names(data)) {
-    strata_col <- data[[strata]]
-    data[[strata]] <- NULL
-  }
-
-  if (ncol(data) == 0)
-    stop('`data` has no variables to fit.', call. = FALSE)
-
   dn  <- if (.row_names_info(data) > 0) rownames(data) else NULL
   idx <- match_rows(rownames(x), n, dn, nrow(data), ref = '`ord`')
-  if (!is.null(strata_col)) strata_col <- strata_col[idx]
+
+  # A strata column is a blocking factor, not a variable to fit.
+  col <- if (is.character(strata) && length(strata) == 1 && strata %in% names(data)) strata
+  strata <- per_sample(strata, 'strata', data, idx, rownames(x), n, ref = '`ord`')
+  if (!is.null(col)) data[[col]] <- NULL
+
+  if (ncol(data) == 0 && !has_counts)
+    stop('`data` has no variables to fit.', call. = FALSE)
 
   data <- data[idx, , drop = FALSE]
 
@@ -564,7 +546,7 @@ envfit_env <- function (data, x, strata) {
     stop('Infinite values in `data` column', if (length(inf) > 1) 's', ': ',
          name_list(inf), call. = FALSE)
 
-  list(data = data, strata_col = strata_col)
+  list(data = data, strata = strata)
 }
 
 

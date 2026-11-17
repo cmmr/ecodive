@@ -47,6 +47,7 @@
 #   z            n x pz centred matrix of the Condition() variables, or NULL.
 #   strata       Integer codes 0 .. n_strata - 1, or NULL.
 #   data         `data`, with rows aligned to the samples.
+#   idx          The row of `data` (as given) for each sample.
 #------------------------------------------------------------------------------
 model_design <- function (
     data, formula = NULL, labels = NULL, n, strata = NULL,
@@ -193,7 +194,8 @@ model_design <- function (
       terms       = NULL,
       z           = z,
       strata      = strata,
-      data        = data ))
+      data        = data,
+      idx         = idx ))
   }
 
   xt <- if (length(cond_terms)) stats::drop.terms(tt, cond_terms) else tt
@@ -208,7 +210,8 @@ model_design <- function (
     terms       = xt,
     z           = z,
     strata      = strata,
-    data        = data )
+    data        = data,
+    idx         = idx )
 }
 
 
@@ -253,12 +256,73 @@ match_rows <- function (
 
   if (n_rows != n)
     stop(
-      sprintf('%s has %d %ss, but %s has %d samples.', what, n_rows, unit, ref, n),
-      if (!is.null(labels))
+      sprintf('%s has %d %s%s, but %s has %d sample%s.', what, n_rows, unit,
+              if (n_rows == 1) '' else 's', ref, n, if (n == 1) '' else 's'),
+      if (!is.null(labels) && unit == 'value')
+        sprintf('\nName the values of %s to match them to the samples by name.', what)
+      else if (!is.null(labels))
         sprintf('\nGive %s %s names to match its %ss to the samples by name.', what, unit, unit),
       call. = FALSE )
 
   seq_len(n)
+}
+
+
+
+#------------------------------------------------------------------------------
+# One rule for every per-sample argument (`groups`, `y`, `given`, `strata`):
+#
+#   * With `data`: the name of one of its columns, or a vector with one value
+#     per row of `data`, in the order of its rows.
+#   * Without `data`: a vector with one value per sample, matched to the
+#     samples by name when both are named, else in the samples' order.
+#
+#   v       The argument's value: NULL, a column name, or an atomic vector.
+#   arg     Its name, for messages.
+#   data    NULL, or the metadata as a data frame, with its rows as given.
+#   idx     With `data`: the row of `data` for each sample (match_rows()).
+#   labels  The samples' names, or NULL.
+#   n       The number of samples.
+#   ref     What the samples belong to, for messages.
+#
+# Returns the values in the samples' order (NULL for NULL).
+#------------------------------------------------------------------------------
+per_sample <- function (v, arg, data, idx, labels, n, ref = '`dm`') {
+
+  if (is.null(v)) return (NULL)
+
+  if (!is.atomic(v) || !is.null(dim(v)))
+    stop(
+      '`', arg, '` must be a vector with one value per sample',
+      if (!is.null(data)) ', or the name of a column of `data`', '.', call. = FALSE )
+
+  one_name <- is.character(v) && length(v) == 1
+
+  if (!is.null(data)) {
+
+    if (one_name && !is.na(v) && v %in% names(data))
+      return (data[[v]][idx])
+
+    if (one_name && nrow(data) != 1)
+      stop(
+        '`', arg, '` must be the name of a column of `data`, but ',
+        name_list(v), ' is not one.', call. = FALSE )
+
+    if (length(v) != nrow(data))
+      stop(
+        'With `data`, `', arg, '` must be the name of a column of `data`, ',
+        'or have one value per row of `data` (', nrow(data), ').', call. = FALSE )
+
+    return (v[idx])
+  }
+
+  if (one_name && n != 1)
+    stop('`', arg, '` names a column, but `data` is not given.', call. = FALSE)
+
+  nms <- names(v)
+  if (!is.null(nms) && (anyNA(nms) || anyDuplicated(nms))) nms <- NULL
+
+  v[match_rows(labels, n, nms, length(v), ref = ref, what = paste0('`', arg, '`'), unit = 'value')]
 }
 
 
@@ -370,9 +434,14 @@ perm_matrix <- function (permutations, n) {
   }
 
   if (!is.numeric(permutations) || length(permutations) != 1 || is.na(permutations) ||
-      permutations < 0 || permutations %% 1 != 0 || permutations > .Machine$integer.max - 1)
+      permutations < 0 || permutations %% 1 != 0)
     stop('`permutations` must be a whole number of at least 0, or a matrix ',
          'with one permutation per row.', call. = FALSE)
+
+  # Each permutation's statistics are kept, and memory for them is taken
+  # before the first check for an interrupt.
+  if (permutations > 1e8)
+    stop('`permutations` must be at most 1e8 (100 million).', call. = FALSE)
 
   list(n_perm = as.integer(permutations), perms = NULL)
 }
