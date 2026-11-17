@@ -9,13 +9,14 @@
 
   expect_identical(ordination(d, 'pcoa'),                 pcoa(d))
   expect_identical(ordination(d, 'pcoa', k = 2, cpus = 1), pcoa(d, k = 2, cpus = 1))
-  expect_identical(ordination(d, 'nmds', trymax = 3),      nmds(d, trymax = 3))
-  expect_identical(ordination(d, 'nmds', k = 3, seed = 2, trymax = 2), nmds(d, k = 3, seed = 2, trymax = 2))
+  expect_identical(ordination(d, 'nmds', n_starts = 1),    nmds(d, n_starts = 1))
+  expect_identical(ordination(d, 'mds',  n_starts = 1),    mds(d, n_starts = 1))
+  expect_identical(ordination(d, 'nmds', k = 3, seed = 2, n_starts = 2), nmds(d, k = 3, seed = 2, n_starts = 2))
   expect_identical(ordination(d, 'tsne', perplexity = 5, n_iter = 100), tsne(d, perplexity = 5, n_iter = 100))
 
   # Arguments the method doesn't take are an error, except `seed`, which is
   # dropped for methods without random parts.
-  expect_error(ordination(d, 'pcoa', trymax = 3), 'unused argument')
+  expect_error(ordination(d, 'pcoa', n_starts = 3), 'unused argument')
   expect_identical(ordination(d, 'pcoa', seed = 1, cpus = 1), pcoa(d, cpus = 1))
   expect_identical(ordination(dm = d, method = 'pcoa'), pcoa(d))
 
@@ -48,7 +49,8 @@
   expect_identical(m('pcoa'),                'pcoa')
   expect_identical(m('PCoA'),                'pcoa')
   expect_identical(m('Principal coord'),     'pcoa')
-  expect_identical(m('MDS'),                 'pcoa')
+  expect_identical(m('MDS'),                 'mds')
+  expect_identical(m('metric MDS'),          'mds')
   expect_identical(m('pco'),                 'pcoa')
   expect_identical(m('classical MDS'),       'pcoa')
   expect_identical(m('cmdscale'),            'pcoa')
@@ -56,6 +58,7 @@
   expect_identical(m('non-metric MDS'),      'nmds')
   expect_identical(m('metaMDS'),             'nmds')
   expect_identical(m('monoMDS'),             'nmds')
+  expect_identical(m('isoMDS'),              'nmds')
   expect_identical(m('dbRDA'),               'dbrda')
   expect_identical(m('distance-based RDA'),  'dbrda')
   expect_identical(m('t-SNE'),               'tsne')
@@ -75,23 +78,24 @@
   df <- list_ordinations()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id', 'input'))
-  expect_identical(df$id, c('dbrda', 'nmds', 'pcoa', 'tsne', 'umap'))
-  expect_identical(rownames(list_ordinations(nm = 'id')), c('dbrda', 'nmds', 'pcoa', 'tsne', 'umap'))
+  expect_identical(df$id, c('dbrda', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
+  expect_identical(rownames(list_ordinations(nm = 'id')), c('dbrda', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
 
   expect_identical(list_ordinations(val = 'id', nm = 'name'),
     c('Distance-based Redundancy Analysis' = 'dbrda',
+      'Metric Multidimensional Scaling' = 'mds',
       'Non-metric Multidimensional Scaling' = 'nmds', 'Principal Coordinates Analysis' = 'pcoa',
       't-distributed Stochastic Neighbor Embedding' = 'tsne',
       'Uniform Manifold Approximation and Projection' = 'umap'))
-  expect_identical(list_ordinations(val = 'func'), list(dbrda = dbrda, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
+  expect_identical(list_ordinations(val = 'func'), list(dbrda = dbrda, mds = mds, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
   expect_identical(list_ordinations(val = 'list')$pcoa, match_ordination('pcoa'))
-  expect_identical(list_ordinations(val = 'input', input = 'dist'), c('dist', 'dist', 'dist', 'dist', 'dist'))
+  expect_identical(list_ordinations(val = 'input', input = 'dist'), c('dist', 'dist', 'dist', 'dist', 'dist', 'dist'))
 
 
   # Invalid input. ====
 
-  expect_error(ordination(d, 'xyz'),   'does not match any option: dbrda, nmds, pcoa, tsne, umap')
-  expect_error(ordination(d, 'm'),     'matches multiple options: nmds, pcoa')
+  expect_error(ordination(d, 'xyz'),   'does not match any option: dbrda, mds, nmds, pcoa, tsne, umap')
+  expect_error(ordination(d, 'm'),     'matches multiple options: mds, nmds')
   expect_error(ordination(d, 123),     'character')
   expect_error(ordination(d, c('pcoa', 'nmds')), 'length 1')
   expect_error(ordination(d, '-'),     'alphabetic')
