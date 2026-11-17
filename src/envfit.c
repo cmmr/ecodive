@@ -421,7 +421,6 @@ SEXP C_envfit(
 
     init_n_ptrs(10);
     ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
-    if (norm) normalize(em, norm, n_threads, pseudocount);
 
     int        ns   = em->n_samples;
     int        m    = em->n_otus;
@@ -432,18 +431,29 @@ SEXP C_envfit(
       error("Invalid arguments to C_envfit()."); // # nocov
     }
 
+    // Before normalizing, which could hide them (as 'binary'
+    // did); and again after, for what `norm` makes.
+    for (int pass = 0; pass < 2; pass++) {
+      if (pass == 1 && norm) normalize(em, norm, n_threads, pseudocount);
+      for (int j = 0; j < ns; j++) {
+        if (map[j] < 0) continue;
+        for (int e = em->pos_vec[j]; e < em->pos_vec[j + 1]; e++)
+          if (!R_FINITE(em->val_vec[e])) {
+            free_all();
+            error(pass == 0
+              ? "`counts` must not contain NA, NaN, or infinite values."
+              : "`counts` must not contain NA, NaN, or infinite values (after `norm`).");
+          }
+      }
+    }
+
     int *cp = (int *) R_alloc((size_t) m + 1, sizeof(int));
     memset(cp, 0, ((size_t) m + 1) * sizeof(int));
 
     for (int j = 0; j < ns; j++) {
       if (map[j] < 0) continue;
-      for (int e = em->pos_vec[j]; e < em->pos_vec[j + 1]; e++) {
-        if (!R_FINITE(em->val_vec[e])) {
-          free_all();
-          error("`data` must not contain NA, NaN, or infinite values (after `norm`).");
-        }
+      for (int e = em->pos_vec[j]; e < em->pos_vec[j + 1]; e++)
         cp[em->otu_vec[e] + 1]++;
-      }
     }
     for (int t = 0; t < m; t++) cp[t + 1] += cp[t];
 

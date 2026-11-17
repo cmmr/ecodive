@@ -142,4 +142,11 @@
   expect_warning(normalize(x, 'clr', cpus = 1), 'pseudocount')
   expect_silent(normalize(x, 'clr', pseudocount = 1, cpus = 1))
 
+  # 'binary' keeps NA as NA, not a presence.
+  xna <- matrix(c(NA, 2, 0, 3), 2)
+  expect_identical(normalize(xna, 'binary', cpus = 1), matrix(c(NA, 1, 0, 1), 2))
+
+  # An all-zero table has no stored values to look at.
+  expect_identical(normalize(matrix(0, 2, 3), 'percent', cpus = 1), matrix(0, 2, 3))
+
 #})

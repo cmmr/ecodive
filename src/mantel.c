@@ -436,8 +436,7 @@ SEXP C_mantel(
 
   for (mt_k0 = 0; mt_k0 < mt_total; mt_k0 = mt_k1) {
 
-    mt_k1 = mt_k0 + per_round;
-    if (mt_k1 > mt_total) mt_k1 = mt_total;
+    mt_k1 = (mt_total - mt_k0 > per_round) ? mt_k0 + per_round : mt_total;
 
     // Threads only for enough work: at least ~1e6
     // operations each. run_parallel() starts them only

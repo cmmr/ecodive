@@ -224,6 +224,14 @@ static int spatial_median(const double *Y, int m, int r, double *dsq, double *ws
 //------------------------------------------------------
 static int pd_failed;
 
+// Set by any worker that runs out of memory (all store 1; read after
+// they finish). Atomic, so it is not a data race.
+#if defined(__GNUC__) || defined(__clang__)
+  #define SET_FAILED() __atomic_store_n(&pd_failed, 1, __ATOMIC_RELAXED)
+#else
+  #define SET_FAILED() (pd_failed = 1)
+#endif
+
 static void *median_worker(void *arg) {
 
   worker_t *w = (worker_t *) arg;
@@ -240,7 +248,7 @@ static void *median_worker(void *arg) {
     if (r == 0 || m == 0) { pd_iters[t] = 0; continue; }
 
     double *Y   = (double *) malloc(((size_t) m * r + 2 * (size_t) r + 2 * (size_t) m) * sizeof(double));
-    if (!Y) { pd_failed = 1; continue; } // # nocov
+    if (!Y) { SET_FAILED(); continue; } // # nocov
     double *dsq = Y + (size_t) m * r;
     double *ws  = dsq + m;
 
@@ -337,10 +345,19 @@ SEXP C_permdisp(SEXP sexp_dm, SEXP sexp_grp, SEXP sexp_opts) {
     // Gower's centred matrix G (lower triangle), as
     // vegan: A = D^2, then column and row means removed.
     //--------------------------------------------------
+    // R_alloc() everything first, so that an R_alloc()
+    // error cannot leak the malloc()-ed n x n buffers.
+    double *rmean = (double *) R_alloc(n, sizeof(double));
+    double *vals  = (double *) R_alloc(n, sizeof(double));
+    double *tmp   = (double *) R_alloc(2 * (size_t) n, sizeof(double));
+    int    *axes  = (int *)    R_alloc(n, sizeof(int));
+    double *scl   = (double *) R_alloc(n, sizeof(double));
+    pd_dsq   = (double *) R_alloc(2 * (size_t) n, sizeof(double));
+    pd_iters = (int *)    R_alloc(2 * (size_t) ng, sizeof(int));
+
     double *G = (double *) malloc((size_t) n * n * sizeof(double));
     if (!G) error("Not enough memory for a %d x %d matrix.", n, n); // # nocov
 
-    double *rmean = (double *) R_alloc(n, sizeof(double));
     for (int i = 0; i < n; i++) rmean[i] = 0;
     for (int j = 0; j < n; j++) {
       G[(size_t) j * n + j] = 0;
@@ -359,8 +376,6 @@ SEXP C_permdisp(SEXP sexp_dm, SEXP sexp_grp, SEXP sexp_opts) {
       for (int i = j; i < n; i++)
         G[(size_t) j * n + i] = -0.5 * (G[(size_t) j * n + i] - rmean[i] - rmean[j] + gmean);
 
-    double *vals = (double *) R_alloc(n, sizeof(double));
-    double *tmp  = (double *) R_alloc(2 * (size_t) n, sizeof(double));
     double *vecs = (double *) malloc((size_t) n * n * sizeof(double));
     if (!vecs) { free(G); error("Not enough memory for a %d x %d matrix.", n, n); } // # nocov
 
@@ -378,8 +393,6 @@ SEXP C_permdisp(SEXP sexp_dm, SEXP sexp_grp, SEXP sexp_opts) {
     double tol = sqrt(DBL_EPSILON);
     double cut = (tol * vals[0] > tol) ? tol * vals[0] : tol;
 
-    int    *axes = (int *)    R_alloc(n, sizeof(int));
-    double *scl  = (double *) R_alloc(n, sizeof(double));
     for (int k = 0; k < n; k++) {
       scl[k] = sqrt(fabs(vals[k]));
       if (fabs(vals[k]) > cut && vals[k] > 0) axes[n_pos++] = k;
@@ -392,8 +405,6 @@ SEXP C_permdisp(SEXP sexp_dm, SEXP sexp_grp, SEXP sexp_opts) {
     pd_axes  = axes;
     pd_npos  = n_pos;
     pd_nneg  = n_neg;
-    pd_dsq   = (double *) R_alloc(2 * (size_t) n, sizeof(double));
-    pd_iters = (int *)    R_alloc(2 * (size_t) ng, sizeof(int));
     for (size_t i = 0; i < 2 * (size_t) n; i++) pd_dsq[i] = 0;
     pd_failed = 0;
 
@@ -588,8 +599,7 @@ SEXP C_permdisp_perm(
 
   for (pp_k0 = 1; pp_k0 <= n_perm; pp_k0 = pp_k1) {
 
-    pp_k1 = pp_k0 + per_round;
-    if (pp_k1 > n_perm + 1) pp_k1 = n_perm + 1;
+    pp_k1 = (n_perm + 1 - pp_k0 > per_round) ? pp_k0 + per_round : n_perm + 1;
 
     int cnt_k = pp_k1 - pp_k0;
     int nt    = threads_for(n_threads, per_perm * cnt_k, 1e6);

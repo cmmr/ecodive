@@ -38,7 +38,8 @@ dist_vector <- function (dm) {
     labels  <- attr(dm, 'Labels', exact = TRUE)
     maxdist <- attr(dm, 'maxdist', exact = TRUE)
 
-    if (length(n) != 1 || is.na(n) || n < 0 || length(dm) != n * (n - 1) / 2)
+    # As double: n * (n - 1) overflows an integer from n = 46342.
+    if (length(n) != 1 || is.na(n) || n < 0 || length(dm) != as.double(n) * (n - 1) / 2)
       stop('`dm` is not a valid dist object.', call. = FALSE)
   }
   else {

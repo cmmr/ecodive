@@ -201,7 +201,7 @@ SEXP C_mrpp(
   //--------------------------------------------------
   // Blocks, and workspace for each thread.
   //--------------------------------------------------
-  int n_blocks = (mr_total + MRPP_FW - 1) / MRPP_FW;
+  int n_blocks = (int) (((size_t) mr_total + MRPP_FW - 1) / MRPP_FW);
   if (n_threads > n_blocks) n_threads = n_blocks;
 
   mr_wlen  = (size_t) n * MRPP_FW + MRPP_FW;
@@ -229,8 +229,7 @@ SEXP C_mrpp(
 
   for (mr_blk0 = 0; mr_blk0 < n_blocks; mr_blk0 = mr_blk1) {
 
-    mr_blk1 = mr_blk0 + per_round;
-    if (mr_blk1 > n_blocks) mr_blk1 = n_blocks;
+    mr_blk1 = (n_blocks - mr_blk0 > per_round) ? mr_blk0 + per_round : n_blocks;
 
     int nt = (mr_blk1 - mr_blk0 < n_threads) ? mr_blk1 - mr_blk0 : n_threads;
     run_parallel(mrpp_worker, nt, (mr_blk1 - mr_blk0 > 1) ? tasks_hint : 1);

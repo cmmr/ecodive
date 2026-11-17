@@ -157,6 +157,12 @@
   expect_identical(rownames(r1), colnames(cnt))
   expect_identical(dim(attr(r1, 'r2_perm')), c(99L, ncol(cnt)))
 
+  # NA in counts is an error, also where 'binary' would have made it a presence.
+  cna <- cnt
+  cna[2, 2] <- NA
+  for (nm in c('none', 'binary', 'percent'))
+    expect_error(envfit(ord, counts = cna, norm = nm, permutations = 9, cpus = 1), '`counts` must not contain NA', info = nm)
+
   # A constant taxon: r2 = 0, no arrow, p = NA.
   const <- which(apply(cnt, 2, function (x) length(unique(x)) == 1))
   expect_true(length(const) > 0)

@@ -85,6 +85,10 @@
   # distances are also used as inputs everywhere.
   home <- at_home()
 
+  # Threads for the determinism checks below, which call the C code directly
+  # (past validate_cpus()): at most 2 on CRAN.
+  many <- if (home) 4L else 2L
+
 
   #--------------------------------------------------
   # Neighbours, smooth kNN, and fuzzy graph: exact.
@@ -104,7 +108,7 @@
   expect_identical(g1$n_components, 1L)
 
   # The same for any number of threads.
-  expect_identical(graph(c1$d, c1$n_neighbors, cpus = 4L), g1)
+  expect_identical(graph(c1$d, c1$n_neighbors, cpus = many), g1)
 
   # Ties, duplicate samples, partial local connectivity, mixed union.
   g2 <- graph(c2$d, c2$n_neighbors, local = c2$local_connectivity, mix = c2$set_op_mix_ratio)
@@ -163,7 +167,7 @@
     expect_equal(sp$vectors, c1$spectral$vectors, tolerance = 1e-8)
     expect_equal(sp$values,  c1$spectral$values,  tolerance = 1e-8)
   }
-  expect_identical(.Call(C_umap_spectral, g1, 2L, 4L), sp)
+  expect_identical(.Call(C_umap_spectral, g1, 2L, many), sp)
 
 
   #--------------------------------------------------
@@ -186,12 +190,12 @@
   s1    <- c1$sgd1
   seeds <- batch_seeds(s1$seed, n1, 5)
   xs    <- .Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, 1L)
-  expect_identical(.Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, 4L), xs)
+  expect_identical(.Call(C_umap_sgd, g1, s1$init, 5L, c(c1$ab, 1, 1, 5, adam), seeds, many), xs)
   if (home) expect_equal(center_like(xs, s1$short), s1$short, tolerance = short_tol)
 
   seeds <- batch_seeds(s1$seed, n1, s1$n_epochs)
   x1    <- .Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, 1L)
-  expect_identical(.Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, 4L), x1)
+  expect_identical(.Call(C_umap_sgd, g1, s1$init, as.integer(s1$n_epochs), c(c1$ab, 1, 1, 5, adam), seeds, many), x1)
   x1 <- center_like(x1, s1$embedding)
   if (same_platform) expect_equal(x1, s1$embedding, tolerance = 0)
 

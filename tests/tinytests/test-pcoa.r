@@ -224,6 +224,8 @@
   expect_error(pcoa(matrix(letters[1:4], 2)),      'symmetric')
   expect_error(pcoa(structure(1:2, class = 'dist', Size = 3L)), 'valid dist')
   expect_error(pcoa(structure(1, class = 'dist', Size = -1L)),  'valid dist')
+  # n * (n - 1) / 2 overflowed an integer from n = 46342.
+  expect_error(pcoa(structure(1:2, class = "dist", Size = 46342L)), "valid dist")
 
   # Negative distances: an error, beyond rounding error, which is set to 0.
   d_neg <- d; d_neg[2] <- -0.1

@@ -138,7 +138,7 @@ static void *norm_chord(void *arg) {
 //======================================================
 static void *norm_binary(void *arg) {
   FOREACH_SAMPLE(
-    FOREACH_VAL(*val = 1);
+    FOREACH_VAL(if (!ISNAN(*val)) *val = 1); // NA stays NA, not a presence
   );
   return NULL;
 }
@@ -180,7 +180,7 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
   
   if (norm == NORM_PERCENT) {
     // Check if it's already normalized to percent. If so, skip.
-    if (*val_vec <= 1) {
+    if (em->nnz > 0 && *val_vec <= 1) {
       is_percent_normalized = 1;
       run_parallel(check_percent_normalized, n_threads, n_samples);
       if (is_percent_normalized) return;
