@@ -61,20 +61,34 @@
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
 #'
-#' @return A data frame (of class `"anova"`, so it prints like
-#'   `stats::anova()` tables) with one row per term tested (or one `"Model"`
-#'   row when `by = 'overall'`), then `"Residual"` and `"Total"` rows. When
-#'   `formula` has `Condition()` terms, a `"Conditional"` row comes first. Its
-#'   columns are:
+#' @return A list of class `c("ecodive_permanova", "ecodive_test")`, which
+#'   prints as a summary and the table of terms. `as.data.frame()` gives its
+#'   first four fields as one row, with the same columns as ecodive's other
+#'   permutation tests. The first four fields are for the model as a whole,
+#'   whatever `by` is (the `"Model"` row of `by = 'overall'`):
 #'
-#'   * `Df`: Degrees of freedom.
-#'   * `SumOfSqs`: Sum of squares.
-#'   * `R2`: Proportion of the total sum of squares, `SumOfSqs / Total`.
-#'   * `F`: Pseudo-\eqn{F} statistic.
-#'   * `Pr(>F)`: Permutation p-value.
+#'   * `statistic`: The model's pseudo-\eqn{F}, named `F`.
+#'   * `p_value`: Its permutation p-value.
+#'   * `z`: Its standardized effect size,
+#'     `(F - mean(f_perm)) / sd(f_perm)`, as `summary(vegan::permustats())`.
+#'   * `n_perm`: The number of permutations.
+#'   * `r2`: The model's \eqn{R^2}: the proportion of the total sum of squares
+#'     it explains.
+#'   * `table`: The table of `vegan::adonis2()`: a data frame (of class
+#'     `"anova"`, so it prints like `stats::anova()` tables) with one row per
+#'     term tested (or one `"Model"` row when `by = 'overall'`), then
+#'     `"Residual"` and `"Total"` rows. When `formula` has `Condition()`
+#'     terms, a `"Conditional"` row comes first. Its columns are `Df`
+#'     (degrees of freedom), `SumOfSqs` (sum of squares), `R2` (proportion of
+#'     the total sum of squares), `F` (pseudo-\eqn{F}), and `Pr(>F)`
+#'     (permutation p-value). Its attribute `f_perm` is a matrix of the
+#'     \eqn{F} statistics of each permutation (rows) for each test (columns),
+#'     as `adonis2()`'s `F.perm`.
+#'   * `by`: The `by` used.
+#'   * `permutation`: How samples were permuted: `'free'`, `'within strata'`,
+#'     or `'supplied matrix'`.
 #'
-#'   Attribute `f_perm` is a matrix of the \eqn{F} statistics of each
-#'   permutation (rows) for each test (columns), as `adonis2()`'s `F.perm`.
+#'   Attribute `f_perm` holds the model's \eqn{F} for each permutation.
 #'
 #' @details
 #'
@@ -135,8 +149,8 @@
 #'   with [beta_div()] or a metric function such as [bray()]. Both
 #'   `permanova(dm, data, ~ terms)` and `adonis2()`'s style,
 #'   `permanova(dm ~ terms, data)`, work.
-#' * The permuted \eqn{F} statistics are attribute `f_perm`, where
-#'   `adonis2()` has `F.perm`.
+#' * `adonis2()`'s table is the `table` field, and its permuted \eqn{F}
+#'   statistics (`F.perm`) are `attr(res$table, 'f_perm')`.
 #' * A term with no degrees of freedom left (aliased with the terms before
 #'   it) has no \eqn{F} or p-value (`NA`), where `adonis2()` reports an
 #'   infinite or undefined \eqn{F}.
@@ -179,7 +193,12 @@
 #'     dm <- bray(counts)
 #'
 #'     # Do treatment and pH explain differences in community composition?
-#'     permanova(dm, meta, ~ treatment + ph)
+#'     res <- permanova(dm, meta, ~ treatment + ph)
+#'     res
+#'
+#'     # The model's F, p-value and z-score, and adonis2()'s table.
+#'     as.data.frame(res)
+#'     res$table
 #'
 #'     # The same, in adonis2()'s style.
 #'     permanova(dm ~ treatment + ph, meta)
@@ -372,21 +391,80 @@ permanova <- function (
 
   rownames(f_prm) <- NULL
 
-  heading <- paste0(
-    'Permutation test for PERMANOVA\n',
-    switch(by,
-      overall = 'Model tested as a whole\n',
-      terms   = 'Terms added sequentially (first to last)\n',
-      margin  = 'Marginal effects of terms\n',
-      onedf   = 'Sequential test for contrasts\n' ),
-    if (!is.null(pm$perms)) 'Permutation: supplied matrix\n'
-    else if (!is.null(des$strata)) 'Permutation: free, within strata\n'
-    else 'Permutation: free\n',
-    'Number of permutations: ', pm$n_perm, '\n' )
+  permutation <- if (!is.null(pm$perms)) 'supplied matrix'
+                 else if (!is.null(des$strata)) 'within strata'
+                 else 'free'
 
-  structure(
+  heading <- paste0(
+    'Permutation test for PERMANOVA
+',
+    switch(by,
+      overall = 'Model tested as a whole
+',
+      terms   = 'Terms added sequentially (first to last)
+',
+      margin  = 'Marginal effects of terms
+',
+      onedf   = 'Sequential test for contrasts
+' ),
+    'Permutation: ', if (permutation == 'within strata') 'free, within strata' else permutation, '
+',
+    'Number of permutations: ', pm$n_perm, '
+' )
+
+  table <- structure(
     .Data   = tbl,
     heading = heading,
     f_perm  = f_prm,
     class   = c('anova', 'data.frame') )
+
+
+  #--------------------------------------------------------
+  # The model as a whole, whatever `by` is: the same F and
+  # p-value as by = 'overall'.
+  #--------------------------------------------------------
+  f_model <- if (full$rank > 0 && total > 0 && df_res > 0)
+    (ss_full / full$rank) / (ss_res / df_res)
+  else rep(NA_real_, pm$n_perm + 1L)
+
+  f0     <- f_model[[1]]
+  f_perm <- f_model[-1]
+
+  p_model <- if (pm$n_perm > 0 && !is.na(f0))
+    (sum(f_perm >= f0 - eps) + 1) / (pm$n_perm + 1)
+  else NA_real_
+
+  new_ecodive_test(
+    class       = 'ecodive_permanova',
+    title       = 'Permutational multivariate analysis of variance (PERMANOVA)',
+    statistic   = c(F = f0),
+    p_value     = p_model,
+    z           = perm_z(f0, f_perm),
+    n_perm      = pm$n_perm,
+    r2          = if (total > 0) ss_full[[1]] / total else NA_real_,
+    table       = table,
+    by          = by,
+    perm        = f_perm,
+    permutation = permutation )
+}
+
+
+
+# Printed after the core results: the table of terms, as adonis2() prints it.
+#' @export
+test_details.ecodive_permanova <- function (x, digits) {
+
+  tbl <- x$table
+  attr(tbl, 'f_perm')  <- NULL
+  attr(tbl, 'heading') <- NULL
+
+  c(
+    paste0('Model R2 = ', formatC(x$r2, digits = digits, format = 'g'), '. ',
+      switch(x$by,
+        overall = 'Model tested as a whole:',
+        terms   = 'Terms added sequentially (first to last):',
+        margin  = 'Marginal effects of terms:',
+        onedf   = 'Sequential test for contrasts:' )),
+    '',
+    utils::capture.output(print(tbl, digits = digits)) )
 }

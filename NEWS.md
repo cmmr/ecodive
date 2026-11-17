@@ -53,11 +53,15 @@
 
 * New `permanova()` runs a permutational multivariate analysis of variance
   on a `dist` object and sample metadata, with a model formula: factors,
-  covariates, interactions, and `Condition()` terms. It returns the same
+  covariates, interactions, and `Condition()` terms. It gives the same
   table as `vegan::adonis2()` (Df, sums of squares, R2, F, and p-values),
   testing the model as a whole or each term sequentially, marginally, or by
   contrast, with optional `strata`. Given the same permutation matrix, its
-  permuted F statistics and p-values are identical to `adonis2()`'s. The sums
+  permuted F statistics and p-values are identical to `adonis2()`'s. It
+  returns a list of class `"ecodive_test"`, like `mrpp()`: the model's F,
+  p-value, z-score (as `summary(vegan::permustats())`) and number of
+  permutations come first, whatever `by` is, then its R2 and `adonis2()`'s
+  table, as `table`. The sums
   of squares come straight from the dist triangle, without the n-by-n
   matrices `adonis2()` builds for each permutation, and permutations run in
   parallel. On one thread it is 25 to 50 times faster than `adonis2()` with

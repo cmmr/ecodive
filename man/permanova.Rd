@@ -68,21 +68,35 @@ gives the same p-values. Default: \code{0}}
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
-A data frame (of class \code{"anova"}, so it prints like
-\code{stats::anova()} tables) with one row per term tested (or one \code{"Model"}
-row when \code{by = 'overall'}), then \code{"Residual"} and \code{"Total"} rows. When
-\code{formula} has \code{Condition()} terms, a \code{"Conditional"} row comes first. Its
-columns are:
+A list of class \code{c("ecodive_permanova", "ecodive_test")}, which
+prints as a summary and the table of terms. \code{as.data.frame()} gives its
+first four fields as one row, with the same columns as ecodive's other
+permutation tests. The first four fields are for the model as a whole,
+whatever \code{by} is (the \code{"Model"} row of \code{by = 'overall'}):
 \itemize{
-\item \code{Df}: Degrees of freedom.
-\item \code{SumOfSqs}: Sum of squares.
-\item \code{R2}: Proportion of the total sum of squares, \code{SumOfSqs / Total}.
-\item \code{F}: Pseudo-\eqn{F} statistic.
-\item \verb{Pr(>F)}: Permutation p-value.
+\item \code{statistic}: The model's pseudo-\eqn{F}, named \code{F}.
+\item \code{p_value}: Its permutation p-value.
+\item \code{z}: Its standardized effect size,
+\code{(F - mean(f_perm)) / sd(f_perm)}, as \code{summary(vegan::permustats())}.
+\item \code{n_perm}: The number of permutations.
+\item \code{r2}: The model's \eqn{R^2}: the proportion of the total sum of squares
+it explains.
+\item \code{table}: The table of \code{vegan::adonis2()}: a data frame (of class
+\code{"anova"}, so it prints like \code{stats::anova()} tables) with one row per
+term tested (or one \code{"Model"} row when \code{by = 'overall'}), then
+\code{"Residual"} and \code{"Total"} rows. When \code{formula} has \code{Condition()}
+terms, a \code{"Conditional"} row comes first. Its columns are \code{Df}
+(degrees of freedom), \code{SumOfSqs} (sum of squares), \code{R2} (proportion of
+the total sum of squares), \code{F} (pseudo-\eqn{F}), and \verb{Pr(>F)}
+(permutation p-value). Its attribute \code{f_perm} is a matrix of the
+\eqn{F} statistics of each permutation (rows) for each test (columns),
+as \code{adonis2()}'s \code{F.perm}.
+\item \code{by}: The \code{by} used.
+\item \code{permutation}: How samples were permuted: \code{'free'}, \code{'within strata'},
+or \code{'supplied matrix'}.
 }
 
-Attribute \code{f_perm} is a matrix of the \eqn{F} statistics of each
-permutation (rows) for each test (columns), as \code{adonis2()}'s \code{F.perm}.
+Attribute \code{f_perm} holds the model's \eqn{F} for each permutation.
 }
 \description{
 Tests whether sample metadata, such as treatment groups, explain the
@@ -147,8 +161,8 @@ p-values agree with it only up to sampling error, unless the same
 with \code{\link[=beta_div]{beta_div()}} or a metric function such as \code{\link[=bray]{bray()}}. Both
 \code{permanova(dm, data, ~ terms)} and \code{adonis2()}'s style,
 \code{permanova(dm ~ terms, data)}, work.
-\item The permuted \eqn{F} statistics are attribute \code{f_perm}, where
-\code{adonis2()} has \code{F.perm}.
+\item \code{adonis2()}'s table is the \code{table} field, and its permuted \eqn{F}
+statistics (\code{F.perm}) are \code{attr(res$table, 'f_perm')}.
 \item A term with no degrees of freedom left (aliased with the terms before
 it) has no \eqn{F} or p-value (\code{NA}), where \code{adonis2()} reports an
 infinite or undefined \eqn{F}.
@@ -175,7 +189,12 @@ draws random permutations.
     dm <- bray(counts)
 
     # Do treatment and pH explain differences in community composition?
-    permanova(dm, meta, ~ treatment + ph)
+    res <- permanova(dm, meta, ~ treatment + ph)
+    res
+
+    # The model's F, p-value and z-score, and adonis2()'s table.
+    as.data.frame(res)
+    res$table
 
     # The same, in adonis2()'s style.
     permanova(dm ~ treatment + ph, meta)
