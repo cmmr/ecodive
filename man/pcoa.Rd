@@ -4,7 +4,7 @@
 \alias{pcoa}
 \title{Principal Coordinates Analysis (PCoA)}
 \usage{
-pcoa(dm, k = 3L, cpus = n_cpus())
+pcoa(dm, k = 3L, correction = "none", cpus = n_cpus())
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
@@ -14,6 +14,10 @@ negative values.}
 \item{k}{The number of axes to compute. Default: \code{3}. Reduced, with a
 warning, to the number of axes with positive eigenvalues, which is
 at most \eqn{n - 1} for \eqn{n} samples.}
+
+\item{correction}{How to deal with negative eigenvalues: \code{'none'} (the
+default), \code{'lingoes'}, or \code{'cailliez'}. See "Negative eigenvalue
+corrections" below.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -32,7 +36,14 @@ more.
 \code{eig / trace}.
 \item \code{trace}: The total variance: the sum of all eigenvalues, including
 negative ones.
+\item \code{correction}: \code{"none"}, \code{"lingoes"}, or \code{"cailliez"}.
+\item \code{constant}: The constant that the correction added, \eqn{c_1} or
+\eqn{c_2} below; \code{0} with \code{correction = "none"}, or when the distances
+needed no correction.
 }
+
+With a correction, \code{eig}, \code{prop}, and \code{trace} are those of the corrected
+distances.
 }
 \description{
 Ordinates samples from their distances, for plotting beta diversity. Also
@@ -69,6 +80,82 @@ the positive axes. Axes with eigenvalues that aren't positive have no real
 coordinates and are dropped with a warning, as \code{cmdscale()} does. So are
 axes with eigenvalues at rounding-error level, below
 \code{sqrt(.Machine$double.eps)} times the first one, as in \code{vegan::wcmdscale()}.
+
+\strong{Negative eigenvalue corrections}
+
+A correction adds a constant to the distances between different samples,
+the smallest that makes them Euclidean, so that no eigenvalue is negative
+(Gower & Legendre 1986; Legendre & Legendre 2012, sec. 9.3):
+\itemize{
+\item \code{'lingoes'} (Lingoes 1971) adds \eqn{2c_1} to the squared distances:
+\eqn{d'_{ij} = \sqrt{d_{ij}^2 + 2c_1}}, where \eqn{c_1} is the magnitude
+of \eqn{B}'s most negative eigenvalue. That adds \eqn{c_1} to every
+eigenvalue but the trivial 0 and leaves the eigenvectors unchanged, so
+the axes are those of \code{correction = 'none'}, with coordinates
+\eqn{u_i\sqrt{\lambda_i + c_1}}, and \code{trace} grows by \eqn{(n-1)c_1}.
+The axis whose eigenvalue was most negative gets eigenvalue 0.
+\item \code{'cailliez'} (Cailliez 1983) adds \eqn{c_2} to the distances:
+\eqn{d'_{ij} = d_{ij} + c_2}, where \eqn{c_2} is the largest real
+eigenvalue of the \eqn{2n \times 2n} matrix
+\eqn{\left[\begin{smallmatrix}0 & 2B \\ -I & -4B_2\end{smallmatrix}\right]}{[[0, 2B], [-I, -4 B2]]},
+with \eqn{B_2 = -\frac{1}{2}JDJ} the centered matrix of the unsquared
+distances. The axes change, and are computed from \eqn{d'}.
+}
+
+\code{eig}, \code{prop}, and \code{trace} are then those of the corrected distances, and
+\code{prop} sums to at most 1. They equal \code{ape::pcoa()}'s \code{Corr_eig} and
+\code{Rel_corr_eig} for the same correction, and \code{vegan::wcmdscale(add = 'lingoes')} or \code{add = 'cailliez'}; \eqn{c_2} is \code{cmdscale(add = TRUE)}'s
+\code{ac}.
+
+Negative eigenvalues above \eqn{-\sqrt{\epsilon}\, trace(B)} (with
+\eqn{\epsilon} = \code{.Machine$double.eps}, so about \eqn{-1.5 \times 10^{-8}}
+of the total) count as rounding error: such distances, Euclidean ones for
+instance, get no correction. \code{constant} is then 0, and the coordinates,
+\code{eig}, \code{prop}, and \code{trace} are identical to those from
+\code{correction = 'none'}. (\code{ape} and \code{vegan} correct those tiny negative
+eigenvalues too, so they can add a tiny constant where \code{pcoa()} adds 0.)
+
+With \code{k} = \eqn{n - 1}, the axis whose eigenvalue the correction makes 0
+is dropped without a warning.
+
+\strong{When to use a correction}
+
+Non-Euclidean distances, such as Bray-Curtis or Jaccard, have negative
+eigenvalues, so the positive axes' \code{prop} can sum to more than 1. Most
+plots simply show the first few positive axes, which is fine when the
+negative eigenvalues are small next to the axes plotted. A correction
+makes every \code{prop} a share of a total of 1, at a price: both corrections
+inflate \code{trace}, and so shrink \code{prop}, more so for more samples. Which
+inflates it more depends on the data. \code{'lingoes'} keeps the uncorrected
+axes and only changes their eigenvalues; \code{'cailliez'} changes the axes
+too. Another remedy is to transform the distances: the square root of
+Bray-Curtis dissimilarities, for one, is Euclidean (Legendre & Legendre
+2012).
+
+\strong{How the corrections are computed}
+
+Neither the \eqn{n \times n} nor the \eqn{2n \times 2n} matrix is formed.
+\eqn{c_1} is the largest eigenvalue of \eqn{-B}, from the same Lanczos
+solver. \eqn{c_2} is the largest \eqn{c} for which
+\eqn{B + 2cB_2 + \frac{c^2}{2}I} is singular (on vectors orthogonal to
+\eqn{\mathbf{1}}), found by a Rayleigh-Ritz iteration that needs only
+products of \eqn{B} and \eqn{B_2} with vectors, computed together from
+\code{dm}. That iteration can settle on a root that isn't the largest (as with
+some exactly symmetric designs), so \eqn{c_2} is checked: the corrected
+matrix's smallest eigenvalue, computed from a fresh start, must not be
+below \eqn{-\sqrt{\epsilon}\, trace(B')}. If it is, its eigenvector
+restarts the iteration, for up to 10 rounds, after which there is a
+warning.
+
+The smallest eigenvalues usually form a dense cluster, which Lanczos
+resolves slowly, so corrections take longer than \code{correction = 'none'}.
+For Bray-Curtis distances between 2,000 sparse samples, on one thread,
+\code{'none'} took 0.4 seconds, \code{'lingoes'} 5 seconds, and \code{'cailliez'} 20
+seconds; \code{cmdscale(add = TRUE)}, which builds the \eqn{2n \times 2n}
+matrix, took 2 minutes. How much longer depends on how tightly the
+smallest eigenvalues cluster. Each pass over \code{dm} takes time proportional
+to \eqn{n^2}, while \code{cmdscale(add = TRUE)} and \code{ape::pcoa()} take time
+proportional to \eqn{n^3}.
 
 \strong{Axis signs and reproducibility}
 
@@ -123,17 +210,37 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 
     plot(ord[, 1:2], asp = 1)
 
+    # Unweighted UniFrac has negative eigenvalues here.
+    d   <- unweighted_unifrac(ex_counts, tree = ex_tree)
+    ord <- pcoa(d, correction = 'cailliez')
+    attr(ord, 'constant')
+    round(100 * attr(ord, 'prop'), 1)
+
 }
 \references{
+Cailliez, F. (1983). The analytical solution of the additive constant
+problem. \emph{Psychometrika}, 48(2), 305-308. \doi{10.1007/BF02294026}
+
 Gower, J. C. (1966). Some distance properties of latent root and vector
 methods used in multivariate analysis. \emph{Biometrika}, 53(3-4), 325-338.
 \doi{10.1093/biomet/53.3-4.325}
+
+Gower, J. C., & Legendre, P. (1986). Metric and Euclidean properties of
+dissimilarity coefficients. \emph{Journal of Classification}, 3(1), 5-48.
+\doi{10.1007/BF01896809}
+
+Legendre, P., & Legendre, L. (2012). \emph{Numerical Ecology} (3rd English ed.,
+sec. 9.3). Elsevier.
+
+Lingoes, J. C. (1971). Some boundary conditions for a monotone analysis of
+symmetric matrices. \emph{Psychometrika}, 36(2), 195-203.
+\doi{10.1007/BF02291398}
 
 Wu, K., & Simon, H. (2000). Thick-restart Lanczos method for large
 symmetric eigenvalue problems. \emph{SIAM Journal on Matrix Analysis and
 Applications}, 22(2), 602-616. \doi{10.1137/S0895479898334605}
 }
 \seealso{
-\code{\link[=pca]{pca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}},
-\code{stats::cmdscale()}
+\code{\link[=pcoa_biplot]{pcoa_biplot()}}, \code{\link[=pca]{pca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=ordination]{ordination()}},
+\code{\link[=beta_div]{beta_div()}}, \code{stats::cmdscale()}
 }

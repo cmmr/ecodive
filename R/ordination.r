@@ -44,7 +44,8 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #'        (see below). Programmatic access via `list_ordinations()`.
 #'
 #' @param ...   Further arguments for the method's function, such as `k`,
-#'        `seed`, or `cpus`. Each method keeps its own defaults; see
+#'        `seed`, `cpus`, or `pcoa`'s `correction`. Each method keeps its own
+#'        defaults; see
 #'        [dbrda()] (which also needs `data`), [nmds()], [pcoa()], [tsne()],
 #'        and [umap()]. `seed` is ignored by the methods that have no random
 #'        parts (`dbrda` and `pcoa`), so the same arguments can be given to

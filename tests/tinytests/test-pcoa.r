@@ -114,7 +114,9 @@
   # The shared ordination result format.
   expect_identical(
     names(attributes(x)),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'class') )
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'correction', 'constant', 'class') )
+  expect_identical(attr(x, 'correction'), 'none')
+  expect_identical(attr(x, 'constant'), 0)
   expect_identical(attr(x, 'method'), 'pcoa')
   expect_identical(class(x), c('ecodive_ord', 'matrix', 'array'))
   expect_true(is.matrix(x) && is.numeric(x))
@@ -126,7 +128,7 @@
   expect_identical(dim(as.data.frame(x)), c(150L, 3L))
   out <- capture.output(print(x))
   expect_true(any(grepl('^pcoa: 150 samples, 3 axes; % of variance: ', out)))
-  expect_true(any(grepl('^Attributes: method, eig, prop, trace$', out)))
+  expect_true(any(grepl('^Attributes: method, eig, prop, trace, correction, constant$', out)))
   expect_identical(capture.output(print(x)), out)
   invisible(capture.output(v <- withVisible(print(x))))
   expect_identical(v$visible, FALSE)
