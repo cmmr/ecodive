@@ -7,47 +7,38 @@
 nmds(
   dm,
   k = 2L,
-  try = 20L,
-  trymax = 20L,
-  max_iter = 200L,
-  weakties = TRUE,
-  stress = 1L,
-  smin = 1e-04,
-  sfgrmin = 1e-07,
-  sratmax = 0.999999,
+  n_starts = 4L,
+  max_iter = 1000L,
+  tol = 1e-07,
+  ties = "primary",
   seed = 0L,
   cpus = n_cpus()
 )
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
-symmetric numeric matrix of distances. Must not contain \code{NA}s.}
+symmetric numeric matrix of distances. Must not contain \code{NA}s or
+negative values.}
 
 \item{k}{The number of dimensions. Default: \code{2}}
 
-\item{try, trymax}{The minimum and maximum number of random starts.
-Random starts continue past \code{try} until the best solution is found
-again, or \code{trymax} is reached. Default: \code{20} and \code{20}}
+\item{n_starts}{The number of random starts to run after the start from the
+PCoA solution, from 0 to 1000. Default: \code{4}}
 
-\item{max_iter}{The maximum number of iterations for each start.
-Default: \code{200}}
+\item{max_iter}{The maximum number of SMACOF iterations for each start.
+Default: \code{1000}}
 
-\item{weakties}{How to treat tied distances in \code{dm}. \code{TRUE}, the default,
-lets them have different distances on the plot (Kruskal's primary
-approach); \code{FALSE} requires their plot distances to be equal too
-(secondary approach).}
+\item{tol}{Each start stops once an iteration lowers the raw stress by
+no more than \code{tol} times the sum of squared distances on the plot
+(i.e., Kruskal's stress-1, squared, improves by less than about
+\code{tol}). Default: \code{1e-7}}
 
-\item{stress}{Kruskal's stress formula to minimize: \code{1} (the default) or
-\code{2}.}
+\item{ties}{How to treat tied distances in \code{dm}: \code{"primary"} (the
+default) lets them have different distances on the plot;
+\code{"secondary"} gives them equal disparities, as scikit-learn does.
+See "Ties and zeros" below.}
 
-\item{smin, sfgrmin, sratmax}{Each start stops when its stress falls
-below \code{smin}, when the gradient's scale factor falls below
-\code{sfgrmin}, or when the stress ratio between iterations rises above
-\code{sratmax} (i.e., stress stops improving). Defaults: \code{1e-4}, \code{1e-7}
-and \code{0.999999}, as in \code{vegan::monoMDS()}.}
-
-\item{seed}{An integer seed for the random starting configurations.
-The same seed gives the same result. Default: \code{0}}
+\item{seed}{An integer seed for the random starts. Default: \code{0}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -58,89 +49,222 @@ dimension, named \code{"NMDS1"}, \code{"NMDS2"}, etc., as described in "Ordinati
 result" below. \code{method} is \code{"nmds"}; \code{eig} and \code{prop} are \code{NA}, as NMDS
 has no eigenvalues. Then come:
 \itemize{
-\item \code{stress}: The stress of the solution (formula \code{stress}), from 0
-(perfect) to 1.
-\item \code{converged}: \code{TRUE} if a random start found the best solution again.
-\item \code{tries}: The number of random starts run.
-\item \code{best_try}: Which start gave the solution: \code{0} for the PCoA start,
+\item \code{stress}: Kruskal's stress-1 of the solution, from 0 (a perfect rank
+order) to 1.
+\item \code{converged}: \code{TRUE} if the best start stopped because a plain step met
+\code{tol}, \code{FALSE} if it stopped at \code{max_iter}.
+\item \code{n_iter}: The number of SMACOF iterations the best start ran.
+\item \code{n_starts}: The number of random starts run.
+\item \code{best_start}: Which start gave the solution: \code{0} for the PCoA start,
 else the random start's number.
+\item \code{n_best}: How many starts (of \code{n_starts + 1}) ended within 0.1\% of the
+lowest stress. If it is 1, other starts might still find lower stress:
+try more.
+\item \code{ties}: The approach to ties used, \code{"primary"} or \code{"secondary"}.
 }
+
+With fewer than two samples there is nothing to fit: the result has no
+columns, \code{stress} is 0, and no starts are run.
 }
 \description{
 Ordinates samples from their distances, for plotting beta diversity, by
 placing them so that their distances on the plot are in the same rank order
-as the distances in \code{dm}, as nearly as possible. Follows the same procedure
-as \code{vegan::metaMDS()} with its default \code{monoMDS()} engine, and gives the
-same solutions from the same starting configurations, but runs the random
-starts in parallel C with far less memory.
+as the distances in \code{dm}, as nearly as possible. Uses the SMACOF algorithm
+of scikit-learn's non-metric \code{MDS()}, ported to parallel C that works from
+\code{dm} directly, with far less time and memory.
 }
 \details{
+\strong{Which ordination?}
+
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=mds]{mds()}}, and \code{nmds()} all place the samples in \code{k} dimensions
+from \code{dm}. \code{\link[=pcoa]{pcoa()}} (classical scaling) is exact and fast, and has
+eigenvalues and "variance explained", but it fits the squared distances
+after double centering, so large distances dominate, and non-Euclidean
+distances such as Bray-Curtis lose part of their structure to negative
+eigenvalues. \code{\link[=mds]{mds()}} (metric MDS) fits the distances themselves, in their
+own units, so that distances on the plot can be read as the data's, with
+\code{stress} saying how well. \code{nmds()} fits only their rank order, which suits
+distances whose values matter less than their order, such as the saturated
+Bray-Curtis values of very different samples; it is the usual choice for
+community data. \code{\link[=mds]{mds()}} and \code{nmds()} iterate from several starts, the first
+of them the PCoA solution, and so take longer than \code{\link[=pcoa]{pcoa()}}.
+
 \strong{Method}
 
-NMDS minimizes Kruskal's stress: how far the distances between points
-\eqn{d_{ij}} are from the closest sequence \eqn{\hat{d}_{ij}} that has the
-same rank order as the distances in \code{dm} (found by monotone regression).
-Formula 1 is
-\eqn{\sqrt{\sum(d_{ij} - \hat{d}_{ij})^2 / \sum d_{ij}^2}}; formula 2
-divides by \eqn{\sum(d_{ij} - \bar{d})^2} instead.
+NMDS minimizes Kruskal's stress-1,
+\eqn{\sqrt{\sum(d_{ij} - \hat{d}_{ij})^2 / \sum d_{ij}^2}}, where
+\eqn{d_{ij}} are the distances between points on the plot, and the
+disparities \eqn{\hat{d}_{ij}} are the closest values to them (in least
+squares) that are in the same order as the distances in \code{dm}, found by
+isotonic regression. It is at most 1, as constant disparities are allowed.
 
-Each start minimizes stress by steepest descent, with Kruskal's step-size
-rules, as in Peter Minchin's \code{monoMDS} (the default engine of
-\code{vegan::metaMDS()}). This is a line-by-line port of it, so from the same
-starting configuration, a start gives exactly the same stress and
-coordinates as \code{vegan::monoMDS()}.
+Each start minimizes stress with SMACOF (de Leeuw, 1977; Borg & Groenen,
+2005), as scikit-learn's non-metric \code{smacof()} does: the first iteration
+uses the distances in \code{dm} as disparities, and each later one fits them by
+isotonic regression; disparities are scaled so that their squares sum to
+the number of pairs; then the Guttman transform \eqn{\Gamma} moves the
+points. A start stops when its raw stress (the numerator above) falls by
+no more than \code{tol} times the denominator in one iteration, or after
+\code{max_iter} iterations. This rule is relative to the sum of squared
+distances, not to the stress itself, so a nearly perfect fit (stress-1
+below about 0.01) stops while stress can still fall noticeably in
+relative terms; a smaller \code{tol} helps there. At the default \code{tol}, on
+typical data, stress ends within about 0.01-0.1\% of its converged value,
+and points within about 1-5\% of the configuration's spread of their
+converged positions; \code{tol = 1e-8} cuts the stress error about tenfold
+and the displacement about threefold, for about 1.5 times the
+iterations.
 
-Steepest descent only finds a local minimum, so, as in \code{metaMDS()}:
+Relaxed steps. To converge in fewer iterations, when \code{k > 1}, iterations
+after the first move the points twice as far as the Guttman transform
+would: \eqn{X \leftarrow 2\Gamma(X) - X}, the relaxed update of de Leeuw
+and Heiser (1980). \eqn{\Gamma} doesn't depend on the scale of \eqn{X},
+so relaxed steps don't converge in that one direction (they flip the scale
+back and forth), nor at all when \code{k = 1}, where \eqn{\Gamma} only depends
+on the order of the points. So a start takes relaxed steps only until one
+makes no more than \code{tol} progress, then plain steps until a plain step
+does (or until \code{max_iter}, whose last step is always plain), and \code{k = 1} uses
+plain steps throughout. The configuration returned and measured thus
+always comes from a plain step: it is a fixed point of \eqn{\Gamma} to
+within \code{tol}, and its stress is what plain steps reach from the same
+start. Relaxed steps typically save about half the iterations, but can
+end in a different local minimum than plain steps would.
+
+In one dimension, SMACOF stops at the first order of the points that is a
+fixed point, which is often not the best one: random starts (\code{n_starts}) are
+the way to search for better ones.
+
+\strong{Ties and zeros}
+
+Beta diversity distances are often tied, e.g. at 1 for every pair of
+samples with no taxa in common. With \code{ties = "primary"} (Kruskal's primary
+approach, as in \code{vegan::metaMDS()}), tied distances only have to stay in
+order with the other distances: on the plot, they may differ from each
+other. With \code{"secondary"} (as in scikit-learn), tied distances get one
+shared disparity, the mean of their distances on the plot, so the
+solution tries to make them equal too; this is a stronger requirement, so
+its stress is higher. Heavily tied data (e.g. Jaccard or Bray-Curtis on
+few taxa or rarefied counts) have many local minima of similar stress, and
+benefit from more \code{n_starts}; see \code{n_best}.
+
+Distances count as tied when they are within \eqn{10^{-15}} times the
+largest distance of the first of their group (sorted increasingly), which
+absorbs rounding error in how they were computed.
+
+Pairs with a distance of exactly 0, such as duplicate samples, have a
+disparity of 0 with either approach, as in scikit-learn: they are pulled
+towards the same point. (Under the primary approach, a zero would
+otherwise just be the smallest tie, free to take any small distance on
+the plot; but identical samples should coincide.) So when \code{dm} has no
+zeros, \code{stress} with \code{ties = "primary"} equals \code{vegan::metaMDS()}'s stress
+for the same configuration; when it has zeros, it is higher.
+
+SMACOF only finds a local minimum of stress. So:
 \enumerate{
-\item The first start is the PCoA solution, from \code{\link[=pcoa]{pcoa()}}.
-\item Then come random starts, with coordinates uniform on [0, 1). A start
-whose stress is within 0.0005 of the best so far is compared with it by
-a Procrustes rotation; the best is "found again" when the root mean
-squared difference is below 0.005 and no point differs by more than
-0.01. At least \code{try} random starts are run, and more, up to \code{trymax},
-until the best is found again.
-\item The best solution is centered, rotated to its principal components, and
-scaled so that its largest distance equals the largest distance in
-\code{dm}. When \code{dm} has a \code{maxdist} attribute (as from \code{vegan::vegdist()}),
-it is instead scaled to half-change units, as in \code{vegan::postMDS()}.
+\item The first start is the PCoA solution, from \code{\link[=pcoa]{pcoa()}}. (An axis without
+a positive eigenvalue gets small random coordinates instead.)
+\item Then come \code{n_starts} random starts, with coordinates uniform on [0, 1).
+\item The start whose final configuration has the lowest stress-1 is kept;
+if several tie exactly, the earliest. Its configuration is centered,
+rotated to its principal axes, and scaled so that the distances
+between points have the same root mean square as the distances in
+\code{dm}. Each axis is flipped so that its coordinate with the largest
+absolute value is positive (the first such sample, if several are
+within a relative \eqn{10^{-8}} of it).
+}
+
+\strong{Differences from scikit-learn}
+
+With plain steps only (an internal setting used by the tests) and
+\code{ties = "secondary"}, a start follows scikit-learn's iterations from the
+same starting configuration to within rounding error: the raw stress of
+every iteration agrees to about \eqn{10^{-13}}, relatively. (Rarely more:
+when points nearly coincide, scikit-learn's distance formula rounds their
+tiny distances to 0, which can change an iteration count.) Otherwise:
+\itemize{
+\item scikit-learn takes plain Guttman steps; \code{nmds()} takes relaxed ones
+(see above).
+\item scikit-learn's defaults are \code{max_iter = 300} and \code{eps = 1e-6}; for a good
+fit (stress-1 of 0.05, squared 0.0025), \code{1e-6} stops while stress still
+falls by 0.04\% per iteration. \code{nmds()} defaults to \code{max_iter = 1000} and
+\code{tol = 1e-7}.
+\item scikit-learn always uses the secondary approach to ties; \code{nmds()} uses
+the primary one unless \code{ties = "secondary"}.
+\item scikit-learn runs \code{n_init} random starts (\code{init = "random"}, its
+current default) or one start from classical MDS (\code{init = "classical_mds"}); \code{nmds()} runs both kinds.
+\item scikit-learn ranks starts by the stress of the last iteration, measured
+with the previous iteration's disparities; \code{nmds()} ranks them by
+stress-1 with disparities fitted to each start's final configuration,
+which is the value reported, and is never higher.
+\item scikit-learn returns the configuration as SMACOF leaves it; \code{nmds()}
+centers, rotates, scales, and flips it as described above. None of that
+changes the stress.
+\item scikit-learn stops when stress falls by \emph{less} than \code{eps}; \code{nmds()}
+stops when it falls by no more than \code{tol}, so that \code{tol = 0} stops once
+stress no longer falls.
+\item scikit-learn's tie tolerance is an absolute \eqn{10^{-15}}; \code{nmds()}'s is
+relative to the largest distance, so that results don't depend on the
+units of \code{dm}.
+\item scikit-learn computes distances on the plot with the expansion
+\eqn{|x|^2 - 2 x \cdot y + |y|^2}, and replaces distances of 0 by
+\eqn{10^{-5}} in the Guttman transform; \code{nmds()} computes them
+directly, and leaves out pairs at distance 0, whose contribution
+\eqn{r_{ij}(x_i - x_j)} is 0 either way.
+\item The random starts come from \code{seed}, not from R's or NumPy's random
+number generators, so \code{set.seed()} has no effect, and R's random
+number stream is left untouched.
 }
 
 \strong{Speed and memory}
 
-\code{metaMDS()} and \code{monoMDS()} copy \code{dm} into an \eqn{n \times n} matrix, and
-keep several arrays with an element for every pair of samples, for every
-start. \code{nmds()} sorts the pairs once, into one shared array of 4 bytes per
-pair, and each start that runs at the same time needs about 16 more bytes
-per pair. \code{cpus} starts run at once, each on its own thread.
+\code{dm}'s pairs are sorted by distance once, and the order is shared by all
+starts: 4 bytes and 1 bit per pair. Each start that runs at the same time
+needs 8 more bytes per pair, plus \eqn{256 n k} bytes. With \code{ties = "primary"}, it also needs 4 bytes per pair for its own order within tie
+groups, and scratch space of 12 bytes per pair in the largest tie group
+(more for several threads, but at most a quarter of all the pairs' worth
+in all). Besides one copy of \code{dm} as a plain vector of doubles, nothing of
+size \eqn{n \times n} is formed, and distances on the plot are recomputed
+from the coordinates as needed. Sorting the pairs at
+the outset takes time proportional to \eqn{n^2 \log n}, and briefly needs
+16 bytes per pair in its largest bucket (about \eqn{N / 16384} of the
+\eqn{N} pairs, for large data) for each thread.
 
-\strong{Differences from \code{metaMDS()}}
-\itemize{
-\item The random starting configurations come from \code{seed}, not from R's
-random number generator, so \code{set.seed()} has no effect, and R's random
-number stream is left untouched. They differ from the ones \code{metaMDS()}
-draws, so when there are several local minima of similar stress, the two
-can settle on different ones.
-\item The first start comes from \code{\link[=pcoa]{pcoa()}} rather than \code{cmdscale()}. The two
-differ only by rounding (about \eqn{10^{-15}}), but \code{monoMDS}'s
-stopping rule can react to that by stopping an iteration earlier or
-later, which changes the stress in about the 7th significant digit.
-\item Only \code{monoMDS}'s default "global" model is offered, not its "local",
-"linear", or "hybrid" ones.
-\item \code{metaMDS()} given a community matrix, as \code{phyloseq::ordinate()} does,
-first transforms the counts and computes the distances itself. Give
-\code{nmds()} those same distances to get the same solution.
-}
+Each SMACOF iteration makes two passes over the pairs, and so takes time
+proportional to \eqn{n^2 k}, plus the isotonic regression, a pass on one
+thread. With \code{ties = "primary"}, each iteration also re-sorts the
+distances within each group of tied ones, which is fast when they barely
+change, but on heavily tied data can cost several times the rest of the
+iteration (e.g. about 4 times, at 1 CPU, on Bray-Curtis of rarefied counts
+with 78 distinct values); groups are sorted in parallel, in up to 64
+parts. \code{ties = "secondary"} avoids that cost.
+
+Several starts run at once, one per thread, while their memory totals at
+most 1 GiB and one iteration takes under about \eqn{2^{26}} pairs of work
+(\eqn{n} up to about 11,500). Otherwise, starts run one at a time, with
+each iteration's passes over the pairs (and the re-sorting of tie groups)
+split across \code{cpus} threads, for data with at least \eqn{2^{18}} pairs
+(\eqn{n} of about 725). Long passes run in parts between checks for user
+interrupts.
+
+\code{dm} may have at most 65,536 samples.
 
 \strong{Reproducibility}
 
-Results are identical from run to run and for any number of \code{cpus}.
+The result, with all its attributes, is bit-identical from run to run, in
+new R sessions, and for any value of \code{cpus}, given the same \code{dm}, \code{k},
+\code{n_starts}, \code{max_iter}, \code{tol}, \code{ties}, and \code{seed}. Each start splits its sums
+into a fixed number of parts that depends only on the number of samples,
+and adds them in a fixed order; the sort order of the distances is a
+total order (tied distances keep their order in \code{dm}), and so is the
+order of each tie group's re-sort; and nothing depends on the BLAS
+library. \code{dm} is read as \code{dm} times a power of 2 that brings its largest
+value near 1, so \code{dm * 2^p} gives exactly the same result times
+\eqn{2^p}, and neither tiny nor large scales overflow. (As for every
+ordination, distances above \eqn{10^{150}} are rejected.) Results can
+still differ in the last bits between computers or compilers, as for any
+floating point code.
 
-Axes are flipped so that each one's coordinate with the largest absolute
-value is positive.
-
-\code{k} larger than \eqn{n - 1} is reduced to \eqn{n - 1}. A stress below
-0.001 gives a warning, as in \code{metaMDS()}: there may be too few samples for
-\code{k} dimensions.
+\code{k} larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
 }
 \section{Ordination result}{
 
@@ -174,13 +298,7 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 }
 
 \examples{
-    # 30 samples in three groups.
-    set.seed(1)
-    counts <- matrix(rpois(30 * 20, 5), 30, 20)
-    counts[11:20, 1:5] <- counts[11:20, 1:5] + 5
-    counts[21:30, 6:10] <- counts[21:30, 6:10] + 5
-
-    ord <- nmds(bray(counts))
+    ord <- nmds(bray(ex_counts))
     ord
 
     attr(ord, 'stress')
@@ -192,10 +310,24 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 Kruskal, J. B. (1964). Nonmetric multidimensional scaling: A numerical
 method. \emph{Psychometrika}, 29(2), 115-129. \doi{10.1007/BF02289694}
 
-Minchin, P. R. (1987). An evaluation of the relative robustness of
-techniques for ecological ordination. \emph{Vegetatio}, 69, 89-107.
-\doi{10.1007/BF00038690}
+de Leeuw, J. (1977). Applications of convex analysis to multidimensional
+scaling. In J. R. Barra, F. Brodeau, G. Romier, & B. van Cutsem (Eds.),
+\emph{Recent Developments in Statistics} (pp. 133-145). North Holland.
+
+de Leeuw, J., & Heiser, W. J. (1980). Multidimensional scaling with
+restrictions on the configurations. In P. R. Krishnaiah (Ed.),
+\emph{Multivariate Analysis V} (pp. 501-522). North Holland.
+
+Borg, I., & Groenen, P. J. F. (2005). \emph{Modern Multidimensional Scaling:
+Theory and Applications} (2nd ed.). Springer.
+\doi{10.1007/0-387-28981-X}
+
+Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python.
+\emph{Journal of Machine Learning Research}, 12, 2825-2830. The C code of
+\code{nmds()} is ported from scikit-learn 1.9.1's \code{sklearn.manifold.smacof()}
+and \code{sklearn.isotonic}, under scikit-learn's BSD-3-Clause license
+(Copyright (c) 2007-2026 The scikit-learn developers).
 }
 \seealso{
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=mds]{mds()}}, \code{\link[=beta_div]{beta_div()}}
 }

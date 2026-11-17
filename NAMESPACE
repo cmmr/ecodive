@@ -80,6 +80,7 @@ export(match_dist_test)
 
 export(blas_threads)
 export(dist_test)
+export(mds)
 export(mrpp)
 export(n_cpus)
 export(nmds)
