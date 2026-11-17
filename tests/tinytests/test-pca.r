@@ -281,8 +281,9 @@
     expected <- readRDS('expected/pcoa_lanczos.rds')
     for (cs in expected$cases) {
       d   <- beta_div(cs$counts, cs$metric, pseudocount = 1)
-      ord <- pcoa(d, k = cs$k, cpus = 2)
-      expect_equal(unclass(ord), cs$expected, tolerance = 1e-12)
+      ord <- unclass(pcoa(d, k = cs$k, cpus = 2))
+      attr(ord, 'correction') <- attr(ord, 'constant') <- NULL  # added since
+      expect_equal(ord, cs$expected, tolerance = 1e-12)
     }
   }
 
