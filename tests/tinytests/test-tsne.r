@@ -321,12 +321,12 @@
   expect_identical(
     names(attributes(ord)),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'kl_divergence',
-      'perplexity', 'init', 'n_iter', 'learning_rate', 'gradient', 'class') )
+      'perplexity', 'init', 'n_iters', 'learning_rate', 'gradient', 'class') )
   expect_identical(attr(ord, 'method'), 'tsne')
   expect_identical(attr(ord, 'eig'),  c(NA_real_, NA_real_))
   expect_identical(attr(ord, 'prop'), c(NA_real_, NA_real_))
   expect_true(attr(ord, 'kl_divergence') > 0 && attr(ord, 'kl_divergence') < 2)
-  expect_identical(attr(ord, 'n_iter'), 1000L)
+  expect_identical(attr(ord, 'n_iters'), 1000L)
   expect_identical(attr(ord, 'perplexity'), 59 / 3)   # Reduced, silently.
   expect_identical(attr(ord, 'init'), 'pcoa')
   expect_identical(attr(ord, 'learning_rate'), 50)
@@ -358,7 +358,7 @@
   o <- tsne(d60, perplexity = 5, learning_rate = 100, early_exaggeration = 4, theta = 0.3, max_iters = 300, cpus = 1)
   expect_identical(attr(o, 'perplexity'), 5)
   expect_identical(attr(o, 'learning_rate'), 100)
-  expect_identical(attr(o, 'n_iter'), 300L)
+  expect_identical(attr(o, 'n_iters'), 300L)
   expect_identical(attr(tsne(d60, early_exaggeration = 1, max_iters = 2, cpus = 1), 'learning_rate'), 50)
 
   # Auto: exact up to 500 samples or for k > 3, else Barnes-Hut.
@@ -371,7 +371,7 @@
   expect_identical(attr(tsne(d501, max_iters = 5, early_exaggeration = 2, cpus = 1), 'learning_rate'), 501 / 2 / 4)
 
   # Fewer iterations than the early exaggeration phase.
-  expect_identical(attr(tsne(d60, max_iters = 20, cpus = 1), 'n_iter'), 20L)
+  expect_identical(attr(tsne(d60, max_iters = 20, cpus = 1), 'n_iters'), 20L)
 
   # Starting layouts. A matrix start with the PCoA start's values gives
   # the PCoA result.
@@ -480,7 +480,7 @@
   expect_identical(unname(unclass(o)[1, ]), c(0, 0, 0))
   expect_identical(rownames(o), 'A')
   expect_identical(attr(o, 'eig'), rep(NA_real_, 3))
-  expect_identical(attr(o, 'n_iter'), 0L)
+  expect_identical(attr(o, 'n_iters'), 0L)
   expect_identical(attr(o, 'kl_divergence'), 0)
   expect_identical(attr(o, 'perplexity'), 1)
   expect_identical(attr(o, 'init'), 'none')
@@ -501,7 +501,7 @@
   # early exaggeration phase and the run stops at the first check. A huge
   # max_iters is fine.
   o <- tsne(dist(1:2), max_iters = 1e12, cpus = 1)
-  expect_identical(attr(o, 'n_iter'), 300L)
+  expect_identical(attr(o, 'n_iters'), 300L)
   expect_true(abs(attr(o, 'kl_divergence')) < 1e-12)
 
   # Duplicate samples (zero distances) stay together (up to rounding: their

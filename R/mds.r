@@ -46,7 +46,7 @@
 #'     better than putting every point in one place). See "Stress" below.
 #'   * `converged`: `TRUE` if the best start stopped because a plain step met
 #'     `tol`, `FALSE` if it stopped at `max_iters`.
-#'   * `n_iter`: The number of SMACOF iterations the best start ran.
+#'   * `n_iters`: The number of SMACOF iterations the best start ran.
 #'   * `n_starts`: The number of random starts run.
 #'   * `best_start`: Which start gave the solution: `0` for the PCoA start,
 #'     else the random start's number.

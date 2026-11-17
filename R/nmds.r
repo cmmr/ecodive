@@ -50,7 +50,7 @@
 #'     order) to 1.
 #'   * `converged`: `TRUE` if the best start stopped because a plain step met
 #'     `tol`, `FALSE` if it stopped at `max_iters`.
-#'   * `n_iter`: The number of SMACOF iterations the best start ran.
+#'   * `n_iters`: The number of SMACOF iterations the best start ran.
 #'   * `n_starts`: The number of random starts run.
 #'   * `best_start`: Which start gave the solution: `0` for the PCoA start,
 #'     else the random start's number.
@@ -334,7 +334,7 @@ smacof_fit <- function (dm, k, n_starts, max_iters, tol, seed, cpus, method, tie
       x, method, labels, prefix = toupper(method),
       stress     = stress,
       converged  = converged,
-      n_iter     = n_iter,
+      n_iters    = n_iter,
       n_starts   = n_starts,
       best_start = best_start,
       n_best     = n_best,

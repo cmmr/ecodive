@@ -78,7 +78,7 @@ With the Barnes-Hut gradient, it is the Barnes-Hut estimate.
 \item \code{init}: How the starting layout was chosen: \code{"pcoa"}, \code{"random"}, or
 \code{"matrix"} (given in \code{init}); \code{"none"} for fewer than 2 samples, which
 are all placed at 0.
-\item \code{n_iter}: The number of iterations run.
+\item \code{n_iters}: The number of iterations run.
 \item \code{learning_rate}: The learning rate used.
 \item \code{gradient}: \code{"exact"} or \code{"barnes_hut"}.
 }
@@ -228,7 +228,7 @@ for points about \eqn{10^8} times farther apart than usual.
 \item The result is centered, and each axis is flipped so that its
 coordinate with the largest absolute value is positive, as for the
 other ordination methods. \code{kl_divergence} is that of the result, rather
-than of the layout before the last step, and \code{n_iter} counts the
+than of the layout before the last step, and \code{n_iters} counts the
 iterations run (scikit-learn's \code{n_iter_} is one less).
 }
 

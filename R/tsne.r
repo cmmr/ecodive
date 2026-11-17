@@ -73,7 +73,7 @@
 #'   * `init`: How the starting layout was chosen: `"pcoa"`, `"random"`, or
 #'     `"matrix"` (given in `init`); `"none"` for fewer than 2 samples, which
 #'     are all placed at 0.
-#'   * `n_iter`: The number of iterations run.
+#'   * `n_iters`: The number of iterations run.
 #'   * `learning_rate`: The learning rate used.
 #'   * `gradient`: `"exact"` or `"barnes_hut"`.
 #'
@@ -220,7 +220,7 @@
 #' * The result is centered, and each axis is flipped so that its
 #'   coordinate with the largest absolute value is positive, as for the
 #'   other ordination methods. `kl_divergence` is that of the result, rather
-#'   than of the layout before the last step, and `n_iter` counts the
+#'   than of the layout before the last step, and `n_iters` counts the
 #'   iterations run (scikit-learn's `n_iter_` is one less).
 #'
 #'
@@ -366,7 +366,7 @@ tsne <- function (
       kl_divergence = kl_divergence,
       perplexity    = perplexity,
       init          = init,
-      n_iter        = n_iter,
+      n_iters       = n_iter,
       learning_rate = learning_rate,
       gradient      = if (exact) 'exact' else 'barnes_hut' )
   }

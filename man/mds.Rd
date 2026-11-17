@@ -46,7 +46,7 @@ MDS has no eigenvalues. Then come:
 better than putting every point in one place). See "Stress" below.
 \item \code{converged}: \code{TRUE} if the best start stopped because a plain step met
 \code{tol}, \code{FALSE} if it stopped at \code{max_iters}.
-\item \code{n_iter}: The number of SMACOF iterations the best start ran.
+\item \code{n_iters}: The number of SMACOF iterations the best start ran.
 \item \code{n_starts}: The number of random starts run.
 \item \code{best_start}: Which start gave the solution: \code{0} for the PCoA start,
 else the random start's number.

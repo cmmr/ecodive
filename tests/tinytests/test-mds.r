@@ -188,13 +188,13 @@
   expect_identical(
     names(attributes(ord)),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged',
-      'n_iter', 'n_starts', 'best_start', 'n_best', 'class') )
+      'n_iters', 'n_starts', 'best_start', 'n_best', 'class') )
   expect_identical(class(ord), c('ecodive_ord', 'matrix', 'array'))
   expect_identical(attr(ord, 'method'), 'mds')
   expect_identical(attr(ord, 'eig'),  c(NA_real_, NA_real_))
   expect_identical(attr(ord, 'prop'), c(NA_real_, NA_real_))
   expect_true(attr(ord, 'stress') > 0 && attr(ord, 'stress') < 1)
-  expect_true(is.integer(attr(ord, 'n_iter')) && attr(ord, 'n_iter') >= 1L)
+  expect_true(is.integer(attr(ord, 'n_iters')) && attr(ord, 'n_iters') >= 1L)
   expect_true(isTRUE(attr(ord, 'converged')))
   expect_identical(attr(ord, 'n_starts'), 4L)
   expect_equal(attr(ord, 'stress'), stress_r(d_bray, ord), tolerance = 1e-10)
@@ -208,7 +208,7 @@
                  relax = 1L, dscale = dscale_of(d_bray))
   expect_identical(attr(ord, 'stress'), min(res$stress_all))
   expect_identical(attr(ord, 'best_start'), which.min(res$stress_all) - 1L)
-  expect_identical(attr(ord, 'n_iter'), res$iters_all[[which.min(res$stress_all)]])
+  expect_identical(attr(ord, 'n_iters'), res$iters_all[[which.min(res$stress_all)]])
   expect_identical(attr(ord, 'n_best'), sum(res$stress_all <= min(res$stress_all) * 1.001))
 
   # Centered and on principal axes, in dm's units, signs fixed.
@@ -231,12 +231,12 @@
 
   # max_iters = 0, small max_iters, and tol = 0.
   ord0 <- mds(d_bray, max_iters = 0, n_starts = 0)
-  expect_identical(attr(ord0, 'n_iter'), 0L)
+  expect_identical(attr(ord0, 'n_iters'), 0L)
   expect_equal(attr(ord0, 'stress'), stress_r(d_bray * dscale_of(d_bray), init[, , 1]), tolerance = 1e-10)
   ord <- mds(d_jacc, tol = 0, max_iters = 5000, n_starts = 0)
   expect_true(attr(ord, 'converged'))
   ord <- mds(d_jacc, max_iters = 2, n_starts = 0)
-  expect_identical(attr(ord, 'n_iter'), 2L)
+  expect_identical(attr(ord, 'n_iters'), 2L)
   expect_false(attr(ord, 'converged'))
 
 
@@ -319,7 +319,7 @@
   expect_identical(
     names(attributes(ord)),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged',
-      'n_iter', 'n_starts', 'best_start', 'n_best', 'class') )
+      'n_iters', 'n_starts', 'best_start', 'n_best', 'class') )
   ord <- mds(dist(c(a = 1, b = 4)))
   expect_identical(dimnames(ord), list(c('a', 'b'), 'MDS1'))
   expect_equal(abs(unname(ord[, 1])), c(1.5, 1.5))
