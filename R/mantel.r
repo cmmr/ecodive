@@ -22,14 +22,20 @@
 #' @param y  The distances to correlate with `dm`: a `dist` object or a
 #'        symmetric numeric matrix, like `dm`. Or a numeric vector with one
 #'        value per sample, such as age or pH, whose absolute differences
-#'        (`stats::dist(y)`) are the distances. Samples are matched to `dm`'s
-#'        by name when both have names; otherwise they must be in the same
-#'        order.
+#'        (`stats::dist(y)`) are the distances. Or, with `data`, the name of
+#'        one of its numeric columns. Samples are matched to `dm`'s by name
+#'        when both have names; otherwise they must be in the same order.
+#'
+#' @param data  Optional sample metadata: a data frame with one row per
+#'        sample, whose columns `y`, `given`, and `strata` can name. Rows are
+#'        matched to the samples in `dm` by row name, and rows for other
+#'        samples are ignored; without row names, they must be in the same
+#'        order as `dm`. Default: `NULL`.
 #'
 #' @param given  For a partial Mantel test: distances whose effect is removed
 #'        from the correlation of `dm` and `y`, as in
-#'        `vegan::mantel.partial()`'s `zdis`. Given like `y`. Default: `NULL`
-#'        (a simple Mantel test).
+#'        `vegan::mantel.partial()`'s `zdis`. Given like `y`, including as a
+#'        column name of `data`. Default: `NULL` (a simple Mantel test).
 #'
 #' @param method  The correlation coefficient: `'pearson'`, `'spearman'`,
 #'        or `'kendall'` (tau-b), as in [stats::cor()]. Default:
@@ -40,9 +46,11 @@
 #'        from `permute::shuffleSet()`, to use instead of random ones.
 #'
 #' @param strata  Permute samples only within these groups (blocks), for
-#'        designs such as repeated measures. A vector with one value per
-#'        sample, matched to `dm`'s samples by name when it has names,
-#'        otherwise in the same order. Default: `NULL` (free permutation).
+#'        designs such as repeated measures. Without `data`, a vector with
+#'        one value per sample, matched to `dm`'s samples by name when it has
+#'        names, otherwise in the same order. With `data`, the name of one of
+#'        its columns, or a vector with one value per row of `data`. Default:
+#'        `NULL` (free permutation).
 #'
 #' @param alternative  Which correlations count as more extreme than the
 #'        observed one: `'greater'` (more positive, as in `vegan::mantel()`),
@@ -119,8 +127,10 @@
 #' **Differences from vegan::mantel()**
 #'
 #' * One function does both the simple and the partial test.
-#' * `y` and `given` may also be numeric vectors, one value per sample.
-#' * Samples are matched by name between `dm`, `y`, `given`, and `strata`.
+#' * `y` and `given` may also be numeric vectors, one value per sample, or
+#'   names of columns of `data`.
+#' * Samples are matched by name between `dm`, `y`, `given`, `data`, and
+#'   `strata`.
 #' * `alternative` adds lower-tail and two-sided tests.
 #' * There's no `na.rm`: distances must not be `NA`.
 #' * When there are fewer possible permutations than requested,
@@ -175,9 +185,14 @@
 #'     # After removing the effect of geographic distance.
 #'     mantel(dm, ph, given = geo)
 #'
+#'     # The same as a column of sample metadata.
+#'     meta <- data.frame(row.names = rownames(counts), ph = ph)
+#'     mantel(dm, 'ph', data = meta, method = 'spearman')
+#'
 mantel <- function (
-    dm, y, given = NULL, method = 'pearson', permutations = 999L,
-    strata = NULL, alternative = 'greater', seed = 0L, cpus = n_cpus() ) {
+    dm, y, data = NULL, given = NULL, method = 'pearson',
+    permutations = 999L, strata = NULL, alternative = 'greater',
+    seed = 0L, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
@@ -191,11 +206,37 @@ mantel <- function (
   if (n < 3)
     stop('`dm` must have at least 3 samples.', call. = FALSE)
 
+  if (missing(y) || is.null(y))
+    stop('`y` is required: distances, one value per sample, or a column name of `data`.', call. = FALSE)
+
+
+  #--------------------------------------------------------
+  # With `data`, `y`, `given` and `strata` may name its
+  # columns; its rows are matched to dm's samples.
+  #--------------------------------------------------------
+  if (is.null(data)) {
+    for (arg in c('y', 'given')) {
+      v <- get(arg)
+      if (is.character(v) && length(v) == 1)
+        stop('`', arg, '` names a column, but `data` is not given.', call. = FALSE)
+    }
+    strata <- mantel_strata(strata, x$labels, n)
+  }
+  else {
+    if (!is.data.frame(data) && !is.matrix(data))
+      stop('`data` must be a data.frame.', call. = FALSE)
+    des <- model_design(
+      data, formula = ~ 1, labels = x$labels, n = n, strata = strata,
+      allow_empty = TRUE )
+    strata <- des$strata
+    y      <- mantel_column(y,     'y',     des$data)
+    given  <- mantel_column(given, 'given', des$data)
+  }
+
   y <- mantel_align(mantel_dist(y, 'y'), 'y', x$labels, n)
   g <- if (is.null(given)) NULL else mantel_align(mantel_dist(given, 'given'), 'given', x$labels, n)
 
-  pm     <- perm_matrix(permutations, n)
-  strata <- mantel_strata(strata, x$labels, n)
+  pm <- perm_matrix(permutations, n)
 
   if (!is.null(pm$perms) && !is.null(strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
@@ -358,6 +399,33 @@ mantel_strata <- function (strata, labels, n) {
     stop('`strata` must not contain NA values.', call. = FALSE)
 
   as.integer(factor(strata)) - 1L
+}
+
+
+
+#------------------------------------------------------------------------------
+# `v` (`y` or `given`) as given, or, if it names a column of `data` (already
+# aligned with dm's samples), that column's values in dm's sample order.
+#------------------------------------------------------------------------------
+mantel_column <- function (v, arg, data) {
+
+  if (!is.character(v) || length(v) != 1) return (v)
+
+  if (is.na(v) || !v %in% colnames(data))
+    stop('`', arg, '` is not a column of `data`: ', name_list(v), call. = FALSE)
+
+  col <- data[[v]]
+
+  if (!is.numeric(col))
+    stop(
+      '`data` column ', name_list(v), ' is not numeric. A Mantel test correlates ',
+      'distances; to test a categorical variable, use permanova(), mrpp(), or ',
+      'anosim().', call. = FALSE )
+
+  if (anyNA(col))
+    stop('Missing values (NA) in `data` column ', name_list(v), '.', call. = FALSE)
+
+  unname(as.double(col))
 }
 
 

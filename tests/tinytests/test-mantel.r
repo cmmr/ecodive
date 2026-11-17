@@ -64,11 +64,6 @@
     mantel(x, ex$y, permutations = ex$perms[1:3, ])$permutation,
     'supplied matrix' )
 
-  # `given` is the third argument, as mantel.partial()'s zdis.
-  expect_identical(
-    mantel(x, ex$y, ex$z, permutations = 9),
-    mantel(x, ex$y, given = ex$z, permutations = 9) )
-
   details <- test_details.ecodive_mantel(res, 4)
   expect_true(is.character(details) && length(details) == 3)
   expect_true(any(grepl("Kendall's", details)))
@@ -220,6 +215,51 @@
     res <- mantel(x, age, given = rev(age), permutations = 9),
     "perfectly correlated" )
   expect_identical(res$statistic[["r"]], NA_real_)
+
+
+
+  # `data`: y, given and strata as its column names, with rows matched to
+  # the samples by name (extra rows ignored). ====
+
+  meta <- data.frame(
+    row.names = labs,
+    age = seq_len(n) %% 7 + 0.5,
+    ph  = round(seq_len(n) / 3, 1) %% 2,
+    blk = rep(1:3, length.out = n),
+    grp = rep(c('a', 'b'), length.out = n),
+    stringsAsFactors = FALSE )
+  v <- function (col) stats::setNames(meta[[col]], labs)
+
+  ref <- mantel(x, v('age'), permutations = 19)
+  expect_identical(mantel(x, 'age', meta, permutations = 19), ref)
+
+  extra <- data.frame(row.names = 'X', age = 99, ph = 0, blk = 1, grp = 'a')
+  shuffled <- rbind(meta[rev(seq_len(n)), ], extra)
+  expect_identical(mantel(x, 'age', data = shuffled, permutations = 19), ref)
+
+  expect_identical(
+    mantel(x, 'age', meta, given = 'ph', permutations = 19),
+    mantel(x, v('age'), given = v('ph'), permutations = 19) )
+  expect_identical(
+    mantel(x, 'age', meta, strata = 'blk', permutations = 19),
+    mantel(x, v('age'), strata = v('blk'), permutations = 19) )
+  expect_identical(
+    mantel(x, ex$y, meta, given = 'ph', strata = meta$blk, permutations = 19),
+    mantel(x, ex$y, given = v('ph'), strata = v('blk'), permutations = 19) )
+
+  # Without row names, rows are in dm's order.
+  expect_identical(mantel(x, 'age', data = `rownames<-`(meta, NULL), permutations = 19), ref)
+
+  na_meta <- meta
+  na_meta$age[[3]] <- NA
+  expect_error(mantel(x, 'age'), '`y` names a column, but `data` is not given')
+  expect_error(mantel(x, ex$y, given = 'ph'), '`given` names a column, but `data` is not given')
+  expect_error(mantel(x, 'nope', meta), '`y` is not a column of `data`')
+  expect_error(mantel(x, 'grp', meta), 'not numeric.*permanova')
+  expect_error(mantel(x, 'age', na_meta), 'Missing values')
+  expect_error(mantel(x, 'age', meta[-1, ]), 'no row in `data`')
+  expect_error(mantel(x, 'age', list(age = 1)), '`data` must be a data.frame')
+  expect_error(mantel(x), '`y` is required')
 
 
 
