@@ -64,6 +64,11 @@
     mantel(x, ex$y, permutations = ex$perms[1:3, ])$permutation,
     'supplied matrix' )
 
+  # `given` is the third argument, as mantel.partial()'s zdis.
+  expect_identical(
+    mantel(x, ex$y, ex$z, permutations = 9),
+    mantel(x, ex$y, given = ex$z, permutations = 9) )
+
   details <- test_details.ecodive_mantel(res, 4)
   expect_true(is.character(details) && length(details) == 3)
   expect_true(any(grepl("Kendall's", details)))

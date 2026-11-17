@@ -26,6 +26,11 @@
 #'        by name when both have names; otherwise they must be in the same
 #'        order.
 #'
+#' @param given  For a partial Mantel test: distances whose effect is removed
+#'        from the correlation of `dm` and `y`, as in
+#'        `vegan::mantel.partial()`'s `zdis`. Given like `y`. Default: `NULL`
+#'        (a simple Mantel test).
+#'
 #' @param method  The correlation coefficient: `'pearson'`, `'spearman'`,
 #'        or `'kendall'` (tau-b), as in [stats::cor()]. Default:
 #'        `'pearson'`.
@@ -38,10 +43,6 @@
 #'        designs such as repeated measures. A vector with one value per
 #'        sample, matched to `dm`'s samples by name when it has names,
 #'        otherwise in the same order. Default: `NULL` (free permutation).
-#'
-#' @param given  For a partial Mantel test: distances whose effect is removed
-#'        from the correlation of `dm` and `y`, given like `y`. Default:
-#'        `NULL` (a simple Mantel test).
 #'
 #' @param alternative  Which correlations count as more extreme than the
 #'        observed one: `'greater'` (more positive, as in `vegan::mantel()`),
@@ -175,8 +176,8 @@
 #'     mantel(dm, ph, given = geo)
 #'
 mantel <- function (
-    dm, y, method = 'pearson', permutations = 999L, strata = NULL,
-    given = NULL, alternative = 'greater', seed = 0L, cpus = n_cpus() ) {
+    dm, y, given = NULL, method = 'pearson', permutations = 999L,
+    strata = NULL, alternative = 'greater', seed = 0L, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()

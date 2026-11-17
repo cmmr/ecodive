@@ -7,10 +7,10 @@
 mantel(
   dm,
   y,
+  given = NULL,
   method = "pearson",
   permutations = 999L,
   strata = NULL,
-  given = NULL,
   alternative = "greater",
   seed = 0L,
   cpus = n_cpus()
@@ -28,6 +28,11 @@ value per sample, such as age or pH, whose absolute differences
 by name when both have names; otherwise they must be in the same
 order.}
 
+\item{given}{For a partial Mantel test: distances whose effect is removed
+from the correlation of \code{dm} and \code{y}, as in
+\code{vegan::mantel.partial()}'s \code{zdis}. Given like \code{y}. Default: \code{NULL}
+(a simple Mantel test).}
+
 \item{method}{The correlation coefficient: \code{'pearson'}, \code{'spearman'},
 or \code{'kendall'} (tau-b), as in \code{\link[stats:cor]{stats::cor()}}. Default:
 \code{'pearson'}.}
@@ -40,10 +45,6 @@ from \code{permute::shuffleSet()}, to use instead of random ones.}
 designs such as repeated measures. A vector with one value per
 sample, matched to \code{dm}'s samples by name when it has names,
 otherwise in the same order. Default: \code{NULL} (free permutation).}
-
-\item{given}{For a partial Mantel test: distances whose effect is removed
-from the correlation of \code{dm} and \code{y}, given like \code{y}. Default:
-\code{NULL} (a simple Mantel test).}
 
 \item{alternative}{Which correlations count as more extreme than the
 observed one: \code{'greater'} (more positive, as in \code{vegan::mantel()}),
