@@ -205,3 +205,104 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
   
   run_parallel(norm_func, n_threads, n_samples);
 }
+
+
+//======================================================
+// R interface, for normalize(): the normalized table, in
+// the input's orientation (samples in rows for margin 1,
+// in columns for margin 2).
+//
+// dense = 1: an n_rows x n_cols double matrix, with zeros
+//            (or, for CLR, each sample's value for zero).
+// dense = 0: list(i, j, x), the non-zero entries' 0-based
+//            row and column, and value, in column-major
+//            order.
+//======================================================
+SEXP C_normalize(
+    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_norm,
+    SEXP sexp_pseudocount, SEXP sexp_dense, SEXP sexp_n_threads ) {
+
+  int    margin = asInteger(sexp_margin);
+  int    norm   = asInteger(sexp_norm);
+  double pc     = asReal(sexp_pseudocount);
+  int    dense  = asLogical(sexp_dense);
+  int    n_thr  = asInteger(sexp_n_threads);
+
+  init_n_ptrs(10);
+
+  ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
+  if (norm) normalize(em, norm, n_thr, pc);
+
+  int        ns  = em->n_samples;
+  int        no  = em->n_otus;
+  int        nnz = em->nnz;
+  const int *pos = em->pos_vec;
+  const int *otu = em->otu_vec;
+  const double *val = em->val_vec;
+  const double *z0  = (norm == NORM_CLR) ? em->clr_vec : NULL;
+
+  int n_rows = (margin == 1) ? ns : no;
+  SEXP result;
+
+  if (dense) {
+
+    result = PROTECT(allocMatrix(REALSXP, n_rows, (margin == 1) ? no : ns));
+    double *out = REAL(result);
+
+    for (int s = 0; s < ns; s++) {
+
+      double zero = z0 ? z0[s] : 0;
+
+      if (margin == 1) {
+        for (int o = 0; o < no; o++) out[s + (size_t) n_rows * o] = zero;
+        for (int e = pos[s]; e < pos[s + 1]; e++)
+          out[s + (size_t) n_rows * otu[e]] = val[e];
+      }
+      else {
+        double *col = out + (size_t) n_rows * s;
+        for (int o = 0; o < no; o++) col[o] = zero;
+        for (int e = pos[s]; e < pos[s + 1]; e++) col[otu[e]] = val[e];
+      }
+    }
+  }
+  else {
+
+    const char *names[] = { "i", "j", "x", "" };
+    result = PROTECT(mkNamed(VECSXP, names));
+    SEXP sexp_i = allocVector(INTSXP,  nnz); SET_VECTOR_ELT(result, 0, sexp_i);
+    SEXP sexp_j = allocVector(INTSXP,  nnz); SET_VECTOR_ELT(result, 1, sexp_j);
+    SEXP sexp_x = allocVector(REALSXP, nnz); SET_VECTOR_ELT(result, 2, sexp_x);
+    int    *ri = INTEGER(sexp_i);
+    int    *rj = INTEGER(sexp_j);
+    double *rx = REAL(sexp_x);
+
+    if (margin == 2) {
+      // Samples are the columns: already column-major.
+      for (int s = 0; s < ns; s++)
+        for (int e = pos[s]; e < pos[s + 1]; e++) {
+          ri[e] = otu[e];
+          rj[e] = s;
+          rx[e] = val[e];
+        }
+    }
+    else {
+      // Features are the columns: a stable counting sort
+      // by feature keeps each column's samples in order.
+      int *fill = (int *) R_alloc((size_t) no + 1, sizeof(int));
+      memset(fill, 0, ((size_t) no + 1) * sizeof(int));
+      for (int e = 0; e < nnz; e++) fill[otu[e] + 1]++;
+      for (int o = 0; o < no; o++)  fill[o + 1] += fill[o];
+      for (int s = 0; s < ns; s++)
+        for (int e = pos[s]; e < pos[s + 1]; e++) {
+          int d = fill[otu[e]]++;
+          ri[d] = s;
+          rj[d] = otu[e];
+          rx[d] = val[e];
+        }
+    }
+  }
+
+  free_all();
+  UNPROTECT(1);
+  return result;
+}

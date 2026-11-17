@@ -107,6 +107,14 @@
   default (`vegan` fits the first two), and its results are identical for any
   number of `cpus`.
 
+* New `normalize()` returns a count table after any of the transformations
+  that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
+  (`'percent'`, `'chord'`, `'binary'`, `'clr'`, `'rclr'`), with exactly the
+  values they use. It keeps the table's orientation, dimnames and form:
+  sparse Matrix and slam input stays sparse. `norm = 'clr'` gives a
+  dense matrix, since every zero gets a value; the functions with a `norm`
+  argument avoid that copy.
+
 * New `pca()` runs a principal component analysis of a count table, after
   any of `beta_div()`'s normalizations (e.g. `norm = 'clr'` for an Aitchison
   PCA), optionally scaling features to unit variance (`scale = TRUE`). It

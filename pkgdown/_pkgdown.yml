@@ -80,6 +80,7 @@ reference:
   - list_metrics
   - read_tree
   - rarefy
+  - normalize
   - n_cpus
   - blas_threads
 
