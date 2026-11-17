@@ -92,7 +92,12 @@ validate_counts <- function (env = parent.frame()) {
         else {
           counts <- as.matrix(counts)
         }
-        
+
+        # What came out of an object above (e.g. an rbiom object holding a
+        # data frame) may be of a class the C code doesn't read.
+        if (!inherits(counts, c('matrix', 'dgCMatrix', 'dgTMatrix', 'dgeMatrix', 'simple_triplet_matrix')))
+          counts <- as.matrix(counts)
+
       }
       
       stopifnot(nrow(counts) > 0)

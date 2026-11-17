@@ -158,9 +158,24 @@
   env$margin <- 1L
   attr(env$counts, 'tree') <- tree
   expect_silent(validate_counts(env))
-  
-  
-  
+
+  # An rbiom-like object whose table is a data frame (samples in columns)
+  # works like the matrix in every function that takes counts.
+  rb_m <- matrix((1:200 * 7) %% 11, 10, dimnames = list(paste0('F', 1:10), paste0('S', 1:20)))
+  rb   <- structure(list(counts = as.data.frame(rb_m)), class = 'rbiom')
+  expect_identical(pca(rb, cpus = 1), pca(rb_m, margin = 2, cpus = 1))
+  expect_identical(normalize(rb, 'percent', cpus = 1), normalize(rb_m, 'percent', margin = 2, cpus = 1))
+  expect_identical(rarefy(rb, depth = 30, cpus = 1), rarefy(rb_m, depth = 30, margin = 2, cpus = 1))
+  expect_identical(bray(rb, cpus = 1), bray(rb_m, margin = 2, cpus = 1))
+  expect_identical(shannon(rb, cpus = 1), shannon(rb_m, margin = 2, cpus = 1))
+  rb_o <- pcoa(bray(rb_m, margin = 2, cpus = 1), cpus = 1)
+  expect_identical(pcoa_biplot(rb_o, rb, cpus = 1), pcoa_biplot(rb_o, rb_m, margin = 2, cpus = 1))
+  expect_identical(
+    envfit(rb_o, counts = rb, permutations = 9, cpus = 1),
+    envfit(rb_o, counts = rb_m, margin = 2, permutations = 9, cpus = 1) )
+
+
+
   
   
   # validate_pseudocount() ====

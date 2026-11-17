@@ -326,11 +326,6 @@ rpca <- function (
 
   validate_counts()
   validate_margin()
-
-  # What validate_counts() extracts from another object (e.g. an rbiom
-  # object's table) can be of a class the C code doesn't read.
-  if (!inherits(counts, c('matrix', 'dgCMatrix', 'dgTMatrix', 'dgeMatrix', 'simple_triplet_matrix')))
-    counts <- as.matrix(counts)
   validate_cpus()
 
   k         <- ord_arg(k,         '`k` must be a whole number from 1 to 10.', whole = TRUE, lo = 1, hi = 10)
