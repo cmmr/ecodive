@@ -4,11 +4,15 @@
 \alias{dist_test}
 \title{Distance Test Wrapper Function}
 \usage{
-dist_test(dm, groups, data = NULL, method, ...)
+dist_test(dm, test, groups, data = NULL, ...)
 }
 \arguments{
 \item{dm}{The distances to test: a \code{dist} object such as from
 \code{\link[=beta_div]{beta_div()}}, or a symmetric matrix of distances.}
+
+\item{test}{The name of a test: \code{"anosim"}, \code{"mantel"}, \code{"mrpp"},
+\code{"permanova"}, or \code{"permdisp"}. Flexible matching is supported (see
+below). Programmatic access via \code{list_dist_tests()}.}
 
 \item{groups}{The variable to test: a vector with one value per sample,
 matched to the samples in \code{dm} by name when both are named, else in
@@ -21,21 +25,17 @@ method takes categorical groups, numeric values, or both: see
 sample, holding \code{groups} (and \code{strata}) as columns. Rows are matched
 to the samples in \code{dm} by row name. Default: \code{NULL}.}
 
-\item{method}{The name of a test: \code{"anosim"}, \code{"mantel"}, \code{"mrpp"},
-\code{"permanova"}, or \code{"permdisp"}. Flexible matching is supported (see
-below). Programmatic access via \code{list_dist_tests()}.}
-
 \item{...}{Further arguments for the method's function, such as
 \code{permutations}, \code{strata}, \code{seed}, or \code{cpus}, which every method
-takes, or a method's own, such as \code{weights} for \code{\link[=mrpp]{mrpp()}}. Each
-method keeps its own defaults. For \code{mantel}, \code{groups} is passed as
-\code{\link[=mantel]{mantel()}}'s \code{y}.}
+takes, or a method's own, such as \code{weights} for \code{\link[=mrpp]{mrpp()}} or
+\code{method} (the correlation) for \code{\link[=mantel]{mantel()}}. Each method keeps its own
+defaults. For \code{mantel}, \code{groups} is passed as \code{\link[=mantel]{mantel()}}'s \code{y}.}
 }
 \value{
 The method's result: a list of class \code{"ecodive_test"} whose first
 fields are \code{statistic}, \code{p_value}, \code{z}, and \code{n_perm}.
 \code{as.data.frame()} turns it into one row with the same columns for every
-method, so results can be \code{rbind()}-ed. \code{dist_test(dm, groups, data, 'mrpp', ...)} is the same as \code{mrpp(dm, groups, data, ...)}.
+method, so results can be \code{rbind()}-ed. \code{dist_test(dm, 'mrpp', groups, data, ...)} is the same as \code{mrpp(dm, groups, data, ...)}.
 }
 \description{
 Runs any of ecodive's statistical tests of a distance matrix by name, as
@@ -44,7 +44,7 @@ treatment groups, explain the differences between samples?
 }
 \details{
 \strong{List of Tests}\tabular{lll}{
-   Option / Function Name \tab Method Name \tab Groups \cr
+   Option / Function Name \tab Test Name \tab Groups \cr
    \code{anosim} \tab Analysis of Similarities (ANOSIM) \tab categorical \cr
    \code{mantel} \tab Mantel Test \tab numeric \cr
    \code{mrpp} \tab Multi-Response Permutation Procedure (MRPP) \tab categorical \cr
@@ -58,12 +58,12 @@ that takes only categorical groups gives an error for numbers, and the
 reverse. \code{mantel} correlates \code{dm} with the differences between samples'
 values; to compare two distance matrices, call \code{\link[=mantel]{mantel()}} directly. To
 test several variables at once, call \code{\link[=permanova]{permanova()}} with a \code{formula},
-either directly or as \code{dist_test(dm, data = meta, method = 'permanova', formula = ~ a + b)}.
+either directly or as \code{dist_test(dm, 'permanova', data = meta, formula = ~ a + b)}.
 
 \strong{Flexible name matching}
 
 Case insensitive and partial matching, ignoring anything but letters. E.g.
-\code{method = 'PERMANOVA'} or \code{'perma'} selects \code{permanova}. Common other names
+\code{test = 'PERMANOVA'} or \code{'perma'} selects \code{permanova}. Common other names
 also work: \code{'adonis'} or \code{'adonis2'} for \code{permanova}; \code{'betadisper'} or
 \code{'PERMDISP2'} for \code{permdisp}; and \code{'Analysis of Similarities'} for
 \code{anosim}.
@@ -94,16 +94,16 @@ runs ecodive's, to be sure.
 
     dm <- bray(counts)
 
-    dist_test(dm, 'treatment', meta, method = 'permanova')
+    dist_test(dm, 'permanova', 'treatment', meta)
 
     # Every test of treatment, as one table.
     tests <- list_dist_tests(val = 'id', groups = 'categorical')
     do.call(rbind, lapply(tests, function (m)
-      as.data.frame(dist_test(dm, 'treatment', meta, m, cpus = 1)) ))
+      as.data.frame(dist_test(dm, m, 'treatment', meta, cpus = 1)) ))
 
     # A numeric variable.
-    dist_test(dm, 'ph', meta, method = 'adonis2')
-    dist_test(dm, 'ph', meta, method = 'mantel')
+    dist_test(dm, 'adonis2', 'ph', meta)
+    dist_test(dm, 'mantel', 'ph', meta, method = 'spearman')
 
 }
 \seealso{

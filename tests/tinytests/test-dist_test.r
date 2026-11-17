@@ -16,49 +16,49 @@
 
     # A column of `data`, with strata.
     expect_identical(
-      dist_test(d, 'trt', meta, method = m, permutations = 19, strata = 'block', cpus = 1),
+      dist_test(d, m, 'trt', meta, permutations = 19, strata = 'block', cpus = 1),
       f(d, 'trt', meta, permutations = 19, strata = 'block', cpus = 1),
       info = m )
 
     # A vector, unnamed or named.
     expect_identical(
-      dist_test(d, meta$trt, method = m, permutations = 19, seed = 3, cpus = 1),
+      dist_test(d, m, meta$trt, permutations = 19, seed = 3, cpus = 1),
       f(d, meta$trt, permutations = 19, seed = 3, cpus = 1),
       info = m )
     expect_identical(
-      dist_test(d, setNames(meta$trt, rownames(meta)), method = m, permutations = 9, cpus = 1),
+      dist_test(d, m, setNames(meta$trt, rownames(meta)), permutations = 9, cpus = 1),
       f(d, setNames(meta$trt, rownames(meta)), permutations = 9, cpus = 1),
       info = m )
 
     # Errors come from the method.
-    expect_error(dist_test(d, 'nothere', meta, method = m), "'nothere' is not one", info = m)
+    expect_error(dist_test(d, m, 'nothere', meta), "'nothere' is not one", info = m)
   }
 
   # A method's own arguments.
   expect_identical(
-    dist_test(d, 'trt', meta, method = 'mrpp', weights = 'n-1', permutations = 9, cpus = 1),
+    dist_test(d, 'mrpp', 'trt', meta, weights = 'n-1', permutations = 9, cpus = 1),
     mrpp(d, 'trt', meta, weights = 'n-1', permutations = 9, cpus = 1) )
   expect_identical(
-    dist_test(d, 'trt', meta, method = 'permanova', by = 'onedf', permutations = 9, cpus = 1),
+    dist_test(d, 'permanova', 'trt', meta, by = 'onedf', permutations = 9, cpus = 1),
     permanova(d, 'trt', meta, by = 'onedf', permutations = 9, cpus = 1) )
   expect_identical(
-    dist_test(d, 'trt', meta, method = 'permdisp', type = 'median', permutations = 9, cpus = 1),
+    dist_test(d, 'permdisp', 'trt', meta, type = 'median', permutations = 9, cpus = 1),
     permdisp(d, 'trt', meta, type = 'median', permutations = 9, cpus = 1) )
 
   # permanova()'s formula, without `groups`.
   expect_identical(
-    dist_test(d, data = meta, method = 'permanova', formula = ~ trt + ph, permutations = 9, cpus = 1),
+    dist_test(d, 'permanova', data = meta, formula = ~ trt + ph, permutations = 9, cpus = 1),
     permanova(d, data = meta, formula = ~ trt + ph, permutations = 9, cpus = 1) )
-  expect_error(dist_test(d, data = meta, method = 'mrpp'), '`groups` is required')
+  expect_error(dist_test(d, 'mrpp', data = meta), '`groups` is required')
 
   # A symmetric matrix, as for the methods.
   expect_identical(
-    dist_test(as.matrix(d), 'trt', meta, method = 'anosim', permutations = 9, cpus = 1),
+    dist_test(as.matrix(d), 'anosim', 'trt', meta, permutations = 9, cpus = 1),
     anosim(d, 'trt', meta, permutations = 9, cpus = 1) )
 
   # Results bind into one table.
   tbl <- do.call(rbind, lapply(list_dist_tests(val = 'id', groups = 'categorical'), function (m)
-    as.data.frame(dist_test(d, 'trt', meta, m, permutations = 9, cpus = 1)) ))
+    as.data.frame(dist_test(d, m, 'trt', meta, permutations = 9, cpus = 1)) ))
   expect_identical(tbl$test, c('anosim', 'mrpp', 'permanova', 'permdisp'))
   expect_identical(names(tbl), c('test', 'stat_name', 'statistic', 'p_value', 'z', 'n_perm'))
 
@@ -68,52 +68,55 @@
 
   # Numeric values: permanova only.
   expect_identical(
-    dist_test(d, 'ph', meta, method = 'permanova', permutations = 9, cpus = 1),
+    dist_test(d, 'permanova', 'ph', meta, permutations = 9, cpus = 1),
     permanova(d, 'ph', meta, permutations = 9, cpus = 1) )
   for (m in c('anosim', 'mrpp', 'permdisp')) {
-    expect_error(dist_test(d, 'ph', meta, method = m), "column 'ph' is numeric", info = m)
-    expect_error(dist_test(d, meta$ph, method = m), '`groups` is numeric', info = m)
-    expect_error(dist_test(d, meta$ph, method = m), 'use: mantel, permanova', info = m)
+    expect_error(dist_test(d, m, 'ph', meta), "column 'ph' is numeric", info = m)
+    expect_error(dist_test(d, m, meta$ph), '`groups` is numeric', info = m)
+    expect_error(dist_test(d, m, meta$ph), 'use: mantel, permanova', info = m)
   }
 
   # mantel(): numeric values only, passed as its `y`.
   expect_identical(
-    dist_test(d, 'ph', meta, method = 'mantel', permutations = 19, strata = 'block', cpus = 1),
+    dist_test(d, 'mantel', 'ph', meta, permutations = 19, strata = 'block', cpus = 1),
     mantel(d, 'ph', meta, permutations = 19, strata = 'block', cpus = 1) )
   expect_identical(
-    dist_test(d, meta$ph, method = 'mantel', permutations = 19, seed = 3, cpus = 1),
+    dist_test(d, 'mantel', meta$ph, permutations = 19, seed = 3, cpus = 1),
     mantel(d, meta$ph, permutations = 19, seed = 3, cpus = 1) )
   expect_identical(
-    dist_test(d, setNames(meta$ph, rownames(meta)), method = 'mantel', permutations = 9, cpus = 1),
+    dist_test(d, 'mantel', setNames(meta$ph, rownames(meta)), permutations = 9, cpus = 1),
     mantel(d, setNames(meta$ph, rownames(meta)), permutations = 9, cpus = 1) )
   expect_identical(
-    dist_test(d, 'depth', meta, method = 'Mantel test', alternative = 'two.sided',
-              permutations = 9, cpus = 1),
+    dist_test(d, 'Mantel test', 'depth', meta, alternative = 'two.sided', permutations = 9, cpus = 1),
     mantel(d, 'depth', meta, alternative = 'two.sided', permutations = 9, cpus = 1) )
-  expect_error(dist_test(d, 'trt', meta, method = 'mantel'), "column 'trt' is categorical")
-  expect_error(dist_test(d, meta$trt, method = 'mantel'), '`groups` is categorical')
+  # mantel()'s own `method` (the correlation) passes through.
+  sp <- dist_test(d, 'mantel', 'ph', meta, method = 'spearman', permutations = 9, cpus = 1)
+  expect_identical(sp, mantel(d, 'ph', meta, method = 'spearman', permutations = 9, cpus = 1))
+  expect_identical(sp$method, 'spearman')
+  expect_error(dist_test(d, 'mantel', 'trt', meta), "column 'trt' is categorical")
+  expect_error(dist_test(d, 'mantel', meta$trt), '`groups` is categorical')
   expect_error(
-    dist_test(d, meta$trt, method = 'mantel'),
+    dist_test(d, 'mantel', meta$trt),
     'use: anosim, mrpp, permanova, permdisp' )
-  expect_error(dist_test(d, 'nothere', meta, method = 'mantel'))
+  expect_error(dist_test(d, 'mantel', 'nothere', meta))
 
   # Character, logical and factor groups are categorical.
   expect_identical(
-    dist_test(d, as.character(meta$trt), method = 'mrpp', permutations = 9, cpus = 1),
+    dist_test(d, 'mrpp', as.character(meta$trt), permutations = 9, cpus = 1),
     mrpp(d, as.character(meta$trt), permutations = 9, cpus = 1) )
   expect_identical(
-    dist_test(d, meta$site == 'A', method = 'anosim', permutations = 9, cpus = 1),
+    dist_test(d, 'anosim', meta$site == 'A', permutations = 9, cpus = 1),
     anosim(d, meta$site == 'A', permutations = 9, cpus = 1) )
 
   # Neither.
   dates <- as.Date('2020-01-01') + seq_len(n)
-  expect_error(dist_test(d, dates, method = 'permanova'), 'of class Date')
+  expect_error(dist_test(d, 'permanova', dates), 'of class Date')
 
   # A vector parallel to the rows of `data`.
   expect_identical(
-    dist_test(d, meta$trt, meta, method = 'mrpp', permutations = 9, cpus = 1),
+    dist_test(d, 'mrpp', meta$trt, meta, permutations = 9, cpus = 1),
     mrpp(d, meta$trt, meta, permutations = 9, cpus = 1) )
-  expect_error(dist_test(d, meta$ph, meta, method = 'mrpp'), '`groups` is numeric')
+  expect_error(dist_test(d, 'mrpp', meta$ph, meta), '`groups` is numeric')
 
 
 
@@ -163,7 +166,7 @@
   expect_error(match_dist_test('!!'),     'alphabetic')
 
   expect_identical(
-    dist_test(d, 'trt', meta, method = 'betadisper', permutations = 9, cpus = 1),
+    dist_test(d, 'betadisper', 'trt', meta, permutations = 9, cpus = 1),
     permdisp(d, 'trt', meta, permutations = 9, cpus = 1) )
 
 
@@ -179,11 +182,11 @@
   ab    <- rep(c('a', 'b'), 6)
   for (m in c('permanova', 'mrpp', 'anosim', 'permdisp')) {
     expect_identical(
-      dist_test(d12, na_g, method = m, permutations = 19, cpus = 1)[1:4],
-      dist_test(d12, zz_g, method = m, permutations = 19, cpus = 1)[1:4], info = m )
+      dist_test(d12, m, na_g, permutations = 19, cpus = 1)[1:4],
+      dist_test(d12, m, zz_g, permutations = 19, cpus = 1)[1:4], info = m )
     expect_identical(
-      dist_test(d12, ab, method = m, strata = na_s, permutations = 19, cpus = 1)[1:4],
-      dist_test(d12, ab, method = m, strata = zz_s, permutations = 19, cpus = 1)[1:4], info = m )
+      dist_test(d12, m, ab, strata = na_s, permutations = 19, cpus = 1)[1:4],
+      dist_test(d12, m, ab, strata = zz_s, permutations = 19, cpus = 1)[1:4], info = m )
   }
   x12 <- c(5, 1, 4, 2, 8, 3, 9, 6, 7, 2, 1, 4)
   expect_identical(

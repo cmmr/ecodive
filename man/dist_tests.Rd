@@ -11,7 +11,7 @@ list_dist_tests(
   groups = NULL
 )
 
-match_dist_test(method, groups = NULL)
+match_dist_test(test, groups = NULL)
 }
 \arguments{
 \item{val}{Sets the return value for this function call. See "Value"
@@ -24,7 +24,7 @@ default is \code{NA} (no name).}
 \item{groups}{Filter by the kind of variable the test takes:
 \code{"categorical"} or \code{"numeric"}. Default: \code{NULL} (no filtering).}
 
-\item{method}{The name of a test to search for. Supports partial
+\item{test}{The name of a test to search for. Supports partial
 matching. All non-alpha characters are ignored.}
 }
 \value{
@@ -32,11 +32,11 @@ matching. All non-alpha characters are ignored.}
 
 A \code{list} with the following elements.
 \itemize{
-\item \code{name} : Method name, e.g. \code{"Multi-Response Permutation Procedure"}
-\item \code{id} : Method ID - also the name of the function, e.g. \code{"mrpp"}
-\item \code{groups} : The kinds of variable the method takes, e.g.
+\item \code{name} : Test name, e.g. \code{"Multi-Response Permutation Procedure"}
+\item \code{id} : Test ID - also the name of the function, e.g. \code{"mrpp"}
+\item \code{groups} : The kinds of variable the test takes, e.g.
 \code{"categorical"}, or \code{"categorical numeric"}.
-\item \code{func} : The function for this method, e.g. \code{ecodive::mrpp}
+\item \code{func} : The function for this test, e.g. \code{ecodive::mrpp}
 \item \code{params} : Formal args for \code{func}, e.g. \code{c("dm", "groups", "data", ...)}
 }
 
@@ -48,12 +48,12 @@ The returned object's type and values are controlled with the \code{val} and
 \item \code{val = "data.frame"} : The data.frame from which the below options are sourced.
 \item \code{val = "list"} : A list of objects as returned by \code{match_dist_test()} (above).
 \item \code{val = "func"} : A list of functions.
-\item \code{val = "id"} : A character vector of method IDs.
-\item \code{val = "name"} : A character vector of method names.
-\item \code{val = "groups"} : A character vector of the kinds of variable each method takes.
+\item \code{val = "id"} : A character vector of test IDs.
+\item \code{val = "name"} : A character vector of test names.
+\item \code{val = "groups"} : A character vector of the kinds of variable each test takes.
 }
 
-If \code{nm} is set, then the names of the vector or list will be the method ID
+If \code{nm} is set, then the names of the vector or list will be the test ID
 (\code{nm="id"}) or name (\code{nm="name"}). When \code{val="data.frame"}, the names will
 be applied to the \code{rownames()} property of the \code{data.frame}.
 }
@@ -69,7 +69,7 @@ distance matrix, and their associated functions.
     # The tests of a numeric variable.
     list_dist_tests(val = 'id', groups = 'numeric')
 
-    # Find the method for 'adonis2'.
+    # Find the test for 'adonis2'.
     m <- match_dist_test('adonis2')
     m$id
 
