@@ -73,6 +73,15 @@
   expect_true(is.character(details) && length(details) == 3)
   expect_true(any(grepl("Kendall's", details)))
 
+  # The shared printout and data frame row.
+  expect_stdout(print(res), 'Partial Mantel test \\(Kendall\\)')
+  expect_stdout(print(res), "Kendall's rank correlation tau-b")
+  row <- as.data.frame(res)
+  expect_identical(row$test, 'mantel')
+  expect_identical(row$stat_name, 'r')
+  expect_identical(row$statistic, res$statistic[['r']])
+  expect_identical(row$p_value, res$p_value)
+
 
 
   # The statistic is stats::cor() of the distances, for every method, with

@@ -70,56 +70,15 @@ static double        mt_n0;      // Pairs of pairs, N(N - 1) / 2.
 static double        mt_n1;      // ... tied in x.
 static double        mt_n2[2];   // ... tied in each target.
 
-// Permutations.
-static const int    *mt_perms;   // n x n_perm, 0-based, or NULL.
-static uint64_t      mt_seed;
-static const int    *mt_order;   // Samples by stratum.
-static const int    *mt_sbeg;    // Start of each stratum in mt_order.
-static int           mt_ns;      // Strata.
+// Permutations: permuted sample a is original sample p[a],
+// as vegan's xmat[take, take].
+static perm_source_t mt_ps;
 
 // Work.
 static int          *mt_iwork;   // Per-thread integer workspace ...
 static size_t        mt_iwlen;   // ... of this many ints.
 static int           mt_k0;      // This round's permutations:
 static int           mt_k1;      //   k0 .. k1 - 1.
-
-
-//------------------------------------------------------
-// Permutation k into p: permuted sample a is original
-// sample p[a]. k = 0 is the identity. As permanova.c:
-// PCG stream k of `seed`, Fisher-Yates within strata.
-//------------------------------------------------------
-static void get_perm(int k, int *p) {
-
-  int n = mt_n;
-
-  if (k == 0) {
-    for (int a = 0; a < n; a++) p[a] = a;
-    return;
-  }
-
-  if (mt_perms) {
-    memcpy(p, mt_perms + (size_t) (k - 1) * n, (size_t) n * sizeof(int));
-    return;
-  }
-
-  // Fisher-Yates shuffle within each stratum.
-  pcg32_random_t rng;
-  pcg32_srandom_r(&rng, mt_seed, (uint64_t) k);
-
-  for (int a = 0; a < n; a++) p[a] = a;
-
-  for (int s = 0; s < mt_ns; s++) {
-    const int *idx = mt_order + mt_sbeg[s];
-    int        len = mt_sbeg[s + 1] - mt_sbeg[s];
-    for (int t = len - 1; t > 0; t--) {
-      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
-      int tmp = p[idx[t]];
-      p[idx[t]] = p[idx[u]];
-      p[idx[u]] = tmp;
-    }
-  }
-}
 
 
 //------------------------------------------------------
@@ -337,7 +296,7 @@ static void *mantel_worker(void *arg) {
   for (int k = mt_k0 + w->i; k < mt_k1; k += w->n) {
 
     double *out = mt_out + (size_t) k * mt_m;
-    get_perm(k, p);
+    perm_source_get(&mt_ps, k, p);
     for (int a = 0; a < mt_n; a++) q[p[a]] = a;
 
     if (mt_method == MT_PEARSON) {
@@ -396,7 +355,6 @@ SEXP C_mantel(
   mt_m      = m;
   mt_method = method;
   mt_total  = n_perm + 1;
-  mt_seed   = (uint64_t) seed;
 
   mt_cs1 = (ptrdiff_t *) R_alloc(n, sizeof(ptrdiff_t));
   for (int b = 0; b < n; b++)
@@ -450,34 +408,7 @@ SEXP C_mantel(
   //--------------------------------------------------
   // Permutations: supplied, or shuffles within strata.
   //--------------------------------------------------
-  mt_perms = isNull(sexp_perms) ? NULL : INTEGER(sexp_perms);
-
-  int *order = (int *) R_alloc(n, sizeof(int));
-  int  ns    = 1;
-  int *sbeg;
-
-  if (isNull(sexp_strata)) {
-    for (int a = 0; a < n; a++) order[a] = a;
-    sbeg    = (int *) R_alloc(2, sizeof(int));
-    sbeg[0] = 0;
-    sbeg[1] = n;
-  }
-  else {
-    const int *strata = INTEGER(sexp_strata);
-    ns = 0;
-    for (int a = 0; a < n; a++)
-      if (strata[a] + 1 > ns) ns = strata[a] + 1;
-    sbeg = (int *) R_alloc(ns + 1, sizeof(int));
-    for (int s = 0; s <= ns; s++) sbeg[s] = 0;
-    for (int a = 0; a < n; a++) sbeg[strata[a] + 1]++;
-    for (int s = 0; s < ns; s++) sbeg[s + 1] += sbeg[s];
-    int *fill = (int *) R_alloc(ns, sizeof(int));
-    memcpy(fill, sbeg, (size_t) ns * sizeof(int));
-    for (int a = 0; a < n; a++) order[fill[strata[a]]++] = a;
-  }
-  mt_order = order;
-  mt_sbeg  = sbeg;
-  mt_ns    = ns;
+  perm_source_init(&mt_ps, n, sexp_perms, sexp_strata, seed);
 
 
   //--------------------------------------------------

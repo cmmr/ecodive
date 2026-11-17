@@ -253,7 +253,7 @@ mantel <- function (
 #------------------------------------------------------------------------------
 # Lines added to print.ecodive_test()'s printout.
 #------------------------------------------------------------------------------
-#' @exportS3Method test_details ecodive_mantel
+#' @export
 test_details.ecodive_mantel <- function (x, digits) {
   c(
     paste0('Correlation: ', switch(x$method,
@@ -410,8 +410,7 @@ mantel_cor <- function (x, targets, method, pm, strata, seed, cpus) {
 
 #------------------------------------------------------------------------------
 # The result, from the observed and permuted statistics (r_all[1] and
-# r_all[-1]). As new_ecodive_test() (on the mrpp branch) builds it.
-# TODO: use new_ecodive_test() and perm_z() after the mrpp merge.
+# r_all[-1]).
 #------------------------------------------------------------------------------
 mantel_result <- function (r_all, method, alternative, partial, n, permutation) {
 
@@ -425,29 +424,19 @@ mantel_result <- function (r_all, method, alternative, partial, n, permutation) 
     less      = (sum(r_perm <= r + eps) + 1) / (n_perm + 1),
     two.sided = (sum(abs(r_perm) >= abs(r) - eps) + 1) / (n_perm + 1) )
 
-  # perm_z()
-  z <- NA_real_
-  if (n_perm >= 2 && !is.na(r)) {
-    z <- (r - mean(r_perm)) / stats::sd(r_perm)
-    if (!is.finite(z)) z <- NA_real_
-  }
-
-  title <- paste0(
-    if (partial) 'Partial Mantel test (' else 'Mantel test (',
-    switch(method, pearson = 'Pearson', spearman = 'Spearman', kendall = 'Kendall'), ')' )
-
-  structure(
-    .Data = list(
-      statistic   = c(r = r),
-      p_value     = as.double(p),
-      z           = as.double(z),
-      n_perm      = as.integer(n_perm),
-      method      = method,
-      alternative = alternative,
-      partial     = partial,
-      n           = as.integer(n),
-      permutation = permutation ),
-    r_perm = as.double(r_perm),
-    title  = title,
-    class  = c('ecodive_mantel', 'ecodive_test') )
+  new_ecodive_test(
+    class       = 'ecodive_mantel',
+    title       = paste0(
+      if (partial) 'Partial Mantel test (' else 'Mantel test (',
+      switch(method, pearson = 'Pearson', spearman = 'Spearman', kendall = 'Kendall'), ')' ),
+    statistic   = c(r = r),
+    p_value     = p,
+    z           = perm_z(r, r_perm),
+    n_perm      = n_perm,
+    method      = method,
+    alternative = alternative,
+    partial     = partial,
+    n           = as.integer(n),
+    perm        = r_perm,
+    permutation = permutation )
 }
