@@ -885,7 +885,9 @@ SEXP C_dbrda(
   int    *kept = (int *)    R_alloc(p + 1, sizeof(int));
   int     rz = 0, rx = 0;
 
-  memcpy(Xc, REAL(sexp_x), (size_t) n * p * sizeof(double));
+  // No columns (e.g. only Condition() terms, or ~ 1): an empty vector's data
+  // pointer may be a sentinel, which even a 0-byte memcpy() may not read.
+  if (p > 0) memcpy(Xc, REAL(sexp_x), (size_t) n * p * sizeof(double));
 
   for (int c = 0; c < p; c++) {
 

@@ -30,7 +30,8 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr, any::xml2, any::rbiom, any::phyloseq, any::TreeSummarizedExperiment
+          # covr 4.0.0 needs pkgbuild but lists it only in Suggests.
+          extra-packages: any::covr, any::pkgbuild, any::xml2, any::rbiom, any::phyloseq, any::TreeSummarizedExperiment
           needs: coverage
 
       - name: Test coverage
