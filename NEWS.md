@@ -194,6 +194,20 @@
   too, and a formula of only `Condition()` terms gives the unconstrained
   ordination after removing their effect.
 
+* `dbrda()` takes the same `groups`, `data` and `formula` as `permanova()`:
+  one variable as `groups` (a vector or a column of `data`), or `data` and a
+  `formula`, or `dm ~ terms`, so `ordination(dm, "dbrda", "treatment", meta)`
+  works. Its results gain `r_squared` and `adj_r_squared`, as
+  `vegan::RsquareAdj()`, including for partial models.
+
+* New `capscale()` runs a constrained analysis of principal coordinates. It
+  gives the same results as `vegan::capscale()` (and
+  `phyloseq::ordinate(method = "CAP")`), with any imaginary inertia from
+  negative eigenvalues reported in `inertia`. Euclidean distances take
+  `dbrda()`'s fast path; otherwise a threaded eigendecomposition makes it
+  about five times faster than `vegan::capscale()` on one thread. Also
+  available as `ordination(dm, "capscale", ...)`.
+
 * New `envfit()` fits sample metadata (`data`) and feature tables
   (`counts`, such as taxa abundances) onto any ordination, for biplots: an
   arrow and r-squared for each numeric variable or feature, the centroid of

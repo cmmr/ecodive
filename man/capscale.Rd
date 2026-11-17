@@ -164,24 +164,27 @@ of \code{cpus}.
 }
 \section{Ordination result}{
 
-Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}},
-\code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so \code{\link[=ordination]{ordination()}}) returns the same kind of
+Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
+\code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
+\code{\link[=ordination]{ordination()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
-after the method: \code{"PCoA1"}, \code{"PC1"}, \code{"dbRDA1"} (then \code{"MDS1"} for
-unconstrained axes), \code{"NMDS1"}, \code{"TSNE1"}, \code{"UMAP1"}, and so on.
+after the method: \code{"PCoA1"}, \code{"PC1"}, \code{"RPCA1"}, \code{"dbRDA1"} or \code{"CAP1"}
+(then \code{"MDS1"} for unconstrained axes), \code{"MDS1"}, \code{"NMDS1"},
+\code{"Isomap1"}, \code{"TSNE1"}, \code{"UMAP1"}, and so on.
 
 Its attributes always begin with these three, in this order, each with
 one value per column:
 \itemize{
 \item \code{method}: The method's ID, e.g. \code{"pcoa"} or \code{"nmds"}.
 \item \code{eig}: Each axis's eigenvalue, on the method's own scale: \code{\link[=pcoa]{pcoa()}}
-gives the eigenvalues of Gower's centered matrix (sums of squares);
-\code{\link[=pca]{pca()}} gives variances, which are \code{\link[=pcoa]{pcoa()}}'s divided by \eqn{n - 1}
-for \eqn{n} samples; and \code{\link[=dbrda]{dbrda()}} follows \code{vegan}, which also divides
-by \eqn{n - 1} when any distance is 4 or more. \code{NA} for \code{\link[=nmds]{nmds()}},
-\code{\link[=tsne]{tsne()}}, and \code{\link[=umap]{umap()}}, which have no eigenvalues.
+and \code{\link[=isomap]{isomap()}} give the eigenvalues of Gower's centered matrix (sums
+of squares); \code{\link[=pca]{pca()}} and \code{\link[=rpca]{rpca()}} give variances, which are \code{\link[=pcoa]{pcoa()}}'s
+divided by \eqn{n - 1} for \eqn{n} samples; and \code{\link[=dbrda]{dbrda()}} and
+\code{\link[=capscale]{capscale()}} follow \code{vegan}, which also divides by \eqn{n - 1} when any
+distance is 4 or more. \code{NA} for \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=tsne]{tsne()}}, and
+\code{\link[=umap]{umap()}}, which have no eigenvalues.
 \item \code{prop}: The proportion of the total variance (or inertia) that each
 axis explains. Unlike \code{eig}, it is comparable between methods, so use
 it to label axes. \code{NA} where it isn't defined.

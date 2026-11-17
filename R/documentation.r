@@ -85,24 +85,27 @@ NULL
 #' @keywords internal
 #'
 #' @section Ordination result:
-#'   Every ordination function ([pcoa()], [pca()], [dbrda()], [nmds()],
-#'   [tsne()], [umap()], and so [ordination()]) returns the same kind of
+#'   Every ordination function ([pcoa()], [pca()], [rpca()], [dbrda()],
+#'   [capscale()], [mds()], [nmds()], [isomap()], [tsne()], [umap()], and so
+#'   [ordination()]) returns the same kind of
 #'   object: a numeric matrix with one row per sample and one column per
 #'   axis, so that it can go straight into `plot()` or a data frame. Rows are
 #'   named after the samples, when the input has names. Columns are named
-#'   after the method: `"PCoA1"`, `"PC1"`, `"dbRDA1"` (then `"MDS1"` for
-#'   unconstrained axes), `"NMDS1"`, `"TSNE1"`, `"UMAP1"`, and so on.
+#'   after the method: `"PCoA1"`, `"PC1"`, `"RPCA1"`, `"dbRDA1"` or `"CAP1"`
+#'   (then `"MDS1"` for unconstrained axes), `"MDS1"`, `"NMDS1"`,
+#'   `"Isomap1"`, `"TSNE1"`, `"UMAP1"`, and so on.
 #'
 #'   Its attributes always begin with these three, in this order, each with
 #'   one value per column:
 #'
 #'   * `method`: The method's ID, e.g. `"pcoa"` or `"nmds"`.
 #'   * `eig`: Each axis's eigenvalue, on the method's own scale: [pcoa()]
-#'     gives the eigenvalues of Gower's centered matrix (sums of squares);
-#'     [pca()] gives variances, which are [pcoa()]'s divided by \eqn{n - 1}
-#'     for \eqn{n} samples; and [dbrda()] follows `vegan`, which also divides
-#'     by \eqn{n - 1} when any distance is 4 or more. `NA` for [nmds()],
-#'     [tsne()], and [umap()], which have no eigenvalues.
+#'     and [isomap()] give the eigenvalues of Gower's centered matrix (sums
+#'     of squares); [pca()] and [rpca()] give variances, which are [pcoa()]'s
+#'     divided by \eqn{n - 1} for \eqn{n} samples; and [dbrda()] and
+#'     [capscale()] follow `vegan`, which also divides by \eqn{n - 1} when any
+#'     distance is 4 or more. `NA` for [mds()], [nmds()], [tsne()], and
+#'     [umap()], which have no eigenvalues.
 #'   * `prop`: The proportion of the total variance (or inertia) that each
 #'     axis explains. Unlike `eig`, it is comparable between methods, so use
 #'     it to label axes. `NA` where it isn't defined.

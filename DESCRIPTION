@@ -35,8 +35,15 @@ Description: Computes alpha and beta diversity metrics in a parallel,
     memory-efficient manner using 'C' and 'pthreads'. Implements 51 classic,
     compositional, and phylogenetic indices including 'Shannon', 'Bray-Curtis',
     'Faith', 'JSD', 'Hellinger', 'Robust Aitchison', and the 'UniFrac' family.
-    Runs principal coordinates analysis (classical multidimensional scaling)
-    and non-metric multidimensional scaling on beta diversity distances.
+    Ordinates beta diversity distances by principal coordinates analysis
+    (with optional negative-eigenvalue corrections), metric and non-metric
+    multidimensional scaling, 'Isomap', 't-SNE' and 'UMAP', and constrains
+    them by distance-based redundancy analysis and constrained analysis of
+    principal coordinates; ordinates count tables by principal components
+    analysis and robust Aitchison PCA; and fits variables onto ordinations.
+    Tests distances with PERMANOVA, PERMDISP, ANOSIM, MRPP and Mantel tests.
+    Several methods are ported from 'scikit-learn', 'scikit-bio', 'gemelli'
+    and 'uwot'.
     Provides random sub-sampling for table rarefaction and parses 'Newick'
     trees into 'phylo' objects. Integrates with data structures from
     'phyloseq', 'rbiom', and other common 'bioinformatics' packages.

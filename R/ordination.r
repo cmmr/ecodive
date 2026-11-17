@@ -43,18 +43,18 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #'        listed by `list_ordinations()` takes distances.
 #'
 #' @param method   The name of an ordination method: `"capscale"`,
-#'        `"dbrda"`, `"nmds"`, `"pcoa"`, `"tsne"`, or `"umap"`. Flexible
-#'        matching is supported (see below). Programmatic access via
-#'        `list_ordinations()`.
+#'        `"dbrda"`, `"isomap"`, `"mds"`, `"nmds"`, `"pcoa"`, `"tsne"`,
+#'        or `"umap"`. Flexible matching is supported (see below).
+#'        Programmatic access via `list_ordinations()`.
 #'
 #' @param ...   Further arguments for the method's function, such as `k`,
 #'        `seed`, `cpus`, or `pcoa`'s `correction`. Each method keeps its own
 #'        defaults; see [capscale()] and [dbrda()] (which also need `groups`,
 #'        or `data` and `formula`, as in `ordination(dm, 'dbrda', 'treatment',
-#'        meta)`), [nmds()], [pcoa()], [tsne()], and [umap()]. `seed` is
-#'        ignored by the methods that have no random parts (`capscale`,
-#'        `dbrda` and `pcoa`), so the same arguments can be given to every
-#'        method.
+#'        meta)`), [isomap()], [mds()], [nmds()], [pcoa()], [tsne()], and
+#'        [umap()]. `seed` is ignored by the methods that have no random
+#'        parts (`capscale`, `dbrda`, `isomap` and `pcoa`), so the same
+#'        arguments can be given to every method.
 #'
 #' @return The method's result, as described in "Ordination result" below.
 #'   `ordination(dm, 'pcoa', ...)` is the same as `pcoa(dm, ...)`.
@@ -74,20 +74,22 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' | `tsne`                 | t-distributed Stochastic Neighbor Embedding (t-SNE)   |
 #' | `umap`                 | Uniform Manifold Approximation and Projection (UMAP)  |
 #'
-#' [pca()] ordinates a count table rather than distances, so it is called
-#' directly, not through `ordination()`. [permanova()] and ecodive's other
+#' [pca()] and [rpca()] ordinate a count table rather than distances, so they
+#' are called directly, not through `ordination()`. [permanova()] and ecodive's other
 #' tests are run by [dist_test()].
 #'
 #' Default numbers of axes differ: `k = 3` for `capscale`, `dbrda`, `pcoa` (and
-#' [pca()]), and `k = 2` for `nmds`, `tsne`, and `umap`.
+#' [pca()], [rpca()]), and `k = 2` for `isomap`, `mds`, `nmds`, `tsne`, and
+#' `umap`.
 #'
 #'
 #' **Flexible name matching**
 #'
 #' Case insensitive and partial matching, ignoring anything but letters. E.g.
 #' `method = 'PCoA'` or `'principal coord'` selects `pcoa`. Common other names
-#' also work: `'MDS'`, `'PCO'`, `'cmdscale'`, or `'classical MDS'` for
-#' `pcoa`; `'non-metric MDS'`, `'metaMDS'`, or `'monoMDS'` for `nmds`;
+#' also work: `'PCO'`, `'cmdscale'`, or `'classical MDS'` for `pcoa`;
+#' `'MDS'` or `'metric MDS'` for `mds`; `'non-metric MDS'`, `'metaMDS'`,
+#' `'monoMDS'`, or `'isoMDS'` for `nmds`; `'isometric mapping'` for `isomap`;
 #' `'Rtsne'`, `'bhtsne'`, or `'Barnes-Hut t-SNE'` for `tsne`; and `'uwot'`
 #' for `umap`. `'dbRDA'` or `'distance-based RDA'` select `dbrda`, and `'CAP'`
 #' selects `capscale`.
@@ -98,17 +100,17 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #'
 #' **Same names in other packages**
 #'
-#' `ape::pcoa()`, `vegan::pca()`, `vegan::dbrda()`, `vegan::capscale()`, and
-#' `uwot::umap()` share
-#' names with ecodive's functions, and whichever package was attached last
+#' `ape::pcoa()`, `vegan::pca()`, `vegan::dbrda()`, `vegan::capscale()`,
+#' `vegan::isomap()` (whose `k` is the number of neighbours, not axes), and
+#' `uwot::umap()` share names with ecodive's functions, and whichever package was attached last
 #' masks the other's. Write `ecodive::pcoa()` and so on, or use
 #' `ordination()`, which always runs ecodive's, to be sure.
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [capscale()], [dbrda()], [nmds()], [pcoa()], [tsne()], [umap()],
-#'   [list_ordinations()]; [pca()] and [permanova()], which are called
-#'   directly.
+#' @seealso [capscale()], [dbrda()], [isomap()], [mds()], [nmds()], [pcoa()],
+#'   [tsne()], [umap()], [list_ordinations()]; [pca()] and [rpca()], which are
+#'   called directly; [dist_test()] for ecodive's tests.
 #'
 #' @export
 #' @examples

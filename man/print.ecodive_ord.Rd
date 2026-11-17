@@ -8,7 +8,8 @@
 }
 \arguments{
 \item{x}{An ordination result, from \code{\link[=ordination]{ordination()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}},
-\code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=tsne]{tsne()}}, or \code{\link[=umap]{umap()}}.}
+\code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}},
+\code{\link[=tsne]{tsne()}}, or \code{\link[=umap]{umap()}}.}
 
 \item{...}{Passed on to \code{print()} for the matrix of coordinates.}
 }
