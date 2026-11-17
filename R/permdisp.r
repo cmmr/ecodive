@@ -9,7 +9,8 @@
 #' multivariate dispersion, or beta diversity. Gives the same results as
 #' `vegan::betadisper()` followed by `vegan::permutest()`: each sample's
 #' distance to its group's centre, each group's mean distance, and a
-#' permutation test of whether those distances differ between groups.
+#' permutation test of whether those distances differ between groups. Note
+#' that the default centre differs: see `type`.
 #'
 #' A significant PERMANOVA ([permanova()]) can come from groups that differ
 #' in location, in dispersion, or both. A non-significant `permdisp()` result
@@ -35,11 +36,14 @@
 #'
 #' @param type  The group centre to measure distances from:
 #'
-#'   * `'median'`: The spatial median, the point with the smallest sum of
-#'     distances to the group's samples. The default, as in `betadisper()`.
-#'     More robust to outlying samples.
 #'   * `'centroid'`: The centroid (multivariate mean), as in Anderson's
-#'     (2006) original PERMDISP. Much faster for large data sets.
+#'     (2006) original PERMDISP. The default: exact, and much faster for
+#'     large data sets.
+#'   * `'median'`: The spatial median, the point with the smallest sum of
+#'     distances to the group's samples. More robust to skewed data and
+#'     outlying samples. The default of `vegan::betadisper()` and
+#'     scikit-bio's `permdisp`, so pass `type = 'median'` to compare with
+#'     them.
 #'
 #' @param bias_adjust  Correct the distances for small group sizes, by
 #'        multiplying each by \eqn{\sqrt{n_g / (n_g - 1)}}, for a group of
@@ -117,16 +121,18 @@
 #'
 #' **Choosing `type`**
 #'
-#' * `'median'`, the default, is what `vegan::betadisper()` and scikit-bio's
-#'   (and so QIIME 2's) `permdisp` use by default. Like the median-based
-#'   (Brown-Forsythe) version of Levene's test, it is less affected by
-#'   skewed distributions and outlying samples (Anderson 2006).
-#' * `'centroid'` measures dispersion around the same centres that
-#'   [permanova()] does: the squared distances to the centroids sum to
+#' * `'centroid'`, the default, measures dispersion around the same centres
+#'   that [permanova()] does: the squared distances to the centroids sum to
 #'   PERMANOVA's within-group sum of squares. So it is the direct check of
 #'   whether a significant PERMANOVA could come from differences in
-#'   dispersion (Anderson 2006; Anderson et al. 2006). It is also exact and
-#'   much faster for many samples (see below).
+#'   dispersion (Anderson 2006; Anderson et al. 2006). It is also exact, and
+#'   needs only the distances within each group, so it is much faster for
+#'   many samples (see below).
+#' * `'median'` is the robust alternative for skewed or outlier-prone data,
+#'   as the median-based (Brown-Forsythe) version of Levene's test is
+#'   (Anderson 2006). It is the default of `vegan::betadisper()` and of
+#'   scikit-bio's (and so QIIME 2's) `permdisp`: to compare with them, pass
+#'   `type = 'median'`.
 #'
 #' `betadisper()` stops its search for the spatial median early, so its
 #' distances to medians are accurate only to about \eqn{10^{-5}};
@@ -214,22 +220,23 @@
 #'     res <- permdisp(dm, 'treatment', meta)
 #'     res
 #'
-#'     # Each group's mean distance to its spatial median.
+#'     # Each group's mean distance to its centroid.
 #'     res$dispersions
 #'
-#'     # Distances to centroids, with each pair of groups tested.
-#'     res <- permdisp(dm, meta$treatment, type = 'centroid', pairwise = TRUE)
+#'     # Distances to spatial medians, as vegan::betadisper()'s default,
+#'     # with each pair of groups tested.
+#'     res <- permdisp(dm, meta$treatment, type = 'median', pairwise = TRUE)
 #'     res$pairwise
 #'
 permdisp <- function (
-    dm, groups, data = NULL, type = 'median', bias_adjust = FALSE,
+    dm, groups, data = NULL, type = 'centroid', bias_adjust = FALSE,
     pairwise = FALSE, permutations = 999L, strata = NULL, seed = 0L,
     cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
 
-  type <- match.arg(type, c('median', 'centroid'))
+  type <- match.arg(type, c('centroid', 'median'))
 
   if (!isTRUE(bias_adjust) && !isFALSE(bias_adjust))
     stop('`bias_adjust` must be TRUE or FALSE.', call. = FALSE)

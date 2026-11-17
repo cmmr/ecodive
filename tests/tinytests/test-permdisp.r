@@ -86,8 +86,7 @@
   # Euclidean distances: the spatial median minimizes the summed distance,
   # where the centroid minimizes the summed squared distance.
   de  <- dms$euclidean
-  res <- permdisp(de, g, permutations = 0, cpus = 1)
-  zm  <- res$distances
+  zm  <- permdisp(de, g, type = 'median', permutations = 0, cpus = 1)$distances
   zc  <- permdisp(de, g, type = 'centroid', permutations = 0, cpus = 1)$distances
   for (lv in levels(g))
     expect_true(sum(zm[g == lv]) <= sum(zc[g == lv]) * (1 + 1e-12))
@@ -96,7 +95,7 @@
   # 0, while the pairwise t statistics (of the distances) are the observed
   # ones.
   id  <- matrix(seq_len(36), 5, 36, byrow = TRUE)
-  res <- permdisp(d, g, permutations = id, pairwise = TRUE, cpus = 1)
+  res <- permdisp(d, g, type = 'median', permutations = id, pairwise = TRUE, cpus = 1)
   expect_equal(unname(attr(res, 'f_perm')), rep(0, 5), tolerance = 1e-12)
   expect_equal(unname(attr(res, 't_perm')), matrix(res$pairwise$t, 5, 3, byrow = TRUE), tolerance = 1e-12)
   expect_identical(res$p_value, 1 / 6)
@@ -114,7 +113,9 @@
 
   # Result format. ====
 
+  # The default is the centroid.
   res <- permdisp(d, g, permutations = 99, cpus = 1)
+  expect_identical(res, permdisp(d, g, type = 'centroid', permutations = 99, cpus = 1))
 
   expect_identical(class(res), c('ecodive_permdisp', 'ecodive_test'))
   expect_identical(names(res), c(
@@ -138,19 +139,20 @@
   expect_identical(tbl$N.Perm, c(99, NA))
   expect_identical(names(res$distances), rownames(meta))
   expect_identical(names(res$dispersions), levels(g))
-  expect_identical(res$type, 'median')
+  expect_identical(res$type, 'centroid')
   expect_false(res$bias_adjust)
   expect_null(res$pairwise)
   expect_null(attr(res, 't_perm'))
   expect_true(res$p_value >= 1 / 100)
-  expect_true(any(grepl('spatial medians', test_details.ecodive_permdisp(res, 4))))
+  expect_true(any(grepl('centroids', test_details.ecodive_permdisp(res, 4))))
   if (exists('print.ecodive_test')) { # The shared print method (mrpp branch).
     out <- utils::capture.output(print(res))
     expect_true(any(grepl('Permutations: 99 (free)', out, fixed = TRUE)))
-    expect_true(any(grepl('spatial medians', out)))
+    expect_true(any(grepl('centroids', out)))
   }
 
-  res <- permdisp(d, g, type = 'centroid', pairwise = TRUE, permutations = 19, cpus = 1)
+  res <- permdisp(d, g, type = 'median', pairwise = TRUE, permutations = 19, cpus = 1)
+  expect_identical(res$type, 'median')
   pw  <- res$pairwise
   expect_identical(rownames(pw), c('ctrl-low', 'ctrl-high', 'low-high'))
   expect_identical(names(pw), c('t', 'Df', 'p_value', 'p_value_perm'))
@@ -158,7 +160,7 @@
   expect_identical(dim(attr(res, 't_perm')), c(19L, 3L))
   expect_identical(colnames(attr(res, 't_perm')), rownames(pw))
   out <- test_details.ecodive_permdisp(res, 4)
-  expect_true(any(grepl('centroids', out)) && any(grepl('ctrl-high', out)))
+  expect_true(any(grepl('spatial medians', out)) && any(grepl('ctrl-high', out)))
 
   # A row for comparing tests, once as.data.frame.ecodive_test() is in.
   if (exists('as.data.frame.ecodive_test')) {
@@ -221,19 +223,22 @@
   }
 
   # The seed changes the permutations, not the statistics.
-  r2 <- permdisp(d, g, permutations = 99, seed = 2, cpus = 1)
-  r3 <- permdisp(d, g, permutations = 99, seed = 3, cpus = 1)
-  expect_identical(r2$table[, 1:5], r3$table[, 1:5])
-  expect_false(identical(attr(r2, 'f_perm'), attr(r3, 'f_perm')))
+  for (type in c('centroid', 'median')) {
+    r2 <- permdisp(d, g, type = type, permutations = 99, seed = 2, cpus = 1)
+    r3 <- permdisp(d, g, type = type, permutations = 99, seed = 3, cpus = 1)
+    expect_identical(r2$table[, 1:5], r3$table[, 1:5], info = type)
+    expect_false(identical(attr(r2, 'f_perm'), attr(r3, 'f_perm')), info = type)
+  }
 
 
 
   # Strata. ====
 
   # One stratum is free permutation.
-  expect_identical(
-    permdisp(d, g, strata = rep(1, 36), permutations = 49, cpus = 1)[1:4],
-    permdisp(d, g, permutations = 49, cpus = 1)[1:4] )
+  for (type in c('centroid', 'median'))
+    expect_identical(
+      permdisp(d, g, type = type, strata = rep(1, 36), permutations = 49, cpus = 1)[1:4],
+      permdisp(d, g, type = type, permutations = 49, cpus = 1)[1:4], info = type )
 
   # Permuting only within the groups leaves the residuals' group means at 0:
   # every permuted F is 0.
@@ -262,6 +267,9 @@
 
   # A symmetric matrix works like a dist.
   expect_identical(permdisp(as.matrix(d), g, permutations = 19, cpus = 1), ref)
+  expect_identical(
+    permdisp(as.matrix(d), g, type = 'median', permutations = 19, cpus = 1),
+    permdisp(d, 'trt', meta[36:1, ], type = 'median', permutations = 19, cpus = 1) )
 
   # Rows for other samples are ignored, with their levels.
   extra <- rbind(meta, meta[1, ])
@@ -288,8 +296,10 @@
   expect_identical(unname(r$distances), c(0, 0, 0))
 
   # Two samples per group, in one dimension.
-  r <- permdisp(stats::dist(c(0, 1, 5, 7)), c('a', 'a', 'b', 'b'), permutations = 0)
-  expect_equal(unname(r$distances), c(0.5, 0.5, 1, 1), tolerance = 1e-14)
+  for (type in c('centroid', 'median')) {
+    r <- permdisp(stats::dist(c(0, 1, 5, 7)), c('a', 'a', 'b', 'b'), type = type, permutations = 0)
+    expect_equal(unname(r$distances), c(0.5, 0.5, 1, 1), tolerance = 1e-14, info = type)
+  }
 
   # Non-metric distances can put a sample closer to its centre on the
   # imaginary axes than on the real ones: its distance is then 0.

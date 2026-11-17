@@ -8,7 +8,7 @@ permdisp(
   dm,
   groups,
   data = NULL,
-  type = "median",
+  type = "centroid",
   bias_adjust = FALSE,
   pairwise = FALSE,
   permutations = 999L,
@@ -36,11 +36,14 @@ order as \code{dm}. Default: \code{NULL}.}
 
 \item{type}{The group centre to measure distances from:
 \itemize{
-\item \code{'median'}: The spatial median, the point with the smallest sum of
-distances to the group's samples. The default, as in \code{betadisper()}.
-More robust to outlying samples.
 \item \code{'centroid'}: The centroid (multivariate mean), as in Anderson's
-(2006) original PERMDISP. Much faster for large data sets.
+(2006) original PERMDISP. The default: exact, and much faster for
+large data sets.
+\item \code{'median'}: The spatial median, the point with the smallest sum of
+distances to the group's samples. More robust to skewed data and
+outlying samples. The default of \code{vegan::betadisper()} and
+scikit-bio's \code{permdisp}, so pass \code{type = 'median'} to compare with
+them.
 }}
 
 \item{bias_adjust}{Correct the distances for small group sizes, by
@@ -103,7 +106,8 @@ Tests whether groups of samples differ in how spread out they are: their
 multivariate dispersion, or beta diversity. Gives the same results as
 \code{vegan::betadisper()} followed by \code{vegan::permutest()}: each sample's
 distance to its group's centre, each group's mean distance, and a
-permutation test of whether those distances differ between groups.
+permutation test of whether those distances differ between groups. Note
+that the default centre differs: see \code{type}.
 }
 \details{
 A significant PERMANOVA (\code{\link[=permanova]{permanova()}}) can come from groups that differ
@@ -131,16 +135,18 @@ count \eqn{|t_{perm}| \ge |t|}.
 
 \strong{Choosing \code{type}}
 \itemize{
-\item \code{'median'}, the default, is what \code{vegan::betadisper()} and scikit-bio's
-(and so QIIME 2's) \code{permdisp} use by default. Like the median-based
-(Brown-Forsythe) version of Levene's test, it is less affected by
-skewed distributions and outlying samples (Anderson 2006).
-\item \code{'centroid'} measures dispersion around the same centres that
-\code{\link[=permanova]{permanova()}} does: the squared distances to the centroids sum to
+\item \code{'centroid'}, the default, measures dispersion around the same centres
+that \code{\link[=permanova]{permanova()}} does: the squared distances to the centroids sum to
 PERMANOVA's within-group sum of squares. So it is the direct check of
 whether a significant PERMANOVA could come from differences in
-dispersion (Anderson 2006; Anderson et al. 2006). It is also exact and
-much faster for many samples (see below).
+dispersion (Anderson 2006; Anderson et al. 2006). It is also exact, and
+needs only the distances within each group, so it is much faster for
+many samples (see below).
+\item \code{'median'} is the robust alternative for skewed or outlier-prone data,
+as the median-based (Brown-Forsythe) version of Levene's test is
+(Anderson 2006). It is the default of \code{vegan::betadisper()} and of
+scikit-bio's (and so QIIME 2's) \code{permdisp}: to compare with them, pass
+\code{type = 'median'}.
 }
 
 \code{betadisper()} stops its search for the spatial median early, so its
@@ -207,11 +213,12 @@ first: pass \code{sqrt(dm)} instead, for instance.
     res <- permdisp(dm, 'treatment', meta)
     res
 
-    # Each group's mean distance to its spatial median.
+    # Each group's mean distance to its centroid.
     res$dispersions
 
-    # Distances to centroids, with each pair of groups tested.
-    res <- permdisp(dm, meta$treatment, type = 'centroid', pairwise = TRUE)
+    # Distances to spatial medians, as vegan::betadisper()'s default,
+    # with each pair of groups tested.
+    res <- permdisp(dm, meta$treatment, type = 'median', pairwise = TRUE)
     res$pairwise
 
 }
