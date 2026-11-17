@@ -163,18 +163,24 @@
   come from a `seed` argument, and results are identical for any number of
   `cpus`.
 
-* New `dist_test()` runs any of these tests by name, as `ordination()` does
-  for ordination methods: `dist_test(dm, 'treatment', meta, method =
-  'mrpp')` is `mrpp(dm, 'treatment', meta)`. It checks that the variable is
-  of a kind the test takes: categorical groups for `anosim`, `mrpp` and
-  `permdisp`, numeric values for `mantel` (passed as its `y`), and either
-  for `permanova`. `list_dist_tests()`
-  and `match_dist_test()` list and look up the tests, with forgiving name
-  matching (`'adonis2'` finds `permanova`, `'betadisper'` finds
-  `permdisp`). `permanova()`, `mrpp()`, `anosim()` and `permdisp()` all take
-  the same `groups` and `data`, with the same checks and messages: one
-  value per sample (matched by name, else by position), or a column name of
-  `data`, or a vector with one value per row of `data`.
+* New `dist_test(dm, test, groups, data, ...)` runs any of these tests by
+  name, as `ordination()` does for ordination methods:
+  `dist_test(dm, "mrpp", "treatment", meta)` is `mrpp(dm, "treatment",
+  meta)`, and other arguments (such as `mantel()`'s `method`) pass through.
+  It checks that the variable is of a kind the test takes: categorical groups
+  for `anosim`, `mrpp` and `permdisp`, numeric values for `mantel` (passed as
+  its `y`), and either for `permanova`. `list_dist_tests()` and
+  `match_dist_test()` list and look up the tests, with forgiving name
+  matching (`"adonis2"` finds `permanova`, `"betadisper"` finds `permdisp`).
+
+* One rule aligns every per-sample argument (`groups`, `strata`, and
+  `mantel()`'s `y` and `given`) in `permanova()`, `mrpp()`, `anosim()`,
+  `permdisp()`, `mantel()`, `envfit()` and `dist_test()`: with `data`, a
+  column name or one value per row of `data`; without it, one value per
+  sample, matched by name when named, else by position. The same checks and
+  messages apply everywhere. As with `vegan::adonis2()`, `permanova()` needs
+  `groups` or a `formula` (use `formula = ~ .` to test every column of
+  `data`). `permutations` is limited to 1e8.
 
 * New `dbrda()` runs a distance-based redundancy analysis (db-RDA): the axes
   of a `dist` object that sample metadata explain, given as a formula such as
