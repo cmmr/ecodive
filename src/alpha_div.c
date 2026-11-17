@@ -2,6 +2,7 @@
 // Licensed under the MIT License: https://opensource.org/license/mit
 
 #include "ecodive.h"
+#include <Rmath.h> // lgammafn
 
 #define ADIV_ACE          1
 #define ADIV_BERGER       2
@@ -139,7 +140,9 @@ static void *berger(void *arg) {
 //======================================================
 // Brillouin (Brillouin 1956)
 // (log(sum(x)!) - sum(log(x!))) / sum(x)
-// note: lgamma(x + 1) == log(x!)
+// note: lgamma(x + 1) == log(x!). R's lgammafn() keeps no global state (C's
+// lgamma() writes signgam, a data race across threads) and never warns
+// for x >= 1.
 //======================================================
 static void *brillouin(void *arg) {
   FOREACH_SAMPLE(
@@ -148,10 +151,10 @@ static void *brillouin(void *arg) {
   
     FOREACH_VAL(
       depth  += *val;
-      result += lgamma(*val + 1);
+      result += lgammafn(*val + 1);
     );
     
-    result = (lgamma(depth + 1) - result) / depth;
+    result = (lgammafn(depth + 1) - result) / depth;
   );
   
   return NULL;

@@ -866,7 +866,12 @@ SEXP C_dbrda(
   // with G (gower.c, shared with pcoa()).
   //--------------------------------------------------
   gower_t g;
-  double trace_g = gower_init(&g, REAL(sexp_dist), n, 16, n_threads); // unscaled
+  // Up to max(16, k, p) vectors per pass over D (k axes; p model columns),
+  // as pcoa() does, rather than several passes for more than 16.
+  int    max_m   = (k > p) ? k : p;
+  if (max_m < 16) max_m = 16;
+  if (max_m > n)  max_m = n;
+  double trace_g = gower_init(&g, REAL(sexp_dist), n, max_m, n_threads); // unscaled
   double total   = trace_g * adj;
 
 
