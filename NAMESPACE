@@ -79,6 +79,7 @@ export(list_dist_tests)
 export(match_dist_test)
 
 export(blas_threads)
+export(capscale)
 export(dist_test)
 export(isomap)
 export(mds)

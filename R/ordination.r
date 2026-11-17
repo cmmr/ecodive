@@ -16,6 +16,7 @@ ORDINATIONS <- local({
     na.strings       = "",
     text             = "
       name,                                id,   input, alt_ids
+      Constrained Analysis of Principal Coordinates, capscale, dist, cap constrainedanalysisofprincipalcoordinates
       Distance-based Redundancy Analysis,  dbrda, dist, distancebasedrda
       Isometric Feature Mapping,           isomap, dist, isometricmapping
       Metric Multidimensional Scaling,     mds,  dist,  metricmds
