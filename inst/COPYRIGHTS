@@ -226,3 +226,120 @@ License:
    See the License for the specific language governing permissions and
    limitations under the License.
 
+
+Files: src/nmds.c src/tsne.c src/isomap.c R/nmds.r R/mds.r R/tsne.r R/isomap.r
+Copyright: 2007-2026 The scikit-learn developers
+Comment: Ported from scikit-learn 1.9.1: the SMACOF iteration (metric and
+   non-metric) and isotonic regression in src/nmds.c (sklearn/manifold/_mds.py,
+   sklearn/isotonic.py, sklearn/_isotonic.pyx); t-SNE in src/tsne.c
+   (sklearn/manifold/_t_sne.py, sklearn/manifold/_utils.pyx,
+   sklearn/manifold/_barnes_hut_tsne.pyx, sklearn/neighbors/_quad_tree.pyx);
+   and Isomap in src/isomap.c (sklearn/manifold/_isomap.py,
+   sklearn/neighbors/_base.py, sklearn/utils/graph.py). The R files follow the
+   same algorithms. The rest of these files is Copyright 2026 ecodive authors,
+   under the MIT license above.
+License:
+   BSD 3-Clause License
+
+   Copyright (c) 2007-2026 The scikit-learn developers.
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+
+   * Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+
+   * Neither the name of the copyright holder nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+   FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: src/umap.c
+Copyright: 2020-2021 James Melville
+Comment: The smooth-kNN calibration, fuzzy union and batch-mode layout
+   optimizer (gradients, edge sampling and Adam) in src/umap.c follow the C++
+   header library of the uwot R package (inst/include/uwot/*.h), whose files
+   carry this BSD 2-Clause notice. No code from uwot's GPL-licensed R or src/
+   files is included. The rest of the file is Copyright 2026 ecodive authors,
+   under the MIT license above.
+License:
+   BSD 2-Clause License
+
+   Copyright 2020-2021 James Melville
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE.
+
+Files: src/pcoa_biplot.c R/pcoa_biplot.r
+Copyright: 2013-- scikit-bio development team
+Comment: pcoa_biplot() follows pcoa_biplot() from scikit-bio
+ (skbio/stats/ordination/_principal_coordinate_analysis.py).
+License:
+   Copyright (c) 2013--, scikit-bio development team.
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without modification,
+   are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+
+   * Redistributions in binary form must reproduce the above copyright notice, this
+     list of conditions and the following disclaimer in the documentation and/or
+     other materials provided with the distribution.
+
+   * Neither the names scikit-bio, skbio, or biocore nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: src/lanczos.c
+Comment: lz_sym_eigen() and lz_gen_eigenvalues() follow the JAMA routines
+ tred2()/tql2() and orthes()/hqr2() (JAMA: A Java Matrix Package, by The
+ MathWorks and the National Institute of Standards and Technology), which
+ are in the public domain, and themselves follow EISPACK. Noted as a
+ courtesy; no licence terms apply.

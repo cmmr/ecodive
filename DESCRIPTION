@@ -13,6 +13,18 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "PCG random number generator"),
     person(
+      "The scikit-learn developers",
+      role    = c("ctb", "cph"),
+      comment = "SMACOF (MDS, NMDS), t-SNE and Isomap code ported from scikit-learn"),
+    person(
+      "James", "Melville",
+      role    = "cph",
+      comment = "uwot's C++ header library, followed by the UMAP code"),
+    person(
+      "scikit-bio development team",
+      role    = c("ctb", "cph"),
+      comment = "PCoA biplot scores, from scikit-bio"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

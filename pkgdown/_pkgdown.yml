@@ -59,7 +59,10 @@ reference:
   contents:
   - ordination
   - pcoa
+  - pcoa_biplot
+  - mds
   - nmds
+  - isomap
   - tsne
   - umap
   - dbrda

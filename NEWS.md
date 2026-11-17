@@ -6,6 +6,20 @@
   and `vegan::wcmdscale()` (up to each axis's sign), but computes only the
   first few axes (`k = 3` by default), in parallel C, without forming an
   n-by-n matrix. Its results are identical for any number of `cpus`.
+  `correction = "lingoes"` or `"cailliez"` adds the smallest constant to the
+  squared distances, or to the distances, that leaves no negative eigenvalue,
+  giving the same constants, eigenvalues and coordinates as `ape::pcoa()`,
+  `vegan::wcmdscale(add = )` and `cmdscale(add = TRUE)`, again without an
+  n-by-n (or 2n-by-2n) matrix: with 2,000 samples, `"cailliez"` takes 20
+  seconds where `cmdscale(add = TRUE)` takes 2 minutes. Every result has
+  `correction` and `constant` attributes.
+
+* New `pcoa_biplot()` projects the features of a table (taxa counts, or
+  environmental variables) onto the axes of a `pcoa()` result, for drawing
+  arrows on a PCoA plot. It computes the same scores as scikit-bio's
+  `pcoa_biplot()`, in parallel C, keeps sparse tables sparse, and takes every
+  table type and `norm` that `pca()` does. `envfit()` gives the same
+  directions with permutation tests.
 
 * New `ordination()` runs any ordination method by name, as `beta_div()`
   does for beta diversity metrics, with the method's own arguments.
@@ -16,29 +30,51 @@
   and `prop`. Every method rejects negative distances (beyond rounding
   error), and `seed` can be given to any of them through `ordination()`.
 
-* New `nmds()` runs a non-metric multidimensional scaling, following
-  `vegan::metaMDS()` with its `monoMDS()` engine: a start from the PCoA
-  solution, then random starts until the best solution is found again, then
-  centering, rotation to principal components, and scaling. Its C port of
-  `monoMDS` gives the same result as `vegan::monoMDS()` from the same starting
-  configuration. Random starts run in parallel, one per thread, and share one
-  sorted copy of the distances, so memory use is a fraction of `metaMDS()`'s.
-  Random starts come from a `seed` argument, and results are identical for
-  any number of `cpus`. Each start runs at most `max_iter` iterations.
+* New `nmds()` runs non-metric multidimensional scaling with the SMACOF
+  algorithm of scikit-learn's non-metric `MDS()`, ported to parallel C. It
+  starts from the PCoA solution and from `n_starts` random configurations,
+  keeps the one with the lowest Kruskal stress-1, and centers it, rotates it
+  to principal axes, and scales it to the distances. Tied distances use
+  Kruskal's primary approach (as in `vegan::metaMDS()`), or scikit-learn's
+  secondary one with `ties = "secondary"`. The distances are sorted once and
+  shared by all starts; nothing n-by-n is formed. Each start runs at most
+  `max_iters` iterations, or stops when the stress improves by less than
+  `tol`. Random starts come from a `seed` argument, and results are
+  identical for any number of `cpus`. The result's attributes are `stress`,
+  `converged`, `n_iters`, `n_starts`, `best_start`, `n_best`, and `ties`.
+
+* New `mds()` runs metric multidimensional scaling with the SMACOF algorithm
+  of scikit-learn's metric `MDS()`, fitting the distances themselves rather
+  than their ranks. It shares `nmds()`'s engine, starts, arguments (without
+  `ties`) and result format, and has no limit on the number of samples.
+  `ordination(dm, "mds")` and `"metric MDS"` select it; `"classical MDS"`,
+  `"pco"` and `"cmdscale"` select `pcoa()`.
+
+* New `isomap()` runs an Isomap (isometric feature mapping) ordination: it
+  links each sample to its `n_neighbors` nearest neighbors (or to those
+  within a `radius`), replaces each distance with the shortest path through
+  that graph, and runs `pcoa()` on those geodesic distances, which keeps long
+  ecological gradients straight where `pcoa()` bends them into an arch. A C
+  port of scikit-learn's `Isomap(metric = "precomputed")`, it gives the same
+  geodesic distances and embedding to rounding, breaks ties by sample order,
+  and joins disconnected neighbor graphs at their closest samples, with a
+  warning (`vegan::isomap()` stops instead; note that its `k` is the number
+  of neighbors, while `isomap()`'s `k` is the number of axes). The neighbor
+  and shortest-path searches run in parallel without an n-by-n matrix, and
+  results are identical for any number of `cpus`.
 
 * New `tsne()` runs t-distributed stochastic neighbor embedding (t-SNE) on a
-  `dist` object, exactly (`theta = 0`) or with the Barnes-Hut approximation
-  (`theta > 0`, the default). It follows `Rtsne::Rtsne()` given distances,
-  and from the same starting coordinates gives exactly the same Barnes-Hut
-  coordinates (up to each axis's sign) and KL divergence. The number of
-  iterations is `n_iter`. It works straight from the distances, without an
-  n-by-n matrix (Barnes-Hut keeps only each sample's nearest neighbors), and
-  runs the neighbor search, perplexity calibration, and gradients in
-  parallel C. As scikit-learn, openTSNE and FIt-SNE do, it starts from PCoA
-  coordinates and sets the learning rate from the number of samples by
-  default (`init = "random", learning_rate = 200` gives Rtsne's procedure).
-  Random starts come from a `seed` argument, and results are identical for
-  any number of `cpus`.
+  `dist` object, as a port of scikit-learn's `TSNE` to parallel C.
+  `gradient = "auto"` uses the exact gradient for up to 500 samples (or more
+  than 3 dimensions) and the Barnes-Hut approximation (a quadtree in 2
+  dimensions, an octree in 3) above that. It finds nearest neighbors exactly
+  from the distances and never forms an n-by-n matrix. It starts from the
+  PCoA solution by default, sets the learning rate with scikit-learn's rule
+  (`learning_rate = "auto"`), stops early once the layout stops improving
+  (at most `max_iters` iterations; the number run is the `n_iters`
+  attribute), and lowers `perplexity` for small datasets. Its layouts match
+  scikit-learn's and `Rtsne::Rtsne()`'s in quality. Random starts come from
+  a `seed` argument, and results are identical for any number of `cpus`.
 
 * New `umap()` runs a uniform manifold approximation and projection (UMAP)
   on a `dist` object, following `uwot::umap()` and its defaults: exact
