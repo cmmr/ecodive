@@ -14,6 +14,17 @@ if (requireNamespace("tinytest", quietly = TRUE)) {
     # input checks, edge cases, and identities within the package run.
     at_home <- identical(tolower(Sys.getenv("NOT_CRAN")), "true")
 
+    # Off CRAN's machines without --as-cran, cap threads at 2 as CRAN does,
+    # so that tests asking for more threads stay within CRAN's limit.
+    if (!at_home) {
+      old_limit <- Sys.getenv("_R_CHECK_LIMIT_CORES_", NA)
+      Sys.setenv("_R_CHECK_LIMIT_CORES_" = "TRUE")
+      on.exit(
+        if (is.na(old_limit)) Sys.unsetenv("_R_CHECK_LIMIT_CORES_")
+        else Sys.setenv("_R_CHECK_LIMIT_CORES_" = old_limit),
+        add = TRUE )
+    }
+
     # Run the tests
     test_dir <- ifelse(dir.exists("tinytests"), "tinytests", "tests/tinytests")
     source(file = file.path(test_dir, 'helper.r'))

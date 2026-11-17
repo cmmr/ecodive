@@ -360,11 +360,11 @@
 
   # Each distance is at most 1e150, but a geodesic sums several of them,
   # and the geodesics are held to the same limit. In a chain of samples,
-  # each `step` from the next and 1e150 from all others, with one neighbor
+  # each `step` from the next and 0.99e150 from all others, with one neighbor
   # each, the geodesics run along the chain: up to 1.8e152 for 200 samples
   # 0.9e150 apart, and 1.2e150 for 3 samples 0.6e150 apart.
   chain <- function (n, step) {
-    m <- matrix(1e150, n, n)
+    m <- matrix(0.99e150, n, n)  # under valgrind, R parses 1e150 2 ulp high
     m[abs(row(m) - col(m)) == 1] <- step
     diag(m) <- 0
     as.dist(m)

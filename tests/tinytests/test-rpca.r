@@ -313,14 +313,20 @@
     expect_identical(rpca(sp0, cpus = 1), rpca(m0, cpus = 1))
 
     # Repeated entries that overflow.
-    tm3 <- Matrix::sparseMatrix(i = c(1, 1, 1:4), j = c(1, 1, 2:5),
-      x = c(1e308, 1e308, 1:4), dims = c(4, 5), repr = 'T')
+    # (Built slot by slot: sparseMatrix(repr = 'T') needs Matrix >= 1.3,
+    # which R 3.6 doesn't have.)
+    triplet <- function (i, j, x, dims) {
+      tm <- methods::as(matrix(0, dims[1], dims[2]), 'CsparseMatrix')
+      tm <- methods::as(tm, 'TsparseMatrix')
+      tm@i <- as.integer(i - 1L); tm@j <- as.integer(j - 1L); tm@x <- as.double(x)
+      tm
+    }
+    tm3 <- triplet(c(1, 1, 1:4), c(1, 1, 2:5), c(1e308, 1e308, 1:4), c(4, 5))
     expect_error(rpca(tm3), 'NA, NaN, or infinite')
 
     # A dgTMatrix in reverse order.
-    rev_t <- Matrix::sparseMatrix(
-      i = rev(rep(1:300, each = 20)), j = rev(rep(1:20, 300)),
-      x = rev(as.double(rep(1:7, length.out = 6000))), dims = c(300, 20), repr = 'T')
+    rev_t <- triplet(rev(rep(1:300, each = 20)), rev(rep(1:20, 300)),
+      rev(as.double(rep(1:7, length.out = 6000))), c(300, 20))
     expect_identical(rpca(rev_t, k = 2, cpus = 1), rpca(methods::as(rev_t, 'CsparseMatrix'), k = 2, cpus = 1))
   }
 

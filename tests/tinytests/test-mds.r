@@ -175,7 +175,9 @@
     expect_true(pro_rmse(ord, pts) < 1e-6)
     expect_true(pro_rmse(ord, pcoa(d, k = k)) < 1e-6)
     expect_equal(as.double(dist(ord)), as.double(d), tolerance = 1e-8)
-    expect_identical(attr(ord, 'best_start'), 0L)
+    # Every start reaches stress ~1e-16 here, so which one wins is a tie
+    # broken by rounding, and it differs between platforms (musl, -O0).
+    expect_true(attr(ord, 'best_start') %in% 0:4)
   }
 
 
