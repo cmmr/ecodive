@@ -29,6 +29,7 @@ extern SEXP C_permdisp_perm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pthreads(void);
 extern SEXP C_stop_thread_pool(void);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rpca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_tsne_p(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_run(SEXP, SEXP, SEXP, SEXP);
@@ -66,6 +67,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_stop_thread_pool", (DL_FUNC) &C_stop_thread_pool, 0},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
+  {"C_rpca",      (DL_FUNC) &C_rpca,     12},
   {"C_tsne_p",    (DL_FUNC) &C_tsne_p,    7},
   {"C_tsne_run",  (DL_FUNC) &C_tsne_run,  4},
   {"C_umap_ab",       (DL_FUNC) &C_umap_ab,       2},

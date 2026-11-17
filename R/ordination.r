@@ -264,6 +264,8 @@ match_ordination <- function (method, input = NULL) {
   # Close relatives that are called directly.
   if (needle %in% c('pca', 'principalcomponents', 'principalcomponentanalysis', 'prcomp'))
     stop('`method = "', method, '"`: call pca() directly; it takes a count table, not distances.')
+  if (needle %in% c('rpca', 'robustpca', 'robustaitchisonpca', 'deicode', 'gemelli'))
+    stop('`method = "', method, '"`: call rpca() directly; it takes a count table, not distances.')
   if (needle %in% names(TEST_HAYSTACK))
     stop('`method = "', method, '"` is a test, not an ordination: use dist_test().')
 
