@@ -7,6 +7,7 @@
 mantel(
   dm,
   y,
+  data = NULL,
   given = NULL,
   method = "pearson",
   permutations = 999L,
@@ -24,14 +25,20 @@ negative values. Its samples are the ones permuted.}
 \item{y}{The distances to correlate with \code{dm}: a \code{dist} object or a
 symmetric numeric matrix, like \code{dm}. Or a numeric vector with one
 value per sample, such as age or pH, whose absolute differences
-(\code{stats::dist(y)}) are the distances. Samples are matched to \code{dm}'s
-by name when both have names; otherwise they must be in the same
-order.}
+(\code{stats::dist(y)}) are the distances. Or, with \code{data}, the name of
+one of its numeric columns. Samples are matched to \code{dm}'s by name
+when both have names; otherwise they must be in the same order.}
+
+\item{data}{Optional sample metadata: a data frame with one row per
+sample, whose columns \code{y}, \code{given}, and \code{strata} can name. Rows are
+matched to the samples in \code{dm} by row name, and rows for other
+samples are ignored; without row names, they must be in the same
+order as \code{dm}. Default: \code{NULL}.}
 
 \item{given}{For a partial Mantel test: distances whose effect is removed
 from the correlation of \code{dm} and \code{y}, as in
-\code{vegan::mantel.partial()}'s \code{zdis}. Given like \code{y}. Default: \code{NULL}
-(a simple Mantel test).}
+\code{vegan::mantel.partial()}'s \code{zdis}. Given like \code{y}, including as a
+column name of \code{data}. Default: \code{NULL} (a simple Mantel test).}
 
 \item{method}{The correlation coefficient: \code{'pearson'}, \code{'spearman'},
 or \code{'kendall'} (tau-b), as in \code{\link[stats:cor]{stats::cor()}}. Default:
@@ -42,9 +49,11 @@ Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones.}
 
 \item{strata}{Permute samples only within these groups (blocks), for
-designs such as repeated measures. A vector with one value per
-sample, matched to \code{dm}'s samples by name when it has names,
-otherwise in the same order. Default: \code{NULL} (free permutation).}
+designs such as repeated measures. Without \code{data}, a vector with
+one value per sample, matched to \code{dm}'s samples by name when it has
+names, otherwise in the same order. With \code{data}, the name of one of
+its columns, or a vector with one value per row of \code{data}. Default:
+\code{NULL} (free permutation).}
 
 \item{alternative}{Which correlations count as more extreme than the
 observed one: \code{'greater'} (more positive, as in \code{vegan::mantel()}),
@@ -131,8 +140,10 @@ so p-values agree with it only up to sampling error, unless the same
 \strong{Differences from vegan::mantel()}
 \itemize{
 \item One function does both the simple and the partial test.
-\item \code{y} and \code{given} may also be numeric vectors, one value per sample.
-\item Samples are matched by name between \code{dm}, \code{y}, \code{given}, and \code{strata}.
+\item \code{y} and \code{given} may also be numeric vectors, one value per sample, or
+names of columns of \code{data}.
+\item Samples are matched by name between \code{dm}, \code{y}, \code{given}, \code{data}, and
+\code{strata}.
 \item \code{alternative} adds lower-tail and two-sided tests.
 \item There's no \code{na.rm}: distances must not be \code{NA}.
 \item When there are fewer possible permutations than requested,
@@ -160,6 +171,10 @@ so p-values agree with it only up to sampling error, unless the same
 
     # After removing the effect of geographic distance.
     mantel(dm, ph, given = geo)
+
+    # The same as a column of sample metadata.
+    meta <- data.frame(row.names = rownames(counts), ph = ph)
+    mantel(dm, 'ph', data = meta, method = 'spearman')
 
 }
 \references{

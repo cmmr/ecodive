@@ -269,7 +269,7 @@
   expect_error(mantel(x, c(age[-1], Z = 1)), '`y` has no samples named "S01"')
   expect_error(mantel(x, matrix(1:6, 2, 3)), '`y` must be a dist object')
   expect_error(mantel(x, c(NA, age[-1])), '`y` must not contain NA')
-  expect_error(mantel(x, y, given = 'a'), '`given` must be')
+  expect_error(mantel(x, y, given = matrix('a', 2, 2)), '`given` must be')
   expect_error(mantel(stats::dist(1:2), stats::dist(1:2)), 'at least 3 samples')
   expect_error(mantel(x, y, method = 'foo'))
   expect_error(mantel(x, y, alternative = 'foo'))
