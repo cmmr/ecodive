@@ -17,6 +17,7 @@ ORDINATIONS <- local({
     text             = "
       name,                                id,   input, alt_ids
       Distance-based Redundancy Analysis,  dbrda, dist, distancebasedrda
+      Isometric Feature Mapping,           isomap, dist, isometricmapping
       Non-metric Multidimensional Scaling, nmds, dist,  nonmetricmds metamds monomds
       Principal Coordinates Analysis,      pcoa, dist,  pco mds cmdscale classicalmds metricmds
       t-distributed Stochastic Neighbor Embedding, tsne, dist, rtsne bhtsne barneshuttsne
@@ -61,6 +62,7 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' | Option / Function Name | Method Name                                           |
 #' | :--------------------- | :---------------------------------------------------- |
 #' | `dbrda`                | Distance-based Redundancy Analysis (db-RDA)           |
+#' | `isomap`               | Isometric Feature Mapping (Isomap)                    |
 #' | `nmds`                 | Non-metric Multidimensional Scaling (NMDS)            |
 #' | `pcoa`                 | Principal Coordinates Analysis (PCoA)                 |
 #' | `tsne`                 | t-distributed Stochastic Neighbor Embedding (t-SNE)   |

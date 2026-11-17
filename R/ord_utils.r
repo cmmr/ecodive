@@ -110,7 +110,7 @@ formula_dm <- function (dm, formula) {
 ord_arg <- function (x, msg, whole = FALSE, lo = 0, hi = Inf) {
 
   ok <- is.numeric(x) && length(x) == 1 && is.finite(x) && x >= lo && x <= hi &&
-    (!whole || x %% 1 == 0)
+    (!whole || x == floor(x))  # not x %% 1, which warns for huge x
 
   if (!isTRUE(ok)) stop(msg, call. = FALSE)
 

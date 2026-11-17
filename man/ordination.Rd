@@ -35,6 +35,7 @@ beta diversity metrics.
 \strong{List of Ordination Methods}\tabular{ll}{
    Option / Function Name \tab Method Name \cr
    \code{dbrda} \tab Distance-based Redundancy Analysis (db-RDA) \cr
+   \code{isomap} \tab Isometric Feature Mapping (Isomap) \cr
    \code{nmds} \tab Non-metric Multidimensional Scaling (NMDS) \cr
    \code{pcoa} \tab Principal Coordinates Analysis (PCoA) \cr
    \code{tsne} \tab t-distributed Stochastic Neighbor Embedding (t-SNE) \cr
