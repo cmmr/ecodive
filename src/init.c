@@ -22,6 +22,8 @@ extern SEXP C_nmds_scale(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_pcoa_correct(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_pcoa_biplot(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_permanova(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_permdisp(SEXP, SEXP, SEXP);
 extern SEXP C_permdisp_perm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -56,6 +58,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_normalize", (DL_FUNC) &C_normalize, 6},
   {"C_pca",       (DL_FUNC) &C_pca,       7},
   {"C_pcoa",      (DL_FUNC) &C_pcoa,      4},
+  {"C_pcoa_correct", (DL_FUNC) &C_pcoa_correct, 5},
+  {"C_pcoa_biplot",  (DL_FUNC) &C_pcoa_biplot,  7},
   {"C_permanova", (DL_FUNC) &C_permanova, 9},
   {"C_permdisp",  (DL_FUNC) &C_permdisp,  3},
   {"C_permdisp_perm", (DL_FUNC) &C_permdisp_perm, 6},

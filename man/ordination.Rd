@@ -16,7 +16,8 @@ listed by \code{list_ordinations()} takes distances.}
 (see below). Programmatic access via \code{list_ordinations()}.}
 
 \item{...}{Further arguments for the method's function, such as \code{k},
-\code{seed}, or \code{cpus}. Each method keeps its own defaults; see
+\code{seed}, \code{cpus}, or \code{pcoa}'s \code{correction}. Each method keeps its own
+defaults; see
 \code{\link[=dbrda]{dbrda()}} (which also needs \code{data}), \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}},
 and \code{\link[=umap]{umap()}}. \code{seed} is ignored by the methods that have no random
 parts (\code{dbrda} and \code{pcoa}), so the same arguments can be given to

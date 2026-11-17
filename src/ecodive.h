@@ -100,15 +100,38 @@ typedef struct {
   double      *resid;     // Out: k relative residual norms.
   int          steps;     // Out: products with blocks.
   int          converged; // Out: 1 if converged.
+
+  // Optional. Left at 0 / NULL, each keeps the default,
+  // and lanczos() runs exactly as without these fields.
+  int          max_basis; // In: basis size before a thick restart (default LZ_BASIS, 60).
+  int          rr_every;  // In: Rayleigh-Ritz every this many steps, and
+                          //     whenever a restart or the end is due (default 1).
+  double       tol;       // In: residual tolerance, replacing both LZ_TOL and
+                          //     LZ_TOL_STALL (default 0: those).
+  int          early_stop;// In: if set, also stop (as converged) once the largest
+  double       stop_above;//     Ritz value is above stop_above with its residual
+  double       stop_tol;  //     at most stop_tol (INFINITY: at once). Ritz values
+                          //     never exceed B's largest eigenvalue, so this
+                          //     proves that eigenvalue is above stop_above.
+  uint64_t     stream;    // In: PCG stream of the starting block (default 54).
+  double      *ritz;      // Out: if not NULL, up to n_ritz of the final Ritz
+  int          n_ritz;    //      vectors (n x n_ritz, largest first; signs not
+  int          n_ritz_out;//      fixed), and how many were written.
 } lanczos_t;
 
 void   lanczos(lanczos_t *lz);
 double lz_dot(const double *x, const double *y, int n);
 void   lz_center(double *x, int n);
 int    lz_sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp);
+int    lz_gen_eigenvalues(double *A, int s, double *wr, double *wi, double *ort);
 int    lz_sign_index(const double *x, int n);
 void   lz_combine(const double *V, int n, int s, const double *Y, int m, double *X);
 void   lz_project_out(const double *F, int f, double *x, int n);
+void   lz_fill_random(double *x, size_t n, pcg32_random_t *rng);
+int    lz_orthonormalize(const double *V, int s, double *R, int m, int n,
+                         int deflate, const double *F, int f, pcg32_random_t *rng);
+void   lz_extend_h(const double *V, const double *W, double *H, int M, int s_w, int s_v, int n);
+void   lz_restart_h(const double *V, const double *W, double *H, int M, int keep, int n);
 
 /* --- dist objects --- */
 // Offset of element (j + 1, j) in a dist object's packed
@@ -144,10 +167,16 @@ typedef struct {
   int           max_m;      // Vectors per pass over `dist`.
   double       *xr, *yr;    // n x max_m scratch.
   int           n_threads;
+  double        shift;      // Distances are read as d + shift (default 0;
+                            //   set with gower_set_shift()).
+  double        max_d;      // Out: the largest distance as given.
+  double       *yr2;        // n x max_m scratch for gower_mult2(), or NULL.
 } gower_t;
 
 double gower_init(gower_t *g, const double *dist, int n, int max_m, int n_threads);
 void   gower_mult(const double *V, double *W, int m, void *ctx);
+double gower_set_shift(gower_t *g, double shift);
+void   gower_mult2(const double *V, double *W, double *W2, int m, gower_t *g);
 
 /* --- knn.c --- */
 void knn_from_dist(const double *dist, int n, int k, int include_self,

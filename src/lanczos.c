@@ -19,6 +19,20 @@
  * uses it for the unconstrained axes, which lie in the
  * space orthogonal to the constraints.
  *
+ * Optional fields of lanczos_t (see ecodive.h) set a larger
+ * basis, a Rayleigh-Ritz step only every few products, a
+ * looser tolerance, an early stop once the largest
+ * eigenvalue is known to exceed a value, another starting
+ * stream, and output of the final Ritz vectors. pcoa()'s
+ * negative eigenvalue corrections use them. Left at 0,
+ * lanczos() runs exactly as without them.
+ *
+ * lz_sym_eigen() and lz_gen_eigenvalues() follow the JAMA
+ * routines tred2()/tql2() and orthes()/hqr2(), which are in
+ * the public domain (JAMA: A Java Matrix Package, by The
+ * MathWorks and the National Institute of Standards and
+ * Technology), and themselves follow EISPACK.
+ *
  * Determinism: everything here runs on the main thread, in
  * a fixed order, and the starting vectors come from a fixed
  * PCG stream. The product function must be deterministic
@@ -73,13 +87,15 @@ void lz_center(double *x, int n) {
 #define center    lz_center
 #define sym_eigen lz_sym_eigen
 #define combine   lz_combine
+#define fill_random     lz_fill_random
+#define orthonormalize  lz_orthonormalize
 
 
 
 //------------------------------------------------------
 // Uniform random values in [-1, 1) from a PCG stream.
 //------------------------------------------------------
-static void fill_random(double *x, size_t n, pcg32_random_t *rng) {
+void lz_fill_random(double *x, size_t n, pcg32_random_t *rng) {
   for (size_t i = 0; i < n; i++)
     x[i] = pcg32_random_r(rng) / 2147483648.0 - 1.0;
 }
@@ -95,7 +111,7 @@ static void fill_random(double *x, size_t n, pcg32_random_t *rng) {
 // and the column is dropped. Returns how many columns are
 // kept, moved to the front of R.
 //------------------------------------------------------
-static int orthonormalize(
+int lz_orthonormalize(
     const double *V, int s, double *R, int m, int n,
     int deflate, const double *F, int f, pcg32_random_t *rng ) {
 
@@ -360,6 +376,81 @@ void combine(const double *V, int n, int s, const double *Y, int m, double *X) {
 }
 
 
+//------------------------------------------------------
+// Extend H = V' * W (M x M, column-major) to columns s_w
+// to s_v - 1 of V and W, symmetrizing.
+//------------------------------------------------------
+void lz_extend_h(
+    const double *V, const double *W, double *H,
+    int M, int s_w, int s_v, int n ) {
+
+  for (int b = s_w; b < s_v; b++)
+    for (int a = 0; a < s_v; a++)
+      H[(size_t) b * M + a] = dot(V + (size_t) n * a, W + (size_t) n * b, n);
+
+  for (int b = s_w; b < s_v; b++) {
+    for (int a = 0; a < s_w; a++)
+      H[(size_t) a * M + b] = H[(size_t) b * M + a];
+    for (int a = s_w; a < b; a++) {
+      double avg = (H[(size_t) b * M + a] + H[(size_t) a * M + b]) / 2;
+      H[(size_t) b * M + a] = avg;
+      H[(size_t) a * M + b] = avg;
+    }
+  }
+}
+
+
+//------------------------------------------------------
+// H = V' * W for the first `keep` columns, symmetrized,
+// after a thick restart.
+//------------------------------------------------------
+void lz_restart_h(const double *V, const double *W, double *H, int M, int keep, int n) {
+  for (int b = 0; b < keep; b++)
+    for (int a = 0; a <= b; a++) {
+      double h = (a == b)
+        ? dot(V + (size_t) n * a, W + (size_t) n * b, n)
+        : (dot(V + (size_t) n * a, W + (size_t) n * b, n) +
+           dot(V + (size_t) n * b, W + (size_t) n * a, n)) / 2;
+      H[(size_t) b * M + a] = h;
+      H[(size_t) a * M + b] = h;
+    }
+}
+
+
+//------------------------------------------------------
+// Rayleigh-Ritz for the basis V (n x s) with W = B * V and
+// H = V' * W (leading dimension M): Ritz values to eig
+// (decreasing), their coordinates in V to the columns of
+// Y, and the first k pairs' residual norms, relative to
+// the larger of `trace` and the largest |Ritz value|, to
+// res. Returns the largest of those; sets *ql_failed.
+//------------------------------------------------------
+static double rayleigh_ritz(
+    const double *V, const double *W, const double *H, int M, int s, int n,
+    int k, double trace, double *Hc, double *eig, double *Y, double *tmp,
+    double *u, double *bu, double *res, int *ql_failed ) {
+
+  for (int j = 0; j < s; j++)
+    memcpy(Hc + (size_t) j * s, H + (size_t) j * M, (size_t) s * sizeof(double));
+  *ql_failed = sym_eigen(Hc, s, eig, Y, tmp);
+
+  double scale = trace;
+  for (int j = 0; j < s; j++)
+    if (fabs(eig[j]) > scale) scale = fabs(eig[j]);
+
+  double worst = 0;
+  for (int j = 0; j < k; j++) {
+    combine(V, n, s, Y + (size_t) j * s, 1, u);
+    combine(W, n, s, Y + (size_t) j * s, 1, bu);
+    for (int i = 0; i < n; i++) bu[i] -= eig[j] * u[i];
+    res[j] = sqrt(dot(bu, bu, n)) / scale;
+    if (res[j] > worst) worst = res[j];
+  }
+
+  return worst;
+}
+
+
 //======================================================
 // The k largest eigenpairs of the n x n operator that
 // lz->op applies. See lanczos_t in ecodive.h. B's range
@@ -378,12 +469,18 @@ void lanczos(lanczos_t *lz) {
   const double *F = lz->basis;
   int           f = F ? lz->n_basis : 0;
 
+  // Optional settings (see ecodive.h).
+  int    every     = (lz->rr_every > 1) ? lz->rr_every : 1;
+  double tol       = (lz->tol > 0) ? lz->tol : LZ_TOL;
+  double tol_stall = (lz->tol > 0) ? lz->tol : LZ_TOL_STALL;
+  int    limit     = (every == 1) ? LZ_STALL : (LZ_STALL + every - 1) / every;
+
   //--------------------------------------------------
   // Sizes: block p >= k; basis of at most M columns;
   // q Ritz vectors kept at each restart.
   //--------------------------------------------------
   int p = (k > LZ_BLOCK) ? k : LZ_BLOCK;
-  int M = LZ_BASIS;
+  int M = (lz->max_basis > 0) ? lz->max_basis : LZ_BASIS;
   if (M < 2 * k + 2 * p) M = 2 * k + 2 * p;
   if (p > dims) p = dims;
   if (M > dims) M = dims;
@@ -404,7 +501,7 @@ void lanczos(lanczos_t *lz) {
   double *bu  = (double *) R_alloc(n, sizeof(double));
 
   pcg32_random_t rng;
-  pcg32_srandom_r(&rng, 20260116u, 54u);
+  pcg32_srandom_r(&rng, 20260116u, lz->stream ? lz->stream : 54u);
 
 
   //--------------------------------------------------
@@ -415,7 +512,7 @@ void lanczos(lanczos_t *lz) {
   int s_w = 0;                                            // ... with W = B * V
   memcpy(V, R, (size_t) n * s_v * sizeof(double));
 
-  int    steps = 0, converged = 0, stalled = 0;
+  int    steps = 0, converged = 0, stalled = 0, ql_failed = 0, fresh = 0;
   double best  = INFINITY;
 
   while (1) {
@@ -428,50 +525,35 @@ void lanczos(lanczos_t *lz) {
     lz->op(V + (size_t) n * s_w, W + (size_t) n * s_w, m, lz->ctx);
     steps++;
 
-    for (int b = s_w; b < s_v; b++)
-      for (int a = 0; a < s_v; a++)
-        H[(size_t) b * M + a] = dot(V + (size_t) n * a, W + (size_t) n * b, n);
-
-    for (int b = s_w; b < s_v; b++) {
-      for (int a = 0; a < s_w; a++)
-        H[(size_t) a * M + b] = H[(size_t) b * M + a];
-      for (int a = s_w; a < b; a++) {
-        double avg = (H[(size_t) b * M + a] + H[(size_t) a * M + b]) / 2;
-        H[(size_t) b * M + a] = avg;
-        H[(size_t) a * M + b] = avg;
-      }
-    }
+    lz_extend_h(V, W, H, M, s_w, s_v, n);
     s_w = s_v;
 
 
     //------------------------------------------------
-    // Rayleigh-Ritz.
+    // Rayleigh-Ritz: every `every` steps, and whenever
+    // this may be the last step or a restart is due
+    // (which needs current Ritz vectors).
     //------------------------------------------------
-    for (int j = 0; j < s_w; j++)
-      memcpy(Hc + (size_t) j * s_w, H + (size_t) j * M, (size_t) s_w * sizeof(double));
-    int ql_failed = sym_eigen(Hc, s_w, eig, Y, tmp);
+    fresh = (every == 1 || steps % every == 0 || s_w == dims ||
+             steps >= LZ_MAX_STEPS || s_v + m > M);
 
-    double scale = trace;
-    for (int j = 0; j < s_w; j++)
-      if (fabs(eig[j]) > scale) scale = fabs(eig[j]);
+    if (fresh) {
 
-    double worst = 0;
-    for (int j = 0; j < k; j++) {
-      combine(V, n, s_w, Y + (size_t) j * s_w, 1, u);
-      combine(W, n, s_w, Y + (size_t) j * s_w, 1, bu);
-      for (int i = 0; i < n; i++) bu[i] -= eig[j] * u[i];
-      res[j] = sqrt(dot(bu, bu, n)) / scale;
-      if (res[j] > worst) worst = res[j];
+      double worst = rayleigh_ritz(
+        V, W, H, M, s_w, n, k, trace, Hc, eig, Y, tmp, u, bu, res, &ql_failed );
+
+      if (worst < best / 2) { best = worst; stalled = 0; }
+      else                  { stalled++;                }
+
+      // A basis of the whole space makes Rayleigh-Ritz exact.
+      converged = !ql_failed && (s_w == dims || worst <= tol ||
+        (worst <= tol_stall && stalled >= limit));
+
+      if (lz->early_stop && !ql_failed && eig[0] > lz->stop_above && res[0] <= lz->stop_tol)
+        converged = 1;
+
+      if (converged || s_w == dims || steps >= LZ_MAX_STEPS) break;
     }
-
-    if (worst < best / 2) { best = worst; stalled = 0; }
-    else                  { stalled++;                }
-
-    // A basis of the whole space makes Rayleigh-Ritz exact.
-    converged = !ql_failed && (s_w == dims || worst <= LZ_TOL ||
-      (worst <= LZ_TOL_STALL && stalled >= LZ_STALL));
-
-    if (converged || s_w == dims || steps >= LZ_MAX_STEPS) break;
 
     // pca() holds malloc'd buffers (memory.c): free them first.
     if (user_interrupted()) { free_all(); error("Interrupted."); } // # nocov
@@ -484,13 +566,16 @@ void lanczos(lanczos_t *lz) {
     memcpy(R, W + (size_t) n * (s_w - m), (size_t) n * m * sizeof(double));
     int r = orthonormalize(V, s_v, R, m, n, deflate, F, f, &rng);
     if (r == 0) { // # nocov start: only if the space is exhausted,
-      converged = !ql_failed; // which makes Rayleigh-Ritz exact.
+      if (!fresh) // which makes Rayleigh-Ritz exact.
+        rayleigh_ritz(V, W, H, M, s_w, n, k, trace, Hc, eig, Y, tmp, u, bu, res, &ql_failed);
+      converged = !ql_failed;
       break;
     } // # nocov end
 
 
     //------------------------------------------------
-    // Thick restart: keep the top q Ritz vectors.
+    // Thick restart: keep the top q Ritz vectors. (Y is
+    // current: r <= m, so s_v + m > M above.)
     //------------------------------------------------
     if (s_v + r > M) {
 
@@ -501,15 +586,7 @@ void lanczos(lanczos_t *lz) {
       combine(W, n, s_w, Y, keep, T);
       memcpy(W, T, (size_t) n * keep * sizeof(double));
 
-      for (int b = 0; b < keep; b++)
-        for (int a = 0; a <= b; a++) {
-          double h = (a == b)
-            ? dot(V + (size_t) n * a, W + (size_t) n * b, n)
-            : (dot(V + (size_t) n * a, W + (size_t) n * b, n) +
-               dot(V + (size_t) n * b, W + (size_t) n * a, n)) / 2;
-          H[(size_t) b * M + a] = h;
-          H[(size_t) a * M + b] = h;
-        }
+      lz_restart_h(V, W, H, M, keep, n);
 
       s_v = s_w = keep;
     }
@@ -520,10 +597,18 @@ void lanczos(lanczos_t *lz) {
 
 
   //--------------------------------------------------
-  // The wanted Ritz pairs.
+  // The wanted Ritz pairs, and any other Ritz vectors
+  // asked for.
   //--------------------------------------------------
   combine(V, n, s_w, Y, k, lz->vecs);
   memcpy(lz->vals, eig, (size_t) k * sizeof(double));
+
+  lz->n_ritz_out = 0;
+  if (lz->ritz && lz->n_ritz > 0) {
+    int nr = (lz->n_ritz < s_w) ? lz->n_ritz : s_w;
+    combine(V, n, s_w, Y, nr, lz->ritz);
+    lz->n_ritz_out = nr;
+  }
 
   lz->steps     = steps;
   lz->converged = converged;
@@ -560,4 +645,249 @@ void lz_project_out(const double *F, int f, double *x, int n) {
     double        h = lz_dot(q, x, n);
     for (int i = 0; i < n; i++) x[i] -= h * q[i];
   }
+}
+
+
+//------------------------------------------------------
+// Eigenvalues of a real general s x s matrix A (column-
+// major; overwritten): reduction to upper Hessenberg form
+// by Householder reflections, then the Francis double-
+// shift QR algorithm. After the public-domain JAMA
+// routines orthes() and hqr2(), which follow EISPACK,
+// without the eigenvectors. Real parts go to wr and
+// imaginary parts to wi. A real eigenvalue found alone,
+// or in a 2 x 2 block with real roots, has wi exactly 0,
+// but a repeated real eigenvalue can come out as a
+// complex pair with a tiny wi. `ort` needs room for s
+// doubles. There is no balancing step, so A's entries
+// should be of similar magnitude (see pcoa.c). Returns 0,
+// or 1 if the QR iteration failed to converge.
+//------------------------------------------------------
+int lz_gen_eigenvalues(double *A, int s, double *wr, double *wi, double *ort) {
+
+  #define H(i, j) A[(size_t) (j) * s + (i)]
+
+  //--------------------------------------------------
+  // Householder reduction to Hessenberg form (orthes).
+  //--------------------------------------------------
+  int low = 0, high = s - 1;
+
+  for (int m = low + 1; m <= high - 1; m++) {
+
+    double scale = 0;
+    for (int i = m; i <= high; i++) scale += fabs(H(i, m - 1));
+    if (scale == 0) continue;
+
+    double h = 0;
+    for (int i = high; i >= m; i--) {
+      ort[i] = H(i, m - 1) / scale;
+      h     += ort[i] * ort[i];
+    }
+    double g = sqrt(h);
+    if (ort[m] > 0) g = -g;
+    h      = h - ort[m] * g;
+    ort[m] = ort[m] - g;
+
+    for (int j = m; j < s; j++) {
+      double f = 0;
+      for (int i = high; i >= m; i--) f += ort[i] * H(i, j);
+      f = f / h;
+      for (int i = m; i <= high; i++) H(i, j) -= f * ort[i];
+    }
+
+    for (int i = 0; i <= high; i++) {
+      double f = 0;
+      for (int j = high; j >= m; j--) f += ort[j] * H(i, j);
+      f = f / h;
+      for (int j = m; j <= high; j++) H(i, j) -= f * ort[j];
+    }
+
+    ort[m]      = scale * ort[m];
+    H(m, m - 1) = scale * g;
+  }
+
+  for (int j = 0; j < s; j++)
+    for (int i = j + 2; i < s; i++)
+      H(i, j) = 0;
+
+
+  //--------------------------------------------------
+  // Francis double-shift QR (hqr2, eigenvalues only).
+  //--------------------------------------------------
+  int    nn = s, n = nn - 1, iter = 0, total = 0;
+  double eps = DBL_EPSILON, exshift = 0;
+  double p = 0, q = 0, r = 0, ss = 0, w = 0, x = 0, y = 0, z = 0;
+
+  double norm = 0;
+  for (int i = 0; i < nn; i++)
+    for (int j = (i > 0) ? i - 1 : 0; j < nn; j++)
+      norm += fabs(H(i, j));
+
+  while (n >= low) {
+
+    // Look for a single small subdiagonal element.
+    int l = n;
+    while (l > low) {
+      ss = fabs(H(l - 1, l - 1)) + fabs(H(l, l));
+      if (ss == 0) ss = norm;
+      if (fabs(H(l, l - 1)) < eps * ss) break;
+      l--;
+    }
+
+    if (l == n) { // One root found.
+
+      wr[n] = H(n, n) + exshift;
+      wi[n] = 0;
+      n--;
+      iter = 0;
+    }
+
+    else if (l == n - 1) { // Two roots found.
+
+      w = H(n, n - 1) * H(n - 1, n);
+      p = (H(n - 1, n - 1) - H(n, n)) / 2.0;
+      q = p * p + w;
+      z = sqrt(fabs(q));
+      x = H(n, n) + exshift;
+
+      if (q >= 0) { // Real pair.
+        z         = (p >= 0) ? p + z : p - z;
+        wr[n - 1] = x + z;
+        wr[n]     = (z != 0) ? x - w / z : x + z;
+        wi[n - 1] = 0;
+        wi[n]     = 0;
+      }
+      else {        // Complex pair.
+        wr[n - 1] = x + p;
+        wr[n]     = x + p;
+        wi[n - 1] = z;
+        wi[n]     = -z;
+      }
+
+      n   -= 2;
+      iter = 0;
+    }
+
+    else { // No convergence yet.
+
+      if (++total > 50 * nn) return 1; // # nocov
+
+      // Form the shift.
+      x = H(n, n);
+      y = 0;
+      w = 0;
+      if (l < n) {
+        y = H(n - 1, n - 1);
+        w = H(n, n - 1) * H(n - 1, n);
+      }
+
+      // Wilkinson's original ad hoc shift.
+      if (iter == 10) { // # nocov start
+        exshift += x;
+        for (int i = low; i <= n; i++) H(i, i) -= x;
+        ss = fabs(H(n, n - 1)) + fabs(H(n - 1, n - 2));
+        x  = y = 0.75 * ss;
+        w  = -0.4375 * ss * ss;
+      }
+
+      // MATLAB's ad hoc shift.
+      if (iter == 30) {
+        ss = (y - x) / 2.0;
+        ss = ss * ss + w;
+        if (ss > 0) {
+          ss = sqrt(ss);
+          if (y < x) ss = -ss;
+          ss = x - w / ((y - x) / 2.0 + ss);
+          for (int i = low; i <= n; i++) H(i, i) -= ss;
+          exshift += ss;
+          x = y = w = 0.964;
+        }
+      } // # nocov end
+
+      iter++;
+
+      // Look for two consecutive small subdiagonal elements.
+      int m = n - 2;
+      while (m >= l) {
+        z  = H(m, m);
+        r  = x - z;
+        ss = y - z;
+        p  = (r * ss - w) / H(m + 1, m) + H(m, m + 1);
+        q  = H(m + 1, m + 1) - z - r - ss;
+        r  = H(m + 2, m + 1);
+        ss = fabs(p) + fabs(q) + fabs(r);
+        p /= ss;
+        q /= ss;
+        r /= ss;
+        if (m == l) break;
+        if (fabs(H(m, m - 1)) * (fabs(q) + fabs(r)) <
+            eps * (fabs(p) * (fabs(H(m - 1, m - 1)) + fabs(z) + fabs(H(m + 1, m + 1)))))
+          break;
+        m--;
+      }
+
+      for (int i = m + 2; i <= n; i++) {
+        H(i, i - 2) = 0;
+        if (i > m + 2) H(i, i - 3) = 0;
+      }
+
+      // Double QR step on rows l to n and columns m to n.
+      for (int k = m; k <= n - 1; k++) {
+
+        int notlast = (k != n - 1);
+
+        if (k != m) {
+          p = H(k, k - 1);
+          q = H(k + 1, k - 1);
+          r = notlast ? H(k + 2, k - 1) : 0;
+          x = fabs(p) + fabs(q) + fabs(r);
+          if (x == 0) continue; // # nocov
+          p /= x;
+          q /= x;
+          r /= x;
+        }
+
+        ss = sqrt(p * p + q * q + r * r);
+        if (p < 0) ss = -ss;
+        if (ss == 0) continue; // # nocov
+
+        if (k != m)      H(k, k - 1) = -ss * x;
+        else if (l != m) H(k, k - 1) = -H(k, k - 1);
+
+        p = p + ss;
+        x = p / ss;
+        y = q / ss;
+        z = r / ss;
+        q = q / p;
+        r = r / p;
+
+        // Row modification.
+        for (int j = k; j < nn; j++) {
+          p = H(k, j) + q * H(k + 1, j);
+          if (notlast) {
+            p           += r * H(k + 2, j);
+            H(k + 2, j) -= p * z;
+          }
+          H(k, j)     -= p * x;
+          H(k + 1, j) -= p * y;
+        }
+
+        // Column modification.
+        int imax = (n < k + 3) ? n : k + 3;
+        for (int i = 0; i <= imax; i++) {
+          p = x * H(i, k) + y * H(i, k + 1);
+          if (notlast) {
+            p           += z * H(i, k + 2);
+            H(i, k + 2) -= p * r;
+          }
+          H(i, k)     -= p;
+          H(i, k + 1) -= p * q;
+        }
+      }
+    }
+  }
+
+  #undef H
+
+  return 0;
 }
