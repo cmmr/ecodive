@@ -25,6 +25,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "PCoA biplot scores, from scikit-bio"),
     person(
+      "Cameron", "Martino",
+      role    = c("ctb", "cph"),
+      comment = "'gemelli' robust Aitchison PCA"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

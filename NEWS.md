@@ -224,6 +224,18 @@
   distances; its `loadings` attribute holds the features' weights. Results
   are identical for any number of `cpus`.
 
+* New `rpca()` runs a robust Aitchison PCA (Martino et al. 2019) straight
+  from a count table: a robust centered log-ratio transform that treats zeros
+  as missing, OptSpace matrix completion, and a PCA of the completed matrix.
+  It returns sample scores, feature loadings, and the fit's progress in the
+  shared ordination format (with `eig` as variances, on `pca()`'s scale),
+  and optionally gemelli's distances between samples as a `dist` object
+  (`distances = TRUE`). A C port of `gemelli`'s `rpca()`, it gives the same
+  results to within rounding error, but works only with the non-zero counts,
+  so sparse tables stay sparse and nothing of size samples by features is
+  formed. It takes every count-table class that `pca()` takes, and its
+  results are identical for any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference
