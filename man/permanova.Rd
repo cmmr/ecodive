@@ -6,7 +6,8 @@
 \usage{
 permanova(
   dm,
-  data,
+  groups,
+  data = NULL,
   formula = NULL,
   by = "overall",
   permutations = 999L,
@@ -21,21 +22,30 @@ symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values. Alternatively, as in \code{vegan::adonis2()}, a formula
 with the distances on its left-hand side and the terms to test on
 its right, such as \code{dm ~ treatment}, in place of \code{dm} and
-\code{formula}.}
+\code{formula}; the metadata may then be given second, as in
+\code{permanova(dm ~ treatment, meta)}.}
 
-\item{data}{The sample metadata: a data frame with one row per sample.
+\item{groups}{The one variable to test: a vector or factor with one value
+per sample, matched to the samples in \code{dm} by name when both are
+named, else in the same order as \code{dm}. Or, when \code{data} is given,
+the name of one of its columns. Categories (factor, character, or
+logical) or a numeric covariate. The same as
+\code{formula = ~ groups}. Give \code{groups} or \code{formula}, not both.}
+
+\item{data}{Sample metadata: a data frame with one row per sample,
+holding the columns named in \code{groups}, \code{formula}, or \code{strata}.
 Rows are matched to the samples in \code{dm} by row name, and rows for
 other samples are ignored; without row names, they must be in the
-same order as \code{dm}. A single vector or factor is also accepted, as
-one variable named \code{group}.}
+same order as \code{dm}. Default: \code{NULL}.}
 
-\item{formula}{A one-sided formula naming the variables in \code{data} to
-test, such as \code{~ treatment} or \code{~ treatment * site + ph}. Factors,
-numeric covariates, and interactions are all allowed. Wrap
-variables in \code{Condition()} to remove their effect before the other
-terms are tested, as in \code{vegan::dbrda()}. A left-hand side, if
-given, is ignored. The default, \code{NULL}, uses every column of
-\code{data} (\code{~ .}).}
+\item{formula}{Instead of \code{groups}, for models of several variables: a
+one-sided formula naming the variables in \code{data} to test, such as
+\code{~ treatment} or \code{~ treatment * site + ph}. Factors, numeric
+covariates, and interactions are all allowed. Wrap variables in
+\code{Condition()} to remove their effect before the other terms are
+tested, as in \code{vegan::dbrda()}. A left-hand side, if given, is
+ignored. With neither \code{groups} nor \code{formula}, every column of
+\code{data} is tested (\code{~ .}). Default: \code{NULL}.}
 
 \item{by}{How to test the terms of \code{formula}:
 \itemize{
@@ -59,7 +69,8 @@ from \code{permute::shuffleSet()}, to use instead of random ones.}
 \item{strata}{Permute samples only within these groups (blocks), for
 designs such as repeated measures. The name of a column of \code{data}
 (which the default \code{formula} then leaves out), or a vector with one
-value per row of \code{data}. Default: \code{NULL} (free permutation).}
+value per row of \code{data} (or, without \code{data}, per value of
+\code{groups}). Default: \code{NULL} (free permutation).}
 
 \item{seed}{An integer seed for the random permutations. The same seed
 gives the same p-values. Default: \code{0}}
@@ -158,9 +169,9 @@ p-values agree with it only up to sampling error, unless the same
 \strong{Differences from adonis2()}
 \itemize{
 \item \code{permanova()} takes distances, not a community table: compute them first
-with \code{\link[=beta_div]{beta_div()}} or a metric function such as \code{\link[=bray]{bray()}}. Both
-\code{permanova(dm, data, ~ terms)} and \code{adonis2()}'s style,
-\code{permanova(dm ~ terms, data)}, work.
+with \code{\link[=beta_div]{beta_div()}} or a metric function such as \code{\link[=bray]{bray()}}. One variable
+can be given as \code{groups}, like ecodive's other tests; several as
+\code{formula}, with \code{data}. \code{adonis2()}'s style, \code{permanova(dm ~ terms, data)}, also works.
 \item \code{adonis2()}'s table is the \code{table} field, and its permuted \eqn{F}
 statistics (\code{F.perm}) are \code{attr(res$table, 'f_perm')}.
 \item A term with no degrees of freedom left (aliased with the terms before
@@ -188,22 +199,26 @@ draws random permutations.
 
     dm <- bray(counts)
 
-    # Do treatment and pH explain differences in community composition?
-    res <- permanova(dm, meta, ~ treatment + ph)
+    # Does treatment explain differences in community composition?
+    res <- permanova(dm, 'treatment', meta)
     res
 
-    # The model's F, p-value and z-score, and adonis2()'s table.
+    # The same, with the groups as a vector.
+    permanova(dm, meta$treatment)
+
+    # F, p-value and z-score as one row, and adonis2()'s table.
     as.data.frame(res)
     res$table
 
-    # The same, in adonis2()'s style.
-    permanova(dm ~ treatment + ph, meta)
+    # Several variables: a formula. Each term in turn, after the ones
+    # before it.
+    permanova(dm, data = meta, formula = ~ treatment + ph, by = 'terms')
 
-    # Each term in turn, after the ones before it.
-    permanova(dm, meta, ~ treatment + ph, by = 'terms')
+    # The same, in adonis2()'s style.
+    permanova(dm ~ treatment + ph, meta, by = 'terms')
 
     # pH, after removing the effect of treatment.
-    permanova(dm, meta, ~ ph + Condition(treatment))
+    permanova(dm, data = meta, formula = ~ ph + Condition(treatment))
 
 }
 \references{

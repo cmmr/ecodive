@@ -199,8 +199,7 @@ mrpp <- function (
   if (n < 2)
     stop('`dm` must have at least 2 samples.', call. = FALSE)
 
-  if (missing(groups) || is.null(groups))
-    stop('`groups` is required: one group per sample, or a column name of `data`.', call. = FALSE)
+  if (missing(groups)) groups <- NULL
 
   pm <- perm_matrix(permutations, n)
 
@@ -208,42 +207,14 @@ mrpp <- function (
   #--------------------------------------------------------
   # Each sample's group, in the order of dm's samples.
   #--------------------------------------------------------
-  if (is.null(data)) {
+  g   <- test_groups(groups, data, n, dv$labels, strata)
+  des <- model_design(
+    g$data, formula = ~ 1, labels = dv$labels, n = n, strata = strata,
+    allow_empty = TRUE )
+  grp <- des$data[[g$col]]
 
-    if (!is.atomic(groups) || !is.null(dim(groups)))
-      stop('`groups` must be a vector or factor with one value per sample.', call. = FALSE)
-    if (is.character(groups) && length(groups) == 1)
-      stop('`groups` names a column, but `data` is not given.', call. = FALSE)
-    if (anyNA(groups))
-      stop('`groups` must not contain NAs.', call. = FALSE)
-    if (length(groups) != n && (is.null(names(groups)) || is.null(dv$labels)))
-      stop(sprintf('`groups` has %d values, but `dm` has %d samples.', length(groups), n), call. = FALSE)
-
-    if (!is.null(strata) && !(is.atomic(strata) && length(strata) == length(groups)))
-      stop('Without `data`, `strata` must have one value per value of `groups`.', call. = FALSE)
-
-    des <- model_design(
-      groups, formula = ~ 1, labels = dv$labels, n = n, strata = strata,
-      allow_empty = TRUE )
-    grp <- des$data[[1]]
-  }
-  else {
-
-    if (!is.character(groups) || length(groups) != 1 || is.na(groups))
-      stop('With `data`, `groups` must be the name of one of its columns.', call. = FALSE)
-    if (!is.data.frame(data) && !is.matrix(data))
-      stop('`data` must be a data.frame.', call. = FALSE)
-    if (!groups %in% colnames(data))
-      stop('`groups` is not a column of `data`: ', name_list(groups), call. = FALSE)
-
-    des <- model_design(
-      data, formula = ~ 1, labels = dv$labels, n = n, strata = strata,
-      allow_empty = TRUE )
-    grp <- des$data[[groups]]
-
-    if (anyNA(grp))
-      stop('Missing values (NA) in `data` column ', name_list(groups), '.', call. = FALSE)
-  }
+  if (anyNA(grp))
+    stop('Missing values (NA) in `data` column ', name_list(g$col), '.', call. = FALSE)
 
   if (!is.null(pm$perms) && !is.null(des$strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)

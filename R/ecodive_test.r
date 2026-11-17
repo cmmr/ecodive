@@ -69,6 +69,50 @@ new_ecodive_test <- function (
 
 
 #------------------------------------------------------------------------------
+# Checks the `groups` argument of a test: one value per sample (a vector or
+# factor, matched to the dist's `labels` by name when both are named, else in
+# order), or, with `data`, the name of one of its columns.
+#
+# Returns list(data, col): pass `data` on to model_design(), which aligns it
+# with the samples (a vector becomes a one-column data frame, `group`), and
+# take the groups from column `col` of its result.
+#------------------------------------------------------------------------------
+test_groups <- function (groups, data, n, labels, strata = NULL) {
+
+  if (is.null(groups))
+    stop('`groups` is required: one value per sample, or a column name of `data`.', call. = FALSE)
+
+  if (is.null(data)) {
+
+    if (is.character(groups) && length(groups) == 1 && n != 1)
+      stop('`groups` names a column, but `data` is not given.', call. = FALSE)
+    if (!is.atomic(groups) || !is.null(dim(groups)))
+      stop(
+        '`groups` must be a vector or factor with one value per sample, ',
+        'or the name of a column of `data`.', call. = FALSE )
+    if (anyNA(groups))
+      stop('`groups` must not contain NAs.', call. = FALSE)
+    if (length(groups) != n && (is.null(names(groups)) || is.null(labels)))
+      stop(sprintf('`groups` has %d values, but `dm` has %d samples.', length(groups), n), call. = FALSE)
+    if (!is.null(strata) && !(is.atomic(strata) && length(strata) == length(groups)))
+      stop('Without `data`, `strata` must have one value per value of `groups`.', call. = FALSE)
+
+    return (list(data = groups, col = 'group'))
+  }
+
+  if (!is.character(groups) || length(groups) != 1 || is.na(groups))
+    stop('With `data`, `groups` must be the name of one of its columns.', call. = FALSE)
+  if (!is.data.frame(data) && !is.matrix(data))
+    stop('`data` must be a data.frame.', call. = FALSE)
+  if (!groups %in% colnames(data))
+    stop('`groups` is not a column of `data`: ', name_list(groups), call. = FALSE)
+
+  list(data = data, col = groups)
+}
+
+
+
+#------------------------------------------------------------------------------
 # z-score of a statistic against its permuted values, as
 # summary(vegan::permustats()). NA with fewer than 2 permutations or when they
 # are all equal.

@@ -19,21 +19,30 @@
 #'        negative values. Alternatively, as in `vegan::adonis2()`, a formula
 #'        with the distances on its left-hand side and the terms to test on
 #'        its right, such as `dm ~ treatment`, in place of `dm` and
-#'        `formula`.
+#'        `formula`; the metadata may then be given second, as in
+#'        `permanova(dm ~ treatment, meta)`.
 #'
-#' @param data  The sample metadata: a data frame with one row per sample.
+#' @param groups  The one variable to test: a vector or factor with one value
+#'        per sample, matched to the samples in `dm` by name when both are
+#'        named, else in the same order as `dm`. Or, when `data` is given,
+#'        the name of one of its columns. Categories (factor, character, or
+#'        logical) or a numeric covariate. The same as
+#'        `formula = ~ groups`. Give `groups` or `formula`, not both.
+#'
+#' @param data  Sample metadata: a data frame with one row per sample,
+#'        holding the columns named in `groups`, `formula`, or `strata`.
 #'        Rows are matched to the samples in `dm` by row name, and rows for
 #'        other samples are ignored; without row names, they must be in the
-#'        same order as `dm`. A single vector or factor is also accepted, as
-#'        one variable named `group`.
+#'        same order as `dm`. Default: `NULL`.
 #'
-#' @param formula  A one-sided formula naming the variables in `data` to
-#'        test, such as `~ treatment` or `~ treatment * site + ph`. Factors,
-#'        numeric covariates, and interactions are all allowed. Wrap
-#'        variables in `Condition()` to remove their effect before the other
-#'        terms are tested, as in `vegan::dbrda()`. A left-hand side, if
-#'        given, is ignored. The default, `NULL`, uses every column of
-#'        `data` (`~ .`).
+#' @param formula  Instead of `groups`, for models of several variables: a
+#'        one-sided formula naming the variables in `data` to test, such as
+#'        `~ treatment` or `~ treatment * site + ph`. Factors, numeric
+#'        covariates, and interactions are all allowed. Wrap variables in
+#'        `Condition()` to remove their effect before the other terms are
+#'        tested, as in `vegan::dbrda()`. A left-hand side, if given, is
+#'        ignored. With neither `groups` nor `formula`, every column of
+#'        `data` is tested (`~ .`). Default: `NULL`.
 #'
 #' @param by  How to test the terms of `formula`:
 #'
@@ -56,7 +65,8 @@
 #' @param strata  Permute samples only within these groups (blocks), for
 #'        designs such as repeated measures. The name of a column of `data`
 #'        (which the default `formula` then leaves out), or a vector with one
-#'        value per row of `data`. Default: `NULL` (free permutation).
+#'        value per row of `data` (or, without `data`, per value of
+#'        `groups`). Default: `NULL` (free permutation).
 #'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
@@ -146,9 +156,10 @@
 #' **Differences from adonis2()**
 #'
 #' * `permanova()` takes distances, not a community table: compute them first
-#'   with [beta_div()] or a metric function such as [bray()]. Both
-#'   `permanova(dm, data, ~ terms)` and `adonis2()`'s style,
-#'   `permanova(dm ~ terms, data)`, work.
+#'   with [beta_div()] or a metric function such as [bray()]. One variable
+#'   can be given as `groups`, like ecodive's other tests; several as
+#'   `formula`, with `data`. `adonis2()`'s style, `permanova(dm ~ terms,
+#'   data)`, also works.
 #' * `adonis2()`'s table is the `table` field, and its permuted \eqn{F}
 #'   statistics (`F.perm`) are `attr(res$table, 'f_perm')`.
 #' * A term with no degrees of freedom left (aliased with the terms before
@@ -192,36 +203,78 @@
 #'
 #'     dm <- bray(counts)
 #'
-#'     # Do treatment and pH explain differences in community composition?
-#'     res <- permanova(dm, meta, ~ treatment + ph)
+#'     # Does treatment explain differences in community composition?
+#'     res <- permanova(dm, 'treatment', meta)
 #'     res
 #'
-#'     # The model's F, p-value and z-score, and adonis2()'s table.
+#'     # The same, with the groups as a vector.
+#'     permanova(dm, meta$treatment)
+#'
+#'     # F, p-value and z-score as one row, and adonis2()'s table.
 #'     as.data.frame(res)
 #'     res$table
 #'
-#'     # The same, in adonis2()'s style.
-#'     permanova(dm ~ treatment + ph, meta)
+#'     # Several variables: a formula. Each term in turn, after the ones
+#'     # before it.
+#'     permanova(dm, data = meta, formula = ~ treatment + ph, by = 'terms')
 #'
-#'     # Each term in turn, after the ones before it.
-#'     permanova(dm, meta, ~ treatment + ph, by = 'terms')
+#'     # The same, in adonis2()'s style.
+#'     permanova(dm ~ treatment + ph, meta, by = 'terms')
 #'
 #'     # pH, after removing the effect of treatment.
-#'     permanova(dm, meta, ~ ph + Condition(treatment))
+#'     permanova(dm, data = meta, formula = ~ ph + Condition(treatment))
 #'
 permanova <- function (
-    dm, data, formula = NULL, by = 'overall', permutations = 999L,
-    strata = NULL, seed = 0L, cpus = n_cpus() ) {
+    dm, groups, data = NULL, formula = NULL, by = 'overall',
+    permutations = 999L, strata = NULL, seed = 0L, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
 
   by <- match.arg(by, c('overall', 'terms', 'margin', 'onedf'))
 
-  fd  <- formula_dm(dm, formula)
-  dv  <- dist_vector(fd$dm)
-  n   <- dv$n
-  des <- model_design(data, fd$formula, dv$labels, n, strata, env = parent.frame())
+  # adonis2()'s style, permanova(dm ~ terms, data): the metadata may come
+  # second, where `groups` is.
+  lhs <- inherits(dm, 'formula') && length(dm) == 3
+  if (lhs && !missing(groups) && is.null(data) && is.data.frame(groups)) {
+    data   <- groups
+    groups <- NULL
+  }
+  if (missing(groups)) groups <- NULL
+
+  if (inherits(data, 'formula') || inherits(groups, 'formula'))
+    stop(
+      'Name the formula argument: permanova(dm, data = meta, formula = ~ a + b), ',
+      'or give the groups: permanova(dm, groups, data).', call. = FALSE )
+
+  fd <- formula_dm(dm, formula)
+  dv <- dist_vector(fd$dm)
+  n  <- dv$n
+
+
+  #--------------------------------------------------------
+  # `groups` is the one-term model ~ groups. Otherwise
+  # `formula` (or, with neither, every column of `data`).
+  #--------------------------------------------------------
+  formula <- fd$formula
+  env     <- parent.frame()
+
+  if (!is.null(groups)) {
+
+    if (!is.null(formula))
+      stop('Give `groups` or `formula`, not both.', call. = FALSE)
+
+    g       <- test_groups(groups, data, n, dv$labels, strata)
+    data    <- g$data
+    formula <- stats::as.formula(call('~', as.name(g$col)), env = env)
+  }
+  else if (is.null(data)) {
+    stop(
+      '`groups` is required: one value per sample, or a column name of `data`. ',
+      'Or give `data` and a `formula`.', call. = FALSE )
+  }
+
+  des <- model_design(data, formula, dv$labels, n, strata, env = env)
   pm  <- perm_matrix(permutations, n)
 
   if (n < 2)

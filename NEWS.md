@@ -52,23 +52,25 @@
   `min_dist` defaults to the canonical 0.1 (umap-learn's), not uwot's 0.01.
 
 * New `permanova()` runs a permutational multivariate analysis of variance
-  on a `dist` object and sample metadata, with a model formula: factors,
-  covariates, interactions, and `Condition()` terms. It gives the same
-  table as `vegan::adonis2()` (Df, sums of squares, R2, F, and p-values),
-  testing the model as a whole or each term sequentially, marginally, or by
-  contrast, with optional `strata`. Given the same permutation matrix, its
-  permuted F statistics and p-values are identical to `adonis2()`'s. It
-  returns a list of class `"ecodive_test"`, like `mrpp()`: the model's F,
-  p-value, z-score (as `summary(vegan::permustats())`) and number of
-  permutations come first, whatever `by` is, then its R2 and `adonis2()`'s
-  table, as `table`. The sums
-  of squares come straight from the dist triangle, without the n-by-n
+  on a `dist` object and sample metadata. Like ecodive's other tests, it
+  takes `groups`: one value per sample (categories or a numeric covariate),
+  or a column name of `data`. For several variables, give `data` and a
+  `formula` instead: factors, covariates, interactions, and `Condition()`
+  terms. It gives the same table as `vegan::adonis2()` (Df, sums of squares,
+  R2, F, and p-values), testing the model as a whole or each term
+  sequentially, marginally, or by contrast, with optional `strata`. Given the
+  same permutation matrix, its permuted F statistics and p-values are
+  identical to `adonis2()`'s. It returns a list of class `"ecodive_test"`,
+  like `mrpp()`: the model's F, p-value, z-score (as
+  `summary(vegan::permustats())`) and number of permutations come first,
+  whatever `by` is, then its R2 and `adonis2()`'s table, as `table`. The
+  sums of squares come straight from the dist triangle, without the n-by-n
   matrices `adonis2()` builds for each permutation, and permutations run in
   parallel. On one thread it is 25 to 50 times faster than `adonis2()` with
   200 samples, and 100 to 300 times faster with 1,000.
   Permutations come from a `seed` argument, and results are identical for
   any number of `cpus`. Like `adonis2()`, it also takes the distances on the
-  left-hand side of the formula: `permanova(dm ~ treatment, data)`.
+  left-hand side of a formula: `permanova(dm ~ treatment + ph, data)`.
 
 * New `mrpp()` runs a multi-response permutation procedure on a `dist`
   object and each sample's group, as `vegan::mrpp()`: the observed and

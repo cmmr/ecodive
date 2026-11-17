@@ -30,7 +30,7 @@ dist_vector <- function (dm) {
   if (inherits(dm, 'formula'))
     stop(
       '`dm` must be a dist object or a symmetric matrix, not a formula. ',
-      'Give the formula separately, e.g. permanova(dm, data, ~ group).', call. = FALSE )
+      'Give the formula separately, e.g. permanova(dm, data = meta, formula = ~ group).', call. = FALSE )
 
   if (inherits(dm, 'dist')) {
 
