@@ -402,38 +402,26 @@ permdisp <- function (
     check.names = FALSE )
   names(tbl) <- c('Df', 'Sum Sq', 'Mean Sq', 'F', 'N.Perm', 'Pr(>F)')
 
-  # TODO: use new_ecodive_test() after the mrpp branch is merged; this
-  # builds the same object.
-  res <- list(
+  res <- new_ecodive_test(
+    class       = 'ecodive_permdisp',
+    title       = 'Homogeneity of multivariate dispersions (PERMDISP)',
     statistic   = c(F = f_obs),
-    p_value     = as.double(p_obs),
-    z           = pd_perm_z(f_obs, f_perm),
-    n_perm      = as.integer(pm$n_perm),
+    p_value     = p_obs,
+    z           = perm_z(f_obs, f_perm),
+    n_perm      = pm$n_perm,
     table       = structure(tbl, class = c('anova', 'data.frame')),
     distances   = z,
     dispersions = disp,
     type        = type,
     bias_adjust = bias_adjust,
     pairwise    = pw,
+    perm        = f_perm,
     permutation = if (!is.null(pm$perms)) 'supplied matrix'
                   else if (!is.null(des$strata)) 'within strata'
                   else 'free' )
 
-  attr(res, 'f_perm') <- as.double(f_perm)
-  attr(res, 'title')  <- 'Homogeneity of multivariate dispersions (PERMDISP)'
   attr(res, 't_perm') <- t_perm
-  class(res) <- c('ecodive_permdisp', 'ecodive_test')
-
   res
-}
-
-
-
-# TODO: use the shared perm_z() after the mrpp branch is merged.
-pd_perm_z <- function (statistic, perm) {
-  if (length(perm) < 2 || is.na(statistic)) return (NA_real_)
-  z <- (statistic - mean(perm)) / stats::sd(perm)
-  if (is.finite(z)) z else NA_real_
 }
 
 

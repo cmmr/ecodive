@@ -145,11 +145,10 @@
   expect_null(attr(res, 't_perm'))
   expect_true(res$p_value >= 1 / 100)
   expect_true(any(grepl('centroids', test_details.ecodive_permdisp(res, 4))))
-  if (exists('print.ecodive_test')) { # The shared print method (mrpp branch).
-    out <- utils::capture.output(print(res))
-    expect_true(any(grepl('Permutations: 99 (free)', out, fixed = TRUE)))
-    expect_true(any(grepl('centroids', out)))
-  }
+  out <- utils::capture.output(print(res))
+  expect_true(any(grepl('Homogeneity of multivariate dispersions', out, fixed = TRUE)))
+  expect_true(any(grepl('Permutations: 99 (free)', out, fixed = TRUE)))
+  expect_true(any(grepl('centroids', out)))
 
   res <- permdisp(d, g, type = 'median', pairwise = TRUE, permutations = 19, cpus = 1)
   expect_identical(res$type, 'median')
@@ -162,12 +161,15 @@
   out <- test_details.ecodive_permdisp(res, 4)
   expect_true(any(grepl('spatial medians', out)) && any(grepl('ctrl-high', out)))
 
-  # A row for comparing tests, once as.data.frame.ecodive_test() is in.
-  if (exists('as.data.frame.ecodive_test')) {
-    df <- as.data.frame(res)
-    expect_identical(df$test, 'permdisp')
-    expect_identical(df$stat_name, 'F')
-  }
+  out <- utils::capture.output(print(res))
+  expect_true(any(grepl('Pairwise t tests', out, fixed = TRUE)))
+
+  # One row for comparing tests.
+  df <- as.data.frame(res)
+  expect_identical(df$test, 'permdisp')
+  expect_identical(df$stat_name, 'F')
+  expect_identical(df$statistic, res$statistic[['F']])
+  expect_identical(df$p_value, res$p_value)
 
   # No permutations: no p-values.
   res <- permdisp(d, g, permutations = 0, pairwise = TRUE, cpus = 1)

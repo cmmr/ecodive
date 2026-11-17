@@ -437,47 +437,13 @@ static const int    *pp_grp;
 static const double *pp_cnt;    // Group sizes.
 static int           pp_pair;   // Pairwise t statistics?
 static int           pp_npair;
-static const int    *pp_perms;  // n x n_perm supplied permutations, or NULL.
-static const int    *pp_order;  // Samples, ordered by stratum.
-static const int    *pp_sbeg;
-static int           pp_ns;
-static uint64_t      pp_seed;
+static perm_source_t pp_ps;     // Supplied or random permutations.
 static int           pp_k0;     // Permutations for this round:
 static int           pp_k1;     // ... pp_k0 to pp_k1 - 1 (1-based).
 static double       *pp_f;      // n_perm.
 static double       *pp_t;      // n_pair x n_perm.
 static int          *pp_iwork;  // n ints per thread.
 static double       *pp_work;   // 3 * n_groups doubles per thread.
-
-
-// Permutation k (k >= 1) into p: permuted row a is
-// original row p[a].
-static void pp_get_perm(int k, int *p) {
-
-  int n = pp_n;
-
-  if (pp_perms) {
-    memcpy(p, pp_perms + (size_t) (k - 1) * n, (size_t) n * sizeof(int));
-    return;
-  }
-
-  // Fisher-Yates shuffle within each stratum.
-  pcg32_random_t rng;
-  pcg32_srandom_r(&rng, pp_seed, (uint64_t) k);
-
-  for (int a = 0; a < n; a++) p[a] = a;
-
-  for (int s = 0; s < pp_ns; s++) {
-    const int *idx = pp_order + pp_sbeg[s];
-    int        len = pp_sbeg[s + 1] - pp_sbeg[s];
-    for (int t = len - 1; t > 0; t--) {
-      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
-      int tmp = p[idx[t]];
-      p[idx[t]] = p[idx[u]];
-      p[idx[u]] = tmp;
-    }
-  }
-}
 
 
 static void *perm_worker(void *arg) {
@@ -491,7 +457,9 @@ static void *perm_worker(void *arg) {
 
   for (int k = pp_k0 + w->i; k < pp_k1; k += w->n) {
 
-    pp_get_perm(k, p);
+    // Permuted row a is original row p[a], as vegan's
+    // resids[take].
+    perm_source_get(&pp_ps, k, p);
 
     //--------------------------------------------------
     // F of the permuted residuals.
@@ -587,8 +555,6 @@ SEXP C_permdisp_perm(
   pp_grp   = INTEGER(sexp_grp);
   pp_pair  = pairwise;
   pp_npair = ng * (ng - 1) / 2;
-  pp_seed  = (uint64_t) seed;
-  pp_perms = isNull(sexp_perms) ? NULL : INTEGER(sexp_perms);
 
   double *cnt = (double *) R_alloc(ng, sizeof(double));
   for (int g = 0; g < ng; g++) cnt[g] = 0;
@@ -600,33 +566,7 @@ SEXP C_permdisp_perm(
   pp_cnt = cnt;
 
 
-  // Strata: samples ordered by stratum.
-  int *order = (int *) R_alloc(n, sizeof(int));
-  int  ns    = 1;
-  int *sbeg;
-
-  if (isNull(sexp_strata)) {
-    for (int a = 0; a < n; a++) order[a] = a;
-    sbeg    = (int *) R_alloc(2, sizeof(int));
-    sbeg[0] = 0;
-    sbeg[1] = n;
-  }
-  else {
-    const int *strata = INTEGER(sexp_strata);
-    ns = 0;
-    for (int a = 0; a < n; a++)
-      if (strata[a] + 1 > ns) ns = strata[a] + 1;
-    sbeg = (int *) R_alloc(ns + 1, sizeof(int));
-    for (int s = 0; s <= ns; s++) sbeg[s] = 0;
-    for (int a = 0; a < n; a++) sbeg[strata[a] + 1]++;
-    for (int s = 0; s < ns; s++) sbeg[s + 1] += sbeg[s];
-    int *fill = (int *) R_alloc(ns, sizeof(int));
-    memcpy(fill, sbeg, (size_t) ns * sizeof(int));
-    for (int a = 0; a < n; a++) order[fill[strata[a]]++] = a;
-  }
-  pp_order = order;
-  pp_sbeg  = sbeg;
-  pp_ns    = ns;
+  perm_source_init(&pp_ps, n, sexp_perms, sexp_strata, seed);
 
 
   SEXP sexp_f = PROTECT(allocVector(REALSXP, n_perm));
