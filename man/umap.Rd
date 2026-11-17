@@ -89,6 +89,7 @@ similarities, fitted from \code{min_dist} and \code{spread}.
 \code{"pcoa"}, \code{"random"}, or \code{"matrix"} (given in \code{init}); \code{"none"} for
 fewer than 2 samples, which are placed at 0.
 \item \code{n_epochs}: The number of optimization epochs run.
+\item \code{n_neighbors}: The \code{n_neighbors} given.
 }
 }
 \description{
@@ -116,8 +117,8 @@ duplicates) and \eqn{\sigma_i} is chosen by binary search so that the
 weights sum to \eqn{\log_2(}\code{n_neighbors}\eqn{)}. The two weights
 \eqn{w_{ij}} and \eqn{w_{ji}} of each pair are combined by fuzzy union,
 \eqn{w_{ij} + w_{ji} - w_{ij} w_{ji}}.
-\item \strong{Curve.} \code{a} and \code{b} are fitted by nonlinear least squares
-(\code{\link[stats:nls]{stats::nls()}}) to a curve that is 1 up to \code{min_dist} and decays
+\item \strong{Curve.} \code{a} and \code{b} are fitted by least squares (Levenberg-Marquardt,
+as umap-learn fits them) to a curve that is 1 up to \code{min_dist} and decays
 exponentially, with scale \code{spread}, beyond it.
 \item \strong{Layout.} Starting from \code{init}, stochastic gradient descent pulls
 the two samples of each edge together, sampling each edge in proportion
@@ -245,6 +246,11 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 McInnes, L., Healy, J., & Melville, J. (2018). UMAP: Uniform manifold
 approximation and projection for dimension reduction. \emph{arXiv},
 1802.03426. \doi{10.48550/arXiv.1802.03426}
+
+Melville, J. (2020). uwot: The Uniform Manifold Approximation and Projection
+(UMAP) Method for Dimensionality Reduction. R package. Its C++ header
+library (BSD 2-Clause License) is the basis of the graph and layout code.
+\url{https://github.com/jlmelville/uwot}
 
 Wu, K., & Simon, H. (2000). Thick-restart Lanczos method for large
 symmetric eigenvalue problems. \emph{SIAM Journal on Matrix Analysis and

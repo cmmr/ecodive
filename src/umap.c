@@ -1,5 +1,39 @@
 // Copyright (c) 2026 ecodive authors
 // Licensed under the MIT License: https://opensource.org/license/mit
+//
+// The smooth-kNN calibration, fuzzy union, and batch-mode optimizer
+// (gradients, edge sampling and Adam) follow the C++ header library of the
+// uwot R package (inst/include/uwot/*.h: smooth_knn.h, gradient.h,
+// sampler.h, epoch.h, update.h, optimize.h), which carries this notice:
+//
+//   BSD 2-Clause License
+//
+//   Copyright 2020-2021 James Melville
+//
+//   Redistribution and use in source and binary forms, with or without
+//   modification, are permitted provided that the following conditions are
+//   met:
+//
+//   1. Redistributions of source code must retain the above copyright
+//      notice, this list of conditions and the following disclaimer.
+//
+//   2. Redistributions in binary form must reproduce the above copyright
+//      notice, this list of conditions and the following disclaimer in the
+//      documentation and/or other materials provided with the distribution.
+//
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//   IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//   THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//   PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+//   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// No code from uwot's GPL-licensed R or src/ files is included.
 
 /*
  * Uniform Manifold Approximation and Projection (UMAP), from
@@ -944,4 +978,137 @@ SEXP C_umap_rand(SEXP sexp_len, SEXP sexp_kind, SEXP sexp_seed) {
 
   UNPROTECT(1);
   return sexp_result;
+}
+
+
+
+//======================================================
+// The a and b of the curve 1 / (1 + a * x^(2b)), fitted
+// by least squares to 300 points of exp(-(x - min_dist) /
+// spread) (1 below min_dist) on [0, 3 * spread], the
+// target umap-learn's find_ab_params() fits (McInnes et
+// al. 2018). Levenberg-Marquardt over (log a, log b), from
+// a = b = 1.
+//
+// The problem is scale-free: with x = spread * u, the curve
+// is 1 / (1 + a spread^(2b) u^(2b)), and the target depends
+// on u and min_dist / spread only. So the fit is made for
+// spread = 1 and min_dist / spread, where it is well
+// conditioned, and a is then divided by spread^(2b).
+//======================================================
+#define AB_POINTS 300
+
+// Sum of squared residuals at (p, q) = (log a, log b), and,
+// if JtJ is given, the Gauss-Newton system J'J (3 values:
+// [0,0], [0,1], [1,1]) and J'r.
+static double ab_eval(
+    const double *x, const double *y, double p, double q,
+    double *JtJ, double *Jtr ) {
+
+  double b  = exp(q);
+  double ss = 0;
+
+  if (JtJ) { JtJ[0] = JtJ[1] = JtJ[2] = Jtr[0] = Jtr[1] = 0; }
+
+  for (int i = 0; i < AB_POINTS; i++) {
+
+    double f, g0, g1;
+
+    if (x[i] > 0) {
+      // f = logistic(-t), with t = log(a * x^(2b)).
+      double lx = log(x[i]);
+      double t  = p + 2 * b * lx;
+      double et = exp(-fabs(t));
+      double s  = 1 / (1 + et); // logistic(|t|)
+      double omf;
+      if (t >= 0) { f = 1 - s; omf = s;     }
+      else        { f = s;     omf = 1 - s; }
+      double fo = f * omf;      // -df/dt
+      g0 = -fo;                 // df/dp
+      g1 = -fo * 2 * b * lx;    // df/dq
+    }
+    else {
+      f = 1; g0 = g1 = 0;
+    }
+
+    double r = f - y[i];
+    ss += r * r;
+
+    if (JtJ) {
+      JtJ[0] += g0 * g0;
+      JtJ[1] += g0 * g1;
+      JtJ[2] += g1 * g1;
+      Jtr[0] += g0 * r;
+      Jtr[1] += g1 * r;
+    }
+  }
+
+  return ss;
+}
+
+
+// R interface: c(a, b) for `spread` and `min_dist`, both
+// positive and finite (checked in R).
+SEXP C_umap_ab(SEXP sexp_spread, SEXP sexp_min_dist) {
+
+  double spread = asReal(sexp_spread);
+  double ratio  = asReal(sexp_min_dist) / spread;
+
+  // Beyond the fitted range the target is constant: no curve to fit.
+  if (!(ratio < 3))
+    error("Cannot fit a and b for spread = %g and min_dist = %g.", spread, ratio * spread);
+
+  double x[AB_POINTS], y[AB_POINTS];
+  for (int i = 0; i < AB_POINTS; i++) {
+    x[i] = 3 * i / (AB_POINTS - 1.0);
+    y[i] = (x[i] < ratio) ? 1 : exp(-(x[i] - ratio));
+  }
+
+  double p = 0, q = 0, lambda = 1e-3;
+  double JtJ[3], Jtr[2];
+  double ss = ab_eval(x, y, p, q, JtJ, Jtr);
+  int    converged = 0;
+
+  for (int iter = 0; iter < 1000 && !converged; iter++) {
+
+    // Solve (J'J + lambda * diag(J'J)) delta = -J'r, raising
+    // lambda until the step lowers the sum of squares.
+    for (int tries = 0; tries < 60; tries++) {
+
+      double h00 = JtJ[0] * (1 + lambda), h11 = JtJ[2] * (1 + lambda), h01 = JtJ[1];
+      double det = h00 * h11 - h01 * h01;
+      double dp  = 0, dq = 0;
+      if (det > 0) {
+        dp = -( h11 * Jtr[0] - h01 * Jtr[1]) / det;
+        dq = -(-h01 * Jtr[0] + h00 * Jtr[1]) / det;
+      }
+
+      double ss2 = ab_eval(x, y, p + dp, q + dq, NULL, NULL);
+
+      if (ss2 <= ss) {
+        int small = fabs(dp) <= 1e-12 * (1 + fabs(p)) && fabs(dq) <= 1e-12 * (1 + fabs(q));
+        converged = small || ss - ss2 <= 1e-15 * ss;
+        p += dp; q += dq; ss = ss2;
+        lambda = (lambda / 10 > 1e-12) ? lambda / 10 : 1e-12;
+        ab_eval(x, y, p, q, JtJ, Jtr);
+        break;
+      }
+
+      lambda *= 10;
+      if (tries == 59) converged = 1; // # nocov (no step lowers the sum)
+    }
+  }
+
+  double b = exp(q);
+  double a = exp(p - 2 * b * log(spread));
+
+  // The layout computes in floats.
+  if (!(a >= FLT_MIN && a <= FLT_MAX && b >= FLT_MIN && b <= FLT_MAX))
+    error("Cannot fit a and b for spread = %g and min_dist = %g.", spread, ratio * spread);
+
+  SEXP sexp_ab = PROTECT(allocVector(REALSXP, 2));
+  REAL(sexp_ab)[0] = a;
+  REAL(sexp_ab)[1] = b;
+  UNPROTECT(1);
+  return sexp_ab;
 }

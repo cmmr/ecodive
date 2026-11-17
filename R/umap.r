@@ -76,6 +76,7 @@
 #'     `"pcoa"`, `"random"`, or `"matrix"` (given in `init`); `"none"` for
 #'     fewer than 2 samples, which are placed at 0.
 #'   * `n_epochs`: The number of optimization epochs run.
+#'   * `n_neighbors`: The `n_neighbors` given.
 #'
 #' @details
 #'
@@ -95,8 +96,8 @@
 #'    weights sum to \eqn{\log_2(}`n_neighbors`\eqn{)}. The two weights
 #'    \eqn{w_{ij}} and \eqn{w_{ji}} of each pair are combined by fuzzy union,
 #'    \eqn{w_{ij} + w_{ji} - w_{ij} w_{ji}}.
-#' 3. **Curve.** `a` and `b` are fitted by nonlinear least squares
-#'    ([stats::nls()]) to a curve that is 1 up to `min_dist` and decays
+#' 3. **Curve.** `a` and `b` are fitted by least squares (Levenberg-Marquardt,
+#'    as umap-learn fits them) to a curve that is 1 up to `min_dist` and decays
 #'    exponentially, with scale `spread`, beyond it.
 #' 4. **Layout.** Starting from `init`, stochastic gradient descent pulls
 #'    the two samples of each edge together, sampling each edge in proportion
@@ -183,6 +184,11 @@
 #' approximation and projection for dimension reduction. *arXiv*,
 #' 1802.03426. \doi{10.48550/arXiv.1802.03426}
 #'
+#' Melville, J. (2020). uwot: The Uniform Manifold Approximation and Projection
+#' (UMAP) Method for Dimensionality Reduction. R package. Its C++ header
+#' library (BSD 2-Clause License) is the basis of the graph and layout code.
+#' \url{https://github.com/jlmelville/uwot}
+#'
 #' Wu, K., & Simon, H. (2000). Thick-restart Lanczos method for large
 #' symmetric eigenvalue problems. *SIAM Journal on Matrix Analysis and
 #' Applications*, 22(2), 602-616. \doi{10.1137/S0895479898334605}
@@ -263,8 +269,9 @@ umap <- function (
       matrix(x, n, k), 'umap', labels, prefix = 'UMAP',
       a        = ab[['a']],
       b        = ab[['b']],
-      init     = init,
-      n_epochs = n_epochs )
+      init        = init,
+      n_epochs    = n_epochs,
+      n_neighbors = n_neighbors )
   }
 
   if (n < 2) {
@@ -332,24 +339,12 @@ umap <- function (
 
 
 
-# The a and b parameters of the curve 1 / (1 + a * d^(2b)), fitted to
-# 1 for d < min_dist and exp(-(d - min_dist) / spread) beyond, at 300
-# points from 0 to 3 * spread, as in uwot and umap-learn.
+# The a and b parameters of the curve 1 / (1 + a * d^(2b)): a least-squares
+# fit, in C, to 1 below min_dist and exp(-(d - min_dist) / spread) beyond,
+# the target defined by McInnes et al. (2018).
 umap_ab <- function (spread, min_dist) {
-
-  xv <- seq(from = 0, to = spread * 3, length.out = 300)
-  yv <- rep(0, length(xv))
-  yv[xv <  min_dist] <- 1
-  yv[xv >= min_dist] <- exp(-(xv[xv >= min_dist] - min_dist) / spread)
-
-  res <- tryCatch(
-    stats::nls(yv ~ 1 / (1 + a * xv^(2 * b)), start = list(a = 1, b = 1))$m$getPars(),
-    error = function (e) NULL )
-
-  if (is.null(res))
-    stop('Cannot fit a and b for spread = ', spread, ' and min_dist = ', min_dist, '.', call. = FALSE)
-
-  res
+  ab <- .Call(C_umap_ab, as.double(spread), as.double(min_dist))
+  c(a = ab[[1]], b = ab[[2]])
 }
 
 

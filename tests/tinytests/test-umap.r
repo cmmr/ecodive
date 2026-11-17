@@ -148,8 +148,8 @@
   #--------------------------------------------------
   # Curve parameters.
   #--------------------------------------------------
-  # A nonlinear least-squares fit, which stops at a relative tolerance of
-  # 1e-5: last-bit differences in the math library move it by ~3e-10.
+  # ecodive's Levenberg-Marquardt fit against uwot's nls() fit of the same
+  # curve, which stops at a relative tolerance of 1e-5.
   if (home) {
     expect_equal(umap_ab(1, 0.01),    c1$ab,      tolerance = 1e-6)
     expect_equal(umap_ab(1.5, 0.3),   c1$sgd2$ab, tolerance = 1e-6)
@@ -249,7 +249,7 @@
   expect_identical(colnames(u), c('UMAP1', 'UMAP2'))
   expect_identical(
     names(attributes(u)),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'a', 'b', 'init', 'n_epochs', 'class') )
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'a', 'b', 'init', 'n_epochs', 'n_neighbors', 'class') )
   expect_identical(attr(u, 'method'), 'umap')
   expect_identical(attr(u, 'eig'),  c(NA_real_, NA_real_))
   expect_identical(attr(u, 'prop'), c(NA_real_, NA_real_))

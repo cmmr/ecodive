@@ -31,6 +31,7 @@ extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_tsne(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_affinity(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_umap_ab(SEXP, SEXP);
 extern SEXP C_umap_graph(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_rand(SEXP, SEXP, SEXP);
 extern SEXP C_umap_sgd(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -65,6 +66,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
   {"C_tsne",      (DL_FUNC) &C_tsne,      6},
   {"C_tsne_affinity", (DL_FUNC) &C_tsne_affinity, 5},
+  {"C_umap_ab",       (DL_FUNC) &C_umap_ab,       2},
   {"C_umap_graph",    (DL_FUNC) &C_umap_graph,    5},
   {"C_umap_rand",     (DL_FUNC) &C_umap_rand,     3},
   {"C_umap_sgd",      (DL_FUNC) &C_umap_sgd,      6},
