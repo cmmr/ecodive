@@ -8,7 +8,7 @@ mds(
   dm,
   k = 2L,
   n_starts = 4L,
-  max_iter = 1000L,
+  max_iters = 1000L,
   tol = 1e-07,
   seed = 0L,
   cpus = n_cpus()
@@ -24,7 +24,7 @@ negative values.}
 \item{n_starts}{The number of random starts to run after the start from the
 PCoA solution, from 0 to 1000. Default: \code{4}}
 
-\item{max_iter}{The maximum number of SMACOF iterations for each start.
+\item{max_iters}{The maximum number of SMACOF iterations for each start.
 Default: \code{1000}}
 
 \item{tol}{Each start stops once an iteration lowers the raw stress by
@@ -45,7 +45,7 @@ MDS has no eigenvalues. Then come:
 \item \code{stress}: The stress of the solution, from 0 (a perfect fit) to 1 (no
 better than putting every point in one place). See "Stress" below.
 \item \code{converged}: \code{TRUE} if the best start stopped because a plain step met
-\code{tol}, \code{FALSE} if it stopped at \code{max_iter}.
+\code{tol}, \code{FALSE} if it stopped at \code{max_iters}.
 \item \code{n_iter}: The number of SMACOF iterations the best start ran.
 \item \code{n_starts}: The number of random starts run.
 \item \code{best_start}: Which start gave the solution: \code{0} for the PCoA start,
@@ -88,13 +88,13 @@ distances in \code{dm}. It does so by SMACOF (de Leeuw, 1977; Borg & Groenen,
 points by the Guttman transform, \eqn{X \leftarrow \Gamma(X) =
 \frac{1}{n} B(X) X}, which never increases \eqn{\sigma}. A start stops
 when an iteration lowers \eqn{\sigma} by no more than \code{tol} times
-\eqn{\sum d_{ij}^2}, or after \code{max_iter} iterations.
+\eqn{\sum d_{ij}^2}, or after \code{max_iters} iterations.
 
 As in \code{\link[=nmds]{nmds()}} (see there), iterations take relaxed steps,
 \eqn{X \leftarrow 2\Gamma(X) - X} (de Leeuw & Heiser, 1980), when \code{k > 1},
 until one makes no more than \code{tol} progress, and then plain steps until a
 plain step does; \code{k = 1} uses plain steps only, and so does the last
-iteration allowed by \code{max_iter}. So the returned configuration is a fixed
+iteration allowed by \code{max_iters}. So the returned configuration is a fixed
 point of \eqn{\Gamma} to within \code{tol}, at the right scale
 (\eqn{\sum d_{ij}\delta_{ij} = \sum d_{ij}^2}), typically in about half the
 iterations that plain steps take. With plain steps only (an internal
@@ -126,7 +126,7 @@ The \code{stress} reported is
 the distances in \code{dm}. It only depends on \eqn{\sigma}, so the lowest
 stress is the best fit, and it doesn't depend on the units of \code{dm}. It is
 1 when all points coincide, and at most 1 after any SMACOF iteration
-(\code{max_iter = 0} returns the starting configuration, whose stress can be
+(\code{max_iters = 0} returns the starting configuration, whose stress can be
 higher). Pairs with a distance of 0 in \code{dm}, such as duplicate samples,
 are pulled towards the same point.
 
@@ -143,7 +143,7 @@ is \code{sqrt(sum((dist(x) - dm)^2) / sum(dist(x)^2))}.
 current default) or one start from classical MDS (\code{init = "classical_mds"}); \code{mds()} runs both kinds, and ranks them by the stress
 described above.
 \item scikit-learn's defaults are \code{max_iter = 300} and \code{eps = 1e-6}; \code{mds()}'s
-are \code{max_iter = 1000} and \code{tol = 1e-7}.
+are \code{max_iters = 1000} and \code{tol = 1e-7}.
 \item scikit-learn returns the configuration as SMACOF leaves it; \code{mds()}
 centers, rotates, and flips it, which doesn't change the stress.
 \item scikit-learn stops when stress falls by \emph{less} than \code{eps}; \code{mds()} stops
@@ -176,7 +176,7 @@ pairs), in parts between checks for user interrupts.
 
 The result, with all its attributes, is bit-identical from run to run, in
 new R sessions, and for any value of \code{cpus}, given the same \code{dm}, \code{k},
-\code{n_starts}, \code{max_iter}, \code{tol}, and \code{seed}, for the reasons given in \code{\link[=nmds]{nmds()}}.
+\code{n_starts}, \code{max_iters}, \code{tol}, and \code{seed}, for the reasons given in \code{\link[=nmds]{nmds()}}.
 \code{dm * 2^p} gives exactly the result for \code{dm}, times \eqn{2^p}. (As for
 every ordination, distances above \eqn{10^{150}} are rejected.) Results can
 still differ in the last bits between computers or compilers, as for any

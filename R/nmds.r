@@ -26,7 +26,7 @@
 #' @param n_starts The number of random starts to run after the start from the
 #'        PCoA solution, from 0 to 1000. Default: `4`
 #'
-#' @param max_iter The maximum number of SMACOF iterations for each start.
+#' @param max_iters The maximum number of SMACOF iterations for each start.
 #'        Default: `1000`
 #'
 #' @param tol   Each start stops once an iteration lowers the raw stress by
@@ -49,7 +49,7 @@
 #'   * `stress`: Kruskal's stress-1 of the solution, from 0 (a perfect rank
 #'     order) to 1.
 #'   * `converged`: `TRUE` if the best start stopped because a plain step met
-#'     `tol`, `FALSE` if it stopped at `max_iter`.
+#'     `tol`, `FALSE` if it stopped at `max_iters`.
 #'   * `n_iter`: The number of SMACOF iterations the best start ran.
 #'   * `n_starts`: The number of random starts run.
 #'   * `best_start`: Which start gave the solution: `0` for the PCoA start,
@@ -95,7 +95,7 @@
 #' the number of pairs; then the Guttman transform \eqn{\Gamma} moves the
 #' points. A start stops when its raw stress (the numerator above) falls by
 #' no more than `tol` times the denominator in one iteration, or after
-#' `max_iter` iterations. This rule is relative to the sum of squared
+#' `max_iters` iterations. This rule is relative to the sum of squared
 #' distances, not to the stress itself, so a nearly perfect fit (stress-1
 #' below about 0.01) stops while stress can still fall noticeably in
 #' relative terms; a smaller `tol` helps there. At the default `tol`, on
@@ -113,7 +113,7 @@
 #' back and forth), nor at all when `k = 1`, where \eqn{\Gamma} only depends
 #' on the order of the points. So a start takes relaxed steps only until one
 #' makes no more than `tol` progress, then plain steps until a plain step
-#' does (or until `max_iter`, whose last step is always plain), and `k = 1` uses
+#' does (or until `max_iters`, whose last step is always plain), and `k = 1` uses
 #' plain steps throughout. The configuration returned and measured thus
 #' always comes from a plain step: it is a fixed point of \eqn{\Gamma} to
 #' within `tol`, and its stress is what plain steps reach from the same
@@ -177,7 +177,7 @@
 #'   (see above).
 #' * scikit-learn's defaults are `max_iter = 300` and `eps = 1e-6`; for a good
 #'   fit (stress-1 of 0.05, squared 0.0025), `1e-6` stops while stress still
-#'   falls by 0.04% per iteration. `nmds()` defaults to `max_iter = 1000` and
+#'   falls by 0.04% per iteration. `nmds()` defaults to `max_iters = 1000` and
 #'   `tol = 1e-7`.
 #' * scikit-learn always uses the secondary approach to ties; `nmds()` uses
 #'   the primary one unless `ties = "secondary"`.
@@ -246,7 +246,7 @@
 #'
 #' The result, with all its attributes, is bit-identical from run to run, in
 #' new R sessions, and for any value of `cpus`, given the same `dm`, `k`,
-#' `n_starts`, `max_iter`, `tol`, `ties`, and `seed`. Each start splits its sums
+#' `n_starts`, `max_iters`, `tol`, `ties`, and `seed`. Each start splits its sums
 #' into a fixed number of parts that depends only on the number of samples,
 #' and adds them in a fixed order; the sort order of the distances is a
 #' total order (tied distances keep their order in `dm`), and so is the
@@ -296,7 +296,7 @@
 #'     plot(ord, asp = 1)
 #'
 nmds <- function (
-    dm, k = 2L, n_starts = 4L, max_iter = 1000L, tol = 1e-7,
+    dm, k = 2L, n_starts = 4L, max_iters = 1000L, tol = 1e-7,
     ties = 'primary', seed = 0L, cpus = n_cpus() ) {
 
   validate_cpus()
@@ -305,7 +305,7 @@ nmds <- function (
   if (!is.character(ties) || length(ties) != 1 || !ties %in% c('primary', 'secondary'))
     stop('`ties` must be "primary" or "secondary".', call. = FALSE)
 
-  smacof_fit(dm, k, n_starts, max_iter, tol, seed, cpus, 'nmds', ties = ties)
+  smacof_fit(dm, k, n_starts, max_iters, tol, seed, cpus, 'nmds', ties = ties)
 }
 
 
@@ -313,12 +313,12 @@ nmds <- function (
 # SMACOF for nmds() (`method = "nmds"`, with `ties`) and mds() (`"mds"`):
 # validates the shared arguments, runs the starts in C, and assembles the
 # result.
-smacof_fit <- function (dm, k, n_starts, max_iter, tol, seed, cpus, method, ties = NULL) {
+smacof_fit <- function (dm, k, n_starts, max_iters, tol, seed, cpus, method, ties = NULL) {
 
-  k        <- ord_k(k)
-  n_starts <- ord_arg(n_starts, '`n_starts` must be a whole number from 0 to 1000.', whole = TRUE, hi = 1000)
-  max_iter <- ord_arg(max_iter, '`max_iter` must be a whole number of at least 0.', whole = TRUE)
-  tol      <- ord_arg(tol,      '`tol` must be a number of at least 0.')
+  k         <- ord_k(k)
+  n_starts  <- ord_arg(n_starts,  '`n_starts` must be a whole number from 0 to 1000.', whole = TRUE, hi = 1000)
+  max_iters <- ord_arg(max_iters, '`max_iters` must be a whole number of at least 0.', whole = TRUE)
+  tol       <- ord_arg(tol,       '`tol` must be a number of at least 0.')
 
   dv     <- dist_vector(dm)
   dm     <- dv$dm
@@ -365,7 +365,7 @@ smacof_fit <- function (dm, k, n_starts, max_iter, tol, seed, cpus, method, ties
   } else {
     .Call(C_pcoa, dm * dscale, n, k, cpus)$points
   }
-  opts <- c(n_starts, seed, max_iter, cpus, 0L, identical(ties, 'primary'),
+  opts <- c(n_starts, seed, max_iters, cpus, 0L, identical(ties, 'primary'),
             1024L, 1L, method == 'mds', 2^26, 2^18)
   res  <- .Call(C_nmds, dm, n, k, init, as.integer(opts), c(tol, dscale))
 

@@ -30,12 +30,12 @@
 
   # The C engine, from given starting configurations (n x k x m array).
   engine <- function (
-      d, init = NULL, k = dim(init)[2], n_starts = 0L, max_iter = 300L, tol = 1e-6,
+      d, init = NULL, k = dim(init)[2], n_starts = 0L, max_iters = 300L, tol = 1e-6,
       ties = 'secondary', cpus = 1L, seed = 0L, mem = 1024L, relax = 0L,
       metric = 0L, check = 2^26, parmin = 2^18, dscale = 1 ) {
     .Call(
       C_nmds, as.double(d), attr(d, 'Size'), as.integer(k), init,
-      as.integer(c(n_starts, seed, max_iter, cpus, 1L, ties == 'primary', mem,
+      as.integer(c(n_starts, seed, max_iters, cpus, 1L, ties == 'primary', mem,
                    relax, metric, check, parmin)),
       c(tol, dscale) )
   }
@@ -90,10 +90,10 @@
 
   # Non-metric SMACOF in plain R, written from scikit-learn's description:
   # the per-iteration raw stress, and the final configuration.
-  smacof_r <- function (d, init, max_iter = 300L, tol = 1e-6, ties = 'secondary') {
+  smacof_r <- function (d, init, max_iters = 300L, tol = 1e-6, ties = 'secondary') {
     dv <- as.double(d); N <- length(dv)
     x  <- init; trace <- numeric(0); old <- NA
-    for (it in seq_len(max_iter)) {
+    for (it in seq_len(max_iters)) {
       dx   <- as.double(dist(x))
       dhat <- if (it == 1) dv else iso_r(dv, dx, ties)
       dhat <- dhat * sqrt(N / sum(dhat^2))
@@ -164,20 +164,20 @@
     # The plain R version agrees too.
     d    <- fx$dists$bray30
     init <- fx$values[[1]]$init
-    ref  <- smacof_r(d, init, max_iter = 60L)
-    res  <- engine(d, array(init, c(dim(init), 1)), max_iter = 60L)
+    ref  <- smacof_r(d, init, max_iters = 60L)
+    res  <- engine(d, array(init, c(dim(init), 1)), max_iters = 60L)
     expect_true(max(abs(res$trace / ref$trace - 1)) < 1e-10)
 
     # Tied dissimilarities and zeros are recognized.
     d   <- fx$dists$ties50
-    res <- engine(d, max_iter = 1L, k = 2L, n_starts = 1L)
+    res <- engine(d, max_iters = 1L, k = 2L, n_starts = 1L)
     expect_identical(res$n_zero,   as.double(sum(d == 0)))
     expect_identical(res$n_groups, as.double(length(unique(d[d > 0]))))
 
     # The primary approach to ties matches plain R.
     init <- array(runif(50 * 2), c(50, 2, 1))
-    res  <- engine(d, init, ties = 'primary', max_iter = 40L)
-    ref  <- smacof_r(d, init[, , 1], ties = 'primary', max_iter = 40L)
+    res  <- engine(d, init, ties = 'primary', max_iters = 40L)
+    ref  <- smacof_r(d, init[, , 1], ties = 'primary', max_iters = 40L)
     expect_identical(res$iters, length(ref$trace))
     expect_true(max(abs(res$trace[seq_len(res$iters)] / ref$trace - 1)) < 1e-9)
     expect_true(rel_diff(res$x_all[, , 1], ref$x) < 1e-8)
@@ -203,7 +203,7 @@
 
   # Tied dissimilarities and zeros are recognized. ====
 
-  res <- engine(d_jacc, max_iter = 1L, k = 2L, n_starts = 1L)
+  res <- engine(d_jacc, max_iters = 1L, k = 2L, n_starts = 1L)
   expect_identical(res$n_zero,   as.double(sum(d_jacc == 0)))
   expect_identical(res$n_groups, as.double(length(unique(d_jacc[d_jacc > 0]))))
 
@@ -219,7 +219,7 @@
   sv    <- sort(v)
   first <- -1; groups <- 0
   for (x in sv) if (x > first && x - first >= 1e-15) { groups <- groups + 1; first <- x }
-  res   <- engine(d, k = 1L, n_starts = 1L, max_iter = 0L, cpus = 2L)
+  res   <- engine(d, k = 1L, n_starts = 1L, max_iters = 0L, cpus = 2L)
   expect_identical(res$n_groups, groups)
   expect_true(groups < N - 10000)
 
@@ -228,8 +228,8 @@
   # The primary approach to ties matches plain R. ====
 
   init <- array(runif(50 * 2), c(50, 2, 1))
-  res  <- engine(d_jacc, init, ties = 'primary', max_iter = 40L)
-  ref  <- smacof_r(d_jacc, init[, , 1], ties = 'primary', max_iter = 40L)
+  res  <- engine(d_jacc, init, ties = 'primary', max_iters = 40L)
+  ref  <- smacof_r(d_jacc, init[, , 1], ties = 'primary', max_iters = 40L)
   expect_identical(res$iters, length(ref$trace))
   expect_true(max(abs(res$trace[seq_len(res$iters)] / ref$trace - 1)) < 1e-9)
   expect_true(rel_diff(res$x_all[, , 1], ref$x) < 1e-8)
@@ -250,11 +250,11 @@
   # start. Tight tolerances take a while, so for k = 1, 2, 3 at home.
 
   for (k in if (home) 1:3 else 2L) for (ties in c('primary', 'secondary')) {
-    ord <- nmds(d_bray, k = k, ties = ties, n_starts = 0, tol = 1e-12, max_iter = 1e5, cpus = 1)
+    ord <- nmds(d_bray, k = k, ties = ties, n_starts = 0, tol = 1e-12, max_iters = 1e5, cpus = 1)
     expect_true(attr(ord, 'converged'))
     expect_true(stationarity(d_bray, ord, ties) < 1e-5, info = paste(k, ties))
     res <- engine(d_bray, pcoa_init(d_bray, k), ties = ties, tol = 1e-12,
-                  max_iter = 100000L, dscale = dscale_of(d_bray))
+                  max_iters = 100000L, dscale = dscale_of(d_bray))
     expect_equal(attr(ord, 'stress'), res$stress, tolerance = 1e-6, info = paste(k, ties))
   }
 
@@ -290,7 +290,7 @@
   # The best start is the one reported, and n_best counts the starts
   # within 0.1% of it.
   init <- pcoa_init(d_bray, 2)
-  res  <- engine(d_bray, init, n_starts = 4L, ties = 'primary', max_iter = 1000L,
+  res  <- engine(d_bray, init, n_starts = 4L, ties = 'primary', max_iters = 1000L,
                  tol = 1e-7, relax = 1L, dscale = dscale_of(d_bray))
   expect_identical(attr(ord, 'stress'), min(res$stress_all))
   expect_identical(attr(ord, 'best_start'), which.min(res$stress_all) - 1L)
@@ -315,17 +315,17 @@
   expect_identical(dim(nmds(d_pln, k = 1, n_starts = 1)), c(40L, 1L))
   expect_identical(nmds(as.matrix(d_bray), n_starts = 1), nmds(d_bray, n_starts = 1))
 
-  # max_iter = 0: the starting configurations themselves.
-  ord0 <- nmds(d_bray, max_iter = 0, n_starts = 0)
+  # max_iters = 0: the starting configurations themselves.
+  ord0 <- nmds(d_bray, max_iters = 0, n_starts = 0)
   expect_identical(attr(ord0, 'n_iter'), 0L)
   expect_false(attr(ord0, 'converged'))
   expect_equal(attr(ord0, 'stress'), stress_r(d_bray, init[, , 1], 'primary'), tolerance = 1e-10)
 
-  # Stopping at max_iter (its last step plain), or at tol = 0.
-  ord <- nmds(d_bray, max_iter = 3, n_starts = 0)
+  # Stopping at max_iters (its last step plain), or at tol = 0.
+  ord <- nmds(d_bray, max_iters = 3, n_starts = 0)
   expect_identical(attr(ord, 'n_iter'), 3L)
   expect_false(attr(ord, 'converged'))
-  ord <- nmds(d_pln, tol = 0, max_iter = 5000, n_starts = 0)
+  ord <- nmds(d_pln, tol = 0, max_iters = 5000, n_starts = 0)
   expect_true(attr(ord, 'converged'))
 
 
@@ -363,10 +363,10 @@
   # parallel re-sorting of tie groups): the same results.
   init <- pcoa_init(d_big, 2)
   for (ties in c('primary', 'secondary')) {
-    r1 <- engine(d_big, init, n_starts = 3L, max_iter = 25L, ties = ties, relax = 1L)
+    r1 <- engine(d_big, init, n_starts = 3L, max_iters = 25L, ties = ties, relax = 1L)
     for (cpus in unique(c(2L, many))) for (mem in c(1L, 1024L)) for (check in c(2^26, 1000))
       expect_identical(
-        engine(d_big, init, n_starts = 3L, max_iter = 25L, ties = ties, relax = 1L,
+        engine(d_big, init, n_starts = 3L, max_iters = 25L, ties = ties, relax = 1L,
                cpus = cpus, mem = mem, check = check, parmin = 1000),
         r1 )
   }
@@ -418,7 +418,7 @@
 
   # Perfect fit: points in a plane.
   pts <- cbind(x = sin(1:30), y = cos(1:30 / 2) * 3)
-  ord <- nmds(dist(pts), max_iter = 2000, tol = 1e-12)
+  ord <- nmds(dist(pts), max_iters = 2000, tol = 1e-12)
   expect_true(attr(ord, 'stress') < 1e-3)
 
   # All distances tied.
@@ -430,7 +430,7 @@
   # Exactly equal configuration distances among tied dissimilarities: the
   # corners of a square.
   sq  <- dist(cbind(c(0, 1, 0, 1), c(0, 0, 1, 1)))
-  ord <- nmds(sq, ties = 'secondary', max_iter = 1000, tol = 1e-12)
+  ord <- nmds(sq, ties = 'secondary', max_iters = 1000, tol = 1e-12)
   expect_true(attr(ord, 'stress') < 1e-4)
 
   # Duplicate samples: zero distances, pulled together, for both
@@ -475,21 +475,21 @@
   expect_identical(nmds(d, k = 10), nmds(d, k = 2))
   expect_identical(nmds(d, k = 1e12), nmds(d, k = 2))
 
-  # Huge max_iter still converges; cpus larger than n.
-  expect_identical(nmds(d_pln, max_iter = 1e12), nmds(d_pln, max_iter = 1e6))
+  # Huge max_iters still converges; cpus larger than n.
+  expect_identical(nmds(d_pln, max_iters = 1e12), nmds(d_pln, max_iters = 1e6))
   expect_identical(nmds(d, cpus = 100), nmds(d, cpus = 1))
-  expect_identical(nmds(d_bray, n_starts = 1, max_iter = 5, cpus = 1e5), nmds(d_bray, n_starts = 1, max_iter = 5, cpus = 1))
+  expect_identical(nmds(d_bray, n_starts = 1, max_iters = 5, cpus = 1e5), nmds(d_bray, n_starts = 1, max_iters = 5, cpus = 1))
 
   # A PCoA axis without a positive eigenvalue gets random coordinates; so
   # does a start that isn't finite, or has no spread.
   d   <- as.dist(matrix(c(0, 1, 1, 3, 1, 0, 1, 1, 1, 1, 0, 1, 3, 1, 1, 0), 4))
   ord <- nmds(d, k = 3, n_starts = 0)
   expect_true(all(apply(ord, 2, sd) > 0))
-  res <- engine(d_bray, array(c(1:60, rep(5, 60)), c(60, 2, 1)), max_iter = 0L)
+  res <- engine(d_bray, array(c(1:60, rep(5, 60)), c(60, 2, 1)), max_iters = 0L)
   expect_true(sd(res$x_all[, 2, 1]) > 0)
-  res <- engine(d_bray, array(1, c(60, 2, 1)), max_iter = 0L)
+  res <- engine(d_bray, array(1, c(60, 2, 1)), max_iters = 0L)
   expect_true(all(apply(res$x_all[, , 1], 2, sd) > 0))
-  res <- engine(d_bray, array(c(NaN, 1:119), c(60, 2, 1)), max_iter = 0L)
+  res <- engine(d_bray, array(c(NaN, 1:119), c(60, 2, 1)), max_iters = 0L)
   expect_true(all(is.finite(res$x_all)))
 
   # A start whose points all collapse together.
@@ -531,9 +531,9 @@
   expect_error(nmds(d_bray, n_starts = 1001),  '`n_starts`')
   expect_error(nmds(d_bray, n_starts = 1e10),  '`n_starts`')
   expect_error(nmds(d_bray, n_starts = NULL),  '`n_starts`')
-  expect_error(nmds(d_bray, max_iter = 1:2),   '`max_iter`')
-  expect_error(nmds(d_bray, max_iter = -1),    '`max_iter`')
-  expect_error(nmds(d_bray, max_iter = NaN),   '`max_iter`')
+  expect_error(nmds(d_bray, max_iters = 1:2),   '`max_iters`')
+  expect_error(nmds(d_bray, max_iters = -1),    '`max_iters`')
+  expect_error(nmds(d_bray, max_iters = NaN),   '`max_iters`')
   expect_error(nmds(d_bray, tol = -1),         '`tol`')
   expect_error(nmds(d_bray, tol = NA),         '`tol`')
   expect_error(nmds(d_bray, tol = Inf),        '`tol`')

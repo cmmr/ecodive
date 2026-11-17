@@ -22,12 +22,12 @@
 
   # The C engine in metric mode, from given starting configurations.
   engine <- function (
-      d, init = NULL, k = dim(init)[2], n_starts = 0L, max_iter = 300L, tol = 1e-6,
+      d, init = NULL, k = dim(init)[2], n_starts = 0L, max_iters = 300L, tol = 1e-6,
       cpus = 1L, seed = 0L, mem = 1024L, relax = 0L, check = 2^26,
       parmin = 2^18, dscale = 1 ) {
     .Call(
       C_nmds, as.double(d), attr(d, 'Size'), as.integer(k), init,
-      as.integer(c(n_starts, seed, max_iter, cpus, 1L, 0L, mem, relax, 1L, check, parmin)),
+      as.integer(c(n_starts, seed, max_iters, cpus, 1L, 0L, mem, relax, 1L, check, parmin)),
       c(tol, dscale) )
   }
 
@@ -58,10 +58,10 @@
 
   # Metric SMACOF in plain R, written from scikit-learn's description: the
   # per-iteration raw stress, and the final configuration.
-  smacof_r <- function (d, init, max_iter = 300L, tol = 1e-6) {
+  smacof_r <- function (d, init, max_iters = 300L, tol = 1e-6) {
     dv <- as.double(d)
     x  <- init; trace <- numeric(0); old <- NA
-    for (it in seq_len(max_iter)) {
+    for (it in seq_len(max_iters)) {
       x  <- guttman_r(x, d)
       dx <- as.double(dist(x))
       st <- sum((dx - dv)^2)
@@ -118,8 +118,8 @@
     # The plain R version agrees too.
     d    <- fx$dists$bray30
     init <- fx$values[[1]]$init
-    ref  <- smacof_r(d, init, max_iter = 60L)
-    res  <- engine(d, array(init, c(dim(init), 1)), max_iter = 60L)
+    ref  <- smacof_r(d, init, max_iters = 60L)
+    res  <- engine(d, array(init, c(dim(init), 1)), max_iters = 60L)
     expect_true(max(abs(res$trace / ref$trace - 1)) < 1e-10)
   }
 
@@ -128,8 +128,8 @@
   # The plain R version agrees, from a random start. ====
 
   init <- array(runif(50 * 2), c(50, 2, 1))
-  ref  <- smacof_r(d_jacc, init[, , 1], max_iter = 40L)
-  res  <- engine(d_jacc, init, max_iter = 40L)
+  ref  <- smacof_r(d_jacc, init[, , 1], max_iters = 40L)
+  res  <- engine(d_jacc, init, max_iters = 40L)
   expect_identical(res$iters, length(ref$trace))
   expect_true(max(abs(res$trace[seq_len(res$iters)] / ref$trace - 1)) < 1e-10)
   expect_true(rel_diff(res$x_all[, , 1], ref$x) < 1e-8)
@@ -142,14 +142,14 @@
   # at home.
 
   for (k in if (home) 1:3 else 2L) {
-    ord <- mds(d_bray, k = k, n_starts = 0, tol = 1e-12, max_iter = 1e5, cpus = 1)
+    ord <- mds(d_bray, k = k, n_starts = 0, tol = 1e-12, max_iters = 1e5, cpus = 1)
     x   <- matrix(unclass(ord), 60)
     g   <- guttman_r(x, d_bray)
     expect_true(attr(ord, 'converged'))
     expect_true(sqrt(sum((x - g)^2) / sum(x^2)) < 1e-5, info = k)
     dx  <- as.double(dist(x))
     expect_equal(sum(dx * d_bray) / sum(dx^2), 1, tolerance = 1e-8, info = k)
-    res <- engine(d_bray, pcoa_init(d_bray, k), tol = 1e-12, max_iter = 100000L,
+    res <- engine(d_bray, pcoa_init(d_bray, k), tol = 1e-12, max_iters = 100000L,
                   dscale = dscale_of(d_bray))
     expect_equal(attr(ord, 'stress'), res$stress, tolerance = 1e-8, info = k)
   }
@@ -204,7 +204,7 @@
 
   # The best start is the one reported.
   init <- pcoa_init(d_bray, 2)
-  res  <- engine(d_bray, init, n_starts = 4L, max_iter = 1000L, tol = 1e-7,
+  res  <- engine(d_bray, init, n_starts = 4L, max_iters = 1000L, tol = 1e-7,
                  relax = 1L, dscale = dscale_of(d_bray))
   expect_identical(attr(ord, 'stress'), min(res$stress_all))
   expect_identical(attr(ord, 'best_start'), which.min(res$stress_all) - 1L)
@@ -229,13 +229,13 @@
   expect_true(attr(ord3, 'stress') < attr(ord, 'stress'))
   expect_identical(mds(as.matrix(d_bray), n_starts = 1), mds(d_bray, n_starts = 1))
 
-  # max_iter = 0, small max_iter, and tol = 0.
-  ord0 <- mds(d_bray, max_iter = 0, n_starts = 0)
+  # max_iters = 0, small max_iters, and tol = 0.
+  ord0 <- mds(d_bray, max_iters = 0, n_starts = 0)
   expect_identical(attr(ord0, 'n_iter'), 0L)
   expect_equal(attr(ord0, 'stress'), stress_r(d_bray * dscale_of(d_bray), init[, , 1]), tolerance = 1e-10)
-  ord <- mds(d_jacc, tol = 0, max_iter = 5000, n_starts = 0)
+  ord <- mds(d_jacc, tol = 0, max_iters = 5000, n_starts = 0)
   expect_true(attr(ord, 'converged'))
-  ord <- mds(d_jacc, max_iter = 2, n_starts = 0)
+  ord <- mds(d_jacc, max_iters = 2, n_starts = 0)
   expect_identical(attr(ord, 'n_iter'), 2L)
   expect_false(attr(ord, 'converged'))
 
@@ -269,10 +269,10 @@
   }
 
   init <- pcoa_init(d_big, 2)
-  r1   <- engine(d_big, init, n_starts = 3L, max_iter = 25L, relax = 1L)
+  r1   <- engine(d_big, init, n_starts = 3L, max_iters = 25L, relax = 1L)
   for (cpus in unique(c(2L, many))) for (mem in c(1L, 1024L)) for (check in c(2^26, 1000))
     expect_identical(
-      engine(d_big, init, n_starts = 3L, max_iter = 25L, relax = 1L, cpus = cpus,
+      engine(d_big, init, n_starts = 3L, max_iters = 25L, relax = 1L, cpus = cpus,
              mem = mem, check = check, parmin = 1000),
       r1 )
 
@@ -329,7 +329,7 @@
   expect_identical(dim(ord), c(3L, 2L))
   expect_equal(as.double(dist(ord)), c(3, 4, 5), tolerance = 1e-6)
   expect_identical(mds(d, cpus = 100), mds(d, cpus = 1))
-  expect_identical(mds(d_bray, max_iter = 1e12, n_starts = 0), mds(d_bray, max_iter = 1e6, n_starts = 0))
+  expect_identical(mds(d_bray, max_iters = 1e12, n_starts = 0), mds(d_bray, max_iters = 1e6, n_starts = 0))
 
   # A start whose points all collapse together: stress 1.
   d    <- as.dist(matrix(c(0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0), 4))
@@ -358,8 +358,8 @@
   expect_error(mds(d_bray, n_starts = -1),    '`n_starts`')
   expect_error(mds(d_bray, n_starts = 1001),  '`n_starts`')
   expect_error(mds(d_bray, n_starts = NA),    '`n_starts`')
-  expect_error(mds(d_bray, max_iter = -1),    '`max_iter`')
-  expect_error(mds(d_bray, max_iter = Inf),   '`max_iter`')
+  expect_error(mds(d_bray, max_iters = -1),    '`max_iters`')
+  expect_error(mds(d_bray, max_iters = Inf),   '`max_iters`')
   expect_error(mds(d_bray, tol = -1),         '`tol`')
   expect_error(mds(d_bray, tol = NaN),        '`tol`')
   expect_error(mds(d_bray, seed = 'a'),       'seed')

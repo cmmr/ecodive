@@ -8,7 +8,7 @@ nmds(
   dm,
   k = 2L,
   n_starts = 4L,
-  max_iter = 1000L,
+  max_iters = 1000L,
   tol = 1e-07,
   ties = "primary",
   seed = 0L,
@@ -25,7 +25,7 @@ negative values.}
 \item{n_starts}{The number of random starts to run after the start from the
 PCoA solution, from 0 to 1000. Default: \code{4}}
 
-\item{max_iter}{The maximum number of SMACOF iterations for each start.
+\item{max_iters}{The maximum number of SMACOF iterations for each start.
 Default: \code{1000}}
 
 \item{tol}{Each start stops once an iteration lowers the raw stress by
@@ -52,7 +52,7 @@ has no eigenvalues. Then come:
 \item \code{stress}: Kruskal's stress-1 of the solution, from 0 (a perfect rank
 order) to 1.
 \item \code{converged}: \code{TRUE} if the best start stopped because a plain step met
-\code{tol}, \code{FALSE} if it stopped at \code{max_iter}.
+\code{tol}, \code{FALSE} if it stopped at \code{max_iters}.
 \item \code{n_iter}: The number of SMACOF iterations the best start ran.
 \item \code{n_starts}: The number of random starts run.
 \item \code{best_start}: Which start gave the solution: \code{0} for the PCoA start,
@@ -105,7 +105,7 @@ isotonic regression; disparities are scaled so that their squares sum to
 the number of pairs; then the Guttman transform \eqn{\Gamma} moves the
 points. A start stops when its raw stress (the numerator above) falls by
 no more than \code{tol} times the denominator in one iteration, or after
-\code{max_iter} iterations. This rule is relative to the sum of squared
+\code{max_iters} iterations. This rule is relative to the sum of squared
 distances, not to the stress itself, so a nearly perfect fit (stress-1
 below about 0.01) stops while stress can still fall noticeably in
 relative terms; a smaller \code{tol} helps there. At the default \code{tol}, on
@@ -123,7 +123,7 @@ so relaxed steps don't converge in that one direction (they flip the scale
 back and forth), nor at all when \code{k = 1}, where \eqn{\Gamma} only depends
 on the order of the points. So a start takes relaxed steps only until one
 makes no more than \code{tol} progress, then plain steps until a plain step
-does (or until \code{max_iter}, whose last step is always plain), and \code{k = 1} uses
+does (or until \code{max_iters}, whose last step is always plain), and \code{k = 1} uses
 plain steps throughout. The configuration returned and measured thus
 always comes from a plain step: it is a fixed point of \eqn{\Gamma} to
 within \code{tol}, and its stress is what plain steps reach from the same
@@ -186,7 +186,7 @@ tiny distances to 0, which can change an iteration count.) Otherwise:
 (see above).
 \item scikit-learn's defaults are \code{max_iter = 300} and \code{eps = 1e-6}; for a good
 fit (stress-1 of 0.05, squared 0.0025), \code{1e-6} stops while stress still
-falls by 0.04\% per iteration. \code{nmds()} defaults to \code{max_iter = 1000} and
+falls by 0.04\% per iteration. \code{nmds()} defaults to \code{max_iters = 1000} and
 \code{tol = 1e-7}.
 \item scikit-learn always uses the secondary approach to ties; \code{nmds()} uses
 the primary one unless \code{ties = "secondary"}.
@@ -252,7 +252,7 @@ interrupts.
 
 The result, with all its attributes, is bit-identical from run to run, in
 new R sessions, and for any value of \code{cpus}, given the same \code{dm}, \code{k},
-\code{n_starts}, \code{max_iter}, \code{tol}, \code{ties}, and \code{seed}. Each start splits its sums
+\code{n_starts}, \code{max_iters}, \code{tol}, \code{ties}, and \code{seed}. Each start splits its sums
 into a fixed number of parts that depends only on the number of samples,
 and adds them in a fixed order; the sort order of the distances is a
 total order (tied distances keep their order in \code{dm}), and so is the

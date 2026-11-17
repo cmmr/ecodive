@@ -45,7 +45,7 @@
 #'   * `stress`: The stress of the solution, from 0 (a perfect fit) to 1 (no
 #'     better than putting every point in one place). See "Stress" below.
 #'   * `converged`: `TRUE` if the best start stopped because a plain step met
-#'     `tol`, `FALSE` if it stopped at `max_iter`.
+#'     `tol`, `FALSE` if it stopped at `max_iters`.
 #'   * `n_iter`: The number of SMACOF iterations the best start ran.
 #'   * `n_starts`: The number of random starts run.
 #'   * `best_start`: Which start gave the solution: `0` for the PCoA start,
@@ -68,13 +68,13 @@
 #' points by the Guttman transform, \eqn{X \leftarrow \Gamma(X) =
 #' \frac{1}{n} B(X) X}, which never increases \eqn{\sigma}. A start stops
 #' when an iteration lowers \eqn{\sigma} by no more than `tol` times
-#' \eqn{\sum d_{ij}^2}, or after `max_iter` iterations.
+#' \eqn{\sum d_{ij}^2}, or after `max_iters` iterations.
 #'
 #' As in [nmds()] (see there), iterations take relaxed steps,
 #' \eqn{X \leftarrow 2\Gamma(X) - X} (de Leeuw & Heiser, 1980), when `k > 1`,
 #' until one makes no more than `tol` progress, and then plain steps until a
 #' plain step does; `k = 1` uses plain steps only, and so does the last
-#' iteration allowed by `max_iter`. So the returned configuration is a fixed
+#' iteration allowed by `max_iters`. So the returned configuration is a fixed
 #' point of \eqn{\Gamma} to within `tol`, at the right scale
 #' (\eqn{\sum d_{ij}\delta_{ij} = \sum d_{ij}^2}), typically in about half the
 #' iterations that plain steps take. With plain steps only (an internal
@@ -106,7 +106,7 @@
 #' the distances in `dm`. It only depends on \eqn{\sigma}, so the lowest
 #' stress is the best fit, and it doesn't depend on the units of `dm`. It is
 #' 1 when all points coincide, and at most 1 after any SMACOF iteration
-#' (`max_iter = 0` returns the starting configuration, whose stress can be
+#' (`max_iters = 0` returns the starting configuration, whose stress can be
 #' higher). Pairs with a distance of 0 in `dm`, such as duplicate samples,
 #' are pulled towards the same point.
 #'
@@ -125,7 +125,7 @@
 #'   "classical_mds"`); `mds()` runs both kinds, and ranks them by the stress
 #'   described above.
 #' * scikit-learn's defaults are `max_iter = 300` and `eps = 1e-6`; `mds()`'s
-#'   are `max_iter = 1000` and `tol = 1e-7`.
+#'   are `max_iters = 1000` and `tol = 1e-7`.
 #' * scikit-learn returns the configuration as SMACOF leaves it; `mds()`
 #'   centers, rotates, and flips it, which doesn't change the stress.
 #' * scikit-learn stops when stress falls by *less* than `eps`; `mds()` stops
@@ -159,7 +159,7 @@
 #'
 #' The result, with all its attributes, is bit-identical from run to run, in
 #' new R sessions, and for any value of `cpus`, given the same `dm`, `k`,
-#' `n_starts`, `max_iter`, `tol`, and `seed`, for the reasons given in [nmds()].
+#' `n_starts`, `max_iters`, `tol`, and `seed`, for the reasons given in [nmds()].
 #' `dm * 2^p` gives exactly the result for `dm`, times \eqn{2^p}. (As for
 #' every ordination, distances above \eqn{10^{150}} are rejected.) Results can
 #' still differ in the last bits between computers or compilers, as for any
@@ -204,11 +204,11 @@
 #'     all.equal(c(dist(ord)), c(dist(pts)))
 #'
 mds <- function (
-    dm, k = 2L, n_starts = 4L, max_iter = 1000L, tol = 1e-7,
+    dm, k = 2L, n_starts = 4L, max_iters = 1000L, tol = 1e-7,
     seed = 0L, cpus = n_cpus() ) {
 
   validate_cpus()
   validate_seed()
 
-  smacof_fit(dm, k, n_starts, max_iter, tol, seed, cpus, 'mds')
+  smacof_fit(dm, k, n_starts, max_iters, tol, seed, cpus, 'mds')
 }
