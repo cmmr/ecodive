@@ -433,7 +433,7 @@ perm_matrix <- function (permutations, n) {
     return(list(n_perm = nrow(p), perms = t(p) - 1L))
   }
 
-  if (!is.numeric(permutations) || length(permutations) != 1 || is.na(permutations) ||
+  if (!is.numeric(permutations) || length(permutations) != 1 || !is.finite(permutations) ||
       permutations < 0 || permutations %% 1 != 0)
     stop('`permutations` must be a whole number of at least 0, or a matrix ',
          'with one permutation per row.', call. = FALSE)

@@ -102,7 +102,7 @@
     expect_identical(g1$rho,   c1$rho)
     expect_identical(g1$p,     c1$graph$p)
     expect_identical(g1$j,     c1$graph$i)
-    expect_identical(g1$x,     c1$graph$x)
+    expect_equal(g1$x, c1$graph$x, tolerance = 1e-14)  # exp() differs by an ulp across libms
   }
   expect_identical(g1$n_failures,   0L)
   expect_identical(g1$n_components, 1L)
@@ -120,7 +120,7 @@
     expect_identical(g2$rho,   c2$rho)
     expect_identical(g2$p,     c2$graph$p)
     expect_identical(g2$j,     c2$graph$i)
-    expect_identical(g2$x,     c2$graph$x)
+    expect_equal(g2$x, c2$graph$x, tolerance = 1e-14)  # exp() differs by an ulp across libms
   }
 
   # Pure fuzzy intersection keeps only mutual neighbours.
@@ -223,6 +223,10 @@
   x9 <- center_like(x9, unclass(u2)[, ])
   expect_equal(unname(unclass(u2)[, ]), x9, tolerance = 0)
   expect_identical(attr(u2, 'init'), 'matrix')
+
+  # A constant column would leave every sample at the same place.
+  expect_error(umap(c1$d, init = matrix(0, n1, 2)), 'all the same')
+  expect_error(umap(c1$d, init = cbind(seq_len(n1), 1)), 'all the same')
 
 
   #--------------------------------------------------

@@ -365,6 +365,7 @@
 
   expect_error(permanova(d, data = meta, formula = ~ trt, permutations = -1), 'permutations')
   expect_error(permanova(d, data = meta, formula = ~ trt, permutations = 1.5), 'permutations')
+  expect_error(permanova(d, data = meta, formula = ~ trt, permutations = Inf), 'permutations')
   expect_error(permanova(d, data = meta, formula = ~ trt, permutations = ex$perms[, -1]), '36 columns')
   bad <- ex$perms
   bad[2, 1:2] <- 1L

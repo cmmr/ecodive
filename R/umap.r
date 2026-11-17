@@ -243,7 +243,12 @@ umap <- function (
   n      <- dv$n
   labels <- dv$labels
 
-  if (!is.null(init_mtx)) init_mtx <- ord_init_matrix(init_mtx, n, k)
+  # A constant column would stay constant: its gradients are all zero.
+  if (!is.null(init_mtx)) {
+    init_mtx <- ord_init_matrix(init_mtx, n, k)
+    if (n >= 2 && any(apply(init_mtx, 2L, function (v) all(v == v[[1]]))))
+      stop('`init` must not have a column whose values are all the same.', call. = FALSE)
+  }
 
   # Coordinates (n x k) and the graph's edges (up to 2n(n_neighbors - 1))
   # are indexed with ints in C.
