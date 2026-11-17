@@ -16,6 +16,7 @@ ORDINATIONS <- local({
     na.strings       = "",
     text             = "
       name,                                id,   input, alt_ids
+      Constrained Analysis of Principal Coordinates, capscale, dist, cap constrainedanalysisofprincipalcoordinates
       Distance-based Redundancy Analysis,  dbrda, dist, distancebasedrda
       Isometric Feature Mapping,           isomap, dist, isometricmapping
       Metric Multidimensional Scaling,     mds,  dist,  metricmds
@@ -41,17 +42,19 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #'        [beta_div()], or a symmetric matrix of distances. Every method
 #'        listed by `list_ordinations()` takes distances.
 #'
-#' @param method   The name of an ordination method: `"dbrda"`, `"nmds"`,
-#'        `"pcoa"`, `"tsne"`, or `"umap"`. Flexible matching is supported
-#'        (see below). Programmatic access via `list_ordinations()`.
+#' @param method   The name of an ordination method: `"capscale"`,
+#'        `"dbrda"`, `"nmds"`, `"pcoa"`, `"tsne"`, or `"umap"`. Flexible
+#'        matching is supported (see below). Programmatic access via
+#'        `list_ordinations()`.
 #'
 #' @param ...   Further arguments for the method's function, such as `k`,
 #'        `seed`, `cpus`, or `pcoa`'s `correction`. Each method keeps its own
-#'        defaults; see
-#'        [dbrda()] (which also needs `data`), [nmds()], [pcoa()], [tsne()],
-#'        and [umap()]. `seed` is ignored by the methods that have no random
-#'        parts (`dbrda` and `pcoa`), so the same arguments can be given to
-#'        every method.
+#'        defaults; see [capscale()] and [dbrda()] (which also need `groups`,
+#'        or `data` and `formula`, as in `ordination(dm, 'dbrda', 'treatment',
+#'        meta)`), [nmds()], [pcoa()], [tsne()], and [umap()]. `seed` is
+#'        ignored by the methods that have no random parts (`capscale`,
+#'        `dbrda` and `pcoa`), so the same arguments can be given to every
+#'        method.
 #'
 #' @return The method's result, as described in "Ordination result" below.
 #'   `ordination(dm, 'pcoa', ...)` is the same as `pcoa(dm, ...)`.
@@ -62,6 +65,7 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #'
 #' | Option / Function Name | Method Name                                           |
 #' | :--------------------- | :---------------------------------------------------- |
+#' | `capscale`             | Constrained Analysis of Principal Coordinates         |
 #' | `dbrda`                | Distance-based Redundancy Analysis (db-RDA)           |
 #' | `isomap`               | Isometric Feature Mapping (Isomap)                    |
 #' | `mds`                  | Metric Multidimensional Scaling (MDS)                 |
@@ -74,7 +78,7 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' directly, not through `ordination()`. [permanova()] and ecodive's other
 #' tests are run by [dist_test()].
 #'
-#' Default numbers of axes differ: `k = 3` for `dbrda`, `pcoa` (and
+#' Default numbers of axes differ: `k = 3` for `capscale`, `dbrda`, `pcoa` (and
 #' [pca()]), and `k = 2` for `nmds`, `tsne`, and `umap`.
 #'
 #'
@@ -85,7 +89,8 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' also work: `'MDS'`, `'PCO'`, `'cmdscale'`, or `'classical MDS'` for
 #' `pcoa`; `'non-metric MDS'`, `'metaMDS'`, or `'monoMDS'` for `nmds`;
 #' `'Rtsne'`, `'bhtsne'`, or `'Barnes-Hut t-SNE'` for `tsne`; and `'uwot'`
-#' for `umap`. `'dbRDA'` or `'distance-based RDA'` select `dbrda`.
+#' for `umap`. `'dbRDA'` or `'distance-based RDA'` select `dbrda`, and `'CAP'`
+#' selects `capscale`.
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
@@ -93,14 +98,15 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #'
 #' **Same names in other packages**
 #'
-#' `ape::pcoa()`, `vegan::pca()`, `vegan::dbrda()`, and `uwot::umap()` share
+#' `ape::pcoa()`, `vegan::pca()`, `vegan::dbrda()`, `vegan::capscale()`, and
+#' `uwot::umap()` share
 #' names with ecodive's functions, and whichever package was attached last
 #' masks the other's. Write `ecodive::pcoa()` and so on, or use
 #' `ordination()`, which always runs ecodive's, to be sure.
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [dbrda()], [nmds()], [pcoa()], [tsne()], [umap()],
+#' @seealso [capscale()], [dbrda()], [nmds()], [pcoa()], [tsne()], [umap()],
 #'   [list_ordinations()]; [pca()] and [permanova()], which are called
 #'   directly.
 #'

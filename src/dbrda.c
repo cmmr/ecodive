@@ -48,16 +48,63 @@
  * Sign convention: each axis is flipped so that its score
  * with the largest absolute value is positive (the first such
  * sample, if tied).
+ *
+ *
+ * capscale() is the same analysis of G's positive part, G+:
+ * the principal coordinates with positive eigenvalues, as
+ * vegan::capscale() analyzes them. When G has no eigenvalue
+ * below zero (beyond vegan's tolerance; Euclidean
+ * distances), G+ = G and nothing changes. A Lanczos run on
+ * -G, as products straight from D, settles that: it stops as
+ * soon as a Ritz value of -G proves a negative eigenvalue
+ * (a Ritz value never exceeds the largest eigenvalue), and
+ * otherwise runs until -G's largest eigenvalue has
+ * converged.
+ *
+ * Otherwise G+ needs all of G's eigenvalues: G (scaled) is
+ * formed, reduced to tridiagonal form T by Householder
+ * reflections, and T's eigenvalues are found by the QL
+ * algorithm. Eigenvectors are only computed for one side:
+ * for the positive eigenvalues, so that G+ = Y Y', or for
+ * the others, so that G+ = G - Y S Y' (S their signs),
+ * whichever has fewer. They come from inverse iteration on
+ * T, then the reflections. That needs about 4n^3/3 + 2n^2 r
+ * operations, for r eigenvectors, against several times as
+ * many for all of them.
  */
 
 #include "ecodive.h"
 
-#include <float.h> // DBL_EPSILON
+#include <float.h>  // DBL_EPSILON
+#include <stdlib.h> // qsort
 
 // A design column is aliased (redundant) when Gram-Schmidt
 // leaves less than this fraction of its centred norm: the
 // same rule and tolerance as R's qr(), which vegan uses.
 #define DBRDA_QR_TOL 1e-7
+
+// capscale()'s probe for a negative eigenvalue: Lanczos
+// with a large basis, and Rayleigh-Ritz every few steps
+// (cheaper per step than pcoa()'s 200 and 4, for about as
+// many steps).
+#define CAP_BASIS    120
+#define CAP_RR_EVERY 6
+
+// Inverse iteration: at most this many solves for an
+// eigenvector, and this many more once it has converged.
+#define CAP_INV_ITERS 10
+#define CAP_INV_EXTRA 2
+
+// Eigenvalues of T closer than this (times T's norm) are a
+// cluster, whose eigenvectors are kept orthogonal to each
+// other (LAPACK's dstein uses the same).
+#define CAP_ORTOL 1e-3
+
+// Columns of a dense product per block.
+#define CAP_BLOCK 16
+
+// Eigenvectors per back-transformation task.
+#define CAP_VEC_TASK 8
 
 
 //------------------------------------------------------
@@ -86,6 +133,684 @@ static void fix_sign(double *x, int n, double *y, int ny) {
 }
 
 
+
+//======================================================
+// Products with B, the matrix analyzed: G itself, from
+// D (gower.c), or capscale()'s G+ (see pos_part()):
+//
+//   r == 0           B = G
+//   Y, rest == 0     B = Y Y'
+//   Y, rest == 1     B = G - Y S Y', S = diag(sign)
+//
+// Each product is centred and has F projected out, as
+// gower_mult() does for G (which reads F from g).
+//======================================================
+typedef struct {
+  int           n;
+  gower_t      *g;
+  const double *Y;     // n x r, or NULL.
+  const double *sign;  // r signs (rest == 1).
+  int           r;
+  int           rest;
+  double       *t;     // r x CAP_BLOCK scratch.
+  double       *w;     // n x CAP_BLOCK scratch.
+  const double *F;     // n x f orthonormal columns to
+  int           f;     // project out, or NULL / 0.
+} bop_t;
+
+
+// Point both B and G's products at F.
+static void bop_set_basis(bop_t *b, const double *F, int f) {
+  b->F    = F;
+  b->f    = f;
+  b->g->F = F;
+  b->g->f = f;
+}
+
+
+static void bop_mult(const double *V, double *W, int m, void *ctx) {
+
+  bop_t *b = (bop_t *) ctx;
+  int    n = b->n, r = b->r;
+
+  if (b->Y == NULL || b->rest) gower_mult(V, W, m, b->g);
+  if (b->Y == NULL) return;
+
+  for (int v0 = 0; v0 < m; v0 += CAP_BLOCK) {
+
+    int mc = (m - v0 < CAP_BLOCK) ? m - v0 : CAP_BLOCK;
+
+    // t = Y' V, then w = Y t (times the signs).
+    for (int v = 0; v < mc; v++) {
+      const double *x = V + (size_t) (v0 + v) * n;
+      double       *t = b->t + (size_t) v * r;
+      for (int c = 0; c < r; c++) {
+        t[c] = dot(b->Y + (size_t) c * n, x, n);
+        if (b->rest) t[c] *= b->sign[c];
+      }
+    }
+
+    for (int v = 0; v < mc; v++) {
+      double *w = (b->rest) ? b->w : W + (size_t) (v0 + v) * n;
+      combine(b->Y, n, r, b->t + (size_t) v * r, 1, w);
+      center(w, n);
+      project_out(b->F, b->f, w, n);
+      if (b->rest) {
+        double *out = W + (size_t) (v0 + v) * n;
+        for (int i = 0; i < n; i++) out[i] -= w[i];
+      }
+    }
+  }
+}
+
+
+
+//======================================================
+// capscale(): is there an eigenvalue of G below -limit?
+// The largest eigenvalue of -G, by Lanczos on products
+// straight from D. A Ritz value above `limit` proves one,
+// and stops the run; otherwise it runs until -G's
+// largest eigenvalue has converged, which can take many
+// steps when G's smallest eigenvalues are close together
+// (full-rank Euclidean distances). After CAP_PROBE_MIN
+// steps, or n / CAP_PROBE_DIV if more, by when the
+// eigen-decomposition would cost about as much, it gives
+// up and answers yes: pos_part() is right either way.
+//======================================================
+#define CAP_PROBE_MIN 30
+#define CAP_PROBE_DIV 10
+
+static void neg_mult(const double *V, double *W, int m, void *ctx) {
+  gower_mult(V, W, m, ctx);
+  size_t len = (size_t) m * ((gower_t *) ctx)->n;
+  for (size_t i = 0; i < len; i++) W[i] = -W[i];
+}
+
+static int has_negative(gower_t *g, int n, double trace, double limit, int *steps) {
+
+  double  val = 0, res = 0;
+  double *vec = (double *) R_alloc(n, sizeof(double));
+  int     max = (n / CAP_PROBE_DIV > CAP_PROBE_MIN) ? n / CAP_PROBE_DIV : CAP_PROBE_MIN;
+
+  lanczos_t lz = {
+    .n = n, .k = 1, .dims = n - 1, .deflate = 1, .scale = trace,
+    .op = neg_mult, .ctx = g, .vecs = vec, .vals = &val, .resid = &res,
+    .max_basis = CAP_BASIS, .rr_every = CAP_RR_EVERY,
+    .early_stop = 1, .stop_above = limit, .stop_tol = INFINITY,
+    .stream = 61u, .max_steps = max };
+
+  lanczos(&lz);
+
+  *steps += lz.steps;
+
+  return val > limit || !lz.converged;
+}
+
+
+
+//======================================================
+// Dense symmetric eigenvalues, for capscale().
+//======================================================
+
+// Householder reduction of the symmetric n x n matrix in
+// A's lower triangle (column-major) to tridiagonal T =
+// H' A H, H = H_0 H_1 ... H_{n-3}, H_k = I - tau_k v v'.
+// T's diagonal goes to d, its sub-diagonal to e (n - 1),
+// and each v (v[0] = 1, at row k + 1) to column k of A,
+// below the diagonal.
+//
+// Step k needs p = B v for the trailing block B, then
+// updates B -= v w' + w v'. Both are passes over B, so
+// the update is put off: step k + 1 applies it to each
+// column of its (smaller) trailing block just before
+// reading that column for its own product, so that each
+// step makes one pass. Only the column that step k + 1
+// takes its reflection from is updated at once.
+//
+// A pass is split into tasks of TD_BLOCK columns, run in
+// parallel. A column's own sum goes to sdot; its
+// contributions to rows below go to its task's buffer,
+// and the buffers are added up in task order. The tasks
+// don't depend on the number of threads, so neither do
+// the results.
+#define TD_BLOCK 32
+
+static double       *td_B;      // the trailing block, leading dimension td_ld
+static int           td_ld, td_m;
+static const double *td_pv;     // pending update: B -= pv pw' + pw pv',
+static const double *td_pw;     // ... or NULL
+static const double *td_v;      // product vector, or NULL
+static double       *td_part;   // tasks x m
+static double       *td_sdot;   // m
+
+static void *td_pass(void *arg) {
+
+  int share = ((worker_t *) arg)->i, shares = ((worker_t *) arg)->n;
+  int m = td_m, tasks = (m + TD_BLOCK - 1) / TD_BLOCK;
+
+  const double *pv = td_pv, *pw = td_pw, *v = td_v;
+
+  for (int t = share; t < tasks; t += shares) {
+
+    int     c0   = t * TD_BLOCK;
+    int     c1   = (c0 + TD_BLOCK < m) ? c0 + TD_BLOCK : m;
+    double *part = td_part + (size_t) t * m;
+
+    if (v) for (int i = c0; i < m; i++) part[i] = 0;
+
+    for (int j = c0; j < c1; j++) {
+
+      double *col = td_B + (size_t) j * td_ld;
+
+      if (pv && !v) {
+        double pvj = pv[j], pwj = pw[j];
+        for (int i = j; i < m; i++) col[i] -= pv[i] * pwj + pw[i] * pvj;
+        continue;
+      }
+
+      if (pv) col[j] -= pv[j] * pw[j] + pw[j] * pv[j];
+
+      double vj = v[j], s0 = col[j] * vj, s1 = 0;
+      int    i  = j + 1;
+
+      if (pv) {
+        double pvj = pv[j], pwj = pw[j];
+        for (; i + 1 < m; i += 2) {
+          double a0 = col[i]     - (pv[i]     * pwj + pw[i]     * pvj);
+          double a1 = col[i + 1] - (pv[i + 1] * pwj + pw[i + 1] * pvj);
+          col[i] = a0; col[i + 1] = a1;
+          part[i] += a0 * vj; part[i + 1] += a1 * vj;
+          s0 += a0 * v[i];    s1 += a1 * v[i + 1];
+        }
+        if (i < m) {
+          double a0 = col[i] - (pv[i] * pwj + pw[i] * pvj);
+          col[i] = a0;
+          part[i] += a0 * vj;
+          s0 += a0 * v[i];
+        }
+      }
+      else {
+        for (; i + 1 < m; i += 2) {
+          double a0 = col[i], a1 = col[i + 1];
+          part[i] += a0 * vj; part[i + 1] += a1 * vj;
+          s0 += a0 * v[i];    s1 += a1 * v[i + 1];
+        }
+        if (i < m) {
+          part[i] += col[i] * vj;
+          s0 += col[i] * v[i];
+        }
+      }
+
+      td_sdot[j] = s0 + s1;
+    }
+  }
+
+  return NULL;
+}
+
+// One pass over the m x m block B (leading dimension ld):
+// the pending update (pv, pw), if any, then p = B v, if v.
+static void td_run(
+    double *B, int ld, int m, const double *pv, const double *pw,
+    const double *v, double *p, int n_threads ) {
+
+  td_B = B; td_ld = ld; td_m = m; td_pv = pv; td_pw = pw; td_v = v;
+
+  int tasks = (m + TD_BLOCK - 1) / TD_BLOCK;
+  int nt    = threads_for(n_threads, (double) m * m, 2.5e5);
+  run_parallel(td_pass, (nt < tasks) ? nt : tasks, m);
+
+  if (!v) return;
+  for (int i = 0; i < m; i++) {
+    double s = td_sdot[i];
+    for (int t = 0; t < tasks && t * TD_BLOCK < i; t++)
+      s += td_part[(size_t) t * m + i];
+    p[i] = s;
+  }
+}
+
+static void tridiagonalize(
+    double *A, int n, double *d, double *e, double *tau, int n_threads ) {
+
+  int tasks = (n + TD_BLOCK - 1) / TD_BLOCK;
+  td_part   = (double *) R_alloc((size_t) tasks * n + 1, sizeof(double));
+  td_sdot   = (double *) R_alloc(n, sizeof(double));
+
+  double *p  = (double *) R_alloc(n, sizeof(double));
+  double *w0 = (double *) R_alloc(n, sizeof(double));
+  double *w1 = (double *) R_alloc(n, sizeof(double));
+
+  const double *pv = NULL, *pw = NULL; // pending update of the trailing block
+
+  for (int k = 0; k < n - 2; k++) {
+
+    if (k % 64 == 0 && user_interrupted()) error("Interrupted."); // # nocov
+
+    int     m = n - k - 1;
+    double *v = A + (size_t) k * n + k + 1;
+    double *B = A + (size_t) (k + 1) * n + k + 1; // trailing m x m block
+    double *w = (k % 2) ? w1 : w0;
+
+    // Column k is up to date: its reflection.
+    d[k] = A[(size_t) k * n + k];
+
+    double alpha = v[0], sig = 0;
+    for (int i = 1; i < m; i++) sig += v[i] * v[i];
+
+    tau[k] = 0;
+    e[k]   = alpha;
+    if (sig > 0) {
+      double beta = -copysign(sqrt(alpha * alpha + sig), alpha);
+      double sc   = 1 / (alpha - beta);
+      for (int i = 1; i < m; i++) v[i] *= sc;
+      e[k]   = beta;
+      tau[k] = (beta - alpha) / beta;
+    }
+    v[0] = 1;
+
+    // The pending update, and p = B v.
+    td_run(B, n, m, pv, pw, (tau[k] != 0) ? v : NULL, p, n_threads);
+    pv = pw = NULL;
+    if (tau[k] == 0) continue;
+
+    // w = tau p - (tau^2 / 2) (p'v) v.
+    double h = 0;
+    for (int i = 0; i < m; i++) { w[i] = tau[k] * p[i]; h += w[i] * v[i]; }
+    h *= -0.5 * tau[k];
+    for (int i = 0; i < m; i++) w[i] += h * v[i];
+
+    // B's first column now; the rest at the next step.
+    for (int i = 0; i < m; i++) B[i] -= v[i] * w[0] + w[i] * v[0];
+    pv = v + 1;
+    pw = w + 1;
+  }
+
+  if (pv) td_run(A + (size_t) (n - 1) * n + n - 1, n, 1, pv, pw, NULL, NULL, 1);
+
+  if (n >= 2) {
+    d[n - 2] = A[(size_t) (n - 2) * n + n - 2];
+    e[n - 2] = A[(size_t) (n - 2) * n + n - 1];
+  }
+  d[n - 1] = A[(size_t) (n - 1) * n + n - 1];
+}
+
+// Eigenvalues of the symmetric tridiagonal matrix with
+// diagonal d and sub-diagonal e (n - 1; both overwritten),
+// by the QL algorithm with implicit shifts, as in the
+// public-domain JAMA routine tql2() (lz_sym_eigen()),
+// without the eigenvectors. Returns 1 if an eigenvalue
+// failed to converge.
+static int tri_eigenvalues(double *d, double *e, int n) {
+
+  e[n - 1] = 0;
+
+  double f = 0, tst1 = 0;
+  int    failed = 0;
+
+  for (int l = 0; l < n; l++) {
+
+    double t = fabs(d[l]) + fabs(e[l]);
+    if (t > tst1) tst1 = t;
+    int m = l;
+    while (m < n - 1 && fabs(e[m]) > DBL_EPSILON * tst1) m++;
+
+    if (m > l) {
+      int done = 0;
+      for (int iter = 0; iter < 100; iter++) {
+
+        double g = d[l];
+        double p = (d[l + 1] - g) / (2 * e[l]);
+        double r = hypot(p, 1);
+        if (p < 0) r = -r;
+        d[l]       = e[l] / (p + r);
+        d[l + 1]   = e[l] * (p + r);
+        double dl1 = d[l + 1];
+        double h   = g - d[l];
+        for (int i = l + 2; i < n; i++) d[i] -= h;
+        f += h;
+
+        p = d[m];
+        double c = 1, c2 = 1, c3 = 1, sn = 0, s2 = 0;
+        double el1 = e[l + 1];
+        for (int i = m - 1; i >= l; i--) {
+          c3 = c2;
+          c2 = c;
+          s2 = sn;
+          g  = c * e[i];
+          h  = c * p;
+          r  = hypot(p, e[i]);
+          e[i + 1] = sn * r;
+          sn = e[i] / r;
+          c  = p / r;
+          p  = c * d[i] - sn * g;
+          d[i + 1] = h + sn * (c * g + sn * d[i]);
+        }
+        p    = -sn * s2 * c3 * el1 * e[l] / dl1;
+        e[l] = sn * p;
+        d[l] = c * p;
+
+        if (fabs(e[l]) <= DBL_EPSILON * tst1) { done = 1; break; }
+      }
+      if (!done) failed = 1; // # nocov
+    }
+    d[l] = d[l] + f;
+    e[l] = 0;
+  }
+
+  return failed;
+}
+
+
+static int cmp_double(const void *a, const void *b) {
+  double x = *(const double *) a, y = *(const double *) b;
+  return (x > y) - (x < y);
+}
+
+
+// Eigenvectors of the symmetric tridiagonal T (diagonal d,
+// sub-diagonal e) for its eigenvalues w[0..r-1], ascending,
+// by inverse iteration, to the columns of Z (n x r).
+// Eigenvalues within CAP_ORTOL * tnorm of the one before
+// are a cluster: each eigenvector in it is kept orthogonal
+// to the cluster's earlier ones, and its shift at least
+// 10 eps * tnorm above the earlier one's, as in LAPACK's
+// dstein. Starting vectors come from a fixed PCG stream.
+static void tri_vectors(
+    const double *d, const double *e, int n, const double *w, int r,
+    double *Z, double tnorm ) {
+
+  double *u1  = (double *) R_alloc(n, sizeof(double)); // U's diagonal,
+  double *u2  = (double *) R_alloc(n, sizeof(double)); // ... first and
+  double *u3  = (double *) R_alloc(n, sizeof(double)); // ... second super-diagonal.
+  double *l   = (double *) R_alloc(n, sizeof(double)); // multipliers
+  int    *piv = (int *)    R_alloc(n, sizeof(int));    // rows swapped?
+
+  double ortol = CAP_ORTOL * tnorm;
+  double pert  = 10 * DBL_EPSILON * tnorm;
+  double tiny  = DBL_EPSILON * tnorm;
+  double grow  = sqrt(0.1 / n) / (n * DBL_EPSILON * tnorm);
+  if (!(tnorm > 0)) { pert = tiny = DBL_MIN; grow = 1 / DBL_EPSILON; } // # nocov
+
+  pcg32_random_t rng;
+  pcg32_srandom_r(&rng, 20261117u, 62u);
+
+  int    c0   = 0;  // first eigenvector of the current cluster
+  double prev = 0;  // the previous shift
+
+  for (int j = 0; j < r; j++) {
+
+    if (j % 64 == 0 && user_interrupted()) error("Interrupted."); // # nocov
+
+    double lam = w[j];
+    if (j == 0 || lam - w[j - 1] > ortol) c0 = j;
+    else if (lam - prev < pert) lam = prev + pert;
+    prev = lam;
+
+
+    //------------------------------------------------
+    // T - lam I = P L U, with partial pivoting. U has
+    // two super-diagonals; tiny pivots are replaced by
+    // +/- tiny, so that every solve is defined.
+    //------------------------------------------------
+    double a = d[0] - lam, b = (n > 1) ? e[0] : 0;
+    for (int i = 0; i < n - 1; i++) {
+      double c  = e[i];                               // row i + 1, column i
+      double dn = d[i + 1] - lam;                     // ... column i + 1
+      double en = (i + 1 < n - 1) ? e[i + 1] : 0;     // ... column i + 2
+      if (fabs(c) > fabs(a)) {
+        piv[i] = 1;
+        l[i]   = a / c;
+        u1[i]  = c;
+        u2[i]  = dn;
+        u3[i]  = en;
+        a      = b - l[i] * dn;
+        b      = -l[i] * en;
+      }
+      else {
+        piv[i] = 0;
+        if (fabs(a) < tiny) a = copysign(tiny, a);
+        l[i]   = c / a;
+        u1[i]  = a;
+        u2[i]  = b;
+        u3[i]  = 0;
+        a      = dn - l[i] * b;
+        b      = en;
+      }
+    }
+    if (fabs(a) < tiny) a = copysign(tiny, a);
+    u1[n - 1] = a;
+    u2[n - 1] = u3[n - 1] = 0;
+    if (n >= 2) u3[n - 2] = 0;
+
+
+    //------------------------------------------------
+    // Iterate from a random start.
+    //------------------------------------------------
+    double *x = Z + (size_t) j * n;
+    lz_fill_random(x, n, &rng);
+    double nrm = sqrt(dot(x, x, n));
+    for (int i = 0; i < n; i++) x[i] /= nrm;
+
+    int conv = 0;
+    for (int it = 0; it < CAP_INV_ITERS; it++) {
+
+      // Solve (T - lam I) y = x in place.
+      for (int i = 0; i < n - 1; i++) {
+        if (piv[i]) { double t = x[i]; x[i] = x[i + 1]; x[i + 1] = t; }
+        x[i + 1] -= l[i] * x[i];
+      }
+      x[n - 1] /= u1[n - 1];
+      if (n >= 2) x[n - 2] = (x[n - 2] - u2[n - 2] * x[n - 1]) / u1[n - 2];
+      for (int i = n - 3; i >= 0; i--)
+        x[i] = (x[i] - u2[i] * x[i + 1] - u3[i] * x[i + 2]) / u1[i];
+
+      // Orthogonal to the cluster's earlier eigenvectors.
+      double y_nrm = sqrt(dot(x, x, n));
+      for (int c = c0; c < j; c++) {
+        const double *z = Z + (size_t) c * n;
+        double s = dot(z, x, n);
+        for (int i = 0; i < n; i++) x[i] -= s * z[i];
+      }
+
+      nrm = sqrt(dot(x, x, n));
+      if (!(nrm > 0)) { // # nocov start: a fresh start
+        lz_fill_random(x, n, &rng);
+        nrm = sqrt(dot(x, x, n));
+      } // # nocov end
+      for (int i = 0; i < n; i++) x[i] /= nrm;
+
+      if (y_nrm >= grow && ++conv > CAP_INV_EXTRA) break;
+    }
+  }
+}
+
+
+// Back-transformation: Z <- H Z for the reflections that
+// tridiagonalize() left in A and tau. Each task takes
+// CAP_VEC_TASK columns of Z, applying the reflections
+// from last to first.
+static const double *bt_A, *bt_tau;
+static double       *bt_Z;
+static int           bt_n, bt_r;
+
+static void *back_transform(void *arg) {
+
+  int share = ((worker_t *) arg)->i, shares = ((worker_t *) arg)->n;
+  int n = bt_n, tasks = (bt_r + CAP_VEC_TASK - 1) / CAP_VEC_TASK;
+
+  for (int task = share; task < tasks; task += shares) {
+    int j0 = task * CAP_VEC_TASK;
+    int j1 = (j0 + CAP_VEC_TASK < bt_r) ? j0 + CAP_VEC_TASK : bt_r;
+    for (int k = n - 3; k >= 0; k--) {
+      double t = bt_tau[k];
+      if (t == 0) continue;
+      int           m = n - k - 1;
+      const double *v = bt_A + (size_t) k * n + k + 1;
+      int           j = j0;
+
+      // Four columns at a time, each summed as on its own.
+      for (; j + 3 < j1; j += 4) {
+        double *z0 = bt_Z + (size_t) j * n + k + 1;
+        double *z1 = z0 + n, *z2 = z1 + n, *z3 = z2 + n;
+        double  s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+        for (int i = 0; i < m; i++) {
+          s0 += v[i] * z0[i]; s1 += v[i] * z1[i];
+          s2 += v[i] * z2[i]; s3 += v[i] * z3[i];
+        }
+        s0 *= t; s1 *= t; s2 *= t; s3 *= t;
+        for (int i = 0; i < m; i++) {
+          z0[i] -= s0 * v[i]; z1[i] -= s1 * v[i];
+          z2[i] -= s2 * v[i]; z3[i] -= s3 * v[i];
+        }
+      }
+      for (; j < j1; j++) {
+        double *z = bt_Z + (size_t) j * n + k + 1;
+        double  s = 0;
+        for (int i = 0; i < m; i++) s += v[i] * z[i];
+        s *= t;
+        for (int i = 0; i < m; i++) z[i] -= s * v[i];
+      }
+    }
+  }
+
+  return NULL;
+}
+
+
+//------------------------------------------------------
+// capscale(): sets up `b` for products with G+, the
+// positive part of G (with distances `dist`), and returns
+// trace(G+) and the sum of G's negative eigenvalues in
+// *real and *imag, on the scale of trace_g = trace(G).
+// Eigenvalues within vegan's tolerance of 0,
+// max(sqrt(eps), sqrt(eps) * lambda_1) on the scale that
+// `adj` gives, count as 0.
+//------------------------------------------------------
+static void pos_part(
+    const double *dist, int n, double trace_g, double adj, int n_threads,
+    bop_t *b, double *real, double *imag ) {
+
+  //--------------------------------------------------
+  // A = G / trace(G), from distances scaled by their
+  // largest value (so that no square overflows).
+  //--------------------------------------------------
+  size_t nd  = (size_t) n * (n - 1) / 2;
+  double top = 0;
+  for (size_t i = 0; i < nd; i++) if (dist[i] > top) top = dist[i];
+
+  double *A  = (double *) R_alloc((size_t) n * n, sizeof(double));
+  double *rs = (double *) R_alloc(n, sizeof(double));
+  for (int i = 0; i < n; i++) rs[i] = 0;
+
+  double tot = 0;
+  for (int j = 0; j < n; j++) {
+    const double *dj = dist + dist_col_start(j, n);
+    for (int i = j + 1; i < n; i++) {
+      double a = dj[i - j - 1] / top;
+      a *= a;
+      rs[i] += a;
+      rs[j] += a;
+    }
+  }
+  for (int i = 0; i < n; i++) { tot += rs[i]; rs[i] /= n; }
+  double mean = tot / ((double) n * n);
+  double tr   = tot / (2.0 * n); // trace of the scaled G
+
+  for (int j = 0; j < n; j++) {
+    const double *dj = dist + dist_col_start(j, n);
+    double       *aj = A + (size_t) j * n;
+    aj[j] = (rs[j] - 0.5 * mean) / tr;
+    for (int i = j + 1; i < n; i++) {
+      double a = dj[i - j - 1] / top;
+      aj[i] = -0.5 * (a * a - rs[i] - rs[j] + mean) / tr;
+    }
+  }
+
+
+  //--------------------------------------------------
+  // T, and its eigenvalues (ascending).
+  //--------------------------------------------------
+  double *d   = (double *) R_alloc(n, sizeof(double));
+  double *e   = (double *) R_alloc(n, sizeof(double));
+  double *tau = (double *) R_alloc(n, sizeof(double));
+  double *w   = (double *) R_alloc(n, sizeof(double));
+  double *we  = (double *) R_alloc(n, sizeof(double));
+
+  for (int i = 0; i < n; i++) tau[i] = e[i] = 0;
+  tridiagonalize(A, n, d, e, tau, n_threads);
+
+  double tnorm = 0;
+  for (int i = 0; i < n; i++) {
+    double t = fabs(d[i]) + ((i > 0) ? fabs(e[i - 1]) : 0) + ((i < n - 1) ? fabs(e[i]) : 0);
+    if (t > tnorm) tnorm = t;
+  }
+
+  memcpy(w,  d, n * sizeof(double));
+  memcpy(we, e, n * sizeof(double));
+  if (tri_eigenvalues(w, we, n))
+    error("The eigenvalues of the distances' Gower matrix did not converge."); // # nocov
+  qsort(w, n, sizeof(double), cmp_double);
+
+
+  //--------------------------------------------------
+  // vegan's tolerance, on A's scale: G = trace_g * A,
+  // and vegan's eigenvalues are G's times adj.
+  //--------------------------------------------------
+  double zero = sqrt(DBL_EPSILON);
+  double tol  = zero * w[n - 1];
+  if (tol < zero / (trace_g * adj)) tol = zero / (trace_g * adj);
+
+  int    n_pos = 0;
+  double pos = 0, neg = 0;
+  for (int i = 0; i < n; i++) {
+    if (w[i] >  tol) { pos += w[i]; n_pos++; }
+    if (w[i] < -tol) { neg += w[i]; }
+  }
+
+  *real = pos * trace_g;
+  *imag = neg * trace_g;
+
+
+  //--------------------------------------------------
+  // Eigenvectors for the side with fewer: the top n_pos
+  // eigenvalues, or the other n - n_pos.
+  //--------------------------------------------------
+  int           rest = (n - n_pos < n_pos);
+  int           r    = rest ? n - n_pos : n_pos;
+  const double *wr   = rest ? w : w + (n - n_pos);
+
+  double *Z    = (double *) R_alloc((size_t) n * r + 1, sizeof(double));
+  double *sign = (double *) R_alloc(r + 1, sizeof(double));
+
+  if (r > 0) {
+
+    tri_vectors(d, e, n, wr, r, Z, tnorm);
+
+    bt_A = A; bt_tau = tau; bt_Z = Z; bt_n = n; bt_r = r;
+    // (run_parallel() threads only for 100 or more tasks; the
+    // shares split the column groups among themselves.)
+    int tasks = (r + CAP_VEC_TASK - 1) / CAP_VEC_TASK;
+    int nt    = threads_for(n_threads, (double) n * n * r, 1e6);
+    run_parallel(back_transform, (nt < tasks) ? nt : tasks, (r < 100) ? r : 100);
+  }
+
+  // Y = Z |w|^(1/2), on G's scale.
+  for (int c = 0; c < r; c++) {
+    double  s = sqrt(fabs(wr[c]) * trace_g);
+    double *z = Z + (size_t) c * n;
+    for (int i = 0; i < n; i++) z[i] *= s;
+    sign[c] = (wr[c] < 0) ? -1 : 1;
+  }
+
+  b->Y    = Z;
+  b->sign = sign;
+  b->r    = r;
+  b->rest = rest;
+  b->t    = (double *) R_alloc((size_t) r * CAP_BLOCK + 1, sizeof(double));
+  b->w    = (double *) R_alloc((size_t) n * CAP_BLOCK, sizeof(double));
+}
+
+
 //======================================================
 // R interface.
 //
@@ -97,6 +822,7 @@ static void fix_sign(double *x, int n, double *y, int ny) {
 //   sexp_k      Axes wanted (>= 1).
 //   sexp_adj    Multiplier for G (vegan's 1/(n-1) for
 //               "mean squared distances", else 1).
+//   sexp_pos    1 for capscale(): analyze G+, not G.
 //
 // Returns list(
 //   scores        n x m: wa scores for constrained axes,
@@ -109,16 +835,22 @@ static void fix_sign(double *x, int n, double *y, int ny) {
 //   biplot        (kept constraint columns) x n_con,
 //   u             n x (positive constrained axes) unit
 //                 eigenvectors (lc scores, unscaled),
-//   steps, converged )
+//   steps, converged,
+//   real          trace(G+) times adj (= total for G),
+//   imaginary     the sum of G's negative eigenvalues
+//                 times adj, for capscale() (else 0),
+//   dense         TRUE if G+ was found by a full eigen-
+//                 decomposition (G had a negative one) )
 //======================================================
 SEXP C_dbrda(
     SEXP sexp_dist, SEXP sexp_n, SEXP sexp_x, SEXP sexp_nz,
-    SEXP sexp_k, SEXP sexp_adj, SEXP sexp_n_threads ) {
+    SEXP sexp_k, SEXP sexp_adj, SEXP sexp_pos, SEXP sexp_n_threads ) {
 
   int    n         = asInteger(sexp_n);
   int    nz        = asInteger(sexp_nz);
   int    k         = asInteger(sexp_k);
   double adj       = asReal(sexp_adj);
+  int    positive  = asLogical(sexp_pos) == TRUE;
   int    n_threads = asInteger(sexp_n_threads);
   int    p         = (n > 0) ? (int) (XLENGTH(sexp_x) / n) : 0;
 
@@ -180,12 +912,36 @@ SEXP C_dbrda(
 
 
   //--------------------------------------------------
-  // GQ = G * Q, then the conditional inertia and the
-  // constrained matrix C = Qx' G Qx.
+  // B: G, or for capscale() G+. G+ = G unless G has an
+  // eigenvalue below vegan's tolerance, -max(ZERO, ZERO
+  // * lambda_1) after adj. lambda_1 is at least
+  // trace(G) / (n - 1), so a probe with that bound in
+  // its place misses none (and may find ones that
+  // pos_part() then counts as 0).
+  //--------------------------------------------------
+  int     steps = 0, converged = 1, dense = 0;
+  double  real_g = trace_g, imag_g = 0;
+  bop_t   B = { .n = n, .g = &g };
+
+  if (positive && trace_g > 0) {
+
+    double limit = ZERO * trace_g * adj / (n - 1);
+    if (limit < ZERO) limit = ZERO;
+
+    if (has_negative(&g, n, trace_g, limit / adj, &steps)) {
+      dense = 1;
+      pos_part(REAL(sexp_dist), n, trace_g, adj, n_threads, &B, &real_g, &imag_g);
+    }
+  }
+
+
+  //--------------------------------------------------
+  // GQ = B * Q, then the conditional inertia and the
+  // constrained matrix C = Qx' B Qx.
   //--------------------------------------------------
   double *GQ = (double *) R_alloc((size_t) n * (rq + 1), sizeof(double));
 
-  gower_mult(Q, GQ, rq, &g);
+  bop_mult(Q, GQ, rq, &B);
   const double *GQx = GQ + (size_t) n * rz;
 
   double conditional = 0;
@@ -239,29 +995,28 @@ SEXP C_dbrda(
   // eigenpairs of (I-H) G (I-H), in the space orthogonal
   // to Q and the ones vector.
   //--------------------------------------------------
-  int     kr = 0, steps = 0, converged = 1;
+  int     kr = 0;
   int     dims_r = n - 1 - rq;
   double *r_vecs = NULL, *r_vals = NULL;
 
-  if (kc < k && dims_r > 0) {
+  if (kc < k && dims_r > 0 && real_g > 0) {
 
     kr     = (k - kc < dims_r) ? k - kc : dims_r;
     r_vecs = (double *) R_alloc((size_t) n * kr, sizeof(double));
     r_vals = (double *) R_alloc(kr, sizeof(double));
 
-    g.F = Q;
-    g.f = rq;
+    bop_set_basis(&B, Q, rq);
 
     lanczos_t lz = {
       .n = n, .k = kr, .dims = dims_r, .deflate = 1,
-      .basis = Q, .n_basis = rq, .scale = trace_g,
-      .op = gower_mult, .ctx = &g,
+      .basis = Q, .n_basis = rq, .scale = real_g,
+      .op = bop_mult, .ctx = &B,
       .vecs = r_vecs, .vals = r_vals,
       .resid = (double *) R_alloc(kr, sizeof(double)) };
 
     lanczos(&lz);
-    steps     = lz.steps;
-    converged = lz.converged;
+    steps    += lz.steps;
+    converged = converged && lz.converged;
 
     // Keep the positive, non-zero ones (vegan's ordResid).
     double res_zero = (ZERO * r_vals[0] * adj > ZERO) ? ZERO * r_vals[0] * adj : ZERO;
@@ -337,7 +1092,8 @@ SEXP C_dbrda(
 
   const char *names[] = {
     "scores", "eig", "n_con", "con_eig", "total", "conditional",
-    "constrained", "kept", "biplot", "u", "steps", "converged", "" };
+    "constrained", "kept", "biplot", "u", "steps", "converged",
+    "real", "imaginary", "dense", "" };
 
   SEXP sexp_result = PROTECT(mkNamed(VECSXP, names));
   SET_VECTOR_ELT(sexp_result,  0, sexp_scores);
@@ -352,6 +1108,9 @@ SEXP C_dbrda(
   SET_VECTOR_ELT(sexp_result,  9, sexp_u);
   SET_VECTOR_ELT(sexp_result, 10, ScalarInteger(steps));
   SET_VECTOR_ELT(sexp_result, 11, ScalarLogical(converged));
+  SET_VECTOR_ELT(sexp_result, 12, ScalarReal(real_g * adj));
+  SET_VECTOR_ELT(sexp_result, 13, ScalarReal(imag_g * adj));
+  SET_VECTOR_ELT(sexp_result, 14, ScalarLogical(dense));
 
   UNPROTECT(7);
   return sexp_result;

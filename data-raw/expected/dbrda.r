@@ -18,7 +18,9 @@
 #   expected          vegan's results, named after ecodive's attributes:
 #                     sites (scores(display = "sites"), scaling 2), eig, prop
 #                     ("Proportion Explained"), trace, conditional,
-#                     constrained, unconstrained, constrained_eig, biplot,
+#                     constrained, unconstrained, constrained_eig,
+#                     r_squared and adj_r_squared (RsquareAdj(); numeric(0)
+#                     without constraints), biplot,
 #                     centroids.
 
 library(vegan)
@@ -62,7 +64,12 @@ cases <- list(
   list(name = 'bray, k > n - 1',            dm = vegdist(dune[1:8, ]), data = dune.env[1:8, ], constraints = 'Management', conditions = NULL, k = 10),
   # Conditions only.
   list(name = 'bray, conditions only',      dm = vegdist(dune), data = dune.env, constraints = NULL, conditions = 'A1',              k = 3),
-  list(name = 'bray, conditions only, factor', dm = vegdist(dune), data = dune.env, constraints = NULL, conditions = 'Management + A1', k = 4) )
+  list(name = 'bray, conditions only, factor', dm = vegdist(dune), data = dune.env, constraints = NULL, conditions = 'Management + A1', k = 4),
+  # Aliased (redundant) columns: R-squared adjusts for the rest.
+  list(name = 'bray, aliased',              dm = vegdist(dune), data = cbind(dune.env, A1x2 = 2 * dune.env$A1), constraints = 'Management + A1 + A1x2', conditions = NULL, k = 3),
+  list(name = 'bray, aliased, partial',     dm = vegdist(dune), data = dune.env, constraints = 'Moisture + Management', conditions = 'Use + Manure', k = 3),
+  # No residual degrees of freedom: adjusted R-squared is NA.
+  list(name = 'bray, saturated',            dm = vegdist(dune), data = cbind(dune.env, id = factor(1:20)), constraints = 'id', conditions = NULL, k = 3) )
 
 # The right-hand side of a case's formula.
 case_rhs <- function (cs) {
@@ -76,6 +83,9 @@ for (i in seq_along(cases)) {
   cs  <- cases[[i]]
   dm  <- if (is.null(cs$dm)) dist(cs$counts) else cs$dm
   fit <- dbrda(as.formula(paste('dm ~', case_rhs(cs))), data = cs$data)
+
+  # numeric(0) for both without constraints (conditions only).
+  r2  <- RsquareAdj(fit)
 
   ev  <- eigenvals(fit)
   ev  <- ev[ev > 0]
@@ -101,8 +111,10 @@ for (i in seq_along(cases)) {
     trace           = fit$tot.chi,
     conditional     = if (is.null(fit$pCCA)) 0 else fit$pCCA$tot.chi,
     constrained     = if (is.null(fit$CCA)) 0 else fit$CCA$tot.chi,
-    unconstrained   = fit$CA$tot.chi,
+    unconstrained   = if (is.null(fit$CA$tot.chi)) 0 else fit$CA$tot.chi,
     constrained_eig = if (is.null(fit$CCA)) numeric(0) else unname(fit$CCA$eig),
+    r_squared       = r2$r.squared,
+    adj_r_squared   = r2$adj.r.squared,
     biplot          = sc$biplot,
     centroids       = sc$centroids )
 
