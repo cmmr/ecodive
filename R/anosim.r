@@ -218,12 +218,7 @@ anosim <- function (
   eps <- sqrt(.Machine$double.eps)
   p   <- if (pm$n_perm > 0) (1 + sum(r_prm >= r_obs - eps)) / (1 + pm$n_perm) else NA_real_
 
-  # TODO: use perm_z() once mrpp is merged (R/ecodive_test.r).
-  z <- NA_real_
-  if (pm$n_perm > 1) {
-    z <- (r_obs - mean(r_prm)) / stats::sd(r_prm)
-    if (!is.finite(z)) z <- NA_real_
-  }
+  z <- perm_z(r_obs, r_prm)
 
 
   #--------------------------------------------------------
@@ -242,18 +237,16 @@ anosim <- function (
     else if (!is.null(grp$strata)) 'within strata'
     else                           'free'
 
-  # TODO: use new_ecodive_test() once mrpp is merged (R/ecodive_test.r).
-  structure(
-    .Data = list(
-      statistic   = c(R = r_obs),
-      p_value     = as.double(p),
-      z           = as.double(z),
-      n_perm      = as.integer(pm$n_perm),
-      ranks       = ranks,
-      permutation = permutation ),
-    r_perm = as.double(r_prm),
-    title  = 'Analysis of similarities (ANOSIM)',
-    class  = c('ecodive_anosim', 'ecodive_test') )
+  new_ecodive_test(
+    class       = 'ecodive_anosim',
+    title       = 'Analysis of similarities (ANOSIM)',
+    statistic   = c(R = r_obs),
+    p_value     = p,
+    z           = z,
+    n_perm      = pm$n_perm,
+    ranks       = ranks,
+    perm        = r_prm,
+    permutation = permutation )
 }
 
 

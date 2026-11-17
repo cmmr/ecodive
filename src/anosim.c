@@ -26,15 +26,16 @@
  * shared by a block of PERM_FW permutations, with no n x n
  * matrix.
  *
- * Permutations: as in vegan::anosim(), sample a gets the
- * group of sample p[a] (vegan's grouping[take]).
+ * Permutations come from permute.c, shared with ecodive's
+ * other permutation tests: permutation k (k >= 1) comes from
+ * its own PCG stream, seeded with (seed, k), or from a
+ * supplied matrix; permutation 0 is the identity, the
+ * observed statistic. As in vegan::anosim(), sample a gets
+ * the group of sample p[a] (vegan's grouping[take]).
  *
- * Determinism: permutation k (k >= 1) comes from its own PCG
- * stream, seeded with (seed, k), or from a supplied matrix.
- * Permutation 0 is the identity: the observed statistic.
- * Each block of permutations is computed by one thread, and
- * every sum runs in a fixed order, so results are bit-
- * identical for any number of threads.
+ * Determinism: each block of permutations is computed by one
+ * thread, and every sum runs in a fixed order, so results
+ * are bit-identical for any number of threads.
  */
 
 #include "ecodive.h"
@@ -48,11 +49,7 @@
 static int           an_n;       // Samples.
 static const double *an_rk;      // Packed lower triangle of doubled ranks.
 static const int    *an_grp;     // Each sample's group, 0 .. g - 1.
-static const int    *an_perms;   // n x n_perm supplied permutations, or NULL.
-static const int    *an_order;   // Samples, ordered by stratum.
-static const int    *an_sbeg;    // Stratum s is an_order[an_sbeg[s]] ..
-static int           an_ns;      // ... an_order[an_sbeg[s + 1] - 1].
-static uint64_t      an_seed;
+static perm_source_t an_ps;      // The permutations.
 static int           an_blk0;    // Blocks for this round:
 static int           an_blk1;    // ... an_blk0 to an_blk1 - 1.
 static int           an_total;   // Permutations, including the identity.
@@ -61,44 +58,6 @@ static double       *an_work;    // Per-thread workspace ...
 static size_t        an_wlen;    // ... of this many doubles.
 static int          *an_iwork;   // Per-thread integer workspace ...
 static size_t        an_iwlen;   // ... of this many ints.
-
-
-//------------------------------------------------------
-// Permutation k into p. k = 0 is the identity. The same
-// streams as permanova()'s get_perm(), so the same seed
-// draws the same permutations.
-//------------------------------------------------------
-static void get_perm(int k, int *p) {
-
-  int n = an_n;
-
-  if (k == 0) {
-    for (int a = 0; a < n; a++) p[a] = a;
-    return;
-  }
-
-  if (an_perms) {
-    memcpy(p, an_perms + (size_t) (k - 1) * n, (size_t) n * sizeof(int));
-    return;
-  }
-
-  // Fisher-Yates shuffle within each stratum.
-  pcg32_random_t rng;
-  pcg32_srandom_r(&rng, an_seed, (uint64_t) k);
-
-  for (int a = 0; a < n; a++) p[a] = a;
-
-  for (int s = 0; s < an_ns; s++) {
-    const int *idx = an_order + an_sbeg[s];
-    int        len = an_sbeg[s + 1] - an_sbeg[s];
-    for (int t = len - 1; t > 0; t--) {
-      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
-      int tmp = p[idx[t]];
-      p[idx[t]] = p[idx[u]];
-      p[idx[u]] = tmp;
-    }
-  }
-}
 
 
 //------------------------------------------------------
@@ -305,7 +264,7 @@ static void *within_worker(void *arg) {
     // Sample a gets the group of sample p[a].
     for (int b = 0; b < nb; b++) {
       double *lc = L + (size_t) (b / PERM_W) * n * PERM_W + b % PERM_W;
-      get_perm(k0 + b, p);
+      perm_source_get(&an_ps, k0 + b, p);
       for (int a = 0; a < n; a++)
         lc[(size_t) a * PERM_W] = an_grp[p[a]];
     }
@@ -388,7 +347,6 @@ SEXP C_anosim(
 
   an_n     = n;
   an_grp   = INTEGER(sexp_grp);
-  an_seed  = (uint64_t) seed;
   an_total = n_perm + 1;
 
 
@@ -429,34 +387,7 @@ SEXP C_anosim(
   //--------------------------------------------------
   // Permutations: supplied, or shuffles within strata.
   //--------------------------------------------------
-  an_perms = isNull(sexp_perms) ? NULL : INTEGER(sexp_perms);
-
-  int *order = (int *) R_alloc(n, sizeof(int));
-  int  ns    = 1;
-  int *sbeg;
-
-  if (isNull(sexp_strata)) {
-    for (int a = 0; a < n; a++) order[a] = a;
-    sbeg    = (int *) R_alloc(2, sizeof(int));
-    sbeg[0] = 0;
-    sbeg[1] = n;
-  }
-  else {
-    const int *strata = INTEGER(sexp_strata);
-    ns = 0;
-    for (int a = 0; a < n; a++)
-      if (strata[a] + 1 > ns) ns = strata[a] + 1;
-    sbeg = (int *) R_alloc(ns + 1, sizeof(int));
-    for (int s = 0; s <= ns; s++) sbeg[s] = 0;
-    for (int a = 0; a < n; a++) sbeg[strata[a] + 1]++;
-    for (int s = 0; s < ns; s++) sbeg[s + 1] += sbeg[s];
-    int *fill = (int *) R_alloc(ns, sizeof(int));
-    memcpy(fill, sbeg, (size_t) ns * sizeof(int));
-    for (int a = 0; a < n; a++) order[fill[strata[a]]++] = a;
-  }
-  an_order = order;
-  an_sbeg  = sbeg;
-  an_ns    = ns;
+  perm_source_init(&an_ps, n, sexp_perms, sexp_strata, seed);
 
 
   //--------------------------------------------------

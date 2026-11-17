@@ -118,10 +118,17 @@
   expect_identical(anosim(d, meta$trt, permutations = ex$perms)$permutation, 'supplied matrix')
   expect_identical(anosim(d, meta$trt, permutations = 9, strata = meta$block)$permutation, 'within strata')
 
-  # The printout's details.
-  det <- test_details.ecodive_anosim(res, 4L)
-  expect_true(any(grepl('Mean rank', det)))
-  expect_true(any(grepl('^Between', det)))
+  # The printout, with the mean ranks; one row of the shared columns.
+  out <- capture.output(print(res))
+  expect_true(any(grepl('Analysis of similarities (ANOSIM)', out, fixed = TRUE)))
+  expect_true(any(grepl('R = ', out, fixed = TRUE)))
+  expect_true(any(grepl('Mean rank', out, fixed = TRUE)))
+  expect_true(any(grepl('^Between', out)))
+  df <- as.data.frame(res)
+  expect_identical(df$test, 'anosim')
+  expect_identical(df$stat_name, 'R')
+  expect_identical(df$statistic, res$statistic[['R']])
+  expect_identical(df$p_value, res$p_value)
 
   # No permutations: no p-value or z.
   res <- anosim(d, meta$trt, permutations = 0)
