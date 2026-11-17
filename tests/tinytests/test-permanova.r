@@ -416,6 +416,12 @@
   zero_df <- z$Df == 0 & !rownames(z) %in% c('Residual', 'Total')
   expect_true(all(is.na(z$F[zero_df])) && all(is.na(z[['Pr(>F)']][zero_df])))
 
+  # No term left to drop (the only marginal term is aliased): a table, not
+  # "subscript out of bounds".
+  al$sq <- as.numeric(factor(al$trt))^2
+  z <- permanova(d, data = al, formula = ~ trt * sq, by = 'margin', permutations = 9, cpus = 1)
+  expect_identical(rownames(z$table), c('Residual', 'Total'))
+
   # Infinite values in a term.
   inf <- meta
   inf$ph[3] <- Inf

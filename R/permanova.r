@@ -388,7 +388,8 @@ permanova <- function (
   }
   else { # margin
     num <- vapply(sets[-1], function (s) ss_full - s$set_ss, numeric(pm$n_perm + 1L))
-    num <- matrix(num, ncol = length(scope), dimnames = list(NULL, scope))
+    # nrow: with no term in scope, vapply() gives a list, not a matrix.
+    num <- matrix(unlist(num), nrow = pm$n_perm + 1L, ncol = length(scope), dimnames = list(NULL, scope))
     dfs <- vapply(sets[-1], function (s) full$rank - s$rank, integer(1))
   }
 
