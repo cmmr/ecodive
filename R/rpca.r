@@ -96,7 +96,7 @@
 #'   * `cost`: The root mean squared error of the low-rank fit to the
 #'     observed values, after OptSpace's initialization and after each
 #'     iteration (on OptSpace's rescaled data, as gemelli measures it).
-#'   * `n_iter`: The number of OptSpace iterations run.
+#'   * `n_iters`: The number of OptSpace iterations run.
 #'   * `dm`: Only with `distances = TRUE`. A `dist` object of distances
 #'     between the kept samples.
 #'
@@ -425,7 +425,7 @@ rpca <- function (
     trace    = total / denom,
     loadings = loadings,
     cost     = res$cost,
-    n_iter   = res$n_iter,
+    n_iters  = res$n_iters,
     dm       = dm )
 }
 

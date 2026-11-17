@@ -119,7 +119,7 @@
 
       # The distortion after initialization and after each iteration.
       expect_equal(res$cost, c(fx$cost), tolerance = TOL, info = name)
-      expect_identical(res$n_iter, 5L, info = name)
+      expect_identical(res$n_iters, 5L, info = name)
 
       # OptSpace's final factors, up to the rotation that the starting bases
       # leave free: the same completed matrix, the same singular values of
@@ -230,12 +230,12 @@
   expect_identical(
     names(attributes(ord)),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings',
-      'cost', 'n_iter', 'dm', 'class') )
+      'cost', 'n_iters', 'dm', 'class') )
   expect_identical(dimnames(ord), list(rownames(m), c('RPCA1', 'RPCA2')))
   expect_identical(attr(ord, 'method'), 'rpca')
   expect_identical(dimnames(attr(ord, 'loadings')), list(colnames(m), c('RPCA1', 'RPCA2')))
   expect_length(attr(ord, 'cost'), 6L)
-  expect_identical(attr(ord, 'n_iter'), 5L)
+  expect_identical(attr(ord, 'n_iters'), 5L)
   expect_true(all(diff(attr(ord, 'cost')) < 0))
   expect_true(all(attr(ord, 'prop') > 0) && sum(attr(ord, 'prop')) <= 1 + 1e-12)
   expect_equal(attr(ord, 'prop'), attr(ord, 'eig') / attr(ord, 'trace'), tolerance = 1e-14)
@@ -266,11 +266,11 @@
   # max_iters and tol.
   o1 <- rpca(m, max_iters = 1, cpus = 1)
   expect_length(attr(o1, 'cost'), 2L)
-  expect_identical(attr(o1, 'n_iter'), 1L)
+  expect_identical(attr(o1, 'n_iters'), 1L)
   expect_length(attr(rpca(m, max_iters = 12, cpus = 1), 'cost'), 13L)
   o1 <- rpca(m, tol = 10, cpus = 1)
   expect_length(attr(o1, 'cost'), 2L)
-  expect_identical(attr(o1, 'n_iter'), 1L)
+  expect_identical(attr(o1, 'n_iters'), 1L)
   expect_identical(rpca(m, tol = 0, cpus = 1), rpca(m, cpus = 1))
 
   # Not one of ordination()'s methods: it takes counts.

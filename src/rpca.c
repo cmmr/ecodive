@@ -726,7 +726,7 @@ static void direction(const double *U, const double *RVS, int rows,
 // its penalty).
 //
 // Returns list(scores, loadings, eig, samples, features,
-// single, k, cost, n_iter, dist, rclr, u0, v0, u, s, v,
+// single, k, cost, n_iters, dist, rclr, u0, v0, u, s, v,
 // ss, lanczos_steps, lanczos_converged, threads): scores
 // n x r (u * s), loadings m x r (v), eig the r values
 // s^2 (largest first), the kept samples and features
@@ -1122,7 +1122,7 @@ SEXP C_rpca(
     if (cost[iter] < tol) { iter++; break; }
     iter++;
   }
-  int n_iter = iter - 1; // Iterations run; cost[0 .. n_iter].
+  int n_iters = iter - 1; // Iterations run; cost[0 .. n_iters].
 
   #undef GRADIENT
 
@@ -1260,11 +1260,11 @@ SEXP C_rpca(
   SEXP sexp_sam    = PROTECT(allocVector(INTSXP, n));          nprot++;
   SEXP sexp_fea    = PROTECT(allocVector(INTSXP, m));          nprot++;
   SEXP sexp_single = PROTECT(allocVector(INTSXP, n_single));   nprot++;
-  SEXP sexp_cost   = PROTECT(allocVector(REALSXP, n_iter + 1)); nprot++;
+  SEXP sexp_cost   = PROTECT(allocVector(REALSXP, n_iters + 1)); nprot++;
   for (int k = 0; k < n; k++)        INTEGER(sexp_sam)[k]    = s_idx[k] + 1;
   for (int l = 0; l < m; l++)        INTEGER(sexp_fea)[l]    = f_idx[l] + 1;
   for (int i = 0; i < n_single; i++) INTEGER(sexp_single)[i] = single[i] + 1;
-  memcpy(REAL(sexp_cost), cost, sizeof(double) * (n_iter + 1));
+  memcpy(REAL(sexp_cost), cost, sizeof(double) * (n_iters + 1));
 
   SEXP sexp_u = R_NilValue, sexp_s = R_NilValue, sexp_v = R_NilValue;
   if (debug) {
@@ -1281,7 +1281,7 @@ SEXP C_rpca(
 
   const char *names[] = {
     "scores", "loadings", "eig", "samples", "features", "single", "k",
-    "cost", "n_iter", "dist", "rclr", "u0", "v0", "u", "s", "v",
+    "cost", "n_iters", "dist", "rclr", "u0", "v0", "u", "s", "v",
     "ss", "lanczos_steps", "lanczos_converged", "threads", "" };
   SEXP res = PROTECT(mkNamed(VECSXP, names)); nprot++;
   SET_VECTOR_ELT(res,  0, sexp_scores);
@@ -1292,7 +1292,7 @@ SEXP C_rpca(
   SET_VECTOR_ELT(res,  5, sexp_single);
   SET_VECTOR_ELT(res,  6, ScalarInteger(r));
   SET_VECTOR_ELT(res,  7, sexp_cost);
-  SET_VECTOR_ELT(res,  8, ScalarInteger(n_iter));
+  SET_VECTOR_ELT(res,  8, ScalarInteger(n_iters));
   SET_VECTOR_ELT(res,  9, sexp_dist);
   SET_VECTOR_ELT(res, 10, sexp_rclr);
   SET_VECTOR_ELT(res, 11, sexp_u0);

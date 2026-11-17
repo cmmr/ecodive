@@ -75,7 +75,7 @@ axis: the unit-length feature loadings, for a biplot.
 \item \code{cost}: The root mean squared error of the low-rank fit to the
 observed values, after OptSpace's initialization and after each
 iteration (on OptSpace's rescaled data, as gemelli measures it).
-\item \code{n_iter}: The number of OptSpace iterations run.
+\item \code{n_iters}: The number of OptSpace iterations run.
 \item \code{dm}: Only with \code{distances = TRUE}. A \code{dist} object of distances
 between the kept samples.
 }
