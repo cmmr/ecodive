@@ -30,8 +30,8 @@ extern SEXP C_pthreads(void);
 extern SEXP C_stop_thread_pool(void);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
-extern SEXP C_tsne(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP C_tsne_affinity(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_tsne_p(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_tsne_run(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_ab(SEXP, SEXP);
 extern SEXP C_umap_graph(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_rand(SEXP, SEXP, SEXP);
@@ -66,8 +66,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_stop_thread_pool", (DL_FUNC) &C_stop_thread_pool, 0},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
-  {"C_tsne",      (DL_FUNC) &C_tsne,      6},
-  {"C_tsne_affinity", (DL_FUNC) &C_tsne_affinity, 5},
+  {"C_tsne_p",    (DL_FUNC) &C_tsne_p,    7},
+  {"C_tsne_run",  (DL_FUNC) &C_tsne_run,  4},
   {"C_umap_ab",       (DL_FUNC) &C_umap_ab,       2},
   {"C_umap_graph",    (DL_FUNC) &C_umap_graph,    5},
   {"C_umap_rand",     (DL_FUNC) &C_umap_rand,     3},

@@ -1,177 +1,261 @@
 # Copyright (c) 2026 ecodive authors
 # Licensed under the MIT License: https://opensource.org/license/mit
+#
+# Ported in part from scikit-learn (BSD-3-Clause License, Copyright (c)
+# 2007-2026 The scikit-learn developers); see src/tsne.c and
+# inst/COPYRIGHTS for the license text.
 
 
 
 #' t-distributed Stochastic Neighbor Embedding (t-SNE)
 #'
 #' Ordinates samples from their distances, for plotting beta diversity, by
-#' placing samples that are near each other in `dm` near each other on the
-#' plot. Follows the same procedure as `Rtsne::Rtsne()` given a distance
-#' matrix, and from the same starting coordinates gives the same Barnes-Hut
-#' embedding, but runs in parallel C with far less memory.
+#' placing samples that are near neighbors in `dm` near each other on the
+#' plot. t-SNE is good at showing clusters, but the distances between
+#' clusters, and their sizes, mean little. A port of scikit-learn's `TSNE`
+#' (with `metric = "precomputed"`) to parallel C, with exact and Barnes-Hut
+#' gradients, that never copies `dm` into an \eqn{n \times n} matrix.
 #'
 #' @inheritParams documentation
 #'
 #' @param dm  A `dist` object, such as from [beta_div()] or [bray()], or a
-#'        symmetric numeric matrix of distances. Must not contain `NA`s.
+#'        symmetric numeric matrix of distances. Must not contain `NA`s or
+#'        negative values. Its scale doesn't matter (see "Scale").
 #'
-#' @param k   The number of dimensions. Must be 1, 2, or 3 unless
-#'        `theta = 0`. Default: `2`
+#' @param k   The number of dimensions. Default: `2`
 #'
-#' @param perplexity   Roughly, how many close neighbors each sample has.
-#'        At least `1`, and at most \eqn{(n - 1) / 3} for \eqn{n} samples:
-#'        larger values are reduced to that, with a warning if given.
-#'        Default: `30`, or \eqn{(n - 1) / 3} if that is smaller.
+#' @param perplexity   Roughly, how many neighbors each sample's
+#'        neighborhood counts. Must be at least 1; values above
+#'        \eqn{(n - 1) / 3} are reduced to that (see "Perplexity and small
+#'        datasets" below). Typical values are 5 to 50. Default: `30`
 #'
-#' @param theta   Speed/accuracy trade-off for the Barnes-Hut
-#'        approximation, from `0` to `1`. `0` computes t-SNE exactly, which
-#'        takes time proportional to \eqn{n^2} per iteration. Larger values
-#'        approximate it faster. Default: `0.5`
+#' @param theta   Accuracy of the Barnes-Hut gradient, from 0 (exact, and
+#'        slow) to 1 (fast, and rough): a group of samples is treated as one
+#'        point when its cell's width, divided by its distance, is below
+#'        `theta`. scikit-learn calls it `angle`. Not used by the exact
+#'        gradient. Default: `0.5`
 #'
-#' @param n_iter   The number of iterations: exactly this many are run. Default: `1000`
+#' @param gradient   How to compute the gradient: `"exact"`, `"barnes_hut"`,
+#'        or `"auto"` (the default), which uses `"exact"` for up to 500
+#'        samples, or when `k > 3`, and `"barnes_hut"` otherwise.
+#'        (scikit-learn calls it `method`.)
 #'
-#' @param init   The starting coordinates: `"pcoa"` (the default),
-#'        `"random"`, or a numeric matrix with one row per sample, in the same
-#'        order as `dm`, and `k` columns. See "Starting coordinates" below.
+#' @param init   The starting layout: `"pcoa"` (the default), `"random"`, or
+#'        a numeric matrix with one row per sample, in the same order as
+#'        `dm`, and `k` columns, none of them constant (a constant column
+#'        could never move). See "Starting layout" below.
 #'
-#' @param learning_rate   The step size of the gradient descent (`eta` in
-#'        `Rtsne()`). `"auto"`, the default, uses
-#'        `max(n / exaggeration_factor, 200)` for `n` samples, as
-#'        scikit-learn and FIt-SNE do: `Rtsne()`'s fixed `200` for up to 2400
-#'        samples, and larger steps for more, which need them to converge in
-#'        `n_iter` iterations.
+#' @param max_iters   The most iterations to run, including the first 250 with
+#'        early exaggeration. The run stops sooner when it stops improving
+#'        (see "Method"). Default: `1000`
 #'
-#' @param momentum,final_momentum   The momentum of the gradient descent
-#'        before and after iteration `mom_switch_iter`, from `0` to less than
-#'        `1`. Defaults: `0.5` and `0.8`
+#' @param early_exaggeration   How much to multiply the affinities by during
+#'        the first 250 iterations, which pulls clusters apart early on.
+#'        Must be at least 1. Default: `12`
 #'
-#' @param mom_switch_iter   The iteration from which `final_momentum` is
-#'        used. `NULL`, the default, means `250`, or `0` when `init` is a
-#'        matrix.
+#' @param learning_rate   The step size: a positive number, or `"auto"` (the
+#'        default) for \eqn{\max(n / early\_exaggeration / 4, 50)}, as in
+#'        scikit-learn.
 #'
-#' @param exaggeration_factor   How much the input similarities are
-#'        multiplied by during the early iterations ("early exaggeration"),
-#'        which helps clusters separate. Default: `12`
-#'
-#' @param stop_lying_iter   The iteration at which early exaggeration stops.
-#'        `NULL`, the default, means `250`, or `0` (no exaggeration) when
-#'        `init` is a matrix.
-#'
-#' @param seed   An integer seed for the random starting coordinates. The
-#'        same seed gives the same result. Not used when `init` is `"pcoa"`
-#'        or a matrix. Default: `0`
+#' @param seed   An integer seed for the random starting layout. The same
+#'        seed gives the same result. Not used when `init` is a matrix, nor
+#'        by a PCoA start with `k` axes. Default: `0`
 #'
 #' @return A numeric matrix with one row per sample and one column per
 #'   dimension, named `"TSNE1"`, `"TSNE2"`, etc., as described in "Ordination
 #'   result" below. `method` is `"tsne"`; `eig` and `prop` are `NA`, as t-SNE
 #'   has no eigenvalues. Then come:
 #'
-#'   * `kl_divergence`: The Kullback-Leibler divergence of the embedding's
-#'     similarities from the input similarities at the end: the cost that
-#'     t-SNE minimizes. As in `Rtsne()`, it is approximate when `theta > 0`.
-#'   * `perplexity`: The perplexity used.
-#'   * `init`: How the starting coordinates were chosen: `"random"`,
-#'     `"pcoa"`, or `"matrix"` (given in `init`); `"none"` for fewer than 2
-#'     samples, which are all placed at 0.
+#'   * `kl_divergence`: The Kullback-Leibler divergence of the result's
+#'     affinities from the input affinities: the quantity t-SNE minimizes.
+#'     With the Barnes-Hut gradient, it is the Barnes-Hut estimate.
+#'   * `perplexity`: The perplexity used, after any reduction.
+#'   * `init`: How the starting layout was chosen: `"pcoa"`, `"random"`, or
+#'     `"matrix"` (given in `init`); `"none"` for fewer than 2 samples, which
+#'     are all placed at 0.
+#'   * `n_iter`: The number of iterations run.
+#'   * `learning_rate`: The learning rate used.
+#'   * `gradient`: `"exact"` or `"barnes_hut"`.
 #'
 #' @details
 #'
 #' **Method**
 #'
-#' t-SNE turns the distances \eqn{d_{ij}} into similarities: each sample
-#' \eqn{i} gets a Gaussian kernel \eqn{p_{j|i} \propto \exp(-\beta_i
-#' d_{ij}^2)}, whose \eqn{\beta_i} is found by binary search so that the
-#' kernel's perplexity (2 to the power of its entropy in bits) equals
-#' `perplexity`. Then \eqn{p_{ij} = (p_{j|i} + p_{i|j}) / 2n}. Samples are
-#' placed in `k` dimensions so that the heavy-tailed similarities
-#' \eqn{q_{ij} \propto (1 + |y_i - y_j|^2)^{-1}} between their coordinates
-#' match \eqn{p_{ij}} as well as possible: the coordinates minimize the
+#' Each sample \eqn{i} gets a Gaussian distribution over the other samples,
+#' \eqn{p_{j|i} \propto \exp(-\beta_i d_{ij}^2)}, with \eqn{\beta_i} chosen by
+#' binary search so that its perplexity (2 to the power of its entropy, in
+#' bits) equals `perplexity`. The input affinities are
+#' \eqn{p_{ij} = (p_{j|i} + p_{i|j}) / 2n}. On the plot, the affinities are
+#' \eqn{q_{ij} \propto (1 + |y_i - y_j|^2)^{-1}}, a Student t distribution
+#' with one degree of freedom, whose heavy tail lets dissimilar samples sit
+#' far apart. t-SNE moves the points \eqn{y_i} to minimize the
 #' Kullback-Leibler divergence \eqn{\sum p_{ij} \log(p_{ij} / q_{ij})} by
-#' gradient descent with momentum and per-coordinate adaptive gains.
-#'
-#' With `theta > 0`, two Barnes-Hut approximations make this fast for large
-#' \eqn{n} (van der Maaten 2014): \eqn{p_{j|i}} is computed only for each
-#' sample's \eqn{\lfloor 3 \times} `perplexity`\eqn{\rfloor} nearest
-#' neighbors (others are 0), and the repulsion between distant groups of
-#' samples is computed from their centers of mass in a quadtree (an octree
-#' for `k = 3`). A group is used whole when its cell's width divided by its
-#' distance is below `theta`.
-#'
-#' t-SNE preserves neighborhoods, not distances: the sizes of clusters and
-#' the distances between them on the plot are not meaningful.
+#' gradient descent, with momentum and per-coordinate gains: momentum 0.5
+#' for the first 250 iterations, during which \eqn{p_{ij}} is multiplied by
+#' `early_exaggeration`, then 0.8. Every 50 iterations, it stops if the
+#' gradient's norm is below \eqn{10^{-7}}, or if the divergence hasn't
+#' improved for 300 iterations (after the first 250). These are
+#' scikit-learn's defaults.
 #'
 #'
-#' **Starting coordinates**
+#' **Exact and Barnes-Hut gradients**
 #'
-#' * `"pcoa"`: The first `k` axes of [pcoa()], scaled so that the first has
-#'   standard deviation \eqn{10^{-4}}, as scikit-learn, openTSNE and FIt-SNE
-#'   scale their PCA starts by default. This preserves more of the
-#'   large-scale layout than a random start, and makes the result depend
-#'   only on `dm`. If fewer than `k` axes have positive eigenvalues,
-#'   `"random"` is used instead.
-#' * `"random"`: Normal, with mean 0 and standard deviation \eqn{10^{-4}}, as
-#'   in `Rtsne()`, drawn from `seed`.
-#' * A matrix: used as given. As in `Rtsne()`, the defaults then skip early
-#'   exaggeration and the low-momentum phase, as suits continuing from an
-#'   earlier result.
+#' The exact gradient sums over every pair of samples, which takes time
+#' proportional to \eqn{n^2} per iteration. The Barnes-Hut approximation
+#' (van der Maaten 2014) takes time proportional to \eqn{n \log n}:
+#'
+#' * Each sample's \eqn{p_{j|i}} is computed over its
+#'   \eqn{\lfloor 3 \times perplexity + 1 \rfloor} nearest neighbors only
+#'   (found exactly from `dm`), and is 0 for the rest.
+#' * The repulsion between points on the plot is computed from a tree of
+#'   cells: a quadtree for `k = 2`, an octree for `k = 3`, and a binary tree
+#'   for `k = 1`. A cell far enough away (see `theta`) acts as one point at
+#'   its center of mass.
+#'
+#' The tree only exists for up to 3 dimensions, so larger `k` always uses
+#' the exact gradient. `gradient = "auto"` uses the exact gradient for up to
+#' 500 samples, where it is fast enough, and Barnes-Hut for more.
+#'
+#'
+#' **Perplexity and small datasets**
+#'
+#' Each sample needs at least \eqn{3 \times perplexity} neighbors, so
+#' `perplexity` is reduced to \eqn{(n - 1) / 3} when it is larger (but not
+#' below 1), with a warning if you set `perplexity` yourself. For example,
+#' 40 samples allow a perplexity of up to 13. `k` is used as given, even
+#' when it is \eqn{n} or more.
+#'
+#'
+#' **Scale**
+#'
+#' t-SNE's affinities don't depend on the scale of `dm`, but finding them
+#' does: each sample's binary search (as in scikit-learn) starts at a
+#' precision of 1 and doubles or halves it at most 100 times, so it can't
+#' reach the precision that distances far from 1 need, and their affinities
+#' would come out uniform. So `dm` is first multiplied by a power of 2
+#' (which is exact) that brings its largest distance to between 1 and 2;
+#' multiplying `dm` by any power of 2 gives exactly the same result, and by
+#' any other number, the same up to the search's tolerance. A sample whose
+#' search still doesn't converge in those 100 steps (e.g. one whose nearest
+#' neighbors are \eqn{10^{-20}} times closer than the farthest sample) is
+#' searched again, starting from a better guess and with no limit on the
+#' range.
+#'
+#'
+#' **Starting layout**
+#'
+#' t-SNE only finds a local minimum, and which one depends on the starting
+#' layout. The default, `"pcoa"`, starts from the first `k` axes of
+#' [pcoa()], scaled so that the first has a standard deviation of
+#' \eqn{10^{-4}}, as scikit-learn scales its PCA start: this keeps more of
+#' the data's global structure than a random start, and doesn't depend on a
+#' seed (Kobak & Linderman 2021). Without `k` axes with positive
+#' eigenvalues, it starts at random instead. `"random"` draws each
+#' coordinate from a normal distribution with a standard deviation of
+#' \eqn{10^{-4}}, from `seed`.
 #'
 #'
 #' **Speed and memory**
 #'
-#' `Rtsne()` copies a dist object into an \eqn{n \times n} matrix, and for
-#' `theta = 0` keeps three more \eqn{n \times n} matrices. `tsne()` works
-#' straight from `dm`. For `theta = 0` it keeps one array of \eqn{p_{ij}} the
-#' size of `dm`; for `theta > 0`, only the nearest neighbors'. The neighbor
-#' search, the calibration of each \eqn{\beta_i}, and each iteration's
-#' gradient run on `cpus` threads.
+#' Finding the affinities reads each distance twice (once for each of its
+#' two samples), in parallel. Each sample's binary search then makes up to
+#' 100 passes over its \eqn{3 \times perplexity + 1} neighbors (Barnes-Hut)
+#' or all \eqn{n - 1} other samples (exact). Each iteration takes time
+#' proportional to \eqn{k n^2} (exact) or roughly
+#' \eqn{k n (\log n + 3 \times perplexity)} (Barnes-Hut), divided among
+#' `cpus` threads. The affinities are found in batches, between which the
+#' computation can be interrupted.
+#'
+#' Besides `dm`, the exact gradient keeps \eqn{p_{ij}} for every pair, 8
+#' bytes per pair, the same as `dm` itself. Barnes-Hut keeps
+#' \eqn{n (3 \times perplexity + 1)} to twice that many affinities, 12 bytes
+#' each (and, while building them, two more lists of
+#' \eqn{n (3 \times perplexity + 1)}), and a tree of at most \eqn{2n}
+#' cells. While reading distances for the exact gradient, each thread also
+#' holds 32 rows of them (\eqn{256 n} bytes).
 #'
 #'
-#' **Differences from `Rtsne()`**
+#' **Differences from scikit-learn**
 #'
-#' * The defaults `init = "pcoa"` and `learning_rate = "auto"` follow
-#'   scikit-learn (since version 1.2), openTSNE and FIt-SNE, which have
-#'   moved on from `Rtsne()`'s random start and fixed learning rate. Use
-#'   `init = "random", learning_rate = 200` for `Rtsne()`'s procedure.
-#' * The random starting coordinates come from `seed`, not from R's random
-#'   number generator, so `set.seed()` has no effect, and R's random number
-#'   stream is left untouched. They have the same distribution as
-#'   `Rtsne()`'s: normal with standard deviation \eqn{10^{-4}}.
-#' * Nearest neighbors are found exactly, by scanning `dm`. `Rtsne()` finds
-#'   them with a vantage-point tree, which can miss some when the distances
-#'   aren't metric (e.g. Bray-Curtis), so its results can then differ. Ties
-#'   between neighbors' distances are broken by sample order, which
-#'   `Rtsne()`'s tree doesn't do, so results also differ when distances tie
-#'   at the last neighbor, as they often do for integer data or duplicate
-#'   samples.
-#' * `perplexity` too large for the number of samples is reduced (with a
-#'   warning, if it was given), not an error.
+#' This is a port of scikit-learn 1.9.1's `TSNE` (BSD-3-Clause License,
+#' Copyright (c) 2007-2026 The scikit-learn developers). From the same
+#' affinities and starting layout, the exact gradient gives the same
+#' iterations as scikit-learn's to within rounding; and, as in
+#' scikit-learn, `dm` is squared before the affinities are found. These are
+#' the differences:
 #'
-#' Otherwise every step is computed as `Rtsne()` computes it, in the same
-#' order, with one exception: for `theta = 0`, the sum that normalizes
-#' \eqn{q_{ij}} is added up in parallel, which changes its rounding. So from
-#' the same starting coordinates (`init`; `Y_init` in `Rtsne()`), the
-#' Barnes-Hut (`theta > 0`) coordinates and cost are exactly `Rtsne()`'s.
-#' With `theta = 0` they agree closely at first, but t-SNE magnifies tiny
-#' rounding differences over its iterations, so the two can settle in
-#' different, equally good, local minima. The same can happen with
-#' `theta > 0` on other hardware (e.g. with fused multiply-adds).
+#' * Everything is computed in double precision. scikit-learn rounds the
+#'   squared distances to single precision before finding the affinities,
+#'   and runs Barnes-Hut in single precision, which changes affinities and
+#'   gradients by about 1 part in \eqn{10^7}. Since t-SNE is chaotic, two
+#'   runs that differ by that much end at different (but equally good)
+#'   layouts.
+#' * \eqn{q_{ij}} always has one degree of freedom. scikit-learn uses
+#'   \eqn{\max(k - 1, 1)}, i.e. 2 for `k = 3`, with a gradient that isn't
+#'   exactly the divergence's for more than one degree of freedom. For
+#'   `k = 1` and `k = 2`, the two agree.
+#' * The default start is PCoA. scikit-learn doesn't allow its PCA start with
+#'   precomputed distances, so starts at random there. Random starts come
+#'   from `seed` (see "Reproducibility"), so they differ from scikit-learn's.
+#' * `gradient = "auto"` uses the exact gradient for up to 500 samples;
+#'   scikit-learn defaults to Barnes-Hut.
+#' * `dm` is rescaled by a power of 2, and a binary search that doesn't
+#'   converge is redone (see "Scale"). Where scikit-learn's search does
+#'   converge, the affinities are the same to within its tolerance
+#'   (identical if the largest distance is already between 1 and 2).
+#' * A `perplexity` too large for \eqn{n} is reduced instead of being an
+#'   error; it must be at least 1. Any `max_iters` of at least 1 is allowed
+#'   (scikit-learn requires at least 250). A layout that diverges (e.g.
+#'   from a far too large `learning_rate`) is an error.
+#' * The Barnes-Hut tree handles identical points exactly. scikit-learn's
+#'   merges points within \eqn{10^{-6}} of each other on every axis and
+#'   leaves out their repulsion from each other. A cell that holds the point
+#'   being moved is never summarized (scikit-learn's can be, when `theta` is
+#'   above \eqn{1/\sqrt{2}} for `k = 2`, or \eqn{1/\sqrt{3}} for `k = 3`).
+#' * Nearest neighbors with equal distances are chosen by sample order.
+#' * The gradient and the divergence leave out scikit-learn's lower limits on
+#'   \eqn{q_{ij}} (\eqn{2.2 \times 10^{-16}} for the exact gradient, and
+#'   single precision's smallest number for Barnes-Hut). They only matter
+#'   for points about \eqn{10^8} times farther apart than usual.
+#' * The result is centered, and each axis is flipped so that its
+#'   coordinate with the largest absolute value is positive, as for the
+#'   other ordination methods. `kl_divergence` is that of the result, rather
+#'   than of the layout before the last step, and `n_iter` counts the
+#'   iterations run (scikit-learn's `n_iter_` is one less).
+#'
+#'
+#' **Compared with `Rtsne()`**
+#'
+#' `Rtsne::Rtsne()` (van der Maaten's bhtsne) runs the same kind of
+#' optimization with different defaults: a random start, a learning rate of
+#' 200, Barnes-Hut whenever `theta > 0`, \eqn{\lfloor 3 \times perplexity
+#' \rfloor} neighbors found with a vantage-point tree, and always exactly
+#' `max_iters` iterations. `init = "random", learning_rate = 200` comes close
+#' to its procedure. The two don't give the same coordinates, but layouts of
+#' the same quality: the tests check that the KL divergence and
+#' trustworthiness are as good as `Rtsne()`'s on the same data.
 #'
 #'
 #' **Reproducibility**
 #'
-#' Results are identical from run to run and for any number of `cpus`. The
-#' coordinates are centered on 0, and each axis is flipped so that its
-#' largest coordinate in absolute value is positive, as the other ordination
-#' methods do; so they equal `Rtsne()`'s up to the sign of each axis.
+#' The result, including its attributes, is bit-for-bit identical from run
+#' to run, in the same or a new R session, and for any number of `cpus`:
+#' each quantity is computed by one thread in a fixed order, sums over
+#' samples are taken in sample order, and all of it is in double precision
+#' (not R's long double, whose precision varies between platforms). Random
+#' starts come from a PCG random number generator seeded with `seed`, not
+#' from R's, so `set.seed()` has no effect and R's random number stream is
+#' left untouched. Different compilers, processors, or math libraries can
+#' change the last bits of a result, which t-SNE amplifies, so other
+#' platforms can give a different (but equally good) layout.
 #'
 #' @references
 #' van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE.
-#' *Journal of Machine Learning Research*, 9, 2579-2605.
+#' *Journal of Machine Learning Research*, 9(86), 2579-2605.
 #' <https://jmlr.org/papers/v9/vandermaaten08a.html>
 #'
 #' van der Maaten, L. (2014). Accelerating t-SNE using tree-based
-#' algorithms. *Journal of Machine Learning Research*, 15, 3221-3245.
+#' algorithms. *Journal of Machine Learning Research*, 15(93), 3221-3245.
 #' <https://jmlr.org/papers/v15/vandermaaten14a.html>
 #'
 #' Belkina, A. C., Ciccolella, C. O., Anno, R., Halpert, R., Spidlen, J., &
@@ -180,9 +264,13 @@
 #' analysis of large datasets. *Nature Communications*, 10, 5415.
 #' \doi{10.1038/s41467-019-13055-y}
 #'
-#' Kobak, D., & Berens, P. (2019). The art of using t-SNE for single-cell
-#' transcriptomics. *Nature Communications*, 10, 5416.
-#' \doi{10.1038/s41467-019-13056-x}
+#' Kobak, D., & Linderman, G. C. (2021). Initialization is critical for
+#' preserving global data structure in both t-SNE and UMAP. *Nature
+#' Biotechnology*, 39, 156-157. \doi{10.1038/s41587-020-00809-z}
+#'
+#' Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python.
+#' *Journal of Machine Learning Research*, 12, 2825-2830.
+#' <https://jmlr.org/papers/v12/pedregosa11a.html>
 #'
 #' @inheritSection ordination_section Ordination result
 #'
@@ -201,56 +289,38 @@
 #'
 #'     plot(ord, asp = 1, col = flowers$Species)
 #'
-#'     # Exact gradients, from a random start.
-#'     ord <- tsne(d, perplexity = 20, init = 'random', theta = 0)
+#'     # Barnes-Hut gradients, from a random start.
+#'     ord <- tsne(d, perplexity = 20, init = 'random', gradient = 'barnes_hut')
 #'
 tsne <- function (
-    dm, k = 2L, perplexity = 30, theta = 0.5, n_iter = 1000L, init = 'pcoa',
-    learning_rate = 'auto', momentum = 0.5, final_momentum = 0.8,
-    mom_switch_iter = NULL,
-    exaggeration_factor = 12,
-    stop_lying_iter = NULL,
-    seed = 0L, cpus = n_cpus() ) {
+    dm, k = 2L, perplexity = 30, theta = 0.5, gradient = 'auto',
+    init = 'pcoa', max_iters = 1000L, early_exaggeration = 12,
+    learning_rate = 'auto', seed = 0L, cpus = n_cpus() ) {
 
   validate_cpus()
   validate_seed()
 
-  ia       <- ord_init_arg(init, c('random', 'pcoa'))
+  k          <- ord_k(k)
+  perp_given <- !missing(perplexity)
+  perplexity <- ord_arg(perplexity, '`perplexity` must be a number of at least 1.', lo = 1)
+  theta      <- ord_arg(theta,      '`theta` must be a number from 0 to 1.', hi = 1)
+  max_iters  <- ord_arg(max_iters,  '`max_iters` must be a whole number of at least 1.', whole = TRUE, lo = 1)
+  early_exaggeration <- ord_arg(
+    early_exaggeration, '`early_exaggeration` must be a number of at least 1.', lo = 1 )
+  if (!identical(learning_rate, 'auto'))
+    learning_rate <- ord_arg(
+      learning_rate, '`learning_rate` must be "auto" or a number greater than 0.',
+      lo = .Machine$double.xmin )
+
+  choices <- c('auto', 'exact', 'barnes_hut')
+  if (!is.character(gradient) || length(gradient) != 1 || !gradient %in% choices)
+    stop('`gradient` must be "auto", "exact", or "barnes_hut".', call. = FALSE)
+  if (gradient == 'barnes_hut' && k > 3)
+    stop('`gradient = "barnes_hut"` supports at most k = 3 dimensions.', call. = FALSE)
+
+  ia       <- ord_init_arg(init, c('pcoa', 'random'))
   init     <- ia$init
   init_mtx <- ia$mtx
-
-  # As in Rtsne, a given start skips early exaggeration and low momentum.
-  if (is.null(mom_switch_iter)) mom_switch_iter <- if (init == 'matrix') 0L else 250L
-  if (is.null(stop_lying_iter)) stop_lying_iter <- if (init == 'matrix') 0L else 250L
-
-  k               <- ord_k(k)
-  perp_given      <- !missing(perplexity)
-  perplexity      <- ord_arg(perplexity,      '`perplexity` must be a number of at least 1.')
-  theta           <- ord_arg(theta,           '`theta` must be a number from 0 to 1.', hi = 1)
-  n_iter          <- ord_arg(n_iter,          '`n_iter` must be a whole number of at least 0.', whole = TRUE)
-  if (!identical(learning_rate, 'auto'))
-    learning_rate <- ord_arg(learning_rate, '`learning_rate` must be "auto" or a number greater than 0.')
-  momentum        <- ord_arg(momentum,        '`momentum` must be a number from 0 to less than 1.')
-  final_momentum  <- ord_arg(final_momentum,  '`final_momentum` must be a number from 0 to less than 1.')
-  mom_switch_iter <- ord_arg(mom_switch_iter, '`mom_switch_iter` must be a whole number of at least 0.', whole = TRUE)
-  exaggeration_factor <- ord_arg(exaggeration_factor, '`exaggeration_factor` must be a number greater than 0.')
-  stop_lying_iter <- ord_arg(stop_lying_iter, '`stop_lying_iter` must be a whole number of at least 0.', whole = TRUE)
-
-  # Below 1, no Gaussian can reach the perplexity, and Barnes-Hut would
-  # have no neighbors (floor(3 * perplexity) = 0).
-  if (perplexity < 1)
-    stop('`perplexity` must be a number of at least 1.', call. = FALSE)
-  # Momentum of 1 or more makes the updates grow without bound.
-  if (momentum >= 1)
-    stop('`momentum` must be a number from 0 to less than 1.', call. = FALSE)
-  if (final_momentum >= 1)
-    stop('`final_momentum` must be a number from 0 to less than 1.', call. = FALSE)
-  if (is.numeric(learning_rate) && learning_rate <= 0)
-    stop('`learning_rate` must be "auto" or a number greater than 0.', call. = FALSE)
-  if (exaggeration_factor <= 0)
-    stop('`exaggeration_factor` must be a number greater than 0.', call. = FALSE)
-  if (theta > 0 && k > 3)
-    stop('`k` must be 1, 2, or 3 when `theta` > 0; use `theta = 0` for more.', call. = FALSE)
 
 
   dv     <- dist_vector(dm)
@@ -258,54 +328,97 @@ tsne <- function (
   n      <- dv$n
   labels <- dv$labels
 
+  # Coordinates (n x k) are indexed with ints in C.
   if (as.double(n) * k > .Machine$integer.max)
     stop('`k` is too large: ', n, ' samples times `k` dimensions must be ',
          'at most ', .Machine$integer.max, '.', call. = FALSE)
 
-  if (!is.null(init_mtx)) init_mtx <- ord_init_matrix(init_mtx, n, k)
+  if (!is.null(init_mtx)) {
+    init_mtx <- ord_init_matrix(init_mtx, n, k)
+    if (n >= 2 && any(apply(init_mtx, 2L, function (v) all(v == v[[1]]))))
+      stop('`init` must not have a column whose values are all the same.', call. = FALSE)
+  }
 
-  result <- function (x, kl_divergence) {
-    # Each axis's largest absolute coordinate is positive.
-    x <- ord_flip(x)
+
+  # Each sample needs at least 3 * perplexity neighbors.
+  perp_max <- max(1, (n - 1) / 3)
+  if (perplexity > perp_max) {
+    if (perp_given)
+      warning(sprintf(
+        '`perplexity` reduced from %g to %g, the most that %d samples allow.',
+        perplexity, perp_max, n ), call. = FALSE)
+    perplexity <- perp_max
+  }
+
+  exact <- switch(
+    EXPR       = gradient,
+    exact      = TRUE,
+    barnes_hut = FALSE,
+    auto       = k > 3 || n <= TSNE_EXACT_MAX )
+
+  if (identical(learning_rate, 'auto'))
+    learning_rate <- max(n / early_exaggeration / 4, 50)
+
+
+  result <- function (x, kl_divergence, n_iter) {
     ord_result(
-      x, 'tsne', labels, prefix = 'TSNE',
+      ord_flip(x), 'tsne', labels, prefix = 'TSNE',
       kl_divergence = kl_divergence,
       perplexity    = perplexity,
-      init          = init )
+      init          = init,
+      n_iter        = n_iter,
+      learning_rate = learning_rate,
+      gradient      = if (exact) 'exact' else 'barnes_hut' )
   }
 
   if (n < 2) {
     # One sample or none: nothing to embed.
     if (init != 'matrix') init <- 'none'
-    return (result(matrix(0, n, k), 0))
+    return (result(matrix(0, n, k), 0, 0L))
   }
 
 
-  # Each point needs floor(3 * perplexity) neighbors.
-  if (3 * perplexity > n - 1) {
-    if (perp_given)
-      warning(
-        '`perplexity` reduced from ', perplexity, ' to ', signif((n - 1) / 3, 4),
-        ', the most that ', n, ' samples allow.', call. = FALSE )
-    perplexity <- (n - 1) / 3
-  }
+  # t-SNE doesn't depend on the scale of `dm`, but its arithmetic does: the
+  # affinities' binary search starts at a precision of 1. So distances are
+  # multiplied by a power of 2 (exactly) to make the largest one from 1 to 2.
+  top   <- max(dm)
+  e     <- if (top > 0) floor(log2(top)) else 0
+  scale <- 2^-min(max(e, -1000), 1000)
 
 
-  if (identical(learning_rate, 'auto'))
-    learning_rate <- max(n / exaggeration_factor, 200)
-
-  # The PCoA start, scaled so that the first axis has standard deviation
-  # 1e-4, as openTSNE and scikit-learn scale their PCA starts.
+  # Starting layout: 0 = given, 1 = PCoA (scaled in C), 2 = random.
+  start <- 0L
   if (init == 'pcoa') {
-    init_mtx <- pcoa_start(dm, n, k, cpus)
+    # Far from 1, PCoA's squared distances could underflow; the start is
+    # rescaled anyway, so scale a copy first.
+    dp       <- if (scale < 2^-64 || scale > 2^64) dm * scale else dm
+    init_mtx <- pcoa_start(dp, n, k, cpus)
+    rm(dp)
     if (is.null(init_mtx)) init <- 'random'
-    else init_mtx <- init_mtx / stats::sd(init_mtx[, 1]) * 1e-4
+    else                   start <- 1L
   }
+  if (init == 'random') start <- 2L
 
-  res <- .Call(
-    C_tsne, dm, n, k, init_mtx,
-    as.integer(c(n_iter, stop_lying_iter, mom_switch_iter, cpus, seed)),
-    c(perplexity, theta, learning_rate, momentum, final_momentum, exaggeration_factor) )
 
-  result(res$points, res$kl_divergence)
+  # Input affinities, then the optimization.
+  K <- if (exact) 0L else as.integer(min(n - 1, floor(3 * perplexity + 1)))
+  P <- .Call(C_tsne_p, dm, n, perplexity, K, FALSE, scale, cpus)
+  rm(dm)
+
+  iopt <- as.integer(c(n, k, max_iters, 250L, cpus, 50L, 300L, 1L, start, seed))
+  dopt <- c(theta, early_exaggeration, learning_rate, 1e-7, 0.5, 0.8)
+  res  <- .Call(C_tsne_run, P, init_mtx, iopt, dopt)
+
+  if (res$diverged)
+    stop(
+      't-SNE diverged: coordinates became infinite or NaN. ',
+      'Try a smaller `learning_rate` or `early_exaggeration`.', call. = FALSE )
+
+  result(res$points, res$kl, res$n_iter)
 }
+
+
+
+# Largest number of samples that gradient = "auto" runs with the exact
+# gradient.
+TSNE_EXACT_MAX <- 500L

@@ -9,67 +9,58 @@ tsne(
   k = 2L,
   perplexity = 30,
   theta = 0.5,
-  n_iter = 1000L,
+  gradient = "auto",
   init = "pcoa",
+  max_iters = 1000L,
+  early_exaggeration = 12,
   learning_rate = "auto",
-  momentum = 0.5,
-  final_momentum = 0.8,
-  mom_switch_iter = NULL,
-  exaggeration_factor = 12,
-  stop_lying_iter = NULL,
   seed = 0L,
   cpus = n_cpus()
 )
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
-symmetric numeric matrix of distances. Must not contain \code{NA}s.}
+symmetric numeric matrix of distances. Must not contain \code{NA}s or
+negative values. Its scale doesn't matter (see "Scale").}
 
-\item{k}{The number of dimensions. Must be 1, 2, or 3 unless
-\code{theta = 0}. Default: \code{2}}
+\item{k}{The number of dimensions. Default: \code{2}}
 
-\item{perplexity}{Roughly, how many close neighbors each sample has.
-At least \code{1}, and at most \eqn{(n - 1) / 3} for \eqn{n} samples:
-larger values are reduced to that, with a warning if given.
-Default: \code{30}, or \eqn{(n - 1) / 3} if that is smaller.}
+\item{perplexity}{Roughly, how many neighbors each sample's
+neighborhood counts. Must be at least 1; values above
+\eqn{(n - 1) / 3} are reduced to that (see "Perplexity and small
+datasets" below). Typical values are 5 to 50. Default: \code{30}}
 
-\item{theta}{Speed/accuracy trade-off for the Barnes-Hut
-approximation, from \code{0} to \code{1}. \code{0} computes t-SNE exactly, which
-takes time proportional to \eqn{n^2} per iteration. Larger values
-approximate it faster. Default: \code{0.5}}
+\item{theta}{Accuracy of the Barnes-Hut gradient, from 0 (exact, and
+slow) to 1 (fast, and rough): a group of samples is treated as one
+point when its cell's width, divided by its distance, is below
+\code{theta}. scikit-learn calls it \code{angle}. Not used by the exact
+gradient. Default: \code{0.5}}
 
-\item{n_iter}{The number of iterations: exactly this many are run. Default: \code{1000}}
+\item{gradient}{How to compute the gradient: \code{"exact"}, \code{"barnes_hut"},
+or \code{"auto"} (the default), which uses \code{"exact"} for up to 500
+samples, or when \code{k > 3}, and \code{"barnes_hut"} otherwise.
+(scikit-learn calls it \code{method}.)}
 
-\item{init}{The starting coordinates: \code{"pcoa"} (the default),
-\code{"random"}, or a numeric matrix with one row per sample, in the same
-order as \code{dm}, and \code{k} columns. See "Starting coordinates" below.}
+\item{init}{The starting layout: \code{"pcoa"} (the default), \code{"random"}, or
+a numeric matrix with one row per sample, in the same order as
+\code{dm}, and \code{k} columns, none of them constant (a constant column
+could never move). See "Starting layout" below.}
 
-\item{learning_rate}{The step size of the gradient descent (\code{eta} in
-\code{Rtsne()}). \code{"auto"}, the default, uses
-\code{max(n / exaggeration_factor, 200)} for \code{n} samples, as
-scikit-learn and FIt-SNE do: \code{Rtsne()}'s fixed \code{200} for up to 2400
-samples, and larger steps for more, which need them to converge in
-\code{n_iter} iterations.}
+\item{max_iters}{The most iterations to run, including the first 250 with
+early exaggeration. The run stops sooner when it stops improving
+(see "Method"). Default: \code{1000}}
 
-\item{momentum, final_momentum}{The momentum of the gradient descent
-before and after iteration \code{mom_switch_iter}, from \code{0} to less than
-\code{1}. Defaults: \code{0.5} and \code{0.8}}
+\item{early_exaggeration}{How much to multiply the affinities by during
+the first 250 iterations, which pulls clusters apart early on.
+Must be at least 1. Default: \code{12}}
 
-\item{mom_switch_iter}{The iteration from which \code{final_momentum} is
-used. \code{NULL}, the default, means \code{250}, or \code{0} when \code{init} is a
-matrix.}
+\item{learning_rate}{The step size: a positive number, or \code{"auto"} (the
+default) for \eqn{\max(n / early\_exaggeration / 4, 50)}, as in
+scikit-learn.}
 
-\item{exaggeration_factor}{How much the input similarities are
-multiplied by during the early iterations ("early exaggeration"),
-which helps clusters separate. Default: \code{12}}
-
-\item{stop_lying_iter}{The iteration at which early exaggeration stops.
-\code{NULL}, the default, means \code{250}, or \code{0} (no exaggeration) when
-\code{init} is a matrix.}
-
-\item{seed}{An integer seed for the random starting coordinates. The
-same seed gives the same result. Not used when \code{init} is \code{"pcoa"}
-or a matrix. Default: \code{0}}
+\item{seed}{An integer seed for the random starting layout. The same
+seed gives the same result. Not used when \code{init} is a matrix, nor
+by a PCoA start with \code{k} axes. Default: \code{0}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -80,108 +71,190 @@ dimension, named \code{"TSNE1"}, \code{"TSNE2"}, etc., as described in "Ordinati
 result" below. \code{method} is \code{"tsne"}; \code{eig} and \code{prop} are \code{NA}, as t-SNE
 has no eigenvalues. Then come:
 \itemize{
-\item \code{kl_divergence}: The Kullback-Leibler divergence of the embedding's
-similarities from the input similarities at the end: the cost that
-t-SNE minimizes. As in \code{Rtsne()}, it is approximate when \code{theta > 0}.
-\item \code{perplexity}: The perplexity used.
-\item \code{init}: How the starting coordinates were chosen: \code{"random"},
-\code{"pcoa"}, or \code{"matrix"} (given in \code{init}); \code{"none"} for fewer than 2
-samples, which are all placed at 0.
+\item \code{kl_divergence}: The Kullback-Leibler divergence of the result's
+affinities from the input affinities: the quantity t-SNE minimizes.
+With the Barnes-Hut gradient, it is the Barnes-Hut estimate.
+\item \code{perplexity}: The perplexity used, after any reduction.
+\item \code{init}: How the starting layout was chosen: \code{"pcoa"}, \code{"random"}, or
+\code{"matrix"} (given in \code{init}); \code{"none"} for fewer than 2 samples, which
+are all placed at 0.
+\item \code{n_iter}: The number of iterations run.
+\item \code{learning_rate}: The learning rate used.
+\item \code{gradient}: \code{"exact"} or \code{"barnes_hut"}.
 }
 }
 \description{
 Ordinates samples from their distances, for plotting beta diversity, by
-placing samples that are near each other in \code{dm} near each other on the
-plot. Follows the same procedure as \code{Rtsne::Rtsne()} given a distance
-matrix, and from the same starting coordinates gives the same Barnes-Hut
-embedding, but runs in parallel C with far less memory.
+placing samples that are near neighbors in \code{dm} near each other on the
+plot. t-SNE is good at showing clusters, but the distances between
+clusters, and their sizes, mean little. A port of scikit-learn's \code{TSNE}
+(with \code{metric = "precomputed"}) to parallel C, with exact and Barnes-Hut
+gradients, that never copies \code{dm} into an \eqn{n \times n} matrix.
 }
 \details{
 \strong{Method}
 
-t-SNE turns the distances \eqn{d_{ij}} into similarities: each sample
-\eqn{i} gets a Gaussian kernel \eqn{p_{j|i} \propto \exp(-\beta_i
-d_{ij}^2)}, whose \eqn{\beta_i} is found by binary search so that the
-kernel's perplexity (2 to the power of its entropy in bits) equals
-\code{perplexity}. Then \eqn{p_{ij} = (p_{j|i} + p_{i|j}) / 2n}. Samples are
-placed in \code{k} dimensions so that the heavy-tailed similarities
-\eqn{q_{ij} \propto (1 + |y_i - y_j|^2)^{-1}} between their coordinates
-match \eqn{p_{ij}} as well as possible: the coordinates minimize the
+Each sample \eqn{i} gets a Gaussian distribution over the other samples,
+\eqn{p_{j|i} \propto \exp(-\beta_i d_{ij}^2)}, with \eqn{\beta_i} chosen by
+binary search so that its perplexity (2 to the power of its entropy, in
+bits) equals \code{perplexity}. The input affinities are
+\eqn{p_{ij} = (p_{j|i} + p_{i|j}) / 2n}. On the plot, the affinities are
+\eqn{q_{ij} \propto (1 + |y_i - y_j|^2)^{-1}}, a Student t distribution
+with one degree of freedom, whose heavy tail lets dissimilar samples sit
+far apart. t-SNE moves the points \eqn{y_i} to minimize the
 Kullback-Leibler divergence \eqn{\sum p_{ij} \log(p_{ij} / q_{ij})} by
-gradient descent with momentum and per-coordinate adaptive gains.
+gradient descent, with momentum and per-coordinate gains: momentum 0.5
+for the first 250 iterations, during which \eqn{p_{ij}} is multiplied by
+\code{early_exaggeration}, then 0.8. Every 50 iterations, it stops if the
+gradient's norm is below \eqn{10^{-7}}, or if the divergence hasn't
+improved for 300 iterations (after the first 250). These are
+scikit-learn's defaults.
 
-With \code{theta > 0}, two Barnes-Hut approximations make this fast for large
-\eqn{n} (van der Maaten 2014): \eqn{p_{j|i}} is computed only for each
-sample's \eqn{\lfloor 3 \times} \code{perplexity}\eqn{\rfloor} nearest
-neighbors (others are 0), and the repulsion between distant groups of
-samples is computed from their centers of mass in a quadtree (an octree
-for \code{k = 3}). A group is used whole when its cell's width divided by its
-distance is below \code{theta}.
+\strong{Exact and Barnes-Hut gradients}
 
-t-SNE preserves neighborhoods, not distances: the sizes of clusters and
-the distances between them on the plot are not meaningful.
-
-\strong{Starting coordinates}
+The exact gradient sums over every pair of samples, which takes time
+proportional to \eqn{n^2} per iteration. The Barnes-Hut approximation
+(van der Maaten 2014) takes time proportional to \eqn{n \log n}:
 \itemize{
-\item \code{"pcoa"}: The first \code{k} axes of \code{\link[=pcoa]{pcoa()}}, scaled so that the first has
-standard deviation \eqn{10^{-4}}, as scikit-learn, openTSNE and FIt-SNE
-scale their PCA starts by default. This preserves more of the
-large-scale layout than a random start, and makes the result depend
-only on \code{dm}. If fewer than \code{k} axes have positive eigenvalues,
-\code{"random"} is used instead.
-\item \code{"random"}: Normal, with mean 0 and standard deviation \eqn{10^{-4}}, as
-in \code{Rtsne()}, drawn from \code{seed}.
-\item A matrix: used as given. As in \code{Rtsne()}, the defaults then skip early
-exaggeration and the low-momentum phase, as suits continuing from an
-earlier result.
+\item Each sample's \eqn{p_{j|i}} is computed over its
+\eqn{\lfloor 3 \times perplexity + 1 \rfloor} nearest neighbors only
+(found exactly from \code{dm}), and is 0 for the rest.
+\item The repulsion between points on the plot is computed from a tree of
+cells: a quadtree for \code{k = 2}, an octree for \code{k = 3}, and a binary tree
+for \code{k = 1}. A cell far enough away (see \code{theta}) acts as one point at
+its center of mass.
 }
+
+The tree only exists for up to 3 dimensions, so larger \code{k} always uses
+the exact gradient. \code{gradient = "auto"} uses the exact gradient for up to
+500 samples, where it is fast enough, and Barnes-Hut for more.
+
+\strong{Perplexity and small datasets}
+
+Each sample needs at least \eqn{3 \times perplexity} neighbors, so
+\code{perplexity} is reduced to \eqn{(n - 1) / 3} when it is larger (but not
+below 1), with a warning if you set \code{perplexity} yourself. For example,
+40 samples allow a perplexity of up to 13. \code{k} is used as given, even
+when it is \eqn{n} or more.
+
+\strong{Scale}
+
+t-SNE's affinities don't depend on the scale of \code{dm}, but finding them
+does: each sample's binary search (as in scikit-learn) starts at a
+precision of 1 and doubles or halves it at most 100 times, so it can't
+reach the precision that distances far from 1 need, and their affinities
+would come out uniform. So \code{dm} is first multiplied by a power of 2
+(which is exact) that brings its largest distance to between 1 and 2;
+multiplying \code{dm} by any power of 2 gives exactly the same result, and by
+any other number, the same up to the search's tolerance. A sample whose
+search still doesn't converge in those 100 steps (e.g. one whose nearest
+neighbors are \eqn{10^{-20}} times closer than the farthest sample) is
+searched again, starting from a better guess and with no limit on the
+range.
+
+\strong{Starting layout}
+
+t-SNE only finds a local minimum, and which one depends on the starting
+layout. The default, \code{"pcoa"}, starts from the first \code{k} axes of
+\code{\link[=pcoa]{pcoa()}}, scaled so that the first has a standard deviation of
+\eqn{10^{-4}}, as scikit-learn scales its PCA start: this keeps more of
+the data's global structure than a random start, and doesn't depend on a
+seed (Kobak & Linderman 2021). Without \code{k} axes with positive
+eigenvalues, it starts at random instead. \code{"random"} draws each
+coordinate from a normal distribution with a standard deviation of
+\eqn{10^{-4}}, from \code{seed}.
 
 \strong{Speed and memory}
 
-\code{Rtsne()} copies a dist object into an \eqn{n \times n} matrix, and for
-\code{theta = 0} keeps three more \eqn{n \times n} matrices. \code{tsne()} works
-straight from \code{dm}. For \code{theta = 0} it keeps one array of \eqn{p_{ij}} the
-size of \code{dm}; for \code{theta > 0}, only the nearest neighbors'. The neighbor
-search, the calibration of each \eqn{\beta_i}, and each iteration's
-gradient run on \code{cpus} threads.
+Finding the affinities reads each distance twice (once for each of its
+two samples), in parallel. Each sample's binary search then makes up to
+100 passes over its \eqn{3 \times perplexity + 1} neighbors (Barnes-Hut)
+or all \eqn{n - 1} other samples (exact). Each iteration takes time
+proportional to \eqn{k n^2} (exact) or roughly
+\eqn{k n (\log n + 3 \times perplexity)} (Barnes-Hut), divided among
+\code{cpus} threads. The affinities are found in batches, between which the
+computation can be interrupted.
 
-\strong{Differences from \code{Rtsne()}}
+Besides \code{dm}, the exact gradient keeps \eqn{p_{ij}} for every pair, 8
+bytes per pair, the same as \code{dm} itself. Barnes-Hut keeps
+\eqn{n (3 \times perplexity + 1)} to twice that many affinities, 12 bytes
+each (and, while building them, two more lists of
+\eqn{n (3 \times perplexity + 1)}), and a tree of at most \eqn{2n}
+cells. While reading distances for the exact gradient, each thread also
+holds 32 rows of them (\eqn{256 n} bytes).
+
+\strong{Differences from scikit-learn}
+
+This is a port of scikit-learn 1.9.1's \code{TSNE} (BSD-3-Clause License,
+Copyright (c) 2007-2026 The scikit-learn developers). From the same
+affinities and starting layout, the exact gradient gives the same
+iterations as scikit-learn's to within rounding; and, as in
+scikit-learn, \code{dm} is squared before the affinities are found. These are
+the differences:
 \itemize{
-\item The defaults \code{init = "pcoa"} and \code{learning_rate = "auto"} follow
-scikit-learn (since version 1.2), openTSNE and FIt-SNE, which have
-moved on from \code{Rtsne()}'s random start and fixed learning rate. Use
-\verb{init = "random", learning_rate = 200} for \code{Rtsne()}'s procedure.
-\item The random starting coordinates come from \code{seed}, not from R's random
-number generator, so \code{set.seed()} has no effect, and R's random number
-stream is left untouched. They have the same distribution as
-\code{Rtsne()}'s: normal with standard deviation \eqn{10^{-4}}.
-\item Nearest neighbors are found exactly, by scanning \code{dm}. \code{Rtsne()} finds
-them with a vantage-point tree, which can miss some when the distances
-aren't metric (e.g. Bray-Curtis), so its results can then differ. Ties
-between neighbors' distances are broken by sample order, which
-\code{Rtsne()}'s tree doesn't do, so results also differ when distances tie
-at the last neighbor, as they often do for integer data or duplicate
-samples.
-\item \code{perplexity} too large for the number of samples is reduced (with a
-warning, if it was given), not an error.
+\item Everything is computed in double precision. scikit-learn rounds the
+squared distances to single precision before finding the affinities,
+and runs Barnes-Hut in single precision, which changes affinities and
+gradients by about 1 part in \eqn{10^7}. Since t-SNE is chaotic, two
+runs that differ by that much end at different (but equally good)
+layouts.
+\item \eqn{q_{ij}} always has one degree of freedom. scikit-learn uses
+\eqn{\max(k - 1, 1)}, i.e. 2 for \code{k = 3}, with a gradient that isn't
+exactly the divergence's for more than one degree of freedom. For
+\code{k = 1} and \code{k = 2}, the two agree.
+\item The default start is PCoA. scikit-learn doesn't allow its PCA start with
+precomputed distances, so starts at random there. Random starts come
+from \code{seed} (see "Reproducibility"), so they differ from scikit-learn's.
+\item \code{gradient = "auto"} uses the exact gradient for up to 500 samples;
+scikit-learn defaults to Barnes-Hut.
+\item \code{dm} is rescaled by a power of 2, and a binary search that doesn't
+converge is redone (see "Scale"). Where scikit-learn's search does
+converge, the affinities are the same to within its tolerance
+(identical if the largest distance is already between 1 and 2).
+\item A \code{perplexity} too large for \eqn{n} is reduced instead of being an
+error; it must be at least 1. Any \code{max_iters} of at least 1 is allowed
+(scikit-learn requires at least 250). A layout that diverges (e.g.
+from a far too large \code{learning_rate}) is an error.
+\item The Barnes-Hut tree handles identical points exactly. scikit-learn's
+merges points within \eqn{10^{-6}} of each other on every axis and
+leaves out their repulsion from each other. A cell that holds the point
+being moved is never summarized (scikit-learn's can be, when \code{theta} is
+above \eqn{1/\sqrt{2}} for \code{k = 2}, or \eqn{1/\sqrt{3}} for \code{k = 3}).
+\item Nearest neighbors with equal distances are chosen by sample order.
+\item The gradient and the divergence leave out scikit-learn's lower limits on
+\eqn{q_{ij}} (\eqn{2.2 \times 10^{-16}} for the exact gradient, and
+single precision's smallest number for Barnes-Hut). They only matter
+for points about \eqn{10^8} times farther apart than usual.
+\item The result is centered, and each axis is flipped so that its
+coordinate with the largest absolute value is positive, as for the
+other ordination methods. \code{kl_divergence} is that of the result, rather
+than of the layout before the last step, and \code{n_iter} counts the
+iterations run (scikit-learn's \code{n_iter_} is one less).
 }
 
-Otherwise every step is computed as \code{Rtsne()} computes it, in the same
-order, with one exception: for \code{theta = 0}, the sum that normalizes
-\eqn{q_{ij}} is added up in parallel, which changes its rounding. So from
-the same starting coordinates (\code{init}; \code{Y_init} in \code{Rtsne()}), the
-Barnes-Hut (\code{theta > 0}) coordinates and cost are exactly \code{Rtsne()}'s.
-With \code{theta = 0} they agree closely at first, but t-SNE magnifies tiny
-rounding differences over its iterations, so the two can settle in
-different, equally good, local minima. The same can happen with
-\code{theta > 0} on other hardware (e.g. with fused multiply-adds).
+\strong{Compared with \code{Rtsne()}}
+
+\code{Rtsne::Rtsne()} (van der Maaten's bhtsne) runs the same kind of
+optimization with different defaults: a random start, a learning rate of
+200, Barnes-Hut whenever \code{theta > 0}, \eqn{\lfloor 3 \times perplexity
+\rfloor} neighbors found with a vantage-point tree, and always exactly
+\code{max_iters} iterations. \verb{init = "random", learning_rate = 200} comes close
+to its procedure. The two don't give the same coordinates, but layouts of
+the same quality: the tests check that the KL divergence and
+trustworthiness are as good as \code{Rtsne()}'s on the same data.
 
 \strong{Reproducibility}
 
-Results are identical from run to run and for any number of \code{cpus}. The
-coordinates are centered on 0, and each axis is flipped so that its
-largest coordinate in absolute value is positive, as the other ordination
-methods do; so they equal \code{Rtsne()}'s up to the sign of each axis.
+The result, including its attributes, is bit-for-bit identical from run
+to run, in the same or a new R session, and for any number of \code{cpus}:
+each quantity is computed by one thread in a fixed order, sums over
+samples are taken in sample order, and all of it is in double precision
+(not R's long double, whose precision varies between platforms). Random
+starts come from a PCG random number generator seeded with \code{seed}, not
+from R's, so \code{set.seed()} has no effect and R's random number stream is
+left untouched. Different compilers, processors, or math libraries can
+change the last bits of a result, which t-SNE amplifies, so other
+platforms can give a different (but equally good) layout.
 }
 \section{Ordination result}{
 
@@ -226,17 +299,17 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 
     plot(ord, asp = 1, col = flowers$Species)
 
-    # Exact gradients, from a random start.
-    ord <- tsne(d, perplexity = 20, init = 'random', theta = 0)
+    # Barnes-Hut gradients, from a random start.
+    ord <- tsne(d, perplexity = 20, init = 'random', gradient = 'barnes_hut')
 
 }
 \references{
 van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE.
-\emph{Journal of Machine Learning Research}, 9, 2579-2605.
+\emph{Journal of Machine Learning Research}, 9(86), 2579-2605.
 \url{https://jmlr.org/papers/v9/vandermaaten08a.html}
 
 van der Maaten, L. (2014). Accelerating t-SNE using tree-based
-algorithms. \emph{Journal of Machine Learning Research}, 15, 3221-3245.
+algorithms. \emph{Journal of Machine Learning Research}, 15(93), 3221-3245.
 \url{https://jmlr.org/papers/v15/vandermaaten14a.html}
 
 Belkina, A. C., Ciccolella, C. O., Anno, R., Halpert, R., Spidlen, J., &
@@ -245,9 +318,13 @@ T-distributed stochastic neighbor embedding improve visualization and
 analysis of large datasets. \emph{Nature Communications}, 10, 5415.
 \doi{10.1038/s41467-019-13055-y}
 
-Kobak, D., & Berens, P. (2019). The art of using t-SNE for single-cell
-transcriptomics. \emph{Nature Communications}, 10, 5416.
-\doi{10.1038/s41467-019-13056-x}
+Kobak, D., & Linderman, G. C. (2021). Initialization is critical for
+preserving global data structure in both t-SNE and UMAP. \emph{Nature
+Biotechnology}, 39, 156-157. \doi{10.1038/s41587-020-00809-z}
+
+Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python.
+\emph{Journal of Machine Learning Research}, 12, 2825-2830.
+\url{https://jmlr.org/papers/v12/pedregosa11a.html}
 }
 \seealso{
 \code{\link[=umap]{umap()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}}

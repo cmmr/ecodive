@@ -12,7 +12,7 @@
   expect_identical(ordination(d, 'nmds', n_starts = 1),    nmds(d, n_starts = 1))
   expect_identical(ordination(d, 'mds',  n_starts = 1),    mds(d, n_starts = 1))
   expect_identical(ordination(d, 'nmds', k = 3, seed = 2, n_starts = 2), nmds(d, k = 3, seed = 2, n_starts = 2))
-  expect_identical(ordination(d, 'tsne', perplexity = 5, n_iter = 100), tsne(d, perplexity = 5, n_iter = 100))
+  expect_identical(ordination(d, 'tsne', perplexity = 5, max_iters = 100), tsne(d, perplexity = 5, max_iters = 100))
 
   # Arguments the method doesn't take are an error, except `seed`, which is
   # dropped for methods without random parts.
