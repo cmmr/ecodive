@@ -32,11 +32,6 @@
 #'        Alternatively, a matrix with one permutation of `1:n` per row, as
 #'        from `permute::shuffleSet()`, to use instead of random ones.
 #'
-#' @param strata  Permute samples only within these groups (blocks), for
-#'        designs such as repeated measures. The name of a column of `data`,
-#'        or a vector with one value per row of `data` (or, without `data`,
-#'        per value of `groups`). Default: `NULL` (free permutation).
-#'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-value. Default: `0`
 #'
@@ -215,8 +210,7 @@ anosim <- function (
   #--------------------------------------------------------
   # p-value and z-score.
   #--------------------------------------------------------
-  eps <- sqrt(.Machine$double.eps)
-  p   <- if (pm$n_perm > 0) (1 + sum(r_prm >= r_obs - eps)) / (1 + pm$n_perm) else NA_real_
+  p <- perm_p(r_obs, r_prm)
 
   z <- perm_z(r_obs, r_prm)
 

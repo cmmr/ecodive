@@ -40,6 +40,10 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #' @param dm  The distances to test: a `dist` object such as from
 #'        [beta_div()], or a symmetric matrix of distances.
 #'
+#' @param test  The name of a test: `"anosim"`, `"mantel"`, `"mrpp"`,
+#'        `"permanova"`, or `"permdisp"`. Flexible matching is supported (see
+#'        below). Programmatic access via `list_dist_tests()`.
+#'
 #' @param groups  The variable to test: a vector with one value per sample,
 #'        matched to the samples in `dm` by name when both are named, else in
 #'        the same order as `dm`. Or, when `data` is given, the name of one of
@@ -51,27 +55,23 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #'        sample, holding `groups` (and `strata`) as columns. Rows are matched
 #'        to the samples in `dm` by row name. Default: `NULL`.
 #'
-#' @param method  The name of a test: `"anosim"`, `"mantel"`, `"mrpp"`,
-#'        `"permanova"`, or `"permdisp"`. Flexible matching is supported (see
-#'        below). Programmatic access via `list_dist_tests()`.
-#'
 #' @param ...  Further arguments for the method's function, such as
 #'        `permutations`, `strata`, `seed`, or `cpus`, which every method
-#'        takes, or a method's own, such as `weights` for [mrpp()]. Each
-#'        method keeps its own defaults. For `mantel`, `groups` is passed as
-#'        [mantel()]'s `y`.
+#'        takes, or a method's own, such as `weights` for [mrpp()] or
+#'        `method` (the correlation) for [mantel()]. Each method keeps its own
+#'        defaults. For `mantel`, `groups` is passed as [mantel()]'s `y`.
 #'
 #' @return The method's result: a list of class `"ecodive_test"` whose first
 #'   fields are `statistic`, `p_value`, `z`, and `n_perm`.
 #'   `as.data.frame()` turns it into one row with the same columns for every
-#'   method, so results can be `rbind()`-ed. `dist_test(dm, groups, data,
-#'   'mrpp', ...)` is the same as `mrpp(dm, groups, data, ...)`.
+#'   method, so results can be `rbind()`-ed. `dist_test(dm, 'mrpp',
+#'   groups, data, ...)` is the same as `mrpp(dm, groups, data, ...)`.
 #'
 #' @details
 #'
 #' **List of Tests**
 #'
-#' | Option / Function Name | Method Name                                       | Groups                 |
+#' | Option / Function Name | Test Name                                         | Groups                 |
 #' | :--------------------- | :------------------------------------------------ | :--------------------- |
 #' | `anosim`               | Analysis of Similarities (ANOSIM)                 | categorical            |
 #' | `mantel`               | Mantel Test                                       | numeric                |
@@ -84,14 +84,14 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #' reverse. `mantel` correlates `dm` with the differences between samples'
 #' values; to compare two distance matrices, call [mantel()] directly. To
 #' test several variables at once, call [permanova()] with a `formula`,
-#' either directly or as `dist_test(dm, data = meta, method = 'permanova',
+#' either directly or as `dist_test(dm, 'permanova', data = meta,
 #' formula = ~ a + b)`.
 #'
 #'
 #' **Flexible name matching**
 #'
 #' Case insensitive and partial matching, ignoring anything but letters. E.g.
-#' `method = 'PERMANOVA'` or `'perma'` selects `permanova`. Common other names
+#' `test = 'PERMANOVA'` or `'perma'` selects `permanova`. Common other names
 #' also work: `'adonis'` or `'adonis2'` for `permanova`; `'betadisper'` or
 #' `'PERMDISP2'` for `permdisp`; and `'Analysis of Similarities'` for
 #' `anosim`.
@@ -127,38 +127,38 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #'
 #'     dm <- bray(counts)
 #'
-#'     dist_test(dm, 'treatment', meta, method = 'permanova')
+#'     dist_test(dm, 'permanova', 'treatment', meta)
 #'
 #'     # Every test of treatment, as one table.
 #'     tests <- list_dist_tests(val = 'id', groups = 'categorical')
 #'     do.call(rbind, lapply(tests, function (m)
-#'       as.data.frame(dist_test(dm, 'treatment', meta, m, cpus = 1)) ))
+#'       as.data.frame(dist_test(dm, m, 'treatment', meta, cpus = 1)) ))
 #'
 #'     # A numeric variable.
-#'     dist_test(dm, 'ph', meta, method = 'adonis2')
-#'     dist_test(dm, 'ph', meta, method = 'mantel')
+#'     dist_test(dm, 'adonis2', 'ph', meta)
+#'     dist_test(dm, 'mantel', 'ph', meta, method = 'spearman')
 #'
-dist_test <- function (dm, groups, data = NULL, method, ...) {
+dist_test <- function (dm, test, groups, data = NULL, ...) {
 
-  method <- match_dist_test(method)
-  args   <- list(...)
+  test <- match_dist_test(test)
+  args <- list(...)
 
   # No `groups`: e.g. permanova()'s `formula`, given in `...`.
   if (missing(groups))
-    return (do.call(method$func, c(list(quote(dm)), list(data = data), args)))
+    return (do.call(test$func, c(list(quote(dm)), list(data = data), args)))
 
-  test_group_type(groups, data, method)
+  test_group_type(groups, data, test)
 
   # quote(), so that a large `dm` isn't copied into the call.
-  y <- if (method$id == 'mantel') 'y' else 'groups'
-  do.call(method$func, c(list(quote(dm)), stats::setNames(list(quote(groups)), y), list(data = data), args))
+  y <- if (test$id == 'mantel') 'y' else 'groups'
+  do.call(test$func, c(list(quote(dm)), stats::setNames(list(quote(groups)), y), list(data = data), args))
 }
 
 
 # Checks that `groups` (a vector, or a column of `data`) is a kind of
-# variable that `method` (from match_dist_test()) tests. Anything else is
-# left to the method to check.
-test_group_type <- function (groups, data, method) {
+# variable that `test` (from match_dist_test()) tests. Anything else is
+# left to the test's function to check.
+test_group_type <- function (groups, data, test) {
 
   vals <- NULL
   what <- '`groups`'
@@ -182,7 +182,7 @@ test_group_type <- function (groups, data, method) {
           else if (is.numeric(vals)) 'numeric'
           else class(vals)[[1]]
 
-  ok <- strsplit(method$groups, ' ', fixed = TRUE)[[1]]
+  ok <- strsplit(test$groups, ' ', fixed = TRUE)[[1]]
   if (type %in% ok) return (invisible())
 
   kinds <- c(
@@ -192,7 +192,7 @@ test_group_type <- function (groups, data, method) {
   others <- list_dist_tests(val = 'id', groups = intersect(type, names(kinds)))
 
   stop(
-    '`method = "', method$id, '"` tests ', paste(kinds[ok], collapse = ' or '),
+    '`test = "', test$id, '"` tests ', paste(kinds[ok], collapse = ' or '),
     ', but ', what, ' is ', if (type %in% names(kinds)) type else paste0('of class ', type), '.',
     if (length(others)) paste0(' For ', type, ' values, use: ', paste(others, collapse = ', '), '.'),
     call. = FALSE )
@@ -205,7 +205,7 @@ test_group_type <- function (groups, data, method) {
 #' Programmatic access to the list of available statistical tests of a
 #' distance matrix, and their associated functions.
 #'
-#' @param method   The name of a test to search for. Supports partial
+#' @param test   The name of a test to search for. Supports partial
 #'        matching. All non-alpha characters are ignored.
 #'
 #' @param val   Sets the return value for this function call. See "Value"
@@ -224,11 +224,11 @@ test_group_type <- function (groups, data, method) {
 #'
 #' A `list` with the following elements.
 #'
-#' * `name` : Method name, e.g. `"Multi-Response Permutation Procedure"`
-#' * `id` : Method ID - also the name of the function, e.g. `"mrpp"`
-#' * `groups` : The kinds of variable the method takes, e.g.
+#' * `name` : Test name, e.g. `"Multi-Response Permutation Procedure"`
+#' * `id` : Test ID - also the name of the function, e.g. `"mrpp"`
+#' * `groups` : The kinds of variable the test takes, e.g.
 #'   `"categorical"`, or `"categorical numeric"`.
-#' * `func` : The function for this method, e.g. `ecodive::mrpp`
+#' * `func` : The function for this test, e.g. `ecodive::mrpp`
 #' * `params` : Formal args for `func`, e.g. `c("dm", "groups", "data", ...)`
 #'
 #'
@@ -240,11 +240,11 @@ test_group_type <- function (groups, data, method) {
 #' * `val = "data.frame"` : The data.frame from which the below options are sourced.
 #' * `val = "list"` : A list of objects as returned by `match_dist_test()` (above).
 #' * `val = "func"` : A list of functions.
-#' * `val = "id"` : A character vector of method IDs.
-#' * `val = "name"` : A character vector of method names.
-#' * `val = "groups"` : A character vector of the kinds of variable each method takes.
+#' * `val = "id"` : A character vector of test IDs.
+#' * `val = "name"` : A character vector of test names.
+#' * `val = "groups"` : A character vector of the kinds of variable each test takes.
 #'
-#' If `nm` is set, then the names of the vector or list will be the method ID
+#' If `nm` is set, then the names of the vector or list will be the test ID
 #' (`nm="id"`) or name (`nm="name"`). When `val="data.frame"`, the names will
 #' be applied to the `rownames()` property of the `data.frame`.
 #'
@@ -260,7 +260,7 @@ test_group_type <- function (groups, data, method) {
 #'     # The tests of a numeric variable.
 #'     list_dist_tests(val = 'id', groups = 'numeric')
 #'
-#'     # Find the method for 'adonis2'.
+#'     # Find the test for 'adonis2'.
 #'     m <- match_dist_test('adonis2')
 #'     m$id
 #'
@@ -317,31 +317,31 @@ list_dist_tests <- function (
 #' @rdname dist_tests
 #' @export
 #'
-match_dist_test <- function (method, groups = NULL) {
+match_dist_test <- function (test, groups = NULL) {
 
-  if (!is.character(method)) stop('`method` must be a character vector')
-  if (length(method) != 1)   stop('`method` must be length 1')
-  if (is.na(method))         stop('`method` must not be NA')
+  if (!is.character(test)) stop('`test` must be a character vector')
+  if (length(test) != 1)   stop('`test` must be length 1')
+  if (is.na(test))         stop('`test` must not be NA')
 
   df <- list_dist_tests(groups = groups)
 
   # Exact match
-  if (method %in% df$id)
-    return (dist_test_info(df[df$id == method,]))
+  if (test %in% df$id)
+    return (dist_test_info(df[df$id == test,]))
 
   # Use partial matching
-  needle <- gsub('[^a-z]', '', tolower(method))
-  if (nchar(needle) == 0) stop('`method` must contain alphabetic characters')
+  needle <- gsub('[^a-z]', '', tolower(test))
+  if (nchar(needle) == 0) stop('`test` must contain alphabetic characters')
 
   opts  <- TEST_HAYSTACK[unname(TEST_HAYSTACK) %in% df$id]
   match <- unique(unname(opts[startsWith(names(opts), needle)]))
 
   if (length(match) > 1) stop(
-    '`method = "', method, '"` matches multiple options: ',
+    '`test = "', test, '"` matches multiple options: ',
     paste(collapse = ', ', sort(match)) )
 
   if (length(match) == 0) stop(
-    '`method = "', method, '"` does not match any option: ',
+    '`test = "', test, '"` does not match any option: ',
     paste(collapse = ', ', sort(unique(unname(opts)))) )
 
   dist_test_info(df[df$id == match,])

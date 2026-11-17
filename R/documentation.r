@@ -46,6 +46,13 @@
 #'        \code{norm = 'clr'}. Ignored for other normalization methods. See 
 #'        **Pseudocount** section.
 #' 
+#' @param strata  Permute samples only within these groups (blocks), for
+#'        designs such as repeated measures. With `data`, the name of one of
+#'        its columns, or a vector with one value per row of `data`. Without
+#'        `data`, a vector with one value per sample, matched to the samples
+#'        by name when it has names, otherwise in the same order. Default:
+#'        `NULL` (free permutation).
+#'
 #' @param margin  The margin containing samples. `1` if samples are rows, 
 #'        `2` if samples are columns. Ignored when `counts` is a special object 
 #'        class (e.g. `phyloseq`). Default: `1`

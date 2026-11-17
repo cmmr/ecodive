@@ -70,15 +70,20 @@ new_ecodive_test <- function (
 
 #------------------------------------------------------------------------------
 # Checks the `groups` argument of a test (permanova(), mrpp(), anosim(),
-# permdisp(), dist_test()): one value per sample (a vector or factor,
-# matched to the dist's `labels` by name when both are named, else in order),
-# or, with `data`, the name of one of its columns (or a vector with one value
-# per row of `data`). Every test gives the same messages.
+# permdisp(), dist_test()), and `strata`, by per_sample()'s one rule:
+#   * with `data`: the name of one of its columns, or a vector with one value
+#     per row of `data`;
+#   * without `data`: one value per sample, matched to the dist's `labels`
+#     by name when both are named, else in order.
+# Every test gives the same messages.
 #
-# Returns list(data, col): pass `data` on to model_design(), which aligns it
-# with the samples (a vector becomes a one-column data frame, `group`), and
-# take the groups from column `col` of its result. test_group_values() does
-# both.
+# Returns list(data, col, strata):
+#   data    A data frame with one row per sample, in the dist's order: the
+#           columns of `data` (if given), and the groups in column `col`.
+#           Its row names are the samples' (when they have unique names).
+#   strata  The strata values in the same order, or NULL.
+# Pass `data` and `strata` on to model_design(); test_group_values() gives
+# the groups and strata codes directly.
 #------------------------------------------------------------------------------
 test_groups <- function (groups, data, n, labels, strata = NULL) {
 
@@ -90,112 +95,124 @@ test_groups <- function (groups, data, n, labels, strata = NULL) {
       '`groups` must be a vector or factor with one value per sample, ',
       'or the name of a column of `data`.', call. = FALSE )
 
-
-  #--------------------------------------------------------
-  # A column of `data`.
-  #--------------------------------------------------------
+  idx <- NULL
   if (!is.null(data)) {
-
     if (!is.data.frame(data) && !is.matrix(data))
       stop('`data` must be a data.frame.', call. = FALSE)
-
-    if (is.character(groups) && length(groups) == 1 && !is.na(groups) &&
-        groups %in% colnames(data))
-      return (list(data = data, col = groups))
-
-    # A vector parallel to the rows of `data`: a new column.
-    if (length(groups) == nrow(data) && !(is.character(groups) && length(groups) == 1)) {
-      data <- as.data.frame(data, stringsAsFactors = FALSE)
-      col  <- make.unique(c(names(data), 'group'))[[ncol(data) + 1L]]
-      data[[col]] <- groups
-      return (list(data = data, col = col))
-    }
-
-    if (is.character(groups) && length(groups) == 1)
-      stop(
-        '`groups` must be the name of a column of `data`, but ',
-        name_list(groups), ' is not one.', call. = FALSE )
-
-    stop(
-      'With `data`, `groups` must be the name of a column of `data`, ',
-      'or have one value per row of `data` (', nrow(data), ').', call. = FALSE )
+    data <- as.data.frame(data, stringsAsFactors = FALSE)
+    dn   <- if (.row_names_info(data) > 0) rownames(data) else NULL
+    idx  <- match_rows(labels, n, dn, nrow(data))
   }
 
+  val <- per_sample(groups, 'groups', data, idx, labels, n)
+  src <- if (!is.null(data) && is.character(groups) && length(groups) == 1 &&
+             groups %in% names(data)) groups
 
-  #--------------------------------------------------------
-  # One value per sample.
-  #--------------------------------------------------------
-  if (is.character(groups) && length(groups) == 1 && n != 1)
-    stop('`groups` names a column, but `data` is not given.', call. = FALSE)
-
-  nms   <- names(groups)
-  named <- !is.null(labels) && !is.null(nms) && !anyNA(nms) && !anyDuplicated(nms)
-
-  if (named && !all(labels %in% nms)) {
-    miss <- labels[!labels %in% nms]
-    stop(
-      sprintf('%d sample%s in `dm` %s no value in `groups`: %s',
-        length(miss), if (length(miss) == 1) '' else 's',
-        if (length(miss) == 1) 'has' else 'have', name_list(miss) ),
-      call. = FALSE )
-  }
-
-  if (!named && length(groups) != n)
-    stop(sprintf('`groups` has %d values, but `dm` has %d samples.', length(groups), n), call. = FALSE)
-
-  # Values for other samples are ignored, even NAs.
-  used <- if (named) groups[match(labels, nms)] else groups
-  if (anyNA(used))
-    stop('`groups` must not contain NAs.', call. = FALSE)
-
-  if (!is.null(strata) && !(is.atomic(strata) && is.null(dim(strata)) && length(strata) == length(groups)))
-    stop('Without `data`, `strata` must have one value per value of `groups`.', call. = FALSE)
-
-  list(data = groups, col = 'group')
-}
-
-
-#------------------------------------------------------------------------------
-# test_groups(), then each sample's group in the order of the dist's samples.
-# Returns list(groups (the values, with unused factor levels dropped),
-# strata (0-based codes, or NULL), col).
-#------------------------------------------------------------------------------
-test_group_values <- function (groups, data, n, labels, strata = NULL) {
-
-  g   <- test_groups(groups, data, n, labels, strata)
-
-  # `~ 1`: aligned rows and strata, without a model matrix (which fails for a
-  # one-level factor).
-  des <- model_design(g$data, ~ 1, labels, n, strata, allow_empty = TRUE)
-  val <- des$data[[g$col]]
-
+  # Values for samples not in `dm` were left out, even NAs.
   if (anyNA(val))
-    stop('Missing values (NA) in `data` column ', name_list(g$col), '.', call. = FALSE)
+    stop(
+      if (is.null(src)) '`groups` must not contain NAs.'
+      else paste0('Missing values (NA) in `data` column ', name_list(src), '.'),
+      call. = FALSE )
 
   # A factor's NA level (from addNA()) is a group like any other, as in
   # model.matrix(); anyNA() is FALSE for it. Name it "NA", so that it can
   # label results.
   if (is.factor(val) && anyNA(levels(val))) {
     lev <- levels(val)
-    lev[is.na(lev)] <- make.unique(c(lev[!is.na(lev)], "NA"))[[sum(!is.na(lev)) + 1L]]
+    lev[is.na(lev)] <- make.unique(c(lev[!is.na(lev)], 'NA'))[[sum(!is.na(lev)) + 1L]]
     levels(val) <- lev
   }
 
-  list(groups = val, strata = des$strata, col = g$col)
+  strata <- per_sample(strata, 'strata', data, idx, labels, n)
+
+  out <- if (is.null(data)) data.frame(row.names = seq_len(n)) else data[idx, , drop = FALSE]
+  col <- if (!is.null(src)) src else make.unique(c(names(out), 'group'))[[ncol(out) + 1L]]
+  out[[col]] <- val
+  rownames(out) <- if (!is.null(labels) && !anyNA(labels) && !anyDuplicated(labels)) labels else NULL
+
+  list(data = out, col = col, strata = strata)
+}
+
+
+#------------------------------------------------------------------------------
+# test_groups(), then each sample's group and stratum, in the order of the
+# dist's samples. Returns list(groups (the values, with unused factor levels
+# dropped), strata (0-based codes, or NULL), col).
+#------------------------------------------------------------------------------
+test_group_values <- function (groups, data, n, labels, strata = NULL) {
+
+  g   <- test_groups(groups, data, n, labels, strata)
+  val <- g$data[[g$col]]
+  if (is.factor(val)) val <- droplevels(val)
+
+  list(groups = val, strata = strata_codes(g$strata), col = g$col)
+}
+
+
+# 0-based integer codes of strata values (already in the samples' order), or
+# NULL. A factor's NA level is a stratum like any other.
+strata_codes <- function (strata) {
+  if (is.null(strata)) return (NULL)
+  if (anyNA(strata)) stop('`strata` must not contain NAs.', call. = FALSE)
+  as.integer(factor(strata, exclude = NULL)) - 1L
 }
 
 
 
 #------------------------------------------------------------------------------
-# z-score of a statistic against its permuted values, as
-# summary(vegan::permustats()). NA with fewer than 2 permutations or when they
-# are all equal.
+# Permutation p-values: the proportion of the permutations, counting the
+# observed one, with a statistic at least as extreme as the observed one,
+# (count + 1) / (n_perm + 1). As vegan, values within `tol` of the observed
+# one count as ties; give `tol` on the statistic's scale when it has units.
+# Permuted values that are NA or NaN never count.
+#
+#   stat         The observed statistics (length m).
+#   perm         The permuted ones: a vector (m = 1) or n_perm x m matrix.
+#   alternative  'greater' (larger is more extreme), 'less', or 'two.sided'
+#                (larger in absolute value).
 #------------------------------------------------------------------------------
-perm_z <- function (statistic, perm) {
-  if (length(perm) < 2 || is.na(statistic)) return (NA_real_)
-  z <- (statistic - mean(perm)) / stats::sd(perm)
-  if (is.finite(z)) z else NA_real_
+perm_p <- function (
+    stat, perm, alternative = 'greater', tol = sqrt(.Machine$double.eps) ) {
+
+  perm   <- as.matrix(perm)
+  n_perm <- nrow(perm)
+  if (n_perm == 0) return (rep(NA_real_, length(stat)))
+
+  lim <- rep(switch(alternative, less = stat + tol, two.sided = abs(stat) - tol, stat - tol), each = n_perm)
+  hit <- switch(alternative,
+    greater   = perm >= lim,
+    less      = perm <= lim,
+    two.sided = abs(perm) >= lim )
+
+  p <- (colSums(hit, na.rm = TRUE) + 1) / (n_perm + 1)
+  p[is.na(stat)] <- NA_real_
+  unname(p)
 }
+
+
+
+#------------------------------------------------------------------------------
+# z-scores of statistics against their permuted values, as
+# summary(vegan::permustats()): (stat - mean(perm)) / sd(perm). `perm` is a
+# vector (one statistic) or an n_perm x m matrix. NA with fewer than 2
+# permutations, or when the permuted values are all equal (an sd that is
+# only rounding noise would give a huge, meaningless z).
+#------------------------------------------------------------------------------
+perm_z <- function (stat, perm) {
+
+  perm <- as.matrix(perm)
+  if (nrow(perm) < 2) return (rep(NA_real_, length(stat)))
+
+  vapply(seq_along(stat), function (j) {
+    p <- perm[, j]
+    s <- stats::sd(p)
+    if (is.na(stat[[j]]) || !is.finite(s) || s <= 1e-12 * max(abs(p))) return (NA_real_)
+    z <- (stat[[j]] - mean(p)) / s
+    if (is.finite(z)) z else NA_real_
+  }, numeric(1))
+}
+
 
 
 

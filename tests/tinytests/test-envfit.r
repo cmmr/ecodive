@@ -286,7 +286,7 @@
   expect_identical(sc$p_value[sc$variable == 'blkf'][1], 1)
 
   expect_error(envfit(ord, env, strata = blk[-1]), 'one value per row')
-  expect_error(envfit(ord, env, strata = 'nope'), 'no column')
+  expect_error(envfit(ord, env, strata = 'nope'), "'nope' is not one")
   expect_error(envfit(ord, env, strata = blk, permutations = pm), 'not both')
 
 
@@ -327,5 +327,10 @@
   expect_error(envfit(ord, env, na.rm = NA), 'na.rm')
   expect_error(envfit(ord, data.frame(x = I(list(1)))[rep(1, 24), , drop = FALSE]))
   expect_error(envfit(ord[1, , drop = FALSE], env[1, ]), 'At least 2')
+
+  # The arguments' order: what to fit, how to prepare it, then the test.
+  expect_identical(names(formals(envfit)), c(
+    'ord', 'data', 'counts', 'margin', 'norm', 'pseudocount', 'axes', 'na.rm',
+    'permutations', 'strata', 'seed', 'cpus' ))
 
 #})

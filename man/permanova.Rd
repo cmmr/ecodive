@@ -45,8 +45,8 @@ one-sided formula naming the variables in \code{data} to test, such as
 covariates, and interactions are all allowed. Wrap variables in
 \code{Condition()} to remove their effect before the other terms are
 tested, as in \code{vegan::dbrda()}. A left-hand side, if given, is
-ignored. With neither \code{groups} nor \code{formula}, every column of
-\code{data} is tested (\code{~ .}). Default: \code{NULL}.}
+ignored. Give \code{groups} or \code{formula}: there is no default model
+(as in \code{vegan::adonis2()}). Default: \code{NULL}.}
 
 \item{by}{How to test the terms of \code{formula}:
 \itemize{
@@ -68,10 +68,11 @@ Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones.}
 
 \item{strata}{Permute samples only within these groups (blocks), for
-designs such as repeated measures. The name of a column of \code{data}
-(which the default \code{formula} then leaves out), or a vector with one
-value per row of \code{data} (or, without \code{data}, per value of
-\code{groups}). Default: \code{NULL} (free permutation).}
+designs such as repeated measures. With \code{data}, the name of one of
+its columns, or a vector with one value per row of \code{data}. Without
+\code{data}, a vector with one value per sample, matched to the samples
+by name when it has names, otherwise in the same order. Default:
+\code{NULL} (free permutation).}
 
 \item{seed}{An integer seed for the random permutations. The same seed
 gives the same p-values. Default: \code{0}}

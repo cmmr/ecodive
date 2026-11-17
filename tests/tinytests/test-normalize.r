@@ -142,9 +142,19 @@
   expect_warning(normalize(x, 'clr', cpus = 1), 'pseudocount')
   expect_silent(normalize(x, 'clr', pseudocount = 1, cpus = 1))
 
-  # 'binary' keeps NA as NA, not a presence.
+  # NA, NaN and Inf are errors, for every norm (as in pca() and envfit()).
   xna <- matrix(c(NA, 2, 0, 3), 2)
-  expect_identical(normalize(xna, 'binary', cpus = 1), matrix(c(NA, 1, 0, 1), 2))
+  for (nm in c('none', 'percent', 'chord', 'binary', 'clr', 'rclr')) {
+    expect_error(normalize(xna, nm, cpus = 1), 'must not contain NA', info = nm)
+    expect_error(normalize(xna * Inf, nm, cpus = 1), 'must not contain NA', info = nm)
+  }
+  expect_error(normalize(x, 'clr', pseudocount = Inf), 'pseudocount')
+
+  # chord of very small or large values: no underflow to Inf or NaN.
+  m4 <- matrix(c(1, 3, 0, 2), 2)
+  ch <- normalize(m4, 'chord', cpus = 1)
+  expect_equal(normalize(m4 * 1e300,  'chord', cpus = 1), ch, tolerance = 1e-12)
+  expect_equal(normalize(m4 * 1e-320, 'chord', cpus = 1), ch, tolerance = 1e-2)  # subnormal inputs
 
   # An all-zero table has no stored values to look at.
   expect_identical(normalize(matrix(0, 2, 3), 'percent', cpus = 1), matrix(0, 2, 3))

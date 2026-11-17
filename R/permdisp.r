@@ -58,11 +58,6 @@
 #'        Alternatively, a matrix with one permutation of `1:n` per row, as
 #'        from `permute::shuffleSet()`, to use instead of random ones.
 #'
-#' @param strata  Permute samples only within these groups (blocks), for
-#'        designs such as repeated measures. The name of a column of `data`,
-#'        or a vector with one value per sample (or per row of `data`).
-#'        Default: `NULL` (free permutation).
-#'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
 #'
@@ -305,12 +300,26 @@ permdisp <- function (
   ss_res <- sum((z - mu)^2)
   f_obs  <- (ss_grp / df_grp) / (ss_res / df_res)
 
-  if (ng < 2)
+  # Degenerate fits. Sums of squares within ~1e-12 of the total are rounding
+  # noise: with none left within the groups, F is infinite (and cannot be
+  # tested), whichever `type` made the distances.
+  ss_tot <- ss_grp + ss_res
+  if (ng < 2) {
     warning('`groups` has only one group, so there is nothing to test.', call. = FALSE)
-  else if (df_res < 1)
+    f_obs <- NA_real_
+  }
+  else if (df_res < 1) {
     warning('Every group has only one sample, so there is nothing to test.', call. = FALSE)
-
-  if (ng < 2 || df_res < 1 || is.nan(f_obs)) f_obs <- NA_real_
+    f_obs <- NA_real_
+  }
+  else if (!isTRUE(ss_tot > 0)) {
+    warning('Every sample is as far from its group centre as every other, so there is nothing to test.', call. = FALSE)
+    f_obs <- NA_real_
+  }
+  else if (ss_res <= 1e-12 * ss_tot) {
+    warning('The samples of each group are all equally far from its centre (no residual variation), so F is infinite and cannot be tested.', call. = FALSE)
+    f_obs <- Inf
+  }
 
 
   #--------------------------------------------------------
@@ -321,13 +330,9 @@ permdisp <- function (
     if (is.null(des$strata)) NULL else as.integer(des$strata),
     as.integer(c(ng, pm$n_perm, seed, cpus, pairwise)) )
 
-  eps   <- sqrt(.Machine$double.eps)
-  p_obs <- if (pm$n_perm > 0 && !is.na(f_obs))
-    (sum(pr$f >= f_obs - eps) + 1) / (pm$n_perm + 1)
-  else NA_real_
-
   f_perm <- pr$f
-  if (is.na(f_obs)) f_perm[] <- NA_real_
+  if (!is.finite(f_obs)) f_perm[] <- NA_real_
+  p_obs  <- if (is.finite(f_obs)) perm_p(f_obs, f_perm) else NA_real_
 
 
   #--------------------------------------------------------
@@ -346,6 +351,8 @@ permdisp <- function (
       m <- length(x)
       k <- length(y)
       pooled <- sqrt(((m - 1) * stats::var(x) + (k - 1) * stats::var(y)) / (m + k - 2))
+      # No variance within the two groups beyond rounding: t is undefined.
+      if (!isTRUE(pooled > 1e-12 * max(abs(c(x, y))))) return (NA_real_)
       (mean(x) - mean(y)) / (pooled * sqrt(1 / m + 1 / k))
     })
     t_obs[is.nan(t_obs)] <- NA_real_
@@ -357,9 +364,7 @@ permdisp <- function (
     t_perm[, cnt[combos[1, ]] < 2 | cnt[combos[2, ]] < 2] <- NA_real_
     dimnames(t_perm) <- list(NULL, labs)
 
-    p_t <- if (pm$n_perm > 0)
-      (colSums(sweep(abs(t_perm), 2, abs(t_obs) - eps, '>=')) + 1) / (pm$n_perm + 1)
-    else rep(NA_real_, length(labs))
+    p_t <- perm_p(t_obs, t_perm, 'two.sided')
 
     pw <- data.frame(
       t            = t_obs,

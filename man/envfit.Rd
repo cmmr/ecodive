@@ -8,14 +8,14 @@ envfit(
   ord,
   data = NULL,
   counts = NULL,
-  axes = NULL,
-  permutations = 999L,
-  strata = NULL,
-  seed = 0L,
   margin = 1L,
   norm = "none",
   pseudocount = NULL,
+  axes = NULL,
   na.rm = FALSE,
+  permutations = 999L,
+  strata = NULL,
+  seed = 0L,
   cpus = n_cpus()
 )
 }
@@ -43,22 +43,6 @@ row names, and samples not in \code{ord} are ignored; without names,
 they must be in the same order as \code{ord}. Give \code{data}, \code{counts}, or
 both.}
 
-\item{axes}{Which columns of \code{ord} to fit onto: indices or column names.
-The default, \code{NULL}, uses every column. \code{vegan::envfit()} uses the
-first two by default (its \code{choices = c(1, 2)}), so give \code{axes = 1:2} to compare with it.}
-
-\item{permutations}{The number of permutations. Default: \code{999}.
-Alternatively, a matrix with one permutation of \code{1:n} per row, as
-from \code{permute::shuffleSet()}, to use instead of random ones.}
-
-\item{strata}{Permute samples only within these groups (blocks): the
-name of a column of \code{data} (which is then not fitted), or a vector
-with one value per row of \code{ord}, in the same order. Default: \code{NULL}
-(free permutation).}
-
-\item{seed}{An integer seed for the random permutations. The same seed
-gives the same p-values. Default: \code{0}}
-
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
 class (e.g. \code{phyloseq}). Default: \code{1}}
@@ -72,10 +56,28 @@ class (e.g. \code{phyloseq}). Default: \code{1}}
 \code{norm = 'clr'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
+\item{axes}{Which columns of \code{ord} to fit onto: indices or column names.
+The default, \code{NULL}, uses every column. \code{vegan::envfit()} uses the
+first two by default (its \code{choices = c(1, 2)}), so give \code{axes = 1:2} to compare with it.}
+
 \item{na.rm}{Leave out samples with missing values (\code{NA}) in \code{ord} or in
 any column of \code{data}, as \code{vegan::envfit()} does. \code{counts} must not
 have any.
 Default: \code{FALSE}, which stops with an error if there are any.}
+
+\item{permutations}{The number of permutations. Default: \code{999}.
+Alternatively, a matrix with one permutation of \code{1:n} per row, as
+from \code{permute::shuffleSet()}, to use instead of random ones.}
+
+\item{strata}{Permute samples only within these groups (blocks). With
+\code{data}, the name of one of its columns (which is then not fitted),
+or a vector with one value per row of \code{data}. Without \code{data}, a
+vector with one value per row of \code{ord}, matched to them by name when
+it has names, otherwise in the same order. Default: \code{NULL} (free
+permutation).}
+
+\item{seed}{An integer seed for the random permutations. The same seed
+gives the same p-values. Default: \code{0}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

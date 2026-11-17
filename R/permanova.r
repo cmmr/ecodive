@@ -42,8 +42,8 @@
 #'        covariates, and interactions are all allowed. Wrap variables in
 #'        `Condition()` to remove their effect before the other terms are
 #'        tested, as in `vegan::dbrda()`. A left-hand side, if given, is
-#'        ignored. With neither `groups` nor `formula`, every column of
-#'        `data` is tested (`~ .`). Default: `NULL`.
+#'        ignored. Give `groups` or `formula`: there is no default model
+#'        (as in `vegan::adonis2()`). Default: `NULL`.
 #'
 #' @param by  How to test the terms of `formula`:
 #'
@@ -62,12 +62,6 @@
 #' @param permutations  The number of permutations. Default: `999`.
 #'        Alternatively, a matrix with one permutation of `1:n` per row, as
 #'        from `permute::shuffleSet()`, to use instead of random ones.
-#'
-#' @param strata  Permute samples only within these groups (blocks), for
-#'        designs such as repeated measures. The name of a column of `data`
-#'        (which the default `formula` then leaves out), or a vector with one
-#'        value per row of `data` (or, without `data`, per value of
-#'        `groups`). Default: `NULL` (free permutation).
 #'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
@@ -237,11 +231,12 @@ permanova <- function (
   # adonis2()'s style, permanova(dm ~ terms, data): the metadata may come
   # second, where `groups` is.
   lhs <- inherits(dm, 'formula') && length(dm) == 3
-  if (lhs && !missing(groups) && is.null(data) && is.data.frame(groups)) {
-    data   <- groups
-    groups <- NULL
+  no_groups <- missing(groups)
+  if (lhs && !no_groups && is.null(data) && is.data.frame(groups)) {
+    data      <- groups
+    no_groups <- TRUE
   }
-  if (missing(groups)) groups <- NULL
+  if (no_groups) groups <- NULL
 
   if (inherits(data, 'formula') || inherits(groups, 'formula'))
     stop(
@@ -253,9 +248,15 @@ permanova <- function (
   n  <- dv$n
 
 
+  if (n < 2)
+    stop('`dm` must have at least 2 samples.', call. = FALSE)
+
+
   #--------------------------------------------------------
   # `groups` is the one-term model ~ groups. Otherwise
-  # `formula` (or, with neither, every column of `data`).
+  # `formula`: there is no default (as in adonis2()), so
+  # that a misspelled `groups` (NULL) can't test every
+  # column of `data`.
   #--------------------------------------------------------
   formula <- fd$formula
   env     <- parent.frame()
@@ -267,19 +268,21 @@ permanova <- function (
 
     g       <- test_groups(groups, data, n, dv$labels, strata)
     data    <- g$data
+    strata  <- g$strata
     formula <- stats::as.formula(call('~', as.name(g$col)), env = env)
   }
-  else if (is.null(data)) {
+  else if (is.null(formula)) {
     stop(
-      '`groups` is required: one value per sample, or a column name of `data`. ',
-      'Or give `data` and a `formula`.', call. = FALSE )
+      if (no_groups) '`groups` is required: one value per sample, or a column name of `data`. '
+      else '`groups` is NULL (a misspelled column, such as meta$tretment?). ',
+      'Or give `data` and a `formula`, such as `formula = ~ a + b`.', call. = FALSE )
+  }
+  else if (is.null(data)) {
+    stop('`data` is required with `formula`: the sample metadata.', call. = FALSE)
   }
 
   des <- model_design(data, formula, dv$labels, n, strata, env = env)
   pm  <- perm_matrix(permutations, n)
-
-  if (n < 2)
-    stop('`dm` must have at least 2 samples.', call. = FALSE)
 
   if (!is.null(pm$perms) && !is.null(des$strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
@@ -415,11 +418,7 @@ permanova <- function (
   f_obs <- f_all[1, ]
   f_prm <- f_all[-1, , drop = FALSE]
 
-  eps <- sqrt(.Machine$double.eps)
-  p   <- if (pm$n_perm > 0)
-    (colSums(sweep(f_prm, 2, f_obs - eps, '>=')) + 1) / (pm$n_perm + 1)
-  else rep(NA_real_, ncol(num))
-  p[is.na(f_obs)] <- NA_real_
+  p <- perm_p(f_obs, f_prm)
 
 
   #--------------------------------------------------------
@@ -485,9 +484,7 @@ permanova <- function (
   f0     <- f_model[[1]]
   f_perm <- f_model[-1]
 
-  p_model <- if (pm$n_perm > 0 && !is.na(f0))
-    (sum(f_perm >= f0 - eps) + 1) / (pm$n_perm + 1)
-  else NA_real_
+  p_model <- perm_p(f0, f_perm)
 
   new_ecodive_test(
     class       = 'ecodive_permanova',

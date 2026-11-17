@@ -48,12 +48,6 @@
 #'        Alternatively, a matrix with one permutation of `1:n` per row, as
 #'        from `permute::shuffleSet()`, to use instead of random ones.
 #'
-#' @param strata  Permute samples only within these groups (blocks), for
-#'        designs such as repeated measures. The name of a column of `data`,
-#'        or a vector with one value per sample (per row of `data`, when
-#'        given; else in the same order as `groups`). Default: `NULL` (free
-#'        permutation).
-#'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
 #'
@@ -256,11 +250,10 @@ mrpp <- function (
   #--------------------------------------------------------
   # p-value and z-score from the permuted deltas.
   #--------------------------------------------------------
-  eps <- sqrt(.Machine$double.eps)
-
-  p <- if (pm$n_perm > 0 && !is.na(delta))
-    (1 + sum(delta_perm <= delta + eps)) / (pm$n_perm + 1)
-  else NA_real_
+  # delta has the distances' units, so ties are judged relative to its
+  # scale (vegan's absolute tolerance gives p = 1 for tiny distances).
+  tol <- sqrt(.Machine$double.eps) * max(abs(delta), e_delta, na.rm = TRUE)
+  p   <- perm_p(delta, delta_perm, 'less', tol = tol)
 
   new_ecodive_test(
     class          = 'ecodive_mrpp',

@@ -281,7 +281,7 @@
   expect_error(mantel(x, y, alternative = 'foo'))
   expect_error(mantel(x, y, permutations = -1), '`permutations` must be')
   expect_error(mantel(x, y, permutations = perms, strata = grp), 'not both')
-  expect_error(mantel(x, y, strata = grp[-1]), 'one value per sample')
+  expect_error(mantel(x, y, strata = grp[-1]), 'has 29 values')
   expect_error(mantel(x, y, strata = c(NA, grp[-1])), 'must not contain NA')
   expect_error(mantel(x, y, seed = 1.5), '`seed`')
   expect_error(mantel(x, y, cpus = 0), '`cpus`')
