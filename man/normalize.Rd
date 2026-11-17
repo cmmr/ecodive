@@ -68,6 +68,11 @@ Samples whose counts are already proportions (summing to 1, within
 \eqn{10^{-6}}) are left as they are by \code{norm = 'percent'}, as in the
 functions with a \code{norm} argument. Stored zeros in sparse input are
 dropped, and repeated entries of a \code{dgTMatrix} are summed.
+
+\strong{Masking}: \pkg{BiocGenerics}, which is attached along with
+\pkg{phyloseq} or \pkg{SummarizedExperiment}, also has a \code{normalize()}.
+Whichever package was attached last masks the other's, so call
+\code{ecodive::normalize()} to be sure of getting this one.
 }
 \section{Pseudocount}{
 

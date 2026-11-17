@@ -53,6 +53,11 @@
 #' functions with a `norm` argument. Stored zeros in sparse input are
 #' dropped, and repeated entries of a `dgTMatrix` are summed.
 #'
+#' **Masking**: \pkg{BiocGenerics}, which is attached along with
+#' \pkg{phyloseq} or \pkg{SummarizedExperiment}, also has a `normalize()`.
+#' Whichever package was attached last masks the other's, so call
+#' `ecodive::normalize()` to be sure of getting this one.
+#'
 #' @seealso [beta_div()], [pca()], [envfit()], [rarefy()]
 #'
 #' @export
