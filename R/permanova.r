@@ -317,7 +317,7 @@ permanova <- function (
   if (is.null(qz) && by != 'onedf' && length(des$term_labels) == 1 && full$rank > 0) {
     v <- des$data[[des$term_labels]]
     if (is.factor(v) || is.character(v) || is.logical(v))
-      grp <- as.integer(factor(v)) - 1L
+      grp <- as.integer(factor(v, exclude = NULL)) - 1L
   }
 
   if (full$rank == 0) {

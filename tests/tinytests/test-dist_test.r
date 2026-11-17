@@ -166,4 +166,37 @@
     dist_test(d, 'trt', meta, method = 'betadisper', permutations = 9, cpus = 1),
     permdisp(d, 'trt', meta, permutations = 9, cpus = 1) )
 
+
+
+  # A factor's NA level (from addNA()) is a group, or a stratum, like any
+  # other, as in model.matrix(). It crashed R. ====
+
+  na_g  <- addNA(factor(rep(c('a', NA, 'b'), length.out = 12)))
+  zz_g  <- factor(rep(c('a', 'zz', 'b'), length.out = 12), levels = c('a', 'b', 'zz'))
+  na_s  <- addNA(factor(rep(c(1, 2, NA), each = 4)))
+  zz_s  <- factor(rep(c(1, 2, 99), each = 4))
+  d12   <- dist(c(1, 4, 2, 8, 5, 7, 3, 9, 6, 2, 8, 1))
+  ab    <- rep(c('a', 'b'), 6)
+  for (m in c('permanova', 'mrpp', 'anosim', 'permdisp')) {
+    expect_identical(
+      dist_test(d12, na_g, method = m, permutations = 19, cpus = 1)[1:4],
+      dist_test(d12, zz_g, method = m, permutations = 19, cpus = 1)[1:4], info = m )
+    expect_identical(
+      dist_test(d12, ab, method = m, strata = na_s, permutations = 19, cpus = 1)[1:4],
+      dist_test(d12, ab, method = m, strata = zz_s, permutations = 19, cpus = 1)[1:4], info = m )
+  }
+  x12 <- c(5, 1, 4, 2, 8, 3, 9, 6, 7, 2, 1, 4)
+  expect_identical(
+    mantel(d12, x12, strata = na_s, permutations = 19, cpus = 1)[1:4],
+    mantel(d12, x12, strata = zz_s, permutations = 19, cpus = 1)[1:4] )
+  expect_identical(
+    permanova(d12, data = data.frame(g = na_g), formula = ~ g, permutations = 19, cpus = 1)[1:4],
+    permanova(d12, data = data.frame(g = zz_g), formula = ~ g, permutations = 19, cpus = 1)[1:4] )
+  ord12 <- pcoa(d12, k = 1, cpus = 1)
+  e_na  <- envfit(ord12, data.frame(g = na_g, row.names = NULL), strata = na_s, permutations = 19, cpus = 1)
+  e_zz  <- envfit(ord12, data.frame(g = zz_g, row.names = NULL), strata = zz_s, permutations = 19, cpus = 1)
+  expect_identical(e_na$r2, e_zz$r2)
+  expect_identical(e_na$p_value, e_zz$p_value)
+  expect_identical(nrow(e_na), 3L)  # a centroid for each level, NA's too
+
 #})

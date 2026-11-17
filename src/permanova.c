@@ -510,7 +510,8 @@ SEXP C_permanova(
     pm_grp = INTEGER(sexp_grp);
     int g  = 0;
     for (int a = 0; a < n; a++)
-      if (pm_grp[a] + 1 > g) g = pm_grp[a] + 1;
+      if (pm_grp[a] < 0 || pm_grp[a] >= n) error("Invalid arguments to C_permanova()."); // # nocov
+      else if (pm_grp[a] + 1 > g) g = pm_grp[a] + 1;
 
     double *inv = (double *) R_alloc(g, sizeof(double));
     for (int c = 0; c < g; c++) inv[c] = 0;

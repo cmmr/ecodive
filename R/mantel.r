@@ -282,8 +282,13 @@ mantel <- function (
     }
     rxy   <- r_all[1, ]
     rxg   <- r_all[2, ]
+    if (abs(rxg[[1]]) >= 1 - 1e-12) {
+      warning('`dm` and `given` are perfectly correlated, so there is no ',
+              'partial correlation.', call. = FALSE)
+      return (result(undefined))
+    }
     r_all <- (rxy - rxg * ryg) / sqrt(1 - rxg * rxg) / sqrt(1 - ryg * ryg)  # as vegan
-    r_all[!is.finite(r_all)] <- NA_real_
+    r_all[!is.finite(r_all) | abs(rxg) >= 1 - 1e-12] <- NA_real_
   }
 
   result(r_all)
@@ -398,7 +403,7 @@ mantel_strata <- function (strata, labels, n) {
   if (anyNA(strata))
     stop('`strata` must not contain NA values.', call. = FALSE)
 
-  as.integer(factor(strata)) - 1L
+  as.integer(factor(strata, exclude = NULL)) - 1L
 }
 
 

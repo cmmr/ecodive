@@ -258,7 +258,7 @@ permdisp <- function (
 
   des   <- test_group_values(groups, data, n, dv$labels, strata)
   grp_f <- des$groups
-  if (!is.factor(grp_f)) grp_f <- factor(grp_f)
+  if (!is.factor(grp_f)) grp_f <- factor(grp_f, exclude = NULL)
   grp_f <- droplevels(grp_f)
   ng    <- nlevels(grp_f)
   grp   <- as.integer(grp_f) - 1L

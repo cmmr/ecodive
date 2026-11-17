@@ -567,7 +567,7 @@ SEXP C_envfit(
     ef_wid   = EF_W;
   }
 
-  int n_blocks = (ef_total + ef_bsize - 1) / ef_bsize;
+  int n_blocks = (int) (((size_t) ef_total + ef_bsize - 1) / ef_bsize);
   int nt_max   = n_threads;
   if (nt_max < 1) nt_max = 1;
 
@@ -605,15 +605,15 @@ SEXP C_envfit(
 
   double nnz      = (ef_m > 0) ? (double) ef_cp[ef_m] : 0;
   double blk_work = (double) ef_wid * (nnz + 2 * n) + (double) ef_bsize * n * (ef_f * kx + 2) + 1;
-  int    per_round = (int) (1e8 * n_threads / blk_work);
+  double rounds    = 1e8 * n_threads / blk_work;
+  int    per_round = (rounds < n_blocks) ? (int) rounds : n_blocks; // no overflow
   if (per_round < n_threads) per_round = n_threads;
 
   int tasks_hint = (blk_work > 1e4) ? 100 : 1;
 
   for (ef_blk0 = 0; ef_blk0 < n_blocks; ef_blk0 = ef_blk1) {
 
-    ef_blk1 = ef_blk0 + per_round;
-    if (ef_blk1 > n_blocks) ef_blk1 = n_blocks;
+    ef_blk1 = (n_blocks - ef_blk0 > per_round) ? ef_blk0 + per_round : n_blocks;
 
     int nt = (ef_blk1 - ef_blk0 < n_threads) ? ef_blk1 - ef_blk0 : n_threads;
     run_parallel(perm_worker, nt, (ef_blk1 - ef_blk0 > 1) ? tasks_hint : 1);

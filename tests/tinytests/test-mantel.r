@@ -216,6 +216,12 @@
     "perfectly correlated" )
   expect_identical(res$statistic[["r"]], NA_real_)
 
+  # dm and given perfectly correlated: the same (it gave r = 6.6e-10).
+  expect_warning(
+    res <- mantel(x, age, given = x, permutations = 9),
+    "perfectly correlated" )
+  expect_identical(res$statistic[["r"]], NA_real_)
+
 
 
   # `data`: y, given and strata as its column names, with rows matched to

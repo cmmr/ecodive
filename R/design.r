@@ -101,7 +101,7 @@ model_design <- function (
   if (!is.null(strata)) {
     strata <- strata[idx]
     if (anyNA(strata)) stop('`strata` must not contain NAs.', call. = FALSE)
-    strata <- as.integer(factor(strata)) - 1L
+    strata <- as.integer(factor(strata, exclude = NULL)) - 1L
   }
 
 

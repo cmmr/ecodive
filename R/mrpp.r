@@ -213,7 +213,7 @@ mrpp <- function (
   if (!is.null(pm$perms) && !is.null(des$strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
 
-  grp   <- factor(grp)
+  grp   <- factor(grp, exclude = NULL)  # a factor's NA level is a group
   lvls  <- levels(grp)
   gi    <- as.integer(grp)
   ng    <- tabulate(gi, length(lvls))

@@ -172,6 +172,15 @@ test_group_values <- function (groups, data, n, labels, strata = NULL) {
   if (anyNA(val))
     stop('Missing values (NA) in `data` column ', name_list(g$col), '.', call. = FALSE)
 
+  # A factor's NA level (from addNA()) is a group like any other, as in
+  # model.matrix(); anyNA() is FALSE for it. Name it "NA", so that it can
+  # label results.
+  if (is.factor(val) && anyNA(levels(val))) {
+    lev <- levels(val)
+    lev[is.na(lev)] <- make.unique(c(lev[!is.na(lev)], "NA"))[[sum(!is.na(lev)) + 1L]]
+    levels(val) <- lev
+  }
+
   list(groups = val, strata = des$strata, col = g$col)
 }
 

@@ -181,7 +181,7 @@ anosim <- function (
   if (missing(groups)) groups <- NULL
 
   des <- test_group_values(groups, data, n, dv$labels, strata)
-  grp <- list(groups = droplevels(factor(des$groups)), strata = des$strata)
+  grp <- list(groups = droplevels(factor(des$groups, exclude = NULL)), strata = des$strata)
   pm  <- perm_matrix(permutations, n)
 
   if (!is.null(pm$perms) && !is.null(grp$strata))

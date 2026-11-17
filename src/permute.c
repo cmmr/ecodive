@@ -46,7 +46,8 @@ void perm_source_init(
     const int *strata = INTEGER(sexp_strata);
     ns = 0;
     for (int a = 0; a < n; a++)
-      if (strata[a] + 1 > ns) ns = strata[a] + 1;
+      if (strata[a] < 0 || strata[a] >= n) error("Invalid strata codes."); // # nocov
+      else if (strata[a] + 1 > ns) ns = strata[a] + 1;
     sbeg = (int *) R_alloc(ns + 1, sizeof(int));
     for (int s = 0; s <= ns; s++) sbeg[s] = 0;
     for (int a = 0; a < n; a++) sbeg[strata[a] + 1]++;

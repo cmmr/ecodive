@@ -365,7 +365,8 @@ SEXP C_anosim(
   //--------------------------------------------------
   int g = 0;
   for (int a = 0; a < n; a++)
-    if (an_grp[a] + 1 > g) g = an_grp[a] + 1;
+    if (an_grp[a] < 0 || an_grp[a] >= n) error("Invalid arguments to C_anosim()."); // # nocov
+    else if (an_grp[a] + 1 > g) g = an_grp[a] + 1;
 
   SEXP sexp_gsw = PROTECT(allocVector(REALSXP, g));
   SEXP sexp_gnp = PROTECT(allocVector(REALSXP, g));

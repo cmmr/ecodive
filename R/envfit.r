@@ -250,7 +250,7 @@ envfit <- function (
            '), or name a column of `data`.', call. = FALSE)
     strata <- strata[keep]
     if (anyNA(strata)) stop('`strata` must not contain NAs.', call. = FALSE)
-    strata <- as.integer(factor(strata)) - 1L
+    strata <- as.integer(factor(strata, exclude = NULL)) - 1L
   }
 
   pm <- perm_matrix(permutations, n)
@@ -598,7 +598,7 @@ envfit_vars <- function (data) {
   }
 
   if (any(!num)) {
-    facs <- lapply(data[!num], function (v) droplevels(factor(v)))
+    facs <- lapply(data[!num], function (v) droplevels(factor(v, exclude = NULL)))
     names(facs) <- vnms[!num]
     vars$factors <- facs
   }
