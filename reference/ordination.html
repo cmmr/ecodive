@@ -51,105 +51,188 @@ beta diversity metrics.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ordination</span><span class="op">(</span><span class="va">x</span>, <span class="va">method</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ordination</span><span class="op">(</span><span class="va">dm</span>, <span class="va">method</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>The data to ordinate: for <code>"pcoa"</code> and <code>"nmds"</code>, a <code>dist</code> object
-such as from <code><a href="beta_div.html">beta_div()</a></code>, or a symmetric matrix of distances. See
-<code><a href="ordinations.html">list_ordinations()</a></code> for what each method takes.</p></dd>
+<dl><dt id="arg-dm">dm<a class="anchor" aria-label="anchor" href="#arg-dm"></a></dt>
+<dd><p>The distances to ordinate: a <code>dist</code> object such as from
+<code><a href="beta_div.html">beta_div()</a></code>, or a symmetric matrix of distances. Every method
+listed by <code><a href="ordinations.html">list_ordinations()</a></code> takes distances.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>The name of an ordination method: <code>"nmds"</code> or <code>"pcoa"</code>.
-Flexible matching is supported (see below). Programmatic access via
-<code><a href="ordinations.html">list_ordinations()</a></code>.</p></dd>
+<dd><p>The name of an ordination method: <code>"capscale"</code>,
+<code>"dbrda"</code>, <code>"isomap"</code>, <code>"mds"</code>, <code>"nmds"</code>, <code>"pcoa"</code>, <code>"tsne"</code>,
+or <code>"umap"</code>. Flexible matching is supported (see below).
+Programmatic access via <code><a href="ordinations.html">list_ordinations()</a></code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Further arguments for the method's function, such as <code>k</code> or
-<code>cpus</code>. Each method keeps its own defaults; see <code><a href="pcoa.html">pcoa()</a></code> and
-<code><a href="nmds.html">nmds()</a></code>.</p></dd>
+<dd><p>Further arguments for the method's function, such as <code>k</code>,
+<code>seed</code>, <code>cpus</code>, or <code>pcoa</code>'s <code>correction</code>. Each method keeps its own
+defaults; see <code><a href="capscale.html">capscale()</a></code> and <code><a href="dbrda.html">dbrda()</a></code> (which also need <code>groups</code>,
+or <code>data</code> and <code>formula</code>, as in <code>ordination(dm, 'dbrda', 'treatment', meta)</code>), <code><a href="isomap.html">isomap()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>, <code><a href="tsne.html">tsne()</a></code>, and
+<code><a href="umap.html">umap()</a></code>. <code>seed</code> is ignored by the methods that have no random
+parts (<code>capscale</code>, <code>dbrda</code>, <code>isomap</code> and <code>pcoa</code>), so the same
+arguments can be given to every method.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The method's result, as described in "Ordination result" below.
-<code>ordination(x, 'pcoa', ...)</code> is the same as <code>pcoa(x, ...)</code>.</p>
+<code>ordination(dm, 'pcoa', ...)</code> is the same as <code>pcoa(dm, ...)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>List of Ordination Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>nmds</code></td><td>Non-metric Multidimensional Scaling (NMDS)</td></tr><tr><td><code>pcoa</code></td><td>Principal Coordinates Analysis (PCoA)</td></tr></table><p><strong>Flexible name matching</strong></p>
+    <p><strong>List of Ordination Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>capscale</code></td><td>Constrained Analysis of Principal Coordinates</td></tr><tr><td><code>dbrda</code></td><td>Distance-based Redundancy Analysis (db-RDA)</td></tr><tr><td><code>isomap</code></td><td>Isometric Feature Mapping (Isomap)</td></tr><tr><td><code>mds</code></td><td>Metric Multidimensional Scaling (MDS)</td></tr><tr><td><code>nmds</code></td><td>Non-metric Multidimensional Scaling (NMDS)</td></tr><tr><td><code>pcoa</code></td><td>Principal Coordinates Analysis (PCoA)</td></tr><tr><td><code>tsne</code></td><td>t-distributed Stochastic Neighbor Embedding (t-SNE)</td></tr><tr><td><code>umap</code></td><td>Uniform Manifold Approximation and Projection (UMAP)</td></tr></table><p><code><a href="pca.html">pca()</a></code> and <code><a href="rpca.html">rpca()</a></code> ordinate a count table rather than distances, so they
+are called directly, not through <code>ordination()</code>. <code><a href="permanova.html">permanova()</a></code> and ecodive's other
+tests are run by <code><a href="dist_test.html">dist_test()</a></code>.</p>
+<p>Default numbers of axes differ: <code>k = 3</code> for <code>capscale</code>, <code>dbrda</code>, <code>pcoa</code> (and
+<code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>), and <code>k = 2</code> for <code>isomap</code>, <code>mds</code>, <code>nmds</code>, <code>tsne</code>, and
+<code>umap</code>.</p>
+<p><strong>Flexible name matching</strong></p>
 <p>Case insensitive and partial matching, ignoring anything but letters. E.g.
 <code>method = 'PCoA'</code> or <code>'principal coord'</code> selects <code>pcoa</code>. Common other names
-also work: <code>'MDS'</code>, <code>'PCO'</code>, <code>'cmdscale'</code>, or <code>'classical MDS'</code> for
-<code>pcoa</code>, and <code>'non-metric MDS'</code>, <code>'metaMDS'</code>, or <code>'monoMDS'</code> for <code>nmds</code>.</p>
+also work: <code>'PCO'</code>, <code>'cmdscale'</code>, or <code>'classical MDS'</code> for <code>pcoa</code>;
+<code>'MDS'</code> or <code>'metric MDS'</code> for <code>mds</code>; <code>'non-metric MDS'</code>, <code>'metaMDS'</code>,
+<code>'monoMDS'</code>, or <code>'isoMDS'</code> for <code>nmds</code>; <code>'isometric mapping'</code> for <code>isomap</code>;
+<code>'Rtsne'</code>, <code>'bhtsne'</code>, or <code>'Barnes-Hut t-SNE'</code> for <code>tsne</code>; and <code>'uwot'</code>
+for <code>umap</code>. <code>'dbRDA'</code> or <code>'distance-based RDA'</code> select <code>dbrda</code>, and <code>'CAP'</code>
+selects <code>capscale</code>.</p>
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.</p>
+<p><strong>Same names in other packages</strong></p>
+<p><code>ape::pcoa()</code>, <code>vegan::pca()</code>, <code>vegan::dbrda()</code>, <code>vegan::capscale()</code>,
+<code>vegan::isomap()</code> (whose <code>k</code> is the number of neighbours, not axes), and
+<code>uwot::umap()</code> share names with ecodive's functions, and whichever package was attached last
+masks the other's. Write <code><a href="pcoa.html">ecodive::pcoa()</a></code> and so on, or use
+<code>ordination()</code>, which always runs ecodive's, to be sure.</p>
     </div>
     <div class="section level2">
     <h2 id="ordination-result">Ordination result<a class="anchor" aria-label="anchor" href="#ordination-result"></a></h2>
 
 
-<p>Every ordination method (<code><a href="pcoa.html">pcoa()</a></code>, <code><a href="nmds.html">nmds()</a></code>, and <code>ordination()</code>) returns
-the same kind of object: a plain numeric matrix with one row per sample
-(named after the samples) and one column per axis (named <code>"PCoA1"</code>,
-<code>"NMDS1"</code>, etc.), so that it can go straight into <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data
-frame. Its attributes always begin with these three, in this order:</p><ul><li><p><code>method</code>: The method's ID, e.g. <code>"pcoa"</code> or <code>"nmds"</code>.</p></li>
-<li><p><code>eig</code>: Each axis's eigenvalue, or <code>NA</code> for methods without them.</p></li>
-<li><p><code>prop</code>: The proportion of the total variance that each axis explains,
-or <code>NA</code> where that isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them.</p>
+<p>Every ordination function (<code><a href="pcoa.html">pcoa()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>,
+<code><a href="capscale.html">capscale()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, and so
+<code>ordination()</code>) returns the same kind of
+object: a numeric matrix with one row per sample and one column per
+axis, so that it can go straight into <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data frame. Rows are
+named after the samples, when the input has names. Columns are named
+after the method: <code>"PCoA1"</code>, <code>"PC1"</code>, <code>"RPCA1"</code>, <code>"dbRDA1"</code> or <code>"CAP1"</code>
+(then <code>"MDS1"</code> for unconstrained axes), <code>"MDS1"</code>, <code>"NMDS1"</code>,
+<code>"Isomap1"</code>, <code>"TSNE1"</code>, <code>"UMAP1"</code>, and so on.</p>
+<p>Its attributes always begin with these three, in this order, each with
+one value per column:</p><ul><li><p><code>method</code>: The method's ID, e.g. <code>"pcoa"</code> or <code>"nmds"</code>.</p></li>
+<li><p><code>eig</code>: Each axis's eigenvalue, on the method's own scale: <code><a href="pcoa.html">pcoa()</a></code>
+and <code><a href="isomap.html">isomap()</a></code> give the eigenvalues of Gower's centered matrix (sums
+of squares); <code><a href="pca.html">pca()</a></code> and <code><a href="rpca.html">rpca()</a></code> give variances, which are <code><a href="pcoa.html">pcoa()</a></code>'s
+divided by \(n - 1\) for \(n\) samples; and <code><a href="dbrda.html">dbrda()</a></code> and
+<code><a href="capscale.html">capscale()</a></code> follow <code>vegan</code>, which also divides by \(n - 1\) when any
+distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="tsne.html">tsne()</a></code>, and
+<code><a href="umap.html">umap()</a></code>, which have no eigenvalues.</p></li>
+<li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
+axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
+it to label axes. <code>NA</code> where it isn't defined.</p></li>
+</ul><p>Attributes particular to the method follow them. The matrix has class
+<code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), only so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
+other attributes by name rather than in full. Subsetting with <code>[</code>, or
+<code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, gives a plain matrix or data frame without them.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="pcoa.html">pcoa()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="ordinations.html">list_ordinations()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="capscale.html">capscale()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>,
+<code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, <code><a href="ordinations.html">list_ordinations()</a></code>; <code><a href="pca.html">pca()</a></code> and <code><a href="rpca.html">rpca()</a></code>, which are
+called directly; <code><a href="dist_test.html">dist_test()</a></code> for ecodive's tests.</p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="co"># 30 samples in three groups.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">30</span> <span class="op">*</span> <span class="fl">20</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fl">30</span>, <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">counts</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">20</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">counts</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">20</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">+</span> <span class="fl">5</span></span></span>
+<span class="r-in"><span>    <span class="va">counts</span><span class="op">[</span><span class="fl">21</span><span class="op">:</span><span class="fl">30</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">counts</span><span class="op">[</span><span class="fl">21</span><span class="op">:</span><span class="fl">30</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span> <span class="op">+</span> <span class="fl">5</span></span></span>
+<span class="r-in"><span>    <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="fu">ordination</span><span class="op">(</span><span class="va">d</span>, <span class="st">'pcoa'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             PCoA1       PCoA2        PCoA3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Saliva -0.3891250 -0.03721713  0.296748867</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gums   -0.3951099 -0.05550727 -0.293514268</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Nose    0.3179676  0.53707433 -0.006811864</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   0.4662673 -0.44434993  0.003577264</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"method")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pcoa"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"eig")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6260388 0.4903619 0.1742697</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"prop")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.4850493 0.3799280 0.1350226</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"trace")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.29067</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               PCoA1        PCoA2         PCoA3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -0.0360804114  0.091711440 -0.1105907710</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -0.0230948908  0.123523905 -0.0720542583</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  0.0523017762  0.023894547  0.0235011671</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -0.0009831621  0.069549555  0.0169203791</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -0.0019453437  0.054035906  0.0292109270</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -0.0371823183  0.093398842  0.1360915815</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -0.0495658911  0.022897755 -0.0384654522</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  0.0178610881  0.180607395 -0.0002660476</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  0.0484965214  0.067648469  0.0504743481</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  0.0181776324  0.059231479 -0.0944284441</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] -0.1704793942 -0.017409877 -0.1143911894</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] -0.0815143578 -0.063620085  0.0198252902</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] -0.0969931110 -0.085572949  0.0926132764</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] -0.1065929852 -0.089396338 -0.0179647914</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] -0.1184732425 -0.116377213 -0.0303943691</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] -0.1665560361  0.027653615  0.0174461498</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] -0.2065533700  0.078005363  0.0479182367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] -0.1541357844 -0.056715440  0.0690006947</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19,] -0.1668647980 -0.057014693 -0.0136648054</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [20,] -0.1185943205 -0.071167788 -0.0275055595</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [21,]  0.0607370055 -0.096812933  0.0213953915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [22,]  0.1124361421  0.009240374  0.0398499073</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [23,]  0.1513725637 -0.010969491  0.0091507334</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [24,]  0.1776768087 -0.036775431  0.0316047331</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25,]  0.1493110539 -0.066778910 -0.1082642886</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [26,]  0.2149586662 -0.049343885 -0.0087576882</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [27,]  0.1359001225  0.012315397  0.0378789660</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [28,]  0.1551753035  0.002891378 -0.0037064635</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29,]  0.1120427050 -0.034752576 -0.0060420219</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [30,]  0.1291620279 -0.063897809  0.0036143680</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pcoa: 30 samples, 3 axes; % of variance: 39.1, 14.3, 9.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Attributes: method, eig, prop, trace, correction, constant</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="fu">ordination</span><span class="op">(</span><span class="va">d</span>, <span class="st">'NMDS'</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>stress is (nearly) zero: there may be too few samples</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             NMDS1       NMDS2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Saliva -0.3891463 -0.03721917</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gums   -0.3951316 -0.05551031</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Nose    0.3179851  0.53710375</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   0.4662929 -0.44437427</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"method")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "nmds"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"eig")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"prop")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"stress")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"converged")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"tries")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"best_try")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              NMDS1        NMDS2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -0.076781363  0.184513370</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -0.040414313  0.248387588</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  0.064948612 -0.002575346</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -0.003660619  0.096767066</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  0.003267326  0.043200706</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -0.091256926  0.118311810</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -0.068782527  0.016120041</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  0.093922221  0.254939142</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  0.073463986  0.040734910</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  0.088556261  0.142786881</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] -0.240601041 -0.003062966</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] -0.101167871 -0.090308848</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] -0.119556208 -0.184893547</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] -0.142478350 -0.117483748</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] -0.155876934 -0.106334842</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] -0.188632895  0.019645493</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] -0.255225924  0.069545906</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] -0.203245632 -0.086022836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19,] -0.266318367 -0.061424564</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [20,] -0.153158074 -0.061986908</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [21,]  0.063659131 -0.086858301</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [22,]  0.163322207  0.012150440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [23,]  0.185608829 -0.043395410</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [24,]  0.231877693 -0.045640625</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25,]  0.192147954 -0.100967879</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [26,]  0.272631460 -0.090684559</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [27,]  0.172236247 -0.009536038</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [28,]  0.210499651  0.013269110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29,]  0.132892496 -0.065269638</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [30,]  0.158122970 -0.103926413</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> nmds: 30 samples, 2 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Attributes: method, eig, prop, stress, converged, n_iters, n_starts, best_start, n_best, ties</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># The same arguments for every method.</span></span></span>
+<span class="r-in"><span>    <span class="va">ords</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'pcoa'</span>, <span class="st">'nmds'</span>, <span class="st">'umap'</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="fu">ordination</span><span class="op">(</span><span class="va">d</span>, <span class="va">m</span>, k <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

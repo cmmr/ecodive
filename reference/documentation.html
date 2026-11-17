@@ -105,6 +105,15 @@ communities (\(p\)). Default: <code>1.5</code></p></dd>
 <strong>Pseudocount</strong> section.</p></dd>
 
 
+<dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
+<dd><p>Permute samples only within these groups (blocks), for
+designs such as repeated measures. With <code>data</code>, the name of one of
+its columns, or a vector with one value per row of <code>data</code>. Without
+<code>data</code>, a vector with one value per sample, matched to the samples
+by name when it has names, otherwise in the same order. Default:
+<code>NULL</code> (free permutation).</p></dd>
+
+
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
 <dd><p>The margin containing samples. <code>1</code> if samples are rows,
 <code>2</code> if samples are columns. Ignored when <code>counts</code> is a special object

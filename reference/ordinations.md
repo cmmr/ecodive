@@ -87,12 +87,18 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_ordinations()
-#>                                  name   id input
-#> 1 Non-metric Multidimensional Scaling nmds  dist
-#> 2      Principal Coordinates Analysis pcoa  dist
+#>                                            name       id input
+#> 1 Constrained Analysis of Principal Coordinates capscale  dist
+#> 2            Distance-based Redundancy Analysis    dbrda  dist
+#> 3                     Isometric Feature Mapping   isomap  dist
+#> 4               Metric Multidimensional Scaling      mds  dist
+#> 5           Non-metric Multidimensional Scaling     nmds  dist
+#> 6                Principal Coordinates Analysis     pcoa  dist
+#> 7   t-distributed Stochastic Neighbor Embedding     tsne  dist
+#> 8 Uniform Manifold Approximation and Projection     umap  dist
 
     # Find the method for 'MDS'.
     m <- match_ordination('MDS')
     m$id
-#> [1] "pcoa"
+#> [1] "mds"
 ```

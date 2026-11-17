@@ -53,14 +53,14 @@ less time and memory for large datasets."><meta property="og:image" content="htt
     <div class="ref-description section level2">
     <p>Ordinates samples from their distances, for plotting beta diversity. Also
 known as classical or metric multidimensional scaling. Gives the same
-coordinates and eigenvalues as <code><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">stats::cmdscale()</a></code>, <code><a href="https://rdrr.io/pkg/ape/man/pcoa.html" class="external-link">ape::pcoa()</a></code>, and
-<code><a href="https://vegandevs.github.io/vegan/reference/wcmdscale.html" class="external-link">vegan::wcmdscale()</a></code>, but computes only the first few axes, which takes far
+coordinates and eigenvalues as <code><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">stats::cmdscale()</a></code>, <code>ape::pcoa()</code>, and
+<code>vegan::wcmdscale()</code>, but computes only the first few axes, which takes far
 less time and memory for large datasets.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pcoa</span><span class="op">(</span><span class="va">dm</span>, k <span class="op">=</span> <span class="fl">3L</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pcoa</span><span class="op">(</span><span class="va">dm</span>, k <span class="op">=</span> <span class="fl">3L</span>, correction <span class="op">=</span> <span class="st">"none"</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -69,11 +69,20 @@ less time and memory for large datasets.</p>
 
 <dl><dt id="arg-dm">dm<a class="anchor" aria-label="anchor" href="#arg-dm"></a></dt>
 <dd><p>A <code>dist</code> object, such as from <code><a href="beta_div.html">beta_div()</a></code> or <code><a href="bray.html">bray()</a></code>, or a
-symmetric numeric matrix of distances. Must not contain <code>NA</code>s.</p></dd>
+symmetric numeric matrix of distances. Must not contain <code>NA</code>s or
+negative values.</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
-<dd><p>The number of axes to compute. Default: <code>3</code></p></dd>
+<dd><p>The number of axes to compute. Default: <code>3</code>. Reduced, with a
+warning, to the number of axes with positive eigenvalues, which is
+at most \(n - 1\) for \(n\) samples.</p></dd>
+
+
+<dt id="arg-correction">correction<a class="anchor" aria-label="anchor" href="#arg-correction"></a></dt>
+<dd><p>How to deal with negative eigenvalues: <code>'none'</code> (the
+default), <code>'lingoes'</code>, or <code>'cailliez'</code>. See "Negative eigenvalue
+corrections" below.</p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
@@ -86,12 +95,21 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
     <p>A numeric matrix with one row per sample and one column per axis,
 named <code>"PCoA1"</code>, <code>"PCoA2"</code>, etc., as described in "Ordination result"
 below. Its attributes are:</p><ul><li><p><code>method</code>: <code>"pcoa"</code>.</p></li>
-<li><p><code>eig</code>: The eigenvalue of each axis.</p></li>
+<li><p><code>eig</code>: The eigenvalue of each axis: of Gower's centered matrix, so on
+the scale of sums of squares. <code><a href="pca.html">pca()</a></code>'s <code>eig</code> are variances, these
+divided by \(n - 1\); <code><a href="dbrda.html">dbrda()</a></code>'s are too when any distance is 4 or
+more.</p></li>
 <li><p><code>prop</code>: The proportion of the total variance that each axis explains,
 <code>eig / trace</code>.</p></li>
 <li><p><code>trace</code>: The total variance: the sum of all eigenvalues, including
 negative ones.</p></li>
-</ul></div>
+<li><p><code>correction</code>: <code>"none"</code>, <code>"lingoes"</code>, or <code>"cailliez"</code>.</p></li>
+<li><p><code>constant</code>: The constant that the correction added, \(c_1\) or
+\(c_2\) below; <code>0</code> with <code>correction = "none"</code>, or when the distances
+needed no correction.</p></li>
+</ul><p>With a correction, <code>eig</code>, <code>prop</code>, and <code>trace</code> are those of the corrected
+distances.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>Method</strong></p>
@@ -99,7 +117,7 @@ negative ones.</p></li>
 the centering matrix, PCoA finds the eigenvalues \(\lambda_i\) and unit
 eigenvectors \(u_i\) of \(B = -\frac{1}{2}JAJ\). Axis \(i\)'s
 coordinates are \(u_i\sqrt{\lambda_i}\).</p>
-<p><code><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">cmdscale()</a></code>, <code><a href="https://rdrr.io/pkg/ape/man/pcoa.html" class="external-link">ape::pcoa()</a></code>, and <code><a href="https://vegandevs.github.io/vegan/reference/wcmdscale.html" class="external-link">vegan::wcmdscale()</a></code> build \(B\) in full
+<p><code><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">cmdscale()</a></code>, <code>ape::pcoa()</code>, and <code>vegan::wcmdscale()</code> build \(B\) in full
 (\(n \times n\)) and compute all \(n\) of its eigenvalues, which takes
 time proportional to \(n^3\). <code>pcoa()</code> finds only the largest <code>k</code>
 eigenvalues, by block Lanczos iteration with thick restarts. That only needs
@@ -108,14 +126,77 @@ parallel straight from <code>dm</code>, without ever forming \(B\).</p>
 <p><strong>Proportion of variance</strong></p>
 <p>The total variance is \(trace(B) = \frac{1}{n}\sum_{i&lt;j}d_{ij}^2\), the
 sum of all \(n\) eigenvalues. <code>prop</code> is each axis's eigenvalue divided by
-it: the same as <code><a href="https://rdrr.io/pkg/ape/man/pcoa.html" class="external-link">ape::pcoa()</a></code>'s <code>Relative_eig</code> and <code>vegan</code>'s "Proportion
-Explained", the values that <code><a href="https://rdrr.io/pkg/phyloseq/man/plot_ordination.html" class="external-link">phyloseq::plot_ordination()</a></code> shows on its axes.</p>
+it: the same as <code>ape::pcoa()</code>'s <code>Relative_eig</code> and <code>vegan</code>'s "Proportion
+Explained", the values that <code>phyloseq::plot_ordination()</code> shows on its axes.</p>
 <p>Non-Euclidean distances, such as Bray-Curtis, can give negative eigenvalues.
 They still count towards the total, so <code>prop</code> can sum to more than 1 over
 the positive axes. Axes with eigenvalues that aren't positive have no real
 coordinates and are dropped with a warning, as <code><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">cmdscale()</a></code> does. So are
 axes with eigenvalues at rounding-error level, below
-<code>sqrt(.Machine$double.eps)</code> times the first one, as in <code><a href="https://vegandevs.github.io/vegan/reference/wcmdscale.html" class="external-link">vegan::wcmdscale()</a></code>.</p>
+<code>sqrt(.Machine$double.eps)</code> times the first one, as in <code>vegan::wcmdscale()</code>.</p>
+<p><strong>Negative eigenvalue corrections</strong></p>
+<p>A correction adds a constant to the distances between different samples,
+the smallest that makes them Euclidean, so that no eigenvalue is negative
+(Gower &amp; Legendre 1986; Legendre &amp; Legendre 2012, sec. 9.3):</p><ul><li><p><code>'lingoes'</code> (Lingoes 1971) adds \(2c_1\) to the squared distances:
+\(d'_{ij} = \sqrt{d_{ij}^2 + 2c_1}\), where \(c_1\) is the magnitude
+of \(B\)'s most negative eigenvalue. That adds \(c_1\) to every
+eigenvalue but the trivial 0 and leaves the eigenvectors unchanged, so
+the axes are those of <code>correction = 'none'</code>, with coordinates
+\(u_i\sqrt{\lambda_i + c_1}\), and <code>trace</code> grows by \((n-1)c_1\).
+The axis whose eigenvalue was most negative gets eigenvalue 0.</p></li>
+<li><p><code>'cailliez'</code> (Cailliez 1983) adds \(c_2\) to the distances:
+\(d'_{ij} = d_{ij} + c_2\), where \(c_2\) is the largest real
+eigenvalue of the \(2n \times 2n\) matrix
+\(\left[\begin{smallmatrix}0 &amp; 2B \\ -I &amp; -4B_2\end{smallmatrix}\right]\),
+with \(B_2 = -\frac{1}{2}JDJ\) the centered matrix of the unsquared
+distances. The axes change, and are computed from \(d'\).</p></li>
+</ul><p><code>eig</code>, <code>prop</code>, and <code>trace</code> are then those of the corrected distances, and
+<code>prop</code> sums to at most 1. They equal <code>ape::pcoa()</code>'s <code>Corr_eig</code> and
+<code>Rel_corr_eig</code> for the same correction, and <code>vegan::wcmdscale(add = 'lingoes')</code> or <code>add = 'cailliez'</code>; \(c_2\) is <code>cmdscale(add = TRUE)</code>'s
+<code>ac</code>.</p>
+<p>Negative eigenvalues above \(-\sqrt{\epsilon}\, trace(B)\) (with
+\(\epsilon\) = <code>.Machine$double.eps</code>, so about \(-1.5 \times 10^{-8}\)
+of the total) count as rounding error: such distances, Euclidean ones for
+instance, get no correction. <code>constant</code> is then 0, and the coordinates,
+<code>eig</code>, <code>prop</code>, and <code>trace</code> are identical to those from
+<code>correction = 'none'</code>. (<code>ape</code> and <code>vegan</code> correct those tiny negative
+eigenvalues too, so they can add a tiny constant where <code>pcoa()</code> adds 0.)</p>
+<p>With <code>k</code> = \(n - 1\), the axis whose eigenvalue the correction makes 0
+is dropped without a warning.</p>
+<p><strong>When to use a correction</strong></p>
+<p>Non-Euclidean distances, such as Bray-Curtis or Jaccard, have negative
+eigenvalues, so the positive axes' <code>prop</code> can sum to more than 1. Most
+plots simply show the first few positive axes, which is fine when the
+negative eigenvalues are small next to the axes plotted. A correction
+makes every <code>prop</code> a share of a total of 1, at a price: both corrections
+inflate <code>trace</code>, and so shrink <code>prop</code>, more so for more samples. Which
+inflates it more depends on the data. <code>'lingoes'</code> keeps the uncorrected
+axes and only changes their eigenvalues; <code>'cailliez'</code> changes the axes
+too. Another remedy is to transform the distances: the square root of
+Bray-Curtis dissimilarities, for one, is Euclidean (Legendre &amp; Legendre
+2012).</p>
+<p><strong>How the corrections are computed</strong></p>
+<p>Neither the \(n \times n\) nor the \(2n \times 2n\) matrix is formed.
+\(c_1\) is the largest eigenvalue of \(-B\), from the same Lanczos
+solver. \(c_2\) is the largest \(c\) for which
+\(B + 2cB_2 + \frac{c^2}{2}I\) is singular (on vectors orthogonal to
+\(\mathbf{1}\)), found by a Rayleigh-Ritz iteration that needs only
+products of \(B\) and \(B_2\) with vectors, computed together from
+<code>dm</code>. That iteration can settle on a root that isn't the largest (as with
+some exactly symmetric designs), so \(c_2\) is checked: the corrected
+matrix's smallest eigenvalue, computed from a fresh start, must not be
+below \(-\sqrt{\epsilon}\, trace(B')\). If it is, its eigenvector
+restarts the iteration, for up to 10 rounds, after which there is a
+warning.</p>
+<p>The smallest eigenvalues usually form a dense cluster, which Lanczos
+resolves slowly, so corrections take longer than <code>correction = 'none'</code>.
+For Bray-Curtis distances between 2,000 sparse samples, on one thread,
+<code>'none'</code> took 0.4 seconds, <code>'lingoes'</code> 5 seconds, and <code>'cailliez'</code> 20
+seconds; <code>cmdscale(add = TRUE)</code>, which builds the \(2n \times 2n\)
+matrix, took 2 minutes. How much longer depends on how tightly the
+smallest eigenvalues cluster. Each pass over <code>dm</code> takes time proportional
+to \(n^2\), while <code>cmdscale(add = TRUE)</code> and <code>ape::pcoa()</code> take time
+proportional to \(n^3\).</p>
 <p><strong>Axis signs and reproducibility</strong></p>
 <p>An eigenvector's sign is arbitrary, so different software can return
 mirror images of the same axis. <code>pcoa()</code> flips each axis so that its
@@ -128,28 +209,55 @@ from run to run and for any number of <code>cpus</code>.</p>
     <h2 id="ordination-result">Ordination result<a class="anchor" aria-label="anchor" href="#ordination-result"></a></h2>
 
 
-<p>Every ordination method (<code>pcoa()</code>, <code><a href="nmds.html">nmds()</a></code>, and <code><a href="ordination.html">ordination()</a></code>) returns
-the same kind of object: a plain numeric matrix with one row per sample
-(named after the samples) and one column per axis (named <code>"PCoA1"</code>,
-<code>"NMDS1"</code>, etc.), so that it can go straight into <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data
-frame. Its attributes always begin with these three, in this order:</p><ul><li><p><code>method</code>: The method's ID, e.g. <code>"pcoa"</code> or <code>"nmds"</code>.</p></li>
-<li><p><code>eig</code>: Each axis's eigenvalue, or <code>NA</code> for methods without them.</p></li>
-<li><p><code>prop</code>: The proportion of the total variance that each axis explains,
-or <code>NA</code> where that isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them.</p>
+<p>Every ordination function (<code>pcoa()</code>, <code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>,
+<code><a href="capscale.html">capscale()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, and so
+<code><a href="ordination.html">ordination()</a></code>) returns the same kind of
+object: a numeric matrix with one row per sample and one column per
+axis, so that it can go straight into <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data frame. Rows are
+named after the samples, when the input has names. Columns are named
+after the method: <code>"PCoA1"</code>, <code>"PC1"</code>, <code>"RPCA1"</code>, <code>"dbRDA1"</code> or <code>"CAP1"</code>
+(then <code>"MDS1"</code> for unconstrained axes), <code>"MDS1"</code>, <code>"NMDS1"</code>,
+<code>"Isomap1"</code>, <code>"TSNE1"</code>, <code>"UMAP1"</code>, and so on.</p>
+<p>Its attributes always begin with these three, in this order, each with
+one value per column:</p><ul><li><p><code>method</code>: The method's ID, e.g. <code>"pcoa"</code> or <code>"nmds"</code>.</p></li>
+<li><p><code>eig</code>: Each axis's eigenvalue, on the method's own scale: <code>pcoa()</code>
+and <code><a href="isomap.html">isomap()</a></code> give the eigenvalues of Gower's centered matrix (sums
+of squares); <code><a href="pca.html">pca()</a></code> and <code><a href="rpca.html">rpca()</a></code> give variances, which are <code>pcoa()</code>'s
+divided by \(n - 1\) for \(n\) samples; and <code><a href="dbrda.html">dbrda()</a></code> and
+<code><a href="capscale.html">capscale()</a></code> follow <code>vegan</code>, which also divides by \(n - 1\) when any
+distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="tsne.html">tsne()</a></code>, and
+<code><a href="umap.html">umap()</a></code>, which have no eigenvalues.</p></li>
+<li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
+axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
+it to label axes. <code>NA</code> where it isn't defined.</p></li>
+</ul><p>Attributes particular to the method follow them. The matrix has class
+<code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), only so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
+other attributes by name rather than in full. Subsetting with <code>[</code>, or
+<code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, gives a plain matrix or data frame without them.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Gower, J. C. (1966). Some distance properties of latent root and vector
+    <p>Cailliez, F. (1983). The analytical solution of the additive constant
+problem. <em>Psychometrika</em>, 48(2), 305-308. <a href="https://doi.org/10.1007/BF02294026" class="external-link">doi:10.1007/BF02294026</a></p>
+<p>Gower, J. C. (1966). Some distance properties of latent root and vector
 methods used in multivariate analysis. <em>Biometrika</em>, 53(3-4), 325-338.
 <a href="https://doi.org/10.1093/biomet/53.3-4.325" class="external-link">doi:10.1093/biomet/53.3-4.325</a></p>
+<p>Gower, J. C., &amp; Legendre, P. (1986). Metric and Euclidean properties of
+dissimilarity coefficients. <em>Journal of Classification</em>, 3(1), 5-48.
+<a href="https://doi.org/10.1007/BF01896809" class="external-link">doi:10.1007/BF01896809</a></p>
+<p>Legendre, P., &amp; Legendre, L. (2012). <em>Numerical Ecology</em> (3rd English ed.,
+sec. 9.3). Elsevier.</p>
+<p>Lingoes, J. C. (1971). Some boundary conditions for a monotone analysis of
+symmetric matrices. <em>Psychometrika</em>, 36(2), 195-203.
+<a href="https://doi.org/10.1007/BF02291398" class="external-link">doi:10.1007/BF02291398</a></p>
 <p>Wu, K., &amp; Simon, H. (2000). Thick-restart Lanczos method for large
 symmetric eigenvalue problems. <em>SIAM Journal on Matrix Analysis and
 Applications</em>, 22(2), 602-616. <a href="https://doi.org/10.1137/S0895479898334605" class="external-link">doi:10.1137/S0895479898334605</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="nmds.html">nmds()</a></code>, <code><a href="beta_div.html">beta_div()</a></code>, <code><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">stats::cmdscale()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="pcoa_biplot.html">pcoa_biplot()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="ordination.html">ordination()</a></code>,
+<code><a href="beta_div.html">beta_div()</a></code>, <code><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">stats::cmdscale()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -161,14 +269,9 @@ Applications</em>, 22(2), 602-616. <a href="https://doi.org/10.1137/S08954798983
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gums   -0.3951099 -0.05550727 -0.293514268</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Nose    0.3179676  0.53707433 -0.006811864</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Stool   0.4662673 -0.44434993  0.003577264</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"method")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pcoa"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"eig")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6260388 0.4903619 0.1742697</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"prop")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.4850493 0.3799280 0.1350226</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"trace")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.29067</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pcoa: 4 samples, 3 axes; % of variance: 48.5, 38.0, 13.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Attributes: method, eig, prop, trace, correction, constant</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Percent of variance explained by each axis.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span></span>
@@ -184,6 +287,14 @@ Applications</em>, 22(2), 602-616. <a href="https://doi.org/10.1137/S08954798983
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, asp <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="pcoa-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Unweighted UniFrac has negative eigenvalues here.</span></span></span>
+<span class="r-in"><span>    <span class="va">d</span>   <span class="op">&lt;-</span> <span class="fu"><a href="unweighted_unifrac.html">unweighted_unifrac</a></span><span class="op">(</span><span class="va">ex_counts</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">pcoa</span><span class="op">(</span><span class="va">d</span>, correction <span class="op">=</span> <span class="st">'cailliez'</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'constant'</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.0002072223</span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 98.9  1.1</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -111,14 +111,20 @@ be applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="ex
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A data.frame of all available methods.</span></span></span>
 <span class="r-in"><span>    <span class="fu">list_ordinations</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                  name   id input</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Non-metric Multidimensional Scaling nmds  dist</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      Principal Coordinates Analysis pcoa  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                            name       id input</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Constrained Analysis of Principal Coordinates capscale  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            Distance-based Redundancy Analysis    dbrda  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                     Isometric Feature Mapping   isomap  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4               Metric Multidimensional Scaling      mds  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5           Non-metric Multidimensional Scaling     nmds  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                Principal Coordinates Analysis     pcoa  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   t-distributed Stochastic Neighbor Embedding     tsne  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8 Uniform Manifold Approximation and Projection     umap  dist</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Find the method for 'MDS'.</span></span></span>
 <span class="r-in"><span>    <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">match_ordination</span><span class="op">(</span><span class="st">'MDS'</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">m</span><span class="op">$</span><span class="va">id</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pcoa"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mds"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

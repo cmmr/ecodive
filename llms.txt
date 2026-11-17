@@ -354,17 +354,58 @@ Distance measures based on phylogenetic branch lengths (UniFrac family).
 
 ## Ordination
 
-Plot samples by their beta diversity distances.
+Plot samples by their beta diversity distances, or (pca, rpca) by their
+feature abundances.
 
 - [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md)
   : Ordination Wrapper Function
 - [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) :
   Principal Coordinates Analysis (PCoA)
+- [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
+  : PCoA Biplot Scores
+- [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md) : Metric
+  Multidimensional Scaling (MDS)
 - [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) :
   Non-metric Multidimensional Scaling (NMDS)
+- [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md) :
+  Isometric Feature Mapping (Isomap)
+- [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md) :
+  t-distributed Stochastic Neighbor Embedding (t-SNE)
+- [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md) : Uniform
+  Manifold Approximation and Projection (UMAP)
+- [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) :
+  Distance-based Redundancy Analysis (db-RDA)
+- [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) :
+  Constrained Analysis of Principal Coordinates (capscale)
+- [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) : Principal
+  Component Analysis (PCA)
+- [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) : Robust
+  Aitchison PCA (RPCA)
+- [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) : Fit
+  Variables or Taxa onto an Ordination
 - [`list_ordinations()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
   [`match_ordination()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
   : Find and Browse Ordination Methods
+
+## Hypothesis Tests
+
+Test whether sample metadata explain beta diversity distances.
+
+- [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)
+  : Distance Test Wrapper Function
+- [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
+  : Permutational Multivariate Analysis of Variance (PERMANOVA)
+- [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) :
+  Mantel Test
+- [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) :
+  Multi-Response Permutation Procedure (MRPP)
+- [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md) :
+  Analysis of Similarities (ANOSIM)
+- [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md) :
+  Homogeneity of Multivariate Dispersions (PERMDISP)
+- [`list_dist_tests()`](https://cmmr.github.io/ecodive/reference/dist_tests.md)
+  [`match_dist_test()`](https://cmmr.github.io/ecodive/reference/dist_tests.md)
+  : Find and Browse Distance Tests
 
 ## Utilities & Helpers
 
@@ -377,6 +418,8 @@ Tools for programmatic access, data manipulation, and configuration.
   : Read a newick formatted phylogenetic tree.
 - [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md) :
   Rarefy Observation Counts
+- [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
+  : Normalize a Count Table
 - [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md) :
   Number of CPU Cores
 - [`blas_threads()`](https://cmmr.github.io/ecodive/reference/blas_threads.md)

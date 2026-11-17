@@ -1,0 +1,38 @@
+# Print an ordination result
+
+Prints the coordinates, then one line on the axes and the names of the
+other attributes, rather than every attribute in full (such as
+[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)'s loadings).
+
+## Usage
+
+``` r
+# S3 method for class 'ecodive_ord'
+print(x, ...)
+```
+
+## Arguments
+
+- x:
+
+  An ordination result, from
+  [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md),
+  [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
+  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
+  [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
+  [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
+  [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md),
+  [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
+  [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
+  [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md), or
+  [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md).
+
+- ...:
+
+  Passed on to [`print()`](https://rdrr.io/r/base/print.html) for the
+  matrix of coordinates.
+
+## Value
+
+`x`, invisibly.

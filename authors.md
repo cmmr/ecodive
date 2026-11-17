@@ -8,6 +8,18 @@
 - **Melissa O'Neill**. Contributor, copyright holder.  
   PCG random number generator
 
+- **The scikit-learn developers**. Contributor, copyright holder.  
+  SMACOF (MDS, NMDS), t-SNE and Isomap code ported from scikit-learn
+
+- **James Melville**. Copyright holder.  
+  uwot's C++ header library, followed by the UMAP code
+
+- **scikit-bio development team**. Contributor, copyright holder.  
+  PCoA biplot scores, from scikit-bio
+
+- **Cameron Martino**. Contributor, copyright holder.  
+  'gemelli' robust Aitchison PCA
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

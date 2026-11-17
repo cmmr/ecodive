@@ -51,15 +51,31 @@
     <h2 id="ordination-result">Ordination result<a class="anchor" aria-label="anchor" href="#ordination-result"></a></h2>
 
 
-<p>Every ordination method (<code><a href="pcoa.html">pcoa()</a></code>, <code><a href="nmds.html">nmds()</a></code>, and <code><a href="ordination.html">ordination()</a></code>) returns
-the same kind of object: a plain numeric matrix with one row per sample
-(named after the samples) and one column per axis (named <code>"PCoA1"</code>,
-<code>"NMDS1"</code>, etc.), so that it can go straight into <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data
-frame. Its attributes always begin with these three, in this order:</p><ul><li><p><code>method</code>: The method's ID, e.g. <code>"pcoa"</code> or <code>"nmds"</code>.</p></li>
-<li><p><code>eig</code>: Each axis's eigenvalue, or <code>NA</code> for methods without them.</p></li>
-<li><p><code>prop</code>: The proportion of the total variance that each axis explains,
-or <code>NA</code> where that isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them.</p>
+<p>Every ordination function (<code><a href="pcoa.html">pcoa()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>,
+<code><a href="capscale.html">capscale()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, and so
+<code><a href="ordination.html">ordination()</a></code>) returns the same kind of
+object: a numeric matrix with one row per sample and one column per
+axis, so that it can go straight into <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data frame. Rows are
+named after the samples, when the input has names. Columns are named
+after the method: <code>"PCoA1"</code>, <code>"PC1"</code>, <code>"RPCA1"</code>, <code>"dbRDA1"</code> or <code>"CAP1"</code>
+(then <code>"MDS1"</code> for unconstrained axes), <code>"MDS1"</code>, <code>"NMDS1"</code>,
+<code>"Isomap1"</code>, <code>"TSNE1"</code>, <code>"UMAP1"</code>, and so on.</p>
+<p>Its attributes always begin with these three, in this order, each with
+one value per column:</p><ul><li><p><code>method</code>: The method's ID, e.g. <code>"pcoa"</code> or <code>"nmds"</code>.</p></li>
+<li><p><code>eig</code>: Each axis's eigenvalue, on the method's own scale: <code><a href="pcoa.html">pcoa()</a></code>
+and <code><a href="isomap.html">isomap()</a></code> give the eigenvalues of Gower's centered matrix (sums
+of squares); <code><a href="pca.html">pca()</a></code> and <code><a href="rpca.html">rpca()</a></code> give variances, which are <code><a href="pcoa.html">pcoa()</a></code>'s
+divided by \(n - 1\) for \(n\) samples; and <code><a href="dbrda.html">dbrda()</a></code> and
+<code><a href="capscale.html">capscale()</a></code> follow <code>vegan</code>, which also divides by \(n - 1\) when any
+distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="tsne.html">tsne()</a></code>, and
+<code><a href="umap.html">umap()</a></code>, which have no eigenvalues.</p></li>
+<li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
+axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
+it to label axes. <code>NA</code> where it isn't defined.</p></li>
+</ul><p>Attributes particular to the method follow them. The matrix has class
+<code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), only so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
+other attributes by name rather than in full. Subsetting with <code>[</code>, or
+<code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, gives a plain matrix or data frame without them.</p>
     </div>
 
   </main></div>
