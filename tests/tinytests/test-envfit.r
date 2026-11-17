@@ -328,4 +328,9 @@
   expect_error(envfit(ord, data.frame(x = I(list(1)))[rep(1, 24), , drop = FALSE]))
   expect_error(envfit(ord[1, , drop = FALSE], env[1, ]), 'At least 2')
 
+  # The arguments' order: what to fit, how to prepare it, then the test.
+  expect_identical(names(formals(envfit)), c(
+    'ord', 'data', 'counts', 'margin', 'norm', 'pseudocount', 'axes', 'na.rm',
+    'permutations', 'strata', 'seed', 'cpus' ))
+
 #})

@@ -194,9 +194,9 @@
 #'     arrows(0, 0, top$PCoA1 * sqrt(top$r2) * 0.3, top$PCoA2 * sqrt(top$r2) * 0.3)
 #'
 envfit <- function (
-    ord, data = NULL, counts = NULL, axes = NULL, permutations = 999L,
-    strata = NULL, seed = 0L, margin = 1L, norm = 'none', pseudocount = NULL,
-    na.rm = FALSE, cpus = n_cpus() ) {
+    ord, data = NULL, counts = NULL, margin = 1L, norm = 'none',
+    pseudocount = NULL, axes = NULL, na.rm = FALSE, permutations = 999L,
+    strata = NULL, seed = 0L, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
