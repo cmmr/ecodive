@@ -34,15 +34,14 @@
  * fixed order. So results are bit-identical for any number
  * of threads.
  *
- * TODO: use shared helpers after Batch C. The permutation
- * generator, bounded_rand(), col_start(), and the group
- * kernels are copies of permanova.c's; share them (and the
- * thread pool / parallel_for) once Batch C is merged.
+ * The permutations (permute.c) and the group kernel
+ * (group_kernel.h) are shared with permanova().
  */
 
 #include "ecodive.h"
+#include "group_kernel.h"
 
-#define MRPP_W  8              // Lanes per chunk.
+#define MRPP_W  GK_W           // Lanes per chunk.
 #define MRPP_FW (4 * MRPP_W)   // Permutations per block.
 
 
@@ -54,11 +53,7 @@ static int           mr_n;       // Samples.
 static const double *mr_d;       // Packed lower triangle of D.
 static const int    *mr_grp;     // Each sample's group, 0 .. g - 1.
 static const double *mr_coef;    // c_g for each group.
-static const int    *mr_perms;   // n x n_perm supplied permutations, or NULL.
-static const int    *mr_order;   // Samples, ordered by stratum.
-static const int    *mr_sbeg;    // Stratum s is mr_order[mr_sbeg[s]] ..
-static int           mr_ns;      // ... mr_order[mr_sbeg[s + 1] - 1].
-static uint64_t      mr_seed;
+static perm_source_t mr_ps;      // Where permutations come from.
 static int           mr_blk0;    // Blocks for this round:
 static int           mr_blk1;    // ... mr_blk0 to mr_blk1 - 1.
 static int           mr_total;   // Permutations, including the identity.
@@ -66,169 +61,6 @@ static double       *mr_out;     // mr_total deltas.
 static double       *mr_work;    // Per-thread workspace ...
 static size_t        mr_wlen;    // ... of this many doubles.
 static int          *mr_iwork;   // Per-thread integer workspace (n each).
-
-
-//------------------------------------------------------
-// Offset of element (j + 1, j) in a dist vector. Column
-// j's elements, rows j + 1 to n - 1, follow it in order.
-// TODO: use shared helper after Batch C.
-//------------------------------------------------------
-static inline size_t mr_col_start(int j, int n) {
-  return (size_t) j * (size_t) n - (size_t) j * (size_t) (j + 1) / 2;
-}
-
-
-//------------------------------------------------------
-// Uniform integer in 0 .. bound - 1, without modulo bias.
-// TODO: use shared helper after Batch C.
-//------------------------------------------------------
-static inline uint32_t mr_bounded_rand(pcg32_random_t *rng, uint32_t bound) {
-  uint32_t threshold = (0u - bound) % bound;
-  while (1) {
-    uint32_t r = pcg32_random_r(rng);
-    if (r >= threshold) return r % bound;
-  }
-}
-
-
-//------------------------------------------------------
-// Permutation k into p: permuted sample a takes original
-// sample p[a]'s group. k = 0 is the identity.
-// TODO: use shared helper after Batch C.
-//------------------------------------------------------
-static void mr_get_perm(int k, int *p) {
-
-  int n = mr_n;
-
-  if (k == 0) {
-    for (int a = 0; a < n; a++) p[a] = a;
-    return;
-  }
-
-  if (mr_perms) {
-    memcpy(p, mr_perms + (size_t) (k - 1) * n, (size_t) n * sizeof(int));
-    return;
-  }
-
-  // Fisher-Yates shuffle within each stratum.
-  pcg32_random_t rng;
-  pcg32_srandom_r(&rng, mr_seed, (uint64_t) k);
-
-  for (int a = 0; a < n; a++) p[a] = a;
-
-  for (int s = 0; s < mr_ns; s++) {
-    const int *idx = mr_order + mr_sbeg[s];
-    int        len = mr_sbeg[s + 1] - mr_sbeg[s];
-    for (int t = len - 1; t > 0; t--) {
-      int u   = (int) mr_bounded_rand(&rng, (uint32_t) t + 1);
-      int tmp = p[idx[t]];
-      p[idx[t]] = p[idx[u]];
-      p[idx[u]] = tmp;
-    }
-  }
-}
-
-
-//------------------------------------------------------
-// The inner loops, for one chunk of MRPP_W permutations
-// and one column j of D's triangle (nd = n - j - 1 rows
-// below it):
-//
-//   s[k] += coef[lj[k]] * sum_t d[t] * (li[t, k] == lj[k])
-//
-// GCC and clang get explicit two-lane vectors: compilers
-// don't vectorize these loops at R's default -O2. Each lane
-// does the same operations in the same order as the scalar
-// fallback, so results don't depend on which is used.
-// TODO: share with permanova.c after Batch C.
-//------------------------------------------------------
-#if defined(__GNUC__) || defined(__clang__)
-
-typedef double    mr_v2d __attribute__((vector_size(16)));
-typedef long long mr_v2l __attribute__((vector_size(16)));
-
-static inline mr_v2d mr_load2(const double *p) { mr_v2d x; memcpy(&x, p, sizeof(x)); return x; }
-
-#define MR_REP(F) F(0) F(1) F(2) F(3)
-
-static inline void mr_chunk(
-    const double *d, const double *li, const double *lj, int nd, double *s,
-    const double *coef) {
-
-  #define G_INIT(h) mr_v2d acc##h = { 0, 0 }, g##h = mr_load2(lj + 2 * h);
-  #define G_STEP(h) acc##h += (mr_v2d) ((mr_v2l) a & (mr_v2l) (mr_load2(li + 2 * h) == g##h));
-  #define G_DONE(h) s[2 * h]     += acc##h[0] * coef[(int) lj[2 * h]]; \
-                    s[2 * h + 1] += acc##h[1] * coef[(int) lj[2 * h + 1]];
-
-  MR_REP(G_INIT)
-  for (int t = 0; t < nd; t++, li += MRPP_W) {
-    mr_v2d a = { d[t], d[t] };
-    MR_REP(G_STEP)
-  }
-  MR_REP(G_DONE)
-}
-
-// Two columns, j and j + 1, at once: each row's labels are
-// loaded once for both. Row j + 1 is column j's alone.
-// Every sum runs in the same order as with one column at a
-// time.
-static inline void mr_chunk2(
-    const double *d0, const double *d1, const double *li,
-    const double *lj0, const double *lj1, int nd, double *s,
-    const double *coef) {
-
-  #define G2_INIT(h) mr_v2d acc##h = { 0, 0 }, bcc##h = { 0, 0 }, \
-                     g##h = mr_load2(lj0 + 2 * h), k##h = mr_load2(lj1 + 2 * h);
-  #define G2_FIRST(h) acc##h += (mr_v2d) ((mr_v2l) a & (mr_v2l) (mr_load2(li + 2 * h) == g##h));
-  #define G2_STEP(h) { mr_v2d x = mr_load2(li + 2 * h); \
-                       acc##h += (mr_v2d) ((mr_v2l) a & (mr_v2l) (x == g##h)); \
-                       bcc##h += (mr_v2d) ((mr_v2l) b & (mr_v2l) (x == k##h)); }
-  #define G2_DONE(h) \
-    s[2 * h]     += acc##h[0] * coef[(int) lj0[2 * h]];     \
-    s[2 * h + 1] += acc##h[1] * coef[(int) lj0[2 * h + 1]]; \
-    s[2 * h]     += bcc##h[0] * coef[(int) lj1[2 * h]];     \
-    s[2 * h + 1] += bcc##h[1] * coef[(int) lj1[2 * h + 1]];
-
-  MR_REP(G2_INIT)
-  { mr_v2d a = { d0[0], d0[0] }; MR_REP(G2_FIRST) }
-  li += MRPP_W;
-  for (int t = 1; t < nd; t++, li += MRPP_W) {
-    mr_v2d a = { d0[t],     d0[t]     };
-    mr_v2d b = { d1[t - 1], d1[t - 1] };
-    MR_REP(G2_STEP)
-  }
-  MR_REP(G2_DONE)
-}
-
-#else
-
-#define MR_REP8(F) F(0) F(1) F(2) F(3) F(4) F(5) F(6) F(7)
-
-static inline void mr_chunk(
-    const double *d, const double *li, const double *lj, int nd, double *s,
-    const double *coef) {
-
-  #define G_INIT(k) double acc##k = 0, g##k = lj[k];
-  #define G_STEP(k) acc##k += (li[k] == g##k) ? a : 0.0;
-  #define G_DONE(k) s[k] += acc##k * coef[(int) g##k];
-
-  MR_REP8(G_INIT)
-  for (int t = 0; t < nd; t++, li += MRPP_W) {
-    double a = d[t];
-    MR_REP8(G_STEP)
-  }
-  MR_REP8(G_DONE)
-}
-
-static inline void mr_chunk2(
-    const double *d0, const double *d1, const double *li,
-    const double *lj0, const double *lj1, int nd, double *s,
-    const double *coef) {
-  mr_chunk(d0, li, lj0, nd, s, coef);
-  mr_chunk(d1, li + MRPP_W, lj1, nd - 1, s, coef);
-}
-
-#endif
 
 
 //------------------------------------------------------
@@ -259,7 +91,7 @@ static void *mrpp_worker(void *arg) {
 
     for (int b = 0; b < nb; b++) {
       double *lc = L + (size_t) (b / MRPP_W) * n * MRPP_W + b % MRPP_W;
-      mr_get_perm(k0 + b, p);
+      perm_source_get(&mr_ps, k0 + b, p);
       for (int a = 0; a < n; a++)
         lc[(size_t) a * MRPP_W] = mr_grp[p[a]];
     }
@@ -269,13 +101,13 @@ static void *mrpp_worker(void *arg) {
     for (int j = 0; j < n - 1; ) {
 
       int nd = n - j - 1;
-      const double *d0 = mr_d + mr_col_start(j, n);
+      const double *d0 = mr_d + dist_col_start(j, n);
 
       if (nd >= 2) {
-        const double *d1 = mr_d + mr_col_start(j + 1, n);
+        const double *d1 = mr_d + dist_col_start(j + 1, n);
         for (int h = 0; h < nc; h++) {
           const double *vc = L + (size_t) h * n * MRPP_W;
-          mr_chunk2(
+          group_chunk2(
             d0, d1, vc + (size_t) (j + 1) * MRPP_W,
             vc + (size_t) j * MRPP_W, vc + (size_t) (j + 1) * MRPP_W,
             nd, s + h * MRPP_W, mr_coef );
@@ -285,7 +117,7 @@ static void *mrpp_worker(void *arg) {
       else {
         for (int h = 0; h < nc; h++) {
           const double *vc = L + (size_t) h * n * MRPP_W;
-          mr_chunk(
+          group_chunk(
             d0, vc + (size_t) (j + 1) * MRPP_W, vc + (size_t) j * MRPP_W,
             nd, s + h * MRPP_W, mr_coef );
         }
@@ -342,40 +174,14 @@ SEXP C_mrpp(
   mr_d     = REAL(sexp_dm);
   mr_grp   = grp;
   mr_coef  = REAL(sexp_coef);
-  mr_seed  = (uint64_t) seed;
   mr_total = n_perm + 1;
-  mr_perms = isNull(sexp_perms) ? NULL : INTEGER(sexp_perms);
 
 
   //--------------------------------------------------
-  // Strata: samples ordered by stratum.
+  // Permutations: sample a takes group grp[p[a]], as
+  // vegan's grouping[p].
   //--------------------------------------------------
-  int *order = (int *) R_alloc(n, sizeof(int));
-  int  ns    = 1;
-  int *sbeg;
-
-  if (isNull(sexp_strata)) {
-    for (int a = 0; a < n; a++) order[a] = a;
-    sbeg    = (int *) R_alloc(2, sizeof(int));
-    sbeg[0] = 0;
-    sbeg[1] = n;
-  }
-  else {
-    const int *strata = INTEGER(sexp_strata);
-    ns = 0;
-    for (int a = 0; a < n; a++)
-      if (strata[a] + 1 > ns) ns = strata[a] + 1;
-    sbeg = (int *) R_alloc(ns + 1, sizeof(int));
-    for (int s = 0; s <= ns; s++) sbeg[s] = 0;
-    for (int a = 0; a < n; a++) sbeg[strata[a] + 1]++;
-    for (int s = 0; s < ns; s++) sbeg[s + 1] += sbeg[s];
-    int *fill = (int *) R_alloc(ns, sizeof(int));
-    memcpy(fill, sbeg, (size_t) ns * sizeof(int));
-    for (int a = 0; a < n; a++) order[fill[strata[a]]++] = a;
-  }
-  mr_order = order;
-  mr_sbeg  = sbeg;
-  mr_ns    = ns;
+  perm_source_init(&mr_ps, n, sexp_perms, sexp_strata, seed);
 
 
   //--------------------------------------------------
@@ -385,7 +191,7 @@ SEXP C_mrpp(
   double *cs = REAL(sexp_cs);
   for (int c = 0; c < g; c++) cs[c] = 0;
   for (int j = 0; j < n - 1; j++) {
-    const double *d  = mr_d + mr_col_start(j, n);
+    const double *d  = mr_d + dist_col_start(j, n);
     int           gj = grp[j];
     for (int i = j + 1; i < n; i++)
       if (grp[i] == gj) cs[gj] += d[i - j - 1];
@@ -410,12 +216,11 @@ SEXP C_mrpp(
   // Rounds of blocks, checking for interrupts between
   // them. Each round has at least ~1e8 comparisons per
   // thread, or every remaining block.
-  // TODO: use the thread pool / parallel_for after
-  // Batch C.
   //--------------------------------------------------
   double pairs     = (double) n * (n - 1) / 2;
   double blk_work  = pairs * MRPP_FW + 1;
-  int    per_round = (int) (1e8 * n_threads / blk_work);
+  double rounds    = 1e8 * n_threads / blk_work;
+  int    per_round = (rounds < n_blocks) ? (int) rounds : n_blocks; // no overflow
   if (per_round < n_threads) per_round = n_threads;
 
   // run_parallel() starts threads only when told of at

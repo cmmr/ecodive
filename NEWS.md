@@ -66,6 +66,23 @@
   any number of `cpus`. Like `adonis2()`, it also takes the distances on the
   left-hand side of the formula: `permanova(dm ~ treatment, data)`.
 
+* New `mrpp()` runs a multi-response permutation procedure on a `dist`
+  object and each sample's group, as `vegan::mrpp()`: the observed and
+  expected weighted mean within-group distance (delta), the chance-corrected
+  within-group agreement A, each group's mean distance, and a permutation
+  p-value, with group weights `'n'`, `'n-1'` or `'n(n-1)'` (vegan's
+  `weight.type` 1 to 3) and optional `strata`. It also gives the
+  standardized effect size z of `summary(vegan::permustats())`. Given the
+  same permutation matrix, its permuted deltas, p-values and z are those of
+  `vegan::mrpp()`. Each permutation costs one comparison per pair of
+  samples, read straight from the dist triangle; with 500 samples and 999
+  permutations it is about 60 times faster than `vegan::mrpp()` on one
+  thread. Results are identical for any number of `cpus`. Like ecodive's
+  other permutation tests, it returns a list of class `"ecodive_test"`
+  whose `statistic`, `p_value`, `z` and `n_perm` come first, and
+  `as.data.frame()` turns it into one row with the same columns for every
+  test.
+
 * New `dbrda()` runs a distance-based redundancy analysis (db-RDA): the axes
   of a `dist` object that sample metadata explain, given as a formula such as
   `~ treatment + Condition(site)`. It gives the same eigenvalues, inertia,

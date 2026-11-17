@@ -1,5 +1,9 @@
 useDynLib(ecodive, .registration = TRUE)
 
+S3method(as.data.frame, ecodive_test)
+S3method(print, ecodive_test)
+S3method(test_details, default)
+S3method(test_details, ecodive_mrpp)
 S3method(print, ecodive_ord)
 importFrom(parallel, detectCores)
 importFrom(utils, combn)
@@ -66,6 +70,7 @@ export(list_ordinations)
 export(match_ordination)
 
 export(blas_threads)
+export(mrpp)
 export(n_cpus)
 export(nmds)
 export(ordination)

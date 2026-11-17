@@ -118,6 +118,22 @@ static inline size_t dist_col_start(int j, int n) {
   return (size_t) j * (size_t) n - (size_t) j * (size_t) (j + 1) / 2;
 }
 
+/* --- permute.c --- */
+// Where permutation tests get their permutations: a
+// supplied matrix, or random shuffles within strata, one
+// PCG stream (seed, k) per permutation k. See permute.c.
+typedef struct {
+  int           n;      // Samples.
+  const int    *perms;  // n x n_perm 0-based permutations, or NULL.
+  uint64_t      seed;
+  const int    *order;  // Samples, ordered by stratum.
+  const int    *sbeg;   // Stratum s is order[sbeg[s]] ..
+  int           ns;     // ... order[sbeg[s + 1] - 1].
+} perm_source_t;
+
+void perm_source_init(perm_source_t *ps, int n, SEXP sexp_perms, SEXP sexp_strata, int seed);
+void perm_source_get(const perm_source_t *ps, int k, int *p);
+
 /* --- gower.c --- */
 // Products with Gower's centered matrix G = -1/2 J D^2 J.
 typedef struct {

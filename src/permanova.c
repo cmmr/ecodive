@@ -49,6 +49,7 @@
  */
 
 #include "ecodive.h"
+#include "group_kernel.h"
 
 // Aim for this many vectors (permutations x columns) per
 // pass over D.
@@ -74,11 +75,7 @@ static int           pm_pz;
 static const int    *pm_grp;     // One factor: each sample's group, or NULL.
 static const double *pm_inv_ng;  // ... 1 / group size.
 static double        pm_sst;     // trace(G).
-static const int    *pm_perms;   // n x n_perm supplied permutations, or NULL.
-static const int    *pm_order;   // Samples, ordered by stratum.
-static const int    *pm_sbeg;    // Stratum s is pm_order[pm_sbeg[s]] ..
-static int           pm_ns;      // ... pm_order[pm_sbeg[s + 1] - 1].
-static uint64_t      pm_seed;
+static perm_source_t pm_ps;      // Where permutations come from.
 static int           pm_bsize;   // Permutations per block.
 static int           pm_blk0;    // Blocks for this round:
 static int           pm_blk1;    // ... pm_blk0 to pm_blk1 - 1.
@@ -92,43 +89,6 @@ static size_t        pm_iwlen;   // ... of this many ints.
 
 
 #define col_start dist_col_start // ecodive.h
-
-
-//------------------------------------------------------
-// Permutation k into p: permuted row a is original row
-// p[a]. k = 0 is the identity.
-//------------------------------------------------------
-static void get_perm(int k, int *p) {
-
-  int n = pm_n;
-
-  if (k == 0) {
-    for (int a = 0; a < n; a++) p[a] = a;
-    return;
-  }
-
-  if (pm_perms) {
-    memcpy(p, pm_perms + (size_t) (k - 1) * n, (size_t) n * sizeof(int));
-    return;
-  }
-
-  // Fisher-Yates shuffle within each stratum.
-  pcg32_random_t rng;
-  pcg32_srandom_r(&rng, pm_seed, (uint64_t) k);
-
-  for (int a = 0; a < n; a++) p[a] = a;
-
-  for (int s = 0; s < pm_ns; s++) {
-    const int *idx = pm_order + pm_sbeg[s];
-    int        len = pm_sbeg[s + 1] - pm_sbeg[s];
-    for (int t = len - 1; t > 0; t--) {
-      int u   = (int) pcg32_bounded(&rng, (uint32_t) t + 1);
-      int tmp = p[idx[t]];
-      p[idx[t]] = p[idx[u]];
-      p[idx[u]] = tmp;
-    }
-  }
-}
 
 
 //------------------------------------------------------
@@ -177,8 +137,10 @@ static int orthonormalize(double *v, const double *basis, int nb, int n) {
 // block, each summed in a fixed order.
 //------------------------------------------------------
 
-// Repeat F(k) for k = 0 to PERM_W - 1.
-#define PERM_W 8
+// Repeat F(k) for k = 0 to PERM_W - 1. The one-factor
+// kernels, group_chunk() and group_chunk2(), are shared
+// with mrpp(): see group_kernel.h.
+#define PERM_W GK_W
 #define PERM_REP(F) F(0) F(1) F(2) F(3) F(4) F(5) F(6) F(7)
 
 
@@ -191,17 +153,8 @@ static int orthonormalize(double *v, const double *basis, int nb, int n) {
 // fallback, so results don't depend on which is used.
 //
 // quad_chunk:  s[k] += vj[k] * sum_t dsq[t] * vi[t, k]
-// group_chunk: s[k] += inv_ng[lj[k]] *
-//                      sum_t dsq[t] * (li[t, k] == lj[k])
 //------------------------------------------------------
 #if defined(__GNUC__) || defined(__clang__)
-
-typedef double    v2d __attribute__((vector_size(16)));
-typedef long long v2l __attribute__((vector_size(16)));
-
-static inline v2d load2(const double *p) { v2d x; memcpy(&x, p, sizeof(x)); return x; }
-
-#define V2_REP(F) F(0) F(1) F(2) F(3)
 
 static inline void quad_chunk(
     const double *dsq, const double *vi, const double *vj, int nd, double *s) {
@@ -216,23 +169,6 @@ static inline void quad_chunk(
     V2_REP(Q_STEP)
   }
   V2_REP(Q_DONE)
-}
-
-static inline void group_chunk(
-    const double *dsq, const double *li, const double *lj, int nd, double *s,
-    const double *inv_ng) {
-
-  #define G_INIT(h) v2d acc##h = { 0, 0 }, g##h = load2(lj + 2 * h);
-  #define G_STEP(h) acc##h += (v2d) ((v2l) a & (v2l) (load2(li + 2 * h) == g##h));
-  #define G_DONE(h) s[2 * h]     += acc##h[0] * inv_ng[(int) lj[2 * h]]; \
-                    s[2 * h + 1] += acc##h[1] * inv_ng[(int) lj[2 * h + 1]];
-
-  V2_REP(G_INIT)
-  for (int t = 0; t < nd; t++, li += PERM_W) {
-    v2d a = { dsq[t], dsq[t] };
-    V2_REP(G_STEP)
-  }
-  V2_REP(G_DONE)
 }
 
 // Two columns, j and j + 1, at once: each row's vectors are
@@ -262,34 +198,6 @@ static inline void quad_chunk2(
   V2_REP(Q2_DONE)
 }
 
-static inline void group_chunk2(
-    const double *dsq0, const double *dsq1, const double *li,
-    const double *lj0, const double *lj1, int nd, double *s,
-    const double *inv_ng) {
-
-  #define G2_INIT(h) v2d acc##h = { 0, 0 }, bcc##h = { 0, 0 }, \
-                     g##h = load2(lj0 + 2 * h), k##h = load2(lj1 + 2 * h);
-  #define G2_FIRST(h) acc##h += (v2d) ((v2l) a & (v2l) (load2(li + 2 * h) == g##h));
-  #define G2_STEP(h) { v2d x = load2(li + 2 * h); \
-                       acc##h += (v2d) ((v2l) a & (v2l) (x == g##h)); \
-                       bcc##h += (v2d) ((v2l) b & (v2l) (x == k##h)); }
-  #define G2_DONE(h) \
-    s[2 * h]     += acc##h[0] * inv_ng[(int) lj0[2 * h]];     \
-    s[2 * h + 1] += acc##h[1] * inv_ng[(int) lj0[2 * h + 1]]; \
-    s[2 * h]     += bcc##h[0] * inv_ng[(int) lj1[2 * h]];     \
-    s[2 * h + 1] += bcc##h[1] * inv_ng[(int) lj1[2 * h + 1]];
-
-  V2_REP(G2_INIT)
-  { v2d a = { dsq0[0], dsq0[0] }; V2_REP(G2_FIRST) }
-  li += PERM_W;
-  for (int t = 1; t < nd; t++, li += PERM_W) {
-    v2d a = { dsq0[t],     dsq0[t]     };
-    v2d b = { dsq1[t - 1], dsq1[t - 1] };
-    V2_REP(G2_STEP)
-  }
-  V2_REP(G2_DONE)
-}
-
 #else
 
 static inline void quad_chunk(
@@ -307,35 +215,11 @@ static inline void quad_chunk(
   PERM_REP(Q_DONE)
 }
 
-static inline void group_chunk(
-    const double *dsq, const double *li, const double *lj, int nd, double *s,
-    const double *inv_ng) {
-
-  #define G_INIT(k) double acc##k = 0, g##k = lj[k];
-  #define G_STEP(k) acc##k += (li[k] == g##k) ? a : 0.0;
-  #define G_DONE(k) s[k] += acc##k * inv_ng[(int) g##k];
-
-  PERM_REP(G_INIT)
-  for (int t = 0; t < nd; t++, li += PERM_W) {
-    double a = dsq[t];
-    PERM_REP(G_STEP)
-  }
-  PERM_REP(G_DONE)
-}
-
 static inline void quad_chunk2(
     const double *dsq0, const double *dsq1, const double *vi,
     const double *vj0, const double *vj1, int nd, double *s) {
   quad_chunk(dsq0, vi, vj0, nd, s);
   quad_chunk(dsq1, vi + PERM_W, vj1, nd - 1, s);
-}
-
-static inline void group_chunk2(
-    const double *dsq0, const double *dsq1, const double *li,
-    const double *lj0, const double *lj1, int nd, double *s,
-    const double *inv_ng) {
-  group_chunk(dsq0, li, lj0, nd, s, inv_ng);
-  group_chunk(dsq1, li + PERM_W, lj1, nd - 1, s, inv_ng);
 }
 
 #endif
@@ -371,7 +255,7 @@ static void *quad_worker(void *arg) {
     //--------------------------------------------------
     for (int b = 0; b < nb; b++) {
 
-      get_perm(k0 + b, p);
+      perm_source_get(&pm_ps, k0 + b, p);
 
       if (pm_qz) {
 
@@ -481,7 +365,7 @@ static void *factor_worker(void *arg) {
 
     for (int b = 0; b < nb; b++) {
       double *lc = L + (size_t) (b / PERM_W) * n * PERM_W + b % PERM_W;
-      get_perm(k0 + b, p);
+      perm_source_get(&pm_ps, k0 + b, p);
       for (int a = 0; a < n; a++)
         lc[(size_t) p[a] * PERM_W] = pm_grp[a];
     }
@@ -592,7 +476,6 @@ SEXP C_permanova(
 
   pm_n     = n;
   pm_d     = REAL(sexp_dm);
-  pm_seed  = (uint64_t) seed;
   pm_total = n_perm + 1;
 
 
@@ -651,34 +534,8 @@ SEXP C_permanova(
   //--------------------------------------------------
   // Permutations: supplied, or shuffles within strata.
   //--------------------------------------------------
-  pm_perms = isNull(sexp_perms) ? NULL : INTEGER(sexp_perms);
-
-  int *order = (int *) R_alloc(n, sizeof(int));
-  int  ns    = 1;
-  int *sbeg;
-
-  if (isNull(sexp_strata)) {
-    for (int a = 0; a < n; a++) order[a] = a;
-    sbeg    = (int *) R_alloc(2, sizeof(int));
-    sbeg[0] = 0;
-    sbeg[1] = n;
-  }
-  else {
-    const int *strata = INTEGER(sexp_strata);
-    ns = 0;
-    for (int a = 0; a < n; a++)
-      if (strata[a] + 1 > ns) ns = strata[a] + 1;
-    sbeg = (int *) R_alloc(ns + 1, sizeof(int));
-    for (int s = 0; s <= ns; s++) sbeg[s] = 0;
-    for (int a = 0; a < n; a++) sbeg[strata[a] + 1]++;
-    for (int s = 0; s < ns; s++) sbeg[s + 1] += sbeg[s];
-    int *fill = (int *) R_alloc(ns, sizeof(int));
-    memcpy(fill, sbeg, (size_t) ns * sizeof(int));
-    for (int a = 0; a < n; a++) order[fill[strata[a]]++] = a;
-  }
-  pm_order = order;
-  pm_sbeg  = sbeg;
-  pm_ns    = ns;
+  // Permuted row a is original row p[a], as vegan's G[p, p].
+  perm_source_init(&pm_ps, n, sexp_perms, sexp_strata, seed);
 
 
   //--------------------------------------------------

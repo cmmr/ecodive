@@ -70,6 +70,7 @@ reference:
   desc: Test whether sample metadata explain beta diversity distances.
   contents:
   - permanova
+  - mrpp
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.
