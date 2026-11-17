@@ -11,7 +11,7 @@ tsne(
   theta = 0.5,
   gradient = "auto",
   init = "pcoa",
-  max_iter = 1000L,
+  max_iters = 1000L,
   early_exaggeration = 12,
   learning_rate = "auto",
   seed = 0L,
@@ -46,7 +46,7 @@ a numeric matrix with one row per sample, in the same order as
 \code{dm}, and \code{k} columns, none of them constant (a constant column
 could never move). See "Starting layout" below.}
 
-\item{max_iter}{The most iterations to run, including the first 250 with
+\item{max_iters}{The most iterations to run, including the first 250 with
 early exaggeration. The run stops sooner when it stops improving
 (see "Method"). Default: \code{1000}}
 
@@ -212,7 +212,7 @@ converge is redone (see "Scale"). Where scikit-learn's search does
 converge, the affinities are the same to within its tolerance
 (identical if the largest distance is already between 1 and 2).
 \item A \code{perplexity} too large for \eqn{n} is reduced instead of being an
-error; it must be at least 1. Any \code{max_iter} of at least 1 is allowed
+error; it must be at least 1. Any \code{max_iters} of at least 1 is allowed
 (scikit-learn requires at least 250). A layout that diverges (e.g.
 from a far too large \code{learning_rate}) is an error.
 \item The Barnes-Hut tree handles identical points exactly. scikit-learn's
@@ -238,7 +238,7 @@ iterations run (scikit-learn's \code{n_iter_} is one less).
 optimization with different defaults: a random start, a learning rate of
 200, Barnes-Hut whenever \code{theta > 0}, \eqn{\lfloor 3 \times perplexity
 \rfloor} neighbors found with a vantage-point tree, and always exactly
-\code{max_iter} iterations. \verb{init = "random", learning_rate = 200} comes close
+\code{max_iters} iterations. \verb{init = "random", learning_rate = 200} comes close
 to its procedure. The two don't give the same coordinates, but layouts of
 the same quality: the tests check that the KL divergence and
 trustworthiness are as good as \code{Rtsne()}'s on the same data.

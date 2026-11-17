@@ -11,7 +11,7 @@
   expect_identical(ordination(d, 'pcoa', k = 2, cpus = 1), pcoa(d, k = 2, cpus = 1))
   expect_identical(ordination(d, 'nmds', trymax = 3),      nmds(d, trymax = 3))
   expect_identical(ordination(d, 'nmds', k = 3, seed = 2, trymax = 2), nmds(d, k = 3, seed = 2, trymax = 2))
-  expect_identical(ordination(d, 'tsne', perplexity = 5, max_iter = 100), tsne(d, perplexity = 5, max_iter = 100))
+  expect_identical(ordination(d, 'tsne', perplexity = 5, max_iters = 100), tsne(d, perplexity = 5, max_iters = 100))
 
   # Arguments the method doesn't take are an error, except `seed`, which is
   # dropped for methods without random parts.

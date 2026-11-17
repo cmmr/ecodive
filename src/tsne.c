@@ -1288,7 +1288,7 @@ static void scale_start(double *y, int n, int k) {
 //
 //   sexp_init: the n x k starting layout, or NULL for a
 //              random one.
-//   sexp_iopt: n, k, max_iter, exaggeration iterations,
+//   sexp_iopt: n, k, max_iters, exaggeration iterations,
 //              threads, iterations between checks,
 //              iterations without progress, whether to
 //              center the result, how to start, and the
@@ -1308,7 +1308,7 @@ static void scale_start(double *y, int n, int k) {
 // iterations run, whether the layout diverged (a
 // coordinate became NaN or beyond +-1e100; the run stops
 // then), and the gradient at the final embedding (without
-// exaggeration). With max_iter = 0, they are the start's
+// exaggeration). With max_iters = 0, they are the start's
 // KL divergence and gradient, which the tests compare with
 // scikit-learn's.
 //======================================================
@@ -1333,7 +1333,7 @@ SEXP C_tsne_run(SEXP sexp_p, SEXP sexp_init, SEXP sexp_iopt, SEXP sexp_dopt) {
   double *dopt         = REAL(sexp_dopt);
   int     n            = iopt[0];
   int     k            = iopt[1];
-  int     max_iter     = iopt[2];
+  int     max_iters     = iopt[2];
   int     exag_iter    = iopt[3];
   int     n_iter_check = iopt[5];
   int     no_progress  = iopt[6];
@@ -1343,7 +1343,7 @@ SEXP C_tsne_run(SEXP sexp_p, SEXP sexp_init, SEXP sexp_iopt, SEXP sexp_dopt) {
   double  lr           = dopt[2];
   double  min_grad     = dopt[3];
 
-  if (n < 2 || k < 1 || max_iter < 0 || n_iter_check < 1 || start < 0 || start > 2 ||
+  if (n < 2 || k < 1 || max_iters < 0 || n_iter_check < 1 || start < 0 || start > 2 ||
       (double) n * k > INT_MAX)
     error("Invalid arguments to C_tsne_run()."); // # nocov
 
@@ -1372,7 +1372,7 @@ SEXP C_tsne_run(SEXP sexp_p, SEXP sexp_init, SEXP sexp_iopt, SEXP sexp_dopt) {
 
   for (int phase = 0; phase < 2 && !diverged; phase++) {
 
-    int    stop     = phase ? max_iter : ((exag_iter < max_iter) ? exag_iter : max_iter);
+    int    stop     = phase ? max_iters : ((exag_iter < max_iters) ? exag_iter : max_iters);
     double momentum = dopt[4 + phase];
     double best     = DBL_MAX;
     int    best_it  = it;

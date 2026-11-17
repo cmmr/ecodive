@@ -45,7 +45,7 @@
 #'        `dm`, and `k` columns, none of them constant (a constant column
 #'        could never move). See "Starting layout" below.
 #'
-#' @param max_iter   The most iterations to run, including the first 250 with
+#' @param max_iters   The most iterations to run, including the first 250 with
 #'        early exaggeration. The run stops sooner when it stops improving
 #'        (see "Method"). Default: `1000`
 #'
@@ -204,7 +204,7 @@
 #'   converge, the affinities are the same to within its tolerance
 #'   (identical if the largest distance is already between 1 and 2).
 #' * A `perplexity` too large for \eqn{n} is reduced instead of being an
-#'   error; it must be at least 1. Any `max_iter` of at least 1 is allowed
+#'   error; it must be at least 1. Any `max_iters` of at least 1 is allowed
 #'   (scikit-learn requires at least 250). A layout that diverges (e.g.
 #'   from a far too large `learning_rate`) is an error.
 #' * The Barnes-Hut tree handles identical points exactly. scikit-learn's
@@ -230,7 +230,7 @@
 #' optimization with different defaults: a random start, a learning rate of
 #' 200, Barnes-Hut whenever `theta > 0`, \eqn{\lfloor 3 \times perplexity
 #' \rfloor} neighbors found with a vantage-point tree, and always exactly
-#' `max_iter` iterations. `init = "random", learning_rate = 200` comes close
+#' `max_iters` iterations. `init = "random", learning_rate = 200` comes close
 #' to its procedure. The two don't give the same coordinates, but layouts of
 #' the same quality: the tests check that the KL divergence and
 #' trustworthiness are as good as `Rtsne()`'s on the same data.
@@ -294,7 +294,7 @@
 #'
 tsne <- function (
     dm, k = 2L, perplexity = 30, theta = 0.5, gradient = 'auto',
-    init = 'pcoa', max_iter = 1000L, early_exaggeration = 12,
+    init = 'pcoa', max_iters = 1000L, early_exaggeration = 12,
     learning_rate = 'auto', seed = 0L, cpus = n_cpus() ) {
 
   validate_cpus()
@@ -304,7 +304,7 @@ tsne <- function (
   perp_given <- !missing(perplexity)
   perplexity <- ord_arg(perplexity, '`perplexity` must be a number of at least 1.', lo = 1)
   theta      <- ord_arg(theta,      '`theta` must be a number from 0 to 1.', hi = 1)
-  max_iter   <- ord_arg(max_iter,   '`max_iter` must be a whole number of at least 1.', whole = TRUE, lo = 1)
+  max_iters  <- ord_arg(max_iters,  '`max_iters` must be a whole number of at least 1.', whole = TRUE, lo = 1)
   early_exaggeration <- ord_arg(
     early_exaggeration, '`early_exaggeration` must be a number of at least 1.', lo = 1 )
   if (!identical(learning_rate, 'auto'))
@@ -405,7 +405,7 @@ tsne <- function (
   P <- .Call(C_tsne_p, dm, n, perplexity, K, FALSE, scale, cpus)
   rm(dm)
 
-  iopt <- as.integer(c(n, k, max_iter, 250L, cpus, 50L, 300L, 1L, start, seed))
+  iopt <- as.integer(c(n, k, max_iters, 250L, cpus, 50L, 300L, 1L, start, seed))
   dopt <- c(theta, early_exaggeration, learning_rate, 1e-7, 0.5, 0.8)
   res  <- .Call(C_tsne_run, P, init_mtx, iopt, dopt)
 

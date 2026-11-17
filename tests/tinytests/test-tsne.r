@@ -355,23 +355,23 @@
   expect_identical(colnames(tsne(d60, k = 3, cpus = 1)), paste0('TSNE', 1:3))
   expect_identical(attr(tsne(d60, k = 3, gradient = 'barnes_hut', cpus = 1), 'gradient'), 'barnes_hut')
 
-  o <- tsne(d60, perplexity = 5, learning_rate = 100, early_exaggeration = 4, theta = 0.3, max_iter = 300, cpus = 1)
+  o <- tsne(d60, perplexity = 5, learning_rate = 100, early_exaggeration = 4, theta = 0.3, max_iters = 300, cpus = 1)
   expect_identical(attr(o, 'perplexity'), 5)
   expect_identical(attr(o, 'learning_rate'), 100)
   expect_identical(attr(o, 'n_iter'), 300L)
-  expect_identical(attr(tsne(d60, early_exaggeration = 1, max_iter = 2, cpus = 1), 'learning_rate'), 50)
+  expect_identical(attr(tsne(d60, early_exaggeration = 1, max_iters = 2, cpus = 1), 'learning_rate'), 50)
 
   # Auto: exact up to 500 samples or for k > 3, else Barnes-Hut.
-  expect_identical(attr(tsne(d60, k = 4, max_iter = 10, cpus = 1), 'gradient'), 'exact')
+  expect_identical(attr(tsne(d60, k = 4, max_iters = 10, cpus = 1), 'gradient'), 'exact')
   set.seed(2)
   d501 <- dist(matrix(rnorm(501 * 3), 501))
-  o <- tsne(d501, max_iter = 5, cpus = 1)
+  o <- tsne(d501, max_iters = 5, cpus = 1)
   expect_identical(attr(o, 'gradient'), 'barnes_hut')
   expect_identical(attr(o, 'learning_rate'), 50)
-  expect_identical(attr(tsne(d501, max_iter = 5, early_exaggeration = 2, cpus = 1), 'learning_rate'), 501 / 2 / 4)
+  expect_identical(attr(tsne(d501, max_iters = 5, early_exaggeration = 2, cpus = 1), 'learning_rate'), 501 / 2 / 4)
 
   # Fewer iterations than the early exaggeration phase.
-  expect_identical(attr(tsne(d60, max_iter = 20, cpus = 1), 'n_iter'), 20L)
+  expect_identical(attr(tsne(d60, max_iters = 20, cpus = 1), 'n_iter'), 20L)
 
   # Starting layouts. A matrix start with the PCoA start's values gives
   # the PCoA result.
@@ -392,9 +392,9 @@
 
   # PCoA with fewer positive axes than k: a random start instead.
   d <- dist(matrix(c(0, 1, 2, 4), 4))  # On a line: one axis.
-  o <- tsne(d, k = 3, max_iter = 10, cpus = 1)
+  o <- tsne(d, k = 3, max_iters = 10, cpus = 1)
   expect_identical(attr(o, 'init'), 'random')
-  expect_identical(o, tsne(d, k = 3, max_iter = 10, init = 'random', cpus = 1))
+  expect_identical(o, tsne(d, k = 3, max_iters = 10, init = 'random', cpus = 1))
   expect_true(all(is.finite(o)) && all(apply(o, 2, sd) > 0))
 
 
@@ -411,9 +411,9 @@
   for (k in 1:3) {
     for (g in c('exact', 'barnes_hut')) {
       cps <- if (home && k == 2) c(2L, 3L, 4L, 1500L) else many
-      x1  <- tsne(db, k = k, gradient = g, max_iter = 30, cpus = 1)
+      x1  <- tsne(db, k = k, gradient = g, max_iters = 30, cpus = 1)
       for (cp in cps)
-        expect_identical(tsne(db, k = k, gradient = g, max_iter = 30, cpus = cp), x1)
+        expect_identical(tsne(db, k = k, gradient = g, max_iters = 30, cpus = cp), x1)
     }
   }
 
@@ -423,16 +423,16 @@
 
   # The whole schedule (both phases), with threads.
   for (g in c('exact', 'barnes_hut')) {
-    x1 <- tsne(db, gradient = g, max_iter = 260, cpus = 1)
-    expect_identical(tsne(db, gradient = g, max_iter = 260, cpus = many), x1)
-    expect_identical(tsne(db, gradient = g, max_iter = 260, cpus = 1), x1)
+    x1 <- tsne(db, gradient = g, max_iters = 260, cpus = 1)
+    expect_identical(tsne(db, gradient = g, max_iters = 260, cpus = many), x1)
+    expect_identical(tsne(db, gradient = g, max_iters = 260, cpus = 1), x1)
   }
 
   # R's random number generator is neither used nor changed.
   set.seed(5); r1 <- runif(1)
-  set.seed(5); x <- tsne(d60, init = 'random', max_iter = 30, cpus = 1); r2 <- runif(1)
+  set.seed(5); x <- tsne(d60, init = 'random', max_iters = 30, cpus = 1); r2 <- runif(1)
   expect_identical(r1, r2)
-  set.seed(6); x6 <- tsne(d60, init = 'random', max_iter = 30, cpus = 1)
+  set.seed(6); x6 <- tsne(d60, init = 'random', max_iters = 30, cpus = 1)
   expect_identical(x6, x)
 
   # A fresh R session gives the same results: random and PCoA starts,
@@ -442,9 +442,9 @@
   # e.g. under valgrind.)
   if (home) {
     fresh <- function (d, cpus) {
-      runs <- list(ecodive::tsne(d, init = 'random', max_iter = 30, cpus = cpus))
+      runs <- list(ecodive::tsne(d, init = 'random', max_iters = 30, cpus = cpus))
       for (k in 1:3) for (g in c('exact', 'barnes_hut'))
-        runs <- c(runs, list(ecodive::tsne(d, k = k, gradient = g, max_iter = 30, cpus = cpus)))
+        runs <- c(runs, list(ecodive::tsne(d, k = k, gradient = g, max_iters = 30, cpus = cpus)))
       runs
     }
     environment(fresh) <- globalenv()  # Don't save this test's objects.
@@ -495,12 +495,12 @@
       expect_identical(dim(o), c(n, k))
     }
   }
-  expect_identical(dim(tsne(d60, k = 70, max_iter = 2, cpus = 1)), c(60L, 70L))
+  expect_identical(dim(tsne(d60, k = 70, max_iters = 2, cpus = 1)), c(60L, 70L))
 
   # Two samples: P and Q are both 1/2, so the gradient vanishes after the
   # early exaggeration phase and the run stops at the first check. A huge
-  # max_iter is fine.
-  o <- tsne(dist(1:2), max_iter = 1e12, cpus = 1)
+  # max_iters is fine.
+  o <- tsne(dist(1:2), max_iters = 1e12, cpus = 1)
   expect_identical(attr(o, 'n_iter'), 300L)
   expect_true(abs(attr(o, 'kl_divergence')) < 1e-12)
 
@@ -532,7 +532,7 @@
   for (g in c('exact', 'barnes_hut')) {
     expect_error(tsne(d60, gradient = g, learning_rate = 1e300, cpus = 1), 'diverged')
     expect_error(tsne(d60, gradient = g, early_exaggeration = 1e305, cpus = 1), 'diverged')
-    expect_error(tsne(d60, gradient = g, learning_rate = 1e300, max_iter = 20, cpus = 1), 'diverged')
+    expect_error(tsne(d60, gradient = g, learning_rate = 1e300, max_iters = 20, cpus = 1), 'diverged')
   }
 
   # The scale of the distances doesn't matter: multiplying them by a power
@@ -589,9 +589,9 @@
   expect_error(tsne(d60, theta = -0.1), '`theta` must be a number from 0 to 1')
   expect_error(tsne(d60, theta = 1.1),  '`theta` must be a number from 0 to 1')
   expect_error(tsne(d60, theta = NaN),  '`theta` must be a number from 0 to 1')
-  expect_error(tsne(d60, max_iter = 0),   '`max_iter` must be a whole number of at least 1')
-  expect_error(tsne(d60, max_iter = 2.5), '`max_iter` must be a whole number of at least 1')
-  expect_error(tsne(d60, max_iter = Inf), '`max_iter` must be a whole number of at least 1')
+  expect_error(tsne(d60, max_iters = 0),   '`max_iters` must be a whole number of at least 1')
+  expect_error(tsne(d60, max_iters = 2.5), '`max_iters` must be a whole number of at least 1')
+  expect_error(tsne(d60, max_iters = Inf), '`max_iters` must be a whole number of at least 1')
   expect_error(tsne(d60, early_exaggeration = 0.5), '`early_exaggeration` must be a number of at least 1')
   expect_error(tsne(d60, early_exaggeration = Inf), '`early_exaggeration` must be a number of at least 1')
   expect_error(tsne(d60, learning_rate = 0),      '`learning_rate` must be "auto" or a number greater than 0')
@@ -640,9 +640,9 @@
   expect_error(tsne(NULL),                     'symmetric numeric matrix')
 
   # A perplexity too large for n is reduced, with a warning only if given.
-  expect_warning(o <- tsne(d60, perplexity = 25, max_iter = 10, cpus = 1), 'reduced from 25 to 19.6667')
+  expect_warning(o <- tsne(d60, perplexity = 25, max_iters = 10, cpus = 1), 'reduced from 25 to 19.6667')
   expect_identical(attr(o, 'perplexity'), 59 / 3)
-  expect_silent(tsne(d60, max_iter = 10, cpus = 1))
+  expect_silent(tsne(d60, max_iters = 10, cpus = 1))
 
   # Integer storage is converted.
   di <- dist(matrix(c(1L, 5L, 2L, 8L, 9L), 5))
