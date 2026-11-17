@@ -23,8 +23,8 @@ negative values.}
 \item{groups}{Each sample's group: a vector or factor with one value per
 sample, matched to the samples in \code{dm} by name when both are named,
 else in the same order as \code{dm}. Or, when \code{data} is given, the name of
-one of its columns. Values are treated as categories, even if they
-are numbers.}
+one of its columns (or a vector with one value per row of \code{data}).
+Values are treated as categories, even if they are numbers.}
 
 \item{data}{Optional sample metadata: a data frame with one row per
 sample, holding \code{groups} (and \code{strata}) as columns. Rows are matched

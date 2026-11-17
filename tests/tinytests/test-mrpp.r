@@ -219,8 +219,9 @@
   expect_identical(mrpp(d, 'trt', extra, permutations = 19, cpus = 1), ref)
 
   expect_error(mrpp(d, 'trt', meta[-1, ]), "1 sample in `dm` has no row in `data`: 'S01'")
-  expect_error(mrpp(d, 'nothere', meta), 'not a column')
-  expect_error(mrpp(d, meta$trt, meta), 'name of one of its columns')
+  expect_error(mrpp(d, 'nothere', meta), "'nothere' is not one")
+  expect_identical(mrpp(d, meta$trt, meta, permutations = 19, cpus = 1), mrpp(d, meta$trt, permutations = 19, cpus = 1))
+  expect_error(mrpp(d, meta$trt[-1], meta), 'one value per row')
   expect_error(mrpp(d, 'trt'), '`data` is not given')
   expect_error(mrpp(d, meta$trt[-1]), 'has 29 values')
   expect_error(mrpp(d), '`groups` is required')

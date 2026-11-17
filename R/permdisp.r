@@ -23,16 +23,17 @@
 #'        negative values.
 #'
 #' @param groups  Each sample's group: a vector or factor with one value per
-#'        sample, or, when `data` is given, the name of a column of `data`.
-#'        Values are matched to the samples in `dm` by name when both have
-#'        names, and taken in the same order as `dm` otherwise. Groups with no
-#'        samples left are dropped.
+#'        sample, matched to the samples in `dm` by name when both are named,
+#'        else in the same order as `dm`. Or, when `data` is given, the name of
+#'        one of its columns (or a vector with one value per row of `data`).
+#'        Values are treated as categories, even if they are numbers.
+#'        Groups with no samples left are dropped.
 #'
 #' @param data  Optional sample metadata: a data frame with one row per
-#'        sample, holding the `groups` (and `strata`) columns. Rows are
-#'        matched to the samples in `dm` by row name, and rows for other
-#'        samples are ignored; without row names, they must be in the same
-#'        order as `dm`. Default: `NULL`.
+#'        sample, holding `groups` (and `strata`) as columns. Rows are matched
+#'        to the samples in `dm` by row name, and rows for other samples are
+#'        ignored; without row names, they must be in the same order as `dm`.
+#'        Default: `NULL`.
 #'
 #' @param type  The group centre to measure distances from:
 #'
@@ -253,29 +254,10 @@ permdisp <- function (
   #--------------------------------------------------------
   # Each sample's group, aligned with the samples of `dm`.
   #--------------------------------------------------------
-  if (missing(groups) || is.null(groups))
-    stop('`groups` is required.', call. = FALSE)
+  if (missing(groups)) groups <- NULL
 
-  if (is.null(data)) {
-    if (!is.null(dim(groups)) || !is.atomic(groups))
-      stop('`groups` must be a vector or factor with one value per sample.', call. = FALSE)
-    col  <- 'group'
-    data <- groups
-  }
-  else {
-    if (!is.character(groups) || length(groups) != 1 || is.na(groups) ||
-        !groups %in% names(data))
-      stop('With `data`, `groups` must be the name of a column of `data`.', call. = FALSE)
-    col <- groups
-  }
-
-  # model_design() aligns the rows with the samples; `~ 1` keeps it from
-  # building a model matrix, which fails for a single group.
-  des <- model_design(data, ~ 1, dv$labels, n, strata, allow_empty = TRUE)
-
-  grp_f <- des$data[[col]]
-  if (anyNA(grp_f))
-    stop('`groups` must not contain NAs.', call. = FALSE)
+  des   <- test_group_values(groups, data, n, dv$labels, strata)
+  grp_f <- des$groups
   if (!is.factor(grp_f)) grp_f <- factor(grp_f)
   grp_f <- droplevels(grp_f)
   ng    <- nlevels(grp_f)

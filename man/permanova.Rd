@@ -25,12 +25,13 @@ its right, such as \code{dm ~ treatment}, in place of \code{dm} and
 \code{formula}; the metadata may then be given second, as in
 \code{permanova(dm ~ treatment, meta)}.}
 
-\item{groups}{The one variable to test: a vector or factor with one value
-per sample, matched to the samples in \code{dm} by name when both are
-named, else in the same order as \code{dm}. Or, when \code{data} is given,
-the name of one of its columns. Categories (factor, character, or
-logical) or a numeric covariate. The same as
-\code{formula = ~ groups}. Give \code{groups} or \code{formula}, not both.}
+\item{groups}{The one variable to test: a vector or factor with one value per
+sample, matched to the samples in \code{dm} by name when both are named,
+else in the same order as \code{dm}. Or, when \code{data} is given, the name of
+one of its columns (or a vector with one value per row of \code{data}).
+Categories (factor, character, or logical) or a numeric
+covariate. The same as \code{formula = ~ groups}. Give \code{groups} or
+\code{formula}, not both.}
 
 \item{data}{Sample metadata: a data frame with one row per sample,
 holding the columns named in \code{groups}, \code{formula}, or \code{strata}.

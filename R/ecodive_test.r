@@ -69,45 +69,110 @@ new_ecodive_test <- function (
 
 
 #------------------------------------------------------------------------------
-# Checks the `groups` argument of a test: one value per sample (a vector or
-# factor, matched to the dist's `labels` by name when both are named, else in
-# order), or, with `data`, the name of one of its columns.
+# Checks the `groups` argument of a test (permanova(), mrpp(), anosim(),
+# permdisp(), dist_test()): one value per sample (a vector or factor,
+# matched to the dist's `labels` by name when both are named, else in order),
+# or, with `data`, the name of one of its columns (or a vector with one value
+# per row of `data`). Every test gives the same messages.
 #
 # Returns list(data, col): pass `data` on to model_design(), which aligns it
 # with the samples (a vector becomes a one-column data frame, `group`), and
-# take the groups from column `col` of its result.
+# take the groups from column `col` of its result. test_group_values() does
+# both.
 #------------------------------------------------------------------------------
 test_groups <- function (groups, data, n, labels, strata = NULL) {
 
   if (is.null(groups))
     stop('`groups` is required: one value per sample, or a column name of `data`.', call. = FALSE)
 
-  if (is.null(data)) {
+  if (!is.atomic(groups) || !is.null(dim(groups)))
+    stop(
+      '`groups` must be a vector or factor with one value per sample, ',
+      'or the name of a column of `data`.', call. = FALSE )
 
-    if (is.character(groups) && length(groups) == 1 && n != 1)
-      stop('`groups` names a column, but `data` is not given.', call. = FALSE)
-    if (!is.atomic(groups) || !is.null(dim(groups)))
+
+  #--------------------------------------------------------
+  # A column of `data`.
+  #--------------------------------------------------------
+  if (!is.null(data)) {
+
+    if (!is.data.frame(data) && !is.matrix(data))
+      stop('`data` must be a data.frame.', call. = FALSE)
+
+    if (is.character(groups) && length(groups) == 1 && !is.na(groups) &&
+        groups %in% colnames(data))
+      return (list(data = data, col = groups))
+
+    # A vector parallel to the rows of `data`: a new column.
+    if (length(groups) == nrow(data) && !(is.character(groups) && length(groups) == 1)) {
+      data <- as.data.frame(data, stringsAsFactors = FALSE)
+      col  <- make.unique(c(names(data), 'group'))[[ncol(data) + 1L]]
+      data[[col]] <- groups
+      return (list(data = data, col = col))
+    }
+
+    if (is.character(groups) && length(groups) == 1)
       stop(
-        '`groups` must be a vector or factor with one value per sample, ',
-        'or the name of a column of `data`.', call. = FALSE )
-    if (anyNA(groups))
-      stop('`groups` must not contain NAs.', call. = FALSE)
-    if (length(groups) != n && (is.null(names(groups)) || is.null(labels)))
-      stop(sprintf('`groups` has %d values, but `dm` has %d samples.', length(groups), n), call. = FALSE)
-    if (!is.null(strata) && !(is.atomic(strata) && length(strata) == length(groups)))
-      stop('Without `data`, `strata` must have one value per value of `groups`.', call. = FALSE)
+        '`groups` must be the name of a column of `data`, but ',
+        name_list(groups), ' is not one.', call. = FALSE )
 
-    return (list(data = groups, col = 'group'))
+    stop(
+      'With `data`, `groups` must be the name of a column of `data`, ',
+      'or have one value per row of `data` (', nrow(data), ').', call. = FALSE )
   }
 
-  if (!is.character(groups) || length(groups) != 1 || is.na(groups))
-    stop('With `data`, `groups` must be the name of one of its columns.', call. = FALSE)
-  if (!is.data.frame(data) && !is.matrix(data))
-    stop('`data` must be a data.frame.', call. = FALSE)
-  if (!groups %in% colnames(data))
-    stop('`groups` is not a column of `data`: ', name_list(groups), call. = FALSE)
 
-  list(data = data, col = groups)
+  #--------------------------------------------------------
+  # One value per sample.
+  #--------------------------------------------------------
+  if (is.character(groups) && length(groups) == 1 && n != 1)
+    stop('`groups` names a column, but `data` is not given.', call. = FALSE)
+
+  nms   <- names(groups)
+  named <- !is.null(labels) && !is.null(nms) && !anyNA(nms) && !anyDuplicated(nms)
+
+  if (named && !all(labels %in% nms)) {
+    miss <- labels[!labels %in% nms]
+    stop(
+      sprintf('%d sample%s in `dm` %s no value in `groups`: %s',
+        length(miss), if (length(miss) == 1) '' else 's',
+        if (length(miss) == 1) 'has' else 'have', name_list(miss) ),
+      call. = FALSE )
+  }
+
+  if (!named && length(groups) != n)
+    stop(sprintf('`groups` has %d values, but `dm` has %d samples.', length(groups), n), call. = FALSE)
+
+  # Values for other samples are ignored, even NAs.
+  used <- if (named) groups[match(labels, nms)] else groups
+  if (anyNA(used))
+    stop('`groups` must not contain NAs.', call. = FALSE)
+
+  if (!is.null(strata) && !(is.atomic(strata) && is.null(dim(strata)) && length(strata) == length(groups)))
+    stop('Without `data`, `strata` must have one value per value of `groups`.', call. = FALSE)
+
+  list(data = groups, col = 'group')
+}
+
+
+#------------------------------------------------------------------------------
+# test_groups(), then each sample's group in the order of the dist's samples.
+# Returns list(groups (the values, with unused factor levels dropped),
+# strata (0-based codes, or NULL), col).
+#------------------------------------------------------------------------------
+test_group_values <- function (groups, data, n, labels, strata = NULL) {
+
+  g   <- test_groups(groups, data, n, labels, strata)
+
+  # `~ 1`: aligned rows and strata, without a model matrix (which fails for a
+  # one-level factor).
+  des <- model_design(g$data, ~ 1, labels, n, strata, allow_empty = TRUE)
+  val <- des$data[[g$col]]
+
+  if (anyNA(val))
+    stop('Missing values (NA) in `data` column ', name_list(g$col), '.', call. = FALSE)
+
+  list(groups = val, strata = des$strata, col = g$col)
 }
 
 

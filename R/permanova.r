@@ -22,12 +22,13 @@
 #'        `formula`; the metadata may then be given second, as in
 #'        `permanova(dm ~ treatment, meta)`.
 #'
-#' @param groups  The one variable to test: a vector or factor with one value
-#'        per sample, matched to the samples in `dm` by name when both are
-#'        named, else in the same order as `dm`. Or, when `data` is given,
-#'        the name of one of its columns. Categories (factor, character, or
-#'        logical) or a numeric covariate. The same as
-#'        `formula = ~ groups`. Give `groups` or `formula`, not both.
+#' @param groups  The one variable to test: a vector or factor with one value per
+#'        sample, matched to the samples in `dm` by name when both are named,
+#'        else in the same order as `dm`. Or, when `data` is given, the name of
+#'        one of its columns (or a vector with one value per row of `data`).
+#'        Categories (factor, character, or logical) or a numeric
+#'        covariate. The same as `formula = ~ groups`. Give `groups` or
+#'        `formula`, not both.
 #'
 #' @param data  Sample metadata: a data frame with one row per sample,
 #'        holding the columns named in `groups`, `formula`, or `strata`.

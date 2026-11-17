@@ -315,10 +315,11 @@
   expect_identical(unname(r$distances[c(1, 4)]), c(0, 0))
 
   expect_error(permdisp(d), '`groups` is required')
-  expect_error(permdisp(d, g[-1]), '35 rows')
+  expect_error(permdisp(d, g[-1]), 'has 35 values')
   expect_error(permdisp(d, c(NA, as.character(g[-1]))), 'NA')
   expect_error(permdisp(d, 'nothere', meta), 'name of a column')
-  expect_error(permdisp(d, g, meta), 'name of a column')
+  expect_identical(permdisp(d, g, meta, permutations = 9, cpus = 1), permdisp(d, g, permutations = 9, cpus = 1))
+  expect_error(permdisp(d, g[-1], meta), 'one value per row')
   expect_error(permdisp(d, matrix(1, 36, 2)), 'vector or factor')
   expect_error(permdisp(d, g, type = 'mean'), "'arg' should be one of")
   expect_error(permdisp(d, g, bias_adjust = NA), 'bias_adjust')

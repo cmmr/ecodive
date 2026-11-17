@@ -2,7 +2,6 @@
 # Licensed under the MIT License: https://opensource.org/license/mit
 
 
-
 #' Analysis of Similarities (ANOSIM)
 #'
 #' Tests whether samples in the same group are more similar to each other
@@ -18,15 +17,16 @@
 #'        negative values.
 #'
 #' @param groups  Each sample's group: a vector or factor with one value per
-#'        sample, or the name of a column of `data`. With `data`, a vector
-#'        has one value per row of `data`. Without `data`, a named vector is
-#'        matched to the samples in `dm` by name; an unnamed one must be in
-#'        the same order as `dm`.
+#'        sample, matched to the samples in `dm` by name when both are named,
+#'        else in the same order as `dm`. Or, when `data` is given, the name of
+#'        one of its columns (or a vector with one value per row of `data`).
+#'        Values are treated as categories, even if they are numbers.
 #'
 #' @param data  Optional sample metadata: a data frame with one row per
-#'        sample. Rows are matched to the samples in `dm` by row name, and
-#'        rows for other samples are ignored; without row names, they must
-#'        be in the same order as `dm`. Default: `NULL`.
+#'        sample, holding `groups` (and `strata`) as columns. Rows are matched
+#'        to the samples in `dm` by row name, and rows for other samples are
+#'        ignored; without row names, they must be in the same order as `dm`.
+#'        Default: `NULL`.
 #'
 #' @param permutations  The number of permutations. Default: `999`.
 #'        Alternatively, a matrix with one permutation of `1:n` per row, as
@@ -178,10 +178,10 @@ anosim <- function (
   if (n < 2)
     stop('`dm` must have at least 2 samples.', call. = FALSE)
 
-  if (missing(groups))
-    stop('`groups` is required.', call. = FALSE)
+  if (missing(groups)) groups <- NULL
 
-  grp <- anosim_groups(groups, data, dv$labels, n, strata)
+  des <- test_group_values(groups, data, n, dv$labels, strata)
+  grp <- list(groups = droplevels(factor(des$groups)), strata = des$strata)
   pm  <- perm_matrix(permutations, n)
 
   if (!is.null(pm$perms) && !is.null(grp$strata))
@@ -250,7 +250,6 @@ anosim <- function (
 }
 
 
-
 # Lines added to the printout by print.ecodive_test(): the mean ranks.
 #' @export
 test_details.ecodive_anosim <- function (x, digits) {
@@ -258,112 +257,4 @@ test_details.ecodive_anosim <- function (x, digits) {
   rk$mean_rank <- signif(rk$mean_rank, digits + 2L)
   c('Mean rank of the distances, between and within groups:',
     utils::capture.output(print(rk)) )
-}
-
-
-
-#------------------------------------------------------------------------------
-# Each sample's group, as a factor in the order of the dist's samples, with
-# permanova()'s metadata matching (model_design()).
-#
-#   groups   A vector with one value per row of `data` (or, without `data`,
-#            per sample, matched by name if it has names), or the name of a
-#            column of `data`.
-#   data     NULL, or a data.frame or matrix of sample metadata.
-#   labels   The dist's sample names, or NULL.
-#   n        The number of samples.
-#   strata   NULL, the name of a column of `data`, or a vector parallel to
-#            `groups` (or to the rows of `data`).
-#
-# Returns list(groups = factor, name = the grouping variable's name (unused),
-# strata = integer codes 0 .. n_strata - 1, or NULL).
-#------------------------------------------------------------------------------
-anosim_groups <- function (groups, data, labels, n, strata) {
-
-  if (is.null(groups) || !is.null(dim(groups)) || !is.atomic(groups))
-    stop('`groups` must be a vector or factor, or the name of a column of `data`.', call. = FALSE)
-
-  if (is.null(data)) {
-
-    if (is.character(groups) && length(groups) == 1)
-      stop('`groups` names a column, but no `data` was given.', call. = FALSE)
-
-    name <- 'group'
-    vals <- groups
-    nms  <- names(groups)
-    rn   <- if (!is.null(nms) && !anyDuplicated(nms) && !anyNA(nms)) nms
-
-    if (is.null(rn) || is.null(labels)) {
-      if (length(groups) != n)
-        stop(sprintf('`groups` has %d values, but `dm` has %d samples.', length(groups), n),
-             call. = FALSE)
-    }
-    else if (!all(labels %in% rn)) {
-      miss <- labels[!labels %in% rn]
-      stop(
-        sprintf('%d sample%s in `dm` %s no value in `groups`: %s',
-          length(miss), if (length(miss) == 1) '' else 's',
-          if (length(miss) == 1) 'has' else 'have', name_list(miss) ),
-        call. = FALSE )
-    }
-
-    # Values for other samples are ignored, even NAs.
-    used <- if (is.null(rn) || is.null(labels)) vals else vals[match(labels, rn)]
-    if (anyNA(used))
-      stop('`groups` must not contain NAs.', call. = FALSE)
-
-    if (!is.null(strata) && (length(strata) != length(groups) || !is.null(dim(strata))))
-      stop('Without `data`, `strata` must have one value per value of `groups`.', call. = FALSE)
-  }
-  else {
-
-    if (is.matrix(data)) data <- as.data.frame(data, stringsAsFactors = FALSE)
-    if (!is.data.frame(data))
-      stop('`data` must be a data.frame or matrix.', call. = FALSE)
-
-    if (is.character(groups) && length(groups) == 1 && groups %in% names(data)) {
-      name <- groups
-      vals <- data[[groups]]
-    }
-    else if (length(groups) == nrow(data)) {
-      name <- 'group'
-      vals <- groups
-    }
-    else {
-      stop(
-        '`groups` must be the name of a column of `data`, or have one value ',
-        'per row of `data` (', nrow(data), ').', call. = FALSE )
-    }
-
-    if (is.character(strata) && length(strata) == 1 && strata %in% names(data))
-      strata <- data[[strata]]
-
-    rn <- if (.row_names_info(data) > 0) rownames(data)
-  }
-
-
-  #--------------------------------------------------------
-  # Integer codes go through model_design(), which aligns
-  # them with the dist's samples (and so does `strata`).
-  # As numbers, they make a one-column model matrix, however
-  # many groups there are.
-  #--------------------------------------------------------
-  f   <- factor(vals)
-  df  <- data.frame(seq_along(f))
-  df[[1]] <- as.integer(f)
-  names(df) <- name
-  if (!is.null(rn)) rownames(df) <- rn
-
-  des <- model_design(
-    data    = df,
-    formula = stats::as.formula(call('~', as.name(name)), env = globalenv()),
-    labels  = labels,
-    n       = n,
-    strata  = strata )
-
-  codes <- des$data[[name]]
-  list(
-    groups = droplevels(factor(levels(f)[codes], levels = levels(f))),
-    name   = name,
-    strata = des$strata )
 }

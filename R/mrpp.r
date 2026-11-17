@@ -23,8 +23,8 @@
 #' @param groups  Each sample's group: a vector or factor with one value per
 #'        sample, matched to the samples in `dm` by name when both are named,
 #'        else in the same order as `dm`. Or, when `data` is given, the name of
-#'        one of its columns. Values are treated as categories, even if they
-#'        are numbers.
+#'        one of its columns (or a vector with one value per row of `data`).
+#'        Values are treated as categories, even if they are numbers.
 #'
 #' @param data  Optional sample metadata: a data frame with one row per
 #'        sample, holding `groups` (and `strata`) as columns. Rows are matched
@@ -207,14 +207,8 @@ mrpp <- function (
   #--------------------------------------------------------
   # Each sample's group, in the order of dm's samples.
   #--------------------------------------------------------
-  g   <- test_groups(groups, data, n, dv$labels, strata)
-  des <- model_design(
-    g$data, formula = ~ 1, labels = dv$labels, n = n, strata = strata,
-    allow_empty = TRUE )
-  grp <- des$data[[g$col]]
-
-  if (anyNA(grp))
-    stop('Missing values (NA) in `data` column ', name_list(g$col), '.', call. = FALSE)
+  des <- test_group_values(groups, data, n, dv$labels, strata)
+  grp <- des$groups
 
   if (!is.null(pm$perms) && !is.null(des$strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)

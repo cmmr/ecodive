@@ -23,16 +23,17 @@ symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values.}
 
 \item{groups}{Each sample's group: a vector or factor with one value per
-sample, or, when \code{data} is given, the name of a column of \code{data}.
-Values are matched to the samples in \code{dm} by name when both have
-names, and taken in the same order as \code{dm} otherwise. Groups with no
-samples left are dropped.}
+sample, matched to the samples in \code{dm} by name when both are named,
+else in the same order as \code{dm}. Or, when \code{data} is given, the name of
+one of its columns (or a vector with one value per row of \code{data}).
+Values are treated as categories, even if they are numbers.
+Groups with no samples left are dropped.}
 
 \item{data}{Optional sample metadata: a data frame with one row per
-sample, holding the \code{groups} (and \code{strata}) columns. Rows are
-matched to the samples in \code{dm} by row name, and rows for other
-samples are ignored; without row names, they must be in the same
-order as \code{dm}. Default: \code{NULL}.}
+sample, holding \code{groups} (and \code{strata}) as columns. Rows are matched
+to the samples in \code{dm} by row name, and rows for other samples are
+ignored; without row names, they must be in the same order as \code{dm}.
+Default: \code{NULL}.}
 
 \item{type}{The group centre to measure distances from:
 \itemize{

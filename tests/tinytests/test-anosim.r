@@ -235,7 +235,7 @@
   expect_equal(res$statistic[['R']], anosim_r(d, pairs2)[[1]], tolerance = 1e-14)
 
   expect_error(anosim(d), '`groups` is required')
-  expect_error(anosim(d, 'trt'), 'no `data`')
+  expect_error(anosim(d, 'trt'), '`data` is not given')
   expect_error(anosim(d, meta$trt[-1]), '29 values')
   expect_error(anosim(d, setNames(meta$trt, rownames(meta))[-1]), "1 sample in `dm` has no value in `groups`: 'S01'")
   expect_error(anosim(d, 'nothere', meta), 'name of a column')

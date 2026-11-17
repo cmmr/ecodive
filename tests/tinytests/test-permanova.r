@@ -275,8 +275,11 @@
   expect_error(permanova(d, ~ trt, meta), 'Name the formula argument')
   expect_error(permanova(d, meta), '`groups` must be a vector')
   expect_error(permanova(d, 'trt'), '`data` is not given')
-  expect_error(permanova(d, 'nothere', meta), 'not a column of `data`')
-  expect_error(permanova(d, meta$trt, meta), 'name of one of its columns')
+  expect_error(permanova(d, 'nothere', meta), "'nothere' is not one")
+  expect_identical(
+    permanova(d, meta$trt, meta, strata = 'block', permutations = 19, cpus = 1),
+    permanova(d, meta$trt, strata = meta$block, permutations = 19, cpus = 1) )
+  expect_error(permanova(d, meta$trt[-1], meta), 'one value per row')
   expect_error(permanova(d, c(NA, meta$ph[-1])), 'NAs')
   expect_error(permanova(d, meta$ph[-1]), 'has 35 values')
   expect_error(permanova(d, meta$ph, strata = 1:3), 'strata')
