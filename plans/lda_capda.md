@@ -41,12 +41,16 @@ for `capscale()`, as already documented, so this is **`capda()`**.
   - Error when the within-group covariance is singular, suggesting
     `capda()` or fewer features.
   - Joins `COUNT_ORDS`, with aliases `lda`, `lineardiscriminantanalysis`.
-- **`capda(dm, groups, data = NULL, m = NULL, permutations = 999L, seed = 0L, cpus = n_cpus())`.**
-  - `m` is the number of PCoA axes. The default (`NULL`) chooses it by
-    leave-one-out classification success, as Anderson & Willis do.
+- **`capda(dm, groups, data = NULL, n_axes = NULL, permutations = 999L, seed = 0L, cpus = n_cpus())`.**
+  - `n_axes` is the number of PCoA axes (Anderson & Willis's *m*). The
+    default (`NULL`) chooses it by leave-one-out classification success,
+    as they do.
+  - Don't name it `m`: R would partially match `m` to `dist_ord()`'s own
+    `method` argument, so `dist_ord(dm, 'capda', m = 3)` would fail (see
+    README, "Argument names").
   - **Result:** an `ecodive_ord` matrix, columns `CAP1..`.
     - Attributes: `eig` (the squared canonical correlations, δ²), `prop`,
-      `m`, `success` (the leave-one-out classification table and overall
+      `n_axes`, `success` (the leave-one-out classification table and overall
       rate), `trace_stat`, `p_value` (permutation test of the trace
       statistic), `n_perm`.
   - Joins `ORDINATIONS` (it takes distances), passing `groups` and `data`
@@ -83,7 +87,7 @@ for `capscale()`, as already documented, so this is **`capda()`**.
   and MASS's proportion of trace and group separation.
 - `capda()` matches BiodiversityR's m, δ² and success table on dune
   or varespec, and its p-value with shared permutations.
-- `capda(dm, m = M)` equals `lda()` on `pcoa(dm, k = M)` scores.
+- `capda(dm, n_axes = M)` equals `lda()` on `pcoa(dm, k = M)` scores.
 - Edge cases: two groups (k = 1); a singleton group; singular input to
   `lda()` (a clear error).
 - Results are identical for any `cpus`; a smoke-test line for each

@@ -146,6 +146,21 @@ particular), **the per-method plans and this README win.**
   - `margin`, `norm`, `pseudocount`;
   - `max_iters` (a cap), `n_iters` (attribute: the number run), `tol`,
     `n_starts`.
+- **Arguments must pass cleanly through the wrappers.** R matches named
+  arguments to a function's arguments before `...`, exactly or by
+  **prefix**, so the wrappers' own arguments shadow a method's:
+
+  | Wrapper | Its arguments | A method it runs must not take |
+  |:--------|:--------------|:-------------------------------|
+  | `dist_ord()` | `dm`, `method` | an argument named `method`, or any prefix of `method` or `dm` (`m`, `me`, `d`, ...) |
+  | `count_ord()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
+  | `dist_test()` | `dm`, `test`, `groups`, `data` | an argument named `test`, or any prefix of `test`, `groups` or `data` (`t`, `g`, `gr`, `d`, `da`, ...) |
+
+  `groups` and `data` themselves are fine in `dist_test()`: it passes
+  them through on purpose. Tests may take a `method` argument (as
+  `mantel()` does, for the correlation), because `dist_test()` names its
+  selector `test`. Plain functions with no wrapper are free of this
+  constraint.
 - **Pairwise tests** take `pairwise = FALSE` and `p_adjust = 'holm'`
   (see [pairwise_tests.md](pairwise_tests.md)).
 - **Masking:** many names will mask vegan, ade4 or MASS functions when both
