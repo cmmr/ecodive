@@ -280,3 +280,70 @@ Applies to `permanova()`, `anosim()`, `mrpp()` and `permdisp()`, each with
   every method and for `'none'`. The raw `p_value` columns still match
   vegan, `pairwiseAdonis` and `RVAideMemoire`. Invalid `p_adjust` values,
   and `p_adjust` without `pairwise = TRUE`, are errors.
+
+
+## 7. Reference implementations (surveyed 2026-11-18)
+
+Port code only from permissively licensed sources (MIT, BSD, Apache-2.0).
+Keep each source's copyright and license text for the ported files, as for
+the existing scikit-learn, scikit-bio and gemelli ports: `inst/COPYRIGHTS`
+and a `cph` entry in `Authors@R`. **Apache-2.0 code must keep the Apache
+text and notices**; it can't be relabelled MIT.
+
+GPL packages (vegan, ade4, adespatial, ecodist, BiodiversityR, mixOmics,
+MiRKAT, pairwiseAdonis, RVAideMemoire, destiny, CompQuadForm) and other
+copyleft ones (phyloseq is AGPL; ropls is CeCILL) are **output-only**.
+Their results can be stored as test fixtures, but their code must not be
+read for porting.
+
+Shared sources:
+
+| Source | License | Version |
+|:-------|:--------|:--------|
+| scikit-bio (skbio) | BSD-3 | 0.7.4 |
+| scikit-learn (sklearn) | BSD-3 | 1.9.1 |
+| SciPy | BSD-3 | 1.18.1 |
+| ecopy | MIT | unmaintained since 2020; breaks on pandas ≥ 2 |
+
+Recommended sources per method:
+
+| # | Method | Port from (permissive) | Match outputs of (GPL) | Notes |
+|--:|:-------|:-----------------------|:-----------------------|:------|
+| 1 | `rda()` | skbio `rda()` | vegan `rda`, `anova.cca` | skbio has no `Condition()` (partial RDA) and no permutation test. Build those on `dbrda.c`'s solver, following Borcard et al. 1992 and Legendre, Oksanen & ter Braak 2011. **skbio's "eigenvalues" are singular values, not squared (verified in its source), so its `proportion_explained` isn't a share of variance; don't copy that.** |
+| 2 | `cca()` (canonical *correspondence*) | skbio `cca()` | vegan `cca` | skbio doesn't drop collinear constraints and has no partial CCA or test. sklearn's `CCA` is canonical *correlation*, a different method; say "canonical correspondence" in the docs. |
+| 3a | `ca()` | skbio `ca()` | vegan `cca(X)`, ade4 `dudi.coa` | skbio says it matches vegan. |
+| 3b | `dca()` | **none**: Hill's original DECORANA is public domain, but no unmodified copy was found, and vegan's `decorana.f` is GPL | vegan `decorana` | Write it from Hill & Gauch 1980 and Oksanen & Minchin 1997. "Faithful to Hill" and "matches vegan" are different targets; aim to match vegan. |
+| 4a | `varpart()` | none | vegan `varpart` | Peres-Neto et al. 2006, built on partial RDA. |
+| 4b | `forward_select()` | none | vegan `ordiR2step`, adespatial `forward.sel` | Blanchet, Legendre & Borcard 2008. |
+| 5a | `procrustes()` | SciPy `linalg.orthogonal_procrustes` (and `spatial.procrustes` for the symmetric form) | vegan `procrustes` | `spatial.procrustes` is symmetric only; vegan defaults to `symmetric = FALSE`. |
+| 5b | `protest()` | SciPy, plus a permutation loop | vegan `protest` | Report r = √(1 − ss) and p = (k + 1)/(n + 1), as vegan does; ecopy's p-value omits the +1. |
+| 6 | pairwise tests | q2-diversity `beta_group_significance(pairwise = True)` (BSD-3); skbio `permanova` | pairwiseAdonis, RVAideMemoire | q2 subsets the distance matrix to each pair and reruns the test. That fits our design; use Holm by default (§6), not q2's BH. |
+| 7 | `simper()` | ecopy `simper` (MIT) | vegan `simper` | ecopy has no permutation p-values; add them from Clarke 1993. Document Warton et al. 2012's caveat (it confounds location with dispersion). |
+| 8 | `bioenv()` | skbio `bioenv()` | vegan `bioenv` | skbio lacks vegan's `upto`, `partial`, `metric` and `method` options; add them from vegan's documentation. |
+| 9a | `mrm()` | none | ecodist `MRM` | Legendre, Lapointe & Casgrain 1994; Lichstein 2007. |
+| 9b | `mantel_correlogram()` | none (skbio `mantel` as a building block) | vegan `mantel.correlog` | Oden & Sokal 1986; Sturges classes and Holm correction, as in vegan. |
+| 10 | `dpcoa()` | none | ade4 `dpcoa` | Pavoine, Dufour & Chessel 2004. |
+| 11 | `plsda()` | sklearn `PLSRegression` on dummy-coded groups; sparse: none (Lê Cao et al. 2011); OPLS: pyopls (MIT) | mixOmics `plsda`, `splsda`; ropls | sklearn has no classification rule; mixOmics predicts by max, centroid or Mahalanobis distance. OPLS is mainly a rotation of PLS-DA, so it's a cheap option to add. |
+| 12 | `mirkat()` | none | MiRKAT | Zhao et al. 2015, scoped to the original continuous and binary test. For p-values, write Davies (1980) or Liu, Tang & Zhang (2009) from the papers. **Don't port `chi2comb` or `chiscore`:** they're labelled MIT, but repackage CompQuadForm's GPL `davies`. |
+| 14 | `coinertia()` | hoggorm `RVcoeff` (BSD-2) for the RV coefficient; sklearn `PLSSVD` for the uniform-weight case | ade4 `coinertia`, `RV.rtest` | ade4's row and column weights need a weighted SVD (Dray et al. 2003). |
+| 15a | `capdiscrim()` | none (pcoa followed by sklearn LDA) | BiodiversityR `CAPdiscrim` | Anderson & Willis 2003. Shares code with `lda()`. |
+| 15b | `lda()` | sklearn `LinearDiscriminantAnalysis` | MASS `lda` | Discriminant scores differ from MASS's `scaling` by scale and sign. Singular when taxa outnumber samples. |
+| 16 | `prc()` | none (partial RDA) | vegan `prc` | van den Brink & ter Braak 1999. |
+| 17a | `dbmem()` | none vetted (spacc, MIT, is new and its Moran's I differs from adespatial's) | adespatial `dbmem` | Dray, Legendre & Peres-Neto 2006; Borcard & Legendre 2002. |
+| 17b | `moran()` | PySAL esda `Moran` (BSD-3), with libpysal weights | ape `Moran.I` | esda row-standardises weights by default. |
+| 18a | `phate()` | **none**: PHATE's LICENSE is now Yale's "Non-Commercial License" (verified), and graphtools is GPL-3 | phate | Clean room from Moon et al. 2019 only. Check the non-commercial terms before even generating fixtures with it. |
+| 18b | `diffusion_map()` | pydiffmap (MIT; unmaintained); scanpy `tl.diffmap` (BSD-3) | destiny | Kernels differ between implementations; pick one convention and document it. |
+| 18c | `pacmap()` | PaCMAP (Apache-2.0; LICENSE file checked) | — | Keep the Apache notice. |
+| 18d | `largevis()` | uwot's C++ headers `gradient.h` (`largevis_gradient`), `perplexity.h` and `epoch.h`: **BSD-2** (verified), even though the uwot package is GPL-3 | uwot `lvish()` | ecodive's `umap()` already follows these headers. The original LargeVis (Apache-2.0, abandoned 2016) uses GSL (GPL) for random numbers. |
+
+### Changes the survey suggests (for the user to decide)
+
+1. **PHATE:** drop it, or build it clean-room from the paper? There's no
+   permissive code, and the reference itself is now non-commercial.
+2. **LargeVis:** offer it as `largevis()` on uwot's BSD-2 headers (cheap,
+   since `umap()` already uses them), or drop it as superseded by UMAP?
+3. **DCA:** keep it at lower priority, written from the papers to match
+   vegan? It is widely criticised, and has no permissive source.
+4. **`mirkat()`:** limit it to the original MiRKAT (continuous and binary
+   outcomes), not MiRKAT-S, MMiRKAT and the rest of the family.
+5. **OPLS-DA:** an option of `plsda()`, not its own function.
