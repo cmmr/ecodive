@@ -3,13 +3,17 @@
 groups into the contribution of each taxon, to rank the taxa that
 differ most between the groups (Clarke 1993). Permutation tests give
 each taxon's contribution a p-value. Gives the same results as
-vegan::simper() and summary() of it, and the same p-values for the
-same permutations, but runs in parallel C on sparse tables."><meta property="og:description" content="Breaks down the mean Bray-Curtis dissimilarity between each pair of
+vegan::simper() and summary() of it, but runs in parallel C on
+sparse tables. Its p-values count ties with the observed contribution,
+as Clarke (1993) does, so they are never smaller than vegan's, which
+are too small for small groups (see Permutations)."><meta property="og:description" content="Breaks down the mean Bray-Curtis dissimilarity between each pair of
 groups into the contribution of each taxon, to rank the taxa that
 differ most between the groups (Clarke 1993). Permutation tests give
 each taxon's contribution a p-value. Gives the same results as
-vegan::simper() and summary() of it, and the same p-values for the
-same permutations, but runs in parallel C on sparse tables."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.png"></head><body>
+vegan::simper() and summary() of it, but runs in parallel C on
+sparse tables. Its p-values count ties with the observed contribution,
+as Clarke (1993) does, so they are never smaller than vegan's, which
+are too small for small groups (see Permutations)."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -59,8 +63,10 @@ same permutations, but runs in parallel C on sparse tables."><meta property="og:
 groups into the contribution of each taxon, to rank the taxa that
 differ most between the groups (Clarke 1993). Permutation tests give
 each taxon's contribution a p-value. Gives the same results as
-<code>vegan::simper()</code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of it, and the same p-values for the
-same permutations, but runs in parallel C on sparse tables.</p>
+<code>vegan::simper()</code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of it, but runs in parallel C on
+sparse tables. Its p-values count ties with the observed contribution,
+as Clarke (1993) does, so they are never smaller than vegan's, which
+are too small for small groups (see <strong>Permutations</strong>).</p>
     </div>
 
     <div class="section level2">
@@ -204,18 +210,19 @@ defined for Bray-Curtis only.</p>
 <p><strong>Permutations</strong></p>
 <p>A taxon's p-value (Clarke 1993) comes from shuffling the group labels of
 the pair's samples (only within <code>strata</code>, when given), and recomputing
-its <code>average</code>. As <code>vegan::simper()</code>, the p-value is \((1 +
-\#\{average_{perm} &gt; average\}) / (1 + permutations)\): permutations
-that give the same <code>average</code> as observed (within a relative
-\(10^{-7}\), for rounding) don't count. <strong>So p-values are too small
-when groups are small:</strong> permutations that only swap samples within
-groups reproduce the observed <code>average</code> exactly, and the more of them
-there are, the smaller the p-value. With two samples per group, a
-third of all permutations do, and a taxon whose observed <code>average</code> is
-the largest possible gets \(p \approx 1 / (1 + permutations)\)
-rather than about 1/3. Clarke's (1993) "at least as large" rule would
-count them; ecodive follows vegan so that results agree. Treat the
-p-values of groups of a few samples with suspicion. Each pair has random
+its <code>average</code>. The p-value is \((1 + \#\{average_{perm} \ge
+average\}) / (1 + permutations)\), Clarke's (1993) "at least as large"
+rule, with permuted averages within a relative \(10^{-7}\) of the
+observed one counted as ties (for rounding). Permutations that only swap
+samples within groups reproduce the observed <code>average</code> exactly, so they
+count. <code>vegan::simper()</code> counts only permuted averages that are strictly
+larger, which makes its p-values too small when groups are small: with
+two samples per group, a third of all permutations reproduce the
+observed <code>average</code>, and a taxon whose observed <code>average</code> is the largest
+possible gets \(p \approx 1 / (1 + permutations)\) from vegan, where
+its p-value is about 1/3. So ecodive's p-values are never smaller than
+vegan's on the same permutations, and are equal for taxa that no
+permutation ties. Each pair has random
 permutations of its own, drawn from <code>seed</code> and the pair's position, as
 the pairwise tests of <code><a href="permanova.html">permanova()</a></code> and the others have. So <code>p_value</code>s
 are identical for any number of <code>cpus</code>, but differ by sampling error
@@ -223,7 +230,7 @@ from <code>simper()</code> run by hand on the pair's samples with the same <code
 A supplied <code>permutations</code> matrix is cut down to each pair's samples by
 following each permutation's cycles, as in the pairwise tests (see
 <code><a href="permanova.html">permanova()</a></code>'s <strong>Pairwise comparisons</strong>). Give <code>vegan::simper()</code> those
-permutations, on the pair's samples, for identical p-values.</p>
+permutations, on the pair's samples, for the same permutations.</p>
 <p>The adjusted p-values (<code>p_adjusted</code>) are an addition: <code>vegan::simper()</code>
 doesn't adjust. A study of a few groups and hundreds of taxa tests many
 hypotheses, so look at <code>p_adjusted</code>, not <code>p_value</code>.</p>
@@ -253,6 +260,9 @@ levels; vegan names them <code>"a_b"</code>, in the order the groups first appea
 matrix covers all of them), so its p-values for a pair also depend on
 the other groups' samples. ecodive permutes only the pair's samples, as
 its pairwise tests do.</p></li>
+<li><p>p-values count permutations whose <code>average</code> ties the observed one, as
+Clarke (1993) does; vegan counts only larger ones (see
+<strong>Permutations</strong>).</p></li>
 <li><p><code>p_adjusted</code>, <code>norm</code>, and <code>strata</code> given directly.</p></li>
 </ul></div>
     <div class="section level2">
