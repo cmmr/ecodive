@@ -82,6 +82,7 @@ export(match_dist_test)
 
 export(blas_threads)
 export(capscale)
+export(cca)
 export(count_ord)
 export(dist_ord)
 export(dist_test)

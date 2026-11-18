@@ -42,7 +42,7 @@
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
   the methods. `count_ord()`, with `list_count_ords()` and
   `match_count_ord()`, does the same for the methods that take a count table
-  rather than distances, `pca()`, `rda()` and `rpca()`: `count_ord(counts, "pca")` is
+  rather than distances, `pca()`, `rda()`, `cca()` and `rpca()`: `count_ord(counts, "pca")` is
   `pca(counts)`. Each wrapper points to the other when given the other's
   method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
@@ -261,6 +261,22 @@
   are identical for any number of `cpus`. Also available as
   `count_ord(counts, "rda", ...)`. Its permutation test is `permanova()` of
   Euclidean distances of the normalized table.
+
+* New `cca()` runs a canonical correspondence analysis (ter Braak 1986) of a
+  table of abundances: the correspondence analysis axes, in the chi-square
+  metric, that sample metadata explain (`CCA1`, ...), then correspondence
+  analysis axes of the rest (`CA1`, ...). It takes `groups`, `data` and
+  `formula` as `rda()` does, including `Condition()` for partial CCA and
+  `counts ~ terms`, and with no model it is a correspondence analysis. It
+  gives the same site scores, species scores (`loadings`), eigenvalues,
+  inertia, R-squared, biplot scores and centroids as `vegan::cca()` (up to
+  each axis's sign), and the same permutation-based adjusted R-squared as
+  `vegan::RsquareAdj()` for the same permutations (`permutations` and `seed`;
+  `NA` for partial CCA). It shares `rda()`'s solver, with the chi-square
+  weights, and multiplies the table's non-zero values only, so a sparse table
+  is never made dense: with 3,000 samples and 2,000 taxa it takes half a
+  second where `vegan::cca()` takes a minute. Results are identical for any
+  number of `cpus`. Also available as `count_ord(counts, "cca", ...)`.
 
 * New `envfit()` fits sample metadata (`data`) and feature tables
   (`counts`, such as taxa abundances) onto any ordination, for biplots: an

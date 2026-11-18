@@ -11,18 +11,18 @@ count_ord(counts, method, ...)
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
 
-\item{method}{The name of an ordination method: \code{"pca"}, \code{"rda"}, or
-\code{"rpca"}.
+\item{method}{The name of an ordination method: \code{"cca"}, \code{"pca"},
+\code{"rda"}, or \code{"rpca"}.
 Flexible matching is supported (see below). Programmatic access via
 \code{list_count_ords()}.}
 
 \item{...}{Further arguments for the method's function, such as \code{n_axes},
 \code{margin}, \code{cpus}, \code{\link[=pca]{pca()}}'s \code{norm}, \code{pseudocount}, and \code{scale}, or
-\code{\link[=rda]{rda()}}'s \code{groups}, \code{data}, and \code{formula}. Each method keeps its own
-defaults; see \code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}}, and \code{\link[=rpca]{rpca()}}.
-\code{seed} is ignored by the methods that have no random parts (all of
-them, at present), so the same arguments can be given to every
-method.}
+\code{\link[=rda]{rda()}}'s and \code{\link[=cca]{cca()}}'s \code{groups}, \code{data}, and \code{formula}. Each method
+keeps its own defaults; see \code{\link[=cca]{cca()}}, \code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}}, and \code{\link[=rpca]{rpca()}}.
+\code{seed} is ignored by the methods that have no random parts (all
+but \code{\link[=cca]{cca()}}, whose adjusted \eqn{R^2} is found by permutation), so
+the same arguments can be given to every method.}
 }
 \value{
 The method's result, as described in "Ordination result" below.
@@ -35,6 +35,7 @@ as \code{\link[=dist_ord]{dist_ord()}} does for the methods that take distances.
 \details{
 \strong{List of Ordination Methods}\tabular{ll}{
    Option / Function Name \tab Method Name \cr
+   \code{cca} \tab Canonical Correspondence Analysis (CCA), constrained \cr
    \code{pca} \tab Principal Component Analysis (PCA) \cr
    \code{rda} \tab Redundancy Analysis (RDA), constrained \cr
    \code{rpca} \tab Robust Aitchison PCA \cr
@@ -43,7 +44,9 @@ as \code{\link[=dist_ord]{dist_ord()}} does for the methods that take distances.
 
 \code{rda} is constrained by sample metadata, given as further arguments:
 \code{count_ord(counts, 'rda', 'treatment', meta)} is
-\code{rda(counts, 'treatment', meta)}. Without them, it is a PCA.
+\code{rda(counts, 'treatment', meta)}. Without them, it is a PCA. \code{cca} is
+constrained the same way; without constraints, it is a correspondence
+analysis.
 
 Methods that ordinate distances, such as \code{\link[=pcoa]{pcoa()}} and \code{\link[=nmds]{nmds()}}, are run
 by \code{\link[=dist_ord]{dist_ord()}}.
@@ -53,7 +56,7 @@ by \code{\link[=dist_ord]{dist_ord()}}.
 Case insensitive and partial matching, ignoring anything but letters. E.g.
 \code{method = 'PCA'} or \code{'principal comp'} selects \code{pca}. Common other names
 also work: \code{'prcomp'} for \code{pca}; \code{'redundancy analysis'}, \code{'tbRDA'}, or
-\code{'transformation-based RDA'} for \code{rda}; and \code{'robust PCA'}, \code{'DEICODE'},
+\code{'transformation-based RDA'} for \code{rda}; \code{'canonical correspondence analysis'} or \code{'constrained correspondence analysis'} for \code{cca}; and \code{'robust PCA'}, \code{'DEICODE'},
 or \code{'gemelli'} for \code{rpca}.
 
 Finished code should always use the full primary option name to avoid
@@ -61,9 +64,10 @@ ambiguity with future additions to the list of methods.
 
 \strong{Same names in other packages}
 
-\code{vegan::pca()} and \code{vegan::rda()} share their names with ecodive's \code{\link[=pca]{pca()}}
-and \code{\link[=rda]{rda()}}, and whichever package was attached last masks the other's.
-Write \code{ecodive::pca()} or \code{ecodive::rda()}, or use \code{count_ord()}, which
+\code{vegan::pca()}, \code{vegan::rda()} and \code{vegan::cca()} share their names with
+ecodive's \code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}} and \code{\link[=cca]{cca()}}, and whichever package was attached
+last masks the other's. Write \code{ecodive::pca()} and so on, or use
+\code{count_ord()}, which
 always runs ecodive's, to be sure.
 }
 \section{Ordination result}{
@@ -110,6 +114,6 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 
 }
 \seealso{
-\code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=list_count_ords]{list_count_ords()}}; \code{\link[=dist_ord]{dist_ord()}} for
+\code{\link[=cca]{cca()}}, \code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=list_count_ords]{list_count_ords()}}; \code{\link[=dist_ord]{dist_ord()}} for
 the methods that take distances.
 }

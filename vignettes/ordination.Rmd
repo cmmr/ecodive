@@ -65,6 +65,7 @@ dm <- bray(iris[, 1:4])
 | `dbrda()`    | Distance-based Redundancy Analysis (db-RDA)    | `dm`   | Axes that sample metadata explain (a constrained ordination).           |
 | `capscale()` | Constrained Analysis of Principal Coordinates  | `dm`   | The same, as `vegan::capscale()` computes it.                           |
 | `rda()`      | Redundancy Analysis (RDA)                      | counts | Axes of (transformed) counts that sample metadata explain.              |
+| `cca()`      | Canonical Correspondence Analysis (CCA)        | counts | The same in the chi-square metric, for species with unimodal responses. |
 | `pca()`      | Principal Component Analysis (PCA)             | counts | Euclidean geometry of (transformed) counts, with feature loadings.      |
 | `rpca()`     | Robust Aitchison PCA                           | counts | Sparse compositional data, such as microbiome counts.                   |
 
@@ -207,10 +208,28 @@ permanova(hd, 'Species', iris, permutations = 99)
 `varpart()`, `forward_select()` and `principal_response_curves()`, which
 are planned, will build on `rda()`.
 
+`cca()`, canonical **correspondence** analysis (not canonical correlation
+analysis), is the unimodal counterpart of RDA: it constrains a
+correspondence analysis, which compares samples' profiles in the
+chi-square metric, rather than a PCA. RDA and PCA assume that each species
+responds linearly to the gradients; CA and CCA assume that it peaks at some
+optimum, which suits long gradients, where many species are absent from
+much of the range. Over short gradients, tb-RDA is often preferred, and
+CCA, which gives rare species a large weight, can be sensitive to them. It
+takes the same `groups`, `formula` and `Condition()`, and its
+`adj_r_squared` is estimated by permutation, as `vegan::RsquareAdj()` does.
+
+```{r}
+ord <- cca(round(iris[, 1:4] * 10), 'Species', iris)
+
+attr(ord, 'r_squared')
+attr(ord, 'adj_r_squared')
+```
+
 
 ## Ordinating counts directly
 
-`pca()`, `rpca()` and `rda()` take the count table rather than distances.
+`pca()`, `rpca()`, `rda()` and `cca()` take the count table rather than distances.
 `count_ord()` runs them by name, as `dist_ord()` does for the methods that
 take distances: `count_ord(counts, 'pca')` is `pca(counts)`. PCA
 works on any of ecodive's transformations, such as `norm = 'clr'` (centered

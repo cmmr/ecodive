@@ -207,6 +207,16 @@ double pca_table_init(SEXP counts, SEXP margin, int norm, double pseudocount,
 void   pca_gram_mult(const double *V, double *W, int m, void *ctx);
 void   pca_cross(const double *U, int m, double *L, int n_threads);
 
+/* --- cca.c: the chi-square table of cca() --- */
+double        cca_table_init(SEXP counts, SEXP margin, int n_threads, int *n,
+                             int *p, int **empty);
+const double *cca_sqrt_r(void);
+const double *cca_sqrt_c(void);
+void          cca_gram_mult(const double *V, double *W, int m, void *ctx);
+void          cca_cross(const double *U, int m, double *L);
+void          cca_perm_inertia(const double *x, int px, perm_source_t *ps,
+                               int n_perm, double *out);
+
 /* --- parallel.c --- */
 void run_parallel(pthread_func_t func, int n_threads, int n_tasks);
 int  user_interrupted(void);

@@ -840,9 +840,15 @@ typedef struct {
   int     rz, rx, rq;  // Kept condition / constraint columns.
   double *Xc, *Q;      // n x p, n x rq.
   int    *kept;        // p: 1 if not aliased.
+  const double *w;     // cca(): sqrt(r), the square roots of the
+                       // row weights (summing to 1), or NULL.
 } cord_design_t;
 
-static void cord_design(SEXP sexp_x, int n, int nz, cord_design_t *d) {
+// With w (cca()), columns are centred with the weights w^2
+// and multiplied by w, so they are orthogonal to w, which
+// takes the place of the ones vector.
+static void cord_design(
+    SEXP sexp_x, int n, int nz, const double *w, cord_design_t *d ) {
 
   int p = (n > 0) ? (int) (XLENGTH(sexp_x) / n) : 0;
 
@@ -867,7 +873,14 @@ static void cord_design(SEXP sexp_x, int n, int nz, cord_design_t *d) {
       if (!R_FINITE(xc[i]))
         error("The design must not contain NA, NaN, or infinite values.");
 
-    center(xc, n);
+    if (w) {
+      double mu = 0;
+      for (int i = 0; i < n; i++) mu += w[i] * w[i] * xc[i];
+      for (int i = 0; i < n; i++) xc[i] = w[i] * (xc[i] - mu);
+    }
+    else {
+      center(xc, n);
+    }
     memcpy(q, xc, (size_t) n * sizeof(double));
 
     double norm0 = sqrt(dot(q, q, n));
@@ -884,7 +897,7 @@ static void cord_design(SEXP sexp_x, int n, int nz, cord_design_t *d) {
 
   d->n = n; d->p = p; d->nz = nz;
   d->rz = rz; d->rx = rx; d->rq = rz + rx;
-  d->Xc = Xc; d->Q = Q; d->kept = kept;
+  d->Xc = Xc; d->Q = Q; d->kept = kept; d->w = w;
 }
 
 
@@ -987,9 +1000,19 @@ static SEXP cord_solve(
 
     bop_set_basis(B, Q, rq);
 
+    // cca(): deflate w, as the first basis column, in
+    // place of the ones vector.
+    const double *basis = Q;
+    if (d->w) {
+      double *wq = (double *) R_alloc((size_t) n * (rq + 1), sizeof(double));
+      memcpy(wq, d->w, (size_t) n * sizeof(double));
+      if (rq > 0) memcpy(wq + n, Q, (size_t) n * rq * sizeof(double));
+      basis = wq;
+    }
+
     lanczos_t lz = {
-      .n = n, .k = kr, .dims = dims_r, .deflate = 1,
-      .basis = Q, .n_basis = rq, .scale = real_g,
+      .n = n, .k = kr, .dims = dims_r, .deflate = (d->w == NULL),
+      .basis = basis, .n_basis = rq + (d->w != NULL), .scale = real_g,
       .op = bop_mult, .ctx = B,
       .vecs = r_vecs, .vals = r_vals,
       .resid = (double *) R_alloc(kr, sizeof(double)) };
@@ -1048,6 +1071,7 @@ static SEXP cord_solve(
     combine(GQx, n, rx, y, 1, wa);
     project_out(Qz, rz, wa, n);
     for (int i = 0; i < n; i++) wa[i] /= lam[e];
+    if (d->w) for (int i = 0; i < n; i++) wa[i] /= d->w[i];
 
     fix_sign(wa, n, uj, n);
     eig[j] = lam[e] * adj;
@@ -1066,6 +1090,7 @@ static SEXP cord_solve(
   for (int j = 0; j < kr; j++) {
     double *x = scores + (size_t) (kc + j) * n;
     memcpy(x, r_vecs + (size_t) j * n, (size_t) n * sizeof(double));
+    if (d->w) for (int i = 0; i < n; i++) x[i] /= d->w[i];
     fix_sign(x, n, NULL, 0);
     eig[kc + j] = r_vals[j] * adj;
   }
@@ -1162,7 +1187,7 @@ SEXP C_dbrda(
 
 
   cord_design_t des;
-  cord_design(sexp_x, n, nz, &des);
+  cord_design(sexp_x, n, nz, NULL, &des);
 
 
   //--------------------------------------------------
@@ -1236,7 +1261,7 @@ SEXP C_rda(
   int n = tbl.n, p = tbl.p;
 
   cord_design_t des;
-  cord_design(sexp_x, n, nz, &des);
+  cord_design(sexp_x, n, nz, NULL, &des);
 
   bop_t B = { .n = n, .g = NULL, .tmult = pca_gram_mult, .tctx = tbl.ctx };
 
@@ -1278,5 +1303,133 @@ SEXP C_rda(
   setAttrib(out, R_NamesSymbol, names);
 
   UNPROTECT(4);
+  return out;
+}
+
+
+
+
+//======================================================
+// cca(): the same analysis of B = Qbar Qbar', with Qbar
+// the chi-square residuals of the table (cca.c), the
+// design centred and weighted by the row weights r, and
+// sqrt(r) in place of the ones vector, as in ter Braak
+// (1986) and vegan::cca(). Scores are divided by sqrt(r)
+// (vegan's scaling 2, without its rda() constant).
+//
+//   sexp_counts, sexp_margin   the table, as for C_pca();
+//   sexp_x, sexp_nz, sexp_k    as for C_dbrda();
+//   sexp_perms   n x n_perm 0-based permutations, or NULL;
+//   sexp_n_perm  permutations for the adjusted R-squared
+//                (0 for none);
+//   sexp_seed    their seed, when sexp_perms is NULL.
+//
+// Returns C_dbrda()'s list, plus
+//   loadings      p x m: vegan's species scores, scaling 2;
+//   w             sqrt(r), n;
+//   perm_inertia  the constrained inertia for each
+//                 permutation (n_perm).
+// or, if some samples have no observations, list(empty =
+// their 1-based indices).
+//======================================================
+SEXP C_cca(
+    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_x, SEXP sexp_nz,
+    SEXP sexp_k, SEXP sexp_perms, SEXP sexp_n_perm, SEXP sexp_seed,
+    SEXP sexp_n_threads ) {
+
+  int nz        = asInteger(sexp_nz);
+  int k         = asInteger(sexp_k);
+  int n_perm    = asInteger(sexp_n_perm);
+  int n_threads = asInteger(sexp_n_threads);
+
+  if (k < 1 || n_threads < 1 || n_perm < 0)
+    error("Invalid arguments to C_cca()."); // # nocov
+
+  init_n_ptrs(10);
+
+  int    n, p, *empty;
+  double trace_g = cca_table_init(sexp_counts, sexp_margin, n_threads, &n, &p, &empty);
+
+  if (trace_g < 0) {
+    int ne = 0;
+    for (int i = 0; i < n; i++) ne += empty[i];
+    SEXP idx = PROTECT(allocVector(INTSXP, ne));
+    for (int i = 0, a = 0; i < n; i++) if (empty[i]) INTEGER(idx)[a++] = i + 1;
+    const char *names[] = { "empty", "" };
+    SEXP out = PROTECT(mkNamed(VECSXP, names));
+    SET_VECTOR_ELT(out, 0, idx);
+    UNPROTECT(2);
+    return out;
+  }
+
+  if (n < 2) error("Invalid arguments to C_cca()."); // # nocov
+
+  const double *w = cca_sqrt_r();
+
+  cord_design_t des;
+  cord_design(sexp_x, n, nz, w, &des);
+
+  bop_t B = { .n = n, .g = NULL, .tmult = cca_gram_mult, .tctx = NULL };
+
+  SEXP sexp_res = PROTECT(cord_solve(&B, &des, k, 1.0, trace_g, trace_g, 0, 0, 0));
+
+
+  //--------------------------------------------------
+  // Loadings: Dc^-1/2 Qbar' u, for the constrained axes'
+  // u and the unconstrained axes' unit eigenvectors
+  // (their scores times w).
+  //--------------------------------------------------
+  int     kc     = asInteger(VECTOR_ELT(sexp_res, 2));
+  SEXP    sexp_s = VECTOR_ELT(sexp_res, 0);
+  int     m      = ncols(sexp_s);
+  double *U      = (double *) R_alloc((size_t) n * m + 1, sizeof(double));
+
+  if (kc > 0)
+    memcpy(U, REAL(VECTOR_ELT(sexp_res, 9)), (size_t) n * kc * sizeof(double));
+  for (int j = kc; j < m; j++)
+    for (int i = 0; i < n; i++)
+      U[(size_t) j * n + i] = REAL(sexp_s)[(size_t) j * n + i] * w[i];
+
+  SEXP sexp_load = PROTECT(allocMatrix(REALSXP, p, m));
+  if (m > 0) cca_cross(U, m, REAL(sexp_load));
+
+  SEXP sexp_w = PROTECT(allocVector(REALSXP, n));
+  memcpy(REAL(sexp_w), w, (size_t) n * sizeof(double));
+
+
+  //--------------------------------------------------
+  // Permuted constrained inertia, for the adjusted
+  // R-squared.
+  //--------------------------------------------------
+  SEXP sexp_pi = PROTECT(allocVector(REALSXP, n_perm));
+  int  px      = des.p - nz;
+  if (n_perm > 0 && px > 0) {
+    perm_source_t ps;
+    perm_source_init(&ps, n, sexp_perms, R_NilValue, asInteger(sexp_seed));
+    cca_perm_inertia(REAL(sexp_x) + (size_t) n * nz, px, &ps, n_perm, REAL(sexp_pi));
+  }
+  else {
+    for (int i = 0; i < n_perm; i++) REAL(sexp_pi)[i] = 0;
+  }
+
+
+  // The result, with loadings, w and perm_inertia appended.
+  int  len   = length(sexp_res);
+  SEXP out   = PROTECT(allocVector(VECSXP, len + 3));
+  SEXP names = PROTECT(allocVector(STRSXP, len + 3));
+  SEXP old   = getAttrib(sexp_res, R_NamesSymbol);
+  for (int i = 0; i < len; i++) {
+    SET_VECTOR_ELT(out, i, VECTOR_ELT(sexp_res, i));
+    SET_STRING_ELT(names, i, STRING_ELT(old, i));
+  }
+  SET_VECTOR_ELT(out, len,     sexp_load);
+  SET_VECTOR_ELT(out, len + 1, sexp_w);
+  SET_VECTOR_ELT(out, len + 2, sexp_pi);
+  SET_STRING_ELT(names, len,     mkChar("loadings"));
+  SET_STRING_ELT(names, len + 1, mkChar("w"));
+  SET_STRING_ELT(names, len + 2, mkChar("perm_inertia"));
+  setAttrib(out, R_NamesSymbol, names);
+
+  UNPROTECT(6);
   return out;
 }

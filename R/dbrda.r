@@ -361,12 +361,16 @@ dbrda_core <- function (
 
 
 
-# The ecodive_ord result of a constrained ordination, from C_dbrda()'s or
-# C_rda()'s list `res`, the design `d` (cord_design()), and `mf`. Columns
-# are named `prefix` (constrained) and `prefix_u` (unconstrained); `...`
-# adds attributes at the end.
+# The ecodive_ord result of a constrained ordination, from C_dbrda()'s,
+# C_rda()'s or C_cca()'s list `res`, the design `d` (cord_design()), and
+# `mf`. Columns are named `prefix` (constrained) and `prefix_u`
+# (unconstrained); `...` adds attributes at the end. `scale` is vegan's
+# scores() constant (NULL: rda()'s and dbrda()'s), `r2` replaces
+# dbrda_r_squared()'s pair, and `weights` are cca()'s sqrt(r), for weighted
+# centroids.
 cord_result <- function (
-    res, d, mf, k, n, labels, method, prefix, prefix_u, positive = FALSE, ... ) {
+    res, d, mf, k, n, labels, method, prefix, prefix_u, positive = FALSE,
+    scale = NULL, r2 = NULL, weights = NULL, ... ) {
 
   x <- d$x
   z <- d$z
@@ -383,7 +387,8 @@ cord_result <- function (
   real  <- res$real      # trace(G+) for capscale; total for dbrda
   kc    <- res$n_con
   m     <- ncol(res$scores)
-  scale <- sqrt(sqrt((n - 1) * total)) # vegan's scores() constant
+  if (is.null(scale))
+    scale <- sqrt(sqrt((n - 1) * total)) # vegan's scores() constant
 
   # Axes with eigenvalues that aren't positive have no coordinates.
   if (m < min(k, n - 1L))
@@ -407,9 +412,9 @@ cord_result <- function (
     unconstrained = unconstrained,
     imaginary     = if (positive) res$imaginary )
 
-  centroids <- dbrda_centroids(res$u, mf, kc, m, scale, cols)
+  centroids <- dbrda_centroids(res$u, mf, kc, m, scale, cols, weights)
 
-  r2 <- dbrda_r_squared(
+  if (is.null(r2)) r2 <- dbrda_r_squared(
     con = res$constrained, cond = res$conditional, real = real, total = total,
     n = n, p = sum(kept_x), q = sum(res$kept[seq_len(ncol(z))]) )
 
@@ -454,8 +459,10 @@ dbrda_r_squared <- function (con, cond, real, total, n, p, q) {
 
 # vegan's factor-level centroids (centroids.cca() and getCentroids()): the
 # mean unit constrained eigenvector of each level of each factor or character
-# variable in the model frame, dropping near-zero rows, then scaled.
-dbrda_centroids <- function (u, mf, kc, m, scale, cols) {
+# variable in the model frame, dropping near-zero rows, then scaled. With
+# `weights` (cca()'s sqrt(r)), the weighted mean (weights r) of the lc
+# scores u / sqrt(r).
+dbrda_centroids <- function (u, mf, kc, m, scale, cols, weights = NULL) {
 
   if (is.null(mf) || ncol(u) == 0) return (NULL)
 
@@ -465,8 +472,14 @@ dbrda_centroids <- function (u, mf, kc, m, scale, cols) {
   out <- NULL
   for (nm in names(mf)[facts]) {
     f   <- droplevels(as.factor(mf[[nm]]))
-    cnt <- tabulate(f, nlevels(f))
-    cn  <- rowsum(u, f, reorder = TRUE) / cnt
+    if (is.null(weights)) {
+      cnt <- tabulate(f, nlevels(f))
+      cn  <- rowsum(u, f, reorder = TRUE) / cnt
+    }
+    else {
+      cnt <- as.vector(rowsum(weights ^ 2, f, reorder = TRUE))
+      cn  <- rowsum(u * weights, f, reorder = TRUE) / cnt
+    }
     rownames(cn) <- paste0(nm, levels(f))
     out <- rbind(out, cn)
   }

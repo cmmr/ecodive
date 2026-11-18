@@ -39,7 +39,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Alpha diversity       | `alpha_div()`   | `shannon()`, `simpson()`, `chao1()`, `faith()`, and 10 more                               |
 | Beta diversity        | `beta_div()`    | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 33 more                   |
 | Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`     |
-| Ordination of counts  | `count_ord()`   | `pca()`, `rpca()`, `rda()`                                                               |
+| Ordination of counts  | `count_ord()`   | `pca()`, `rpca()`, `rda()`, `cca()`                                                      |
 | Biplots               |                 | `pcoa_biplot()`, `envfit()`                                                              |
 | Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`        |
 | Data preparation      |                 | `rarefy()`, `normalize()`, `read_tree()`                                                 |
@@ -141,7 +141,7 @@ weighted_unifrac(counts, tree = ex_tree)
 ### Ordination
 
 Ordinations place samples on a few axes for plotting. Most start from beta
-diversity distances; `pca()`, `rpca()` and `rda()` start from the counts. With only
+diversity distances; `pca()`, `rpca()`, `rda()` and `cca()` start from the counts. With only
 four samples, `ex_counts` is too small to ordinate, so these examples use
 R's built-in `iris` data: 150 flowers from three species.
 

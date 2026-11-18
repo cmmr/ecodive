@@ -12,6 +12,7 @@ extern SEXP C_anosim(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_beta_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_blas_settable(void);
 extern SEXP C_blas_threads(SEXP);
+extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -51,6 +52,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_beta_div",  (DL_FUNC) &C_beta_div,  8},
   {"C_blas_settable", (DL_FUNC) &C_blas_settable, 0},
   {"C_blas_threads",  (DL_FUNC) &C_blas_threads,  1},
+  {"C_cca",       (DL_FUNC) &C_cca,       9},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
   {"C_envfit",    (DL_FUNC) &C_envfit,   12},
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},

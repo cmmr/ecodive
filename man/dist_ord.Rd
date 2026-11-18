@@ -49,7 +49,7 @@ and \code{dist_test()}.
 }
 
 
-\code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}} and \code{\link[=rpca]{rpca()}} ordinate a count table rather than
+\code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}} and \code{\link[=rpca]{rpca()}} ordinate a count table rather than
 distances, so they are run by \code{\link[=count_ord]{count_ord()}}, or called directly. PCA is PCoA of Euclidean
 distances: \code{dist_ord(euclidean(counts), 'pcoa')} gives the same scores as
 \code{pca(counts)}, up to each axis's sign, but \code{pca()} also returns the
@@ -128,6 +128,6 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 \seealso{
 \code{\link[=capscale]{capscale()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}},
 \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, \code{\link[=list_dist_ords]{list_dist_ords()}}; \code{\link[=count_ord]{count_ord()}} for \code{\link[=pca]{pca()}},
-\code{\link[=rda]{rda()}} and \code{\link[=rpca]{rpca()}}, which take a count table; \code{\link[=dist_test]{dist_test()}} for
+\code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}} and \code{\link[=rpca]{rpca()}}, which take a count table; \code{\link[=dist_test]{dist_test()}} for
 ecodive's tests.
 }

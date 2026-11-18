@@ -16,6 +16,7 @@ COUNT_ORDS <- local({
     na.strings       = "",
     text             = "
       name,                                id,   alt_ids
+      Canonical Correspondence Analysis,   cca,  canonicalcorrespondenceanalysis constrainedcorrespondenceanalysis
       Principal Component Analysis,        pca,  principalcomponents prcomp
       Redundancy Analysis,                 rda,  redundancyanalysis tbrda transformationbasedrda
       Robust Aitchison PCA,                rpca, robustpca deicode gemelli
@@ -33,18 +34,18 @@ COUNT_ORDS <- local({
 #'
 #' @inheritParams documentation
 #'
-#' @param method   The name of an ordination method: `"pca"`, `"rda"`, or
-#'        `"rpca"`.
+#' @param method   The name of an ordination method: `"cca"`, `"pca"`,
+#'        `"rda"`, or `"rpca"`.
 #'        Flexible matching is supported (see below). Programmatic access via
 #'        `list_count_ords()`.
 #'
 #' @param ...   Further arguments for the method's function, such as `n_axes`,
 #'        `margin`, `cpus`, [pca()]'s `norm`, `pseudocount`, and `scale`, or
-#'        [rda()]'s `groups`, `data`, and `formula`. Each method keeps its own
-#'        defaults; see [pca()], [rda()], and [rpca()].
-#'        `seed` is ignored by the methods that have no random parts (all of
-#'        them, at present), so the same arguments can be given to every
-#'        method.
+#'        [rda()]'s and [cca()]'s `groups`, `data`, and `formula`. Each method
+#'        keeps its own defaults; see [cca()], [pca()], [rda()], and [rpca()].
+#'        `seed` is ignored by the methods that have no random parts (all
+#'        but [cca()], whose adjusted \eqn{R^2} is found by permutation), so
+#'        the same arguments can be given to every method.
 #'
 #' @return The method's result, as described in "Ordination result" below.
 #'   `count_ord(counts, 'pca', ...)` is the same as `pca(counts, ...)`.
@@ -55,13 +56,16 @@ COUNT_ORDS <- local({
 #'
 #' | Option / Function Name | Method Name                                |
 #' | :--------------------- | :----------------------------------------- |
+#' | `cca`                  | Canonical Correspondence Analysis (CCA), constrained |
 #' | `pca`                  | Principal Component Analysis (PCA)         |
 #' | `rda`                  | Redundancy Analysis (RDA), constrained     |
 #' | `rpca`                 | Robust Aitchison PCA                       |
 #'
 #' `rda` is constrained by sample metadata, given as further arguments:
 #' `count_ord(counts, 'rda', 'treatment', meta)` is
-#' `rda(counts, 'treatment', meta)`. Without them, it is a PCA.
+#' `rda(counts, 'treatment', meta)`. Without them, it is a PCA. `cca` is
+#' constrained the same way; without constraints, it is a correspondence
+#' analysis.
 #'
 #' Methods that ordinate distances, such as [pcoa()] and [nmds()], are run
 #' by [dist_ord()].
@@ -72,7 +76,8 @@ COUNT_ORDS <- local({
 #' Case insensitive and partial matching, ignoring anything but letters. E.g.
 #' `method = 'PCA'` or `'principal comp'` selects `pca`. Common other names
 #' also work: `'prcomp'` for `pca`; `'redundancy analysis'`, `'tbRDA'`, or
-#' `'transformation-based RDA'` for `rda`; and `'robust PCA'`, `'DEICODE'`,
+#' `'transformation-based RDA'` for `rda`; `'canonical correspondence
+#' analysis'` or `'constrained correspondence analysis'` for `cca`; and `'robust PCA'`, `'DEICODE'`,
 #' or `'gemelli'` for `rpca`.
 #'
 #' Finished code should always use the full primary option name to avoid
@@ -81,14 +86,15 @@ COUNT_ORDS <- local({
 #'
 #' **Same names in other packages**
 #'
-#' `vegan::pca()` and `vegan::rda()` share their names with ecodive's [pca()]
-#' and [rda()], and whichever package was attached last masks the other's.
-#' Write `ecodive::pca()` or `ecodive::rda()`, or use `count_ord()`, which
+#' `vegan::pca()`, `vegan::rda()` and `vegan::cca()` share their names with
+#' ecodive's [pca()], [rda()] and [cca()], and whichever package was attached
+#' last masks the other's. Write `ecodive::pca()` and so on, or use
+#' `count_ord()`, which
 #' always runs ecodive's, to be sure.
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pca()], [rda()], [rpca()], [list_count_ords()]; [dist_ord()] for
+#' @seealso [cca()], [pca()], [rda()], [rpca()], [list_count_ords()]; [dist_ord()] for
 #'   the methods that take distances.
 #'
 #' @export

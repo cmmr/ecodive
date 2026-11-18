@@ -76,7 +76,7 @@ ORDINATIONS <- local({
 #' | `tsne`                 | t-distributed Stochastic Neighbor Embedding (t-SNE)   |
 #' | `umap`                 | Uniform Manifold Approximation and Projection (UMAP)  |
 #'
-#' [pca()], [rda()] and [rpca()] ordinate a count table rather than
+#' [pca()], [rda()], [cca()] and [rpca()] ordinate a count table rather than
 #' distances, so they are run by [count_ord()], or called directly. PCA is PCoA of Euclidean
 #' distances: `dist_ord(euclidean(counts), 'pcoa')` gives the same scores as
 #' `pca(counts)`, up to each axis's sign, but `pca()` also returns the
@@ -116,7 +116,7 @@ ORDINATIONS <- local({
 #'
 #' @seealso [capscale()], [dbrda()], [isomap()], [mds()], [nmds()], [pcoa()],
 #'   [tsne()], [umap()], [list_dist_ords()]; [count_ord()] for [pca()],
-#'   [rda()] and [rpca()], which take a count table; [dist_test()] for
+#'   [rda()], [cca()] and [rpca()], which take a count table; [dist_test()] for
 #'   ecodive's tests.
 #'
 #' @export

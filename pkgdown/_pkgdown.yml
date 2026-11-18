@@ -69,6 +69,7 @@ reference:
   - dbrda
   - capscale
   - rda
+  - cca
   - pca
   - rpca
   - envfit
