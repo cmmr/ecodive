@@ -1,0 +1,295 @@
+---
+title: "Benchmarks: Ordination and Statistics"
+resource_files:
+  - "figures/benchmarks_ord_stats.svg"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  echo     = FALSE )
+
+bench_dir   <- 'benchmark_ord_stats'
+timings     <- readRDS(file.path(bench_dir, 'ord_stats_results.rds'))
+agreement   <- readRDS(file.path(bench_dir, 'ord_stats_agreement.rds'))
+determinism <- readRDS(file.path(bench_dir, 'ord_stats_determinism.rds'))
+
+fmt_time <- function (s)
+  ifelse(s < 1e-3, sprintf('%.0f µs', s * 1e6),
+  ifelse(s < 1,    sprintf('%.1f ms', s * 1e3),
+  ifelse(s < 60,   sprintf('%.2f s',  s),
+                   sprintf('%.1f min', s / 60) )))
+
+fmt_bytes <- function (b)
+  ifelse(b < 1024^2, sprintf('%.0f KB', b / 1024),
+  ifelse(b < 1024^3, sprintf('%.1f MB', b / 1024^2),
+                     sprintf('%.2f GB', b / 1024^3) ))
+
+fmt_x <- function (x)
+  ifelse(x < 1.5, sprintf('%.1fx', x), formatC(round(x), format = 'd', big.mark = ','))
+
+yes_no <- function (x) ifelse(is.na(x), '—', ifelse(x, 'yes', '**no**'))
+
+gh <- function (path, label = basename(path))
+  sprintf('[%s](https://github.com/cmmr/ecodive/blob/main/%s)', label, path)
+```
+
+
+# Introduction
+
+The [alpha and beta diversity benchmarks](benchmark.html) compare ecodive's
+diversity metrics with those of 15 other R packages. This page does the same
+for the ordination methods and permutation tests: each ecodive function is
+timed against the R functions it replaces, on the same data, with ecodive
+running on 4 CPU threads.
+
+Speed is worth nothing if the answers are wrong. So this page first sets out
+what ecodive claims about its results, and the evidence behind each claim:
+
+1. **Equivalence.** Every function gives the same result as an established
+   implementation, to floating-point rounding wherever the method is
+   deterministic.
+2. **Determinism.** The same call always returns the same result, bit for
+   bit, on any number of threads, with or without `set.seed()`.
+
+Both claims are checked twice: by ecodive's test suite, against stored
+results from the reference packages, and again below on the benchmark data
+itself.
+
+
+<br>
+
+
+# Equivalence
+
+### What "the same result" means
+
+The methods fall into three groups, and "the same" means something different
+for each.
+
+* **Deterministic methods** (PCoA and its corrections, PCA, db-RDA, capscale,
+  envfit, and the test statistics of PERMANOVA, PERMDISP, ANOSIM, MRPP and
+  Mantel). There is one right answer, and ecodive returns it: scores,
+  eigenvalues and statistics agree with the reference to about 1e-10 or
+  better, relative to the largest value. Ordination axes may come out with
+  the opposite sign, which carries no meaning, so signs are matched before
+  comparing.
+
+* **Permutation p-values.** A p-value depends on which random permutations
+  were drawn. Given the *same* permutations as vegan (ecodive's
+  `permutations` argument accepts vegan's permutation matrices), ecodive
+  computes the same statistic for every one of them, and so the same
+  p-value, exactly. With its own permutations, p-values differ from vegan's
+  only as much as two vegan runs with different seeds do.
+
+* **Iterative methods with random starts or stochastic steps** (metric MDS,
+  NMDS, t-SNE, UMAP). Each start converges to a different, equally valid
+  layout, so coordinates can't match any other package's, or even vegan's
+  own from another seed. Here ecodive is checked two ways: each algorithm's
+  deterministic parts (affinities, neighbour graphs, gradients, steps from a
+  shared starting layout) are compared with the reference implementation to
+  rounding, and its final layouts are compared on quality measures (stress,
+  KL divergence, neighbours kept), on which ecodive must do at least as well.
+
+### Evidence from the test suite
+
+Each test below compares ecodive with results stored from the reference
+package, so the tests need no reference package installed. The scripts in
+`r gh('data-raw/expected', 'data-raw/expected/')` produce those results, and the tests in
+`r gh('tests/tinytests', 'tests/tinytests/')` run on GitHub CI on Linux, macOS and Windows.
+Tolerances are relative differences.
+
+| Function | Reference | What is compared | Tolerance | Test |
+|:---------|:----------|:-----------------|:----------|:-----|
+| `pcoa()` | `stats::cmdscale()`, `ape::pcoa()`, `vegan::wcmdscale()` | Scores (up to sign), eigenvalues, proportions, total inertia | 1e-9 scores; 1e-10 the rest | `r gh('tests/tinytests/test-pcoa.r', 'test-pcoa.r')` |
+| `pcoa(correction =)` | `ape::pcoa()`, `vegan::wcmdscale()`, `cmdscale(add = TRUE)` | Lingoes and Cailliez constants, corrected eigenvalues, scores | 1e-10; 1e-8 scores | `r gh('tests/tinytests/test-pcoa_correct.r', 'test-pcoa_correct.r')` |
+| `pcoa_biplot()` | scikit-bio 0.7.4 | Eigenvalues, coordinates, biplot scores | 1e-12; 1e-10 scores | `r gh('tests/tinytests/test-pcoa_biplot.r', 'test-pcoa_biplot.r')` |
+| `mds()` | scikit-learn 1.9.1 (SMACOF) | From the same start: iteration count (exact), stress at every 10th iteration, final layout. Quality: stress no worse than scikit-learn's best | 1e-10 stress; 1e-8 layout | `r gh('tests/tinytests/test-mds.r', 'test-mds.r')` |
+| `nmds()` | scikit-learn 1.9.1; `vegan::metaMDS()` | As `mds()`; and stress no worse than vegan's | 1e-10 stress; 1e-8 layout | `r gh('tests/tinytests/test-nmds.r', 'test-nmds.r')` |
+| `isomap()` | scikit-learn 1.9.1 | Neighbour graph (exact), geodesic distances, embedding, eigenvalues | 1e-12 geodesics; 1e-9 embedding | `r gh('tests/tinytests/test-isomap.r', 'test-isomap.r')` |
+| `tsne()` | scikit-learn 1.9.1; `Rtsne::Rtsne()` | Affinities; exact and Barnes-Hut KL divergence and gradients; the first iterations' steps. Quality: KL, trustworthiness and nearest-neighbour accuracy over 10 seeds | 1e-10 exact; 1e-6 where scikit-learn uses single precision | `r gh('tests/tinytests/test-tsne.r', 'test-tsne.r')` |
+| `umap()` | `uwot::umap(batch = TRUE)` 0.2.5 | Nearest neighbours and fuzzy graph (exact), curve parameters, spectral start, optimised layout from the same start and seeds | 1e-14 graph; 0 (bit-identical) layout on Windows x86_64 | `r gh('tests/tinytests/test-umap.r', 'test-umap.r')` |
+| `dbrda()` | `vegan::dbrda()` | Site scores, eigenvalues, inertia, R², adjusted R², biplot scores, centroids | 1e-10 | `r gh('tests/tinytests/test-dbrda.r', 'test-dbrda.r')` |
+| `capscale()` | `vegan::capscale()` | As `dbrda()`, plus imaginary inertia | 1e-10 | `r gh('tests/tinytests/test-capscale.r', 'test-capscale.r')` |
+| `pca()` | `stats::prcomp()` | Scores and loadings (up to sign), eigenvalues, proportions | 1e-10 | `r gh('tests/tinytests/test-pca.r', 'test-pca.r')` |
+| `rpca()` | gemelli 0.0.13 (Python) | Every stage: rclr, starting subspaces, cost per iteration, completed matrix; final scores, loadings and distances | 1e-10 | `r gh('tests/tinytests/test-rpca.r', 'test-rpca.r')` |
+| `envfit()` | `vegan::envfit()` | Arrows, r², centroids; p-values with vegan's permutations | 1e-10; p-values identical | `r gh('tests/tinytests/test-envfit.r', 'test-envfit.r')` |
+| `permanova()` | `vegan::adonis2()` | The whole table (Df, SS, R², F); every permuted F; p-values | 1e-10; p-values identical | `r gh('tests/tinytests/test-permanova.r', 'test-permanova.r')` |
+| `permdisp()` | `vegan::betadisper()`, `vegan::permutest()` | Distances to centres, dispersions, ANOVA table, every permuted F, p-values | 1e-10; p-values identical | `r gh('tests/tinytests/test-permdisp.r', 'test-permdisp.r')` |
+| `anosim()` | `vegan::anosim()` | R, every permuted R, mean ranks, p-values | 1e-14; p-values identical | `r gh('tests/tinytests/test-anosim.r', 'test-anosim.r')` |
+| `mrpp()` | `vegan::mrpp()` | δ, expected δ, A, every permuted δ, z, p-values | 1e-12; p-values identical | `r gh('tests/tinytests/test-mrpp.r', 'test-mrpp.r')` |
+| `mantel()` | `vegan::mantel()`, `vegan::mantel.partial()` | r (Pearson, Spearman, Kendall; partial), every permuted r, p-values | 1e-12; p-values identical | `r gh('tests/tinytests/test-mantel.r', 'test-mantel.r')` |
+
+### Where ecodive deliberately differs
+
+* **`permdisp(type = 'median')`.** vegan finds each group's spatial median
+  with a general-purpose optimiser that stops early, so its medians are only
+  accurate to about 1e-5. ecodive solves for the exact median, and its
+  results agree with an exact solution to 1e-10, and with vegan's to about
+  1e-3. The default, `type = 'centroid'`, has no such difference.
+* **`umap()`** always uses uwot's batch optimiser (`batch = TRUE`), which can
+  run in parallel and still give the same layout every time. uwot's default
+  optimiser can't do both. Its `min_dist` default is 0.1, as in Python's
+  umap-learn (uwot's is 0.01).
+* **`tsne()`** follows scikit-learn but computes in double precision
+  throughout, where scikit-learn uses single precision for parts of the
+  calculation. It starts from PCoA by default.
+* **`nmds()` and `mds()`** start from PCoA plus random starts and take
+  relaxed (faster) SMACOF steps. They reproduce scikit-learn's iterations
+  exactly only when given its start and plain steps, which is how the tests
+  check them.
+* **`dbrda()`** reproduces `vegan::dbrda()`, and **`capscale()`**
+  reproduces `vegan::capscale()`. The two differ for non-Euclidean
+  distances, in vegan as in ecodive.
+* A few edge cases are handled differently: for example, `envfit()` gives
+  `NA` rather than 1 as the p-value of a constant variable, and `pcoa()`
+  drops axes with non-positive eigenvalues instead of returning columns of
+  zeros.
+
+### Evidence from the benchmark data
+
+The same comparisons, repeated on the benchmark data set (1,006 samples; see
+[Setup](#setup)). "Relative difference" is the largest absolute difference
+divided by the largest absolute value in the reference result. For the
+permutation tests, ecodive and vegan were both given the same 999
+permutations.
+
+```{r}
+tbl <- agreement
+tbl$value <- ifelse(
+  grepl('^[0-9.e+-]+$', tbl$value),
+  sprintf('%s (relative difference)', tbl$value),
+  tbl$value )
+names(tbl) <- c('Method', 'Reference', 'Quantity', 'Agreement')
+knitr::kable(tbl, row.names = FALSE)
+```
+
+
+<br>
+
+
+# Determinism
+
+ecodive's results depend only on the inputs and the `seed` argument. They
+never depend on:
+
+* **The number of threads.** Work is split into the same pieces whatever
+  `cpus` is, and each piece is summed in a fixed order, so the floating-point
+  rounding never changes.
+* **R's random number generator.** Methods with random parts take a `seed`
+  argument (default `0`) and use their own generator. Calling the same
+  function twice gives the same result, without `set.seed()`, and ecodive
+  never changes R's random state.
+* **Timing.** Threads never race to update shared values.
+
+That matters for reproducible research: a p-value or a plot from a paper can
+be regenerated exactly, on a laptop or on a 64-core server.
+
+Many R packages are deterministic only after `set.seed()`, and some not even
+then once they use more than one thread. Each function below was run five
+times with its default arguments: twice in a row; twice more, each after
+`set.seed(1)`; and once more after `set.seed(1)` with one thread instead of
+four. A "yes" means the results were bit-for-bit identical.
+
+```{r}
+tbl <- determinism
+tbl$rerun            <- yes_no(tbl$rerun)
+tbl$rerun_same_seed  <- yes_no(tbl$rerun_same_seed)
+tbl$one_vs_4_threads <- yes_no(tbl$one_vs_4_threads)
+tbl <- tbl[order(tbl$package != 'ecodive', tbl$package), ]
+names(tbl) <- c('Method', 'Package', 'Run twice', 'Run twice after `set.seed(1)`', '1 vs 4 threads')
+knitr::kable(tbl, row.names = FALSE)
+```
+
+DETERMINISM_NOTES
+
+
+<br>
+
+
+# Speed
+
+### Methodology
+
+The `bench` R package timed each function and measured the memory it
+allocated on R's heap. All benchmarks ran on:
+
+    CPU: 6-Core Intel i5-9600K @ 3.70GHz
+    RAM: 64.0 GB
+    OS:  Windows 11 Pro (64-bit, Build 26300)
+    R:   4.6.1, with R's reference BLAS
+
+ecodive used 4 threads (`cpus = 4`). Every other package that can use
+several threads was given 4 as well: `Rtsne` (`num_threads`), `uwot`
+(`n_threads`, `n_sgd_threads`), and vegan's permutation tests and NMDS
+(`parallel = 4`). On Windows, vegan's `parallel` starts a cluster of R
+processes on every call, which can make it slower than running serially, so
+vegan's tests were timed both ways.
+
+A few things to keep in mind:
+
+* Other packages' eigendecompositions (`cmdscale()`, `prcomp()`, vegan's
+  constrained ordinations) call BLAS and LAPACK. With an optimised,
+  multithreaded BLAS such as OpenBLAS or Intel MKL, they would run faster
+  than with R's reference BLAS used here. ecodive computes only the few axes
+  that are returned, in its own threaded C, so its speed hardly depends on
+  the BLAS.
+* `bench` counts only memory allocated on R's heap. That covers most of what
+  these functions allocate, ecodive's included, but not memory that C or
+  Fortran code allocates directly.
+* Where packages have different defaults, they were set to do comparable
+  work: four starts for each NMDS and MDS that supports several, 999
+  permutations for every test, and three axes for PCoA and PCA. The
+  iterative methods then stop when their own convergence criteria are met.
+
+<a id="setup"></a>
+
+### Setup
+
+The `gems` data set from the `rbiom` package has 1,006 stool samples from
+children in four countries, with 767 OTUs, each sample's diarrhea status
+(case or control), age, and country. The benchmarks use its Bray-Curtis
+distances, which every method takes as its input, except PCA, which takes
+centered log-ratio transformed counts. The tests ask whether country explains
+the distances, and the Mantel test correlates them with differences in age.
+Distances and other inputs are computed before the timed code.
+
+<details>
+  <summary>Click to reveal the R code.</summary>
+
+```{r, eval = FALSE, echo = TRUE, code = readLines(file.path(bench_dir, 'ord_stats.r'))}
+```
+
+</details>
+
+<details>
+  <summary>Click to reveal the R session information.</summary>
+
+```{r, comment = ''}
+writeLines(readLines(file.path(bench_dir, 'ord_stats_session.txt')))
+```
+
+</details>
+
+
+### Results
+
+```{r out.width = "98%"}
+knitr::include_graphics('figures/benchmarks_ord_stats.svg')
+```
+
+SPEED_NOTES
+
+```{r}
+tbl <- timings
+tbl <- tbl[order(match(tbl$method, unique(tbl$method)), tbl$seconds), ]
+tbl <- data.frame(
+  Method            = ifelse(duplicated(tbl$method), '', tbl$method),
+  Package           = ifelse(tbl$package == 'ecodive', '**ecodive**', tbl$package),
+  `Median time`     = fmt_time(tbl$seconds),
+  `Times slower`    = ifelse(tbl$package == 'ecodive', '', fmt_x(tbl$speedup)),
+  `Memory (R heap)` = fmt_bytes(tbl$bytes),
+  check.names = FALSE )
+knitr::kable(tbl, row.names = FALSE, align = 'llrrr')
+```
