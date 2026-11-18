@@ -250,8 +250,8 @@ mtx['Saliva', 'Nose']
 
 An ordination turns a distance matrix into coordinates for a plot. ecodive
 has eight methods that take distances, run by name with `dist_ord()` or
-directly by their own functions, and two (`pca()` and `rpca()`) that take
-the count table itself.
+directly by their own functions, and three (`pca()`, `rpca()` and `rda()`)
+that take the count table itself, run by name with `count_ord()`.
 
 | Function     | Method                                          |
 | :----------- | :---------------------------------------------- |
@@ -265,6 +265,7 @@ the count table itself.
 | `capscale()` | Constrained Analysis of Principal Coordinates   |
 | `pca()`      | Principal Component Analysis (PCA)              |
 | `rpca()`     | Robust Aitchison PCA                            |
+| `rda()`      | Redundancy Analysis (RDA)                       |
 
 `pcoa_biplot()` and `envfit()` add arrows for the features or metadata that
 drive the axes.

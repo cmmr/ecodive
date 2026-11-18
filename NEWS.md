@@ -42,7 +42,7 @@
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
   the methods. `count_ord()`, with `list_count_ords()` and
   `match_count_ord()`, does the same for the methods that take a count table
-  rather than distances, `pca()` and `rpca()`: `count_ord(counts, "pca")` is
+  rather than distances, `pca()`, `rda()` and `rpca()`: `count_ord(counts, "pca")` is
   `pca(counts)`. Each wrapper points to the other when given the other's
   method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
@@ -246,6 +246,21 @@
   `dbrda()`'s fast path; otherwise a threaded eigendecomposition makes it
   about five times faster than `vegan::capscale()` on one thread. Also
   available as `dist_ord(dm, "capscale", ...)`.
+
+* New `rda()` runs a redundancy analysis of a count table: the axes of the
+  (normalized) table that sample metadata explain (`RDA1`, ...), then
+  principal components of the rest (`PC1`, ...). `norm = 'hellinger'` or
+  `'chord'` gives transformation-based RDA (tb-RDA), and `Condition()` terms
+  partial RDA. It takes `groups`, `data` and `formula` as `dbrda()` does
+  (and `counts ~ terms`, as `vegan::rda()`), and with no model it is a PCA.
+  It gives the same site scores, species scores (`loadings`), eigenvalues,
+  inertia, R-squared, biplot scores and centroids as `vegan::rda()` (up to
+  each axis's sign), sharing `dbrda()`'s solver and `pca()`'s sparse table
+  products, so the table is never made dense: with 3,000 samples and 2,000
+  taxa it takes half a second where `vegan::rda()` takes a minute. Results
+  are identical for any number of `cpus`. Also available as
+  `count_ord(counts, "rda", ...)`. Its permutation test is `permanova()` of
+  Euclidean distances of the normalized table.
 
 * New `envfit()` fits sample metadata (`data`) and feature tables
   (`counts`, such as taxa abundances) onto any ordination, for biplots: an

@@ -242,9 +242,9 @@ ord_result <- function (
 #' other attributes, rather than every attribute in full (such as `pca()`'s
 #' loadings).
 #'
-#' @param x  An ordination result, from [dist_ord()], [pcoa()], [pca()],
-#'        [rpca()], [dbrda()], [capscale()], [mds()], [nmds()], [isomap()],
-#'        [tsne()], or [umap()].
+#' @param x  An ordination result, from [dist_ord()], [count_ord()],
+#'        [pcoa()], [pca()], [rpca()], [rda()], [dbrda()], [capscale()],
+#'        [mds()], [nmds()], [isomap()], [tsne()], or [umap()].
 #'
 #' @param ...  Passed on to `print()` for the matrix of coordinates.
 #'

@@ -132,3 +132,106 @@ check it against the fixture. Don't add a separate test function.
   Ecology and Evolution*, 2, 269–277.
 - Legendre, P., & Legendre, L. (2012). *Numerical Ecology* (3rd ed.),
   §11.1.
+
+
+## Decisions made while implementing
+
+Asked of the user at the start (2026-11-18), and answered:
+
+1. **Site scores are "wa" scores** (vegan's `scores()` default for sites,
+   and what `dbrda()` / `capscale()` return), in scaling 2. No `lc`
+   attribute.
+2. **`loadings` are vegan's species scores in scaling 2**
+   (`scores(display = "species")`), so that an `rda()` biplot matches
+   vegan's. The docs say they differ from `pca()`'s unit-length loadings.
+3. **Scaling 2 everywhere.** The plan's "scores equal `pca()`'s up to
+   sign" conflicts with scaling 2, so the test checks that unconstrained
+   `rda()` has `pca()`'s `eig`, `prop` and `trace`, and that its scores and
+   loadings are `pca()`'s rescaled per axis (same directions).
+4. **`rda(counts ~ terms, meta)` is accepted,** as `dbrda(dm ~ terms)` and
+   `vegan::rda(Y ~ X)` are.
+
+Made while implementing:
+
+5. **No code was ported from scikit-bio.** `dbrda()`'s solver already does
+   all of RDA's algebra (a QR basis of the centred design, `Condition()`,
+   the small constrained eigenproblem, Lanczos for residual axes), since
+   G = YYᵀ. So there is no scikit-bio licence header, `inst/COPYRIGHTS`
+   stanza or `Authors@R` change. scikit-bio 0.7.4 is used as an
+   output reference instead (`data-raw/expected/rda.py`), in scaling 2.
+6. **The kernel was generalised, not duplicated.**
+   - `src/dbrda.c`: `bop_t` gained a table mode (`g == NULL`: B = AAᵀ
+     through a product callback). `C_dbrda()` was split into
+     `cord_design()` (centring and Gram-Schmidt of the design) and
+     `cord_solve()` (everything after the operator is set up).
+     `C_rda()` calls both.
+   - `src/pca.c`: the table setup of `C_pca()` became
+     `pca_table_init()`, with `pca_gram_mult()` (AAᵀV) and `pca_cross()`
+     (AᵀU), shared by `C_pca()` and `C_rda()`. Sparse tables stay sparse,
+     including CLR's dense-zero trick.
+   - On the R side, `constrained_ord()` was split into `ord_model()` (the
+     model from `groups` / `data` / `formula`), `cord_design()`,
+     `cord_empty()` and `cord_result()` (the shared result builder), used
+     by `dbrda()`, `capscale()` and `rda()`.
+   - `dbrda()`, `capscale()` and `pca()` results are unchanged: their tests
+     pass as before.
+7. **Unconstrained axes always use the sample-side Lanczos** (as
+   `dbrda()` does), even when there are fewer features than samples. Each
+   product costs O(nnz), so there was no need for `pca()`'s choice of side.
+8. **With no `groups` and no `formula`, `rda()` is an unconstrained PCA.**
+   An explicit `NULL` `groups` (a misspelled column) is still an error, as
+   in `dbrda()`. `count_ord(counts, 'rda')` therefore runs a PCA.
+9. **Scale:** eigenvalues and inertia are variances (G is multiplied by
+   1/(n − 1), as in `vegan::rda()`); `dbrda()`'s "mean squared distances"
+   rule doesn't apply. So, against `dbrda(euclidean(counts, norm =
+   'hellinger'))`, `eig`, `trace`, `inertia` and `constrained_eig` differ
+   by n − 1, and scores by (n − 1)^¼. `prop`, R² and biplot scores are the
+   same. When a distance reaches 4, `dbrda()` divides by n − 1 too, and
+   everything matches. Both cases are documented and tested.
+10. **`scale = TRUE` with constant features:** they are left out (loading
+    0, and `trace` counts only the other features), as `pca(scale = TRUE)`
+    does, where `vegan::rda(scale = TRUE)` stops. The fixture gives vegan
+    the table without them.
+11. **`n_axes`** is reduced only to the positive eigenvalues (at most
+    n − 1). It is not bounded by the number of features: one feature gives
+    `RDA1` and `PC1` (the fitted values and the residuals).
+12. **Attributes:** `dbrda()`'s, in its order, then `loadings`.
+    `centroids` is absent when no constraint is a factor, as in `dbrda()`.
+    Columns are `RDA1..`, then `PC1..`.
+13. **Fixtures use vegan 2.7.8 and permute 0.10.0** (the plan asks for
+    2.7-x). The apt build's vegan 2.6-4 gives the same RDA results, but
+    `anova.cca()` permutes partial models differently from 2.7-x.
+    `permanova()` matches 2.7.8's F and every permuted F exactly, for full
+    and partial models. vegan 2.7.8 needs a `shuffleSet()` matrix rather
+    than a plain one.
+14. **Registry order:** `rda` sits between `pca` and `rpca` in
+    `COUNT_ORDS` (alphabetical). So `match_count_ord('r')` is now
+    ambiguous between `rda` and `rpca`; it used to select `rpca`. The
+    aliases `redundancyanalysis`, `tbrda` and `transformationbasedrda`
+    collide with nothing in the four registries.
+15. **Permutation test:** documented as
+    `permanova(euclidean(counts, norm = 'hellinger'), ...)`, and tested
+    against `anova.cca()` on a tb-RDA, full and partial (same F and
+    p-value for the same permutations). No separate test function.
+16. **Docs:** NEWS (under 2.4.0, the version in development); README and
+    the `ecodive` vignette's method tables; the `ordination` vignette's
+    "Constrained ordination" section; `count_ord()`, `dist_ord()` and
+    `print.ecodive_ord()` docs; and pkgdown's Ordination section.
+
+Reference results:
+
+- **vegan 2.7.8**, 29 cases (dune, varespec, a 110 × 40 table; Hellinger,
+  chord, none, percent, binary, CLR; `scale`; factors, ordered factors,
+  numeric constraints and interactions; `Condition()`; conditions only;
+  unconstrained; aliased; saturated; constant features; `n_axes` beyond the
+  constrained axes, n − 1 and the rank). Sites, species, `eig`, `prop`,
+  `trace`, `inertia`, `constrained_eig`, R², adjusted R², biplot and
+  centroids all match at the 1e-10 tolerance. The largest differences seen
+  were about 2e-15 for constrained results and 7e-14 for the
+  Lanczos-computed unconstrained axes.
+- **scikit-bio 0.7.4**, scaling 2: all 19 axes' sites, species and biplot
+  scores match to about 7e-15, and `eig` = s² / (n − 1) for its "eigvals"
+  s.
+- **Speed:** 3,000 samples × 2,000 taxa (5% non-zero), `~ g + x +
+  Condition(z)`, 8 axes. `rda()` takes 0.46 s on 4 threads and
+  `vegan::rda()` 63 s, with eigenvalues equal to 6e-18.

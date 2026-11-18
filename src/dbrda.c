@@ -71,6 +71,13 @@
  * T, then the reflections. That needs about 4n^3/3 + 2n^2 r
  * operations, for r eigenvectors, against several times as
  * many for all of them.
+ *
+ * rda() (C_rda(), at the end) is the same analysis of
+ * B = A A' for the centred (scaled) count table A, whose
+ * products pca.c computes from the table's non-zeros: the
+ * constrained and unconstrained solvers below never see
+ * where B comes from (bop_t). Its species scores are A' u
+ * for each axis's unit vector u.
  */
 
 #include "ecodive.h"
@@ -141,13 +148,16 @@ static void fix_sign(double *x, int n, double *y, int ny) {
 //   r == 0           B = G
 //   Y, rest == 0     B = Y Y'
 //   Y, rest == 1     B = G - Y S Y', S = diag(sign)
+//   g == NULL        B = A A', rda()'s centred table
 //
 // Each product is centred and has F projected out, as
 // gower_mult() does for G (which reads F from g).
 //======================================================
 typedef struct {
   int           n;
-  gower_t      *g;
+  gower_t      *g;     // G from D, or NULL for rda()'s
+  lanczos_op_t  tmult; // ... B = A A' from a table: tmult
+  void         *tctx;  // ... returns B V, centred.
   const double *Y;     // n x r, or NULL.
   const double *sign;  // r signs (rest == 1).
   int           r;
@@ -161,10 +171,12 @@ typedef struct {
 
 // Point both B and G's products at F.
 static void bop_set_basis(bop_t *b, const double *F, int f) {
-  b->F    = F;
-  b->f    = f;
-  b->g->F = F;
-  b->g->f = f;
+  b->F = F;
+  b->f = f;
+  if (b->g) {
+    b->g->F = F;
+    b->g->f = f;
+  }
 }
 
 
@@ -172,6 +184,12 @@ static void bop_mult(const double *V, double *W, int m, void *ctx) {
 
   bop_t *b = (bop_t *) ctx;
   int    n = b->n, r = b->r;
+
+  if (b->g == NULL) {
+    b->tmult(V, W, m, b->tctx);
+    for (int v = 0; v < m; v++) project_out(b->F, b->f, W + (size_t) v * n, n);
+    return;
+  }
 
   if (b->Y == NULL || b->rest) gower_mult(V, W, m, b->g);
   if (b->Y == NULL) return;
@@ -812,74 +830,25 @@ static void pos_part(
 
 
 //======================================================
-// R interface.
-//
-//   sexp_dist   Packed lower triangle of D (double),
-//               for n >= 2 samples.
-//   sexp_x      n x p design matrix (double): the first
-//               `nz` columns are conditioning variables,
-//               the rest constraints. Centred here.
-//   sexp_k      Axes wanted (>= 1).
-//   sexp_adj    Multiplier for G (vegan's 1/(n-1) for
-//               "mean squared distances", else 1).
-//   sexp_pos    1 for capscale(): analyze G+, not G.
-//
-// Returns list(
-//   scores        n x m: wa scores for constrained axes,
-//                 unit eigenvectors for unconstrained ones,
-//   eig           m eigenvalues, times adj,
-//   n_con         how many of the m axes are constrained,
-//   con_eig       all non-zero constrained eigenvalues,
-//   total, conditional, constrained   inertia,
-//   kept          per design column, 1 if not aliased,
-//   biplot        (kept constraint columns) x n_con,
-//   u             n x (positive constrained axes) unit
-//                 eigenvectors (lc scores, unscaled),
-//   steps, converged,
-//   real          trace(G+) times adj (= total for G),
-//   imaginary     the sum of G's negative eigenvalues
-//                 times adj, for capscale() (else 0),
-//   dense         TRUE if G+ was found by a full eigen-
-//                 decomposition (G had a negative one) )
+// The design: its columns centred (Xc), and orthonormalized
+// in order by Gram-Schmidt (two passes) into Q = [Qz, Qx],
+// dropping the aliased ones. The first nz of the p columns
+// are conditions, the rest constraints.
 //======================================================
-SEXP C_dbrda(
-    SEXP sexp_dist, SEXP sexp_n, SEXP sexp_x, SEXP sexp_nz,
-    SEXP sexp_k, SEXP sexp_adj, SEXP sexp_pos, SEXP sexp_n_threads ) {
+typedef struct {
+  int     n, p, nz;
+  int     rz, rx, rq;  // Kept condition / constraint columns.
+  double *Xc, *Q;      // n x p, n x rq.
+  int    *kept;        // p: 1 if not aliased.
+} cord_design_t;
 
-  int    n         = asInteger(sexp_n);
-  int    nz        = asInteger(sexp_nz);
-  int    k         = asInteger(sexp_k);
-  double adj       = asReal(sexp_adj);
-  int    positive  = asLogical(sexp_pos) == TRUE;
-  int    n_threads = asInteger(sexp_n_threads);
-  int    p         = (n > 0) ? (int) (XLENGTH(sexp_x) / n) : 0;
+static void cord_design(SEXP sexp_x, int n, int nz, cord_design_t *d) {
 
-  if (n < 2 || k < 1 || n_threads < 1 || nz < 0 || nz > p ||
-      !isReal(sexp_x) || XLENGTH(sexp_x) != (R_xlen_t) n * p ||
-      XLENGTH(sexp_dist) != (R_xlen_t) n * (n - 1) / 2 || !(adj > 0))
-    error("Invalid arguments to C_dbrda()."); // # nocov
+  int p = (n > 0) ? (int) (XLENGTH(sexp_x) / n) : 0;
 
-  const double ZERO = sqrt(DBL_EPSILON); // vegan's threshold
+  if (nz < 0 || nz > p || !isReal(sexp_x) || XLENGTH(sexp_x) != (R_xlen_t) n * p)
+    error("Invalid design."); // # nocov
 
-  //--------------------------------------------------
-  // trace(G) = (1/n) * sum_{i<j} d_ij^2, and products
-  // with G (gower.c, shared with pcoa()).
-  //--------------------------------------------------
-  gower_t g;
-  // Up to max(16, k, p) vectors per pass over D (k axes; p model columns),
-  // as pcoa() does, rather than several passes for more than 16.
-  int    max_m   = (k > p) ? k : p;
-  if (max_m < 16) max_m = 16;
-  if (max_m > n)  max_m = n;
-  double trace_g = gower_init(&g, REAL(sexp_dist), n, max_m, n_threads); // unscaled
-  double total   = trace_g * adj;
-
-
-  //--------------------------------------------------
-  // Centre the design's columns, and orthonormalize them
-  // in order by Gram-Schmidt (two passes), dropping the
-  // aliased ones. Xc keeps the centred columns.
-  //--------------------------------------------------
   double *Xc   = (double *) R_alloc((size_t) n * (p + 1), sizeof(double));
   double *Q    = (double *) R_alloc((size_t) n * (p + 1), sizeof(double));
   int    *kept = (int *)    R_alloc(p + 1, sizeof(int));
@@ -913,33 +882,37 @@ SEXP C_dbrda(
     if (c < nz) rz++; else rx++;
   }
 
+  d->n = n; d->p = p; d->nz = nz;
+  d->rz = rz; d->rx = rx; d->rq = rz + rx;
+  d->Xc = Xc; d->Q = Q; d->kept = kept;
+}
+
+
+
+//======================================================
+// The constrained ordination of B (see bop_t), on the
+// design d. trace_g is trace(B), real_g trace(B+) (the
+// same, but for capscale()), imag_g the sum of B's
+// negative eigenvalues (capscale()), all unscaled; adj
+// scales every eigenvalue and inertia. `steps` and
+// `dense` come from capscale()'s probe. Returns the list
+// that C_dbrda() documents.
+//======================================================
+static SEXP cord_solve(
+    bop_t *B, const cord_design_t *d, int k, double adj, double trace_g,
+    double real_g, double imag_g, int steps, int dense ) {
+
+  const double ZERO = sqrt(DBL_EPSILON); // vegan's threshold
+
+  int     n  = d->n, p = d->p, nz = d->nz;
+  int     rz = d->rz, rx = d->rx, rq = d->rq;
+  int    *kept = d->kept;
+  double *Xc   = d->Xc;
+  const double *Q  = d->Q;
   const double *Qz = Q;
   const double *Qx = Q + (size_t) n * rz;
-  int           rq = rz + rx;
-
-
-  //--------------------------------------------------
-  // B: G, or for capscale() G+. G+ = G unless G has an
-  // eigenvalue below vegan's tolerance, -max(ZERO, ZERO
-  // * lambda_1) after adj. lambda_1 is at least
-  // trace(G) / (n - 1), so a probe with that bound in
-  // its place misses none (and may find ones that
-  // pos_part() then counts as 0).
-  //--------------------------------------------------
-  int     steps = 0, converged = 1, dense = 0;
-  double  real_g = trace_g, imag_g = 0;
-  bop_t   B = { .n = n, .g = &g };
-
-  if (positive && trace_g > 0) {
-
-    double limit = ZERO * trace_g * adj / (n - 1);
-    if (limit < ZERO) limit = ZERO;
-
-    if (has_negative(&g, n, trace_g, limit / adj, &steps)) {
-      dense = 1;
-      pos_part(REAL(sexp_dist), n, trace_g, adj, n_threads, &B, &real_g, &imag_g);
-    }
-  }
+  double  total = trace_g * adj;
+  int     converged = 1;
 
 
   //--------------------------------------------------
@@ -948,7 +921,7 @@ SEXP C_dbrda(
   //--------------------------------------------------
   double *GQ = (double *) R_alloc((size_t) n * (rq + 1), sizeof(double));
 
-  bop_mult(Q, GQ, rq, &B);
+  bop_mult(Q, GQ, rq, B);
   const double *GQx = GQ + (size_t) n * rz;
 
   double conditional = 0;
@@ -1012,12 +985,12 @@ SEXP C_dbrda(
     r_vecs = (double *) R_alloc((size_t) n * kr, sizeof(double));
     r_vals = (double *) R_alloc(kr, sizeof(double));
 
-    bop_set_basis(&B, Q, rq);
+    bop_set_basis(B, Q, rq);
 
     lanczos_t lz = {
       .n = n, .k = kr, .dims = dims_r, .deflate = 1,
       .basis = Q, .n_basis = rq, .scale = real_g,
-      .op = bop_mult, .ctx = &B,
+      .op = bop_mult, .ctx = B,
       .vecs = r_vecs, .vals = r_vals,
       .resid = (double *) R_alloc(kr, sizeof(double)) };
 
@@ -1121,4 +1094,189 @@ SEXP C_dbrda(
 
   UNPROTECT(7);
   return sexp_result;
+}
+
+
+
+//======================================================
+// R interface.
+//
+//   sexp_dist   Packed lower triangle of D (double),
+//               for n >= 2 samples.
+//   sexp_x      n x p design matrix (double): the first
+//               `nz` columns are conditioning variables,
+//               the rest constraints. Centred here.
+//   sexp_k      Axes wanted (>= 1).
+//   sexp_adj    Multiplier for G (vegan's 1/(n-1) for
+//               "mean squared distances", else 1).
+//   sexp_pos    1 for capscale(): analyze G+, not G.
+//
+// Returns list(
+//   scores        n x m: wa scores for constrained axes,
+//                 unit eigenvectors for unconstrained ones,
+//   eig           m eigenvalues, times adj,
+//   n_con         how many of the m axes are constrained,
+//   con_eig       all non-zero constrained eigenvalues,
+//   total, conditional, constrained   inertia,
+//   kept          per design column, 1 if not aliased,
+//   biplot        (kept constraint columns) x n_con,
+//   u             n x (positive constrained axes) unit
+//                 eigenvectors (lc scores, unscaled),
+//   steps, converged,
+//   real          trace(G+) times adj (= total for G),
+//   imaginary     the sum of G's negative eigenvalues
+//                 times adj, for capscale() (else 0),
+//   dense         TRUE if G+ was found by a full eigen-
+//                 decomposition (G had a negative one) )
+//======================================================
+SEXP C_dbrda(
+    SEXP sexp_dist, SEXP sexp_n, SEXP sexp_x, SEXP sexp_nz,
+    SEXP sexp_k, SEXP sexp_adj, SEXP sexp_pos, SEXP sexp_n_threads ) {
+
+  int    n         = asInteger(sexp_n);
+  int    nz        = asInteger(sexp_nz);
+  int    k         = asInteger(sexp_k);
+  double adj       = asReal(sexp_adj);
+  int    positive  = asLogical(sexp_pos) == TRUE;
+  int    n_threads = asInteger(sexp_n_threads);
+  int    p         = (n > 0) ? (int) (XLENGTH(sexp_x) / n) : 0;
+
+  if (n < 2 || k < 1 || n_threads < 1 || nz < 0 || nz > p ||
+      !isReal(sexp_x) || XLENGTH(sexp_x) != (R_xlen_t) n * p ||
+      XLENGTH(sexp_dist) != (R_xlen_t) n * (n - 1) / 2 || !(adj > 0))
+    error("Invalid arguments to C_dbrda()."); // # nocov
+
+  const double ZERO = sqrt(DBL_EPSILON); // vegan's threshold
+
+  //--------------------------------------------------
+  // trace(G) = (1/n) * sum_{i<j} d_ij^2, and products
+  // with G (gower.c, shared with pcoa()).
+  //--------------------------------------------------
+  gower_t g;
+  // Up to max(16, k, p) vectors per pass over D (k axes; p model columns),
+  // as pcoa() does, rather than several passes for more than 16.
+  int    max_m   = (k > p) ? k : p;
+  if (max_m < 16) max_m = 16;
+  if (max_m > n)  max_m = n;
+  double trace_g = gower_init(&g, REAL(sexp_dist), n, max_m, n_threads); // unscaled
+
+
+  cord_design_t des;
+  cord_design(sexp_x, n, nz, &des);
+
+
+  //--------------------------------------------------
+  // B: G, or for capscale() G+. G+ = G unless G has an
+  // eigenvalue below vegan's tolerance, -max(ZERO, ZERO
+  // * lambda_1) after adj. lambda_1 is at least
+  // trace(G) / (n - 1), so a probe with that bound in
+  // its place misses none (and may find ones that
+  // pos_part() then counts as 0).
+  //--------------------------------------------------
+  int     steps = 0, dense = 0;
+  double  real_g = trace_g, imag_g = 0;
+  bop_t   B = { .n = n, .g = &g };
+
+  if (positive && trace_g > 0) {
+
+    double limit = ZERO * trace_g * adj / (n - 1);
+    if (limit < ZERO) limit = ZERO;
+
+    if (has_negative(&g, n, trace_g, limit / adj, &steps)) {
+      dense = 1;
+      pos_part(REAL(sexp_dist), n, trace_g, adj, n_threads, &B, &real_g, &imag_g);
+    }
+  }
+
+
+  return cord_solve(&B, &des, k, adj, trace_g, real_g, imag_g, steps, dense);
+}
+
+
+
+
+//======================================================
+// rda(): the same analysis of B = A A', where A = J Z D^-1
+// is the centred (and, with `scale`, standardized) count
+// table after normalization (pca.c), with adj = 1/(n - 1)
+// so that eigenvalues are variances, as in vegan::rda().
+// Products with B take two passes over the table's
+// non-zeros, never forming A or B.
+//
+//   sexp_counts, sexp_margin, sexp_norm, sexp_pseudocount,
+//   sexp_scale   as for C_pca();
+//   sexp_x, sexp_nz, sexp_k   as for C_dbrda().
+//
+// Returns C_dbrda()'s list, plus
+//   loadings   p x m: A' u for each axis's unit
+//              eigenvector u (lc scores, unscaled), in
+//              the axes' (fixed) signs.
+//======================================================
+SEXP C_rda(
+    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_norm,
+    SEXP sexp_pseudocount, SEXP sexp_scale, SEXP sexp_x, SEXP sexp_nz,
+    SEXP sexp_k, SEXP sexp_n_threads ) {
+
+  int    norm        = asInteger(sexp_norm);
+  double pseudocount = asReal(sexp_pseudocount);
+  int    scale       = asLogical(sexp_scale) == TRUE;
+  int    nz          = asInteger(sexp_nz);
+  int    k           = asInteger(sexp_k);
+  int    n_threads   = asInteger(sexp_n_threads);
+
+  if (k < 1 || n_threads < 1)
+    error("Invalid arguments to C_rda()."); // # nocov
+
+  init_n_ptrs(10);
+
+  pca_table_t tbl;
+  double trace_g = pca_table_init(
+    sexp_counts, sexp_margin, norm, pseudocount, scale, n_threads, &tbl );
+
+  int n = tbl.n, p = tbl.p;
+
+  cord_design_t des;
+  cord_design(sexp_x, n, nz, &des);
+
+  bop_t B = { .n = n, .g = NULL, .tmult = pca_gram_mult, .tctx = tbl.ctx };
+
+  SEXP sexp_res = PROTECT(cord_solve(
+    &B, &des, k, 1.0 / (n - 1), trace_g, trace_g, 0, 0, 0 ));
+
+
+  //--------------------------------------------------
+  // Loadings: A' u, for the constrained axes' u (the
+  // first n_con columns of `u`) and the unconstrained
+  // axes' eigenvectors (columns n_con.. of `scores`).
+  //--------------------------------------------------
+  int     kc     = asInteger(VECTOR_ELT(sexp_res, 2));
+  SEXP    sexp_s = VECTOR_ELT(sexp_res, 0);
+  int     m      = ncols(sexp_s);
+  double *U      = (double *) R_alloc((size_t) n * m + 1, sizeof(double));
+
+  if (kc > 0)
+    memcpy(U, REAL(VECTOR_ELT(sexp_res, 9)), (size_t) n * kc * sizeof(double));
+  if (m > kc)
+    memcpy(U + (size_t) n * kc, REAL(sexp_s) + (size_t) n * kc, (size_t) n * (m - kc) * sizeof(double));
+
+  SEXP sexp_load = PROTECT(allocMatrix(REALSXP, p, m));
+  if (m > 0) pca_cross(U, m, REAL(sexp_load), n_threads);
+
+  free_all();
+
+  // The result, with `loadings` appended.
+  int  len   = length(sexp_res);
+  SEXP out   = PROTECT(allocVector(VECSXP, len + 1));
+  SEXP names = PROTECT(allocVector(STRSXP, len + 1));
+  SEXP old   = getAttrib(sexp_res, R_NamesSymbol);
+  for (int i = 0; i < len; i++) {
+    SET_VECTOR_ELT(out, i, VECTOR_ELT(sexp_res, i));
+    SET_STRING_ELT(names, i, STRING_ELT(old, i));
+  }
+  SET_VECTOR_ELT(out, len, sexp_load);
+  SET_STRING_ELT(names, len, mkChar("loadings"));
+  setAttrib(out, R_NamesSymbol, names);
+
+  UNPROTECT(4);
+  return out;
 }

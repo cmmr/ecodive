@@ -358,24 +358,19 @@ static void op_features(const double *V, double *W, int m, void *ctx) {
 
 
 //======================================================
-// R interface. Returns list(scores, loadings, eig, total,
-// steps, converged, resid): scores n x k (U * S), loadings
-// p x k (V), eig the k values s^2, and total the sum of
-// all s^2 (squared Frobenius norm of A). Axes with s^2 <= 0
-// have scores and loadings of 0.
+// The centred (and scaled) table A = J * Z * D^-1, for
+// pca() and rda(). pca_table_init() reads and normalizes
+// the counts, and sets up the products below; it returns
+// the squared Frobenius norm of A (the sum of every s^2).
+// The caller must call init_n_ptrs() first (it uses one
+// safe_malloc slot set; 10 is ample) and free_all() when
+// done with the products.
 //======================================================
-SEXP C_pca(
-    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_norm,
-    SEXP sexp_pseudocount, SEXP sexp_k, SEXP sexp_scale,
-    SEXP sexp_n_threads ) {
+static pca_ctx_t tbl_ctx;
 
-  int    norm        = asInteger(sexp_norm);
-  double pseudocount = asReal(sexp_pseudocount);
-  int    k           = asInteger(sexp_k);
-  int    scale       = asLogical(sexp_scale);
-  int    n_threads   = asInteger(sexp_n_threads);
-
-  init_n_ptrs(10);
+double pca_table_init(
+    SEXP sexp_counts, SEXP sexp_margin, int norm, double pseudocount,
+    int scale, int n_threads, pca_table_t *t ) {
 
   ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
 
@@ -392,9 +387,9 @@ SEXP C_pca(
   int p   = em->n_otus;
   int nnz = em->nnz;
 
-  if (n < 2 || p < 1 || k < 1 || k > n - 1 || k > p || n_threads < 1) {
+  if (n < 2 || p < 1 || n_threads < 1) {
     free_all();                                       // # nocov
-    error("Invalid arguments to C_pca().");           // # nocov
+    error("Invalid arguments to pca_table_init().");  // # nocov
   }
 
   n_sams = n;
@@ -496,13 +491,6 @@ SEXP C_pca(
     error("`counts` must not contain NA, NaN, or infinite values.");
   }
 
-
-  //--------------------------------------------------
-  // Top k eigenpairs of A * A' or A' * A.
-  //--------------------------------------------------
-  int side_n = (n - 1 <= p); // Sample side?
-  int len    = side_n ? n : p;
-
   pca_ctx_t ctx = {
     .xn        = (double *) R_alloc((size_t) n * PCA_W, sizeof(double)),
     .yn        = (double *) R_alloc((size_t) n * PCA_W, sizeof(double)),
@@ -511,6 +499,82 @@ SEXP C_pca(
     .w_feat    = w_feat,
     .w2_feat   = w2_feat,
     .n_threads = threads_for(n_threads, ((double) nnz + n + p) * PCA_W, 1e6) };
+  tbl_ctx = ctx;
+
+  t->n       = n;
+  t->p       = p;
+  t->nnz     = nnz;
+  t->w_feat  = w_feat;
+  t->ctx     = &tbl_ctx;
+
+  return total;
+}
+
+
+// W = A * A' * V (n x m each): a lanczos_op_t, with any
+// ctx (the table is pca_table_init()'s).
+void pca_gram_mult(const double *V, double *W, int m, void *ctx) {
+  (void) ctx;
+  op_samples(V, W, m, &tbl_ctx);
+}
+
+
+// L = A' * U, for U n x m and L p x m. Features that
+// `scale` left out get 0.
+void pca_cross(const double *U, int m, double *L, int n_threads) {
+
+  pca_ctx_t *c = &tbl_ctx;
+  int        n = n_sams, p = n_feat;
+
+  for (int v0 = 0; v0 < m; v0 += PCA_W) {
+    int mc = (m - v0 < PCA_W) ? m - v0 : PCA_W;
+    pack(U + (size_t) v0 * n, n, mc, NULL, c->xn);
+    center_rows(c->xn, n);
+    run_zt(c->xn, c->yp, n_threads);
+    unpack(c->yp, p, mc, c->w_feat, L + (size_t) v0 * p);
+  }
+}
+
+
+//======================================================
+// R interface. Returns list(scores, loadings, eig, total,
+// steps, converged, resid): scores n x k (U * S), loadings
+// p x k (V), eig the k values s^2, and total the sum of
+// all s^2 (squared Frobenius norm of A). Axes with s^2 <= 0
+// have scores and loadings of 0.
+//======================================================
+SEXP C_pca(
+    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_norm,
+    SEXP sexp_pseudocount, SEXP sexp_k, SEXP sexp_scale,
+    SEXP sexp_n_threads ) {
+
+  int    norm        = asInteger(sexp_norm);
+  double pseudocount = asReal(sexp_pseudocount);
+  int    k           = asInteger(sexp_k);
+  int    scale       = asLogical(sexp_scale);
+  int    n_threads   = asInteger(sexp_n_threads);
+
+  init_n_ptrs(10);
+
+  pca_table_t tbl;
+  double total = pca_table_init(
+    sexp_counts, sexp_margin, norm, pseudocount, scale, n_threads, &tbl );
+
+  int n = tbl.n, p = tbl.p;
+  const double *w_feat = tbl.w_feat;
+  pca_ctx_t     ctx    = tbl_ctx;
+
+  if (k < 1 || k > n - 1 || k > p) {
+    free_all();                                       // # nocov
+    error("Invalid arguments to C_pca().");           // # nocov
+  }
+
+
+  //--------------------------------------------------
+  // Top k eigenpairs of A * A' or A' * A.
+  //--------------------------------------------------
+  int side_n = (n - 1 <= p); // Sample side?
+  int len    = side_n ? n : p;
 
   SEXP sexp_scores   = PROTECT(allocMatrix(REALSXP, n, k));
   SEXP sexp_loadings = PROTECT(allocMatrix(REALSXP, p, k));

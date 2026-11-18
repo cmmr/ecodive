@@ -19,14 +19,14 @@ knitr::opts_chunk$set(
 ## Introduction
 
 An ordination places samples on a few axes so that similar samples land near
-each other, ready to plot. ecodive has ten ordination methods, and two
+each other, ready to plot. ecodive has eleven ordination methods, and two
 functions that show which features or variables drive the axes. All of them
 are written in parallel C and give the same results as the R and Python
 packages they replace, for any number of threads.
 
 Most methods ordinate a distance matrix, which you compute first with any
-beta diversity metric. Two methods, PCA and robust Aitchison PCA, start from
-the count table itself.
+beta diversity metric. Three methods, PCA, robust Aitchison PCA and
+redundancy analysis, start from the count table itself.
 
 ```
                  bray(), beta_div(), ...
@@ -64,6 +64,7 @@ dm <- bray(iris[, 1:4])
 | `umap()`     | Uniform Manifold Approximation and Projection  | `dm`   | Clusters, with more of the global layout kept than t-SNE.               |
 | `dbrda()`    | Distance-based Redundancy Analysis (db-RDA)    | `dm`   | Axes that sample metadata explain (a constrained ordination).           |
 | `capscale()` | Constrained Analysis of Principal Coordinates  | `dm`   | The same, as `vegan::capscale()` computes it.                           |
+| `rda()`      | Redundancy Analysis (RDA)                      | counts | Axes of (transformed) counts that sample metadata explain.              |
 | `pca()`      | Principal Component Analysis (PCA)             | counts | Euclidean geometry of (transformed) counts, with feature loadings.      |
 | `rpca()`     | Robust Aitchison PCA                           | counts | Sparse compositional data, such as microbiome counts.                   |
 
@@ -178,10 +179,38 @@ ord <- dbrda(dm, data = iris, formula = ~ Species + Condition(Sepal.Width))
 attr(ord, 'inertia')
 ```
 
+`rda()` does the same for a count table rather than distances: it is
+constrained PCA. With `norm = 'hellinger'` or `norm = 'chord'` it is
+transformation-based RDA (tb-RDA), the usual choice for community data,
+and it takes `groups`, `formula` and `Condition()` as `dbrda()` does. Its
+`loadings` attribute holds the features' (species) scores, for a biplot.
+
+```{r}
+ord <- rda(iris[, 1:4], 'Species', iris, norm = 'hellinger')
+
+attr(ord, 'r_squared')
+
+head(attr(ord, 'loadings'))
+```
+
+db-RDA of Euclidean distances is RDA, so `rda(counts, ..., norm =
+'hellinger')` has the same axes and \(R^2\) as `dbrda()` of the Hellinger
+distances, `euclidean(counts, norm = 'hellinger')`. Its permutation test is
+`permanova()` of those distances.
+
+```{r}
+hd <- euclidean(iris[, 1:4], norm = 'hellinger')
+c(rda = attr(ord, 'r_squared'), dbrda = attr(dbrda(hd, 'Species', iris), 'r_squared'))
+permanova(hd, 'Species', iris, permutations = 99)
+```
+
+`varpart()`, `forward_select()` and `principal_response_curves()`, which
+are planned, will build on `rda()`.
+
 
 ## Ordinating counts directly
 
-`pca()` and `rpca()` take the count table rather than distances.
+`pca()`, `rpca()` and `rda()` take the count table rather than distances.
 `count_ord()` runs them by name, as `dist_ord()` does for the methods that
 take distances: `count_ord(counts, 'pca')` is `pca(counts)`. PCA
 works on any of ecodive's transformations, such as `norm = 'clr'` (centered

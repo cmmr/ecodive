@@ -184,8 +184,8 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [capscale()], [pcoa()], [pca()], [permanova()], [dist_ord()],
-#'   [beta_div()]
+#' @seealso [capscale()], [rda()], [pcoa()], [pca()], [permanova()],
+#'   [dist_ord()], [beta_div()]
 #'
 #' @export
 #' @examples
@@ -224,27 +224,47 @@ constrained_ord <- function (
     no_groups <- TRUE
   }
 
-  if (inherits(data, 'formula') || inherits(groups, 'formula'))
-    stop(
-      'Name the formula argument: ', fn, '(dm, data = meta, formula = ~ a + b), ',
-      'or give the groups: ', fn, '(dm, groups, data).', call. = FALSE )
+  ord_formula_check(fn, 'dm', groups, data)
 
   fd <- formula_dm(dm, formula)
   dv <- dist_vector(fd$dm)
-  n  <- dv$n
 
-  formula <- fd$formula
+  model <- ord_model(groups, no_groups, data, fd$formula, dv$n, dv$labels, env)
+
+  dbrda_core(dv, model$x, model$z, model$mf, k, cpus, positive = (fn == 'capscale'))
+}
+
+
+
+# A formula given in place of `data` or `groups` is an error.
+ord_formula_check <- function (fn, first, groups, data) {
+  if (inherits(data, 'formula') || inherits(groups, 'formula'))
+    stop(
+      'Name the formula argument: ', fn, '(', first, ', data = meta, formula = ~ a + b), ',
+      'or give the groups: ', fn, '(', first, ', groups, data).', call. = FALSE )
+}
+
+
+
+# The constraints (x), conditions (z) and the constraints' model frame (mf,
+# for factor-level centroids) from `groups`, or `data` and `formula`, for n
+# samples named `labels`. With `optional`, no model at all (no `groups`, no
+# `formula`) gives list(x = NULL, z = NULL, mf = NULL), an unconstrained
+# ordination, rather than an error.
+ord_model <- function (
+    groups, no_groups, data, formula, n, labels, env, optional = FALSE ) {
 
   if (!is.null(groups)) {
 
     if (!is.null(formula))
       stop('Give `groups` or `formula`, not both.', call. = FALSE)
 
-    g       <- test_groups(groups, data, n, dv$labels)
+    g       <- test_groups(groups, data, n, labels)
     data    <- g$data
     formula <- stats::as.formula(call('~', as.name(g$col)), env = env)
   }
   else if (is.null(formula)) {
+    if (optional && no_groups) return (list(x = NULL, z = NULL, mf = NULL))
     stop(
       if (no_groups) '`groups` is required: one value per sample, or a column name of `data`. '
       else '`groups` is NULL (a misspelled column, such as meta$tretment?). ',
@@ -255,7 +275,7 @@ constrained_ord <- function (
   }
 
   design <- model_design(
-    data, formula, labels = dv$labels, n = n, allow_empty = TRUE, env = env )
+    data, formula, labels = labels, n = n, allow_empty = TRUE, env = env )
 
   # The constraints' variables, for factor-level centroids (vegan leaves out
   # the conditions' variables).
@@ -265,7 +285,36 @@ constrained_ord <- function (
     attr(mf, 'terms') <- NULL
   }
 
-  dbrda_core(dv, design$x, design$z, mf, k, cpus, positive = (fn == 'capscale'))
+  list(x = design$x, z = design$z, mf = mf)
+}
+
+
+
+# The numeric design: constraints `x` and conditions `z` as matrices with n
+# rows (zero columns if NULL), and both together, conditions first.
+cord_design <- function (x, z, n) {
+
+  if (is.null(x)) x <- matrix(0, n, 0)
+  if (is.null(z)) z <- matrix(0, n, 0)
+  x <- as.matrix(x)
+  z <- as.matrix(z)
+  if (is.null(colnames(x)) && ncol(x)) colnames(x) <- paste0('X', seq_len(ncol(x)))
+
+  design <- cbind(z, x)
+  storage.mode(design) <- 'double'
+
+  list(x = x, z = z, design = design)
+}
+
+
+
+# The empty C result for n < 2 samples.
+cord_empty <- function (n, d) {
+  list(
+    scores = matrix(numeric(0), n, 0), eig = numeric(0), n_con = 0L,
+    con_eig = numeric(0), total = 0, conditional = 0, constrained = 0,
+    kept = rep(TRUE, ncol(d$design)), biplot = matrix(numeric(0), ncol(d$x), 0),
+    u = matrix(numeric(0), n, 0), real = 0, imaginary = 0 )
 }
 
 
@@ -278,17 +327,8 @@ constrained_ord <- function (
 dbrda_core <- function (
     dv, x, z = NULL, mf = NULL, k = 3L, cpus = n_cpus(), positive = FALSE ) {
 
-  n      <- dv$n
-  labels <- dv$labels
-
-  if (is.null(x)) x <- matrix(0, n, 0)
-  if (is.null(z)) z <- matrix(0, n, 0)
-  x <- as.matrix(x)
-  z <- as.matrix(z)
-  if (is.null(colnames(x)) && ncol(x)) colnames(x) <- paste0('X', seq_len(ncol(x)))
-
-  design <- cbind(z, x)
-  storage.mode(design) <- 'double'
+  n <- dv$n
+  d <- cord_design(x, z, n)
 
 
   # vegan's dbrda() and capscale() divide distances by sqrt(n - 1) when any
@@ -299,14 +339,10 @@ dbrda_core <- function (
 
 
   if (n < 2) {
-    res <- list(
-      scores = matrix(numeric(0), n, 0), eig = numeric(0), n_con = 0L,
-      con_eig = numeric(0), total = 0, conditional = 0, constrained = 0,
-      kept = rep(TRUE, ncol(design)), biplot = matrix(numeric(0), ncol(x), 0),
-      u = matrix(numeric(0), n, 0), real = 0, imaginary = 0 )
+    res <- cord_empty(n, d)
   }
   else {
-    res <- .Call(C_dbrda, dv$dm, n, design, ncol(z), k, adj, positive, cpus)
+    res <- .Call(C_dbrda, dv$dm, n, d$design, ncol(d$z), k, adj, positive, cpus)
 
     if (!res$converged) # nocov start
       warning(
@@ -314,6 +350,27 @@ dbrda_core <- function (
         ' did not converge; coordinates may be inexact.', call. = FALSE )
     # nocov end
   }
+
+  cord_result(
+    res, d, mf, k, n, dv$labels,
+    method   = if (positive) 'capscale' else 'dbrda',
+    prefix   = if (positive) 'CAP' else 'dbRDA',
+    prefix_u = 'MDS',
+    positive = positive )
+}
+
+
+
+# The ecodive_ord result of a constrained ordination, from C_dbrda()'s or
+# C_rda()'s list `res`, the design `d` (cord_design()), and `mf`. Columns
+# are named `prefix` (constrained) and `prefix_u` (unconstrained); `...`
+# adds attributes at the end.
+cord_result <- function (
+    res, d, mf, k, n, labels, method, prefix, prefix_u, positive = FALSE, ... ) {
+
+  x <- d$x
+  z <- d$z
+  design <- d$design
 
   if (any(aliased <- !res$kept))
     message(
@@ -332,8 +389,7 @@ dbrda_core <- function (
   if (m < min(k, n - 1L))
     warning(sprintf('only %d of the first %d eigenvalues are > 0', m, min(k, n - 1L)), call. = FALSE)
 
-  prefix <- if (positive) 'CAP' else 'dbRDA'
-  cols   <- c(sprintf('%s%d', prefix, seq_len(kc)), sprintf('MDS%d', seq_len(m - kc)))
+  cols <- c(sprintf('%s%d', prefix, seq_len(kc)), sprintf('%s%d', prefix_u, seq_len(m - kc)))
 
   kept_x <- res$kept[ncol(z) + seq_len(ncol(x))]
   biplot <- matrix(0, nrow(res$biplot), m, dimnames = list(
@@ -358,7 +414,7 @@ dbrda_core <- function (
     n = n, p = sum(kept_x), q = sum(res$kept[seq_len(ncol(z))]) )
 
   ord_result(
-    res$scores * scale, if (positive) 'capscale' else 'dbrda', labels, cols = cols,
+    res$scores * scale, method, labels, cols = cols,
     eig             = res$eig,
     prop            = res$eig / (real - res$conditional),
     trace           = total,
@@ -367,7 +423,8 @@ dbrda_core <- function (
     r_squared       = r2[[1]],
     adj_r_squared   = r2[[2]],
     biplot          = biplot,
-    centroids       = centroids )
+    centroids       = centroids,
+    ... )
 }
 
 

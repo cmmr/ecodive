@@ -195,6 +195,18 @@ void* maybe_free_one(void *ptr);
 /* --- normalize.c --- */
 void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_);
 
+/* --- pca.c: the centred (scaled) table, shared with rda() --- */
+typedef struct {
+  int           n, p, nnz;  // Samples, features, non-zeros.
+  const double *w_feat;     // 1 / sd per feature (scale), or NULL.
+  void         *ctx;        // For pca_gram_mult().
+} pca_table_t;
+
+double pca_table_init(SEXP counts, SEXP margin, int norm, double pseudocount,
+                      int scale, int n_threads, pca_table_t *t);
+void   pca_gram_mult(const double *V, double *W, int m, void *ctx);
+void   pca_cross(const double *U, int m, double *L, int n_threads);
+
 /* --- parallel.c --- */
 void run_parallel(pthread_func_t func, int n_threads, int n_tasks);
 int  user_interrupted(void);

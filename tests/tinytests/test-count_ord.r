@@ -42,6 +42,10 @@
   expect_identical(mo('Robust Aitchison PCA'), 'rpca')
   expect_identical(mo('DEICODE'),             'rpca')
   expect_identical(mo('gemelli'),             'rpca')
+  expect_identical(mo('RDA'),                 'rda')
+  expect_identical(mo('redundancy analysis'), 'rda')
+  expect_identical(mo('tb-RDA'),              'rda')
+  expect_identical(mo('transformation-based RDA'), 'rda')
 
   info <- match_count_ord('pca')
   expect_identical(info$func, pca)
@@ -55,18 +59,18 @@
   df <- list_count_ords()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id'))
-  expect_identical(df$id, c('pca', 'rpca'))
-  expect_identical(rownames(list_count_ords(nm = 'id')), c('pca', 'rpca'))
+  expect_identical(df$id, c('pca', 'rda', 'rpca'))
+  expect_identical(rownames(list_count_ords(nm = 'id')), c('pca', 'rda', 'rpca'))
   expect_identical(list_count_ords(val = 'id', nm = 'name'),
-    c('Principal Component Analysis' = 'pca', 'Robust Aitchison PCA' = 'rpca'))
-  expect_identical(list_count_ords(val = 'func'), list(pca = pca, rpca = rpca))
+    c('Principal Component Analysis' = 'pca', 'Redundancy Analysis' = 'rda', 'Robust Aitchison PCA' = 'rpca'))
+  expect_identical(list_count_ords(val = 'func'), list(pca = pca, rda = rda, rpca = rpca))
   expect_identical(list_count_ords(val = 'list')$pca, match_count_ord('pca'))
-  expect_identical(list_count_ords('name'), c('Principal Component Analysis', 'Robust Aitchison PCA'))
+  expect_identical(list_count_ords('name'), c('Principal Component Analysis', 'Redundancy Analysis', 'Robust Aitchison PCA'))
 
 
   # Invalid input, and methods of the other wrappers. ====
 
-  expect_error(count_ord(m, 'xyz'),   'does not match any option: pca, rpca')
+  expect_error(count_ord(m, 'xyz'),   'does not match any option: pca, rda, rpca')
   expect_error(count_ord(m, 123),     'character')
   expect_error(count_ord(m, c('pca', 'rpca')), 'length 1')
   expect_error(count_ord(m, '-'),     'alphabetic')

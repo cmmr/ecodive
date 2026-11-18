@@ -68,6 +68,7 @@ reference:
   - umap
   - dbrda
   - capscale
+  - rda
   - pca
   - rpca
   - envfit

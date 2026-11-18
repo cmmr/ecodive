@@ -229,6 +229,6 @@ fractions. \emph{Ecology}, 87(10), 2614-2625.
 \doi{10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2}
 }
 \seealso{
-\code{\link[=capscale]{capscale()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=dist_ord]{dist_ord()}},
-\code{\link[=beta_div]{beta_div()}}
+\code{\link[=capscale]{capscale()}}, \code{\link[=rda]{rda()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=permanova]{permanova()}},
+\code{\link[=dist_ord]{dist_ord()}}, \code{\link[=beta_div]{beta_div()}}
 }
