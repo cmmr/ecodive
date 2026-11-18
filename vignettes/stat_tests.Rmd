@@ -103,6 +103,28 @@ mrpp(dm, 'Species', iris)
 ```
 
 
+## Pairwise comparisons
+
+When an overall test finds that the groups differ, the next question is
+usually which ones. `pairwise = TRUE` reruns the test on each pair of
+groups' samples, and adjusts the pairs' p-values for multiple testing
+(Holm's method by default; `p_adjust = 'BH'` controls the false discovery
+rate instead). The overall result is unchanged.
+
+```{r}
+res <- permanova(dm, 'Species', iris, pairwise = TRUE)
+res$pairwise
+```
+
+`p_value` is each pair's own permutation p-value, and `p_adjusted` the
+value to report. `anosim()` and `mrpp()` take the same arguments, and
+`permdisp()` adds adjusted p-values to its pairwise t tests:
+
+```{r}
+permdisp(dm, 'Species', iris, pairwise = TRUE)$pairwise
+```
+
+
 ## Mantel test
 
 `mantel()` correlates `dm` with a numeric variable, or with a second

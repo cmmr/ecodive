@@ -52,7 +52,8 @@
 #'        TRUE)`. Default: `FALSE`.
 #'
 #' @param pairwise  Also test each pair of groups with a \eqn{t} statistic,
-#'        as `permutest(pairwise = TRUE)`. Default: `FALSE`.
+#'        as `permutest(pairwise = TRUE)`, and adjust the pairs' p-values for
+#'        multiple testing with `p_adjust`. Default: `FALSE`.
 #'
 #' @param permutations  The number of permutations. Default: `999`.
 #'        Alternatively, a matrix with one permutation of `1:n` per row, as
@@ -82,9 +83,16 @@
 #'   * `bias_adjust`: `TRUE` or `FALSE`.
 #'   * `pairwise`: With `pairwise = TRUE`, a data frame with one row per pair
 #'     of groups, named like `"a-b"`, and columns `t` (the \eqn{t} statistic
-#'     of group `a` minus group `b`), `Df`, `p_value` (from the \eqn{t}
-#'     distribution), and `p_value_perm` (from the permutations). Otherwise
-#'     `NULL`.
+#'     of group `a` minus group `b`), `Df`, `z` (how far \eqn{t} lies from
+#'     its permuted values, in standard deviations), `n` (the pair's
+#'     samples), `n_perm`, `p_value` (from the \eqn{t} distribution),
+#'     `p_value_perm` (from the permutations), `p_adjusted` and
+#'     `p_adjusted_perm` (each p-value column adjusted across the pairs with
+#'     `stats::p.adjust(method = p_adjust)`). A pair with a group of one
+#'     sample has no \eqn{t} (`NA`, with a warning), as in `permutest()`.
+#'     Otherwise `NULL`.
+#'   * `p_adjust`: With `pairwise = TRUE`, the `p_adjust` method used.
+#'     Otherwise `NULL`.
 #'   * `permutation`: How samples were permuted: `'free'`, `'within
 #'     strata'`, or `'supplied matrix'`.
 #'
@@ -174,6 +182,12 @@
 #' * Pairwise permutation p-values count permuted \eqn{|t|} within
 #'   `sqrt(.Machine$double.eps)` of the observed one as ties, as for
 #'   \eqn{F}.
+#' * Pairwise p-values are also adjusted for multiple testing (`p_adjust`,
+#'   Holm's method by default), in columns of their own; `permutest()`
+#'   adjusts nothing. Unlike ecodive's other tests' `pairwise`, the pairs
+#'   are not tested on their own: their \eqn{t} statistics come from the
+#'   whole test's distances to the group centres, and their permutation
+#'   p-values from its permutations, as in `permutest()`.
 #' * `strata` permutes freely within strata. For other restricted designs,
 #'   pass a `permutations` matrix from `permute::shuffleSet()`.
 #' * `betadisper()`'s `sqrt.dist` and `add` options transform the distances
@@ -226,8 +240,8 @@
 #'
 permdisp <- function (
     dm, groups, data = NULL, type = 'centroid', bias_adjust = FALSE,
-    pairwise = FALSE, permutations = 999L, strata = NULL, seed = 0L,
-    cpus = n_cpus() ) {
+    pairwise = FALSE, p_adjust = 'holm', permutations = 999L,
+    strata = NULL, seed = 0L, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
@@ -236,8 +250,7 @@ permdisp <- function (
 
   if (!isTRUE(bias_adjust) && !isFALSE(bias_adjust))
     stop('`bias_adjust` must be TRUE or FALSE.', call. = FALSE)
-  if (!isTRUE(pairwise) && !isFALSE(pairwise))
-    stop('`pairwise` must be TRUE or FALSE.', call. = FALSE)
+  p_adjust <- pairwise_method(pairwise, p_adjust, !missing(p_adjust))
 
   dv <- dist_vector(dm)
   n  <- dv$n
@@ -365,13 +378,32 @@ permdisp <- function (
     dimnames(t_perm) <- list(NULL, labs)
 
     p_t <- perm_p(t_obs, t_perm, 'two.sided')
+    p_v <- 2 * stats::pt(-abs(t_obs), t_df)
 
     pw <- data.frame(
-      t            = t_obs,
-      Df           = as.double(t_df),
-      p_value      = 2 * stats::pt(-abs(t_obs), t_df),
-      p_value_perm = unname(p_t),
-      row.names    = labs )
+      t               = t_obs,
+      Df              = as.double(t_df),
+      z               = perm_z(t_obs, t_perm),
+      n               = as.integer(t_df + 2),
+      n_perm          = as.integer(pm$n_perm),
+      p_value         = p_v,
+      p_value_perm    = unname(p_t),
+      p_adjusted      = stats::p.adjust(p_v, p_adjust),
+      p_adjusted_perm = stats::p.adjust(unname(p_t), p_adjust),
+      row.names       = labs )
+
+    # One warning for each reason, naming its pairs.
+    small <- cnt[combos[1, ]] < 2 | cnt[combos[2, ]] < 2
+    for (s in c(TRUE, FALSE)) {
+      k <- which(is.na(t_obs) & small == s)
+      if (length(k))
+        warning(
+          if (length(k) == 1) 'Pair ' else 'Pairs ', paste(labs[k], collapse = ', '),
+          ' could not be tested: ',
+          if (s) 'a group has only one sample, so it has no variance.'
+          else 'the distances to the group centres do not vary within the two groups.',
+          call. = FALSE )
+    }
   }
 
 
@@ -402,6 +434,7 @@ permdisp <- function (
     type        = type,
     bias_adjust = bias_adjust,
     pairwise    = pw,
+    p_adjust    = p_adjust,
     perm        = f_perm,
     permutation = if (!is.null(pm$perms)) 'supplied matrix'
                   else if (!is.null(des$strata)) 'within strata'
@@ -427,5 +460,5 @@ test_details.ecodive_permdisp <- function (x, digits) {
     out(x$dispersions),
     '',
     out(x$table),
-    if (!is.null(x$pairwise)) c('', 'Pairwise t tests:', out(x$pairwise)) )
+    pairwise_details(x, digits, 'Pairwise t tests') )
 }

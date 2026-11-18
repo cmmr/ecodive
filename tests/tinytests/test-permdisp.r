@@ -13,9 +13,13 @@
     for (cs in ex$cases) {
 
       info <- paste(cs$dist, cs$type, cs$bias, cs$groups)
-      res  <- permdisp(
+      run  <- function () permdisp(
         dms[[cs$dist]], meta[[cs$groups]], type = cs$type, bias_adjust = cs$bias,
         pairwise = TRUE, permutations = ex$perms, cpus = 1 )
+
+      # A group of one sample: its pairs have no t, as in permutest().
+      if (cs$groups == 'solo') expect_warning(res <- run(), 'could not be tested', info = info)
+      else res <- run()
 
       tbl <- unname(as.matrix(res$table))
 
@@ -120,7 +124,7 @@
   expect_identical(class(res), c('ecodive_permdisp', 'ecodive_test'))
   expect_identical(names(res), c(
     'statistic', 'p_value', 'z', 'n_perm', 'table', 'distances',
-    'dispersions', 'type', 'bias_adjust', 'pairwise', 'permutation' ))
+    'dispersions', 'type', 'bias_adjust', 'pairwise', 'p_adjust', 'permutation' ))
   expect_identical(names(res$statistic), 'F')
   expect_identical(res$statistic[['F']], res$table$F[[1]])
   expect_identical(res$p_value, res$table[['Pr(>F)']][[1]])
@@ -142,6 +146,7 @@
   expect_identical(res$type, 'centroid')
   expect_false(res$bias_adjust)
   expect_null(res$pairwise)
+  expect_null(res$p_adjust)
   expect_null(attr(res, 't_perm'))
   expect_true(res$p_value >= 1 / 100)
   expect_true(any(grepl('centroids', test_details.ecodive_permdisp(res, 4))))
@@ -154,8 +159,15 @@
   expect_identical(res$type, 'median')
   pw  <- res$pairwise
   expect_identical(rownames(pw), c('ctrl-low', 'ctrl-high', 'low-high'))
-  expect_identical(names(pw), c('t', 'Df', 'p_value', 'p_value_perm'))
+  expect_identical(names(pw), c(
+    't', 'Df', 'z', 'n', 'n_perm', 'p_value', 'p_value_perm', 'p_adjusted', 'p_adjusted_perm' ))
   expect_identical(pw$Df, c(24, 22, 20))
+  expect_identical(pw$n, c(26L, 24L, 22L))
+  expect_identical(pw$n_perm, rep(19L, 3))
+  expect_identical(res$p_adjust, 'holm')
+  expect_identical(pw$p_adjusted, stats::p.adjust(pw$p_value, 'holm'))
+  expect_identical(pw$p_adjusted_perm, stats::p.adjust(pw$p_value_perm, 'holm'))
+  expect_equal(pw$z, ecodive:::perm_z(pw$t, attr(res, 't_perm')))
   expect_identical(dim(attr(res, 't_perm')), c(19L, 3L))
   expect_identical(colnames(attr(res, 't_perm')), rownames(pw))
   out <- test_details.ecodive_permdisp(res, 4)
@@ -179,7 +191,9 @@
   expect_true(all(is.na(res$pairwise$p_value_perm)))
 
   # A group of one sample: no t statistics for its pairs.
-  res <- permdisp(d, meta$solo, type = 'centroid', pairwise = TRUE, permutations = 9, cpus = 1)
+  expect_warning(
+    res <- permdisp(d, meta$solo, type = 'centroid', pairwise = TRUE, permutations = 9, cpus = 1),
+    'Pairs a-d, b-d, c-d could not be tested: a group has only one sample' )
   pw  <- res$pairwise
   solo <- grepl('d', rownames(pw))
   expect_true(all(is.na(pw$t[solo])) && all(!is.na(pw$t[!solo])))

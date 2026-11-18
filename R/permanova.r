@@ -90,10 +90,20 @@
 #'     \eqn{F} statistics of each permutation (rows) for each test (columns),
 #'     as `adonis2()`'s `F.perm`.
 #'   * `by`: The `by` used.
+#'   * `pairwise`: With `pairwise = TRUE`, a data frame with one row per pair
+#'     of groups, named like `"a-b"`, and columns `F`, `R2`, `z`, `n` (the
+#'     pair's samples), `n_perm`, `p_value`, and `p_adjusted`. Pairs are
+#'     the groups of one categorical variable: `groups`, or the only term of
+#'     a `formula` with no `Condition()`. See **Pairwise comparisons**.
+#'     Otherwise `NULL`.
+#'   * `p_adjust`: With `pairwise = TRUE`, the `p_adjust` method used.
+#'     Otherwise `NULL`.
 #'   * `permutation`: How samples were permuted: `'free'`, `'within strata'`,
 #'     or `'supplied matrix'`.
 #'
 #'   Attribute `f_perm` holds the model's \eqn{F} for each permutation.
+#'
+#' @inheritSection pairwise_section Pairwise comparisons
 #'
 #' @details
 #'
@@ -219,14 +229,24 @@
 #'     # pH, after removing the effect of treatment.
 #'     permanova(dm, data = meta, formula = ~ ph + Condition(treatment))
 #'
+#'     # Which treatments differ? Each pair of groups, with Holm-adjusted
+#'     # p-values.
+#'     res <- permanova(dm, 'treatment', meta, pairwise = TRUE)
+#'     res$pairwise
+#'
+#'     # False discovery rate instead.
+#'     permanova(dm, 'treatment', meta, pairwise = TRUE, p_adjust = 'BH')$pairwise
+#'
 permanova <- function (
     dm, groups, data = NULL, formula = NULL, by = 'overall',
-    permutations = 999L, strata = NULL, seed = 0L, cpus = n_cpus() ) {
+    pairwise = FALSE, p_adjust = 'holm', permutations = 999L,
+    strata = NULL, seed = 0L, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
 
-  by <- match.arg(by, c('overall', 'terms', 'margin', 'onedf'))
+  by       <- match.arg(by, c('overall', 'terms', 'margin', 'onedf'))
+  p_adjust <- pairwise_method(pairwise, p_adjust, !missing(p_adjust))
 
   # adonis2()'s style, permanova(dm ~ terms, data): the metadata may come
   # second, where `groups` is.
@@ -286,6 +306,18 @@ permanova <- function (
 
   if (!is.null(pm$perms) && !is.null(des$strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
+
+  # pairwise = TRUE: the one categorical variable whose groups are compared.
+  pair_groups <- NULL
+  if (pairwise) {
+    v <- if (length(des$term_labels) == 1 && is.null(des$z)) des$data[[des$term_labels]]
+    if (!(is.factor(v) || is.character(v) || is.logical(v)))
+      stop(
+        '`pairwise = TRUE` compares the groups of one categorical variable: ',
+        'give it as `groups`, or as the only term of `formula`, with no ',
+        '`Condition()`.', call. = FALSE )
+    pair_groups <- droplevels(factor(v, exclude = NULL))
+  }
 
 
   #--------------------------------------------------------
@@ -486,6 +518,19 @@ permanova <- function (
 
   p_model <- perm_p(f0, f_perm)
 
+
+  #--------------------------------------------------------
+  # Each pair of groups, tested on its own: the one factor
+  # of `groups`, or of a formula with just that term.
+  #--------------------------------------------------------
+  pw <- NULL
+  if (pairwise)
+    pw <- pairwise_table(
+      dv, pair_groups, des$strata, permutations, seed, p_adjust,
+      c('F', 'R2'),
+      function (dm, g, s, p, sd) pair_result(permanova(
+        dm, g, permutations = p, strata = s, seed = sd, cpus = cpus ), 'r2', 'R2') )
+
   new_ecodive_test(
     class       = 'ecodive_permanova',
     title       = 'Permutational multivariate analysis of variance (PERMANOVA)',
@@ -496,6 +541,8 @@ permanova <- function (
     r2          = if (total > 0) ss_full[[1]] / total else NA_real_,
     table       = table,
     by          = by,
+    pairwise    = pw,
+    p_adjust    = p_adjust,
     perm        = f_perm,
     permutation = permutation )
 }
@@ -518,5 +565,6 @@ test_details.ecodive_permanova <- function (x, digits) {
         margin  = 'Marginal effects of terms:',
         onedf   = 'Sequential test for contrasts:' )),
     '',
-    utils::capture.output(print(tbl, digits = digits)) )
+    utils::capture.output(print(tbl, digits = digits)),
+    pairwise_details(x, digits) )
 }

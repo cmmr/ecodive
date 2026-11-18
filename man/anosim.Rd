@@ -8,6 +8,8 @@ anosim(
   dm,
   groups,
   data = NULL,
+  pairwise = FALSE,
+  p_adjust = "holm",
   permutations = 999L,
   strata = NULL,
   seed = 0L,
@@ -30,6 +32,18 @@ sample, holding \code{groups} (and \code{strata}) as columns. Rows are matched
 to the samples in \code{dm} by row name, and rows for other samples are
 ignored; without row names, they must be in the same order as \code{dm}.
 Default: \code{NULL}.}
+
+\item{pairwise}{Also test each pair of groups: run the same test on just
+the two groups' samples, for every pair, and adjust the pairs'
+p-values for multiple testing with \code{p_adjust}. See \strong{Pairwise
+comparisons}. Default: \code{FALSE}.}
+
+\item{p_adjust}{With \code{pairwise = TRUE}, how to adjust the pairs'
+p-values for multiple testing: one of \code{stats::p.adjust.methods}
+(\code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'},
+\code{'BY'}, \code{'fdr'}, or \code{'none'}), matched as \code{stats::p.adjust()}
+matches them. Giving it without \code{pairwise = TRUE} is an error.
+Default: \code{'holm'}.}
 
 \item{permutations}{The number of permutations. Default: \code{999}.
 Alternatively, a matrix with one permutation of \code{1:n} per row, as
@@ -66,6 +80,12 @@ different groups (\code{"Between"}) and one for each group, with the number
 of \code{pairs} and their \code{mean_rank}: the averages behind
 \code{summary(anosim(...))}'s quantiles. A group of one sample has no pairs
 and an \code{NA} mean rank.
+\item \code{pairwise}: With \code{pairwise = TRUE}, a data frame with one row per pair
+of groups, named like \code{"a-b"}, and columns \code{R}, \code{z}, \code{n} (the pair's
+samples), \code{n_perm}, \code{p_value}, and \code{p_adjusted}. See \strong{Pairwise
+comparisons}. Otherwise \code{NULL}.
+\item \code{p_adjust}: With \code{pairwise = TRUE}, the \code{p_adjust} method used.
+Otherwise \code{NULL}.
 \item \code{permutation}: How samples were permuted: \code{"free"}, \code{"within strata"},
 or \code{"supplied matrix"}.
 }
@@ -139,6 +159,45 @@ random permutations.
 \item Negative distances are an error, where \code{vegan} warns.
 }
 }
+\section{Pairwise comparisons}{
+
+With \code{pairwise = TRUE}, each pair of groups is also tested on its own,
+as q2-diversity's \code{beta_group_significance(pairwise=True)} does: the
+distances are cut down to the two groups' samples, and the same test is
+run on them, with the same number of \code{permutations}, the same \code{strata}
+(cut down too), and the test's other arguments. The overall test is
+unchanged.
+\itemize{
+\item \strong{Permutations:} Each pair has random permutations of its own, drawn
+from \code{seed} and the pair's position in the table, never from the
+number of \code{cpus}. So a pair's p-value is reproducible, but differs
+(by sampling error) from that of the same test run by hand on the
+pair's samples with the same \code{seed}. A supplied \code{permutations} matrix
+is cut down to each pair's samples by following each permutation's
+cycles: each of the pair's samples goes to the next of the pair's
+samples on its cycle. That gives a permutation of the pair's samples,
+uniformly distributed when the full one is, which keeps any
+restriction the matrix has, such as permuting only within strata.
+\item \strong{Multiple testing:} The pairs' permutation p-values are adjusted
+together with \code{stats::p.adjust(method = p_adjust)}. The default,
+Holm's method, controls the family-wise error rate whatever the
+dependence between the pairs' tests. \code{'BH'} controls the false
+discovery rate instead, as q2-diversity's q-values do. The raw
+p-values are kept as well.
+\item \strong{Pairs that can't be tested:} A pair the test can't be run on, such
+as two groups of one sample each, gets \code{NA}s, with a warning, rather
+than an error. A test's other warnings for a pair, such as all of its
+distances being 0, are passed on, naming the pair.
+}
+
+The \code{pairwise} field of the result is a data frame with one row per pair
+of groups, named like \code{"a-b"}, in the order of the groups' factor levels
+(sorted values, for other vectors). Its columns are the test's
+statistics for the pair, \code{z}, \code{n} (the pair's number of samples),
+\code{n_perm}, \code{p_value} (unadjusted) and \code{p_adjusted}. The \code{p_adjust} field
+names the method, and \code{print()} shows both.
+}
+
 \examples{
     # 30 samples in three treatment groups. The 'high' group has more
     # of the first five genera.
@@ -165,6 +224,9 @@ random permutations.
 
     # Mean rank of the distances between and within groups.
     anosim(dm, 'treatment', meta)$ranks
+
+    # Each pair of treatments, with Holm-adjusted p-values.
+    anosim(dm, 'treatment', meta, pairwise = TRUE)$pairwise
 
 }
 \references{

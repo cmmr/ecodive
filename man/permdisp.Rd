@@ -11,6 +11,7 @@ permdisp(
   type = "centroid",
   bias_adjust = FALSE,
   pairwise = FALSE,
+  p_adjust = "holm",
   permutations = 999L,
   strata = NULL,
   seed = 0L,
@@ -52,7 +53,15 @@ multiplying each by \eqn{\sqrt{n_g / (n_g - 1)}}, for a group of
 \eqn{n_g} samples (Stier et al. 2013), as \code{betadisper(bias.adjust = TRUE)}. Default: \code{FALSE}.}
 
 \item{pairwise}{Also test each pair of groups with a \eqn{t} statistic,
-as \code{permutest(pairwise = TRUE)}. Default: \code{FALSE}.}
+as \code{permutest(pairwise = TRUE)}, and adjust the pairs' p-values for
+multiple testing with \code{p_adjust}. Default: \code{FALSE}.}
+
+\item{p_adjust}{With \code{pairwise = TRUE}, how to adjust the pairs'
+p-values for multiple testing: one of \code{stats::p.adjust.methods}
+(\code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'},
+\code{'BY'}, \code{'fdr'}, or \code{'none'}), matched as \code{stats::p.adjust()}
+matches them. Giving it without \code{pairwise = TRUE} is an error.
+Default: \code{'holm'}.}
 
 \item{permutations}{The number of permutations. Default: \code{999}.
 Alternatively, a matrix with one permutation of \code{1:n} per row, as
@@ -93,9 +102,16 @@ sample, when \code{dm} has names), as \code{betadisper()$distances}.
 \item \code{bias_adjust}: \code{TRUE} or \code{FALSE}.
 \item \code{pairwise}: With \code{pairwise = TRUE}, a data frame with one row per pair
 of groups, named like \code{"a-b"}, and columns \code{t} (the \eqn{t} statistic
-of group \code{a} minus group \code{b}), \code{Df}, \code{p_value} (from the \eqn{t}
-distribution), and \code{p_value_perm} (from the permutations). Otherwise
-\code{NULL}.
+of group \code{a} minus group \code{b}), \code{Df}, \code{z} (how far \eqn{t} lies from
+its permuted values, in standard deviations), \code{n} (the pair's
+samples), \code{n_perm}, \code{p_value} (from the \eqn{t} distribution),
+\code{p_value_perm} (from the permutations), \code{p_adjusted} and
+\code{p_adjusted_perm} (each p-value column adjusted across the pairs with
+\code{stats::p.adjust(method = p_adjust)}). A pair with a group of one
+sample has no \eqn{t} (\code{NA}, with a warning), as in \code{permutest()}.
+Otherwise \code{NULL}.
+\item \code{p_adjust}: With \code{pairwise = TRUE}, the \code{p_adjust} method used.
+Otherwise \code{NULL}.
 \item \code{permutation}: How samples were permuted: \code{'free'}, \code{'within strata'}, or \code{'supplied matrix'}.
 }
 
@@ -193,6 +209,12 @@ where \code{betadisper()} gives \code{NaN}.
 \item Pairwise permutation p-values count permuted \eqn{|t|} within
 \code{sqrt(.Machine$double.eps)} of the observed one as ties, as for
 \eqn{F}.
+\item Pairwise p-values are also adjusted for multiple testing (\code{p_adjust},
+Holm's method by default), in columns of their own; \code{permutest()}
+adjusts nothing. Unlike ecodive's other tests' \code{pairwise}, the pairs
+are not tested on their own: their \eqn{t} statistics come from the
+whole test's distances to the group centres, and their permutation
+p-values from its permutations, as in \code{permutest()}.
 \item \code{strata} permutes freely within strata. For other restricted designs,
 pass a \code{permutations} matrix from \code{permute::shuffleSet()}.
 \item \code{betadisper()}'s \code{sqrt.dist} and \code{add} options transform the distances

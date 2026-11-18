@@ -104,3 +104,22 @@ void perm_source_get(const perm_source_t *ps, int k, int *p) {
     }
   }
 }
+
+
+//======================================================
+// The seed for pair `pair` (1, 2, ...) of a pairwise test
+// (pairwise = TRUE), from the test's own seed: a 31-bit
+// draw from PCG, seeded with (seed ^ a constant, pair).
+// The constant keeps these draws apart from the streams of
+// any test's own permutations, whose states are seed
+// values sign-extended to 64 bits.
+//======================================================
+SEXP C_pair_seed(SEXP sexp_seed, SEXP sexp_pair) {
+
+  pcg32_random_t rng;
+  uint64_t       state = (uint64_t) asInteger(sexp_seed) ^ 0x9E3779B97F4A7C15ULL;
+
+  pcg32_srandom_r(&rng, state, (uint64_t) asInteger(sexp_pair));
+
+  return ScalarInteger((int) (pcg32_random_r(&rng) >> 1));
+}

@@ -80,7 +80,7 @@
   expect_identical(class(obj), c('ecodive_permanova', 'ecodive_test'))
   expect_identical(
     names(obj),
-    c('statistic', 'p_value', 'z', 'n_perm', 'r2', 'table', 'by', 'permutation') )
+    c('statistic', 'p_value', 'z', 'n_perm', 'r2', 'table', 'by', 'pairwise', 'p_adjust', 'permutation') )
   expect_identical(names(obj$statistic), 'F')
   expect_identical(obj$n_perm, 99L)
   expect_identical(obj$by, 'terms')

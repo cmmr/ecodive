@@ -10,6 +10,8 @@ permanova(
   data = NULL,
   formula = NULL,
   by = "overall",
+  pairwise = FALSE,
+  p_adjust = "holm",
   permutations = 999L,
   strata = NULL,
   seed = 0L,
@@ -63,6 +65,18 @@ marginality: in \code{~ a * b}, only \code{a:b}.
 contrast of a factor.
 }}
 
+\item{pairwise}{Also test each pair of groups: run the same test on just
+the two groups' samples, for every pair, and adjust the pairs'
+p-values for multiple testing with \code{p_adjust}. See \strong{Pairwise
+comparisons}. Default: \code{FALSE}.}
+
+\item{p_adjust}{With \code{pairwise = TRUE}, how to adjust the pairs'
+p-values for multiple testing: one of \code{stats::p.adjust.methods}
+(\code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'},
+\code{'BY'}, \code{'fdr'}, or \code{'none'}), matched as \code{stats::p.adjust()}
+matches them. Giving it without \code{pairwise = TRUE} is an error.
+Default: \code{'holm'}.}
+
 \item{permutations}{The number of permutations. Default: \code{999}.
 Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones.}
@@ -105,6 +119,14 @@ the total sum of squares), \code{F} (pseudo-\eqn{F}), and \verb{Pr(>F)}
 \eqn{F} statistics of each permutation (rows) for each test (columns),
 as \code{adonis2()}'s \code{F.perm}.
 \item \code{by}: The \code{by} used.
+\item \code{pairwise}: With \code{pairwise = TRUE}, a data frame with one row per pair
+of groups, named like \code{"a-b"}, and columns \code{F}, \code{R2}, \code{z}, \code{n} (the
+pair's samples), \code{n_perm}, \code{p_value}, and \code{p_adjusted}. Pairs are
+the groups of one categorical variable: \code{groups}, or the only term of
+a \code{formula} with no \code{Condition()}. See \strong{Pairwise comparisons}.
+Otherwise \code{NULL}.
+\item \code{p_adjust}: With \code{pairwise = TRUE}, the \code{p_adjust} method used.
+Otherwise \code{NULL}.
 \item \code{permutation}: How samples were permuted: \code{'free'}, \code{'within strata'},
 or \code{'supplied matrix'}.
 }
@@ -186,6 +208,45 @@ pass a \code{permutations} matrix from \code{permute::shuffleSet()}.
 draws random permutations.
 }
 }
+\section{Pairwise comparisons}{
+
+With \code{pairwise = TRUE}, each pair of groups is also tested on its own,
+as q2-diversity's \code{beta_group_significance(pairwise=True)} does: the
+distances are cut down to the two groups' samples, and the same test is
+run on them, with the same number of \code{permutations}, the same \code{strata}
+(cut down too), and the test's other arguments. The overall test is
+unchanged.
+\itemize{
+\item \strong{Permutations:} Each pair has random permutations of its own, drawn
+from \code{seed} and the pair's position in the table, never from the
+number of \code{cpus}. So a pair's p-value is reproducible, but differs
+(by sampling error) from that of the same test run by hand on the
+pair's samples with the same \code{seed}. A supplied \code{permutations} matrix
+is cut down to each pair's samples by following each permutation's
+cycles: each of the pair's samples goes to the next of the pair's
+samples on its cycle. That gives a permutation of the pair's samples,
+uniformly distributed when the full one is, which keeps any
+restriction the matrix has, such as permuting only within strata.
+\item \strong{Multiple testing:} The pairs' permutation p-values are adjusted
+together with \code{stats::p.adjust(method = p_adjust)}. The default,
+Holm's method, controls the family-wise error rate whatever the
+dependence between the pairs' tests. \code{'BH'} controls the false
+discovery rate instead, as q2-diversity's q-values do. The raw
+p-values are kept as well.
+\item \strong{Pairs that can't be tested:} A pair the test can't be run on, such
+as two groups of one sample each, gets \code{NA}s, with a warning, rather
+than an error. A test's other warnings for a pair, such as all of its
+distances being 0, are passed on, naming the pair.
+}
+
+The \code{pairwise} field of the result is a data frame with one row per pair
+of groups, named like \code{"a-b"}, in the order of the groups' factor levels
+(sorted values, for other vectors). Its columns are the test's
+statistics for the pair, \code{z}, \code{n} (the pair's number of samples),
+\code{n_perm}, \code{p_value} (unadjusted) and \code{p_adjusted}. The \code{p_adjust} field
+names the method, and \code{print()} shows both.
+}
+
 \examples{
     # 30 samples in three treatment groups. The 'high' group has more
     # of the first five genera.
@@ -221,6 +282,14 @@ draws random permutations.
 
     # pH, after removing the effect of treatment.
     permanova(dm, data = meta, formula = ~ ph + Condition(treatment))
+
+    # Which treatments differ? Each pair of groups, with Holm-adjusted
+    # p-values.
+    res <- permanova(dm, 'treatment', meta, pairwise = TRUE)
+    res$pairwise
+
+    # False discovery rate instead.
+    permanova(dm, 'treatment', meta, pairwise = TRUE, p_adjust = 'BH')$pairwise
 
 }
 \references{

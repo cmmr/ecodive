@@ -72,11 +72,19 @@
 #'     group of one sample).
 #'   * `class_n`: Each group's number of samples.
 #'   * `weights`: The `weights` used.
+#'   * `pairwise`: With `pairwise = TRUE`, a data frame with one row per pair
+#'     of groups, named like `"a-b"`, and columns `delta`, `A`, `z`, `n` (the
+#'     pair's samples), `n_perm`, `p_value`, and `p_adjusted`. See
+#'     **Pairwise comparisons**. Otherwise `NULL`.
+#'   * `p_adjust`: With `pairwise = TRUE`, the `p_adjust` method used.
+#'     Otherwise `NULL`.
 #'   * `permutation`: How samples were permuted: `'free'`, `'within strata'`,
 #'     or `'supplied matrix'`.
 #'
 #'   Attribute `delta_perm` holds the \eqn{\delta} of each permutation, as
 #'   `vegan::mrpp()`'s `boot.deltas`.
+#'
+#' @inheritSection pairwise_section Pairwise comparisons
 #'
 #' @details
 #'
@@ -179,12 +187,18 @@
 #'     # Permuting only within sites.
 #'     mrpp(dm, 'treatment', meta, strata = 'site')
 #'
+#'     # Each pair of treatments, with Holm-adjusted p-values.
+#'     mrpp(dm, 'treatment', meta, pairwise = TRUE)$pairwise
+#'
 mrpp <- function (
-    dm, groups, data = NULL, weights = 'n', permutations = 999L,
-    strata = NULL, seed = 0L, cpus = n_cpus() ) {
+    dm, groups, data = NULL, weights = 'n', pairwise = FALSE,
+    p_adjust = 'holm', permutations = 999L, strata = NULL, seed = 0L,
+    cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
+
+  p_adjust <- pairwise_method(pairwise, p_adjust, !missing(p_adjust))
 
   wt  <- mrpp_weights(weights)
   dv  <- dist_vector(dm)
@@ -255,6 +269,17 @@ mrpp <- function (
   tol <- sqrt(.Machine$double.eps) * max(abs(delta), e_delta, na.rm = TRUE)
   p   <- perm_p(delta, delta_perm, 'less', tol = tol)
 
+  #--------------------------------------------------------
+  # Each pair of groups, tested on its own.
+  #--------------------------------------------------------
+  pw <- NULL
+  if (pairwise)
+    pw <- pairwise_table(
+      dv, grp, des$strata, permutations, seed, p_adjust, c('delta', 'A'),
+      function (dm, g, s, p, sd) pair_result(mrpp(
+        dm, g, weights = wt, permutations = p, strata = s, seed = sd,
+        cpus = cpus ), 'A') )
+
   new_ecodive_test(
     class          = 'ecodive_mrpp',
     title          = 'Multi-response permutation procedure (MRPP)',
@@ -267,6 +292,8 @@ mrpp <- function (
     class_delta    = class_delta,
     class_n        = ng,
     weights        = wt,
+    pairwise       = pw,
+    p_adjust       = p_adjust,
     perm           = delta_perm,
     permutation    = if (!is.null(pm$perms)) 'supplied matrix'
                      else if (!is.null(des$strata)) 'within strata'
@@ -310,5 +337,6 @@ test_details.ecodive_mrpp <- function (x, digits) {
     utils::capture.output(print(noquote(tbl), right = TRUE)),
     '',
     paste0('Expected delta: ', fmt(x$expected_delta)),
-    paste0('Chance-corrected within-group agreement A: ', fmt(x$A)) )
+    paste0('Chance-corrected within-group agreement A: ', fmt(x$A)),
+    pairwise_details(x, digits) )
 }

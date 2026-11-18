@@ -106,7 +106,7 @@
 
   expect_inherits(res, 'ecodive_anosim')
   expect_inherits(res, 'ecodive_test')
-  expect_identical(names(res), c('statistic', 'p_value', 'z', 'n_perm', 'ranks', 'permutation'))
+  expect_identical(names(res), c('statistic', 'p_value', 'z', 'n_perm', 'ranks', 'pairwise', 'p_adjust', 'permutation'))
   expect_identical(names(res$statistic), 'R')
   expect_identical(res$n_perm, 99L)
   expect_identical(res$permutation, 'free')

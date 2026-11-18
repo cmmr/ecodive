@@ -94,10 +94,10 @@
   # Distance-based tests. ====
 
   tests <- list(
-    permanova = permanova(dm, 'grp', meta, permutations = 9, cpus = cpus),
-    mrpp      = mrpp(dm, 'grp', meta, permutations = 9, cpus = cpus),
-    anosim    = anosim(dm, 'grp', meta, permutations = 9, cpus = cpus),
-    permdisp  = permdisp(dm, 'grp', meta, permutations = 9, cpus = cpus),
+    permanova = permanova(dm, 'grp', meta, pairwise = TRUE, permutations = 9, cpus = cpus),
+    mrpp      = mrpp(dm, 'grp', meta, pairwise = TRUE, permutations = 9, cpus = cpus),
+    anosim    = anosim(dm, 'grp', meta, pairwise = TRUE, permutations = 9, cpus = cpus),
+    permdisp  = permdisp(dm, 'grp', meta, pairwise = TRUE, permutations = 9, cpus = cpus),
     mantel    = mantel(dm, 'x', meta, permutations = 9, cpus = cpus),
     mantel_partial = mantel_partial(dm, 'x', rep(1:4, 5), meta, permutations = 9, cpus = cpus),
     dist_test = dist_test(dm, 'permanova', 'grp', meta, permutations = 9, cpus = cpus) )
@@ -109,7 +109,14 @@
     expect_true(t$p_value >= 0 && t$p_value <= 1, info = nm)
     expect_identical(nrow(as.data.frame(t)), 1L, info = nm)
     expect_true(length(capture.output(print(t))) > 0, info = nm)
+    if (!is.null(t$pairwise)) {
+      expect_inherits(t$pairwise, 'data.frame', info = nm)
+      expect_identical(rownames(t$pairwise), 'a-b', info = nm)
+      expect_true(all(t$pairwise$p_adjusted >= 0 & t$pairwise$p_adjusted <= 1), info = nm)
+    }
   }
+  for (nm in c('permanova', 'mrpp', 'anosim', 'permdisp'))
+    expect_identical(tests[[nm]]$p_adjust, 'holm', info = nm)
   expect_true(all(c('permanova', 'mantel') %in% list_dist_tests()$id))
   expect_identical(match_dist_test('adonis2')$id, 'permanova')
 

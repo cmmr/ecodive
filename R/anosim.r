@@ -52,11 +52,19 @@
 #'     of `pairs` and their `mean_rank`: the averages behind
 #'     `summary(anosim(...))`'s quantiles. A group of one sample has no pairs
 #'     and an `NA` mean rank.
+#'   * `pairwise`: With `pairwise = TRUE`, a data frame with one row per pair
+#'     of groups, named like `"a-b"`, and columns `R`, `z`, `n` (the pair's
+#'     samples), `n_perm`, `p_value`, and `p_adjusted`. See **Pairwise
+#'     comparisons**. Otherwise `NULL`.
+#'   * `p_adjust`: With `pairwise = TRUE`, the `p_adjust` method used.
+#'     Otherwise `NULL`.
 #'   * `permutation`: How samples were permuted: `"free"`, `"within strata"`,
 #'     or `"supplied matrix"`.
 #'
 #'   Attribute `r_perm` is a vector of the \eqn{R} statistics of each
 #'   permutation, `anosim()`'s `perm`.
+#'
+#' @inheritSection pairwise_section Pairwise comparisons
 #'
 #' @details
 #'
@@ -160,12 +168,17 @@
 #'     # Mean rank of the distances between and within groups.
 #'     anosim(dm, 'treatment', meta)$ranks
 #'
+#'     # Each pair of treatments, with Holm-adjusted p-values.
+#'     anosim(dm, 'treatment', meta, pairwise = TRUE)$pairwise
+#'
 anosim <- function (
-    dm, groups, data = NULL, permutations = 999L, strata = NULL,
-    seed = 0L, cpus = n_cpus() ) {
+    dm, groups, data = NULL, pairwise = FALSE, p_adjust = 'holm',
+    permutations = 999L, strata = NULL, seed = 0L, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
+
+  p_adjust <- pairwise_method(pairwise, p_adjust, !missing(p_adjust))
 
   dv <- dist_vector(dm)
   n  <- dv$n
@@ -231,6 +244,16 @@ anosim <- function (
     else if (!is.null(grp$strata)) 'within strata'
     else                           'free'
 
+  #--------------------------------------------------------
+  # Each pair of groups, tested on its own.
+  #--------------------------------------------------------
+  pw <- NULL
+  if (pairwise)
+    pw <- pairwise_table(
+      dv, grp$groups, grp$strata, permutations, seed, p_adjust, 'R',
+      function (dm, g, s, p, sd) pair_result(anosim(
+        dm, g, permutations = p, strata = s, seed = sd, cpus = cpus )) )
+
   new_ecodive_test(
     class       = 'ecodive_anosim',
     title       = 'Analysis of similarities (ANOSIM)',
@@ -239,6 +262,8 @@ anosim <- function (
     z           = z,
     n_perm      = pm$n_perm,
     ranks       = ranks,
+    pairwise    = pw,
+    p_adjust    = p_adjust,
     perm        = r_prm,
     permutation = permutation )
 }
@@ -250,5 +275,6 @@ test_details.ecodive_anosim <- function (x, digits) {
   rk <- x$ranks
   rk$mean_rank <- signif(rk$mean_rank, digits + 2L)
   c('Mean rank of the distances, between and within groups:',
-    utils::capture.output(print(rk)) )
+    utils::capture.output(print(rk)),
+    pairwise_details(x, digits) )
 }

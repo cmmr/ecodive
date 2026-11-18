@@ -194,6 +194,24 @@
   `match_dist_test()` list and look up the tests, with forgiving name matching
   (`"adonis2"` finds `permanova`, `"betadisper"` finds `permdisp`).
 
+* `permanova()`, `anosim()`, `mrpp()` and `permdisp()` take `pairwise = TRUE`
+  to also compare each pair of groups, as is usual after an overall test
+  across several groups, and `p_adjust` to adjust the pairs' p-values for
+  multiple testing: any of `stats::p.adjust.methods`, Holm's method by
+  default. `permanova()`, `anosim()` and `mrpp()` rerun the test on each
+  pair's samples, as q2-diversity's `beta_group_significance(pairwise=True)`
+  and pairwiseAdonis's `pairwise.adonis2()` do, with the pair's statistics,
+  z-score, sample size, and raw and adjusted p-values in a `pairwise` data
+  frame. Given the same permutations, the pairs' statistics and p-values are
+  identical to vegan's tests on each pair. Each pair's random permutations
+  come from `seed` and the pair, so results are identical for any number of
+  `cpus`; a supplied `permutations` matrix is cut down to each pair's
+  samples. A pair that can't be tested, such as two groups of one sample,
+  gives `NA`s with a warning. `permdisp()`'s pairwise t tests gain
+  `p_adjusted` and `p_adjusted_perm` (each of its p-value columns adjusted
+  across the pairs, which `vegan::permutest()` doesn't do), and `z`, `n` and
+  `n_perm` columns, so its pairwise table now has more columns than before.
+
 * One rule aligns every per-sample argument (`groups`, `strata`, and the
   Mantel tests' `y` and `given`) in `permanova()`, `mrpp()`, `anosim()`,
   `permdisp()`, `mantel()`, `mantel_partial()`, `envfit()` and `dist_test()`:

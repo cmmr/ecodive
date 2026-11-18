@@ -89,7 +89,7 @@
   expect_identical(
     names(res),
     c('statistic', 'p_value', 'z', 'n_perm', 'expected_delta', 'A',
-      'class_delta', 'class_n', 'weights', 'permutation') )
+      'class_delta', 'class_n', 'weights', 'pairwise', 'p_adjust', 'permutation') )
   expect_identical(class(res), c('ecodive_mrpp', 'ecodive_test'))
   expect_identical(names(res$statistic), 'delta')
   expect_identical(attr(res, 'title'), 'Multi-response permutation procedure (MRPP)')

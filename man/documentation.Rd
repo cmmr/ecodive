@@ -39,6 +39,18 @@ calculated for? The default value (\code{NULL}) calculates all-vs-all.
 Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.}
 
+\item{pairwise}{Also test each pair of groups: run the same test on just
+the two groups' samples, for every pair, and adjust the pairs'
+p-values for multiple testing with \code{p_adjust}. See \strong{Pairwise
+comparisons}. Default: \code{FALSE}.}
+
+\item{p_adjust}{With \code{pairwise = TRUE}, how to adjust the pairs'
+p-values for multiple testing: one of \code{stats::p.adjust.methods}
+(\code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'},
+\code{'BY'}, \code{'fdr'}, or \code{'none'}), matched as \code{stats::p.adjust()}
+matches them. Giving it without \code{pairwise = TRUE} is an error.
+Default: \code{'holm'}.}
+
 \item{power}{Scaling factor for the magnitude of differences between
 communities (\eqn{p}). Default: \code{1.5}}
 
