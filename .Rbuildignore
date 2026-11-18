@@ -4,6 +4,7 @@
 ^data-raw$
 ^doc$
 ^paper$
+^plans$
 ^logo$
 ^Meta$
 ^pkgdown$
