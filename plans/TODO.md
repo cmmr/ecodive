@@ -28,7 +28,7 @@ meaningful sense, so they sit just after the methods they build on.
 | 5 | [x] `ca()` (80c8a86) | [cca_ca.md](cca_ca.md) | port (skbio) | Cheap once `cca()`'s weighted core exists. |
 | 6 | [x] `procrustes()` and `procrustes_test()` (a1c2a66) | [procrustes.md](procrustes.md) | port (SciPy, BSD-3) | In QIIME 2; simple. |
 | 7 | [x] `plsda()` (b3c81a4) | [plsda_oplsda.md](plsda_oplsda.md) | port (scikit-learn, BSD-3) | Popular in microbiome work through mixOmics. |
-| 8 | [ ] `simper()` | [simper.md](simper.md) | port (ecopy, MIT) + Clarke's permutation p-values | High demand in community ecology; simple. |
+| 8 | [x] `simper()` (dbf0c2b) | [simper.md](simper.md) | port (ecopy, MIT) + Clarke's permutation p-values | High demand in community ecology; simple. |
 | 9 | [ ] `bioenv()` | [bioenv.md](bioenv.md) | port (skbio) | In QIIME 2; simple. |
 | 10 | [ ] `lda()` | [lda_capda.md](lda_capda.md) | port (scikit-learn) | Simple; `capda()` needs it. |
 | 11 | [ ] `oplsda()` | [plsda_oplsda.md](plsda_oplsda.md) | port (pyopls, MIT) | Metabolomics demand; small on top of `plsda()`. |
