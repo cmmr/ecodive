@@ -20,6 +20,9 @@
 - **Cameron Martino**. Contributor, copyright holder.  
   'gemelli' robust Aitchison PCA
 
+- **The SciPy developers**. Contributor, copyright holder.  
+  Procrustes analysis, following SciPy
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

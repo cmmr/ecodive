@@ -29,8 +29,9 @@ print(x, ...)
   [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md),
   [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
   [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
-  [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md), or
-  [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md).
+  [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
+  [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), or
+  [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md).
 
 - ...:
 

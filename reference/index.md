@@ -191,6 +191,10 @@ take the count table.
   Aitchison PCA (RPCA)
 - [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) : Fit
   Variables or Taxa onto an Ordination
+- [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
+  : Procrustes Rotation of One Ordination onto Another
+- [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
+  : Procrustes Randomization Test (PROTEST)
 - [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
   [`match_dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
   : Find and Browse Distance-based Ordination Methods

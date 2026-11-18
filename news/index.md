@@ -425,6 +425,26 @@
   and its results are identical for any number of `cpus`.
 
 - New
+  [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
+  rotates, reflects, and optionally dilates one ordination to fit
+  another of the same samples, and reports the Procrustes sum of
+  squares, m^2: how similar, say, Bray-Curtis and UniFrac PCoAs (or 16S
+  and metagenomic ones) of the same samples are. It gives the same
+  rotation, translation, dilation, residuals and m^2 as
+  `vegan::procrustes()` (and the same symmetric m^2 as SciPy’s
+  `scipy.spatial.procrustes()`), but takes its arguments as
+  `procrustes(ord, target)`: `vegan::procrustes(target, ord)`. vegan’s
+  `scale` is called `dilate`. Inputs may be `dist` objects, ordinated
+  with [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md)
+  first (`n_axes` axes), and samples are matched by name. The result is
+  the rotated ordination, with the rest as attributes. New
+  [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
+  runs the Procrustes randomization test (PROTEST), giving the same
+  statistic as `vegan::protest()` and the same p-values for the same
+  permutation matrix, in parallel C, with `strata`, and identical
+  results for any number of `cpus`.
+
+- New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   returns a count table after any of the transformations that
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),

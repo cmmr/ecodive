@@ -434,6 +434,57 @@ text(xy, labels = vec$variable, pos = 1, cex = 0.8)
 
 ![](ordination_files/figure-html/unnamed-chunk-20-1.png)
 
+## Comparing two ordinations
+
+[`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
+rotates, reflects and scales one ordination to fit another of the same
+samples, and reports how far apart they still are: the Procrustes sum of
+squares, m^2.
+[`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
+asks whether they agree better than chance (PROTEST), as
+`vegan::protest()` does. Here, Bray-Curtis and unweighted UniFrac PCoAs
+of 30 simulated samples of the six taxa in ecodive’s example tree, along
+a gradient that favours some taxa at one end and others at the other:
+
+``` r
+
+set.seed(1)
+taxa   <- colnames(ex_counts)
+grad   <- seq(-2, 2, length.out = 30)
+counts <- sapply(seq_along(taxa), function (j) rpois(30, 3 * exp(grad * (j - 3.5))))
+dimnames(counts) <- list(paste0('S', 1:30), taxa)
+
+bc <- pcoa(bray(counts), n_axes = 2)
+uf <- pcoa(unweighted_unifrac(counts, tree = ex_tree), n_axes = 2)
+
+fit <- procrustes(uf, bc, symmetric = TRUE)
+attr(fit, 'ss')
+#> [1] 0.4595868
+
+procrustes_test(uf, bc)
+#> Procrustes randomization test (PROTEST)
+#> 
+#> r = 0.7351, p = 0.001, z =  6.67
+#> Permutations: 999 (free)
+#> 
+#> Symmetric Procrustes sum of squares (m^2): 0.4596
+#> Samples: 30, axes: 2
+```
+
+The rotated UniFrac coordinates are the result itself, and the
+Bray-Curtis ones it was fitted to are its `target` attribute, so a line
+from each sample’s one point to the other shows where the two metrics
+disagree.
+
+``` r
+
+xy <- attr(fit, 'target')
+plot(xy, asp = 1, pch = 16, xlab = 'Axis 1', ylab = 'Axis 2')
+arrows(xy[, 1], xy[, 2], fit[, 1], fit[, 2], length = 0.05, col = 'grey40')
+```
+
+![](ordination_files/figure-html/unnamed-chunk-22-1.png)
+
 ## Speed and reproducibility
 
 Every method runs on all available cores by default; set `cpus` to use

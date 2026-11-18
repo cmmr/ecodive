@@ -274,6 +274,10 @@ count table itself, run by name with
 [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
 and [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) add
 arrows for the features or metadata that drive the axes.
+[`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
+and
+[`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
+compare two ordinations of the same samples.
 
 Four samples are too few to ordinate, so this example uses R’s built-in
 `iris` data: 150 flowers, four measurements each, and three species.
