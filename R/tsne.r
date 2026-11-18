@@ -22,7 +22,7 @@
 #'        symmetric numeric matrix of distances. Must not contain `NA`s or
 #'        negative values. Its scale doesn't matter (see "Scale").
 #'
-#' @param k   The number of dimensions. Default: `2`
+#' @param n_axes   The number of dimensions. Default: `2`
 #'
 #' @param perplexity   Roughly, how many neighbors each sample's
 #'        neighborhood counts. Must be at least 1; values above
@@ -42,7 +42,7 @@
 #'
 #' @param init   The starting layout: `"pcoa"` (the default), `"random"`, or
 #'        a numeric matrix with one row per sample, in the same order as
-#'        `dm`, and `k` columns, none of them constant (a constant column
+#'        `dm`, and `n_axes` columns, none of them constant (a constant column
 #'        could never move). See "Starting layout" below.
 #'
 #' @param max_iters   The most iterations to run, including the first 250 with
@@ -59,7 +59,7 @@
 #'
 #' @param seed   An integer seed for the random starting layout. The same
 #'        seed gives the same result. Not used when `init` is a matrix, nor
-#'        by a PCoA start with `k` axes. Default: `0`
+#'        by a PCoA start with `n_axes` axes. Default: `0`
 #'
 #' @return A numeric matrix with one row per sample and one column per
 #'   dimension, named `"TSNE1"`, `"TSNE2"`, etc., as described in "Ordination
@@ -108,11 +108,11 @@
 #'   \eqn{\lfloor 3 \times perplexity + 1 \rfloor} nearest neighbors only
 #'   (found exactly from `dm`), and is 0 for the rest.
 #' * The repulsion between points on the plot is computed from a tree of
-#'   cells: a quadtree for `k = 2`, an octree for `k = 3`, and a binary tree
-#'   for `k = 1`. A cell far enough away (see `theta`) acts as one point at
+#'   cells: a quadtree for `n_axes = 2`, an octree for `n_axes = 3`, and a binary tree
+#'   for `n_axes = 1`. A cell far enough away (see `theta`) acts as one point at
 #'   its center of mass.
 #'
-#' The tree only exists for up to 3 dimensions, so larger `k` always uses
+#' The tree only exists for up to 3 dimensions, so larger `n_axes` always uses
 #' the exact gradient. `gradient = "auto"` uses the exact gradient for up to
 #' 500 samples, where it is fast enough, and Barnes-Hut for more.
 #'
@@ -122,7 +122,7 @@
 #' Each sample needs at least \eqn{3 \times perplexity} neighbors, so
 #' `perplexity` is reduced to \eqn{(n - 1) / 3} when it is larger (but not
 #' below 1), with a warning if you set `perplexity` yourself. For example,
-#' 40 samples allow a perplexity of up to 13. `k` is used as given, even
+#' 40 samples allow a perplexity of up to 13. `n_axes` is used as given, even
 #' when it is \eqn{n} or more.
 #'
 #'
@@ -145,11 +145,11 @@
 #' **Starting layout**
 #'
 #' t-SNE only finds a local minimum, and which one depends on the starting
-#' layout. The default, `"pcoa"`, starts from the first `k` axes of
+#' layout. The default, `"pcoa"`, starts from the first `n_axes` axes of
 #' [pcoa()], scaled so that the first has a standard deviation of
 #' \eqn{10^{-4}}, as scikit-learn scales its PCA start: this keeps more of
 #' the data's global structure than a random start, and doesn't depend on a
-#' seed (Kobak & Linderman 2021). Without `k` axes with positive
+#' seed (Kobak & Linderman 2021). Without `n_axes` axes with positive
 #' eigenvalues, it starts at random instead. `"random"` draws each
 #' coordinate from a normal distribution with a standard deviation of
 #' \eqn{10^{-4}}, from `seed`.
@@ -191,9 +191,9 @@
 #'   runs that differ by that much end at different (but equally good)
 #'   layouts.
 #' * \eqn{q_{ij}} always has one degree of freedom. scikit-learn uses
-#'   \eqn{\max(k - 1, 1)}, i.e. 2 for `k = 3`, with a gradient that isn't
+#'   \eqn{\max(k - 1, 1)}, i.e. 2 for `n_axes = 3`, with a gradient that isn't
 #'   exactly the divergence's for more than one degree of freedom. For
-#'   `k = 1` and `k = 2`, the two agree.
+#'   `n_axes = 1` and `n_axes = 2`, the two agree.
 #' * The default start is PCoA. scikit-learn doesn't allow its PCA start with
 #'   precomputed distances, so starts at random there. Random starts come
 #'   from `seed` (see "Reproducibility"), so they differ from scikit-learn's.
@@ -211,7 +211,7 @@
 #'   merges points within \eqn{10^{-6}} of each other on every axis and
 #'   leaves out their repulsion from each other. A cell that holds the point
 #'   being moved is never summarized (scikit-learn's can be, when `theta` is
-#'   above \eqn{1/\sqrt{2}} for `k = 2`, or \eqn{1/\sqrt{3}} for `k = 3`).
+#'   above \eqn{1/\sqrt{2}} for `n_axes = 2`, or \eqn{1/\sqrt{3}} for `n_axes = 3`).
 #' * Nearest neighbors with equal distances are chosen by sample order.
 #' * The gradient and the divergence leave out scikit-learn's lower limits on
 #'   \eqn{q_{ij}} (\eqn{2.2 \times 10^{-16}} for the exact gradient, and
@@ -285,14 +285,14 @@
 #'     str(ord)
 #'
 tsne <- function (
-    dm, k = 2L, perplexity = 30, theta = 0.5, gradient = 'auto',
+    dm, n_axes = 2L, perplexity = 30, theta = 0.5, gradient = 'auto',
     init = 'pcoa', max_iters = 1000L, early_exaggeration = 12,
     learning_rate = 'auto', seed = 0L, cpus = n_cpus() ) {
 
   validate_cpus()
   validate_seed()
 
-  k          <- ord_k(k)
+  k          <- ord_k(n_axes)
   perp_given <- !missing(perplexity)
   perplexity <- ord_arg(perplexity, '`perplexity` must be a number of at least 1.', lo = 1)
   theta      <- ord_arg(theta,      '`theta` must be a number from 0 to 1.', hi = 1)
@@ -308,7 +308,7 @@ tsne <- function (
   if (!is.character(gradient) || length(gradient) != 1 || !gradient %in% choices)
     stop('`gradient` must be "auto", "exact", or "barnes_hut".', call. = FALSE)
   if (gradient == 'barnes_hut' && k > 3)
-    stop('`gradient = "barnes_hut"` supports at most k = 3 dimensions.', call. = FALSE)
+    stop('`gradient = "barnes_hut"` supports at most `n_axes = 3` dimensions.', call. = FALSE)
 
   ia       <- ord_init_arg(init, c('pcoa', 'random'))
   init     <- ia$init
@@ -322,7 +322,7 @@ tsne <- function (
 
   # Coordinates (n x k) are indexed with ints in C.
   if (as.double(n) * k > .Machine$integer.max)
-    stop('`k` is too large: ', n, ' samples times `k` dimensions must be ',
+    stop('`n_axes` is too large: ', n, ' samples times `n_axes` dimensions must be ',
          'at most ', .Machine$integer.max, '.', call. = FALSE)
 
   if (!is.null(init_mtx)) {

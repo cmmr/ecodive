@@ -8,9 +8,9 @@
   # Same as calling the method's function. ====
 
   expect_identical(count_ord(m, 'pca', cpus = 1),                pca(m, cpus = 1))
-  expect_identical(count_ord(m, 'pca', k = 2, norm = 'clr', pseudocount = 1, cpus = 1),
-                   pca(m, k = 2, norm = 'clr', pseudocount = 1, cpus = 1))
-  expect_identical(count_ord(m, 'rpca', k = 2, cpus = 1),        rpca(m, k = 2, cpus = 1))
+  expect_identical(count_ord(m, 'pca', n_axes = 2, norm = 'clr', pseudocount = 1, cpus = 1),
+                   pca(m, n_axes = 2, norm = 'clr', pseudocount = 1, cpus = 1))
+  expect_identical(count_ord(m, 'rpca', n_axes = 2, cpus = 1),        rpca(m, n_axes = 2, cpus = 1))
   expect_identical(count_ord(counts = m, method = 'pca', cpus = 1), pca(m, cpus = 1))
 
   # Arguments the method doesn't take are an error, except `seed`, which is
@@ -20,7 +20,7 @@
 
   # Every method returns the common attributes first, in the same order.
   for (id in list_count_ords(val = 'id')) {
-    ord <- count_ord(m, id, k = 2, seed = 1, cpus = 1)
+    ord <- count_ord(m, id, n_axes = 2, seed = 1, cpus = 1)
     expect_true(is.matrix(ord) && is.double(ord), info = id)
     expect_identical(rownames(ord), rownames(m), info = id)
     expect_identical(names(attributes(ord))[1:5], c('dim', 'dimnames', 'method', 'eig', 'prop'), info = id)

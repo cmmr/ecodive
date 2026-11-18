@@ -16,7 +16,7 @@
 #' @return A numeric matrix with one row per sample and one column per axis,
 #'   as described in "Ordination result" below. Constrained axes come first,
 #'   named `"CAP1"`, `"CAP2"`, etc., then, if the constraints give fewer than
-#'   `k` of them, unconstrained axes named `"MDS1"`, `"MDS2"`, etc. The values
+#'   `n_axes` of them, unconstrained axes named `"MDS1"`, `"MDS2"`, etc. The values
 #'   are `vegan`'s site scores ("wa" scores, scaling 2), as for [dbrda()].
 #'   Its attributes are:
 #'
@@ -148,10 +148,10 @@
 #'     str(ord)
 #'
 capscale <- function (
-    dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus() ) {
+    dm, groups, data = NULL, formula = NULL, n_axes = 3L, cpus = n_cpus() ) {
 
   validate_cpus()
-  k <- ord_k(k)
+  k <- ord_k(n_axes)
 
   no_groups <- missing(groups)
   constrained_ord(

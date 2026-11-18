@@ -17,7 +17,7 @@
 #' @param dm  A `dist` object, such as from [beta_div()] or [bray()], or a
 #'        symmetric numeric matrix of distances. Must not contain `NA`s.
 #'
-#' @param k   The number of dimensions. Default: `2`
+#' @param n_axes   The number of dimensions. Default: `2`
 #'
 #' @param n_neighbors   How many nearest neighbours of each sample (counting
 #'        the sample itself) to use. Larger values preserve more of the
@@ -57,7 +57,7 @@
 #'
 #' @param init   The starting coordinates: `"spectral"` (the default),
 #'        `"pcoa"`, `"random"`, or a numeric matrix with one row per sample
-#'        and `k` columns. See "Starting coordinates" below.
+#'        and `n_axes` columns. See "Starting coordinates" below.
 #'
 #' @param seed   An integer seed for the random parts of the method: the
 #'        negative samples, random starting coordinates, and the small
@@ -131,7 +131,7 @@
 #'   deviation 0.0001. When the graph is not connected, the `"pcoa"` start is
 #'   used instead, scaled to standard deviation 1, and with fewer than 3
 #'   samples (or \eqn{k > n - 2}), the `"random"` one, as in `uwot::umap()`.
-#' * `"pcoa"`: The first `k` axes of [pcoa()], each centered and scaled to
+#' * `"pcoa"`: The first `n_axes` axes of [pcoa()], each centered and scaled to
 #'   standard deviation 0.0001 (`uwot::umap()`'s `"spca"`).
 #' * `"random"`: Coordinates uniform on \[-10, 10).
 #' * A matrix: Used as is.
@@ -206,7 +206,7 @@
 #'     str(ord)
 #'
 umap <- function (
-    dm, k = 2L, n_neighbors = 15L, min_dist = 0.1, spread = 1,
+    dm, n_axes = 2L, n_neighbors = 15L, min_dist = 0.1, spread = 1,
     n_epochs = NULL, learning_rate = 1, negative_sample_rate = 5,
     repulsion_strength = 1, set_op_mix_ratio = 1, local_connectivity = 1,
     bandwidth = 1, init = 'spectral', seed = 0L, cpus = n_cpus() ) {
@@ -214,7 +214,7 @@ umap <- function (
   validate_cpus()
   validate_seed()
 
-  k           <- ord_k(k)
+  k           <- ord_k(n_axes)
   n_neighbors <- ord_arg(n_neighbors, '`n_neighbors` must be a whole number of at least 2.', whole = TRUE, lo = 2)
   min_dist    <- ord_arg(min_dist, '`min_dist` must be a number of at least 0.')
   spread      <- ord_arg(spread, '`spread` must be a number greater than 0.', lo = .Machine$double.xmin)
@@ -248,7 +248,7 @@ umap <- function (
   # Coordinates (n x k) and the graph's edges (up to 2n(n_neighbors - 1))
   # are indexed with ints in C.
   if (as.double(n) * k > .Machine$integer.max)
-    stop('`k` is too large: ', n, ' samples times `k` dimensions must be ',
+    stop('`n_axes` is too large: ', n, ' samples times `n_axes` dimensions must be ',
          'at most ', .Machine$integer.max, '.', call. = FALSE)
   if (2 * as.double(n) * (min(n_neighbors, n) - 1) > .Machine$integer.max)
     stop('`n_neighbors` is too large for ', n, ' samples.', call. = FALSE)

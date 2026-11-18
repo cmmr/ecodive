@@ -6,7 +6,7 @@
 \usage{
 umap(
   dm,
-  k = 2L,
+  n_axes = 2L,
   n_neighbors = 15L,
   min_dist = 0.1,
   spread = 1,
@@ -26,7 +26,7 @@ umap(
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
 symmetric numeric matrix of distances. Must not contain \code{NA}s.}
 
-\item{k}{The number of dimensions. Default: \code{2}}
+\item{n_axes}{The number of dimensions. Default: \code{2}}
 
 \item{n_neighbors}{How many nearest neighbours of each sample (counting
 the sample itself) to use. Larger values preserve more of the
@@ -66,7 +66,7 @@ are assumed to be fully connected to it. Default: \code{1}}
 
 \item{init}{The starting coordinates: \code{"spectral"} (the default),
 \code{"pcoa"}, \code{"random"}, or a numeric matrix with one row per sample
-and \code{k} columns. See "Starting coordinates" below.}
+and \code{n_axes} columns. See "Starting coordinates" below.}
 
 \item{seed}{An integer seed for the random parts of the method: the
 negative samples, random starting coordinates, and the small
@@ -151,7 +151,7 @@ largest absolute coordinate is 10, plus normal noise with standard
 deviation 0.0001. When the graph is not connected, the \code{"pcoa"} start is
 used instead, scaled to standard deviation 1, and with fewer than 3
 samples (or \eqn{k > n - 2}), the \code{"random"} one, as in \code{uwot::umap()}.
-\item \code{"pcoa"}: The first \code{k} axes of \code{\link[=pcoa]{pcoa()}}, each centered and scaled to
+\item \code{"pcoa"}: The first \code{n_axes} axes of \code{\link[=pcoa]{pcoa()}}, each centered and scaled to
 standard deviation 0.0001 (\code{uwot::umap()}'s \code{"spca"}).
 \item \code{"random"}: Coordinates uniform on [-10, 10).
 \item A matrix: Used as is.

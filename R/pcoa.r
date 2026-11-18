@@ -17,7 +17,7 @@
 #'        symmetric numeric matrix of distances. Must not contain `NA`s or
 #'        negative values.
 #'
-#' @param k   The number of axes to compute. Default: `3`. Reduced, with a
+#' @param n_axes   The number of axes to compute. Default: `3`. Reduced, with a
 #'        warning, to the number of axes with positive eigenvalues, which is
 #'        at most \eqn{n - 1} for \eqn{n} samples.
 #'
@@ -57,7 +57,7 @@
 #'
 #' `cmdscale()`, `ape::pcoa()`, and `vegan::wcmdscale()` build \eqn{B} in full
 #' (\eqn{n \times n}) and compute all \eqn{n} of its eigenvalues, which takes
-#' time proportional to \eqn{n^3}. `pcoa()` finds only the largest `k`
+#' time proportional to \eqn{n^3}. `pcoa()` finds only the largest `n_axes`
 #' eigenvalues, by block Lanczos iteration with thick restarts. That only needs
 #' products of \eqn{B} with a few vectors at a time, which are computed in
 #' parallel straight from `dm`, without ever forming \eqn{B}.
@@ -112,7 +112,7 @@
 #' `correction = 'none'`. (`ape` and `vegan` correct those tiny negative
 #' eigenvalues too, so they can add a tiny constant where `pcoa()` adds 0.)
 #'
-#' With `k` = \eqn{n - 1}, the axis whose eigenvalue the correction makes 0
+#' With `n_axes` = \eqn{n - 1}, the axis whose eigenvalue the correction makes 0
 #' is dropped without a warning.
 #'
 #'
@@ -164,7 +164,7 @@
 #' largest coordinate in absolute value is positive. Results are identical
 #' from run to run and for any number of `cpus`.
 #'
-#' `k` larger than \eqn{n - 1} (the most axes possible) is reduced to
+#' `n_axes` larger than \eqn{n - 1} (the most axes possible) is reduced to
 #' \eqn{n - 1}.
 #'
 #' @references
@@ -203,10 +203,10 @@
 #'     head(ord)
 #'     str(ord)
 #'
-pcoa <- function (dm, k = 3L, correction = 'none', cpus = n_cpus()) {
+pcoa <- function (dm, n_axes = 3L, correction = 'none', cpus = n_cpus()) {
 
   validate_cpus()
-  k <- ord_k(k)
+  k <- ord_k(n_axes)
 
   if (!is.character(correction) || length(correction) != 1 || is.na(correction) ||
       is.na(correction <- pmatch(correction, c('none', 'lingoes', 'cailliez'))))

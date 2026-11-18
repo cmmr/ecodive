@@ -4,7 +4,7 @@
 \alias{capscale}
 \title{Constrained Analysis of Principal Coordinates (capscale)}
 \usage{
-capscale(dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus())
+capscale(dm, groups, data = NULL, formula = NULL, n_axes = 3L, cpus = n_cpus())
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
@@ -40,7 +40,7 @@ after removing their effect. A left-hand side, if given, is
 ignored. Give \code{groups} or \code{formula}: there is no default model.
 Default: \code{NULL}.}
 
-\item{k}{The number of axes to return. Default: \code{3}. Reduced, with a
+\item{n_axes}{The number of axes to return. Default: \code{3}. Reduced, with a
 warning, to the number of axes with positive eigenvalues, which is
 at most \eqn{n - 1} for \eqn{n} samples.}
 
@@ -51,7 +51,7 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 A numeric matrix with one row per sample and one column per axis,
 as described in "Ordination result" below. Constrained axes come first,
 named \code{"CAP1"}, \code{"CAP2"}, etc., then, if the constraints give fewer than
-\code{k} of them, unconstrained axes named \code{"MDS1"}, \code{"MDS2"}, etc. The values
+\code{n_axes} of them, unconstrained axes named \code{"MDS1"}, \code{"MDS2"}, etc. The values
 are \code{vegan}'s site scores ("wa" scores, scaling 2), as for \code{\link[=dbrda]{dbrda()}}.
 Its attributes are:
 \itemize{

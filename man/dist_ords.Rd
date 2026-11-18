@@ -6,12 +6,11 @@
 \title{Find and Browse Distance-based Ordination Methods}
 \usage{
 list_dist_ords(
-  val = c("data.frame", "list", "func", "id", "name", "input"),
-  nm = c(NA, "id", "name"),
-  input = NULL
+  val = c("data.frame", "list", "func", "id", "name"),
+  nm = c(NA, "id", "name")
 )
 
-match_dist_ord(method, input = NULL)
+match_dist_ord(method)
 }
 \arguments{
 \item{val}{Sets the return value for this function call. See "Value"
@@ -20,9 +19,6 @@ section below. Default: \code{"data.frame"}}
 \item{nm}{What value to use for the names of the returned object.
 Default is \code{"id"} when \code{val} is \code{"list"} or \code{"func"}, otherwise the
 default is \code{NA} (no name).}
-
-\item{input}{Filter by the kind of data the method takes: \code{"dist"}
-for distances. Default: \code{NULL} (no filtering).}
 
 \item{method}{The name of an ordination method to search for. Supports
 partial matching. All non-alpha characters are ignored.}
@@ -34,9 +30,8 @@ A \code{list} with the following elements.
 \itemize{
 \item \code{name} : Method name, e.g. \code{"Principal Coordinates Analysis"}
 \item \code{id} : Method ID - also the name of the function, e.g. \code{"pcoa"}
-\item \code{input} : The kind of data the method takes, e.g. \code{"dist"}.
 \item \code{func} : The function for this method, e.g. \code{ecodive::pcoa}
-\item \code{params} : Formal args for \code{func}, e.g. \code{c("dm", "k", "cpus")}
+\item \code{params} : Formal args for \code{func}, e.g. \code{c("dm", "n_axes", "cpus")}
 }
 
 \strong{\code{list_dist_ords()}}
@@ -49,7 +44,6 @@ The returned object's type and values are controlled with the \code{val} and
 \item \code{val = "func"} : A list of functions.
 \item \code{val = "id"} : A character vector of method IDs.
 \item \code{val = "name"} : A character vector of method names.
-\item \code{val = "input"} : A character vector of the kinds of data each method takes.
 }
 
 If \code{nm} is set, then the names of the vector or list will be the method ID

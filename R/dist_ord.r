@@ -3,8 +3,9 @@
 
 
 
-# Ordination methods. `input` is what each method's function takes as `x`:
-# "dist" for a dist object (or symmetric matrix) of beta diversity distances.
+# Ordination methods that take distances (a dist object or a symmetric
+# matrix of beta diversity distances). Methods that take a count table are
+# in COUNT_ORDS (count_ord.r).
 ORDINATIONS <- local({
 
   df <- read.table(
@@ -15,15 +16,15 @@ ORDINATIONS <- local({
     stringsAsFactors = FALSE,
     na.strings       = "",
     text             = "
-      name,                                id,   input, alt_ids
-      Constrained Analysis of Principal Coordinates, capscale, dist, cap constrainedanalysisofprincipalcoordinates
-      Distance-based Redundancy Analysis,  dbrda, dist, distancebasedrda
-      Isometric Feature Mapping,           isomap, dist, isometricmapping
-      Metric Multidimensional Scaling,     mds,  dist,  metricmds
-      Non-metric Multidimensional Scaling, nmds, dist,  nonmetricmds metamds monomds isomds
-      Principal Coordinates Analysis,      pcoa, dist,  pco cmdscale classicalmds
-      t-distributed Stochastic Neighbor Embedding, tsne, dist, rtsne bhtsne barneshuttsne
-      Uniform Manifold Approximation and Projection, umap, dist, uwot
+      name,                                id,   alt_ids
+      Constrained Analysis of Principal Coordinates, capscale, cap constrainedanalysisofprincipalcoordinates
+      Distance-based Redundancy Analysis,  dbrda, distancebasedrda
+      Isometric Feature Mapping,           isomap, isometricmapping
+      Metric Multidimensional Scaling,     mds,  metricmds
+      Non-metric Multidimensional Scaling, nmds, nonmetricmds metamds monomds isomds
+      Principal Coordinates Analysis,      pcoa, pco cmdscale classicalmds
+      t-distributed Stochastic Neighbor Embedding, tsne, rtsne bhtsne barneshuttsne
+      Uniform Manifold Approximation and Projection, umap, uwot
   " )
 
   return (df)
@@ -48,7 +49,7 @@ ORDINATIONS <- local({
 #'        or `"umap"`. Flexible matching is supported (see below).
 #'        Programmatic access via `list_dist_ords()`.
 #'
-#' @param ...   Further arguments for the method's function, such as `k`,
+#' @param ...   Further arguments for the method's function, such as `n_axes`,
 #'        `seed`, `cpus`, or `pcoa`'s `correction`. Each method keeps its own
 #'        defaults; see [capscale()] and [dbrda()] (which also need `groups`,
 #'        or `data` and `formula`, as in `dist_ord(dm, 'dbrda', 'treatment',
@@ -82,9 +83,10 @@ ORDINATIONS <- local({
 #' features' loadings and never forms the distance matrix. [permanova()] and
 #' ecodive's other tests are run by [dist_test()].
 #'
-#' Default numbers of axes differ: `k = 3` for `capscale`, `dbrda`, `pcoa` (and
-#' [pca()], [rpca()]), and `k = 2` for `isomap`, `mds`, `nmds`, `tsne`, and
-#' `umap`.
+#' Default numbers of axes differ: `n_axes = 3` for the methods whose axes
+#' have eigenvalues (`capscale`, `dbrda`, `isomap`, `pcoa`, and [pca()] and
+#' [rpca()]), and `n_axes = 2` for those that fit a layout in a fixed number
+#' of dimensions (`mds`, `nmds`, `tsne`, and `umap`).
 #'
 #'
 #' **Flexible name matching**
@@ -152,9 +154,6 @@ dist_ord <- function (dm, method, ...) {
 #'        Default is `"id"` when `val` is `"list"` or `"func"`, otherwise the
 #'        default is `NA` (no name).
 #'
-#' @param input   Filter by the kind of data the method takes: `"dist"`
-#'        for distances. Default: `NULL` (no filtering).
-#'
 #' @return
 #'
 #' **`match_dist_ord()`**
@@ -163,9 +162,8 @@ dist_ord <- function (dm, method, ...) {
 #'
 #' * `name` : Method name, e.g. `"Principal Coordinates Analysis"`
 #' * `id` : Method ID - also the name of the function, e.g. `"pcoa"`
-#' * `input` : The kind of data the method takes, e.g. `"dist"`.
 #' * `func` : The function for this method, e.g. `ecodive::pcoa`
-#' * `params` : Formal args for `func`, e.g. `c("dm", "k", "cpus")`
+#' * `params` : Formal args for `func`, e.g. `c("dm", "n_axes", "cpus")`
 #'
 #'
 #' **`list_dist_ords()`**
@@ -178,7 +176,6 @@ dist_ord <- function (dm, method, ...) {
 #' * `val = "func"` : A list of functions.
 #' * `val = "id"` : A character vector of method IDs.
 #' * `val = "name"` : A character vector of method names.
-#' * `val = "input"` : A character vector of the kinds of data each method takes.
 #'
 #' If `nm` is set, then the names of the vector or list will be the method ID
 #' (`nm="id"`) or name (`nm="name"`). When `val="data.frame"`, the names will
@@ -198,28 +195,15 @@ dist_ord <- function (dm, method, ...) {
 #'     m$id
 #'
 list_dist_ords <- function (
-    val   = c('data.frame', 'list', 'func', 'id', 'name', 'input'),
-    nm    = c(NA, 'id', 'name'),
-    input = NULL ) {
+    val = c('data.frame', 'list', 'func', 'id', 'name'),
+    nm  = c(NA, 'id', 'name') ) {
 
   val <- match.arg(val)
 
   if (missing(nm)) { nm <- ifelse(val %in% c('list', 'func'), 'id', NA) }
   else             { nm <- match.arg(nm)                                }
 
-
   df <- ORDINATIONS
-
-  if (!is.null(input)) {
-
-    if (length(bad <- setdiff(input, ORDINATIONS$input)) > 0)
-      stop(
-        "Invalid value for `input`: ", paste(collapse = ", ", bad), "\n",
-        "Options are: NULL, ", paste(collapse = ", ", sort(unique(ORDINATIONS$input))), "." )
-
-    df <- df[df$input %in% input,, drop = FALSE]
-  }
-
 
   if (val == 'data.frame') {
     if (!is.na(nm)) rownames(df) <- df[[nm]]
@@ -248,13 +232,13 @@ list_dist_ords <- function (
 #' @rdname dist_ords
 #' @export
 #'
-match_dist_ord <- function (method, input = NULL) {
+match_dist_ord <- function (method) {
 
   if (!is.character(method)) stop('`method` must be a character vector')
   if (length(method) != 1)   stop('`method` must be length 1')
   if (is.na(method))         stop('`method` must not be NA')
 
-  df <- list_dist_ords(input = input)
+  df <- ORDINATIONS
 
   # Exact match
   if (method %in% df$id)

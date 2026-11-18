@@ -12,7 +12,7 @@
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It
   gives the same coordinates and eigenvalues as `cmdscale()`, `ape::pcoa()`,
   and `vegan::wcmdscale()` (up to each axis's sign), but computes only the
-  first few axes (`k = 3` by default), in parallel C, without forming an
+  first few axes (`n_axes = 3` by default), in parallel C, without forming an
   n-by-n matrix. Its results are identical for any number of `cpus`.
   `correction = "lingoes"` or `"cailliez"` adds the smallest constant to the
   squared distances, or to the distances, that leaves no negative eigenvalue,
@@ -28,6 +28,13 @@
   `pcoa_biplot()`, in parallel C, keeps sparse tables sparse, and takes every
   table type and `norm` that `pca()` does. `envfit()` gives the same
   directions with permutation tests.
+
+* Every ordination function takes the number of axes to return as `n_axes`
+  (3 by default for the methods whose axes have eigenvalues: `pcoa()`,
+  `pca()`, `rpca()`, `dbrda()`, `capscale()` and `isomap()`; 2 for `mds()`,
+  `nmds()`, `tsne()` and `umap()`). The name says what it counts; `k`, as
+  `cmdscale()` and vegan call it, often means a number of neighbours in
+  these methods.
 
 * New `dist_ord()` runs any distance-based ordination method by name, as
   `beta_div()` does for beta diversity metrics and `dist_test()` does for
@@ -73,7 +80,7 @@
   geodesic distances and embedding to rounding, breaks ties by sample order,
   and joins disconnected neighbor graphs at their closest samples, with a
   warning (`vegan::isomap()` stops instead; note that its `k` is the number
-  of neighbors, while `isomap()`'s `k` is the number of axes). The neighbor
+  of neighbors, while `isomap()`'s `n_axes` is the number of axes). The neighbor
   and shortest-path searches run in parallel without an n-by-n matrix, and
   results are identical for any number of `cpus`.
 
@@ -203,7 +210,7 @@
   axis's sign; not `vegan::capscale()`, which differs for non-Euclidean
   distances), without forming an n-by-n matrix: the constrained axes come from
   a small eigenproblem, and unconstrained axes (`MDS1`, ...) are only computed
-  when the constraints give fewer than `k` axes. Its results are identical for
+  when the constraints give fewer than `n_axes` axes. Its results are identical for
   any number of `cpus`. As in `vegan`, `dbrda(dm ~ treatment, data)` works
   too, and a formula of only `Condition()` terms gives the unconstrained
   ordination after removing their effect.

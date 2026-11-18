@@ -179,7 +179,7 @@ random permutations.
 }
 \examples{
     dm  <- bray(iris[, 1:4])
-    ord <- pcoa(dm, k = 2)
+    ord <- pcoa(dm, n_axes = 2)
 
     # An arrow for each measurement, a centroid for each species.
     fit <- envfit(ord, iris)

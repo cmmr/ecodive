@@ -43,7 +43,7 @@
 
   # Arguments that do pass through, by name, reach the method.
   dm <- bray(iris[1:30, 1:4])
-  expect_identical(dist_ord(dm, 'pcoa', k = 2, cpus = 1), pcoa(dm, k = 2, cpus = 1))
+  expect_identical(dist_ord(dm, 'pcoa', n_axes = 2, cpus = 1), pcoa(dm, n_axes = 2, cpus = 1))
   expect_identical(
     dist_test(dm, 'mantel', iris$Petal.Width[1:30], method = 'spearman', permutations = 9, cpus = 1),
     mantel(dm, iris$Petal.Width[1:30], method = 'spearman', permutations = 9, cpus = 1) )

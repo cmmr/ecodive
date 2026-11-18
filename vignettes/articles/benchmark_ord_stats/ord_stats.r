@@ -31,7 +31,7 @@ n      <- nrow(counts)
 dm     <- ecodive::bray(counts, cpus = CPUS)      # Bray-Curtis distances
 age_dm <- dist(meta$age)                          # age differences
 clr    <- log(counts + 1); clr <- clr - rowMeans(clr)  # CLR, pseudocount 1
-ord    <- ecodive::pcoa(dm, k = 2L, cpus = CPUS)  # an ordination for envfit
+ord    <- ecodive::pcoa(dm, n_axes = 2L, cpus = CPUS)  # an ordination for envfit
 
 # One shared set of 999 permutations, so that ecodive and vegan test the very
 # same permuted data sets and their p-values can be compared exactly.
@@ -106,14 +106,14 @@ results <- list()
 
 results$pcoa <- timed(
   'PCoA', iterations = 10,
-  'ecodive' = ecodive::pcoa(dm, k = 3, cpus = CPUS),
+  'ecodive' = ecodive::pcoa(dm, n_axes = 3, cpus = CPUS),
   'stats'   = stats::cmdscale(dm, k = 3, eig = TRUE),
   'ape'     = ape::pcoa(dm),
   'vegan'   = vegan::wcmdscale(dm, k = 3, eig = TRUE),
   'labdsv'  = labdsv::pco(dm, k = 3),
   'ecodist' = ecodist::pco(dm) )
 
-x  <- ecodive::pcoa(dm, k = 3, cpus = CPUS)
+x  <- ecodive::pcoa(dm, n_axes = 3, cpus = CPUS)
 cm <- stats::cmdscale(dm, k = 3, eig = TRUE)
 ap <- ape::pcoa(dm)
 agree('PCoA', 'stats::cmdscale', 'scores (3 axes)',     rel_diff_signed(x, cm$points))
@@ -124,12 +124,12 @@ agree('PCoA', 'ape::pcoa',       'variance explained',  rel_diff(attr(x, 'prop')
 
 results$pcoa_cailliez <- timed(
   'PCoA (Cailliez)', iterations = 3,
-  'ecodive' = ecodive::pcoa(dm, k = 3, correction = 'cailliez', cpus = CPUS),
+  'ecodive' = ecodive::pcoa(dm, n_axes = 3, correction = 'cailliez', cpus = CPUS),
   'stats'   = stats::cmdscale(dm, k = 3, eig = TRUE, add = TRUE),
   'ape'     = ape::pcoa(dm, correction = 'cailliez'),
   'vegan'   = vegan::wcmdscale(dm, k = 3, eig = TRUE, add = 'cailliez') )
 
-x  <- ecodive::pcoa(dm, k = 3, correction = 'cailliez', cpus = CPUS)
+x  <- ecodive::pcoa(dm, n_axes = 3, correction = 'cailliez', cpus = CPUS)
 vg <- vegan::wcmdscale(dm, k = 3, eig = TRUE, add = 'cailliez')
 agree('PCoA (Cailliez)', 'vegan::wcmdscale', 'constant',        rel_diff(attr(x, 'constant'), vg$ac))
 agree('PCoA (Cailliez)', 'vegan::wcmdscale', 'scores (3 axes)', rel_diff_signed(x, vg$points))
@@ -247,13 +247,13 @@ agree('capscale', 'vegan::capscale', 'R-squared',               rel_diff(attr(x,
 
 results$pca <- timed(
   'PCA', iterations = 10,
-  'ecodive' = ecodive::pca(counts, norm = 'clr', pseudocount = 1, k = 3, cpus = CPUS),
+  'ecodive' = ecodive::pca(counts, norm = 'clr', pseudocount = 1, n_axes = 3, cpus = CPUS),
   'stats'   = stats::prcomp(clr, rank. = 3),
   'irlba'   = irlba::prcomp_irlba(clr, n = 3),
   'vegan'   = vegan::rda(clr),
   'ade4'    = ade4::dudi.pca(clr, scale = FALSE, scannf = FALSE, nf = 3) )
 
-x  <- ecodive::pca(counts, norm = 'clr', pseudocount = 1, k = 3, cpus = CPUS)
+x  <- ecodive::pca(counts, norm = 'clr', pseudocount = 1, n_axes = 3, cpus = CPUS)
 pr <- stats::prcomp(clr, rank. = 3)
 agree('PCA', 'stats::prcomp', 'scores (3 axes)',   rel_diff_signed(x, pr$x))
 agree('PCA', 'stats::prcomp', 'loadings (3 axes)', rel_diff_signed(attr(x, 'loadings'), pr$rotation))
@@ -291,12 +291,12 @@ agree('envfit', 'vegan::envfit', 'p-values', same_p(x1$p_value, unname(vg_p)))
 
 results$nmds <- timed(
   'NMDS', iterations = 3,
-  'ecodive' = ecodive::nmds(dm, k = 2, n_starts = 4, seed = 1, cpus = CPUS),
+  'ecodive' = ecodive::nmds(dm, n_axes = 2, n_starts = 4, seed = 1, cpus = CPUS),
   'vegan'   = vegan::metaMDS(dm, k = 2, try = 3, trymax = 3, parallel = CPUS, trace = 0),
   'MASS'    = MASS::isoMDS(dm, k = 2, trace = FALSE),
   'smacof'  = smacof::smacofSym(dm, ndim = 2, type = 'ordinal') )
 
-x  <- ecodive::nmds(dm, k = 2, n_starts = 4, seed = 1, cpus = CPUS)
+x  <- ecodive::nmds(dm, n_axes = 2, n_starts = 4, seed = 1, cpus = CPUS)
 vg <- vegan::metaMDS(dm, k = 2, try = 3, trymax = 3, parallel = CPUS, trace = 0)
 ms <- MASS::isoMDS(dm, k = 2, trace = FALSE)
 agree('NMDS', 'vegan::metaMDS', 'stress (ecodive vs vegan)', sprintf('%.4f vs %.4f', attr(x, 'stress'), vg$stress))
@@ -306,10 +306,10 @@ agree('NMDS', 'vegan::metaMDS', 'Procrustes correlation',    procrustes_r(vg$poi
 
 results$mds <- timed(
   'Metric MDS', iterations = 3,
-  'ecodive' = ecodive::mds(dm, k = 2, n_starts = 4, seed = 1, cpus = CPUS),
+  'ecodive' = ecodive::mds(dm, n_axes = 2, n_starts = 4, seed = 1, cpus = CPUS),
   'smacof'  = smacof::smacofSym(dm, ndim = 2, type = 'ratio') )
 
-x  <- ecodive::mds(dm, k = 2, n_starts = 4, seed = 1, cpus = CPUS)
+x  <- ecodive::mds(dm, n_axes = 2, n_starts = 4, seed = 1, cpus = CPUS)
 sm <- smacof::smacofSym(dm, ndim = 2, type = 'ratio')
 agree('Metric MDS', 'smacof::smacofSym', 'stress-1 (ecodive vs smacof)', sprintf('%.4f vs %.4f', attr(x, 'stress'), sm$stress))
 agree('Metric MDS', 'smacof::smacofSym', 'Procrustes correlation',       procrustes_r(sm$conf, x))
@@ -317,20 +317,20 @@ agree('Metric MDS', 'smacof::smacofSym', 'Procrustes correlation',       procrus
 
 results$isomap <- timed(
   'Isomap', iterations = 5,
-  'ecodive' = ecodive::isomap(dm, k = 2, n_neighbors = 15, cpus = CPUS),
-  'vegan'   = vegan::isomap(dm, ndim = 2, k = 15) )
+  'ecodive' = ecodive::isomap(dm, n_axes = 2, n_neighbors = 15, cpus = CPUS),
+  'vegan'   = vegan::isomap(dm, ndim = 2, n_axes = 15) )
 
-x  <- ecodive::isomap(dm, k = 2, n_neighbors = 15, cpus = CPUS)
-vg <- vegan::isomap(dm, ndim = 2, k = 15)
+x  <- ecodive::isomap(dm, n_axes = 2, n_neighbors = 15, cpus = CPUS)
+vg <- vegan::isomap(dm, ndim = 2, n_axes = 15)
 agree('Isomap', 'vegan::isomap', 'scores (2 axes)', rel_diff_signed(x, vg$points))
 
 
 results$tsne <- timed(
   't-SNE', iterations = 5,
-  'ecodive' = ecodive::tsne(dm, k = 2, seed = 1, cpus = CPUS),
+  'ecodive' = ecodive::tsne(dm, n_axes = 2, seed = 1, cpus = CPUS),
   'Rtsne'   = Rtsne::Rtsne(dm, dims = 2, is_distance = TRUE, pca = FALSE, num_threads = CPUS) )
 
-x  <- ecodive::tsne(dm, k = 2, seed = 1, cpus = CPUS)
+x  <- ecodive::tsne(dm, n_axes = 2, seed = 1, cpus = CPUS)
 set.seed(1)
 rt <- Rtsne::Rtsne(dm, dims = 2, is_distance = TRUE, pca = FALSE, num_threads = CPUS)
 agree('t-SNE', 'Rtsne::Rtsne', 'KL divergence (ecodive vs Rtsne)', sprintf('%.3f vs %.3f', attr(x, 'kl_divergence'), tail(rt$itercosts, 1)))
@@ -339,10 +339,10 @@ agree('t-SNE', 'Rtsne::Rtsne', '15-NN kept (ecodive vs Rtsne)',    sprintf('%.3f
 
 results$umap <- timed(
   'UMAP', iterations = 5,
-  'ecodive' = ecodive::umap(dm, k = 2, seed = 1, cpus = CPUS),
+  'ecodive' = ecodive::umap(dm, n_axes = 2, seed = 1, cpus = CPUS),
   'uwot'    = uwot::umap(dm, n_components = 2, min_dist = 0.1, batch = TRUE, n_threads = CPUS, n_sgd_threads = CPUS, seed = 1) )
 
-x  <- ecodive::umap(dm, k = 2, seed = 1, cpus = CPUS)
+x  <- ecodive::umap(dm, n_axes = 2, seed = 1, cpus = CPUS)
 uw <- uwot::umap(dm, n_components = 2, min_dist = 0.1, batch = TRUE, n_threads = CPUS, n_sgd_threads = CPUS, seed = 1)
 agree('UMAP', 'uwot::umap', '15-NN kept (ecodive vs uwot)', sprintf('%.3f vs %.3f', nn_kept(x), nn_kept(uw)))
 

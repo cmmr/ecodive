@@ -73,8 +73,8 @@
 #'     rowSums(clr)  # 0 for every sample
 #'
 #'     # The same values as pca()'s own normalization
-#'     a <- pca(ex_counts, norm = 'clr', pseudocount = 1, k = 2)
-#'     b <- pca(clr, k = 2)
+#'     a <- pca(ex_counts, norm = 'clr', pseudocount = 1, n_axes = 2)
+#'     b <- pca(clr, n_axes = 2)
 #'     all.equal(a, b)
 #'
 normalize <- function (

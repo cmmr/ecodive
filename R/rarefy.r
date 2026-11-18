@@ -84,7 +84,7 @@
 rarefy <- function (
     counts, 
     depth  = NULL, 
-    seed   = 0, 
+    seed   = 0L,
     times  = NULL, 
     drop   = TRUE, 
     margin = 1L, 

@@ -16,7 +16,7 @@
 #' directly, with far less time and memory.
 #'
 #' **Which ordination?** [pcoa()], `mds()`, and [nmds()] all fit a
-#' configuration to `dm` in `k` dimensions. [pcoa()] (classical scaling) is exact and fast, has
+#' configuration to `dm` in `n_axes` dimensions. [pcoa()] (classical scaling) is exact and fast, has
 #' eigenvalues and "variance explained", but fits the squared distances after
 #' double centering, so large distances dominate, and non-Euclidean
 #' distances such as Bray-Curtis lose part of their structure to negative
@@ -73,7 +73,7 @@
 #' As in [nmds()] (see there), iterations take relaxed steps,
 #' \eqn{X \leftarrow 2\Gamma(X) - X} (de Leeuw & Heiser, 1980), when `k > 1`,
 #' until one makes no more than `tol` progress, and then plain steps until a
-#' plain step does; `k = 1` uses plain steps only, and so does the last
+#' plain step does; `n_axes = 1` uses plain steps only, and so does the last
 #' iteration allowed by `max_iters`. So the returned configuration is a fixed
 #' point of \eqn{\Gamma} to within `tol`, at the right scale
 #' (\eqn{\sum d_{ij}\delta_{ij} = \sum d_{ij}^2}), typically in about half the
@@ -85,7 +85,7 @@
 #' SMACOF only finds a local minimum of stress, so, as in [nmds()]:
 #'
 #' 1. The first start is the PCoA solution, from [pcoa()]. For distances
-#'    that are Euclidean in `k` dimensions, PCoA recovers the configuration,
+#'    that are Euclidean in `n_axes` dimensions, PCoA recovers the configuration,
 #'    and SMACOF stops at once. (An axis without a positive eigenvalue gets
 #'    small random coordinates instead.)
 #' 2. Then come `n_starts` random starts, with coordinates uniform on \[0, 1).
@@ -158,14 +158,14 @@
 #' **Reproducibility**
 #'
 #' The result, with all its attributes, is bit-identical from run to run, in
-#' new R sessions, and for any value of `cpus`, given the same `dm`, `k`,
+#' new R sessions, and for any value of `cpus`, given the same `dm`, `n_axes`,
 #' `n_starts`, `max_iters`, `tol`, and `seed`, for the reasons given in [nmds()].
 #' `dm * 2^p` gives exactly the result for `dm`, times \eqn{2^p}. (As for
 #' every ordination, distances above \eqn{10^{150}} are rejected.) Results can
 #' still differ in the last bits between computers or compilers, as for any
 #' floating point code.
 #'
-#' `k` larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
+#' `n_axes` larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
 #'
 #' @references
 #' de Leeuw, J. (1977). Applications of convex analysis to multidimensional
@@ -199,11 +199,11 @@
 #'     str(ord)
 #'
 mds <- function (
-    dm, k = 2L, n_starts = 4L, max_iters = 1000L, tol = 1e-7,
+    dm, n_axes = 2L, n_starts = 4L, max_iters = 1000L, tol = 1e-7,
     seed = 0L, cpus = n_cpus() ) {
 
   validate_cpus()
   validate_seed()
 
-  smacof_fit(dm, k, n_starts, max_iters, tol, seed, cpus, 'mds')
+  smacof_fit(dm, n_axes, n_starts, max_iters, tol, seed, cpus, 'mds')
 }

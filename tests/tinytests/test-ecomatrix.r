@@ -247,7 +247,7 @@
     x <- if (mg == 1) dgc else Matrix::t(dgc)
     expect_identical(bray(x, margin = mg), bray(dz))
     expect_identical(observed(x, margin = mg), observed(dz))
-    expect_identical(pca(x, margin = mg, norm = 'binary', k = 2, cpus = 1), pca(dz, norm = 'binary', k = 2, cpus = 1))
+    expect_identical(pca(x, margin = mg, norm = 'binary', n_axes = 2, cpus = 1), pca(dz, norm = 'binary', n_axes = 2, cpus = 1))
   }
 
   dgt <- as(as(dn, COMPRESSED), TRIPLET)

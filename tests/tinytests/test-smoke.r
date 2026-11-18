@@ -121,7 +121,7 @@
   expect_error(pcoa(bad), 'negative')
   bad[1] <- NA
   expect_error(permanova(bad, 'grp', meta), 'NA')
-  expect_error(pcoa(dm, k = 0), '`k`')
+  expect_error(pcoa(dm, n_axes = 0), '`n_axes`')
   expect_error(dist_ord(dm, 'no_such_method'))
   expect_error(dist_test(dm, 'no_such_test', 'grp', meta))
 

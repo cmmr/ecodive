@@ -87,7 +87,7 @@
       expect_equal(res$dist, c(fx$e2e_dist), tolerance = TOL, info = name)
 
       # Through rpca() itself, whose eig is s^2 / (n - 1).
-      ord <- rpca(fx$counts, k = k, min_sample_count = fx$filters[1],
+      ord <- rpca(fx$counts, n_axes = k, min_sample_count = fx$filters[1],
                   min_feature_count = fx$filters[2],
                   min_feature_frequency = fx$filters[3], distances = TRUE,
                   cpus = 1)
@@ -100,7 +100,7 @@
       expect_equal(c(attr(ord, 'dm')), c(fx$e2e_dist), tolerance = TOL, info = name)
 
       # And with threads.
-      expect_identical(rpca(fx$counts, k = k, min_sample_count = fx$filters[1],
+      expect_identical(rpca(fx$counts, n_axes = k, min_sample_count = fx$filters[1],
                             min_feature_count = fx$filters[2],
                             min_feature_frequency = fx$filters[3],
                             distances = TRUE, cpus = max_cpus), ord, info = name)
@@ -207,8 +207,8 @@
   # ====================================================================
 
   x <- named(matrix(rpois(60, 20) + 1, 12))
-  o <- rpca(x, k = 4, distances = TRUE, cpus = 1)
-  p <- pca(x, norm = 'clr', k = 4, cpus = 1)
+  o <- rpca(x, n_axes = 4, distances = TRUE, cpus = 1)
+  p <- pca(x, norm = 'clr', n_axes = 4, cpus = 1)
   expect_equal(c(dist(o)), c(robust_aitchison(x)), tolerance = 1e-12)
   expect_equal(c(dist(o)), c(aitchison(x)), tolerance = 1e-12)
   expect_true(max(abs(attr(o, 'dm') - robust_aitchison(x))) > 0.1)
@@ -224,7 +224,7 @@
   # Result format.
   # ====================================================================
 
-  ord <- rpca(m, k = 2, distances = TRUE, cpus = 1)
+  ord <- rpca(m, n_axes = 2, distances = TRUE, cpus = 1)
 
   expect_true(inherits(ord, 'ecodive_ord') && is.matrix(ord) && is.double(ord))
   expect_identical(
@@ -255,7 +255,7 @@
   expect_true(inherits(d, 'dist'))
   expect_identical(attr(d, 'Labels'), rownames(m))
   expect_identical(attr(d, 'Size'), nrow(m))
-  expect_identical(dim(pcoa(d, k = 2, cpus = 1)), c(nrow(m), 2L))
+  expect_identical(dim(pcoa(d, n_axes = 2, cpus = 1)), c(nrow(m), 2L))
   expect_null(attr(rpca(m, cpus = 1), 'dm'))
 
   # Unnamed tables get numbered samples and features.
@@ -327,7 +327,7 @@
     # A dgTMatrix in reverse order.
     rev_t <- triplet(rev(rep(1:300, each = 20)), rev(rep(1:20, 300)),
       rev(as.double(rep(1:7, length.out = 6000))), c(300, 20))
-    expect_identical(rpca(rev_t, k = 2, cpus = 1), rpca(methods::as(rev_t, 'CsparseMatrix'), k = 2, cpus = 1))
+    expect_identical(rpca(rev_t, n_axes = 2, cpus = 1), rpca(methods::as(rev_t, 'CsparseMatrix'), n_axes = 2, cpus = 1))
   }
 
   # Objects that hold a table (here an rbiom-like object holding a data
@@ -440,9 +440,9 @@
 
   # k too large for the table is reduced, with a warning.
   small <- m[1:4, 1:6]
-  expect_warning(ord <- rpca(small, k = 5, cpus = 1), '`k` reduced to 3')
+  expect_warning(ord <- rpca(small, n_axes = 5, cpus = 1), '`n_axes` reduced to 3')
   expect_identical(ncol(ord), 3L)
-  expect_warning(ord <- rpca(m[, 1:3], k = 5, cpus = 1), '`k` reduced to 2')
+  expect_warning(ord <- rpca(m[, 1:3], n_axes = 5, cpus = 1), '`n_axes` reduced to 2')
   expect_identical(ncol(ord), 2L)
 
   # Smallest tables: 2 samples or 2 features, giving 1 axis.
@@ -463,20 +463,20 @@
   expect_error(rpca(rbind(c(1, 0, 0), c(1, 1, 0))), '1 sample with a single non-zero feature was removed')
 
   # k = 1.
-  expect_identical(dim(rpca(m, k = 1, cpus = 1)), c(nrow(m), 1L))
+  expect_identical(dim(rpca(m, n_axes = 1, cpus = 1)), c(nrow(m), 1L))
 
   # Rank deficient: only two distinct samples, repeated. OptSpace's start
   # and fit then have directions without data; results are still finite,
   # and axes without variance are dropped with a warning.
   rd <- named(m[rep(1:2, 10), ])
-  expect_warning(ord <- rpca(rd, k = 3, cpus = 1), 'eigenvalues are > 0')
+  expect_warning(ord <- rpca(rd, n_axes = 3, cpus = 1), 'eigenvalues are > 0')
   expect_true(all(is.finite(ord)))
   expect_true(ncol(ord) < 3)
   expect_true(max(abs(ord[seq(1, 20, 2), ] - ord[rep(1, 10), ])) < 1e-8 * max(abs(ord)))
 
   # Even rank 1 with k = 1 still works.
   r1 <- named(rbind(c(1, 2, 0, 4), c(2, 4, 0, 8), c(0, 3, 9, 1), c(0, 3, 9, 1)))
-  expect_true(all(is.finite(suppressWarnings(rpca(r1, k = 1, cpus = 1)))))
+  expect_true(all(is.finite(suppressWarnings(rpca(r1, n_axes = 1, cpus = 1)))))
 
   # Values that aren't counts.
   bad <- m; bad[1, 1] <- -1
@@ -497,7 +497,7 @@
   # ====================================================================
 
   for (k in list(0, 11, 1.5, NA, NaN, Inf, '3', c(2, 3), 1e300, -1e300, NULL, TRUE))
-    expect_error(rpca(m, k = k), '`k` must be a whole number from 1 to 10')
+    expect_error(rpca(m, n_axes = k), '`n_axes` must be a whole number from 1 to 10')
   for (x in list(0, 1.5, NA, 2e6, 1e300, 'a'))
     expect_error(rpca(m, max_iters = x), '`max_iters` must be')
   for (x in list(-1, NA, Inf, 'a', c(1, 2), NULL)) {
@@ -511,9 +511,9 @@
     expect_error(rpca(m, distances = x), '`distances` must be TRUE or FALSE')
   expect_error(rpca(m, margin = 3), '`margin` must be 1 or 2')
   expect_error(rpca(m, cpus = 0), '`cpus` must be')
-  expect_silent(rpca(m, k = 1e1, max_iters = 5, tol = 1e300,
+  expect_silent(rpca(m, n_axes = 1e1, max_iters = 5, tol = 1e300,
                      min_sample_count = 1e300 * 0, cpus = 1))
-  expect_identical(rpca(m, k = 3.0, cpus = 1), rpca(m, k = 3L, cpus = 1))
+  expect_identical(rpca(m, n_axes = 3.0, cpus = 1), rpca(m, n_axes = 3L, cpus = 1))
 
 
 

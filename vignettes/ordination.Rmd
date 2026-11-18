@@ -57,7 +57,7 @@ dm <- bray(iris[, 1:4])
 | Function     | Method                                         | Input  | Best for                                                                 |
 | :----------- | :--------------------------------------------- | :----- | :----------------------------------------------------------------------- |
 | `pcoa()`     | Principal Coordinates Analysis (PCoA)          | `dm`   | The default: exact, fast, and reports the variance on each axis.        |
-| `mds()`      | Metric Multidimensional Scaling                | `dm`   | Fitting the distances themselves in exactly `k` dimensions.             |
+| `mds()`      | Metric Multidimensional Scaling                | `dm`   | Fitting the distances themselves in exactly `n_axes` dimensions.        |
 | `nmds()`     | Non-metric Multidimensional Scaling (NMDS)     | `dm`   | Keeping the rank order of distances; popular with Bray-Curtis.          |
 | `isomap()`   | Isometric Feature Mapping (Isomap)             | `dm`   | Long gradients that PCoA bends into an arch.                            |
 | `tsne()`     | t-distributed Stochastic Neighbor Embedding    | `dm`   | Separating clusters; distances between clusters mean little.            |

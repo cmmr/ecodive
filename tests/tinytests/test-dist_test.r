@@ -195,7 +195,7 @@
   expect_identical(
     permanova(d12, data = data.frame(g = na_g), formula = ~ g, permutations = 19, cpus = 1)[1:4],
     permanova(d12, data = data.frame(g = zz_g), formula = ~ g, permutations = 19, cpus = 1)[1:4] )
-  ord12 <- pcoa(d12, k = 1, cpus = 1)
+  ord12 <- pcoa(d12, n_axes = 1, cpus = 1)
   e_na  <- envfit(ord12, data.frame(g = na_g, row.names = NULL), strata = na_s, permutations = 19, cpus = 1)
   e_zz  <- envfit(ord12, data.frame(g = zz_g, row.names = NULL), strata = zz_s, permutations = 19, cpus = 1)
   expect_identical(e_na$r2, e_zz$r2)

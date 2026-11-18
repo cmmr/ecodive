@@ -6,7 +6,7 @@
 \usage{
 nmds(
   dm,
-  k = 2L,
+  n_axes = 2L,
   n_starts = 4L,
   max_iters = 1000L,
   tol = 1e-07,
@@ -20,7 +20,7 @@ nmds(
 symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values.}
 
-\item{k}{The number of dimensions. Default: \code{2}}
+\item{n_axes}{The number of dimensions. Default: \code{2}}
 
 \item{n_starts}{The number of random starts to run after the start from the
 PCoA solution, from 0 to 1000. Default: \code{4}}
@@ -76,7 +76,7 @@ of scikit-learn's non-metric \code{MDS()}, ported to parallel C that works from
 \details{
 \strong{Which ordination?}
 
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=mds]{mds()}}, and \code{nmds()} all place the samples in \code{k} dimensions
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=mds]{mds()}}, and \code{nmds()} all place the samples in \code{n_axes} dimensions
 from \code{dm}. \code{\link[=pcoa]{pcoa()}} (classical scaling) is exact and fast, and has
 eigenvalues and "variance explained", but it fits the squared distances
 after double centering, so large distances dominate, and non-Euclidean
@@ -120,10 +120,10 @@ after the first move the points twice as far as the Guttman transform
 would: \eqn{X \leftarrow 2\Gamma(X) - X}, the relaxed update of de Leeuw
 and Heiser (1980). \eqn{\Gamma} doesn't depend on the scale of \eqn{X},
 so relaxed steps don't converge in that one direction (they flip the scale
-back and forth), nor at all when \code{k = 1}, where \eqn{\Gamma} only depends
+back and forth), nor at all when \code{n_axes = 1}, where \eqn{\Gamma} only depends
 on the order of the points. So a start takes relaxed steps only until one
 makes no more than \code{tol} progress, then plain steps until a plain step
-does (or until \code{max_iters}, whose last step is always plain), and \code{k = 1} uses
+does (or until \code{max_iters}, whose last step is always plain), and \code{n_axes = 1} uses
 plain steps throughout. The configuration returned and measured thus
 always comes from a plain step: it is a fixed point of \eqn{\Gamma} to
 within \code{tol}, and its stress is what plain steps reach from the same
@@ -251,7 +251,7 @@ interrupts.
 \strong{Reproducibility}
 
 The result, with all its attributes, is bit-identical from run to run, in
-new R sessions, and for any value of \code{cpus}, given the same \code{dm}, \code{k},
+new R sessions, and for any value of \code{cpus}, given the same \code{dm}, \code{n_axes},
 \code{n_starts}, \code{max_iters}, \code{tol}, \code{ties}, and \code{seed}. Each start splits its sums
 into a fixed number of parts that depends only on the number of samples,
 and adds them in a fixed order; the sort order of the distances is a
@@ -264,7 +264,7 @@ ordination, distances above \eqn{10^{150}} are rejected.) Results can
 still differ in the last bits between computers or compilers, as for any
 floating point code.
 
-\code{k} larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
+\code{n_axes} larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
 }
 \section{Ordination result}{
 

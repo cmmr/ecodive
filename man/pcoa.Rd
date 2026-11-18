@@ -4,14 +4,14 @@
 \alias{pcoa}
 \title{Principal Coordinates Analysis (PCoA)}
 \usage{
-pcoa(dm, k = 3L, correction = "none", cpus = n_cpus())
+pcoa(dm, n_axes = 3L, correction = "none", cpus = n_cpus())
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
 symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values.}
 
-\item{k}{The number of axes to compute. Default: \code{3}. Reduced, with a
+\item{n_axes}{The number of axes to compute. Default: \code{3}. Reduced, with a
 warning, to the number of axes with positive eigenvalues, which is
 at most \eqn{n - 1} for \eqn{n} samples.}
 
@@ -62,7 +62,7 @@ coordinates are \eqn{u_i\sqrt{\lambda_i}}.
 
 \code{cmdscale()}, \code{ape::pcoa()}, and \code{vegan::wcmdscale()} build \eqn{B} in full
 (\eqn{n \times n}) and compute all \eqn{n} of its eigenvalues, which takes
-time proportional to \eqn{n^3}. \code{pcoa()} finds only the largest \code{k}
+time proportional to \eqn{n^3}. \code{pcoa()} finds only the largest \code{n_axes}
 eigenvalues, by block Lanczos iteration with thick restarts. That only needs
 products of \eqn{B} with a few vectors at a time, which are computed in
 parallel straight from \code{dm}, without ever forming \eqn{B}.
@@ -115,7 +115,7 @@ instance, get no correction. \code{constant} is then 0, and the coordinates,
 \code{correction = 'none'}. (\code{ape} and \code{vegan} correct those tiny negative
 eigenvalues too, so they can add a tiny constant where \code{pcoa()} adds 0.)
 
-With \code{k} = \eqn{n - 1}, the axis whose eigenvalue the correction makes 0
+With \code{n_axes} = \eqn{n - 1}, the axis whose eigenvalue the correction makes 0
 is dropped without a warning.
 
 \strong{When to use a correction}
@@ -164,7 +164,7 @@ mirror images of the same axis. \code{pcoa()} flips each axis so that its
 largest coordinate in absolute value is positive. Results are identical
 from run to run and for any number of \code{cpus}.
 
-\code{k} larger than \eqn{n - 1} (the most axes possible) is reduced to
+\code{n_axes} larger than \eqn{n - 1} (the most axes possible) is reduced to
 \eqn{n - 1}.
 }
 \section{Ordination result}{

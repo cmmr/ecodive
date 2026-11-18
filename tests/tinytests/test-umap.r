@@ -221,7 +221,7 @@
   if (same_platform) expect_equal(center_like(x3, s3$epochs50), s3$epochs50, tolerance = 0)
 
   # umap() with init = matrix runs the same layout, from its own seeds.
-  u2 <- do.call(umap, c(list(dm = c1$d, k = 3, init = s2$init, seed = 9), a2))
+  u2 <- do.call(umap, c(list(dm = c1$d, n_axes = 3, init = s2$init, seed = 9), a2))
   x9 <- .Call(C_umap_sgd, g12, s2$init, as.integer(a2$n_epochs), opt2, 9L, 1L)
   x9 <- center_like(x9, unclass(u2)[, ])
   expect_equal(unname(unclass(u2)[, ]), x9, tolerance = 0)
@@ -320,7 +320,7 @@
   #--------------------------------------------------
   d3 <- dist(matrix(c(0, 1, 3), 3))
   expect_identical(attr(umap(d3, n_epochs = 10), 'init'), 'random')   # k > n - 2
-  expect_identical(dim(umap(d3, k = 1, n_epochs = 10)), c(3L, 1L))
+  expect_identical(dim(umap(d3, n_axes = 1, n_epochs = 10)), c(3L, 1L))
   expect_identical(dim(umap(dist(1:2), n_epochs = 10)), c(2L, 2L))
   expect_identical(dim(umap(dist(1))), c(1L, 2L))
   expect_identical(attr(umap(dist(1)), 'init'), 'none')
@@ -331,7 +331,7 @@
   #--------------------------------------------------
   # Invalid arguments.
   #--------------------------------------------------
-  expect_error(umap(c1$d, k = 0))
+  expect_error(umap(c1$d, n_axes = 0))
   expect_error(umap(c1$d, n_neighbors = 1))
   expect_error(umap(c1$d, min_dist = -1))
   expect_error(umap(c1$d, spread = 0))

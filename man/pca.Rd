@@ -9,7 +9,7 @@ pca(
   margin = 1L,
   norm = "none",
   pseudocount = NULL,
-  k = 3L,
+  n_axes = 3L,
   scale = FALSE,
   cpus = n_cpus()
 )
@@ -41,7 +41,7 @@ Default: \code{'none'}.}
 \code{norm = 'clr'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
-\item{k}{The number of axes to compute. Default: \code{3}}
+\item{n_axes}{The number of axes to compute. Default: \code{3}}
 
 \item{scale}{Scale each feature to unit variance (after \code{norm}, before
 the PCA), as in \code{prcomp(scale. = TRUE)}. This gives every feature
@@ -85,7 +85,7 @@ singular value decomposition \eqn{JZD^{-1} = USV^T}. The scores are
 \eqn{s^2 / (n - 1)}, for \eqn{n} samples.
 
 \code{prcomp()} builds the whole centered table and decomposes it in full.
-\code{pca()} finds only the first \code{k} axes, by block Lanczos iteration, which
+\code{pca()} finds only the first \code{n_axes} axes, by block Lanczos iteration, which
 only needs products of the table with a few vectors at a time. Those are
 computed in parallel from the non-zero counts alone: the zeros of each
 sample all share one value after normalization (0, or
@@ -119,7 +119,7 @@ so that its largest score in absolute value is positive, and flips its
 loadings to match. Results are identical from run to run and for any
 number of \code{cpus}.
 
-\code{k} larger than the number of samples minus one, or the number of
+\code{n_axes} larger than the number of samples minus one, or the number of
 features, is reduced to the smaller of those. Axes with variances at
 rounding-error level, below \code{sqrt(.Machine$double.eps)} times the first
 one, are dropped with a warning. With \code{scale = TRUE}, features with

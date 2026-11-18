@@ -16,7 +16,7 @@ listed by \code{list_dist_ords()} takes distances.}
 or \code{"umap"}. Flexible matching is supported (see below).
 Programmatic access via \code{list_dist_ords()}.}
 
-\item{...}{Further arguments for the method's function, such as \code{k},
+\item{...}{Further arguments for the method's function, such as \code{n_axes},
 \code{seed}, \code{cpus}, or \code{pcoa}'s \code{correction}. Each method keeps its own
 defaults; see \code{\link[=capscale]{capscale()}} and \code{\link[=dbrda]{dbrda()}} (which also need \code{groups},
 or \code{data} and \code{formula}, as in \code{dist_ord(dm, 'dbrda', 'treatment', meta)}), \code{\link[=isomap]{isomap()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}}, and
@@ -56,9 +56,10 @@ distances: \code{dist_ord(euclidean(counts), 'pcoa')} gives the same scores as
 features' loadings and never forms the distance matrix. \code{\link[=permanova]{permanova()}} and
 ecodive's other tests are run by \code{\link[=dist_test]{dist_test()}}.
 
-Default numbers of axes differ: \code{k = 3} for \code{capscale}, \code{dbrda}, \code{pcoa} (and
-\code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}), and \code{k = 2} for \code{isomap}, \code{mds}, \code{nmds}, \code{tsne}, and
-\code{umap}.
+Default numbers of axes differ: \code{n_axes = 3} for the methods whose axes
+have eigenvalues (\code{capscale}, \code{dbrda}, \code{isomap}, \code{pcoa}, and \code{\link[=pca]{pca()}} and
+\code{\link[=rpca]{rpca()}}), and \code{n_axes = 2} for those that fit a layout in a fixed number
+of dimensions (\code{mds}, \code{nmds}, \code{tsne}, and \code{umap}).
 
 \strong{Flexible name matching}
 

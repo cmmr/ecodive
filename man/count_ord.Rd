@@ -15,7 +15,7 @@ proportions are also accepted.}
 Flexible matching is supported (see below). Programmatic access via
 \code{list_count_ords()}.}
 
-\item{...}{Further arguments for the method's function, such as \code{k},
+\item{...}{Further arguments for the method's function, such as \code{n_axes},
 \code{margin}, \code{cpus}, or \code{\link[=pca]{pca()}}'s \code{norm}, \code{pseudocount}, and \code{scale}.
 Each method keeps its own defaults; see \code{\link[=pca]{pca()}} and \code{\link[=rpca]{rpca()}}.
 \code{seed} is ignored by the methods that have no random parts (all of
@@ -97,7 +97,7 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
     str(ord)
 
     # The same arguments for every method.
-    lapply(list_count_ords('id'), function (m) attr(count_ord(ex_counts, m, k = 2), 'prop'))
+    lapply(list_count_ords('id'), function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 
 }
 \seealso{

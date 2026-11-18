@@ -4,7 +4,7 @@
 \alias{dbrda}
 \title{Distance-based Redundancy Analysis (db-RDA)}
 \usage{
-dbrda(dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus())
+dbrda(dm, groups, data = NULL, formula = NULL, n_axes = 3L, cpus = n_cpus())
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
@@ -40,7 +40,7 @@ after removing their effect. A left-hand side, if given, is
 ignored. Give \code{groups} or \code{formula}: there is no default model.
 Default: \code{NULL}.}
 
-\item{k}{The number of axes to return. Default: \code{3}. Reduced, with a
+\item{n_axes}{The number of axes to return. Default: \code{3}. Reduced, with a
 warning, to the number of axes with positive eigenvalues, which is
 at most \eqn{n - 1} for \eqn{n} samples.}
 
@@ -50,7 +50,7 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 \value{
 A numeric matrix with one row per sample and one column per axis,
 as described in "Ordination result" below. Constrained axes come first,
-named \code{"dbRDA1"}, \code{"dbRDA2"}, etc. If the constraints give fewer than \code{k}
+named \code{"dbRDA1"}, \code{"dbRDA2"}, etc. If the constraints give fewer than \code{n_axes}
 of them, unconstrained axes follow, named \code{"MDS1"}, \code{"MDS2"}, etc. The
 values are \code{vegan}'s site scores ("wa" scores, scaling 2): what
 \code{vegan::scores(x, display = "sites")} returns and what

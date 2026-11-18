@@ -52,7 +52,7 @@
 #'        Values must be finite and non-negative; they need not be integers
 #'        (proportions give the same result as counts).
 #'
-#' @param k   The rank of the low-rank model, which is also the number of
+#' @param n_axes   The rank of the low-rank model, which is also the number of
 #'        axes returned: a whole number from 1 to 10 (gemelli suggests
 #'        fewer than 10). Default: `3`
 #'
@@ -90,7 +90,7 @@
 #'     variance that each axis explains, `eig / trace`. This is gemelli's
 #'     `proportion_explained`.
 #'   * `trace`: The centered completed matrix's total variance: the sum of
-#'     all `k` axes' variances. (The completed matrix has rank `k`.)
+#'     all `n_axes` axes' variances. (The completed matrix has rank `n_axes`.)
 #'   * `loadings`: A matrix with one row per kept feature and one column per
 #'     axis: the unit-length feature loadings, for a biplot.
 #'   * `cost`: The root mean squared error of the low-rank fit to the
@@ -121,8 +121,8 @@
 #'    mean and are not given a value.
 #'
 #' 3. **Matrix completion.** OptSpace (Keshavan, Montanari & Oh 2010) fits a
-#'    rank-`k` matrix \eqn{USV^T} to the observed values only: it starts from
-#'    their top `k` singular vectors and runs up to `max_iters` steps of
+#'    rank-`n_axes` matrix \eqn{USV^T} to the observed values only: it starts from
+#'    their top `n_axes` singular vectors and runs up to `max_iters` steps of
 #'    gradient descent on the Grassmann manifold, re-fitting the
 #'    \eqn{k \times k} matrix \eqn{S} after each step.
 #'
@@ -163,7 +163,7 @@
 #' Each descent step takes time proportional to the number of non-zero
 #' counts times \eqn{k^2}, plus \eqn{k^4/4} per sample for re-fitting
 #' \eqn{S}. The initial SVD takes a number of steps that depends on the gap
-#' between the `k`-th and next singular values, each a pass over the
+#' between the `n_axes`-th and next singular values, each a pass over the
 #' non-zero counts plus work on a basis of \eqn{\min(n, p)}-long vectors.
 #' Memory beyond the input is about 24 bytes per non-zero count, plus about
 #' \eqn{80 (n + p) k} bytes for the factors, plus about 1.5 kB per sample or
@@ -186,7 +186,7 @@
 #' scale them for display, e.g.
 #'
 #' ```r
-#' ord  <- rpca(ex_counts, k = 2)
+#' ord  <- rpca(ex_counts, n_axes = 2)
 #' load <- attr(ord, 'loadings')
 #' f    <- 0.8 * max(abs(ord)) / max(abs(load))
 #' plot(ord, asp = 1)
@@ -212,8 +212,8 @@
 #' returns with its ordination (which it describes as the Aitchison distance
 #' of the sample loadings): Euclidean distances between the rows of
 #' OptSpace's sample factor \eqn{U}, which are normalized so that each of its
-#' `k` columns has a squared length of about \eqn{n}, before the singular
-#' values in \eqn{S} are applied. All `k` axes count equally in them. They
+#' `n_axes` columns has a squared length of about \eqn{n}, before the singular
+#' values in \eqn{S} are applied. All `n_axes` axes count equally in them. They
 #' are computed in parallel straight into a `dist` object, so they can go to
 #' [pcoa()], [nmds()] or [permanova()], and nothing of size
 #' \eqn{n \times n} is made without `distances = TRUE`.
@@ -226,7 +226,7 @@
 #' * [robust_aitchison()]: Euclidean distances between the samples' robust
 #'   clr values with no completion: missing values count as 0, so each pair
 #'   of samples is compared on the features observed in either, and no
-#'   low-rank model is fitted. For a table with no zeros and `k` at least
+#'   low-rank model is fitted. For a table with no zeros and `n_axes` at least
 #'   the rank of its clr matrix, the completed matrix is the clr matrix, so
 #'   `dist(ord)` is then the same as `robust_aitchison()` and [aitchison()].
 #'
@@ -237,7 +237,7 @@
 #' its results to within rounding error and the initial SVD's tolerance, with
 #' these exceptions. On the package's test tables, results agree with
 #' gemelli's to about \eqn{10^{-13}} (relative). Ill-conditioned problems
-#' agree less closely: when the `k`-th and next singular values of the rclr
+#' agree less closely: when the `n_axes`-th and next singular values of the rclr
 #' matrix are nearly tied, the initial subspace (in gemelli as here) is only
 #' determined to about \eqn{10^{-15}} divided by their relative gap, and
 #' results can then differ from gemelli's by \eqn{10^{-10}} or more.
@@ -250,8 +250,8 @@
 #'   and their position only reflects the other samples. `rpca()` drops them
 #'   with a warning.
 #' * gemelli requires \eqn{2 \le k \le \min(n, p) - 1}. `rpca()` accepts
-#'   `k = 1`, and reduces `k` above \eqn{\min(n, p) - 1} with a warning.
-#'   It also limits `k` to 10, because re-fitting \eqn{S} takes time in
+#'   `n_axes = 1`, and reduces `n_axes` above \eqn{\min(n, p) - 1} with a warning.
+#'   It also limits `n_axes` to 10, because re-fitting \eqn{S} takes time in
 #'   proportion to \eqn{k^4}; gemelli has no limit but suggests
 #'   \eqn{k < 10}. gemelli adds an axis of zeros when \eqn{k = 2};
 #'   `rpca()` doesn't.
@@ -302,7 +302,7 @@
 rpca <- function (
     counts,
     margin                = 1L,
-    k                     = 3L,
+    n_axes                = 3L,
     max_iters             = 5L,
     tol                   = 1e-5,
     min_sample_count      = 0,
@@ -315,7 +315,7 @@ rpca <- function (
   validate_margin()
   validate_cpus()
 
-  k         <- ord_arg(k,         '`k` must be a whole number from 1 to 10.', whole = TRUE, lo = 1, hi = 10)
+  k         <- ord_arg(n_axes, '`n_axes` must be a whole number from 1 to 10.', whole = TRUE, lo = 1, hi = 10)
   max_iters <- ord_arg(max_iters, '`max_iters` must be a whole number from 1 to 1000000.', whole = TRUE, lo = 1, hi = 1e6)
   tol       <- ord_arg(tol,       '`tol` must be a number of at least 0.')
 
@@ -364,7 +364,7 @@ rpca <- function (
   if (res$k < k)
     warning(
       call. = FALSE,
-      '`k` reduced to ', res$k, ': at most one less than the number of ',
+      '`n_axes` reduced to ', res$k, ': at most one less than the number of ',
       'samples and of features (', length(res$samples), ' and ',
       length(res$features), ' after filtering).' )
 

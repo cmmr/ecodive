@@ -47,13 +47,13 @@
 #'        ignored. Give `groups` or `formula`: there is no default model.
 #'        Default: `NULL`.
 #'
-#' @param k   The number of axes to return. Default: `3`. Reduced, with a
+#' @param n_axes   The number of axes to return. Default: `3`. Reduced, with a
 #'        warning, to the number of axes with positive eigenvalues, which is
 #'        at most \eqn{n - 1} for \eqn{n} samples.
 #'
 #' @return A numeric matrix with one row per sample and one column per axis,
 #'   as described in "Ordination result" below. Constrained axes come first,
-#'   named `"dbRDA1"`, `"dbRDA2"`, etc. If the constraints give fewer than `k`
+#'   named `"dbRDA1"`, `"dbRDA2"`, etc. If the constraints give fewer than `n_axes`
 #'   of them, unconstrained axes follow, named `"MDS1"`, `"MDS2"`, etc. The
 #'   values are `vegan`'s site scores ("wa" scores, scaling 2): what
 #'   `vegan::scores(x, display = "sites")` returns and what
@@ -196,10 +196,10 @@
 #'     str(ord)
 #'
 dbrda <- function (
-    dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus() ) {
+    dm, groups, data = NULL, formula = NULL, n_axes = 3L, cpus = n_cpus() ) {
 
   validate_cpus()
-  k <- ord_k(k)
+  k <- ord_k(n_axes)
 
   no_groups <- missing(groups)
   constrained_ord(

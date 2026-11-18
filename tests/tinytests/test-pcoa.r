@@ -41,7 +41,7 @@
 
   # More axes than one pass over `dm` computes at a time.
   d   <- bray(m150)
-  ord <- pcoa(d, k = 6, cpus = 1)
+  ord <- pcoa(d, n_axes = 6, cpus = 1)
   cm  <- cmdscale(d, k = 6, eig = TRUE)
   expect_true(coord_diff(ord, cm$points) < 1e-9)
   expect_equal(attr(ord, 'eig'), cm$eig[1:6], tolerance = 1e-10)
@@ -84,9 +84,9 @@
       d <- if (is.null(cs$pts)) bray(cs$counts) else dist(cs$pts)
 
       if (is.null(cs$warn)) {
-        ord <- pcoa(d, k = cs$k, cpus = 2)
+        ord <- pcoa(d, n_axes = cs$k, cpus = 2)
       } else {
-        expect_warning(ord <- pcoa(d, k = cs$k, cpus = 2), cs$warn, info = cs$name)
+        expect_warning(ord <- pcoa(d, n_axes = cs$k, cpus = 2), cs$warn, info = cs$name)
       }
 
       k <- length(cs$ape$eig)
@@ -157,7 +157,7 @@
 
   # lambda3 = lambda4 = lambda5: any basis of their space is right.
   d   <- config(150, c(10, 5, 2, 2, 2, 1))
-  ord <- pcoa(d, k = 5)
+  ord <- pcoa(d, n_axes = 5)
   expect_equal(attr(ord, 'eig'), c(100, 25, 4, 4, 4), tolerance = 1e-12)
   expect_equal(crossprod(unclass(ord)), diag(c(100, 25, 4, 4, 4)), tolerance = 1e-10, check.attributes = FALSE)
 
@@ -201,7 +201,7 @@
 
   # k larger than n - 1, and integer storage.
   d <- as.dist(matrix(c(0L, 3L, 4L, 3L, 0L, 5L, 4L, 5L, 0L), 3))
-  expect_identical(pcoa(d, k = 10), pcoa(d, k = 2))
+  expect_identical(pcoa(d, n_axes = 10), pcoa(d, n_axes = 2))
   expect_equal(attr(pcoa(d), 'eig'), cmdscale(d, k = 2, eig = TRUE)$eig[1:2])
 
 
@@ -215,10 +215,10 @@
   d_na[2] <- Inf
   expect_error(pcoa(d_na), 'infinite')
 
-  expect_error(pcoa(d, k = 0))
-  expect_error(pcoa(d, k = 1.5))
-  expect_error(pcoa(d, k = NA))
-  expect_error(pcoa(d, k = 'a'))
+  expect_error(pcoa(d, n_axes = 0))
+  expect_error(pcoa(d, n_axes = 1.5))
+  expect_error(pcoa(d, n_axes = NA))
+  expect_error(pcoa(d, n_axes = 'a'))
   expect_error(pcoa(d, cpus = 0))
 
   expect_error(pcoa(matrix(1:6, 2)),               'symmetric')
@@ -234,7 +234,7 @@
   expect_error(pcoa(d_neg), 'must not contain negative distances')
   d_neg[2] <- -1e-15
   d_0 <- d; d_0[2] <- 0
-  expect_identical(pcoa(d_neg, k = 2, cpus = 1), pcoa(d_0, k = 2, cpus = 1))
+  expect_identical(pcoa(d_neg, n_axes = 2, cpus = 1), pcoa(d_0, n_axes = 2, cpus = 1))
 
   # Distances too large to square.
   expect_error(pcoa(d * 1e160), 'too large to square')

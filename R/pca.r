@@ -28,7 +28,7 @@
 #'
 #'   Default: `'none'`.
 #'
-#' @param k   The number of axes to compute. Default: `3`
+#' @param n_axes   The number of axes to compute. Default: `3`
 #'
 #' @param scale   Scale each feature to unit variance (after `norm`, before
 #'        the PCA), as in `prcomp(scale. = TRUE)`. This gives every feature
@@ -60,7 +60,7 @@
 #' \eqn{s^2 / (n - 1)}, for \eqn{n} samples.
 #'
 #' `prcomp()` builds the whole centered table and decomposes it in full.
-#' `pca()` finds only the first `k` axes, by block Lanczos iteration, which
+#' `pca()` finds only the first `n_axes` axes, by block Lanczos iteration, which
 #' only needs products of the table with a few vectors at a time. Those are
 #' computed in parallel from the non-zero counts alone: the zeros of each
 #' sample all share one value after normalization (0, or
@@ -97,7 +97,7 @@
 #' loadings to match. Results are identical from run to run and for any
 #' number of `cpus`.
 #'
-#' `k` larger than the number of samples minus one, or the number of
+#' `n_axes` larger than the number of samples minus one, or the number of
 #' features, is reduced to the smaller of those. Axes with variances at
 #' rounding-error level, below `sqrt(.Machine$double.eps)` times the first
 #' one, are dropped with a warning. With `scale = TRUE`, features with
@@ -129,7 +129,7 @@ pca <- function (
     margin      = 1L,
     norm        = 'none',
     pseudocount = NULL,
-    k           = 3L,
+    n_axes      = 3L,
     scale       = FALSE,
     cpus        = n_cpus() ) {
 
@@ -138,7 +138,7 @@ pca <- function (
   validate_pseudocount()
   validate_margin()
   validate_cpus()
-  k <- ord_k(k)
+  k <- ord_k(n_axes)
 
   if (!isTRUE(scale) && !isFALSE(scale))
     stop('`scale` must be TRUE or FALSE.', call. = FALSE)

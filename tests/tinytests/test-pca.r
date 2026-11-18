@@ -37,7 +37,7 @@
         norm        = cs$norm,
         pseudocount = cs$pseudocount,
         scale       = cs$scale,
-        k           = cs$k,
+        n_axes           = cs$k,
         cpus        = 1 )
 
       ex   <- cs$expected
@@ -80,7 +80,7 @@
         norm        = cs$norm,
         pseudocount = cs$pseudocount,
         scale       = cs$scale,
-        k           = cs$k,
+        n_axes           = cs$k,
         cpus        = 2 )
 
       info <- paste(dim(cs$counts), cs$norm, cs$scale, cs$k, cs$sparse, collapse = ' ')
@@ -121,8 +121,8 @@
     expect_equal(attr(ord, 'eig') * (nrow(m) - 1), attr(pco, 'eig'), tolerance = 1e-10)
     expect_equal(attr(ord, 'prop'), attr(pco, 'prop'), tolerance = 1e-10)
 
-    ord <- pca(m, norm = 'clr', pseudocount = 1, k = 4)
-    pco <- pcoa(aitchison(m, pseudocount = 1), k = 4)
+    ord <- pca(m, norm = 'clr', pseudocount = 1, n_axes = 4)
+    pco <- pcoa(aitchison(m, pseudocount = 1), n_axes = 4)
     expect_equal(unclass(ord), unclass(pco), tolerance = 1e-9, check.attributes = FALSE)
     expect_equal(attr(ord, 'prop'), attr(pco, 'prop'), tolerance = 1e-10)
 
@@ -132,8 +132,8 @@
   }
 
   # More axes than one pass over the data computes at a time.
-  ord <- pca(m150, k = 9)
-  pco <- pcoa(euclidean(m150), k = 9)
+  ord <- pca(m150, n_axes = 9)
+  pco <- pcoa(euclidean(m150), n_axes = 9)
   expect_equal(unclass(ord), unclass(pco), tolerance = 1e-9, check.attributes = FALSE)
 
   # The default pseudocount, with its warning, as aitchison() has.
@@ -144,7 +144,7 @@
 
   # Scores are the centered data times the loadings. ====
 
-  ord  <- pca(m150, scale = TRUE, k = 4)
+  ord  <- pca(m150, scale = TRUE, n_axes = 4)
   x    <- scale(m150)
   expect_equal(unclass(ord), x %*% attr(ord, 'loadings'), check.attributes = FALSE)
   expect_equal(crossprod(attr(ord, 'loadings')), diag(4), check.attributes = FALSE)
@@ -177,10 +177,10 @@
   # Identical across runs and thread counts. ====
 
   for (m in list(m150, rand_counts(160, 400))) { # both solver sides
-    x <- pca(m, norm = 'clr', pseudocount = 1, k = 5, cpus = 1)
-    expect_identical(pca(m, norm = 'clr', pseudocount = 1, k = 5, cpus = 1), x)
-    expect_identical(pca(m, norm = 'clr', pseudocount = 1, k = 5, cpus = 2), x)
-    expect_identical(pca(m, norm = 'clr', pseudocount = 1, k = 5, cpus = 4), x)
+    x <- pca(m, norm = 'clr', pseudocount = 1, n_axes = 5, cpus = 1)
+    expect_identical(pca(m, norm = 'clr', pseudocount = 1, n_axes = 5, cpus = 1), x)
+    expect_identical(pca(m, norm = 'clr', pseudocount = 1, n_axes = 5, cpus = 2), x)
+    expect_identical(pca(m, norm = 'clr', pseudocount = 1, n_axes = 5, cpus = 4), x)
   }
 
   # The shared ordination result format.
@@ -238,15 +238,15 @@
   # far from 0 relative to their spread used to lose most of their digits.)
   set.seed(5)
   xn <- matrix(rnorm(1200), 60, 20)
-  p0 <- pca(xn, k = 3, cpus = 1)
+  p0 <- pca(xn, n_axes = 3, cpus = 1)
   for (off in c(1e4, 1e9)) {
-    p1 <- pca(xn + off, k = 3, cpus = 1)
+    p1 <- pca(xn + off, n_axes = 3, cpus = 1)
     expect_equal(attr(p1, 'eig'), attr(p0, 'eig'), tolerance = 1e-6) # x + 1e9 is itself rounded
     expect_equal(unclass(p1)[, ], unclass(p0)[, ], tolerance = 1e-6)
   }
   xs <- xn
   xs[, 1] <- 5 + xs[, 1] * 1e-6
-  expect_equal(attr(pca(xs, scale = TRUE, k = 3), 'eig'), attr(pca(xn, scale = TRUE, k = 3), 'eig'), tolerance = 1e-8)
+  expect_equal(attr(pca(xs, scale = TRUE, n_axes = 3), 'eig'), attr(pca(xn, scale = TRUE, n_axes = 3), 'eig'), tolerance = 1e-8)
 
   # Constant data: no axes, not rounding noise.
   expect_warning(ord <- pca(matrix(3, 10, 5)), 'only 0 of the first 3')
@@ -259,8 +259,8 @@
   expect_error(pca(m_na, scale = TRUE),    'must not contain NA')
 
   # Bad input.
-  expect_error(pca(m30, k = 0),        '`k` must be')
-  expect_error(pca(m30, k = 1.5),      '`k` must be')
+  expect_error(pca(m30, n_axes = 0),        '`n_axes` must be')
+  expect_error(pca(m30, n_axes = 1.5),      '`n_axes` must be')
   expect_error(pca(m30, scale = NA),   '`scale` must be')
   expect_error(pca(m30, norm = 'xyz'))
   m[3, 3] <- NA
@@ -281,7 +281,7 @@
     expected <- readRDS('expected/pcoa_lanczos.rds')
     for (cs in expected$cases) {
       d   <- beta_div(cs$counts, cs$metric, pseudocount = 1)
-      ord <- unclass(pcoa(d, k = cs$k, cpus = 2))
+      ord <- unclass(pcoa(d, n_axes = cs$k, cpus = 2))
       attr(ord, 'correction') <- attr(ord, 'constant') <- NULL  # added since
       expect_equal(ord, cs$expected, tolerance = 1e-12)
     }

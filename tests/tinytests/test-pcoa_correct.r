@@ -90,7 +90,7 @@
     d   <- ds[[nm]]
     n   <- attr(d, 'Size')
     k   <- min(4L, n - 1L)
-    ord <- suppressWarnings(pcoa(d, k = k, correction = corr, cpus = 1))
+    ord <- suppressWarnings(pcoa(d, n_axes = k, correction = corr, cpus = 1))
     ref <- dense(d, corr)
     kk  <- ncol(ord)
     inf <- paste(nm, corr)
@@ -139,8 +139,8 @@
   # Lingoes keeps the eigenvectors: same axes as no correction, each
   # eigenvalue plus c1, and trace plus (n - 1) c1.
   d  <- ds$bray
-  o0 <- pcoa(d, k = 5, cpus = 1)
-  o1 <- pcoa(d, k = 5, correction = 'lingoes', cpus = 1)
+  o0 <- pcoa(d, n_axes = 5, cpus = 1)
+  o1 <- pcoa(d, n_axes = 5, correction = 'lingoes', cpus = 1)
   c1 <- attr(o1, 'constant')
   expect_equal(attr(o1, 'eig'), attr(o0, 'eig') + c1, tolerance = 1e-12)
   expect_equal(attr(o1, 'trace'), attr(o0, 'trace') + 59 * c1, tolerance = 1e-12)
@@ -153,15 +153,15 @@
   # which becomes 0 and, with k = n - 1, is dropped as expected: no warning.
   # With fewer axes than the correction can make positive, there is one.
   d <- ds$jaccard
-  expect_warning(o0 <- pcoa(d, k = 29), 'eigenvalues are > 0')
-  expect_silent(o1 <- pcoa(d, k = 29, correction = 'lingoes'))
-  expect_silent(o2 <- pcoa(d, k = 29, correction = 'cailliez'))
+  expect_warning(o0 <- pcoa(d, n_axes = 29), 'eigenvalues are > 0')
+  expect_silent(o1 <- pcoa(d, n_axes = 29, correction = 'lingoes'))
+  expect_silent(o2 <- pcoa(d, n_axes = 29, correction = 'cailliez'))
   expect_true(ncol(o0) < 28)
   expect_identical(c(ncol(o1), ncol(o2)), c(28L, 28L))
   expect_equal(attr(o1, 'eig'), dense(d, 'lingoes')$eig[1:28],  tolerance = 1e-10)
   expect_equal(attr(o2, 'eig'), dense(d, 'cailliez')$eig[1:28], tolerance = 1e-10)
   pts <- dist(cbind(x = sin(1:40), y = cos(1:40 / 2) * 3))
-  expect_warning(pcoa(pts, k = 39, correction = 'lingoes'), 'only 2 of the first 39')
+  expect_warning(pcoa(pts, n_axes = 39, correction = 'lingoes'), 'only 2 of the first 39')
 
   # Through dist_ord().
   expect_identical(dist_ord(ds$bray, 'pcoa', correction = 'lingoes'), pcoa(ds$bray, correction = 'lingoes'))

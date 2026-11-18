@@ -156,7 +156,7 @@
       # Final quality: no worse than scikit-learn's own best, from 8 random
       # starts or from classical MDS, with the same stress measure.
       if (cs$k >= 2) {
-        ord <- nmds(d, k = cs$k, ties = 'secondary', cpus = 1)
+        ord <- nmds(d, n_axes = cs$k, ties = 'secondary', cpus = 1)
         expect_true(attr(ord, 'stress') <= min(cs$skl_random, cs$skl_cmds) * (1 + 1e-3), info = cs$case)
       }
     }
@@ -250,7 +250,7 @@
   # start. Tight tolerances take a while, so for k = 1, 2, 3 at home.
 
   for (k in if (home) 1:3 else 2L) for (ties in c('primary', 'secondary')) {
-    ord <- nmds(d_bray, k = k, ties = ties, n_starts = 0, tol = 1e-12, max_iters = 1e5, cpus = 1)
+    ord <- nmds(d_bray, n_axes = k, ties = ties, n_starts = 0, tol = 1e-12, max_iters = 1e5, cpus = 1)
     expect_true(attr(ord, 'converged'))
     expect_true(stationarity(d_bray, ord, ties) < 1e-5, info = paste(k, ties))
     res <- engine(d_bray, pcoa_init(d_bray, k), ties = ties, tol = 1e-12,
@@ -260,7 +260,7 @@
 
   # With default settings too.
   for (k in 1:3) {
-    ord <- nmds(d_bray, k = k, cpus = 1)
+    ord <- nmds(d_bray, n_axes = k, cpus = 1)
     expect_true(stationarity(d_bray, ord, 'primary') < 1e-3)
   }
 
@@ -307,12 +307,12 @@
   expect_equal(pro_rmse(x, res$x_all[, , which.min(res$stress_all)]), 0, tolerance = 1e-7)
 
   # k = 3, 4 and 1, and a symmetric matrix input.
-  ord3 <- nmds(d_bray, k = 3, n_starts = 1)
-  ord4 <- nmds(d_bray, k = 4, n_starts = 1)
+  ord3 <- nmds(d_bray, n_axes = 3, n_starts = 1)
+  ord4 <- nmds(d_bray, n_axes = 4, n_starts = 1)
   expect_identical(colnames(ord4), paste0('NMDS', 1:4))
   expect_true(attr(ord4, 'stress') < attr(ord3, 'stress'))
   expect_true(attr(ord3, 'stress') < attr(ord, 'stress'))
-  expect_identical(dim(nmds(d_pln, k = 1, n_starts = 1)), c(40L, 1L))
+  expect_identical(dim(nmds(d_pln, n_axes = 1, n_starts = 1)), c(40L, 1L))
   expect_identical(nmds(as.matrix(d_bray), n_starts = 1), nmds(d_bray, n_starts = 1))
 
   # max_iters = 0: the starting configurations themselves.
@@ -351,7 +351,7 @@
 
   for (args in list(
       list(dm = d_bray),                                  # several starts at once
-      list(dm = d_jacc, ties = 'secondary', k = 3) )) {
+      list(dm = d_jacc, ties = 'secondary', n_axes = 3) )) {
     x <- do.call(nmds, c(args, cpus = 1))
     expect_identical(do.call(nmds, c(args, cpus = 1)), x)
     for (cpus in c(2, 3, 4, 100))
@@ -467,13 +467,13 @@
   expect_identical(dim(ord), c(3L, 2L))
   expect_true(attr(ord, 'stress') < 1e-3)
 
-  ord <- nmds(bray(counts), k = 3)
+  ord <- nmds(bray(counts), n_axes = 3)
   expect_identical(dim(ord), c(4L, 3L))
 
   # k larger than n - 1 (even huge), and integer storage.
   d <- as.dist(matrix(c(0L, 3L, 4L, 3L, 0L, 5L, 4L, 5L, 0L), 3))
-  expect_identical(nmds(d, k = 10), nmds(d, k = 2))
-  expect_identical(nmds(d, k = 1e12), nmds(d, k = 2))
+  expect_identical(nmds(d, n_axes = 10), nmds(d, n_axes = 2))
+  expect_identical(nmds(d, n_axes = 1e12), nmds(d, n_axes = 2))
 
   # Huge max_iters still converges; cpus larger than n.
   expect_identical(nmds(d_pln, max_iters = 1e12), nmds(d_pln, max_iters = 1e6))
@@ -483,7 +483,7 @@
   # A PCoA axis without a positive eigenvalue gets random coordinates; so
   # does a start that isn't finite, or has no spread.
   d   <- as.dist(matrix(c(0, 1, 1, 3, 1, 0, 1, 1, 1, 1, 0, 1, 3, 1, 1, 0), 4))
-  ord <- nmds(d, k = 3, n_starts = 0)
+  ord <- nmds(d, n_axes = 3, n_starts = 0)
   expect_true(all(apply(ord, 2, sd) > 0))
   res <- engine(d_bray, array(c(1:60, rep(5, 60)), c(60, 2, 1)), max_iters = 0L)
   expect_true(sd(res$x_all[, 2, 1]) > 0)
@@ -520,13 +520,13 @@
   expect_error(nmds(as.dist(matrix(0, 5, 5))), 'greater than 0')
   expect_error(nmds(d_bray * 1e151), 'too large')
 
-  expect_error(nmds(d_bray, k = 0),            '`k`')
-  expect_error(nmds(d_bray, k = -1),           '`k`')
-  expect_error(nmds(d_bray, k = 1.5),          '`k`')
-  expect_error(nmds(d_bray, k = NA),           '`k`')
-  expect_error(nmds(d_bray, k = Inf),          '`k`')
-  expect_error(nmds(d_bray, k = 1:2),          '`k`')
-  expect_error(nmds(d_bray, k = '2'),          '`k`')
+  expect_error(nmds(d_bray, n_axes = 0),            '`n_axes`')
+  expect_error(nmds(d_bray, n_axes = -1),           '`n_axes`')
+  expect_error(nmds(d_bray, n_axes = 1.5),          '`n_axes`')
+  expect_error(nmds(d_bray, n_axes = NA),           '`n_axes`')
+  expect_error(nmds(d_bray, n_axes = Inf),          '`n_axes`')
+  expect_error(nmds(d_bray, n_axes = 1:2),          '`n_axes`')
+  expect_error(nmds(d_bray, n_axes = '2'),          '`n_axes`')
   expect_error(nmds(d_bray, n_starts = -1),    '`n_starts`')
   expect_error(nmds(d_bray, n_starts = 1001),  '`n_starts`')
   expect_error(nmds(d_bray, n_starts = 1e10),  '`n_starts`')

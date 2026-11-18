@@ -6,7 +6,7 @@
 \usage{
 mds(
   dm,
-  k = 2L,
+  n_axes = 2L,
   n_starts = 4L,
   max_iters = 1000L,
   tol = 1e-07,
@@ -19,7 +19,7 @@ mds(
 symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values.}
 
-\item{k}{The number of dimensions. Default: \code{2}}
+\item{n_axes}{The number of dimensions. Default: \code{2}}
 
 \item{n_starts}{The number of random starts to run after the start from the
 PCoA solution, from 0 to 1000. Default: \code{4}}
@@ -66,7 +66,7 @@ directly, with far less time and memory.
 }
 \details{
 \strong{Which ordination?} \code{\link[=pcoa]{pcoa()}}, \code{mds()}, and \code{\link[=nmds]{nmds()}} all fit a
-configuration to \code{dm} in \code{k} dimensions. \code{\link[=pcoa]{pcoa()}} (classical scaling) is exact and fast, has
+configuration to \code{dm} in \code{n_axes} dimensions. \code{\link[=pcoa]{pcoa()}} (classical scaling) is exact and fast, has
 eigenvalues and "variance explained", but fits the squared distances after
 double centering, so large distances dominate, and non-Euclidean
 distances such as Bray-Curtis lose part of their structure to negative
@@ -93,7 +93,7 @@ when an iteration lowers \eqn{\sigma} by no more than \code{tol} times
 As in \code{\link[=nmds]{nmds()}} (see there), iterations take relaxed steps,
 \eqn{X \leftarrow 2\Gamma(X) - X} (de Leeuw & Heiser, 1980), when \code{k > 1},
 until one makes no more than \code{tol} progress, and then plain steps until a
-plain step does; \code{k = 1} uses plain steps only, and so does the last
+plain step does; \code{n_axes = 1} uses plain steps only, and so does the last
 iteration allowed by \code{max_iters}. So the returned configuration is a fixed
 point of \eqn{\Gamma} to within \code{tol}, at the right scale
 (\eqn{\sum d_{ij}\delta_{ij} = \sum d_{ij}^2}), typically in about half the
@@ -105,7 +105,7 @@ the same starting configuration to within rounding error (about
 SMACOF only finds a local minimum of stress, so, as in \code{\link[=nmds]{nmds()}}:
 \enumerate{
 \item The first start is the PCoA solution, from \code{\link[=pcoa]{pcoa()}}. For distances
-that are Euclidean in \code{k} dimensions, PCoA recovers the configuration,
+that are Euclidean in \code{n_axes} dimensions, PCoA recovers the configuration,
 and SMACOF stops at once. (An axis without a positive eigenvalue gets
 small random coordinates instead.)
 \item Then come \code{n_starts} random starts, with coordinates uniform on [0, 1).
@@ -175,14 +175,14 @@ pairs), in parts between checks for user interrupts.
 \strong{Reproducibility}
 
 The result, with all its attributes, is bit-identical from run to run, in
-new R sessions, and for any value of \code{cpus}, given the same \code{dm}, \code{k},
+new R sessions, and for any value of \code{cpus}, given the same \code{dm}, \code{n_axes},
 \code{n_starts}, \code{max_iters}, \code{tol}, and \code{seed}, for the reasons given in \code{\link[=nmds]{nmds()}}.
 \code{dm * 2^p} gives exactly the result for \code{dm}, times \eqn{2^p}. (As for
 every ordination, distances above \eqn{10^{150}} are rejected.) Results can
 still differ in the last bits between computers or compilers, as for any
 floating point code.
 
-\code{k} larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
+\code{n_axes} larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
 }
 \section{Ordination result}{
 

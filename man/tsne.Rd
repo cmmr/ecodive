@@ -6,7 +6,7 @@
 \usage{
 tsne(
   dm,
-  k = 2L,
+  n_axes = 2L,
   perplexity = 30,
   theta = 0.5,
   gradient = "auto",
@@ -23,7 +23,7 @@ tsne(
 symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values. Its scale doesn't matter (see "Scale").}
 
-\item{k}{The number of dimensions. Default: \code{2}}
+\item{n_axes}{The number of dimensions. Default: \code{2}}
 
 \item{perplexity}{Roughly, how many neighbors each sample's
 neighborhood counts. Must be at least 1; values above
@@ -43,7 +43,7 @@ samples, or when \code{k > 3}, and \code{"barnes_hut"} otherwise.
 
 \item{init}{The starting layout: \code{"pcoa"} (the default), \code{"random"}, or
 a numeric matrix with one row per sample, in the same order as
-\code{dm}, and \code{k} columns, none of them constant (a constant column
+\code{dm}, and \code{n_axes} columns, none of them constant (a constant column
 could never move). See "Starting layout" below.}
 
 \item{max_iters}{The most iterations to run, including the first 250 with
@@ -60,7 +60,7 @@ scikit-learn.}
 
 \item{seed}{An integer seed for the random starting layout. The same
 seed gives the same result. Not used when \code{init} is a matrix, nor
-by a PCoA start with \code{k} axes. Default: \code{0}}
+by a PCoA start with \code{n_axes} axes. Default: \code{0}}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -120,12 +120,12 @@ proportional to \eqn{n^2} per iteration. The Barnes-Hut approximation
 \eqn{\lfloor 3 \times perplexity + 1 \rfloor} nearest neighbors only
 (found exactly from \code{dm}), and is 0 for the rest.
 \item The repulsion between points on the plot is computed from a tree of
-cells: a quadtree for \code{k = 2}, an octree for \code{k = 3}, and a binary tree
-for \code{k = 1}. A cell far enough away (see \code{theta}) acts as one point at
+cells: a quadtree for \code{n_axes = 2}, an octree for \code{n_axes = 3}, and a binary tree
+for \code{n_axes = 1}. A cell far enough away (see \code{theta}) acts as one point at
 its center of mass.
 }
 
-The tree only exists for up to 3 dimensions, so larger \code{k} always uses
+The tree only exists for up to 3 dimensions, so larger \code{n_axes} always uses
 the exact gradient. \code{gradient = "auto"} uses the exact gradient for up to
 500 samples, where it is fast enough, and Barnes-Hut for more.
 
@@ -134,7 +134,7 @@ the exact gradient. \code{gradient = "auto"} uses the exact gradient for up to
 Each sample needs at least \eqn{3 \times perplexity} neighbors, so
 \code{perplexity} is reduced to \eqn{(n - 1) / 3} when it is larger (but not
 below 1), with a warning if you set \code{perplexity} yourself. For example,
-40 samples allow a perplexity of up to 13. \code{k} is used as given, even
+40 samples allow a perplexity of up to 13. \code{n_axes} is used as given, even
 when it is \eqn{n} or more.
 
 \strong{Scale}
@@ -155,11 +155,11 @@ range.
 \strong{Starting layout}
 
 t-SNE only finds a local minimum, and which one depends on the starting
-layout. The default, \code{"pcoa"}, starts from the first \code{k} axes of
+layout. The default, \code{"pcoa"}, starts from the first \code{n_axes} axes of
 \code{\link[=pcoa]{pcoa()}}, scaled so that the first has a standard deviation of
 \eqn{10^{-4}}, as scikit-learn scales its PCA start: this keeps more of
 the data's global structure than a random start, and doesn't depend on a
-seed (Kobak & Linderman 2021). Without \code{k} axes with positive
+seed (Kobak & Linderman 2021). Without \code{n_axes} axes with positive
 eigenvalues, it starts at random instead. \code{"random"} draws each
 coordinate from a normal distribution with a standard deviation of
 \eqn{10^{-4}}, from \code{seed}.
@@ -199,9 +199,9 @@ gradients by about 1 part in \eqn{10^7}. Since t-SNE is chaotic, two
 runs that differ by that much end at different (but equally good)
 layouts.
 \item \eqn{q_{ij}} always has one degree of freedom. scikit-learn uses
-\eqn{\max(k - 1, 1)}, i.e. 2 for \code{k = 3}, with a gradient that isn't
+\eqn{\max(k - 1, 1)}, i.e. 2 for \code{n_axes = 3}, with a gradient that isn't
 exactly the divergence's for more than one degree of freedom. For
-\code{k = 1} and \code{k = 2}, the two agree.
+\code{n_axes = 1} and \code{n_axes = 2}, the two agree.
 \item The default start is PCoA. scikit-learn doesn't allow its PCA start with
 precomputed distances, so starts at random there. Random starts come
 from \code{seed} (see "Reproducibility"), so they differ from scikit-learn's.
@@ -219,7 +219,7 @@ from a far too large \code{learning_rate}) is an error.
 merges points within \eqn{10^{-6}} of each other on every axis and
 leaves out their repulsion from each other. A cell that holds the point
 being moved is never summarized (scikit-learn's can be, when \code{theta} is
-above \eqn{1/\sqrt{2}} for \code{k = 2}, or \eqn{1/\sqrt{3}} for \code{k = 3}).
+above \eqn{1/\sqrt{2}} for \code{n_axes = 2}, or \eqn{1/\sqrt{3}} for \code{n_axes = 3}).
 \item Nearest neighbors with equal distances are chosen by sample order.
 \item The gradient and the divergence leave out scikit-learn's lower limits on
 \eqn{q_{ij}} (\eqn{2.2 \times 10^{-16}} for the exact gradient, and

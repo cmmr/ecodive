@@ -351,9 +351,9 @@
   o <- tsne(d60, gradient = 'barnes_hut', cpus = 1)
   expect_identical(attr(o, 'gradient'), 'barnes_hut')
   expect_true(attr(o, 'kl_divergence') < 2)
-  expect_identical(colnames(tsne(d60, k = 1, cpus = 1)), 'TSNE1')
-  expect_identical(colnames(tsne(d60, k = 3, cpus = 1)), paste0('TSNE', 1:3))
-  expect_identical(attr(tsne(d60, k = 3, gradient = 'barnes_hut', cpus = 1), 'gradient'), 'barnes_hut')
+  expect_identical(colnames(tsne(d60, n_axes = 1, cpus = 1)), 'TSNE1')
+  expect_identical(colnames(tsne(d60, n_axes = 3, cpus = 1)), paste0('TSNE', 1:3))
+  expect_identical(attr(tsne(d60, n_axes = 3, gradient = 'barnes_hut', cpus = 1), 'gradient'), 'barnes_hut')
 
   o <- tsne(d60, perplexity = 5, learning_rate = 100, early_exaggeration = 4, theta = 0.3, max_iters = 300, cpus = 1)
   expect_identical(attr(o, 'perplexity'), 5)
@@ -362,7 +362,7 @@
   expect_identical(attr(tsne(d60, early_exaggeration = 1, max_iters = 2, cpus = 1), 'learning_rate'), 50)
 
   # Auto: exact up to 500 samples or for k > 3, else Barnes-Hut.
-  expect_identical(attr(tsne(d60, k = 4, max_iters = 10, cpus = 1), 'gradient'), 'exact')
+  expect_identical(attr(tsne(d60, n_axes = 4, max_iters = 10, cpus = 1), 'gradient'), 'exact')
   set.seed(2)
   d501 <- dist(matrix(rnorm(501 * 3), 501))
   o <- tsne(d501, max_iters = 5, cpus = 1)
@@ -392,9 +392,9 @@
 
   # PCoA with fewer positive axes than k: a random start instead.
   d <- dist(matrix(c(0, 1, 2, 4), 4))  # On a line: one axis.
-  o <- tsne(d, k = 3, max_iters = 10, cpus = 1)
+  o <- tsne(d, n_axes = 3, max_iters = 10, cpus = 1)
   expect_identical(attr(o, 'init'), 'random')
-  expect_identical(o, tsne(d, k = 3, max_iters = 10, init = 'random', cpus = 1))
+  expect_identical(o, tsne(d, n_axes = 3, max_iters = 10, init = 'random', cpus = 1))
   expect_true(all(is.finite(o)) && all(apply(o, 2, sd) > 0))
 
 
@@ -411,9 +411,9 @@
   for (k in 1:3) {
     for (g in c('exact', 'barnes_hut')) {
       cps <- if (home && k == 2) c(2L, 3L, 4L, 1500L) else many
-      x1  <- tsne(db, k = k, gradient = g, max_iters = 30, cpus = 1)
+      x1  <- tsne(db, n_axes = k, gradient = g, max_iters = 30, cpus = 1)
       for (cp in cps)
-        expect_identical(tsne(db, k = k, gradient = g, max_iters = 30, cpus = cp), x1)
+        expect_identical(tsne(db, n_axes = k, gradient = g, max_iters = 30, cpus = cp), x1)
     }
   }
 
@@ -444,7 +444,7 @@
     fresh <- function (d, cpus) {
       runs <- list(ecodive::tsne(d, init = 'random', max_iters = 30, cpus = cpus))
       for (k in 1:3) for (g in c('exact', 'barnes_hut'))
-        runs <- c(runs, list(ecodive::tsne(d, k = k, gradient = g, max_iters = 30, cpus = cpus)))
+        runs <- c(runs, list(ecodive::tsne(d, n_axes = k, gradient = g, max_iters = 30, cpus = cpus)))
       runs
     }
     environment(fresh) <- globalenv()  # Don't save this test's objects.
@@ -471,11 +471,11 @@
 
   # Small and degenerate inputs. ====
 
-  # No samples, or one: all at 0, with `k` columns.
+  # No samples, or one: all at 0, with `n_axes` columns.
   o <- tsne(dist(matrix(numeric(0), 0, 2)))
   expect_identical(dim(o), c(0L, 2L))
   expect_identical(attr(o, 'init'), 'none')
-  o <- tsne(dist(matrix(1:2, 1, dimnames = list('A', NULL))), k = 3)
+  o <- tsne(dist(matrix(1:2, 1, dimnames = list('A', NULL))), n_axes = 3)
   expect_identical(dim(o), c(1L, 3L))
   expect_identical(unname(unclass(o)[1, ]), c(0, 0, 0))
   expect_identical(rownames(o), 'A')
@@ -485,17 +485,17 @@
   expect_identical(attr(o, 'perplexity'), 1)
   expect_identical(attr(o, 'init'), 'none')
 
-  # 2, 3, and 4 samples: perplexity 1, `k` as given, finite results.
+  # 2, 3, and 4 samples: perplexity 1, `n_axes` as given, finite results.
   for (n in 2:4) {
     d <- dist(matrix(c(0, 1, 3, 7)[seq_len(n)], n))
     for (g in c('exact', 'barnes_hut')) for (k in 1:3) {
-      o <- tsne(d, k = k, gradient = g, cpus = 1)
+      o <- tsne(d, n_axes = k, gradient = g, cpus = 1)
       expect_true(all(is.finite(o)))
       expect_identical(attr(o, 'perplexity'), 1)
       expect_identical(dim(o), c(n, k))
     }
   }
-  expect_identical(dim(tsne(d60, k = 70, max_iters = 2, cpus = 1)), c(60L, 70L))
+  expect_identical(dim(tsne(d60, n_axes = 70, max_iters = 2, cpus = 1)), c(60L, 70L))
 
   # Two samples: P and Q are both 1/2, so the gradient vanishes after the
   # early exaggeration phase and the run stops at the first check. A huge
@@ -574,12 +574,12 @@
 
   # Invalid input. ====
 
-  expect_error(tsne(d60, k = 0),        '`k` must be a whole number of at least 1')
-  expect_error(tsne(d60, k = 1.5),      '`k` must be a whole number')
-  expect_error(tsne(d60, k = NA),       '`k` must be a whole number')
-  expect_error(tsne(d60, k = 'a'),      '`k` must be a whole number')
-  expect_error(tsne(d60, k = 1:2),      '`k` must be a whole number')
-  expect_error(tsne(d60, k = 1e10),     '`k` is too large')
+  expect_error(tsne(d60, n_axes = 0),        '`n_axes` must be a whole number of at least 1')
+  expect_error(tsne(d60, n_axes = 1.5),      '`n_axes` must be a whole number')
+  expect_error(tsne(d60, n_axes = NA),       '`n_axes` must be a whole number')
+  expect_error(tsne(d60, n_axes = 'a'),      '`n_axes` must be a whole number')
+  expect_error(tsne(d60, n_axes = 1:2),      '`n_axes` must be a whole number')
+  expect_error(tsne(d60, n_axes = 1e10),     '`n_axes` is too large')
   expect_error(tsne(d60, perplexity = 0.5), '`perplexity` must be a number of at least 1')
   expect_error(tsne(d60, perplexity = -1),  '`perplexity` must be a number of at least 1')
   expect_error(tsne(d60, perplexity = NA),  '`perplexity` must be a number of at least 1')
@@ -603,7 +603,7 @@
   expect_error(tsne(d60, gradient = 1),      '`gradient` must be "auto", "exact", or "barnes_hut"')
   expect_error(tsne(d60, gradient = NA),     '`gradient` must be "auto", "exact", or "barnes_hut"')
   expect_error(tsne(d60, gradient = c('exact', 'barnes_hut')), '`gradient` must be')
-  expect_error(tsne(d60, gradient = 'barnes_hut', k = 4), 'at most k = 3')
+  expect_error(tsne(d60, gradient = 'barnes_hut', n_axes = 4), 'at most `n_axes = 3`')
   expect_error(tsne(d60, init = 'pca'),       '`init` must be "pcoa", "random", or a numeric matrix')
   expect_error(tsne(d60, init = NA),          '`init` must be "pcoa", "random", or a numeric matrix')
   expect_error(tsne(d60, init = 1:120),       '`init` must be "pcoa", "random", or a numeric matrix')

@@ -55,7 +55,7 @@
 #'        negative values. Distances, and the geodesic distances summed from
 #'        them, must not exceed \eqn{10^{150}}, since they are squared.
 #'
-#' @param k   The number of axes to compute. Default: `2`. Reduced to
+#' @param n_axes   The number of axes to compute. Default: `3`. Reduced to
 #'        \eqn{n - 1} for \eqn{n} samples.
 #'
 #' @param n_neighbors   How many nearest neighbors to link each sample to.
@@ -107,7 +107,7 @@
 #'    search per sample (scikit-learn lets SciPy choose between Dijkstra
 #'    and Floyd-Warshall; both give the same lengths, up to rounding).
 #' 4. **Embedding.** Classical scaling of the geodesic distances, exactly as
-#'    in [pcoa()]: the top `k` eigenvectors of
+#'    in [pcoa()]: the top `n_axes` eigenvectors of
 #'    \eqn{B = -\frac{1}{2}JG^{(2)}J}, where \eqn{G^{(2)}} holds the squared
 #'    geodesic distances and \eqn{J} is the centering matrix, scaled by the
 #'    square roots of their eigenvalues. Axes whose eigenvalues aren't
@@ -166,7 +166,7 @@
 #'   prefers the earlier sample. When no tie straddles the
 #'   `n_neighbors`-th neighbor, the two graphs are the same.
 #' * **Axes with eigenvalues that aren't positive.** scikit-learn stops
-#'   with an error when one of the top `k` eigenvalues is substantially
+#'   with an error when one of the top `n_axes` eigenvalues is substantially
 #'   negative, and otherwise returns axes of zeros for them. `isomap()`
 #'   drops them with a warning, as `pcoa()` does.
 #' * **Rounding.** Each geodesic distance is summed along its path from the
@@ -196,8 +196,8 @@
 #'
 #' **Coming from `vegan::isomap()`**
 #'
-#' * `vegan::isomap()`'s `k` is the number of neighbors; `isomap()`'s `k` is
-#'   the number of axes (`vegan`'s `ndim`). Give the number of neighbors as
+#' * `vegan::isomap()`'s `k` is the number of neighbors; the number of axes
+#'   (`vegan`'s `ndim`) is `isomap()`'s `n_axes`. Give the number of neighbors as
 #'   `n_neighbors`.
 #' * `vegan`'s `epsilon` corresponds to `radius`.
 #' * When the neighbor graph falls apart into several components, `vegan`
@@ -219,7 +219,7 @@
 #' effect and R's random number stream is left untouched. Results can
 #' differ in the last bits between computers or compilers.
 #'
-#' `k` larger than \eqn{n - 1} (the most axes possible) is reduced to
+#' `n_axes` larger than \eqn{n - 1} (the most axes possible) is reduced to
 #' \eqn{n - 1}.
 #'
 #' @references
@@ -251,10 +251,10 @@
 #'     head(ord)
 #'     str(ord)
 #'
-isomap <- function (dm, k = 2L, n_neighbors = 5L, radius = NULL, cpus = n_cpus()) {
+isomap <- function (dm, n_axes = 3L, n_neighbors = 5L, radius = NULL, cpus = n_cpus()) {
 
   validate_cpus()
-  k <- ord_k(k)
+  k <- ord_k(n_axes)
 
   by_radius <- !is.null(radius)
 

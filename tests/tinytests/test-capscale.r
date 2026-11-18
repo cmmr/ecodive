@@ -12,7 +12,7 @@
   }
 
   fit_case <- function (cs, cpus = 1, fn = capscale) {
-    suppressMessages(fn(cs$dm, data = cs$data, formula = case_formula(cs), k = cs$k, cpus = cpus))
+    suppressMessages(fn(cs$dm, data = cs$data, formula = case_formula(cs), n_axes = cs$k, cpus = cpus))
   }
 
   case <- function (name) ref$cases[[match(name, vapply(ref$cases, `[[`, '', 'name'))]]
@@ -213,7 +213,7 @@
   expect_error(capscale(d),                          '`groups` is required')
   expect_error(capscale(d, meta$Managment, meta),    '`groups` is NULL')
   expect_error(capscale(d, meta, ~ A1),               'capscale\\(dm, data = meta')
-  expect_error(capscale(d, 'Management', meta, k = 0), '`k`')
+  expect_error(capscale(d, 'Management', meta, n_axes = 0), '`n_axes`')
   expect_error(capscale(d, 'Management', meta, cpus = 0))
 
   # Aliased columns are dropped with a message.
@@ -235,10 +235,10 @@
   cnt    <- matrix(rpois(n * 30, 2), n, dimnames = list(paste0('S', 1:n), NULL))
   env    <- data.frame(row.names = rownames(cnt), g = rep(c('a', 'b', 'c'), 50), x = rnorm(n))
   for (dd in list(bray(cnt), euclidean(cnt))) {
-    o1 <- capscale(dd, data = env, formula = ~ g + x, k = 4, cpus = 1)
-    expect_identical(capscale(dd, data = env, formula = ~ g + x, k = 4, cpus = 1),        o1)
-    expect_identical(capscale(dd, data = env, formula = ~ g + x, k = 4, cpus = 2),        o1)
-    expect_identical(capscale(dd, data = env, formula = ~ g + x, k = 4, cpus = max_cpus), o1)
+    o1 <- capscale(dd, data = env, formula = ~ g + x, n_axes = 4, cpus = 1)
+    expect_identical(capscale(dd, data = env, formula = ~ g + x, n_axes = 4, cpus = 1),        o1)
+    expect_identical(capscale(dd, data = env, formula = ~ g + x, n_axes = 4, cpus = 2),        o1)
+    expect_identical(capscale(dd, data = env, formula = ~ g + x, n_axes = 4, cpus = max_cpus), o1)
   }
 
 

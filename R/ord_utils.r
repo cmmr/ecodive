@@ -9,7 +9,7 @@
 #                    triangle, checked for NA, negative and huge values.
 #   formula_dm()     splits vegan-style `dm ~ terms` calls.
 #   ord_arg()        checks a numeric scalar argument.
-#   ord_k()          checks `k`.
+#   ord_k()          checks `n_axes`, the number of axes.
 #   ord_keep()       which eigenvalues are positive, with a warning if not all.
 #   ord_result()     the shared result: a matrix of class "ecodive_ord".
 
@@ -118,9 +118,9 @@ ord_arg <- function (x, msg, whole = FALSE, lo = 0, hi = Inf) {
 }
 
 
-# Checks `k`, the number of axes.
+# Checks `n_axes`, the number of axes (called `k` internally).
 ord_k <- function (k) {
-  ord_arg(k, '`k` must be a whole number of at least 1.', whole = TRUE, lo = 1)
+  ord_arg(k, '`n_axes` must be a whole number of at least 1.', whole = TRUE, lo = 1)
 }
 
 

@@ -13,7 +13,7 @@
 
   fit_case <- function (cs, cpus = 1) {
     if (is.null(cs$dm)) cs$dm <- dist(cs$counts)
-    suppressMessages(dbrda(cs$dm, data = cs$data, formula = case_formula(cs), k = cs$k, cpus = cpus))
+    suppressMessages(dbrda(cs$dm, data = cs$data, formula = case_formula(cs), n_axes = cs$k, cpus = cpus))
   }
 
 
@@ -165,9 +165,9 @@
   expect_identical(attr(oc, 'r_squared'),     0)
   expect_identical(attr(oc, 'adj_r_squared'), 0)
 
-  # `k` is validated.
-  expect_error(dbrda(d, 'Management', meta, k = 0),   '`k`')
-  expect_error(dbrda(d, 'Management', meta, k = 1.5), '`k`')
+  # `n_axes` is validated.
+  expect_error(dbrda(d, 'Management', meta, n_axes = 0),   '`n_axes`')
+  expect_error(dbrda(d, 'Management', meta, n_axes = 1.5), '`n_axes`')
 
 
 
@@ -175,7 +175,7 @@
 
   # Bray-Curtis: every distance is below 4.
   ds  <- ref$cases[[1]]$dm
-  pcs <- pcoa(ds, k = 2, cpus = 1)
+  pcs <- pcoa(ds, n_axes = 2, cpus = 1)
   ords <- dbrda_core(dist_vector(ds), NULL, k = 2, cpus = 1)
   expect_true(max(ds) < 4)
   expect_equal(attr(ords, 'trace'), attr(pcs, 'trace'), tolerance = 1e-12)
@@ -184,7 +184,7 @@
   # Euclidean distances between counts: dbrda's are pcoa's / (ns - 1).
   ds  <- ref$cases[[6]]$dm
   ns  <- attr(ds, 'Size')
-  pcs <- pcoa(ds, k = 2, cpus = 1)
+  pcs <- pcoa(ds, n_axes = 2, cpus = 1)
   ords <- dbrda_core(dist_vector(ds), NULL, k = 2, cpus = 1)
   expect_true(max(ds) >= 4)
   expect_equal(attr(ords, 'trace'), attr(pcs, 'trace') / (ns - 1), tolerance = 1e-12)
@@ -256,7 +256,7 @@
   # No constraints: the same axes as PCoA, named MDS.
   d   <- cs$dm
   ord <- dbrda_core(dist_vector(d), NULL, k = 2, cpus = 1)
-  pc  <- pcoa(d, k = 2, cpus = 1)
+  pc  <- pcoa(d, n_axes = 2, cpus = 1)
   expect_identical(colnames(ord), c('MDS1', 'MDS2'))
   expect_equal(attr(ord, 'eig'), attr(pc, 'eig'), tolerance = 1e-10)
   expect_equal(attr(ord, 'inertia')[['unconstrained']], attr(ord, 'trace'))

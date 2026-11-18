@@ -7,7 +7,7 @@
 rpca(
   counts,
   margin = 1L,
-  k = 3L,
+  n_axes = 3L,
   max_iters = 5L,
   tol = 1e-05,
   min_sample_count = 0,
@@ -27,7 +27,7 @@ Values must be finite and non-negative; they need not be integers
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
 class (e.g. \code{phyloseq}). Default: \code{1}}
 
-\item{k}{The rank of the low-rank model, which is also the number of
+\item{n_axes}{The rank of the low-rank model, which is also the number of
 axes returned: a whole number from 1 to 10 (gemelli suggests
 fewer than 10). Default: \code{3}}
 
@@ -69,7 +69,7 @@ kept samples, as for \code{\link[=pca]{pca()}}. See "Relation to gemelli's resul
 variance that each axis explains, \code{eig / trace}. This is gemelli's
 \code{proportion_explained}.
 \item \code{trace}: The centered completed matrix's total variance: the sum of
-all \code{k} axes' variances. (The completed matrix has rank \code{k}.)
+all \code{n_axes} axes' variances. (The completed matrix has rank \code{n_axes}.)
 \item \code{loadings}: A matrix with one row per kept feature and one column per
 axis: the unit-length feature loadings, for a biplot.
 \item \code{cost}: The root mean squared error of the low-rank fit to the
@@ -107,8 +107,8 @@ the mean log over its non-zero counts (as \code{\link[=normalize]{normalize()}} 
 \code{norm = 'rclr'}). Zeros are missing values: they are not part of the
 mean and are not given a value.
 \item \strong{Matrix completion.} OptSpace (Keshavan, Montanari & Oh 2010) fits a
-rank-\code{k} matrix \eqn{USV^T} to the observed values only: it starts from
-their top \code{k} singular vectors and runs up to \code{max_iters} steps of
+rank-\code{n_axes} matrix \eqn{USV^T} to the observed values only: it starts from
+their top \code{n_axes} singular vectors and runs up to \code{max_iters} steps of
 gradient descent on the Grassmann manifold, re-fitting the
 \eqn{k \times k} matrix \eqn{S} after each step.
 \item \strong{PCA.} The completed matrix \eqn{X = USV^T} is centered (columns,
@@ -147,7 +147,7 @@ pass; and the final PCA reduces to \eqn{k \times k} problems.
 Each descent step takes time proportional to the number of non-zero
 counts times \eqn{k^2}, plus \eqn{k^4/4} per sample for re-fitting
 \eqn{S}. The initial SVD takes a number of steps that depends on the gap
-between the \code{k}-th and next singular values, each a pass over the
+between the \code{n_axes}-th and next singular values, each a pass over the
 non-zero counts plus work on a basis of \eqn{\min(n, p)}-long vectors.
 Memory beyond the input is about 24 bytes per non-zero count, plus about
 \eqn{80 (n + p) k} bytes for the factors, plus about 1.5 kB per sample or
@@ -168,7 +168,7 @@ which its robust clr increases. (gemelli, and QIIME 2's Emperor, plot
 \eqn{u} and \eqn{v}.) The loadings are much shorter than the scores, so
 scale them for display, e.g.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{ord  <- rpca(ex_counts, k = 2)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{ord  <- rpca(ex_counts, n_axes = 2)
 load <- attr(ord, 'loadings')
 f    <- 0.8 * max(abs(ord)) / max(abs(load))
 plot(ord, asp = 1)
@@ -192,8 +192,8 @@ With \code{distances = TRUE}, \code{rpca()} also returns the distances that geme
 returns with its ordination (which it describes as the Aitchison distance
 of the sample loadings): Euclidean distances between the rows of
 OptSpace's sample factor \eqn{U}, which are normalized so that each of its
-\code{k} columns has a squared length of about \eqn{n}, before the singular
-values in \eqn{S} are applied. All \code{k} axes count equally in them. They
+\code{n_axes} columns has a squared length of about \eqn{n}, before the singular
+values in \eqn{S} are applied. All \code{n_axes} axes count equally in them. They
 are computed in parallel straight into a \code{dist} object, so they can go to
 \code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}} or \code{\link[=permanova]{permanova()}}, and nothing of size
 \eqn{n \times n} is made without \code{distances = TRUE}.
@@ -206,7 +206,7 @@ axis counts in proportion to its variance.
 \item \code{\link[=robust_aitchison]{robust_aitchison()}}: Euclidean distances between the samples' robust
 clr values with no completion: missing values count as 0, so each pair
 of samples is compared on the features observed in either, and no
-low-rank model is fitted. For a table with no zeros and \code{k} at least
+low-rank model is fitted. For a table with no zeros and \code{n_axes} at least
 the rank of its clr matrix, the completed matrix is the clr matrix, so
 \code{dist(ord)} is then the same as \code{robust_aitchison()} and \code{\link[=aitchison]{aitchison()}}.
 }
@@ -217,7 +217,7 @@ the rank of its clr matrix, the completed matrix is the clr matrix, so
 its results to within rounding error and the initial SVD's tolerance, with
 these exceptions. On the package's test tables, results agree with
 gemelli's to about \eqn{10^{-13}} (relative). Ill-conditioned problems
-agree less closely: when the \code{k}-th and next singular values of the rclr
+agree less closely: when the \code{n_axes}-th and next singular values of the rclr
 matrix are nearly tied, the initial subspace (in gemelli as here) is only
 determined to about \eqn{10^{-15}} divided by their relative gap, and
 results can then differ from gemelli's by \eqn{10^{-10}} or more.
@@ -230,8 +230,8 @@ is 0, which gemelli treats as missing, so they have no observed values
 and their position only reflects the other samples. \code{rpca()} drops them
 with a warning.
 \item gemelli requires \eqn{2 \le k \le \min(n, p) - 1}. \code{rpca()} accepts
-\code{k = 1}, and reduces \code{k} above \eqn{\min(n, p) - 1} with a warning.
-It also limits \code{k} to 10, because re-fitting \eqn{S} takes time in
+\code{n_axes = 1}, and reduces \code{n_axes} above \eqn{\min(n, p) - 1} with a warning.
+It also limits \code{n_axes} to 10, because re-fitting \eqn{S} takes time in
 proportion to \eqn{k^4}; gemelli has no limit but suggests
 \eqn{k < 10}. gemelli adds an axis of zeros when \eqn{k = 2};
 \code{rpca()} doesn't.

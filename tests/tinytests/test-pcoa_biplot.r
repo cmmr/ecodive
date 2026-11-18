@@ -17,7 +17,7 @@
   m[, 1] <- m[, 1] + 1
   dimnames(m) <- list(paste0('S', 1:40), paste0('OTU', 1:15))
 
-  ord <- pcoa(bray(m), k = 4)
+  ord <- pcoa(bray(m), n_axes = 4)
 
 
 
@@ -78,7 +78,7 @@
 
   # A corrected ordination uses its corrected coordinates and eigenvalues.
   for (corr in c('lingoes', 'cailliez')) {
-    oc <- pcoa(bray(m), k = 4, correction = corr)
+    oc <- pcoa(bray(m), n_axes = 4, correction = corr)
     expect_equal(unclass(pcoa_biplot(oc, m)), direct(oc, m), tolerance = 1e-12, check.attributes = FALSE)
   }
 
@@ -151,7 +151,7 @@
   # Edge cases. ====
 
   # Unnamed samples are matched by position.
-  o  <- pcoa(bray(unname(m)), k = 2)
+  o  <- pcoa(bray(unname(m)), n_axes = 2)
   on <- structure(o, dimnames = list(rownames(m), colnames(o)))
   expect_identical(unname(pcoa_biplot(o, unname(m))), unname(pcoa_biplot(on, m)))
   expect_identical(dimnames(pcoa_biplot(o, unname(m))), list(NULL, c('PCoA1', 'PCoA2')))
@@ -215,7 +215,7 @@
     for (nm in names(ex$fits)) {
 
       fit <- ex$fits[[nm]]
-      ord <- pcoa(fit$dist, k = 5, cpus = 2)
+      ord <- pcoa(fit$dist, n_axes = 5, cpus = 2)
       sgn <- sign(colSums(unclass(ord) * fit$coords))
 
       # scikit-bio's pcoa().
@@ -243,7 +243,7 @@
 
     # An all-zero feature and one with the same count everywhere score
     # exactly 0.
-    ord    <- pcoa(ex$fits$bray$dist, k = 5)
+    ord    <- pcoa(ex$fits$bray$dist, n_axes = 5)
     scores <- pcoa_biplot(ord, ex$counts)
     expect_identical(unname(scores['OTU11', ]), rep(0, 5))
     expect_identical(unname(scores['OTU12', ]), rep(0, 5))

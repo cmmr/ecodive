@@ -8,10 +8,10 @@
   # Same as calling the method's function. ====
 
   expect_identical(dist_ord(d, 'pcoa'),                 pcoa(d))
-  expect_identical(dist_ord(d, 'pcoa', k = 2, cpus = 1), pcoa(d, k = 2, cpus = 1))
+  expect_identical(dist_ord(d, 'pcoa', n_axes = 2, cpus = 1), pcoa(d, n_axes = 2, cpus = 1))
   expect_identical(dist_ord(d, 'nmds', n_starts = 1),    nmds(d, n_starts = 1))
   expect_identical(dist_ord(d, 'mds',  n_starts = 1),    mds(d, n_starts = 1))
-  expect_identical(dist_ord(d, 'nmds', k = 3, seed = 2, n_starts = 2), nmds(d, k = 3, seed = 2, n_starts = 2))
+  expect_identical(dist_ord(d, 'nmds', n_axes = 3, seed = 2, n_starts = 2), nmds(d, n_axes = 3, seed = 2, n_starts = 2))
   expect_identical(dist_ord(d, 'tsne', perplexity = 5, max_iters = 100), tsne(d, perplexity = 5, max_iters = 100))
 
   # Arguments the method doesn't take are an error, except `seed`, which is
@@ -31,7 +31,7 @@
 
   for (id in list_dist_ords(val = 'id')) {
     # The same arguments, `seed` included, work for every method.
-    ord <- do.call(dist_ord, c(list(d, id, k = 2, seed = 1, cpus = 1), args[[id]]))
+    ord <- do.call(dist_ord, c(list(d, id, n_axes = 2, seed = 1, cpus = 1), args[[id]]))
     expect_true(is.matrix(ord) && is.double(ord))
     expect_identical(rownames(ord), attr(d, 'Labels'))
     expect_identical(names(attributes(ord))[1:5], c('dim', 'dimnames', 'method', 'eig', 'prop'))
@@ -70,12 +70,10 @@
   expect_identical(m('Barnes-Hut t-SNE'),    'tsne')
   expect_identical(m('Isomap'),              'isomap')
   expect_identical(m('isometric mapping'),   'isomap')
-  expect_identical(match_dist_ord('nmds', input = 'dist')$id, 'nmds')
-
   info <- match_dist_ord('pcoa')
+  expect_identical(names(info), c('name', 'id', 'func', 'params'))
   expect_identical(info$func, pcoa)
   expect_identical(info$params, names(formals(pcoa)))
-  expect_identical(info$input, 'dist')
   expect_null(info$alt_ids)
 
 
@@ -83,7 +81,7 @@
 
   df <- list_dist_ords()
   expect_true(is.data.frame(df))
-  expect_identical(names(df), c('name', 'id', 'input'))
+  expect_identical(names(df), c('name', 'id'))
   expect_identical(df$id, c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
   expect_identical(rownames(list_dist_ords(nm = 'id')), c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
 
@@ -96,7 +94,10 @@
       'Uniform Manifold Approximation and Projection' = 'umap'))
   expect_identical(list_dist_ords(val = 'func'), list(capscale = capscale, dbrda = dbrda, isomap = isomap, mds = mds, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
   expect_identical(list_dist_ords(val = 'list')$pcoa, match_dist_ord('pcoa'))
-  expect_identical(list_dist_ords(val = 'input', input = 'dist'), rep('dist', 8))
+
+  # The same shape as list_count_ords() and match_count_ord().
+  expect_identical(names(formals(list_dist_ords)), names(formals(list_count_ords)))
+  expect_identical(names(formals(match_dist_ord)), names(formals(match_count_ord)))
 
 
   # Invalid input. ====
@@ -115,7 +116,7 @@
   # 'mantel' is an alias that the prefix haystack drops (it begins
   # 'manteltest'), so it is found only by exact matching.
   expect_error(dist_ord(d, 'Mantel'),    'use dist_test')
-  expect_error(list_dist_ords(input = 'counts'), 'Options are: NULL, dist')
   expect_error(list_dist_ords(val = 'xyz'))
+  expect_error(list_dist_ords(val = 'input'))
 
 #})

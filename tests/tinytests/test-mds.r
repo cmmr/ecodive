@@ -110,7 +110,7 @@
       # Final quality: no worse than scikit-learn's own best, from 8 random
       # starts or from classical MDS, by the same (scale-safe) measure.
       if (cs$k >= 2) {
-        ord <- mds(d, k = cs$k, cpus = 1)
+        ord <- mds(d, n_axes = cs$k, cpus = 1)
         expect_true(attr(ord, 'stress') <= min(cs$skl_random, cs$skl_cmds) * (1 + 1e-3), info = cs$case)
       }
     }
@@ -142,7 +142,7 @@
   # at home.
 
   for (k in if (home) 1:3 else 2L) {
-    ord <- mds(d_bray, k = k, n_starts = 0, tol = 1e-12, max_iters = 1e5, cpus = 1)
+    ord <- mds(d_bray, n_axes = k, n_starts = 0, tol = 1e-12, max_iters = 1e5, cpus = 1)
     x   <- matrix(unclass(ord), 60)
     g   <- guttman_r(x, d_bray)
     expect_true(attr(ord, 'converged'))
@@ -156,7 +156,7 @@
 
   # With default settings too.
   for (k in 1:3) {
-    ord <- mds(d_bray, k = k, cpus = 1)
+    ord <- mds(d_bray, n_axes = k, cpus = 1)
     x   <- matrix(unclass(ord), 60)
     dx  <- as.double(dist(x))
     expect_true(sqrt(sum((x - guttman_r(x, d_bray))^2) / sum(x^2)) < 1e-3, info = k)
@@ -170,10 +170,10 @@
   for (k in 1:3) {
     pts <- matrix(rnorm(40 * k), 40, k, dimnames = list(paste0('P', 1:40), NULL))
     d   <- dist(pts)
-    ord <- mds(d, k = k, cpus = 1)
+    ord <- mds(d, n_axes = k, cpus = 1)
     expect_true(attr(ord, 'stress') < 1e-8)
     expect_true(pro_rmse(ord, pts) < 1e-6)
-    expect_true(pro_rmse(ord, pcoa(d, k = k)) < 1e-6)
+    expect_true(pro_rmse(ord, pcoa(d, n_axes = k)) < 1e-6)
     expect_equal(as.double(dist(ord)), as.double(d), tolerance = 1e-8)
     # Every start reaches stress ~1e-16 here, so which one wins is a tie
     # broken by rounding, and it differs between platforms (musl, -O0).
@@ -224,8 +224,8 @@
   # Same as through dist_ord(); k = 3, 4; matrix input.
   expect_identical(dist_ord(d_bray, 'mds', cpus = 1), ord)
   expect_identical(dist_ord(d_bray, 'MDS', cpus = 1), ord)
-  ord3 <- mds(d_bray, k = 3, n_starts = 1)
-  ord4 <- mds(d_bray, k = 4, n_starts = 1)
+  ord3 <- mds(d_bray, n_axes = 3, n_starts = 1)
+  ord4 <- mds(d_bray, n_axes = 4, n_starts = 1)
   expect_identical(colnames(ord4), paste0('MDS', 1:4))
   expect_true(attr(ord4, 'stress') < attr(ord3, 'stress'))
   expect_true(attr(ord3, 'stress') < attr(ord, 'stress'))
@@ -263,7 +263,7 @@
   # Identical across runs and thread counts (and, in test-nmds.r, ====
   # sessions).
 
-  for (args in list(list(dm = d_bray), list(dm = d_jacc, k = 3))) {
+  for (args in list(list(dm = d_bray), list(dm = d_jacc, n_axes = 3))) {
     x <- do.call(mds, c(args, cpus = 1))
     expect_identical(do.call(mds, c(args, cpus = 1)), x)
     for (cpus in c(2, 3, 4, 100))
@@ -327,7 +327,7 @@
   expect_equal(abs(unname(ord[, 1])), c(1.5, 1.5))
   expect_equal(attr(ord, 'stress'), 0)
   d <- as.dist(matrix(c(0L, 3L, 4L, 3L, 0L, 5L, 4L, 5L, 0L), 3))
-  ord <- mds(d, k = 1e12)
+  ord <- mds(d, n_axes = 1e12)
   expect_identical(dim(ord), c(3L, 2L))
   expect_equal(as.double(dist(ord)), c(3, 4, 5), tolerance = 1e-6)
   expect_identical(mds(d, cpus = 100), mds(d, cpus = 1))
@@ -353,10 +353,10 @@
   expect_error(mds(as.dist(matrix(0, 5, 5))), 'greater than 0')
   expect_error(mds(d_bray * 1e151), 'too large')
 
-  expect_error(mds(d_bray, k = 0),            '`k`')
-  expect_error(mds(d_bray, k = 2.5),          '`k`')
-  expect_error(mds(d_bray, k = c(2, 3)),      '`k`')
-  expect_error(mds(d_bray, k = 'a'),          '`k`')
+  expect_error(mds(d_bray, n_axes = 0),            '`n_axes`')
+  expect_error(mds(d_bray, n_axes = 2.5),          '`n_axes`')
+  expect_error(mds(d_bray, n_axes = c(2, 3)),      '`n_axes`')
+  expect_error(mds(d_bray, n_axes = 'a'),          '`n_axes`')
   expect_error(mds(d_bray, n_starts = -1),    '`n_starts`')
   expect_error(mds(d_bray, n_starts = 1001),  '`n_starts`')
   expect_error(mds(d_bray, n_starts = NA),    '`n_starts`')

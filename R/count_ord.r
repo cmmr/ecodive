@@ -36,7 +36,7 @@ COUNT_ORDS <- local({
 #'        Flexible matching is supported (see below). Programmatic access via
 #'        `list_count_ords()`.
 #'
-#' @param ...   Further arguments for the method's function, such as `k`,
+#' @param ...   Further arguments for the method's function, such as `n_axes`,
 #'        `margin`, `cpus`, or [pca()]'s `norm`, `pseudocount`, and `scale`.
 #'        Each method keeps its own defaults; see [pca()] and [rpca()].
 #'        `seed` is ignored by the methods that have no random parts (all of
@@ -88,7 +88,7 @@ COUNT_ORDS <- local({
 #'     str(ord)
 #'
 #'     # The same arguments for every method.
-#'     lapply(list_count_ords('id'), function (m) attr(count_ord(ex_counts, m, k = 2), 'prop'))
+#'     lapply(list_count_ords('id'), function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 #'
 count_ord <- function (counts, method, ...) {
 

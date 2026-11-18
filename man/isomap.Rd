@@ -4,7 +4,7 @@
 \alias{isomap}
 \title{Isometric Feature Mapping (Isomap)}
 \usage{
-isomap(dm, k = 2L, n_neighbors = 5L, radius = NULL, cpus = n_cpus())
+isomap(dm, n_axes = 3L, n_neighbors = 5L, radius = NULL, cpus = n_cpus())
 }
 \arguments{
 \item{dm}{A \code{dist} object, such as from \code{\link[=beta_div]{beta_div()}} or \code{\link[=bray]{bray()}}, or a
@@ -12,7 +12,7 @@ symmetric numeric matrix of distances. Must not contain \code{NA}s or
 negative values. Distances, and the geodesic distances summed from
 them, must not exceed \eqn{10^{150}}, since they are squared.}
 
-\item{k}{The number of axes to compute. Default: \code{2}. Reduced to
+\item{n_axes}{The number of axes to compute. Default: \code{3}. Reduced to
 \eqn{n - 1} for \eqn{n} samples.}
 
 \item{n_neighbors}{How many nearest neighbors to link each sample to.
@@ -77,7 +77,7 @@ graph between every pair of samples, by Dijkstra's algorithm, one
 search per sample (scikit-learn lets SciPy choose between Dijkstra
 and Floyd-Warshall; both give the same lengths, up to rounding).
 \item \strong{Embedding.} Classical scaling of the geodesic distances, exactly as
-in \code{\link[=pcoa]{pcoa()}}: the top \code{k} eigenvectors of
+in \code{\link[=pcoa]{pcoa()}}: the top \code{n_axes} eigenvectors of
 \eqn{B = -\frac{1}{2}JG^{(2)}J}, where \eqn{G^{(2)}} holds the squared
 geodesic distances and \eqn{J} is the centering matrix, scaled by the
 square roots of their eigenvalues. Axes whose eigenvalues aren't
@@ -135,7 +135,7 @@ link different ones among duplicate samples too. \code{isomap()} always
 prefers the earlier sample. When no tie straddles the
 \code{n_neighbors}-th neighbor, the two graphs are the same.
 \item \strong{Axes with eigenvalues that aren't positive.} scikit-learn stops
-with an error when one of the top \code{k} eigenvalues is substantially
+with an error when one of the top \code{n_axes} eigenvalues is substantially
 negative, and otherwise returns axes of zeros for them. \code{isomap()}
 drops them with a warning, as \code{pcoa()} does.
 \item \strong{Rounding.} Each geodesic distance is summed along its path from the
@@ -165,8 +165,8 @@ attributes.
 
 \strong{Coming from \code{vegan::isomap()}}
 \itemize{
-\item \code{vegan::isomap()}'s \code{k} is the number of neighbors; \code{isomap()}'s \code{k} is
-the number of axes (\code{vegan}'s \code{ndim}). Give the number of neighbors as
+\item \code{vegan::isomap()}'s \code{k} is the number of neighbors; the number of axes
+(\code{vegan}'s \code{ndim}) is \code{isomap()}'s \code{n_axes}. Give the number of neighbors as
 \code{n_neighbors}.
 \item \code{vegan}'s \code{epsilon} corresponds to \code{radius}.
 \item When the neighbor graph falls apart into several components, \code{vegan}
@@ -188,7 +188,7 @@ which thread finishes first. The eigenvectors are as reproducible as
 effect and R's random number stream is left untouched. Results can
 differ in the last bits between computers or compilers.
 
-\code{k} larger than \eqn{n - 1} (the most axes possible) is reduced to
+\code{n_axes} larger than \eqn{n - 1} (the most axes possible) is reduced to
 \eqn{n - 1}.
 }
 \section{Ordination result}{

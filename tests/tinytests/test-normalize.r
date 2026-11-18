@@ -44,12 +44,12 @@
   # pca()'s CLR path keeps the table sparse, with each sample's value for
   # zeros as an offset, so it sums in another order: equal to rounding.
   expect_equal(
-    pca(x, norm = 'clr', pseudocount = 1, k = 2, cpus = 1),
-    pca(normalize(x, 'clr', pseudocount = 1, cpus = 1), k = 2, cpus = 1),
+    pca(x, norm = 'clr', pseudocount = 1, n_axes = 2, cpus = 1),
+    pca(normalize(x, 'clr', pseudocount = 1, cpus = 1), n_axes = 2, cpus = 1),
     tolerance = 1e-12 )
   expect_identical(
-    pca(x, norm = 'percent', k = 2, cpus = 1),
-    pca(normalize(x, 'percent', cpus = 1), k = 2, cpus = 1) )
+    pca(x, norm = 'percent', n_axes = 2, cpus = 1),
+    pca(normalize(x, 'percent', cpus = 1), n_axes = 2, cpus = 1) )
   expect_identical(
     bray(x, norm = 'percent', cpus = 1),
     bray(normalize(x, 'percent', cpus = 1), cpus = 1) )
@@ -66,7 +66,7 @@
     euclidean(x, norm = 'hellinger', cpus = 1),
     euclidean(normalize(x, 'hellinger', cpus = 1), cpus = 1) )
   expect_equal(euclidean(x, norm = 'hellinger', cpus = 1), hellinger(x, cpus = 1), tolerance = 1e-12)
-  hp <- unclass(pca(x, norm = 'hellinger', k = 2, cpus = 1))[, ]
+  hp <- unclass(pca(x, norm = 'hellinger', n_axes = 2, cpus = 1))[, ]
   pr <- stats::prcomp(sqrt(pct), rank. = 2)$x
   pr <- sweep(pr, 2, sign(colSums(pr * hp)), '*')  # match each axis's sign
   expect_equal(hp, pr, check.attributes = FALSE, tolerance = 1e-10)
@@ -77,7 +77,7 @@
   expect_error(euclidean(neg, norm = 'hellinger', cpus = 1), 'negative values')
   expect_error(pca(neg, norm = 'hellinger', cpus = 1), 'negative values')
 
-  ord <- pcoa(bray(x, cpus = 1), k = 2, cpus = 1)
+  ord <- pcoa(bray(x, cpus = 1), n_axes = 2, cpus = 1)
   for (nm in c('percent', 'chord', 'hellinger', 'rclr'))
     expect_equal(
       envfit(ord, counts = x, norm = nm, permutations = 19, cpus = 1),

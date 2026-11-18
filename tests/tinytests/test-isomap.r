@@ -63,8 +63,8 @@
 
       # Embedding and eigenvalues.
       run <- function ()
-        if (knn) isomap(fx$dm, k = fx$k, n_neighbors = fx$n_neighbors, cpus = 1)
-        else     isomap(fx$dm, k = fx$k, radius = fx$radius, cpus = 1)
+        if (knn) isomap(fx$dm, n_axes = fx$k, n_neighbors = fx$n_neighbors, cpus = 1)
+        else     isomap(fx$dm, n_axes = fx$k, radius = fx$radius, cpus = 1)
 
       if (split) { expect_warning(ord <- run(), 'connected components', info = name) }
       else       { ord <- run()                                                  }
@@ -100,7 +100,7 @@
     names(attributes(x)),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace',
       'n_neighbors', 'radius', 'components', 'membership', 'class') )
-  expect_identical(dimnames(x), list(attr(d, 'Labels'), c('Isomap1', 'Isomap2')))
+  expect_identical(dimnames(x), list(attr(d, 'Labels'), c('Isomap1', 'Isomap2', 'Isomap3')))
   expect_identical(attr(x, 'method'), 'isomap')
   expect_identical(attr(x, 'n_neighbors'), 10L)
   expect_identical(attr(x, 'radius'), NA_real_)
@@ -124,7 +124,7 @@
 
   # The embedding is pcoa() of the geodesic distances.
   g  <- geodesics(d, n_neighbors = 10)
-  pc <- pcoa(structure(g$geo, Size = 120L, class = 'dist'), k = 2, cpus = 1)
+  pc <- pcoa(structure(g$geo, Size = 120L, class = 'dist'), n_axes = 3, cpus = 1)
   expect_identical(vals(pc), vals(x))
   expect_identical(attr(pc, 'eig'), attr(x, 'eig'))
   expect_identical(attr(pc, 'trace'), attr(x, 'trace'))
@@ -141,8 +141,8 @@
   expect_identical(g$geo, as.vector(d))
   expect_identical(nrow(g$edges), 8385L)
 
-  iso <- isomap(d, k = 3, n_neighbors = 129, cpus = 1)
-  pc  <- pcoa(d, k = 3, cpus = 1)
+  iso <- isomap(d, n_axes = 3, n_neighbors = 129, cpus = 1)
+  pc  <- pcoa(d, n_axes = 3, cpus = 1)
   expect_identical(vals(iso), vals(pc))
   expect_identical(attr(iso, 'eig'),   attr(pc, 'eig'))
   expect_identical(attr(iso, 'prop'),  attr(pc, 'prop'))
@@ -150,9 +150,9 @@
 
   # So do an infinite radius, and a radius of 0, which leaves every sample
   # on its own until they are all joined pairwise.
-  rad <- isomap(d, k = 3, radius = Inf, cpus = 1)
+  rad <- isomap(d, n_axes = 3, radius = Inf, cpus = 1)
   expect_identical(vals(rad), vals(iso))
-  expect_warning(rad <- isomap(d, k = 3, radius = 0, cpus = 1), '130 connected components')
+  expect_warning(rad <- isomap(d, n_axes = 3, radius = 0, cpus = 1), '130 connected components')
   expect_identical(vals(rad), vals(iso))
   expect_identical(attr(rad, 'membership'), 1:130)
 
@@ -200,8 +200,8 @@
   d      <- bray(counts)
   expect_true(mean(as.vector(d) > 0.99) > 0.25) # saturated distances
 
-  rho_iso  <- abs(cor(isomap(d, k = 1, n_neighbors = 6, cpus = 1)[, 1], pos, method = 'spearman'))
-  rho_pcoa <- abs(cor(pcoa(d, k = 1, cpus = 1)[, 1], pos, method = 'spearman'))
+  rho_iso  <- abs(cor(isomap(d, n_axes = 1, n_neighbors = 6, cpus = 1)[, 1], pos, method = 'spearman'))
+  rho_pcoa <- abs(cor(pcoa(d, n_axes = 1, cpus = 1)[, 1], pos, method = 'spearman'))
   expect_true(rho_iso > 0.99)
   expect_true(rho_iso > rho_pcoa + 0.05)
 
@@ -215,7 +215,7 @@
   cases <- list(
     list(d = bray(big_mtx),    args = list(n_neighbors = 3)),
     list(d = bray(big_mtx),    args = list(n_neighbors = 40)),
-    list(d = bray(m),          args = list(n_neighbors = 4, k = 3)),
+    list(d = bray(m),          args = list(n_neighbors = 4, n_axes = 3)),
     list(d = bray(m),          args = list(radius = 0.55)),
     list(d = dist(round(pts)), args = list(n_neighbors = 2)) )
 
@@ -298,10 +298,10 @@
 
   # Three and four samples.
   d <- dist(matrix(c(0, 0, 3, 0, 0, 4), 3, byrow = TRUE))
-  expect_identical(vals(isomap(d, n_neighbors = 2)), vals(pcoa(d, k = 2)))
+  expect_identical(vals(isomap(d, n_neighbors = 2)), vals(pcoa(d, n_axes = 2)))
 
   d <- dist(c(0, 1, 10, 11))
-  expect_warning(ord <- isomap(d, k = 1, n_neighbors = 1), '2 connected components')
+  expect_warning(ord <- isomap(d, n_axes = 1, n_neighbors = 1), '2 connected components')
   expect_identical(unname(attr(ord, 'membership')), c(1L, 1L, 2L, 2L))
   expect_equal(abs(vals(ord)[, 1]), c(5.5, 4.5, 4.5, 5.5))
 
@@ -314,11 +314,11 @@
 
   # k larger than n - 1.
   expect_identical(
-    suppressWarnings(isomap(d, k = 1e10, n_neighbors = 9)),
-    suppressWarnings(isomap(d, k = 9,    n_neighbors = 9)) )
+    suppressWarnings(isomap(d, n_axes = 1e10, n_neighbors = 9)),
+    suppressWarnings(isomap(d, n_axes = 9,    n_neighbors = 9)) )
 
   # All distances zero: no axes.
-  expect_warning(ord <- isomap(as.dist(matrix(0, 5, 5))), 'only 0 of the first 2')
+  expect_warning(ord <- isomap(as.dist(matrix(0, 5, 5))), 'only 0 of the first 3')
   expect_identical(dim(ord), c(5L, 0L))
   expect_identical(attr(ord, 'trace'), 0)
   expect_identical(attr(ord, 'prop'), numeric(0))
@@ -377,7 +377,7 @@
   expect_identical(g$max, 1e150)
 
   for (bad in list(0, -1, 1.5, NA, NaN, Inf, 'a', c(1, 2), NULL, TRUE))
-    expect_error(isomap(d, k = bad), '`k` must be')
+    expect_error(isomap(d, n_axes = bad), '`n_axes` must be')
   for (bad in list(0, -1, 1.5, NA, NaN, Inf, 'a', c(1, 2), NULL, TRUE))
     expect_error(isomap(d, n_neighbors = bad), '`n_neighbors` must be')
   for (bad in list(-1, NA, NaN, 'a', c(1, 2), TRUE))
@@ -399,9 +399,9 @@
       invokeRestart('muffleWarning') })
     w
   }
-  w <- warnings_of(ord <- isomap(d, k = 1e300, n_neighbors = 9))
-  expect_identical(w, warnings_of(isomap(d, k = 9, n_neighbors = 9)))
-  expect_identical(ord, suppressWarnings(isomap(d, k = 9, n_neighbors = 9)))
+  w <- warnings_of(ord <- isomap(d, n_axes = 1e300, n_neighbors = 9))
+  expect_identical(w, warnings_of(isomap(d, n_axes = 9, n_neighbors = 9)))
+  expect_identical(ord, suppressWarnings(isomap(d, n_axes = 9, n_neighbors = 9)))
   w <- warnings_of(ord <- isomap(d, n_neighbors = 1e300))
   expect_identical(length(w), 1L)
   expect_true(grepl('more than the 9 other samples', w[1]))

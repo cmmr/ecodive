@@ -21,7 +21,7 @@
 #'        symmetric numeric matrix of distances. Must not contain `NA`s or
 #'        negative values.
 #'
-#' @param k   The number of dimensions. Default: `2`
+#' @param n_axes   The number of dimensions. Default: `2`
 #'
 #' @param n_starts The number of random starts to run after the start from the
 #'        PCoA solution, from 0 to 1000. Default: `4`
@@ -66,7 +66,7 @@
 #'
 #' **Which ordination?**
 #'
-#' [pcoa()], [mds()], and `nmds()` all place the samples in `k` dimensions
+#' [pcoa()], [mds()], and `nmds()` all place the samples in `n_axes` dimensions
 #' from `dm`. [pcoa()] (classical scaling) is exact and fast, and has
 #' eigenvalues and "variance explained", but it fits the squared distances
 #' after double centering, so large distances dominate, and non-Euclidean
@@ -110,10 +110,10 @@
 #' would: \eqn{X \leftarrow 2\Gamma(X) - X}, the relaxed update of de Leeuw
 #' and Heiser (1980). \eqn{\Gamma} doesn't depend on the scale of \eqn{X},
 #' so relaxed steps don't converge in that one direction (they flip the scale
-#' back and forth), nor at all when `k = 1`, where \eqn{\Gamma} only depends
+#' back and forth), nor at all when `n_axes = 1`, where \eqn{\Gamma} only depends
 #' on the order of the points. So a start takes relaxed steps only until one
 #' makes no more than `tol` progress, then plain steps until a plain step
-#' does (or until `max_iters`, whose last step is always plain), and `k = 1` uses
+#' does (or until `max_iters`, whose last step is always plain), and `n_axes = 1` uses
 #' plain steps throughout. The configuration returned and measured thus
 #' always comes from a plain step: it is a fixed point of \eqn{\Gamma} to
 #' within `tol`, and its stress is what plain steps reach from the same
@@ -245,7 +245,7 @@
 #' **Reproducibility**
 #'
 #' The result, with all its attributes, is bit-identical from run to run, in
-#' new R sessions, and for any value of `cpus`, given the same `dm`, `k`,
+#' new R sessions, and for any value of `cpus`, given the same `dm`, `n_axes`,
 #' `n_starts`, `max_iters`, `tol`, `ties`, and `seed`. Each start splits its sums
 #' into a fixed number of parts that depends only on the number of samples,
 #' and adds them in a fixed order; the sort order of the distances is a
@@ -258,7 +258,7 @@
 #' still differ in the last bits between computers or compilers, as for any
 #' floating point code.
 #'
-#' `k` larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
+#' `n_axes` larger than \eqn{n - 1} is reduced to \eqn{n - 1}.
 #'
 #' @references
 #' Kruskal, J. B. (1964). Nonmetric multidimensional scaling: A numerical
@@ -295,7 +295,7 @@
 #'     str(ord)
 #'
 nmds <- function (
-    dm, k = 2L, n_starts = 4L, max_iters = 1000L, tol = 1e-7,
+    dm, n_axes = 2L, n_starts = 4L, max_iters = 1000L, tol = 1e-7,
     ties = 'primary', seed = 0L, cpus = n_cpus() ) {
 
   validate_cpus()
@@ -304,7 +304,7 @@ nmds <- function (
   if (!is.character(ties) || length(ties) != 1 || !ties %in% c('primary', 'secondary'))
     stop('`ties` must be "primary" or "secondary".', call. = FALSE)
 
-  smacof_fit(dm, k, n_starts, max_iters, tol, seed, cpus, 'nmds', ties = ties)
+  smacof_fit(dm, n_axes, n_starts, max_iters, tol, seed, cpus, 'nmds', ties = ties)
 }
 
 
