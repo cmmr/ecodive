@@ -16,7 +16,7 @@ print(x, ...)
 - x:
 
   An ordination result, from
-  [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md),
+  [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md),
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),

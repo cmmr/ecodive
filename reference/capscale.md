@@ -3,9 +3,10 @@
 Constrained ordination of samples from their distances, like
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md), but of
 the principal coordinates with positive eigenvalues only. Gives the same
-results as `vegan::capscale()` (and so as
-`phyloseq::ordinate(method = "CAP")`). For Euclidean distances it gives
-the same results as
+results as
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+(and so as `phyloseq::ordinate(method = "CAP")`). For Euclidean
+distances it gives the same results as
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md).
 
 ## Usage
@@ -22,10 +23,12 @@ capscale(dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus())
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
   or [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), or a
   symmetric numeric matrix of distances. Must not contain `NA`s or
-  negative values. Alternatively, as in `vegan::dbrda()`, a formula with
-  the distances on its left-hand side and the constraints on its right,
-  such as `dm ~ treatment`, in place of `dm` and `formula`; the metadata
-  may then be given second, as in `dbrda(dm ~ treatment, meta)`.
+  negative values. Alternatively, as in
+  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+  a formula with the distances on its left-hand side and the constraints
+  on its right, such as `dm ~ treatment`, in place of `dm` and
+  `formula`; the metadata may then be given second, as in
+  `dbrda(dm ~ treatment, meta)`.
 
 - groups:
 
@@ -52,10 +55,11 @@ capscale(dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus())
   such as `~ treatment + ph`. Factors, numeric covariates, and
   interactions are all allowed. Wrap variables in `Condition()` to
   remove their effect first (a partial analysis), as in
-  `vegan::dbrda()`: `~ treatment + Condition(site)`. With only
-  `Condition()` terms, the result is the unconstrained ordination after
-  removing their effect. A left-hand side, if given, is ignored. Give
-  `groups` or `formula`: there is no default model. Default: `NULL`.
+  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html):
+  `~ treatment + Condition(site)`. With only `Condition()` terms, the
+  result is the unconstrained ordination after removing their effect. A
+  left-hand side, if given, is ignored. Give `groups` or `formula`:
+  there is no default model. Default: `NULL`.
 
 - k:
 
@@ -158,14 +162,16 @@ eigen-decomposition, `capscale()` stops looking and decomposes \\G\\, as
 below, which gives the same results either way.
 
 Otherwise, \\G\_+\\ needs every eigenvalue of \\G\\, as in
-`vegan::capscale()`: `capscale()` forms \\G\\ (\\8n^2\\ bytes, such as
-200 MB for 5000 samples), reduces it to tridiagonal form, finds all of
-its eigenvalues, and then the eigenvectors of the positive ones, or of
-the others if they are fewer, by inverse iteration. That takes time
-proportional to \\n^3\\, though several times less than a full
-eigen-decomposition: for 2000 Bray-Curtis distances, about 2 seconds on
-one core, against 12 for `vegan::capscale()`. The reduction and the
-eigenvectors are computed in parallel on `cpus` threads.
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html):
+`capscale()` forms \\G\\ (\\8n^2\\ bytes, such as 200 MB for 5000
+samples), reduces it to tridiagonal form, finds all of its eigenvalues,
+and then the eigenvectors of the positive ones, or of the others if they
+are fewer, by inverse iteration. That takes time proportional to
+\\n^3\\, though several times less than a full eigen-decomposition: for
+2000 Bray-Curtis distances, about 2 seconds on one core, against 12 for
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html).
+The reduction and the eigenvectors are computed in parallel on `cpus`
+threads.
 
 **capscale() or dbrda()?**
 
@@ -186,17 +192,19 @@ square roots of Bray-Curtis distances (Legendre & Legendre 2012, Table
 
 `capscale()` gives the same scores, eigenvalues, inertia (including the
 imaginary inertia), \\R^2\\, biplot scores and centroids as
-`vegan::capscale()` given distances, up to the signs of the axes. As
-there, distances are divided by \\\sqrt{n-1}\\ when any is 4 or more
-(see "Scale" in
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+given distances, up to the signs of the axes. As there, distances are
+divided by \\\sqrt{n-1}\\ when any is 4 or more (see "Scale" in
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)).
-`vegan::capscale()` can also take a community table, add a constant to
-the distances (`add`), or take their square roots (`sqrt.dist`), and
-gives species scores; `capscale()` does not.
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+can also take a community table, add a constant to the distances
+(`add`), or take their square roots (`sqrt.dist`), and gives species
+scores; `capscale()` does not.
 
-`capscale()` is named after `vegan::capscale()`. Anderson & Willis's
-(2003) "canonical analysis of principal coordinates" (CAP) is a related
-but different method.
+`capscale()` is named after
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html).
+Anderson & Willis's (2003) "canonical analysis of principal coordinates"
+(CAP) is a related but different method.
 
 **Axis signs and reproducibility**
 
@@ -217,7 +225,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -280,34 +288,44 @@ ed.). Elsevier.
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md),
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md),
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
 
 ## Examples
 
 ``` r
-    set.seed(1)
-    counts <- matrix(rpois(30 * 20, 5), 30, dimnames = list(paste0('S', 1:30), NULL))
-    counts[16:30, 1:5] <- counts[16:30, 1:5] + 10
-    meta <- data.frame(
-      row.names = rownames(counts),
-      group     = rep(c('A', 'B'), each = 15),
-      pH        = runif(30, 5, 8) )
+    dm  <- bray(iris[, 1:4])
+    ord <- capscale(dm, 'Species', iris)
+    plot(ord, col = iris$Species)
 
-    # Bray-Curtis distances aren't Euclidean: the two differ.
-    cap <- capscale(bray(counts), data = meta, formula = ~ group + pH)
-    db  <- dbrda(bray(counts), data = meta, formula = ~ group + pH)
-    rbind(capscale = attr(cap, 'eig'), dbrda = attr(db, 'eig'))
-#>               [,1]       [,2]      [,3]
-#> capscale 0.5614052 0.01931422 0.1124148
-#> dbrda    0.5612329 0.01504930 0.1124109
-    attr(cap, 'inertia')
-#>   conditional   constrained unconstrained     imaginary 
-#>     0.0000000     0.5807195     0.7086203    -0.1028207 
-
-    # Euclidean distances are: the two agree.
-    cap <- capscale(euclidean(counts), 'group', meta)
-    db  <- dbrda(euclidean(counts), 'group', meta)
-    all.equal(attr(cap, 'eig'), attr(db, 'eig'))
-#> [1] TRUE
+    head(ord)
+#>           CAP1        CAP2        MDS1
+#> [1,] 0.5066572 -0.26288381 -0.07396932
+#> [2,] 0.5050815  0.26531512  0.31060632
+#> [3,] 0.5565336 -0.08822428  0.21441482
+#> [4,] 0.5347107  0.09086444  0.28072084
+#> [5,] 0.5279706 -0.33653429 -0.05903183
+#> [6,] 0.4111538 -0.26696879 -0.40145462
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:3] 0.507 0.505 0.557 0.535 0.528 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:3] "CAP1" "CAP2" "MDS1"
+#>  - attr(*, "method")= chr "capscale"
+#>  - attr(*, "eig")= num [1:3] 2.234 0.086 0.244
+#>  - attr(*, "prop")= num [1:3] 0.7674 0.0296 0.084
+#>  - attr(*, "trace")= num 2.64
+#>  - attr(*, "inertia")= Named num [1:4] 0 2.32 0.591 -0.274
+#>   ..- attr(*, "names")= chr [1:4] "conditional" "constrained" "unconstrained" "imaginary"
+#>  - attr(*, "constrained_eig")= num [1:2] 2.234 0.086
+#>  - attr(*, "r_squared")= num 0.797
+#>  - attr(*, "adj_r_squared")= num 0.794
+#>  - attr(*, "biplot")= num [1:2, 1:3] -0.275 -0.695 0.962 -0.719 0 ...
+#>   ..- attr(*, "dimnames")=List of 2
+#>   .. ..$ : chr [1:2] "Speciesversicolor" "Speciesvirginica"
+#>   .. ..$ : chr [1:3] "CAP1" "CAP2" "MDS1"
+#>  - attr(*, "centroids")= num [1:3, 1:3] 0.499 -0.141 -0.357 -0.125 0.494 ...
+#>   ..- attr(*, "dimnames")=List of 2
+#>   .. ..$ : chr [1:3] "Speciessetosa" "Speciesversicolor" "Speciesvirginica"
+#>   .. ..$ : chr [1:3] "CAP1" "CAP2" "MDS1"
 ```

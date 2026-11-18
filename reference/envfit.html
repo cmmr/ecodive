@@ -39,7 +39,9 @@ biplot."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/stat_tests.html">Statistical Tests</a></li>
     <li><a class="dropdown-item" href="../articles/unifrac.html">UniFrac Calculations</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -64,7 +66,7 @@ biplot."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.
 ordination (\(r^2\)); and, for each factor, the centroid of each of its
 levels and how well the factor separates the samples. Permutation tests
 give p-values. Gives the same arrows, centroids, and \(r^2\) as
-<code>vegan::envfit()</code>, and the same p-values for the same permutations, but
+<code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code>, and the same p-values for the same permutations, but
 runs in parallel C, so that fitting thousands of taxa with 999
 permutations each takes seconds. Use it for the arrows and labels of a
 biplot.</p>
@@ -142,13 +144,13 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 
 <dt id="arg-axes">axes<a class="anchor" aria-label="anchor" href="#arg-axes"></a></dt>
 <dd><p>Which columns of <code>ord</code> to fit onto: indices or column names.
-The default, <code>NULL</code>, uses every column. <code>vegan::envfit()</code> uses the
+The default, <code>NULL</code>, uses every column. <code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code> uses the
 first two by default (its <code>choices = c(1, 2)</code>), so give <code>axes = 1:2</code> to compare with it.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
 <dd><p>Leave out samples with missing values (<code>NA</code>) in <code>ord</code> or in
-any column of <code>data</code>, as <code>vegan::envfit()</code> does. <code>counts</code> must not
+any column of <code>data</code>, as <code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code> does. <code>counts</code> must not
 have any.
 Default: <code>FALSE</code>, which stops with an error if there are any.</p></dd>
 
@@ -156,7 +158,7 @@ Default: <code>FALSE</code>, which stops with an error if there are any.</p></dd
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of permutations. Default: <code>999</code>.
 Alternatively, a matrix with one permutation of <code>1:n</code> per row, as
-from <code>permute::shuffleSet()</code>, to use instead of random ones.</p></dd>
+from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
@@ -196,7 +198,7 @@ that is between its levels (repeated on each level's row).</p></li>
 factors).</p></li>
 <li><p><code>z</code>: The standardized effect size, <code>(r2 - mean(r2_perm)) / sd(r2_perm)</code>, for that variable's column of <code>r2_perm</code>.</p></li>
 </ul><p>Row names are the variables' names, and for factor levels, the
-variable's name pasted to the level's, as in <code>vegan::envfit()</code>. The
+variable's name pasted to the level's, as in <code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code>. The
 data frame has class <code>"ecodive_envfit"</code>, only to mark what made it.</p>
 <p>Attributes: <code>r2_perm</code>, a matrix of the \(r^2\) of each permutation
 (rows) for each variable (columns); and <code>n_perm</code>, the number of
@@ -215,7 +217,7 @@ squares between its levels' centroids divided by the total sum of squares
 of \(X\), as in a one-way MANOVA.</p>
 <p>The p-value is the proportion of permutations of the samples, counting
 the observed data, with an \(r^2\) at least as large: \((1 +
-\#\{r^2_{perm} \ge r^2\}) / (1 + permutations)\). As in <code>vegan::envfit()</code>,
+\#\{r^2_{perm} \ge r^2\}) / (1 + permutations)\). As in <code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code>,
 permuted values within <code>sqrt(.Machine$double.eps)</code> of the observed one
 count as ties.</p>
 <p><strong>Speed and memory</strong></p>
@@ -244,7 +246,7 @@ in the arrows, where <code>vegan</code> gives <code>NA</code> for every arrow.</
 <li><p>There are no weights (<code>w</code>): no ecodive ordination has them. <code>vegan</code>
 uses them only for its CA and CCA results.</p></li>
 <li><p><code>strata</code> permutes freely within strata. For other restricted designs,
-pass a <code>permutations</code> matrix from <code>permute::shuffleSet()</code>.</p></li>
+pass a <code>permutations</code> matrix from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>.</p></li>
 <li><p>When there are fewer possible permutations than requested, <code>vegan</code>
 (via <code>permute</code>) runs each of them once instead. <code>envfit()</code> always draws
 random permutations.</p></li>
@@ -264,48 +266,33 @@ southeastern Spain. <em>Vegetatio</em>, 55, 37-55. <a href="https://doi.org/10.1
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="co"># 30 samples in three treatment groups. The 'high' group has more</span></span></span>
-<span class="r-in"><span>    <span class="co"># of the first five genera.</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">30</span> <span class="op">*</span> <span class="fl">20</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fl">30</span>, <span class="fl">20</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'S'</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'G'</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>      row.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>      treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'ctrl'</span>, <span class="st">'low'</span>, <span class="st">'high'</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>      ph        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">7</span>, <span class="fl">0.3</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">high</span> <span class="op">&lt;-</span> <span class="va">meta</span><span class="op">$</span><span class="va">treatment</span> <span class="op">==</span> <span class="st">'high'</span></span></span>
-<span class="r-in"><span>    <span class="va">counts</span><span class="op">[</span><span class="va">high</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">counts</span><span class="op">[</span><span class="va">high</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">+</span> <span class="fl">5</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="va">dm</span>  <span class="op">&lt;-</span> <span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="pcoa.html">pcoa</a></span><span class="op">(</span><span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="co"># An arrow for each measurement, a centroid for each species.</span></span></span>
+<span class="r-in"><span>    <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">envfit</span><span class="op">(</span><span class="va">ord</span>, <span class="va">iris</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">fit</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       variable      level       PCoA1       PCoA2        r2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length      Sepal.Length       &lt;NA&gt; -0.62240779 -0.78269313 0.8942973</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Width        Sepal.Width       &lt;NA&gt;  0.17280029 -0.98495688 0.9213948</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length      Petal.Length       &lt;NA&gt; -0.99139935 -0.13087144 0.9849779</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width        Petal.Width       &lt;NA&gt; -0.96090689 -0.27687170 0.9289167</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciessetosa          Species     setosa  0.16700378 -0.01395054 0.8875721</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor      Species versicolor -0.04635194  0.03090254 0.8875721</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica       Species  virginica -0.12065184 -0.01695200 0.8875721</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   p_value        z</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length        0.001 71.49808</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Width         0.001 67.92426</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length        0.001 74.01866</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width         0.001 70.39502</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciessetosa       0.001 70.18593</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor   0.001 70.18593</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica    0.001 70.18593</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># Metadata: an arrow for pH, a centroid for each treatment.</span></span></span>
-<span class="r-in"><span>    <span class="fu">envfit</span><span class="op">(</span><span class="va">ord</span>, <span class="va">meta</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                variable level       PCoA1        PCoA2         r2 p_value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentctrl treatment  ctrl -0.05943289  0.009287556 0.49204476   0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmenthigh treatment  high  0.10130261  0.009855297 0.49204476   0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentlow  treatment   low -0.04186972 -0.019142853 0.49204476   0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ph                   ph  &lt;NA&gt;  0.02600727  0.999661754 0.03004821   0.660</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                        z</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentctrl  8.7956678</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmenthigh  8.7956678</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> treatmentlow   8.7956678</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ph            -0.6024862</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># Each genus's relative abundance as an arrow.</span></span></span>
-<span class="r-in"><span>    <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">envfit</span><span class="op">(</span><span class="va">ord</span>, counts <span class="op">=</span> <span class="va">counts</span>, norm <span class="op">=</span> <span class="st">'percent'</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fit</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">p_value</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     variable level      PCoA1       PCoA2        r2 p_value         z</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> G2        G2  &lt;NA&gt;  0.9698078 -0.24387071 0.4161638   0.001  5.450425</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> G4        G4  &lt;NA&gt;  0.9962046 -0.08704264 0.4415129   0.001  6.149942</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> G5        G5  &lt;NA&gt;  0.8752503  0.48367023 0.4412296   0.001  5.737329</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> G9        G9  &lt;NA&gt; -0.4499446 -0.89305645 0.4500782   0.001  5.642102</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> G15      G15  &lt;NA&gt; -0.8941686  0.44773034 0.5157017   0.001  7.381947</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> G16      G16  &lt;NA&gt; -0.2155534  0.97649205 0.7302768   0.001 10.369686</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># A biplot of the genera with p &lt;= 0.05.</span></span></span>
-<span class="r-in"><span>    <span class="va">top</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">[</span><span class="va">fit</span><span class="op">$</span><span class="va">p_value</span> <span class="op">&lt;=</span> <span class="fl">0.05</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, asp <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/arrows.html" class="external-link">arrows</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="va">top</span><span class="op">$</span><span class="va">PCoA1</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">top</span><span class="op">$</span><span class="va">r2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.3</span>, <span class="va">top</span><span class="op">$</span><span class="va">PCoA2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">top</span><span class="op">$</span><span class="va">r2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="co"># A biplot of the measurements.</span></span></span>
+<span class="r-in"><span>    <span class="va">vec</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">level</span><span class="op">)</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/arrows.html" class="external-link">arrows</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="va">vec</span><span class="op">$</span><span class="va">PCoA1</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">vec</span><span class="op">$</span><span class="va">r2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.1</span>, <span class="va">vec</span><span class="op">$</span><span class="va">PCoA2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">vec</span><span class="op">$</span><span class="va">r2</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="envfit-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

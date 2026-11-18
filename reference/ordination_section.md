@@ -15,7 +15,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data

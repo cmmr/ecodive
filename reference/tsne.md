@@ -308,7 +308,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 `tsne()`, [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md),
 and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -382,33 +382,36 @@ Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python.
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md),
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md),
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md),
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
 
 ## Examples
 
 ``` r
-    # Four samples only allow a perplexity of 1.
-    tsne(bray(ex_counts))
-#>             TSNE1      TSNE2
-#> Saliva  -9.234093   43.22449
-#> Gums     9.233451  -43.22473
-#> Nose   -36.684201  171.72548
-#> Stool   36.684843 -171.72525
-#> 
-#> tsne: 4 samples, 2 axes
-#> Attributes: method, eig, prop, kl_divergence, perplexity, init, n_iters, learning_rate, gradient
+    dm  <- bray(iris[, 1:4])
+    ord <- tsne(dm)
+    plot(ord, col = iris$Species)
 
-    # A larger example: iris flowers, by Euclidean distance.
-    flowers <- unique(iris)
-    d       <- dist(flowers[, 1:4])
-    ord     <- tsne(d, perplexity = 20)
-    attr(ord, 'kl_divergence')
-#> [1] 0.1966918
-
-    plot(ord, asp = 1, col = flowers$Species)
-
-
-    # Barnes-Hut gradients, from a random start.
-    ord <- tsne(d, perplexity = 20, init = 'random', gradient = 'barnes_hut')
+    head(ord)
+#>         TSNE1     TSNE2
+#> [1,] 25.08105 -6.857942
+#> [2,] 24.92025 -4.253650
+#> [3,] 25.85836 -4.578273
+#> [4,] 25.52385 -4.178758
+#> [5,] 25.34108 -6.647509
+#> [6,] 24.19891 -8.867062
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:2] 25.1 24.9 25.9 25.5 25.3 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:2] "TSNE1" "TSNE2"
+#>  - attr(*, "method")= chr "tsne"
+#>  - attr(*, "eig")= num [1:2] NA NA
+#>  - attr(*, "prop")= num [1:2] NA NA
+#>  - attr(*, "kl_divergence")= num 0.14
+#>  - attr(*, "perplexity")= num 30
+#>  - attr(*, "init")= chr "pcoa"
+#>  - attr(*, "n_iters")= int 1000
+#>  - attr(*, "learning_rate")= num 50
+#>  - attr(*, "gradient")= chr "exact"
 ```

@@ -2,11 +2,12 @@
 
 Constrained ordination of samples from their distances: the axes of beta
 diversity that sample metadata explain. Gives the same results as
-`vegan::dbrda()`, without ever forming an \\n \times n\\ matrix, so it
-takes far less time and memory for large datasets.
+[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+without ever forming an \\n \times n\\ matrix, so it takes far less time
+and memory for large datasets.
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) is
 the same analysis of the distances' positive eigenvalues only, as in
-`vegan::capscale()`.
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html).
 
 ## Usage
 
@@ -22,10 +23,12 @@ dbrda(dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus())
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
   or [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), or a
   symmetric numeric matrix of distances. Must not contain `NA`s or
-  negative values. Alternatively, as in `vegan::dbrda()`, a formula with
-  the distances on its left-hand side and the constraints on its right,
-  such as `dm ~ treatment`, in place of `dm` and `formula`; the metadata
-  may then be given second, as in `dbrda(dm ~ treatment, meta)`.
+  negative values. Alternatively, as in
+  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+  a formula with the distances on its left-hand side and the constraints
+  on its right, such as `dm ~ treatment`, in place of `dm` and
+  `formula`; the metadata may then be given second, as in
+  `dbrda(dm ~ treatment, meta)`.
 
 - groups:
 
@@ -52,10 +55,11 @@ dbrda(dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus())
   such as `~ treatment + ph`. Factors, numeric covariates, and
   interactions are all allowed. Wrap variables in `Condition()` to
   remove their effect first (a partial analysis), as in
-  `vegan::dbrda()`: `~ treatment + Condition(site)`. With only
-  `Condition()` terms, the result is the unconstrained ordination after
-  removing their effect. A left-hand side, if given, is ignored. Give
-  `groups` or `formula`: there is no default model. Default: `NULL`.
+  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html):
+  `~ treatment + Condition(site)`. With only `Condition()` terms, the
+  result is the unconstrained ordination after removing their effect. A
+  left-hand side, if given, is ignored. Give `groups` or `formula`:
+  there is no default model. Default: `NULL`.
 
 - k:
 
@@ -77,7 +81,8 @@ named `"dbRDA1"`, `"dbRDA2"`, etc. If the constraints give fewer than
 `k` of them, unconstrained axes follow, named `"MDS1"`, `"MDS2"`, etc.
 The values are `vegan`'s site scores ("wa" scores, scaling 2): what
 `vegan::scores(x, display = "sites")` returns and what
-`phyloseq::plot_ordination()` plots. Its attributes are:
+[`phyloseq::plot_ordination()`](https://rdrr.io/pkg/phyloseq/man/plot_ordination.html)
+plots. Its attributes are:
 
 - `method`: `"dbrda"`.
 
@@ -141,15 +146,17 @@ matrix \\G = -\frac{1}{2}JAJ\\. With \\H\\ the projection onto the
 axes are the eigenvectors of \\HGH\\, and the unconstrained axes are
 those of \\(I-H)G(I-H)\\. Non-Euclidean distances, such as Bray-Curtis,
 can give negative eigenvalues. They are kept in the inertia, as
-`vegan::dbrda()` does, but have no axes.
+[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+does, but have no axes.
 
-`vegan::dbrda()` forms \\G\\ and \\HGH\\ in full and computes all \\n\\
-of their eigenvalues, which takes time proportional to \\n^3\\.
-`dbrda()` instead projects \\G\\ onto an orthonormal basis of the
-constraints, which only needs a few products of \\G\\ with vectors,
-computed in parallel straight from `dm`, and a small eigenproblem with
-one row per constraint column. Unconstrained axes are only computed when
-needed, by block Lanczos iteration as in
+[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+forms \\G\\ and \\HGH\\ in full and computes all \\n\\ of their
+eigenvalues, which takes time proportional to \\n^3\\. `dbrda()` instead
+projects \\G\\ onto an orthonormal basis of the constraints, which only
+needs a few products of \\G\\ with vectors, computed in parallel
+straight from `dm`, and a small eigenproblem with one row per constraint
+column. Unconstrained axes are only computed when needed, by block
+Lanczos iteration as in
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
 
 **dbrda() or capscale()?**
@@ -172,27 +179,31 @@ names. For others, such as Bray-Curtis:
   distances, and it needs all of the eigenvalues of \\G\\, which takes
   time proportional to \\n^3\\.
 
-`phyloseq::ordinate(method = "CAP")` calls `vegan::capscale()`, so its
-results match
+`phyloseq::ordinate(method = "CAP")` calls
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+so its results match
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md)'s,
 not `dbrda()`'s.
 
 **Matching vegan**
 
 `dbrda()` gives the same scores, eigenvalues, inertia, \\R^2\\, biplot
-scores and centroids as `vegan::dbrda()`, up to the signs of the axes.
-Columns of the model matrix that are linear combinations of earlier ones
-are dropped, with a message, as in `vegan`.
+scores and centroids as
+[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+up to the signs of the axes. Columns of the model matrix that are linear
+combinations of earlier ones are dropped, with a message, as in `vegan`.
 
 **Scale**
 
-Like `vegan::dbrda()`, `dbrda()` divides the distances by \\\sqrt{n-1}\\
-when any of them is 4 or more ("mean squared distances"). That divides
-`trace`, `eig`, `inertia` and `constrained_eig` by \\n-1\\, but leaves
-`prop` and \\R^2\\ unchanged. So for the same `dm`,
-`attr(dbrda(dm, ...), 'trace')` equals `attr(pcoa(dm), 'trace')` when
-every distance is below 4 (e.g. Bray-Curtis or Jaccard), and equals it
-divided by \\n-1\\ otherwise (e.g. Euclidean distances between counts).
+Like
+[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+`dbrda()` divides the distances by \\\sqrt{n-1}\\ when any of them is 4
+or more ("mean squared distances"). That divides `trace`, `eig`,
+`inertia` and `constrained_eig` by \\n-1\\, but leaves `prop` and
+\\R^2\\ unchanged. So for the same `dm`, `attr(dbrda(dm, ...), 'trace')`
+equals `attr(pcoa(dm), 'trace')` when every distance is below 4 (e.g.
+Bray-Curtis or Jaccard), and equals it divided by \\n-1\\ otherwise
+(e.g. Euclidean distances between counts).
 
 **Axis signs and reproducibility**
 
@@ -214,7 +225,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -280,54 +291,44 @@ comparison of fractions. *Ecology*, 87(10), 2614-2625.
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md),
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md),
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
 
 ## Examples
 
 ``` r
-    d    <- bray(ex_counts)
-    meta <- data.frame(
-      row.names = rownames(ex_counts),
-      treated   = c(TRUE, TRUE, FALSE, FALSE) )
+    dm  <- bray(iris[, 1:4])
+    ord <- dbrda(dm, 'Species', iris)
+    plot(ord, col = iris$Species)
 
-    ord <- dbrda(d, 'treated', meta)
-    ord
-#>            dbRDA1        MDS1        MDS2
-#> Saliva -0.6963425  0.01702589  0.99175675
-#> Gums   -0.7064201 -0.01702589 -0.99175675
-#> Nose    0.6729651  0.99175675 -0.01702589
-#> Stool   0.7297974 -0.99175675  0.01702589
-#> 
-#> dbrda: 4 samples, 3 axes; % of variance: 48.3, 38.2, 13.5
-#> Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared, adj_r_squared, biplot
-
-    # The same, with a formula, and in vegan's style.
-    dbrda(d, data = meta, formula = ~ treated)
-#>            dbRDA1        MDS1        MDS2
-#> Saliva -0.6963425  0.01702589  0.99175675
-#> Gums   -0.7064201 -0.01702589 -0.99175675
-#> Nose    0.6729651  0.99175675 -0.01702589
-#> Stool   0.7297974 -0.99175675  0.01702589
-#> 
-#> dbrda: 4 samples, 3 axes; % of variance: 48.3, 38.2, 13.5
-#> Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared, adj_r_squared, biplot
-    dbrda(d ~ treated, meta)
-#>            dbRDA1        MDS1        MDS2
-#> Saliva -0.6963425  0.01702589  0.99175675
-#> Gums   -0.7064201 -0.01702589 -0.99175675
-#> Nose    0.6729651  0.99175675 -0.01702589
-#> Stool   0.7297974 -0.99175675  0.01702589
-#> 
-#> dbrda: 4 samples, 3 axes; % of variance: 48.3, 38.2, 13.5
-#> Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared, adj_r_squared, biplot
-
-    # Percent of the inertia explained by each axis, and by treatment.
-    round(100 * attr(ord, 'prop'), 1)
-#> [1] 48.3 38.2 13.5
-    attr(ord, 'r_squared')
-#> [1] 0.4831851
-
-    plot(ord[, 1:2])
-
+    head(ord)
+#>         dbRDA1      dbRDA2        MDS1
+#> [1,] 0.5063136 -0.24878132 -0.07219804
+#> [2,] 0.5054159  0.23586757  0.31152982
+#> [3,] 0.5562949 -0.08101404  0.21660752
+#> [4,] 0.5346932  0.08738929  0.28235426
+#> [5,] 0.5275513 -0.32964567 -0.05581075
+#> [6,] 0.4111321 -0.25311068 -0.40408427
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:3] 0.506 0.505 0.556 0.535 0.528 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:3] "dbRDA1" "dbRDA2" "MDS1"
+#>  - attr(*, "method")= chr "dbrda"
+#>  - attr(*, "eig")= num [1:3] 2.2334 0.0839 0.2441
+#>  - attr(*, "prop")= num [1:3] 0.8469 0.0318 0.0926
+#>  - attr(*, "trace")= num 2.64
+#>  - attr(*, "inertia")= Named num [1:3] 0 2.32 0.32
+#>   ..- attr(*, "names")= chr [1:3] "conditional" "constrained" "unconstrained"
+#>  - attr(*, "constrained_eig")= num [1:2] 2.2334 0.0839
+#>  - attr(*, "r_squared")= num 0.879
+#>  - attr(*, "adj_r_squared")= num 0.877
+#>  - attr(*, "biplot")= num [1:2, 1:3] -0.275 -0.695 0.962 -0.719 0 ...
+#>   ..- attr(*, "dimnames")=List of 2
+#>   .. ..$ : chr [1:2] "Speciesversicolor" "Speciesvirginica"
+#>   .. ..$ : chr [1:3] "dbRDA1" "dbRDA2" "MDS1"
+#>  - attr(*, "centroids")= num [1:3, 1:3] 0.499 -0.141 -0.358 -0.125 0.494 ...
+#>   ..- attr(*, "dimnames")=List of 2
+#>   .. ..$ : chr [1:3] "Speciessetosa" "Speciesversicolor" "Speciesvirginica"
+#>   .. ..$ : chr [1:3] "dbRDA1" "dbRDA2" "MDS1"
 ```

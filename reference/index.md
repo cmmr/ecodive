@@ -153,11 +153,12 @@ Distance measures based on phylogenetic branch lengths (UniFrac family).
 
 ## Ordination
 
-Plot samples by their beta diversity distances, or (pca, rpca) by their
-feature abundances.
+Place samples on a few axes for plotting. dist_ord() runs the methods
+that take beta diversity distances; pca() and rpca() take the count
+table.
 
-- [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md)
-  : Ordination Wrapper Function
+- [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) :
+  Distance-based Ordination
 - [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) :
   Principal Coordinates Analysis (PCoA)
 - [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
@@ -182,9 +183,9 @@ feature abundances.
   Aitchison PCA (RPCA)
 - [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) : Fit
   Variables or Taxa onto an Ordination
-- [`list_ordinations()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
-  [`match_ordination()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
-  : Find and Browse Ordination Methods
+- [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
+  [`match_dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
+  : Find and Browse Distance-based Ordination Methods
 
 ## Hypothesis Tests
 

@@ -33,7 +33,9 @@ dm into an \(n \times n\) matrix."><meta property="og:image" content="https://cm
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/stat_tests.html">Statistical Tests</a></li>
     <li><a class="dropdown-item" href="../articles/unifrac.html">UniFrac Calculations</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -270,7 +272,7 @@ compute the spectral start, and compute each epoch's gradients.</p>
 
 <p>Every ordination function (<code><a href="pcoa.html">pcoa()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>,
 <code><a href="capscale.html">capscale()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="tsne.html">tsne()</a></code>, <code>umap()</code>, and so
-<code><a href="ordination.html">ordination()</a></code>) returns the same kind of
+<code><a href="dist_ord.html">dist_ord()</a></code>) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -309,29 +311,36 @@ Applications</em>, 22(2), 602-616. <a href="https://doi.org/10.1137/S08954798983
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="tsne.html">tsne()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="ordination.html">ordination()</a></code>, <code><a href="beta_div.html">beta_div()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="tsne.html">tsne()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="dist_ord.html">dist_ord()</a></code>, <code><a href="beta_div.html">beta_div()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="co"># 60 samples from three kinds of community.</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">rates</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">20</span>, <span class="fl">5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">50</span>, <span class="fl">20</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">20</span>, <span class="fl">50</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">240</span>, <span class="va">rates</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span>, <span class="fl">60</span>, <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'S'</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">umap</span><span class="op">(</span><span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>, n_neighbors <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        UMAP1     UMAP2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S1 -4.303218 -5.413200</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S2 -4.315105 -4.058528</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S3 -4.103787 -4.148089</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S4 -4.833076 -5.088704</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S5 -4.040465 -5.625855</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> S6 -4.726087 -4.851616</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, asp <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="va">dm</span>  <span class="op">&lt;-</span> <span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">umap</span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="umap-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         UMAP1       UMAP2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 5.254048 -1.77263912</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 4.404295 -0.18979135</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 5.162174  0.11891402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 4.950985 -0.01741511</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 5.250620 -1.60047599</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 4.974723 -2.73126598</span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  'ecodive_ord' num [1:150, 1:2] 5.25 4.4 5.16 4.95 5.25 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ : chr [1:2] "UMAP1" "UMAP2"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "method")= chr "umap"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "eig")= num [1:2] NA NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "prop")= num [1:2] NA NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "a")= num 1.58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "b")= num 0.895</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "init")= chr "pcoa"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "n_epochs")= int 500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "n_neighbors")= int 15</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -2,23 +2,36 @@
 
 ## ecodive 2.4.0
 
+- ecodive now covers a whole diversity analysis: besides alpha and beta
+  diversity, it ordinates samples and tests what explains their
+  distances (see below). New vignettes,
+  [`vignette("ordination")`](https://cmmr.github.io/ecodive/articles/ordination.md)
+  and
+  [`vignette("stat_tests")`](https://cmmr.github.io/ecodive/articles/stat_tests.md),
+  walk through both, and the README and
+  [`vignette("ecodive")`](https://cmmr.github.io/ecodive/articles/ecodive.md)
+  give an overview of everything the package does. The package title is
+  now “Parallel and Memory-Efficient Ecological Diversity Analysis”.
+
 - New [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) runs
   a principal coordinates analysis (classical multidimensional scaling)
   on a `dist` object, such as from
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md).
   It gives the same coordinates and eigenvalues as
-  [`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html), `ape::pcoa()`,
-  and `vegan::wcmdscale()` (up to each axis’s sign), but computes only
-  the first few axes (`k = 3` by default), in parallel C, without
-  forming an n-by-n matrix. Its results are identical for any number of
-  `cpus`. `correction = "lingoes"` or `"cailliez"` adds the smallest
-  constant to the squared distances, or to the distances, that leaves no
-  negative eigenvalue, giving the same constants, eigenvalues and
-  coordinates as `ape::pcoa()`, `vegan::wcmdscale(add = )` and
-  `cmdscale(add = TRUE)`, again without an n-by-n (or 2n-by-2n) matrix:
-  with 2,000 samples, `"cailliez"` takes 20 seconds where
-  `cmdscale(add = TRUE)` takes 2 minutes. Every result has `correction`
-  and `constant` attributes.
+  [`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html),
+  [`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html), and
+  [`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html)
+  (up to each axis’s sign), but computes only the first few axes
+  (`k = 3` by default), in parallel C, without forming an n-by-n matrix.
+  Its results are identical for any number of `cpus`.
+  `correction = "lingoes"` or `"cailliez"` adds the smallest constant to
+  the squared distances, or to the distances, that leaves no negative
+  eigenvalue, giving the same constants, eigenvalues and coordinates as
+  [`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html),
+  `vegan::wcmdscale(add = )` and `cmdscale(add = TRUE)`, again without
+  an n-by-n (or 2n-by-2n) matrix: with 2,000 samples, `"cailliez"` takes
+  20 seconds where `cmdscale(add = TRUE)` takes 2 minutes. Every result
+  has `correction` and `constant` attributes.
 
 - New
   [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
@@ -35,20 +48,26 @@
   the same directions with permutation tests.
 
 - New
-  [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md)
-  runs any ordination method by name, as
+  [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md)
+  runs any distance-based ordination method by name, as
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
-  does for beta diversity metrics, with the method’s own arguments.
-  [`list_ordinations()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
+  does for beta diversity metrics and
+  [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)
+  does for statistical tests, with the method’s own arguments:
+  `dist_ord(dm, "nmds")` is `nmds(dm)`.
+  [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
   and
-  [`match_ordination()`](https://cmmr.github.io/ecodive/reference/ordinations.md)
-  list and look up the methods. Every ordination method returns the same
-  kind of result: a sample-by-axis matrix (of class `"ecodive_ord"`,
-  which prints its attributes’ names rather than their contents) whose
-  attributes start with `method`, `eig`, and `prop`. Every method
-  rejects negative distances (beyond rounding error), and `seed` can be
-  given to any of them through
-  [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md).
+  [`match_dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
+  list and look up the methods.
+  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) take a
+  count table rather than distances, so they are called directly. Every
+  ordination method returns the same kind of result: a sample-by-axis
+  matrix (of class `"ecodive_ord"`, which prints its attributes’ names
+  rather than their contents) whose attributes start with `method`,
+  `eig`, and `prop`. Every method rejects negative distances (beyond
+  rounding error), and `seed` can be given to any of them through
+  [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md).
 
 - New [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) runs
   non-metric multidimensional scaling with the SMACOF algorithm of
@@ -56,7 +75,8 @@
   from the PCoA solution and from `n_starts` random configurations,
   keeps the one with the lowest Kruskal stress-1, and centers it,
   rotates it to principal axes, and scales it to the distances. Tied
-  distances use Kruskal’s primary approach (as in `vegan::metaMDS()`),
+  distances use Kruskal’s primary approach (as in
+  [`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)),
   or scikit-learn’s secondary one with `ties = "secondary"`. The
   distances are sorted once and shared by all starts; nothing n-by-n is
   formed. Each start runs at most `max_iters` iterations, or stops when
@@ -71,7 +91,7 @@
   than their ranks. It shares
   [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md)’s engine,
   starts, arguments (without `ties`) and result format, and has no limit
-  on the number of samples. `ordination(dm, "mds")` and `"metric MDS"`
+  on the number of samples. `dist_ord(dm, "mds")` and `"metric MDS"`
   select it; `"classical MDS"`, `"pco"` and `"cmdscale"` select
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
 
@@ -87,8 +107,8 @@
   `Isomap(metric = "precomputed")`, it gives the same geodesic distances
   and embedding to rounding, breaks ties by sample order, and joins
   disconnected neighbor graphs at their closest samples, with a warning
-  (`vegan::isomap()` stops instead; note that its `k` is the number of
-  neighbors, while
+  ([`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)
+  stops instead; note that its `k` is the number of neighbors, while
   [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md)’s `k`
   is the number of axes). The neighbor and shortest-path searches run in
   parallel without an n-by-n matrix, and results are identical for any
@@ -129,7 +149,8 @@
   `groups`: one value per sample (categories or a numeric covariate), or
   a column name of `data`. For several variables, give `data` and a
   `formula` instead: factors, covariates, interactions, and
-  `Condition()` terms. It gives the same table as `vegan::adonis2()`
+  `Condition()` terms. It gives the same table as
+  [`vegan::adonis2()`](https://vegandevs.github.io/vegan/reference/adonis.html)
   (Df, sums of squares, R2, F, and p-values), testing the model as a
   whole or each term sequentially, marginally, or by contrast, with
   optional `strata`. Given the same permutation matrix, its permuted F
@@ -149,17 +170,21 @@
 
 - New [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) runs
   a multi-response permutation procedure on a `dist` object and each
-  sample’s group, as `vegan::mrpp()`: the observed and expected weighted
-  mean within-group distance (delta), the chance-corrected within-group
-  agreement A, each group’s mean distance, and a permutation p-value,
-  with group weights `'n'`, `'n-1'` or `'n(n-1)'` (vegan’s `weight.type`
-  1 to 3) and optional `strata`. It also gives the standardized effect
-  size z of `summary(vegan::permustats())`. Given the same permutation
-  matrix, its permuted deltas, p-values and z are those of
-  `vegan::mrpp()`. Each permutation costs one comparison per pair of
-  samples, read straight from the dist triangle; with 500 samples and
-  999 permutations it is about 60 times faster than `vegan::mrpp()` on
-  one thread. Results are identical for any number of `cpus`. Like
+  sample’s group, as
+  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html):
+  the observed and expected weighted mean within-group distance (delta),
+  the chance-corrected within-group agreement A, each group’s mean
+  distance, and a permutation p-value, with group weights `'n'`, `'n-1'`
+  or `'n(n-1)'` (vegan’s `weight.type` 1 to 3) and optional `strata`. It
+  also gives the standardized effect size z of
+  `summary(vegan::permustats())`. Given the same permutation matrix, its
+  permuted deltas, p-values and z are those of
+  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html).
+  Each permutation costs one comparison per pair of samples, read
+  straight from the dist triangle; with 500 samples and 999 permutations
+  it is about 60 times faster than
+  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)
+  on one thread. Results are identical for any number of `cpus`. Like
   ecodive’s other permutation tests, it returns a list of class
   `"ecodive_test"` whose `statistic`, `p_value`, `z` and `n_perm` come
   first, and
@@ -170,24 +195,30 @@
   runs an analysis of similarities (ANOSIM) on a `dist` object and each
   sample’s group, given as a vector or as a column of sample metadata,
   with optional `strata`. Given the same permutation matrix, its R
-  statistic, permuted R values and p-value match `vegan::anosim()`’s. It
-  ranks the distances once, with a radix sort, and then each permutation
-  needs only one pass over the ranks, without the n-by-n matrices
-  `vegan::anosim()` builds; permutations run in parallel. With 300
-  samples and 999 permutations it takes under a tenth of a second,
-  against about seven for `vegan::anosim()`. Results are identical for
-  any number of `cpus`.
+  statistic, permuted R values and p-value match
+  [`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html)’s.
+  It ranks the distances once, with a radix sort, and then each
+  permutation needs only one pass over the ranks, without the n-by-n
+  matrices
+  [`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html)
+  builds; permutations run in parallel. With 300 samples and 999
+  permutations it takes under a tenth of a second, against about seven
+  for
+  [`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html).
+  Results are identical for any number of `cpus`.
 
 - New
   [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md)
   tests the homogeneity of multivariate dispersions (PERMDISP), as
-  `vegan::betadisper()` followed by `vegan::permutest()`: each sample’s
-  distance to its group’s centroid (the default) or spatial median, each
-  group’s mean distance, and the ANOVA F with a permutation p-value,
-  plus optional pairwise t tests and small-group bias adjustment.
-  Distances to centroids come from the distances within groups alone,
-  with no eigendecomposition: they match `betadisper()`’s to rounding
-  error, and are about 100 times faster with 1,000 samples.
+  [`vegan::betadisper()`](https://vegandevs.github.io/vegan/reference/betadisper.html)
+  followed by
+  [`vegan::permutest()`](https://vegandevs.github.io/vegan/reference/anova.cca.html):
+  each sample’s distance to its group’s centroid (the default) or
+  spatial median, each group’s mean distance, and the ANOVA F with a
+  permutation p-value, plus optional pairwise t tests and small-group
+  bias adjustment. Distances to centroids come from the distances within
+  groups alone, with no eigendecomposition: they match `betadisper()`’s
+  to rounding error, and are about 100 times faster with 1,000 samples.
   `betadisper()` defaults to spatial medians instead: pass
   `type = "median"` to compare with it.
   [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md)
@@ -201,20 +232,22 @@
   runs a Mantel test of the correlation between two distance matrices
   (Pearson, Spearman, or Kendall), or a partial Mantel test that removes
   the effect of a third (`given`). It gives the same statistic as
-  `vegan::mantel()` and `vegan::mantel.partial()`, and, given the same
-  permutation matrix, the same permuted statistics and p-values. The
-  second matrix may also be a numeric vector, one value per sample (such
-  as age), and samples are matched by name. It adds lower-tail and
-  two-sided tests (`alternative`). Each permutation is one pass over the
-  dist triangle, with no n-by-n matrix (Kendall’s tau-b by Knight’s
-  merge sort rather than [`cor()`](https://rdrr.io/r/stats/cor.html)’s
-  quadratic count), and permutations run in parallel. Permutations come
-  from a `seed` argument, and results are identical for any number of
-  `cpus`.
+  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)
+  and
+  [`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html),
+  and, given the same permutation matrix, the same permuted statistics
+  and p-values. The second matrix may also be a numeric vector, one
+  value per sample (such as age), and samples are matched by name. It
+  adds lower-tail and two-sided tests (`alternative`). Each permutation
+  is one pass over the dist triangle, with no n-by-n matrix (Kendall’s
+  tau-b by Knight’s merge sort rather than
+  [`cor()`](https://rdrr.io/r/stats/cor.html)’s quadratic count), and
+  permutations run in parallel. Permutations come from a `seed`
+  argument, and results are identical for any number of `cpus`.
 
 - New `dist_test(dm, test, groups, data, ...)` runs any of these tests
   by name, as
-  [`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md)
+  [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md)
   does for ordination methods:
   `dist_test(dm, "mrpp", "treatment", meta)` is
   `mrpp(dm, "treatment", meta)`, and other arguments (such as
@@ -242,7 +275,7 @@
   with `data`, a column name or one value per row of `data`; without it,
   one value per sample, matched by name when named, else by position.
   The same checks and messages apply everywhere. As with
-  `vegan::adonis2()`,
+  [`vegan::adonis2()`](https://vegandevs.github.io/vegan/reference/adonis.html),
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
   needs `groups` or a `formula` (use `formula = ~ .` to test every
   column of `data`). `permutations` is limited to 1e8.
@@ -251,48 +284,55 @@
   runs a distance-based redundancy analysis (db-RDA): the axes of a
   `dist` object that sample metadata explain, given as a formula such as
   `~ treatment + Condition(site)`. It gives the same eigenvalues,
-  inertia, site scores, biplot scores and centroids as `vegan::dbrda()`
-  (up to each axis’s sign; not `vegan::capscale()`, which differs for
-  non-Euclidean distances), without forming an n-by-n matrix: the
-  constrained axes come from a small eigenproblem, and unconstrained
-  axes (`MDS1`, …) are only computed when the constraints give fewer
-  than `k` axes. Its results are identical for any number of `cpus`. As
-  in `vegan`, `dbrda(dm ~ treatment, data)` works too, and a formula of
-  only `Condition()` terms gives the unconstrained ordination after
-  removing their effect.
+  inertia, site scores, biplot scores and centroids as
+  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+  (up to each axis’s sign; not
+  [`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+  which differs for non-Euclidean distances), without forming an n-by-n
+  matrix: the constrained axes come from a small eigenproblem, and
+  unconstrained axes (`MDS1`, …) are only computed when the constraints
+  give fewer than `k` axes. Its results are identical for any number of
+  `cpus`. As in `vegan`, `dbrda(dm ~ treatment, data)` works too, and a
+  formula of only `Condition()` terms gives the unconstrained ordination
+  after removing their effect.
 
 - [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) takes
   the same `groups`, `data` and `formula` as
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md):
   one variable as `groups` (a vector or a column of `data`), or `data`
   and a `formula`, or `dm ~ terms`, so
-  `ordination(dm, "dbrda", "treatment", meta)` works. Its results gain
-  `r_squared` and `adj_r_squared`, as `vegan::RsquareAdj()`, including
-  for partial models.
+  `dist_ord(dm, "dbrda", "treatment", meta)` works. Its results gain
+  `r_squared` and `adj_r_squared`, as
+  [`vegan::RsquareAdj()`](https://vegandevs.github.io/vegan/reference/RsquareAdj.html),
+  including for partial models.
 
 - New
   [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md)
   runs a constrained analysis of principal coordinates. It gives the
-  same results as `vegan::capscale()` (and
-  `phyloseq::ordinate(method = "CAP")`), with any imaginary inertia from
-  negative eigenvalues reported in `inertia`. Euclidean distances take
-  [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)’s fast
-  path; otherwise a threaded eigendecomposition makes it about five
-  times faster than `vegan::capscale()` on one thread. Also available as
-  `ordination(dm, "capscale", ...)`.
+  same results as
+  [`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+  (and `phyloseq::ordinate(method = "CAP")`), with any imaginary inertia
+  from negative eigenvalues reported in `inertia`. Euclidean distances
+  take [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)’s
+  fast path; otherwise a threaded eigendecomposition makes it about five
+  times faster than
+  [`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+  on one thread. Also available as `dist_ord(dm, "capscale", ...)`.
 
 - New [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md)
   fits sample metadata (`data`) and feature tables (`counts`, such as
   taxa abundances) onto any ordination, for biplots: an arrow and
   r-squared for each numeric variable or feature, the centroid of each
   factor level, and permutation p-values. It gives the same arrows,
-  r-squared and centroids as `vegan::envfit()`, and the same p-values
-  for the same permutation matrix. Each permutation costs a few
-  multiply-adds per non-zero value of the table, with no refitting, and
-  sparse tables are never made dense, so thousands of taxa with 999
-  permutations take well under a second (minutes in `vegan`). It fits
-  every axis of the ordination by default (`vegan` fits the first two),
-  and its results are identical for any number of `cpus`.
+  r-squared and centroids as
+  [`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html),
+  and the same p-values for the same permutation matrix. Each
+  permutation costs a few multiply-adds per non-zero value of the table,
+  with no refitting, and sparse tables are never made dense, so
+  thousands of taxa with 999 permutations take well under a second
+  (minutes in `vegan`). It fits every axis of the ordination by default
+  (`vegan` fits the first two), and its results are identical for any
+  number of `cpus`.
 
 - New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)

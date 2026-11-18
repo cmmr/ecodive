@@ -238,7 +238,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -310,25 +310,30 @@ scikit-learn developers).
 ## Examples
 
 ``` r
-    ord <- mds(bray(ex_counts))
-    ord
-#>              MDS1       MDS2
-#> Saliva -0.4402325  0.2063831
-#> Gums   -0.4036317 -0.2770339
-#> Nose    0.3674288  0.5011040
-#> Stool   0.4764354 -0.4304532
-#> 
-#> mds: 4 samples, 2 axes
-#> Attributes: method, eig, prop, stress, converged, n_iters, n_starts, best_start, n_best
+    dm  <- bray(iris[, 1:4])
+    ord <- mds(dm)
+    plot(ord, col = iris$Species)
 
-    attr(ord, 'stress')
-#> [1] 0.1120873
-
-    # Distances that are Euclidean in 2 dimensions are recovered exactly.
-    pts <- cbind(x = c(0, 3, 0, 3, 1), y = c(0, 0, 4, 4, 2))
-    ord <- mds(dist(pts))
-    attr(ord, 'stress')
-#> [1] 1.312143e-16
-    all.equal(c(dist(ord)), c(dist(pts)))
-#> [1] TRUE
+    head(ord)
+#>           MDS1         MDS2
+#> [1,] 0.1690167 -0.025108951
+#> [2,] 0.1711458  0.019271351
+#> [3,] 0.1902816  0.007971196
+#> [4,] 0.1831555  0.019815690
+#> [5,] 0.1762013 -0.027267075
+#> [6,] 0.1334516 -0.058522704
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:2] 0.169 0.171 0.19 0.183 0.176 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:2] "MDS1" "MDS2"
+#>  - attr(*, "method")= chr "mds"
+#>  - attr(*, "eig")= num [1:2] NA NA
+#>  - attr(*, "prop")= num [1:2] NA NA
+#>  - attr(*, "stress")= num 0.0422
+#>  - attr(*, "converged")= logi TRUE
+#>  - attr(*, "n_iters")= int 17
+#>  - attr(*, "n_starts")= int 4
+#>  - attr(*, "best_start")= int 0
+#>  - attr(*, "n_best")= int 1
 ```

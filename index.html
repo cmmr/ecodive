@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Parallel and Memory-Efficient Ecological Diversity Metrics • ecodive</title>
+<title>Parallel and Memory-Efficient Ecological Diversity Analysis • ecodive</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
-<meta property="og:title" content="Parallel and Memory-Efficient Ecological Diversity Metrics">
+<meta property="og:title" content="Parallel and Memory-Efficient Ecological Diversity Analysis">
 <meta name="description" content="Computes alpha and beta diversity metrics in a parallel, memory-efficient manner using C and pthreads. Implements 51 classic, compositional, and phylogenetic indices including Shannon, Bray-Curtis, Faith, JSD, Hellinger, Robust Aitchison, and the UniFrac family. Ordinates beta diversity distances by principal coordinates analysis (with optional negative-eigenvalue corrections), metric and non-metric multidimensional scaling, Isomap, t-SNE and UMAP, and constrains them by distance-based redundancy analysis and constrained analysis of principal coordinates; ordinates count tables by principal components analysis and robust Aitchison PCA; and fits variables onto ordinations. Tests distances with PERMANOVA, PERMDISP, ANOSIM, MRPP and Mantel tests. Several methods are ported from scikit-learn, scikit-bio, gemelli and uwot. Provides random sub-sampling for table rarefaction and parses Newick trees into phylo objects. Integrates with data structures from phyloseq, rbiom, and other common bioinformatics packages. Algorithms are described in Smith et al. (2026) &lt;doi:10.21105/joss.09777&gt;.">
 <meta property="og:description" content="Computes alpha and beta diversity metrics in a parallel, memory-efficient manner using C and pthreads. Implements 51 classic, compositional, and phylogenetic indices including Shannon, Bray-Curtis, Faith, JSD, Hellinger, Robust Aitchison, and the UniFrac family. Ordinates beta diversity distances by principal coordinates analysis (with optional negative-eigenvalue corrections), metric and non-metric multidimensional scaling, Isomap, t-SNE and UMAP, and constrains them by distance-based redundancy analysis and constrained analysis of principal coordinates; ordinates count tables by principal components analysis and robust Aitchison PCA; and fits variables onto ordinations. Tests distances with PERMANOVA, PERMDISP, ANOSIM, MRPP and Mantel tests. Several methods are ported from scikit-learn, scikit-bio, gemelli and uwot. Provides random sub-sampling for table rarefaction and parses Newick trees into phylo objects. Integrates with data structures from phyloseq, rbiom, and other common bioinformatics packages. Algorithms are described in Smith et al. (2026) &lt;doi:10.21105/joss.09777&gt;.">
 <meta property="og:image" content="https://cmmr.github.io/ecodive/logo.png">
@@ -48,7 +48,9 @@
     <li><a class="dropdown-item" href="articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="articles/bdiv.html">Beta Diversity</a></li>
     <li><a class="dropdown-item" href="articles/benchmark.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="articles/performance.html">Performance Guide</a></li>
+    <li><a class="dropdown-item" href="articles/stat_tests.html">Statistical Tests</a></li>
     <li><a class="dropdown-item" href="articles/unifrac.html">UniFrac Calculations</a></li>
   </ul>
 </li>
@@ -73,7 +75,7 @@
 </div>
 <!-- badges: start -->
 
-<p><code>ecodive</code> is an R package for calculating ecological diversity metrics in a parallelized and memory-efficient manner. It is designed to handle large datasets, such as those common in microbiome research.</p>
+<p><code>ecodive</code> is an R package for ecological diversity analysis, from a count table to figures and p-values: alpha and beta diversity, ordination, and permutation tests, all in parallelized and memory-efficient C. It is designed to handle large datasets, such as those common in microbiome research.</p>
 <div class="section level2">
 <h2 id="why-ecodive">Why ecodive?<a class="anchor" aria-label="anchor" href="#why-ecodive"></a>
 </h2>
@@ -81,9 +83,77 @@
 <ul>
 <li><p><strong>High Performance:</strong> <code>ecodive</code> is written in C and parallelized using pthreads, making it dramatically faster than other R packages. <a href="https://cmmr.github.io/ecodive/articles/benchmark.html">Benchmarks</a> show it can be up to <strong>14,000x faster</strong> and use up to <strong>200,000x less memory</strong>.</p></li>
 <li><p><strong>Zero Dependencies:</strong> The package has no external R dependencies, making it lightweight, stable, and easy to install. This also makes it an ideal and secure backend for other R packages.</p></li>
-<li><p><strong>Comprehensive Metrics:</strong> It implements a wide range of common alpha and beta diversity metrics, including classic and phylogenetic-aware methods like <strong>Faith’s PD</strong> and the <strong>complete UniFrac family</strong>.</p></li>
+<li><p><strong>Comprehensive Metrics:</strong> It implements 14 alpha and 37 beta diversity metrics, including classic and phylogenetic-aware methods like <strong>Faith’s PD</strong> and the <strong>complete UniFrac family</strong>.</p></li>
+<li><p><strong>Ordination and Statistics:</strong> Ten ordination methods (PCoA, NMDS, UMAP, t-SNE, db-RDA, robust Aitchison PCA, and more), biplots, and five permutation tests (PERMANOVA, PERMDISP, ANOSIM, MRPP, and Mantel), so a whole analysis needs no other package.</p></li>
+<li><p><strong>Trusted Results:</strong> Every method is tested against the established package it replaces, such as <code>vegan</code>, <code>ape</code>, <code>scikit-bio</code>, <code>scikit-learn</code>, <code>uwot</code>, and <code>gemelli</code>. Results are identical for any number of threads, and random methods take a <code>seed</code>.</p></li>
 <li><p><strong>Ease of Use:</strong> The API is simple and integrates seamlessly with popular bioinformatics packages like <a href="http://joey711.github.io/phyloseq/" class="external-link"><code>phyloseq</code></a> and <a href="https://cmmr.github.io/rbiom/" class="external-link"><code>rbiom</code></a>.</p></li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="whats-included">What’s Included<a class="anchor" aria-label="anchor" href="#whats-included"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="16%">
+<col width="12%">
+<col width="70%">
+</colgroup>
+<thead><tr>
+<th align="left">Task</th>
+<th align="left">Wrapper</th>
+<th align="left">Functions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left">Alpha diversity</td>
+<td align="left"><code><a href="reference/alpha_div.html">alpha_div()</a></code></td>
+<td align="left">
+<code><a href="reference/shannon.html">shannon()</a></code>, <code><a href="reference/simpson.html">simpson()</a></code>, <code><a href="reference/chao1.html">chao1()</a></code>, <code><a href="reference/faith.html">faith()</a></code>, and 10 more</td>
+</tr>
+<tr>
+<td align="left">Beta diversity</td>
+<td align="left"><code><a href="reference/beta_div.html">beta_div()</a></code></td>
+<td align="left">
+<code><a href="reference/bray.html">bray()</a></code>, <code><a href="reference/jaccard.html">jaccard()</a></code>, <code><a href="reference/aitchison.html">aitchison()</a></code>, <code><a href="reference/weighted_unifrac.html">weighted_unifrac()</a></code>, and 33 more</td>
+</tr>
+<tr>
+<td align="left">Ordination</td>
+<td align="left"><code><a href="reference/dist_ord.html">dist_ord()</a></code></td>
+<td align="left">
+<code><a href="reference/pcoa.html">pcoa()</a></code>, <code><a href="reference/mds.html">mds()</a></code>, <code><a href="reference/nmds.html">nmds()</a></code>, <code><a href="reference/isomap.html">isomap()</a></code>, <code><a href="reference/tsne.html">tsne()</a></code>, <code><a href="reference/umap.html">umap()</a></code>, <code><a href="reference/dbrda.html">dbrda()</a></code>, <code><a href="reference/capscale.html">capscale()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Ordination of counts</td>
+<td align="left"></td>
+<td align="left">
+<code><a href="reference/pca.html">pca()</a></code>, <code><a href="reference/rpca.html">rpca()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Biplots</td>
+<td align="left"></td>
+<td align="left">
+<code><a href="reference/pcoa_biplot.html">pcoa_biplot()</a></code>, <code><a href="reference/envfit.html">envfit()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Statistical tests</td>
+<td align="left"><code><a href="reference/dist_test.html">dist_test()</a></code></td>
+<td align="left">
+<code><a href="reference/permanova.html">permanova()</a></code>, <code><a href="reference/permdisp.html">permdisp()</a></code>, <code><a href="reference/anosim.html">anosim()</a></code>, <code><a href="reference/mrpp.html">mrpp()</a></code>, <code><a href="reference/mantel.html">mantel()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Data preparation</td>
+<td align="left"></td>
+<td align="left">
+<code><a href="reference/rarefy.html">rarefy()</a></code>, <code><a href="reference/normalize.html">normalize()</a></code>, <code><a href="reference/read_tree.html">read_tree()</a></code>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Each wrapper runs its functions by name, such as <code>beta_div(counts, 'bray')</code> or <code>dist_ord(dm, 'nmds')</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -161,12 +231,70 @@
 <span><span class="co">#&gt; Nose   67.23768  55.97101          </span></span>
 <span><span class="co">#&gt; Stool 109.77971 109.44058 110.00870</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="ordination">Ordination<a class="anchor" aria-label="anchor" href="#ordination"></a>
+</h3>
+<p>Ordinations place samples on a few axes for plotting. Most start from beta diversity distances; <code><a href="reference/pca.html">pca()</a></code> and <code><a href="reference/rpca.html">rpca()</a></code> start from the counts. With only four samples, <code>ex_counts</code> is too small to ordinate, so these examples use R’s built-in <code>iris</code> data: 150 flowers from three species.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          PCoA1       PCoA2        PCoA3</span></span>
+<span><span class="co">#&gt; [1,] 0.1692812 -0.02591990 -0.005053611</span></span>
+<span><span class="co">#&gt; [2,] 0.1706354  0.02346821  0.030848760</span></span>
+<span><span class="co">#&gt; [3,] 0.1870090 -0.00320247  0.032221661</span></span>
+<span></span>
+<span><span class="co"># Percent of variance on each axis.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 89.0  9.3  2.9</span></span>
+<span></span>
+<span><span class="co"># Any method by name.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/dist_ord.html">dist_ord</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'pcoa'</span><span class="op">)</span>, col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/dist_ord.html">dist_ord</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'nmds'</span><span class="op">)</span>, col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/dist_ord.html">dist_ord</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'umap'</span><span class="op">)</span>, col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-ordination.png" alt="PCoA, NMDS and UMAP ordinations of the iris data, colored by species" width="100%"></p>
+</div>
+<div class="section level3">
+<h3 id="statistical-tests">Statistical Tests<a class="anchor" aria-label="anchor" href="#statistical-tests"></a>
+</h3>
+<p>Permutation tests ask whether a variable, such as species or treatment, explains the distances between samples.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; F = 532.7, p = 0.001, z = 577.6</span></span>
+<span><span class="co">#&gt; Permutations: 999 (free)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Model R2 = 0.8788. Model tested as a whole:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Df SumOfSqs     R2     F Pr(&gt;F)    </span></span>
+<span><span class="co">#&gt; Model      2   2.3173 0.8788 532.7  0.001 ***</span></span>
+<span><span class="co">#&gt; Residual 147   0.3197 0.1212                 </span></span>
+<span><span class="co">#&gt; Total    149   2.6370 1.0000                 </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span></span>
+<span><span class="co"># Any test by name.</span></span>
+<span><span class="fu"><a href="reference/dist_test.html">dist_test</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'anosim'</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Analysis of similarities (ANOSIM)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; R = 0.8576, p = 0.001, z =  79.4</span></span>
+<span><span class="co">#&gt; Permutations: 999 (free)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Mean rank of the distances, between and within groups:</span></span>
+<span><span class="co">#&gt;            pairs mean_rank</span></span>
+<span><span class="co">#&gt; Between     7500   7163.90</span></span>
+<span><span class="co">#&gt; setosa      1225   2239.66</span></span>
+<span><span class="co">#&gt; versicolor  1225   2457.85</span></span>
+<span><span class="co">#&gt; virginica   1225   2418.15</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="available-methods">Available Methods<a class="anchor" aria-label="anchor" href="#available-methods"></a>
 </h2>
-<p>Use <code><a href="reference/metrics.html">list_metrics()</a></code> to browse the metrics available for calculating diversity.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>Use <code><a href="reference/metrics.html">list_metrics()</a></code> to browse the metrics available for calculating diversity, <code><a href="reference/dist_ords.html">list_dist_ords()</a></code> for ordination methods, and <code><a href="reference/dist_tests.html">list_dist_tests()</a></code> for statistical tests.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Alpha Diversity</span></span>
 <span><span class="fu"><a href="reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'alpha'</span>, <span class="st">'id'</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "ace"         "berger"      "brillouin"   "chao1"       "faith"      </span></span>
@@ -187,12 +315,41 @@
 <span><span class="co">#&gt; [28] "robust_aitchison"          "soergel"                   "squared_chisq"            </span></span>
 <span><span class="co">#&gt; [31] "squared_chord"             "squared_euclidean"         "topsoe"                   </span></span>
 <span><span class="co">#&gt; [34] "unweighted_unifrac"        "variance_adjusted_unifrac" "wave_hedges"              </span></span>
-<span><span class="co">#&gt; [37] "weighted_unifrac" </span></span></code></pre></div>
+<span><span class="co">#&gt; [37] "weighted_unifrac" </span></span>
+<span></span>
+<span><span class="co"># Ordination methods that take distances</span></span>
+<span><span class="fu"><a href="reference/dist_ords.html">list_dist_ords</a></span><span class="op">(</span><span class="st">'id'</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "capscale" "dbrda"    "isomap"   "mds"      "nmds"     "pcoa"     "tsne"    </span></span>
+<span><span class="co">#&gt; [8] "umap"    </span></span>
+<span></span>
+<span><span class="co"># Statistical tests</span></span>
+<span><span class="fu"><a href="reference/dist_tests.html">list_dist_tests</a></span><span class="op">(</span><span class="st">'id'</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "anosim"    "mantel"    "mrpp"      "permanova" "permdisp" </span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
-<p>The online manual for ecodive is available at <a href="https://cmmr.github.io/ecodive/" class="uri">https://cmmr.github.io/ecodive/</a>. It includes a getting started guide, articles on alpha/beta diversity, and reference pages for each function.</p>
+<p>The online manual for ecodive is available at <a href="https://cmmr.github.io/ecodive/" class="uri">https://cmmr.github.io/ecodive/</a>. It includes reference pages for each function and these guides, which are also available offline with <code><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette()</a></code>:</p>
+<ul>
+<li>
+<a href="https://cmmr.github.io/ecodive/articles/ecodive.html">Introduction to ecodive</a> - <code><a href="articles/ecodive.html">vignette('ecodive')</a></code>
+</li>
+<li>
+<a href="https://cmmr.github.io/ecodive/articles/adiv.html">Alpha Diversity</a> - <code><a href="articles/adiv.html">vignette('adiv')</a></code>
+</li>
+<li>
+<a href="https://cmmr.github.io/ecodive/articles/bdiv.html">Beta Diversity</a> - <code><a href="articles/bdiv.html">vignette('bdiv')</a></code>
+</li>
+<li>
+<a href="https://cmmr.github.io/ecodive/articles/ordination.html">Ordination</a> - <code><a href="articles/ordination.html">vignette('ordination')</a></code>
+</li>
+<li>
+<a href="https://cmmr.github.io/ecodive/articles/stat_tests.html">Statistical Tests</a> - <code><a href="articles/stat_tests.html">vignette('stat_tests')</a></code>
+</li>
+<li>
+<a href="https://cmmr.github.io/ecodive/articles/performance.html">Performance</a> - <code><a href="articles/performance.html">vignette('performance')</a></code>
+</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="community-guidelines">Community guidelines<a class="anchor" aria-label="anchor" href="#community-guidelines"></a>
@@ -224,6 +381,14 @@
 <ul>
 <li>
 <a href="https://www.pcg-random.org" class="external-link"><strong>PCG Random Number Generation for C</strong></a>: Licensed under the <a href="https://opensource.org/license/apache-2.0" class="external-link">Apache License, Version 2.0</a>.</li>
+<li>
+<a href="https://scikit-learn.org" class="external-link"><strong>scikit-learn</strong></a> (SMACOF for MDS and NMDS, t-SNE, and Isomap): Licensed under the <a href="https://opensource.org/license/bsd-3-clause" class="external-link">BSD 3-Clause License</a>.</li>
+<li>
+<a href="https://scikit.bio" class="external-link"><strong>scikit-bio</strong></a> (PCoA biplot scores): Licensed under the <a href="https://opensource.org/license/bsd-3-clause" class="external-link">BSD 3-Clause License</a>.</li>
+<li>
+<a href="https://github.com/biocore/gemelli" class="external-link"><strong>gemelli</strong></a> (robust Aitchison PCA): Licensed under the <a href="https://opensource.org/license/bsd-3-clause" class="external-link">BSD 3-Clause License</a>.</li>
+<li>
+<a href="https://github.com/jlmelville/uwot" class="external-link"><strong>uwot</strong></a> (UMAP): Licensed under the <a href="https://opensource.org/license/bsd-2-clause" class="external-link">BSD 2-Clause License</a>.</li>
 </ul>
 <p>Detailed copyright and licensing information for all components can be found in the <a href="https://github.com/cmmr/ecodive/blob/main/inst/COPYRIGHTS" class="external-link"><code>inst/COPYRIGHTS</code></a> file.</p>
 </div>

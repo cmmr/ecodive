@@ -258,7 +258,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md), `umap()`,
 and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -323,28 +323,35 @@ Applications*, 22(2), 602-616.
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md),
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md),
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
 
 ## Examples
 
 ``` r
-    # 60 samples from three kinds of community.
-    set.seed(1)
-    rates  <- rbind(c(50, 20, 5, 1), c(5, 50, 20, 1), c(1, 5, 20, 50))
-    counts <- matrix(rpois(240, rates[rep(1:3, each = 20), ]), 60, 4)
-    rownames(counts) <- paste0('S', 1:60)
+    dm  <- bray(iris[, 1:4])
+    ord <- umap(dm)
+    plot(ord, col = iris$Species)
 
-    ord <- umap(bray(counts), n_neighbors = 10)
     head(ord)
-#>        UMAP1     UMAP2
-#> S1 -4.303218 -5.413200
-#> S2 -4.315105 -4.058528
-#> S3 -4.103787 -4.148089
-#> S4 -4.833076 -5.088704
-#> S5 -4.040465 -5.625855
-#> S6 -4.726087 -4.851616
-
-    plot(ord, col = rep(1:3, each = 20), asp = 1)
-
+#>         UMAP1       UMAP2
+#> [1,] 5.254048 -1.77263912
+#> [2,] 4.404295 -0.18979135
+#> [3,] 5.162174  0.11891402
+#> [4,] 4.950985 -0.01741511
+#> [5,] 5.250620 -1.60047599
+#> [6,] 4.974723 -2.73126598
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:2] 5.25 4.4 5.16 4.95 5.25 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:2] "UMAP1" "UMAP2"
+#>  - attr(*, "method")= chr "umap"
+#>  - attr(*, "eig")= num [1:2] NA NA
+#>  - attr(*, "prop")= num [1:2] NA NA
+#>  - attr(*, "a")= num 1.58
+#>  - attr(*, "b")= num 0.895
+#>  - attr(*, "init")= chr "pcoa"
+#>  - attr(*, "n_epochs")= int 500
+#>  - attr(*, "n_neighbors")= int 15
 ```

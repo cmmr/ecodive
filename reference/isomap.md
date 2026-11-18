@@ -198,11 +198,12 @@ rounding, and the same embedding (`embedding_`) and eigenvalues as
   and `reconstruction_error()` are not offered. The components of the
   neighbor graph are returned as attributes.
 
-**Coming from `vegan::isomap()`**
+**Coming from
+[`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)**
 
-- `vegan::isomap()`'s `k` is the number of neighbors; `isomap()`'s `k`
-  is the number of axes (`vegan`'s `ndim`). Give the number of neighbors
-  as `n_neighbors`.
+- [`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)'s
+  `k` is the number of neighbors; `isomap()`'s `k` is the number of axes
+  (`vegan`'s `ndim`). Give the number of neighbors as `n_neighbors`.
 
 - `vegan`'s `epsilon` corresponds to `radius`.
 
@@ -242,7 +243,7 @@ Every ordination function
 `isomap()`,
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -308,37 +309,35 @@ methods used in multivariate analysis. *Biometrika*, 53(3-4), 325-338.
 
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md)
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md)
 
 ## Examples
 
 ``` r
-    ord <- isomap(bray(ex_counts), n_neighbors = 3)
-    ord
-#>           Isomap1     Isomap2
-#> Saliva -0.3891250 -0.03721713
-#> Gums   -0.3951099 -0.05550727
-#> Nose    0.3179676  0.53707433
-#> Stool   0.4662673 -0.44434993
-#> 
-#> isomap: 4 samples, 2 axes; % of variance: 48.5, 38.0
-#> Attributes: method, eig, prop, trace, n_neighbors, radius, components, membership
+    dm  <- bray(iris[, 1:4])
+    # Enough neighbours to link setosa to the other two species.
+    ord <- isomap(dm, n_neighbors = 50)
+    plot(ord, col = iris$Species)
 
-    # Percent of the geodesic distances' variance on each axis.
-    round(100 * attr(ord, 'prop'), 1)
-#> [1] 48.5 38.0
-
-    plot(ord, asp = 1)
-
-
-    # A long gradient: species replace each other along it.
-    x      <- seq(0, 10, length.out = 60)
-    counts <- round(100 * exp(-outer(x, 0:10, '-')^2 / 2))
-    d      <- bray(counts)
-
-    # PCoA bends it into an arch; Isomap lays it out straight.
-    plot(pcoa(d), asp = 1)
-
-    plot(isomap(d, k = 1)[, 1], x)
-
+    head(ord)
+#>        Isomap1      Isomap2
+#> [1,] 0.1815951 -0.039742273
+#> [2,] 0.1976638  0.024659828
+#> [3,] 0.2105455 -0.008544025
+#> [4,] 0.2123135  0.026838706
+#> [5,] 0.1909184 -0.040604972
+#> [6,] 0.1734805 -0.026899418
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:2] 0.182 0.198 0.211 0.212 0.191 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:2] "Isomap1" "Isomap2"
+#>  - attr(*, "method")= chr "isomap"
+#>  - attr(*, "eig")= num [1:2] 3.156 0.142
+#>  - attr(*, "prop")= num [1:2] 0.9455 0.0424
+#>  - attr(*, "trace")= num 3.34
+#>  - attr(*, "n_neighbors")= int 50
+#>  - attr(*, "radius")= num NA
+#>  - attr(*, "components")= int 1
+#>  - attr(*, "membership")= int [1:150] 1 1 1 1 1 1 1 1 1 1 ...
 ```

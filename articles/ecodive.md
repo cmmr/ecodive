@@ -2,10 +2,15 @@
 
 ## Introduction
 
-Ecodive calculates ecological diversity metrics. Alpha diversity metrics
-provide insight about a single sample’s diversity, whereas beta
-diversity metrics indicate how different a pair of samples are from each
-other.
+Ecodive covers an ecological diversity analysis from start to finish:
+
+- **Alpha diversity** metrics describe a single sample’s diversity.
+- **Beta diversity** metrics indicate how different a pair of samples
+  are from each other.
+- **Ordinations** place samples on a few axes, so that similar samples
+  plot near each other.
+- **Statistical tests** check whether a variable, such as treatment or
+  body site, explains the differences between samples.
 
 In this guide, we’ll use the `ex_counts` dataset included with ecodive.
 `ex_counts` is a feature table that enumerates how many times each
@@ -66,10 +71,10 @@ list_metrics('alpha')[,1:5]
 ## Beta Diversity
 
 Beta diversity metrics describe how different two samples are, based on
-the genera observed in each.UniFrac metrics incorporate a phylogenetic
+the genera observed in each. UniFrac metrics incorporate a phylogenetic
 tree into this calculation.
 
-The available alpha diversity metrics can be listed using
+The available beta diversity metrics can be listed using
 [`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md).
 
 ``` r
@@ -235,6 +240,97 @@ mtx
 mtx['Saliva', 'Nose']
 #> [1] 0.5
 ```
+
+## Ordination
+
+An ordination turns a distance matrix into coordinates for a plot.
+ecodive has eight methods that take distances, run by name with
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) or
+directly by their own functions, and two
+([`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)) that take
+the count table itself.
+
+| Function | Method |
+|:---|:---|
+| [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) | Principal Coordinates Analysis (PCoA) |
+| [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md) | Metric Multidimensional Scaling |
+| [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) | Non-metric Multidimensional Scaling (NMDS) |
+| [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md) | Isometric Feature Mapping (Isomap) |
+| [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md) | t-distributed Stochastic Neighbor Embedding |
+| [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md) | Uniform Manifold Approximation and Projection |
+| [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) | Distance-based Redundancy Analysis (db-RDA) |
+| [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) | Constrained Analysis of Principal Coordinates |
+| [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) | Principal Component Analysis (PCA) |
+| [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) | Robust Aitchison PCA |
+
+[`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
+and [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) add
+arrows for the features or metadata that drive the axes.
+
+Four samples are too few to ordinate, so this example uses R’s built-in
+`iris` data: 150 flowers, four measurements each, and three species.
+Every ordination returns a matrix with one row per sample and one column
+per axis.
+
+``` r
+
+dm  <- bray(iris[, 1:4])
+ord <- pcoa(dm)
+
+head(ord, 3)
+#>          PCoA1       PCoA2        PCoA3
+#> [1,] 0.1692812 -0.02591990 -0.005053611
+#> [2,] 0.1706354  0.02346821  0.030848760
+#> [3,] 0.1870090 -0.00320247  0.032221661
+
+# Percent of variance on each axis.
+round(100 * attr(ord, 'prop'), 1)
+#> [1] 89.0  9.3  2.9
+
+plot(ord, col = iris$Species)
+```
+
+- Further reading:
+  [`vignette('ordination')`](https://cmmr.github.io/ecodive/articles/ordination.md)
+
+## Statistical Tests
+
+ecodive’s permutation tests take the same distance matrix, and a
+variable to test: a vector with one value per sample, or a column of a
+data frame.
+
+| Function | Test |
+|:---|:---|
+| [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md) | Permutational Multivariate Analysis of Variance |
+| [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md) | Homogeneity of Multivariate Dispersions |
+| [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md) | Analysis of Similarities |
+| [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) | Multi-Response Permutation Procedure |
+| [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) | Mantel Test |
+
+[`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)
+runs any of them by name.
+
+``` r
+
+permanova(dm, 'Species', iris)
+#> Permutational multivariate analysis of variance (PERMANOVA)
+#> 
+#> F = 532.7, p = 0.001, z = 577.6
+#> Permutations: 999 (free)
+#> 
+#> Model R2 = 0.8788. Model tested as a whole:
+#> 
+#>           Df SumOfSqs     R2     F Pr(>F)    
+#> Model      2   2.3173 0.8788 532.7  0.001 ***
+#> Residual 147   0.3197 0.1212                 
+#> Total    149   2.6370 1.0000                 
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+- Further reading:
+  [`vignette('stat_tests')`](https://cmmr.github.io/ecodive/articles/stat_tests.md)
 
 ## Performance with Large Datasets
 

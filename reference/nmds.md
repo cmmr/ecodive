@@ -170,14 +170,16 @@ a fixed point, which is often not the best one: random starts
 
 Beta diversity distances are often tied, e.g. at 1 for every pair of
 samples with no taxa in common. With `ties = "primary"` (Kruskal's
-primary approach, as in `vegan::metaMDS()`), tied distances only have to
-stay in order with the other distances: on the plot, they may differ
-from each other. With `"secondary"` (as in scikit-learn), tied distances
-get one shared disparity, the mean of their distances on the plot, so
-the solution tries to make them equal too; this is a stronger
-requirement, so its stress is higher. Heavily tied data (e.g. Jaccard or
-Bray-Curtis on few taxa or rarefied counts) have many local minima of
-similar stress, and benefit from more `n_starts`; see `n_best`.
+primary approach, as in
+[`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)),
+tied distances only have to stay in order with the other distances: on
+the plot, they may differ from each other. With `"secondary"` (as in
+scikit-learn), tied distances get one shared disparity, the mean of
+their distances on the plot, so the solution tries to make them equal
+too; this is a stronger requirement, so its stress is higher. Heavily
+tied data (e.g. Jaccard or Bray-Curtis on few taxa or rarefied counts)
+have many local minima of similar stress, and benefit from more
+`n_starts`; see `n_best`.
 
 Distances count as tied when they are within \\10^{-15}\\ times the
 largest distance of the first of their group (sorted increasingly),
@@ -188,7 +190,8 @@ disparity of 0 with either approach, as in scikit-learn: they are pulled
 towards the same point. (Under the primary approach, a zero would
 otherwise just be the smallest tie, free to take any small distance on
 the plot; but identical samples should coincide.) So when `dm` has no
-zeros, `stress` with `ties = "primary"` equals `vegan::metaMDS()`'s
+zeros, `stress` with `ties = "primary"` equals
+[`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)'s
 stress for the same configuration; when it has zeros, it is higher.
 
 SMACOF only finds a local minimum of stress. So:
@@ -326,7 +329,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -402,20 +405,31 @@ and `sklearn.isotonic`, under scikit-learn's BSD-3-Clause license
 ## Examples
 
 ``` r
-    ord <- nmds(bray(ex_counts))
-    ord
-#>             NMDS1       NMDS2
-#> Saliva -0.4523796 -0.27623675
-#> Gums    0.1053942 -0.11182804
-#> Nose   -0.4630612  0.33581477
-#> Stool   0.8100466  0.05225002
-#> 
-#> nmds: 4 samples, 2 axes
-#> Attributes: method, eig, prop, stress, converged, n_iters, n_starts, best_start, n_best, ties
+    dm  <- bray(iris[, 1:4])
+    ord <- nmds(dm)
+    plot(ord, col = iris$Species)
 
-    attr(ord, 'stress')
-#> [1] 5.123131e-05
-
-    plot(ord, asp = 1)
-
+    head(ord)
+#>          NMDS1       NMDS2
+#> [1,] 0.1703377 -0.02307947
+#> [2,] 0.1727886  0.01624136
+#> [3,] 0.1910232  0.00691959
+#> [4,] 0.1843325  0.01709551
+#> [5,] 0.1772749 -0.02496549
+#> [6,] 0.1364458 -0.05359534
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:2] 0.17 0.173 0.191 0.184 0.177 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:2] "NMDS1" "NMDS2"
+#>  - attr(*, "method")= chr "nmds"
+#>  - attr(*, "eig")= num [1:2] NA NA
+#>  - attr(*, "prop")= num [1:2] NA NA
+#>  - attr(*, "stress")= num 0.0378
+#>  - attr(*, "converged")= logi TRUE
+#>  - attr(*, "n_iters")= int 18
+#>  - attr(*, "n_starts")= int 4
+#>  - attr(*, "best_start")= int 0
+#>  - attr(*, "n_best")= int 1
+#>  - attr(*, "ties")= chr "primary"
 ```

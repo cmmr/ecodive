@@ -227,26 +227,22 @@ Data Scientists, Students, and Developers. <https://scikit.bio>
 ## Examples
 
 ``` r
-    ord    <- pcoa(bray(ex_counts))
-    scores <- pcoa_biplot(ord, ex_counts, norm = 'percent')
-    head(scores)
-#>                        PCoA1       PCoA2        PCoA3
-#> Streptococcus     -0.8444828 -0.11459333 -0.708698446
-#> Bacteroides        0.7344978 -0.89905795  0.022583870
-#> Corynebacterium    0.2513952  0.53803207 -0.019220678
-#> Haemophilus       -0.3840530 -0.05002057  0.722996875
-#> Propionibacterium  0.1235829  0.27157169 -0.006669624
-#> Staphylococcus     0.1190599  0.25406808 -0.010991997
-
-    # The 5 features with the longest arrows on the first two axes.
-    top <- head(order(-rowSums(scores[, 1:2]^2)), 5)
+    dm     <- bray(iris[, 1:4])
+    ord    <- pcoa(dm)
+    scores <- pcoa_biplot(ord, iris[, 1:4])
+    scores
+#>                   PCoA1     PCoA2     PCoA3
+#> Sepal.Length  -5.778706 -7.266865 -1.034818
+#> Sepal.Width    1.588488 -9.054336 -2.458405
+#> Petal.Length -13.945894 -1.840953  4.618196
+#> Petal.Width   -5.827864 -1.679216  2.596898
+#> attr(,"method")
+#> [1] "pcoa_biplot"
 
     # Scale the arrows to the samples' spread, and draw them.
-    xy <- scores[top, 1:2]
-    xy <- xy * 0.8 * max(abs(ord[, 1:2])) / max(abs(xy))
-
-    plot(ord[, 1:2], asp = 1)
-    arrows(0, 0, xy[, 1], xy[, 2], length = 0.1, col = 'red')
-    text(xy, labels = rownames(xy), pos = 3, col = 'red')
+    xy <- scores[, 1:2] * 0.8 * max(abs(ord[, 1:2])) / max(abs(scores[, 1:2]))
+    plot(ord, col = iris$Species)
+    arrows(0, 0, xy[, 1], xy[, 2], length = 0.1)
+    text(xy, labels = rownames(xy), pos = 3)
 
 ```

@@ -5,10 +5,10 @@ Finds the direction in an ordination along which each numeric variable
 ordination (\\r^2\\); and, for each factor, the centroid of each of its
 levels and how well the factor separates the samples. Permutation tests
 give p-values. Gives the same arrows, centroids, and \\r^2\\ as
-`vegan::envfit()`, and the same p-values for the same permutations, but
-runs in parallel C, so that fitting thousands of taxa with 999
-permutations each takes seconds. Use it for the arrows and labels of a
-biplot.
+[`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html),
+and the same p-values for the same permutations, but runs in parallel C,
+so that fitting thousands of taxa with 999 permutations each takes
+seconds. Use it for the arrows and labels of a biplot.
 
 ## Usage
 
@@ -86,21 +86,25 @@ envfit(
 - axes:
 
   Which columns of `ord` to fit onto: indices or column names. The
-  default, `NULL`, uses every column. `vegan::envfit()` uses the first
-  two by default (its `choices = c(1, 2)`), so give `axes = 1:2` to
-  compare with it.
+  default, `NULL`, uses every column.
+  [`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html)
+  uses the first two by default (its `choices = c(1, 2)`), so give
+  `axes = 1:2` to compare with it.
 
 - na.rm:
 
   Leave out samples with missing values (`NA`) in `ord` or in any column
-  of `data`, as `vegan::envfit()` does. `counts` must not have any.
-  Default: `FALSE`, which stops with an error if there are any.
+  of `data`, as
+  [`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html)
+  does. `counts` must not have any. Default: `FALSE`, which stops with
+  an error if there are any.
 
 - permutations:
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  `permute::shuffleSet()`, to use instead of random ones.
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
+  to use instead of random ones.
 
 - strata:
 
@@ -149,8 +153,9 @@ feature of `counts`. Its columns are:
   `r2_perm`.
 
 Row names are the variables' names, and for factor levels, the
-variable's name pasted to the level's, as in `vegan::envfit()`. The data
-frame has class `"ecodive_envfit"`, only to mark what made it.
+variable's name pasted to the level's, as in
+[`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html).
+The data frame has class `"ecodive_envfit"`, only to mark what made it.
 
 Attributes: `r2_perm`, a matrix of the \\r^2\\ of each permutation
 (rows) for each variable (columns); and `n_perm`, the number of
@@ -172,8 +177,9 @@ MANOVA.
 The p-value is the proportion of permutations of the samples, counting
 the observed data, with an \\r^2\\ at least as large: \\(1 +
 \\\\r^2\_{perm} \ge r^2\\) / (1 + permutations)\\. As in
-`vegan::envfit()`, permuted values within `sqrt(.Machine$double.eps)` of
-the observed one count as ties.
+[`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html),
+permuted values within `sqrt(.Machine$double.eps)` of the observed one
+count as ties.
 
 **Speed and memory**
 
@@ -213,7 +219,8 @@ unless the same `permutations` matrix is given to both.
   uses them only for its CA and CCA results.
 
 - `strata` permutes freely within strata. For other restricted designs,
-  pass a `permutations` matrix from `permute::shuffleSet()`.
+  pass a `permutations` matrix from
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html).
 
 - When there are fewer possible permutations than requested, `vegan`
   (via `permute`) runs each of them once instead. `envfit()` always
@@ -239,47 +246,32 @@ Oksanen, J., et al. vegan: Community Ecology Package. `envfit()`.
 ## Examples
 
 ``` r
-    # 30 samples in three treatment groups. The 'high' group has more
-    # of the first five genera.
-    set.seed(1)
-    counts <- matrix(rpois(30 * 20, 5), 30, 20)
-    dimnames(counts) <- list(paste0('S', 1:30), paste0('G', 1:20))
-    meta <- data.frame(
-      row.names = rownames(counts),
-      treatment = rep(c('ctrl', 'low', 'high'), each = 10),
-      ph        = round(rnorm(30, 7, 0.3), 1) )
-    high <- meta$treatment == 'high'
-    counts[high, 1:5] <- counts[high, 1:5] + 5
+    dm  <- bray(iris[, 1:4])
+    ord <- pcoa(dm, k = 2)
 
-    ord <- pcoa(bray(counts), k = 2)
+    # An arrow for each measurement, a centroid for each species.
+    fit <- envfit(ord, iris)
+    fit
+#>                       variable      level       PCoA1       PCoA2        r2
+#> Sepal.Length      Sepal.Length       <NA> -0.62240779 -0.78269313 0.8942973
+#> Sepal.Width        Sepal.Width       <NA>  0.17280029 -0.98495688 0.9213948
+#> Petal.Length      Petal.Length       <NA> -0.99139935 -0.13087144 0.9849779
+#> Petal.Width        Petal.Width       <NA> -0.96090689 -0.27687170 0.9289167
+#> Speciessetosa          Species     setosa  0.16700378 -0.01395054 0.8875721
+#> Speciesversicolor      Species versicolor -0.04635194  0.03090254 0.8875721
+#> Speciesvirginica       Species  virginica -0.12065184 -0.01695200 0.8875721
+#>                   p_value        z
+#> Sepal.Length        0.001 71.49808
+#> Sepal.Width         0.001 67.92426
+#> Petal.Length        0.001 74.01866
+#> Petal.Width         0.001 70.39502
+#> Speciessetosa       0.001 70.18593
+#> Speciesversicolor   0.001 70.18593
+#> Speciesvirginica    0.001 70.18593
 
-    # Metadata: an arrow for pH, a centroid for each treatment.
-    envfit(ord, meta)
-#>                variable level       PCoA1        PCoA2         r2 p_value
-#> treatmentctrl treatment  ctrl -0.05943289  0.009287556 0.49204476   0.001
-#> treatmenthigh treatment  high  0.10130261  0.009855297 0.49204476   0.001
-#> treatmentlow  treatment   low -0.04186972 -0.019142853 0.49204476   0.001
-#> ph                   ph  <NA>  0.02600727  0.999661754 0.03004821   0.660
-#>                        z
-#> treatmentctrl  8.7956678
-#> treatmenthigh  8.7956678
-#> treatmentlow   8.7956678
-#> ph            -0.6024862
-
-    # Each genus's relative abundance as an arrow.
-    fit <- envfit(ord, counts = counts, norm = 'percent')
-    head(fit[order(fit$p_value), ])
-#>     variable level      PCoA1       PCoA2        r2 p_value         z
-#> G2        G2  <NA>  0.9698078 -0.24387071 0.4161638   0.001  5.450425
-#> G4        G4  <NA>  0.9962046 -0.08704264 0.4415129   0.001  6.149942
-#> G5        G5  <NA>  0.8752503  0.48367023 0.4412296   0.001  5.737329
-#> G9        G9  <NA> -0.4499446 -0.89305645 0.4500782   0.001  5.642102
-#> G15      G15  <NA> -0.8941686  0.44773034 0.5157017   0.001  7.381947
-#> G16      G16  <NA> -0.2155534  0.97649205 0.7302768   0.001 10.369686
-
-    # A biplot of the genera with p <= 0.05.
-    top <- fit[fit$p_value <= 0.05, ]
-    plot(ord, asp = 1)
-    arrows(0, 0, top$PCoA1 * sqrt(top$r2) * 0.3, top$PCoA2 * sqrt(top$r2) * 0.3)
+    # A biplot of the measurements.
+    vec <- fit[is.na(fit$level), ]
+    plot(ord, col = iris$Species)
+    arrows(0, 0, vec$PCoA1 * sqrt(vec$r2) * 0.1, vec$PCoA2 * sqrt(vec$r2) * 0.1)
 
 ```

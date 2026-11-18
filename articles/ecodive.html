@@ -45,7 +45,9 @@
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/stat_tests.html">Statistical Tests</a></li>
     <li><a class="dropdown-item" href="../articles/unifrac.html">UniFrac Calculations</a></li>
   </ul>
 </li>
@@ -80,10 +82,22 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Ecodive calculates ecological diversity metrics. Alpha diversity
-metrics provide insight about a single sample’s diversity, whereas beta
-diversity metrics indicate how different a pair of samples are from each
-other.</p>
+<p>Ecodive covers an ecological diversity analysis from start to
+finish:</p>
+<ul>
+<li>
+<strong>Alpha diversity</strong> metrics describe a single sample’s
+diversity.</li>
+<li>
+<strong>Beta diversity</strong> metrics indicate how different a
+pair of samples are from each other.</li>
+<li>
+<strong>Ordinations</strong> place samples on a few axes, so that
+similar samples plot near each other.</li>
+<li>
+<strong>Statistical tests</strong> check whether a variable, such as
+treatment or body site, explains the differences between samples.</li>
+</ul>
 <p>In this guide, we’ll use the <code>ex_counts</code> dataset included
 with ecodive. <code>ex_counts</code> is a feature table that enumerates
 how many times each bacterial genera was observed on different body
@@ -140,9 +154,9 @@ split among genera (evenness), or how distantly related the genera are
 <h2 id="beta-diversity">Beta Diversity<a class="anchor" aria-label="anchor" href="#beta-diversity"></a>
 </h2>
 <p>Beta diversity metrics describe how different two samples are, based
-on the genera observed in each.UniFrac metrics incorporate a
+on the genera observed in each. UniFrac metrics incorporate a
 phylogenetic tree into this calculation.</p>
-<p>The available alpha diversity metrics can be listed using
+<p>The available beta diversity metrics can be listed using
 <code><a href="../reference/metrics.html">list_metrics()</a></code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'beta'</span><span class="op">)</span><span class="op">[</span>,<span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
@@ -295,6 +309,143 @@ function.</p>
 <span><span class="va">mtx</span><span class="op">[</span><span class="st">'Saliva'</span>, <span class="st">'Nose'</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] 0.5</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="ordination">Ordination<a class="anchor" aria-label="anchor" href="#ordination"></a>
+</h2>
+<p>An ordination turns a distance matrix into coordinates for a plot.
+ecodive has eight methods that take distances, run by name with
+<code><a href="../reference/dist_ord.html">dist_ord()</a></code> or directly by their own functions, and two
+(<code><a href="../reference/pca.html">pca()</a></code> and <code><a href="../reference/rpca.html">rpca()</a></code>) that take the count table
+itself.</p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">Function</th>
+<th align="left">Method</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code><a href="../reference/pcoa.html">pcoa()</a></code></td>
+<td align="left">Principal Coordinates Analysis (PCoA)</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/mds.html">mds()</a></code></td>
+<td align="left">Metric Multidimensional Scaling</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/nmds.html">nmds()</a></code></td>
+<td align="left">Non-metric Multidimensional Scaling (NMDS)</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/isomap.html">isomap()</a></code></td>
+<td align="left">Isometric Feature Mapping (Isomap)</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/tsne.html">tsne()</a></code></td>
+<td align="left">t-distributed Stochastic Neighbor Embedding</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/umap.html">umap()</a></code></td>
+<td align="left">Uniform Manifold Approximation and Projection</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/dbrda.html">dbrda()</a></code></td>
+<td align="left">Distance-based Redundancy Analysis (db-RDA)</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/capscale.html">capscale()</a></code></td>
+<td align="left">Constrained Analysis of Principal Coordinates</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/pca.html">pca()</a></code></td>
+<td align="left">Principal Component Analysis (PCA)</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/rpca.html">rpca()</a></code></td>
+<td align="left">Robust Aitchison PCA</td>
+</tr>
+</tbody>
+</table>
+<p><code><a href="../reference/pcoa_biplot.html">pcoa_biplot()</a></code> and <code><a href="../reference/envfit.html">envfit()</a></code> add arrows for
+the features or metadata that drive the axes.</p>
+<p>Four samples are too few to ordinate, so this example uses R’s
+built-in <code>iris</code> data: 150 flowers, four measurements each,
+and three species. Every ordination returns a matrix with one row per
+sample and one column per axis.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dm</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          PCoA1       PCoA2        PCoA3</span></span>
+<span><span class="co">#&gt; [1,] 0.1692812 -0.02591990 -0.005053611</span></span>
+<span><span class="co">#&gt; [2,] 0.1706354  0.02346821  0.030848760</span></span>
+<span><span class="co">#&gt; [3,] 0.1870090 -0.00320247  0.032221661</span></span>
+<span></span>
+<span><span class="co"># Percent of variance on each axis.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 89.0  9.3  2.9</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>Further reading: <code><a href="../articles/ordination.html">vignette('ordination')</a></code>
+</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="statistical-tests">Statistical Tests<a class="anchor" aria-label="anchor" href="#statistical-tests"></a>
+</h2>
+<p>ecodive’s permutation tests take the same distance matrix, and a
+variable to test: a vector with one value per sample, or a column of a
+data frame.</p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">Function</th>
+<th align="left">Test</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code><a href="../reference/permanova.html">permanova()</a></code></td>
+<td align="left">Permutational Multivariate Analysis of Variance</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/permdisp.html">permdisp()</a></code></td>
+<td align="left">Homogeneity of Multivariate Dispersions</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/anosim.html">anosim()</a></code></td>
+<td align="left">Analysis of Similarities</td>
+</tr>
+<tr class="even">
+<td align="left"><code><a href="../reference/mrpp.html">mrpp()</a></code></td>
+<td align="left">Multi-Response Permutation Procedure</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/mantel.html">mantel()</a></code></td>
+<td align="left">Mantel Test</td>
+</tr>
+</tbody>
+</table>
+<p><code><a href="../reference/dist_test.html">dist_test()</a></code> runs any of them by name.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; F = 532.7, p = 0.001, z = 577.6</span></span>
+<span><span class="co">#&gt; Permutations: 999 (free)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Model R2 = 0.8788. Model tested as a whole:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Df SumOfSqs     R2     F Pr(&gt;F)    </span></span>
+<span><span class="co">#&gt; Model      2   2.3173 0.8788 532.7  0.001 ***</span></span>
+<span><span class="co">#&gt; Residual 147   0.3197 0.1212                 </span></span>
+<span><span class="co">#&gt; Total    149   2.6370 1.0000                 </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<ul>
+<li>Further reading: <code><a href="../articles/stat_tests.html">vignette('stat_tests')</a></code>
+</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="performance-with-large-datasets">Performance with Large Datasets<a class="anchor" aria-label="anchor" href="#performance-with-large-datasets"></a>

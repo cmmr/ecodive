@@ -167,7 +167,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -264,45 +264,35 @@ data. *Biometrika*, 70(1), 57-65.
 
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md),
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md),
 [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md),
 [`stats::prcomp()`](https://rdrr.io/r/stats/prcomp.html)
 
 ## Examples
 
 ``` r
-    ord <- pca(ex_counts, norm = 'clr', pseudocount = 1)
-    ord
-#>              PC1       PC2          PC3
-#> Saliva -3.528246 -1.336813  0.879437784
-#> Gums   -3.691532 -1.381718 -0.860746227
-#> Nose    6.050248 -2.662859 -0.010805525
-#> Stool   1.169530  5.381390 -0.007886032
-#> 
-#> pca: 4 samples, 3 axes; % of variance: 60.8, 37.7, 1.4
-#> Attributes: method, eig, prop, trace, loadings
+    ord <- pca(iris[, 1:4])
+    plot(ord, col = iris$Species)
 
-    # Percent of variance explained by each axis.
-    round(100 * attr(ord, 'prop'), 1)
-#> [1] 60.8 37.7  1.4
-
-    # Features contributing most to the first axis.
-    head(sort(abs(attr(ord, 'loadings')[, 1]), decreasing = TRUE))
-#>       Haemophilus     Streptococcus   Corynebacterium    Staphylococcus 
-#>        0.56399158        0.49259684        0.46351081        0.35322904 
-#> Propionibacterium       Bacteroides 
-#>        0.30818630        0.06833773 
-
-    # Same scores as prcomp(), up to the sign of each axis.
-    clr <- log(ex_counts + 1)
-    clr <- clr - rowMeans(clr)
-    head(prcomp(clr)$x[, 1:3])
-#>              PC1       PC2          PC3
-#> Saliva  3.528246  1.336813  0.879437784
-#> Gums    3.691532  1.381718 -0.860746227
-#> Nose   -6.050248  2.662859 -0.010805525
-#> Stool  -1.169530 -5.381390 -0.007886032
-
-    plot(ord[, 1:2], asp = 1)
-
+    head(ord)
+#>            PC1        PC2         PC3
+#> [1,] -2.684126  0.3193972 -0.02791483
+#> [2,] -2.714142 -0.1770012 -0.21046427
+#> [3,] -2.888991 -0.1449494  0.01790026
+#> [4,] -2.745343 -0.3182990  0.03155937
+#> [5,] -2.728717  0.3267545  0.09007924
+#> [6,] -2.280860  0.7413304  0.16867766
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:3] -2.68 -2.71 -2.89 -2.75 -2.73 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:3] "PC1" "PC2" "PC3"
+#>  - attr(*, "method")= chr "pca"
+#>  - attr(*, "eig")= num [1:3] 4.2282 0.2427 0.0782
+#>  - attr(*, "prop")= num [1:3] 0.9246 0.0531 0.0171
+#>  - attr(*, "trace")= num 4.57
+#>  - attr(*, "loadings")= num [1:4, 1:3] 0.3614 -0.0845 0.8567 0.3583 0.6566 ...
+#>   ..- attr(*, "dimnames")=List of 2
+#>   .. ..$ : chr [1:4] "Sepal.Length" "Sepal.Width" "Petal.Length" "Petal.Width"
+#>   .. ..$ : chr [1:3] "PC1" "PC2" "PC3"
 ```

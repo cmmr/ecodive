@@ -157,7 +157,7 @@ identified. Its attributes are:
 `rpca()` takes a count table, not distances, so like
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) it is called
 directly rather than through
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md).
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md).
 
 **Relation to gemelli's results**
 
@@ -315,7 +315,7 @@ Every ordination function
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -405,38 +405,30 @@ Martino, C. (2019). *gemelli* (Python package, version 0.0.13). BSD
 ## Examples
 
 ``` r
-    ord <- rpca(ex_counts)
-    ord
-#>            RPCA1       RPCA2       RPCA3
-#> Saliva -3.714892  0.00589238  1.32684864
-#> Gums   -4.217962 -1.07425935 -1.21556106
-#> Nose    3.045297  5.28210144 -0.18772254
-#> Stool   4.887557 -4.21373447  0.07643496
-#> 
-#> rpca: 4 samples, 3 axes; % of variance: 56.4, 40.8, 2.9
-#> Attributes: method, eig, prop, trace, loadings, cost, n_iters
+    ord <- rpca(iris[, 1:4])
+    plot(ord, col = iris$Species)
 
-    # Percent of variance explained by each axis.
-    round(100 * attr(ord, 'prop'), 1)
-#> [1] 56.4 40.8  2.9
-
-    # Feature loadings, for a biplot.
-    head(attr(ord, 'loadings'))
-#>                         RPCA1       RPCA2       RPCA3
-#> Streptococcus     -0.55514792 -0.02261322 -0.54157517
-#> Bacteroides        0.41451952 -0.75586514 -0.11626169
-#> Corynebacterium    0.02525886  0.41738331 -0.34235756
-#> Haemophilus       -0.52276260 -0.23929236  0.57160498
-#> Propionibacterium  0.46477004  0.20948992 -0.06623526
-#> Staphylococcus     0.17336210  0.39089749  0.49482470
-
-    # A biplot (see "Biplots").
-    load <- attr(ord, 'loadings')
-    f    <- 0.8 * max(abs(ord)) / max(abs(load))
-    plot(ord[, 1:2], asp = 1)
-    arrows(0, 0, f * load[, 1], f * load[, 2], length = 0.05, col = 'grey')
-
-
-    # gemelli's distances, e.g. for pcoa() or a PERMANOVA.
-    d <- attr(rpca(ex_counts, distances = TRUE), 'dm')
+    head(ord)
+#>       RPCA1        RPCA2        RPCA3
+#> 1 1.2379290  0.005488659  0.008320257
+#> 2 1.1353545 -0.050106259  0.056553065
+#> 3 1.1739161  0.036919287  0.015602530
+#> 4 1.1172469 -0.082817128 -0.033203894
+#> 5 1.2472104  0.018834118 -0.021746165
+#> 6 0.7874903  0.234444962 -0.019601198
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:3] 1.24 1.14 1.17 1.12 1.25 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : chr [1:150] "1" "2" "3" "4" ...
+#>   ..$ : chr [1:3] "RPCA1" "RPCA2" "RPCA3"
+#>  - attr(*, "method")= chr "rpca"
+#>  - attr(*, "eig")= num [1:3] 0.67591 0.01909 0.00325
+#>  - attr(*, "prop")= num [1:3] 0.96799 0.02735 0.00466
+#>  - attr(*, "trace")= num 0.698
+#>  - attr(*, "loadings")= num [1:4, 1:3] 0.349 0.575 -0.216 -0.708 -0.117 ...
+#>   ..- attr(*, "dimnames")=List of 2
+#>   .. ..$ : chr [1:4] "Sepal.Length" "Sepal.Width" "Petal.Length" "Petal.Width"
+#>   .. ..$ : chr [1:3] "RPCA1" "RPCA2" "RPCA3"
+#>  - attr(*, "cost")= num [1:2] 2.67e-15 2.62e-15
+#>  - attr(*, "n_iters")= int 1
 ```

@@ -4,8 +4,10 @@ Ordinates samples from their distances, for plotting beta diversity.
 Also known as classical or metric multidimensional scaling. Gives the
 same coordinates and eigenvalues as
 [`stats::cmdscale()`](https://rdrr.io/r/stats/cmdscale.html),
-`ape::pcoa()`, and `vegan::wcmdscale()`, but computes only the first few
-axes, which takes far less time and memory for large datasets.
+[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html), and
+[`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html),
+but computes only the first few axes, which takes far less time and
+memory for large datasets.
 
 ## Usage
 
@@ -80,20 +82,24 @@ With \\A\\ the matrix of squared distances and \\J = I -
 eigenvalues \\\lambda_i\\ and unit eigenvectors \\u_i\\ of \\B =
 -\frac{1}{2}JAJ\\. Axis \\i\\'s coordinates are \\u_i\sqrt{\lambda_i}\\.
 
-[`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html), `ape::pcoa()`,
-and `vegan::wcmdscale()` build \\B\\ in full (\\n \times n\\) and
-compute all \\n\\ of its eigenvalues, which takes time proportional to
-\\n^3\\. `pcoa()` finds only the largest `k` eigenvalues, by block
-Lanczos iteration with thick restarts. That only needs products of \\B\\
-with a few vectors at a time, which are computed in parallel straight
-from `dm`, without ever forming \\B\\.
+[`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html),
+[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html), and
+[`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html)
+build \\B\\ in full (\\n \times n\\) and compute all \\n\\ of its
+eigenvalues, which takes time proportional to \\n^3\\. `pcoa()` finds
+only the largest `k` eigenvalues, by block Lanczos iteration with thick
+restarts. That only needs products of \\B\\ with a few vectors at a
+time, which are computed in parallel straight from `dm`, without ever
+forming \\B\\.
 
 **Proportion of variance**
 
 The total variance is \\trace(B) = \frac{1}{n}\sum\_{i\<j}d\_{ij}^2\\,
 the sum of all \\n\\ eigenvalues. `prop` is each axis's eigenvalue
-divided by it: the same as `ape::pcoa()`'s `Relative_eig` and `vegan`'s
-"Proportion Explained", the values that `phyloseq::plot_ordination()`
+divided by it: the same as
+[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html)'s `Relative_eig`
+and `vegan`'s "Proportion Explained", the values that
+[`phyloseq::plot_ordination()`](https://rdrr.io/pkg/phyloseq/man/plot_ordination.html)
 shows on its axes.
 
 Non-Euclidean distances, such as Bray-Curtis, can give negative
@@ -103,7 +109,7 @@ positive have no real coordinates and are dropped with a warning, as
 [`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html) does. So are axes
 with eigenvalues at rounding-error level, below
 `sqrt(.Machine$double.eps)` times the first one, as in
-`vegan::wcmdscale()`.
+[`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html).
 
 **Negative eigenvalue corrections**
 
@@ -127,7 +133,8 @@ negative (Gower & Legendre 1986; Legendre & Legendre 2012, sec. 9.3):
   computed from \\d'\\.
 
 `eig`, `prop`, and `trace` are then those of the corrected distances,
-and `prop` sums to at most 1. They equal `ape::pcoa()`'s `Corr_eig` and
+and `prop` sums to at most 1. They equal
+[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html)'s `Corr_eig` and
 `Rel_corr_eig` for the same correction, and
 `vegan::wcmdscale(add = 'lingoes')` or `add = 'cailliez'`; \\c_2\\ is
 `cmdscale(add = TRUE)`'s `ac`.
@@ -178,8 +185,9 @@ For Bray-Curtis distances between 2,000 sparse samples, on one thread,
 seconds; `cmdscale(add = TRUE)`, which builds the \\2n \times 2n\\
 matrix, took 2 minutes. How much longer depends on how tightly the
 smallest eigenvalues cluster. Each pass over `dm` takes time
-proportional to \\n^2\\, while `cmdscale(add = TRUE)` and `ape::pcoa()`
-take time proportional to \\n^3\\.
+proportional to \\n^2\\, while `cmdscale(add = TRUE)` and
+[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html) take time
+proportional to \\n^3\\.
 
 **Axis signs and reproducibility**
 
@@ -203,7 +211,7 @@ Every ordination function (`pcoa()`,
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md))
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
 sample and one column per axis, so that it can go straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
@@ -277,44 +285,34 @@ Applications*, 22(2), 602-616.
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
 [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
-[`ordination()`](https://cmmr.github.io/ecodive/reference/ordination.md),
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md),
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
 [`stats::cmdscale()`](https://rdrr.io/r/stats/cmdscale.html)
 
 ## Examples
 
 ``` r
-    ord <- pcoa(bray(ex_counts))
-    ord
-#>             PCoA1       PCoA2        PCoA3
-#> Saliva -0.3891250 -0.03721713  0.296748867
-#> Gums   -0.3951099 -0.05550727 -0.293514268
-#> Nose    0.3179676  0.53707433 -0.006811864
-#> Stool   0.4662673 -0.44434993  0.003577264
-#> 
-#> pcoa: 4 samples, 3 axes; % of variance: 48.5, 38.0, 13.5
-#> Attributes: method, eig, prop, trace, correction, constant
+    dm  <- bray(iris[, 1:4])
+    ord <- pcoa(dm)
+    plot(ord, col = iris$Species)
 
-    # Percent of variance explained by each axis.
-    round(100 * attr(ord, 'prop'), 1)
-#> [1] 48.5 38.0 13.5
-
-    # Same coordinates as cmdscale(), up to the sign of each axis.
-    cmdscale(bray(ex_counts), k = 3)
-#>              [,1]        [,2]         [,3]
-#> Saliva -0.3891250  0.03721713  0.296748867
-#> Gums   -0.3951099  0.05550727 -0.293514268
-#> Nose    0.3179676 -0.53707433 -0.006811864
-#> Stool   0.4662673  0.44434993  0.003577264
-
-    plot(ord[, 1:2], asp = 1)
-
-
-    # Unweighted UniFrac has negative eigenvalues here.
-    d   <- unweighted_unifrac(ex_counts, tree = ex_tree)
-    ord <- pcoa(d, correction = 'cailliez')
-    attr(ord, 'constant')
-#> [1] 0.0002072223
-    round(100 * attr(ord, 'prop'), 1)
-#> [1] 98.9  1.1
+    head(ord)
+#>          PCoA1       PCoA2        PCoA3
+#> [1,] 0.1692812 -0.02591990 -0.005053611
+#> [2,] 0.1706354  0.02346821  0.030848760
+#> [3,] 0.1870090 -0.00320247  0.032221661
+#> [4,] 0.1801593  0.01132449  0.037211653
+#> [5,] 0.1763516 -0.02998591 -0.006128668
+#> [6,] 0.1363264 -0.03979963 -0.043074846
+    str(ord)
+#>  'ecodive_ord' num [1:150, 1:3] 0.169 0.171 0.187 0.18 0.176 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr [1:3] "PCoA1" "PCoA2" "PCoA3"
+#>  - attr(*, "method")= chr "pcoa"
+#>  - attr(*, "eig")= num [1:3] 2.3473 0.2459 0.0766
+#>  - attr(*, "prop")= num [1:3] 0.8901 0.0932 0.0291
+#>  - attr(*, "trace")= num 2.64
+#>  - attr(*, "correction")= chr "none"
+#>  - attr(*, "constant")= num 0
 ```

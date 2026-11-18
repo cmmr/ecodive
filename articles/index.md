@@ -9,7 +9,10 @@
 - [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.md):
 - [Introduction to
   ecodive](https://cmmr.github.io/ecodive/articles/ecodive.md):
+- [Ordination](https://cmmr.github.io/ecodive/articles/ordination.md):
 - [Performance
   Guide](https://cmmr.github.io/ecodive/articles/performance.md):
+- [Statistical
+  Tests](https://cmmr.github.io/ecodive/articles/stat_tests.md):
 - [UniFrac
   Calculations](https://cmmr.github.io/ecodive/articles/unifrac.md):
