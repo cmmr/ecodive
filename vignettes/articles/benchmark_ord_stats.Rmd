@@ -10,10 +10,17 @@ knitr::opts_chunk$set(
   comment  = "#>",
   echo     = FALSE )
 
-bench_dir   <- 'benchmark_ord_stats'
-timings     <- readRDS(file.path(bench_dir, 'ord_stats_results.rds'))
-agreement   <- readRDS(file.path(bench_dir, 'ord_stats_agreement.rds'))
-determinism <- readRDS(file.path(bench_dir, 'ord_stats_determinism.rds'))
+bench_dir <- 'benchmark_ord_stats'
+
+# Until benchmark_ord_stats/ord_stats.r has been run, build the page without
+# its results rather than failing the site build.
+if (file.exists(file.path(bench_dir, 'ord_stats_results.rds'))) {
+  timings     <- readRDS(file.path(bench_dir, 'ord_stats_results.rds'))
+  agreement   <- readRDS(file.path(bench_dir, 'ord_stats_agreement.rds'))
+  determinism <- readRDS(file.path(bench_dir, 'ord_stats_determinism.rds'))
+} else {
+  knitr::opts_chunk$set(eval = FALSE)
+}
 
 fmt_time <- function (s)
   ifelse(s < 1e-3, sprintf('%.0f µs', s * 1e6),
