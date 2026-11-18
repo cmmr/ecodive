@@ -58,9 +58,16 @@ jobs:
     # the same path. (Keep this if rhub::rhub_setup() rewrites the file.)
     # NOT_CRAN=true runs ecodive's full test suite under R-hub's sanitizers
     # and compilers; without it, only the CRAN smoke tests run.
+    # OpenBLAS (0.3.20 in the Ubuntu 22.04 images) gave wrong results on some
+    # GitHub runners' CPUs for the references the tests compute with R's
+    # eigen() and %*% (e.g. cmdscale(add = TRUE) constants of 19196, 4.67 and
+    # 2.29 where the right one is 0.208). ecodive's C code uses no BLAS. Pin
+    # OpenBLAS to its AVX2 kernels and one thread; other BLASes ignore these.
     env:
       R_LIBS_USER: /github/home/R/library/${{ matrix.config.container }}
       NOT_CRAN: 'true'
+      OPENBLAS_CORETYPE: Haswell
+      OPENBLAS_NUM_THREADS: '1'
 
     steps:
       - uses: r-hub/actions/checkout@v1
