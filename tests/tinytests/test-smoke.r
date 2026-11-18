@@ -97,6 +97,11 @@
 
   expect_true(any(grepl('PCoA1', capture.output(print(o)))))
 
+  sp <- simper(counts, 'grp', meta, permutations = 9, cpus = cpus)
+  expect_inherits(sp, c('ecodive_simper', 'data.frame'))
+  expect_identical(dim(sp), c(12L, 10L))
+  expect_true(all(is.finite(sp$average)) && all(sp$p_value > 0 & sp$p_value <= 1))
+
 
 
   # Distance-based tests. ====

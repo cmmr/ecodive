@@ -90,3 +90,88 @@ even when their means don't differ. Say so in the docs, and suggest
 - Warton, D. I., Wright, S. T., & Wang, Y. (2012). Distance-based
   multivariate analyses confound location and dispersion effects.
   *Methods in Ecology and Evolution*, 3, 89–101.
+
+
+## Decisions made while implementing (2026-11-18)
+
+Asked the user at the start, who chose the recommended option each time:
+
+- **`norm`:** added, `norm = 'none'` by default (vegan uses the values as
+  given), with `bray()`'s choices except `'clr'` and `'rclr'`, which give
+  negative values that Bray-Curtis can't use (an error names the allowed
+  ones). `pseudocount` is therefore not needed and not offered.
+- **`p_adjust`:** added, `'holm'` by default, with a `p_adjusted` column:
+  `stats::p.adjust()` over the taxa of each pair, so taxa whose `p_value` is
+  `NA` aren't counted. Matched as in the pairwise tests (`pairwise_method()`).
+  `p_value` stays unadjusted and matches vegan.
+- **Permutations across pairs:** as the pairwise tests. Each pair shuffles
+  only its own samples' labels, with seed `pair_seed(seed, k)` for pair k; a
+  supplied matrix is cut down to each pair by `induced_perms()`; `strata` are
+  cut down (and recoded) to the pair's samples. vegan instead shuffles all
+  the samples' groups for every pair (its supplied matrix has a column per
+  sample), so its p-values for a pair depend on the other groups' samples.
+  The fixtures therefore run vegan on each pair's samples alone with the
+  induced permutations, as `data-raw/expected/pairwise.r` does.
+
+My own calls:
+
+- **vegan's p-value rule, found from its outputs:** p = (1 + #{permuted
+  average **>** observed}) / (1 + n_perm); permutations giving the same
+  average (only swapping samples within groups) don't count. ecodive does
+  the same, with ties judged within a relative 1e-7 (both are sums in a
+  fixed order, so true ties differ only by rounding). This is
+  anti-conservative for small groups (2 vs 2: p = 1/(n+1) for the top taxon
+  where the exact p is about 1/3); the docs say so in bold, and the example
+  uses `permutations = 0`. Clarke's "≥" rule would fix it but break the
+  match with vegan: flagged as an open question for the user.
+- **`p_value` is `NA` for taxa with `average` 0** (absent from both groups,
+  or the same value in every sample), as vegan's outputs give.
+- **Result:** one data frame, pairs in factor-level order ("a-b"), taxa by
+  decreasing `average` (ties in column order: `order(decreasing = TRUE)`,
+  which gave vegan's order in every fixture). Columns: `pair, taxon,
+  average, sd, ratio, mean_a, mean_b, cumsum, p_value, p_adjusted`. `taxon`
+  is the column number as text when `counts` has no column names. `ratio`
+  is `NaN` for absent taxa (0/0) as in vegan; `sd` and `ratio` are `NA`
+  when both groups have one sample. Attributes: `overall` (per pair, named),
+  `n_perm`, `p_adjust`, `permutation` (`'free'`, `'within strata'`,
+  `'supplied matrix'`). Class `c('ecodive_simper', 'data.frame')`, with no
+  print method (as `envfit()`).
+- **`mean_a`, `mean_b`** are means after `norm`. vegan's `ava`/`avb` follow
+  its own pair order (order of first appearance), so the fixture script
+  swaps them where vegan's pair is "b_a".
+- **Empty samples are an error** ("Samples with no counts: ..."), as in
+  ecopy: Bray-Curtis is 0/0 between two of them. NA, negative or infinite
+  values are an error too.
+- **C (`src/simper.c`):** the pair's samples are re-laid out taxon by taxon
+  (CSC), and each taxon's sum runs over only the samples that have it
+  (about nnz × n/2 operations; absent taxa cost nothing). The observed sums
+  and the sd (two-pass: squared deviations over the pairs where the taxon is
+  present, plus the zero pairs' `mean^2` times their count, so no
+  cancellation) are split over blocks of 256 taxa; permutations over tasks
+  of 16 permutations, each summed by one thread, with only integer counts
+  combined. Results are identical for any `cpus`. 300 samples × 3,000
+  taxa, three pairs, 99 permutations: 1.8 s on one thread, 0.8 s on four;
+  `vegan::simper()` takes 27 s for one pair.
+- **Argument order:** `counts, groups, data, margin, norm, p_adjust,
+  permutations, strata, seed, cpus` (`norm` after `margin` as in
+  `plsda()`; `p_adjust` before `permutations` as in the pairwise tests).
+- **Licensing:** ecopy's sdist has no licence file; its `setup.py`,
+  `PKG-INFO` and README say MIT. The standard MIT text, with "Copyright (c)
+  2017 Nathan Lemoine" (the author, and the 0.1.2.2 release year; no
+  copyright line exists in the source), is in `src/simper.c`'s header and a
+  new `inst/COPYRIGHTS` stanza; Nathan Lemoine is `ctb`/`cph` in
+  `Authors@R`.
+- **Docs:** a new "Interpreting Differences" group in the pkgdown reference
+  index; the Warton et al. (2012) caveat, a "Differences from
+  vegan::simper()" list, and a "Same names in other packages" section;
+  NEWS entry.
+- **References:** vegan 2.7.8 and permute 0.10.0
+  (`data-raw/expected/simper.r`): dune / Management with 999 free and 199
+  within-`Use` block permutations, and a sparse 25 × 40 table with three
+  unequal groups (an absent taxon, a constant one), raw and with
+  `norm = 'percent'` against vegan on `decostand(, 'total')`. Every column
+  agrees to about 5e-16 relative, p-values are identical, and the taxa come
+  in the same order.
+- **Open issue (not changed):** when `groups` has the wrong length, the
+  shared `per_sample()` message says "`dm` has 4 samples" even for count
+  tables (also in `plsda()`).

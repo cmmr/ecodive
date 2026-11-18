@@ -333,6 +333,23 @@
   Like every supervised method, it separates any groups it is given, so
   validate the separation (e.g. with `permanova()`).
 
+* New `simper()` runs a similarity percentages analysis (SIMPER): it breaks
+  the mean Bray-Curtis dissimilarity between each pair of groups down into
+  each taxon's contribution, with its sd, ratio, the groups' mean
+  abundances and the cumulative proportion, following ecopy's `simper()`,
+  and gives each taxon a permutation p-value (Clarke 1993), adjusted within
+  each pair by `p_adjust` (Holm's method by default). It gives the same
+  results as `vegan::simper()` and `summary()` of it, and the same p-values
+  for the same permutations, as one data frame. As in the pairwise tests,
+  each pair's permutations shuffle only its own samples (vegan shuffles all
+  of them). It takes `groups` and `data` as `permanova()` does, `strata`,
+  `norm` (`'none'` by default, as vegan) and sparse tables, which it never
+  makes dense, and runs in parallel C: 300 samples and 3,000 taxa, three
+  pairs with 99 permutations, take under 2 seconds on one thread, where
+  `vegan::simper()` takes 27 seconds for one pair. Results are identical
+  for any number of `cpus`. Its docs explain why SIMPER's ranking mixes up
+  differences in mean and in variability (Warton et al. 2012).
+
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
   (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),

@@ -95,6 +95,11 @@ reference:
   - permdisp
   - list_dist_tests
 
+- title: Interpreting Differences
+  desc: Which taxa drive the differences between groups.
+  contents:
+  - simper
+
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.
   contents:
