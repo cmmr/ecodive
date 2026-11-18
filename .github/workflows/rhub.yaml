@@ -56,8 +56,11 @@ jobs:
     # built in another container against libc++ ("libc++.so.1: cannot open
     # shared object file"). actions/cache only restores a cache saved for
     # the same path. (Keep this if rhub::rhub_setup() rewrites the file.)
+    # NOT_CRAN=true runs ecodive's full test suite under R-hub's sanitizers
+    # and compilers; without it, only the CRAN smoke tests run.
     env:
       R_LIBS_USER: /github/home/R/library/${{ matrix.config.container }}
+      NOT_CRAN: 'true'
 
     steps:
       - uses: r-hub/actions/checkout@v1
@@ -93,6 +96,9 @@ jobs:
       fail-fast: false
       matrix:
         config: ${{ fromJson(needs.setup.outputs.platforms) }}
+    # The full test suite, as above.
+    env:
+      NOT_CRAN: 'true'
 
     steps:
       - uses: r-hub/actions/checkout@v1
