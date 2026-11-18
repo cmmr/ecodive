@@ -24,6 +24,9 @@
 - **The SciPy developers**. Contributor, copyright holder.  
   Procrustes analysis, following SciPy
 
+- **Nathan Lemoine**. Contributor, copyright holder.  
+  SIMPER, following 'ecopy'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

@@ -233,6 +233,13 @@ Test whether sample metadata explain beta diversity distances.
   [`match_dist_test()`](https://cmmr.github.io/ecodive/reference/dist_tests.md)
   : Find and Browse Distance Tests
 
+## Interpreting Differences
+
+Which taxa drive the differences between groups.
+
+- [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md) :
+  Similarity Percentages (SIMPER)
+
 ## Utilities & Helpers
 
 Tools for programmatic access, data manipulation, and configuration.

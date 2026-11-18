@@ -466,6 +466,28 @@
   validate the separation (e.g. with
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)).
 
+- New [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md)
+  runs a similarity percentages analysis (SIMPER): it breaks the mean
+  Bray-Curtis dissimilarity between each pair of groups down into each
+  taxon’s contribution, with its sd, ratio, the groups’ mean abundances
+  and the cumulative proportion, following ecopy’s
+  [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md), and
+  gives each taxon a permutation p-value (Clarke 1993), adjusted within
+  each pair by `p_adjust` (Holm’s method by default). It gives the same
+  results as `vegan::simper()` and
+  [`summary()`](https://rdrr.io/r/base/summary.html) of it, and the same
+  p-values for the same permutations, as one data frame. As in the
+  pairwise tests, each pair’s permutations shuffle only its own samples
+  (vegan shuffles all of them). It takes `groups` and `data` as
+  [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
+  does, `strata`, `norm` (`'none'` by default, as vegan) and sparse
+  tables, which it never makes dense, and runs in parallel C: 300
+  samples and 3,000 taxa, three pairs with 99 permutations, take under 2
+  seconds on one thread, where `vegan::simper()` takes 27 seconds for
+  one pair. Results are identical for any number of `cpus`. Its docs
+  explain why SIMPER’s ranking mixes up differences in mean and in
+  variability (Warton et al. 2012).
+
 - New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   returns a count table after any of the transformations that
