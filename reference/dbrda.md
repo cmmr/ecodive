@@ -277,6 +277,7 @@ comparison of fractions. *Ecology*, 87(10), 2614-2625.
 ## See also
 
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),

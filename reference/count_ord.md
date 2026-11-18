@@ -21,17 +21,20 @@ count_ord(counts, method, ...)
 
 - method:
 
-  The name of an ordination method: `"pca"` or `"rpca"`. Flexible
-  matching is supported (see below). Programmatic access via
+  The name of an ordination method: `"pca"`, `"rda"`, or `"rpca"`.
+  Flexible matching is supported (see below). Programmatic access via
   [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md).
 
 - ...:
 
   Further arguments for the method's function, such as `n_axes`,
-  `margin`, `cpus`, or
+  `margin`, `cpus`,
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)'s `norm`,
-  `pseudocount`, and `scale`. Each method keeps its own defaults; see
-  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
+  `pseudocount`, and `scale`, or
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md)'s `groups`,
+  `data`, and `formula`. Each method keeps its own defaults; see
+  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), and
   [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md). `seed`
   is ignored by the methods that have no random parts (all of them, at
   present), so the same arguments can be given to every method.
@@ -45,11 +48,16 @@ The method's result, as described in "Ordination result" below.
 
 **List of Ordination Methods**
 
-|                        |                                    |
-|------------------------|------------------------------------|
-| Option / Function Name | Method Name                        |
-| `pca`                  | Principal Component Analysis (PCA) |
-| `rpca`                 | Robust Aitchison PCA               |
+|                        |                                        |
+|------------------------|----------------------------------------|
+| Option / Function Name | Method Name                            |
+| `pca`                  | Principal Component Analysis (PCA)     |
+| `rda`                  | Redundancy Analysis (RDA), constrained |
+| `rpca`                 | Robust Aitchison PCA                   |
+
+`rda` is constrained by sample metadata, given as further arguments:
+`count_ord(counts, 'rda', 'treatment', meta)` is
+`rda(counts, 'treatment', meta)`. Without them, it is a PCA.
 
 Methods that ordinate distances, such as
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) and
@@ -60,18 +68,21 @@ Methods that ordinate distances, such as
 
 Case insensitive and partial matching, ignoring anything but letters.
 E.g. `method = 'PCA'` or `'principal comp'` selects `pca`. Common other
-names also work: `'prcomp'` for `pca`; and `'robust PCA'`, `'DEICODE'`,
-or `'gemelli'` for `rpca`.
+names also work: `'prcomp'` for `pca`; `'redundancy analysis'`,
+`'tbRDA'`, or `'transformation-based RDA'` for `rda`; and
+`'robust PCA'`, `'DEICODE'`, or `'gemelli'` for `rpca`.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
 
 **Same names in other packages**
 
-`vegan::pca()` shares its name with ecodive's
-[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), and
+`vegan::pca()` and `vegan::rda()` share their names with ecodive's
+[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), and
 whichever package was attached last masks the other's. Write
-[`ecodive::pca()`](https://cmmr.github.io/ecodive/reference/pca.md), or
+[`ecodive::pca()`](https://cmmr.github.io/ecodive/reference/pca.md) or
+[`ecodive::rda()`](https://cmmr.github.io/ecodive/reference/rda.md), or
 use `count_ord()`, which always runs ecodive's, to be sure.
 
 ## Ordination result
@@ -134,6 +145,7 @@ plain matrix or data frame without them.
 ## See also
 
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
 [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md);
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) for
@@ -169,6 +181,9 @@ the methods that take distances.
 #> [1] 0.5428410 0.3713532
 #> 
 #> [[2]]
+#> [1] 0.5428410 0.3713532
+#> 
+#> [[3]]
 #> [1] 0.5737685 0.4262315
 #> 
 ```

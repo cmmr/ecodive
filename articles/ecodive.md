@@ -246,10 +246,12 @@ mtx['Saliva', 'Nose']
 An ordination turns a distance matrix into coordinates for a plot.
 ecodive has eight methods that take distances, run by name with
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) or
-directly by their own functions, and two
-([`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
-[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)) that take
-the count table itself.
+directly by their own functions, and three
+([`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) and
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md)) that take
+the count table itself, run by name with
+[`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md).
 
 | Function | Method |
 |:---|:---|
@@ -263,6 +265,7 @@ the count table itself.
 | [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) | Constrained Analysis of Principal Coordinates |
 | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) | Principal Component Analysis (PCA) |
 | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) | Robust Aitchison PCA |
+| [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) | Redundancy Analysis (RDA) |
 
 [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
 and [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) add

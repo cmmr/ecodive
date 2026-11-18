@@ -179,6 +179,8 @@ take the count table.
   Distance-based Redundancy Analysis (db-RDA)
 - [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) :
   Constrained Analysis of Principal Coordinates (capscale)
+- [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) :
+  Redundancy Analysis (RDA)
 - [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) : Principal
   Component Analysis (PCA)
 - [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) : Robust

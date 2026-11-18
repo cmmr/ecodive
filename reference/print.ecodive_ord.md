@@ -17,9 +17,11 @@ print(x, ...)
 
   An ordination result, from
   [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md),
+  [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md),
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
   [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
   [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
   [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md),

@@ -74,7 +74,8 @@ The method's result, as described in "Ordination result" below.
 | `tsne` | t-distributed Stochastic Neighbor Embedding (t-SNE) |
 | `umap` | Uniform Manifold Approximation and Projection (UMAP) |
 
-[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
+[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) and
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) ordinate a
 count table rather than distances, so they are run by
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md),
@@ -185,7 +186,8 @@ plain matrix or data frame without them.
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md),
 [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md);
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
-for [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
+for [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) and
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), which take
 a count table;
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)

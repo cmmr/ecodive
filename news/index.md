@@ -79,8 +79,9 @@
   and
   [`match_count_ord()`](https://cmmr.github.io/ecodive/reference/count_ords.md),
   does the same for the methods that take a count table rather than
-  distances, [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)
-  and [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md):
+  distances, [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) and
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md):
   `count_ord(counts, "pca")` is `pca(counts)`. Each wrapper points to
   the other when given the other’s method, and to
   [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)
@@ -351,6 +352,27 @@
   path; otherwise a threaded eigendecomposition makes it about five
   times faster than `vegan::capscale()` on one thread. Also available as
   `dist_ord(dm, "capscale", ...)`.
+
+- New [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) runs a
+  redundancy analysis of a count table: the axes of the (normalized)
+  table that sample metadata explain (`RDA1`, …), then principal
+  components of the rest (`PC1`, …). `norm = 'hellinger'` or `'chord'`
+  gives transformation-based RDA (tb-RDA), and `Condition()` terms
+  partial RDA. It takes `groups`, `data` and `formula` as
+  [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) does
+  (and `counts ~ terms`, as `vegan::rda()`), and with no model it is a
+  PCA. It gives the same site scores, species scores (`loadings`),
+  eigenvalues, inertia, R-squared, biplot scores and centroids as
+  `vegan::rda()` (up to each axis’s sign), sharing
+  [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)’s
+  solver and
+  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)’s sparse
+  table products, so the table is never made dense: with 3,000 samples
+  and 2,000 taxa it takes half a second where `vegan::rda()` takes a
+  minute. Results are identical for any number of `cpus`. Also available
+  as `count_ord(counts, "rda", ...)`. Its permutation test is
+  [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
+  of Euclidean distances of the normalized table.
 
 - New [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md)
   fits sample metadata (`data`) and feature tables (`counts`, such as

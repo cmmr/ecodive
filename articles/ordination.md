@@ -3,14 +3,14 @@
 ## Introduction
 
 An ordination places samples on a few axes so that similar samples land
-near each other, ready to plot. ecodive has ten ordination methods, and
-two functions that show which features or variables drive the axes. All
-of them are written in parallel C and give the same results as the R and
-Python packages they replace, for any number of threads.
+near each other, ready to plot. ecodive has eleven ordination methods,
+and two functions that show which features or variables drive the axes.
+All of them are written in parallel C and give the same results as the R
+and Python packages they replace, for any number of threads.
 
 Most methods ordinate a distance matrix, which you compute first with
-any beta diversity metric. Two methods, PCA and robust Aitchison PCA,
-start from the count table itself.
+any beta diversity metric. Three methods, PCA, robust Aitchison PCA and
+redundancy analysis, start from the count table itself.
 
                      bray(), beta_div(), ...
       count table  ────────────────────────►  dm  ──►  dist_ord(dm, 'pcoa')
@@ -53,6 +53,7 @@ dm <- bray(iris[, 1:4])
 | [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md) | Uniform Manifold Approximation and Projection | `dm` | Clusters, with more of the global layout kept than t-SNE. |
 | [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) | Distance-based Redundancy Analysis (db-RDA) | `dm` | Axes that sample metadata explain (a constrained ordination). |
 | [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) | Constrained Analysis of Principal Coordinates | `dm` | The same, as `vegan::capscale()` computes it. |
+| [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) | Redundancy Analysis (RDA) | counts | Axes of (transformed) counts that sample metadata explain. |
 | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) | Principal Component Analysis (PCA) | counts | Euclidean geometry of (transformed) counts, with feature loadings. |
 | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) | Robust Aitchison PCA | counts | Sparse compositional data, such as microbiome counts. |
 
@@ -217,10 +218,68 @@ attr(ord, 'inertia')
 #>     0.6670388     1.8230845     0.1468869
 ```
 
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) does the same
+for a count table rather than distances: it is constrained PCA. With
+`norm = 'hellinger'` or `norm = 'chord'` it is transformation-based RDA
+(tb-RDA), the usual choice for community data, and it takes `groups`,
+`formula` and `Condition()` as
+[`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) does. Its
+`loadings` attribute holds the features’ (species) scores, for a biplot.
+
+``` r
+
+ord <- rda(iris[, 1:4], 'Species', iris, norm = 'hellinger')
+
+attr(ord, 'r_squared')
+#> [1] 0.9480809
+
+head(attr(ord, 'loadings'))
+#>                    RDA1        RDA2         PC1
+#> Sepal.Length  0.3150483  0.04442764 -0.07668916
+#> Sepal.Width   0.6627525 -0.01599961  0.03400069
+#> Petal.Length -0.7703689  0.03375146 -0.01565281
+#> Petal.Width  -0.7519133 -0.03006730  0.19051616
+```
+
+db-RDA of Euclidean distances is RDA, so
+`rda(counts, ..., norm = 'hellinger')` has the same axes and R^2 as
+[`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) of the
+Hellinger distances, `euclidean(counts, norm = 'hellinger')`. Its
+permutation test is
+[`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
+of those distances.
+
+``` r
+
+hd <- euclidean(iris[, 1:4], norm = 'hellinger')
+c(rda = attr(ord, 'r_squared'), dbrda = attr(dbrda(hd, 'Species', iris), 'r_squared'))
+#>       rda     dbrda 
+#> 0.9480809 0.9480809
+permanova(hd, 'Species', iris, permutations = 99)
+#> Permutational multivariate analysis of variance (PERMANOVA)
+#> 
+#> F =  1342, p = 0.01, z =  1215
+#> Permutations: 99 (free)
+#> 
+#> Model R2 = 0.9481. Model tested as a whole:
+#> 
+#>           Df SumOfSqs     R2    F Pr(>F)   
+#> Model      2    3.054 0.9481 1342   0.01 **
+#> Residual 147    0.167 0.0519               
+#> Total    149    3.221 1.0000               
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+`varpart()`, `forward_select()` and `principal_response_curves()`, which
+are planned, will build on
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md).
+
 ## Ordinating counts directly
 
-[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
-[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) take the
+[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) and
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) take the
 count table rather than distances.
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
 runs them by name, as
@@ -249,7 +308,7 @@ arrows(0, 0, load[, 1], load[, 2], length = 0.1)
 text(load[, 1:2], labels = rownames(load), pos = 4)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-12-1.png)
+![](ordination_files/figure-html/unnamed-chunk-14-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -328,7 +387,7 @@ arrows(0, 0, xy$PCoA1, xy$PCoA2, length = 0.1)
 text(xy, labels = vec$variable, pos = 1, cex = 0.8)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-16-1.png)
+![](ordination_files/figure-html/unnamed-chunk-18-1.png)
 
 ## Speed and reproducibility
 

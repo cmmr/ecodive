@@ -79,7 +79,8 @@ will be applied to the
     list_count_ords()
 #>                           name   id
 #> 1 Principal Component Analysis  pca
-#> 2         Robust Aitchison PCA rpca
+#> 2          Redundancy Analysis  rda
+#> 3         Robust Aitchison PCA rpca
 
     # Find the method for 'prcomp'.
     m <- match_count_ord('prcomp')
