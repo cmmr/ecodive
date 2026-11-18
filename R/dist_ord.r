@@ -29,8 +29,6 @@ ORDINATIONS <- local({
   return (df)
 })
 
-ORD_HAYSTACK <- make_haystack(ORDINATIONS)
-
 
 
 #' Distance-based Ordination
@@ -271,10 +269,11 @@ match_dist_ord <- function (method, input = NULL) {
     stop('`method = "', method, '"`: call pca() directly; it takes a count table, not distances.')
   if (needle %in% c('rpca', 'robustpca', 'robustaitchisonpca', 'deicode', 'gemelli'))
     stop('`method = "', method, '"`: call rpca() directly; it takes a count table, not distances.')
-  if (needle %in% names(TEST_HAYSTACK))
+  if (needle %in% names(haystack('DIST_TESTS')))
     stop('`method = "', method, '"` is a test, not an ordination: use dist_test().')
 
-  opts  <- ORD_HAYSTACK[unname(ORD_HAYSTACK) %in% df$id]
+  opts  <- haystack('ORDINATIONS')
+  opts  <- opts[unname(opts) %in% df$id]
   match <- unique(unname(opts[startsWith(names(opts), needle)]))
 
   if (length(match) > 1) stop(

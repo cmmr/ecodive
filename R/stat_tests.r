@@ -27,8 +27,6 @@ DIST_TESTS <- local({
   return (df)
 })
 
-TEST_HAYSTACK <- make_haystack(DIST_TESTS)
-
 
 
 #' Distance Test Wrapper Function
@@ -333,7 +331,8 @@ match_dist_test <- function (test, groups = NULL) {
   needle <- gsub('[^a-z]', '', tolower(test))
   if (nchar(needle) == 0) stop('`test` must contain alphabetic characters')
 
-  opts  <- TEST_HAYSTACK[unname(TEST_HAYSTACK) %in% df$id]
+  opts  <- haystack('DIST_TESTS')
+  opts  <- opts[unname(opts) %in% df$id]
   match <- unique(unname(opts[startsWith(names(opts), needle)]))
 
   if (length(match) > 1) stop(

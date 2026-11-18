@@ -96,8 +96,6 @@ make_haystack <- function (df) {
   return (result)
 }
 
-HAYSTACK <- make_haystack(METRICS)
-
 ENV <- environment()
 
 
@@ -288,7 +286,8 @@ match_metric <- function (
     needle <- gsub('[^a-z]', '', tolower(metric))
     if (nchar(needle) == 0) stop('`metric` must contain alphabetic characters')
     
-    opts  <- HAYSTACK[unname(HAYSTACK) %in% df$id]
+    opts  <- haystack('METRICS')
+    opts  <- opts[unname(opts) %in% df$id]
     match <- unique(unname(opts[startsWith(names(opts), needle)]))
     
     if (length(match) > 1) stop(

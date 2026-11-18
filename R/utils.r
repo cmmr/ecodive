@@ -6,6 +6,18 @@
 CACHE <- new.env(parent = emptyenv())
 
 
+# The haystack (see make_haystack()) of a registry such as METRICS, named as
+# a string. It is built on first use and kept in CACHE, rather than at
+# install time, so that no file's top-level code needs another file to have
+# been sourced before it.
+haystack <- function (registry) {
+  key <- paste0('haystack_', registry)
+  if (is.null(CACHE[[key]]))
+    CACHE[[key]] <- make_haystack(get(registry, envir = ENV, inherits = FALSE))
+  CACHE[[key]]
+}
+
+
 
 #' Number of CPU Cores
 #' 
