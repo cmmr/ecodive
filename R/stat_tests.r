@@ -331,9 +331,7 @@ match_dist_test <- function (test, groups = NULL) {
   needle <- gsub('[^a-z]', '', tolower(test))
   if (nchar(needle) == 0) stop('`test` must contain alphabetic characters')
 
-  opts  <- haystack('DIST_TESTS')
-  opts  <- opts[unname(opts) %in% df$id]
-  match <- unique(unname(opts[startsWith(names(opts), needle)]))
+  match <- match_name(needle, 'DIST_TESTS', df$id)
 
   if (length(match) > 1) stop(
     '`test = "', test, '"` matches multiple options: ',
@@ -341,7 +339,7 @@ match_dist_test <- function (test, groups = NULL) {
 
   if (length(match) == 0) stop(
     '`test = "', test, '"` does not match any option: ',
-    paste(collapse = ', ', sort(unique(unname(opts)))) )
+    paste(collapse = ', ', sort(df$id)) )
 
   dist_test_info(df[df$id == match,])
 }

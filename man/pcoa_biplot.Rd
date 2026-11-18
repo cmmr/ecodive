@@ -31,6 +31,8 @@ them:
 \item \code{'none'}: As given, as in scikit-bio.
 \item \code{'percent'}: Relative abundance (sample abundances sum to 1).
 \item \code{'chord'}: Each sample scaled to unit length (Euclidean norm 1).
+\item \code{'hellinger'}: Square root of relative abundance (the Hellinger
+transformation).
 \item \code{'binary'}: Presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
 \item \code{'rclr'}: Robust centered log ratio. Zeros stay 0.

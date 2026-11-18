@@ -28,6 +28,8 @@
 #'   
 #'   * `'none'`: No transformation.
 #'   * `'percent'`: Relative abundance (sample abundances sum to 1).
+#'   * `'hellinger'`: Square root of relative abundance (the Hellinger
+#'     transformation).
 #'   * `'binary'`: Unweighted presence/absence (each count is either 0 or 1).
 #'   * `'clr'`: Centered log ratio.
 #'   * `'rclr'`: Robust centered log ratio.

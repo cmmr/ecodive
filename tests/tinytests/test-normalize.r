@@ -12,6 +12,8 @@
   pct <- x / rowSums(x)
   expect_equal(normalize(x, 'percent', cpus = 1), pct)
   expect_equal(normalize(x, 'chord',   cpus = 1), x / sqrt(rowSums(x^2)))
+  expect_equal(normalize(x, 'hellinger', cpus = 1), sqrt(pct))
+  expect_equal(normalize(x, 'Hell',    cpus = 1), sqrt(pct))
   expect_equal(normalize(x, 'binary',  cpus = 1), (x > 0) * 1)
   expect_equal(normalize(x, 'none',    cpus = 1), x * 1)
 
@@ -58,8 +60,25 @@
     aitchison(x, pseudocount = 1, cpus = 1),
     euclidean(normalize(x, 'clr', pseudocount = 1, cpus = 1), cpus = 1), tolerance = 1e-12 )
 
+  # Hellinger: Euclidean distances of the transformed table are Hellinger
+  # distances, and PCA of it is the usual Hellinger PCA.
+  expect_identical(
+    euclidean(x, norm = 'hellinger', cpus = 1),
+    euclidean(normalize(x, 'hellinger', cpus = 1), cpus = 1) )
+  expect_equal(euclidean(x, norm = 'hellinger', cpus = 1), hellinger(x, cpus = 1), tolerance = 1e-12)
+  hp <- unclass(pca(x, norm = 'hellinger', k = 2, cpus = 1))[, ]
+  pr <- stats::prcomp(sqrt(pct), rank. = 2)$x
+  pr <- sweep(pr, 2, sign(colSums(pr * hp)), '*')  # match each axis's sign
+  expect_equal(hp, pr, check.attributes = FALSE, tolerance = 1e-10)
+
+  # Negative values can't be Hellinger-transformed.
+  neg <- x - 1
+  expect_error(normalize(neg, 'hellinger', cpus = 1), 'negative values; cannot perform Hellinger')
+  expect_error(euclidean(neg, norm = 'hellinger', cpus = 1), 'negative values')
+  expect_error(pca(neg, norm = 'hellinger', cpus = 1), 'negative values')
+
   ord <- pcoa(bray(x, cpus = 1), k = 2, cpus = 1)
-  for (nm in c('percent', 'chord', 'rclr'))
+  for (nm in c('percent', 'chord', 'hellinger', 'rclr'))
     expect_equal(
       envfit(ord, counts = x, norm = nm, permutations = 19, cpus = 1),
       envfit(ord, counts = normalize(x, nm, cpus = 1), permutations = 19, cpus = 1),

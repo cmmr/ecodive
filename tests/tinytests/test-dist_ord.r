@@ -107,9 +107,14 @@
   expect_error(dist_ord(d, c('pcoa', 'nmds')), 'length 1')
   expect_error(dist_ord(d, '-'),     'alphabetic')
   expect_error(dist_ord(d, NA_character_), 'NA')
-  expect_error(dist_ord(d, 'PCA'),       'call pca\\(\\) directly')
+  expect_error(dist_ord(d, 'PCA'),       'takes a count table, not distances. Use count_ord\\(counts, "pca"\\)')
+  expect_error(dist_ord(d, 'prcomp'),    'count_ord\\(counts, "pca"\\)')
+  expect_error(dist_ord(d, 'DEICODE'),   'count_ord\\(counts, "rpca"\\)')
   expect_error(dist_ord(d, 'adonis2'),   'is a test, not an ordination: use dist_test')
   expect_error(dist_ord(d, 'betadisper'), 'use dist_test')
+  # 'mantel' is an alias that the prefix haystack drops (it begins
+  # 'manteltest'), so it is found only by exact matching.
+  expect_error(dist_ord(d, 'Mantel'),    'use dist_test')
   expect_error(list_dist_ords(input = 'counts'), 'Options are: NULL, dist')
   expect_error(list_dist_ords(val = 'xyz'))
 

@@ -8,6 +8,20 @@ NORM_CLR     <- 2L
 NORM_CHORD   <- 3L
 NORM_BINARY  <- 4L
 NORM_RCLR    <- 5L
+NORM_HELLINGER <- 6L
+
+
+# The stored values of a count table, with repeated (i, j) entries of a
+# triplet matrix summed, as the C code sums them.
+stored_values <- function (counts) {
+  switch(
+    get_matrix_package(counts),
+    'base'   = counts,
+    'slam'   = sum_triplets(counts$i, counts$j, counts$v, counts$nrow),
+    'Matrix' = if (!is.null(attr(counts, 'j')) && is.null(attr(counts, 'p')))
+                   sum_triplets(counts@i, counts@j, counts@x, nrow(counts))
+                 else counts@x )
+}
 
 
 validate_args <- function () {
@@ -299,22 +313,18 @@ validate_pseudocount <- function (env = parent.frame()) {
   with(env, {
     
     if (!identical(norm, NORM_CLR)) {
+
+      # sqrt() of a negative proportion would be NaN.
+      if (identical(norm, NORM_HELLINGER) && isTRUE(any(stored_values(counts) < 0)))
+        stop('`counts` contains negative values; cannot perform Hellinger normalization.')
+
       pseudocount <- 0
     }
-    
-    else {
-      
-      mtx_pkg <- get_matrix_package(counts)
 
-      # The stored values, with repeated (i, j) entries of a triplet matrix
-      # summed, as the C code sums them.
-      pc_vals <- switch(
-        mtx_pkg,
-        'base'   = counts,
-        'slam'   = sum_triplets(counts$i, counts$j, counts$v, counts$nrow),
-        'Matrix' = if (!is.null(attr(counts, 'j')) && is.null(attr(counts, 'p')))
-                       sum_triplets(counts@i, counts@j, counts@x, nrow(counts))
-                     else counts@x )
+    else {
+
+      mtx_pkg <- get_matrix_package(counts)
+      pc_vals <- stored_values(counts)
 
       val_range <- range(pc_vals)
       
@@ -410,13 +420,14 @@ validate_norm <- function (env = parent.frame()) {
     norm <- switch(
       EXPR = match.arg(
         arg     = tolower(norm), 
-        choices = c('none', 'percent', 'chord', 'binary', 'clr', 'rclr') ),
-      'none'    = NORM_NONE,
-      'percent' = NORM_PERCENT,
-      'chord'   = NORM_CHORD,
-      'binary'  = NORM_BINARY,
-      'clr'     = NORM_CLR,
-      'rclr'    = NORM_RCLR )
+        choices = c('none', 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr') ),
+      'none'      = NORM_NONE,
+      'percent'   = NORM_PERCENT,
+      'chord'     = NORM_CHORD,
+      'hellinger' = NORM_HELLINGER,
+      'binary'    = NORM_BINARY,
+      'clr'       = NORM_CLR,
+      'rclr'      = NORM_RCLR )
     
   })
 }

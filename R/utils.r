@@ -18,6 +18,42 @@ haystack <- function (registry) {
 }
 
 
+# Every name, ID and alias of a registry's entries, as letters only in lower
+# case, each named after itself and holding its entry's ID. Unlike the
+# haystack, it keeps an alias that begins another entry's longer name (such
+# as 'ca', which begins 'capscale'), so that it can still be matched exactly.
+exact_names <- function (registry) {
+  key <- paste0('exact_', registry)
+  if (is.null(CACHE[[key]])) {
+    df  <- get(registry, envir = ENV, inherits = FALSE)
+    alt <- strsplit(df$alt_ids, ' ', fixed = TRUE)
+    res <- character(0)
+    for (i in seq_len(nrow(df))) {
+      nms <- unique(gsub('[^a-z]', '', tolower(c(df$name[[i]], df$id[[i]], stats::na.omit(alt[[i]])))))
+      res <- c(res, stats::setNames(rep(df$id[[i]], length(nms)), nms))
+    }
+    CACHE[[key]] <- res
+  }
+  CACHE[[key]]
+}
+
+
+# The IDs (among `ids`) of a registry's entries that `needle` (letters only,
+# lower case) names. A needle that is exactly one entry's name, ID or alias
+# selects that entry; otherwise it selects every entry with a name, ID or
+# alias that it begins.
+match_name <- function (needle, registry, ids) {
+
+  exact <- exact_names(registry)
+  hit   <- unique(unname(exact[names(exact) == needle & exact %in% ids]))
+  if (length(hit) == 1) return (hit)
+
+  opts <- haystack(registry)
+  opts <- opts[unname(opts) %in% ids]
+  unique(unname(opts[startsWith(names(opts), needle)]))
+}
+
+
 
 #' Number of CPU Cores
 #' 

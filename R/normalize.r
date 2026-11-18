@@ -17,6 +17,9 @@
 #'     their sum (so they sum to 1).
 #'   * `'chord'`: Each sample's counts divided by their Euclidean norm
 #'     (so their squares sum to 1).
+#'   * `'hellinger'`: The square root of each count divided by the sample's
+#'     sum (the Hellinger transformation). Euclidean distances between the
+#'     results are Hellinger distances.
 #'   * `'binary'`: Presence/absence: 1 for each non-zero count.
 #'   * `'clr'`: Centered log ratio: \eqn{\log(x + pseudocount)} minus the
 #'     sample's mean of those logs, over every feature. Zeros get a value
@@ -78,10 +81,10 @@ normalize <- function (
     counts, norm, margin = 1L, pseudocount = NULL, cpus = n_cpus() ) {
 
   if (missing(norm))
-    stop("`norm` is required: 'percent', 'chord', 'binary', 'clr', 'rclr', or 'none'.",
+    stop("`norm` is required: 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', or 'none'.",
          call. = FALSE)
   if (!is.character(norm) || length(norm) != 1 || is.na(norm))
-    stop("`norm` must be one of 'percent', 'chord', 'binary', 'clr', 'rclr', or 'none'.",
+    stop("`norm` must be one of 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', or 'none'.",
          call. = FALSE)
 
   validate_counts()

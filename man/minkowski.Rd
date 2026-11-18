@@ -30,6 +30,8 @@ communities (\eqn{p}). Default: \code{1.5}}
 \itemize{
 \item \code{'none'}: No transformation.
 \item \code{'percent'}: Relative abundance (sample abundances sum to 1).
+\item \code{'hellinger'}: Square root of relative abundance (the Hellinger
+transformation).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
 \item \code{'rclr'}: Robust centered log ratio.

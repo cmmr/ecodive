@@ -274,7 +274,7 @@
   expect_identical(rpca(m, tol = 0, cpus = 1), rpca(m, cpus = 1))
 
   # Not one of dist_ord()'s methods: it takes counts.
-  expect_error(dist_ord(dist(m), 'rpca'), 'call rpca\\(\\) directly')
+  expect_error(dist_ord(dist(m), 'rpca'), 'count_ord\\(counts, "rpca"\\)')
 
 
 

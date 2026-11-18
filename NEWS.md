@@ -33,8 +33,11 @@
   `beta_div()` does for beta diversity metrics and `dist_test()` does for
   statistical tests, with the method's own arguments: `dist_ord(dm, "nmds")`
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
-  the methods. `pca()` and `rpca()` take a count table rather than
-  distances, so they are called directly.
+  the methods. `count_ord()`, with `list_count_ords()` and
+  `match_count_ord()`, does the same for the methods that take a count table
+  rather than distances, `pca()` and `rpca()`: `count_ord(counts, "pca")` is
+  `pca(counts)`. Each wrapper points to the other when given the other's
+  method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
   matrix (of class `"ecodive_ord"`, which prints its attributes' names
   rather than their contents) whose attributes start with `method`, `eig`,
@@ -233,11 +236,27 @@
 
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
-  (`'percent'`, `'chord'`, `'binary'`, `'clr'`, `'rclr'`), with exactly the
-  values they use. It keeps the table's orientation, dimnames and form:
-  sparse Matrix and slam input stays sparse. `norm = 'clr'` gives a
-  dense matrix, since every zero gets a value; the functions with a `norm`
-  argument avoid that copy.
+  (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),
+  with exactly the values they use. It keeps the table's orientation,
+  dimnames and form: sparse Matrix and slam input stays sparse.
+  `norm = 'clr'` gives a dense matrix, since every zero gets a value; the
+  functions with a `norm` argument avoid that copy.
+
+* New `norm = 'hellinger'` option, wherever `norm` is offered (beta
+  diversity metrics, `pca()`, `pcoa_biplot()`, `envfit()` and
+  `normalize()`): the square root of each sample's relative abundances.
+  Euclidean distances of the result are Hellinger distances, and
+  `pca(counts, norm = 'hellinger')` is the usual Hellinger PCA. Negative
+  values are an error.
+
+* Method names are matched more reliably by `match_metric()`,
+  `match_dist_ord()`, `match_dist_test()` and `match_count_ord()`, and so by
+  `beta_div()`, `alpha_div()`, `dist_ord()`, `dist_test()` and `count_ord()`:
+  a name that is exactly a method's ID or alias, in any case, now selects it
+  even when it also begins another method's name. For example, `"Jensen"`
+  selects `jensen` rather than stopping as ambiguous with `jsd`
+  (Jensen-Shannon divergence), and `dist_ord(dm, "Mantel")` now says to use
+  `dist_test()`.
 
 * New `pca()` runs a principal component analysis of a count table, after
   any of `beta_div()`'s normalizations (e.g. `norm = 'clr'` for an Aitchison

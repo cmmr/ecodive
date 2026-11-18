@@ -286,17 +286,15 @@ match_metric <- function (
     needle <- gsub('[^a-z]', '', tolower(metric))
     if (nchar(needle) == 0) stop('`metric` must contain alphabetic characters')
     
-    opts  <- haystack('METRICS')
-    opts  <- opts[unname(opts) %in% df$id]
-    match <- unique(unname(opts[startsWith(names(opts), needle)]))
-    
+    match <- match_name(needle, 'METRICS', df$id)
+
     if (length(match) > 1) stop(
       '`metric = "', metric, '"` matches multiple options: ', 
       paste(collapse = ', ', sort(match)) )
     
     if (length(match) == 0) stop(
       '`metric = "', metric, '"` does not match any option: \n', 
-      paste(collapse = '\n', strwrap(paste(collapse = ', ', sort(unique(unname(opts)))))) )
+      paste(collapse = '\n', strwrap(paste(collapse = ', ', sort(df$id)))) )
     
     metric <- as.list(df[df$id == match,])
   }

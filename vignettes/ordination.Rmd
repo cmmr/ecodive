@@ -34,7 +34,8 @@ the count table itself.
        │                                           pcoa(dm), nmds(dm), umap(dm), ...
        │                                           dist_test(dm, 'permanova', ...)
        │
-       └─────────────────────────────────────────►  pca(counts), rpca(counts)
+       └─────────────────────────────────────────►  count_ord(counts, 'pca')
+                                                   pca(counts), rpca(counts)
 ```
 
 The examples here use R's built-in `iris` data: 150 flowers (the samples),
@@ -180,9 +181,13 @@ attr(ord, 'inertia')
 
 ## Ordinating counts directly
 
-`pca()` and `rpca()` take the count table rather than distances. PCA
+`pca()` and `rpca()` take the count table rather than distances.
+`count_ord()` runs them by name, as `dist_ord()` does for the methods that
+take distances: `count_ord(counts, 'pca')` is `pca(counts)`. PCA
 works on any of ecodive's transformations, such as `norm = 'clr'` (centered
-log-ratios, with a `pseudocount` for zeros); `scale = TRUE` gives every
+log-ratios, with a `pseudocount` for zeros) or `norm = 'hellinger'`
+(square-root proportions, a common choice for community data);
+`scale = TRUE` gives every
 feature equal weight. The `loadings` attribute holds each feature's
 direction, for a biplot.
 

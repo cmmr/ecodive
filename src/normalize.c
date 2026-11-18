@@ -10,6 +10,7 @@
 #define NORM_CHORD   3
 #define NORM_BINARY  4
 #define NORM_RCLR    5
+#define NORM_HELLINGER 6
 
 static int     n_samples;
 static int     n_otus;
@@ -146,6 +147,20 @@ static void *norm_chord(void *arg) {
 
 
 //======================================================
+// Hellinger-Transformed Relative Abundance
+// sqrt(x / sum(x))
+//======================================================
+static void *norm_hellinger(void *arg) {
+  FOREACH_SAMPLE(
+    double depth = 0;
+    FOREACH_VAL(depth += *val);
+    FOREACH_VAL(*val = sqrt(*val / depth));
+  );
+  return NULL;
+}
+
+
+//======================================================
 // Set each abundance to 1 (present) or 0 (absent)
 // x > 0
 //======================================================
@@ -211,6 +226,7 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
     case NORM_CHORD:   norm_func = norm_chord;   break;
     case NORM_BINARY:  norm_func = norm_binary;  break;
     case NORM_RCLR:    norm_func = norm_rclr;    break;
+    case NORM_HELLINGER: norm_func = norm_hellinger; break;
   }
   
   pseudocount = pseudocount_;

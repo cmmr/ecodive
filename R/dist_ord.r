@@ -76,7 +76,7 @@ ORDINATIONS <- local({
 #' | `umap`                 | Uniform Manifold Approximation and Projection (UMAP)  |
 #'
 #' [pca()] and [rpca()] ordinate a count table rather than distances, so they
-#' are called directly, not through `dist_ord()`. PCA is PCoA of Euclidean
+#' are run by [count_ord()], or called directly. PCA is PCoA of Euclidean
 #' distances: `dist_ord(euclidean(counts), 'pcoa')` gives the same scores as
 #' `pca(counts)`, up to each axis's sign, but `pca()` also returns the
 #' features' loadings and never forms the distance matrix. [permanova()] and
@@ -113,8 +113,8 @@ ORDINATIONS <- local({
 #' @inheritSection ordination_section Ordination result
 #'
 #' @seealso [capscale()], [dbrda()], [isomap()], [mds()], [nmds()], [pcoa()],
-#'   [tsne()], [umap()], [list_dist_ords()]; [pca()] and [rpca()], which are
-#'   called directly; [dist_test()] for ecodive's tests.
+#'   [tsne()], [umap()], [list_dist_ords()]; [count_ord()] for [pca()] and
+#'   [rpca()], which take a count table; [dist_test()] for ecodive's tests.
 #'
 #' @export
 #' @examples
@@ -264,17 +264,17 @@ match_dist_ord <- function (method, input = NULL) {
   needle <- gsub('[^a-z]', '', tolower(method))
   if (nchar(needle) == 0) stop('`method` must contain alphabetic characters')
 
-  # Close relatives that are called directly.
-  if (needle %in% c('pca', 'principalcomponents', 'principalcomponentanalysis', 'prcomp'))
-    stop('`method = "', method, '"`: call pca() directly; it takes a count table, not distances.')
-  if (needle %in% c('rpca', 'robustpca', 'robustaitchisonpca', 'deicode', 'gemelli'))
-    stop('`method = "', method, '"`: call rpca() directly; it takes a count table, not distances.')
-  if (needle %in% names(haystack('DIST_TESTS')))
+  # Methods of the other wrappers.
+  if (needle %in% names(exact_names('COUNT_ORDS'))) {
+    id <- exact_names('COUNT_ORDS')[[needle]]
+    stop(
+      '`method = "', method, '"`: ', id, '() takes a count table, not distances. ',
+      'Use count_ord(counts, "', id, '"), or call ', id, '() directly.' )
+  }
+  if (needle %in% names(exact_names('DIST_TESTS')))
     stop('`method = "', method, '"` is a test, not an ordination: use dist_test().')
 
-  opts  <- haystack('ORDINATIONS')
-  opts  <- opts[unname(opts) %in% df$id]
-  match <- unique(unname(opts[startsWith(names(opts), needle)]))
+  match <- match_name(needle, 'ORDINATIONS', df$id)
 
   if (length(match) > 1) stop(
     '`method = "', method, '"` matches multiple options: ',
@@ -282,7 +282,7 @@ match_dist_ord <- function (method, input = NULL) {
 
   if (length(match) == 0) stop(
     '`method = "', method, '"` does not match any option: ',
-    paste(collapse = ', ', sort(unique(unname(opts)))) )
+    paste(collapse = ', ', sort(df$id)) )
 
   ord_info(df[df$id == match,])
 }

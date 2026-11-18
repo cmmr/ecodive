@@ -31,6 +31,8 @@
 #'   * `'none'`: As given, as in scikit-bio.
 #'   * `'percent'`: Relative abundance (sample abundances sum to 1).
 #'   * `'chord'`: Each sample scaled to unit length (Euclidean norm 1).
+#'   * `'hellinger'`: Square root of relative abundance (the Hellinger
+#'     transformation).
 #'   * `'binary'`: Presence/absence (each count is either 0 or 1).
 #'   * `'clr'`: Centered log ratio.
 #'   * `'rclr'`: Robust centered log ratio. Zeros stay 0.

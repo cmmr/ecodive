@@ -30,6 +30,12 @@
   
   expect_error(match_metric('badoption'))   # not a valid metric name
   expect_error(match_metric('s'))           # matches shannon and simpson
+
+  # A name that is exactly one metric's ID or alias selects it, even when it
+  # also begins another's ('jensen' begins 'jensenshannondivergence', an
+  # alias of jsd).
+  expect_identical(match_metric('Jensen')$id, 'jensen')
+  expect_identical(match_metric('JSD')$id,    'jsd')
   expect_error(match_metric(3))             # stopifnot(is.character(metric))
   expect_error(match_metric(c('a', 'b')))   # stopifnot(length(metric) == 1)
   expect_error(match_metric(NA_character_)) # stopifnot(!is.na(metric))

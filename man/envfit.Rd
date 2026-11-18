@@ -48,8 +48,8 @@ both.}
 class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{norm}{Normalize \code{counts} before fitting them, as in
-\code{\link[=beta_div]{beta_div()}}: \code{'none'}, \code{'percent'}, \code{'chord'}, \code{'binary'},
-\code{'clr'}, or \code{'rclr'}. Default: \code{'none'}. \code{margin}, \code{norm}, and
+\code{\link[=beta_div]{beta_div()}}: \code{'none'}, \code{'percent'}, \code{'chord'}, \code{'hellinger'},
+\code{'binary'}, \code{'clr'}, or \code{'rclr'}. Default: \code{'none'}. \code{margin}, \code{norm}, and
 \code{pseudocount} apply only to \code{counts}.}
 
 \item{pseudocount}{Value added to counts to handle zeros when

@@ -17,6 +17,9 @@ proportions are also accepted.}
 their sum (so they sum to 1).
 \item \code{'chord'}: Each sample's counts divided by their Euclidean norm
 (so their squares sum to 1).
+\item \code{'hellinger'}: The square root of each count divided by the sample's
+sum (the Hellinger transformation). Euclidean distances between the
+results are Hellinger distances.
 \item \code{'binary'}: Presence/absence: 1 for each non-zero count.
 \item \code{'clr'}: Centered log ratio: \eqn{\log(x + pseudocount)} minus the
 sample's mean of those logs, over every feature. Zeros get a value

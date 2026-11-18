@@ -74,6 +74,9 @@
   expect_true(is_ord(dist_ord(dm, 'pcoa', cpus = cpus), 'PCoA'))
   expect_true(all(c('pcoa', 'nmds', 'umap') %in% list_dist_ords('id')))
   expect_identical(match_dist_ord('cmdscale')$id, 'pcoa')
+  expect_true(is_ord(count_ord(counts, 'pca', cpus = cpus), 'PC'))
+  expect_identical(list_count_ords('id'), c('pca', 'rpca'))
+  expect_identical(match_count_ord('prcomp')$id, 'pca')
 
   o  <- pcoa(dm, cpus = cpus)
   bp <- pcoa_biplot(o, counts, cpus = cpus)

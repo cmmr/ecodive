@@ -1,0 +1,246 @@
+# Copyright (c) 2026 ecodive authors
+# Licensed under the MIT License: https://opensource.org/license/mit
+
+
+
+# Ordination methods that take a count table (`counts`) rather than
+# distances. Methods that take distances are in ORDINATIONS (dist_ord.r).
+COUNT_ORDS <- local({
+
+  df <- read.table(
+    header           = TRUE,
+    sep              = ",",
+    quote            = "",
+    strip.white      = TRUE,
+    stringsAsFactors = FALSE,
+    na.strings       = "",
+    text             = "
+      name,                                id,   alt_ids
+      Principal Component Analysis,        pca,  principalcomponents prcomp
+      Robust Aitchison PCA,                rpca, robustpca deicode gemelli
+  " )
+
+  return (df)
+})
+
+
+
+#' Count Table Ordination
+#'
+#' Runs any of ecodive's ordination methods that take a count table by name,
+#' as [dist_ord()] does for the methods that take distances.
+#'
+#' @inheritParams documentation
+#'
+#' @param method   The name of an ordination method: `"pca"` or `"rpca"`.
+#'        Flexible matching is supported (see below). Programmatic access via
+#'        `list_count_ords()`.
+#'
+#' @param ...   Further arguments for the method's function, such as `k`,
+#'        `margin`, `cpus`, or [pca()]'s `norm`, `pseudocount`, and `scale`.
+#'        Each method keeps its own defaults; see [pca()] and [rpca()].
+#'        `seed` is ignored by the methods that have no random parts (all of
+#'        them, at present), so the same arguments can be given to every
+#'        method.
+#'
+#' @return The method's result, as described in "Ordination result" below.
+#'   `count_ord(counts, 'pca', ...)` is the same as `pca(counts, ...)`.
+#'
+#' @details
+#'
+#' **List of Ordination Methods**
+#'
+#' | Option / Function Name | Method Name                                |
+#' | :--------------------- | :----------------------------------------- |
+#' | `pca`                  | Principal Component Analysis (PCA)         |
+#' | `rpca`                 | Robust Aitchison PCA                       |
+#'
+#' Methods that ordinate distances, such as [pcoa()] and [nmds()], are run
+#' by [dist_ord()].
+#'
+#'
+#' **Flexible name matching**
+#'
+#' Case insensitive and partial matching, ignoring anything but letters. E.g.
+#' `method = 'PCA'` or `'principal comp'` selects `pca`. Common other names
+#' also work: `'prcomp'` for `pca`; and `'robust PCA'`, `'DEICODE'`, or
+#' `'gemelli'` for `rpca`.
+#'
+#' Finished code should always use the full primary option name to avoid
+#' ambiguity with future additions to the list of methods.
+#'
+#'
+#' **Same names in other packages**
+#'
+#' `vegan::pca()` shares its name with ecodive's [pca()], and whichever
+#' package was attached last masks the other's. Write `ecodive::pca()`, or
+#' use `count_ord()`, which always runs ecodive's, to be sure.
+#'
+#' @inheritSection ordination_section Ordination result
+#'
+#' @seealso [pca()], [rpca()], [list_count_ords()]; [dist_ord()] for the
+#'   methods that take distances.
+#'
+#' @export
+#' @examples
+#'     ord <- count_ord(ex_counts, 'pca', norm = 'clr', pseudocount = 1)
+#'     head(ord)
+#'     str(ord)
+#'
+#'     # The same arguments for every method.
+#'     lapply(list_count_ords('id'), function (m) attr(count_ord(ex_counts, m, k = 2), 'prop'))
+#'
+count_ord <- function (counts, method, ...) {
+
+  method <- match_count_ord(method)
+
+  args <- list(...)
+  if (!'seed' %in% method$params) args$seed <- NULL
+
+  # quote(counts), so that a large table isn't copied into the call.
+  do.call(method$func, c(list(quote(counts)), args))
+}
+
+
+
+#' Find and Browse Count Table Ordination Methods
+#'
+#' Programmatic access to the list of ordination methods that [count_ord()]
+#' runs, and their associated functions.
+#'
+#' @param method   The name of an ordination method to search for. Supports
+#'        partial matching. All non-alpha characters are ignored.
+#'
+#' @param val   Sets the return value for this function call. See "Value"
+#'        section below. Default: `"data.frame"`
+#'
+#' @param nm   What value to use for the names of the returned object.
+#'        Default is `"id"` when `val` is `"list"` or `"func"`, otherwise the
+#'        default is `NA` (no name).
+#'
+#' @return
+#'
+#' **`match_count_ord()`**
+#'
+#' A `list` with the following elements.
+#'
+#' * `name` : Method name, e.g. `"Principal Component Analysis"`
+#' * `id` : Method ID - also the name of the function, e.g. `"pca"`
+#' * `func` : The function for this method, e.g. `ecodive::pca`
+#' * `params` : Formal args for `func`, e.g. `c("counts", "margin", ...)`
+#'
+#'
+#' **`list_count_ords()`**
+#'
+#' The returned object's type and values are controlled with the `val` and
+#' `nm` arguments.
+#'
+#' * `val = "data.frame"` : The data.frame from which the below options are sourced.
+#' * `val = "list"` : A list of objects as returned by `match_count_ord()` (above).
+#' * `val = "func"` : A list of functions.
+#' * `val = "id"` : A character vector of method IDs.
+#' * `val = "name"` : A character vector of method names.
+#'
+#' If `nm` is set, then the names of the vector or list will be the method ID
+#' (`nm="id"`) or name (`nm="name"`). When `val="data.frame"`, the names will
+#' be applied to the `rownames()` property of the `data.frame`.
+#'
+#'
+#' @rdname count_ords
+#' @export
+#'
+#' @examples
+#'
+#'     # A data.frame of all available methods.
+#'     list_count_ords()
+#'
+#'     # Find the method for 'prcomp'.
+#'     m <- match_count_ord('prcomp')
+#'     m$id
+#'
+list_count_ords <- function (
+    val = c('data.frame', 'list', 'func', 'id', 'name'),
+    nm  = c(NA, 'id', 'name') ) {
+
+  val <- match.arg(val)
+
+  if (missing(nm)) { nm <- ifelse(val %in% c('list', 'func'), 'id', NA) }
+  else             { nm <- match.arg(nm)                                }
+
+  df <- COUNT_ORDS
+
+  if (val == 'data.frame') {
+    if (!is.na(nm)) rownames(df) <- df[[nm]]
+    df$alt_ids <- NULL
+    return (df)
+  }
+
+  if (val == 'list') {
+    result <- lapply(df$id, function (id) count_ord_info(df[df$id == id,]))
+    if (!is.na(nm)) names(result) <- df[[nm]]
+    return (result)
+  }
+
+  if (val == 'func') {
+    result <- mget(df$id, ENV)
+    if (!is.na(nm)) names(result) <- df[[nm]]
+    return (result)
+  }
+
+  result <- df[[val]]
+  if (!is.na(nm)) names(result) <- df[[nm]]
+  return (result)
+}
+
+
+#' @rdname count_ords
+#' @export
+#'
+match_count_ord <- function (method) {
+
+  if (!is.character(method)) stop('`method` must be a character vector')
+  if (length(method) != 1)   stop('`method` must be length 1')
+  if (is.na(method))         stop('`method` must not be NA')
+
+  df <- COUNT_ORDS
+
+  # Exact match
+  if (method %in% df$id)
+    return (count_ord_info(df[df$id == method,]))
+
+  # Use partial matching
+  needle <- gsub('[^a-z]', '', tolower(method))
+  if (nchar(needle) == 0) stop('`method` must contain alphabetic characters')
+
+  # Methods of the other wrappers.
+  if (needle %in% names(exact_names('ORDINATIONS'))) {
+    id <- exact_names('ORDINATIONS')[[needle]]
+    stop(
+      '`method = "', method, '"`: ', id, '() takes distances, not a count table. ',
+      'Use dist_ord(dm, "', id, '"), or call ', id, '() directly.' )
+  }
+  if (needle %in% names(exact_names('DIST_TESTS')))
+    stop('`method = "', method, '"` is a test, not an ordination: use dist_test().')
+
+  match <- match_name(needle, 'COUNT_ORDS', df$id)
+
+  if (length(match) > 1) stop(
+    '`method = "', method, '"` matches multiple options: ',
+    paste(collapse = ', ', sort(match)) )
+
+  if (length(match) == 0) stop(
+    '`method = "', method, '"` does not match any option: ',
+    paste(collapse = ', ', sort(df$id)) )
+
+  count_ord_info(df[df$id == match,])
+}
+
+
+# One row of COUNT_ORDS as a list, with the method's function and its args.
+count_ord_info <- function (row) {
+  info         <- as.list(row)
+  info$alt_ids <- NULL
+  info$func    <- get(info$id, ENV)
+  info$params  <- names(formals(info$func))
+  info
+}
