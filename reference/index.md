@@ -183,6 +183,8 @@ take the count table.
   Redundancy Analysis (RDA)
 - [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) : Canonical
   Correspondence Analysis (CCA)
+- [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) :
+  Correspondence Analysis (CA)
 - [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) : Principal
   Component Analysis (PCA)
 - [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) : Robust

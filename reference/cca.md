@@ -82,8 +82,8 @@ cca(
   The number of permutations for `adj_r_squared`. Default: `1000`, as
   `vegan::RsquareAdj()`. Alternatively, a matrix with one permutation of
   `1:n` per row, as from `permute::shuffleSet()`, to use instead of
-  random ones. `0` gives an `adj_r_squared` of `NA`. Unused for partial
-  CCA and unconstrained CA, whose `adj_r_squared` is always `NA`.
+  random ones. `0` gives an `adj_r_squared` of `NA`. Unused without
+  constraints.
 
 - seed:
 
@@ -139,7 +139,8 @@ same meanings, but for inertia in place of variance:
 
 - `adj_r_squared`: `r_squared` adjusted by permutation, as
   `vegan::RsquareAdj(x)$adj.r.squared` (see "Adjusted R-squared" below).
-  `NA` for partial CCA, unconstrained CA, or `permutations = 0`.
+  `0` without constraints; `NA` for `permutations = 0`, or a model with
+  no residual degrees of freedom.
 
 - `biplot`: Biplot scores of the constraints: their weighted
   correlations with the constrained axes' "lc" scores, one row per
@@ -204,8 +205,13 @@ does, `cca()` estimates it by permutation: \\R^2\_{adj} = 1 - (1 - R^2)
 \\R^2\\ over `permutations` random permutations of the samples (their
 rows of the table, against the constraints). It is random: the same
 `seed` gives the same value, and a `permutations` matrix the same value
-as `vegan::RsquareAdj(x, permutations = matrix)`. As in `vegan`, it is
-`NA` for partial CCA.
+as `vegan::RsquareAdj(x, permutations = matrix)`.
+
+For partial CCA, as in `vegan`, it is the adjusted \\R^2\\ of the
+constraints and conditions together less that of the conditions alone
+(Peres-Neto et al. 2006). Each is estimated as above, but permuting the
+rows of the chi-square matrix \\\bar{Q}\\ against the fixed (weighted)
+design, as `vegan::RsquareAdj()` does for partial models.
 
 **Matching vegan**
 
@@ -217,7 +223,8 @@ observations are an error, as in `vegan`; features with no observations
 have no weight, and get species scores of 0.
 
 With no constraints, `cca(counts)` is a correspondence analysis, as
-`vegan::cca(counts)`.
+`vegan::cca(counts)`, and the same as
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md).
 
 **Permutation tests**
 
@@ -341,6 +348,7 @@ Chapman & Hall/CRC.
 
 ## See also
 
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),

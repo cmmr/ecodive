@@ -21,8 +21,8 @@ count_ord(counts, method, ...)
 
 - method:
 
-  The name of an ordination method: `"cca"`, `"pca"`, `"rda"`, or
-  `"rpca"`. Flexible matching is supported (see below). Programmatic
+  The name of an ordination method: `"ca"`, `"cca"`, `"pca"`, `"rda"`,
+  or `"rpca"`. Flexible matching is supported (see below). Programmatic
   access via
   [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md).
 
@@ -35,6 +35,7 @@ count_ord(counts, method, ...)
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md)'s and
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md)'s `groups`,
   `data`, and `formula`. Each method keeps its own defaults; see
+  [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), and
@@ -56,6 +57,7 @@ The method's result, as described in "Ordination result" below.
 |  |  |
 |----|----|
 | Option / Function Name | Method Name |
+| `ca` | Correspondence Analysis (CA) |
 | `cca` | Canonical Correspondence Analysis (CCA), constrained |
 | `pca` | Principal Component Analysis (PCA) |
 | `rda` | Redundancy Analysis (RDA), constrained |
@@ -79,19 +81,23 @@ E.g. `method = 'PCA'` or `'principal comp'` selects `pca`. Common other
 names also work: `'prcomp'` for `pca`; `'redundancy analysis'`,
 `'tbRDA'`, or `'transformation-based RDA'` for `rda`;
 `'canonical correspondence analysis'` or
-`'constrained correspondence analysis'` for `cca`; and `'robust PCA'`,
-`'DEICODE'`, or `'gemelli'` for `rpca`.
+`'constrained correspondence analysis'` for `cca`;
+`'correspondence analysis'` for `ca`; and `'robust PCA'`, `'DEICODE'`,
+or `'gemelli'` for `rpca`. `'CA'` selects `ca`, and `'CCA'` selects
+`cca`.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
 
 **Same names in other packages**
 
-`vegan::pca()`, `vegan::rda()` and `vegan::cca()` share their names with
-ecodive's [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
-[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) and
-[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), and
-whichever package was attached last masks the other's. Write
+`vegan::pca()`, `vegan::rda()`, `vegan::cca()` and `vegan::ca()` (and
+`ca::ca()`) share their names with ecodive's
+[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
+[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), and whichever
+package was attached last masks the other's. Write
 [`ecodive::pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
 so on, or use `count_ord()`, which always runs ecodive's, to be sure.
 
@@ -154,6 +160,7 @@ plain matrix or data frame without them.
 
 ## See also
 
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
@@ -192,12 +199,15 @@ the methods that take distances.
 #> [1] 0.4572664 0.4438732
 #> 
 #> [[2]]
-#> [1] 0.5428410 0.3713532
+#> [1] 0.4572664 0.4438732
 #> 
 #> [[3]]
 #> [1] 0.5428410 0.3713532
 #> 
 #> [[4]]
+#> [1] 0.5428410 0.3713532
+#> 
+#> [[5]]
 #> [1] 0.5737685 0.4262315
 #> 
 ```

@@ -56,6 +56,7 @@ dm <- bray(iris[, 1:4])
 | [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) | Redundancy Analysis (RDA) | counts | Axes of (transformed) counts that sample metadata explain. |
 | [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) | Canonical Correspondence Analysis (CCA) | counts | The same in the chi-square metric, for species with unimodal responses. |
 | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) | Principal Component Analysis (PCA) | counts | Euclidean geometry of (transformed) counts, with feature loadings. |
+| [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) | Correspondence Analysis (CA) | counts | The chi-square geometry of species profiles, for unimodal responses. |
 | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) | Robust Aitchison PCA | counts | Sparse compositional data, such as microbiome counts. |
 
 [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
@@ -298,13 +299,33 @@ attr(ord, 'adj_r_squared')
 #> [1] 0.9415516
 ```
 
+Without constraints,
+[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) is a
+correspondence analysis, which
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) also runs on
+its own: the unimodal counterpart of PCA, with species scores in its
+`loadings`. So, between the four: choose a unimodal method (CA, CCA) for
+long gradients and species turnover, and a linear one (PCA, RDA) on
+transformed counts for short gradients; and a constrained method (RDA,
+CCA) to ask how much of the variation metadata explain, and an
+unconstrained one (PCA, CA) to see its main patterns, whatever drives
+them.
+
+``` r
+
+ord <- ca(round(iris[, 1:4] * 10), n_axes = 2)
+attr(ord, 'prop')
+#> [1] 0.95585403 0.03431714
+```
+
 ## Ordinating counts directly
 
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
-[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) and
-[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) take the
-count table rather than distances.
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
+[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) take the count
+table rather than distances.
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
 runs them by name, as
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md)
@@ -332,7 +353,7 @@ arrows(0, 0, load[, 1], load[, 2], length = 0.1)
 text(load[, 1:2], labels = rownames(load), pos = 4)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-15-1.png)
+![](ordination_files/figure-html/unnamed-chunk-16-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -411,7 +432,7 @@ arrows(0, 0, xy$PCoA1, xy$PCoA2, length = 0.1)
 text(xy, labels = vec$variable, pos = 1, cex = 0.8)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-19-1.png)
+![](ordination_files/figure-html/unnamed-chunk-20-1.png)
 
 ## Speed and reproducibility
 

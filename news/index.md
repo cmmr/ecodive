@@ -81,7 +81,8 @@
   does the same for the methods that take a count table rather than
   distances, [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
-  [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
+  [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+  [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) and
   [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md):
   `count_ord(counts, "pca")` is `pca(counts)`. Each wrapper points to
   the other when given the other’s method, and to
@@ -388,13 +389,27 @@
   biplot scores and centroids as `vegan::cca()` (up to each axis’s
   sign), and the same permutation-based adjusted R-squared as
   `vegan::RsquareAdj()` for the same permutations (`permutations` and
-  `seed`; `NA` for partial CCA). It shares
+  `seed`), partial CCA included. It shares
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md)’s solver,
   with the chi-square weights, and multiplies the table’s non-zero
   values only, so a sparse table is never made dense: with 3,000 samples
   and 2,000 taxa it takes half a second where `vegan::cca()` takes a
   minute. Results are identical for any number of `cpus`. Also available
   as `count_ord(counts, "cca", ...)`.
+
+- New [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) runs a
+  correspondence analysis of a table of abundances: the unconstrained
+  ordination in the chi-square metric, with species scores (`loadings`).
+  It gives the same site scores, species scores, eigenvalues and inertia
+  as `vegan::ca()` (`vegan::cca()` without constraints),
+  `ade4::dudi.coa()` and scikit-bio’s
+  [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) (up to each
+  axis’s sign), and is the same as
+  [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) with no
+  model, whose sparse solver it shares. Results are identical for any
+  number of `cpus`. Also available as `count_ord(counts, "ca")`; `"CA"`
+  selects it, and `dist_ord(dm, "ca")` points to
+  [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md).
 
 - New [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md)
   fits sample metadata (`data`) and feature tables (`counts`, such as

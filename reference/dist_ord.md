@@ -76,7 +76,8 @@ The method's result, as described in "Ordination result" below.
 
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
-[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
+[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) and
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) ordinate a
 count table rather than distances, so they are run by
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md),
@@ -105,7 +106,10 @@ other names also work: `'PCO'`, `'cmdscale'`, or `'classical MDS'` for
 `'metaMDS'`, `'monoMDS'`, or `'isoMDS'` for `nmds`;
 `'isometric mapping'` for `isomap`; `'Rtsne'`, `'bhtsne'`, or
 `'Barnes-Hut t-SNE'` for `tsne`; and `'uwot'` for `umap`. `'dbRDA'` or
-`'distance-based RDA'` select `dbrda`, and `'CAP'` selects `capscale`.
+`'distance-based RDA'` select `dbrda`, and `'CAP'` selects `capscale`
+(but `'CA'` names
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), which takes a
+count table).
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -189,7 +193,8 @@ plain matrix or data frame without them.
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
 for [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
-[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
+[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) and
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), which take
 a count table;
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)

@@ -99,7 +99,7 @@ arguments can be given to every method.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>List of Ordination Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>capscale</code></td><td>Constrained Analysis of Principal Coordinates</td></tr><tr><td><code>dbrda</code></td><td>Distance-based Redundancy Analysis (db-RDA)</td></tr><tr><td><code>isomap</code></td><td>Isometric Feature Mapping (Isomap)</td></tr><tr><td><code>mds</code></td><td>Metric Multidimensional Scaling (MDS)</td></tr><tr><td><code>nmds</code></td><td>Non-metric Multidimensional Scaling (NMDS)</td></tr><tr><td><code>pcoa</code></td><td>Principal Coordinates Analysis (PCoA)</td></tr><tr><td><code>tsne</code></td><td>t-distributed Stochastic Neighbor Embedding (t-SNE)</td></tr><tr><td><code>umap</code></td><td>Uniform Manifold Approximation and Projection (UMAP)</td></tr></table><p><code><a href="pca.html">pca()</a></code>, <code><a href="rda.html">rda()</a></code>, <code><a href="cca.html">cca()</a></code> and <code><a href="rpca.html">rpca()</a></code> ordinate a count table rather than
+    <p><strong>List of Ordination Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>capscale</code></td><td>Constrained Analysis of Principal Coordinates</td></tr><tr><td><code>dbrda</code></td><td>Distance-based Redundancy Analysis (db-RDA)</td></tr><tr><td><code>isomap</code></td><td>Isometric Feature Mapping (Isomap)</td></tr><tr><td><code>mds</code></td><td>Metric Multidimensional Scaling (MDS)</td></tr><tr><td><code>nmds</code></td><td>Non-metric Multidimensional Scaling (NMDS)</td></tr><tr><td><code>pcoa</code></td><td>Principal Coordinates Analysis (PCoA)</td></tr><tr><td><code>tsne</code></td><td>t-distributed Stochastic Neighbor Embedding (t-SNE)</td></tr><tr><td><code>umap</code></td><td>Uniform Manifold Approximation and Projection (UMAP)</td></tr></table><p><code><a href="pca.html">pca()</a></code>, <code><a href="rda.html">rda()</a></code>, <code><a href="cca.html">cca()</a></code>, <code><a href="ca.html">ca()</a></code> and <code><a href="rpca.html">rpca()</a></code> ordinate a count table rather than
 distances, so they are run by <code><a href="count_ord.html">count_ord()</a></code>, or called directly. PCA is PCoA of Euclidean
 distances: <code>dist_ord(euclidean(counts), 'pcoa')</code> gives the same scores as
 <code>pca(counts)</code>, up to each axis's sign, but <code><a href="pca.html">pca()</a></code> also returns the
@@ -117,7 +117,7 @@ also work: <code>'PCO'</code>, <code>'cmdscale'</code>, or <code>'classical MDS'
 <code>'monoMDS'</code>, or <code>'isoMDS'</code> for <code>nmds</code>; <code>'isometric mapping'</code> for <code>isomap</code>;
 <code>'Rtsne'</code>, <code>'bhtsne'</code>, or <code>'Barnes-Hut t-SNE'</code> for <code>tsne</code>; and <code>'uwot'</code>
 for <code>umap</code>. <code>'dbRDA'</code> or <code>'distance-based RDA'</code> select <code>dbrda</code>, and <code>'CAP'</code>
-selects <code>capscale</code>.</p>
+selects <code>capscale</code> (but <code>'CA'</code> names <code><a href="ca.html">ca()</a></code>, which takes a count table).</p>
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.</p>
 <p><strong>Same names in other packages</strong></p>
@@ -161,7 +161,7 @@ other attributes by name rather than in full. Subsetting with <code>[</code>, or
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="capscale.html">capscale()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>,
 <code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, <code><a href="dist_ords.html">list_dist_ords()</a></code>; <code><a href="count_ord.html">count_ord()</a></code> for <code><a href="pca.html">pca()</a></code>,
-<code><a href="rda.html">rda()</a></code>, <code><a href="cca.html">cca()</a></code> and <code><a href="rpca.html">rpca()</a></code>, which take a count table; <code><a href="dist_test.html">dist_test()</a></code> for
+<code><a href="rda.html">rda()</a></code>, <code><a href="cca.html">cca()</a></code>, <code><a href="ca.html">ca()</a></code> and <code><a href="rpca.html">rpca()</a></code>, which take a count table; <code><a href="dist_test.html">dist_test()</a></code> for
 ecodive's tests.</p></div>
     </div>
 

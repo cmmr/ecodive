@@ -144,8 +144,7 @@ at most \(n - 1\) for \(n\) samples.</p></dd>
 Default: <code>1000</code>, as <code>vegan::RsquareAdj()</code>. Alternatively, a matrix
 with one permutation of <code>1:n</code> per row, as from
 <code>permute::shuffleSet()</code>, to use instead of random ones. <code>0</code> gives
-an <code>adj_r_squared</code> of <code>NA</code>. Unused for partial CCA and
-unconstrained CA, whose <code>adj_r_squared</code> is always <code>NA</code>.</p></dd>
+an <code>adj_r_squared</code> of <code>NA</code>. Unused without constraints.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -188,8 +187,8 @@ constraints explain, <code>inertia[["constrained"]] / trace</code>, as
 <code>vegan::RsquareAdj(x)$r.squared</code>.</p></li>
 <li><p><code>adj_r_squared</code>: <code>r_squared</code> adjusted by permutation, as
 <code>vegan::RsquareAdj(x)$adj.r.squared</code> (see "Adjusted R-squared"
-below). <code>NA</code> for partial CCA, unconstrained CA, or
-<code>permutations = 0</code>.</p></li>
+below). <code>0</code> without constraints; <code>NA</code> for <code>permutations = 0</code>, or a
+model with no residual degrees of freedom.</p></li>
 <li><p><code>biplot</code>: Biplot scores of the constraints: their weighted
 correlations with the constrained axes' "lc" scores, one row per
 column of the model matrix and one column per axis (<code>0</code> for
@@ -241,8 +240,12 @@ where \(\bar{R}^2_{perm}\) is the mean \(R^2\) over <code>permutations</code>
 random permutations of the samples (their rows of the table, against the
 constraints). It is random: the same <code>seed</code> gives the same value, and
 a <code>permutations</code> matrix the same value as
-<code>vegan::RsquareAdj(x, permutations = matrix)</code>. As in <code>vegan</code>, it is <code>NA</code>
-for partial CCA.</p>
+<code>vegan::RsquareAdj(x, permutations = matrix)</code>.</p>
+<p>For partial CCA, as in <code>vegan</code>, it is the adjusted \(R^2\) of the
+constraints and conditions together less that of the conditions alone
+(Peres-Neto et al. 2006). Each is estimated as above, but permuting the
+rows of the chi-square matrix \(\bar{Q}\) against the fixed
+(weighted) design, as <code>vegan::RsquareAdj()</code> does for partial models.</p>
 <p><strong>Matching vegan</strong></p>
 <p><code>cca()</code> gives the same scores, eigenvalues, inertia, \(R^2\), biplot
 scores, centroids and species scores as <code>vegan::cca()</code>, up to the signs
@@ -251,7 +254,7 @@ earlier ones are dropped, with a message, as in <code>vegan</code>. Samples with
 observations are an error, as in <code>vegan</code>; features with no observations
 have no weight, and get species scores of 0.</p>
 <p>With no constraints, <code>cca(counts)</code> is a correspondence analysis, as
-<code>vegan::cca(counts)</code>.</p>
+<code>vegan::cca(counts)</code>, and the same as <code><a href="ca.html">ca()</a></code>.</p>
 <p><strong>Permutation tests</strong></p>
 <p><code>cca()</code> has no permutation test of its own; <code>vegan::anova.cca()</code> gives
 one. (Unlike RDA's, CCA's test is not a PERMANOVA of any distance.)</p>
@@ -329,7 +332,7 @@ Chapman &amp; Hall/CRC.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="rda.html">rda()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="count_ord.html">count_ord()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="ca.html">ca()</a></code>, <code><a href="rda.html">rda()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="count_ord.html">count_ord()</a></code></p></div>
     </div>
 
     <div class="section level2">
