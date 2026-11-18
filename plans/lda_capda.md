@@ -29,8 +29,11 @@ for `capscale()`, as already documented, so this is **`capda()`**.
 
 ## Design
 
-- **`lda(counts, groups, data = NULL, margin = 1L, norm = 'none', pseudocount = NULL, k = NULL, cpus = n_cpus())`.**
-  - `k` defaults to min(number of groups − 1, number of features).
+- **`lda(counts, groups, data = NULL, margin = 1L, norm = 'none', pseudocount = NULL, n_axes = NULL, cpus = n_cpus())`.**
+  - `n_axes = NULL` means min(3, number of groups − 1), the most
+    discriminant axes there are, capped at 3 as for other ordinations
+    with eigenvalues (see [parameter_names.md](parameter_names.md) §3.1).
+    It can't exceed the number of features either.
   - **Result:** an `ecodive_ord` matrix of discriminant scores, columns
     `LD1..`.
     - `eig` holds the discriminant eigenvalues (between-group / within-group
@@ -41,17 +44,19 @@ for `capscale()`, as already documented, so this is **`capda()`**.
   - Error when the within-group covariance is singular, suggesting
     `capda()` or fewer features.
   - Joins `COUNT_ORDS`, with aliases `lda`, `lineardiscriminantanalysis`.
-- **`capda(dm, groups, data = NULL, n_axes = NULL, permutations = 999L, seed = 0L, cpus = n_cpus())`.**
-  - `n_axes` is the number of PCoA axes (Anderson & Willis's *m*). The
-    default (`NULL`) chooses it by leave-one-out classification success,
-    as they do.
+- **`capda(dm, groups, data = NULL, n_pcoa_axes = NULL, n_axes = NULL, permutations = 999L, seed = 0L, cpus = n_cpus())`.**
+  - `n_pcoa_axes` is the number of PCoA axes *used* (Anderson & Willis's
+    *m*). The default (`NULL`) chooses it by leave-one-out classification
+    success, as they do.
+  - `n_axes` is the number of discriminant axes *returned*, as in every
+    ordination. `NULL` means min(3, number of groups − 1), as for `lda()`.
   - Don't name it `m`: R would partially match `m` to `dist_ord()`'s own
     `method` argument, so `dist_ord(dm, 'capda', m = 3)` would fail (see
     README, "Argument names").
   - **Result:** an `ecodive_ord` matrix, columns `CAP1..`.
     - Attributes: `eig` (the squared canonical correlations, δ²), `prop`,
-      `n_axes`, `success` (the leave-one-out classification table and overall
-      rate), `trace_stat`, `p_value` (permutation test of the trace
+      `n_pcoa_axes`, `success` (the leave-one-out classification table and
+      overall rate), `trace_stat`, `p_value` (permutation test of the trace
       statistic), `n_perm`.
   - Joins `ORDINATIONS` (it takes distances), passing `groups` and `data`
     through `dist_ord()`'s `...`, like `dbrda`.
@@ -87,8 +92,10 @@ for `capscale()`, as already documented, so this is **`capda()`**.
   and MASS's proportion of trace and group separation.
 - `capda()` matches BiodiversityR's m, δ² and success table on dune
   or varespec, and its p-value with shared permutations.
-- `capda(dm, n_axes = M)` equals `lda()` on `pcoa(dm, k = M)` scores.
-- Edge cases: two groups (k = 1); a singleton group; singular input to
+- `capda(dm, n_pcoa_axes = M)` equals `lda()` on `pcoa(dm, n_axes = M)`
+  scores.
+- Edge cases: two groups (one discriminant axis, so `n_axes = NULL`
+  gives 1); a singleton group; singular input to
   `lda()` (a clear error).
 - Results are identical for any `cpus`; a smoke-test line for each
   function.

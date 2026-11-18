@@ -16,7 +16,7 @@ microbiome time series.
 
 ## Design
 
-- **Signature:** `diffusion_map(dm, k = 2L, n_neighbors = 15L, epsilon = 'bgh', alpha = 0.5, t = 1, cpus = n_cpus())`.
+- **Signature:** `diffusion_map(dm, n_axes = 3L, n_neighbors = 15L, epsilon = 'bgh', alpha = 0.5, t = 1, cpus = n_cpus())`.
   - **Kernel:** Gaussian on `dm`, restricted to each sample's
     `n_neighbors` nearest neighbours.
   - **`epsilon`:** a number, or the Berry–Harlim–Giannakis automatic

@@ -22,7 +22,7 @@ microeco, mia `runRDA`.
 
 ## Design
 
-- **Signature:** `rda(counts, groups, data = NULL, formula = NULL, margin = 1L, norm = 'none', pseudocount = NULL, scale = FALSE, k = 3L, cpus = n_cpus())`.
+- **Signature:** `rda(counts, groups, data = NULL, formula = NULL, margin = 1L, norm = 'none', pseudocount = NULL, scale = FALSE, n_axes = 3L, cpus = n_cpus())`.
   - `groups`, `data` and `formula` work as in `dbrda()` (`model_design()`),
     including `Condition()`.
   - With no constraints, it is a PCA (vegan's `rda(X)`): keep that
@@ -35,7 +35,7 @@ microeco, mia `runRDA`.
   - Make `match_dist_ord('rda')` point to `count_ord()` (that is automatic
     once `rda` is in `COUNT_ORDS`).
 - **Result:** an `ecodive_ord` matrix, with columns `RDA1..` and then
-  `PC1..` for unconstrained axes, filling up to `k`.
+  `PC1..` for unconstrained axes, filling up to `n_axes`.
   - Site scores ("wa" or "lc" — decide which and document it; vegan's
     `scores()` default for sites is "wa").
   - Use scaling 2, matching `dbrda()`'s choice.
@@ -86,8 +86,8 @@ microeco, mia `runRDA`.
   - Data: dune / dune.env, varespec / varechem, and a larger random table
     (n of about 110).
   - Variants: Hellinger, chord and none; `scale = TRUE`; factor and
-    numeric constraints; `Condition()`; constraints with no rank; k larger
-    than the number of constrained axes.
+    numeric constraints; `Condition()`; constraints with no rank; `n_axes`
+    larger than the number of constrained axes.
   - Compare scores (sign-matched), `eig`, `prop`, `trace`, `inertia`,
     `constrained_eig`, R², adjusted R², biplot, centroids and loadings, at
     1e-10.

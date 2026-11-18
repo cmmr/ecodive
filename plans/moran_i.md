@@ -18,11 +18,14 @@ which eigenvectors to keep ([dbmem.md](dbmem.md)).
 
 ## Design
 
-- **Signature:** `moran_i(x, w, data = NULL, alternative = 'greater', permutations = 999L, seed = 0L, cpus = n_cpus())`.
-  - `x` is a numeric vector, or a column name of `data`. `w` holds the
-    spatial weights: a sample × sample matrix, a `dist` (converted to
-    inverse-distance weights — decide and document), or coordinates (with
-    a neighbour rule, e.g. k nearest).
+- **Signature:** `moran_i(x, space, data = NULL, alternative = 'greater', permutations = 999L, seed = 0L, cpus = n_cpus())`.
+  - `x` is a numeric vector, or a column name of `data`.
+  - `space` gives the samples' positions, in any of three forms (the same
+    argument name as `dbmem()`'s): spatial weights as a sample × sample
+    matrix; geographic distances as a `dist` (converted to
+    inverse-distance weights — decide and document); or a coordinate
+    matrix (with a neighbour rule, e.g. k nearest). It isn't called
+    `weights`, which means group weights in `mrpp()`.
   - Start with an explicit weight matrix, plus a documented helper for
     inverse distances. Row-standardise weights as esda does by default;
     `ape::Moran.I` doesn't. Document which, and offer an argument if both

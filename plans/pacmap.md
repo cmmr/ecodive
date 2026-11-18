@@ -16,7 +16,7 @@ work.
 
 ## Design
 
-- **Signature:** `pacmap(dm, k = 2L, n_neighbors = 10L, mn_ratio = 0.5, fp_ratio = 2, n_iters = 450L, init = 'pcoa', learning_rate = 1, seed = 0L, cpus = n_cpus())`.
+- **Signature:** `pacmap(dm, n_axes = 2L, n_neighbors = 10L, mn_ratio = 0.5, fp_ratio = 2, n_iters = 450L, init = 'pcoa', learning_rate = 1, seed = 0L, cpus = n_cpus())`.
   - The argument names follow PaCMAP's (`n_neighbors`, `MN_ratio`,
     `FP_ratio`, `num_iters`), mapped to ecodive's conventions:
     `n_iters` is an exact count, as for tsne.

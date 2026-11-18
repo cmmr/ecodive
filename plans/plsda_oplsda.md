@@ -22,7 +22,7 @@ PLS-DA are **three functions**.
 
 ## Design
 
-- **`plsda(counts, groups, data = NULL, margin = 1L, norm = 'none', pseudocount = NULL, scale = TRUE, k = 2L, cpus = n_cpus())`.**
+- **`plsda(counts, groups, data = NULL, margin = 1L, norm = 'none', pseudocount = NULL, scale = TRUE, n_axes = 2L, cpus = n_cpus())`.**
   - `groups` is a categorical vector or a column name of `data`, handled
     by `test_groups()`-style code.
   - `scale = TRUE` standardises features, as scikit-learn and mixOmics do
@@ -89,7 +89,7 @@ PLS-DA are **three functions**.
 ## Tests
 
 - `plsda()` scores, loadings and weights match scikit-learn's
-  `PLSRegression(n_components = k, scale = True)` on the dummy matrix at
+  `PLSRegression(n_components = n_axes, scale = True)` on the dummy matrix at
   1e-10, sign-matched; the explained variance matches mixOmics.
 - VIP matches a direct implementation of the formula.
 - `oplsda()` matches pyopls (Python fixture) at 1e-10, and ropls's R2Y on

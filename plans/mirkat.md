@@ -31,16 +31,27 @@ named `mirkat_<variant>()`, later.
 
 ## Design
 
-- **Signature:** `mirkat(dm, groups, data = NULL, formula = NULL, outcome = 'continuous', p_method = 'davies', permutations = 999L, seed = 0L, cpus = n_cpus())`.
+- **Signature:** `mirkat(dm, groups, data = NULL, formula = NULL, p_method = 'davies', permutations = 999L, seed = 0L, cpus = n_cpus())`.
   - `dm` is one dist, or a named list of dists for the omnibus test.
   - `groups` is the outcome: a vector, or a column name of `data`.
+  - **The outcome type is inferred from `groups`,** not given by an
+    argument (no other ecodive test asks for the variable's type, and
+    `dist_test()` already checks it from the values):
+    - numeric → continuous (a linear covariate model);
+    - categorical with two categories → binary (a logistic model);
+    - categorical with more than two categories → an error, saying that
+      MiRKAT handles continuous and binary outcomes only.
+
+    Document that a numeric 0/1 vector is treated as continuous, so a
+    binary outcome should be a factor, character or logical vector. Record
+    the inferred type in the result (`outcome`).
   - `formula` holds one-sided covariates (`~ age + sex`) over `data`.
-  - `outcome` is `'continuous'` or `'binary'`.
   - `p_method` is `'davies'` (exact, as MiRKAT's default), `'liu'`
     (moment matching) or `'permutation'`.
 - **Result:** an `ecodive_test` of class
   `c('ecodive_mirkat', 'ecodive_test')`: `statistic = c(Q = ...)`,
-  `p_value`, `z` (`NA` unless permuted), `n_perm`.
+  `p_value`, `z` (`NA` unless permuted), `n_perm`, and `outcome`
+  (`'continuous'` or `'binary'`, as inferred).
   - For several kernels: a `kernels` data frame of each kernel's Q and p,
     plus the omnibus p as the core `p_value`.
 - **Wrapper:** joins `dist_test()` (it tests `dm` against one variable),
@@ -48,7 +59,8 @@ named `mirkat_<variant>()`, later.
   - Add a `DIST_TESTS` row:
     `Microbiome Regression-based Kernel Association Test, mirkat, categorical numeric, kernelassociation`.
   - `dist_test()`'s group-type check must allow only two categories for
-    `mirkat`. Add a check in `mirkat()` itself.
+    `mirkat`. Add the same check in `mirkat()` itself, as part of
+    inferring the outcome type.
 - **Masking:** none (MiRKAT's is `MiRKAT`).
 
 
@@ -78,7 +90,12 @@ named `mirkat_<variant>()`, later.
 - Davies and Liu p-values match CompQuadForm's on fixed eigenvalue sets
   (stored as a fixture) at 1e-8.
 - End-to-end p-values match MiRKAT for continuous and binary outcomes,
-  with and without covariates, for one and several kernels.
+  with and without covariates, for one and several kernels. The outcome
+  type comes from `groups` alone: a numeric `groups` matches MiRKAT's
+  `out_type = 'C'`, and a two-category one its `out_type = 'D'`.
+- Outcome inference: numeric → continuous; a two-level factor, character
+  or logical → binary; three or more categories → a clear error; a
+  numeric 0/1 vector → continuous (as documented).
 - The permutation p-value agrees with Davies' statistically.
 - Results are identical for any `cpus`; a smoke-test line.
 

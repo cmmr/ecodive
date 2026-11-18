@@ -82,7 +82,7 @@ particular), **the per-method plans and this README win.**
   sample × axis matrix of class `ecodive_ord`. Its attributes start with
   `method`, `eig` and `prop` (`NA` where undefined); method-specific
   attributes follow. `ord_flip()` fixes axis signs; `ord_k()` and
-  `ord_keep()` check `k` and drop non-positive axes.
+  `ord_keep()` check `n_axes` and drop non-positive axes.
 - **Test results:** `new_ecodive_test()` in `R/ecodive_test.r` builds the
   object.
   - Core fields come first: `statistic` (named), `p_value`, `z`, `n_perm`.
@@ -140,9 +140,14 @@ particular), **the per-method plans and this README win.**
     below.
   - If a wrapper's matcher should point to another wrapper, follow how
     `match_dist_ord()` and `match_count_ord()` do it.
-- **Argument names:** reuse existing ones where the meaning is the same:
-  - `k` (axes), `cpus`, `seed`, `permutations`, `strata`;
+- **Argument names:** reuse existing ones where the meaning is the same
+  (the full glossary is [parameter_names.md](parameter_names.md) §1):
+  - `n_axes` (the number of axes returned), `axes` (**which** axes of an
+    input ordination to use, as in `envfit()`), `cpus`, `seed`,
+    `permutations`, `strata`;
   - `groups`, `data`, `formula`;
+  - `given` (what is partialled out), `space` (sample positions:
+    coordinates, geographic distances or spatial weights);
   - `margin`, `norm`, `pseudocount`;
   - `max_iters` (a cap), `n_iters` (attribute: the number run), `tol`,
     `n_starts`.

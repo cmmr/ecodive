@@ -38,9 +38,10 @@
     - Class `c('ecodive_varpart', 'data.frame')`, with a print method
       showing the Venn fractions as text.
   - Plotting is out of scope; the data frame is enough.
-- **`forward_select(x, scope, data, norm = 'none', pseudocount = NULL, margin = 1L, alpha = 0.05, permutations = 999L, seed = 0L, cpus = n_cpus())`.**
-  - `x` is a `dist` or a count table, as for `varpart()`. `scope` is a
-    one-sided formula of the candidate variables.
+- **`forward_select(x, formula, data, norm = 'none', pseudocount = NULL, margin = 1L, alpha = 0.05, permutations = 999L, seed = 0L, cpus = n_cpus())`.**
+  - `x` is a `dist` or a count table, as for `varpart()`. `formula` is a
+    one-sided formula over `data` naming the candidate variables (vegan's
+    `scope`), as for `bioenv()`.
   - **Result:** a data frame, one row per step: `variable`,
     `adj_r_squared`, `adj_r_squared_cum`, `F`, `p_value`.
     - Attribute `selected` holds the formula of the chosen variables,

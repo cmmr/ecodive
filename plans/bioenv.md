@@ -14,19 +14,23 @@ QIIME 2 (`diversity bioenv`) and vegan (`bioenv()`).
 
 ## Design
 
-- **Signature:** `bioenv(dm, data, vars = NULL, method = 'spearman', metric = 'euclidean', upto = NULL, partial = NULL, cpus = n_cpus())`.
+- **Signature:** `bioenv(dm, data, formula = NULL, method = 'spearman', metric = 'euclidean', max_vars = NULL, given = NULL, cpus = n_cpus())`.
   - `dm` is the community distances. `data` holds the sample metadata,
-    matched to `dm` by row name. `vars` names the numeric columns to
-    search; the default is every numeric column.
+    matched to `dm` by row name. `formula` is a one-sided formula over
+    `data` naming the candidate variables (`~ N + P + K + pH`), as
+    variables come from `data` through `formula` everywhere else; the
+    default `NULL` searches every numeric column of `data`.
   - `method`: the correlation (`'spearman'` by default, as in vegan; also
     `'pearson'` and `'kendall'`).
   - `metric`: the distances among the variables. vegan offers
     `'euclidean'`, `'mahalanobis'`, `'manhattan'` and `'gower'`. Start
     with `'euclidean'`, the default and the only one skbio has, and add the
     others if cheap (ecodive already has `manhattan` and `gower` code).
-  - `upto`: the largest subset size, as vegan's `upto`.
-  - `partial`: distances to partial out, as vegan's `partial`. This is a
-    partial correlation; reuse `mantel_partial()`'s correlation code (see
+  - `max_vars`: the largest subset size (a cap, so `max_*`), as vegan's
+    `upto`.
+  - `given`: distances to partial out, as vegan's `partial`; the same name
+    and concept as `mantel_partial()`'s `given`. This is a partial
+    correlation; reuse `mantel_partial()`'s correlation code (see
     [mantel_partial.md](mantel_partial.md)).
 - **Result:** a plain function, not part of `dist_test()` (it takes many
   variables and returns a table).
@@ -46,7 +50,8 @@ QIIME 2 (`diversity bioenv`) and vegan (`bioenv()`).
   - It searches exhaustively, z-scores the variables, uses Euclidean
     distances and Spearman correlation, and breaks ties by taking the first
     subset, "to match vegan".
-  - **It lacks** vegan's `upto`, `partial`, `metric` and `method` options,
+  - **It lacks** vegan's `upto`, `partial`, `metric` and `method` options
+    (ecodive's `max_vars`, `given`, `metric` and `method`),
     and takes a distance matrix where vegan takes `comm` and `index`.
     ecodive takes `dm`, like skbio.
   - The degrees of freedom used for standardising can't change a Spearman

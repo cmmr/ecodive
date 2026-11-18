@@ -36,14 +36,18 @@ and aim to match vegan.
 
 ## Design
 
-- **Signature:** `dca(counts, margin = 1L, k = 4L, n_segments = 26L, rescale = 4L, downweight = FALSE, cpus = n_cpus())`.
+- **Signature:** `dca(counts, margin = 1L, n_axes = 3L, n_segments = 26L, n_rescales = 4L, downweight = FALSE, cpus = n_cpus())`.
   - The defaults mirror vegan's `decorana(iweigh = 0, iresc = 4, ira = 0,
-    mk = 26)`.
-  - `k` defaults to 4, since DCA traditionally reports 4 axes.
+    mk = 26)`; `n_rescales` is vegan's `iresc`, an exact count of
+    rescaling cycles.
+  - `n_axes` defaults to 3, like every ordination whose axes have
+    eigenvalues (see [parameter_names.md](parameter_names.md) §3.1).
+    DCA traditionally reports 4 axes, and `n_axes = 4` still works.
   - `downweight` is vegan's `iweigh`. `ira = 1` (basic reciprocal
     averaging, without detrending) is just `ca()`, so leave that option
     out and point to `ca()`.
-- **Result:** an `ecodive_ord` matrix with columns `DCA1..4`.
+- **Result:** an `ecodive_ord` matrix with columns `DCA1..` (`DCA1..4`
+  with `n_axes = 4`).
   - `eig` holds the "decorana values"; `prop` is `NA`, since DCA has no
     proper inertia decomposition.
   - Attributes `axis_lengths` (the gradient lengths in SD units, the most

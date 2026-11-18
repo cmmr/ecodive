@@ -17,7 +17,7 @@ rows to test it. It's used for multi-omics integration.
 
 ## Design
 
-- **Signature:** `coinertia(x, y, x_method = 'pca', y_method = 'pca', k = 2L, permutations = 999L, seed = 0L, cpus = n_cpus())`.
+- **Signature:** `coinertia(x, y, x_method = 'pca', y_method = 'pca', n_axes = 3L, permutations = 999L, seed = 0L, cpus = n_cpus())`.
   - `x` and `y` are two tables with the same samples (matched by name),
     or ecodive ordination results.
   - `*_method` is the analysis applied to each side: `'pca'` (centred),

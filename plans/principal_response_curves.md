@@ -24,15 +24,19 @@ sampled over time. vegan `prc()`.
 
 ## Design
 
-- **Signature:** `principal_response_curves(counts, treatment, time, data = NULL, control = NULL, margin = 1L, norm = 'none', pseudocount = NULL, k = 1L, cpus = n_cpus())`.
+- **Signature:** `principal_response_curves(counts, treatment, time, data = NULL, control = NULL, margin = 1L, norm = 'none', pseudocount = NULL, n_axes = 1L, cpus = n_cpus())`.
+  - `n_axes` defaults to 1, the method's convention (one curve per
+    treatment). Document it as the exception to the rule that ordinations
+    with eigenvalues default to 3 axes
+    ([parameter_names.md](parameter_names.md) §3.1).
   - `treatment` and `time` are factors, or column names of `data`.
   - `control` names the control level; the default is the first level,
     as in vegan.
 - **Result:** a plain function, since the result isn't a sample × axis
   matrix. A list of class `ecodive_prc` with:
   - `coefficients`: a data frame with one row per treatment × time
-    (control 0), and columns `treatment`, `time` and `PRC1..k`;
-  - `weights`: the taxa × k species weights;
+    (control 0), and columns `treatment`, `time` and `PRC1..` (one per axis);
+  - `weights`: the taxa × `n_axes` species weights;
   - `eig`, `prop`;
   - the underlying `rda()` result as `rda`.
 

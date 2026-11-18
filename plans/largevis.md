@@ -32,12 +32,15 @@ contain LargeVis's gradient.
 
 ## Design
 
-- **Signature:** `largevis(dm, k = 2L, perplexity = 50, n_neighbors = NULL, n_epochs = NULL, learning_rate = 1, negative_sample_rate = 5, gamma = 7, init = 'pcoa', seed = 0L, cpus = n_cpus())`.
+- **Signature:** `largevis(dm, n_axes = 2L, perplexity = 50, n_neighbors = NULL, n_epochs = NULL, learning_rate = 1, negative_sample_rate = 5, repulsion_strength = 7, init = 'pcoa', seed = 0L, cpus = n_cpus())`.
   - The defaults are those of uwot's `lvish()` documentation: perplexity
-    50, gamma 7, negative_sample_rate 5, and n_neighbors 3 × perplexity.
-    Verify them against the documentation.
+    50, repulsion_strength 7 (LargeVis's γ), negative_sample_rate 5, and
+    n_neighbors 3 × perplexity. Verify them against the documentation.
   - Share `umap()`'s argument names where they mean the same thing
-    (`n_epochs`, `learning_rate`, `negative_sample_rate`, `init`, `seed`).
+    (`n_epochs`, `learning_rate`, `negative_sample_rate`,
+    `repulsion_strength`, `init`, `seed`). `repulsion_strength` is also
+    `lvish()`'s name; don't call it `gamma`, which means something else in
+    `phate()`.
 - **Result:** an `ecodive_ord` matrix with columns `LargeVis1..`; `eig`
   and `prop` are `NA`. Attributes `perplexity`, `n_epochs`.
 - **Wrapper:** joins `ORDINATIONS`, with aliases `largevis` and `lvish`.

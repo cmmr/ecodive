@@ -20,7 +20,7 @@ diversity. It's in phyloseq (`ordinate(method = "DPCoA")`) and mia
 
 ## Design
 
-- **Signature:** `dpcoa(counts, tree = NULL, margin = 1L, k = 3L, cpus = n_cpus())`.
+- **Signature:** `dpcoa(counts, tree = NULL, margin = 1L, n_axes = 3L, cpus = n_cpus())`.
   - `tree` is a `phylo` object, pulled from phyloseq, rbiom or TSE
     objects as the UniFrac functions do (see `validate_counts()` /
     `validate_tree()`).

@@ -40,7 +40,7 @@ use for time series and gradients.
 
 ## Design
 
-- **Signature:** `phate(dm, k = 2L, n_neighbors = 5L, decay = 40, t = 'auto', gamma = 1, n_landmarks = NULL, seed = 0L, cpus = n_cpus())`.
+- **Signature:** `phate(dm, n_axes = 2L, n_neighbors = 5L, decay = 40, t = 'auto', gamma = 1, n_landmarks = NULL, seed = 0L, cpus = n_cpus())`.
   - The defaults are PHATE's documented ones (knn = 5, decay = 40,
     t = "auto", gamma = 1). Verify them against its documentation, not its
     code.

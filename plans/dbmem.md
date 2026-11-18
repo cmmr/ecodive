@@ -22,9 +22,9 @@ model spatial structure. The steps are:
 
 ## Design
 
-- **Signature:** `dbmem(x, threshold = NULL, moran_positive = TRUE, cpus = n_cpus())`.
-  - `x` is a dist of geographic distances, or a coordinate matrix (made
-    Euclidean).
+- **Signature:** `dbmem(space, threshold = NULL, moran_positive = TRUE, cpus = n_cpus())`.
+  - `space` gives the samples' positions, named as in `moran_i()`: a dist
+    of geographic distances, or a coordinate matrix (made Euclidean).
   - `threshold` defaults to the longest edge of the minimum spanning tree.
   - `moran_positive` keeps only the eigenvectors with positive Moran's I
     (adespatial's `MEM.autocor = "positive"`, its default).
@@ -48,7 +48,7 @@ model spatial structure. The steps are:
   and don't port from it without checking its license file and results.
 - **Write from the papers.** Reuse ecodive's code:
   - `pcoa()` (block Lanczos, no n × n matrix);
-  - a minimum spanning tree over `dm` (new and small: Prim's algorithm on
+  - a minimum spanning tree over the distances of `space` (new and small: Prim's algorithm on
     the packed triangle);
   - `moran_i()`.
 - **Output-only fixtures (GPL):** adespatial 0.3-30

@@ -29,7 +29,7 @@ method. Always say "canonical correspondence analysis" in the docs.
 
 ## Design
 
-- **`ca(counts, margin = 1L, k = 3L, cpus = n_cpus())`.**
+- **`ca(counts, margin = 1L, n_axes = 3L, cpus = n_cpus())`.**
   - Raw non-negative abundances; no `norm`, since the chi-square metric is
     the method.
   - Error on negative values, and on all-zero rows or columns: drop them
@@ -37,7 +37,7 @@ method. Always say "canonical correspondence analysis" in the docs.
   - Columns `CA1..`.
   - Attributes: `method`, `eig`, `prop`, `trace` (total inertia), and
     `loadings` (species scores).
-- **`cca(counts, groups, data = NULL, formula = NULL, margin = 1L, k = 3L, cpus = n_cpus())`.**
+- **`cca(counts, groups, data = NULL, formula = NULL, margin = 1L, n_axes = 3L, cpus = n_cpus())`.**
   - `groups`, `data` and `formula` as in `dbrda()` / `rda()`, including
     `Condition()`.
   - Columns `CCA1..`, then `CA1..`.
@@ -86,7 +86,7 @@ method. Always say "canonical correspondence analysis" in the docs.
 - Fixtures from vegan, written by `data-raw/expected/cca.r`.
   - Data: dune, dune.env, varespec, varechem, and a random sparse table.
   - Cover factor and numeric constraints, `Condition()`, collinear
-    constraints, and k larger than the number of axes.
+    constraints, and `n_axes` larger than the number of axes.
   - Compare scores (sign-matched), eig, prop, inertia, R² and adjusted R²,
     biplot, centroids and loadings at 1e-10.
 - `ca(x)` equals `cca(x)` with no constraints.

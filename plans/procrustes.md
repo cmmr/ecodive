@@ -23,23 +23,34 @@ QIIME 2 has `procrustes-analysis` and `partial-procrustes`; vegan has
 
 ## Design
 
-- **`procrustes(x, y, k = NULL, symmetric = FALSE, scale = TRUE)`.**
-  - `x` is the target and `y` is rotated to fit it.
+- **`procrustes(ord, target, axes = NULL, symmetric = FALSE, dilate = TRUE)`.**
+  - `ord` is rotated (and reflected, and optionally dilated) to fit
+    `target`. vegan's `procrustes(X, Y)` rotates `Y` onto `X`, so
+    ecodive's `procrustes(ord, target)` corresponds to vegan's
+    `procrustes(target, ord)`; say so in the docs.
   - Each may be an ordination (`ecodive_ord`), a plain matrix, or a `dist`
     (then `pcoa()` is applied first).
   - Rows are matched by name when both are named, as elsewhere in
-    ecodive. `k` axes are used; the default is
-    `min(ncol(x), ncol(y))`.
-  - Zero-pad the narrower configuration, as vegan and SciPy do.
-  - `symmetric` and `scale` follow vegan's meanings, which are options of
-    the one method, so they stay arguments.
+    ecodive.
+  - `axes` selects **which** axes (column indices) of each input are used,
+    as in `envfit()`. The default `NULL` uses the first
+    `min(ncol(ord), ncol(target))`.
+  - If one input has fewer of the requested axes, zero-pad it, as vegan
+    and SciPy do.
+  - `symmetric` follows vegan's meaning. `dilate` is vegan's `scale`:
+    whether to allow a uniform dilation of `ord` (Gower's term). It's
+    renamed because `scale` means "standardise features" everywhere else
+    in ecodive. Both are options of the one method, so they stay
+    arguments.
 - **Its result** (decide the class: a list of class `ecodive_procrustes`
   is likely):
-  - the rotated `y` (an `ecodive_ord` with `method = 'procrustes'`);
-  - `ss` (m²), `rotation`, `translation`, `scale`;
+  - the rotated `ord` (an `ecodive_ord` with `method = 'procrustes'`);
+  - `ss` (m²), `rotation`, `translation`, `dilation` (the dilation factor, vegan's `scale`;
+    1 when `dilate = FALSE`);
   - per-sample `residuals`;
   - `symmetric`.
-- **`procrustes_test(x, y, k = NULL, permutations = 999L, strata = NULL, seed = 0L, cpus = n_cpus())`.**
+- **`procrustes_test(ord, target, axes = NULL, permutations = 999L, strata = NULL, seed = 0L, cpus = n_cpus())`.**
+  - `ord`, `target` and `axes` as in `procrustes()`.
   - Returns an `ecodive_test` of class `c('ecodive_procrustes_test', 'ecodive_test')`.
   - `statistic = c(r = sqrt(1 - ss))`, where `ss` is the **symmetric**
     m², as vegan computes it.

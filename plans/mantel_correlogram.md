@@ -19,9 +19,13 @@ ecodist `mgram()`.
 
 ## Design
 
-- **Signature:** `mantel_correlogram(dm, y, data = NULL, breaks = NULL, n_classes = NULL, cutoff = TRUE, method = 'pearson', permutations = 999L, p_adjust = 'holm', strata = NULL, seed = 0L, cpus = n_cpus())`.
+- **Signature:** `mantel_correlogram(dm, y, data = NULL, breaks = NULL, n_classes = NULL, cutoff = TRUE, method = 'pearson', permutations = 999L, p_adjust = 'holm', strata = NULL, alternative = 'greater', seed = 0L, cpus = n_cpus())`.
   - `y` holds the distances to classify (a dist, a matrix, coordinates, or
     a column of `data`), handled as `mantel()`'s `y` is.
+  - `alternative` (`'greater'`, `'less'` or `'two.sided'`) applies to each
+    class's test, as in every other Mantel function. Check how it maps
+    onto vegan's `mantel.correlog()` p-values when writing the fixtures,
+    and document it.
   - **Classes:** the default is Sturges' rule, as in vegan.
   - **`cutoff`:** as in vegan, test only classes up to half the largest
     distance.

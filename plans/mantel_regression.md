@@ -22,13 +22,16 @@ to separate the effects of environment and space.
 
 ## Design
 
-- **Signature:** `mantel_regression(dm, ..., data = NULL, formula = NULL, method = 'linear', permutations = 999L, seed = 0L, cpus = n_cpus())`.
+- **Signature:** `mantel_regression(dm, ..., data = NULL, formula = NULL, method = 'pearson', permutations = 999L, seed = 0L, cpus = n_cpus())`.
   - Explanatory distances come through `...` (named dist objects or
     matrices, matched by sample name), or through `formula` with `data`.
     In a formula, numeric columns become Euclidean differences, as
     `mantel()`'s `y` does.
-  - `method = 'linear'` uses ordinary least squares on the pair vectors.
-    `'rank'` ranks every vector first (ecodist's `mrank = TRUE`).
+  - `method` uses the same vocabulary as the rest of the Mantel family.
+    `'pearson'` uses ordinary least squares on the pair vectors (ecodist's
+    `mrank = FALSE`). `'spearman'` ranks every vector first, the rank
+    regression that is the Spearman analogue (ecodist's `mrank = TRUE`).
+    Document this mapping.
 - **Result:** a list of class `ecodive_mantel_regression`:
   - `coefficients`: a data frame with `term`, `estimate`, `p_value`
     (permutation);

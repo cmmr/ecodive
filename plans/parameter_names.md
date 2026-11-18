@@ -1,5 +1,7 @@
 # Parameter names: glossary and proposed renames (2026-11-18)
 
+**Status:** all renames in §2 and §3 were approved by the user and applied on 2026-11-18.
+
 I compared every exported signature (dumped from the installed package)
 and every signature proposed in the method plans, looking for two things:
 the same name meaning different things, and different names meaning the
