@@ -77,10 +77,11 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_count_ords()
-#>                           name   id
-#> 1 Principal Component Analysis  pca
-#> 2          Redundancy Analysis  rda
-#> 3         Robust Aitchison PCA rpca
+#>                                name   id
+#> 1 Canonical Correspondence Analysis  cca
+#> 2      Principal Component Analysis  pca
+#> 3               Redundancy Analysis  rda
+#> 4              Robust Aitchison PCA rpca
 
     # Find the method for 'prcomp'.
     m <- match_count_ord('prcomp')

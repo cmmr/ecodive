@@ -67,8 +67,8 @@ proportions are also accepted.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>The name of an ordination method: <code>"pca"</code>, <code>"rda"</code>, or
-<code>"rpca"</code>.
+<dd><p>The name of an ordination method: <code>"cca"</code>, <code>"pca"</code>,
+<code>"rda"</code>, or <code>"rpca"</code>.
 Flexible matching is supported (see below). Programmatic access via
 <code><a href="count_ords.html">list_count_ords()</a></code>.</p></dd>
 
@@ -76,11 +76,11 @@ Flexible matching is supported (see below). Programmatic access via
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Further arguments for the method's function, such as <code>n_axes</code>,
 <code>margin</code>, <code>cpus</code>, <code><a href="pca.html">pca()</a></code>'s <code>norm</code>, <code>pseudocount</code>, and <code>scale</code>, or
-<code><a href="rda.html">rda()</a></code>'s <code>groups</code>, <code>data</code>, and <code>formula</code>. Each method keeps its own
-defaults; see <code><a href="pca.html">pca()</a></code>, <code><a href="rda.html">rda()</a></code>, and <code><a href="rpca.html">rpca()</a></code>.
-<code>seed</code> is ignored by the methods that have no random parts (all of
-them, at present), so the same arguments can be given to every
-method.</p></dd>
+<code><a href="rda.html">rda()</a></code>'s and <code><a href="cca.html">cca()</a></code>'s <code>groups</code>, <code>data</code>, and <code>formula</code>. Each method
+keeps its own defaults; see <code><a href="cca.html">cca()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="rda.html">rda()</a></code>, and <code><a href="rpca.html">rpca()</a></code>.
+<code>seed</code> is ignored by the methods that have no random parts (all
+but <code><a href="cca.html">cca()</a></code>, whose adjusted \(R^2\) is found by permutation), so
+the same arguments can be given to every method.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -90,23 +90,26 @@ method.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>List of Ordination Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>pca</code></td><td>Principal Component Analysis (PCA)</td></tr><tr><td><code>rda</code></td><td>Redundancy Analysis (RDA), constrained</td></tr><tr><td><code>rpca</code></td><td>Robust Aitchison PCA</td></tr></table><p><code>rda</code> is constrained by sample metadata, given as further arguments:
+    <p><strong>List of Ordination Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>cca</code></td><td>Canonical Correspondence Analysis (CCA), constrained</td></tr><tr><td><code>pca</code></td><td>Principal Component Analysis (PCA)</td></tr><tr><td><code>rda</code></td><td>Redundancy Analysis (RDA), constrained</td></tr><tr><td><code>rpca</code></td><td>Robust Aitchison PCA</td></tr></table><p><code>rda</code> is constrained by sample metadata, given as further arguments:
 <code>count_ord(counts, 'rda', 'treatment', meta)</code> is
-<code>rda(counts, 'treatment', meta)</code>. Without them, it is a PCA.</p>
+<code>rda(counts, 'treatment', meta)</code>. Without them, it is a PCA. <code>cca</code> is
+constrained the same way; without constraints, it is a correspondence
+analysis.</p>
 <p>Methods that ordinate distances, such as <code><a href="pcoa.html">pcoa()</a></code> and <code><a href="nmds.html">nmds()</a></code>, are run
 by <code><a href="dist_ord.html">dist_ord()</a></code>.</p>
 <p><strong>Flexible name matching</strong></p>
 <p>Case insensitive and partial matching, ignoring anything but letters. E.g.
 <code>method = 'PCA'</code> or <code>'principal comp'</code> selects <code>pca</code>. Common other names
 also work: <code>'prcomp'</code> for <code>pca</code>; <code>'redundancy analysis'</code>, <code>'tbRDA'</code>, or
-<code>'transformation-based RDA'</code> for <code>rda</code>; and <code>'robust PCA'</code>, <code>'DEICODE'</code>,
+<code>'transformation-based RDA'</code> for <code>rda</code>; <code>'canonical correspondence analysis'</code> or <code>'constrained correspondence analysis'</code> for <code>cca</code>; and <code>'robust PCA'</code>, <code>'DEICODE'</code>,
 or <code>'gemelli'</code> for <code>rpca</code>.</p>
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.</p>
 <p><strong>Same names in other packages</strong></p>
-<p><code>vegan::pca()</code> and <code>vegan::rda()</code> share their names with ecodive's <code><a href="pca.html">pca()</a></code>
-and <code><a href="rda.html">rda()</a></code>, and whichever package was attached last masks the other's.
-Write <code><a href="pca.html">ecodive::pca()</a></code> or <code><a href="rda.html">ecodive::rda()</a></code>, or use <code>count_ord()</code>, which
+<p><code>vegan::pca()</code>, <code>vegan::rda()</code> and <code>vegan::cca()</code> share their names with
+ecodive's <code><a href="pca.html">pca()</a></code>, <code><a href="rda.html">rda()</a></code> and <code><a href="cca.html">cca()</a></code>, and whichever package was attached
+last masks the other's. Write <code><a href="pca.html">ecodive::pca()</a></code> and so on, or use
+<code>count_ord()</code>, which
 always runs ecodive's, to be sure.</p>
     </div>
     <div class="section level2">
@@ -141,7 +144,7 @@ other attributes by name rather than in full. Subsetting with <code>[</code>, or
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="pca.html">pca()</a></code>, <code><a href="rda.html">rda()</a></code>, <code><a href="rpca.html">rpca()</a></code>, <code><a href="count_ords.html">list_count_ords()</a></code>; <code><a href="dist_ord.html">dist_ord()</a></code> for
+    <div class="dont-index"><p><code><a href="cca.html">cca()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="rda.html">rda()</a></code>, <code><a href="rpca.html">rpca()</a></code>, <code><a href="count_ords.html">list_count_ords()</a></code>; <code><a href="dist_ord.html">dist_ord()</a></code> for
 the methods that take distances.</p></div>
     </div>
 
@@ -171,12 +174,15 @@ the methods that take distances.</p></div>
 <span class="r-in"><span>    <span class="co"># The same arguments for every method.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="count_ords.html">list_count_ords</a></span><span class="op">(</span><span class="st">'id'</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu">count_ord</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="va">m</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, <span class="st">'prop'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5428410 0.3713532</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.4572664 0.4438732</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5428410 0.3713532</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5428410 0.3713532</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5737685 0.4262315</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>

@@ -127,7 +127,7 @@
 <td align="left">Ordination of counts</td>
 <td align="left"><code><a href="reference/count_ord.html">count_ord()</a></code></td>
 <td align="left">
-<code><a href="reference/pca.html">pca()</a></code>, <code><a href="reference/rpca.html">rpca()</a></code>, <code><a href="reference/rda.html">rda()</a></code>
+<code><a href="reference/pca.html">pca()</a></code>, <code><a href="reference/rpca.html">rpca()</a></code>, <code><a href="reference/rda.html">rda()</a></code>, <code><a href="reference/cca.html">cca()</a></code>
 </td>
 </tr>
 <tr>
@@ -234,7 +234,7 @@
 <div class="section level3">
 <h3 id="ordination">Ordination<a class="anchor" aria-label="anchor" href="#ordination"></a>
 </h3>
-<p>Ordinations place samples on a few axes for plotting. Most start from beta diversity distances; <code><a href="reference/pca.html">pca()</a></code>, <code><a href="reference/rpca.html">rpca()</a></code> and <code><a href="reference/rda.html">rda()</a></code> start from the counts. With only four samples, <code>ex_counts</code> is too small to ordinate, so these examples use R’s built-in <code>iris</code> data: 150 flowers from three species.</p>
+<p>Ordinations place samples on a few axes for plotting. Most start from beta diversity distances; <code><a href="reference/pca.html">pca()</a></code>, <code><a href="reference/rpca.html">rpca()</a></code>, <code><a href="reference/rda.html">rda()</a></code> and <code><a href="reference/cca.html">cca()</a></code> start from the counts. With only four samples, <code>ex_counts</code> is too small to ordinate, so these examples use R’s built-in <code>iris</code> data: 150 flowers from three species.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>

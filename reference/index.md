@@ -181,6 +181,8 @@ take the count table.
   Constrained Analysis of Principal Coordinates (capscale)
 - [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) :
   Redundancy Analysis (RDA)
+- [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) : Canonical
+  Correspondence Analysis (CCA)
 - [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) : Principal
   Component Analysis (PCA)
 - [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) : Robust
