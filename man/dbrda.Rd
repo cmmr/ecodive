@@ -175,7 +175,7 @@ number of \code{cpus}.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -206,23 +206,11 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 }
 
 \examples{
-    d    <- bray(ex_counts)
-    meta <- data.frame(
-      row.names = rownames(ex_counts),
-      treated   = c(TRUE, TRUE, FALSE, FALSE) )
-
-    ord <- dbrda(d, 'treated', meta)
-    ord
-
-    # The same, with a formula, and in vegan's style.
-    dbrda(d, data = meta, formula = ~ treated)
-    dbrda(d ~ treated, meta)
-
-    # Percent of the inertia explained by each axis, and by treatment.
-    round(100 * attr(ord, 'prop'), 1)
-    attr(ord, 'r_squared')
-
-    plot(ord[, 1:2])
+    dm  <- bray(iris[, 1:4])
+    ord <- dbrda(dm, 'Species', iris)
+    plot(ord, col = iris$Species)
+    head(ord)
+    str(ord)
 
 }
 \references{
@@ -241,6 +229,6 @@ fractions. \emph{Ecology}, 87(10), 2614-2625.
 \doi{10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2}
 }
 \seealso{
-\code{\link[=capscale]{capscale()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=ordination]{ordination()}},
+\code{\link[=capscale]{capscale()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=dist_ord]{dist_ord()}},
 \code{\link[=beta_div]{beta_div()}}
 }

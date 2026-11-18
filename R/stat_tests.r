@@ -34,7 +34,7 @@ TEST_HAYSTACK <- make_haystack(DIST_TESTS)
 #' Distance Test Wrapper Function
 #'
 #' Runs any of ecodive's statistical tests of a distance matrix by name, as
-#' [ordination()] does for ordination methods: does one variable, such as
+#' [dist_ord()] does for ordination methods: does one variable, such as
 #' treatment groups, explain the differences between samples?
 #'
 #' @param dm  The distances to test: a `dist` object such as from

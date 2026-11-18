@@ -39,7 +39,7 @@ method, so results can be \code{rbind()}-ed. \code{dist_test(dm, 'mrpp', groups,
 }
 \description{
 Runs any of ecodive's statistical tests of a distance matrix by name, as
-\code{\link[=ordination]{ordination()}} does for ordination methods: does one variable, such as
+\code{\link[=dist_ord]{dist_ord()}} does for ordination methods: does one variable, such as
 treatment groups, explain the differences between samples?
 }
 \details{

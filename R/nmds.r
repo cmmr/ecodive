@@ -288,12 +288,11 @@
 #'
 #' @export
 #' @examples
-#'     ord <- nmds(bray(ex_counts))
-#'     ord
-#'
-#'     attr(ord, 'stress')
-#'
-#'     plot(ord, asp = 1)
+#'     dm  <- bray(iris[, 1:4])
+#'     ord <- nmds(dm)
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 nmds <- function (
     dm, k = 2L, n_starts = 4L, max_iters = 1000L, tol = 1e-7,

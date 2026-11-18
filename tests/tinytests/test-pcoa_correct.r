@@ -163,8 +163,8 @@
   pts <- dist(cbind(x = sin(1:40), y = cos(1:40 / 2) * 3))
   expect_warning(pcoa(pts, k = 39, correction = 'lingoes'), 'only 2 of the first 39')
 
-  # Through ordination().
-  expect_identical(ordination(ds$bray, 'pcoa', correction = 'lingoes'), pcoa(ds$bray, correction = 'lingoes'))
+  # Through dist_ord().
+  expect_identical(dist_ord(ds$bray, 'pcoa', correction = 'lingoes'), pcoa(ds$bray, correction = 'lingoes'))
 
 
 

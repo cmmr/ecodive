@@ -134,7 +134,7 @@
 #'    rows would give the same scores.
 #'
 #' `rpca()` takes a count table, not distances, so like [pca()] it is called
-#' directly rather than through [ordination()].
+#' directly rather than through [dist_ord()].
 #'
 #'
 #' **Relation to gemelli's results**
@@ -294,23 +294,10 @@
 #'
 #' @export
 #' @examples
-#'     ord <- rpca(ex_counts)
-#'     ord
-#'
-#'     # Percent of variance explained by each axis.
-#'     round(100 * attr(ord, 'prop'), 1)
-#'
-#'     # Feature loadings, for a biplot.
-#'     head(attr(ord, 'loadings'))
-#'
-#'     # A biplot (see "Biplots").
-#'     load <- attr(ord, 'loadings')
-#'     f    <- 0.8 * max(abs(ord)) / max(abs(load))
-#'     plot(ord[, 1:2], asp = 1)
-#'     arrows(0, 0, f * load[, 1], f * load[, 2], length = 0.05, col = 'grey')
-#'
-#'     # gemelli's distances, e.g. for pcoa() or a PERMANOVA.
-#'     d <- attr(rpca(ex_counts, distances = TRUE), 'dm')
+#'     ord <- rpca(iris[, 1:4])
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 rpca <- function (
     counts,

@@ -273,8 +273,8 @@
   expect_identical(attr(o1, 'n_iters'), 1L)
   expect_identical(rpca(m, tol = 0, cpus = 1), rpca(m, cpus = 1))
 
-  # Not one of ordination()'s methods: it takes counts.
-  expect_error(ordination(dist(m), 'rpca'), 'call rpca\\(\\) directly')
+  # Not one of dist_ord()'s methods: it takes counts.
+  expect_error(dist_ord(dist(m), 'rpca'), 'call rpca\\(\\) directly')
 
 
 

@@ -280,9 +280,9 @@
   expect_identical(umap(d5, n_epochs = 30, cpus = 3), u5)
   expect_identical(umap(d5, n_epochs = 30, cpus = 8), u5)
 
-  # Through ordination(), and from a matrix.
-  expect_identical(ordination(c1$d, 'umap'), u)
-  expect_identical(match_ordination('UMAP')$id, 'umap')
+  # Through dist_ord(), and from a matrix.
+  expect_identical(dist_ord(c1$d, 'umap'), u)
+  expect_identical(match_dist_ord('UMAP')$id, 'umap')
   m <- as.matrix(c2$d)
   dimnames(m) <- list(paste0('S', 1:40), paste0('S', 1:40))
   um <- umap(m, n_neighbors = 10, n_epochs = 20)

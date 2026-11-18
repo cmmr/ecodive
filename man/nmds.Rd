@@ -270,7 +270,7 @@ floating point code.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -301,12 +301,11 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 }
 
 \examples{
-    ord <- nmds(bray(ex_counts))
-    ord
-
-    attr(ord, 'stress')
-
-    plot(ord, asp = 1)
+    dm  <- bray(iris[, 1:4])
+    ord <- nmds(dm)
+    plot(ord, col = iris$Species)
+    head(ord)
+    str(ord)
 
 }
 \references{

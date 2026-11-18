@@ -113,25 +113,14 @@
 #' @inheritSection ordination_section Ordination result
 #' @inheritSection documentation Input Types
 #'
-#' @seealso [pcoa()], [dbrda()], [ordination()], [aitchison()], `stats::prcomp()`
+#' @seealso [pcoa()], [dbrda()], [dist_ord()], [aitchison()], `stats::prcomp()`
 #'
 #' @export
 #' @examples
-#'     ord <- pca(ex_counts, norm = 'clr', pseudocount = 1)
-#'     ord
-#'
-#'     # Percent of variance explained by each axis.
-#'     round(100 * attr(ord, 'prop'), 1)
-#'
-#'     # Features contributing most to the first axis.
-#'     head(sort(abs(attr(ord, 'loadings')[, 1]), decreasing = TRUE))
-#'
-#'     # Same scores as prcomp(), up to the sign of each axis.
-#'     clr <- log(ex_counts + 1)
-#'     clr <- clr - rowMeans(clr)
-#'     head(prcomp(clr)$x[, 1:3])
-#'
-#'     plot(ord[, 1:2], asp = 1)
+#'     ord <- pca(iris[, 1:4])
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 pca <- function (
     counts,

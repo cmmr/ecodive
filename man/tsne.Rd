@@ -260,7 +260,7 @@ platforms can give a different (but equally good) layout.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -291,19 +291,11 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 }
 
 \examples{
-    # Four samples only allow a perplexity of 1.
-    tsne(bray(ex_counts))
-
-    # A larger example: iris flowers, by Euclidean distance.
-    flowers <- unique(iris)
-    d       <- dist(flowers[, 1:4])
-    ord     <- tsne(d, perplexity = 20)
-    attr(ord, 'kl_divergence')
-
-    plot(ord, asp = 1, col = flowers$Species)
-
-    # Barnes-Hut gradients, from a random start.
-    ord <- tsne(d, perplexity = 20, init = 'random', gradient = 'barnes_hut')
+    dm  <- bray(iris[, 1:4])
+    ord <- tsne(dm)
+    plot(ord, col = iris$Species)
+    head(ord)
+    str(ord)
 
 }
 \references{
@@ -330,5 +322,5 @@ Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python.
 \url{https://jmlr.org/papers/v12/pedregosa11a.html}
 }
 \seealso{
-\code{\link[=umap]{umap()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=umap]{umap()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=dist_ord]{dist_ord()}}, \code{\link[=beta_div]{beta_div()}}
 }

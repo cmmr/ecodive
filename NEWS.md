@@ -1,5 +1,13 @@
 # ecodive 2.4.0
 
+* ecodive now covers a whole diversity analysis: besides alpha and beta
+  diversity, it ordinates samples and tests what explains their distances
+  (see below). New vignettes, `vignette("ordination")` and
+  `vignette("stat_tests")`, walk through both, and the README and
+  `vignette("ecodive")` give an overview of everything the package does. The
+  package title is now "Parallel and Memory-Efficient Ecological Diversity
+  Analysis".
+
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It
   gives the same coordinates and eigenvalues as `cmdscale()`, `ape::pcoa()`,
@@ -21,14 +29,17 @@
   table type and `norm` that `pca()` does. `envfit()` gives the same
   directions with permutation tests.
 
-* New `ordination()` runs any ordination method by name, as `beta_div()`
-  does for beta diversity metrics, with the method's own arguments.
-  `list_ordinations()` and `match_ordination()` list and look up the methods.
+* New `dist_ord()` runs any distance-based ordination method by name, as
+  `beta_div()` does for beta diversity metrics and `dist_test()` does for
+  statistical tests, with the method's own arguments: `dist_ord(dm, "nmds")`
+  is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
+  the methods. `pca()` and `rpca()` take a count table rather than
+  distances, so they are called directly.
   Every ordination method returns the same kind of result: a sample-by-axis
   matrix (of class `"ecodive_ord"`, which prints its attributes' names
   rather than their contents) whose attributes start with `method`, `eig`,
   and `prop`. Every method rejects negative distances (beyond rounding
-  error), and `seed` can be given to any of them through `ordination()`.
+  error), and `seed` can be given to any of them through `dist_ord()`.
 
 * New `nmds()` runs non-metric multidimensional scaling with the SMACOF
   algorithm of scikit-learn's non-metric `MDS()`, ported to parallel C. It
@@ -47,7 +58,7 @@
   of scikit-learn's metric `MDS()`, fitting the distances themselves rather
   than their ranks. It shares `nmds()`'s engine, starts, arguments (without
   `ties`) and result format, and has no limit on the number of samples.
-  `ordination(dm, "mds")` and `"metric MDS"` select it; `"classical MDS"`,
+  `dist_ord(dm, "mds")` and `"metric MDS"` select it; `"classical MDS"`,
   `"pco"` and `"cmdscale"` select `pcoa()`.
 
 * New `isomap()` runs an Isomap (isometric feature mapping) ordination: it
@@ -164,7 +175,7 @@
   `cpus`.
 
 * New `dist_test(dm, test, groups, data, ...)` runs any of these tests by
-  name, as `ordination()` does for ordination methods:
+  name, as `dist_ord()` does for ordination methods:
   `dist_test(dm, "mrpp", "treatment", meta)` is `mrpp(dm, "treatment",
   meta)`, and other arguments (such as `mantel()`'s `method`) pass through.
   It checks that the variable is of a kind the test takes: categorical groups
@@ -196,7 +207,7 @@
 
 * `dbrda()` takes the same `groups`, `data` and `formula` as `permanova()`:
   one variable as `groups` (a vector or a column of `data`), or `data` and a
-  `formula`, or `dm ~ terms`, so `ordination(dm, "dbrda", "treatment", meta)`
+  `formula`, or `dm ~ terms`, so `dist_ord(dm, "dbrda", "treatment", meta)`
   works. Its results gain `r_squared` and `adj_r_squared`, as
   `vegan::RsquareAdj()`, including for partial models.
 
@@ -206,7 +217,7 @@
   negative eigenvalues reported in `inertia`. Euclidean distances take
   `dbrda()`'s fast path; otherwise a threaded eigendecomposition makes it
   about five times faster than `vegan::capscale()` on one thread. Also
-  available as `ordination(dm, "capscale", ...)`.
+  available as `dist_ord(dm, "capscale", ...)`.
 
 * New `envfit()` fits sample metadata (`data`) and feature tables
   (`counts`, such as taxa abundances) onto any ordination, for biplots: an

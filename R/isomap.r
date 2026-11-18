@@ -240,26 +240,16 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pcoa()], [nmds()], [ordination()]
+#' @seealso [pcoa()], [nmds()], [dist_ord()]
 #'
 #' @export
 #' @examples
-#'     ord <- isomap(bray(ex_counts), n_neighbors = 3)
-#'     ord
-#'
-#'     # Percent of the geodesic distances' variance on each axis.
-#'     round(100 * attr(ord, 'prop'), 1)
-#'
-#'     plot(ord, asp = 1)
-#'
-#'     # A long gradient: species replace each other along it.
-#'     x      <- seq(0, 10, length.out = 60)
-#'     counts <- round(100 * exp(-outer(x, 0:10, '-')^2 / 2))
-#'     d      <- bray(counts)
-#'
-#'     # PCoA bends it into an arch; Isomap lays it out straight.
-#'     plot(pcoa(d), asp = 1)
-#'     plot(isomap(d, k = 1)[, 1], x)
+#'     dm  <- bray(iris[, 1:4])
+#'     # Enough neighbours to link setosa to the other two species.
+#'     ord <- isomap(dm, n_neighbors = 50)
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 isomap <- function (dm, k = 2L, n_neighbors = 5L, radius = NULL, cpus = n_cpus()) {
 

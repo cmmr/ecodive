@@ -285,7 +285,7 @@
   expect_identical(attr(ord, 'n_starts'), 4L)
   expect_identical(attr(ord, 'ties'), 'primary')
   expect_equal(attr(ord, 'stress'), stress_r(d_bray, ord, 'primary'), tolerance = 1e-10)
-  expect_identical(ordination(d_bray, 'nmds', cpus = 1), ord)
+  expect_identical(dist_ord(d_bray, 'nmds', cpus = 1), ord)
 
   # The best start is the one reported, and n_best counts the starts
   # within 0.1% of it.

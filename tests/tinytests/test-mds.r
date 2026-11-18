@@ -221,9 +221,9 @@
   expect_true(all(apply(x, 2, function (v) v[which.max(abs(v))] > 0)))
   expect_equal(pro_rmse(x, res$x_all[, , which.min(res$stress_all)] / dscale_of(d_bray)), 0, tolerance = 1e-10)
 
-  # Same as through ordination(); k = 3, 4; matrix input.
-  expect_identical(ordination(d_bray, 'mds', cpus = 1), ord)
-  expect_identical(ordination(d_bray, 'MDS', cpus = 1), ord)
+  # Same as through dist_ord(); k = 3, 4; matrix input.
+  expect_identical(dist_ord(d_bray, 'mds', cpus = 1), ord)
+  expect_identical(dist_ord(d_bray, 'MDS', cpus = 1), ord)
   ord3 <- mds(d_bray, k = 3, n_starts = 1)
   ord4 <- mds(d_bray, k = 4, n_starts = 1)
   expect_identical(colnames(ord4), paste0('MDS', 1:4))

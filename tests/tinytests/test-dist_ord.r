@@ -7,18 +7,18 @@
 
   # Same as calling the method's function. ====
 
-  expect_identical(ordination(d, 'pcoa'),                 pcoa(d))
-  expect_identical(ordination(d, 'pcoa', k = 2, cpus = 1), pcoa(d, k = 2, cpus = 1))
-  expect_identical(ordination(d, 'nmds', n_starts = 1),    nmds(d, n_starts = 1))
-  expect_identical(ordination(d, 'mds',  n_starts = 1),    mds(d, n_starts = 1))
-  expect_identical(ordination(d, 'nmds', k = 3, seed = 2, n_starts = 2), nmds(d, k = 3, seed = 2, n_starts = 2))
-  expect_identical(ordination(d, 'tsne', perplexity = 5, max_iters = 100), tsne(d, perplexity = 5, max_iters = 100))
+  expect_identical(dist_ord(d, 'pcoa'),                 pcoa(d))
+  expect_identical(dist_ord(d, 'pcoa', k = 2, cpus = 1), pcoa(d, k = 2, cpus = 1))
+  expect_identical(dist_ord(d, 'nmds', n_starts = 1),    nmds(d, n_starts = 1))
+  expect_identical(dist_ord(d, 'mds',  n_starts = 1),    mds(d, n_starts = 1))
+  expect_identical(dist_ord(d, 'nmds', k = 3, seed = 2, n_starts = 2), nmds(d, k = 3, seed = 2, n_starts = 2))
+  expect_identical(dist_ord(d, 'tsne', perplexity = 5, max_iters = 100), tsne(d, perplexity = 5, max_iters = 100))
 
   # Arguments the method doesn't take are an error, except `seed`, which is
   # dropped for methods without random parts.
-  expect_error(ordination(d, 'pcoa', n_starts = 3), 'unused argument')
-  expect_identical(ordination(d, 'pcoa', seed = 1, cpus = 1), pcoa(d, cpus = 1))
-  expect_identical(ordination(dm = d, method = 'pcoa'), pcoa(d))
+  expect_error(dist_ord(d, 'pcoa', n_starts = 3), 'unused argument')
+  expect_identical(dist_ord(d, 'pcoa', seed = 1, cpus = 1), pcoa(d, cpus = 1))
+  expect_identical(dist_ord(dm = d, method = 'pcoa'), pcoa(d))
 
 
   # Every method returns the common attributes first, in the same order. ====
@@ -29,9 +29,9 @@
     capscale = list(groups = 'g', data = meta),
     dbrda    = list(groups = 'g', data = meta) )
 
-  for (id in list_ordinations(val = 'id')) {
+  for (id in list_dist_ords(val = 'id')) {
     # The same arguments, `seed` included, work for every method.
-    ord <- do.call(ordination, c(list(d, id, k = 2, seed = 1, cpus = 1), args[[id]]))
+    ord <- do.call(dist_ord, c(list(d, id, k = 2, seed = 1, cpus = 1), args[[id]]))
     expect_true(is.matrix(ord) && is.double(ord))
     expect_identical(rownames(ord), attr(d, 'Labels'))
     expect_identical(names(attributes(ord))[1:5], c('dim', 'dimnames', 'method', 'eig', 'prop'))
@@ -47,7 +47,7 @@
 
   # Flexible matching. ====
 
-  m <- function (x) match_ordination(x)$id
+  m <- function (x) match_dist_ord(x)$id
   expect_identical(m('pcoa'),                'pcoa')
   expect_identical(m('PCoA'),                'pcoa')
   expect_identical(m('Principal coord'),     'pcoa')
@@ -70,9 +70,9 @@
   expect_identical(m('Barnes-Hut t-SNE'),    'tsne')
   expect_identical(m('Isomap'),              'isomap')
   expect_identical(m('isometric mapping'),   'isomap')
-  expect_identical(match_ordination('nmds', input = 'dist')$id, 'nmds')
+  expect_identical(match_dist_ord('nmds', input = 'dist')$id, 'nmds')
 
-  info <- match_ordination('pcoa')
+  info <- match_dist_ord('pcoa')
   expect_identical(info$func, pcoa)
   expect_identical(info$params, names(formals(pcoa)))
   expect_identical(info$input, 'dist')
@@ -81,36 +81,36 @@
 
   # Listing. ====
 
-  df <- list_ordinations()
+  df <- list_dist_ords()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id', 'input'))
   expect_identical(df$id, c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
-  expect_identical(rownames(list_ordinations(nm = 'id')), c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
+  expect_identical(rownames(list_dist_ords(nm = 'id')), c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
 
-  expect_identical(list_ordinations(val = 'id', nm = 'name'),
+  expect_identical(list_dist_ords(val = 'id', nm = 'name'),
     c('Constrained Analysis of Principal Coordinates' = 'capscale',
       'Distance-based Redundancy Analysis' = 'dbrda', 'Isometric Feature Mapping' = 'isomap',
       'Metric Multidimensional Scaling' = 'mds',
       'Non-metric Multidimensional Scaling' = 'nmds', 'Principal Coordinates Analysis' = 'pcoa',
       't-distributed Stochastic Neighbor Embedding' = 'tsne',
       'Uniform Manifold Approximation and Projection' = 'umap'))
-  expect_identical(list_ordinations(val = 'func'), list(capscale = capscale, dbrda = dbrda, isomap = isomap, mds = mds, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
-  expect_identical(list_ordinations(val = 'list')$pcoa, match_ordination('pcoa'))
-  expect_identical(list_ordinations(val = 'input', input = 'dist'), rep('dist', 8))
+  expect_identical(list_dist_ords(val = 'func'), list(capscale = capscale, dbrda = dbrda, isomap = isomap, mds = mds, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
+  expect_identical(list_dist_ords(val = 'list')$pcoa, match_dist_ord('pcoa'))
+  expect_identical(list_dist_ords(val = 'input', input = 'dist'), rep('dist', 8))
 
 
   # Invalid input. ====
 
-  expect_error(ordination(d, 'xyz'),   'does not match any option: capscale, dbrda, isomap, mds, nmds, pcoa, tsne, umap')
-  expect_error(ordination(d, 'm'),     'matches multiple options: mds, nmds')
-  expect_error(ordination(d, 123),     'character')
-  expect_error(ordination(d, c('pcoa', 'nmds')), 'length 1')
-  expect_error(ordination(d, '-'),     'alphabetic')
-  expect_error(ordination(d, NA_character_), 'NA')
-  expect_error(ordination(d, 'PCA'),       'call pca\\(\\) directly')
-  expect_error(ordination(d, 'adonis2'),   'is a test, not an ordination: use dist_test')
-  expect_error(ordination(d, 'betadisper'), 'use dist_test')
-  expect_error(list_ordinations(input = 'counts'), 'Options are: NULL, dist')
-  expect_error(list_ordinations(val = 'xyz'))
+  expect_error(dist_ord(d, 'xyz'),   'does not match any option: capscale, dbrda, isomap, mds, nmds, pcoa, tsne, umap')
+  expect_error(dist_ord(d, 'm'),     'matches multiple options: mds, nmds')
+  expect_error(dist_ord(d, 123),     'character')
+  expect_error(dist_ord(d, c('pcoa', 'nmds')), 'length 1')
+  expect_error(dist_ord(d, '-'),     'alphabetic')
+  expect_error(dist_ord(d, NA_character_), 'NA')
+  expect_error(dist_ord(d, 'PCA'),       'call pca\\(\\) directly')
+  expect_error(dist_ord(d, 'adonis2'),   'is a test, not an ordination: use dist_test')
+  expect_error(dist_ord(d, 'betadisper'), 'use dist_test')
+  expect_error(list_dist_ords(input = 'counts'), 'Options are: NULL, dist')
+  expect_error(list_dist_ords(val = 'xyz'))
 
 #})

@@ -7,7 +7,7 @@
 \method{print}{ecodive_ord}(x, ...)
 }
 \arguments{
-\item{x}{An ordination result, from \code{\link[=ordination]{ordination()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}},
+\item{x}{An ordination result, from \code{\link[=dist_ord]{dist_ord()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}},
 \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}},
 \code{\link[=tsne]{tsne()}}, or \code{\link[=umap]{umap()}}.}
 

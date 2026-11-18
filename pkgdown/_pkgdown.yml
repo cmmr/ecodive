@@ -55,9 +55,9 @@ reference:
   - variance_adjusted_unifrac
 
 - title: Ordination
-  desc: Plot samples by their beta diversity distances, or (pca, rpca) by their feature abundances.
+  desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances; pca() and rpca() take the count table.
   contents:
-  - ordination
+  - dist_ord
   - pcoa
   - pcoa_biplot
   - mds
@@ -70,7 +70,7 @@ reference:
   - pca
   - rpca
   - envfit
-  - list_ordinations
+  - list_dist_ords
 
 - title: Hypothesis Tests
   desc: Test whether sample metadata explain beta diversity distances.

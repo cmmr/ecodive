@@ -171,7 +171,7 @@ from run to run and for any number of \code{cpus}.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -202,22 +202,11 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 }
 
 \examples{
-    ord <- pcoa(bray(ex_counts))
-    ord
-
-    # Percent of variance explained by each axis.
-    round(100 * attr(ord, 'prop'), 1)
-
-    # Same coordinates as cmdscale(), up to the sign of each axis.
-    cmdscale(bray(ex_counts), k = 3)
-
-    plot(ord[, 1:2], asp = 1)
-
-    # Unweighted UniFrac has negative eigenvalues here.
-    d   <- unweighted_unifrac(ex_counts, tree = ex_tree)
-    ord <- pcoa(d, correction = 'cailliez')
-    attr(ord, 'constant')
-    round(100 * attr(ord, 'prop'), 1)
+    dm  <- bray(iris[, 1:4])
+    ord <- pcoa(dm)
+    plot(ord, col = iris$Species)
+    head(ord)
+    str(ord)
 
 }
 \references{
@@ -244,6 +233,6 @@ symmetric eigenvalue problems. \emph{SIAM Journal on Matrix Analysis and
 Applications}, 22(2), 602-616. \doi{10.1137/S0895479898334605}
 }
 \seealso{
-\code{\link[=pcoa_biplot]{pcoa_biplot()}}, \code{\link[=pca]{pca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=ordination]{ordination()}},
+\code{\link[=pcoa_biplot]{pcoa_biplot()}}, \code{\link[=pca]{pca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=dist_ord]{dist_ord()}},
 \code{\link[=beta_div]{beta_div()}}, \code{stats::cmdscale()}
 }

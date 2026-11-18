@@ -1,0 +1,150 @@
+---
+title: "Statistical Tests"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Statistical Tests}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>" )
+```
+
+
+## Introduction
+
+An ordination plot can suggest that groups of samples differ. ecodive's
+permutation tests check whether the difference is real: does a variable,
+such as treatment or body site, explain the distances between samples?
+
+Each test takes a distance matrix (`dm`) from any beta diversity metric,
+plus the variable to test: either a vector with one value per sample, or
+the name of a column in a data frame of sample metadata (`data`).
+
+| Function      | Test                                              | Variable    | Question                                                      |
+| :------------ | :------------------------------------------------ | :---------- | :------------------------------------------------------------ |
+| `permanova()` | Permutational Multivariate Analysis of Variance   | either      | Do group centroids differ? How much variance (R²) does it explain? |
+| `permdisp()`  | Homogeneity of Multivariate Dispersions           | categorical | Do groups differ in their spread?                             |
+| `anosim()`    | Analysis of Similarities                          | categorical | Are distances within groups smaller than between them (ranks)? |
+| `mrpp()`      | Multi-Response Permutation Procedure              | categorical | Are distances within groups smaller than expected?            |
+| `mantel()`    | Mantel Test                                       | numeric     | Do distances correlate with differences in a numeric variable, or with another distance matrix? |
+
+They give the same statistics as `vegan`'s `adonis2()`, `betadisper()`,
+`anosim()`, `mrpp()`, and `mantel()`, with permutations run in parallel C,
+and the p-values are identical for any number of threads.
+
+The examples use R's built-in `iris` data, as in `vignette('ordination')`:
+150 flowers, four measurements each, and three species.
+
+```{r}
+library(ecodive)
+
+dm <- bray(iris[, 1:4])
+```
+
+
+## PERMANOVA
+
+`permanova()` is the most widely used test. Give the grouping variable as a
+column name of `data`, or as a vector.
+
+```{r}
+permanova(dm, 'Species', iris)
+```
+
+Species explain most of the variation between flowers (`R2`), and no
+permutation of the labels did as well (`p`). The p-value cannot be smaller
+than 1 / (`permutations` + 1), so use more permutations for a more precise
+one.
+
+A `formula` tests several variables at once. `by = 'terms'` tests each in
+turn, as `adonis2()` does, and `strata` restricts permutations to within
+blocks (such as subjects in a repeated-measures design).
+
+```{r}
+permanova(dm, data = iris, formula = ~ Species + Sepal.Width, by = 'terms')
+```
+
+
+## Checking the spread
+
+PERMANOVA can also give a small p-value when groups have the same center
+but different spreads. `permdisp()` tests the spread on its own; a
+significant result means a PERMANOVA difference may come partly or wholly
+from dispersion.
+
+```{r}
+permdisp(dm, 'Species', iris)
+```
+
+Here the three species are equally spread, so the PERMANOVA result above
+reflects a real difference in their centers. The warning comes from
+Bray-Curtis distances not being Euclidean: a flower can then sit at a
+negative squared distance from its species' center, which `permdisp()`
+sets to zero (Anderson 2006).
+
+
+## ANOSIM and MRPP
+
+`anosim()` compares the ranks of distances within and between groups. `R`
+near 1 means every group is distinct, and near 0 means no difference.
+`mrpp()` compares the average distance within groups with what random
+groups would give.
+
+```{r}
+anosim(dm, 'Species', iris)
+
+mrpp(dm, 'Species', iris)
+```
+
+
+## Mantel test
+
+`mantel()` correlates `dm` with a numeric variable, or with a second
+distance matrix: here, whether flowers with similar petals also have
+similar sepals. `method` can be `'pearson'`, `'spearman'`, or `'kendall'`.
+
+```{r}
+sepals <- bray(iris[, 1:2])
+petals <- bray(iris[, 3:4])
+
+mantel(sepals, petals, method = 'spearman')
+```
+
+
+## Running tests by name
+
+`dist_test()` runs any test by name, as `dist_ord()` does for ordinations.
+It checks that the variable suits the test (categorical or numeric), and
+names are matched forgivingly: `'adonis2'` finds `permanova` and
+`'betadisper'` finds `permdisp`.
+
+```{r}
+dist_test(dm, 'adonis2', 'Species', iris)
+```
+
+Each result converts to a one-row data frame with the same columns, so
+several tests combine into one table.
+
+```{r}
+tests <- list_dist_tests(val = 'id', groups = 'categorical')
+
+do.call(rbind, lapply(tests, function (test)
+  as.data.frame(dist_test(dm, test, 'Species', iris)) ))
+```
+
+
+## Reproducibility
+
+Permutations come from ecodive's own random number generator, set by
+`seed` (default `0`), so the same call always gives the same p-value, on
+any computer and with any number of `cpus`. R's `set.seed()` has no effect.
+
+```{r}
+identical(
+  permanova(dm, 'Species', iris, seed = 1, cpus = 1),
+  permanova(dm, 'Species', iris, seed = 1, cpus = 2) )
+```

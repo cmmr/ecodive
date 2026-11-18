@@ -178,20 +178,16 @@ See \code{\link{aitchison}} for references.
 }
 
 \examples{
-    ord    <- pcoa(bray(ex_counts))
-    scores <- pcoa_biplot(ord, ex_counts, norm = 'percent')
-    head(scores)
-
-    # The 5 features with the longest arrows on the first two axes.
-    top <- head(order(-rowSums(scores[, 1:2]^2)), 5)
+    dm     <- bray(iris[, 1:4])
+    ord    <- pcoa(dm)
+    scores <- pcoa_biplot(ord, iris[, 1:4])
+    scores
 
     # Scale the arrows to the samples' spread, and draw them.
-    xy <- scores[top, 1:2]
-    xy <- xy * 0.8 * max(abs(ord[, 1:2])) / max(abs(xy))
-
-    plot(ord[, 1:2], asp = 1)
-    arrows(0, 0, xy[, 1], xy[, 2], length = 0.1, col = 'red')
-    text(xy, labels = rownames(xy), pos = 3, col = 'red')
+    xy <- scores[, 1:2] * 0.8 * max(abs(ord[, 1:2])) / max(abs(scores[, 1:2]))
+    plot(ord, col = iris$Species)
+    arrows(0, 0, xy[, 1], xy[, 2], length = 0.1)
+    text(xy, labels = rownames(xy), pos = 3)
 
 }
 \references{

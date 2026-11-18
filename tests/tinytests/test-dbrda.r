@@ -129,13 +129,13 @@
   expect_error(dbrda(dmx ~ A1, meta, ~ A1), 'Name the formula argument')
   expect_error(dbrda(dmx ~ A1, data = meta, formula = ~ A1), 'not both')
 
-  # ordination() passes the same arguments on.
-  expect_identical(ordination(d, 'dbrda', 'Management', meta, cpus = 1), one)
-  expect_identical(ordination(d, 'dbrda', data = meta, formula = ~ Management, cpus = 1), one)
-  expect_identical(match_ordination('distance-based RDA')$id, 'dbrda')
+  # dist_ord() passes the same arguments on.
+  expect_identical(dist_ord(d, 'dbrda', 'Management', meta, cpus = 1), one)
+  expect_identical(dist_ord(d, 'dbrda', data = meta, formula = ~ Management, cpus = 1), one)
+  expect_identical(match_dist_ord('distance-based RDA')$id, 'dbrda')
 
-  # ordination() drops `seed` for dbrda, which has no random parts.
-  expect_identical(ordination(d, 'dbrda', 'Management', meta, seed = 1, cpus = 1), one)
+  # dist_ord() drops `seed` for dbrda, which has no random parts.
+  expect_identical(dist_ord(d, 'dbrda', 'Management', meta, seed = 1, cpus = 1), one)
 
   # A symmetric matrix gives the same result as a dist.
   expect_identical(dbrda(as.matrix(d), 'Management', meta, cpus = 1), one)

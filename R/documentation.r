@@ -87,7 +87,7 @@ NULL
 #' @section Ordination result:
 #'   Every ordination function ([pcoa()], [pca()], [rpca()], [dbrda()],
 #'   [capscale()], [mds()], [nmds()], [isomap()], [tsne()], [umap()], and so
-#'   [ordination()]) returns the same kind of
+#'   [dist_ord()]) returns the same kind of
 #'   object: a numeric matrix with one row per sample and one column per
 #'   axis, so that it can go straight into `plot()` or a data frame. Rows are
 #'   named after the samples, when the input has names. Columns are named

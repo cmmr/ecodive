@@ -178,31 +178,17 @@ random permutations.
 }
 }
 \examples{
-    # 30 samples in three treatment groups. The 'high' group has more
-    # of the first five genera.
-    set.seed(1)
-    counts <- matrix(rpois(30 * 20, 5), 30, 20)
-    dimnames(counts) <- list(paste0('S', 1:30), paste0('G', 1:20))
-    meta <- data.frame(
-      row.names = rownames(counts),
-      treatment = rep(c('ctrl', 'low', 'high'), each = 10),
-      ph        = round(rnorm(30, 7, 0.3), 1) )
-    high <- meta$treatment == 'high'
-    counts[high, 1:5] <- counts[high, 1:5] + 5
+    dm  <- bray(iris[, 1:4])
+    ord <- pcoa(dm, k = 2)
 
-    ord <- pcoa(bray(counts), k = 2)
+    # An arrow for each measurement, a centroid for each species.
+    fit <- envfit(ord, iris)
+    fit
 
-    # Metadata: an arrow for pH, a centroid for each treatment.
-    envfit(ord, meta)
-
-    # Each genus's relative abundance as an arrow.
-    fit <- envfit(ord, counts = counts, norm = 'percent')
-    head(fit[order(fit$p_value), ])
-
-    # A biplot of the genera with p <= 0.05.
-    top <- fit[fit$p_value <= 0.05, ]
-    plot(ord, asp = 1)
-    arrows(0, 0, top$PCoA1 * sqrt(top$r2) * 0.3, top$PCoA2 * sqrt(top$r2) * 0.3)
+    # A biplot of the measurements.
+    vec <- fit[is.na(fit$level), ]
+    plot(ord, col = iris$Species)
+    arrows(0, 0, vec$PCoA1 * sqrt(vec$r2) * 0.1, vec$PCoA2 * sqrt(vec$r2) * 0.1)
 
 }
 \references{

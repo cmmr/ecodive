@@ -202,7 +202,7 @@ Results are identical from run to run and for any number of \code{cpus}.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -233,16 +233,11 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 }
 
 \examples{
-    # 60 samples from three kinds of community.
-    set.seed(1)
-    rates  <- rbind(c(50, 20, 5, 1), c(5, 50, 20, 1), c(1, 5, 20, 50))
-    counts <- matrix(rpois(240, rates[rep(1:3, each = 20), ]), 60, 4)
-    rownames(counts) <- paste0('S', 1:60)
-
-    ord <- umap(bray(counts), n_neighbors = 10)
+    dm  <- bray(iris[, 1:4])
+    ord <- umap(dm)
+    plot(ord, col = iris$Species)
     head(ord)
-
-    plot(ord, col = rep(1:3, each = 20), asp = 1)
+    str(ord)
 
 }
 \references{
@@ -260,5 +255,5 @@ symmetric eigenvalue problems. \emph{SIAM Journal on Matrix Analysis and
 Applications}, 22(2), 602-616. \doi{10.1137/S0895479898334605}
 }
 \seealso{
-\code{\link[=tsne]{tsne()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=tsne]{tsne()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=dist_ord]{dist_ord()}}, \code{\link[=beta_div]{beta_div()}}
 }

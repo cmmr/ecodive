@@ -71,9 +71,9 @@
   expect_true(is_ord(capscale(dm, 'grp', meta, cpus = cpus), 'CAP'))
   expect_true(is_ord(pca(counts, cpus = cpus), 'PC'))
   expect_true(is_ord(rpca(counts, cpus = cpus), 'RPCA'))
-  expect_true(is_ord(ordination(dm, 'pcoa', cpus = cpus), 'PCoA'))
-  expect_true(all(c('pcoa', 'nmds', 'umap') %in% list_ordinations('id')))
-  expect_identical(match_ordination('cmdscale')$id, 'pcoa')
+  expect_true(is_ord(dist_ord(dm, 'pcoa', cpus = cpus), 'PCoA'))
+  expect_true(all(c('pcoa', 'nmds', 'umap') %in% list_dist_ords('id')))
+  expect_identical(match_dist_ord('cmdscale')$id, 'pcoa')
 
   o  <- pcoa(dm, cpus = cpus)
   bp <- pcoa_biplot(o, counts, cpus = cpus)
@@ -119,7 +119,7 @@
   bad[1] <- NA
   expect_error(permanova(bad, 'grp', meta), 'NA')
   expect_error(pcoa(dm, k = 0), '`k`')
-  expect_error(ordination(dm, 'no_such_method'))
+  expect_error(dist_ord(dm, 'no_such_method'))
   expect_error(dist_test(dm, 'no_such_test', 'grp', meta))
 
   expect_true(n_cpus() >= 1)

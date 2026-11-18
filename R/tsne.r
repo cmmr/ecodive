@@ -274,23 +274,15 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [umap()], [pcoa()], [nmds()], [ordination()], [beta_div()]
+#' @seealso [umap()], [pcoa()], [nmds()], [dist_ord()], [beta_div()]
 #'
 #' @export
 #' @examples
-#'     # Four samples only allow a perplexity of 1.
-#'     tsne(bray(ex_counts))
-#'
-#'     # A larger example: iris flowers, by Euclidean distance.
-#'     flowers <- unique(iris)
-#'     d       <- dist(flowers[, 1:4])
-#'     ord     <- tsne(d, perplexity = 20)
-#'     attr(ord, 'kl_divergence')
-#'
-#'     plot(ord, asp = 1, col = flowers$Species)
-#'
-#'     # Barnes-Hut gradients, from a random start.
-#'     ord <- tsne(d, perplexity = 20, init = 'random', gradient = 'barnes_hut')
+#'     dm  <- bray(iris[, 1:4])
+#'     ord <- tsne(dm)
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 tsne <- function (
     dm, k = 2L, perplexity = 30, theta = 0.5, gradient = 'auto',

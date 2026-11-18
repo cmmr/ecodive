@@ -204,11 +204,11 @@
   expect_identical(capscale(d, 'Management', meta[rev(seq_len(nrow(meta))), ], cpus = 1), one)
   expect_equal(unclass(capscale(d, meta$Management, cpus = 1))[, ], unclass(one)[, ])
 
-  # ordination() runs it, by its name or another.
-  expect_identical(ordination(d, 'capscale', 'Management', meta, cpus = 1), one)
-  expect_identical(ordination(d, 'capscale', 'Management', meta, seed = 3, cpus = 1), one)
-  expect_identical(match_ordination('CAP')$id, 'capscale')
-  expect_identical(match_ordination('constrained analysis of principal coordinates')$id, 'capscale')
+  # dist_ord() runs it, by its name or another.
+  expect_identical(dist_ord(d, 'capscale', 'Management', meta, cpus = 1), one)
+  expect_identical(dist_ord(d, 'capscale', 'Management', meta, seed = 3, cpus = 1), one)
+  expect_identical(match_dist_ord('CAP')$id, 'capscale')
+  expect_identical(match_dist_ord('constrained analysis of principal coordinates')$id, 'capscale')
 
   expect_error(capscale(d),                          '`groups` is required')
   expect_error(capscale(d, meta$Managment, meta),    '`groups` is NULL')

@@ -120,7 +120,7 @@ rows would give the same scores.
 }
 
 \code{rpca()} takes a count table, not distances, so like \code{\link[=pca]{pca()}} it is called
-directly rather than through \code{\link[=ordination]{ordination()}}.
+directly rather than through \code{\link[=dist_ord]{dist_ord()}}.
 
 \strong{Relation to gemelli's results}
 
@@ -255,7 +255,7 @@ case that can change which step length is accepted.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -303,23 +303,10 @@ For large datasets, standard matrix operations may be slow. See
 }
 
 \examples{
-    ord <- rpca(ex_counts)
-    ord
-
-    # Percent of variance explained by each axis.
-    round(100 * attr(ord, 'prop'), 1)
-
-    # Feature loadings, for a biplot.
-    head(attr(ord, 'loadings'))
-
-    # A biplot (see "Biplots").
-    load <- attr(ord, 'loadings')
-    f    <- 0.8 * max(abs(ord)) / max(abs(load))
-    plot(ord[, 1:2], asp = 1)
-    arrows(0, 0, f * load[, 1], f * load[, 2], length = 0.05, col = 'grey')
-
-    # gemelli's distances, e.g. for pcoa() or a PERMANOVA.
-    d <- attr(rpca(ex_counts, distances = TRUE), 'dm')
+    ord <- rpca(iris[, 1:4])
+    plot(ord, col = iris$Species)
+    head(ord)
+    str(ord)
 
 }
 \references{

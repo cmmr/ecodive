@@ -195,20 +195,15 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [tsne()], [pcoa()], [nmds()], [ordination()], [beta_div()]
+#' @seealso [tsne()], [pcoa()], [nmds()], [dist_ord()], [beta_div()]
 #'
 #' @export
 #' @examples
-#'     # 60 samples from three kinds of community.
-#'     set.seed(1)
-#'     rates  <- rbind(c(50, 20, 5, 1), c(5, 50, 20, 1), c(1, 5, 20, 50))
-#'     counts <- matrix(rpois(240, rates[rep(1:3, each = 20), ]), 60, 4)
-#'     rownames(counts) <- paste0('S', 1:60)
-#'
-#'     ord <- umap(bray(counts), n_neighbors = 10)
+#'     dm  <- bray(iris[, 1:4])
+#'     ord <- umap(dm)
+#'     plot(ord, col = iris$Species)
 #'     head(ord)
-#'
-#'     plot(ord, col = rep(1:3, each = 20), asp = 1)
+#'     str(ord)
 #'
 umap <- function (
     dm, k = 2L, n_neighbors = 15L, min_dist = 0.1, spread = 1,

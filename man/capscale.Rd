@@ -166,7 +166,7 @@ of \code{cpus}.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -197,24 +197,11 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 }
 
 \examples{
-    set.seed(1)
-    counts <- matrix(rpois(30 * 20, 5), 30, dimnames = list(paste0('S', 1:30), NULL))
-    counts[16:30, 1:5] <- counts[16:30, 1:5] + 10
-    meta <- data.frame(
-      row.names = rownames(counts),
-      group     = rep(c('A', 'B'), each = 15),
-      pH        = runif(30, 5, 8) )
-
-    # Bray-Curtis distances aren't Euclidean: the two differ.
-    cap <- capscale(bray(counts), data = meta, formula = ~ group + pH)
-    db  <- dbrda(bray(counts), data = meta, formula = ~ group + pH)
-    rbind(capscale = attr(cap, 'eig'), dbrda = attr(db, 'eig'))
-    attr(cap, 'inertia')
-
-    # Euclidean distances are: the two agree.
-    cap <- capscale(euclidean(counts), 'group', meta)
-    db  <- dbrda(euclidean(counts), 'group', meta)
-    all.equal(attr(cap, 'eig'), attr(db, 'eig'))
+    dm  <- bray(iris[, 1:4])
+    ord <- capscale(dm, 'Species', iris)
+    plot(ord, col = iris$Species)
+    head(ord)
+    str(ord)
 
 }
 \references{
@@ -232,5 +219,5 @@ Legendre, P., & Legendre, L. (2012). \emph{Numerical Ecology} (3rd English
 ed.). Elsevier.
 }
 \seealso{
-\code{\link[=dbrda]{dbrda()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=dbrda]{dbrda()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=dist_ord]{dist_ord()}}, \code{\link[=beta_div]{beta_div()}}
 }

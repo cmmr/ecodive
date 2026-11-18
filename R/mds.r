@@ -192,16 +192,11 @@
 #'
 #' @export
 #' @examples
-#'     ord <- mds(bray(ex_counts))
-#'     ord
-#'
-#'     attr(ord, 'stress')
-#'
-#'     # Distances that are Euclidean in 2 dimensions are recovered exactly.
-#'     pts <- cbind(x = c(0, 3, 0, 3, 1), y = c(0, 0, 4, 4, 2))
-#'     ord <- mds(dist(pts))
-#'     attr(ord, 'stress')
-#'     all.equal(c(dist(ord)), c(dist(pts)))
+#'     dm  <- bray(iris[, 1:4])
+#'     ord <- mds(dm)
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 mds <- function (
     dm, k = 2L, n_starts = 4L, max_iters = 1000L, tol = 1e-7,

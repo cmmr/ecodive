@@ -195,7 +195,7 @@ differ in the last bits between computers or compilers.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -226,22 +226,12 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
 }
 
 \examples{
-    ord <- isomap(bray(ex_counts), n_neighbors = 3)
-    ord
-
-    # Percent of the geodesic distances' variance on each axis.
-    round(100 * attr(ord, 'prop'), 1)
-
-    plot(ord, asp = 1)
-
-    # A long gradient: species replace each other along it.
-    x      <- seq(0, 10, length.out = 60)
-    counts <- round(100 * exp(-outer(x, 0:10, '-')^2 / 2))
-    d      <- bray(counts)
-
-    # PCoA bends it into an arch; Isomap lays it out straight.
-    plot(pcoa(d), asp = 1)
-    plot(isomap(d, k = 1)[, 1], x)
+    dm  <- bray(iris[, 1:4])
+    # Enough neighbours to link setosa to the other two species.
+    ord <- isomap(dm, n_neighbors = 50)
+    plot(ord, col = iris$Species)
+    head(ord)
+    str(ord)
 
 }
 \references{
@@ -261,5 +251,5 @@ methods used in multivariate analysis. \emph{Biometrika}, 53(3-4), 325-338.
 \doi{10.1093/biomet/53.3-4.325}
 }
 \seealso{
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=ordination]{ordination()}}
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=dist_ord]{dist_ord()}}
 }

@@ -128,7 +128,7 @@ where \code{prcomp()} would stop with an error.
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
-\code{\link[=ordination]{ordination()}}) returns the same kind of
+\code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
 axis, so that it can go straight into \code{plot()} or a data frame. Rows are
 named after the samples, when the input has names. Columns are named
@@ -196,21 +196,10 @@ See \code{\link{aitchison}} for references.
 }
 
 \examples{
-    ord <- pca(ex_counts, norm = 'clr', pseudocount = 1)
-    ord
-
-    # Percent of variance explained by each axis.
-    round(100 * attr(ord, 'prop'), 1)
-
-    # Features contributing most to the first axis.
-    head(sort(abs(attr(ord, 'loadings')[, 1]), decreasing = TRUE))
-
-    # Same scores as prcomp(), up to the sign of each axis.
-    clr <- log(ex_counts + 1)
-    clr <- clr - rowMeans(clr)
-    head(prcomp(clr)$x[, 1:3])
-
-    plot(ord[, 1:2], asp = 1)
+    ord <- pca(iris[, 1:4])
+    plot(ord, col = iris$Species)
+    head(ord)
+    str(ord)
 
 }
 \references{
@@ -222,5 +211,5 @@ Aitchison, J. (1983). Principal component analysis of compositional data.
 \emph{Biometrika}, 70(1), 57-65. \doi{10.1093/biomet/70.1.57}
 }
 \seealso{
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=ordination]{ordination()}}, \code{\link[=aitchison]{aitchison()}}, \code{stats::prcomp()}
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=dist_ord]{dist_ord()}}, \code{\link[=aitchison]{aitchison()}}, \code{stats::prcomp()}
 }

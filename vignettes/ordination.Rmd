@@ -1,0 +1,261 @@
+---
+title: "Ordination"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Ordination}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse   = TRUE,
+  comment    = "#>",
+  fig.width  = 5,
+  fig.height = 4.5 )
+```
+
+
+## Introduction
+
+An ordination places samples on a few axes so that similar samples land near
+each other, ready to plot. ecodive has ten ordination methods, and two
+functions that show which features or variables drive the axes. All of them
+are written in parallel C and give the same results as the R and Python
+packages they replace, for any number of threads.
+
+Most methods ordinate a distance matrix, which you compute first with any
+beta diversity metric. Two methods, PCA and robust Aitchison PCA, start from
+the count table itself.
+
+```
+                 bray(), beta_div(), ...
+  count table  ────────────────────────►  dm  ──►  dist_ord(dm, 'pcoa')
+       │                                           pcoa(dm), nmds(dm), umap(dm), ...
+       │                                           dist_test(dm, 'permanova', ...)
+       │
+       └─────────────────────────────────────────►  pca(counts), rpca(counts)
+```
+
+The examples here use R's built-in `iris` data: 150 flowers (the samples),
+four measurements of each (the features), and three species. Your own data
+can be any count table that ecodive takes, such as a matrix, a sparse
+matrix, or a `phyloseq` or `rbiom` object.
+
+```{r}
+library(ecodive)
+
+head(iris)
+
+dm <- bray(iris[, 1:4])
+```
+
+
+## Choosing a method
+
+| Function     | Method                                         | Input  | Best for                                                                 |
+| :----------- | :--------------------------------------------- | :----- | :----------------------------------------------------------------------- |
+| `pcoa()`     | Principal Coordinates Analysis (PCoA)          | `dm`   | The default: exact, fast, and reports the variance on each axis.        |
+| `mds()`      | Metric Multidimensional Scaling                | `dm`   | Fitting the distances themselves in exactly `k` dimensions.             |
+| `nmds()`     | Non-metric Multidimensional Scaling (NMDS)     | `dm`   | Keeping the rank order of distances; popular with Bray-Curtis.          |
+| `isomap()`   | Isometric Feature Mapping (Isomap)             | `dm`   | Long gradients that PCoA bends into an arch.                            |
+| `tsne()`     | t-distributed Stochastic Neighbor Embedding    | `dm`   | Separating clusters; distances between clusters mean little.            |
+| `umap()`     | Uniform Manifold Approximation and Projection  | `dm`   | Clusters, with more of the global layout kept than t-SNE.               |
+| `dbrda()`    | Distance-based Redundancy Analysis (db-RDA)    | `dm`   | Axes that sample metadata explain (a constrained ordination).           |
+| `capscale()` | Constrained Analysis of Principal Coordinates  | `dm`   | The same, as `vegan::capscale()` computes it.                           |
+| `pca()`      | Principal Component Analysis (PCA)             | counts | Euclidean geometry of (transformed) counts, with feature loadings.      |
+| `rpca()`     | Robust Aitchison PCA                           | counts | Sparse compositional data, such as microbiome counts.                   |
+
+`list_dist_ords()` lists the methods that take distances, with the other
+names each one answers to.
+
+
+## The result
+
+Every method returns the same kind of object: a matrix with one row per
+sample and one column per axis, so it goes straight into `plot()` or a data
+frame.
+
+```{r}
+ord <- pcoa(dm)
+head(ord)
+```
+
+Its attributes say how the ordination was made and how good it is. They
+always begin with `method`, `eig` (the eigenvalues), and `prop` (the
+proportion of variance on each axis), followed by the method's own.
+
+```{r}
+str(ord)
+```
+
+`prop` makes informative axis labels. PCoA axes share one scale, so plot
+them with `asp = 1` to keep distances true.
+
+```{r}
+pct <- round(100 * attr(ord, 'prop'), 1)
+
+plot(
+  ord, col = iris$Species, asp = 1,
+  xlab = paste0('PCoA1 (', pct[1], '%)'),
+  ylab = paste0('PCoA2 (', pct[2], '%)') )
+legend('topleft', levels(iris$Species), col = 1:3, pch = 1)
+```
+
+
+## Running methods by name
+
+`dist_ord()` runs any distance-based method by name, as `beta_div()` does
+for beta diversity metrics. Each method keeps its own arguments and
+defaults, and `seed` is accepted (and ignored) by the methods that have no
+random parts, so one call can run them all.
+
+```{r, fig.width = 7, fig.height = 5}
+ords <- list(
+  'PCoA'   = dist_ord(dm, 'pcoa'),
+  'MDS'    = dist_ord(dm, 'mds',    seed = 1),
+  'NMDS'   = dist_ord(dm, 'nmds',   seed = 1),
+  'Isomap' = dist_ord(dm, 'isomap', n_neighbors = 50),
+  't-SNE'  = dist_ord(dm, 'tsne',   seed = 1),
+  'UMAP'   = dist_ord(dm, 'umap',   seed = 1) )
+
+par(mfrow = c(2, 3), mar = c(2, 2, 2, 1))
+for (nm in names(ords))
+  plot(ords[[nm]], col = iris$Species, main = nm, xlab = '', ylab = '')
+```
+
+Names are matched forgivingly, so `'PCoA'`, `'cmdscale'`, `'metaMDS'`, and
+`'t-SNE'` all work. Finished code should use the primary names shown by
+`list_dist_ords('id')`.
+
+```{r}
+list_dist_ords()
+```
+
+
+## Non-Euclidean distances
+
+Many ecological distances, such as Bray-Curtis and unweighted UniFrac, are
+not Euclidean: PCoA then finds negative eigenvalues, which cannot be drawn.
+`correction = 'lingoes'` or `'cailliez'` adds the smallest constant that
+removes them, as `ape::pcoa()` does.
+
+```{r}
+ord <- pcoa(dm, correction = 'cailliez')
+attr(ord, 'constant')
+```
+
+NMDS sidesteps the question by fitting only the rank order of the
+distances. Its `stress` attribute measures how well it did: below 0.1 is
+good, and below 0.05 is excellent.
+
+```{r}
+attr(nmds(dm), 'stress')
+```
+
+
+## Constrained ordination
+
+`dbrda()` and `capscale()` find the axes of `dm` that sample metadata
+explain. Give one variable as `groups`, or several in a `formula`.
+
+```{r}
+ord <- dbrda(dm, 'Species', iris)
+
+attr(ord, 'r_squared')
+
+attr(ord, 'centroids')
+```
+
+The first two axes (`dbRDA1`, `dbRDA2`) are constrained by species, and the
+third (`MDS1`) is the largest remaining variation. A formula can hold
+several variables, and `Condition()` removes the effect of one before the
+others are fitted, as in `vegan`.
+
+```{r}
+ord <- dbrda(dm, data = iris, formula = ~ Species + Condition(Sepal.Width))
+attr(ord, 'inertia')
+```
+
+
+## Ordinating counts directly
+
+`pca()` and `rpca()` take the count table rather than distances. PCA
+works on any of ecodive's transformations, such as `norm = 'clr'` (centered
+log-ratios, with a `pseudocount` for zeros); `scale = TRUE` gives every
+feature equal weight. The `loadings` attribute holds each feature's
+direction, for a biplot.
+
+```{r}
+ord <- pca(iris[, 1:4], scale = TRUE)
+
+attr(ord, 'loadings')
+
+load <- attr(ord, 'loadings') * 3
+plot(ord, col = iris$Species, asp = 1)
+arrows(0, 0, load[, 1], load[, 2], length = 0.1)
+text(load[, 1:2], labels = rownames(load), pos = 4)
+```
+
+PCA is PCoA of Euclidean distances: both give the same scores, up to each
+axis's sign. `pca()` also returns the loadings, and never forms the
+150-by-150 distance matrix.
+
+```{r}
+all.equal(abs(pca(iris[, 1:4])[, 1]), abs(pcoa(euclidean(iris[, 1:4]))[, 1]))
+```
+
+`rpca()` is robust Aitchison PCA (as in the `gemelli` Python package and
+QIIME 2's DEICODE). It treats zeros as missing rather than adding a
+pseudocount, which suits sparse microbiome counts.
+
+```{r}
+ord <- rpca(iris[, 1:4])
+round(100 * attr(ord, 'prop'), 1)
+```
+
+
+## What drives the axes?
+
+`pcoa_biplot()` projects each feature of a table onto a PCoA, giving an
+arrow for each one, as scikit-bio does.
+
+```{r}
+ord    <- pcoa(dm)
+scores <- pcoa_biplot(ord, iris[, 1:4])
+scores
+```
+
+`envfit()` fits sample metadata, or a feature table, onto any ordination.
+Numeric variables get an arrow and r-squared, factors a centroid per level,
+and each one a permutation p-value, as `vegan::envfit()` gives.
+
+```{r}
+fit <- envfit(ord, iris)
+fit
+
+# An arrow for each measurement, longer for a better fit.
+vec <- fit[is.na(fit$level), ]
+xy  <- vec[, c('PCoA1', 'PCoA2')] * sqrt(vec$r2) * 0.1
+plot(ord, col = iris$Species, asp = 1)
+arrows(0, 0, xy$PCoA1, xy$PCoA2, length = 0.1)
+text(xy, labels = vec$variable, pos = 1, cex = 0.8)
+```
+
+
+## Speed and reproducibility
+
+Every method runs on all available cores by default; set `cpus` to use
+fewer. Results are identical for any number of threads. Methods with random
+starts (`mds()`, `nmds()`, `tsne()`, and `umap()`) take a `seed`, so a seed
+always gives the same result.
+
+```{r}
+identical(nmds(dm, seed = 1, cpus = 1), nmds(dm, seed = 1, cpus = 2))
+```
+
+
+## Next steps
+
+An ordination shows whether groups of samples look different. To test it,
+see `vignette('stat_tests')`.

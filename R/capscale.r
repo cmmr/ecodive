@@ -137,28 +137,15 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [dbrda()], [pcoa()], [permanova()], [ordination()], [beta_div()]
+#' @seealso [dbrda()], [pcoa()], [permanova()], [dist_ord()], [beta_div()]
 #'
 #' @export
 #' @examples
-#'     set.seed(1)
-#'     counts <- matrix(rpois(30 * 20, 5), 30, dimnames = list(paste0('S', 1:30), NULL))
-#'     counts[16:30, 1:5] <- counts[16:30, 1:5] + 10
-#'     meta <- data.frame(
-#'       row.names = rownames(counts),
-#'       group     = rep(c('A', 'B'), each = 15),
-#'       pH        = runif(30, 5, 8) )
-#'
-#'     # Bray-Curtis distances aren't Euclidean: the two differ.
-#'     cap <- capscale(bray(counts), data = meta, formula = ~ group + pH)
-#'     db  <- dbrda(bray(counts), data = meta, formula = ~ group + pH)
-#'     rbind(capscale = attr(cap, 'eig'), dbrda = attr(db, 'eig'))
-#'     attr(cap, 'inertia')
-#'
-#'     # Euclidean distances are: the two agree.
-#'     cap <- capscale(euclidean(counts), 'group', meta)
-#'     db  <- dbrda(euclidean(counts), 'group', meta)
-#'     all.equal(attr(cap, 'eig'), attr(db, 'eig'))
+#'     dm  <- bray(iris[, 1:4])
+#'     ord <- capscale(dm, 'Species', iris)
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 capscale <- function (
     dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus() ) {

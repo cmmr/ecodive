@@ -337,10 +337,10 @@
   expect_equal(colMeans(x), c(0, 0), tolerance = 1e-12)
   expect_true(all(apply(x, 2, function (v) v[which(abs(v) >= max(abs(v)) * (1 - 1e-8))[[1]]] > 0)))
 
-  # A symmetric matrix gives the same result; ordination() too.
+  # A symmetric matrix gives the same result; dist_ord() too.
   expect_identical(tsne(as.matrix(d60), cpus = 1), ord)
-  expect_identical(ordination(d60, 'tsne', cpus = 1), ord)
-  expect_identical(ordination(d60, 't-SNE', cpus = 1), ord)
+  expect_identical(dist_ord(d60, 'tsne', cpus = 1), ord)
+  expect_identical(dist_ord(d60, 't-SNE', cpus = 1), ord)
 
   # The KL divergence is that of the result.
   sc60 <- 2^-floor(log2(max(d60)))

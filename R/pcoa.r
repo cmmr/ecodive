@@ -192,27 +192,16 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [pcoa_biplot()], [pca()], [dbrda()], [nmds()], [ordination()],
+#' @seealso [pcoa_biplot()], [pca()], [dbrda()], [nmds()], [dist_ord()],
 #'   [beta_div()], `stats::cmdscale()`
 #'
 #' @export
 #' @examples
-#'     ord <- pcoa(bray(ex_counts))
-#'     ord
-#'
-#'     # Percent of variance explained by each axis.
-#'     round(100 * attr(ord, 'prop'), 1)
-#'
-#'     # Same coordinates as cmdscale(), up to the sign of each axis.
-#'     cmdscale(bray(ex_counts), k = 3)
-#'
-#'     plot(ord[, 1:2], asp = 1)
-#'
-#'     # Unweighted UniFrac has negative eigenvalues here.
-#'     d   <- unweighted_unifrac(ex_counts, tree = ex_tree)
-#'     ord <- pcoa(d, correction = 'cailliez')
-#'     attr(ord, 'constant')
-#'     round(100 * attr(ord, 'prop'), 1)
+#'     dm  <- bray(iris[, 1:4])
+#'     ord <- pcoa(dm)
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 pcoa <- function (dm, k = 3L, correction = 'none', cpus = n_cpus()) {
 

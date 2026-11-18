@@ -33,31 +33,34 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 
 
 
-#' Ordination Wrapper Function
+#' Distance-based Ordination
 #'
-#' Runs any of ecodive's ordination methods by name, as [beta_div()] does for
-#' beta diversity metrics.
+#' Runs any of ecodive's distance-based ordination methods by name, as
+#' [beta_div()] does for beta diversity metrics and [dist_test()] does for
+#' statistical tests. Compute the distances once with [beta_div()] (or a
+#' metric's own function, such as [bray()]), then pass them to `dist_ord()`
+#' and `dist_test()`.
 #'
 #' @param dm   The distances to ordinate: a `dist` object such as from
 #'        [beta_div()], or a symmetric matrix of distances. Every method
-#'        listed by `list_ordinations()` takes distances.
+#'        listed by `list_dist_ords()` takes distances.
 #'
 #' @param method   The name of an ordination method: `"capscale"`,
 #'        `"dbrda"`, `"isomap"`, `"mds"`, `"nmds"`, `"pcoa"`, `"tsne"`,
 #'        or `"umap"`. Flexible matching is supported (see below).
-#'        Programmatic access via `list_ordinations()`.
+#'        Programmatic access via `list_dist_ords()`.
 #'
 #' @param ...   Further arguments for the method's function, such as `k`,
 #'        `seed`, `cpus`, or `pcoa`'s `correction`. Each method keeps its own
 #'        defaults; see [capscale()] and [dbrda()] (which also need `groups`,
-#'        or `data` and `formula`, as in `ordination(dm, 'dbrda', 'treatment',
+#'        or `data` and `formula`, as in `dist_ord(dm, 'dbrda', 'treatment',
 #'        meta)`), [isomap()], [mds()], [nmds()], [pcoa()], [tsne()], and
 #'        [umap()]. `seed` is ignored by the methods that have no random
 #'        parts (`capscale`, `dbrda`, `isomap` and `pcoa`), so the same
 #'        arguments can be given to every method.
 #'
 #' @return The method's result, as described in "Ordination result" below.
-#'   `ordination(dm, 'pcoa', ...)` is the same as `pcoa(dm, ...)`.
+#'   `dist_ord(dm, 'pcoa', ...)` is the same as `pcoa(dm, ...)`.
 #'
 #' @details
 #'
@@ -75,8 +78,11 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' | `umap`                 | Uniform Manifold Approximation and Projection (UMAP)  |
 #'
 #' [pca()] and [rpca()] ordinate a count table rather than distances, so they
-#' are called directly, not through `ordination()`. [permanova()] and ecodive's other
-#' tests are run by [dist_test()].
+#' are called directly, not through `dist_ord()`. PCA is PCoA of Euclidean
+#' distances: `dist_ord(euclidean(counts), 'pcoa')` gives the same scores as
+#' `pca(counts)`, up to each axis's sign, but `pca()` also returns the
+#' features' loadings and never forms the distance matrix. [permanova()] and
+#' ecodive's other tests are run by [dist_test()].
 #'
 #' Default numbers of axes differ: `k = 3` for `capscale`, `dbrda`, `pcoa` (and
 #' [pca()], [rpca()]), and `k = 2` for `isomap`, `mds`, `nmds`, `tsne`, and
@@ -104,34 +110,25 @@ ORD_HAYSTACK <- make_haystack(ORDINATIONS)
 #' `vegan::isomap()` (whose `k` is the number of neighbours, not axes), and
 #' `uwot::umap()` share names with ecodive's functions, and whichever package was attached last
 #' masks the other's. Write `ecodive::pcoa()` and so on, or use
-#' `ordination()`, which always runs ecodive's, to be sure.
+#' `dist_ord()`, which always runs ecodive's, to be sure.
 #'
 #' @inheritSection ordination_section Ordination result
 #'
 #' @seealso [capscale()], [dbrda()], [isomap()], [mds()], [nmds()], [pcoa()],
-#'   [tsne()], [umap()], [list_ordinations()]; [pca()] and [rpca()], which are
+#'   [tsne()], [umap()], [list_dist_ords()]; [pca()] and [rpca()], which are
 #'   called directly; [dist_test()] for ecodive's tests.
 #'
 #' @export
 #' @examples
-#'     # 30 samples in three groups.
-#'     set.seed(1)
-#'     counts <- matrix(rpois(30 * 20, 5), 30, 20)
-#'     counts[11:20, 1:5] <- counts[11:20, 1:5] + 5
-#'     counts[21:30, 6:10] <- counts[21:30, 6:10] + 5
-#'     d <- bray(counts)
+#'     dm  <- bray(iris[, 1:4])
+#'     ord <- dist_ord(dm, 'pcoa')
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
-#'     ordination(d, 'pcoa')
-#'
-#'     ordination(d, 'NMDS', k = 2)
-#'
-#'     # The same arguments for every method.
-#'     ords <- lapply(c('pcoa', 'nmds', 'umap'), function (m)
-#'       ordination(d, m, k = 2, seed = 1, cpus = 1) )
-#'
-ordination <- function (dm, method, ...) {
+dist_ord <- function (dm, method, ...) {
 
-  method <- match_ordination(method)
+  method <- match_dist_ord(method)
 
   args <- list(...)
   if (!'seed' %in% method$params) args$seed <- NULL
@@ -142,10 +139,10 @@ ordination <- function (dm, method, ...) {
 
 
 
-#' Find and Browse Ordination Methods
+#' Find and Browse Distance-based Ordination Methods
 #'
-#' Programmatic access to the list of available ordination methods, and
-#' their associated functions.
+#' Programmatic access to the list of ordination methods that [dist_ord()]
+#' runs, and their associated functions.
 #'
 #' @param method   The name of an ordination method to search for. Supports
 #'        partial matching. All non-alpha characters are ignored.
@@ -162,7 +159,7 @@ ordination <- function (dm, method, ...) {
 #'
 #' @return
 #'
-#' **`match_ordination()`**
+#' **`match_dist_ord()`**
 #'
 #' A `list` with the following elements.
 #'
@@ -173,13 +170,13 @@ ordination <- function (dm, method, ...) {
 #' * `params` : Formal args for `func`, e.g. `c("dm", "k", "cpus")`
 #'
 #'
-#' **`list_ordinations()`**
+#' **`list_dist_ords()`**
 #'
 #' The returned object's type and values are controlled with the `val` and
 #' `nm` arguments.
 #'
 #' * `val = "data.frame"` : The data.frame from which the below options are sourced.
-#' * `val = "list"` : A list of objects as returned by `match_ordination()` (above).
+#' * `val = "list"` : A list of objects as returned by `match_dist_ord()` (above).
 #' * `val = "func"` : A list of functions.
 #' * `val = "id"` : A character vector of method IDs.
 #' * `val = "name"` : A character vector of method names.
@@ -190,19 +187,19 @@ ordination <- function (dm, method, ...) {
 #' be applied to the `rownames()` property of the `data.frame`.
 #'
 #'
-#' @rdname ordinations
+#' @rdname dist_ords
 #' @export
 #'
 #' @examples
 #'
 #'     # A data.frame of all available methods.
-#'     list_ordinations()
+#'     list_dist_ords()
 #'
 #'     # Find the method for 'MDS'.
-#'     m <- match_ordination('MDS')
+#'     m <- match_dist_ord('MDS')
 #'     m$id
 #'
-list_ordinations <- function (
+list_dist_ords <- function (
     val   = c('data.frame', 'list', 'func', 'id', 'name', 'input'),
     nm    = c(NA, 'id', 'name'),
     input = NULL ) {
@@ -250,16 +247,16 @@ list_ordinations <- function (
 }
 
 
-#' @rdname ordinations
+#' @rdname dist_ords
 #' @export
 #'
-match_ordination <- function (method, input = NULL) {
+match_dist_ord <- function (method, input = NULL) {
 
   if (!is.character(method)) stop('`method` must be a character vector')
   if (length(method) != 1)   stop('`method` must be length 1')
   if (is.na(method))         stop('`method` must not be NA')
 
-  df <- list_ordinations(input = input)
+  df <- list_dist_ords(input = input)
 
   # Exact match
   if (method %in% df$id)

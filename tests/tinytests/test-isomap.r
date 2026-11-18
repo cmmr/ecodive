@@ -109,9 +109,9 @@
   expect_equal(attr(x, 'prop'), attr(x, 'eig') / attr(x, 'trace'))
   expect_identical(ord_flip(vals(x)), vals(x))
 
-  # Through ordination().
-  expect_identical(ordination(d, 'isomap', n_neighbors = 10, cpus = 1), x)
-  expect_identical(ordination(d, 'isometric mapping', n_neighbors = 10, seed = 1, cpus = 1), x)
+  # Through dist_ord().
+  expect_identical(dist_ord(d, 'isomap', n_neighbors = 10, cpus = 1), x)
+  expect_identical(dist_ord(d, 'isometric mapping', n_neighbors = 10, seed = 1, cpus = 1), x)
 
   # A symmetric matrix gives the same result as a dist.
   expect_identical(isomap(as.matrix(d), n_neighbors = 10, cpus = 1), x)

@@ -242,7 +242,7 @@ ord_result <- function (
 #' other attributes, rather than every attribute in full (such as `pca()`'s
 #' loadings).
 #'
-#' @param x  An ordination result, from [ordination()], [pcoa()], [pca()],
+#' @param x  An ordination result, from [dist_ord()], [pcoa()], [pca()],
 #'        [rpca()], [dbrda()], [capscale()], [mds()], [nmds()], [isomap()],
 #'        [tsne()], or [umap()].
 #'

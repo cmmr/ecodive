@@ -184,28 +184,16 @@
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [capscale()], [pcoa()], [pca()], [permanova()], [ordination()],
+#' @seealso [capscale()], [pcoa()], [pca()], [permanova()], [dist_ord()],
 #'   [beta_div()]
 #'
 #' @export
 #' @examples
-#'     d    <- bray(ex_counts)
-#'     meta <- data.frame(
-#'       row.names = rownames(ex_counts),
-#'       treated   = c(TRUE, TRUE, FALSE, FALSE) )
-#'
-#'     ord <- dbrda(d, 'treated', meta)
-#'     ord
-#'
-#'     # The same, with a formula, and in vegan's style.
-#'     dbrda(d, data = meta, formula = ~ treated)
-#'     dbrda(d ~ treated, meta)
-#'
-#'     # Percent of the inertia explained by each axis, and by treatment.
-#'     round(100 * attr(ord, 'prop'), 1)
-#'     attr(ord, 'r_squared')
-#'
-#'     plot(ord[, 1:2])
+#'     dm  <- bray(iris[, 1:4])
+#'     ord <- dbrda(dm, 'Species', iris)
+#'     plot(ord, col = iris$Species)
+#'     head(ord)
+#'     str(ord)
 #'
 dbrda <- function (
     dm, groups, data = NULL, formula = NULL, k = 3L, cpus = n_cpus() ) {
