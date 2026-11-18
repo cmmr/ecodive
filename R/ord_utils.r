@@ -244,7 +244,7 @@ ord_result <- function (
 #'
 #' @param x  An ordination result, from [dist_ord()], [count_ord()],
 #'        [pcoa()], [pca()], [rpca()], [rda()], [cca()], [ca()], [dbrda()], [capscale()],
-#'        [mds()], [nmds()], [isomap()], [tsne()], or [umap()].
+#'        [mds()], [nmds()], [isomap()], [tsne()], [umap()], or [procrustes()].
 #'
 #' @param ...  Passed on to `print()` for the matrix of coordinates.
 #'

@@ -123,3 +123,73 @@ QIIME 2 has `procrustes-analysis` and `partial-procrustes`; vegan has
   community environment concordance. *Écoscience*, 2, 297–303.
 - Peres-Neto, P. R., & Jackson, D. A. (2001). How well do multivariate
   data sets match? *Oecologia*, 129, 169–178.
+
+
+## Decisions made while implementing
+
+Asked of the user at the start (2026-11-18):
+
+- **Result class (user):** `procrustes()` returns the rotated `ord` itself,
+  an `ecodive_ord` matrix with `method = 'procrustes'` (eig and prop `NA`),
+  not a list. The rest are attributes, in this order: `ss`, `rotation`,
+  `translation`, `dilation`, `residuals`, `symmetric`, and `target` (the
+  target as fitted: centred, scaled if symmetric, zero-padded; vegan's `X`).
+  `print.ecodive_ord()` then works unchanged.
+- **dist inputs (user):** a new `n_axes` argument (default `3L`, as
+  `pcoa()`'s) is passed to `pcoa()` when `ord` or `target` is a `dist`, so
+  a dist input gives exactly `procrustes(pcoa(d, n_axes), ...)`. Ignored for
+  matrix inputs. `procrustes_test()` takes it too.
+- **Mismatched samples (user):** when both inputs have row names, `target`
+  is reordered to `ord`'s samples; different sample sets are an error naming
+  the missing samples (as `mantel()` does). Without names on both, the rows
+  must be in the same order and number.
+- **Default `axes` (user):** as the plan says, the first
+  `min(ncol(ord), ncol(target))` axes. vegan pads the narrower input with
+  zeros; documented as a difference, and `axes = 1:k` reproduces vegan.
+
+Made while implementing:
+
+- `axes` takes whole numbers only (not names, since the two inputs'
+  axis names usually differ), up to the wider input's column count; axes
+  past an input's width are zero columns. No warning (vegan warns).
+- The rotated result's column names come from `target` (it is in target's
+  frame), or from `ord` for axes where `target` is zero-padded; unnamed
+  columns are `Dim1`, `Dim2`, ...
+- `rotation` is always k × k after padding. When `ord` is the narrower
+  input, vegan returns a (ncol(ord) × k) rotation; its rows equal the first
+  rows of ecodive's (the padded rows are arbitrary). Tests compare those
+  rows.
+- `translation` follows vegan: `xmean - dilation * ymean %*% rotation`, so
+  `dilation * ord %*% rotation + translation` gives the fitted coordinates.
+  With `symmetric = TRUE` it is exactly 0, since both inputs are centred
+  before scaling (vegan's is ~1e-18 there).
+- Inputs with no variation (all samples at one point) are an error, as are
+  fewer than 2 samples, NA/infinite coordinates, and non-numeric inputs.
+- The observed fit is computed in R with `svd()` (SciPy's
+  `orthogonal_procrustes()`: X'Y = U S V', rotation V U', dilation
+  tr(S) / tr(Y'Y)). The permutation loop is C (`src/procrustes.c`,
+  `C_protest`): per permutation the k × k cross-product X' Y[p, ] and its
+  nuclear norm by one-sided Jacobi, one permutation per thread, so results
+  are identical for any `cpus`. Permutation p takes `ord`'s row i to be
+  `ord[p[i], ]`, as vegan's `Y[take, ]` (vegan permutes its `Y`, which is
+  ecodive's `ord`).
+- `procrustes_test()` result fields: `statistic` (`r = sqrt(1 - ss)`),
+  `p_value`, `z`, `n_perm`, `ss`, `n`, `n_axes` (axes compared, after
+  padding), `procrustes` (the symmetric fit), `permutation`; attribute
+  `r_perm`. Title "Procrustes randomization test (PROTEST)". No
+  `alternative` (vegan's test is one-sided); ties within
+  `sqrt(.Machine$double.eps)` count, which reproduces vegan's p-values.
+- `strata` is a vector with one value per sample (matched by name), since
+  there is no `data` argument.
+- Fixtures: `data-raw/expected/procrustes.r` (vegan 2.7.8, permute 0.10.0)
+  and `procrustes.py` (SciPy 1.18.1, symmetric disparity). Cases: varespec
+  PCoA (3 axes) vs NMDS (2 axes), padded and same-width; a reflected,
+  rotated, dilated, shifted copy (ss = 0); an exact match; unrelated noise
+  (p = 0.66), each with symmetric and dilate both ways.
+- Docs: the two functions sit beside `envfit()` in the pkgdown Ordination
+  section; a "Comparing two ordinations" section in
+  `vignette('ordination')` compares Bray-Curtis and unweighted UniFrac PCoAs
+  of 30 simulated samples of `ex_tree`'s taxa (`ex_counts` has only 4
+  samples); a "Comparing ordinations" row in the README table.
+- Credit: "The SciPy developers" added to `Authors@R` (ctb, cph), with a
+  `Files: src/procrustes.c R/procrustes.r` stanza in `inst/COPYRIGHTS`.

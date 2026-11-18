@@ -74,6 +74,8 @@ reference:
   - pca
   - rpca
   - envfit
+  - procrustes
+  - procrustes_test
   - list_dist_ords
   - list_count_ords
 

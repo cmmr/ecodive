@@ -29,6 +29,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "'gemelli' robust Aitchison PCA"),
     person(
+      "The SciPy developers",
+      role    = c("ctb", "cph"),
+      comment = "Procrustes analysis, following SciPy"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

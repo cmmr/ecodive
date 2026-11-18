@@ -41,6 +41,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`     |
 | Ordination of counts  | `count_ord()`   | `pca()`, `rpca()`, `rda()`, `cca()`, `ca()`                                              |
 | Biplots               |                 | `pcoa_biplot()`, `envfit()`                                                              |
+| Comparing ordinations |                 | `procrustes()`, `procrustes_test()`                                                      |
 | Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`        |
 | Data preparation      |                 | `rarefy()`, `normalize()`, `read_tree()`                                                 |
 

@@ -27,6 +27,7 @@ extern SEXP C_pcoa_correct(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa_biplot(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_permanova(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_permdisp(SEXP, SEXP, SEXP);
+extern SEXP C_protest(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_permdisp_perm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pair_seed(SEXP, SEXP);
 extern SEXP C_pthreads(void);
@@ -68,6 +69,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_permanova", (DL_FUNC) &C_permanova, 9},
   {"C_permdisp",  (DL_FUNC) &C_permdisp,  3},
   {"C_permdisp_perm", (DL_FUNC) &C_permdisp_perm, 6},
+  {"C_protest",   (DL_FUNC) &C_protest,   5},
   {"C_pair_seed",     (DL_FUNC) &C_pair_seed,     2},
   {"C_pthreads",  (DL_FUNC) &C_pthreads,  0},
   {"C_stop_thread_pool", (DL_FUNC) &C_stop_thread_pool, 0},

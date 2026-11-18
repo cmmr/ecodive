@@ -270,7 +270,8 @@ that take the count table itself, run by name with `count_ord()`.
 | `ca()`       | Correspondence Analysis (CA)                    |
 
 `pcoa_biplot()` and `envfit()` add arrows for the features or metadata that
-drive the axes.
+drive the axes. `procrustes()` and `procrustes_test()` compare two ordinations of the
+same samples.
 
 Four samples are too few to ordinate, so this example uses R's built-in
 `iris` data: 150 flowers, four measurements each, and three species. Every

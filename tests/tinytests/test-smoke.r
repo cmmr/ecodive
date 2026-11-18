@@ -90,6 +90,10 @@
   expect_inherits(ef, 'data.frame')
   expect_true(all(ef$p_value >= 0 & ef$p_value <= 1))
 
+  pr <- procrustes(o, pcoa(dm, n_axes = 2, cpus = cpus), cpus = cpus)
+  expect_true(is_ord(pr, 'PCoA'))
+  expect_true(is.finite(attr(pr, 'ss')))
+
   expect_true(any(grepl('PCoA1', capture.output(print(o)))))
 
 
@@ -103,6 +107,7 @@
     permdisp  = permdisp(dm, 'grp', meta, pairwise = TRUE, permutations = 9, cpus = cpus),
     mantel    = mantel(dm, 'x', meta, permutations = 9, cpus = cpus),
     mantel_partial = mantel_partial(dm, 'x', rep(1:4, 5), meta, permutations = 9, cpus = cpus),
+    procrustes_test = procrustes_test(o, pcoa(dm, n_axes = 2, cpus = cpus), permutations = 9, cpus = cpus),
     dist_test = dist_test(dm, 'permanova', 'grp', meta, permutations = 9, cpus = cpus) )
 
   for (nm in names(tests)) {
