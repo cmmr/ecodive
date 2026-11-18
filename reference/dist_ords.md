@@ -8,12 +8,11 @@ runs, and their associated functions.
 
 ``` r
 list_dist_ords(
-  val = c("data.frame", "list", "func", "id", "name", "input"),
-  nm = c(NA, "id", "name"),
-  input = NULL
+  val = c("data.frame", "list", "func", "id", "name"),
+  nm = c(NA, "id", "name")
 )
 
-match_dist_ord(method, input = NULL)
+match_dist_ord(method)
 ```
 
 ## Arguments
@@ -28,11 +27,6 @@ match_dist_ord(method, input = NULL)
   What value to use for the names of the returned object. Default is
   `"id"` when `val` is `"list"` or `"func"`, otherwise the default is
   `NA` (no name).
-
-- input:
-
-  Filter by the kind of data the method takes: `"dist"` for distances.
-  Default: `NULL` (no filtering).
 
 - method:
 
@@ -49,12 +43,10 @@ A `list` with the following elements.
 
 - `id` : Method ID - also the name of the function, e.g. `"pcoa"`
 
-- `input` : The kind of data the method takes, e.g. `"dist"`.
-
 - `func` : The function for this method, e.g.
   [`ecodive::pcoa`](https://cmmr.github.io/ecodive/reference/pcoa.md)
 
-- `params` : Formal args for `func`, e.g. `c("dm", "k", "cpus")`
+- `params` : Formal args for `func`, e.g. `c("dm", "n_axes", "cpus")`
 
 **`list_dist_ords()`**
 
@@ -73,9 +65,6 @@ The returned object's type and values are controlled with the `val` and
 
 - `val = "name"` : A character vector of method names.
 
-- `val = "input"` : A character vector of the kinds of data each method
-  takes.
-
 If `nm` is set, then the names of the vector or list will be the method
 ID (`nm="id"`) or name (`nm="name"`). When `val="data.frame"`, the names
 will be applied to the
@@ -88,15 +77,15 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_dist_ords()
-#>                                            name       id input
-#> 1 Constrained Analysis of Principal Coordinates capscale  dist
-#> 2            Distance-based Redundancy Analysis    dbrda  dist
-#> 3                     Isometric Feature Mapping   isomap  dist
-#> 4               Metric Multidimensional Scaling      mds  dist
-#> 5           Non-metric Multidimensional Scaling     nmds  dist
-#> 6                Principal Coordinates Analysis     pcoa  dist
-#> 7   t-distributed Stochastic Neighbor Embedding     tsne  dist
-#> 8 Uniform Manifold Approximation and Projection     umap  dist
+#>                                            name       id
+#> 1 Constrained Analysis of Principal Coordinates capscale
+#> 2            Distance-based Redundancy Analysis    dbrda
+#> 3                     Isometric Feature Mapping   isomap
+#> 4               Metric Multidimensional Scaling      mds
+#> 5           Non-metric Multidimensional Scaling     nmds
+#> 6                Principal Coordinates Analysis     pcoa
+#> 7   t-distributed Stochastic Neighbor Embedding     tsne
+#> 8 Uniform Manifold Approximation and Projection     umap
 
     # Find the method for 'MDS'.
     m <- match_dist_ord('MDS')

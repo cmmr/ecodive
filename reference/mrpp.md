@@ -2,12 +2,12 @@
 
 Tests whether samples are more similar to the other samples in their
 group than to samples in other groups. Gives the same statistics as
-[`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html):
-the observed and expected weighted mean within-group distance
-(\\\delta\\), the chance-corrected within-group agreement \\A\\, the
-mean distance within each group, and a permutation p-value. Also gives
-the standardized effect size \\z\\ that `summary(vegan::permustats())`
-reports. Computes them in parallel C, straight from the distances.
+`vegan::mrpp()`: the observed and expected weighted mean within-group
+distance (\\\delta\\), the chance-corrected within-group agreement
+\\A\\, the mean distance within each group, and a permutation p-value.
+Also gives the standardized effect size \\z\\ that
+`summary(vegan::permustats())` reports. Computes them in parallel C,
+straight from the distances.
 
 ## Usage
 
@@ -56,9 +56,7 @@ mrpp(
   by its number of samples \\n\\:
 
   - `'n'`: \\n\\, as recommended by Mielke & Berry (2001). The default,
-    and
-    [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)'s
-    `weight.type = 1`.
+    and `vegan::mrpp()`'s `weight.type = 1`.
 
   - `'n-1'`: \\n - 1\\. `weight.type = 2`.
 
@@ -66,15 +64,13 @@ mrpp(
     \\\delta\\ is the mean of all within-group distances.
     `weight.type = 3`.
 
-  `1`, `2`, or `3` are also accepted, as in
-  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html).
+  `1`, `2`, or `3` are also accepted, as in `vegan::mrpp()`.
 
 - permutations:
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones.
+  `permute::shuffleSet()`, to use instead of random ones.
 
 - strata:
 
@@ -133,8 +129,7 @@ ecodive's other permutation tests. Its fields:
   or `'supplied matrix'`.
 
 Attribute `delta_perm` holds the \\\delta\\ of each permutation, as
-[`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)'s
-`boot.deltas`.
+`vegan::mrpp()`'s `boot.deltas`.
 
 ## Details
 
@@ -146,20 +141,18 @@ With \\\bar{d}\_g\\ the mean distance between the \\n_g (n_g - 1) / 2\\
 pairs of samples in group \\g\\, the test statistic is their weighted
 mean \$\$\delta = \sum_g C_g \bar{d}\_g, \quad C_g = w_g / \sum_h
 w_h\$\$ with weights \\w_g\\ from `weights`. Groups of one sample have
-no pairs, so they are left out, as in
-[`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html).
-The expected value of \\\delta\\ over all permutations of the samples is
-the mean of all the distances, and the chance-corrected within-group
-agreement is \\A = 1 - \delta / E(\delta)\\ (McCune & Grace 2002): 1
-when samples are identical within groups, 0 when groups are no more
-alike than chance, and negative when they are less alike.
+no pairs, so they are left out, as in `vegan::mrpp()`. The expected
+value of \\\delta\\ over all permutations of the samples is the mean of
+all the distances, and the chance-corrected within-group agreement is
+\\A = 1 - \delta / E(\delta)\\ (McCune & Grace 2002): 1 when samples are
+identical within groups, 0 when groups are no more alike than chance,
+and negative when they are less alike.
 
 For each permutation, the group labels are shuffled among the samples
 and \\\delta\\ is recomputed. The p-value is \\(1 + \\\\\delta\_{perm}
-\le \delta\\) / (1 + permutations)\\. As in
-[`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html),
-permuted values within `sqrt(.Machine$double.eps)` of the observed one
-count as ties. The standardized effect size \\z\\ compares the observed
+\le \delta\\) / (1 + permutations)\\. As in `vegan::mrpp()`, permuted
+values within `sqrt(.Machine$double.eps)` of the observed one count as
+ties. The standardized effect size \\z\\ compares the observed
 \\\delta\\ with the permuted ones, using their mean and (sample)
 standard deviation, as `summary(vegan::permustats())` does. It is `NA`
 with fewer than two permutations, or when every permutation gives the
@@ -179,10 +172,9 @@ The permutations come from `seed`, not from R's random number generator,
 so [`set.seed()`](https://rdrr.io/r/base/Random.html) has no effect, and
 each permutation has a random number stream of its own. Results are
 identical from run to run and for any number of `cpus`. The random
-permutations differ from
-[`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)'s,
-so p-values and \\z\\ agree with it only up to sampling error, unless
-the same `permutations` matrix is given to both.
+permutations differ from `vegan::mrpp()`'s, so p-values and \\z\\ agree
+with it only up to sampling error, unless the same `permutations` matrix
+is given to both.
 
 **Differences from vegan::mrpp()**
 
@@ -192,21 +184,17 @@ the same `permutations` matrix is given to both.
   or a metric function such as
   [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md).
 
-- `A` is reported even with `permutations = 0`;
-  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)
-  gives `NA` then.
+- `A` is reported even with `permutations = 0`; `vegan::mrpp()` gives
+  `NA` then.
 
 - A group of one sample has a `class_delta` of `NA`, where
-  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)
-  has `NaN`.
+  `vegan::mrpp()` has `NaN`.
 
 - `mrpp()` does not compute the classification strength (`CS`), which
-  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)
-  also leaves `NA`.
+  `vegan::mrpp()` also leaves `NA`.
 
 - `strata` permutes freely within strata. For other restricted designs,
-  pass a `permutations` matrix from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html).
+  pass a `permutations` matrix from `permute::shuffleSet()`.
 
 ## References
 

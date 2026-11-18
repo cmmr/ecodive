@@ -50,6 +50,9 @@ pcoa_biplot(
 
   - `'chord'`: Each sample scaled to unit length (Euclidean norm 1).
 
+  - `'hellinger'`: Square root of relative abundance (the Hellinger
+    transformation).
+
   - `'binary'`: Presence/absence (each count is either 0 or 1).
 
   - `'clr'`: Centered log ratio.

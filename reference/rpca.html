@@ -34,6 +34,7 @@ for a biplot."><meta property="og:image" content="https://cmmr.github.io/ecodive
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -71,7 +72,7 @@ for a biplot.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rpca</span><span class="op">(</span></span>
 <span>  <span class="va">counts</span>,</span>
 <span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
-<span>  k <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  n_axes <span class="op">=</span> <span class="fl">3L</span>,</span>
 <span>  max_iters <span class="op">=</span> <span class="fl">5L</span>,</span>
 <span>  tol <span class="op">=</span> <span class="fl">1e-05</span>,</span>
 <span>  min_sample_count <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -99,7 +100,7 @@ Values must be finite and non-negative; they need not be integers
 class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 
 
-<dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
+<dt id="arg-n-axes">n_axes<a class="anchor" aria-label="anchor" href="#arg-n-axes"></a></dt>
 <dd><p>The rank of the low-rank model, which is also the number of
 axes returned: a whole number from 1 to 10 (gemelli suggests
 fewer than 10). Default: <code>3</code></p></dd>
@@ -156,7 +157,7 @@ kept samples, as for <code><a href="pca.html">pca()</a></code>. See "Relation to
 variance that each axis explains, <code>eig / trace</code>. This is gemelli's
 <code>proportion_explained</code>.</p></li>
 <li><p><code>trace</code>: The centered completed matrix's total variance: the sum of
-all <code>k</code> axes' variances. (The completed matrix has rank <code>k</code>.)</p></li>
+all <code>n_axes</code> axes' variances. (The completed matrix has rank <code>n_axes</code>.)</p></li>
 <li><p><code>loadings</code>: A matrix with one row per kept feature and one column per
 axis: the unit-length feature loadings, for a biplot.</p></li>
 <li><p><code>cost</code>: The root mean squared error of the low-rank fit to the
@@ -183,8 +184,8 @@ the mean log over its non-zero counts (as <code><a href="normalize.html">normali
 <code>norm = 'rclr'</code>). Zeros are missing values: they are not part of the
 mean and are not given a value.</p></li>
 <li><p><strong>Matrix completion.</strong> OptSpace (Keshavan, Montanari &amp; Oh 2010) fits a
-rank-<code>k</code> matrix \(USV^T\) to the observed values only: it starts from
-their top <code>k</code> singular vectors and runs up to <code>max_iters</code> steps of
+rank-<code>n_axes</code> matrix \(USV^T\) to the observed values only: it starts from
+their top <code>n_axes</code> singular vectors and runs up to <code>max_iters</code> steps of
 gradient descent on the Grassmann manifold, re-fitting the
 \(k \times k\) matrix \(S\) after each step.</p></li>
 <li><p><strong>PCA.</strong> The completed matrix \(X = USV^T\) is centered (columns,
@@ -216,7 +217,7 @@ pass; and the final PCA reduces to \(k \times k\) problems.</p>
 <p>Each descent step takes time proportional to the number of non-zero
 counts times \(k^2\), plus \(k^4/4\) per sample for re-fitting
 \(S\). The initial SVD takes a number of steps that depends on the gap
-between the <code>k</code>-th and next singular values, each a pass over the
+between the <code>n_axes</code>-th and next singular values, each a pass over the
 non-zero counts plus work on a basis of \(\min(n, p)\)-long vectors.
 Memory beyond the input is about 24 bytes per non-zero count, plus about
 \(80 (n + p) k\) bytes for the factors, plus about 1.5 kB per sample or
@@ -233,7 +234,7 @@ samples are preserved and each feature's arrow shows the direction in
 which its robust clr increases. (gemelli, and QIIME 2's Emperor, plot
 \(u\) and \(v\).) The loadings are much shorter than the scores, so
 scale them for display, e.g.</p>
-<p></p><div class="sourceCode r"><pre><code><span><span class="va">ord</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca.html">rpca</a></span><span class="op">(</span><span class="va">ex_counts</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<p></p><div class="sourceCode r"><pre><code><span><span class="va">ord</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca.html">rpca</a></span><span class="op">(</span><span class="va">ex_counts</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">load</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'loadings'</span><span class="op">)</span></span>
 <span><span class="va">f</span>    <span class="op">&lt;-</span> <span class="fl">0.8</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">load</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, asp <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -252,8 +253,8 @@ recommended; <code>cost</code> shows how the fit changes.</p>
 returns with its ordination (which it describes as the Aitchison distance
 of the sample loadings): Euclidean distances between the rows of
 OptSpace's sample factor \(U\), which are normalized so that each of its
-<code>k</code> columns has a squared length of about \(n\), before the singular
-values in \(S\) are applied. All <code>k</code> axes count equally in them. They
+<code>n_axes</code> columns has a squared length of about \(n\), before the singular
+values in \(S\) are applied. All <code>n_axes</code> axes count equally in them. They
 are computed in parallel straight into a <code>dist</code> object, so they can go to
 <code><a href="pcoa.html">pcoa()</a></code>, <code><a href="nmds.html">nmds()</a></code> or <code><a href="permanova.html">permanova()</a></code>, and nothing of size
 \(n \times n\) is made without <code>distances = TRUE</code>.</p>
@@ -263,7 +264,7 @@ axis counts in proportion to its variance.</p></li>
 <li><p><code><a href="robust_aitchison.html">robust_aitchison()</a></code>: Euclidean distances between the samples' robust
 clr values with no completion: missing values count as 0, so each pair
 of samples is compared on the features observed in either, and no
-low-rank model is fitted. For a table with no zeros and <code>k</code> at least
+low-rank model is fitted. For a table with no zeros and <code>n_axes</code> at least
 the rank of its clr matrix, the completed matrix is the clr matrix, so
 <code>dist(ord)</code> is then the same as <code><a href="robust_aitchison.html">robust_aitchison()</a></code> and <code><a href="aitchison.html">aitchison()</a></code>.</p></li>
 </ul><p><strong>Differences from gemelli</strong></p>
@@ -271,7 +272,7 @@ the rank of its clr matrix, the completed matrix is the clr matrix, so
 its results to within rounding error and the initial SVD's tolerance, with
 these exceptions. On the package's test tables, results agree with
 gemelli's to about \(10^{-13}\) (relative). Ill-conditioned problems
-agree less closely: when the <code>k</code>-th and next singular values of the rclr
+agree less closely: when the <code>n_axes</code>-th and next singular values of the rclr
 matrix are nearly tied, the initial subspace (in gemelli as here) is only
 determined to about \(10^{-15}\) divided by their relative gap, and
 results can then differ from gemelli's by \(10^{-10}\) or more.</p><ul><li><p>gemelli's OptSpace treats any robust clr value that is exactly 0 as
@@ -282,8 +283,8 @@ is 0, which gemelli treats as missing, so they have no observed values
 and their position only reflects the other samples. <code>rpca()</code> drops them
 with a warning.</p></li>
 <li><p>gemelli requires \(2 \le k \le \min(n, p) - 1\). <code>rpca()</code> accepts
-<code>k = 1</code>, and reduces <code>k</code> above \(\min(n, p) - 1\) with a warning.
-It also limits <code>k</code> to 10, because re-fitting \(S\) takes time in
+<code>n_axes = 1</code>, and reduces <code>n_axes</code> above \(\min(n, p) - 1\) with a warning.
+It also limits <code>n_axes</code> to 10, because re-fitting \(S\) takes time in
 proportion to \(k^4\); gemelli has no limit but suggests
 \(k &lt; 10\). gemelli adds an axis of zeros when \(k = 2\);
 <code>rpca()</code> doesn't.</p></li>

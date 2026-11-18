@@ -12,7 +12,7 @@ an arch or horseshoe. A parallel C port of scikit-learn's `Isomap` with
 ## Usage
 
 ``` r
-isomap(dm, k = 2L, n_neighbors = 5L, radius = NULL, cpus = n_cpus())
+isomap(dm, n_axes = 3L, n_neighbors = 5L, radius = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
@@ -26,9 +26,9 @@ isomap(dm, k = 2L, n_neighbors = 5L, radius = NULL, cpus = n_cpus())
   negative values. Distances, and the geodesic distances summed from
   them, must not exceed \\10^{150}\\, since they are squared.
 
-- k:
+- n_axes:
 
-  The number of axes to compute. Default: `2`. Reduced to \\n - 1\\ for
+  The number of axes to compute. Default: `3`. Reduced to \\n - 1\\ for
   \\n\\ samples.
 
 - n_neighbors:
@@ -104,11 +104,12 @@ below. Its attributes are:
 
 4.  **Embedding.** Classical scaling of the geodesic distances, exactly
     as in [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md):
-    the top `k` eigenvectors of \\B = -\frac{1}{2}JG^{(2)}J\\, where
-    \\G^{(2)}\\ holds the squared geodesic distances and \\J\\ is the
-    centering matrix, scaled by the square roots of their eigenvalues.
-    Axes whose eigenvalues aren't positive are dropped with a warning,
-    as in [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
+    the top `n_axes` eigenvectors of \\B = -\frac{1}{2}JG^{(2)}J\\,
+    where \\G^{(2)}\\ holds the squared geodesic distances and \\J\\ is
+    the centering matrix, scaled by the square roots of their
+    eigenvalues. Axes whose eigenvalues aren't positive are dropped with
+    a warning, as in
+    [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
 
 With `n_neighbors` = \\n - 1\\, every pair of samples is linked, and
 when `dm` obeys the triangle inequality (e.g. Euclidean distances), the
@@ -163,9 +164,9 @@ rounding, and the same embedding (`embedding_`) and eigenvalues as
   neighbor, the two graphs are the same.
 
 - **Axes with eigenvalues that aren't positive.** scikit-learn stops
-  with an error when one of the top `k` eigenvalues is substantially
-  negative, and otherwise returns axes of zeros for them. `isomap()`
-  drops them with a warning, as
+  with an error when one of the top `n_axes` eigenvalues is
+  substantially negative, and otherwise returns axes of zeros for them.
+  `isomap()` drops them with a warning, as
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) does.
 
 - **Rounding.** Each geodesic distance is summed along its path from the
@@ -198,12 +199,11 @@ rounding, and the same embedding (`embedding_`) and eigenvalues as
   and `reconstruction_error()` are not offered. The components of the
   neighbor graph are returned as attributes.
 
-**Coming from
-[`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)**
+**Coming from `vegan::isomap()`**
 
-- [`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)'s
-  `k` is the number of neighbors; `isomap()`'s `k` is the number of axes
-  (`vegan`'s `ndim`). Give the number of neighbors as `n_neighbors`.
+- `vegan::isomap()`'s `k` is the number of neighbors; the number of axes
+  (`vegan`'s `ndim`) is `isomap()`'s `n_axes`. Give the number of
+  neighbors as `n_neighbors`.
 
 - `vegan`'s `epsilon` corresponds to `radius`.
 
@@ -227,8 +227,8 @@ random numbers are drawn from R, so
 random number stream is left untouched. Results can differ in the last
 bits between computers or compilers.
 
-`k` larger than \\n - 1\\ (the most axes possible) is reduced to \\n -
-1\\.
+`n_axes` larger than \\n - 1\\ (the most axes possible) is reduced to
+\\n - 1\\.
 
 ## Ordination result
 
@@ -320,21 +320,21 @@ methods used in multivariate analysis. *Biometrika*, 53(3-4), 325-338.
     plot(ord, col = iris$Species)
 
     head(ord)
-#>        Isomap1      Isomap2
-#> [1,] 0.1815951 -0.039742273
-#> [2,] 0.1976638  0.024659828
-#> [3,] 0.2105455 -0.008544025
-#> [4,] 0.2123135  0.026838706
-#> [5,] 0.1909184 -0.040604972
-#> [6,] 0.1734805 -0.026899418
+#>        Isomap1      Isomap2      Isomap3
+#> [1,] 0.1815951 -0.039742273 -0.027484748
+#> [2,] 0.1976638  0.024659828 -0.004686106
+#> [3,] 0.2105455 -0.008544025 -0.035748665
+#> [4,] 0.2123135  0.026838706 -0.005276499
+#> [5,] 0.1909184 -0.040604972 -0.023909921
+#> [6,] 0.1734805 -0.026899418  0.055991780
     str(ord)
-#>  'ecodive_ord' num [1:150, 1:2] 0.182 0.198 0.211 0.212 0.191 ...
+#>  'ecodive_ord' num [1:150, 1:3] 0.182 0.198 0.211 0.212 0.191 ...
 #>  - attr(*, "dimnames")=List of 2
 #>   ..$ : NULL
-#>   ..$ : chr [1:2] "Isomap1" "Isomap2"
+#>   ..$ : chr [1:3] "Isomap1" "Isomap2" "Isomap3"
 #>  - attr(*, "method")= chr "isomap"
-#>  - attr(*, "eig")= num [1:2] 3.156 0.142
-#>  - attr(*, "prop")= num [1:2] 0.9455 0.0424
+#>  - attr(*, "eig")= num [1:3] 3.1556 0.1415 0.0627
+#>  - attr(*, "prop")= num [1:3] 0.9455 0.0424 0.0188
 #>  - attr(*, "trace")= num 3.34
 #>  - attr(*, "n_neighbors")= int 50
 #>  - attr(*, "radius")= num NA

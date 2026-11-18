@@ -36,7 +36,7 @@ dist_ord(dm, method, ...)
 
 - ...:
 
-  Further arguments for the method's function, such as `k`, `seed`,
+  Further arguments for the method's function, such as `n_axes`, `seed`,
   `cpus`, or `pcoa`'s `correction`. Each method keeps its own defaults;
   see
   [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md)
@@ -76,8 +76,9 @@ The method's result, as described in "Ordination result" below.
 
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) ordinate a
-count table rather than distances, so they are called directly, not
-through `dist_ord()`. PCA is PCoA of Euclidean distances:
+count table rather than distances, so they are run by
+[`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md),
+or called directly. PCA is PCoA of Euclidean distances:
 `dist_ord(euclidean(counts), 'pcoa')` gives the same scores as
 `pca(counts)`, up to each axis's sign, but
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) also returns
@@ -86,10 +87,12 @@ the features' loadings and never forms the distance matrix.
 and ecodive's other tests are run by
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md).
 
-Default numbers of axes differ: `k = 3` for `capscale`, `dbrda`, `pcoa`
-(and [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+Default numbers of axes differ: `n_axes = 3` for the methods whose axes
+have eigenvalues (`capscale`, `dbrda`, `isomap`, `pcoa`, and
+[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)), and
-`k = 2` for `isomap`, `mds`, `nmds`, `tsne`, and `umap`.
+`n_axes = 2` for those that fit a layout in a fixed number of dimensions
+(`mds`, `nmds`, `tsne`, and `umap`).
 
 **Flexible name matching**
 
@@ -107,14 +110,10 @@ ambiguity with future additions to the list of methods.
 
 **Same names in other packages**
 
-[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html),
-[`vegan::pca()`](https://vegandevs.github.io/vegan/reference/cca.html),
-[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
-[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
-[`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)
-(whose `k` is the number of neighbours, not axes), and `uwot::umap()`
-share names with ecodive's functions, and whichever package was attached
-last masks the other's. Write
+`ape::pcoa()`, `vegan::pca()`, `vegan::dbrda()`, `vegan::capscale()`,
+`vegan::isomap()` (whose `k` is the number of neighbours, not axes), and
+`uwot::umap()` share names with ecodive's functions, and whichever
+package was attached last masks the other's. Write
 [`ecodive::pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md)
 and so on, or use `dist_ord()`, which always runs ecodive's, to be sure.
 
@@ -185,9 +184,10 @@ plain matrix or data frame without them.
 [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md),
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md),
 [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md);
-[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
-[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), which are
-called directly;
+[`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
+for [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), which take
+a count table;
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)
 for ecodive's tests.
 

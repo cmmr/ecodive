@@ -12,7 +12,7 @@ ever copying `dm` into an \\n \times n\\ matrix.
 ``` r
 umap(
   dm,
-  k = 2L,
+  n_axes = 2L,
   n_neighbors = 15L,
   min_dist = 0.1,
   spread = 1,
@@ -38,7 +38,7 @@ umap(
   or [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), or a
   symmetric numeric matrix of distances. Must not contain `NA`s.
 
-- k:
+- n_axes:
 
   The number of dimensions. Default: `2`
 
@@ -97,7 +97,7 @@ umap(
 - init:
 
   The starting coordinates: `"spectral"` (the default), `"pcoa"`,
-  `"random"`, or a numeric matrix with one row per sample and `k`
+  `"random"`, or a numeric matrix with one row per sample and `n_axes`
   columns. See "Starting coordinates" below.
 
 - seed:
@@ -188,7 +188,7 @@ same.
   is used instead, scaled to standard deviation 1, and with fewer than 3
   samples (or \\k \> n - 2\\), the `"random"` one, as in `uwot::umap()`.
 
-- `"pcoa"`: The first `k` axes of
+- `"pcoa"`: The first `n_axes` axes of
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), each
   centered and scaled to standard deviation 0.0001 (`uwot::umap()`'s
   `"spca"`).

@@ -2,8 +2,7 @@
 
 Tests whether samples in the same group are more similar to each other
 than to samples in other groups, from the ranks of the distances between
-them. Gives the same \\R\\ statistic and p-value as
-[`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html).
+them. Gives the same \\R\\ statistic and p-value as `vegan::anosim()`.
 Computes them in parallel C, from one ranking of the distances, without
 the \\n \times n\\ matrices that `anosim()` builds.
 
@@ -51,8 +50,7 @@ anosim(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones.
+  `permute::shuffleSet()`, to use instead of random ones.
 
 - strata:
 
@@ -79,8 +77,7 @@ anosim(
 A list of class `c("ecodive_anosim", "ecodive_test")`, the same shape as
 the results of ecodive's other permutation tests, with:
 
-- `statistic`: The ANOSIM statistic, `c(R = ...)`:
-  [`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html)'s
+- `statistic`: The ANOSIM statistic, `c(R = ...)`: `vegan::anosim()`'s
   `statistic`.
 
 - `p_value`: Permutation p-value, `anosim()`'s `signif`. `NA` without
@@ -163,8 +160,7 @@ both.
   each class, in field `ranks`.
 
 - `strata` permutes freely within strata. For other restricted designs,
-  pass a `permutations` matrix from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html).
+  pass a `permutations` matrix from `permute::shuffleSet()`.
 
 - When there are fewer possible permutations than requested, `vegan`
   (via `permute`) runs each of them once instead. `anosim()` always

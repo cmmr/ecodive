@@ -32,6 +32,7 @@ dm into an \(n \times n\) matrix."><meta property="og:image" content="https://cm
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -67,7 +68,7 @@ coordinates and random seeds, but runs in parallel C, without ever copying
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">umap</span><span class="op">(</span></span>
 <span>  <span class="va">dm</span>,</span>
-<span>  k <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  n_axes <span class="op">=</span> <span class="fl">2L</span>,</span>
 <span>  n_neighbors <span class="op">=</span> <span class="fl">15L</span>,</span>
 <span>  min_dist <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  spread <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -93,7 +94,7 @@ coordinates and random seeds, but runs in parallel C, without ever copying
 symmetric numeric matrix of distances. Must not contain <code>NA</code>s.</p></dd>
 
 
-<dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
+<dt id="arg-n-axes">n_axes<a class="anchor" aria-label="anchor" href="#arg-n-axes"></a></dt>
 <dd><p>The number of dimensions. Default: <code>2</code></p></dd>
 
 
@@ -156,7 +157,7 @@ are assumed to be fully connected to it. Default: <code>1</code></p></dd>
 <dt id="arg-init">init<a class="anchor" aria-label="anchor" href="#arg-init"></a></dt>
 <dd><p>The starting coordinates: <code>"spectral"</code> (the default),
 <code>"pcoa"</code>, <code>"random"</code>, or a numeric matrix with one row per sample
-and <code>k</code> columns. See "Starting coordinates" below.</p></dd>
+and <code>n_axes</code> columns. See "Starting coordinates" below.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -228,7 +229,7 @@ largest absolute coordinate is 10, plus normal noise with standard
 deviation 0.0001. When the graph is not connected, the <code>"pcoa"</code> start is
 used instead, scaled to standard deviation 1, and with fewer than 3
 samples (or \(k &gt; n - 2\)), the <code>"random"</code> one, as in <code>uwot::umap()</code>.</p></li>
-<li><p><code>"pcoa"</code>: The first <code>k</code> axes of <code><a href="pcoa.html">pcoa()</a></code>, each centered and scaled to
+<li><p><code>"pcoa"</code>: The first <code>n_axes</code> axes of <code><a href="pcoa.html">pcoa()</a></code>, each centered and scaled to
 standard deviation 0.0001 (<code>uwot::umap()</code>'s <code>"spca"</code>).</p></li>
 <li><p><code>"random"</code>: Coordinates uniform on [-10, 10).</p></li>
 <li><p>A matrix: Used as is.</p></li>

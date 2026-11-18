@@ -30,6 +30,7 @@ dm directly, with far less time and memory."><meta property="og:image" content="
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -64,7 +65,7 @@ of scikit-learn's non-metric <code>MDS()</code>, ported to parallel C that works
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">nmds</span><span class="op">(</span></span>
 <span>  <span class="va">dm</span>,</span>
-<span>  k <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  n_axes <span class="op">=</span> <span class="fl">2L</span>,</span>
 <span>  n_starts <span class="op">=</span> <span class="fl">4L</span>,</span>
 <span>  max_iters <span class="op">=</span> <span class="fl">1000L</span>,</span>
 <span>  tol <span class="op">=</span> <span class="fl">1e-07</span>,</span>
@@ -84,7 +85,7 @@ symmetric numeric matrix of distances. Must not contain <code>NA</code>s or
 negative values.</p></dd>
 
 
-<dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
+<dt id="arg-n-axes">n_axes<a class="anchor" aria-label="anchor" href="#arg-n-axes"></a></dt>
 <dd><p>The number of dimensions. Default: <code>2</code></p></dd>
 
 
@@ -144,7 +145,7 @@ columns, <code>stress</code> is 0, and no starts are run.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>Which ordination?</strong></p>
-<p><code><a href="pcoa.html">pcoa()</a></code>, <code><a href="mds.html">mds()</a></code>, and <code>nmds()</code> all place the samples in <code>k</code> dimensions
+<p><code><a href="pcoa.html">pcoa()</a></code>, <code><a href="mds.html">mds()</a></code>, and <code>nmds()</code> all place the samples in <code>n_axes</code> dimensions
 from <code>dm</code>. <code><a href="pcoa.html">pcoa()</a></code> (classical scaling) is exact and fast, and has
 eigenvalues and "variance explained", but it fits the squared distances
 after double centering, so large distances dominate, and non-Euclidean
@@ -184,10 +185,10 @@ after the first move the points twice as far as the Guttman transform
 would: \(X \leftarrow 2\Gamma(X) - X\), the relaxed update of de Leeuw
 and Heiser (1980). \(\Gamma\) doesn't depend on the scale of \(X\),
 so relaxed steps don't converge in that one direction (they flip the scale
-back and forth), nor at all when <code>k = 1</code>, where \(\Gamma\) only depends
+back and forth), nor at all when <code>n_axes = 1</code>, where \(\Gamma\) only depends
 on the order of the points. So a start takes relaxed steps only until one
 makes no more than <code>tol</code> progress, then plain steps until a plain step
-does (or until <code>max_iters</code>, whose last step is always plain), and <code>k = 1</code> uses
+does (or until <code>max_iters</code>, whose last step is always plain), and <code>n_axes = 1</code> uses
 plain steps throughout. The configuration returned and measured thus
 always comes from a plain step: it is a fixed point of \(\Gamma\) to
 within <code>tol</code>, and its stress is what plain steps reach from the same
@@ -199,7 +200,7 @@ the way to search for better ones.</p>
 <p><strong>Ties and zeros</strong></p>
 <p>Beta diversity distances are often tied, e.g. at 1 for every pair of
 samples with no taxa in common. With <code>ties = "primary"</code> (Kruskal's primary
-approach, as in <code><a href="https://vegandevs.github.io/vegan/reference/metaMDS.html" class="external-link">vegan::metaMDS()</a></code>), tied distances only have to stay in
+approach, as in <code>vegan::metaMDS()</code>), tied distances only have to stay in
 order with the other distances: on the plot, they may differ from each
 other. With <code>"secondary"</code> (as in scikit-learn), tied distances get one
 shared disparity, the mean of their distances on the plot, so the
@@ -215,7 +216,7 @@ disparity of 0 with either approach, as in scikit-learn: they are pulled
 towards the same point. (Under the primary approach, a zero would
 otherwise just be the smallest tie, free to take any small distance on
 the plot; but identical samples should coincide.) So when <code>dm</code> has no
-zeros, <code>stress</code> with <code>ties = "primary"</code> equals <code><a href="https://vegandevs.github.io/vegan/reference/metaMDS.html" class="external-link">vegan::metaMDS()</a></code>'s stress
+zeros, <code>stress</code> with <code>ties = "primary"</code> equals <code>vegan::metaMDS()</code>'s stress
 for the same configuration; when it has zeros, it is higher.</p>
 <p>SMACOF only finds a local minimum of stress. So:</p><ol><li><p>The first start is the PCoA solution, from <code><a href="pcoa.html">pcoa()</a></code>. (An axis without
 a positive eigenvalue gets small random coordinates instead.)</p></li>
@@ -294,7 +295,7 @@ interrupts.</p>
 <p><code>dm</code> may have at most 65,536 samples.</p>
 <p><strong>Reproducibility</strong></p>
 <p>The result, with all its attributes, is bit-identical from run to run, in
-new R sessions, and for any value of <code>cpus</code>, given the same <code>dm</code>, <code>k</code>,
+new R sessions, and for any value of <code>cpus</code>, given the same <code>dm</code>, <code>n_axes</code>,
 <code>n_starts</code>, <code>max_iters</code>, <code>tol</code>, <code>ties</code>, and <code>seed</code>. Each start splits its sums
 into a fixed number of parts that depends only on the number of samples,
 and adds them in a fixed order; the sort order of the distances is a
@@ -306,7 +307,7 @@ value near 1, so <code>dm * 2^p</code> gives exactly the same result times
 ordination, distances above \(10^{150}\) are rejected.) Results can
 still differ in the last bits between computers or compilers, as for any
 floating point code.</p>
-<p><code>k</code> larger than \(n - 1\) is reduced to \(n - 1\).</p>
+<p><code>n_axes</code> larger than \(n - 1\) is reduced to \(n - 1\).</p>
     </div>
     <div class="section level2">
     <h2 id="ordination-result">Ordination result<a class="anchor" aria-label="anchor" href="#ordination-result"></a></h2>

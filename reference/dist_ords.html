@@ -24,6 +24,7 @@ runs, and their associated functions."><meta property="og:image" content="https:
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -54,12 +55,11 @@ runs, and their associated functions.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">list_dist_ords</span><span class="op">(</span></span>
-<span>  val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"data.frame"</span>, <span class="st">"list"</span>, <span class="st">"func"</span>, <span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"input"</span><span class="op">)</span>,</span>
-<span>  nm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="st">"id"</span>, <span class="st">"name"</span><span class="op">)</span>,</span>
-<span>  input <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  val <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"data.frame"</span>, <span class="st">"list"</span>, <span class="st">"func"</span>, <span class="st">"id"</span>, <span class="st">"name"</span><span class="op">)</span>,</span>
+<span>  nm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="st">"id"</span>, <span class="st">"name"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">match_dist_ord</span><span class="op">(</span><span class="va">method</span>, input <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">match_dist_ord</span><span class="op">(</span><span class="va">method</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -77,11 +77,6 @@ Default is <code>"id"</code> when <code>val</code> is <code>"list"</code> or <co
 default is <code>NA</code> (no name).</p></dd>
 
 
-<dt id="arg-input">input<a class="anchor" aria-label="anchor" href="#arg-input"></a></dt>
-<dd><p>Filter by the kind of data the method takes: <code>"dist"</code>
-for distances. Default: <code>NULL</code> (no filtering).</p></dd>
-
-
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>The name of an ordination method to search for. Supports
 partial matching. All non-alpha characters are ignored.</p></dd>
@@ -92,9 +87,8 @@ partial matching. All non-alpha characters are ignored.</p></dd>
     <p><strong><code>match_dist_ord()</code></strong></p>
 <p>A <code>list</code> with the following elements.</p><ul><li><p><code>name</code> : Method name, e.g. <code>"Principal Coordinates Analysis"</code></p></li>
 <li><p><code>id</code> : Method ID - also the name of the function, e.g. <code>"pcoa"</code></p></li>
-<li><p><code>input</code> : The kind of data the method takes, e.g. <code>"dist"</code>.</p></li>
 <li><p><code>func</code> : The function for this method, e.g. <code><a href="pcoa.html">ecodive::pcoa</a></code></p></li>
-<li><p><code>params</code> : Formal args for <code>func</code>, e.g. <code>c("dm", "k", "cpus")</code></p></li>
+<li><p><code>params</code> : Formal args for <code>func</code>, e.g. <code>c("dm", "n_axes", "cpus")</code></p></li>
 </ul><p><strong><code>list_dist_ords()</code></strong></p>
 <p>The returned object's type and values are controlled with the <code>val</code> and
 <code>nm</code> arguments.</p><ul><li><p><code>val = "data.frame"</code> : The data.frame from which the below options are sourced.</p></li>
@@ -102,7 +96,6 @@ partial matching. All non-alpha characters are ignored.</p></dd>
 <li><p><code>val = "func"</code> : A list of functions.</p></li>
 <li><p><code>val = "id"</code> : A character vector of method IDs.</p></li>
 <li><p><code>val = "name"</code> : A character vector of method names.</p></li>
-<li><p><code>val = "input"</code> : A character vector of the kinds of data each method takes.</p></li>
 </ul><p>If <code>nm</code> is set, then the names of the vector or list will be the method ID
 (<code>nm="id"</code>) or name (<code>nm="name"</code>). When <code>val="data.frame"</code>, the names will
 be applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames()</a></code> property of the <code>data.frame</code>.</p>
@@ -113,15 +106,15 @@ be applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="ex
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A data.frame of all available methods.</span></span></span>
 <span class="r-in"><span>    <span class="fu">list_dist_ords</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                            name       id input</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Constrained Analysis of Principal Coordinates capscale  dist</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2            Distance-based Redundancy Analysis    dbrda  dist</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                     Isometric Feature Mapping   isomap  dist</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4               Metric Multidimensional Scaling      mds  dist</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5           Non-metric Multidimensional Scaling     nmds  dist</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                Principal Coordinates Analysis     pcoa  dist</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   t-distributed Stochastic Neighbor Embedding     tsne  dist</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8 Uniform Manifold Approximation and Projection     umap  dist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                            name       id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Constrained Analysis of Principal Coordinates capscale</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            Distance-based Redundancy Analysis    dbrda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                     Isometric Feature Mapping   isomap</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4               Metric Multidimensional Scaling      mds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5           Non-metric Multidimensional Scaling     nmds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                Principal Coordinates Analysis     pcoa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   t-distributed Stochastic Neighbor Embedding     tsne</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8 Uniform Manifold Approximation and Projection     umap</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Find the method for 'MDS'.</span></span></span>
 <span class="r-in"><span>    <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">match_dist_ord</span><span class="op">(</span><span class="st">'MDS'</span><span class="op">)</span></span></span>

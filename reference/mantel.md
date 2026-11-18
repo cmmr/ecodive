@@ -2,13 +2,11 @@
 
 Tests whether two distance matrices are correlated: for instance,
 whether samples with more different communities are also further apart,
-or more different in pH. Gives the same statistic as
-[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)
+or more different in pH. Gives the same statistic as `vegan::mantel()`
 (Pearson, Spearman, or Kendall correlation), and as
-[`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html)
-with `given`, with permutation p-values. Computes them in parallel C,
-straight from the distances, without the \\n \times n\\ matrices that
-`mantel()` builds for every permutation.
+`vegan::mantel.partial()` with `given`, with permutation p-values.
+Computes them in parallel C, straight from the distances, without the
+\\n \times n\\ matrices that `mantel()` builds for every permutation.
 
 ## Usage
 
@@ -59,10 +57,9 @@ mantel(
 - given:
 
   For a partial Mantel test: distances whose effect is removed from the
-  correlation of `dm` and `y`, as in
-  [`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
-  `zdis`. Given like `y`, including as a column name of `data`. Default:
-  `NULL` (a simple Mantel test).
+  correlation of `dm` and `y`, as in `vegan::mantel.partial()`'s `zdis`.
+  Given like `y`, including as a column name of `data`. Default: `NULL`
+  (a simple Mantel test).
 
 - method:
 
@@ -74,8 +71,7 @@ mantel(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones.
+  `permute::shuffleSet()`, to use instead of random ones.
 
 - strata:
 
@@ -89,10 +85,9 @@ mantel(
 - alternative:
 
   Which correlations count as more extreme than the observed one:
-  `'greater'` (more positive, as in
-  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)),
-  `'less'` (more negative), or `'two.sided'` (larger in absolute value).
-  Default: `'greater'`.
+  `'greater'` (more positive, as in `vegan::mantel()`), `'less'` (more
+  negative), or `'two.sided'` (larger in absolute value). Default:
+  `'greater'`.
 
 - seed:
 
@@ -111,8 +106,7 @@ A list of class `c('ecodive_mantel', 'ecodive_test')`, with:
 
 - `statistic`: The Mantel statistic, `c(r = ...)`: the correlation of
   `dm` and `y`, or their partial correlation with `given`.
-  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
-  `statistic`.
+  `vegan::mantel()`'s `statistic`.
 
 - `p_value`: The permutation p-value.
 
@@ -133,9 +127,9 @@ A list of class `c('ecodive_mantel', 'ecodive_test')`, with:
   or `'supplied matrix'`.
 
 Attribute `r_perm` is a vector of the statistics of the permutations, as
-[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
-`perm`. [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
-gives the main results as one row.
+`vegan::mantel()`'s `perm`.
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) gives the
+main results as one row.
 
 ## Details
 
@@ -149,17 +143,16 @@ together, `y` is held fixed, and the correlation is recomputed. The
 p-value is the proportion of permutations, counting the observed one,
 with a correlation at least as extreme: \\(1 + \\\\r\_{perm} \ge r\\) /
 (1 + permutations)\\ for `alternative = 'greater'`. As in
-[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html),
-permuted statistics within `sqrt(.Machine$double.eps)` of the observed
-one count as ties.
+`vegan::mantel()`, permuted statistics within
+`sqrt(.Machine$double.eps)` of the observed one count as ties.
 
 The partial Mantel test (Smouse et al. 1986) correlates `dm` and `y`
 after removing the effect of `given`, as the partial correlation
 \$\$r\_{xy.z} = \frac{r\_{xy} - r\_{xz} r\_{yz}}{\sqrt{1 - r\_{xz}^2}
 \sqrt{1 - r\_{yz}^2}}\$\$ with the samples of `dm` permuted, as in
-[`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html).
-Its p-values can be too small when the distances are spatially
-autocorrelated (Legendre & Fortin 2010; Guillot & Rousset 2013).
+`vegan::mantel.partial()`. Its p-values can be too small when the
+distances are spatially autocorrelated (Legendre & Fortin 2010; Guillot
+& Rousset 2013).
 
 **Speed and memory**
 
@@ -177,10 +170,9 @@ The permutations come from `seed`, not from R's random number generator,
 so [`set.seed()`](https://rdrr.io/r/base/Random.html) has no effect, and
 each permutation has a random number stream of its own. P-values are
 identical from run to run and for any number of `cpus`. The random
-permutations differ from
-[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s,
-so p-values agree with it only up to sampling error, unless the same
-`permutations` matrix is given to both.
+permutations differ from `vegan::mantel()`'s, so p-values agree with it
+only up to sampling error, unless the same `permutations` matrix is
+given to both.
 
 **Differences from vegan::mantel()**
 
@@ -197,9 +189,8 @@ so p-values agree with it only up to sampling error, unless the same
 - There's no `na.rm`: distances must not be `NA`.
 
 - When there are fewer possible permutations than requested,
-  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)
-  (via `permute`) runs each of them once instead. `mantel()` always
-  draws random permutations.
+  `vegan::mantel()` (via `permute`) runs each of them once instead.
+  `mantel()` always draws random permutations.
 
 ## References
 

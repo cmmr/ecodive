@@ -14,7 +14,7 @@ and feature loadings for a biplot.
 rpca(
   counts,
   margin = 1L,
-  k = 3L,
+  n_axes = 3L,
   max_iters = 5L,
   tol = 1e-05,
   min_sample_count = 0,
@@ -40,7 +40,7 @@ rpca(
   are columns. Ignored when `counts` is a special object class (e.g.
   `phyloseq`). Default: `1`
 
-- k:
+- n_axes:
 
   The rank of the low-rank model, which is also the number of axes
   returned: a whole number from 1 to 10 (gemelli suggests fewer than
@@ -104,7 +104,8 @@ identified. Its attributes are:
   `proportion_explained`.
 
 - `trace`: The centered completed matrix's total variance: the sum of
-  all `k` axes' variances. (The completed matrix has rank `k`.)
+  all `n_axes` axes' variances. (The completed matrix has rank
+  `n_axes`.)
 
 - `loadings`: A matrix with one row per kept feature and one column per
   axis: the unit-length feature loadings, for a biplot.
@@ -141,10 +142,10 @@ identified. Its attributes are:
     of the mean and are not given a value.
 
 3.  **Matrix completion.** OptSpace (Keshavan, Montanari & Oh 2010) fits
-    a rank-`k` matrix \\USV^T\\ to the observed values only: it starts
-    from their top `k` singular vectors and runs up to `max_iters` steps
-    of gradient descent on the Grassmann manifold, re-fitting the \\k
-    \times k\\ matrix \\S\\ after each step.
+    a rank-`n_axes` matrix \\USV^T\\ to the observed values only: it
+    starts from their top `n_axes` singular vectors and runs up to
+    `max_iters` steps of gradient descent on the Grassmann manifold,
+    re-fitting the \\k \times k\\ matrix \\S\\ after each step.
 
 4.  **PCA.** The completed matrix \\X = USV^T\\ is centered (columns,
     then rows) and decomposed as \\X = u\\\mathrm{diag}(s)\\v^T\\. The
@@ -190,7 +191,7 @@ problems.
 Each descent step takes time proportional to the number of non-zero
 counts times \\k^2\\, plus \\k^4/4\\ per sample for re-fitting \\S\\.
 The initial SVD takes a number of steps that depends on the gap between
-the `k`-th and next singular values, each a pass over the non-zero
+the `n_axes`-th and next singular values, each a pass over the non-zero
 counts plus work on a basis of \\\min(n, p)\\-long vectors. Memory
 beyond the input is about 24 bytes per non-zero count, plus about \\80
 (n + p) k\\ bytes for the factors, plus about 1.5 kB per sample or per
@@ -211,7 +212,7 @@ which its robust clr increases. (gemelli, and QIIME 2's Emperor, plot
 \\u\\ and \\v\\.) The loadings are much shorter than the scores, so
 scale them for display, e.g.
 
-    ord  <- rpca(ex_counts, k = 2)
+    ord  <- rpca(ex_counts, n_axes = 2)
     load <- attr(ord, 'loadings')
     f    <- 0.8 * max(abs(ord)) / max(abs(load))
     plot(ord, asp = 1)
@@ -234,10 +235,11 @@ With `distances = TRUE`, `rpca()` also returns the distances that
 gemelli returns with its ordination (which it describes as the Aitchison
 distance of the sample loadings): Euclidean distances between the rows
 of OptSpace's sample factor \\U\\, which are normalized so that each of
-its `k` columns has a squared length of about \\n\\, before the singular
-values in \\S\\ are applied. All `k` axes count equally in them. They
-are computed in parallel straight into a `dist` object, so they can go
-to [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
+its `n_axes` columns has a squared length of about \\n\\, before the
+singular values in \\S\\ are applied. All `n_axes` axes count equally in
+them. They are computed in parallel straight into a `dist` object, so
+they can go to
+[`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) or
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
 and nothing of size \\n \times n\\ is made without `distances = TRUE`.
@@ -252,9 +254,9 @@ They differ from two other distances:
   Euclidean distances between the samples' robust clr values with no
   completion: missing values count as 0, so each pair of samples is
   compared on the features observed in either, and no low-rank model is
-  fitted. For a table with no zeros and `k` at least the rank of its clr
-  matrix, the completed matrix is the clr matrix, so `dist(ord)` is then
-  the same as
+  fitted. For a table with no zeros and `n_axes` at least the rank of
+  its clr matrix, the completed matrix is the clr matrix, so `dist(ord)`
+  is then the same as
   [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md)
   and
   [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md).
@@ -265,10 +267,10 @@ They differ from two other distances:
 its results to within rounding error and the initial SVD's tolerance,
 with these exceptions. On the package's test tables, results agree with
 gemelli's to about \\10^{-13}\\ (relative). Ill-conditioned problems
-agree less closely: when the `k`-th and next singular values of the rclr
-matrix are nearly tied, the initial subspace (in gemelli as here) is
-only determined to about \\10^{-15}\\ divided by their relative gap, and
-results can then differ from gemelli's by \\10^{-10}\\ or more.
+agree less closely: when the `n_axes`-th and next singular values of the
+rclr matrix are nearly tied, the initial subspace (in gemelli as here)
+is only determined to about \\10^{-15}\\ divided by their relative gap,
+and results can then differ from gemelli's by \\10^{-10}\\ or more.
 
 - gemelli's OptSpace treats any robust clr value that is exactly 0 as
   missing, which depends on rounding. Here a value is missing exactly
@@ -280,10 +282,11 @@ results can then differ from gemelli's by \\10^{-10}\\ or more.
   them with a warning.
 
 - gemelli requires \\2 \le k \le \min(n, p) - 1\\. `rpca()` accepts
-  `k = 1`, and reduces `k` above \\\min(n, p) - 1\\ with a warning. It
-  also limits `k` to 10, because re-fitting \\S\\ takes time in
-  proportion to \\k^4\\; gemelli has no limit but suggests \\k \< 10\\.
-  gemelli adds an axis of zeros when \\k = 2\\; `rpca()` doesn't.
+  `n_axes = 1`, and reduces `n_axes` above \\\min(n, p) - 1\\ with a
+  warning. It also limits `n_axes` to 10, because re-fitting \\S\\ takes
+  time in proportion to \\k^4\\; gemelli has no limit but suggests \\k
+  \< 10\\. gemelli adds an axis of zeros when \\k = 2\\; `rpca()`
+  doesn't.
 
 - gemelli's `rpca()` takes `max_iterations` but doesn't pass it on, so
   it always runs 5 iterations; here `max_iters` is used. `tol` is

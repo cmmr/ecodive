@@ -32,6 +32,7 @@ matrices that adonis2() builds for every permutation."><meta property="og:image"
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -57,7 +58,7 @@ matrices that adonis2() builds for every permutation."><meta property="og:image"
     <div class="ref-description section level2">
     <p>Tests whether sample metadata, such as treatment groups, explain the
 differences between samples in a distance matrix. Gives the same table as
-<code><a href="https://vegandevs.github.io/vegan/reference/adonis.html" class="external-link">vegan::adonis2()</a></code>: degrees of freedom, sums of squares, \(R^2\), and
+<code>vegan::adonis2()</code>: degrees of freedom, sums of squares, \(R^2\), and
 pseudo-\(F\) statistics, with permutation p-values. Computes them in
 parallel C, straight from the distances, without the \(n \times n\)
 matrices that <code>adonis2()</code> builds for every permutation.</p>
@@ -85,7 +86,7 @@ matrices that <code>adonis2()</code> builds for every permutation.</p>
 <dl><dt id="arg-dm">dm<a class="anchor" aria-label="anchor" href="#arg-dm"></a></dt>
 <dd><p>A <code>dist</code> object, such as from <code><a href="beta_div.html">beta_div()</a></code> or <code><a href="bray.html">bray()</a></code>, or a
 symmetric numeric matrix of distances. Must not contain <code>NA</code>s or
-negative values. Alternatively, as in <code><a href="https://vegandevs.github.io/vegan/reference/adonis.html" class="external-link">vegan::adonis2()</a></code>, a formula
+negative values. Alternatively, as in <code>vegan::adonis2()</code>, a formula
 with the distances on its left-hand side and the terms to test on
 its right, such as <code>dm ~ treatment</code>, in place of <code>dm</code> and
 <code>formula</code>; the metadata may then be given second, as in
@@ -116,9 +117,9 @@ one-sided formula naming the variables in <code>data</code> to test, such as
 <code>~ treatment</code> or <code>~ treatment * site + ph</code>. Factors, numeric
 covariates, and interactions are all allowed. Wrap variables in
 <code>Condition()</code> to remove their effect before the other terms are
-tested, as in <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>. A left-hand side, if given, is
+tested, as in <code>vegan::dbrda()</code>. A left-hand side, if given, is
 ignored. Give <code>groups</code> or <code>formula</code>: there is no default model
-(as in <code><a href="https://vegandevs.github.io/vegan/reference/adonis.html" class="external-link">vegan::adonis2()</a></code>). Default: <code>NULL</code>.</p></dd>
+(as in <code>vegan::adonis2()</code>). Default: <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-by">by<a class="anchor" aria-label="anchor" href="#arg-by"></a></dt>
@@ -139,7 +140,7 @@ contrast of a factor.</p></li>
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of permutations. Default: <code>999</code>.
 Alternatively, a matrix with one permutation of <code>1:n</code> per row, as
-from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones.</p></dd>
+from <code>permute::shuffleSet()</code>, to use instead of random ones.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
@@ -174,7 +175,7 @@ whatever <code>by</code> is (the <code>"Model"</code> row of <code>by = 'overall
 <li><p><code>n_perm</code>: The number of permutations.</p></li>
 <li><p><code>r2</code>: The model's \(R^2\): the proportion of the total sum of squares
 it explains.</p></li>
-<li><p><code>table</code>: The table of <code><a href="https://vegandevs.github.io/vegan/reference/adonis.html" class="external-link">vegan::adonis2()</a></code>: a data frame (of class
+<li><p><code>table</code>: The table of <code>vegan::adonis2()</code>: a data frame (of class
 <code>"anova"</code>, so it prints like <code><a href="https://rdrr.io/r/stats/anova.html" class="external-link">stats::anova()</a></code> tables) with one row per
 term tested (or one <code>"Model"</code> row when <code>by = 'overall'</code>), then
 <code>"Residual"</code> and <code>"Total"</code> rows. When <code>formula</code> has <code>Condition()</code>
@@ -207,8 +208,8 @@ counting the observed one, with an \(F\) at least as large:
 \((1 + \#\{F_{perm} \ge F\}) / (1 + permutations)\). As in <code>adonis2()</code>,
 permuted statistics within <code>sqrt(.Machine$double.eps)</code> of the observed one
 count as ties.</p>
-<p>Partial models, with <code>Condition()</code> terms, follow <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code> and
-<code><a href="https://vegandevs.github.io/vegan/reference/anova.cca.html" class="external-link">vegan::anova.cca()</a></code>'s default "reduced" model: the conditions' effect is
+<p>Partial models, with <code>Condition()</code> terms, follow <code>vegan::dbrda()</code> and
+<code>vegan::anova.cca()</code>'s default "reduced" model: the conditions' effect is
 removed from the distances, and the residuals are permuted.</p>
 <p>Every term is tested with the same permutations of the (conditioned)
 distances, as in <code>adonis2()</code>. PERMANOVA+ for PRIMER instead permutes the
@@ -241,7 +242,7 @@ statistics (<code>F.perm</code>) are <code>attr(res$table, 'f_perm')</code>.</p>
 it) has no \(F\) or p-value (<code>NA</code>), where <code>adonis2()</code> reports an
 infinite or undefined \(F\).</p></li>
 <li><p><code>strata</code> permutes freely within strata. For other restricted designs,
-pass a <code>permutations</code> matrix from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>.</p></li>
+pass a <code>permutations</code> matrix from <code>permute::shuffleSet()</code>.</p></li>
 <li><p>When there are fewer possible permutations than requested, <code>adonis2()</code>
 (via <code>permute</code>) runs each of them once instead. <code>permanova()</code> always
 draws random permutations.</p></li>

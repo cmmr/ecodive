@@ -48,6 +48,9 @@ beta_div(
 
   - `'percent'`: Relative abundance (sample abundances sum to 1).
 
+  - `'hellinger'`: Square root of relative abundance (the Hellinger
+    transformation).
+
   - `'binary'`: Unweighted presence/absence (each count is either 0 or
     1).
 

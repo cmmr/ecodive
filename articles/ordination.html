@@ -44,6 +44,7 @@
 <li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -95,7 +96,8 @@ start from the count table itself.</p>
        │                                           pcoa(dm), nmds(dm), umap(dm), ...
        │                                           dist_test(dm, 'permanova', ...)
        │
-       └─────────────────────────────────────────►  pca(counts), rpca(counts)</code></pre>
+       └─────────────────────────────────────────►  count_ord(counts, 'pca')
+                                                   pca(counts), rpca(counts)</code></pre>
 <p>The examples here use R’s built-in <code>iris</code> data: 150
 flowers (the samples), four measurements of each (the features), and
 three species. Your own data can be any count table that ecodive takes,
@@ -144,7 +146,7 @@ each axis.</td>
 <td align="left">Metric Multidimensional Scaling</td>
 <td align="left"><code>dm</code></td>
 <td align="left">Fitting the distances themselves in exactly
-<code>k</code> dimensions.</td>
+<code>n_axes</code> dimensions.</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/nmds.html">nmds()</a></code></td>
@@ -184,7 +186,7 @@ ordination).</td>
 <td align="left"><code><a href="../reference/capscale.html">capscale()</a></code></td>
 <td align="left">Constrained Analysis of Principal Coordinates</td>
 <td align="left"><code>dm</code></td>
-<td align="left">The same, as <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code> computes
+<td align="left">The same, as <code>vegan::capscale()</code> computes
 it.</td>
 </tr>
 <tr class="odd">
@@ -278,15 +280,15 @@ run them all.</p>
 names shown by <code>list_dist_ords('id')</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_ords.html">list_dist_ords</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                            name       id input</span></span>
-<span><span class="co">#&gt; 1 Constrained Analysis of Principal Coordinates capscale  dist</span></span>
-<span><span class="co">#&gt; 2            Distance-based Redundancy Analysis    dbrda  dist</span></span>
-<span><span class="co">#&gt; 3                     Isometric Feature Mapping   isomap  dist</span></span>
-<span><span class="co">#&gt; 4               Metric Multidimensional Scaling      mds  dist</span></span>
-<span><span class="co">#&gt; 5           Non-metric Multidimensional Scaling     nmds  dist</span></span>
-<span><span class="co">#&gt; 6                Principal Coordinates Analysis     pcoa  dist</span></span>
-<span><span class="co">#&gt; 7   t-distributed Stochastic Neighbor Embedding     tsne  dist</span></span>
-<span><span class="co">#&gt; 8 Uniform Manifold Approximation and Projection     umap  dist</span></span></code></pre></div>
+<span><span class="co">#&gt;                                            name       id</span></span>
+<span><span class="co">#&gt; 1 Constrained Analysis of Principal Coordinates capscale</span></span>
+<span><span class="co">#&gt; 2            Distance-based Redundancy Analysis    dbrda</span></span>
+<span><span class="co">#&gt; 3                     Isometric Feature Mapping   isomap</span></span>
+<span><span class="co">#&gt; 4               Metric Multidimensional Scaling      mds</span></span>
+<span><span class="co">#&gt; 5           Non-metric Multidimensional Scaling     nmds</span></span>
+<span><span class="co">#&gt; 6                Principal Coordinates Analysis     pcoa</span></span>
+<span><span class="co">#&gt; 7   t-distributed Stochastic Neighbor Embedding     tsne</span></span>
+<span><span class="co">#&gt; 8 Uniform Manifold Approximation and Projection     umap</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="non-euclidean-distances">Non-Euclidean distances<a class="anchor" aria-label="anchor" href="#non-euclidean-distances"></a>
@@ -295,7 +297,7 @@ names shown by <code>list_dist_ords('id')</code>.</p>
 UniFrac, are not Euclidean: PCoA then finds negative eigenvalues, which
 cannot be drawn. <code>correction = 'lingoes'</code> or
 <code>'cailliez'</code> adds the smallest constant that removes them, as
-<code><a href="https://rdrr.io/pkg/ape/man/pcoa.html" class="external-link">ape::pcoa()</a></code> does.</p>
+<code>ape::pcoa()</code> does.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm</span>, correction <span class="op">=</span> <span class="st">'cailliez'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'constant'</span><span class="op">)</span></span>
@@ -339,11 +341,16 @@ fitted, as in <code>vegan</code>.</p>
 <h2 id="ordinating-counts-directly">Ordinating counts directly<a class="anchor" aria-label="anchor" href="#ordinating-counts-directly"></a>
 </h2>
 <p><code><a href="../reference/pca.html">pca()</a></code> and <code><a href="../reference/rpca.html">rpca()</a></code> take the count table
-rather than distances. PCA works on any of ecodive’s transformations,
-such as <code>norm = 'clr'</code> (centered log-ratios, with a
-<code>pseudocount</code> for zeros); <code>scale = TRUE</code> gives
-every feature equal weight. The <code>loadings</code> attribute holds
-each feature’s direction, for a biplot.</p>
+rather than distances. <code><a href="../reference/count_ord.html">count_ord()</a></code> runs them by name, as
+<code><a href="../reference/dist_ord.html">dist_ord()</a></code> does for the methods that take distances:
+<code>count_ord(counts, 'pca')</code> is <code>pca(counts)</code>. PCA
+works on any of ecodive’s transformations, such as
+<code>norm = 'clr'</code> (centered log-ratios, with a
+<code>pseudocount</code> for zeros) or <code>norm = 'hellinger'</code>
+(square-root proportions, a common choice for community data);
+<code>scale = TRUE</code> gives every feature equal weight. The
+<code>loadings</code> attribute holds each feature’s direction, for a
+biplot.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -393,7 +400,7 @@ PCoA, giving an arrow for each one, as scikit-bio does.</p>
 <p><code><a href="../reference/envfit.html">envfit()</a></code> fits sample metadata, or a feature table, onto
 any ordination. Numeric variables get an arrow and r-squared, factors a
 centroid per level, and each one a permutation p-value, as
-<code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code> gives.</p>
+<code>vegan::envfit()</code> gives.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/envfit.html">envfit</a></span><span class="op">(</span><span class="va">ord</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>

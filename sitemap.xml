@@ -7,6 +7,7 @@
 <url><loc>https://cmmr.github.io/ecodive/articles/bdiv.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/articles/bdiv_guide.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/articles/benchmark.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/articles/benchmark_ord_stats.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/articles/ecodive.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/articles/index.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/articles/ordination.html</loc></url>
@@ -38,6 +39,8 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/chebyshev.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/chord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/clark.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/count_ord.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/count_ords.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dbrda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dist_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dist_ords.html</loc></url>

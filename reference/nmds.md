@@ -11,7 +11,7 @@ that works from `dm` directly, with far less time and memory.
 ``` r
 nmds(
   dm,
-  k = 2L,
+  n_axes = 2L,
   n_starts = 4L,
   max_iters = 1000L,
   tol = 1e-07,
@@ -31,7 +31,7 @@ nmds(
   symmetric numeric matrix of distances. Must not contain `NA`s or
   negative values.
 
-- k:
+- n_axes:
 
   The number of dimensions. Default: `2`
 
@@ -103,7 +103,7 @@ columns, `stress` is 0, and no starts are run.
 
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md), and `nmds()`
-all place the samples in `k` dimensions from `dm`.
+all place the samples in `n_axes` dimensions from `dm`.
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) (classical
 scaling) is exact and fast, and has eigenvalues and "variance
 explained", but it fits the squared distances after double centering, so
@@ -151,12 +151,12 @@ after the first move the points twice as far as the Guttman transform
 would: \\X \leftarrow 2\Gamma(X) - X\\, the relaxed update of de Leeuw
 and Heiser (1980). \\\Gamma\\ doesn't depend on the scale of \\X\\, so
 relaxed steps don't converge in that one direction (they flip the scale
-back and forth), nor at all when `k = 1`, where \\\Gamma\\ only depends
-on the order of the points. So a start takes relaxed steps only until
-one makes no more than `tol` progress, then plain steps until a plain
-step does (or until `max_iters`, whose last step is always plain), and
-`k = 1` uses plain steps throughout. The configuration returned and
-measured thus always comes from a plain step: it is a fixed point of
+back and forth), nor at all when `n_axes = 1`, where \\\Gamma\\ only
+depends on the order of the points. So a start takes relaxed steps only
+until one makes no more than `tol` progress, then plain steps until a
+plain step does (or until `max_iters`, whose last step is always plain),
+and `n_axes = 1` uses plain steps throughout. The configuration returned
+and measured thus always comes from a plain step: it is a fixed point of
 \\\Gamma\\ to within `tol`, and its stress is what plain steps reach
 from the same start. Relaxed steps typically save about half the
 iterations, but can end in a different local minimum than plain steps
@@ -170,16 +170,14 @@ a fixed point, which is often not the best one: random starts
 
 Beta diversity distances are often tied, e.g. at 1 for every pair of
 samples with no taxa in common. With `ties = "primary"` (Kruskal's
-primary approach, as in
-[`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)),
-tied distances only have to stay in order with the other distances: on
-the plot, they may differ from each other. With `"secondary"` (as in
-scikit-learn), tied distances get one shared disparity, the mean of
-their distances on the plot, so the solution tries to make them equal
-too; this is a stronger requirement, so its stress is higher. Heavily
-tied data (e.g. Jaccard or Bray-Curtis on few taxa or rarefied counts)
-have many local minima of similar stress, and benefit from more
-`n_starts`; see `n_best`.
+primary approach, as in `vegan::metaMDS()`), tied distances only have to
+stay in order with the other distances: on the plot, they may differ
+from each other. With `"secondary"` (as in scikit-learn), tied distances
+get one shared disparity, the mean of their distances on the plot, so
+the solution tries to make them equal too; this is a stronger
+requirement, so its stress is higher. Heavily tied data (e.g. Jaccard or
+Bray-Curtis on few taxa or rarefied counts) have many local minima of
+similar stress, and benefit from more `n_starts`; see `n_best`.
 
 Distances count as tied when they are within \\10^{-15}\\ times the
 largest distance of the first of their group (sorted increasingly),
@@ -190,8 +188,7 @@ disparity of 0 with either approach, as in scikit-learn: they are pulled
 towards the same point. (Under the primary approach, a zero would
 otherwise just be the smallest tie, free to take any small distance on
 the plot; but identical samples should coincide.) So when `dm` has no
-zeros, `stress` with `ties = "primary"` equals
-[`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)'s
+zeros, `stress` with `ties = "primary"` equals `vegan::metaMDS()`'s
 stress for the same configuration; when it has zeros, it is higher.
 
 SMACOF only finds a local minimum of stress. So:
@@ -303,7 +300,7 @@ user interrupts.
 
 The result, with all its attributes, is bit-identical from run to run,
 in new R sessions, and for any value of `cpus`, given the same `dm`,
-`k`, `n_starts`, `max_iters`, `tol`, `ties`, and `seed`. Each start
+`n_axes`, `n_starts`, `max_iters`, `tol`, `ties`, and `seed`. Each start
 splits its sums into a fixed number of parts that depends only on the
 number of samples, and adds them in a fixed order; the sort order of the
 distances is a total order (tied distances keep their order in `dm`),
@@ -315,7 +312,7 @@ ordination, distances above \\10^{150}\\ are rejected.) Results can
 still differ in the last bits between computers or compilers, as for any
 floating point code.
 
-`k` larger than \\n - 1\\ is reduced to \\n - 1\\.
+`n_axes` larger than \\n - 1\\ is reduced to \\n - 1\\.
 
 ## Ordination result
 

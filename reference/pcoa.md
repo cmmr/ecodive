@@ -4,15 +4,13 @@ Ordinates samples from their distances, for plotting beta diversity.
 Also known as classical or metric multidimensional scaling. Gives the
 same coordinates and eigenvalues as
 [`stats::cmdscale()`](https://rdrr.io/r/stats/cmdscale.html),
-[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html), and
-[`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html),
-but computes only the first few axes, which takes far less time and
-memory for large datasets.
+`ape::pcoa()`, and `vegan::wcmdscale()`, but computes only the first few
+axes, which takes far less time and memory for large datasets.
 
 ## Usage
 
 ``` r
-pcoa(dm, k = 3L, correction = "none", cpus = n_cpus())
+pcoa(dm, n_axes = 3L, correction = "none", cpus = n_cpus())
 ```
 
 ## Arguments
@@ -25,7 +23,7 @@ pcoa(dm, k = 3L, correction = "none", cpus = n_cpus())
   symmetric numeric matrix of distances. Must not contain `NA`s or
   negative values.
 
-- k:
+- n_axes:
 
   The number of axes to compute. Default: `3`. Reduced, with a warning,
   to the number of axes with positive eigenvalues, which is at most
@@ -82,24 +80,20 @@ With \\A\\ the matrix of squared distances and \\J = I -
 eigenvalues \\\lambda_i\\ and unit eigenvectors \\u_i\\ of \\B =
 -\frac{1}{2}JAJ\\. Axis \\i\\'s coordinates are \\u_i\sqrt{\lambda_i}\\.
 
-[`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html),
-[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html), and
-[`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html)
-build \\B\\ in full (\\n \times n\\) and compute all \\n\\ of its
-eigenvalues, which takes time proportional to \\n^3\\. `pcoa()` finds
-only the largest `k` eigenvalues, by block Lanczos iteration with thick
-restarts. That only needs products of \\B\\ with a few vectors at a
-time, which are computed in parallel straight from `dm`, without ever
-forming \\B\\.
+[`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html), `ape::pcoa()`,
+and `vegan::wcmdscale()` build \\B\\ in full (\\n \times n\\) and
+compute all \\n\\ of its eigenvalues, which takes time proportional to
+\\n^3\\. `pcoa()` finds only the largest `n_axes` eigenvalues, by block
+Lanczos iteration with thick restarts. That only needs products of \\B\\
+with a few vectors at a time, which are computed in parallel straight
+from `dm`, without ever forming \\B\\.
 
 **Proportion of variance**
 
 The total variance is \\trace(B) = \frac{1}{n}\sum\_{i\<j}d\_{ij}^2\\,
 the sum of all \\n\\ eigenvalues. `prop` is each axis's eigenvalue
-divided by it: the same as
-[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html)'s `Relative_eig`
-and `vegan`'s "Proportion Explained", the values that
-[`phyloseq::plot_ordination()`](https://rdrr.io/pkg/phyloseq/man/plot_ordination.html)
+divided by it: the same as `ape::pcoa()`'s `Relative_eig` and `vegan`'s
+"Proportion Explained", the values that `phyloseq::plot_ordination()`
 shows on its axes.
 
 Non-Euclidean distances, such as Bray-Curtis, can give negative
@@ -109,7 +103,7 @@ positive have no real coordinates and are dropped with a warning, as
 [`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html) does. So are axes
 with eigenvalues at rounding-error level, below
 `sqrt(.Machine$double.eps)` times the first one, as in
-[`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html).
+`vegan::wcmdscale()`.
 
 **Negative eigenvalue corrections**
 
@@ -133,8 +127,7 @@ negative (Gower & Legendre 1986; Legendre & Legendre 2012, sec. 9.3):
   computed from \\d'\\.
 
 `eig`, `prop`, and `trace` are then those of the corrected distances,
-and `prop` sums to at most 1. They equal
-[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html)'s `Corr_eig` and
+and `prop` sums to at most 1. They equal `ape::pcoa()`'s `Corr_eig` and
 `Rel_corr_eig` for the same correction, and
 `vegan::wcmdscale(add = 'lingoes')` or `add = 'cailliez'`; \\c_2\\ is
 `cmdscale(add = TRUE)`'s `ac`.
@@ -147,8 +140,8 @@ coordinates, `eig`, `prop`, and `trace` are identical to those from
 `correction = 'none'`. (`ape` and `vegan` correct those tiny negative
 eigenvalues too, so they can add a tiny constant where `pcoa()` adds 0.)
 
-With `k` = \\n - 1\\, the axis whose eigenvalue the correction makes 0
-is dropped without a warning.
+With `n_axes` = \\n - 1\\, the axis whose eigenvalue the correction
+makes 0 is dropped without a warning.
 
 **When to use a correction**
 
@@ -185,9 +178,8 @@ For Bray-Curtis distances between 2,000 sparse samples, on one thread,
 seconds; `cmdscale(add = TRUE)`, which builds the \\2n \times 2n\\
 matrix, took 2 minutes. How much longer depends on how tightly the
 smallest eigenvalues cluster. Each pass over `dm` takes time
-proportional to \\n^2\\, while `cmdscale(add = TRUE)` and
-[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html) take time
-proportional to \\n^3\\.
+proportional to \\n^2\\, while `cmdscale(add = TRUE)` and `ape::pcoa()`
+take time proportional to \\n^3\\.
 
 **Axis signs and reproducibility**
 
@@ -196,8 +188,8 @@ mirror images of the same axis. `pcoa()` flips each axis so that its
 largest coordinate in absolute value is positive. Results are identical
 from run to run and for any number of `cpus`.
 
-`k` larger than \\n - 1\\ (the most axes possible) is reduced to \\n -
-1\\.
+`n_axes` larger than \\n - 1\\ (the most axes possible) is reduced to
+\\n - 1\\.
 
 ## Ordination result
 

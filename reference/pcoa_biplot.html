@@ -28,6 +28,7 @@ in the Python package scikit-bio."><meta property="og:image" content="https://cm
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -95,6 +96,8 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 them:</p><ul><li><p><code>'none'</code>: As given, as in scikit-bio.</p></li>
 <li><p><code>'percent'</code>: Relative abundance (sample abundances sum to 1).</p></li>
 <li><p><code>'chord'</code>: Each sample scaled to unit length (Euclidean norm 1).</p></li>
+<li><p><code>'hellinger'</code>: Square root of relative abundance (the Hellinger
+transformation).</p></li>
 <li><p><code>'binary'</code>: Presence/absence (each count is either 0 or 1).</p></li>
 <li><p><code>'clr'</code>: Centered log ratio.</p></li>
 <li><p><code>'rclr'</code>: Robust centered log ratio. Zeros stay 0.</p></li>

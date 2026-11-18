@@ -11,7 +11,7 @@ of scikit-learn's metric `MDS()`, ported to parallel C that works from
 ``` r
 mds(
   dm,
-  k = 2L,
+  n_axes = 2L,
   n_starts = 4L,
   max_iters = 1000L,
   tol = 1e-07,
@@ -30,7 +30,7 @@ mds(
   symmetric numeric matrix of distances. Must not contain `NA`s or
   negative values.
 
-- k:
+- n_axes:
 
   The number of dimensions. Default: `2`
 
@@ -91,7 +91,7 @@ columns, `stress` is 0, and no starts are run.
 **Which ordination?**
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), `mds()`,
 and [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) all fit
-a configuration to `dm` in `k` dimensions.
+a configuration to `dm` in `n_axes` dimensions.
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) (classical
 scaling) is exact and fast, has eigenvalues and "variance explained",
 but fits the squared distances after double centering, so large
@@ -122,10 +122,10 @@ iterations.
 As in [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) (see
 there), iterations take relaxed steps, \\X \leftarrow 2\Gamma(X) - X\\
 (de Leeuw & Heiser, 1980), when `k > 1`, until one makes no more than
-`tol` progress, and then plain steps until a plain step does; `k = 1`
-uses plain steps only, and so does the last iteration allowed by
-`max_iters`. So the returned configuration is a fixed point of
-\\\Gamma\\ to within `tol`, at the right scale (\\\sum
+`tol` progress, and then plain steps until a plain step does;
+`n_axes = 1` uses plain steps only, and so does the last iteration
+allowed by `max_iters`. So the returned configuration is a fixed point
+of \\\Gamma\\ to within `tol`, at the right scale (\\\sum
 d\_{ij}\delta\_{ij} = \sum d\_{ij}^2\\), typically in about half the
 iterations that plain steps take. With plain steps only (an internal
 setting used by the tests), a start follows scikit-learn's iterations
@@ -137,9 +137,9 @@ SMACOF only finds a local minimum of stress, so, as in
 
 1.  The first start is the PCoA solution, from
     [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md). For
-    distances that are Euclidean in `k` dimensions, PCoA recovers the
-    configuration, and SMACOF stops at once. (An axis without a positive
-    eigenvalue gets small random coordinates instead.)
+    distances that are Euclidean in `n_axes` dimensions, PCoA recovers
+    the configuration, and SMACOF stops at once. (An axis without a
+    positive eigenvalue gets small random coordinates instead.)
 
 2.  Then come `n_starts` random starts, with coordinates uniform on \[0,
     1). On beta diversity distances, a random start sometimes ends with
@@ -217,14 +217,14 @@ checks for user interrupts.
 
 The result, with all its attributes, is bit-identical from run to run,
 in new R sessions, and for any value of `cpus`, given the same `dm`,
-`k`, `n_starts`, `max_iters`, `tol`, and `seed`, for the reasons given
-in [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md).
+`n_axes`, `n_starts`, `max_iters`, `tol`, and `seed`, for the reasons
+given in [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md).
 `dm * 2^p` gives exactly the result for `dm`, times \\2^p\\. (As for
 every ordination, distances above \\10^{150}\\ are rejected.) Results
 can still differ in the last bits between computers or compilers, as for
 any floating point code.
 
-`k` larger than \\n - 1\\ is reduced to \\n - 1\\.
+`n_axes` larger than \\n - 1\\ is reduced to \\n - 1\\.
 
 ## Ordination result
 

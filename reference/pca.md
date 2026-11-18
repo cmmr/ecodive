@@ -15,7 +15,7 @@ pca(
   margin = 1L,
   norm = "none",
   pseudocount = NULL,
-  k = 3L,
+  n_axes = 3L,
   scale = FALSE,
   cpus = n_cpus()
 )
@@ -45,6 +45,9 @@ pca(
 
   - `'chord'`: Each sample scaled to unit length (Euclidean norm 1).
 
+  - `'hellinger'`: Square root of relative abundance (the Hellinger
+    transformation).
+
   - `'binary'`: Presence/absence (each count is either 0 or 1).
 
   - `'clr'`: Centered log ratio, giving an Aitchison PCA.
@@ -58,7 +61,7 @@ pca(
   Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
   other normalization methods. See **Pseudocount** section.
 
-- k:
+- n_axes:
 
   The number of axes to compute. Default: `3`
 
@@ -109,12 +112,12 @@ singular value decomposition \\JZD^{-1} = USV^T\\. The scores are
 
 [`prcomp()`](https://rdrr.io/r/stats/prcomp.html) builds the whole
 centered table and decomposes it in full. `pca()` finds only the first
-`k` axes, by block Lanczos iteration, which only needs products of the
-table with a few vectors at a time. Those are computed in parallel from
-the non-zero counts alone: the zeros of each sample all share one value
-after normalization (0, or \\\log(pseudocount)\\ minus the sample's mean
-log for `norm = 'clr'`), and centering only subtracts each feature's
-mean, so a sparse table is never made dense.
+`n_axes` axes, by block Lanczos iteration, which only needs products of
+the table with a few vectors at a time. Those are computed in parallel
+from the non-zero counts alone: the zeros of each sample all share one
+value after normalization (0, or \\\log(pseudocount)\\ minus the
+sample's mean log for `norm = 'clr'`), and centering only subtracts each
+feature's mean, so a sparse table is never made dense.
 
 **Relation to
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md)**
@@ -147,7 +150,7 @@ mirror images of the same axis. As
 positive, and flips its loadings to match. Results are identical from
 run to run and for any number of `cpus`.
 
-`k` larger than the number of samples minus one, or the number of
+`n_axes` larger than the number of samples minus one, or the number of
 features, is reduced to the smaller of those. Axes with variances at
 rounding-error level, below `sqrt(.Machine$double.eps)` times the first
 one, are dropped with a warning. With `scale = TRUE`, features with

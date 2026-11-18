@@ -30,6 +30,7 @@ directly, with far less time and memory."><meta property="og:image" content="htt
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -64,7 +65,7 @@ directly, with far less time and memory.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mds</span><span class="op">(</span></span>
 <span>  <span class="va">dm</span>,</span>
-<span>  k <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  n_axes <span class="op">=</span> <span class="fl">2L</span>,</span>
 <span>  n_starts <span class="op">=</span> <span class="fl">4L</span>,</span>
 <span>  max_iters <span class="op">=</span> <span class="fl">1000L</span>,</span>
 <span>  tol <span class="op">=</span> <span class="fl">1e-07</span>,</span>
@@ -83,7 +84,7 @@ symmetric numeric matrix of distances. Must not contain <code>NA</code>s or
 negative values.</p></dd>
 
 
-<dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
+<dt id="arg-n-axes">n_axes<a class="anchor" aria-label="anchor" href="#arg-n-axes"></a></dt>
 <dd><p>The number of dimensions. Default: <code>2</code></p></dd>
 
 
@@ -133,7 +134,7 @@ columns, <code>stress</code> is 0, and no starts are run.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>Which ordination?</strong> <code><a href="pcoa.html">pcoa()</a></code>, <code>mds()</code>, and <code><a href="nmds.html">nmds()</a></code> all fit a
-configuration to <code>dm</code> in <code>k</code> dimensions. <code><a href="pcoa.html">pcoa()</a></code> (classical scaling) is exact and fast, has
+configuration to <code>dm</code> in <code>n_axes</code> dimensions. <code><a href="pcoa.html">pcoa()</a></code> (classical scaling) is exact and fast, has
 eigenvalues and "variance explained", but fits the squared distances after
 double centering, so large distances dominate, and non-Euclidean
 distances such as Bray-Curtis lose part of their structure to negative
@@ -157,7 +158,7 @@ when an iteration lowers \(\sigma\) by no more than <code>tol</code> times
 <p>As in <code><a href="nmds.html">nmds()</a></code> (see there), iterations take relaxed steps,
 \(X \leftarrow 2\Gamma(X) - X\) (de Leeuw &amp; Heiser, 1980), when <code>k &gt; 1</code>,
 until one makes no more than <code>tol</code> progress, and then plain steps until a
-plain step does; <code>k = 1</code> uses plain steps only, and so does the last
+plain step does; <code>n_axes = 1</code> uses plain steps only, and so does the last
 iteration allowed by <code>max_iters</code>. So the returned configuration is a fixed
 point of \(\Gamma\) to within <code>tol</code>, at the right scale
 (\(\sum d_{ij}\delta_{ij} = \sum d_{ij}^2\)), typically in about half the
@@ -166,7 +167,7 @@ setting used by the tests), a start follows scikit-learn's iterations from
 the same starting configuration to within rounding error (about
 \(10^{-13}\), relatively, in every iteration's raw stress).</p>
 <p>SMACOF only finds a local minimum of stress, so, as in <code><a href="nmds.html">nmds()</a></code>:</p><ol><li><p>The first start is the PCoA solution, from <code><a href="pcoa.html">pcoa()</a></code>. For distances
-that are Euclidean in <code>k</code> dimensions, PCoA recovers the configuration,
+that are Euclidean in <code>n_axes</code> dimensions, PCoA recovers the configuration,
 and SMACOF stops at once. (An axis without a positive eigenvalue gets
 small random coordinates instead.)</p></li>
 <li><p>Then come <code>n_starts</code> random starts, with coordinates uniform on [0, 1).
@@ -224,13 +225,13 @@ each iteration split across <code>cpus</code> threads (for at least \(2^{18}\)
 pairs), in parts between checks for user interrupts.</p>
 <p><strong>Reproducibility</strong></p>
 <p>The result, with all its attributes, is bit-identical from run to run, in
-new R sessions, and for any value of <code>cpus</code>, given the same <code>dm</code>, <code>k</code>,
+new R sessions, and for any value of <code>cpus</code>, given the same <code>dm</code>, <code>n_axes</code>,
 <code>n_starts</code>, <code>max_iters</code>, <code>tol</code>, and <code>seed</code>, for the reasons given in <code><a href="nmds.html">nmds()</a></code>.
 <code>dm * 2^p</code> gives exactly the result for <code>dm</code>, times \(2^p\). (As for
 every ordination, distances above \(10^{150}\) are rejected.) Results can
 still differ in the last bits between computers or compilers, as for any
 floating point code.</p>
-<p><code>k</code> larger than \(n - 1\) is reduced to \(n - 1\).</p>
+<p><code>n_axes</code> larger than \(n - 1\) is reduced to \(n - 1\).</p>
     </div>
     <div class="section level2">
     <h2 id="ordination-result">Ordination result<a class="anchor" aria-label="anchor" href="#ordination-result"></a></h2>

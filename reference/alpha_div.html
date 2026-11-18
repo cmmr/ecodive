@@ -22,6 +22,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -80,6 +81,8 @@ Programmatic access via <code>list_metrics('alpha')</code>.</p></dd>
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
 <dd><p>Normalize the incoming counts. Options are:</p><ul><li><p><code>'none'</code>: No transformation.</p></li>
 <li><p><code>'percent'</code>: Relative abundance (sample abundances sum to 1).</p></li>
+<li><p><code>'hellinger'</code>: Square root of relative abundance (the Hellinger
+transformation).</p></li>
 <li><p><code>'binary'</code>: Unweighted presence/absence (each count is either 0 or 1).</p></li>
 <li><p><code>'clr'</code>: Centered log ratio.</p></li>
 <li><p><code>'rclr'</code>: Robust centered log ratio.</p></li>

@@ -30,6 +30,7 @@ and dist_test()."><meta property="og:image" content="https://cmmr.github.io/ecod
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/adiv.html">Alpha Diversity</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv_guide.html">Selecting a Beta Diversity Metric</a></li>
     <li><a class="dropdown-item" href="../articles/bdiv.html">Beta Diversity</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_ord_stats.html">Benchmarks: Ordination and Statistics</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">Benchmarks</a></li>
     <li><a class="dropdown-item" href="../articles/ordination.html">Ordination</a></li>
     <li><a class="dropdown-item" href="../articles/performance.html">Performance Guide</a></li>
@@ -83,7 +84,7 @@ Programmatic access via <code><a href="dist_ords.html">list_dist_ords()</a></cod
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Further arguments for the method's function, such as <code>k</code>,
+<dd><p>Further arguments for the method's function, such as <code>n_axes</code>,
 <code>seed</code>, <code>cpus</code>, or <code>pcoa</code>'s <code>correction</code>. Each method keeps its own
 defaults; see <code><a href="capscale.html">capscale()</a></code> and <code><a href="dbrda.html">dbrda()</a></code> (which also need <code>groups</code>,
 or <code>data</code> and <code>formula</code>, as in <code>dist_ord(dm, 'dbrda', 'treatment', meta)</code>), <code><a href="isomap.html">isomap()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>, <code><a href="tsne.html">tsne()</a></code>, and
@@ -100,14 +101,15 @@ arguments can be given to every method.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>List of Ordination Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>capscale</code></td><td>Constrained Analysis of Principal Coordinates</td></tr><tr><td><code>dbrda</code></td><td>Distance-based Redundancy Analysis (db-RDA)</td></tr><tr><td><code>isomap</code></td><td>Isometric Feature Mapping (Isomap)</td></tr><tr><td><code>mds</code></td><td>Metric Multidimensional Scaling (MDS)</td></tr><tr><td><code>nmds</code></td><td>Non-metric Multidimensional Scaling (NMDS)</td></tr><tr><td><code>pcoa</code></td><td>Principal Coordinates Analysis (PCoA)</td></tr><tr><td><code>tsne</code></td><td>t-distributed Stochastic Neighbor Embedding (t-SNE)</td></tr><tr><td><code>umap</code></td><td>Uniform Manifold Approximation and Projection (UMAP)</td></tr></table><p><code><a href="pca.html">pca()</a></code> and <code><a href="rpca.html">rpca()</a></code> ordinate a count table rather than distances, so they
-are called directly, not through <code>dist_ord()</code>. PCA is PCoA of Euclidean
+are run by <code><a href="count_ord.html">count_ord()</a></code>, or called directly. PCA is PCoA of Euclidean
 distances: <code>dist_ord(euclidean(counts), 'pcoa')</code> gives the same scores as
 <code>pca(counts)</code>, up to each axis's sign, but <code><a href="pca.html">pca()</a></code> also returns the
 features' loadings and never forms the distance matrix. <code><a href="permanova.html">permanova()</a></code> and
 ecodive's other tests are run by <code><a href="dist_test.html">dist_test()</a></code>.</p>
-<p>Default numbers of axes differ: <code>k = 3</code> for <code>capscale</code>, <code>dbrda</code>, <code>pcoa</code> (and
-<code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>), and <code>k = 2</code> for <code>isomap</code>, <code>mds</code>, <code>nmds</code>, <code>tsne</code>, and
-<code>umap</code>.</p>
+<p>Default numbers of axes differ: <code>n_axes = 3</code> for the methods whose axes
+have eigenvalues (<code>capscale</code>, <code>dbrda</code>, <code>isomap</code>, <code>pcoa</code>, and <code><a href="pca.html">pca()</a></code> and
+<code><a href="rpca.html">rpca()</a></code>), and <code>n_axes = 2</code> for those that fit a layout in a fixed number
+of dimensions (<code>mds</code>, <code>nmds</code>, <code>tsne</code>, and <code>umap</code>).</p>
 <p><strong>Flexible name matching</strong></p>
 <p>Case insensitive and partial matching, ignoring anything but letters. E.g.
 <code>method = 'PCoA'</code> or <code>'principal coord'</code> selects <code>pcoa</code>. Common other names
@@ -120,8 +122,8 @@ selects <code>capscale</code>.</p>
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.</p>
 <p><strong>Same names in other packages</strong></p>
-<p><code><a href="https://rdrr.io/pkg/ape/man/pcoa.html" class="external-link">ape::pcoa()</a></code>, <code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::pca()</a></code>, <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>, <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code>,
-<code><a href="https://vegandevs.github.io/vegan/reference/isomap.html" class="external-link">vegan::isomap()</a></code> (whose <code>k</code> is the number of neighbours, not axes), and
+<p><code>ape::pcoa()</code>, <code>vegan::pca()</code>, <code>vegan::dbrda()</code>, <code>vegan::capscale()</code>,
+<code>vegan::isomap()</code> (whose <code>k</code> is the number of neighbours, not axes), and
 <code>uwot::umap()</code> share names with ecodive's functions, and whichever package was attached last
 masks the other's. Write <code><a href="pcoa.html">ecodive::pcoa()</a></code> and so on, or use
 <code>dist_ord()</code>, which always runs ecodive's, to be sure.</p>
@@ -159,8 +161,8 @@ other attributes by name rather than in full. Subsetting with <code>[</code>, or
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="capscale.html">capscale()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>,
-<code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, <code><a href="dist_ords.html">list_dist_ords()</a></code>; <code><a href="pca.html">pca()</a></code> and <code><a href="rpca.html">rpca()</a></code>, which are
-called directly; <code><a href="dist_test.html">dist_test()</a></code> for ecodive's tests.</p></div>
+<code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, <code><a href="dist_ords.html">list_dist_ords()</a></code>; <code><a href="count_ord.html">count_ord()</a></code> for <code><a href="pca.html">pca()</a></code> and
+<code><a href="rpca.html">rpca()</a></code>, which take a count table; <code><a href="dist_test.html">dist_test()</a></code> for ecodive's tests.</p></div>
     </div>
 
     <div class="section level2">

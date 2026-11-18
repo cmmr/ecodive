@@ -31,6 +31,10 @@ normalize(counts, norm, margin = 1L, pseudocount = NULL, cpus = n_cpus())
   - `'chord'`: Each sample's counts divided by their Euclidean norm (so
     their squares sum to 1).
 
+  - `'hellinger'`: The square root of each count divided by the sample's
+    sum (the Hellinger transformation). Euclidean distances between the
+    results are Hellinger distances.
+
   - `'binary'`: Presence/absence: 1 for each non-zero count.
 
   - `'clr'`: Centered log ratio: \\\log(x + pseudocount)\\ minus the
@@ -143,8 +147,8 @@ for references.
 #> -2.220446e-16 -6.661338e-16  3.552714e-15 -1.110223e-15 
 
     # The same values as pca()'s own normalization
-    a <- pca(ex_counts, norm = 'clr', pseudocount = 1, k = 2)
-    b <- pca(clr, k = 2)
+    a <- pca(ex_counts, norm = 'clr', pseudocount = 1, n_axes = 2)
+    b <- pca(clr, n_axes = 2)
     all.equal(a, b)
 #> [1] TRUE
 ```

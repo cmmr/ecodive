@@ -17,7 +17,8 @@ start from the count table itself.
            │                                           pcoa(dm), nmds(dm), umap(dm), ...
            │                                           dist_test(dm, 'permanova', ...)
            │
-           └─────────────────────────────────────────►  pca(counts), rpca(counts)
+           └─────────────────────────────────────────►  count_ord(counts, 'pca')
+                                                       pca(counts), rpca(counts)
 
 The examples here use R’s built-in `iris` data: 150 flowers (the
 samples), four measurements of each (the features), and three species.
@@ -45,13 +46,13 @@ dm <- bray(iris[, 1:4])
 | Function | Method | Input | Best for |
 |:---|:---|:---|:---|
 | [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) | Principal Coordinates Analysis (PCoA) | `dm` | The default: exact, fast, and reports the variance on each axis. |
-| [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md) | Metric Multidimensional Scaling | `dm` | Fitting the distances themselves in exactly `k` dimensions. |
+| [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md) | Metric Multidimensional Scaling | `dm` | Fitting the distances themselves in exactly `n_axes` dimensions. |
 | [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md) | Non-metric Multidimensional Scaling (NMDS) | `dm` | Keeping the rank order of distances; popular with Bray-Curtis. |
 | [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md) | Isometric Feature Mapping (Isomap) | `dm` | Long gradients that PCoA bends into an arch. |
 | [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md) | t-distributed Stochastic Neighbor Embedding | `dm` | Separating clusters; distances between clusters mean little. |
 | [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md) | Uniform Manifold Approximation and Projection | `dm` | Clusters, with more of the global layout kept than t-SNE. |
 | [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) | Distance-based Redundancy Analysis (db-RDA) | `dm` | Axes that sample metadata explain (a constrained ordination). |
-| [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) | Constrained Analysis of Principal Coordinates | `dm` | The same, as [`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html) computes it. |
+| [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) | Constrained Analysis of Principal Coordinates | `dm` | The same, as `vegan::capscale()` computes it. |
 | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) | Principal Component Analysis (PCA) | counts | Euclidean geometry of (transformed) counts, with feature loadings. |
 | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) | Robust Aitchison PCA | counts | Sparse compositional data, such as microbiome counts. |
 
@@ -147,15 +148,15 @@ by `list_dist_ords('id')`.
 ``` r
 
 list_dist_ords()
-#>                                            name       id input
-#> 1 Constrained Analysis of Principal Coordinates capscale  dist
-#> 2            Distance-based Redundancy Analysis    dbrda  dist
-#> 3                     Isometric Feature Mapping   isomap  dist
-#> 4               Metric Multidimensional Scaling      mds  dist
-#> 5           Non-metric Multidimensional Scaling     nmds  dist
-#> 6                Principal Coordinates Analysis     pcoa  dist
-#> 7   t-distributed Stochastic Neighbor Embedding     tsne  dist
-#> 8 Uniform Manifold Approximation and Projection     umap  dist
+#>                                            name       id
+#> 1 Constrained Analysis of Principal Coordinates capscale
+#> 2            Distance-based Redundancy Analysis    dbrda
+#> 3                     Isometric Feature Mapping   isomap
+#> 4               Metric Multidimensional Scaling      mds
+#> 5           Non-metric Multidimensional Scaling     nmds
+#> 6                Principal Coordinates Analysis     pcoa
+#> 7   t-distributed Stochastic Neighbor Embedding     tsne
+#> 8 Uniform Manifold Approximation and Projection     umap
 ```
 
 ## Non-Euclidean distances
@@ -163,8 +164,7 @@ list_dist_ords()
 Many ecological distances, such as Bray-Curtis and unweighted UniFrac,
 are not Euclidean: PCoA then finds negative eigenvalues, which cannot be
 drawn. `correction = 'lingoes'` or `'cailliez'` adds the smallest
-constant that removes them, as
-[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html) does.
+constant that removes them, as `ape::pcoa()` does.
 
 ``` r
 
@@ -221,11 +221,16 @@ attr(ord, 'inertia')
 
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) take the
-count table rather than distances. PCA works on any of ecodive’s
-transformations, such as `norm = 'clr'` (centered log-ratios, with a
-`pseudocount` for zeros); `scale = TRUE` gives every feature equal
-weight. The `loadings` attribute holds each feature’s direction, for a
-biplot.
+count table rather than distances.
+[`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
+runs them by name, as
+[`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md)
+does for the methods that take distances: `count_ord(counts, 'pca')` is
+`pca(counts)`. PCA works on any of ecodive’s transformations, such as
+`norm = 'clr'` (centered log-ratios, with a `pseudocount` for zeros) or
+`norm = 'hellinger'` (square-root proportions, a common choice for
+community data); `scale = TRUE` gives every feature equal weight. The
+`loadings` attribute holds each feature’s direction, for a biplot.
 
 ``` r
 
@@ -292,9 +297,7 @@ scores
 [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) fits
 sample metadata, or a feature table, onto any ordination. Numeric
 variables get an arrow and r-squared, factors a centroid per level, and
-each one a permutation p-value, as
-[`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html)
-gives.
+each one a permutation p-value, as `vegan::envfit()` gives.
 
 ``` r
 

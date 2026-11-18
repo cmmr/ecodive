@@ -154,11 +154,13 @@ Distance measures based on phylogenetic branch lengths (UniFrac family).
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods
-that take beta diversity distances; pca() and rpca() take the count
-table.
+that take beta diversity distances, and count_ord() the methods that
+take the count table.
 
 - [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) :
   Distance-based Ordination
+- [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
+  : Count Table Ordination
 - [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) :
   Principal Coordinates Analysis (PCoA)
 - [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
@@ -186,6 +188,9 @@ table.
 - [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
   [`match_dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
   : Find and Browse Distance-based Ordination Methods
+- [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md)
+  [`match_count_ord()`](https://cmmr.github.io/ecodive/reference/count_ords.md)
+  : Find and Browse Count Table Ordination Methods
 
 ## Hypothesis Tests
 

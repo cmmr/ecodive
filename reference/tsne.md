@@ -12,7 +12,7 @@ gradients, that never copies `dm` into an \\n \times n\\ matrix.
 ``` r
 tsne(
   dm,
-  k = 2L,
+  n_axes = 2L,
   perplexity = 30,
   theta = 0.5,
   gradient = "auto",
@@ -35,7 +35,7 @@ tsne(
   symmetric numeric matrix of distances. Must not contain `NA`s or
   negative values. Its scale doesn't matter (see "Scale").
 
-- k:
+- n_axes:
 
   The number of dimensions. Default: `2`
 
@@ -63,9 +63,9 @@ tsne(
 - init:
 
   The starting layout: `"pcoa"` (the default), `"random"`, or a numeric
-  matrix with one row per sample, in the same order as `dm`, and `k`
-  columns, none of them constant (a constant column could never move).
-  See "Starting layout" below.
+  matrix with one row per sample, in the same order as `dm`, and
+  `n_axes` columns, none of them constant (a constant column could never
+  move). See "Starting layout" below.
 
 - max_iters:
 
@@ -88,7 +88,7 @@ tsne(
 
   An integer seed for the random starting layout. The same seed gives
   the same result. Not used when `init` is a matrix, nor by a PCoA start
-  with `k` axes. Default: `0`
+  with `n_axes` axes. Default: `0`
 
 - cpus:
 
@@ -150,21 +150,21 @@ der Maaten 2014) takes time proportional to \\n \log n\\:
   `dm`), and is 0 for the rest.
 
 - The repulsion between points on the plot is computed from a tree of
-  cells: a quadtree for `k = 2`, an octree for `k = 3`, and a binary
-  tree for `k = 1`. A cell far enough away (see `theta`) acts as one
-  point at its center of mass.
+  cells: a quadtree for `n_axes = 2`, an octree for `n_axes = 3`, and a
+  binary tree for `n_axes = 1`. A cell far enough away (see `theta`)
+  acts as one point at its center of mass.
 
-The tree only exists for up to 3 dimensions, so larger `k` always uses
-the exact gradient. `gradient = "auto"` uses the exact gradient for up
-to 500 samples, where it is fast enough, and Barnes-Hut for more.
+The tree only exists for up to 3 dimensions, so larger `n_axes` always
+uses the exact gradient. `gradient = "auto"` uses the exact gradient for
+up to 500 samples, where it is fast enough, and Barnes-Hut for more.
 
 **Perplexity and small datasets**
 
 Each sample needs at least \\3 \times perplexity\\ neighbors, so
 `perplexity` is reduced to \\(n - 1) / 3\\ when it is larger (but not
 below 1), with a warning if you set `perplexity` yourself. For example,
-40 samples allow a perplexity of up to 13. `k` is used as given, even
-when it is \\n\\ or more.
+40 samples allow a perplexity of up to 13. `n_axes` is used as given,
+even when it is \\n\\ or more.
 
 **Scale**
 
@@ -184,14 +184,14 @@ range.
 **Starting layout**
 
 t-SNE only finds a local minimum, and which one depends on the starting
-layout. The default, `"pcoa"`, starts from the first `k` axes of
+layout. The default, `"pcoa"`, starts from the first `n_axes` axes of
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), scaled so
 that the first has a standard deviation of \\10^{-4}\\, as scikit-learn
 scales its PCA start: this keeps more of the data's global structure
 than a random start, and doesn't depend on a seed (Kobak & Linderman
-2021). Without `k` axes with positive eigenvalues, it starts at random
-instead. `"random"` draws each coordinate from a normal distribution
-with a standard deviation of \\10^{-4}\\, from `seed`.
+2021). Without `n_axes` axes with positive eigenvalues, it starts at
+random instead. `"random"` draws each coordinate from a normal
+distribution with a standard deviation of \\10^{-4}\\, from `seed`.
 
 **Speed and memory**
 
@@ -228,9 +228,9 @@ the differences:
   layouts.
 
 - \\q\_{ij}\\ always has one degree of freedom. scikit-learn uses
-  \\\max(k - 1, 1)\\, i.e. 2 for `k = 3`, with a gradient that isn't
-  exactly the divergence's for more than one degree of freedom. For
-  `k = 1` and `k = 2`, the two agree.
+  \\\max(k - 1, 1)\\, i.e. 2 for `n_axes = 3`, with a gradient that
+  isn't exactly the divergence's for more than one degree of freedom.
+  For `n_axes = 1` and `n_axes = 2`, the two agree.
 
 - The default start is PCoA. scikit-learn doesn't allow its PCA start
   with precomputed distances, so starts at random there. Random starts
@@ -254,8 +254,8 @@ the differences:
   merges points within \\10^{-6}\\ of each other on every axis and
   leaves out their repulsion from each other. A cell that holds the
   point being moved is never summarized (scikit-learn's can be, when
-  `theta` is above \\1/\sqrt{2}\\ for `k = 2`, or \\1/\sqrt{3}\\ for
-  `k = 3`).
+  `theta` is above \\1/\sqrt{2}\\ for `n_axes = 2`, or \\1/\sqrt{3}\\
+  for `n_axes = 3`).
 
 - Nearest neighbors with equal distances are chosen by sample order.
 
