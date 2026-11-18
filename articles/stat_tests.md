@@ -161,6 +161,51 @@ mrpp(dm, 'Species', iris)
 #> Chance-corrected within-group agreement A: 0.6332
 ```
 
+## Pairwise comparisons
+
+When an overall test finds that the groups differ, the next question is
+usually which ones. `pairwise = TRUE` reruns the test on each pair of
+groups’ samples, and adjusts the pairs’ p-values for multiple testing
+(Holm’s method by default; `p_adjust = 'BH'` controls the false
+discovery rate instead). The overall result is unchanged.
+
+``` r
+
+res <- permanova(dm, 'Species', iris, pairwise = TRUE)
+res$pairwise
+#>                               F        R2         z   n n_perm p_value
+#> setosa-versicolor     552.51266 0.8493496 412.88785 100    999   0.001
+#> setosa-virginica     1001.54509 0.9108722 688.94049 100    999   0.001
+#> versicolor-virginica   91.82959 0.4837475  75.54295 100    999   0.001
+#>                      p_adjusted
+#> setosa-versicolor         0.003
+#> setosa-virginica          0.003
+#> versicolor-virginica      0.003
+```
+
+`p_value` is each pair’s own permutation p-value, and `p_adjusted` the
+value to report.
+[`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md) and
+[`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) take the
+same arguments, and
+[`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md)
+adds adjusted p-values to its pairwise t tests:
+
+``` r
+
+permdisp(dm, 'Species', iris, pairwise = TRUE)$pairwise
+#> Warning: Some squared distances to group centres are negative, and were set to
+#> 0.
+#>                               t Df          z   n n_perm   p_value p_value_perm
+#> setosa-versicolor    -1.0328277 98 -1.0325057 100    999 0.3042267        0.294
+#> setosa-virginica     -0.7327500 98 -0.7079531 100    999 0.4654599        0.471
+#> versicolor-virginica  0.3204074 98  0.2900848 100    999 0.7493417        0.764
+#>                      p_adjusted p_adjusted_perm
+#> setosa-versicolor     0.9126800           0.882
+#> setosa-virginica      0.9309198           0.942
+#> versicolor-virginica  0.9309198           0.942
+```
+
 ## Mantel test
 
 [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md)

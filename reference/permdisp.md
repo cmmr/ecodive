@@ -17,6 +17,7 @@ permdisp(
   type = "centroid",
   bias_adjust = FALSE,
   pairwise = FALSE,
+  p_adjust = "holm",
   permutations = 999L,
   strata = NULL,
   seed = 0L,
@@ -74,7 +75,19 @@ permdisp(
 - pairwise:
 
   Also test each pair of groups with a \\t\\ statistic, as
-  `permutest(pairwise = TRUE)`. Default: `FALSE`.
+  `permutest(pairwise = TRUE)`, and adjust the pairs' p-values for
+  multiple testing with `p_adjust`. Default: `FALSE`.
+
+- p_adjust:
+
+  With `pairwise = TRUE`, how to adjust the pairs' p-values for multiple
+  testing: one of
+  [`stats::p.adjust.methods`](https://rdrr.io/r/stats/p.adjust.html)
+  (`'holm'`, `'hochberg'`, `'hommel'`, `'bonferroni'`, `'BH'`, `'BY'`,
+  `'fdr'`, or `'none'`), matched as
+  [`stats::p.adjust()`](https://rdrr.io/r/stats/p.adjust.html) matches
+  them. Giving it without `pairwise = TRUE` is an error. Default:
+  `'holm'`.
 
 - permutations:
 
@@ -134,9 +147,17 @@ fields:
 
 - `pairwise`: With `pairwise = TRUE`, a data frame with one row per pair
   of groups, named like `"a-b"`, and columns `t` (the \\t\\ statistic of
-  group `a` minus group `b`), `Df`, `p_value` (from the \\t\\
-  distribution), and `p_value_perm` (from the permutations). Otherwise
-  `NULL`.
+  group `a` minus group `b`), `Df`, `z` (how far \\t\\ lies from its
+  permuted values, in standard deviations), `n` (the pair's samples),
+  `n_perm`, `p_value` (from the \\t\\ distribution), `p_value_perm`
+  (from the permutations), `p_adjusted` and `p_adjusted_perm` (each
+  p-value column adjusted across the pairs with
+  `stats::p.adjust(method = p_adjust)`). A pair with a group of one
+  sample has no \\t\\ (`NA`, with a warning), as in `permutest()`.
+  Otherwise `NULL`.
+
+- `p_adjust`: With `pairwise = TRUE`, the `p_adjust` method used.
+  Otherwise `NULL`.
 
 - `permutation`: How samples were permuted: `'free'`, `'within strata'`,
   or `'supplied matrix'`.
@@ -239,6 +260,13 @@ both.
 - Pairwise permutation p-values count permuted \\\|t\|\\ within
   `sqrt(.Machine$double.eps)` of the observed one as ties, as for \\F\\.
 
+- Pairwise p-values are also adjusted for multiple testing (`p_adjust`,
+  Holm's method by default), in columns of their own; `permutest()`
+  adjusts nothing. Unlike ecodive's other tests' `pairwise`, the pairs
+  are not tested on their own: their \\t\\ statistics come from the
+  whole test's distances to the group centres, and their permutation
+  p-values from its permutations, as in `permutest()`.
+
 - `strata` permutes freely within strata. For other restricted designs,
   pass a `permutations` matrix from `permute::shuffleSet()`.
 
@@ -314,8 +342,12 @@ Sciences*, 97(4), 1423-1426.
     # with each pair of groups tested.
     res <- permdisp(dm, meta$treatment, type = 'median', pairwise = TRUE)
     res$pairwise
-#>                    t Df      p_value p_value_perm
-#> ctrl-high -9.0539173 18 4.029174e-08        0.001
-#> ctrl-low  -0.4405987 18 6.647493e-01        0.662
-#> high-low   8.6234560 18 8.282327e-08        0.001
+#>                    t Df          z  n n_perm      p_value p_value_perm
+#> ctrl-high -9.0539173 18 -8.6372143 20    999 4.029174e-08        0.001
+#> ctrl-low  -0.4405987 18 -0.3886739 20    999 6.647493e-01        0.662
+#> high-low   8.6234560 18  8.4716805 20    999 8.282327e-08        0.001
+#>             p_adjusted p_adjusted_perm
+#> ctrl-high 1.208752e-07           0.003
+#> ctrl-low  6.647493e-01           0.662
+#> high-low  1.656465e-07           0.003
 ```

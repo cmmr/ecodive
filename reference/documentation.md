@@ -58,6 +58,24 @@ documentation
   logical vector specifying positions in the distance matrix to
   calculate. See examples.
 
+- pairwise:
+
+  Also test each pair of groups: run the same test on just the two
+  groups' samples, for every pair, and adjust the pairs' p-values for
+  multiple testing with `p_adjust`. See **Pairwise comparisons**.
+  Default: `FALSE`.
+
+- p_adjust:
+
+  With `pairwise = TRUE`, how to adjust the pairs' p-values for multiple
+  testing: one of
+  [`stats::p.adjust.methods`](https://rdrr.io/r/stats/p.adjust.html)
+  (`'holm'`, `'hochberg'`, `'hommel'`, `'bonferroni'`, `'BH'`, `'BY'`,
+  `'fdr'`, or `'none'`), matched as
+  [`stats::p.adjust()`](https://rdrr.io/r/stats/p.adjust.html) matches
+  them. Giving it without `pairwise = TRUE` is an error. Default:
+  `'holm'`.
+
 - power:
 
   Scaling factor for the magnitude of differences between communities

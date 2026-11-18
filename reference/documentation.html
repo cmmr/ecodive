@@ -98,6 +98,22 @@ Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.</p></dd>
 
 
+<dt id="arg-pairwise">pairwise<a class="anchor" aria-label="anchor" href="#arg-pairwise"></a></dt>
+<dd><p>Also test each pair of groups: run the same test on just
+the two groups' samples, for every pair, and adjust the pairs'
+p-values for multiple testing with <code>p_adjust</code>. See <strong>Pairwise
+comparisons</strong>. Default: <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-p-adjust">p_adjust<a class="anchor" aria-label="anchor" href="#arg-p-adjust"></a></dt>
+<dd><p>With <code>pairwise = TRUE</code>, how to adjust the pairs'
+p-values for multiple testing: one of <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust.methods</a></code>
+(<code>'holm'</code>, <code>'hochberg'</code>, <code>'hommel'</code>, <code>'bonferroni'</code>, <code>'BH'</code>,
+<code>'BY'</code>, <code>'fdr'</code>, or <code>'none'</code>), matched as <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust()</a></code>
+matches them. Giving it without <code>pairwise = TRUE</code> is an error.
+Default: <code>'holm'</code>.</p></dd>
+
+
 <dt id="arg-power">power<a class="anchor" aria-label="anchor" href="#arg-power"></a></dt>
 <dd><p>Scaling factor for the magnitude of differences between
 communities (\(p\)). Default: <code>1.5</code></p></dd>

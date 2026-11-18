@@ -72,6 +72,7 @@ that the default centre differs: see <code>type</code>.</p>
 <span>  type <span class="op">=</span> <span class="st">"centroid"</span>,</span>
 <span>  bias_adjust <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pairwise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  p_adjust <span class="op">=</span> <span class="st">"holm"</span>,</span>
 <span>  permutations <span class="op">=</span> <span class="fl">999L</span>,</span>
 <span>  strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">0L</span>,</span>
@@ -126,7 +127,17 @@ multiplying each by \(\sqrt{n_g / (n_g - 1)}\), for a group of
 
 <dt id="arg-pairwise">pairwise<a class="anchor" aria-label="anchor" href="#arg-pairwise"></a></dt>
 <dd><p>Also test each pair of groups with a \(t\) statistic,
-as <code>permutest(pairwise = TRUE)</code>. Default: <code>FALSE</code>.</p></dd>
+as <code>permutest(pairwise = TRUE)</code>, and adjust the pairs' p-values for
+multiple testing with <code>p_adjust</code>. Default: <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-p-adjust">p_adjust<a class="anchor" aria-label="anchor" href="#arg-p-adjust"></a></dt>
+<dd><p>With <code>pairwise = TRUE</code>, how to adjust the pairs'
+p-values for multiple testing: one of <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust.methods</a></code>
+(<code>'holm'</code>, <code>'hochberg'</code>, <code>'hommel'</code>, <code>'bonferroni'</code>, <code>'BH'</code>,
+<code>'BY'</code>, <code>'fdr'</code>, or <code>'none'</code>), matched as <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust()</a></code>
+matches them. Giving it without <code>pairwise = TRUE</code> is an error.
+Default: <code>'holm'</code>.</p></dd>
 
 
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
@@ -175,9 +186,16 @@ sample, when <code>dm</code> has names), as <code>betadisper()$distances</code>.
 <li><p><code>bias_adjust</code>: <code>TRUE</code> or <code>FALSE</code>.</p></li>
 <li><p><code>pairwise</code>: With <code>pairwise = TRUE</code>, a data frame with one row per pair
 of groups, named like <code>"a-b"</code>, and columns <code>t</code> (the \(t\) statistic
-of group <code>a</code> minus group <code>b</code>), <code>Df</code>, <code>p_value</code> (from the \(t\)
-distribution), and <code>p_value_perm</code> (from the permutations). Otherwise
-<code>NULL</code>.</p></li>
+of group <code>a</code> minus group <code>b</code>), <code>Df</code>, <code>z</code> (how far \(t\) lies from
+its permuted values, in standard deviations), <code>n</code> (the pair's
+samples), <code>n_perm</code>, <code>p_value</code> (from the \(t\) distribution),
+<code>p_value_perm</code> (from the permutations), <code>p_adjusted</code> and
+<code>p_adjusted_perm</code> (each p-value column adjusted across the pairs with
+<code>stats::p.adjust(method = p_adjust)</code>). A pair with a group of one
+sample has no \(t\) (<code>NA</code>, with a warning), as in <code>permutest()</code>.
+Otherwise <code>NULL</code>.</p></li>
+<li><p><code>p_adjust</code>: With <code>pairwise = TRUE</code>, the <code>p_adjust</code> method used.
+Otherwise <code>NULL</code>.</p></li>
 <li><p><code>permutation</code>: How samples were permuted: <code>'free'</code>, <code>'within strata'</code>, or <code>'supplied matrix'</code>.</p></li>
 </ul><p>Attribute <code>f_perm</code> holds the \(F\) statistic of each permutation, as
 <code>permutest()$perm</code>, and, with <code>pairwise = TRUE</code>, attribute <code>t_perm</code> is a
@@ -251,6 +269,12 @@ where <code>betadisper()</code> gives <code>NaN</code>.</p></li>
 <li><p>Pairwise permutation p-values count permuted \(|t|\) within
 <code>sqrt(.Machine$double.eps)</code> of the observed one as ties, as for
 \(F\).</p></li>
+<li><p>Pairwise p-values are also adjusted for multiple testing (<code>p_adjust</code>,
+Holm's method by default), in columns of their own; <code>permutest()</code>
+adjusts nothing. Unlike ecodive's other tests' <code>pairwise</code>, the pairs
+are not tested on their own: their \(t\) statistics come from the
+whole test's distances to the group centres, and their permutation
+p-values from its permutations, as in <code>permutest()</code>.</p></li>
 <li><p><code>strata</code> permutes freely within strata. For other restricted designs,
 pass a <code>permutations</code> matrix from <code>permute::shuffleSet()</code>.</p></li>
 <li><p><code>betadisper()</code>'s <code>sqrt.dist</code> and <code>add</code> options transform the distances
@@ -317,10 +341,14 @@ associated data depth. <em>Proceedings of the National Academy of Sciences</em>,
 <span class="r-in"><span>    <span class="co"># with each pair of groups tested.</span></span></span>
 <span class="r-in"><span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">permdisp</span><span class="op">(</span><span class="va">dm</span>, <span class="va">meta</span><span class="op">$</span><span class="va">treatment</span>, type <span class="op">=</span> <span class="st">'median'</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">res</span><span class="op">$</span><span class="va">pairwise</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    t Df      p_value p_value_perm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ctrl-high -9.0539173 18 4.029174e-08        0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ctrl-low  -0.4405987 18 6.647493e-01        0.662</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> high-low   8.6234560 18 8.282327e-08        0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    t Df          z  n n_perm      p_value p_value_perm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ctrl-high -9.0539173 18 -8.6372143 20    999 4.029174e-08        0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ctrl-low  -0.4405987 18 -0.3886739 20    999 6.647493e-01        0.662</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> high-low   8.6234560 18  8.4716805 20    999 8.282327e-08        0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             p_adjusted p_adjusted_perm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ctrl-high 1.208752e-07           0.003</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ctrl-low  6.647493e-01           0.662</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> high-low  1.656465e-07           0.003</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

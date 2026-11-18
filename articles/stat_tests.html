@@ -271,6 +271,43 @@ distance within groups with what random groups would give.</p>
 <span><span class="co">#&gt; Chance-corrected within-group agreement A: 0.6332</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="pairwise-comparisons">Pairwise comparisons<a class="anchor" aria-label="anchor" href="#pairwise-comparisons"></a>
+</h2>
+<p>When an overall test finds that the groups differ, the next question
+is usually which ones. <code>pairwise = TRUE</code> reruns the test on
+each pair of groups’ samples, and adjusts the pairs’ p-values for
+multiple testing (Holm’s method by default; <code>p_adjust = 'BH'</code>
+controls the false discovery rate instead). The overall result is
+unchanged.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">pairwise</span></span>
+<span><span class="co">#&gt;                               F        R2         z   n n_perm p_value</span></span>
+<span><span class="co">#&gt; setosa-versicolor     552.51266 0.8493496 412.88785 100    999   0.001</span></span>
+<span><span class="co">#&gt; setosa-virginica     1001.54509 0.9108722 688.94049 100    999   0.001</span></span>
+<span><span class="co">#&gt; versicolor-virginica   91.82959 0.4837475  75.54295 100    999   0.001</span></span>
+<span><span class="co">#&gt;                      p_adjusted</span></span>
+<span><span class="co">#&gt; setosa-versicolor         0.003</span></span>
+<span><span class="co">#&gt; setosa-virginica          0.003</span></span>
+<span><span class="co">#&gt; versicolor-virginica      0.003</span></span></code></pre></div>
+<p><code>p_value</code> is each pair’s own permutation p-value, and
+<code>p_adjusted</code> the value to report. <code><a href="../reference/anosim.html">anosim()</a></code> and
+<code><a href="../reference/mrpp.html">mrpp()</a></code> take the same arguments, and <code><a href="../reference/permdisp.html">permdisp()</a></code>
+adds adjusted p-values to its pairwise t tests:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/permdisp.html">permdisp</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">pairwise</span></span>
+<span><span class="co">#&gt; Warning: Some squared distances to group centres are negative, and were set to</span></span>
+<span><span class="co">#&gt; 0.</span></span>
+<span><span class="co">#&gt;                               t Df          z   n n_perm   p_value p_value_perm</span></span>
+<span><span class="co">#&gt; setosa-versicolor    -1.0328277 98 -1.0325057 100    999 0.3042267        0.294</span></span>
+<span><span class="co">#&gt; setosa-virginica     -0.7327500 98 -0.7079531 100    999 0.4654599        0.471</span></span>
+<span><span class="co">#&gt; versicolor-virginica  0.3204074 98  0.2900848 100    999 0.7493417        0.764</span></span>
+<span><span class="co">#&gt;                      p_adjusted p_adjusted_perm</span></span>
+<span><span class="co">#&gt; setosa-versicolor     0.9126800           0.882</span></span>
+<span><span class="co">#&gt; setosa-virginica      0.9309198           0.942</span></span>
+<span><span class="co">#&gt; versicolor-virginica  0.9309198           0.942</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="mantel-test">Mantel test<a class="anchor" aria-label="anchor" href="#mantel-test"></a>
 </h2>
 <p><code><a href="../reference/mantel.html">mantel()</a></code> correlates <code>dm</code> with a numeric
@@ -278,7 +315,7 @@ variable, or with a second distance matrix: here, whether flowers with
 similar petals also have similar sepals. <code>method</code> can be
 <code>'pearson'</code>, <code>'spearman'</code>, or
 <code>'kendall'</code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sepals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">petals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
@@ -294,7 +331,7 @@ similar petals also have similar sepals. <code>method</code> can be
 <p><code><a href="../reference/mantel_partial.html">mantel_partial()</a></code> removes the effect of a third set of
 distances, <code>given</code>: here, whether sepals and petals still
 match after accounting for petal width alone.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/mantel_partial.html">mantel_partial</a></span><span class="op">(</span><span class="va">sepals</span>, <span class="va">petals</span>, given <span class="op">=</span> <span class="st">'Petal.Width'</span>, data <span class="op">=</span> <span class="va">iris</span>, method <span class="op">=</span> <span class="st">'spearman'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Partial Mantel test (Spearman)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -313,7 +350,7 @@ match after accounting for petal width alone.</p>
 variable suits the test (categorical or numeric), and names are matched
 forgivingly: <code>'adonis2'</code> finds <code>permanova</code> and
 <code>'betadisper'</code> finds <code>permdisp</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_test.html">dist_test</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'adonis2'</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -330,7 +367,7 @@ forgivingly: <code>'adonis2'</code> finds <code>permanova</code> and
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>Each result converts to a one-row data frame with the same columns,
 so several tests combine into one table.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tests</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dist_tests.html">list_dist_tests</a></span><span class="op">(</span>val <span class="op">=</span> <span class="st">'id'</span>, groups <span class="op">=</span> <span class="st">'categorical'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">tests</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">test</span><span class="op">)</span></span>
@@ -350,7 +387,7 @@ so several tests combine into one table.</p>
 <code>seed</code> (default <code>0</code>), so the same call always
 gives the same p-value, on any computer and with any number of
 <code>cpus</code>. R’s <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> has no effect.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">)</span></span>

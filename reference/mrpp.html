@@ -76,6 +76,8 @@ straight from the distances.</p>
 <span>  <span class="va">groups</span>,</span>
 <span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weights <span class="op">=</span> <span class="st">"n"</span>,</span>
+<span>  pairwise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  p_adjust <span class="op">=</span> <span class="st">"holm"</span>,</span>
 <span>  permutations <span class="op">=</span> <span class="fl">999L</span>,</span>
 <span>  strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">0L</span>,</span>
@@ -118,6 +120,22 @@ and <code>vegan::mrpp()</code>'s <code>weight.type = 1</code>.</p></li>
 \(\delta\) is the mean of all within-group distances.
 <code>weight.type = 3</code>.</p></li>
 </ul><p><code>1</code>, <code>2</code>, or <code>3</code> are also accepted, as in <code>vegan::mrpp()</code>.</p></dd>
+
+
+<dt id="arg-pairwise">pairwise<a class="anchor" aria-label="anchor" href="#arg-pairwise"></a></dt>
+<dd><p>Also test each pair of groups: run the same test on just
+the two groups' samples, for every pair, and adjust the pairs'
+p-values for multiple testing with <code>p_adjust</code>. See <strong>Pairwise
+comparisons</strong>. Default: <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-p-adjust">p_adjust<a class="anchor" aria-label="anchor" href="#arg-p-adjust"></a></dt>
+<dd><p>With <code>pairwise = TRUE</code>, how to adjust the pairs'
+p-values for multiple testing: one of <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust.methods</a></code>
+(<code>'holm'</code>, <code>'hochberg'</code>, <code>'hommel'</code>, <code>'bonferroni'</code>, <code>'BH'</code>,
+<code>'BY'</code>, <code>'fdr'</code>, or <code>'none'</code>), matched as <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust()</a></code>
+matches them. Giving it without <code>pairwise = TRUE</code> is an error.
+Default: <code>'holm'</code>.</p></dd>
 
 
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
@@ -166,6 +184,12 @@ the mean of all the distances.</p></li>
 group of one sample).</p></li>
 <li><p><code>class_n</code>: Each group's number of samples.</p></li>
 <li><p><code>weights</code>: The <code>weights</code> used.</p></li>
+<li><p><code>pairwise</code>: With <code>pairwise = TRUE</code>, a data frame with one row per pair
+of groups, named like <code>"a-b"</code>, and columns <code>delta</code>, <code>A</code>, <code>z</code>, <code>n</code> (the
+pair's samples), <code>n_perm</code>, <code>p_value</code>, and <code>p_adjusted</code>. See
+<strong>Pairwise comparisons</strong>. Otherwise <code>NULL</code>.</p></li>
+<li><p><code>p_adjust</code>: With <code>pairwise = TRUE</code>, the <code>p_adjust</code> method used.
+Otherwise <code>NULL</code>.</p></li>
 <li><p><code>permutation</code>: How samples were permuted: <code>'free'</code>, <code>'within strata'</code>,
 or <code>'supplied matrix'</code>.</p></li>
 </ul><p>Attribute <code>delta_perm</code> holds the \(\delta\) of each permutation, as
@@ -220,6 +244,42 @@ with <code><a href="beta_div.html">beta_div()</a></code> or a metric function su
 <li><p><code>strata</code> permutes freely within strata. For other restricted designs,
 pass a <code>permutations</code> matrix from <code>permute::shuffleSet()</code>.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="pairwise-comparisons">Pairwise comparisons<a class="anchor" aria-label="anchor" href="#pairwise-comparisons"></a></h2>
+
+
+<p>With <code>pairwise = TRUE</code>, each pair of groups is also tested on its own,
+as q2-diversity's <code>beta_group_significance(pairwise=True)</code> does: the
+distances are cut down to the two groups' samples, and the same test is
+run on them, with the same number of <code>permutations</code>, the same <code>strata</code>
+(cut down too), and the test's other arguments. The overall test is
+unchanged.</p><ul><li><p><strong>Permutations:</strong> Each pair has random permutations of its own, drawn
+from <code>seed</code> and the pair's position in the table, never from the
+number of <code>cpus</code>. So a pair's p-value is reproducible, but differs
+(by sampling error) from that of the same test run by hand on the
+pair's samples with the same <code>seed</code>. A supplied <code>permutations</code> matrix
+is cut down to each pair's samples by following each permutation's
+cycles: each of the pair's samples goes to the next of the pair's
+samples on its cycle. That gives a permutation of the pair's samples,
+uniformly distributed when the full one is, which keeps any
+restriction the matrix has, such as permuting only within strata.</p></li>
+<li><p><strong>Multiple testing:</strong> The pairs' permutation p-values are adjusted
+together with <code>stats::p.adjust(method = p_adjust)</code>. The default,
+Holm's method, controls the family-wise error rate whatever the
+dependence between the pairs' tests. <code>'BH'</code> controls the false
+discovery rate instead, as q2-diversity's q-values do. The raw
+p-values are kept as well.</p></li>
+<li><p><strong>Pairs that can't be tested:</strong> A pair the test can't be run on, such
+as two groups of one sample each, gets <code>NA</code>s, with a warning, rather
+than an error. A test's other warnings for a pair, such as all of its
+distances being 0, are passed on, naming the pair.</p></li>
+</ul><p>The <code>pairwise</code> field of the result is a data frame with one row per pair
+of groups, named like <code>"a-b"</code>, in the order of the groups' factor levels
+(sorted values, for other vectors). Its columns are the test's
+statistics for the pair, <code>z</code>, <code>n</code> (the pair's number of samples),
+<code>n_perm</code>, <code>p_value</code> (unadjusted) and <code>p_adjusted</code>. The <code>p_adjust</code> field
+names the method, and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> shows both.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>McCune, B., &amp; Grace, J. B. (2002). <em>Analysis of Ecological Communities</em>.
@@ -287,6 +347,13 @@ Function Approach</em>. Springer, New York. <a href="https://doi.org/10.1007/978
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expected delta: 0.2438</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Chance-corrected within-group agreement A: 0.07954</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Each pair of treatments, with Holm-adjusted p-values.</span></span></span>
+<span class="r-in"><span>    <span class="fu">mrpp</span><span class="op">(</span><span class="va">dm</span>, <span class="st">'treatment'</span>, <span class="va">meta</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">pairwise</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               delta           A         z  n n_perm p_value p_adjusted</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ctrl-high 0.2100255  0.11073465 -9.180235 20    999   0.001      0.003</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ctrl-low  0.2487199 -0.01162824  1.182126 20    999   0.892      0.892</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> high-low  0.2144254  0.08957766 -7.820948 20    999   0.001      0.003</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
