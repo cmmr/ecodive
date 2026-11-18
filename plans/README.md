@@ -160,7 +160,9 @@ particular), **the per-method plans and this README win.**
   them through on purpose. Tests may take a `method` argument (as
   `mantel()` does, for the correlation), because `dist_test()` names its
   selector `test`. Plain functions with no wrapper are free of this
-  constraint.
+  constraint. `tests/tinytests/test-wrapper_args.r` enforces the rule for
+  every registered method, so adding a registry row whose function breaks
+  it fails the tests.
 - **Pairwise tests** take `pairwise = FALSE` and `p_adjust = 'holm'`
   (see [pairwise_tests.md](pairwise_tests.md)).
 - **Masking:** many names will mask vegan, ade4 or MASS functions when both
