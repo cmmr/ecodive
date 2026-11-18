@@ -8,7 +8,7 @@
 }
 \arguments{
 \item{x}{An ordination result, from \code{\link[=dist_ord]{dist_ord()}}, \code{\link[=count_ord]{count_ord()}},
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capscale]{capscale()}},
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}}, \code{\link[=ca]{ca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capscale]{capscale()}},
 \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, or \code{\link[=umap]{umap()}}.}
 
 \item{...}{Passed on to \code{print()} for the matrix of coordinates.}

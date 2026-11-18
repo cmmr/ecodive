@@ -245,3 +245,77 @@ Reference results:
   `~ g + x + Condition(z)`, 8 axes: `cca()` 0.53 s on 4 threads,
   `vegan::cca()` 66 s, eigenvalues equal to 2e-16. Without the condition
   and with 1,000 permutations for the adjusted R²: 0.9 s.
+
+
+## Decisions made while implementing (ca)
+
+Item 5 (`ca()`).
+
+Asked of the user at the start (2026-11-18), and answered:
+
+1. **Empty rows and columns as in `cca()`:** all-zero samples are an error
+   that names them ("... which CA cannot place: ..."), and all-zero
+   features are left out of the analysis silently, with loadings of 0, so
+   the loadings keep one row per feature. `ca(x)` equals `cca(x)` exactly.
+2. **ade4 is a second reference:** `ade4::dudi.coa()` 1.7-24 (from CRAN, in
+   a scratch library; output-only) is in the fixtures. Its eigenvalues are
+   `ca()`'s (all of them sum to `trace`), its `$l1` (row scores of unit
+   weighted variance) are `ca()`'s scores, and its `$co` (column principal
+   coordinates) are `ca()`'s loadings, so no rescaling is needed.
+3. **`dist_ord('ca')` points to `count_ord()`:** `'ca'` is now an exact
+   name in `COUNT_ORDS`, so `match_dist_ord('ca')` (and `'CA'`, and
+   `'correspondence analysis'`) stops with "ca() takes a count table, not
+   distances. Use count_ord(counts, "ca") ...", as `'pca'` and `'cca'`
+   already do. `'cap'` still selects `capscale` (tested).
+
+Made while implementing:
+
+4. **Signature `ca(counts, margin = 1L, n_axes = 3L, cpus = n_cpus())`**,
+   as planned: no `norm`, `seed` or `permutations` (no random parts), and no
+   formula input. `count_ord()` drops `seed` for it.
+5. **No new solver.** `ca()` calls `C_cca()` with an empty (n × 0) design
+   and no permutations, the path `cca(counts)` takes. The only refactor is
+   `cca_dims()` in `R/cca.r` (the table's n, p and dimnames, shared by both
+   functions), and `cca_empty_msg()` / `cca_empty_check()` gained a
+   `what` argument ("CCA" or "CA") for their messages. No C changes. As in
+   item 4, nothing was ported from scikit-bio, so there is no licence
+   header, `inst/COPYRIGHTS` stanza or `Authors@R` change.
+6. **Attributes:** `method` (`"ca"`), `eig`, `prop` (`eig / trace`),
+   `trace` and `loadings`, in that order; columns `CA1..`. Scores are
+   vegan's site scores in scaling 2 (`D_r^{-1/2} U`) and loadings its
+   species scores in scaling 2 (`D_c^{-1/2} V Σ`). Axes with zero
+   eigenvalues are dropped with the usual "only m of the first k" warning,
+   when fewer than `min(n_axes, n - 1)` remain.
+7. **Registry:** `ca` is the first row of `COUNT_ORDS` (rows are in id
+   order), named "Correspondence Analysis", with alias
+   `correspondenceanalysis`. The snippet in `plans/README.md` finds `ca`
+   and `correspondenceanalysis` only in `COUNT_ORDS`, and no name in any
+   registry begins `correspondence`. `'ca'`, `'CA'`, `'C.A.'`,
+   `'correspondence'` select `ca`; `'CCA'`, `'cc'` and `'canonical'`
+   select `cca`; `'c'` matches both (an error listing them). All tested.
+8. **Masking:** vegan 2.7 has its own `vegan::ca()` (a `cca()` with no
+   constraints), so the docs name `vegan::ca()` and `ca::ca()`; the
+   fixtures call `vegan::ca()`.
+9. **Docs:** a new `ca.Rd` (method, CA or PCA, matching vegan, ade4 and
+   scikit-bio, masking, signs), linked from `cca()`; NEWS (2.4.0), README
+   and the `ecodive` vignette's tables, the `ordination` vignette (method
+   table, and a paragraph with an example on choosing between unimodal and
+   linear, constrained and unconstrained methods), `count_ord()`,
+   `dist_ord()` and `print.ecodive_ord()` docs, and pkgdown's Ordination
+   section.
+
+Reference results (`data-raw/expected/ca.r` and `ca.py`, fixtures in
+`tests/tinytests/expected/ca.rds`, 53 kB):
+
+- **vegan 2.7.8** `ca()`, 9 cases (dune; dune with every axis; an all-zero
+  feature; `n_axes` > n − 1; n = 3; varespec with 6 and with all 23 axes; a
+  110 × 40 random sparse table; a rank-3 table with `n_axes = 8`). Sites,
+  species, `eig`, `prop` and `trace` match at the 1e-10 tolerance; largest
+  absolute differences: site scores 2.6e-13, species scores 9e-14,
+  eigenvalues and proportions 1e-15, trace 4e-15.
+- **ade4 1.7-24** `dudi.coa()`, the same 9 cases: eigenvalues 1.1e-15,
+  `$l1` 3.9e-13, `$co` 1.5e-13.
+- **scikit-bio 0.7.4** `ca()`, scaling 2, every axis of dune and varespec:
+  sites 2.4e-13, species 8.5e-14, eigenvalues 1e-15.
+- **Speed:** 3,000 samples × 2,000 taxa (5% non-zero), 8 axes: `ca()`
+  1.1 s on 4 threads, `vegan::ca()` 29 s, eigenvalues equal to 3e-16.

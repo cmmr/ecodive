@@ -67,6 +67,7 @@ dm <- bray(iris[, 1:4])
 | `rda()`      | Redundancy Analysis (RDA)                      | counts | Axes of (transformed) counts that sample metadata explain.              |
 | `cca()`      | Canonical Correspondence Analysis (CCA)        | counts | The same in the chi-square metric, for species with unimodal responses. |
 | `pca()`      | Principal Component Analysis (PCA)             | counts | Euclidean geometry of (transformed) counts, with feature loadings.      |
+| `ca()`       | Correspondence Analysis (CA)                   | counts | The chi-square geometry of species profiles, for unimodal responses.    |
 | `rpca()`     | Robust Aitchison PCA                           | counts | Sparse compositional data, such as microbiome counts.                   |
 
 `list_dist_ords()` lists the methods that take distances, with the other
@@ -226,10 +227,23 @@ attr(ord, 'r_squared')
 attr(ord, 'adj_r_squared')
 ```
 
+Without constraints, `cca()` is a correspondence analysis, which `ca()`
+also runs on its own: the unimodal counterpart of PCA, with species scores
+in its `loadings`. So, between the four: choose a unimodal method (CA, CCA)
+for long gradients and species turnover, and a linear one (PCA, RDA) on
+transformed counts for short gradients; and a constrained method (RDA, CCA)
+to ask how much of the variation metadata explain, and an unconstrained one
+(PCA, CA) to see its main patterns, whatever drives them.
+
+```{r}
+ord <- ca(round(iris[, 1:4] * 10), n_axes = 2)
+attr(ord, 'prop')
+```
+
 
 ## Ordinating counts directly
 
-`pca()`, `rpca()`, `rda()` and `cca()` take the count table rather than distances.
+`pca()`, `rpca()`, `rda()`, `cca()` and `ca()` take the count table rather than distances.
 `count_ord()` runs them by name, as `dist_ord()` does for the methods that
 take distances: `count_ord(counts, 'pca')` is `pca(counts)`. PCA
 works on any of ecodive's transformations, such as `norm = 'clr'` (centered

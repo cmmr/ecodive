@@ -42,7 +42,7 @@
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
   the methods. `count_ord()`, with `list_count_ords()` and
   `match_count_ord()`, does the same for the methods that take a count table
-  rather than distances, `pca()`, `rda()`, `cca()` and `rpca()`: `count_ord(counts, "pca")` is
+  rather than distances, `pca()`, `rda()`, `cca()`, `ca()` and `rpca()`: `count_ord(counts, "pca")` is
   `pca(counts)`. Each wrapper points to the other when given the other's
   method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
@@ -278,6 +278,16 @@
   takes half a second where `vegan::cca()` takes a minute. Results are
   identical for any number of `cpus`. Also available as `count_ord(counts,
   "cca", ...)`.
+
+* New `ca()` runs a correspondence analysis of a table of abundances: the
+  unconstrained ordination in the chi-square metric, with species scores
+  (`loadings`). It gives the same site scores, species scores, eigenvalues
+  and inertia as `vegan::ca()` (`vegan::cca()` without constraints),
+  `ade4::dudi.coa()` and scikit-bio's `ca()` (up to each axis's sign), and
+  is the same as `cca()` with no model, whose sparse solver it shares.
+  Results are identical for any number of `cpus`. Also available as
+  `count_ord(counts, "ca")`; `"CA"` selects it, and `dist_ord(dm, "ca")`
+  points to `count_ord()`.
 
 * New `envfit()` fits sample metadata (`data`) and feature tables
   (`counts`, such as taxa abundances) onto any ordination, for biplots: an

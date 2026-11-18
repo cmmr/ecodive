@@ -76,7 +76,7 @@ ORDINATIONS <- local({
 #' | `tsne`                 | t-distributed Stochastic Neighbor Embedding (t-SNE)   |
 #' | `umap`                 | Uniform Manifold Approximation and Projection (UMAP)  |
 #'
-#' [pca()], [rda()], [cca()] and [rpca()] ordinate a count table rather than
+#' [pca()], [rda()], [cca()], [ca()] and [rpca()] ordinate a count table rather than
 #' distances, so they are run by [count_ord()], or called directly. PCA is PCoA of Euclidean
 #' distances: `dist_ord(euclidean(counts), 'pcoa')` gives the same scores as
 #' `pca(counts)`, up to each axis's sign, but `pca()` also returns the
@@ -98,7 +98,7 @@ ORDINATIONS <- local({
 #' `'monoMDS'`, or `'isoMDS'` for `nmds`; `'isometric mapping'` for `isomap`;
 #' `'Rtsne'`, `'bhtsne'`, or `'Barnes-Hut t-SNE'` for `tsne`; and `'uwot'`
 #' for `umap`. `'dbRDA'` or `'distance-based RDA'` select `dbrda`, and `'CAP'`
-#' selects `capscale`.
+#' selects `capscale` (but `'CA'` names [ca()], which takes a count table).
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
@@ -116,7 +116,7 @@ ORDINATIONS <- local({
 #'
 #' @seealso [capscale()], [dbrda()], [isomap()], [mds()], [nmds()], [pcoa()],
 #'   [tsne()], [umap()], [list_dist_ords()]; [count_ord()] for [pca()],
-#'   [rda()], [cca()] and [rpca()], which take a count table; [dist_test()] for
+#'   [rda()], [cca()], [ca()] and [rpca()], which take a count table; [dist_test()] for
 #'   ecodive's tests.
 #'
 #' @export

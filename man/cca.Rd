@@ -191,7 +191,7 @@ observations are an error, as in \code{vegan}; features with no observations
 have no weight, and get species scores of 0.
 
 With no constraints, \code{cca(counts)} is a correspondence analysis, as
-\code{vegan::cca(counts)}.
+\code{vegan::cca(counts)}, and the same as \code{\link[=ca]{ca()}}.
 
 \strong{Permutation tests}
 
@@ -299,5 +299,5 @@ Greenacre, M. (2007). \emph{Correspondence Analysis in Practice} (2nd ed.).
 Chapman & Hall/CRC.
 }
 \seealso{
-\code{\link[=rda]{rda()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=pca]{pca()}}, \code{\link[=count_ord]{count_ord()}}
+\code{\link[=ca]{ca()}}, \code{\link[=rda]{rda()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=pca]{pca()}}, \code{\link[=count_ord]{count_ord()}}
 }

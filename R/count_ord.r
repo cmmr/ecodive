@@ -16,6 +16,7 @@ COUNT_ORDS <- local({
     na.strings       = "",
     text             = "
       name,                                id,   alt_ids
+      Correspondence Analysis,             ca,   correspondenceanalysis
       Canonical Correspondence Analysis,   cca,  canonicalcorrespondenceanalysis constrainedcorrespondenceanalysis
       Principal Component Analysis,        pca,  principalcomponents prcomp
       Redundancy Analysis,                 rda,  redundancyanalysis tbrda transformationbasedrda
@@ -34,7 +35,7 @@ COUNT_ORDS <- local({
 #'
 #' @inheritParams documentation
 #'
-#' @param method   The name of an ordination method: `"cca"`, `"pca"`,
+#' @param method   The name of an ordination method: `"ca"`, `"cca"`, `"pca"`,
 #'        `"rda"`, or `"rpca"`.
 #'        Flexible matching is supported (see below). Programmatic access via
 #'        `list_count_ords()`.
@@ -42,7 +43,8 @@ COUNT_ORDS <- local({
 #' @param ...   Further arguments for the method's function, such as `n_axes`,
 #'        `margin`, `cpus`, [pca()]'s `norm`, `pseudocount`, and `scale`, or
 #'        [rda()]'s and [cca()]'s `groups`, `data`, and `formula`. Each method
-#'        keeps its own defaults; see [cca()], [pca()], [rda()], and [rpca()].
+#'        keeps its own defaults; see [ca()], [cca()], [pca()], [rda()], and
+#'        [rpca()].
 #'        `seed` is ignored by the methods that have no random parts (all
 #'        but [cca()], whose adjusted \eqn{R^2} is found by permutation), so
 #'        the same arguments can be given to every method.
@@ -56,6 +58,7 @@ COUNT_ORDS <- local({
 #'
 #' | Option / Function Name | Method Name                                |
 #' | :--------------------- | :----------------------------------------- |
+#' | `ca`                   | Correspondence Analysis (CA)               |
 #' | `cca`                  | Canonical Correspondence Analysis (CCA), constrained |
 #' | `pca`                  | Principal Component Analysis (PCA)         |
 #' | `rda`                  | Redundancy Analysis (RDA), constrained     |
@@ -77,8 +80,10 @@ COUNT_ORDS <- local({
 #' `method = 'PCA'` or `'principal comp'` selects `pca`. Common other names
 #' also work: `'prcomp'` for `pca`; `'redundancy analysis'`, `'tbRDA'`, or
 #' `'transformation-based RDA'` for `rda`; `'canonical correspondence
-#' analysis'` or `'constrained correspondence analysis'` for `cca`; and `'robust PCA'`, `'DEICODE'`,
-#' or `'gemelli'` for `rpca`.
+#' analysis'` or `'constrained correspondence analysis'` for `cca`;
+#' `'correspondence analysis'` for `ca`; and `'robust PCA'`, `'DEICODE'`,
+#' or `'gemelli'` for `rpca`. `'CA'` selects `ca`, and `'CCA'` selects
+#' `cca`.
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
@@ -86,15 +91,15 @@ COUNT_ORDS <- local({
 #'
 #' **Same names in other packages**
 #'
-#' `vegan::pca()`, `vegan::rda()` and `vegan::cca()` share their names with
-#' ecodive's [pca()], [rda()] and [cca()], and whichever package was attached
-#' last masks the other's. Write `ecodive::pca()` and so on, or use
+#' `vegan::pca()`, `vegan::rda()`, `vegan::cca()` and `vegan::ca()` (and
+#' `ca::ca()`) share their names with ecodive's [pca()], [rda()], [cca()]
+#' and [ca()], and whichever package was attached last masks the other's. Write `ecodive::pca()` and so on, or use
 #' `count_ord()`, which
 #' always runs ecodive's, to be sure.
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [cca()], [pca()], [rda()], [rpca()], [list_count_ords()]; [dist_ord()] for
+#' @seealso [ca()], [cca()], [pca()], [rda()], [rpca()], [list_count_ords()]; [dist_ord()] for
 #'   the methods that take distances.
 #'
 #' @export

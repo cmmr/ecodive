@@ -111,6 +111,13 @@
   expect_error(dist_ord(d, 'PCA'),       'takes a count table, not distances. Use count_ord\\(counts, "pca"\\)')
   expect_error(dist_ord(d, 'prcomp'),    'count_ord\\(counts, "pca"\\)')
   expect_error(dist_ord(d, 'DEICODE'),   'count_ord\\(counts, "rpca"\\)')
+  # 'ca' and 'CA' begin 'capscale', but name ca(), which takes a count
+  # table; 'cap' still selects capscale.
+  expect_error(dist_ord(d, 'ca'),        'count_ord\\(counts, "ca"\\)')
+  expect_error(dist_ord(d, 'CA'),        'count_ord\\(counts, "ca"\\)')
+  expect_error(dist_ord(d, 'correspondence analysis'), 'count_ord\\(counts, "ca"\\)')
+  expect_error(dist_ord(d, 'CCA'),       'count_ord\\(counts, "cca"\\)')
+  expect_identical(match_dist_ord('cap')$id, 'capscale')
   expect_error(dist_ord(d, 'adonis2'),   'is a test, not an ordination: use dist_test')
   expect_error(dist_ord(d, 'betadisper'), 'use dist_test')
   # 'mantel' is an alias that the prefix haystack drops (it begins

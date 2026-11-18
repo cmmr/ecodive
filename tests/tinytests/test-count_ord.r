@@ -50,6 +50,16 @@
   expect_identical(mo('canonical correspondence analysis'), 'cca')
   expect_identical(mo('constrained correspondence analysis'), 'cca')
 
+  # 'ca' is a prefix of cca's 'canonical...' alias, but is ca's exact ID.
+  expect_identical(mo('ca'),                  'ca')
+  expect_identical(mo('CA'),                  'ca')
+  expect_identical(mo('C.A.'),                'ca')
+  expect_identical(mo('correspondence analysis'), 'ca')
+  expect_identical(mo('Correspondence'),      'ca')
+  expect_identical(mo('canonical'),           'cca')
+  expect_identical(mo('cc'),                  'cca')
+  expect_error(match_count_ord('c'), 'matches multiple options: ca, cca')
+
   info <- match_count_ord('pca')
   expect_identical(info$func, pca)
   expect_identical(info$params, names(formals(pca)))
@@ -62,18 +72,18 @@
   df <- list_count_ords()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id'))
-  expect_identical(df$id, c('cca', 'pca', 'rda', 'rpca'))
-  expect_identical(rownames(list_count_ords(nm = 'id')), c('cca', 'pca', 'rda', 'rpca'))
+  expect_identical(df$id, c('ca', 'cca', 'pca', 'rda', 'rpca'))
+  expect_identical(rownames(list_count_ords(nm = 'id')), c('ca', 'cca', 'pca', 'rda', 'rpca'))
   expect_identical(list_count_ords(val = 'id', nm = 'name'),
-    c('Canonical Correspondence Analysis' = 'cca', 'Principal Component Analysis' = 'pca', 'Redundancy Analysis' = 'rda', 'Robust Aitchison PCA' = 'rpca'))
-  expect_identical(list_count_ords(val = 'func'), list(cca = cca, pca = pca, rda = rda, rpca = rpca))
+    c('Correspondence Analysis' = 'ca', 'Canonical Correspondence Analysis' = 'cca', 'Principal Component Analysis' = 'pca', 'Redundancy Analysis' = 'rda', 'Robust Aitchison PCA' = 'rpca'))
+  expect_identical(list_count_ords(val = 'func'), list(ca = ca, cca = cca, pca = pca, rda = rda, rpca = rpca))
   expect_identical(list_count_ords(val = 'list')$pca, match_count_ord('pca'))
-  expect_identical(list_count_ords('name'), c('Canonical Correspondence Analysis', 'Principal Component Analysis', 'Redundancy Analysis', 'Robust Aitchison PCA'))
+  expect_identical(list_count_ords('name'), c('Correspondence Analysis', 'Canonical Correspondence Analysis', 'Principal Component Analysis', 'Redundancy Analysis', 'Robust Aitchison PCA'))
 
 
   # Invalid input, and methods of the other wrappers. ====
 
-  expect_error(count_ord(m, 'xyz'),   'does not match any option: cca, pca, rda, rpca')
+  expect_error(count_ord(m, 'xyz'),   'does not match any option: ca, cca, pca, rda, rpca')
   expect_error(count_ord(m, 123),     'character')
   expect_error(count_ord(m, c('pca', 'rpca')), 'length 1')
   expect_error(count_ord(m, '-'),     'alphabetic')

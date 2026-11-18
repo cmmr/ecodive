@@ -164,7 +164,7 @@
 #' have no weight, and get species scores of 0.
 #'
 #' With no constraints, `cca(counts)` is a correspondence analysis, as
-#' `vegan::cca(counts)`.
+#' `vegan::cca(counts)`, and the same as [ca()].
 #'
 #'
 #' **Permutation tests**
@@ -211,7 +211,7 @@
 #' @inheritSection ordination_section Ordination result
 #' @inheritSection documentation Input Types
 #'
-#' @seealso [rda()], [dbrda()], [pca()], [count_ord()]
+#' @seealso [ca()], [rda()], [dbrda()], [pca()], [count_ord()]
 #'
 #' @export
 #' @examples
@@ -263,18 +263,10 @@ cca <- function (
   k <- ord_k(n_axes)
 
 
-  # Dimensions and names, with samples first.
-  switch(
-    EXPR = get_matrix_package(counts),
-    'base'   = { dims <- dim(counts);                 dn <- dimnames(counts) },
-    'slam'   = { dims <- c(counts$nrow, counts$ncol); dn <- counts$dimnames  },
-    'Matrix' = { dims <- counts@Dim;                  dn <- counts@Dimnames  } )
-
-  if (is.null(dn)) dn <- list(NULL, NULL)
-  if (margin == 2L) { dims <- rev(dims); dn <- rev(dn) }
-
-  n <- as.integer(dims[[1]])
-  p <- as.integer(dims[[2]])
+  dims <- cca_dims(counts, margin)
+  n    <- dims$n
+  p    <- dims$p
+  dn   <- dims$dn
 
   model <- ord_model(groups, no_groups, data, formula, n, dn[[1]], env, optional = TRUE)
   d     <- cord_design(model$x, model$z, n)
@@ -319,6 +311,180 @@ cca <- function (
 
 
 
+#' Correspondence Analysis (CA)
+#'
+#' Unconstrained ordination of samples from their feature abundances in the
+#' chi-square metric. Gives the same results as `vegan::ca()`,
+#' computed straight from sparse input without forming any
+#' \eqn{n \times n}{n x n} or dense table, so it takes far less time and
+#' memory for large datasets. [cca()] is its constrained form, canonical
+#' correspondence analysis.
+#'
+#' @inheritParams cca
+#'
+#' @param counts  A numeric matrix of non-negative feature abundances
+#'        (samples \eqn{\times} features), or any of the table types listed
+#'        under "Input Types". Every sample must have at least one non-zero
+#'        abundance.
+#'
+#' @return A numeric matrix with one row per sample and one column per axis,
+#'   named `"CA1"`, `"CA2"`, etc., as described in "Ordination result"
+#'   below. The values are `vegan`'s site scores in scaling 2: what
+#'   `vegan::scores(vegan::ca(counts), display = "sites")` returns and what
+#'   `phyloseq::plot_ordination()` plots. Its attributes are:
+#'
+#'   * `method`: `"ca"`.
+#'   * `eig`: The eigenvalue (inertia) of each axis.
+#'   * `prop`: The proportion of the total inertia that each axis explains,
+#'     `eig / trace`. `vegan`'s "Proportion Explained".
+#'   * `trace`: The total inertia: Pearson's chi-square statistic of the
+#'     table divided by its grand total (`vegan`'s `tot.chi`), which is
+#'     also the sum of all the eigenvalues.
+#'   * `loadings`: The species scores: one row per feature and one column
+#'     per axis, `vegan::scores(x, display = "species")` (scaling 2).
+#'     Features with no observations get `0`.
+#'
+#' @details
+#'
+#' **Method**
+#'
+#' With \eqn{P} the table divided by its grand total, and \eqn{r} and
+#' \eqn{c} its row and column sums (the sample and feature weights),
+#' correspondence analysis (Legendre & Legendre 2012, §9.2; Greenacre 2007)
+#' finds the principal components of the matrix of chi-square residuals
+#' \eqn{\bar{Q} = D_r^{-1/2} (P - rc^T) D_c^{-1/2}}. With
+#' \eqn{\bar{Q} = U \Sigma V^T}, the eigenvalues are the squared singular
+#' values, the site scores (scaling 2) are \eqn{D_r^{-1/2} U}, and the
+#' species scores are \eqn{D_c^{-1/2} V \Sigma}.
+#'
+#' The axes come from block Lanczos iteration, which needs only products of
+#' \eqn{\bar{Q}} with a few vectors at a time. \eqn{\bar{Q}} is a sparse
+#' matrix less a rank-one term, so these are computed in parallel from the
+#' table's non-zero values alone, and a sparse table is never made dense.
+#' `ca()` shares this solver with [cca()]: `ca(counts)` gives the same
+#' scores, eigenvalues and loadings as `cca(counts)` with no constraints.
+#'
+#'
+#' **CA or PCA?**
+#'
+#' Correspondence analysis assumes that each species responds unimodally to
+#' the underlying gradients, peaking at some optimum; PCA assumes linear
+#' responses. Over long gradients, where many species are absent from much
+#' of the range, CA suits better; over short ones, PCA of transformed
+#' abundances (`pca(counts, norm = 'hellinger')`) is often preferred
+#' (Legendre & Gallagher 2001). The chi-square metric gives rare species a
+#' large weight, so CA can be sensitive to them. CA axes of long gradients
+#' can also show an "arch" (the second axis a curved function of the
+#' first).
+#'
+#'
+#' **Matching other software**
+#'
+#' `ca()` gives the same site scores, eigenvalues, inertia and species
+#' scores as `vegan::ca(counts)` and `vegan::cca(counts)` (scaling 2), and as
+#' `skbio.stats.ordination.ca()` in scaling 2, up to the signs of the axes.
+#' `ade4::dudi.coa()` gives the same eigenvalues; its `$l1` (row scores of
+#' unit weighted variance) are `ca()`'s scores, and its `$co` (column
+#' principal coordinates) are `ca()`'s loadings. Samples with no observations are
+#' an error, as in `vegan` and `ade4`; features with no observations have
+#' no weight, and get loadings of 0.
+#'
+#'
+#' **Same names in other packages**
+#'
+#' `vegan::ca()` and `ca::ca()` share their name with ecodive's `ca()`, and
+#' whichever package was attached last masks the other's. Write
+#' `ecodive::ca()`, or use [count_ord()], which always runs ecodive's, to be
+#' sure. `ade4::dudi.coa()` computes the same analysis under another name.
+#'
+#'
+#' **Axis signs and reproducibility**
+#'
+#' An eigenvector's sign is arbitrary, so different software can return
+#' mirror images of the same axis. `ca()` flips each axis so that its
+#' largest score in absolute value is positive, and flips the loadings with
+#' it. Results are identical from run to run and for any number of `cpus`.
+#'
+#' @references
+#' Legendre, P., & Gallagher, E. D. (2001). Ecologically meaningful
+#' transformations for ordination of species data. *Oecologia*, 129(2),
+#' 271-280. \doi{10.1007/s004420100716}
+#'
+#' Legendre, P., & Legendre, L. (2012). *Numerical Ecology* (3rd ed.).
+#' Elsevier.
+#'
+#' Greenacre, M. (2007). *Correspondence Analysis in Practice* (2nd ed.).
+#' Chapman & Hall/CRC.
+#'
+#' @inheritSection ordination_section Ordination result
+#' @inheritSection documentation Input Types
+#'
+#' @seealso [cca()], [pca()], [count_ord()]
+#'
+#' @export
+#' @examples
+#'     ord <- ca(ex_counts)
+#'     plot(ord)
+#'     attr(ord, 'prop')
+#'     head(attr(ord, 'loadings'))
+#'
+#'     # The same as cca() without constraints.
+#'     all.equal(unclass(ord), unclass(cca(ex_counts)), check.attributes = FALSE)
+#'
+ca <- function (counts, margin = 1L, n_axes = 3L, cpus = n_cpus()) {
+
+  validate_counts()
+  validate_margin()
+  validate_cpus()
+  k <- ord_k(n_axes)
+
+  dims <- cca_dims(counts, margin)
+  n    <- dims$n
+  p    <- dims$p
+  dn   <- dims$dn
+
+  if (n < 2) {
+    if (n == 1 && p > 0) cca_empty_check(counts, margin, dn[[1]], 'CA')
+    scores   <- matrix(numeric(0), n, 0)
+    loadings <- matrix(numeric(0), p, 0)
+    eig      <- numeric(0)
+    total    <- 0
+  }
+  else {
+    res <- .Call(
+      C_cca, counts, margin, matrix(0, n, 0), 0L, k,
+      NULL, 0L, 0L, cpus )
+
+    if (!is.null(res$empty))
+      stop(cca_empty_msg(res$empty, dn[[1]], 'CA'), call. = FALSE)
+
+    if (!res$converged) # nocov start
+      warning('CA did not converge; coordinates may be inexact.', call. = FALSE)
+    # nocov end
+
+    scores   <- res$scores
+    loadings <- res$loadings
+    eig      <- res$eig
+    total    <- res$total
+  }
+
+  m <- ncol(scores)
+  if (m < min(k, n - 1L))
+    warning(sprintf('only %d of the first %d eigenvalues are > 0', m, min(k, n - 1L)), call. = FALSE)
+
+  axes <- if (m > 0) paste0('CA', seq_len(m))
+  dimnames(loadings) <- list(dn[[2]], axes)
+
+  ord_result(
+    scores, 'ca', dn[[1]], prefix = 'CA',
+    eig      = eig,
+    prop     = if (total > 0) eig / total else eig,
+    trace    = total,
+    loadings = loadings )
+}
+
+
+
 # R-squared, and vegan's permutation-based adjusted R-squared for cca
 # (RsquareAdj.cca), with adj(r, m) = 1 - (1 - r) / (1 - m) for an R-squared
 # r and a mean permuted R-squared m. Without conditions, adj(R2, mean
@@ -355,23 +521,41 @@ cca_r_squared <- function (res, n_perm, d, n) {
 
 
 
-cca_empty_msg <- function (idx, labels) {
+# The table's numbers of samples (n) and features (p), and its dimnames
+# (dn), samples first.
+cca_dims <- function (counts, margin) {
+
+  switch(
+    EXPR = get_matrix_package(counts),
+    'base'   = { dims <- dim(counts);                 dn <- dimnames(counts) },
+    'slam'   = { dims <- c(counts$nrow, counts$ncol); dn <- counts$dimnames  },
+    'Matrix' = { dims <- counts@Dim;                  dn <- counts@Dimnames  } )
+
+  if (is.null(dn)) dn <- list(NULL, NULL)
+  if (margin == 2L) { dims <- rev(dims); dn <- rev(dn) }
+
+  list(n = as.integer(dims[[1]]), p = as.integer(dims[[2]]), dn = dn)
+}
+
+
+
+cca_empty_msg <- function (idx, labels, what = 'CCA') {
   which_ <- if (is.null(labels)) idx else labels[idx]
   if (length(which_) > 5) which_ <- c(which_[1:5], '...')
   paste0(
     '`counts` has ', length(idx), ' sample', if (length(idx) > 1) 's',
-    ' with no observations (all zero), which CCA cannot place: ',
+    ' with no observations (all zero), which ', what, ' cannot place: ',
     paste(which_, collapse = ', '), '. Remove ',
     if (length(idx) > 1) 'them' else 'it', ' first.' )
 }
 
 
 # For one sample (n = 1, so no C call): is it empty?
-cca_empty_check <- function (counts, margin, labels) {
+cca_empty_check <- function (counts, margin, labels, what = 'CCA') {
   tot <- switch(
     EXPR = get_matrix_package(counts),
     'base'   = sum(counts),
     'slam'   = sum(counts$v),
     'Matrix' = sum(counts) )
-  if (!isTRUE(tot > 0)) stop(cca_empty_msg(1L, labels), call. = FALSE)
+  if (!isTRUE(tot > 0)) stop(cca_empty_msg(1L, labels, what), call. = FALSE)
 }
