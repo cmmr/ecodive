@@ -1,5 +1,18 @@
 # Plan: benchmark ecodive's ordination and statistical tests
 
+> **On hold (2026-11-18).** The user postponed this run; don't start it
+> without their go-ahead. The draft article is
+> `vignettes/articles/_benchmark_ord_stats.Rmd`. pkgdown skips files that
+> start with `_`, so the draft stays off the live site. **To publish it**
+> once the results are in, rename it back:
+> `git mv vignettes/articles/_benchmark_ord_stats.Rmd vignettes/articles/benchmark_ord_stats.Rmd`.
+> The pkgdown deploy now runs with `clean: true`, so pages that are no
+> longer built disappear from the site.
+>
+> Since this plan was written, `k` has been renamed `n_axes` in every
+> ecodive ordination (63d9cab). Calls to ecodive in this plan must use
+> `n_axes`; the reference packages keep their own `k`.
+
 This file is the brief for a cloud Claude Code session. It runs the benchmarks,
 finishes the pkgdown article, and commits the results. Read it all before
 starting. Everything here was worked out in a local session on 2026-11-18,
@@ -8,7 +21,8 @@ which did not run the final benchmarks because the user's desktop was busy.
 
 ## 1. Goal
 
-Publish a pkgdown article, `vignettes/articles/benchmark_ord_stats.Rmd`, that
+Publish a pkgdown article, `vignettes/articles/benchmark_ord_stats.Rmd`
+(now the draft `_benchmark_ord_stats.Rmd`; see the note above), that
 does for ecodive's ordination and statistical-test functions what
 `vignettes/articles/benchmark.Rmd` does for alpha and beta diversity. It must:
 
@@ -36,7 +50,7 @@ that might be as fast as ecodive, or faster.
 | File | State |
 |:-----|:------|
 | `vignettes/articles/benchmark_ord_stats/ord_stats.r` | Benchmark, agreement and determinism script. Its agreement and determinism parts have been tried (see §7). It **does not yet include** the packages added in §5.2, which you must add. |
-| `vignettes/articles/benchmark_ord_stats.Rmd` | Draft article. It reads `vignettes/articles/benchmark_ord_stats/ord_stats_*.rds` and `ord_stats_session.txt` and embeds `vignettes/articles/benchmark_ord_stats/ord_stats.r` with `readLines()`. Two placeholders remain, `DETERMINISM_NOTES` and `SPEED_NOTES`, and the "Methodology" section still describes the user's Windows desktop. Update both once the results are in. |
+| `vignettes/articles/_benchmark_ord_stats.Rmd` | Draft article; drop the leading `_` to publish it. It reads `vignettes/articles/benchmark_ord_stats/ord_stats_*.rds` and `ord_stats_session.txt` and embeds `vignettes/articles/benchmark_ord_stats/ord_stats.r` with `readLines()`. Two placeholders remain, `DETERMINISM_NOTES` and `SPEED_NOTES`, and the "Methodology" section still describes the user's Windows desktop. Update both once the results are in. |
 | `vignettes/articles/benchmark.Rmd` | The existing alpha/beta benchmark page. Match its tone. |
 | `data-raw/expected/*.r`, `tests/tinytests/test-*.r` | Fixture generators and tests. The draft article's test-suite table cites them. |
 
@@ -330,7 +344,8 @@ Re-measure all of this on Linux. Report only what you measure.
    - Check that the figure is readable at about 16 methods with up to 10
      packages each; adjust `ncol` and the height in the script if not.
 7. **Build and look at it:** run
-   `pkgdown::build_article('articles/benchmark_ord_stats')`, then open the
+   `pkgdown::build_article('articles/benchmark_ord_stats')` (after renaming it
+   back without the `_`), then open the
    HTML and check:
    - the tables, the figure and the expandable code and session blocks;
    - that the links to the test files resolve

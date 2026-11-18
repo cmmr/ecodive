@@ -1,6 +1,7 @@
 # Benchmarks and agreement checks for ecodive's ordination and statistical
 # test functions, against the R packages they replace. Shown on the pkgdown
-# site as vignettes/articles/benchmark_ord_stats.Rmd.
+# site as vignettes/articles/benchmark_ord_stats.Rmd (a draft, named with a
+# leading _ so pkgdown skips it, until the results are in).
 #
 # Run from the package root:
 #
