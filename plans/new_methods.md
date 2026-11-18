@@ -1,5 +1,18 @@
 # Plan: methods from the 2026-11-18 R package survey
 
+> **Historical record.** This is the original survey and decision log. The
+> per-method plans in this folder, [TODO.md](TODO.md) and
+> [README.md](README.md) supersede it, and win where they differ. In
+> particular, several function names changed under README's naming scheme:
+> - `partial_mantel` → `mantel_partial`
+> - `protest` → `procrustes_test`
+> - `capdiscrim` → `capda`
+> - `prc` → `principal_response_curves`
+> - `mrm` → `mantel_regression`
+> - `moran` → `moran_i`
+>
+> OPLS-DA became its own function, `oplsda()`.
+
 This file plans items 1–18 of the survey's "methods ecodive lacks" list. For
 each method it records:
 
