@@ -52,8 +52,7 @@
 #'        Default: `1000`, as `vegan::RsquareAdj()`. Alternatively, a matrix
 #'        with one permutation of `1:n` per row, as from
 #'        `permute::shuffleSet()`, to use instead of random ones. `0` gives
-#'        an `adj_r_squared` of `NA`. Unused for partial CCA and
-#'        unconstrained CA, whose `adj_r_squared` is always `NA`.
+#'        an `adj_r_squared` of `NA`. Unused without constraints.
 #'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same `adj_r_squared`. Default: `0`
@@ -88,8 +87,8 @@
 #'     `vegan::RsquareAdj(x)$r.squared`.
 #'   * `adj_r_squared`: `r_squared` adjusted by permutation, as
 #'     `vegan::RsquareAdj(x)$adj.r.squared` (see "Adjusted R-squared"
-#'     below). `NA` for partial CCA, unconstrained CA, or
-#'     `permutations = 0`.
+#'     below). `0` without constraints; `NA` for `permutations = 0`, or a
+#'     model with no residual degrees of freedom.
 #'   * `biplot`: Biplot scores of the constraints: their weighted
 #'     correlations with the constrained axes' "lc" scores, one row per
 #'     column of the model matrix and one column per axis (`0` for
@@ -146,8 +145,13 @@
 #' random permutations of the samples (their rows of the table, against the
 #' constraints). It is random: the same `seed` gives the same value, and
 #' a `permutations` matrix the same value as
-#' `vegan::RsquareAdj(x, permutations = matrix)`. As in `vegan`, it is `NA`
-#' for partial CCA.
+#' `vegan::RsquareAdj(x, permutations = matrix)`.
+#'
+#' For partial CCA, as in `vegan`, it is the adjusted \eqn{R^2} of the
+#' constraints and conditions together less that of the conditions alone
+#' (Peres-Neto et al. 2006). Each is estimated as above, but permuting the
+#' rows of the chi-square matrix \eqn{\bar{Q}} against the fixed
+#' (weighted) design, as `vegan::RsquareAdj()` does for partial models.
 #'
 #'
 #' **Matching vegan**
@@ -276,8 +280,7 @@ cca <- function (
   d     <- cord_design(model$x, model$z, n)
   pm    <- perm_matrix(permutations, n)
 
-  # vegan gives no adjusted R-squared for partial models.
-  n_perm <- if (ncol(d$z) > 0 || ncol(d$x) == 0) 0L else pm$n_perm
+  n_perm <- if (ncol(d$x) == 0) 0L else pm$n_perm
 
 
   if (n < 2) {
@@ -286,6 +289,7 @@ cca <- function (
     res$loadings <- matrix(numeric(0), p, 0)
     res$w        <- rep(1, n)
     res$perm_inertia <- numeric(0)
+    res$perm_cond    <- numeric(0)
   }
   else {
     res <- .Call(
@@ -300,7 +304,7 @@ cca <- function (
     # nocov end
   }
 
-  r2 <- cca_r_squared(res, n_perm, ncol(d$x) > 0)
+  r2 <- cca_r_squared(res, n_perm, d, n)
 
   ord <- cord_result(
     res, d, model$mf, k, n, dn[[1]],
@@ -316,23 +320,37 @@ cca <- function (
 
 
 # R-squared, and vegan's permutation-based adjusted R-squared for cca
-# (RsquareAdj.cca): 1 - (1 - R2) / (1 - mean permuted R2). Without
-# constraints, both are 0, as rda()'s; NA without permutations (partial
-# models, or permutations = 0).
-cca_r_squared <- function (res, n_perm, constrained) {
+# (RsquareAdj.cca), with adj(r, m) = 1 - (1 - r) / (1 - m) for an R-squared
+# r and a mean permuted R-squared m. Without conditions, adj(R2, mean
+# permuted R2), permuting the design's rows. With conditions, adj() of
+# conditions and constraints together less adj() of the conditions alone,
+# each permuting the rows of the chi-square table against the fixed
+# design. Without constraints, both are 0, as rda()'s; NA without
+# permutations or residual degrees of freedom (a saturated model).
+cca_r_squared <- function (res, n_perm, d, n) {
 
   total <- res$total
   if (!(total > 0)) return (c(NA_real_, NA_real_))
 
+  kept <- res$kept
+  nz   <- ncol(d$z)
+  rz   <- sum(kept[seq_len(nz)])
+  rx   <- sum(kept) - rz
+
   r2 <- res$constrained / total
-  if (!constrained) return (c(r2, 0))
-  if (n_perm == 0)  return (c(r2, NA_real_))
+  if (rx == 0)                   return (c(r2, 0))
+  if (n_perm == 0)               return (c(r2, NA_real_))
+  if (n - 1 - rz - rx <= 0)      return (c(r2, NA_real_))
 
-  # Saturated models (no residual inertia) have no adjustment.
-  mp <- mean(res$perm_inertia) / total
-  if (!(1 - mp > sqrt(.Machine$double.eps))) return (c(r2, NA_real_))
+  adj <- function (r, m) 1 - (1 - r) / (1 - m)
 
-  c(r2, 1 - (1 - r2) / (1 - mp))
+  if (rz == 0)
+    return (c(r2, adj(r2, mean(res$perm_inertia) / total)))
+
+  rc <- res$conditional / total
+  c(r2,
+    adj(r2 + rc, mean(res$perm_inertia) / total) -
+    adj(rc,      mean(res$perm_cond)    / total) )
 }
 
 

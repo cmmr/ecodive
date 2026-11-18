@@ -66,8 +66,7 @@
         tolerance = 1e-10, info = lbl )
       expect_equal(attr(ord, 'constrained_eig'), exp$constrained_eig, tolerance = 1e-10, info = lbl)
 
-      # vegan gives no R-squared without constraints; cca() gives 0. For
-      # partial models, cca()'s adjusted R-squared is NA.
+      # vegan gives no R-squared without constraints; cca() gives 0.
       if (length(exp$r_squared) == 0) {
         expect_identical(attr(ord, 'r_squared'),     0, info = lbl)
         expect_identical(attr(ord, 'adj_r_squared'), 0, info = lbl)
@@ -75,10 +74,8 @@
         expect_equal(attr(ord, 'r_squared'), exp$r_squared, tolerance = 1e-10, info = lbl)
         if (length(exp$adj_r_squared) == 0) { # No residual inertia.
           expect_identical(attr(ord, 'adj_r_squared'), NA_real_, info = lbl)
-        } else if (is.null(cs$conditions)) {
-          expect_equal(attr(ord, 'adj_r_squared'), exp$adj_r_squared, tolerance = 1e-10, info = lbl)
         } else {
-          expect_identical(attr(ord, 'adj_r_squared'), NA_real_, info = lbl)
+          expect_equal(attr(ord, 'adj_r_squared'), exp$adj_r_squared, tolerance = 1e-10, info = lbl)
         }
       }
 
@@ -167,7 +164,24 @@
   expect_identical(attr(cca(x, 'A1', meta, seed = 0L, cpus = 1), 'adj_r_squared'), a1)
   expect_false(identical(attr(cca(x, 'A1', meta, seed = 1L, cpus = 1), 'adj_r_squared'), a1))
   expect_identical(attr(cca(x, 'A1', meta, permutations = 0, cpus = 1), 'adj_r_squared'), NA_real_)
-  expect_identical(attr(cca(x, data = meta, formula = ~ A1 + Condition(Use), cpus = 1), 'adj_r_squared'), NA_real_)
+  ap <- attr(cca(x, data = meta, formula = ~ A1 + Condition(Use), cpus = 1), 'adj_r_squared')
+  expect_true(is.finite(ap))
+  expect_identical(attr(cca(x, data = meta, formula = ~ A1 + Condition(Use), cpus = 2), 'adj_r_squared'), ap)
+
+  # Partial models: adj(conditions + constraints) - adj(conditions), each
+  # permuting the rows of the chi-square matrix against the fixed design.
+  pm  <- case('dune, factor')$permutations[1:10, ]
+  op  <- cca(x, data = meta, formula = ~ Management + Condition(A1), permutations = pm, cpus = 1)
+  rr  <- rowSums(x) / sum(x)
+  qb  <- (x / sum(x) - outer(rr, colSums(x) / sum(x))) / sqrt(outer(rr, colSums(x) / sum(x)))
+  wc  <- function (m) sqrt(rr) * sweep(m, 2, colSums(rr * m))
+  qa  <- qr.Q(qr(wc(cbind(meta$A1, model.matrix(~ Management, meta)[, -1]))))
+  mi  <- function (q) mean(apply(pm, 1, function (i) sum(crossprod(q, qb[i, ]) ^ 2)))
+  tot <- attr(op, 'trace')
+  rc  <- attr(op, 'inertia')[['conditional']] / tot
+  adj <- function (r, m) 1 - (1 - r) / (1 - m / tot)
+  expect_equal(attr(op, 'adj_r_squared'),
+               adj(rc + attr(op, 'r_squared'), mi(qa)) - adj(rc, mi(qa[, 1, drop = FALSE])), tolerance = 1e-12)
   expect_identical(attr(cca(x, cpus = 1), 'adj_r_squared'), 0)
 
   # From a supplied matrix: 1 - (1 - R2) / (1 - mean permuted R2), where a

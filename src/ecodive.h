@@ -216,6 +216,9 @@ void          cca_gram_mult(const double *V, double *W, int m, void *ctx);
 void          cca_cross(const double *U, int m, double *L);
 void          cca_perm_inertia(const double *x, int px, perm_source_t *ps,
                                int n_perm, double *out);
+void          cca_perm_inertia_fixed(const double *Q, int rq, int rz,
+                                     perm_source_t *ps, int n_perm,
+                                     double *out_all, double *out_z);
 
 /* --- parallel.c --- */
 void run_parallel(pthread_func_t func, int n_threads, int n_tasks);

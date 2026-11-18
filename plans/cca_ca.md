@@ -132,9 +132,9 @@ Asked of the user at the start (2026-11-18), and answered:
    matrix) and `seed = 0L`, with PCG streams, so it is reproducible and
    identical for any `cpus`. A permutation moves the samples' rows of the
    table (with their weights) against the fixed constraints; with the same
-   matrix, the value equals vegan 2.7.8's to about 2e-16. `NA` for
-   `permutations = 0`, for partial CCA (see 9) and for saturated models
-   (no residual inertia; vegan gives `numeric(0)` there).
+   matrix, the value equals vegan 2.7.8's to about 7e-16, partial models
+   included (see 9). `NA` for `permutations = 0` and for saturated models
+   (no residual degrees of freedom; vegan gives `numeric(0)` there).
 2. **All-zero samples are an error**, naming them (as vegan stops: "all
    row sums must be >0"); the result must keep one row per sample.
    **All-zero features are left out** of the analysis silently, with
@@ -186,17 +186,22 @@ Made while implementing:
    `rda()`), where vegan gives `numeric(0)`.
 8. **Signs:** each axis is flipped so that its largest site score (after
    dividing by `√r`) is positive, as for the other methods.
-9. **Partial CCA's adjusted R² is `NA`.** At the start, the plan's and
-   my understanding was that vegan gives `NA` here, and the user approved
-   that. vegan 2.7.8 in fact returns a number for partial models, but its
-   documentation doesn't say how, and none of the candidates tried
-   reproduced it from outputs (the mean permuted R² of `permutest()`'s
-   statistics, of refits with the community or either set of variables
-   permuted, Peres-Neto's fraction `[a] = adj(X+Z) − adj(Z)`, with either
-   denominator). Without reading vegan's (GPL) source, `NA` is kept, and
-   the fixtures store vegan's value for reference. `varpart()` (item 12)
-   should compute CCA fractions from non-partial models, as Peres-Neto et
-   al. (2006) do.
+9. **Partial CCA's adjusted R² follows vegan** (changed after the first
+   push, with the user's approval). The first version returned `NA`: the
+   plan and I had assumed vegan does, but vegan 2.7.8 returns a number,
+   and its documentation doesn't say how. **The user allowed reading
+   vegan's (GPL) source for this one function only**
+   (`vegan:::RsquareAdj.cca`; `plans/README.md`'s output-only rule is
+   unchanged). The formula, written in ecodive's own code, is Peres-Neto
+   et al.'s fraction `[a] = adj(X+Z) − adj(Z)`, with
+   `adj(r, m) = 1 − (1 − r) / (1 − m)` and each mean permuted R² found by
+   permuting the **rows of the chi-square matrix Q̄ against the fixed
+   weighted design** (orthonormal `[Qz, Qx]` for X+Z and `Qz` for Z).
+   Non-partial models instead permute the design's rows, which re-weights
+   the centring, as `permutest()` does. In C:
+   `cca_perm_inertia_fixed()` in `src/cca.c`, one pass per permutation
+   giving both sums. Conditions that are all aliased count as no
+   conditions, as in vegan.
 10. **Registry:** `cca` is first in `COUNT_ORDS`, with aliases
     `canonicalcorrespondenceanalysis` and
     `constrainedcorrespondenceanalysis`, which collide with nothing in the
@@ -227,11 +232,11 @@ Reference results:
   unconstrained CA; aliased and aliased partial; saturated; an all-zero
   feature; `n_axes` beyond the constrained axes, n − 1 and the rank).
   Sites, species, `eig`, `prop`, `trace`, `inertia`, `constrained_eig`,
-  R², permutation adjusted R² (non-partial), biplot and centroids all
+  R², permutation adjusted R² (partial too), biplot and centroids all
   match at the 1e-10 tolerance. Largest absolute differences over all
   cases: site scores 6e-13 and species scores 1e-13 (Lanczos-computed CA
   axes; constrained axes about 1e-14), centroids 2e-14, biplot 7e-15,
-  trace 2e-15, eigenvalues 1e-15, adjusted R² 6e-16.
+  trace 2e-15, eigenvalues 1e-15, adjusted R² 7e-16.
 - **scikit-bio 0.7.4**, scaling 2, all 19 axes: sites, species and
   eigenvalues match at 1e-10. Its biplot scores are unweighted
   correlations of the weighted constraints, where vegan's are weighted

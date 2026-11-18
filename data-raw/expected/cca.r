@@ -25,10 +25,6 @@
 #                     "species"), scaling 2, with 0 for the features with no
 #                     observations, which vegan leaves out).
 #
-# vegan 2.7.8 gives a permutation-based adjusted R-squared for partial
-# models too, by a method its documentation doesn't describe; cca() gives
-# NA there. It is stored as `adj_r_squared` all the same, for reference.
-#
 # And `skbio`: scikit-bio 0.7.4's cca() (BSD-3) of the dune table on
 # `~ Management + A1`, in scaling 2, from the CSV files that
 # data-raw/expected/cca.py writes to data-raw/expected/cca/ (this script

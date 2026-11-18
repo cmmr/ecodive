@@ -63,8 +63,7 @@ at most \eqn{n - 1} for \eqn{n} samples.}
 Default: \code{1000}, as \code{vegan::RsquareAdj()}. Alternatively, a matrix
 with one permutation of \code{1:n} per row, as from
 \code{permute::shuffleSet()}, to use instead of random ones. \code{0} gives
-an \code{adj_r_squared} of \code{NA}. Unused for partial CCA and
-unconstrained CA, whose \code{adj_r_squared} is always \code{NA}.}
+an \code{adj_r_squared} of \code{NA}. Unused without constraints.}
 
 \item{seed}{An integer seed for the random permutations. The same seed
 gives the same \code{adj_r_squared}. Default: \code{0}}
@@ -105,8 +104,8 @@ constraints explain, \code{inertia[["constrained"]] / trace}, as
 \code{vegan::RsquareAdj(x)$r.squared}.
 \item \code{adj_r_squared}: \code{r_squared} adjusted by permutation, as
 \code{vegan::RsquareAdj(x)$adj.r.squared} (see "Adjusted R-squared"
-below). \code{NA} for partial CCA, unconstrained CA, or
-\code{permutations = 0}.
+below). \code{0} without constraints; \code{NA} for \code{permutations = 0}, or a
+model with no residual degrees of freedom.
 \item \code{biplot}: Biplot scores of the constraints: their weighted
 correlations with the constrained axes' "lc" scores, one row per
 column of the model matrix and one column per axis (\code{0} for
@@ -174,8 +173,13 @@ where \eqn{\bar{R}^2_{perm}} is the mean \eqn{R^2} over \code{permutations}
 random permutations of the samples (their rows of the table, against the
 constraints). It is random: the same \code{seed} gives the same value, and
 a \code{permutations} matrix the same value as
-\code{vegan::RsquareAdj(x, permutations = matrix)}. As in \code{vegan}, it is \code{NA}
-for partial CCA.
+\code{vegan::RsquareAdj(x, permutations = matrix)}.
+
+For partial CCA, as in \code{vegan}, it is the adjusted \eqn{R^2} of the
+constraints and conditions together less that of the conditions alone
+(Peres-Neto et al. 2006). Each is estimated as above, but permuting the
+rows of the chi-square matrix \eqn{\bar{Q}} against the fixed
+(weighted) design, as \code{vegan::RsquareAdj()} does for partial models.
 
 \strong{Matching vegan}
 

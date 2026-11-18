@@ -271,12 +271,13 @@
   gives the same site scores, species scores (`loadings`), eigenvalues,
   inertia, R-squared, biplot scores and centroids as `vegan::cca()` (up to
   each axis's sign), and the same permutation-based adjusted R-squared as
-  `vegan::RsquareAdj()` for the same permutations (`permutations` and `seed`;
-  `NA` for partial CCA). It shares `rda()`'s solver, with the chi-square
-  weights, and multiplies the table's non-zero values only, so a sparse table
-  is never made dense: with 3,000 samples and 2,000 taxa it takes half a
-  second where `vegan::cca()` takes a minute. Results are identical for any
-  number of `cpus`. Also available as `count_ord(counts, "cca", ...)`.
+  `vegan::RsquareAdj()` for the same permutations (`permutations` and
+  `seed`), partial CCA included. It shares `rda()`'s solver, with the
+  chi-square weights, and multiplies the table's non-zero values only, so a
+  sparse table is never made dense: with 3,000 samples and 2,000 taxa it
+  takes half a second where `vegan::cca()` takes a minute. Results are
+  identical for any number of `cpus`. Also available as `count_ord(counts,
+  "cca", ...)`.
 
 * New `envfit()` fits sample metadata (`data`) and feature tables
   (`counts`, such as taxa abundances) onto any ordination, for biplots: an

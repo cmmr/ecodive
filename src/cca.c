@@ -28,7 +28,10 @@
  * cca_perm_inertia() gives the constrained inertia of
  * Qbar on a design whose rows are permuted, for vegan's
  * permutation-based adjusted R-squared (RsquareAdj() on a
- * cca result, after Peres-Neto et al. 2006).
+ * cca result, after Peres-Neto et al. 2006);
+ * cca_perm_inertia_fixed() the same for partial models,
+ * permuting Qbar's rows against a fixed design, as
+ * RsquareAdj() does for them.
  *
  * Determinism: each output element is summed by one thread
  * in a fixed order (features for A' V, samples for A V,
@@ -381,4 +384,94 @@ void cca_perm_inertia(
   pi_out   = out;
 
   run_parallel(perm_worker, n_threads, n_perm);
+}
+
+
+
+//======================================================
+// Partial models, as vegan's RsquareAdj() for a cca with
+// conditions: here the rows of Qbar are permuted against
+// a fixed orthonormal design Q (n x rq; the first rz
+// columns span the conditions), built with the unpermuted
+// weights. For permutation k, with q~[p[a]] = q[a], the
+// fitted inertia of each column is ||Qbar' q~||^2, where
+//   Qbar' q~ = Dc^-1/2 P' Dr^-1/2 q~ - sqrt(c) (sqrt(r)' q~)
+// (q~ is no longer orthogonal to sqrt(r)). out_all gets
+// the sum over all rq columns, out_z over the first rz.
+//======================================================
+static const double *pf_q;
+static int           pf_rq, pf_rz;
+static double       *pf_z;
+
+static void *perm_fixed_worker(void *arg) {
+
+  int thread_i  = ((worker_t *) arg)->i;
+  int n_threads = ((worker_t *) arg)->n;
+  int n = cc_n, p = cc_p;
+
+  size_t  per = (size_t) n + p + n;
+  double *q   = pi_buf + per * thread_i;
+  double *t   = q + n;
+  int    *pm  = (int *) (t + p);
+
+  for (int k = thread_i; k < pi_nperm; k += n_threads) {
+
+    perm_source_get(pi_ps, k + 1, pm);
+
+    double sum = 0, sum_z = 0;
+
+    for (int c = 0; c < pf_rq; c++) {
+
+      const double *qc = pf_q + (size_t) c * n;
+      for (int a = 0; a < n; a++) q[pm[a]] = qc[a];
+
+      double s = 0;
+      for (int i = 0; i < n; i++) s += sr[i] * q[i];
+
+      memset(t, 0, (size_t) p * sizeof(double));
+      for (int i = 0; i < n; i++) {
+        double y = q[i] / sr[i];
+        for (int e = r_pos[i]; e < r_pos[i + 1]; e++) t[r_idx[e]] += raw_val[e] * y;
+      }
+
+      double ss = 0;
+      for (int j = 0; j < p; j++) {
+        if (!(sc[j] > 0)) continue;
+        double v = t[j] / sc[j] - sc[j] * s;
+        ss += v * v;
+      }
+
+      sum += ss;
+      if (c < pf_rz) sum_z += ss;
+    }
+
+    pi_out[k] = sum;
+    pf_z[k]   = sum_z;
+  }
+
+  return NULL;
+}
+
+
+void cca_perm_inertia_fixed(
+    const double *Q, int rq, int rz, perm_source_t *ps, int n_perm,
+    double *out_all, double *out_z ) {
+
+  int n = cc_n, p = cc_p;
+  int n_threads = threads_for(
+    cc_threads, ((double) cc_nnz + n + p) * rq * n_perm, 1e6 );
+  if (n_threads > n_perm) n_threads = n_perm;
+  if (n_threads < 1) n_threads = 1;
+
+  size_t per = (size_t) n + p + n;
+  pi_buf   = (double *) R_alloc(per * n_threads + 1, sizeof(double));
+  pf_q     = Q;
+  pf_rq    = rq;
+  pf_rz    = rz;
+  pi_ps    = ps;
+  pi_nperm = n_perm;
+  pi_out   = out_all;
+  pf_z     = out_z;
+
+  run_parallel(perm_fixed_worker, n_threads, n_perm);
 }

@@ -1328,7 +1328,12 @@ SEXP C_rda(
 //   loadings      p x m: vegan's species scores, scaling 2;
 //   w             sqrt(r), n;
 //   perm_inertia  the constrained inertia for each
-//                 permutation (n_perm).
+//                 permutation (n_perm): with conditions,
+//                 that of conditions and constraints
+//                 together, with Qbar's rows permuted
+//                 against the fixed design;
+//   perm_cond     ... and of the conditions alone (only
+//                 with conditions; else 0s).
 // or, if some samples have no observations, list(empty =
 // their 1-based indices).
 //======================================================
@@ -1402,21 +1407,23 @@ SEXP C_cca(
   // R-squared.
   //--------------------------------------------------
   SEXP sexp_pi = PROTECT(allocVector(REALSXP, n_perm));
+  SEXP sexp_pc = PROTECT(allocVector(REALSXP, n_perm));
   int  px      = des.p - nz;
-  if (n_perm > 0 && px > 0) {
+  for (int i = 0; i < n_perm; i++) REAL(sexp_pi)[i] = REAL(sexp_pc)[i] = 0;
+  if (n_perm > 0 && des.rx > 0) {
     perm_source_t ps;
     perm_source_init(&ps, n, sexp_perms, R_NilValue, asInteger(sexp_seed));
-    cca_perm_inertia(REAL(sexp_x) + (size_t) n * nz, px, &ps, n_perm, REAL(sexp_pi));
-  }
-  else {
-    for (int i = 0; i < n_perm; i++) REAL(sexp_pi)[i] = 0;
+    if (des.rz > 0)
+      cca_perm_inertia_fixed(des.Q, des.rq, des.rz, &ps, n_perm, REAL(sexp_pi), REAL(sexp_pc));
+    else
+      cca_perm_inertia(REAL(sexp_x) + (size_t) n * nz, px, &ps, n_perm, REAL(sexp_pi));
   }
 
 
   // The result, with loadings, w and perm_inertia appended.
   int  len   = length(sexp_res);
-  SEXP out   = PROTECT(allocVector(VECSXP, len + 3));
-  SEXP names = PROTECT(allocVector(STRSXP, len + 3));
+  SEXP out   = PROTECT(allocVector(VECSXP, len + 4));
+  SEXP names = PROTECT(allocVector(STRSXP, len + 4));
   SEXP old   = getAttrib(sexp_res, R_NamesSymbol);
   for (int i = 0; i < len; i++) {
     SET_VECTOR_ELT(out, i, VECTOR_ELT(sexp_res, i));
@@ -1428,8 +1435,10 @@ SEXP C_cca(
   SET_STRING_ELT(names, len,     mkChar("loadings"));
   SET_STRING_ELT(names, len + 1, mkChar("w"));
   SET_STRING_ELT(names, len + 2, mkChar("perm_inertia"));
+  SET_VECTOR_ELT(out, len + 3, sexp_pc);
+  SET_STRING_ELT(names, len + 3, mkChar("perm_cond"));
   setAttrib(out, R_NamesSymbol, names);
 
-  UNPROTECT(6);
+  UNPROTECT(7);
   return out;
 }
