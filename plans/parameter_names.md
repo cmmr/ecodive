@@ -1,0 +1,142 @@
+# Parameter names: glossary and proposed renames (2026-11-18)
+
+I compared every exported signature (dumped from the installed package)
+and every signature proposed in the method plans, looking for two things:
+the same name meaning different things, and different names meaning the
+same thing.
+
+- §1 is the glossary that existing and new functions should follow.
+- §2 lists proposed changes to **existing** functions. They need the
+  user's OK. All of them are in functions new in the unreleased 2.4.0.
+- §3 lists changes to the **planned** signatures.
+- §4 lists inconsistencies left as they are on purpose.
+
+
+## 1. Glossary: one name, one meaning
+
+| Name | Meaning | Used by |
+|:-----|:--------|:--------|
+| `counts` | a count table (first argument) | metrics, `pca`, `rpca`, `normalize`, `rarefy`, `count_ord`, and all planned count-table methods |
+| `dm` | beta diversity distances (first argument) | `pcoa`, ..., all tests, `dist_ord`, `dist_test` |
+| `ord` | an ordination result (first argument) | `envfit`, `pcoa_biplot`; planned `procrustes` |
+| `x`, `y` | two inputs of equal standing, or a first argument that can be either `dm` or `counts` | planned `coinertia(x, y)`, `varpart(x, ...)`, `forward_select(x, ...)`; `mantel(dm, y)` |
+| `n_axes` | **the number of axes returned** (proposed rename of `k`; see §2.0) | every ordination |
+| `axes` | **which** axes of an input ordination to use (indices) | `envfit`; planned `procrustes` |
+| `groups`, `data`, `formula` | the grouping variable or model, and the sample metadata it comes from | tests, `dbrda`, `capscale`, and planned constrained and discriminant methods |
+| `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv` |
+| `margin`, `norm`, `pseudocount` | the count table's orientation and transformation | everything that takes `counts` |
+| `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
+| `scaling` | **reserved** for score scaling (vegan's scaling 1/2), if ever needed | — |
+| `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
+| `metric` | a beta diversity metric name | `beta_div`, `alpha_div`; planned `bioenv` |
+| `alternative` | `'greater'`, `'less'` or `'two.sided'` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `moran_i` |
+| `permutations`, `strata`, `seed` | the permutation test (a count or a matrix), restricted permutations, and the RNG seed | all tests, `envfit` |
+| `pairwise`, `p_adjust` | per-pair tests, and their p-value adjustment | planned on all group tests; `p_adjust` also on `mantel_correlogram` and optionally `simper` |
+| `n_<unit>` | **an exact count** | `n_neighbors`, `n_starts`, `n_epochs`; planned `n_iters` (pacmap), `n_segments` (dca), `n_classes`, `n_landmarks`, `n_orthogonal` |
+| `max_<unit>` | **a cap** (it may stop earlier) | `max_iters` |
+| `tol` | a convergence tolerance | `mds`, `nmds`, `rpca`; planned `splsda` |
+| `init`, `learning_rate` | starting layout, step size | `tsne`, `umap`; planned `pacmap`, `largevis` |
+| `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights | planned `moran_i`, `dbmem` |
+| `cpus` | threads (always last) | everything threaded |
+
+
+## 2. Proposed changes to existing functions (need the user's OK)
+
+0. **`k` → `n_axes` in every ordination** (`pcoa`, `mds`, `nmds`,
+   `isomap`, `tsne`, `umap`, `dbrda`, `capscale`, `pca`, `rpca`), and in
+   every planned one. The user suggested this; recommended.
+   - `k` breaks the `n_<unit>` rule.
+   - It is overloaded in this domain: `vegan::isomap(k)` is a neighbour
+     count, and "k" means k-nearest neighbours in the t-SNE, UMAP,
+     Isomap and PHATE literature, beside ecodive's own `n_neighbors`.
+   - The references don't agree anyway: `cmdscale`/vegan use `k`,
+     scikit-learn/uwot `n_components`, Rtsne `dims`, mixOmics `ncomp`,
+     ade4 `nf`.
+   - `n_axes` (how many) pairs with `envfit()`'s `axes` (which).
+   - All the affected functions are unreleased, so a plain rename is
+     enough (an old `k =` call gets R's "unused argument" error).
+   - Scope: 10 R files, their Rd pages, about 200 `k =` uses in tests
+     (some are fixture fields or local variables, so each needs
+     checking), `vignettes/ordination.Rmd`, NEWS, the benchmark script,
+     and the plans.
+1. **`isomap(k = 2L)` → `k = 3L`.** See the `k` default rule in §3.1:
+   isomap's axes have eigenvalues, like pcoa's. Its default of 2 comes
+   from scikit-learn's `n_components`.
+2. **Drop `input` from `list_dist_ords()` and `match_dist_ord()`, and the
+   `input` column from `ORDINATIONS`.**
+   - It was added before `count_ord()` existed. It's always `"dist"` now
+     that count-table methods have their own registry (`COUNT_ORDS`), and
+     `list_count_ords()` has no such argument.
+   - Removing it makes the two `list_*` / `match_*` pairs identical in
+     shape.
+   - It touches tests in `test-dist_ord.r` (`input = 'dist'`, and the
+     "Options are: NULL, dist" error).
+3. **`rarefy(seed = 0)` → `seed = 0L`,** as every other function writes
+   it. This is cosmetic; behaviour doesn't change.
+
+Nothing else in the existing signatures conflicts with the glossary.
+
+
+## 3. Changes to planned signatures
+
+### 3.1 A rule for the default number of axes (`n_axes`, formerly `k`)
+
+Today ecodive has `k = 3` for pcoa, pca, rpca, dbrda and capscale, and
+`k = 2` for mds, nmds, isomap, tsne and umap. The proposed rule:
+**3 when the axes have eigenvalues (`eig` is defined), 2 when they
+don't** (layouts optimised in a fixed number of dimensions).
+
+| Method | `n_axes` default |
+|:-------|:------------|
+| `rda`, `cca`, `ca`, `dpcoa`, `coinertia`, `diffusion_map` | 3 |
+| `dca` | **3, not 4** (DCA traditionally reports 4 axes; `n_axes = 4` still works) |
+| `lda`, `capda` | `min(3, number of groups − 1)` |
+| `plsda`, `oplsda`, `splsda` | 2 (components have no eigenvalues; matches mixOmics' `ncomp = 2`) |
+| `phate`, `pacmap`, `largevis` | 2 |
+| `principal_response_curves` | 1 (the method's convention; documented as the exception) |
+| `isomap` (existing) | 3, if §2.1 is accepted |
+
+### 3.2 Renames in the plans
+
+| Plan | Now | Proposed | Why |
+|:-----|:----|:---------|:----|
+| [lda_capda.md](lda_capda.md) | `capda(n_axes =)` | `n_pcoa_axes` | `n_axes` is the number of axes *returned*; this is the number of PCoA axes *used*. |
+| [procrustes.md](procrustes.md) | `procrustes(x, y, k, ...)` | `procrustes(ord, target, axes = NULL, ...)` | It's asymmetric (`ord` is rotated onto `target`), so `x`/`y` hide which is which. Choosing input axes is `axes` (as in `envfit`), not a count. Same for `procrustes_test()`. |
+| [procrustes.md](procrustes.md) | `scale = TRUE` | `dilate = TRUE` | `scale` means "standardise features" everywhere else; here it means allowing a uniform dilation of `ord` (Gower's term). |
+| [largevis.md](largevis.md) | `gamma = 7` | `repulsion_strength = 7` | `umap()` already calls this parameter `repulsion_strength`, and so does uwot's `lvish()`. `gamma` also means something else in `phate()`. |
+| [moran_i.md](moran_i.md) | `moran_i(x, w, ...)` | `moran_i(x, space, ...)` | `weights` already means group weights in `mrpp()`, and `w` is cryptic. One name for sample positions across the spatial functions. |
+| [dbmem.md](dbmem.md) | `dbmem(x, ...)` | `dbmem(space, ...)` | As above. |
+| [mantel_regression.md](mantel_regression.md) | `method = 'linear' / 'rank'` | `method = 'pearson' / 'spearman'` | The same vocabulary as the rest of the Mantel family. A rank regression is the Spearman analogue; document the mapping to ecodist's `mrank`. |
+| [mantel_correlogram.md](mantel_correlogram.md) | (none) | add `alternative = 'greater'` | Every other Mantel function has it. |
+| [bioenv.md](bioenv.md) | `vars = NULL` | `formula = NULL` (one-sided, naming the candidates; default all numeric columns) | Variables come from `data` through `formula` everywhere else. |
+| [bioenv.md](bioenv.md) | `upto = NULL` | `max_vars = NULL` | A cap, so `max_*` (vegan's `upto`). |
+| [bioenv.md](bioenv.md) | `partial = NULL` | `given = NULL` | The same concept as `mantel_partial()`'s `given`. |
+| [varpart_forward_select.md](varpart_forward_select.md) | `forward_select(x, scope, ...)` | `forward_select(x, formula, ...)` | As for bioenv: candidates are named in a formula over `data` (vegan's name for it is `scope`). |
+| [splsda.md](splsda.md) | `keep = 10L` | `n_features = 10L` | An exact count per component (mixOmics' `keepX`). |
+| [dca.md](dca.md) | `rescale = 4L` | `n_rescales = 4L` | An exact count of rescaling cycles (vegan's `iresc`). |
+| [mirkat.md](mirkat.md) | `outcome = 'continuous'` | drop it; infer it from `groups` (numeric → continuous; two categories → binary; more → error) | No other test asks for the variable's type; `dist_test()` already checks it from the values. |
+
+
+## 4. Inconsistencies kept on purpose
+
+- **The order of `margin` and other arguments in the alpha and beta metric
+  functions** varies, e.g. `fisher(counts, digits, margin)` and
+  `generalized_unifrac(counts, tree, alpha, margin)`. These functions are
+  released on CRAN, and reordering would break positional calls; the
+  names are already consistent.
+- **`alpha`** means UniFrac's α in `generalized_unifrac()` and
+  `beta_div()`, and would mean Coifman–Lafon's density normalisation in
+  `diffusion_map()`. Both are the standard names in their literatures, the
+  functions are unrelated, and `diffusion_map()` never passes through
+  `beta_div()`. The docs say which α is meant.
+- **`envfit(na.rm =)`** keeps the dot, against the snake_case rule,
+  because `na.rm` is base R's universal idiom.
+- **Wrapper selector names differ by design:** `beta_div(metric)`,
+  `dist_ord(method)`, `count_ord(method)`, `dist_test(test)`. `test` keeps
+  tests free to take a `method` argument (the correlation), as
+  [README.md](README.md) explains.
+- **`umap(n_epochs)` against `tsne(max_iters)`:** uwot runs exactly
+  `n_epochs` (a count), while t-SNE may stop early (a cap). They follow the
+  `n_` / `max_` rule.
+- **Method-specific `n_neighbors` defaults** (isomap 5, umap 15, pacmap
+  10, phate 5, diffusion_map 15) follow each reference.
