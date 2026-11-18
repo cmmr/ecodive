@@ -50,6 +50,14 @@ jobs:
         config: ${{ fromJson(needs.setup.outputs.containers) }}
     container:
       image: ${{ matrix.config.container }}
+    # One package library (and so one cache) per container. setup-deps keys
+    # its cache by OS and R version only, so containers with the same Ubuntu
+    # and R-devel shared one, and nold and ubuntu-clang restored packages
+    # built in another container against libc++ ("libc++.so.1: cannot open
+    # shared object file"). actions/cache only restores a cache saved for
+    # the same path. (Keep this if rhub::rhub_setup() rewrites the file.)
+    env:
+      R_LIBS_USER: /github/home/R/library/${{ matrix.config.container }}
 
     steps:
       - uses: r-hub/actions/checkout@v1
