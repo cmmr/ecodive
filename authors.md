@@ -9,7 +9,8 @@
   PCG random number generator
 
 - **The scikit-learn developers**. Contributor, copyright holder.  
-  SMACOF (MDS, NMDS), t-SNE and Isomap code ported from scikit-learn
+  SMACOF (MDS, NMDS), t-SNE, Isomap and PLS-DA code ported from
+  scikit-learn
 
 - **James Melville**. Copyright holder.  
   uwot's C++ header library, followed by the UMAP code

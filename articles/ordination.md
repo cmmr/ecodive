@@ -58,6 +58,7 @@ dm <- bray(iris[, 1:4])
 | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) | Principal Component Analysis (PCA) | counts | Euclidean geometry of (transformed) counts, with feature loadings. |
 | [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) | Correspondence Analysis (CA) | counts | The chi-square geometry of species profiles, for unimodal responses. |
 | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) | Robust Aitchison PCA | counts | Sparse compositional data, such as microbiome counts. |
+| [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) | Partial Least Squares Discriminant Analysis | counts | Axes that best separate known groups (a supervised ordination). |
 
 [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
 lists the methods that take distances, with the other names each one
@@ -318,14 +319,61 @@ attr(ord, 'prop')
 #> [1] 0.95585403 0.03431714
 ```
 
+## Supervised ordination
+
+[`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md), partial
+least squares discriminant analysis (PLS-DA), finds the components of a
+count table that best separate known groups: PLS regression on a dummy
+matrix of the groups, as scikit-learn’s `PLSRegression` and
+`mixOmics::plsda()` compute it. For microbiome counts, `norm = 'clr'`
+(with a `pseudocount`) is the usual choice. Its `vip` attribute ranks
+the features by their importance to the separation.
+
+``` r
+
+ord <- plsda(round(iris[, 1:4] * 10), 'Species', iris)
+plot(ord, col = iris$Species)
+```
+
+![](ordination_files/figure-html/unnamed-chunk-16-1.png)
+
+``` r
+
+attr(ord, 'vip')
+#>                 PLSDA1    PLSDA2
+#> Sepal.Length 0.9429260 0.8933652
+#> Sepal.Width  0.6290252 0.9320558
+#> Petal.Length 1.1720757 1.0781111
+#> Petal.Width  1.1582126 1.0820569
+```
+
+A supervised ordination always separates the groups it is given: it
+looks for exactly that, and with more features than samples it finds a
+separation even in random data. So a PLS-DA plot is no evidence that the
+groups differ. Test the difference with a permutation test of the
+distances, such as
+[`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
+or estimate how well the groups of new samples are predicted by
+cross-validation.
+
+``` r
+
+set.seed(1)
+grp <- sample(rep(c('a', 'b'), 75))  # Random groups.
+ord <- plsda(round(iris[, 1:4] * 10), grp)
+permanova(euclidean(scale(iris[, 1:4])), grp, permutations = 199)$p_value
+#> [1] 0.77
+```
+
 ## Ordinating counts directly
 
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
-[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
-[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) take the count
-table rather than distances.
+[`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+[`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) and
+[`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) take the
+count table rather than distances.
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
 runs them by name, as
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md)
@@ -353,7 +401,7 @@ arrows(0, 0, load[, 1], load[, 2], length = 0.1)
 text(load[, 1:2], labels = rownames(load), pos = 4)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-16-1.png)
+![](ordination_files/figure-html/unnamed-chunk-18-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -432,7 +480,7 @@ arrows(0, 0, xy$PCoA1, xy$PCoA2, length = 0.1)
 text(xy, labels = vec$variable, pos = 1, cex = 0.8)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-20-1.png)
+![](ordination_files/figure-html/unnamed-chunk-22-1.png)
 
 ## Comparing two ordinations
 
@@ -483,7 +531,7 @@ plot(xy, asp = 1, pch = 16, xlab = 'Axis 1', ylab = 'Axis 2')
 arrows(xy[, 1], xy[, 2], fit[, 1], fit[, 2], length = 0.05, col = 'grey40')
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-22-1.png)
+![](ordination_files/figure-html/unnamed-chunk-24-1.png)
 
 ## Speed and reproducibility
 

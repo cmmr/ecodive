@@ -202,6 +202,15 @@ take the count table.
   [`match_count_ord()`](https://cmmr.github.io/ecodive/reference/count_ords.md)
   : Find and Browse Count Table Ordination Methods
 
+### Supervised
+
+Ordinations that look for the axes that separate known groups. They
+always find some, so validate them with a permutation test such as
+permanova().
+
+- [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) :
+  Partial Least Squares Discriminant Analysis (PLS-DA)
+
 ## Hypothesis Tests
 
 Test whether sample metadata explain beta diversity distances.
