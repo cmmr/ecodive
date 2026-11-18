@@ -69,9 +69,10 @@ treatment groups, explain the differences between samples?</p>
 
 
 <dt id="arg-test">test<a class="anchor" aria-label="anchor" href="#arg-test"></a></dt>
-<dd><p>The name of a test: <code>"anosim"</code>, <code>"mantel"</code>, <code>"mrpp"</code>,
-<code>"permanova"</code>, or <code>"permdisp"</code>. Flexible matching is supported (see
-below). Programmatic access via <code><a href="dist_tests.html">list_dist_tests()</a></code>.</p></dd>
+<dd><p>The name of a test: <code>"anosim"</code>, <code>"mantel"</code>,
+<code>"mantel_partial"</code>, <code>"mrpp"</code>, <code>"permanova"</code>, or <code>"permdisp"</code>.
+Flexible matching is supported (see below). Programmatic access via
+<code><a href="dist_tests.html">list_dist_tests()</a></code>.</p></dd>
 
 
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
@@ -93,8 +94,10 @@ to the samples in <code>dm</code> by row name. Default: <code>NULL</code>.</p></
 <dd><p>Further arguments for the method's function, such as
 <code>permutations</code>, <code>strata</code>, <code>seed</code>, or <code>cpus</code>, which every method
 takes, or a method's own, such as <code>weights</code> for <code><a href="mrpp.html">mrpp()</a></code> or
-<code>method</code> (the correlation) for <code><a href="mantel.html">mantel()</a></code>. Each method keeps its own
-defaults. For <code>mantel</code>, <code>groups</code> is passed as <code><a href="mantel.html">mantel()</a></code>'s <code>y</code>.</p></dd>
+<code>method</code> (the correlation) for <code><a href="mantel.html">mantel()</a></code>, or <code>given</code> for
+<code><a href="mantel_partial.html">mantel_partial()</a></code>. Each method keeps its own defaults. For
+<code>mantel</code> and <code>mantel_partial</code>, <code>groups</code> is passed as the function's
+<code>y</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -106,18 +109,21 @@ method, so results can be <code><a href="https://rdrr.io/r/base/cbind.html" clas
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>List of Tests</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Test Name</td><td>Groups</td></tr><tr><td><code>anosim</code></td><td>Analysis of Similarities (ANOSIM)</td><td>categorical</td></tr><tr><td><code>mantel</code></td><td>Mantel Test</td><td>numeric</td></tr><tr><td><code>mrpp</code></td><td>Multi-Response Permutation Procedure (MRPP)</td><td>categorical</td></tr><tr><td><code>permanova</code></td><td>Permutational Multivariate Analysis of Variance</td><td>categorical or numeric</td></tr><tr><td><code>permdisp</code></td><td>Homogeneity of Multivariate Dispersions (PERMDISP)</td><td>categorical</td></tr></table><p>Categorical groups are factors, character, or logical vectors; a method
+    <p><strong>List of Tests</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Test Name</td><td>Groups</td></tr><tr><td><code>anosim</code></td><td>Analysis of Similarities (ANOSIM)</td><td>categorical</td></tr><tr><td><code>mantel</code></td><td>Mantel Test</td><td>numeric</td></tr><tr><td><code>mantel_partial</code></td><td>Partial Mantel Test</td><td>numeric</td></tr><tr><td><code>mrpp</code></td><td>Multi-Response Permutation Procedure (MRPP)</td><td>categorical</td></tr><tr><td><code>permanova</code></td><td>Permutational Multivariate Analysis of Variance</td><td>categorical or numeric</td></tr><tr><td><code>permdisp</code></td><td>Homogeneity of Multivariate Dispersions (PERMDISP)</td><td>categorical</td></tr></table><p>Categorical groups are factors, character, or logical vectors; a method
 that takes only categorical groups gives an error for numbers, and the
 reverse. <code>mantel</code> correlates <code>dm</code> with the differences between samples'
-values; to compare two distance matrices, call <code><a href="mantel.html">mantel()</a></code> directly. To
+values, and <code>mantel_partial</code> does so after removing the effect of
+<code>given</code> (such as geographic distances); to compare two distance
+matrices, call <code><a href="mantel.html">mantel()</a></code> or <code><a href="mantel_partial.html">mantel_partial()</a></code> directly. To
 test several variables at once, call <code><a href="permanova.html">permanova()</a></code> with a <code>formula</code>,
 either directly or as <code>dist_test(dm, 'permanova', data = meta, formula = ~ a + b)</code>.</p>
 <p><strong>Flexible name matching</strong></p>
 <p>Case insensitive and partial matching, ignoring anything but letters. E.g.
 <code>test = 'PERMANOVA'</code> or <code>'perma'</code> selects <code>permanova</code>. Common other names
 also work: <code>'adonis'</code> or <code>'adonis2'</code> for <code>permanova</code>; <code>'betadisper'</code> or
-<code>'PERMDISP2'</code> for <code>permdisp</code>; and <code>'Analysis of Similarities'</code> for
-<code>anosim</code>.</p>
+<code>'PERMDISP2'</code> for <code>permdisp</code>; <code>'Analysis of Similarities'</code> for
+<code>anosim</code>; and <code>'mantel.partial'</code> or <code>'partial Mantel'</code> for
+<code>mantel_partial</code>.</p>
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.</p>
 <p><strong>Same names in other packages</strong></p>
@@ -129,8 +135,8 @@ runs ecodive's, to be sure.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="anosim.html">anosim()</a></code>, <code><a href="mantel.html">mantel()</a></code>, <code><a href="mrpp.html">mrpp()</a></code>, <code><a href="permanova.html">permanova()</a></code>, <code><a href="permdisp.html">permdisp()</a></code>,
-<code><a href="dist_tests.html">list_dist_tests()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="anosim.html">anosim()</a></code>, <code><a href="mantel.html">mantel()</a></code>, <code><a href="mantel_partial.html">mantel_partial()</a></code>, <code><a href="mrpp.html">mrpp()</a></code>,
+<code><a href="permanova.html">permanova()</a></code>, <code><a href="permdisp.html">permdisp()</a></code>, <code><a href="dist_tests.html">list_dist_tests()</a></code></p></div>
     </div>
 
     <div class="section level2">

@@ -49,7 +49,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 | Ordination | [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) | [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md), [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md), [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md), [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md), [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md), [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) |
 | Ordination of counts |  | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) |
 | Biplots |  | [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md), [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) |
-| Statistical tests | [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md) | [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md), [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md), [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md), [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) |
+| Statistical tests | [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md) | [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md), [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md), [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md), [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md), [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md) |
 | Data preparation |  | [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md), [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md), [`read_tree()`](https://cmmr.github.io/ecodive/reference/read_tree.md) |
 
 Each wrapper runs its functions by name, such as
@@ -257,7 +257,8 @@ list_dist_ords('id')
 
 # Statistical tests
 list_dist_tests('id')
-#> [1] "anosim"    "mantel"    "mrpp"      "permanova" "permdisp" 
+#> [1] "anosim"         "mantel"         "mantel_partial" "mrpp"          
+#> [5] "permanova"      "permdisp"      
 ```
 
 ## Documentation

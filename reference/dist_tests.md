@@ -89,16 +89,24 @@ will be applied to the
 
     # A data.frame of all available tests.
     list_dist_tests()
-#>                                              name        id              groups
-#> 1                        Analysis of Similarities    anosim         categorical
-#> 2                                     Mantel Test    mantel             numeric
-#> 3            Multi-Response Permutation Procedure      mrpp         categorical
-#> 4 Permutational Multivariate Analysis of Variance permanova categorical numeric
-#> 5         Homogeneity of Multivariate Dispersions  permdisp         categorical
+#>                                              name             id
+#> 1                        Analysis of Similarities         anosim
+#> 2                                     Mantel Test         mantel
+#> 3                             Partial Mantel Test mantel_partial
+#> 4            Multi-Response Permutation Procedure           mrpp
+#> 5 Permutational Multivariate Analysis of Variance      permanova
+#> 6         Homogeneity of Multivariate Dispersions       permdisp
+#>                groups
+#> 1         categorical
+#> 2             numeric
+#> 3             numeric
+#> 4         categorical
+#> 5 categorical numeric
+#> 6         categorical
 
     # The tests of a numeric variable.
     list_dist_tests(val = 'id', groups = 'numeric')
-#> [1] "mantel"    "permanova"
+#> [1] "mantel"         "mantel_partial" "permanova"     
 
     # Find the test for 'adonis2'.
     m <- match_dist_test('adonis2')

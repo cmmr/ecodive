@@ -17,13 +17,14 @@ the name of a column in a data frame of sample metadata (`data`).
 | [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md) | Analysis of Similarities | categorical | Are distances within groups smaller than between them (ranks)? |
 | [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) | Multi-Response Permutation Procedure | categorical | Are distances within groups smaller than expected? |
 | [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) | Mantel Test | numeric | Do distances correlate with differences in a numeric variable, or with another distance matrix? |
+| [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md) | Partial Mantel Test | numeric | Do they still, after removing the effect of a third distance matrix? |
 
 They give the same statistics as `vegan`’s `adonis2()`, `betadisper()`,
 [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md),
-[`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md), and
-[`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md), with
-permutations run in parallel C, and the p-values are identical for any
-number of threads.
+[`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md),
+[`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md), and
+`mantel.partial()`, with permutations run in parallel C, and the
+p-values are identical for any number of threads.
 
 The examples use R’s built-in `iris` data, as in
 [`vignette('ordination')`](https://cmmr.github.io/ecodive/articles/ordination.md):
@@ -176,6 +177,23 @@ mantel(sepals, petals, method = 'spearman')
 #> Mantel test (Spearman)
 #> 
 #> r =  0.69, p = 0.001, z = 35.65
+#> Permutations: 999 (free)
+#> 
+#> Correlation: Spearman's rank correlation rho
+#> Alternative: greater (r is more positive than by chance)
+#> Samples: 150
+```
+
+[`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md)
+removes the effect of a third set of distances, `given`: here, whether
+sepals and petals still match after accounting for petal width alone.
+
+``` r
+
+mantel_partial(sepals, petals, given = 'Petal.Width', data = iris, method = 'spearman')
+#> Partial Mantel test (Spearman)
+#> 
+#> r = 0.3918, p = 0.001, z =  12.4
 #> Permutations: 999 (free)
 #> 
 #> Correlation: Spearman's rank correlation rho

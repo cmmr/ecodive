@@ -202,6 +202,8 @@ Test whether sample metadata explain beta diversity distances.
   : Permutational Multivariate Analysis of Variance (PERMANOVA)
 - [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) :
   Mantel Test
+- [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md)
+  : Partial Mantel Test
 - [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) :
   Multi-Response Permutation Procedure (MRPP)
 - [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md) :

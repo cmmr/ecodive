@@ -307,6 +307,7 @@ data frame.
 | [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md) | Analysis of Similarities |
 | [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) | Multi-Response Permutation Procedure |
 | [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) | Mantel Test |
+| [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md) | Partial Mantel Test |
 
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)
 runs any of them by name.

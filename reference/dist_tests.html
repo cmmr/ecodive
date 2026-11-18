@@ -114,16 +114,24 @@ be applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="ex
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A data.frame of all available tests.</span></span></span>
 <span class="r-in"><span>    <span class="fu">list_dist_tests</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                              name        id              groups</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                        Analysis of Similarities    anosim         categorical</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                                     Mantel Test    mantel             numeric</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3            Multi-Response Permutation Procedure      mrpp         categorical</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 Permutational Multivariate Analysis of Variance permanova categorical numeric</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         Homogeneity of Multivariate Dispersions  permdisp         categorical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                              name             id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                        Analysis of Similarities         anosim</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                                     Mantel Test         mantel</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                             Partial Mantel Test mantel_partial</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            Multi-Response Permutation Procedure           mrpp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 Permutational Multivariate Analysis of Variance      permanova</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         Homogeneity of Multivariate Dispersions       permdisp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                groups</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1         categorical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2             numeric</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3             numeric</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         categorical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 categorical numeric</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         categorical</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># The tests of a numeric variable.</span></span></span>
 <span class="r-in"><span>    <span class="fu">list_dist_tests</span><span class="op">(</span>val <span class="op">=</span> <span class="st">'id'</span>, groups <span class="op">=</span> <span class="st">'numeric'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mantel"    "permanova"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mantel"         "mantel_partial" "permanova"     </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Find the test for 'adonis2'.</span></span></span>
 <span class="r-in"><span>    <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">match_dist_test</span><span class="op">(</span><span class="st">'adonis2'</span><span class="op">)</span></span></span>

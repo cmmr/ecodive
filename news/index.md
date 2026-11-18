@@ -241,18 +241,19 @@
 
 - New [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md)
   runs a Mantel test of the correlation between two distance matrices
-  (Pearson, Spearman, or Kendall), or a partial Mantel test that removes
-  the effect of a third (`given`). It gives the same statistic as
-  `vegan::mantel()` and `vegan::mantel.partial()`, and, given the same
-  permutation matrix, the same permuted statistics and p-values. The
-  second matrix may also be a numeric vector, one value per sample (such
-  as age), and samples are matched by name. It adds lower-tail and
-  two-sided tests (`alternative`). Each permutation is one pass over the
-  dist triangle, with no n-by-n matrix (Kendall’s tau-b by Knight’s
-  merge sort rather than [`cor()`](https://rdrr.io/r/stats/cor.html)’s
-  quadratic count), and permutations run in parallel. Permutations come
-  from a `seed` argument, and results are identical for any number of
-  `cpus`.
+  (Pearson, Spearman, or Kendall), and new
+  [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md)
+  a partial Mantel test, which removes the effect of a third (`given`).
+  They give the same statistics as `vegan::mantel()` and
+  `vegan::mantel.partial()`, and, given the same permutation matrix, the
+  same permuted statistics and p-values. The second and third matrices
+  may also be numeric vectors, one value per sample (such as age), and
+  samples are matched by name. They add lower-tail and two-sided tests
+  (`alternative`). Each permutation is one pass over the dist triangle,
+  with no n-by-n matrix (Kendall’s tau-b by Knight’s merge sort rather
+  than [`cor()`](https://rdrr.io/r/stats/cor.html)’s quadratic count),
+  and permutations run in parallel. Permutations come from a `seed`
+  argument, and results are identical for any number of `cpus`.
 
 - New `dist_test(dm, test, groups, data, ...)` runs any of these tests
   by name, as
@@ -263,22 +264,22 @@
   [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md)’s
   `method`) pass through. It checks that the variable is of a kind the
   test takes: categorical groups for `anosim`, `mrpp` and `permdisp`,
-  numeric values for `mantel` (passed as its `y`), and either for
-  `permanova`.
+  numeric values for `mantel` and `mantel_partial` (passed as their
+  `y`), and either for `permanova`.
   [`list_dist_tests()`](https://cmmr.github.io/ecodive/reference/dist_tests.md)
   and
   [`match_dist_test()`](https://cmmr.github.io/ecodive/reference/dist_tests.md)
   list and look up the tests, with forgiving name matching (`"adonis2"`
   finds `permanova`, `"betadisper"` finds `permdisp`).
 
-- One rule aligns every per-sample argument (`groups`, `strata`, and
-  [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md)’s `y`
-  and `given`) in
+- One rule aligns every per-sample argument (`groups`, `strata`, and the
+  Mantel tests’ `y` and `given`) in
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
   [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md),
   [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md),
   [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md),
   [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md),
+  [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md),
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) and
   [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md):
   with `data`, a column name or one value per row of `data`; without it,

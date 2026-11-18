@@ -21,9 +21,9 @@ dist_test(dm, test, groups, data = NULL, ...)
 
 - test:
 
-  The name of a test: `"anosim"`, `"mantel"`, `"mrpp"`, `"permanova"`,
-  or `"permdisp"`. Flexible matching is supported (see below).
-  Programmatic access via
+  The name of a test: `"anosim"`, `"mantel"`, `"mantel_partial"`,
+  `"mrpp"`, `"permanova"`, or `"permdisp"`. Flexible matching is
+  supported (see below). Programmatic access via
   [`list_dist_tests()`](https://cmmr.github.io/ecodive/reference/dist_tests.md).
 
 - groups:
@@ -48,10 +48,11 @@ dist_test(dm, test, groups, data = NULL, ...)
   own, such as `weights` for
   [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) or
   `method` (the correlation) for
-  [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md). Each
-  method keeps its own defaults. For `mantel`, `groups` is passed as
-  [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md)'s
-  `y`.
+  [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md), or
+  `given` for
+  [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md).
+  Each method keeps its own defaults. For `mantel` and `mantel_partial`,
+  `groups` is passed as the function's `y`.
 
 ## Value
 
@@ -72,6 +73,7 @@ into one row with the same columns for every method, so results can be
 | Option / Function Name | Test Name | Groups |
 | `anosim` | Analysis of Similarities (ANOSIM) | categorical |
 | `mantel` | Mantel Test | numeric |
+| `mantel_partial` | Partial Mantel Test | numeric |
 | `mrpp` | Multi-Response Permutation Procedure (MRPP) | categorical |
 | `permanova` | Permutational Multivariate Analysis of Variance | categorical or numeric |
 | `permdisp` | Homogeneity of Multivariate Dispersions (PERMDISP) | categorical |
@@ -79,8 +81,11 @@ into one row with the same columns for every method, so results can be
 Categorical groups are factors, character, or logical vectors; a method
 that takes only categorical groups gives an error for numbers, and the
 reverse. `mantel` correlates `dm` with the differences between samples'
-values; to compare two distance matrices, call
-[`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md)
+values, and `mantel_partial` does so after removing the effect of
+`given` (such as geographic distances); to compare two distance
+matrices, call
+[`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) or
+[`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md)
 directly. To test several variables at once, call
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
 with a `formula`, either directly or as
@@ -91,8 +96,9 @@ with a `formula`, either directly or as
 Case insensitive and partial matching, ignoring anything but letters.
 E.g. `test = 'PERMANOVA'` or `'perma'` selects `permanova`. Common other
 names also work: `'adonis'` or `'adonis2'` for `permanova`;
-`'betadisper'` or `'PERMDISP2'` for `permdisp`; and
-`'Analysis of Similarities'` for `anosim`.
+`'betadisper'` or `'PERMDISP2'` for `permdisp`;
+`'Analysis of Similarities'` for `anosim`; and `'mantel.partial'` or
+`'partial Mantel'` for `mantel_partial`.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -110,6 +116,7 @@ sure.
 
 [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md),
 [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md),
+[`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md),
 [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md),
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
 [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md),
