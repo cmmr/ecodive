@@ -172,36 +172,36 @@
   of `cpus`.
 
 * New `mantel()` runs a Mantel test of the correlation between two distance
-  matrices (Pearson, Spearman, or Kendall), or a partial Mantel test that
-  removes the effect of a third (`given`). It gives the same statistic as
-  `vegan::mantel()` and `vegan::mantel.partial()`, and, given the same
-  permutation matrix, the same permuted statistics and p-values. The second
-  matrix may also be a numeric vector, one value per sample (such as age),
-  and samples are matched by name. It adds lower-tail and two-sided tests
-  (`alternative`). Each permutation is one pass over the dist triangle, with
-  no n-by-n matrix (Kendall's tau-b by Knight's merge sort rather than
-  `cor()`'s quadratic count), and permutations run in parallel. Permutations
-  come from a `seed` argument, and results are identical for any number of
-  `cpus`.
+  matrices (Pearson, Spearman, or Kendall), and new `mantel_partial()` a
+  partial Mantel test, which removes the effect of a third (`given`). They
+  give the same statistics as `vegan::mantel()` and `vegan::mantel.partial()`,
+  and, given the same permutation matrix, the same permuted statistics and
+  p-values. The second and third matrices may also be numeric vectors, one
+  value per sample (such as age), and samples are matched by name. They add
+  lower-tail and two-sided tests (`alternative`). Each permutation is one pass
+  over the dist triangle, with no n-by-n matrix (Kendall's tau-b by Knight's
+  merge sort rather than `cor()`'s quadratic count), and permutations run in
+  parallel. Permutations come from a `seed` argument, and results are
+  identical for any number of `cpus`.
 
 * New `dist_test(dm, test, groups, data, ...)` runs any of these tests by
-  name, as `dist_ord()` does for ordination methods:
-  `dist_test(dm, "mrpp", "treatment", meta)` is `mrpp(dm, "treatment",
-  meta)`, and other arguments (such as `mantel()`'s `method`) pass through.
-  It checks that the variable is of a kind the test takes: categorical groups
-  for `anosim`, `mrpp` and `permdisp`, numeric values for `mantel` (passed as
-  its `y`), and either for `permanova`. `list_dist_tests()` and
-  `match_dist_test()` list and look up the tests, with forgiving name
-  matching (`"adonis2"` finds `permanova`, `"betadisper"` finds `permdisp`).
+  name, as `dist_ord()` does for ordination methods: `dist_test(dm, "mrpp",
+  "treatment", meta)` is `mrpp(dm, "treatment", meta)`, and other arguments
+  (such as `mantel()`'s `method`) pass through. It checks that the variable is
+  of a kind the test takes: categorical groups for `anosim`, `mrpp` and
+  `permdisp`, numeric values for `mantel` and `mantel_partial` (passed as
+  their `y`), and either for `permanova`. `list_dist_tests()` and
+  `match_dist_test()` list and look up the tests, with forgiving name matching
+  (`"adonis2"` finds `permanova`, `"betadisper"` finds `permdisp`).
 
-* One rule aligns every per-sample argument (`groups`, `strata`, and
-  `mantel()`'s `y` and `given`) in `permanova()`, `mrpp()`, `anosim()`,
-  `permdisp()`, `mantel()`, `envfit()` and `dist_test()`: with `data`, a
-  column name or one value per row of `data`; without it, one value per
-  sample, matched by name when named, else by position. The same checks and
-  messages apply everywhere. As with `vegan::adonis2()`, `permanova()` needs
-  `groups` or a `formula` (use `formula = ~ .` to test every column of
-  `data`). `permutations` is limited to 1e8.
+* One rule aligns every per-sample argument (`groups`, `strata`, and the
+  Mantel tests' `y` and `given`) in `permanova()`, `mrpp()`, `anosim()`,
+  `permdisp()`, `mantel()`, `mantel_partial()`, `envfit()` and `dist_test()`:
+  with `data`, a column name or one value per row of `data`; without it, one
+  value per sample, matched by name when named, else by position. The same
+  checks and messages apply everywhere. As with `vegan::adonis2()`,
+  `permanova()` needs `groups` or a `formula` (use `formula = ~ .` to test
+  every column of `data`). `permutations` is limited to 1e8.
 
 * New `dbrda()` runs a distance-based redundancy analysis (db-RDA): the axes
   of a `dist` object that sample metadata explain, given as a formula such as

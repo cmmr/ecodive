@@ -73,7 +73,7 @@
   for (m in c('anosim', 'mrpp', 'permdisp')) {
     expect_error(dist_test(d, m, 'ph', meta), "column 'ph' is numeric", info = m)
     expect_error(dist_test(d, m, meta$ph), '`groups` is numeric', info = m)
-    expect_error(dist_test(d, m, meta$ph), 'use: mantel, permanova', info = m)
+    expect_error(dist_test(d, m, meta$ph), 'use: mantel, mantel_partial, permanova', info = m)
   }
 
   # mantel(): numeric values only, passed as its `y`.
@@ -124,8 +124,8 @@
 
   df <- list_dist_tests()
   expect_identical(names(df), c('name', 'id', 'groups'))
-  expect_identical(df$id, c('anosim', 'mantel', 'mrpp', 'permanova', 'permdisp'))
-  expect_identical(list_dist_tests(val = 'id', groups = 'numeric'), c('mantel', 'permanova'))
+  expect_identical(df$id, c('anosim', 'mantel', 'mantel_partial', 'mrpp', 'permanova', 'permdisp'))
+  expect_identical(list_dist_tests(val = 'id', groups = 'numeric'), c('mantel', 'mantel_partial', 'permanova'))
   expect_identical(
     list_dist_tests(val = 'id', groups = 'categorical'),
     c('anosim', 'mrpp', 'permanova', 'permdisp') )

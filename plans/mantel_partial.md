@@ -70,3 +70,32 @@ released API.
 Smouse, P. E., Long, J. C., & Sokal, R. R. (1986). Multiple regression and
 correlation extensions of the Mantel test of matrix correspondence.
 *Systematic Zoology*, 35, 627–632.
+
+
+## Decisions made while implementing (2026-11-18)
+
+- **2.4.0 is unreleased** (CRAN has 2.3.1), so there is no deprecation period.
+- **`mantel(given =)` gives R's own error** ("unused argument (given = ...)"),
+  not a custom one pointing to `mantel_partial()`. The user chose this over a
+  trailing `...` or a hidden formal argument, to keep `mantel()`'s signature
+  clean (as the `k` -> `n_axes` rename did). The test checks for "unused
+  argument".
+- **`as.data.frame()` names the row `'mantel_partial'`** for a partial test
+  (a small `as.data.frame.ecodive_mantel()` method), so that rows bound
+  together from `dist_test()` carry each test's `dist_test()` id. The class
+  stays `c('ecodive_mantel', 'ecodive_test')`.
+- **`mantel_partial()` without `given`** (missing or `NULL`) is an error that
+  says to use `mantel()` for a simple test; `dist_test(dm,
+  'mantel_partial', ...)` without `given` gives the same error.
+- **Tests:** the partial cases moved to a new
+  `tests/tinytests/test-mantel_partial.r`, which shares the
+  `expected/mantel.rds` fixture with `test-mantel.r`.
+- **Reference check:** besides the stored fixtures, 54 fresh cases (n = 12
+  to 60; Pearson, Spearman, Kendall; tied and untied distances) against
+  live `vegan::mantel.partial()` 2.6-4 with the same permutation matrices:
+  statistics within 7e-14 (relative), permuted statistics within 4e-16, and
+  every p-value identical. Re-running `data-raw/expected/mantel.r` with
+  vegan 2.6-4 reproduces the stored fixture (made with 2.7.6) to 1e-12.
+- **Docs:** `vignettes/stat_tests.Rmd` gains a `mantel_partial()` row and a
+  short example; `vignettes/ecodive.Rmd`, `README.md` and the draft
+  benchmark article list it too.

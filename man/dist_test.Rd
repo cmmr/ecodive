@@ -10,9 +10,10 @@ dist_test(dm, test, groups, data = NULL, ...)
 \item{dm}{The distances to test: a \code{dist} object such as from
 \code{\link[=beta_div]{beta_div()}}, or a symmetric matrix of distances.}
 
-\item{test}{The name of a test: \code{"anosim"}, \code{"mantel"}, \code{"mrpp"},
-\code{"permanova"}, or \code{"permdisp"}. Flexible matching is supported (see
-below). Programmatic access via \code{list_dist_tests()}.}
+\item{test}{The name of a test: \code{"anosim"}, \code{"mantel"},
+\code{"mantel_partial"}, \code{"mrpp"}, \code{"permanova"}, or \code{"permdisp"}.
+Flexible matching is supported (see below). Programmatic access via
+\code{list_dist_tests()}.}
 
 \item{groups}{The variable to test: a vector with one value per sample,
 matched to the samples in \code{dm} by name when both are named, else in
@@ -28,8 +29,10 @@ to the samples in \code{dm} by row name. Default: \code{NULL}.}
 \item{...}{Further arguments for the method's function, such as
 \code{permutations}, \code{strata}, \code{seed}, or \code{cpus}, which every method
 takes, or a method's own, such as \code{weights} for \code{\link[=mrpp]{mrpp()}} or
-\code{method} (the correlation) for \code{\link[=mantel]{mantel()}}. Each method keeps its own
-defaults. For \code{mantel}, \code{groups} is passed as \code{\link[=mantel]{mantel()}}'s \code{y}.}
+\code{method} (the correlation) for \code{\link[=mantel]{mantel()}}, or \code{given} for
+\code{\link[=mantel_partial]{mantel_partial()}}. Each method keeps its own defaults. For
+\code{mantel} and \code{mantel_partial}, \code{groups} is passed as the function's
+\code{y}.}
 }
 \value{
 The method's result: a list of class \code{"ecodive_test"} whose first
@@ -47,6 +50,7 @@ treatment groups, explain the differences between samples?
    Option / Function Name \tab Test Name \tab Groups \cr
    \code{anosim} \tab Analysis of Similarities (ANOSIM) \tab categorical \cr
    \code{mantel} \tab Mantel Test \tab numeric \cr
+   \code{mantel_partial} \tab Partial Mantel Test \tab numeric \cr
    \code{mrpp} \tab Multi-Response Permutation Procedure (MRPP) \tab categorical \cr
    \code{permanova} \tab Permutational Multivariate Analysis of Variance \tab categorical or numeric \cr
    \code{permdisp} \tab Homogeneity of Multivariate Dispersions (PERMDISP) \tab categorical \cr
@@ -56,7 +60,9 @@ treatment groups, explain the differences between samples?
 Categorical groups are factors, character, or logical vectors; a method
 that takes only categorical groups gives an error for numbers, and the
 reverse. \code{mantel} correlates \code{dm} with the differences between samples'
-values; to compare two distance matrices, call \code{\link[=mantel]{mantel()}} directly. To
+values, and \code{mantel_partial} does so after removing the effect of
+\code{given} (such as geographic distances); to compare two distance
+matrices, call \code{\link[=mantel]{mantel()}} or \code{\link[=mantel_partial]{mantel_partial()}} directly. To
 test several variables at once, call \code{\link[=permanova]{permanova()}} with a \code{formula},
 either directly or as \code{dist_test(dm, 'permanova', data = meta, formula = ~ a + b)}.
 
@@ -65,8 +71,9 @@ either directly or as \code{dist_test(dm, 'permanova', data = meta, formula = ~ 
 Case insensitive and partial matching, ignoring anything but letters. E.g.
 \code{test = 'PERMANOVA'} or \code{'perma'} selects \code{permanova}. Common other names
 also work: \code{'adonis'} or \code{'adonis2'} for \code{permanova}; \code{'betadisper'} or
-\code{'PERMDISP2'} for \code{permdisp}; and \code{'Analysis of Similarities'} for
-\code{anosim}.
+\code{'PERMDISP2'} for \code{permdisp}; \code{'Analysis of Similarities'} for
+\code{anosim}; and \code{'mantel.partial'} or \code{'partial Mantel'} for
+\code{mantel_partial}.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -107,6 +114,6 @@ runs ecodive's, to be sure.
 
 }
 \seealso{
-\code{\link[=anosim]{anosim()}}, \code{\link[=mantel]{mantel()}}, \code{\link[=mrpp]{mrpp()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=permdisp]{permdisp()}},
-\code{\link[=list_dist_tests]{list_dist_tests()}}
+\code{\link[=anosim]{anosim()}}, \code{\link[=mantel]{mantel()}}, \code{\link[=mantel_partial]{mantel_partial()}}, \code{\link[=mrpp]{mrpp()}},
+\code{\link[=permanova]{permanova()}}, \code{\link[=permdisp]{permdisp()}}, \code{\link[=list_dist_tests]{list_dist_tests()}}
 }

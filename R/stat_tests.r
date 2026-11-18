@@ -16,12 +16,13 @@ DIST_TESTS <- local({
     stringsAsFactors = FALSE,
     na.strings       = "",
     text             = "
-      name,                                             id,        groups,              alt_ids
-      Analysis of Similarities,                         anosim,    categorical,         analysisofsimilarity
-      Mantel Test,                                      mantel,    numeric,             manteltest
-      Multi-Response Permutation Procedure,             mrpp,      categorical,         multiresponsepermutation
-      Permutational Multivariate Analysis of Variance,  permanova, categorical numeric, adonis adonis2 npmanova permutationalmanova
-      Homogeneity of Multivariate Dispersions,          permdisp,  categorical,         betadisper permdisp2 dispersion multivariatedispersion
+      name,                                            id,             groups,              alt_ids
+      Analysis of Similarities,                        anosim,         categorical,         analysisofsimilarity
+      Mantel Test,                                     mantel,         numeric,             manteltest
+      Partial Mantel Test,                             mantel_partial, numeric,             partialmantel mantelpartial
+      Multi-Response Permutation Procedure,            mrpp,           categorical,         multiresponsepermutation
+      Permutational Multivariate Analysis of Variance, permanova,      categorical numeric, adonis adonis2 npmanova permutationalmanova
+      Homogeneity of Multivariate Dispersions,         permdisp,       categorical,         betadisper permdisp2 dispersion multivariatedispersion
   " )
 
   return (df)
@@ -38,9 +39,10 @@ DIST_TESTS <- local({
 #' @param dm  The distances to test: a `dist` object such as from
 #'        [beta_div()], or a symmetric matrix of distances.
 #'
-#' @param test  The name of a test: `"anosim"`, `"mantel"`, `"mrpp"`,
-#'        `"permanova"`, or `"permdisp"`. Flexible matching is supported (see
-#'        below). Programmatic access via `list_dist_tests()`.
+#' @param test  The name of a test: `"anosim"`, `"mantel"`,
+#'        `"mantel_partial"`, `"mrpp"`, `"permanova"`, or `"permdisp"`.
+#'        Flexible matching is supported (see below). Programmatic access via
+#'        `list_dist_tests()`.
 #'
 #' @param groups  The variable to test: a vector with one value per sample,
 #'        matched to the samples in `dm` by name when both are named, else in
@@ -56,8 +58,10 @@ DIST_TESTS <- local({
 #' @param ...  Further arguments for the method's function, such as
 #'        `permutations`, `strata`, `seed`, or `cpus`, which every method
 #'        takes, or a method's own, such as `weights` for [mrpp()] or
-#'        `method` (the correlation) for [mantel()]. Each method keeps its own
-#'        defaults. For `mantel`, `groups` is passed as [mantel()]'s `y`.
+#'        `method` (the correlation) for [mantel()], or `given` for
+#'        [mantel_partial()]. Each method keeps its own defaults. For
+#'        `mantel` and `mantel_partial`, `groups` is passed as the function's
+#'        `y`.
 #'
 #' @return The method's result: a list of class `"ecodive_test"` whose first
 #'   fields are `statistic`, `p_value`, `z`, and `n_perm`.
@@ -73,6 +77,7 @@ DIST_TESTS <- local({
 #' | :--------------------- | :------------------------------------------------ | :--------------------- |
 #' | `anosim`               | Analysis of Similarities (ANOSIM)                 | categorical            |
 #' | `mantel`               | Mantel Test                                       | numeric                |
+#' | `mantel_partial`       | Partial Mantel Test                               | numeric                |
 #' | `mrpp`                 | Multi-Response Permutation Procedure (MRPP)       | categorical            |
 #' | `permanova`            | Permutational Multivariate Analysis of Variance   | categorical or numeric |
 #' | `permdisp`             | Homogeneity of Multivariate Dispersions (PERMDISP) | categorical            |
@@ -80,7 +85,9 @@ DIST_TESTS <- local({
 #' Categorical groups are factors, character, or logical vectors; a method
 #' that takes only categorical groups gives an error for numbers, and the
 #' reverse. `mantel` correlates `dm` with the differences between samples'
-#' values; to compare two distance matrices, call [mantel()] directly. To
+#' values, and `mantel_partial` does so after removing the effect of
+#' `given` (such as geographic distances); to compare two distance
+#' matrices, call [mantel()] or [mantel_partial()] directly. To
 #' test several variables at once, call [permanova()] with a `formula`,
 #' either directly or as `dist_test(dm, 'permanova', data = meta,
 #' formula = ~ a + b)`.
@@ -91,8 +98,9 @@ DIST_TESTS <- local({
 #' Case insensitive and partial matching, ignoring anything but letters. E.g.
 #' `test = 'PERMANOVA'` or `'perma'` selects `permanova`. Common other names
 #' also work: `'adonis'` or `'adonis2'` for `permanova`; `'betadisper'` or
-#' `'PERMDISP2'` for `permdisp`; and `'Analysis of Similarities'` for
-#' `anosim`.
+#' `'PERMDISP2'` for `permdisp`; `'Analysis of Similarities'` for
+#' `anosim`; and `'mantel.partial'` or `'partial Mantel'` for
+#' `mantel_partial`.
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
@@ -106,8 +114,8 @@ DIST_TESTS <- local({
 #' Write `ecodive::anosim()` and so on, or use `dist_test()`, which always
 #' runs ecodive's, to be sure.
 #'
-#' @seealso [anosim()], [mantel()], [mrpp()], [permanova()], [permdisp()],
-#'   [list_dist_tests()]
+#' @seealso [anosim()], [mantel()], [mantel_partial()], [mrpp()],
+#'   [permanova()], [permdisp()], [list_dist_tests()]
 #'
 #' @export
 #' @examples
@@ -148,7 +156,7 @@ dist_test <- function (dm, test, groups, data = NULL, ...) {
   test_group_type(groups, data, test)
 
   # quote(), so that a large `dm` isn't copied into the call.
-  y <- if (test$id == 'mantel') 'y' else 'groups'
+  y <- if (test$id %in% c('mantel', 'mantel_partial')) 'y' else 'groups'
   do.call(test$func, c(list(quote(dm)), stats::setNames(list(quote(groups)), y), list(data = data), args))
 }
 

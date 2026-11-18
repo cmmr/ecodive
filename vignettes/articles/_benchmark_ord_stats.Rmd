@@ -126,7 +126,7 @@ Tolerances are relative differences.
 | `permdisp()` | `vegan::betadisper()`, `vegan::permutest()` | Distances to centres, dispersions, ANOVA table, every permuted F, p-values | 1e-10; p-values identical | `r gh('tests/tinytests/test-permdisp.r', 'test-permdisp.r')` |
 | `anosim()` | `vegan::anosim()` | R, every permuted R, mean ranks, p-values | 1e-14; p-values identical | `r gh('tests/tinytests/test-anosim.r', 'test-anosim.r')` |
 | `mrpp()` | `vegan::mrpp()` | δ, expected δ, A, every permuted δ, z, p-values | 1e-12; p-values identical | `r gh('tests/tinytests/test-mrpp.r', 'test-mrpp.r')` |
-| `mantel()` | `vegan::mantel()`, `vegan::mantel.partial()` | r (Pearson, Spearman, Kendall; partial), every permuted r, p-values | 1e-12; p-values identical | `r gh('tests/tinytests/test-mantel.r', 'test-mantel.r')` |
+| `mantel()`, `mantel_partial()` | `vegan::mantel()`, `vegan::mantel.partial()` | r (Pearson, Spearman, Kendall; partial), every permuted r, p-values | 1e-12; p-values identical | `r gh('tests/tinytests/test-mantel.r', 'test-mantel.r')`, `r gh('tests/tinytests/test-mantel_partial.r', 'test-mantel_partial.r')` |
 
 ### Where ecodive deliberately differs
 

@@ -8,7 +8,6 @@ mantel(
   dm,
   y,
   data = NULL,
-  given = NULL,
   method = "pearson",
   permutations = 999L,
   strata = NULL,
@@ -33,15 +32,10 @@ to the samples by name when it has names, otherwise in the same
 order.}
 
 \item{data}{Optional sample metadata: a data frame with one row per
-sample, whose columns \code{y}, \code{given}, and \code{strata} can name. Rows are
+sample, whose columns \code{y} and \code{strata} can name. Rows are
 matched to the samples in \code{dm} by row name, and rows for other
 samples are ignored; without row names, they must be in the same
 order as \code{dm}. Default: \code{NULL}.}
-
-\item{given}{For a partial Mantel test: distances whose effect is removed
-from the correlation of \code{dm} and \code{y}, as in
-\code{vegan::mantel.partial()}'s \code{zdis}. Given like \code{y}, including as a
-column name of \code{data}. Default: \code{NULL} (a simple Mantel test).}
 
 \item{method}{The correlation coefficient: \code{'pearson'}, \code{'spearman'},
 or \code{'kendall'} (tau-b), as in \code{\link[stats:cor]{stats::cor()}}. Default:
@@ -73,15 +67,14 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 A list of class \code{c('ecodive_mantel', 'ecodive_test')}, with:
 \itemize{
 \item \code{statistic}: The Mantel statistic, \code{c(r = ...)}: the correlation of
-\code{dm} and \code{y}, or their partial correlation with \code{given}.
-\code{vegan::mantel()}'s \code{statistic}.
+\code{dm} and \code{y}. \code{vegan::mantel()}'s \code{statistic}.
 \item \code{p_value}: The permutation p-value.
 \item \code{z}: The standardized effect size, \code{(r - mean(r_perm)) / sd(r_perm)}.
 \item \code{n_perm}: The number of permutations.
 \item \code{method}: The correlation coefficient: \code{'pearson'}, \code{'spearman'}, or
 \code{'kendall'}.
 \item \code{alternative}: \code{'greater'}, \code{'less'}, or \code{'two.sided'}.
-\item \code{partial}: Whether it is a partial Mantel test (with \code{given}).
+\item \code{partial}: \code{FALSE} (it is \code{TRUE} from \code{\link[=mantel_partial]{mantel_partial()}}).
 \item \code{n}: The number of samples.
 \item \code{permutation}: How samples were permuted: \code{'free'}, \code{'within strata'},
 or \code{'supplied matrix'}.
@@ -95,10 +88,10 @@ one row.
 Tests whether two distance matrices are correlated: for instance, whether
 samples with more different communities are also further apart, or more
 different in pH. Gives the same statistic as \code{vegan::mantel()} (Pearson,
-Spearman, or Kendall correlation), and as \code{vegan::mantel.partial()} with
-\code{given}, with permutation p-values. Computes them in parallel C,
-straight from the distances, without the \eqn{n \times n} matrices that
-\code{mantel()} builds for every permutation.
+Spearman, or Kendall correlation), with permutation p-values. Computes
+them in parallel C, straight from the distances, without the
+\eqn{n \times n} matrices that \code{mantel()} builds for every permutation.
+\code{\link[=mantel_partial]{mantel_partial()}} removes the effect of a third distance matrix.
 }
 \details{
 \strong{Method}
@@ -113,14 +106,6 @@ with a correlation at least as extreme:
 \eqn{(1 + \#\{r_{perm} \ge r\}) / (1 + permutations)} for
 \code{alternative = 'greater'}. As in \code{vegan::mantel()}, permuted statistics
 within \code{sqrt(.Machine$double.eps)} of the observed one count as ties.
-
-The partial Mantel test (Smouse et al. 1986) correlates \code{dm} and \code{y}
-after removing the effect of \code{given}, as the partial correlation
-\deqn{r_{xy.z} = \frac{r_{xy} - r_{xz} r_{yz}}{\sqrt{1 - r_{xz}^2}
-  \sqrt{1 - r_{yz}^2}}}
-with the samples of \code{dm} permuted, as in \code{vegan::mantel.partial()}. Its
-p-values can be too small when the distances are spatially autocorrelated
-(Legendre & Fortin 2010; Guillot & Rousset 2013).
 
 \strong{Speed and memory}
 
@@ -142,11 +127,9 @@ so p-values agree with it only up to sampling error, unless the same
 
 \strong{Differences from vegan::mantel()}
 \itemize{
-\item One function does both the simple and the partial test.
-\item \code{y} and \code{given} may also be numeric vectors, one value per sample, or
-names of columns of \code{data}.
-\item Samples are matched by name between \code{dm}, \code{y}, \code{given}, \code{data}, and
-\code{strata}.
+\item \code{y} may also be a numeric vector, one value per sample, or the name of
+a column of \code{data}.
+\item Samples are matched by name between \code{dm}, \code{y}, \code{data}, and \code{strata}.
 \item \code{alternative} adds lower-tail and two-sided tests.
 \item There's no \code{na.rm}: distances must not be \code{NA}.
 \item When there are fewer possible permutations than requested,
@@ -159,8 +142,7 @@ names of columns of \code{data}.
     set.seed(1)
     counts <- matrix(rpois(30 * 20, 5), 30, 20)
     rownames(counts) <- paste0('S', 1:30)
-    ph  <- setNames(round(runif(30, 6, 8), 1), rownames(counts))
-    geo <- dist(cbind(lat = runif(30, 30, 35), lon = runif(30, -100, -95)))
+    ph <- setNames(round(runif(30, 6, 8), 1), rownames(counts))
     counts[, 1:5] <- counts[, 1:5] + round(4 * (ph - 6))
 
     dm <- bray(counts)
@@ -172,38 +154,25 @@ names of columns of \code{data}.
     # With rank correlation.
     mantel(dm, ph, method = 'spearman')
 
-    # After removing the effect of geographic distance.
-    mantel(dm, ph, given = geo)
-
     # The same as a column of sample metadata.
     meta <- data.frame(row.names = rownames(counts), ph = ph)
     mantel(dm, 'ph', data = meta, method = 'spearman')
 
+    # Two distance matrices.
+    mantel(dm, dist(counts[, 6:20]))
+
 }
 \references{
-Guillot, G., & Rousset, F. (2013). Dismantling the Mantel tests.
-\emph{Methods in Ecology and Evolution}, 4(4), 336-344.
-\doi{10.1111/2041-210x.12018}
-
 Knight, W. R. (1966). A computer method for calculating Kendall's tau
 with ungrouped data. \emph{Journal of the American Statistical Association},
 61(314), 436-439. \doi{10.1080/01621459.1966.10480879}
-
-Legendre, P., & Fortin, M.-J. (2010). Comparison of the Mantel test and
-alternative approaches for detecting complex multivariate relationships
-in the spatial analysis of genetic data. \emph{Molecular Ecology Resources},
-10(5), 831-844. \doi{10.1111/j.1755-0998.2010.02866.x}
 
 Legendre, P., & Legendre, L. (2012). \emph{Numerical Ecology} (3rd ed.),
 section 10.5. Elsevier.
 
 Mantel, N. (1967). The detection of disease clustering and a generalized
 regression approach. \emph{Cancer Research}, 27(2), 209-220.
-
-Smouse, P. E., Long, J. C., & Sokal, R. R. (1986). Multiple regression
-and correlation extensions of the Mantel test of matrix correspondence.
-\emph{Systematic Zoology}, 35(4), 627-632. \doi{10.2307/2413122}
 }
 \seealso{
-\code{\link[=permanova]{permanova()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=mantel_partial]{mantel_partial()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=dist_test]{dist_test()}}, \code{\link[=beta_div]{beta_div()}}
 }

@@ -306,6 +306,7 @@ to test: a vector with one value per sample, or a column of a data frame.
 | `anosim()`    | Analysis of Similarities                          |
 | `mrpp()`      | Multi-Response Permutation Procedure              |
 | `mantel()`    | Mantel Test                                       |
+| `mantel_partial()` | Partial Mantel Test                          |
 
 `dist_test()` runs any of them by name.
 

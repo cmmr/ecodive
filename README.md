@@ -41,7 +41,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`     |
 | Ordination of counts  |                 | `pca()`, `rpca()`                                                                        |
 | Biplots               |                 | `pcoa_biplot()`, `envfit()`                                                              |
-| Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`                            |
+| Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`        |
 | Data preparation      |                 | `rarefy()`, `normalize()`, `read_tree()`                                                 |
 
 Each wrapper runs its functions by name, such as `beta_div(counts, 'bray')`
@@ -241,7 +241,8 @@ list_dist_ords('id')
 
 # Statistical tests
 list_dist_tests('id')
-#> [1] "anosim"    "mantel"    "mrpp"      "permanova" "permdisp" 
+#> [1] "anosim"         "mantel"         "mantel_partial" "mrpp"          
+#> [5] "permanova"      "permdisp"      
 ```
 
 

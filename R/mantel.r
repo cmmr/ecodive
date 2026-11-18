@@ -8,10 +8,10 @@
 #' Tests whether two distance matrices are correlated: for instance, whether
 #' samples with more different communities are also further apart, or more
 #' different in pH. Gives the same statistic as `vegan::mantel()` (Pearson,
-#' Spearman, or Kendall correlation), and as `vegan::mantel.partial()` with
-#' `given`, with permutation p-values. Computes them in parallel C,
-#' straight from the distances, without the \eqn{n \times n} matrices that
-#' `mantel()` builds for every permutation.
+#' Spearman, or Kendall correlation), with permutation p-values. Computes
+#' them in parallel C, straight from the distances, without the
+#' \eqn{n \times n} matrices that `mantel()` builds for every permutation.
+#' [mantel_partial()] removes the effect of a third distance matrix.
 #'
 #' @inheritParams documentation
 #'
@@ -30,15 +30,10 @@
 #'        order.
 #'
 #' @param data  Optional sample metadata: a data frame with one row per
-#'        sample, whose columns `y`, `given`, and `strata` can name. Rows are
+#'        sample, whose columns `y` and `strata` can name. Rows are
 #'        matched to the samples in `dm` by row name, and rows for other
 #'        samples are ignored; without row names, they must be in the same
 #'        order as `dm`. Default: `NULL`.
-#'
-#' @param given  For a partial Mantel test: distances whose effect is removed
-#'        from the correlation of `dm` and `y`, as in
-#'        `vegan::mantel.partial()`'s `zdis`. Given like `y`, including as a
-#'        column name of `data`. Default: `NULL` (a simple Mantel test).
 #'
 #' @param method  The correlation coefficient: `'pearson'`, `'spearman'`,
 #'        or `'kendall'` (tau-b), as in [stats::cor()]. Default:
@@ -59,15 +54,14 @@
 #' @return A list of class `c('ecodive_mantel', 'ecodive_test')`, with:
 #'
 #'   * `statistic`: The Mantel statistic, `c(r = ...)`: the correlation of
-#'     `dm` and `y`, or their partial correlation with `given`.
-#'     `vegan::mantel()`'s `statistic`.
+#'     `dm` and `y`. `vegan::mantel()`'s `statistic`.
 #'   * `p_value`: The permutation p-value.
 #'   * `z`: The standardized effect size, `(r - mean(r_perm)) / sd(r_perm)`.
 #'   * `n_perm`: The number of permutations.
 #'   * `method`: The correlation coefficient: `'pearson'`, `'spearman'`, or
 #'     `'kendall'`.
 #'   * `alternative`: `'greater'`, `'less'`, or `'two.sided'`.
-#'   * `partial`: Whether it is a partial Mantel test (with `given`).
+#'   * `partial`: `FALSE` (it is `TRUE` from [mantel_partial()]).
 #'   * `n`: The number of samples.
 #'   * `permutation`: How samples were permuted: `'free'`, `'within strata'`,
 #'     or `'supplied matrix'`.
@@ -90,14 +84,6 @@
 #' \eqn{(1 + \#\{r_{perm} \ge r\}) / (1 + permutations)} for
 #' `alternative = 'greater'`. As in `vegan::mantel()`, permuted statistics
 #' within `sqrt(.Machine$double.eps)` of the observed one count as ties.
-#'
-#' The partial Mantel test (Smouse et al. 1986) correlates `dm` and `y`
-#' after removing the effect of `given`, as the partial correlation
-#' \deqn{r_{xy.z} = \frac{r_{xy} - r_{xz} r_{yz}}{\sqrt{1 - r_{xz}^2}
-#'   \sqrt{1 - r_{yz}^2}}}
-#' with the samples of `dm` permuted, as in `vegan::mantel.partial()`. Its
-#' p-values can be too small when the distances are spatially autocorrelated
-#' (Legendre & Fortin 2010; Guillot & Rousset 2013).
 #'
 #'
 #' **Speed and memory**
@@ -122,11 +108,9 @@
 #'
 #' **Differences from vegan::mantel()**
 #'
-#' * One function does both the simple and the partial test.
-#' * `y` and `given` may also be numeric vectors, one value per sample, or
-#'   names of columns of `data`.
-#' * Samples are matched by name between `dm`, `y`, `given`, `data`, and
-#'   `strata`.
+#' * `y` may also be a numeric vector, one value per sample, or the name of
+#'   a column of `data`.
+#' * Samples are matched by name between `dm`, `y`, `data`, and `strata`.
 #' * `alternative` adds lower-tail and two-sided tests.
 #' * There's no `na.rm`: distances must not be `NA`.
 #' * When there are fewer possible permutations than requested,
@@ -134,18 +118,9 @@
 #'   `mantel()` always draws random permutations.
 #'
 #' @references
-#' Guillot, G., & Rousset, F. (2013). Dismantling the Mantel tests.
-#' *Methods in Ecology and Evolution*, 4(4), 336-344.
-#' \doi{10.1111/2041-210x.12018}
-#'
 #' Knight, W. R. (1966). A computer method for calculating Kendall's tau
 #' with ungrouped data. *Journal of the American Statistical Association*,
 #' 61(314), 436-439. \doi{10.1080/01621459.1966.10480879}
-#'
-#' Legendre, P., & Fortin, M.-J. (2010). Comparison of the Mantel test and
-#' alternative approaches for detecting complex multivariate relationships
-#' in the spatial analysis of genetic data. *Molecular Ecology Resources*,
-#' 10(5), 831-844. \doi{10.1111/j.1755-0998.2010.02866.x}
 #'
 #' Legendre, P., & Legendre, L. (2012). *Numerical Ecology* (3rd ed.),
 #' section 10.5. Elsevier.
@@ -153,11 +128,7 @@
 #' Mantel, N. (1967). The detection of disease clustering and a generalized
 #' regression approach. *Cancer Research*, 27(2), 209-220.
 #'
-#' Smouse, P. E., Long, J. C., & Sokal, R. R. (1986). Multiple regression
-#' and correlation extensions of the Mantel test of matrix correspondence.
-#' *Systematic Zoology*, 35(4), 627-632. \doi{10.2307/2413122}
-#'
-#' @seealso [permanova()], [beta_div()]
+#' @seealso [mantel_partial()], [permanova()], [dist_test()], [beta_div()]
 #'
 #' @export
 #' @examples
@@ -165,8 +136,7 @@
 #'     set.seed(1)
 #'     counts <- matrix(rpois(30 * 20, 5), 30, 20)
 #'     rownames(counts) <- paste0('S', 1:30)
-#'     ph  <- setNames(round(runif(30, 6, 8), 1), rownames(counts))
-#'     geo <- dist(cbind(lat = runif(30, 30, 35), lon = runif(30, -100, -95)))
+#'     ph <- setNames(round(runif(30, 6, 8), 1), rownames(counts))
 #'     counts[, 1:5] <- counts[, 1:5] + round(4 * (ph - 6))
 #'
 #'     dm <- bray(counts)
@@ -178,17 +148,185 @@
 #'     # With rank correlation.
 #'     mantel(dm, ph, method = 'spearman')
 #'
-#'     # After removing the effect of geographic distance.
-#'     mantel(dm, ph, given = geo)
-#'
 #'     # The same as a column of sample metadata.
 #'     meta <- data.frame(row.names = rownames(counts), ph = ph)
 #'     mantel(dm, 'ph', data = meta, method = 'spearman')
 #'
+#'     # Two distance matrices.
+#'     mantel(dm, dist(counts[, 6:20]))
+#'
 mantel <- function (
-    dm, y, data = NULL, given = NULL, method = 'pearson',
+    dm, y, data = NULL, method = 'pearson',
     permutations = 999L, strata = NULL, alternative = 'greater',
     seed = 0L, cpus = n_cpus() ) {
+
+  mantel_core(
+    dm, y, data = data, given = NULL, method = method,
+    permutations = permutations, strata = strata, alternative = alternative,
+    seed = seed, cpus = cpus )
+}
+
+
+
+#' Partial Mantel Test
+#'
+#' Tests whether two distance matrices are correlated after removing the
+#' effect of a third: for instance, whether samples with more different
+#' communities are also more different in pH, beyond what geographic
+#' distance between them explains. Gives the same statistic as
+#' `vegan::mantel.partial()` (Pearson, Spearman, or Kendall partial
+#' correlation), with permutation p-values, computed in parallel C straight
+#' from the distances. [mantel()] is the simple Mantel test.
+#'
+#' @inheritParams mantel
+#'
+#' @param given  The distances whose effect is removed from the correlation
+#'        of `dm` and `y`, as `vegan::mantel.partial()`'s `zdis`: such as
+#'        geographic distances between the samples. Given in any of the
+#'        forms `y` takes, including as a column name of `data`. Required.
+#'
+#' @param data  Optional sample metadata: a data frame with one row per
+#'        sample, whose columns `y`, `given`, and `strata` can name. Rows are
+#'        matched to the samples in `dm` by row name, and rows for other
+#'        samples are ignored; without row names, they must be in the same
+#'        order as `dm`. Default: `NULL`.
+#'
+#' @return A list of class `c('ecodive_mantel', 'ecodive_test')`, as from
+#'   [mantel()], with:
+#'
+#'   * `statistic`: The partial Mantel statistic, `c(r = ...)`: the partial
+#'     correlation of `dm` and `y` given `given`.
+#'     `vegan::mantel.partial()`'s `statistic`.
+#'   * `p_value`: The permutation p-value.
+#'   * `z`: The standardized effect size, `(r - mean(r_perm)) / sd(r_perm)`.
+#'   * `n_perm`: The number of permutations.
+#'   * `method`: The correlation coefficient: `'pearson'`, `'spearman'`, or
+#'     `'kendall'`.
+#'   * `alternative`: `'greater'`, `'less'`, or `'two.sided'`.
+#'   * `partial`: `TRUE`.
+#'   * `n`: The number of samples.
+#'   * `permutation`: How samples were permuted: `'free'`, `'within strata'`,
+#'     or `'supplied matrix'`.
+#'
+#'   Attribute `r_perm` is a vector of the statistics of the permutations, as
+#'   `vegan::mantel.partial()`'s `perm`. `as.data.frame()` gives the main
+#'   results as one row, with `test = 'mantel_partial'`.
+#'
+#' @details
+#'
+#' **Method**
+#'
+#' The partial Mantel test (Smouse et al. 1986; Legendre & Legendre 2012)
+#' correlates the \eqn{n(n-1)/2} distances of `dm` (\eqn{x}) and `y` after
+#' removing the effect of `given` (\eqn{z}), as the partial correlation
+#' \deqn{r_{xy.z} = \frac{r_{xy} - r_{xz} r_{yz}}{\sqrt{1 - r_{xz}^2}
+#'   \sqrt{1 - r_{yz}^2}}}
+#' where each \eqn{r} is the Pearson, Spearman, or Kendall correlation of
+#' two sets of distances. As in `vegan::mantel.partial()`, the p-value comes
+#' from permutations of the samples of `dm`, with `y` and `given` held fixed:
+#' \eqn{r_{xy}} and \eqn{r_{xz}} are recomputed for each permutation, and
+#' \eqn{r_{yz}} is computed once. The p-value is the proportion of
+#' permutations, counting the observed one, with a partial correlation at
+#' least as extreme, as in [mantel()].
+#'
+#' Its p-values can be too small when the distances are spatially
+#' autocorrelated (Legendre & Fortin 2010; Guillot & Rousset 2013).
+#'
+#' When `y` and `given`, or `dm` and `given`, are perfectly correlated, there
+#' is no partial correlation: the statistic and p-value are `NA`, with a
+#' warning.
+#'
+#'
+#' **Speed, memory, and reproducibility**
+#'
+#' As for [mantel()]: each permutation is one pass over the distances (two
+#' correlations, \eqn{r_{xy}} and \eqn{r_{xz}}, in the same pass), with no
+#' \eqn{n \times n} matrix, and permutations run in parallel. They come from
+#' `seed`, so p-values are identical from run to run and for any number of
+#' `cpus`, and agree with `vegan::mantel.partial()`'s exactly when the same
+#' `permutations` matrix is given to both.
+#'
+#'
+#' **Differences from vegan::mantel.partial()**
+#'
+#' * `y` and `given` may also be numeric vectors, one value per sample, or
+#'   names of columns of `data`.
+#' * Samples are matched by name between `dm`, `y`, `given`, `data`, and
+#'   `strata`.
+#' * `alternative` adds lower-tail and two-sided tests.
+#' * There's no `na.rm`: distances must not be `NA`.
+#'
+#' @references
+#' Guillot, G., & Rousset, F. (2013). Dismantling the Mantel tests.
+#' *Methods in Ecology and Evolution*, 4(4), 336-344.
+#' \doi{10.1111/2041-210x.12018}
+#'
+#' Legendre, P., & Fortin, M.-J. (2010). Comparison of the Mantel test and
+#' alternative approaches for detecting complex multivariate relationships
+#' in the spatial analysis of genetic data. *Molecular Ecology Resources*,
+#' 10(5), 831-844. \doi{10.1111/j.1755-0998.2010.02866.x}
+#'
+#' Legendre, P., & Legendre, L. (2012). *Numerical Ecology* (3rd ed.),
+#' section 10.5. Elsevier.
+#'
+#' Smouse, P. E., Long, J. C., & Sokal, R. R. (1986). Multiple regression
+#' and correlation extensions of the Mantel test of matrix correspondence.
+#' *Systematic Zoology*, 35(4), 627-632. \doi{10.2307/2413122}
+#'
+#' @seealso [mantel()], [dist_test()], [beta_div()]
+#'
+#' @export
+#' @examples
+#'     # 30 samples along a pH gradient, which shifts the first five genera,
+#'     # at random locations.
+#'     set.seed(1)
+#'     counts <- matrix(rpois(30 * 20, 5), 30, 20)
+#'     rownames(counts) <- paste0('S', 1:30)
+#'     meta <- data.frame(
+#'       row.names = rownames(counts),
+#'       ph  = round(runif(30, 6, 8), 1),
+#'       lat = runif(30, 30, 35),
+#'       lon = runif(30, -100, -95) )
+#'     counts[, 1:5] <- counts[, 1:5] + round(4 * (meta$ph - 6))
+#'
+#'     dm  <- bray(counts)
+#'     geo <- dist(meta[, c('lat', 'lon')])
+#'
+#'     # Are samples that differ more in pH also more different in
+#'     # community composition, beyond the effect of geographic distance?
+#'     mantel_partial(dm, 'ph', given = geo, data = meta)
+#'
+#'     # With rank correlation.
+#'     mantel_partial(dm, 'ph', given = geo, data = meta, method = 'spearman')
+#'
+#'     # The same, through dist_test().
+#'     dist_test(dm, 'mantel_partial', 'ph', meta, given = geo, method = 'spearman')
+#'
+mantel_partial <- function (
+    dm, y, given, data = NULL, method = 'pearson',
+    permutations = 999L, strata = NULL, alternative = 'greater',
+    seed = 0L, cpus = n_cpus() ) {
+
+  if (missing(given) || is.null(given))
+    stop(
+      '`given` is required: the distances whose effect is removed, as a dist ',
+      'object, a matrix, one value per sample, or a column name of `data`. ',
+      'For a simple Mantel test, use mantel().', call. = FALSE )
+
+  mantel_core(
+    dm, y, data = data, given = given, method = method,
+    permutations = permutations, strata = strata, alternative = alternative,
+    seed = seed, cpus = cpus )
+}
+
+
+
+#------------------------------------------------------------------------------
+# mantel() (given = NULL) and mantel_partial().
+#------------------------------------------------------------------------------
+mantel_core <- function (
+    dm, y, data, given, method, permutations, strata, alternative, seed,
+    cpus ) {
 
   validate_seed()
   validate_cpus()
@@ -317,6 +455,19 @@ test_details.ecodive_mantel <- function (x, digits) {
       less      = 'less (r is more negative than by chance)',
       two.sided = 'two-sided (|r| is larger than by chance)' )),
     paste0('Samples: ', x$n) )
+}
+
+
+
+#------------------------------------------------------------------------------
+# One row, as for every test, named for the function that ran it (and its
+# dist_test() id): 'mantel' or 'mantel_partial'.
+#------------------------------------------------------------------------------
+#' @export
+as.data.frame.ecodive_mantel <- function (x, row.names = NULL, optional = FALSE, ...) {
+  df <- NextMethod()
+  if (isTRUE(x$partial)) df$test <- 'mantel_partial'
+  df
 }
 
 

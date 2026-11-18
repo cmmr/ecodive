@@ -1,12 +1,14 @@
-# Expected results for tests/tinytests/test-mantel.r, from vegan::mantel()
-# and vegan::mantel.partial(). Run from the package root:
+# Expected results for tests/tinytests/test-mantel.r and
+# test-mantel_partial.r, from vegan::mantel() and vegan::mantel.partial().
+# Run from the package root:
 #
 #     Rscript data-raw/expected/mantel.r
 #
 # Writes tests/tinytests/expected/mantel.rds.
 #
-# The tests give mantel() the same permutation matrix as vegan, so p-values
-# (and every permuted statistic) must match, not just statistically.
+# The tests give mantel() and mantel_partial() the same permutation matrix
+# as vegan, so p-values (and every permuted statistic) must match, not just
+# statistically.
 
 library(vegan)
 

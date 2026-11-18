@@ -99,6 +99,7 @@
     anosim    = anosim(dm, 'grp', meta, permutations = 9, cpus = cpus),
     permdisp  = permdisp(dm, 'grp', meta, permutations = 9, cpus = cpus),
     mantel    = mantel(dm, 'x', meta, permutations = 9, cpus = cpus),
+    mantel_partial = mantel_partial(dm, 'x', rep(1:4, 5), meta, permutations = 9, cpus = cpus),
     dist_test = dist_test(dm, 'permanova', 'grp', meta, permutations = 9, cpus = cpus) )
 
   for (nm in names(tests)) {

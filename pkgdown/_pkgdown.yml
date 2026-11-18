@@ -80,6 +80,7 @@ reference:
   - dist_test
   - permanova
   - mantel
+  - mantel_partial
   - mrpp
   - anosim
   - permdisp

@@ -6,18 +6,17 @@
 
 
 
-  # Same statistics as vegan::mantel() and mantel.partial(), given the same
-  # permutations: stored results, so at home only. Every permuted statistic,
-  # and so every p-value, matches. ====
+  # Same statistics as vegan::mantel(), given the same permutations: stored
+  # results, so at home only. Every permuted statistic, and so every
+  # p-value, matches. (test-mantel_partial.r has mantel.partial()'s.) ====
 
   if (at_home()) {
     for (cs in ex$cases) {
+      if (!is.null(cs$z)) next
 
-      res <- mantel(
-        x, ex[[cs$y]], method = cs$method, permutations = ex$perms,
-        given = if (!is.null(cs$z)) ex[[cs$z]], cpus = 1 )
+      res <- mantel(x, ex[[cs$y]], method = cs$method, permutations = ex$perms, cpus = 1)
 
-      info <- paste(cs$method, cs$y, cs$z)
+      info <- paste(cs$method, cs$y)
       expect_equal(res$statistic[["r"]], cs$statistic, tolerance = 1e-12, info = info)
       expect_identical(res$p_value, cs$signif, info = info)
       expect_equal(attr(res, 'r_perm'), cs$perm, tolerance = 1e-12, info = info)
@@ -54,12 +53,11 @@
   expect_identical(res0$n_perm, 0L)
   expect_identical(attr(res0, 'r_perm'), numeric(0))
 
-  res <- mantel(x, ex$y, given = ex$z, method = 'kendall', permutations = 9,
+  res <- mantel(x, ex$y, method = 'kendall', permutations = 9,
                 strata = rep(1:2, n / 2), alternative = 'less')
-  expect_true(res$partial)
   expect_identical(res$permutation, 'within strata')
   expect_identical(res$alternative, 'less')
-  expect_identical(attr(res, 'title'), 'Partial Mantel test (Kendall)')
+  expect_identical(attr(res, 'title'), 'Mantel test (Kendall)')
   expect_identical(
     mantel(x, ex$y, permutations = ex$perms[1:3, ])$permutation,
     'supplied matrix' )
@@ -69,7 +67,7 @@
   expect_true(any(grepl("Kendall's", details)))
 
   # The shared printout and data frame row.
-  expect_stdout(print(res), 'Partial Mantel test \\(Kendall\\)')
+  expect_stdout(print(res), 'Mantel test \\(Kendall\\)')
   expect_stdout(print(res), "Kendall's rank correlation tau-b")
   row <- as.data.frame(res)
   expect_identical(row$test, 'mantel')
@@ -89,14 +87,6 @@
         stats::cor(as.vector(x), as.vector(y), method = method),
         tolerance = 1e-12, info = method )
     }
-
-    # Partial: as mantel.partial() computes it.
-    r  <- function (a, b) stats::cor(as.vector(a), as.vector(b), method = method)
-    xy <- r(x, ex$y); xz <- r(x, ex$z); yz <- r(ex$y, ex$z)
-    expect_equal(
-      mantel(x, ex$y, given = ex$z, method = method, permutations = 0)$statistic[["r"]],
-      (xy - xz * yz) / sqrt(1 - xz^2) / sqrt(1 - yz^2),
-      tolerance = 1e-12, info = method )
   }
 
   # Kendall, both counting paths: a target with more than 4096 distinct
@@ -139,7 +129,7 @@
 
   eps <- sqrt(.Machine$double.eps)
   for (alt in c('greater', 'less', 'two.sided')) {
-    res <- mantel(x, ex$y, given = ex$z, permutations = 49, alternative = alt, cpus = 1)
+    res <- mantel(x, ex$y, permutations = 49, alternative = alt, cpus = 1)
     rp  <- attr(res, 'r_perm')
     hit <- switch(alt,
       greater   = rp >= res$statistic[["r"]] - eps,
@@ -210,21 +200,9 @@
   expect_identical(mantel(x, rev(age), permutations = 19), ref)
   expect_identical(mantel(x, unname(age), permutations = 19), ref)
 
-  # y and given perfectly correlated: no partial correlation.
-  expect_warning(
-    res <- mantel(x, age, given = rev(age), permutations = 9),
-    "perfectly correlated" )
-  expect_identical(res$statistic[["r"]], NA_real_)
-
-  # dm and given perfectly correlated: the same (it gave r = 6.6e-10).
-  expect_warning(
-    res <- mantel(x, age, given = x, permutations = 9),
-    "perfectly correlated" )
-  expect_identical(res$statistic[["r"]], NA_real_)
 
 
-
-  # `data`: y, given and strata as its column names, with rows matched to
+  # `data`: y and strata as its column names, with rows matched to
   # the samples by name (extra rows ignored). ====
 
   meta <- data.frame(
@@ -244,14 +222,11 @@
   expect_identical(mantel(x, 'age', data = shuffled, permutations = 19), ref)
 
   expect_identical(
-    mantel(x, 'age', meta, given = 'ph', permutations = 19),
-    mantel(x, v('age'), given = v('ph'), permutations = 19) )
-  expect_identical(
     mantel(x, 'age', meta, strata = 'blk', permutations = 19),
     mantel(x, v('age'), strata = v('blk'), permutations = 19) )
   expect_identical(
-    mantel(x, ex$y, meta, given = 'ph', strata = meta$blk, permutations = 19),
-    mantel(x, ex$y, given = v('ph'), strata = v('blk'), permutations = 19) )
+    mantel(x, ex$y, meta, strata = meta$blk, permutations = 19),
+    mantel(x, ex$y, strata = v('blk'), permutations = 19) )
 
   # Without row names, rows are in dm's order.
   expect_identical(mantel(x, 'age', data = `rownames<-`(meta, NULL), permutations = 19), ref)
@@ -259,7 +234,6 @@
   na_meta <- meta
   na_meta$age[[3]] <- NA
   expect_error(mantel(x, 'age'), '`y` names a column, but `data` is not given')
-  expect_error(mantel(x, ex$y, given = 'ph'), '`given` names a column, but `data` is not given')
   expect_error(mantel(x, 'nope', meta), '`y` is not a column of `data`')
   expect_error(mantel(x, 'grp', meta), 'not numeric.*permanova')
   expect_error(mantel(x, 'age', na_meta), 'Missing values')
@@ -275,7 +249,8 @@
   expect_error(mantel(x, c(age[-1], Z = 1)), '`y` has no samples named "S01"')
   expect_error(mantel(x, matrix(1:6, 2, 3)), '`y` must be a dist object')
   expect_error(mantel(x, c(NA, age[-1])), '`y` must not contain NA')
-  expect_error(mantel(x, y, given = matrix('a', 2, 2)), '`given` must be')
+  # The partial test is mantel_partial(): mantel() has no `given`.
+  expect_error(mantel(x, y, given = ex$z), 'unused argument')
   expect_error(mantel(stats::dist(1:2), stats::dist(1:2)), 'at least 3 samples')
   expect_error(mantel(x, y, method = 'foo'))
   expect_error(mantel(x, y, alternative = 'foo'))
