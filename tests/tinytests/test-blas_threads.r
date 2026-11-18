@@ -96,6 +96,11 @@
 
     # In a forked child, the count is only read.
     if (settable && .Platform$OS.type == 'unix') {
+      # Stop ecodive's thread pool first (it restarts when next needed): a
+      # forked child inherits the memory of the pool's threads but not the
+      # threads, and leaves by mcexit() without finalizers, so valgrind would
+      # report that memory as possibly lost in the child.
+      .Call(C_stop_thread_pool)
       job <- parallel::mcparallel({ blas_threads(1L); blas_threads() })
       expect_identical(parallel::mccollect(job)[[1]], old)
       expect_identical(blas_threads(), old)
