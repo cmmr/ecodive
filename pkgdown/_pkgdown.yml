@@ -78,6 +78,10 @@ reference:
   - procrustes_test
   - list_dist_ords
   - list_count_ords
+- subtitle: Supervised
+  desc: Ordinations that look for the axes that separate known groups. They always find some, so validate them with a permutation test such as permanova().
+  contents:
+  - plsda
 
 - title: Hypothesis Tests
   desc: Test whether sample metadata explain beta diversity distances.

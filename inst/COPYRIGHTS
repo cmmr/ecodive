@@ -227,17 +227,19 @@ License:
    limitations under the License.
 
 
-Files: src/nmds.c src/tsne.c src/isomap.c R/nmds.r R/mds.r R/tsne.r R/isomap.r
+Files: src/nmds.c src/tsne.c src/isomap.c src/plsda.c R/nmds.r R/mds.r R/tsne.r
+   R/isomap.r R/plsda.r
 Copyright: 2007-2026 The scikit-learn developers
 Comment: Ported from scikit-learn 1.9.1: the SMACOF iteration (metric and
    non-metric) and isotonic regression in src/nmds.c (sklearn/manifold/_mds.py,
    sklearn/isotonic.py, sklearn/_isotonic.pyx); t-SNE in src/tsne.c
    (sklearn/manifold/_t_sne.py, sklearn/manifold/_utils.pyx,
    sklearn/manifold/_barnes_hut_tsne.pyx, sklearn/neighbors/_quad_tree.pyx);
-   and Isomap in src/isomap.c (sklearn/manifold/_isomap.py,
-   sklearn/neighbors/_base.py, sklearn/utils/graph.py). The R files follow the
-   same algorithms. The rest of these files is Copyright 2026 ecodive authors,
-   under the MIT license above.
+   Isomap in src/isomap.c (sklearn/manifold/_isomap.py,
+   sklearn/neighbors/_base.py, sklearn/utils/graph.py); and PLS regression
+   (PLSRegression) in src/plsda.c (sklearn/cross_decomposition/_pls.py). The
+   R files follow the same algorithms. The rest of these files is Copyright
+   2026 ecodive authors, under the MIT license above.
 License:
    BSD 3-Clause License
 

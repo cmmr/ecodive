@@ -42,7 +42,7 @@
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
   the methods. `count_ord()`, with `list_count_ords()` and
   `match_count_ord()`, does the same for the methods that take a count table
-  rather than distances, `pca()`, `rda()`, `cca()`, `ca()` and `rpca()`: `count_ord(counts, "pca")` is
+  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `plsda()` and `rpca()`: `count_ord(counts, "pca")` is
   `pca(counts)`. Each wrapper points to the other when given the other's
   method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
@@ -315,6 +315,23 @@
   giving the same statistic as `vegan::protest()` and the same p-values for
   the same permutation matrix, in parallel C, with `strata`, and identical
   results for any number of `cpus`.
+
+* New `plsda()` runs a partial least squares discriminant analysis
+  (PLS-DA): the components of a count table that best separate known
+  groups, from PLS regression on a dummy matrix of the groups (ported from
+  scikit-learn's `PLSRegression`). It gives the same scores, weights,
+  loadings and Y loadings as scikit-learn, and the same scores, explained
+  variance and VIP as `mixOmics::plsda()` (up to each component's sign),
+  and also returns each feature's VIP and each group's centroid. Each
+  component's weights are computed directly rather than by NIPALS
+  iteration, so they don't depend on a convergence tolerance. It takes
+  `groups` and `data` as `permanova()` does, every `norm` (`'clr'` is the
+  usual choice for microbiome counts), and sparse tables, which it never
+  makes dense: 1,000 samples and 5,000 taxa take under a tenth of a second,
+  where `mixOmics::plsda()` takes over a second. Results are identical for
+  any number of `cpus`. `count_ord(counts, 'plsda', groups)` runs it too.
+  Like every supervised method, it separates any groups it is given, so
+  validate the separation (e.g. with `permanova()`).
 
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument

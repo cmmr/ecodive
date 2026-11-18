@@ -19,8 +19,11 @@
   expect_identical(count_ord(m, 'pca', seed = 1, cpus = 1), pca(m, cpus = 1))
 
   # Every method returns the common attributes first, in the same order.
+  # plsda() needs groups; the others run without them.
+  grp <- rep(c('a', 'b', 'c'), 10)
   for (id in list_count_ords(val = 'id')) {
-    ord <- count_ord(m, id, n_axes = 2, seed = 1, cpus = 1)
+    ord <- if (id == 'plsda') count_ord(m, id, grp, n_axes = 2, seed = 1, cpus = 1)
+           else count_ord(m, id, n_axes = 2, seed = 1, cpus = 1)
     expect_true(is.matrix(ord) && is.double(ord), info = id)
     expect_identical(rownames(ord), rownames(m), info = id)
     expect_identical(names(attributes(ord))[1:5], c('dim', 'dimnames', 'method', 'eig', 'prop'), info = id)
@@ -59,6 +62,14 @@
   expect_identical(mo('canonical'),           'cca')
   expect_identical(mo('cc'),                  'cca')
   expect_error(match_count_ord('c'), 'matches multiple options: ca, cca')
+  expect_identical(mo('PLS-DA'),              'plsda')
+  expect_identical(mo('pls'),                 'plsda')
+  expect_identical(mo('partial least squares DA'), 'plsda')
+  expect_identical(mo('Partial Least Squares Discriminant Analysis'), 'plsda')
+  expect_identical(mo('PLS discriminant analysis'), 'plsda')
+  expect_error(match_count_ord('p'), 'matches multiple options: pca, plsda')
+  expect_identical(count_ord(m, 'plsda', grp, cpus = 1), plsda(m, grp, cpus = 1))
+  expect_identical(count_ord(m, 'pls-da', groups = grp, n_axes = 3, cpus = 1), plsda(m, grp, n_axes = 3, cpus = 1))
 
   info <- match_count_ord('pca')
   expect_identical(info$func, pca)
@@ -72,18 +83,18 @@
   df <- list_count_ords()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id'))
-  expect_identical(df$id, c('ca', 'cca', 'pca', 'rda', 'rpca'))
-  expect_identical(rownames(list_count_ords(nm = 'id')), c('ca', 'cca', 'pca', 'rda', 'rpca'))
+  expect_identical(df$id, c('ca', 'cca', 'pca', 'plsda', 'rda', 'rpca'))
+  expect_identical(rownames(list_count_ords(nm = 'id')), c('ca', 'cca', 'pca', 'plsda', 'rda', 'rpca'))
   expect_identical(list_count_ords(val = 'id', nm = 'name'),
-    c('Correspondence Analysis' = 'ca', 'Canonical Correspondence Analysis' = 'cca', 'Principal Component Analysis' = 'pca', 'Redundancy Analysis' = 'rda', 'Robust Aitchison PCA' = 'rpca'))
-  expect_identical(list_count_ords(val = 'func'), list(ca = ca, cca = cca, pca = pca, rda = rda, rpca = rpca))
+    c('Correspondence Analysis' = 'ca', 'Canonical Correspondence Analysis' = 'cca', 'Principal Component Analysis' = 'pca', 'Partial Least Squares Discriminant Analysis' = 'plsda', 'Redundancy Analysis' = 'rda', 'Robust Aitchison PCA' = 'rpca'))
+  expect_identical(list_count_ords(val = 'func'), list(ca = ca, cca = cca, pca = pca, plsda = plsda, rda = rda, rpca = rpca))
   expect_identical(list_count_ords(val = 'list')$pca, match_count_ord('pca'))
-  expect_identical(list_count_ords('name'), c('Correspondence Analysis', 'Canonical Correspondence Analysis', 'Principal Component Analysis', 'Redundancy Analysis', 'Robust Aitchison PCA'))
+  expect_identical(list_count_ords('name'), c('Correspondence Analysis', 'Canonical Correspondence Analysis', 'Principal Component Analysis', 'Partial Least Squares Discriminant Analysis', 'Redundancy Analysis', 'Robust Aitchison PCA'))
 
 
   # Invalid input, and methods of the other wrappers. ====
 
-  expect_error(count_ord(m, 'xyz'),   'does not match any option: ca, cca, pca, rda, rpca')
+  expect_error(count_ord(m, 'xyz'),   'does not match any option: ca, cca, pca, plsda, rda, rpca')
   expect_error(count_ord(m, 123),     'character')
   expect_error(count_ord(m, c('pca', 'rpca')), 'length 1')
   expect_error(count_ord(m, '-'),     'alphabetic')

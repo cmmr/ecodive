@@ -195,7 +195,7 @@ void* maybe_free_one(void *ptr);
 /* --- normalize.c --- */
 void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_);
 
-/* --- pca.c: the centred (scaled) table, shared with rda() --- */
+/* --- pca.c: the centred (scaled) table, shared with rda() and plsda() --- */
 typedef struct {
   int           n, p, nnz;  // Samples, features, non-zeros.
   const double *w_feat;     // 1 / sd per feature (scale), or NULL.
@@ -206,6 +206,22 @@ double pca_table_init(SEXP counts, SEXP margin, int norm, double pseudocount,
                       int scale, int n_threads, pca_table_t *t);
 void   pca_gram_mult(const double *V, double *W, int m, void *ctx);
 void   pca_cross(const double *U, int m, double *L, int n_threads);
+void   pca_mult(const double *V, int m, double *S, int n_threads);
+
+/* --- plsda.c: PLS on pca.c's table, for plsda() (and oplsda()) --- */
+// The deflated table X_a = A - T P', A being pca_table_init()'s.
+typedef struct {
+  int     n, p;       // Samples, features.
+  int     k, max_k;   // Deflations so far; room in T and P.
+  double *T;          // n x max_k scores (column-major).
+  double *P;          // p x max_k loadings.
+  int     n_threads;
+} pls_x_t;
+
+void   pls_x_mult(const pls_x_t *x, const double *v, double *out);
+void   pls_xt_mult(const pls_x_t *x, const double *U, int m, double *L);
+void   pls_x_deflate(pls_x_t *x, const double *t, const double *p);
+double pls_weights(const pls_x_t *x, const double *Y, int g, double *M, double *w);
 
 /* --- cca.c: the chi-square table of cca() --- */
 double        cca_table_init(SEXP counts, SEXP margin, int n_threads, int *n,

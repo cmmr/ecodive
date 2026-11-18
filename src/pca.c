@@ -359,7 +359,7 @@ static void op_features(const double *V, double *W, int m, void *ctx) {
 
 //======================================================
 // The centred (and scaled) table A = J * Z * D^-1, for
-// pca() and rda(). pca_table_init() reads and normalizes
+// pca(), rda() and plsda(). pca_table_init() reads and normalizes
 // the counts, and sets up the products below; it returns
 // the squared Frobenius norm of A (the sum of every s^2).
 // The caller must call init_n_ptrs() first (it uses one
@@ -532,6 +532,23 @@ void pca_cross(const double *U, int m, double *L, int n_threads) {
     center_rows(c->xn, n);
     run_zt(c->xn, c->yp, n_threads);
     unpack(c->yp, p, mc, c->w_feat, L + (size_t) v0 * p);
+  }
+}
+
+
+// S = A * V, for V p x m and S n x m (centred columns).
+// Features that `scale` left out count as 0.
+void pca_mult(const double *V, int m, double *S, int n_threads) {
+
+  pca_ctx_t *c = &tbl_ctx;
+  int        n = n_sams, p = n_feat;
+
+  for (int v0 = 0; v0 < m; v0 += PCA_W) {
+    int mc = (m - v0 < PCA_W) ? m - v0 : PCA_W;
+    pack(V + (size_t) v0 * p, p, mc, c->w_feat, c->xp);
+    run_z(c->xp, c->yn, n_threads);
+    center_rows(c->yn, n);
+    unpack(c->yn, n, mc, NULL, S + (size_t) v0 * n);
   }
 }
 

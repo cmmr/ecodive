@@ -69,6 +69,7 @@ dm <- bray(iris[, 1:4])
 | `pca()`      | Principal Component Analysis (PCA)             | counts | Euclidean geometry of (transformed) counts, with feature loadings.      |
 | `ca()`       | Correspondence Analysis (CA)                   | counts | The chi-square geometry of species profiles, for unimodal responses.    |
 | `rpca()`     | Robust Aitchison PCA                           | counts | Sparse compositional data, such as microbiome counts.                   |
+| `plsda()`    | Partial Least Squares Discriminant Analysis    | counts | Axes that best separate known groups (a supervised ordination).         |
 
 `list_dist_ords()` lists the methods that take distances, with the other
 names each one answers to.
@@ -241,9 +242,39 @@ attr(ord, 'prop')
 ```
 
 
+## Supervised ordination
+
+`plsda()`, partial least squares discriminant analysis (PLS-DA), finds the
+components of a count table that best separate known groups: PLS
+regression on a dummy matrix of the groups, as scikit-learn's
+`PLSRegression` and `mixOmics::plsda()` compute it. For microbiome counts,
+`norm = 'clr'` (with a `pseudocount`) is the usual choice. Its `vip`
+attribute ranks the features by their importance to the separation.
+
+```{r}
+ord <- plsda(round(iris[, 1:4] * 10), 'Species', iris)
+plot(ord, col = iris$Species)
+attr(ord, 'vip')
+```
+
+A supervised ordination always separates the groups it is given: it looks
+for exactly that, and with more features than samples it finds a
+separation even in random data. So a PLS-DA plot is no evidence that the
+groups differ. Test the difference with a permutation test of the
+distances, such as `permanova()`, or estimate how well the groups of new
+samples are predicted by cross-validation.
+
+```{r}
+set.seed(1)
+grp <- sample(rep(c('a', 'b'), 75))  # Random groups.
+ord <- plsda(round(iris[, 1:4] * 10), grp)
+permanova(euclidean(scale(iris[, 1:4])), grp, permutations = 199)$p_value
+```
+
+
 ## Ordinating counts directly
 
-`pca()`, `rpca()`, `rda()`, `cca()` and `ca()` take the count table rather than distances.
+`pca()`, `rpca()`, `rda()`, `cca()`, `ca()` and `plsda()` take the count table rather than distances.
 `count_ord()` runs them by name, as `dist_ord()` does for the methods that
 take distances: `count_ord(counts, 'pca')` is `pca(counts)`. PCA
 works on any of ecodive's transformations, such as `norm = 'clr'` (centered

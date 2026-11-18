@@ -1,0 +1,7 @@
+"name","scale","k"
+"dune_mgmt",TRUE,3
+"dune_two",TRUE,2
+"dune_const",TRUE,3
+"dune_hellinger",FALSE,3
+"dune_clr",TRUE,4
+"big_site",TRUE,5

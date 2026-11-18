@@ -15,7 +15,7 @@ Authors@R: c(
     person(
       "The scikit-learn developers",
       role    = c("ctb", "cph"),
-      comment = "SMACOF (MDS, NMDS), t-SNE and Isomap code ported from scikit-learn"),
+      comment = "SMACOF (MDS, NMDS), t-SNE, Isomap and PLS-DA code ported from scikit-learn"),
     person(
       "James", "Melville",
       role    = "cph",
