@@ -42,6 +42,19 @@
     min(e) / max(e)
   }
 
+  # The second-smallest eigenvalue of the corrected matrix, relative to the
+  # largest. The correction's constant is the smallest that makes the
+  # distances Euclidean, so besides the ones vector's 0 there is a second 0;
+  # a larger constant (also Euclidean) leaves it positive.
+  corrected_gap <- function (d, correction, constant) {
+    D <- as.matrix(d)
+    D <- if (correction == 'lingoes') D^2 + 2 * constant else (D + constant)^2
+    diag(D) <- 0
+    J <- diag(nrow(D)) - 1 / nrow(D)
+    e <- sort(eigen(-0.5 * J %*% D %*% J, symmetric = TRUE, only.values = TRUE)$values)
+    e[[2]] / e[[length(e)]]
+  }
+
   # Without the correction's attributes.
   strip <- function (x) {
     attr(x, 'correction') <- NULL
@@ -82,15 +95,16 @@
     kk  <- ncol(ord)
     inf <- paste(nm, corr)
 
-    # pcoa()'s constant makes the distances Euclidean: the corrected
-    # matrix's smallest eigenvalue is 0.
+    # pcoa()'s constant is the smallest that makes the distances Euclidean:
+    # no negative eigenvalue, and a second zero one.
     expect_true(attr(ord, 'constant') > 0, info = inf)
-    expect_true(abs(corrected_min(d, ord)) < 1e-10, info = inf)
+    expect_true(corrected_min(d, ord) > -1e-10, info = inf)
+    expect_true(abs(corrected_gap(d, corr, attr(ord, 'constant'))) < 1e-10, info = inf)
 
     # The reference comes from the platform's BLAS/LAPACK, so it is used only
-    # if it passes the same test: no negative eigenvalue, and the smallest
-    # non-trivial one 0. (On R-hub, OpenBLAS 0.3.20 has given a wrong
-    # Cailliez constant on some runners' CPUs; pcoa() itself uses neither.)
+    # if it passes the same test. (On some R-hub runners, OpenBLAS 0.3.20's
+    # non-symmetric eigen() gave too large a Cailliez constant; pcoa() itself
+    # uses neither BLAS nor LAPACK.)
     ref_ok <- ref$const > 0 &&
       min(ref$eig) > -1e-12 * ref$eig[[1]] &&
       abs(sort(ref$eig)[[2]]) < 1e-10 * ref$eig[[1]]
@@ -109,12 +123,12 @@
   }
 
   # The same constant as cmdscale(add = TRUE), base R's Cailliez correction,
-  # where cmdscale()'s constant (from the platform's LAPACK) makes the
-  # distances Euclidean, as above.
+  # where cmdscale()'s constant (from the platform's non-symmetric eigen())
+  # passes the test above.
   for (d in list(ds$bray, ds$ties, d100, ds$jaccard)) {
     oC <- pcoa(d, correction = 'cailliez', cpus = cpus)
     cm <- cmdscale(d, k = 3, add = TRUE, eig = TRUE)
-    cm_ok <- abs(corrected_min(d, structure(0, correction = 'cailliez', constant = cm$ac))) < 1e-10
+    cm_ok <- abs(corrected_gap(d, 'cailliez', cm$ac)) < 1e-10
     if (cm_ok) {
       expect_equal(attr(oC, 'constant'), cm$ac, tolerance = 1e-10)
       expect_true(coord_diff(oC, cm$points) < 1e-8)
