@@ -52,9 +52,10 @@
  * labels are shuffled among its samples (permuted sample a
  * takes the label lab[p[a]], as vegan's grouping[p]), and
  * each taxon's S_k recomputed. A taxon's p-value counts the
- * permutations whose S_k exceeds the observed one by more
- * than a relative 1e-7 (so rounding ties don't count): the
- * rule vegan::simper()'s outputs follow.
+ * permutations whose S_k is at least the observed one, within
+ * a relative 1e-7 (so rounding doesn't hide a tie): Clarke's
+ * (1993) rule. vegan::simper() counts only larger ones, which
+ * makes p-values too small when groups are small.
  *
  * Determinism: the observed sums are split over taxa, each
  * summed by one thread in a fixed order. Each permutation is
@@ -238,7 +239,7 @@ static void *sp_perm_worker(void *arg) {
       sp_sums(sp_P, 0, p, L, A, na, B, nb, xs, S, NULL, NULL);
 
       for (int k = 0; k < p; k++)
-        if (S[k] > sp_S[k] + SP_TOL * sp_S[k]) cnt[k]++;
+        if (S[k] >= sp_S[k] - SP_TOL * sp_S[k]) cnt[k]++;
     }
   }
 

@@ -12,8 +12,10 @@
 #' groups into the contribution of each taxon, to rank the taxa that
 #' differ most between the groups (Clarke 1993). Permutation tests give
 #' each taxon's contribution a p-value. Gives the same results as
-#' `vegan::simper()` and `summary()` of it, and the same p-values for the
-#' same permutations, but runs in parallel C on sparse tables.
+#' `vegan::simper()` and `summary()` of it, but runs in parallel C on
+#' sparse tables. Its p-values count ties with the observed contribution,
+#' as Clarke (1993) does, so they are never smaller than vegan's, which
+#' are too small for small groups (see **Permutations**).
 #'
 #' @inheritParams documentation
 #'
@@ -109,18 +111,19 @@
 #'
 #' A taxon's p-value (Clarke 1993) comes from shuffling the group labels of
 #' the pair's samples (only within `strata`, when given), and recomputing
-#' its `average`. As `vegan::simper()`, the p-value is \eqn{(1 +
-#' \#\{average_{perm} > average\}) / (1 + permutations)}: permutations
-#' that give the same `average` as observed (within a relative
-#' \eqn{10^{-7}}, for rounding) don't count. **So p-values are too small
-#' when groups are small:** permutations that only swap samples within
-#' groups reproduce the observed `average` exactly, and the more of them
-#' there are, the smaller the p-value. With two samples per group, a
-#' third of all permutations do, and a taxon whose observed `average` is
-#' the largest possible gets \eqn{p \approx 1 / (1 + permutations)}
-#' rather than about 1/3. Clarke's (1993) "at least as large" rule would
-#' count them; ecodive follows vegan so that results agree. Treat the
-#' p-values of groups of a few samples with suspicion. Each pair has random
+#' its `average`. The p-value is \eqn{(1 + \#\{average_{perm} \ge
+#' average\}) / (1 + permutations)}, Clarke's (1993) "at least as large"
+#' rule, with permuted averages within a relative \eqn{10^{-7}} of the
+#' observed one counted as ties (for rounding). Permutations that only swap
+#' samples within groups reproduce the observed `average` exactly, so they
+#' count. `vegan::simper()` counts only permuted averages that are strictly
+#' larger, which makes its p-values too small when groups are small: with
+#' two samples per group, a third of all permutations reproduce the
+#' observed `average`, and a taxon whose observed `average` is the largest
+#' possible gets \eqn{p \approx 1 / (1 + permutations)} from vegan, where
+#' its p-value is about 1/3. So ecodive's p-values are never smaller than
+#' vegan's on the same permutations, and are equal for taxa that no
+#' permutation ties. Each pair has random
 #' permutations of its own, drawn from `seed` and the pair's position, as
 #' the pairwise tests of [permanova()] and the others have. So `p_value`s
 #' are identical for any number of `cpus`, but differ by sampling error
@@ -128,7 +131,7 @@
 #' A supplied `permutations` matrix is cut down to each pair's samples by
 #' following each permutation's cycles, as in the pairwise tests (see
 #' [permanova()]'s **Pairwise comparisons**). Give `vegan::simper()` those
-#' permutations, on the pair's samples, for identical p-values.
+#' permutations, on the pair's samples, for the same permutations.
 #'
 #' The adjusted p-values (`p_adjusted`) are an addition: `vegan::simper()`
 #' doesn't adjust. A study of a few groups and hundreds of taxa tests many
@@ -169,6 +172,9 @@
 #'   matrix covers all of them), so its p-values for a pair also depend on
 #'   the other groups' samples. ecodive permutes only the pair's samples, as
 #'   its pairwise tests do.
+#' * p-values count permutations whose `average` ties the observed one, as
+#'   Clarke (1993) does; vegan counts only larger ones (see
+#'   **Permutations**).
 #' * `p_adjusted`, `norm`, and `strata` given directly.
 #'
 #'

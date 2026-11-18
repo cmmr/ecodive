@@ -339,8 +339,10 @@
   abundances and the cumulative proportion, following ecopy's `simper()`,
   and gives each taxon a permutation p-value (Clarke 1993), adjusted within
   each pair by `p_adjust` (Holm's method by default). It gives the same
-  results as `vegan::simper()` and `summary()` of it, and the same p-values
-  for the same permutations, as one data frame. As in the pairwise tests,
+  results as `vegan::simper()` and `summary()` of it, as one data frame.
+  Its p-values count permuted contributions at least as large as the
+  observed one, as Clarke (1993) does; vegan counts only larger ones, which
+  makes its p-values too small for small groups. As in the pairwise tests,
   each pair's permutations shuffle only its own samples (vegan shuffles all
   of them). It takes `groups` and `data` as `permanova()` does, `strata`,
   `norm` (`'none'` by default, as vegan) and sparse tables, which it never

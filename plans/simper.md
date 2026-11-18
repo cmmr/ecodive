@@ -117,13 +117,18 @@ My own calls:
 
 - **vegan's p-value rule, found from its outputs:** p = (1 + #{permuted
   average **>** observed}) / (1 + n_perm); permutations giving the same
-  average (only swapping samples within groups) don't count. ecodive does
-  the same, with ties judged within a relative 1e-7 (both are sums in a
-  fixed order, so true ties differ only by rounding). This is
+  average (only swapping samples within groups) don't count. This is
   anti-conservative for small groups (2 vs 2: p = 1/(n+1) for the top taxon
-  where the exact p is about 1/3); the docs say so in bold, and the example
-  uses `permutations = 0`. Clarke's "≥" rule would fix it but break the
-  match with vegan: flagged as an open question for the user.
+  where the exact p is about 1/3). ecodive first matched it, and flagged it
+  as an open question.
+- **Changed by the user's choice (2026-11-18, after dbf0c2b): Clarke's
+  "≥" rule.** p = (1 + #{permuted average ≥ observed}) / (1 + n_perm),
+  with ties judged within a relative 1e-7 (both are sums in a fixed order,
+  so true ties differ only by rounding). ecodive's p-values are therefore
+  never smaller than vegan's on the same permutations, and equal for taxa
+  that no permutation ties. The tests compare them with a direct R
+  computation of the rule on the fixtures' permutations, and check that
+  they are at least vegan's stored ones.
 - **`p_value` is `NA` for taxa with `average` 0** (absent from both groups,
   or the same value in every sample), as vegan's outputs give.
 - **Result:** one data frame, pairs in factor-level order ("a-b"), taxa by
@@ -170,8 +175,9 @@ My own calls:
   within-`Use` block permutations, and a sparse 25 × 40 table with three
   unequal groups (an absent taxon, a constant one), raw and with
   `norm = 'percent'` against vegan on `decostand(, 'total')`. Every column
-  agrees to about 5e-16 relative, p-values are identical, and the taxa come
-  in the same order.
+  agrees to about 5e-16 relative and the taxa come in the same order.
+  p-values were identical under vegan's rule; under Clarke's rule they
+  match a direct R computation instead (see above).
 - **Open issue (not changed):** when `groups` has the wrong length, the
   shared `per_sample()` message says "`dm` has 4 samples" even for count
   tables (also in `plsda()`).

@@ -16,7 +16,31 @@
 
 
   # Stored results from vegan::simper() and summary() of it, on each pair's
-  # samples with the induced permutations: identical p-values. ====
+  # samples with the induced permutations. p-values follow Clarke's "at
+  # least as large" rule, where vegan counts only larger permuted averages:
+  # they are checked against a direct computation of the rule on the same
+  # permutations, and are never smaller than vegan's. ====
+
+  # Clarke's p-values for one pair, directly: each sample pair's taxon
+  # contributions, and for each permutation (permuted sample a takes the
+  # label lab[p[a]]) the mean over the pairs whose labels differ.
+  clarke_p <- function (x, lab, perms) {
+    m  <- nrow(x)
+    ij <- which(lower.tri(diag(m)), arr.ind = TRUE)
+    tt <- rowSums(x)
+    cc <- abs(x[ij[, 1], , drop = FALSE] - x[ij[, 2], , drop = FALSE]) /
+          (tt[ij[, 1]] + tt[ij[, 2]])
+    avg <- function (l) colMeans(cc[l[ij[, 1]] != l[ij[, 2]], , drop = FALSE])
+    obs <- avg(lab)
+    cnt <- numeric(ncol(x))
+    for (b in seq_len(nrow(perms))) {
+      pa  <- avg(lab[perms[b, ]])
+      cnt <- cnt + (pa >= obs - 1e-7 * obs)
+    }
+    p <- (cnt + 1) / (nrow(perms) + 1)
+    p[obs == 0] <- NA_real_
+    stats::setNames(p, colnames(x))
+  }
 
   if (at_home()) {
 
@@ -47,7 +71,16 @@
         for (v in c('average', 'sd', 'ratio', 'mean_a', 'mean_b', 'cumsum'))
           expect_equal(r[[v]], e[[v]], tolerance = 1e-10, info = paste(info, v))
 
-        expect_identical(r$p_value, e$p_value, info = info)
+        ab  <- strsplit(pr, '-', fixed = TRUE)[[1]]
+        idx <- which(as.character(cs$groups) %in% ab)
+        x   <- as.matrix(cs$counts)[idx, , drop = FALSE]
+        if (identical(cs$norm, 'percent')) x <- x / rowSums(x)
+        cp  <- clarke_p(x, as.character(cs$groups)[idx],
+                        ecodive:::induced_perms(cs$perms, idx))
+        expect_equal(r$p_value, unname(cp[r$taxon]), info = info)
+        ok <- !is.na(e$p_value)
+        expect_identical(is.na(r$p_value), is.na(e$p_value), info = info)
+        expect_true(all(r$p_value[ok] >= e$p_value[ok]), info = info)
         expect_equal(attr(res, 'overall')[[pr]], e$overall[[1]], tolerance = 1e-10, info = info)
         expect_equal(r$p_adjusted, p.adjust(r$p_value, 'holm'), info = info)
       }
@@ -159,9 +192,16 @@
 
 
   # Strata that hold one group each: no permutation changes the groups, so
-  # no permuted average is larger, and every p-value is 1 / (n + 1).
+  # every permuted average ties the observed one, and every p-value is 1.
   s2 <- simper(cnt[1:13, ], grp[1:13], strata = grp[1:13], permutations = 19, cpus = 1)
-  expect_true(all(s2$p_value == 1 / 20 | is.na(s2$p_value)))
+  expect_true(all(s2$p_value == 1 | is.na(s2$p_value)))
+
+  # Two samples per group: a third of all permutations only swap samples
+  # within the groups, and reproduce the observed averages, so no p-value
+  # is below about 1/3 (vegan's rule would give the top taxon 1/(n+1)).
+  s4 <- simper(cnt[c(1, 2, 8, 9), ],
+               grp[c(1, 2, 8, 9)], permutations = 999, cpus = 1)
+  expect_true(min(s4$p_value, na.rm = TRUE) > 0.25)
 
   # A supplied matrix is cut down to each pair, as in the pairwise tests.
   set.seed(6)
