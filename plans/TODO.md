@@ -34,7 +34,7 @@ meaningful sense, so they sit just after the methods they build on.
 | 11 | [x] `oplsda()` (4c7e646) | [plsda_oplsda.md](plsda_oplsda.md) | port (pyopls, MIT) | Metabolomics demand; small on top of `plsda()`. |
 | 12 | [x] `varpart()` (eb06b58) | [varpart_forward_select.md](varpart_forward_select.md) | derived (on `rda()` / `dbrda()`) | High demand in ecology; formulas only. |
 | 13 | [x] `forward_select()` (d0b6339) | [varpart_forward_select.md](varpart_forward_select.md) | derived (on `rda()` / `dbrda()`) | Usually used alongside varpart. |
-| 14 | [ ] `alr()`, `ilr()` | [log_ratio_transforms.md](log_ratio_transforms.md) | port (scikit-bio, BSD-3) | Simplest compositional gap; `balance()` and `philr()` build on the ILR code. |
+| 14 | [x] `alr()`, `ilr()` (51fd7d0) | [log_ratio_transforms.md](log_ratio_transforms.md) | port (scikit-bio, BSD-3) | Simplest compositional gap; `balance()` and `philr()` build on the ILR code. |
 | 15 | [ ] `replace_zeros()` wrapper (+ `list_zero_replacements()`, `match_zero_replacement()`) and `replace_zeros_mult()` | [zero_replacement.md](zero_replacement.md) | port (scikit-bio, BSD-3) | Principled zeros for every log-ratio method; the wrapper is ready for the Bayesian methods (later item). |
 | 16 | [ ] `log_ratio()`, `balance()` | [log_ratio.md](log_ratio.md) | port (Qurro / scikit-bio, BSD-3) | Trivial; log ratios are what current compositional guidance recommends analysing. |
 | 17 | [ ] `vlr()`, `rho_p()`, `phi_s()` | [proportionality.md](proportionality.md) | port (scikit-bio `vlr`) + formula (propr output-only) | High demand (propr); all-pairs C over features is ecodive's strength. |
