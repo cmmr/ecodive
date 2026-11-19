@@ -376,6 +376,7 @@ License:
 
 Files: src/log_ratio_transforms.c R/log_ratio_transforms.r src/log_ratio.c R/log_ratio.r
  src/proportionality.c R/proportionality.r src/ancom.c R/ancom.r
+ src/dirmult.c R/dirmult_ttest.r
 Copyright: 2013-- scikit-bio development team
 Comment: alr() and ilr(), with their default (Gram-Schmidt / Helmert) basis,
  the conversion of a sequential binary partition and the basis checks, follow
@@ -388,6 +389,10 @@ Comment: alr() and ilr(), with their default (Gram-Schmidt / Helmert) basis,
  skbio/stats/composition/_ancom.py, with the per-feature p-value adjustment
  of _adjust_pvalues() and the grouping checks of _check_grouping() from
  _utils.py; its tests compute each log ratio's statistic directly, in C.
+ dirmult_ttest() follows dirmult_ttest(), _dirmult_draw() and
+ _welch_draw_stats() from skbio/stats/composition/_dirmult.py, with the
+ contrast rules of _check_trt_ref_groups() from _utils.py; its Gamma draws
+ come from ecodive's own sampler (src/rng_dist.c), not NumPy's.
  The rest of these files, including log_ratio(), rho_p() and phi_s(), is
  Copyright 2026 ecodive authors, under the MIT license above.
 License:

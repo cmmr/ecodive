@@ -79,9 +79,10 @@ reference:
   - rho_p
   - phi_s
 - subtitle: Differential abundance
-  desc: Which features' abundances differ between groups, from log ratios, so that the samples' totals don't matter.
+  desc: Which features' abundances differ between groups, from log ratios or clr values, so that the samples' totals don't matter.
   contents:
   - ancom
+  - dirmult_ttest
 - subtitle: Absolute abundance
   desc: With each sample's total microbial load measured (cell counts, qPCR, a spike-in), estimate absolute abundances instead of ratios.
   contents:

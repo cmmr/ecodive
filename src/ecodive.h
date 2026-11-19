@@ -188,6 +188,19 @@ void knn_from_dist(const double *dist, int n, int k, int include_self,
 int64_t kendall_sort_count(int *a, int *buf, size_t len);
 double  kendall_tied_sorted(const int *a, size_t len);
 
+/* --- rng_dist.c: continuous distributions on PCG --- */
+typedef struct {
+  pcg32_random_t pcg;
+  int            has_spare;   // rng_norm()'s second value of a pair
+  double         spare;
+} rng_t;
+
+void   rng_seed(rng_t *r, uint64_t seed, uint64_t stream);
+double rng_unif(rng_t *r);
+double rng_norm(rng_t *r);
+double rng_gamma(rng_t *r, double shape);
+double rng_log_gamma(rng_t *r, double shape);
+
 /* --- memory.c --- */
 void  init_n_ptrs(int n);
 void* safe_malloc(size_t bytes);

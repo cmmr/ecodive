@@ -18,6 +18,7 @@ extern SEXP C_blas_threads(SEXP);
 extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cord_cross(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_dirmult_ttest(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_helmert_basis(SEXP);
@@ -51,6 +52,7 @@ extern SEXP C_rpca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, S
 extern SEXP C_simper(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
+extern SEXP C_rng_dist(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_p(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_run(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_ab(SEXP, SEXP);
@@ -76,6 +78,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_cca",       (DL_FUNC) &C_cca,      10},
   {"C_cord_cross", (DL_FUNC) &C_cord_cross, 8},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
+  {"C_dirmult_ttest", (DL_FUNC) &C_dirmult_ttest, 10},
   {"C_envfit",    (DL_FUNC) &C_envfit,   12},
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},
   {"C_lda",       (DL_FUNC) &C_lda,       5},
@@ -107,6 +110,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
+  {"C_rng_dist",  (DL_FUNC) &C_rng_dist,  5},
   {"C_rpca",      (DL_FUNC) &C_rpca,     12},
   {"C_simper",    (DL_FUNC) &C_simper,    7},
   {"C_tsne_p",    (DL_FUNC) &C_tsne_p,    7},

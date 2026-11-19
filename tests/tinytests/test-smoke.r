@@ -94,6 +94,11 @@
   expect_true(is.integer(z$W) && all(z$W >= 0L & z$W <= 11L) && is.logical(z$reject))
   z <- ancom(counts, meta$grp, sig_test = 'kruskal', p_adjust = 'BH', cpus = cpus)
   expect_true(nrow(z) == 12L && !anyNA(z$reject))
+  z <- dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_dirmult_ttest') && nrow(z) == 12L)
+  expect_identical(z$feature, colnames(counts))
+  expect_true(all(is.finite(as.matrix(z[, 2:7]))) && is.logical(z$reject) && !anyNA(z$reject))
+  expect_true(all(z$ci_lower <= z$log2_fc & z$log2_fc <= z$ci_upper))
 
   # Zero replacement.
   cz <- counts; cz[cz < 4] <- 0L
