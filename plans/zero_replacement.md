@@ -1,6 +1,6 @@
 # `replace_zeros()` and its methods: zero replacement for compositional data
 
-**Priority:** 15 (the wrapper and `replace_zeros_mult()`) and 34 (the four `cmultRepl()` methods). **Tier:**
+**Priority:** 15 (the wrapper and `replace_zeros_mult()`) and 36 (the four `cmultRepl()` methods). **Tier:**
 - `replace_zeros()` (wrapper, registry, `list_*` / `match_*`) and
   `replace_zeros_mult()`: port (scikit-bio 0.7.4 `multi_replace()`,
   BSD-3).

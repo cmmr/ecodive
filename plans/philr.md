@@ -1,6 +1,6 @@
 # `philr()` and `philr_distance()`: phylogenetic isometric log-ratio transform
 
-**Priority:** 32. **Tier:** formula, clean room.
+**Priority:** 34. **Tier:** formula, clean room.
 philr (Bioconductor, GPL-3) is output-only; the formulas are in the
 open-access paper (Silverman et al. 2017, eLife, CC-BY). scikit-bio's
 `tree_basis()` (BSD-3) is a permissive reference for the unweighted basis,

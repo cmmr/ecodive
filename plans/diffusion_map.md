@@ -1,6 +1,6 @@
 # `diffusion_map()`: diffusion maps
 
-**Priority:** 28. **Tier:** port from pydiffmap (MIT) or scanpy (BSD-3).
+**Priority:** 30. **Tier:** port from pydiffmap (MIT) or scanpy (BSD-3).
 Read [README.md](README.md) first.
 
 

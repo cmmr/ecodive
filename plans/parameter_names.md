@@ -46,6 +46,10 @@ same thing.
 | `part_weights`, `ilr_weights` | **(new)** PhILR's taxon and balance weights | planned `philr` |
 | `subjects`, `states` | **(new)** per-sample subject ids and time points / conditions | planned `ctf` |
 | `fit` | **(new)** a fitted result given to a post-hoc test | planned `ancombc_*` |
+| `family`, `l1_ratio`, `lambda`, `n_lambdas`, `lambda_min_ratio` | **(new, 2026-11-19)** the outcome distribution (`'gaussian'`, `'binomial'`), elastic-net mixing (1 = lasso), and the penalty path | planned `coda_lasso`, `coda_lasso_pairwise` |
+| `n_folds`, `folds`, `select` | **(new)** cross-validation: a fold count or a per-sample fold vector (overrides `seed`), and which λ to report (`'min'`, `'1se'`) | planned `coda_lasso`, `coda_lasso_pairwise` |
+| `sources`, `sink_depth` | **(new)** per-sample source-environment labels (`NA` marks a sink), and the sinks' rarefaction depth (`depth` is the sources', as in `rarefy`) | planned `sourcetracker`; `sources` also `feast` |
+| `n_restarts`, `burnin`, `delay`, `loo`, `features` | **(new)** the Gibbs schedule, leave-one-out over environments, and per-feature output | planned `sourcetracker` |
 | `cpus` | threads (always last) | everything threaded |
 
 
@@ -138,6 +142,12 @@ don't** (layouts optimised in a fixed number of dimensions).
   `diffusion_map()`. Both are the standard names in their literatures, the
   functions are unrelated, and `diffusion_map()` never passes through
   `beta_div()`. The docs say which α is meant.
+- **`sourcetracker(alpha1, alpha2, beta)`** keeps SourceTracker's prior
+  names (2026-11-19), which users know from its documentation. None is a
+  significance level, and `beta` is not beta diversity; the docs say so.
+  The elastic-net mixing in `coda_lasso()` is `l1_ratio`, not glmnet's
+  `alpha`, because `alpha` is already a significance level in `ancom()`
+  and `forward_select()`.
 - **`envfit(na.rm =)`** keeps the dot, against the snake_case rule,
   because `na.rm` is base R's universal idiom.
 - **Wrapper selector names differ by design:** `beta_div(metric)`,

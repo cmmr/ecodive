@@ -31,6 +31,7 @@ gaps around them.
 | [ancom.md](ancom.md) | `ancom()` | port (scikit-bio) |
 | [dirmult_ttest.md](dirmult_ttest.md) | `dirmult_ttest()` | port (scikit-bio; scale model from ALDEx3, MIT) |
 | [ancombc.md](ancombc.md) | `ancombc()`, `ancombc2()`; post-hoc `ancombc_global()`, `ancombc_pairwise()`, `ancombc_dunnett()`, `ancombc_trend()`; `structural_zeros()` | port (scikit-bio, BSD-3; derived from Artistic-2.0 ANCOMBC: both notices) |
+| [coda_lasso.md](coda_lasso.md) | `coda_lasso()`, `coda_lasso_pairwise()` (added 2026-11-19) | port (zeroSum, MIT; coda4microbiome, MIT) |
 | [philr.md](philr.md) | `philr()`, `philr_distance()` | port (basis, scikit-bio / gneiss) + formula (weights; philr output-only) |
 | [rpca_phylo.md](rpca_phylo.md) | `rpca_phylo()` | port (gemelli) on ecodive's `rpca()` |
 | [rpca_joint.md](rpca_joint.md) | `rpca_joint()` | port (gemelli) |

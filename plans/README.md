@@ -251,6 +251,8 @@ can't be mistaken for one another:
 | Differential abundance | `ancom`, `ancombc`, `ancombc2`, `ancombc_global`, `ancombc_pairwise`, `ancombc_dunnett`, `ancombc_trend`, `structural_zeros`, `dirmult_ttest` |
 | Absolute abundance | `qmp_scale`, `qmp_rarefy` |
 | Spatial | `moran_i`, `dbmem` |
+| Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
+| Source tracking | `sourcetracker`, `feast` |
 
 Names still worth a word of warning in the docs:
 - `lda` also means latent Dirichlet allocation (topic models) and LEfSe's

@@ -1,6 +1,6 @@
 # `mantel_regression()`: multiple regression on distance matrices (MRM)
 
-**Priority:** 35. **Tier:** clean room. Write it from Legendre, Lapointe &
+**Priority:** 38. **Tier:** clean room. Write it from Legendre, Lapointe &
 Casgrain (1994) and Lichstein (2007). ecodist `MRM()` (GPL) is
 output-only. Read [README.md](README.md) first.
 

@@ -1,6 +1,6 @@
 # `rpca_joint()`: Joint-RPCA across several tables
 
-**Priority:** 30. **Tier:** port (gemelli 0.0.13,
+**Priority:** 32. **Tier:** port (gemelli 0.0.13,
 `joint_rpca()`, BSD-3), on ecodive's OptSpace code from `rpca()`. Read
 [README.md](README.md) first, and [compositional.md](compositional.md) for
 the conventions the compositional plans share.
