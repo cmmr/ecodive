@@ -325,7 +325,7 @@ capda <- function (
   if (!is.null(labels)) names(grp) <- labels
 
   ord_result(
-    flip$scores, 'capda', labels, prefix = 'CAP',
+    flip$scores, 'capda', labels, prefix = 'CAP', dist = dv$step,
     eig         = delta2[seq_len(n_ax)],
     prop        = if (r > 0) delta2[seq_len(n_ax)] / sum(delta2) else numeric(0),
     n_pcoa_axes = m,

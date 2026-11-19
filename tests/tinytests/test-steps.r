@@ -48,7 +48,7 @@
   expect_identical(attr(dist_ord(d, 'pcoa', n_axes = 2, cpus = cpus), 'ord'), oo)
   for (m in list_dist_ords('id')) {
     args <- list(d, m, cpus = cpus)
-    if (m %in% c('dbrda', 'capscale')) args <- c(args, list(groups = 'Species', data = data.frame(Species = iris$Species, row.names = rownames(x))))
+    if ('groups' %in% names(formals(get(m)))) args <- c(args, list(groups = 'Species', data = data.frame(Species = iris$Species, row.names = rownames(x))))
     if (m == 'isomap') args$n_neighbors <- 50
     r <- do.call(dist_ord, args)
     expect_identical(attr(r, 'dist'), rec, info = m)
