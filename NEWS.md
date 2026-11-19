@@ -420,6 +420,22 @@
   Results are identical for any number of `cpus`.
   `count_ord(counts, 'lda', groups)` runs it too.
 
+* New `capda()` runs Anderson & Willis's (2003) discriminant canonical
+  analysis of principal coordinates (CAP, as in PRIMER-PERMANOVA+): `lda()`
+  of the first m axes of `pcoa()`, for any distances, with m chosen by
+  leave-one-out classification success (up to `max_pcoa_axes`, 50 by
+  default; on ties, the smallest m), and a permutation test of the trace
+  statistic (the sum of the squared canonical correlations), with `strata`
+  or a supplied permutation matrix. It gives the same m, classification
+  success, leave-one-out classes, squared canonical correlations and scores
+  as `BiodiversityR::CAPdiscrim()`, whose leave-one-out posteriors underflow
+  for samples far from every group, and which stops at a group of one
+  sample (`capda()` counts such samples as misclassified). The success for
+  every m considered and the leave-one-out table are returned. Results are
+  identical for any number of `cpus`. `dist_ord(dm, 'capda', groups)` runs
+  it too; `'CAP'` still selects `capscale()`, which is db-RDA. `lda()`'s
+  error for a singular within-group covariance now suggests `capda()`.
+
 * New `simper()` runs a similarity percentages analysis (SIMPER): it breaks
   the mean Bray-Curtis dissimilarity between each pair of groups down into
   each taxon's contribution, with its sd, ratio, the groups' mean

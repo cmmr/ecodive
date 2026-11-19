@@ -245,3 +245,138 @@ Made while implementing:
     tables; `count_ord()`'s docs; NEWS under 2.4.0. "Same names in other
     packages" covers `MASS::lda()`, latent Dirichlet allocation and LEfSe's
     LDA score. The benchmark article was not updated.
+
+
+## Decisions made while implementing (capda)
+
+Item 24 (`capda()`).
+
+Asked of the user at the start (2026-11-19), and answered:
+
+1. **Leave-one-out NAs count as misclassified:** the success rate is
+   always correct / n. A sample alone in its group (always NA), and every
+   sample from the first m at which the fit without it is singular, count
+   as wrong, so rates are comparable across m and a singular m scores 0.
+2. **Candidates for m, and ties:** a new argument
+   `max_pcoa_axes = NULL`, meaning min(n − g − 1, the number of positive
+   PCoA axes, 50); an explicit value is reduced silently to the first two.
+   n − g − 1 is the most that leave-one-out classification can use. **Ties
+   go to the smallest m** (as `CAPdiscrim()`, which agreed on every case,
+   including dune by Moisture's tie at m = 1 and 3). `max_pcoa_axes` is
+   ignored when `n_pcoa_axes` is given.
+3. **`success` is a data frame**, one row per m considered (1..max when
+   chosen, else just the given m), columns `n_pcoa_axes`, `overall`, and
+   one per group (named by group, in level order; names made unique if a
+   group is called `overall` or `n_pcoa_axes`), each the proportion
+   classified correctly. The classification table at the chosen m is a
+   separate attribute, `loo_table` (a `table`, rows `group`, columns
+   `loo_class`, plus an `NA` column only if some sample couldn't be
+   classified).
+4. **Permutation test:** m stays at the value chosen on the observed data
+   (Anderson & Willis; PRIMER), and **`strata` is supported** (free
+   shuffles within strata through `src/permute.c`), or a supplied
+   `permutations` matrix; giving both is an error, as in `anosim()`.
+
+Made while implementing:
+
+5. **Signature:** `capda(dm, groups, data = NULL, n_pcoa_axes = NULL,
+   max_pcoa_axes = NULL, n_axes = NULL, permutations = 999L,
+   strata = NULL, seed = 0L, cpus = n_cpus())`. No `prior` argument (the
+   group proportions, as `CAPdiscrim()` and `MASS::lda()` by default, for
+   the classification and the fit) and no PCoA `correction` (only axes
+   with positive eigenvalues are used, as `CAPdiscrim()` without `add`).
+   `groups`/`data`/`strata` go through `test_group_values()`, as the
+   tests.
+6. **Result:** an `ecodive_ord` matrix, columns `CAP1..` (as the plan; the
+   same prefix as `capscale()`'s constrained axes), the scores of
+   `lda_fit()` on the first m axes, flipped as `lda()` (the flip is now a
+   shared helper, `lda_flip()`). Attributes in order: `method`, `eig`
+   (δ²), `prop` (δ² / Σδ² over all the canonical axes: proportion of
+   trace), `n_pcoa_axes`, `success`, `loo_table`, `loo_class` (each
+   sample's leave-one-out class at m, a factor named by sample; not in the
+   plan, but cheap and useful), `trace_stat`, `p_value`, `n_perm`,
+   `trace_perm` (the permuted traces, the `<stat>_perm` convention),
+   `scaling` (m × k, rows `PCoA1..`), `groups`.
+   - δ² comes from `lda_fit()`'s canonical F (MASS's svd²):
+     δ² = F (g − 1) / (F (g − 1) + n − g).
+   - `n_axes = NULL` is min(3, number of canonical axes), as `lda()`.
+   - Groups with identical means: `lda()`'s warning and 0 columns.
+7. **The trace and its test in C** (`src/capda.c`, `C_capda_trace`): with
+   Q the first m axes scaled to unit length, the trace is
+   tr(Q'HQ) = Σₖ |Sₖ|² / nₖ (Sₖ the sum of Q's rows in group k), O(nm) per
+   permutation; blocks of 16 permutations shared among threads, each trace
+   computed on its own, so results are identical for any `cpus`.
+   `trace_stat` is the identity permutation's value (so that ties with
+   permuted values are exact); it equals Σδ² to rounding. The p-value is
+   `perm_p()`'s. **Permutation convention:** sample a takes the group of
+   sample p[a] (as `mrpp()`, vegan's `grouping[p]`); `adonis2()` permutes
+   the response instead, so the reference gives it the inverse
+   permutations.
+8. **`CAPdiscrim()`'s p-value is not comparable:** its documentation says
+   that its permutation test randomises the data and compares the
+   *percentage of correct classifications*, with permutations drawn from
+   R's RNG inside it. So the trace test's reference is, with a shared
+   permutation matrix, Pillai's trace from `summary(manova())` of
+   `cmdscale()`'s first m axes for each permutation (the trace statistic
+   is Pillai's trace), and `vegan::adonis2()` of the unit-length axes'
+   Euclidean distances (its F increases with the trace): same p-value
+   (0.075, dune by Use, m = 2, 199 permutations), and every permuted trace
+   to 1e-10. Within strata: 9999 random permutations, compared
+   statistically with `adonis2()`'s.
+9. **PCoA:** the same C call as `pcoa(dm, n_axes = k)` (`C_pcoa`, block
+   Lanczos), with k = `n_pcoa_axes`, or min(`max_pcoa_axes` or 50,
+   n − g − 1), keeping the axes with eigenvalues above √ε times the first
+   (`ord_keep()`'s rule, without its warning). Errors: `n_pcoa_axes`
+   above n − g, or above the number of positive axes; n − g − 1 < 1 when m
+   is to be chosen.
+10. **MASS underflow:** for mite by Shrub, `CAPdiscrim()`'s success
+    differs from `capda()`'s at 16 of the 37 values of m (m ≥ 20), each by
+    sample 67: its leave-one-out log scores are near −800 for every group,
+    MASS's posteriors underflow to 0/0 = NaN, and its class is then
+    arbitrary. `lda_loo()` subtracts the largest score first, and matches
+    leave-one-out refits in the log domain (`exact_loo()` in the fixture
+    script) at every m. The tests compare with `CAPdiscrim()` for
+    m ≤ 19 there, and with the refits for every m.
+11. **A guard for axes with no within-group variation**
+    (`capda_singular_from()`): `lda_fit()` and `lda_loo()` scale each
+    axis by its within-group sd, so an axis along which the groups vary
+    within only by rounding error (perfect separation) looked full rank
+    and gave scores of 1e15. With the axes at unit length, the within-group
+    sums of squares are W = I − C; the fit is treated as singular (LOO
+    classes NA, and the fit an error) from the first pivot of W's LDLᵀ
+    factorization below 1e-8 (a within-group sd below 1e-4 of the total,
+    `lda()`'s tolerance). Never triggered by the reference data.
+12. **Registry:** row "Discriminant Canonical Analysis of Principal
+    Coordinates", id `capda`, aliases `capdiscriminant discriminantcap`,
+    before `capscale` in `ORDINATIONS`. `'CAP'` still selects `capscale`;
+    `'CAPdiscrim'` and `'discriminant CAP'` select `capda`. Checked with
+    the README snippet: `capda`, `capdiscriminant` and `discriminantcap`
+    each match only themselves, in `ORDINATIONS` only. `cap` begins
+    `capda`'s names too, but it is `capscale`'s exact alias, and exact
+    matches win (tested). `test-wrapper_args.r` passes.
+13. **Fixtures:** `data-raw/expected/capda.r` (BiodiversityR 2.18-1, vegan
+    2.7-8, MASS 7.3-60.0.1, permute 0.10-1). Cases: dune (Bray-Curtis) by
+    Management (m = 9), Use (m = 2) and Moisture (m = 1, a tie with m = 3);
+    mite by Shrub (37 positive axes; m = 7 with mmax = 10 and with the
+    default search). For each, `CAPdiscrim()` with m = 0, mmax = 10, and
+    with every fixed m. A singleton group on dune (MASS `CV = TRUE`, as
+    `CAPdiscrim()` stops there). The permutation case above. Largest
+    differences from `CAPdiscrim()`: δ² 3.7e-15 (relative), Pillai's trace
+    1.1e-15, scores 1.6e-14 (of the largest score); m, success rates and
+    leave-one-out classes identical. Permuted traces 6.0e-15 from MANOVA's;
+    p-values identical. Within strata (9999 permutations each): 0.189 vs
+    `adonis2()`'s 0.196.
+14. **Messages and docs pointing to `capda()`:** `lda_singular()`'s message
+    ("Use fewer features, or capda(), which runs LDA on the first few PCoA
+    axes of the distances between samples."), `lda()`'s "Singular tables"
+    section and example, the LDA paragraph of `vignette("ordination")` (a
+    new CAP paragraph and example, and a row in its table), the README and
+    `vignette("ecodive")` tables, `dist_ord()`'s docs, the "Supervised"
+    group of `pkgdown/_pkgdown.yml`, the ordination section's list, and
+    NEWS.
+15. **Speed:** most of the time is `pcoa()` of up to 50 axes. n = 1,000
+    with 5 groups: 2.4 s by default (`pcoa(n_axes = 50)` alone 2.5 s here,
+    with no gain from `cpus`; full `eigen()` 1.0 s), 0.34 s with
+    `max_pcoa_axes = 10` and 999 permutations, where `CAPdiscrim(mmax = 10)`
+    takes 1.6 s without permutations. n = 5,000: 26 s on 4 threads. The
+    leave-one-out step and the 999 permutations take milliseconds.

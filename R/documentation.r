@@ -119,7 +119,7 @@ NULL
 #' @keywords internal
 #'
 #' @section Ordination result:
-#'   Every ordination function ([pcoa()], [pca()], [rpca()], [dbrda()],
+#'   Every ordination function ([pcoa()], [pca()], [rpca()], [dbrda()], [capda()],
 #'   [capscale()], [mds()], [nmds()], [isomap()], [tsne()], [umap()], and so
 #'   [dist_ord()]) returns the same kind of
 #'   object: a numeric matrix with one row per sample and one column per

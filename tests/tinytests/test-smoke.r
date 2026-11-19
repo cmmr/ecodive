@@ -161,6 +161,7 @@
   expect_true(is_ord(isomap(dm, cpus = cpus), 'Isomap'))
   expect_true(is_ord(dbrda(dm, 'grp', meta, cpus = cpus), 'dbRDA'))
   expect_true(is_ord(capscale(dm, 'grp', meta, cpus = cpus), 'CAP'))
+  expect_true(is_ord(capda(dm, 'grp', meta, permutations = 9, cpus = cpus), 'CAP'))
   expect_true(is_ord(pca(counts, cpus = cpus), 'PC'))
   expect_true(is_ord(rpca(counts, cpus = cpus), 'RPCA'))
   expect_true(is_ord(rpca_phylo(ecodive::ex_counts, ecodive::ex_tree, cpus = cpus), 'RPCA', n = 4L))
@@ -262,6 +263,7 @@
   expect_true(drawn(o, 'x', meta, axes = c(1, 3)))
   expect_true(drawn(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'grp', meta))
   expect_true(drawn(lda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus)))  # one axis
+  expect_true(drawn(capda(dm, 'grp', meta, permutations = 0, cpus = cpus), 'grp', meta))  # one axis
   expect_true(drawn(pr))
   expect_true(drawn(ef))
   expect_true(drawn(ef, add = TRUE))

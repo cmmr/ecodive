@@ -75,6 +75,7 @@ plot(dm, 'Species', iris)
 | `umap()`     | Uniform Manifold Approximation and Projection  | `dm`   | Clusters, with more of the global layout kept than t-SNE.               |
 | `dbrda()`    | Distance-based Redundancy Analysis (db-RDA)    | `dm`   | Axes that sample metadata explain (a constrained ordination).           |
 | `capscale()` | Constrained Analysis of Principal Coordinates  | `dm`   | The same, as `vegan::capscale()` computes it.                           |
+| `capda()`    | Discriminant CAP (Anderson & Willis)           | `dm`   | Axes that best separate known groups, from any distances (supervised).  |
 | `rda()`      | Redundancy Analysis (RDA)                      | counts | Axes of (transformed) counts that sample metadata explain.              |
 | `cca()`      | Canonical Correspondence Analysis (CCA)        | counts | The same in the chi-square metric, for species with unimodal responses. |
 | `pca()`      | Principal Component Analysis (PCA)             | counts | Euclidean geometry of (transformed) counts, with feature loadings.      |
@@ -327,12 +328,28 @@ attr(ord, 'vip')
 `lda()`, linear discriminant analysis (LDA), finds Fisher's discriminant
 axes: those along which the groups are furthest apart relative to the
 variation within them, as `MASS::lda()` computes them. It needs more
-samples than features, so for microbiome tables run it on a few axes of an
-unconstrained ordination, such as `pcoa()`, rather than on the taxa.
+samples than features, so it suits a few measurements, not the taxa of a
+microbiome table.
 
 ```{r}
 ord <- lda(iris[, 1:4], 'Species', iris)
 attr(ord, 'prop')
+```
+
+For microbiome tables, and any distances, use `capda()`: canonical analysis
+of principal coordinates (CAP; Anderson & Willis 2003), the discriminant
+analysis of the first *m* axes of `pcoa()`. It chooses *m* as the number of
+axes that classifies the most samples correctly when each is left out in
+turn, reports that success, and tests the separation of the groups by
+permutation, as `BiodiversityR::CAPdiscrim()` does. It is not
+`capscale()`, which is a constrained ordination (db-RDA) under a similar
+name.
+
+```{r}
+ord <- capda(dm, 'Species', iris, permutations = 199)
+attr(ord, 'n_pcoa_axes')
+attr(ord, 'loo_table')
+attr(ord, 'p_value')
 ```
 
 `oplsda()`, orthogonal PLS-DA (OPLS-DA), separates two groups along one
@@ -352,7 +369,7 @@ c(r2x = attr(ord, 'r2x'), r2y = attr(ord, 'r2y'))
 
 A supervised ordination always separates the groups it is given: it looks
 for exactly that, and with more features than samples it finds a
-separation even in random data. So a PLS-DA or OPLS-DA plot is no evidence that the
+separation even in random data. So a PLS-DA, OPLS-DA or CAP plot is no evidence that the
 groups differ. Test the difference with a permutation test of the
 distances, such as `permanova()`, or estimate how well the groups of new
 samples are predicted by cross-validation.

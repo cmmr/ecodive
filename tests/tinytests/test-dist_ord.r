@@ -26,6 +26,7 @@
   # Sample metadata, for methods that need it.
   meta <- data.frame(row.names = rownames(m30), g = rep(c('a', 'b', 'c'), 10))
   args <- list(
+    capda    = list(groups = 'g', data = meta),
     capscale = list(groups = 'g', data = meta),
     dbrda    = list(groups = 'g', data = meta) )
 
@@ -65,6 +66,10 @@
   expect_identical(m('distance-based RDA'),  'dbrda')
   expect_identical(m('capscale'),            'capscale')
   expect_identical(m('CAP'),                 'capscale')
+  expect_identical(m('capda'),               'capda')
+  expect_identical(m('CAPdiscrim'),          'capda')
+  expect_identical(m('CAP discriminant'),    'capda')
+  expect_identical(m('discriminant CAP'),    'capda')
   expect_identical(m('t-SNE'),               'tsne')
   expect_identical(m('Rtsne'),               'tsne')
   expect_identical(m('Barnes-Hut t-SNE'),    'tsne')
@@ -82,17 +87,18 @@
   df <- list_dist_ords()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id'))
-  expect_identical(df$id, c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
-  expect_identical(rownames(list_dist_ords(nm = 'id')), c('capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
+  expect_identical(df$id, c('capda', 'capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
+  expect_identical(rownames(list_dist_ords(nm = 'id')), c('capda', 'capscale', 'dbrda', 'isomap', 'mds', 'nmds', 'pcoa', 'tsne', 'umap'))
 
   expect_identical(list_dist_ords(val = 'id', nm = 'name'),
-    c('Constrained Analysis of Principal Coordinates' = 'capscale',
+    c('Discriminant Canonical Analysis of Principal Coordinates' = 'capda',
+      'Constrained Analysis of Principal Coordinates' = 'capscale',
       'Distance-based Redundancy Analysis' = 'dbrda', 'Isometric Feature Mapping' = 'isomap',
       'Metric Multidimensional Scaling' = 'mds',
       'Non-metric Multidimensional Scaling' = 'nmds', 'Principal Coordinates Analysis' = 'pcoa',
       't-distributed Stochastic Neighbor Embedding' = 'tsne',
       'Uniform Manifold Approximation and Projection' = 'umap'))
-  expect_identical(list_dist_ords(val = 'func'), list(capscale = capscale, dbrda = dbrda, isomap = isomap, mds = mds, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
+  expect_identical(list_dist_ords(val = 'func'), list(capda = capda, capscale = capscale, dbrda = dbrda, isomap = isomap, mds = mds, nmds = nmds, pcoa = pcoa, tsne = tsne, umap = umap))
   expect_identical(list_dist_ords(val = 'list')$pcoa, match_dist_ord('pcoa'))
 
   # The same shape as list_count_ords() and match_count_ord().
@@ -102,7 +108,7 @@
 
   # Invalid input. ====
 
-  expect_error(dist_ord(d, 'xyz'),   'does not match any option: capscale, dbrda, isomap, mds, nmds, pcoa, tsne, umap')
+  expect_error(dist_ord(d, 'xyz'),   'does not match any option: capda, capscale, dbrda, isomap, mds, nmds, pcoa, tsne, umap')
   expect_error(dist_ord(d, 'm'),     'matches multiple options: mds, nmds')
   expect_error(dist_ord(d, 123),     'character')
   expect_error(dist_ord(d, c('pcoa', 'nmds')), 'length 1')

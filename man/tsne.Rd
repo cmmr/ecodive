@@ -258,7 +258,7 @@ platforms can give a different (but equally good) layout.
 }
 \section{Ordination result}{
 
-Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
+Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capda]{capda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
 \code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per

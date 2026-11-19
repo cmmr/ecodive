@@ -11,7 +11,7 @@ dist_ord(dm, method, ...)
 \code{\link[=beta_div]{beta_div()}}, or a symmetric matrix of distances. Every method
 listed by \code{list_dist_ords()} takes distances.}
 
-\item{method}{The name of an ordination method: \code{"capscale"},
+\item{method}{The name of an ordination method: \code{"capda"}, \code{"capscale"},
 \code{"dbrda"}, \code{"isomap"}, \code{"mds"}, \code{"nmds"}, \code{"pcoa"}, \code{"tsne"},
 or \code{"umap"}. Flexible matching is supported (see below).
 Programmatic access via \code{list_dist_ords()}.}
@@ -19,7 +19,8 @@ Programmatic access via \code{list_dist_ords()}.}
 \item{...}{Further arguments for the method's function, such as \code{n_axes},
 \code{seed}, \code{cpus}, or \code{pcoa}'s \code{correction}. Each method keeps its own
 defaults; see \code{\link[=capscale]{capscale()}} and \code{\link[=dbrda]{dbrda()}} (which also need \code{groups},
-or \code{data} and \code{formula}, as in \code{dist_ord(dm, 'dbrda', 'treatment', meta)}), \code{\link[=isomap]{isomap()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}}, and
+or \code{data} and \code{formula}, as in \code{dist_ord(dm, 'dbrda', 'treatment', meta)}), \code{\link[=capda]{capda()}} (which needs \code{groups}, and \code{data} if \code{groups}
+names a column of it), \code{\link[=isomap]{isomap()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=tsne]{tsne()}}, and
 \code{\link[=umap]{umap()}}. \code{seed} is ignored by the methods that have no random
 parts (\code{capscale}, \code{dbrda}, \code{isomap} and \code{pcoa}), so the same
 arguments can be given to every method.}
@@ -38,6 +39,7 @@ and \code{dist_test()}.
 \details{
 \strong{List of Ordination Methods}\tabular{ll}{
    Option / Function Name \tab Method Name \cr
+   \code{capda} \tab Discriminant Canonical Analysis of Principal Coordinates (CAP), supervised \cr
    \code{capscale} \tab Constrained Analysis of Principal Coordinates \cr
    \code{dbrda} \tab Distance-based Redundancy Analysis (db-RDA) \cr
    \code{isomap} \tab Isometric Feature Mapping (Isomap) \cr
@@ -58,7 +60,8 @@ ecodive's other tests are run by \code{\link[=dist_test]{dist_test()}}.
 
 Default numbers of axes differ: \code{n_axes = 3} for the methods whose axes
 have eigenvalues (\code{capscale}, \code{dbrda}, \code{isomap}, \code{pcoa}, and \code{\link[=pca]{pca()}} and
-\code{\link[=rpca]{rpca()}}), and \code{n_axes = 2} for those that fit a layout in a fixed number
+\code{\link[=rpca]{rpca()}}; \code{capda} returns up to 3, and at most one fewer than the number
+of groups), and \code{n_axes = 2} for those that fit a layout in a fixed number
 of dimensions (\code{mds}, \code{nmds}, \code{tsne}, and \code{umap}).
 
 \strong{Flexible name matching}
@@ -71,6 +74,8 @@ also work: \code{'PCO'}, \code{'cmdscale'}, or \code{'classical MDS'} for \code{
 \code{'Rtsne'}, \code{'bhtsne'}, or \code{'Barnes-Hut t-SNE'} for \code{tsne}; and \code{'uwot'}
 for \code{umap}. \code{'dbRDA'} or \code{'distance-based RDA'} select \code{dbrda}, and \code{'CAP'}
 selects \code{capscale} (but \code{'CA'} names \code{\link[=ca]{ca()}}, which takes a count table).
+\code{'CAPdiscrim'} (BiodiversityR's name) or \code{'discriminant CAP'} select
+\code{capda}, Anderson & Willis's discriminant CAP.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -85,7 +90,7 @@ masks the other's. Write \code{ecodive::pcoa()} and so on, or use
 }
 \section{Ordination result}{
 
-Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
+Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capda]{capda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
 \code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
@@ -130,7 +135,7 @@ matrix or data frame without the attributes.
 
 }
 \seealso{
-\code{\link[=capscale]{capscale()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}},
+\code{\link[=capda]{capda()}}, \code{\link[=capscale]{capscale()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=pcoa]{pcoa()}},
 \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, \code{\link[=list_dist_ords]{list_dist_ords()}}; \code{\link[=count_ord]{count_ord()}} for \code{\link[=pca]{pca()}},
 \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}}, \code{\link[=ca]{ca()}} and \code{\link[=rpca]{rpca()}}, which take a count table; \code{\link[=dist_test]{dist_test()}} for
 ecodive's tests.
