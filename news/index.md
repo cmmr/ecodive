@@ -585,6 +585,40 @@
   table and 0.08 for Bray-Curtis distances, where `vegan::ordiR2step()`
   takes 58 and 85. Results are identical for any number of `cpus`.
 
+- New [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) and
+  [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md), the
+  additive and isometric log-ratio transforms, complete the clr and rclr
+  that `norm` already offers.
+  [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) divides by
+  a `denominator` feature that you choose (there is no default:
+  scikit-bio uses the first feature and compositions the last).
+  [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) takes the
+  Helmert basis that scikit-bio uses by default, a sequential binary
+  partition (converted as scikit-bio’s `sbp_basis()`), or any
+  orthonormal basis, matched to the features by name. Both give the same
+  coordinates as scikit-bio’s
+  [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) and
+  [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md)
+  ([`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) to the
+  last bit, [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md)
+  to 1e-15), take every table type with zeros handled by the shared
+  `pseudocount` rule, and return a dense matrix in the input’s
+  orientation with `method`, `denominator` or `basis`, and `pseudocount`
+  attributes, ready for
+  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
+  [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md) or
+  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md). The
+  default basis is applied by a running sum, without a dense product:
+  2,000 samples by 5,000 taxa take 0.2 seconds, where
+  `normalize(x, 'clr') %*% t(basis)` takes 30 with R’s reference BLAS.
+  Euclidean distances on
+  [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) coordinates
+  are
+  [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md)
+  distances, for any basis. Results are identical for any number of
+  `cpus`.
+
 - New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   returns a count table after any of the transformations that

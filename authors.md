@@ -16,7 +16,8 @@
   uwot's C++ header library, followed by the UMAP code
 
 - **scikit-bio development team**. Contributor, copyright holder.  
-  PCoA biplot scores and BIOENV, from scikit-bio
+  PCoA biplot scores, BIOENV, and the alr and ilr transforms, from
+  scikit-bio
 
 - **Cameron Martino**. Contributor, copyright holder.  
   'gemelli' robust Aitchison PCA

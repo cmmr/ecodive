@@ -22,6 +22,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/adiv_percent_normalized.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/aitchison.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/alpha_div.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/alr.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/anosim.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_assert_integer.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_binary_normalized.html</loc></url>
@@ -62,6 +63,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/hamming.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/hellinger.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/horn.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/ilr.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/index.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/inv_simpson.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/isomap.html</loc></url>
@@ -69,6 +71,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/jensen.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/jsd.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/lda.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/log_ratio_pseudocount_section.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/lorentzian.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/manhattan.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mantel.html</loc></url>

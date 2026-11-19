@@ -500,6 +500,21 @@ Distance measures based on phylogenetic branch lengths (UniFrac family).
 - [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.md)
   : Variance-Adjusted Weighted UniFrac
 
+## Compositional Data
+
+Log ratios for relative abundances. The centered log ratios (clr and
+rclr) are norm choices; see normalize().
+
+### Log-ratio transforms
+
+Coordinates for analyses of the transformed features themselves. For
+distances, use aitchison().
+
+- [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) : Additive
+  Log-Ratio Transform
+- [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) : Isometric
+  Log-Ratio Transform
+
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods
