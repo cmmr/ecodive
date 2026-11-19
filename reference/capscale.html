@@ -223,7 +223,7 @@ of <code>cpus</code>.</p>
 <code>capscale()</code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, and so
 <code><a href="dist_ord.html">dist_ord()</a></code>) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
-axis, so that it can go straight into <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data frame. Rows are
+axis, so that it can go straight into a data frame. Rows are
 named after the samples, when the input has names. Columns are named
 after the method: <code>"PCoA1"</code>, <code>"PC1"</code>, <code>"RPCA1"</code>, <code>"dbRDA1"</code> or <code>"CAP1"</code>
 (then <code>"MDS1"</code> for unconstrained axes), <code>"MDS1"</code>, <code>"NMDS1"</code>,
@@ -241,9 +241,13 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
 </ul><p>Attributes particular to the method follow them. The matrix has class
-<code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), only so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
-other attributes by name rather than in full. Subsetting with <code>[</code>, or
-<code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, gives a plain matrix or data frame without them.</p>
+<code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
+other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
+samples on the first two axes, labelled from the attributes, with any
+loadings, constraints and centroids on top (see <code><a href="plot.ecodive_ord.html">plot.ecodive_ord()</a></code>).
+<code>plot(ord, "Species", iris)</code> colours the samples by a column of
+metadata. Subsetting with <code>[</code>, or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, gives a plain
+matrix or data frame without the attributes.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -267,7 +271,7 @@ ed.). Elsevier.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="va">dm</span>  <span class="op">&lt;-</span> <span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">capscale</span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="capscale-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           CAP1        CAP2        MDS1</span>

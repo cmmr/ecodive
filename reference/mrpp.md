@@ -301,7 +301,8 @@ Function Approach*. Springer, New York.
     dm <- bray(counts)
 
     # Are samples more alike within treatment groups?
-    mrpp(dm, 'treatment', meta)
+    res <- mrpp(dm, 'treatment', meta)
+    res
 #> Multi-response permutation procedure (MRPP)
 #> 
 #> delta = 0.2244, p = 0.001, z = -7.322
@@ -314,6 +315,12 @@ Function Approach*. Springer, New York.
 #> 
 #> Expected delta: 0.2438
 #> Chance-corrected within-group agreement A: 0.07954
+
+    # Each group's mean within-group distance, and the permutations.
+    plot(res)
+
+    plot(res, type = 'null')
+
 
     # The same, with the groups as a vector.
     res <- mrpp(dm, meta$treatment)

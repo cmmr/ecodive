@@ -211,13 +211,16 @@ Series*, 92, 205-219.
     dm <- bray(counts)
 
     # The best subset of each size.
-    bioenv(dm, env)
+    res <- bioenv(dm, env)
+    res
 #>   size          variables correlation
 #> 1    1                 ph   0.3950963
 #> 2    2              ph, n   0.5748103
 #> 3    3           ph, n, k   0.5094742
 #> 4    4    ph, n, k, depth   0.4120055
 #> 5    5 ph, n, p, k, depth   0.2998922
+    plot(res)
+
 
     # Only some variables, transformed, with subsets of up to two.
     bioenv(dm, env, ~ ph + log(n) + p, max_vars = 2)

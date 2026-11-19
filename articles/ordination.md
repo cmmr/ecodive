@@ -105,21 +105,24 @@ str(ord)
 #>  - attr(*, "constant")= num 0
 ```
 
-`prop` makes informative axis labels. PCoA axes share one scale, so plot
-them with `asp = 1` to keep distances true.
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the first
+two axes, and takes its labels from the attributes: the title from
+`method`, and each axis’s share of the variance from `prop`. Give
+`groups` (and `data`) as for the tests to colour the samples, with a
+legend. The axes share one scale (`asp = 1`), to keep distances true.
 
 ``` r
 
-pct <- round(100 * attr(ord, 'prop'), 1)
-
-plot(
-  ord, col = iris$Species, asp = 1,
-  xlab = paste0('PCoA1 (', pct[1], '%)'),
-  ylab = paste0('PCoA2 (', pct[2], '%)') )
-legend('topleft', levels(iris$Species), col = 1:3, pch = 1)
+plot(ord, 'Species', iris)
 ```
 
 ![](ordination_files/figure-html/unnamed-chunk-5-1.png)
+
+Any argument of
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html), such as
+`main`, `xlim` or `cex`, replaces the default, and `axes = c(1, 3)`
+plots other axes. See
+[`?plot.ecodive_ord`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md).
 
 ## Running methods by name
 
@@ -142,7 +145,7 @@ ords <- list(
 
 par(mfrow = c(2, 3), mar = c(2, 2, 2, 1))
 for (nm in names(ords))
-  plot(ords[[nm]], col = iris$Species, main = nm, xlab = '', ylab = '')
+  plot(ords[[nm]], 'Species', iris, main = nm, xlab = '', ylab = '', sub = '', legend = NULL)
 ```
 
 ![](ordination_files/figure-html/unnamed-chunk-6-1.png)
@@ -210,6 +213,15 @@ attr(ord, 'centroids')
 #> Speciesvirginica  -0.3575347 -0.3694093    0
 ```
 
+Its plot labels the centroid of each species, and gives the R^2 below:
+
+``` r
+
+plot(ord, 'Species', iris)
+```
+
+![](ordination_files/figure-html/unnamed-chunk-11-1.png)
+
 The first two axes (`dbRDA1`, `dbRDA2`) are constrained by species, and
 the third (`MDS1`) is the largest remaining variation. A formula can
 hold several variables, and `Condition()` removes the effect of one
@@ -244,7 +256,11 @@ head(attr(ord, 'loadings'))
 #> Sepal.Width   0.6627525 -0.01599961  0.03400069
 #> Petal.Length -0.7703689  0.03375146 -0.01565281
 #> Petal.Width  -0.7519133 -0.03006730  0.19051616
+
+plot(ord, 'Species', iris)
 ```
+
+![](ordination_files/figure-html/unnamed-chunk-13-1.png)
 
 db-RDA of Euclidean distances is RDA, so
 `rda(counts, ..., norm = 'hellinger')` has the same axes and R^2 as
@@ -314,7 +330,10 @@ vp
 #> [b]           sepal  2    0.0197        0.0164     TRUE
 #> [c] species & sepal NA    0.4919        0.4886    FALSE
 #> [d]       residuals NA    0.2596        0.2668    FALSE
+plot(vp)
 ```
+
+![](ordination_files/figure-html/unnamed-chunk-15-1.png)
 
 Only the unique fractions (`[a]` and `[b]` here, marked `testable`) can
 be tested, each by its set conditioned on the others; here `[b]`, sepal
@@ -373,7 +392,10 @@ fs
 #> Selected: ~Species + Sepal.Width
 attr(fs, 'selected')
 #> ~Species + Sepal.Width
+plot(fs)
 ```
+
+![](ordination_files/figure-html/unnamed-chunk-17-1.png)
 
 `principal_response_curves()`, which is planned, will also build on
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md).
@@ -432,10 +454,10 @@ the features by their importance to the separation.
 ``` r
 
 ord <- plsda(round(iris[, 1:4] * 10), 'Species', iris)
-plot(ord, col = iris$Species)
+plot(ord)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-19-1.png)
+![](ordination_files/figure-html/unnamed-chunk-20-1.png)
 
 ``` r
 
@@ -476,10 +498,10 @@ explains.
 
 two <- droplevels(subset(iris, Species != 'setosa'))
 ord <- oplsda(round(two[, 1:4] * 10), 'Species', two)
-plot(ord, col = two$Species)
+plot(ord)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-21-1.png)
+![](ordination_files/figure-html/unnamed-chunk-22-1.png)
 
 ``` r
 
@@ -525,7 +547,10 @@ does for the methods that take distances: `count_ord(counts, 'pca')` is
 `norm = 'clr'` (centered log-ratios, with a `pseudocount` for zeros) or
 `norm = 'hellinger'` (square-root proportions, a common choice for
 community data); `scale = TRUE` gives every feature equal weight. The
-`loadings` attribute holds each feature’s direction, for a biplot.
+`loadings` attribute holds each feature’s direction, and
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws them as
+arrows, for a biplot (the ten longest, by default; `loadings = Inf`
+draws them all).
 
 ``` r
 
@@ -538,13 +563,10 @@ attr(ord, 'loadings')
 #> Petal.Length  0.5804131 0.02449161  0.1421264
 #> Petal.Width   0.5648565 0.06694199  0.6342727
 
-load <- attr(ord, 'loadings') * 3
-plot(ord, col = iris$Species, asp = 1)
-arrows(0, 0, load[, 1], load[, 2], length = 0.1)
-text(load[, 1:2], labels = rownames(load), pos = 4)
+plot(ord, 'Species', iris)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-23-1.png)
+![](ordination_files/figure-html/unnamed-chunk-24-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -615,15 +637,13 @@ fit
 #> Speciesversicolor 0.8649502   0.001 70.45196
 #> Speciesvirginica  0.8649502   0.001 70.45196
 
-# An arrow for each measurement, longer for a better fit.
-vec <- fit[is.na(fit$level), ]
-xy  <- vec[, c('PCoA1', 'PCoA2')] * sqrt(vec$r2) * 0.1
-plot(ord, col = iris$Species, asp = 1)
-arrows(0, 0, xy$PCoA1, xy$PCoA2, length = 0.1)
-text(xy, labels = vec$variable, pos = 1, cex = 0.8)
+# An arrow for each measurement, longer for a better fit, and a label for
+# each species' centroid.
+plot(ord, 'Species', iris)
+plot(fit, add = TRUE)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-27-1.png)
+![](ordination_files/figure-html/unnamed-chunk-28-1.png)
 
 ## Comparing two ordinations
 
@@ -663,18 +683,17 @@ procrustes_test(uf, bc)
 ```
 
 The rotated UniFrac coordinates are the result itself, and the
-Bray-Curtis ones it was fitted to are its `target` attribute, so a line
-from each sample’s one point to the other shows where the two metrics
-disagree.
+Bray-Curtis ones it was fitted to are its `target` attribute.
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws an arrow
+from each sample’s rotated point to its target, which shows where the
+two metrics disagree.
 
 ``` r
 
-xy <- attr(fit, 'target')
-plot(xy, asp = 1, pch = 16, xlab = 'Axis 1', ylab = 'Axis 2')
-arrows(xy[, 1], xy[, 2], fit[, 1], fit[, 2], length = 0.05, col = 'grey40')
+plot(fit)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-29-1.png)
+![](ordination_files/figure-html/unnamed-chunk-30-1.png)
 
 ## Speed and reproducibility
 

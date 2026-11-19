@@ -350,12 +350,14 @@ of explanatory variables. *Ecology*, 89, 2623-2632.
 #> Stopped: adjusted R-squared would exceed the global model's.
 #> Next best: depth (adj. R-squared 0.6217)
 #> Selected: ~ph + temp
+    plot(fs)
+
 
     # db-RDA on Bray-Curtis distances, then partition the variation.
     fs <- forward_select(bray(counts), ~ ph + temp + depth + site, meta)
     attr(fs, 'selected')
 #> ~ph + temp
-#> <environment: 0x5eef5a17b7b8>
+#> <environment: 0x5da986f3dde8>
     varpart(bray(counts), env = attr(fs, 'selected'), site = ~ site, data = meta)
 #> Variation partitioning by db-RDA: 40 samples, 2 sets
 #> Total inertia: 1.5469

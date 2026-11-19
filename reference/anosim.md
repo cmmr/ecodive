@@ -270,7 +270,8 @@ in Ecology and Evolution*, 3(1), 89-101.
     dm <- bray(counts)
 
     # Are samples more alike within treatment groups than between them?
-    anosim(dm, 'treatment', meta)
+    res <- anosim(dm, 'treatment', meta)
+    res
 #> Analysis of similarities (ANOSIM)
 #> 
 #> R = 0.3217, p = 0.001, z = 6.742
@@ -282,6 +283,8 @@ in Ecology and Evolution*, 3(1), 89-101.
 #> ctrl       45   221.111
 #> high       45    43.500
 #> low        45   244.644
+    plot(res)
+
 
     # The same, with the groups as a vector.
     anosim(dm, meta$treatment)

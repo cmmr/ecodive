@@ -262,8 +262,7 @@ Every ordination function
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
-sample and one column per axis, so that it can go straight into
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
+sample and one column per axis, so that it can go straight into a data
 frame. Rows are named after the samples, when the input has names.
 Columns are named after the method: `"PCoA1"`, `"PC1"`, `"RPCA1"`,
 `"dbRDA1"` or `"CAP1"` (then `"MDS1"` for unconstrained axes), `"MDS1"`,
@@ -298,11 +297,17 @@ one value per column:
   it to label axes. `NA` where it isn't defined.
 
 Attributes particular to the method follow them. The matrix has class
-`"ecodive_ord"` (as well as `"matrix"`), only so that
+`"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
-attributes by name rather than in full. Subsetting with `[`, or
+attributes by name rather than in full, and
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+samples on the first two axes, labelled from the attributes, with any
+loadings, constraints and centroids on top (see
+[`plot.ecodive_ord()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)).
+`plot(ord, "Species", iris)` colours the samples by a column of
+metadata. Subsetting with `[`, or
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html), gives a
-plain matrix or data frame without them.
+plain matrix or data frame without the attributes.
 
 ## Input Types
 
@@ -359,7 +364,7 @@ Chapman & Hall/CRC.
 ``` r
     counts <- round(iris[, 1:4] * 10)
     ord    <- cca(counts, 'Species', iris)
-    plot(ord, col = iris$Species)
+    plot(ord, 'Species', iris)
 
     attr(ord, 'r_squared')
 #> [1] 0.9422429

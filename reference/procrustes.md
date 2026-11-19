@@ -159,9 +159,11 @@ number from each ordination, as the default `axes` does.
   matched by name.
 
 - The result is the rotated ordination itself, with the rest as
-  attributes. There are no
-  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or
-  [`fitted()`](https://rdrr.io/r/stats/fitted.values.html) methods.
+  attributes. [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  draws it with an arrow from each sample to its place in `target` (see
+  [`plot.ecodive_ord()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md));
+  there is no [`fitted()`](https://rdrr.io/r/stats/fitted.values.html)
+  method.
 
 **Same names in other packages**
 
@@ -217,6 +219,10 @@ approach over the Mantel test. *Oecologia*, 129(2), 169-178.
 #> 0.24588617 0.36725760 0.23591621 0.18771922 0.23811780 0.60565469 0.23559225 
 #>        S29        S30 
 #> 0.18422628 0.10820729 
+
+    # Each sample's arrow points to where it lies in the target.
+    plot(fit)
+
 
     # Symmetric: m^2 between 0 and 1.
     attr(procrustes(jc, bc, symmetric = TRUE), 'ss')

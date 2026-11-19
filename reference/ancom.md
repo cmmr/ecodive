@@ -266,7 +266,8 @@ Microbiology*, 8, 2114.
       c(23, 21, 14, 10, 10, 10, 10) )
     colnames(x) <- paste0('b', 1:7)
     grp <- rep(c('treatment', 'placebo'), each = 3)
-    ancom(x, grp)
+    res <- ancom(x, grp)
+    res
 #>   feature W reject
 #> 1      b1 0  FALSE
 #> 2      b2 4   TRUE
@@ -275,6 +276,8 @@ Microbiology*, 8, 2114.
 #> 5      b5 1  FALSE
 #> 6      b6 0  FALSE
 #> 7      b7 1  FALSE
+    plot(res)
+
 
     # A table with zeros: replace them first.
     grp <- c('oral', 'oral', 'other', 'other')

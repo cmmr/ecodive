@@ -418,7 +418,14 @@ sample and one column per axis.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 89.0  9.3  2.9</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Colored by a column of metadata, with a legend; the title and axis</span></span>
+<span><span class="co"># labels come from the result.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws any of ecodive’s results from what it
+already holds: ordinations with their loadings, constraints and
+centroids, the permutation distributions of tests, and the results of
+<code><a href="../reference/envfit.html">envfit()</a></code>, <code><a href="../reference/simper.html">simper()</a></code>, <code><a href="../reference/varpart.html">varpart()</a></code>,
+<code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code> and the rest.</p>
 <ul>
 <li>Further reading: <code><a href="../articles/ordination.html">vignette('ordination')</a></code>
 </li>

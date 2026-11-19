@@ -326,6 +326,34 @@ Which taxa drive the differences between groups.
 - [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md) :
   Similarity Percentages (SIMPER)
 
+## Plotting
+
+plot() methods for ecodive’s results. They draw what a result already
+holds, with titles, labels and legends taken from its attributes, in
+base graphics.
+
+- [`plot(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)
+  : Plot an ordination
+- [`plot(`*`<ecodive_envfit>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.md)
+  : Plot fitted variables
+- [`plot(`*`<ecodive_test>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_test.md)
+  [`plot(`*`<ecodive_mrpp>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_test.md)
+  [`plot(`*`<ecodive_permdisp>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_test.md)
+  [`plot(`*`<ecodive_procrustes_test>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_test.md)
+  : Plot a permutation test
+- [`plot(`*`<ecodive_simper>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_simper.md)
+  : Plot a SIMPER result
+- [`plot(`*`<ecodive_dirmult_ttest>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_ttest.md)
+  : Plot a Dirichlet-multinomial t-test
+- [`plot(`*`<ecodive_ancom>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.md)
+  : Plot an ANCOM result
+- [`plot(`*`<ecodive_varpart>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.md)
+  : Plot a variation partitioning
+- [`plot(`*`<ecodive_forward_select>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.md)
+  : Plot a forward selection
+- [`plot(`*`<ecodive_bioenv>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.md)
+  : Plot a BIO-ENV result
+
 ## Utilities & Helpers
 
 Tools for programmatic access, data manipulation, and configuration.

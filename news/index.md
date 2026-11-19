@@ -13,6 +13,48 @@
   give an overview of everything the package does. The package title is
   now “Parallel and Memory-Efficient Ecological Diversity Analysis”.
 
+- New [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods
+  draw ecodive’s results with base graphics (only ‘graphics’ and
+  ‘grDevices’, from R 3.6.0 on), taking their titles, axis labels,
+  subtitles and legends from what each result holds, and computing
+  nothing new:
+
+  - Ordinations
+    ([`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
+    [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+    [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
+    [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
+    [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md),
+    …) draw two axes, labelled with their share of the variance, with
+    the method’s fit in the subtitle (stress, R-squared, …).
+    `plot(ord, "Species", iris)` colours the samples by a column of
+    metadata, with a legend, by the same `groups` and `data` as the
+    tests; supervised ordinations colour by their own groups. Loadings,
+    constraint arrows, centroids and a Procrustes rotation’s target are
+    drawn on top.
+  - `plot(envfit(...), add = TRUE)` adds the fitted variables to an
+    ordination plot.
+  - Permutation tests show the permutation distribution of their
+    statistic, with the observed value marked;
+    [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) and
+    [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md)
+    show each group’s within-group distance or dispersion, and
+    [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
+    its Procrustes fit (each with `type = "null"` for the distribution).
+  - [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md)
+    gives a dot chart of the taxa that contribute most to each pair’s
+    dissimilarity,
+    [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+    a volcano plot,
+    [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) a dot
+    chart of W,
+    [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md) a
+    Venn diagram of the fractions (two to four sets),
+    [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
+    the adjusted R-squared at each step, and
+    [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) the
+    best correlation for each number of variables.
+
 - New [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) runs
   a principal coordinates analysis (classical multidimensional scaling)
   on a `dist` object, such as from

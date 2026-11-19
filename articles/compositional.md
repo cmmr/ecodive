@@ -390,14 +390,14 @@ ord <- rpca(counts, n_axes = 2)
 round(attr(ord, 'prop'), 3)   # proportion of variance per axis
 #> [1] 0.931 0.069
 
-grp <- factor(groups[match(rownames(ord), rownames(counts))])
-plot(ord[, 1], ord[, 2], col = c('#4E9FDE', '#E8854A')[grp], pch = 19,
-     xlab = 'RPCA1', ylab = 'RPCA2', main = 'Robust Aitchison PCA')
-legend('topright', levels(grp), col = c('#4E9FDE', '#E8854A'), pch = 19)
+# A biplot: the samples by group, and the ten longest taxon loadings.
+grp <- groups[match(rownames(ord), rownames(counts))]
+plot(ord, grp, col = c('#4E9FDE', '#E8854A'))
 ```
 
-![RPCA ordination of the simulated samples, coloured by
-group.](compositional_files/figure-html/rpca-1.png)
+![RPCA biplot of the simulated samples, coloured by group, with arrows
+for the taxa with the longest
+loadings.](compositional_files/figure-html/rpca-1.png)
 
 A clr PCA (`pca(counts, norm = 'clr', pseudocount = 1)`) or a PCoA of
 the Aitchison distances (`pcoa(dm_ait)`) gives the classic “Aitchison

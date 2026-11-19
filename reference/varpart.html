@@ -326,6 +326,8 @@ comparison of fractions. <em>Ecology</em>, 87, 2614-2625.
 <span class="r-out co"><span class="r-pr">#&gt;</span> [b]       space  2    0.0631        0.0150     TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [c] env &amp; space NA    0.0097        0.0076    FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [d]   residuals NA    0.8547        0.9524    FALSE</span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">vp</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="varpart-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># db-RDA on Bray-Curtis distances; a set may be a matrix.</span></span></span>
 <span class="r-in"><span>    <span class="fu">varpart</span><span class="op">(</span><span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>, <span class="op">~</span> <span class="va">ph</span> <span class="op">+</span> <span class="va">temp</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">meta</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'x'</span>, <span class="st">'y'</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">meta</span><span class="op">)</span></span></span>

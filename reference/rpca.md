@@ -209,15 +209,13 @@ The scores are \\u\\\mathrm{diag}(s)\\ and the loadings are the unit
 vectors \\v\\: a distance (form) biplot, in which distances between
 samples are preserved and each feature's arrow shows the direction in
 which its robust clr increases. (gemelli, and QIIME 2's Emperor, plot
-\\u\\ and \\v\\.) The loadings are much shorter than the scores, so
-scale them for display, e.g.
+\\u\\ and \\v\\.) The loadings are much shorter than the scores;
+`plot(ord)` scales them to fit among the samples and draws them as
+arrows (see
+[`plot.ecodive_ord()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)):
 
-    ord  <- rpca(ex_counts, n_axes = 2)
-    load <- attr(ord, 'loadings')
-    f    <- 0.8 * max(abs(ord)) / max(abs(load))
-    plot(ord, asp = 1)
-    arrows(0, 0, f * load[, 1], f * load[, 2], length = 0.05, col = 'grey')
-    text(f * load, rownames(load), cex = 0.7)
+    ord <- rpca(ex_counts, n_axes = 2)
+    plot(ord)
 
 **Iterations**
 
@@ -320,8 +318,7 @@ Every ordination function
 [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), and so
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md))
 returns the same kind of object: a numeric matrix with one row per
-sample and one column per axis, so that it can go straight into
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
+sample and one column per axis, so that it can go straight into a data
 frame. Rows are named after the samples, when the input has names.
 Columns are named after the method: `"PCoA1"`, `"PC1"`, `"RPCA1"`,
 `"dbRDA1"` or `"CAP1"` (then `"MDS1"` for unconstrained axes), `"MDS1"`,
@@ -355,11 +352,17 @@ one value per column:
   it to label axes. `NA` where it isn't defined.
 
 Attributes particular to the method follow them. The matrix has class
-`"ecodive_ord"` (as well as `"matrix"`), only so that
+`"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
-attributes by name rather than in full. Subsetting with `[`, or
+attributes by name rather than in full, and
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+samples on the first two axes, labelled from the attributes, with any
+loadings, constraints and centroids on top (see
+[`plot.ecodive_ord()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)).
+`plot(ord, "Species", iris)` colours the samples by a column of
+metadata. Subsetting with `[`, or
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html), gives a
-plain matrix or data frame without them.
+plain matrix or data frame without the attributes.
 
 ## Input Types
 
@@ -411,7 +414,7 @@ the same over the nodes of a phylogenetic tree;
 
 ``` r
     ord <- rpca(iris[, 1:4])
-    plot(ord, col = iris$Species)
+    plot(ord, 'Species', iris)
 
     head(ord)
 #>       RPCA1        RPCA2        RPCA3

@@ -262,9 +262,8 @@ Oksanen, J., et al. vegan: Community Ecology Package. `envfit()`.
 #> Speciesversicolor   0.001 70.18593
 #> Speciesvirginica    0.001 70.18593
 
-    # A biplot of the measurements.
-    vec <- fit[is.na(fit$level), ]
-    plot(ord, col = iris$Species)
-    arrows(0, 0, vec$PCoA1 * sqrt(vec$r2) * 0.1, vec$PCoA2 * sqrt(vec$r2) * 0.1)
+    # A biplot: the fit drawn on the ordination.
+    plot(ord, 'Species', iris)
+    plot(fit, add = TRUE)
 
 ```

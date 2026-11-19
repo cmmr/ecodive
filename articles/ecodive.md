@@ -310,8 +310,20 @@ head(ord, 3)
 round(100 * attr(ord, 'prop'), 1)
 #> [1] 89.0  9.3  2.9
 
-plot(ord, col = iris$Species)
+# Colored by a column of metadata, with a legend; the title and axis
+# labels come from the result.
+plot(ord, 'Species', iris)
 ```
+
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws any of
+ecodive’s results from what it already holds: ordinations with their
+loadings, constraints and centroids, the permutation distributions of
+tests, and the results of
+[`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),
+[`simper()`](https://cmmr.github.io/ecodive/reference/simper.md),
+[`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md),
+[`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+and the rest.
 
 - Further reading:
   [`vignette('ordination')`](https://cmmr.github.io/ecodive/articles/ordination.md)

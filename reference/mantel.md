@@ -207,7 +207,8 @@ regression approach. *Cancer Research*, 27(2), 209-220.
 
     # Are samples that differ more in pH also more different in
     # community composition?
-    mantel(dm, ph)
+    res <- mantel(dm, ph)
+    res
 #> Mantel test (Pearson)
 #> 
 #> r = 0.593, p = 0.001, z = 9.786
@@ -216,6 +217,8 @@ regression approach. *Cancer Research*, 27(2), 209-220.
 #> Correlation: Pearson's product-moment correlation
 #> Alternative: greater (r is more positive than by chance)
 #> Samples: 30
+    plot(res)
+
 
     # With rank correlation.
     mantel(dm, ph, method = 'spearman')

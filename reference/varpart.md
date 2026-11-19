@@ -329,6 +329,8 @@ comparison of fractions. *Ecology*, 87, 2614-2625.
 #> [b]       space  2    0.0631        0.0150     TRUE
 #> [c] env & space NA    0.0097        0.0076    FALSE
 #> [d]   residuals NA    0.8547        0.9524    FALSE
+    plot(vp)
+
 
     # db-RDA on Bray-Curtis distances; a set may be a matrix.
     varpart(bray(counts), ~ ph + temp, as.matrix(meta[, c('x', 'y')]), data = meta)

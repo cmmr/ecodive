@@ -52,6 +52,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 | Comparing ordinations |  | [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md), [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md) |
 | Model building |  | [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md), [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md), [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) |
 | Statistical tests | [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md) | [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md), [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md), [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md), [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md), [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md) |
+| Plotting |  | [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of ordinations, tests, [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md), [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md), [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md), and the other results |
 | Data preparation |  | [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md), [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md), [`read_tree()`](https://cmmr.github.io/ecodive/reference/read_tree.md) |
 
 Each wrapper runs its functions by name, such as
@@ -178,10 +179,10 @@ head(ord, 3)
 round(100 * attr(ord, 'prop'), 1)
 #> [1] 89.0  9.3  2.9
 
-# Any method by name.
-plot(dist_ord(dm, 'pcoa'), col = iris$Species)
-plot(dist_ord(dm, 'nmds'), col = iris$Species)
-plot(dist_ord(dm, 'umap'), col = iris$Species)
+# Any method by name, coloured by a column of metadata.
+plot(dist_ord(dm, 'pcoa'), 'Species', iris)
+plot(dist_ord(dm, 'nmds'), 'Species', iris)
+plot(dist_ord(dm, 'umap'), 'Species', iris)
 ```
 
 ![PCoA, NMDS and UMAP ordinations of the iris data, colored by

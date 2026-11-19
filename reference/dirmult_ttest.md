@@ -318,7 +318,8 @@ scale uncertainty into differential expression analyses using ALDEx2.
     colnames(x) <- paste0('b', 1:7)
     grp <- rep(c('treatment', 'placebo'), each = 3)
 
-    dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
+    res <- dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
+    res
 #>   feature          t   log2_fc   ci_lower  ci_upper     p_value  p_adjusted
 #> 1      b1 -15.441403 -4.999191 -7.8190476 -2.300428 0.003106233 0.018637397
 #> 2      b2 -16.971123 -2.521372 -3.7194332 -1.332911 0.001024445 0.007171115
@@ -335,6 +336,8 @@ scale uncertainty into differential expression analyses using ALDEx2.
 #> 5  FALSE
 #> 6  FALSE
 #> 7  FALSE
+    plot(res)
+
 
     # With a scale model, the intervals widen and fewer features are
     # rejected.

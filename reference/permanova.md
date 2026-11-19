@@ -351,6 +351,10 @@ community data: a comment on distance-based redundancy analysis.
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
+    # The pseudo-F of each permutation, and the observed one.
+    plot(res)
+
+
     # The same, with the groups as a vector.
     permanova(dm, meta$treatment)
 #> Permutational multivariate analysis of variance (PERMANOVA)

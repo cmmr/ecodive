@@ -192,7 +192,9 @@ with fewer axes with zeros. Give <code>axes</code> to do the same.</p></li>
 <li><p><code>ord</code> and <code>target</code> may be <code>dist</code> objects, and their samples are
 matched by name.</p></li>
 <li><p>The result is the rotated ordination itself, with the rest as
-attributes. There are no <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> methods.</p></li>
+attributes. <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws it with an arrow from each sample to its
+place in <code>target</code> (see <code><a href="plot.ecodive_ord.html">plot.ecodive_ord()</a></code>); there is no <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code>
+method.</p></li>
 </ul><p><strong>Same names in other packages</strong></p>
 <p><code>vegan::procrustes()</code> takes its arguments the other way round (see
 above). When both packages are attached, the one attached last masks the
@@ -240,6 +242,10 @@ the Mantel test. <em>Oecologia</em>, 129(2), 169-178.
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.24588617 0.36725760 0.23591621 0.18771922 0.23811780 0.60565469 0.23559225 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        S29        S30 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.18422628 0.10820729 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Each sample's arrow points to where it lies in the target.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="procrustes-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Symmetric: m^2 between 0 and 1.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu">procrustes</span><span class="op">(</span><span class="va">jc</span>, <span class="va">bc</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">'ss'</span><span class="op">)</span></span></span>

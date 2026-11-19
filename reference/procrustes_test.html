@@ -210,7 +210,8 @@ the Mantel test. <em>Oecologia</em>, 129(2), 169-178.
 <span class="r-in"><span>    <span class="va">jc</span> <span class="op">&lt;-</span> <span class="fu"><a href="pcoa.html">pcoa</a></span><span class="op">(</span><span class="fu"><a href="jaccard.html">jaccard</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Do the Bray-Curtis and Jaccard PCoAs agree?</span></span></span>
-<span class="r-in"><span>    <span class="fu">procrustes_test</span><span class="op">(</span><span class="va">jc</span>, <span class="va">bc</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">procrustes_test</span><span class="op">(</span><span class="va">jc</span>, <span class="va">bc</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Procrustes randomization test (PROTEST)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> r = 0.7103, p = 0.001, z =   6.3</span>
@@ -218,6 +219,10 @@ the Mantel test. <em>Oecologia</em>, 129(2), 169-178.
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Symmetric Procrustes sum of squares (m^2): 0.4955</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Samples: 30, axes: 2</span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="procrustes_test-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">'null'</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="procrustes_test-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

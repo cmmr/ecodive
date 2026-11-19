@@ -167,7 +167,8 @@ each, and three species.</p>
 grouping variable as a column name of <code>data</code>, or as a
 vector.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
+<span><span class="va">res</span></span>
 <span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F = 532.7, p = 0.001, z = 577.6</span></span>
@@ -186,11 +187,16 @@ vector.</p>
 (<code>p</code>). The p-value cannot be smaller than 1 /
 (<code>permutations</code> + 1), so use more permutations for a more
 precise one.</p>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> shows the pseudo-<span class="math inline">F</span> of every permutation, and the observed one
+far beyond them:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="stat_tests_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="576"></p>
 <p>A <code>formula</code> tests several variables at once.
 <code>by = 'terms'</code> tests each in turn, as <code>adonis2()</code>
 does, and <code>strata</code> restricts permutations to within blocks
 (such as subjects in a repeated-measures design).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, data <span class="op">=</span> <span class="va">iris</span>, formula <span class="op">=</span> <span class="op">~</span> <span class="va">Species</span> <span class="op">+</span> <span class="va">Sepal.Width</span>, by <span class="op">=</span> <span class="st">'terms'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -214,10 +220,11 @@ does, and <code>strata</code> restricts permutations to within blocks
 center but different spreads. <code><a href="../reference/permdisp.html">permdisp()</a></code> tests the spread
 on its own; a significant result means a PERMANOVA difference may come
 partly or wholly from dispersion.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/permdisp.html">permdisp</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/permdisp.html">permdisp</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Some squared distances to group centres are negative, and were set to</span></span>
 <span><span class="co">#&gt; 0.</span></span>
+<span><span class="va">res</span></span>
 <span><span class="co">#&gt; Homogeneity of multivariate dispersions (PERMDISP)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F = 0.5676, p = 0.573, z = -0.4401</span></span>
@@ -229,7 +236,9 @@ partly or wholly from dispersion.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;            Df  Sum Sq   Mean Sq     F N.Perm Pr(&gt;F)</span></span>
 <span><span class="co">#&gt; Groups      2 0.00057 0.0002852 0.568    999  0.573</span></span>
-<span><span class="co">#&gt; Residuals 147 0.07386 0.0005024</span></span></code></pre></div>
+<span><span class="co">#&gt; Residuals 147 0.07386 0.0005024</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="stat_tests_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="576"></p>
 <p>Here the three species are equally spread, so the PERMANOVA result
 above reflects a real difference in their centers. The warning comes
 from Bray-Curtis distances not being Euclidean: a flower can then sit at
@@ -243,7 +252,7 @@ a negative squared distance from its species’ center, which
 between groups. <code>R</code> near 1 means every group is distinct, and
 near 0 means no difference. <code><a href="../reference/mrpp.html">mrpp()</a></code> compares the average
 distance within groups with what random groups would give.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/anosim.html">anosim</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Analysis of similarities (ANOSIM)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -257,7 +266,8 @@ distance within groups with what random groups would give.</p>
 <span><span class="co">#&gt; versicolor  1225   2457.85</span></span>
 <span><span class="co">#&gt; virginica   1225   2418.15</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/mrpp.html">mrpp</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrpp.html">mrpp</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
+<span><span class="va">res</span></span>
 <span><span class="co">#&gt; Multi-response permutation procedure (MRPP)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; delta = 0.05795, p = 0.001, z = -78.9</span></span>
@@ -270,6 +280,14 @@ distance within groups with what random groups would give.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Expected delta: 0.158</span></span>
 <span><span class="co">#&gt; Chance-corrected within-group agreement A: 0.6332</span></span></code></pre></div>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> of an MRPP result shows each group’s mean
+within-group distance, with their weighted mean (the observed <span class="math inline">\delta</span>) and the mean of all distances (the
+<span class="math inline">\delta</span> expected by chance);
+<code>type = 'null'</code> shows the permutations instead, as for the
+other tests.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="stat_tests_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="pairwise-comparisons">Pairwise comparisons<a class="anchor" aria-label="anchor" href="#pairwise-comparisons"></a>
@@ -280,7 +298,7 @@ each pair of groups’ samples, and adjusts the pairs’ p-values for
 multiple testing (Holm’s method by default; <code>p_adjust = 'BH'</code>
 controls the false discovery rate instead). The overall result is
 unchanged.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">res</span><span class="op">$</span><span class="va">pairwise</span></span>
 <span><span class="co">#&gt;                               F        R2         z   n n_perm p_value</span></span>
@@ -295,7 +313,7 @@ unchanged.</p>
 <code>p_adjusted</code> the value to report. <code><a href="../reference/anosim.html">anosim()</a></code> and
 <code><a href="../reference/mrpp.html">mrpp()</a></code> take the same arguments, and <code><a href="../reference/permdisp.html">permdisp()</a></code>
 adds adjusted p-values to its pairwise t tests:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/permdisp.html">permdisp</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, pairwise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">pairwise</span></span>
 <span><span class="co">#&gt; Warning: Some squared distances to group centres are negative, and were set to</span></span>
 <span><span class="co">#&gt; 0.</span></span>
@@ -316,11 +334,12 @@ variable, or with a second distance matrix: here, whether flowers with
 similar petals also have similar sepals. <code>method</code> can be
 <code>'pearson'</code>, <code>'spearman'</code>, or
 <code>'kendall'</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sepals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">petals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/mantel.html">mantel</a></span><span class="op">(</span><span class="va">sepals</span>, <span class="va">petals</span>, method <span class="op">=</span> <span class="st">'spearman'</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mantel.html">mantel</a></span><span class="op">(</span><span class="va">sepals</span>, <span class="va">petals</span>, method <span class="op">=</span> <span class="st">'spearman'</span><span class="op">)</span></span>
+<span><span class="va">res</span></span>
 <span><span class="co">#&gt; Mantel test (Spearman)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; r =  0.69, p = 0.001, z = 35.65</span></span>
@@ -328,11 +347,13 @@ similar petals also have similar sepals. <code>method</code> can be
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Correlation: Spearman's rank correlation rho</span></span>
 <span><span class="co">#&gt; Alternative: greater (r is more positive than by chance)</span></span>
-<span><span class="co">#&gt; Samples: 150</span></span></code></pre></div>
+<span><span class="co">#&gt; Samples: 150</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="stat_tests_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="576"></p>
 <p><code><a href="../reference/mantel_partial.html">mantel_partial()</a></code> removes the effect of a third set of
 distances, <code>given</code>: here, whether sepals and petals still
 match after accounting for petal width alone.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/mantel_partial.html">mantel_partial</a></span><span class="op">(</span><span class="va">sepals</span>, <span class="va">petals</span>, given <span class="op">=</span> <span class="st">'Petal.Width'</span>, data <span class="op">=</span> <span class="va">iris</span>, method <span class="op">=</span> <span class="st">'spearman'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Partial Mantel test (Spearman)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -351,7 +372,7 @@ match after accounting for petal width alone.</p>
 variable suits the test (categorical or numeric), and names are matched
 forgivingly: <code>'adonis2'</code> finds <code>permanova</code> and
 <code>'betadisper'</code> finds <code>permdisp</code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_test.html">dist_test</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'adonis2'</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -368,7 +389,7 @@ forgivingly: <code>'adonis2'</code> finds <code>permanova</code> and
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>Each result converts to a one-row data frame with the same columns,
 so several tests combine into one table.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tests</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dist_tests.html">list_dist_tests</a></span><span class="op">(</span>val <span class="op">=</span> <span class="st">'id'</span>, groups <span class="op">=</span> <span class="st">'categorical'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">tests</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">test</span><span class="op">)</span></span>
@@ -388,7 +409,7 @@ so several tests combine into one table.</p>
 <code>seed</code> (default <code>0</code>), so the same call always
 gives the same p-value, on any computer and with any number of
 <code>cpus</code>. R’s <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> has no effect.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">)</span></span>

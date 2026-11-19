@@ -45,7 +45,8 @@ name of `data`, or as a vector.
 
 ``` r
 
-permanova(dm, 'Species', iris)
+res <- permanova(dm, 'Species', iris)
+res
 #> Permutational multivariate analysis of variance (PERMANOVA)
 #> 
 #> F = 532.7, p = 0.001, z = 577.6
@@ -65,6 +66,16 @@ Species explain most of the variation between flowers (`R2`), and no
 permutation of the labels did as well (`p`). The p-value cannot be
 smaller than 1 / (`permutations` + 1), so use more permutations for a
 more precise one.
+
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) shows the
+pseudo-F of every permutation, and the observed one far beyond them:
+
+``` r
+
+plot(res)
+```
+
+![](stat_tests_files/figure-html/unnamed-chunk-4-1.png)
 
 A `formula` tests several variables at once. `by = 'terms'` tests each
 in turn, as `adonis2()` does, and `strata` restricts permutations to
@@ -99,9 +110,10 @@ difference may come partly or wholly from dispersion.
 
 ``` r
 
-permdisp(dm, 'Species', iris)
+res <- permdisp(dm, 'Species', iris)
 #> Warning: Some squared distances to group centres are negative, and were set to
 #> 0.
+res
 #> Homogeneity of multivariate dispersions (PERMDISP)
 #> 
 #> F = 0.5676, p = 0.573, z = -0.4401
@@ -114,7 +126,10 @@ permdisp(dm, 'Species', iris)
 #>            Df  Sum Sq   Mean Sq     F N.Perm Pr(>F)
 #> Groups      2 0.00057 0.0002852 0.568    999  0.573
 #> Residuals 147 0.07386 0.0005024
+plot(res)
 ```
+
+![](stat_tests_files/figure-html/unnamed-chunk-6-1.png)
 
 Here the three species are equally spread, so the PERMANOVA result above
 reflects a real difference in their centers. The warning comes from
@@ -146,7 +161,8 @@ anosim(dm, 'Species', iris)
 #> versicolor  1225   2457.85
 #> virginica   1225   2418.15
 
-mrpp(dm, 'Species', iris)
+res <- mrpp(dm, 'Species', iris)
+res
 #> Multi-response permutation procedure (MRPP)
 #> 
 #> delta = 0.05795, p = 0.001, z = -78.9
@@ -160,6 +176,19 @@ mrpp(dm, 'Species', iris)
 #> Expected delta: 0.158
 #> Chance-corrected within-group agreement A: 0.6332
 ```
+
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) of an MRPP
+result shows each group’s mean within-group distance, with their
+weighted mean (the observed \delta) and the mean of all distances (the
+\delta expected by chance); `type = 'null'` shows the permutations
+instead, as for the other tests.
+
+``` r
+
+plot(res)
+```
+
+![](stat_tests_files/figure-html/unnamed-chunk-8-1.png)
 
 ## Pairwise comparisons
 
@@ -218,7 +247,8 @@ sepals. `method` can be `'pearson'`, `'spearman'`, or `'kendall'`.
 sepals <- bray(iris[, 1:2])
 petals <- bray(iris[, 3:4])
 
-mantel(sepals, petals, method = 'spearman')
+res <- mantel(sepals, petals, method = 'spearman')
+res
 #> Mantel test (Spearman)
 #> 
 #> r =  0.69, p = 0.001, z = 35.65
@@ -227,7 +257,10 @@ mantel(sepals, petals, method = 'spearman')
 #> Correlation: Spearman's rank correlation rho
 #> Alternative: greater (r is more positive than by chance)
 #> Samples: 150
+plot(res)
 ```
+
+![](stat_tests_files/figure-html/unnamed-chunk-11-1.png)
 
 [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md)
 removes the effect of a third set of distances, `given`: here, whether

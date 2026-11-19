@@ -184,7 +184,8 @@ approach over the Mantel test. *Oecologia*, 129(2), 169-178.
     jc <- pcoa(jaccard(counts), n_axes = 2)
 
     # Do the Bray-Curtis and Jaccard PCoAs agree?
-    procrustes_test(jc, bc)
+    res <- procrustes_test(jc, bc)
+    res
 #> Procrustes randomization test (PROTEST)
 #> 
 #> r = 0.7103, p = 0.001, z =   6.3
@@ -192,4 +193,8 @@ approach over the Mantel test. *Oecologia*, 129(2), 169-178.
 #> 
 #> Symmetric Procrustes sum of squares (m^2): 0.4955
 #> Samples: 30, axes: 2
+    plot(res)
+
+    plot(res, type = 'null')
+
 ```

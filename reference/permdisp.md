@@ -337,6 +337,8 @@ Sciences*, 97(4), 1423-1426.
     res$dispersions
 #>      ctrl      high       low 
 #> 0.1640327 0.3928983 0.1698156 
+    plot(res)
+
 
     # Distances to spatial medians, as vegan::betadisper()'s default,
     # with each pair of groups tested.

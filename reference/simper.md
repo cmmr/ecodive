@@ -287,6 +287,8 @@ in Ecology and Evolution*, 3, 89-101.
 #> 4 0.8423654      NA         NA
 #> 5 0.9235975      NA         NA
 #> 6 1.0000000      NA         NA
+    plot(res)
+
 
     # The averages sum to the mean between-group Bray-Curtis dissimilarity.
     sum(res$average)
