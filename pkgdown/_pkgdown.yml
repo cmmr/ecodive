@@ -148,6 +148,7 @@ reference:
   desc: plot() methods for ecodive's results. They draw what a result already holds, with titles, labels and legends taken from its attributes, in base graphics.
   contents:
   - plot.ecodive_ord
+  - plot.ecodive_dist
   - plot.ecodive_envfit
   - plot.ecodive_test
   - plot.ecodive_simper

@@ -77,7 +77,8 @@ observed values, after OptSpace's initialization and after each
 iteration (on OptSpace's rescaled data, as gemelli measures it).
 \item \code{n_iters}: The number of OptSpace iterations run.
 \item \code{dm}: Only with \code{distances = TRUE}. A \code{dist} object of distances
-between the kept samples.
+between the kept samples, of class \code{c("ecodive_dist", "dist")}, as
+\code{\link[=beta_div]{beta_div()}} returns.
 }
 }
 \description{

@@ -98,7 +98,8 @@
 #'     iteration (on OptSpace's rescaled data, as gemelli measures it).
 #'   * `n_iters`: The number of OptSpace iterations run.
 #'   * `dm`: Only with `distances = TRUE`. A `dist` object of distances
-#'     between the kept samples.
+#'     between the kept samples, of class `c("ecodive_dist", "dist")`, as
+#'     [beta_div()] returns.
 #'
 #' @details
 #'
@@ -407,7 +408,7 @@ rpca_finish <- function (res, k, method, samples, features, what, distances, ...
       Diag   = FALSE,
       Upper  = FALSE,
       method = method,
-      class  = 'dist' )
+      class  = c('ecodive_dist', 'dist') )
 
   denom <- n - 1L
 

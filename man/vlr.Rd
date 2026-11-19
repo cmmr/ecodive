@@ -29,7 +29,9 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
 A \code{dist} object \strong{over the features} (the packed lower triangle,
-as \code{\link[=beta_div]{beta_div()}} returns over samples), labelled with the feature names.
+as \code{\link[=beta_div]{beta_div()}} returns over samples), labelled with the feature names,
+of class \code{c("ecodive_dist", "dist")}, so that \code{plot()} draws it as a
+heatmap (see \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}).
 Attributes, besides \code{dist}'s \code{Size}, \code{Labels}, \code{Diag} and \code{Upper}:
 \itemize{
 \item \code{method}: \code{'vlr'}.

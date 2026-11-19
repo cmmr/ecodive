@@ -302,6 +302,49 @@
 
 
 
+  # Distance matrices. ====
+
+  # ecodive's distances have class c('ecodive_dist', 'dist'), and every
+  # function for dist objects works on them.
+  rho <- rho_p(ecodive::ex_counts + 1)
+  for (d in list(
+      dm, bray(ecodive::ex_counts), beta_div(ecodive::ex_counts, 'jaccard'),
+      unweighted_unifrac(ecodive::ex_counts, tree = ecodive::ex_tree),
+      weighted_unifrac(ecodive::ex_counts, tree = ecodive::ex_tree),
+      vlr(ecodive::ex_counts + 1), rho, phi_s(ecodive::ex_counts + 1),
+      attr(rpca(cnt, distances = TRUE, cpus = cpus), 'dm') )) {
+    expect_identical(class(d), c('ecodive_dist', 'dist'))
+    expect_identical(dim(as.matrix(d)), rep(attr(d, 'Size'), 2))
+    expect_true(invisibly(d))
+  }
+  m  <- as.matrix(bray(ecodive::ex_counts))
+  d0 <- stats::as.dist(m)
+  expect_equal(as.vector(bray(ecodive::ex_counts)), as.vector(d0))
+  expect_identical(class(stats::as.dist(bray(ecodive::ex_counts))), c('ecodive_dist', 'dist'))
+  expect_true(any(grepl('Saliva', capture.output(print(bray(ecodive::ex_counts))))))
+
+  expect_true(invisibly(dm, 'Species', iris))
+  expect_true(invisibly(dm, iris$Sepal.Length, key = FALSE, main = 'x'))
+  expect_true(invisibly(dm, 'Species', iris, col = grDevices::gray.colors(10)))
+  expect_true(invisibly(dm, useRaster = FALSE))
+
+  # Titles from the method, if any.
+  expect_identical(dist_plot_name(dm)$title, 'Distances')
+  expect_identical(dist_plot_name(rho)$title, 'Proportionality (rho)')
+  expect_identical(dist_plot_name(rho)$unit, 'features')
+
+  # The heatmap restores the margins it widened.
+  mai <- graphics::par('mai')
+  plot(dm, 'Species', iris)
+  expect_equal(graphics::par('mai'), mai)
+
+  expect_error(plot(dm, key = NA), '`key` must be TRUE or FALSE')
+  expect_error(plot(dm, iris$Species[1:10]), 'has 10 values, but `x` has 150 samples')
+  one <- structure(numeric(0), Size = 1L, class = c('ecodive_dist', 'dist'))
+  expect_error(plot(one), 'at least 2 samples')
+
+
+
   # ancombc() and its post-hoc tests. ====
 
   ax <- rbind(

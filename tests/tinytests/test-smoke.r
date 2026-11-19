@@ -255,6 +255,8 @@
     identical(v$value, x) && !v$visible
   }
   grDevices::pdf(NULL)
+  expect_true(drawn(dm))
+  expect_true(drawn(dm, 'grp', meta))
   expect_true(drawn(o))
   expect_true(drawn(o, 'grp', meta))
   expect_true(drawn(o, 'x', meta, axes = c(1, 3)))

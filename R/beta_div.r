@@ -70,7 +70,12 @@ V_UNIFRAC <- 5L
 #'        be omitted if a tree is embedded with the `counts` object or as 
 #'        `attr(counts, 'tree')`.
 #' 
-#' @return A numeric vector.
+#' @return A distance matrix: a `dist` object with one distance per pair of
+#'   samples (the packed lower triangle), labelled with the sample names, as
+#'   [stats::dist()] returns. Its class is `c("ecodive_dist", "dist")`, so
+#'   that `plot()` draws it as a heatmap (see [plot.ecodive_dist()]); every
+#'   function for `dist` objects, such as `as.matrix()`, works on it as
+#'   before. Each metric's own function, such as [bray()], returns the same.
 #' 
 #' 
 #' @details
@@ -137,7 +142,11 @@ V_UNIFRAC <- 5L
 #'     ex_counts
 #'     
 #'     # Bray-Curtis distances
-#'     beta_div(ex_counts, 'bray')
+#'     dm <- beta_div(ex_counts, 'bray')
+#'     dm
+#'
+#'     # As a heatmap.
+#'     plot(dm)
 #'     
 #'     # Generalized UniFrac distances
 #'     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)

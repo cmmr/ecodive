@@ -529,7 +529,9 @@ SEXP C_unifrac(
   SEXP sexp_result_dist = PROTECT(allocVector(REALSXP, n_dist));
   dist_vec              = REAL(sexp_result_dist);
   
-  SEXP sexp_dist_class = PROTECT(mkString("dist"));
+  SEXP sexp_dist_class = PROTECT(allocVector(STRSXP, 2));
+  SET_STRING_ELT(sexp_dist_class, 0, mkChar("ecodive_dist"));
+  SET_STRING_ELT(sexp_dist_class, 1, mkChar("dist"));
   SEXP sexp_size_val   = PROTECT(ScalarInteger(n_samples));
   SEXP sexp_diag_val   = PROTECT(ScalarLogical(0));
   SEXP sexp_upper_val  = PROTECT(ScalarLogical(0));
