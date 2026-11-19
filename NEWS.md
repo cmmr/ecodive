@@ -8,6 +8,29 @@
   package title is now "Parallel and Memory-Efficient Ecological Diversity
   Analysis".
 
+* New `plot()` methods draw ecodive's results with base graphics (only
+  'graphics' and 'grDevices', from R 3.6.0 on), taking their titles, axis
+  labels, subtitles and legends from what each result holds, and computing
+  nothing new:
+  * Ordinations (`pcoa()`, `pca()`, `dbrda()`, `nmds()`, `procrustes()`, ...)
+    draw two axes, labelled with their share of the variance, with the
+    method's fit in the subtitle (stress, R-squared, ...). `plot(ord,
+    "Species", iris)` colours the samples by a column of metadata, with a
+    legend, by the same `groups` and `data` as the tests; supervised
+    ordinations colour by their own groups. Loadings, constraint arrows,
+    centroids and a Procrustes rotation's target are drawn on top.
+  * `plot(envfit(...), add = TRUE)` adds the fitted variables to an
+    ordination plot.
+  * Permutation tests show the permutation distribution of their statistic,
+    with the observed value marked; `mrpp()` and `permdisp()` show each
+    group's within-group distance or dispersion, and `procrustes_test()` its
+    Procrustes fit (each with `type = "null"` for the distribution).
+  * `simper()` gives a dot chart of the taxa that contribute most to each
+    pair's dissimilarity, `dirmult_ttest()` a volcano plot, `ancom()` a dot
+    chart of W, `varpart()` a Venn diagram of the fractions (two to four
+    sets), `forward_select()` the adjusted R-squared at each step, and
+    `bioenv()` the best correlation for each number of variables.
+
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It
   gives the same coordinates and eigenvalues as `cmdscale()`, `ape::pcoa()`,

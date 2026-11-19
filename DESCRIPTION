@@ -87,6 +87,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Config/Needs/website: rmarkdown
 Config/testthat/edition: 3
-Imports: parallel, stats, utils
+Imports: graphics, grDevices, parallel, stats, utils
 Suggests: knitr, Matrix, parallelly, rmarkdown, slam, tinytest
 VignetteBuilder: knitr
