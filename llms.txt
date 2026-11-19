@@ -50,7 +50,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 | Ordination of counts | [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md) | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md), [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md), [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) |
 | Biplots |  | [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md), [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) |
 | Comparing ordinations |  | [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md), [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md) |
-| Model building |  | [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md), [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) |
+| Model building |  | [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md), [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md), [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) |
 | Statistical tests | [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md) | [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md), [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md), [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md), [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md), [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md) |
 | Data preparation |  | [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md), [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md), [`read_tree()`](https://cmmr.github.io/ecodive/reference/read_tree.md) |
 
@@ -544,6 +544,8 @@ take the count table.
   Best Subset of Environmental Variables (BIOENV)
 - [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md) :
   Variation Partitioning
+- [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
+  : Forward Selection of Explanatory Variables
 - [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
   : Procrustes Rotation of One Ordination onto Another
 - [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)

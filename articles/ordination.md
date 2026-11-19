@@ -341,8 +341,41 @@ permanova(
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-`forward_select()` and `principal_response_curves()`, which are planned,
-will also build on
+Before partitioning,
+[`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
+can choose which variables of a set to keep (Blanchet et al. 2008), as
+`vegan::ordiR2step()` does: at each step it adds the variable that
+raises the adjusted R^2 most, if a permutation test of it, given those
+already chosen, is significant, and stops before the adjusted R^2 would
+exceed that of all the candidates together. By default it first tests
+the global model, all candidates together, and selects nothing if that
+is not significant:
+
+``` r
+
+fs <- forward_select(
+  iris[, 3:4], ~ Species + Sepal.Length + Sepal.Width, iris,
+  norm = 'hellinger', permutations = 99 )
+fs
+#> Forward selection by RDA (hellinger): 150 samples
+#> Permutations: 99 (free)
+#> Global model: 4 df, adj. R-squared 0.7332, F = 103.4, p = 0.01
+#> 
+#>      variable df r_squared r_squared_cum adj_r_squared adj_r_squared_cum
+#> 1     Species  2    0.7207        0.7207        0.7169            0.7169
+#> 2 Sepal.Width  1    0.0130        0.7336        0.0113            0.7282
+#>         F p_value
+#> 1 189.600    0.01
+#> 2   7.109    0.01
+#> 
+#> Stopped: not significant.
+#> Next best: Sepal.Length (adj. R-squared 0.7332, F = 3.783, p = 0.11)
+#> Selected: ~Species + Sepal.Width
+attr(fs, 'selected')
+#> ~Species + Sepal.Width
+```
+
+`principal_response_curves()`, which is planned, will also build on
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md).
 
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), canonical
@@ -402,7 +435,7 @@ ord <- plsda(round(iris[, 1:4] * 10), 'Species', iris)
 plot(ord, col = iris$Species)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-18-1.png)
+![](ordination_files/figure-html/unnamed-chunk-19-1.png)
 
 ``` r
 
@@ -446,7 +479,7 @@ ord <- oplsda(round(two[, 1:4] * 10), 'Species', two)
 plot(ord, col = two$Species)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-20-1.png)
+![](ordination_files/figure-html/unnamed-chunk-21-1.png)
 
 ``` r
 
@@ -511,7 +544,7 @@ arrows(0, 0, load[, 1], load[, 2], length = 0.1)
 text(load[, 1:2], labels = rownames(load), pos = 4)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-22-1.png)
+![](ordination_files/figure-html/unnamed-chunk-23-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -590,7 +623,7 @@ arrows(0, 0, xy$PCoA1, xy$PCoA2, length = 0.1)
 text(xy, labels = vec$variable, pos = 1, cex = 0.8)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-26-1.png)
+![](ordination_files/figure-html/unnamed-chunk-27-1.png)
 
 ## Comparing two ordinations
 
@@ -641,7 +674,7 @@ plot(xy, asp = 1, pch = 16, xlab = 'Axis 1', ylab = 'Axis 2')
 arrows(xy[, 1], xy[, 2], fit[, 1], fit[, 2], length = 0.05, col = 'grey40')
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-28-1.png)
+![](ordination_files/figure-html/unnamed-chunk-29-1.png)
 
 ## Speed and reproducibility
 

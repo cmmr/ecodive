@@ -250,8 +250,9 @@ distances.
   those of `anova(vegan::rda(...))` for the same permutations.
 
 [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md),
-`forward_select()` and `principal_response_curves()`, which are planned
-for ecodive, will build on `rda()`.
+[`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
+and `principal_response_curves()`, which are planned for ecodive, will
+build on `rda()`.
 
 **Matching vegan**
 

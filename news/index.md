@@ -567,6 +567,25 @@
   takes 3.5. Results are identical for any number of `cpus`.
 
 - New
+  [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
+  picks explanatory variables one at a time by adjusted R-squared, with
+  a permutation test of each added variable and Blanchet et al.’s (2008)
+  double stopping rule, for RDA of a count table (with `norm`) or db-RDA
+  of a `dist`. It selects the same variables in the same order as
+  `vegan::ordiR2step()`, with the same adjusted R-squared and F, and the
+  same p-values given the same permutations. Candidates are the terms of
+  a formula over `data` (factors enter whole, interactions after their
+  main effects, `Condition()` terms are covariables). By default it
+  first tests the global model and selects nothing if that is not
+  significant; `max_vars` caps the number of variables, and `strata`
+  restricts permutations. Every candidate’s adjusted R-squared comes
+  from one pass over the data, and only the chosen candidate of each
+  step is tested: with 1,000 samples, 500 taxa, 11 candidates and 199
+  permutations, it takes 0.17 seconds on 4 threads for the Hellinger
+  table and 0.08 for Bray-Curtis distances, where `vegan::ordiR2step()`
+  takes 58 and 85. Results are identical for any number of `cpus`.
+
+- New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   returns a count table after any of the transformations that
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),

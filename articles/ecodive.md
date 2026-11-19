@@ -286,7 +286,9 @@ and
 compare two ordinations of the same samples.
 [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md)
 splits the variation that two to four sets of metadata explain into the
-parts each explains alone and the parts they share.
+parts each explains alone and the parts they share, and
+[`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
+picks the variables worth keeping first.
 
 Four samples are too few to ordinate, so this example uses R’s built-in
 `iris` data: 150 flowers, four measurements each, and three species.

@@ -195,6 +195,8 @@ take the count table.
   Best Subset of Environmental Variables (BIOENV)
 - [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md) :
   Variation Partitioning
+- [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
+  : Forward Selection of Explanatory Variables
 - [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
   : Procrustes Rotation of One Ordination onto Another
 - [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
