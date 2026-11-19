@@ -248,7 +248,7 @@ simper <- function (
   #--------------------------------------------------------
   # Each sample's group (and stratum), in counts' order.
   #--------------------------------------------------------
-  des <- test_group_values(groups, data, n, dn[[1]], strata)
+  des <- test_group_values(groups, data, n, dn[[1]], strata, ref = '`counts`')
   grp <- factor(des$groups, exclude = NULL)  # a factor's NA level is a group
   lev <- levels(grp)
   gi  <- as.integer(grp)

@@ -299,6 +299,18 @@
   expect_error(simper(cnt), '`groups` is required')
   expect_error(simper(cnt, rep('a', 18)), 'at least two different values')
   expect_error(simper(cnt, grp[-1]), 'groups')
+
+  # Wrong lengths name `counts`, the table the samples are in, not `dm`.
+  expect_error(simper(cnt, grp[-1]),
+               '`groups` has 17 values, but `counts` has 18 samples.', fixed = TRUE)
+  expect_error(simper(unname(cnt), grp[-1]),
+               '`groups` has 17 values, but `counts` has 18 samples.', fixed = TRUE)
+  expect_error(simper(cnt, 'g', data.frame(g = grp[-1])),
+               '`data` has 17 rows, but `counts` has 18 samples.', fixed = TRUE)
+  expect_error(simper(cnt, grp, strata = rep(1:2, 4)),
+               '`strata` has 8 values, but `counts` has 18 samples.', fixed = TRUE)
+  expect_error(simper(cnt, setNames(grp, paste0('X', 1:18))),
+               '18 samples in `counts` have no value in `groups`', fixed = TRUE)
   expect_error(simper(cnt, c(grp[-1], NA)), 'NA')
   expect_error(simper(cnt, grp, norm = 'clr'), "Bray-Curtis can't use")
   expect_error(simper(cnt, grp, norm = 'rclr'), "Bray-Curtis can't use")

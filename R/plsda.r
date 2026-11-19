@@ -241,7 +241,7 @@ plsda <- function (
   # The groups, as a factor, and their dummy matrix: centred and, with
   # `scale`, each column scaled to unit variance (scikit-learn's
   # _center_scale_xy()).
-  tg  <- test_groups(groups, data, n, dn[[1]])
+  tg  <- test_groups(groups, data, n, dn[[1]], ref = '`counts`')
   grp <- tg$data[[tg$col]]
   grp <- if (is.factor(grp)) droplevels(grp) else factor(grp)
   lev <- levels(grp)

@@ -274,6 +274,16 @@
   expect_error(permanova(d, ~ trt, meta), 'Name the formula argument')
   expect_error(permanova(d, meta), '`groups` must be a vector')
   expect_error(permanova(d, 'trt'), '`data` is not given')
+
+  # Wrong lengths name `dm`, for the functions that take distances.
+  expect_error(permanova(d, meta$trt[-1]),
+               paste0('`groups` has ', nrow(meta) - 1, ' values, but `dm` has ', nrow(meta), ' samples.'), fixed = TRUE)
+  expect_error(permanova(d, 'trt', meta[-1, ]),
+               paste0('sample in `dm` has no row in `data`'), fixed = TRUE)
+  m1 <- meta[-1, ]
+  rownames(m1) <- NULL
+  expect_error(permanova(d, 'trt', m1),
+               paste0('`data` has ', nrow(meta) - 1, ' rows, but `dm` has ', nrow(meta), ' samples.'), fixed = TRUE)
   expect_error(permanova(d, 'nothere', meta), "'nothere' is not one")
   expect_identical(
     permanova(d, meta$trt, meta, strata = 'block', permutations = 19, cpus = 1),

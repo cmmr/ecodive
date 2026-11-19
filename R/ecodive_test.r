@@ -75,7 +75,9 @@ new_ecodive_test <- function (
 #     per row of `data`;
 #   * without `data`: one value per sample, matched to the dist's `labels`
 #     by name when both are named, else in order.
-# Every test gives the same messages.
+# Every test gives the same messages. `ref` names what the samples belong to
+# in messages: '`dm`', or '`counts`' for methods that take a count table
+# (simper(), plsda()).
 #
 # Returns list(data, col, strata):
 #   data    A data frame with one row per sample, in the dist's order: the
@@ -85,7 +87,7 @@ new_ecodive_test <- function (
 # Pass `data` and `strata` on to model_design(); test_group_values() gives
 # the groups and strata codes directly.
 #------------------------------------------------------------------------------
-test_groups <- function (groups, data, n, labels, strata = NULL) {
+test_groups <- function (groups, data, n, labels, strata = NULL, ref = '`dm`') {
 
   if (is.null(groups))
     stop('`groups` is required: one value per sample, or a column name of `data`.', call. = FALSE)
@@ -101,10 +103,10 @@ test_groups <- function (groups, data, n, labels, strata = NULL) {
       stop('`data` must be a data.frame.', call. = FALSE)
     data <- as.data.frame(data, stringsAsFactors = FALSE)
     dn   <- if (.row_names_info(data) > 0) rownames(data) else NULL
-    idx  <- match_rows(labels, n, dn, nrow(data))
+    idx  <- match_rows(labels, n, dn, nrow(data), ref = ref)
   }
 
-  val <- per_sample(groups, 'groups', data, idx, labels, n)
+  val <- per_sample(groups, 'groups', data, idx, labels, n, ref = ref)
   src <- if (!is.null(data) && is.character(groups) && length(groups) == 1 &&
              groups %in% names(data)) groups
 
@@ -124,7 +126,7 @@ test_groups <- function (groups, data, n, labels, strata = NULL) {
     levels(val) <- lev
   }
 
-  strata <- per_sample(strata, 'strata', data, idx, labels, n)
+  strata <- per_sample(strata, 'strata', data, idx, labels, n, ref = ref)
 
   out <- if (is.null(data)) data.frame(row.names = seq_len(n)) else data[idx, , drop = FALSE]
   col <- if (!is.null(src)) src else make.unique(c(names(out), 'group'))[[ncol(out) + 1L]]
@@ -140,9 +142,9 @@ test_groups <- function (groups, data, n, labels, strata = NULL) {
 # dist's samples. Returns list(groups (the values, with unused factor levels
 # dropped), strata (0-based codes, or NULL), col).
 #------------------------------------------------------------------------------
-test_group_values <- function (groups, data, n, labels, strata = NULL) {
+test_group_values <- function (groups, data, n, labels, strata = NULL, ref = '`dm`') {
 
-  g   <- test_groups(groups, data, n, labels, strata)
+  g   <- test_groups(groups, data, n, labels, strata, ref)
   val <- g$data[[g$col]]
   if (is.factor(val)) val <- droplevels(val)
 

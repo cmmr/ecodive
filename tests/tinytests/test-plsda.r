@@ -259,6 +259,12 @@
   expect_error(plsda(m, rep('a', 4)),                      'at least two different values')
   expect_error(plsda(m, c('a', 'b', NA, 'b')),             'must not contain NAs')
   expect_error(plsda(m, c('a', 'b')),                      'groups')
+
+  # Wrong lengths name `counts`, the table the samples are in, not `dm`.
+  expect_error(plsda(m, c('a', 'b')),
+               '`groups` has 2 values, but `counts` has 4 samples.', fixed = TRUE)
+  expect_error(plsda(m, 'g', data.frame(g = c('a', 'b', 'a'))),
+               '`data` has 3 rows, but `counts` has 4 samples.', fixed = TRUE)
   expect_error(plsda(m, 'nope', data.frame(g = 1:4)),      'nope')
   expect_error(plsda(m, c('a', 'b', 'a', 'b'), scale = NA), '`scale` must be TRUE or FALSE')
   expect_error(plsda(m, c('a', 'b', 'a', 'b'), n_axes = 0), '`n_axes` must be a whole number')
