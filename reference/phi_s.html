@@ -62,6 +62,7 @@ relative to that of their log product. <code>0</code> means perfectly proportion
 <span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  denominator <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pseudocount <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  clust <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -102,6 +103,27 @@ is kept.</p></dd>
 default) adds nothing when <code>counts</code> has no zeros, and otherwise
 uses half the smallest non-zero value, with a warning. <code>0</code> adds
 nothing, and is an error when <code>counts</code> has zeros. See <strong>Zeros</strong>.</p></dd>
+
+
+<dt id="arg-clust">clust<a class="anchor" aria-label="anchor" href="#arg-clust"></a></dt>
+<dd><p>Whether and how to cluster the samples (rows and columns)
+before returning the distance matrix: <code>NULL</code> (the default) or
+<code>FALSE</code> to keep them in their input order, or one of
+<code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>'s linkage methods, <code>"average"</code> (UPGMA),
+<code>"complete"</code>, <code>"single"</code>, <code>"ward.D"</code>, <code>"ward.D2"</code>, <code>"mcquitty"</code>
+(WPGMA), <code>"median"</code> or <code>"centroid"</code>, or <code>"pcoa"</code> to order them
+along the first axis of <code><a href="pcoa.html">pcoa()</a></code>. Clustering <strong>reorders the
+samples</strong> of the result, with their labels (samples without names
+are labelled with their positions in the input): attribute <code>order</code>
+gives each one's position in the input, so that <code>meta[attr(d, "order"), ]</code> lines metadata up with them. Tests such as <code><a href="permanova.html">permanova()</a></code> match
+named samples to <code>data</code> by name, but a vector of groups without
+names is matched by position, so reorder it too. The result's
+attribute <code>clust</code> records <code>clust</code> (<code>FALSE</code> as <code>"none"</code>), which
+<code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
+for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
+order. <code>clust</code> needs every distance, so it cannot be used with
+<code>pairs</code>. <code><a href="rho_p.html">rho_p()</a></code>'s similarities are clustered as \(1 -
+       \rho_p\).</p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>

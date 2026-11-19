@@ -61,6 +61,7 @@
 <span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  clust <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -130,6 +131,27 @@ Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.</p></dd>
 
 
+<dt id="arg-clust">clust<a class="anchor" aria-label="anchor" href="#arg-clust"></a></dt>
+<dd><p>Whether and how to cluster the samples (rows and columns)
+before returning the distance matrix: <code>NULL</code> (the default) or
+<code>FALSE</code> to keep them in their input order, or one of
+<code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>'s linkage methods, <code>"average"</code> (UPGMA),
+<code>"complete"</code>, <code>"single"</code>, <code>"ward.D"</code>, <code>"ward.D2"</code>, <code>"mcquitty"</code>
+(WPGMA), <code>"median"</code> or <code>"centroid"</code>, or <code>"pcoa"</code> to order them
+along the first axis of <code><a href="pcoa.html">pcoa()</a></code>. Clustering <strong>reorders the
+samples</strong> of the result, with their labels (samples without names
+are labelled with their positions in the input): attribute <code>order</code>
+gives each one's position in the input, so that <code>meta[attr(d, "order"), ]</code> lines metadata up with them. Tests such as <code><a href="permanova.html">permanova()</a></code> match
+named samples to <code>data</code> by name, but a vector of groups without
+names is matched by position, so reorder it too. The result's
+attribute <code>clust</code> records <code>clust</code> (<code>FALSE</code> as <code>"none"</code>), which
+<code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
+for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
+order. <code>clust</code> needs every distance, so it cannot be used with
+<code>pairs</code>. <code><a href="rho_p.html">rho_p()</a></code>'s similarities are clustered as \(1 -
+       \rho_p\).</p></dd>
+
+
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
 <dd><p>How many parallel processing threads should be used. The
 default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical CPU cores.</p></dd>
@@ -143,7 +165,18 @@ samples (the packed lower triangle), labelled with the sample names, as
 that <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws it as a heatmap (see <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code>); every
 function for <code>dist</code> objects, such as <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>, works on it as
 before. Each metric's own function, such as <code><a href="bray.html">bray()</a></code>, returns the same.</p>
-    </div>
+<p>Besides <code>dist</code>'s <code>Size</code>, <code>Labels</code>, <code>Diag</code> and <code>Upper</code>, its attributes
+record how it was made:</p><ul><li><p><code>metric</code>: The metric's ID, such as <code>"bray"</code>.</p></li>
+<li><p><code>metric_name</code>: Its display name, such as <code>"Bray-Curtis Dissimilarity"</code>, as <code><a href="metrics.html">list_metrics()</a></code> gives it, so that any package
+can label it without ecodive's table.</p></li>
+<li><p><code>norm</code>: The normalization applied before computing it (by name, such
+as <code>"percent"</code>), whether chosen with <code>norm</code> or fixed by the metric
+(such as <code><a href="hellinger.html">hellinger()</a></code>'s). Absent for the UniFrac metrics.</p></li>
+<li><p><code>pseudocount</code>: The pseudocount used (<code>0</code> for none), for the metrics
+that take one.</p></li>
+<li><p><code>power</code>, <code>alpha</code>: For <code><a href="minkowski.html">minkowski()</a></code> and <code><a href="generalized_unifrac.html">generalized_unifrac()</a></code>.</p></li>
+<li><p><code>clust</code>, <code>order</code>: With <code>clust</code>; see its description.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>List of Beta Diversity Metrics</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Metric Name</td></tr><tr><td><code>aitchison</code></td><td>Aitchison distance</td></tr><tr><td><code>bhattacharyya</code></td><td>Bhattacharyya distance</td></tr><tr><td><code>bray</code></td><td>Bray-Curtis dissimilarity</td></tr><tr><td><code>canberra</code></td><td>Canberra distance</td></tr><tr><td><code>chebyshev</code></td><td>Chebyshev distance</td></tr><tr><td><code>chord</code></td><td>Chord distance</td></tr><tr><td><code>clark</code></td><td>Clark's divergence distance</td></tr><tr><td><code>divergence</code></td><td>Divergence</td></tr><tr><td><code>euclidean</code></td><td>Euclidean distance</td></tr><tr><td><code>generalized_unifrac</code></td><td>Generalized UniFrac (GUniFrac)</td></tr><tr><td><code>gower</code></td><td>Gower distance</td></tr><tr><td><code>hamming</code></td><td>Hamming distance</td></tr><tr><td><code>hellinger</code></td><td>Hellinger distance</td></tr><tr><td><code>horn</code></td><td>Horn-Morisita dissimilarity</td></tr><tr><td><code>jaccard</code></td><td>Jaccard distance</td></tr><tr><td><code>jensen</code></td><td>Jensen-Shannon distance</td></tr><tr><td><code>jsd</code></td><td>Jesen-Shannon divergence (JSD)</td></tr><tr><td><code>lorentzian</code></td><td>Lorentzian distance</td></tr><tr><td><code>manhattan</code></td><td>Manhattan distance</td></tr><tr><td><code>matusita</code></td><td>Matusita distance</td></tr><tr><td><code>minkowski</code></td><td>Minkowski distance</td></tr><tr><td><code>morisita</code></td><td>Morisita dissimilarity</td></tr><tr><td><code>motyka</code></td><td>Motyka dissimilarity</td></tr><tr><td><code>normalized_unifrac</code></td><td>Normalized Weighted UniFrac</td></tr><tr><td><code>ochiai</code></td><td>Otsuka-Ochiai dissimilarity</td></tr><tr><td><code>psym_chisq</code></td><td>Probabilistic Symmetric Chi-Squared distance</td></tr><tr><td><code>soergel</code></td><td>Soergel distance</td></tr><tr><td><code>sorensen</code></td><td>Dice-Sorensen dissimilarity</td></tr><tr><td><code>squared_chisq</code></td><td>Squared Chi-Squared distance</td></tr><tr><td><code>squared_chord</code></td><td>Squared Chord distance</td></tr><tr><td><code>squared_euclidean</code></td><td>Squared Euclidean distance</td></tr><tr><td><code>topsoe</code></td><td>Topsoe distance</td></tr><tr><td><code>unweighted_unifrac</code></td><td>Unweighted UniFrac</td></tr><tr><td><code>variance_adjusted_unifrac</code></td><td>Variance-Adjusted Weighted UniFrac (VAW-UniFrac)</td></tr><tr><td><code>wave_hedges</code></td><td>Wave Hedges distance</td></tr><tr><td><code>weighted_unifrac</code></td><td>Weighted UniFrac</td></tr></table><p><strong>Flexible name matching</strong></p>

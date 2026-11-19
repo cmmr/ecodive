@@ -51,7 +51,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">morisita</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">morisita</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pairs <span class="op">=</span> <span class="cn">NULL</span>, clust <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,6 +75,27 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 calculated for? The default value (<code>NULL</code>) calculates all-vs-all.
 Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.</p></dd>
+
+
+<dt id="arg-clust">clust<a class="anchor" aria-label="anchor" href="#arg-clust"></a></dt>
+<dd><p>Whether and how to cluster the samples (rows and columns)
+before returning the distance matrix: <code>NULL</code> (the default) or
+<code>FALSE</code> to keep them in their input order, or one of
+<code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>'s linkage methods, <code>"average"</code> (UPGMA),
+<code>"complete"</code>, <code>"single"</code>, <code>"ward.D"</code>, <code>"ward.D2"</code>, <code>"mcquitty"</code>
+(WPGMA), <code>"median"</code> or <code>"centroid"</code>, or <code>"pcoa"</code> to order them
+along the first axis of <code><a href="pcoa.html">pcoa()</a></code>. Clustering <strong>reorders the
+samples</strong> of the result, with their labels (samples without names
+are labelled with their positions in the input): attribute <code>order</code>
+gives each one's position in the input, so that <code>meta[attr(d, "order"), ]</code> lines metadata up with them. Tests such as <code><a href="permanova.html">permanova()</a></code> match
+named samples to <code>data</code> by name, but a vector of groups without
+names is matched by position, so reorder it too. The result's
+attribute <code>clust</code> records <code>clust</code> (<code>FALSE</code> as <code>"none"</code>), which
+<code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
+for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
+order. <code>clust</code> needs every distance, so it cannot be used with
+<code>pairs</code>. <code><a href="rho_p.html">rho_p()</a></code>'s similarities are clustered as \(1 -
+       \rho_p\).</p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>

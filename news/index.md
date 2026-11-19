@@ -84,6 +84,36 @@
     [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
     a dot chart of their statistics.
 
+- Every function that returns a distance matrix,
+  [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
+  and its 37 metric functions,
+  [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
+  [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md), takes
+  `clust`, to cluster the samples before returning it: one of
+  [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html)’s linkage
+  methods (`"average"`, `"complete"`, `"single"`, `"ward.D"`,
+  `"ward.D2"`, `"mcquitty"`, `"median"`, `"centroid"`), or `"pcoa"` to
+  order them along the first axis of
+  [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
+  Clustering **reorders the samples** of the result, with their labels
+  (unnamed samples are labelled with their input positions); attribute
+  `order` gives each one’s position in the input, and attribute `clust`
+  records the method. Tests match named samples to metadata by name, but
+  metadata matched by position must be reordered with
+  `attr(d, "order")`. `clust = NULL`, the default, leaves the matrix as
+  it was, and [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  then clusters it by average linkage for the heatmap; `clust = FALSE`
+  (recorded as `"none"`) keeps the input order in the plot too.
+
+- Every distance matrix records how it was made, in attributes: `metric`
+  (the metric’s ID, such as `"bray"`) and `metric_name` (its display
+  name, such as `"Bray-Curtis Dissimilarity"`, so that other packages
+  can label it without ecodive’s table of metrics), and, where they
+  apply, `norm` (the normalization, by name), `pseudocount`, `power` and
+  `alpha`. [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  titles its heatmap with `metric_name`.
+
 - New [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) runs
   a principal coordinates analysis (classical multidimensional scaling)
   on a `dist` object, such as from

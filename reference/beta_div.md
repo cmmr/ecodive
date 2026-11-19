@@ -15,6 +15,7 @@ beta_div(
   alpha = 0.5,
   tree = NULL,
   pairs = NULL,
+  clust = NULL,
   cpus = n_cpus()
 )
 ```
@@ -92,6 +93,32 @@ beta_div(
   logical vector specifying positions in the distance matrix to
   calculate. See examples.
 
+- clust:
+
+  Whether and how to cluster the samples (rows and columns) before
+  returning the distance matrix: `NULL` (the default) or `FALSE` to keep
+  them in their input order, or one of
+  [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html)'s linkage
+  methods, `"average"` (UPGMA), `"complete"`, `"single"`, `"ward.D"`,
+  `"ward.D2"`, `"mcquitty"` (WPGMA), `"median"` or `"centroid"`, or
+  `"pcoa"` to order them along the first axis of
+  [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
+  Clustering **reorders the samples** of the result, with their labels
+  (samples without names are labelled with their positions in the
+  input): attribute `order` gives each one's position in the input, so
+  that `meta[attr(d, "order"), ]` lines metadata up with them. Tests
+  such as
+  [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
+  match named samples to `data` by name, but a vector of groups without
+  names is matched by position, so reorder it too. The result's
+  attribute `clust` records `clust` (`FALSE` as `"none"`), which
+  [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
+  follows: with `NULL` it clusters the samples for the heatmap
+  (`"average"`), and with `"none"` it keeps their order. `clust` needs
+  every distance, so it cannot be used with `pairs`.
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md)'s
+  similarities are clustered as \\1 - \rho_p\\.
+
 - cpus:
 
   How many parallel processing threads should be used. The default,
@@ -112,6 +139,32 @@ every function for `dist` objects, such as
 before. Each metric's own function, such as
 [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), returns
 the same.
+
+Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, its attributes
+record how it was made:
+
+- `metric`: The metric's ID, such as `"bray"`.
+
+- `metric_name`: Its display name, such as
+  `"Bray-Curtis Dissimilarity"`, as
+  [`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md)
+  gives it, so that any package can label it without ecodive's table.
+
+- `norm`: The normalization applied before computing it (by name, such
+  as `"percent"`), whether chosen with `norm` or fixed by the metric
+  (such as
+  [`hellinger()`](https://cmmr.github.io/ecodive/reference/hellinger.md)'s).
+  Absent for the UniFrac metrics.
+
+- `pseudocount`: The pseudocount used (`0` for none), for the metrics
+  that take one.
+
+- `power`, `alpha`: For
+  [`minkowski()`](https://cmmr.github.io/ecodive/reference/minkowski.md)
+  and
+  [`generalized_unifrac()`](https://cmmr.github.io/ecodive/reference/generalized_unifrac.md).
+
+- `clust`, `order`: With `clust`; see its description.
 
 ## Details
 

@@ -117,10 +117,14 @@ such as a matrix, a sparse matrix, or a <code>phyloseq</code> or
 <span><span class="co">#&gt; 6          5.4         3.9          1.7         0.4  setosa</span></span>
 <span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the distances as a heatmap. Sorted by
-species, the three species show as blocks of short distances along the
-diagonal, and setosa stands far from the other two: the structure that
-an ordination lays out on a few axes.</p>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the distances as a heatmap, with the
+samples clustered (by average linkage) so that similar ones sit
+together. Sorted by species, the three species show as blocks of short
+distances along the diagonal, and setosa stands far from the other two:
+the structure that an ordination lays out on a few axes. To cluster the
+samples of the matrix itself, give the distance function
+<code>clust</code>, such as
+<code>bray(counts, clust = 'average')</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ordination_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="480"></p>

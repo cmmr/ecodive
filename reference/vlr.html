@@ -57,7 +57,7 @@ keep exactly the same ratio in every sample.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vlr</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pseudocount <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vlr</span><span class="op">(</span><span class="va">counts</span>, margin <span class="op">=</span> <span class="fl">1L</span>, pseudocount <span class="op">=</span> <span class="cn">NULL</span>, clust <span class="op">=</span> <span class="cn">NULL</span>, cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -86,6 +86,27 @@ uses half the smallest non-zero value, with a warning. <code>0</code> adds
 nothing, and is an error when <code>counts</code> has zeros. See <strong>Zeros</strong>.</p></dd>
 
 
+<dt id="arg-clust">clust<a class="anchor" aria-label="anchor" href="#arg-clust"></a></dt>
+<dd><p>Whether and how to cluster the samples (rows and columns)
+before returning the distance matrix: <code>NULL</code> (the default) or
+<code>FALSE</code> to keep them in their input order, or one of
+<code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>'s linkage methods, <code>"average"</code> (UPGMA),
+<code>"complete"</code>, <code>"single"</code>, <code>"ward.D"</code>, <code>"ward.D2"</code>, <code>"mcquitty"</code>
+(WPGMA), <code>"median"</code> or <code>"centroid"</code>, or <code>"pcoa"</code> to order them
+along the first axis of <code><a href="pcoa.html">pcoa()</a></code>. Clustering <strong>reorders the
+samples</strong> of the result, with their labels (samples without names
+are labelled with their positions in the input): attribute <code>order</code>
+gives each one's position in the input, so that <code>meta[attr(d, "order"), ]</code> lines metadata up with them. Tests such as <code><a href="permanova.html">permanova()</a></code> match
+named samples to <code>data</code> by name, but a vector of groups without
+names is matched by position, so reorder it too. The result's
+attribute <code>clust</code> records <code>clust</code> (<code>FALSE</code> as <code>"none"</code>), which
+<code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
+for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
+order. <code>clust</code> needs every distance, so it cannot be used with
+<code>pairs</code>. <code><a href="rho_p.html">rho_p()</a></code>'s similarities are clustered as \(1 -
+       \rho_p\).</p></dd>
+
+
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
 <dd><p>How many parallel processing threads should be used. The
 default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical CPU cores.</p></dd>
@@ -97,7 +118,8 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
 as <code><a href="beta_div.html">beta_div()</a></code> returns over samples), labelled with the feature names,
 of class <code>c("ecodive_dist", "dist")</code>, so that <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws it as a
 heatmap (see <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code>).
-Attributes, besides <code>dist</code>'s <code>Size</code>, <code>Labels</code>, <code>Diag</code> and <code>Upper</code>:</p><ul><li><p><code>method</code>: <code>'vlr'</code>.</p></li>
+Attributes, besides <code>dist</code>'s <code>Size</code>, <code>Labels</code>, <code>Diag</code> and <code>Upper</code>:</p><ul><li><p><code>metric</code>: <code>'vlr'</code>, and <code>metric_name</code>, its display name, <code>'Variance of Log Ratios'</code>, as <code><a href="beta_div.html">beta_div()</a></code>'s results have them.</p></li>
+<li><p><code>method</code>: <code>'vlr'</code>.</p></li>
 <li><p><code>pseudocount</code>: the pseudocount used (<code>0</code> for none).</p></li>
 </ul><p>It is a dissimilarity, so it can be given as <code>dm</code> to <code><a href="pcoa.html">pcoa()</a></code>,
 <code><a href="dist_ord.html">dist_ord()</a></code> or <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code> to ordinate or cluster the features.

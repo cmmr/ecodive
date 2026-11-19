@@ -6,7 +6,7 @@ string into the other.
 ## Usage
 
 ``` r
-hamming(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
+hamming(counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus())
 ```
 
 ## Arguments
@@ -29,6 +29,32 @@ hamming(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
   default value (`NULL`) calculates all-vs-all. Provide a numeric or
   logical vector specifying positions in the distance matrix to
   calculate. See examples.
+
+- clust:
+
+  Whether and how to cluster the samples (rows and columns) before
+  returning the distance matrix: `NULL` (the default) or `FALSE` to keep
+  them in their input order, or one of
+  [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html)'s linkage
+  methods, `"average"` (UPGMA), `"complete"`, `"single"`, `"ward.D"`,
+  `"ward.D2"`, `"mcquitty"` (WPGMA), `"median"` or `"centroid"`, or
+  `"pcoa"` to order them along the first axis of
+  [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
+  Clustering **reorders the samples** of the result, with their labels
+  (samples without names are labelled with their positions in the
+  input): attribute `order` gives each one's position in the input, so
+  that `meta[attr(d, "order"), ]` lines metadata up with them. Tests
+  such as
+  [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
+  match named samples to `data` by name, but a vector of groups without
+  names is matched by position, so reorder it too. The result's
+  attribute `clust` records `clust` (`FALSE` as `"none"`), which
+  [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
+  follows: with `NULL` it clusters the samples for the heatmap
+  (`"average"`), and with `"none"` it keeps their order. `clust` needs
+  every distance, so it cannot be used with `pairs`.
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md)'s
+  similarities are clustered as \\1 - \rho_p\\.
 
 - cpus:
 
