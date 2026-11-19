@@ -244,9 +244,9 @@ can't be mistaken for one another:
 | Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, ✓ `mantel_partial`, `mirkat` |
 | Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
 | Composition | ✓ `simper` |
-| Beta metrics (`beta_div`) | `philr_distance` |
+| Beta metrics (`beta_div`) | ✓ `philr_distance` |
 | Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
-| Log-ratio transforms | ✓ `alr`, ✓ `ilr`, `philr` (clr and rclr stay `norm` choices) |
+| Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
 | Differential abundance | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest` |
