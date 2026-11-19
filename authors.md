@@ -16,8 +16,11 @@
   uwot's C++ header library, followed by the UMAP code
 
 - **scikit-bio development team**. Contributor, copyright holder.  
-  PCoA biplot scores, BIOENV, and the alr and ilr transforms, from
-  scikit-bio
+  PCoA biplot scores, BIOENV, the alr and ilr transforms, and
+  multiplicative zero replacement, from scikit-bio
+
+- **NumPy Developers**. Copyright holder.  
+  numpy's pairwise summation, followed by replace_zeros_mult()
 
 - **Cameron Martino**. Contributor, copyright holder.  
   'gemelli' robust Aitchison PCA

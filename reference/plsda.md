@@ -321,7 +321,10 @@ Zeros are undefined in the centered log-ratio (CLR) transformation. If
 detected, the function uses half the minimum non-zero value
 (`min(x[x>0]) / 2`) and issues a warning.
 
-To suppress the warning, provide an explicit value (e.g., `1`).
+To suppress the warning, provide an explicit value (e.g., `1`), or
+replace the zeros first with
+[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md),
+whose result needs no pseudocount.
 
 **Why this matters:** The choice of pseudocount is not neutral; it acts
 as a weighting factor that can significantly distort downstream results,

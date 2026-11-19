@@ -109,6 +109,8 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefy.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/read_tree.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/replace_zeros.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/replace_zeros_mult.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/robust_aitchison.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rpca.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/shannon.html</loc></url>
@@ -128,5 +130,6 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/varpart.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/wave_hedges.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/weighted_unifrac.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/zero_replacements.html</loc></url>
 </urlset>
 

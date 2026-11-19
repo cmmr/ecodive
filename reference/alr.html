@@ -151,7 +151,8 @@ seamlessly supports objects from the following biological data packages:</p><ul>
 pseudocount is added to every value (not only to zeros), as in
 <code>normalize(norm = 'clr')</code>. With <code>pseudocount = NULL</code> (the default), no
 pseudocount is used when <code>counts</code> has no zeros; otherwise half the
-smallest non-zero value is, with a warning.</p>
+smallest non-zero value is, with a warning. To avoid a pseudocount,
+replace the zeros first with <code><a href="replace_zeros.html">replace_zeros()</a></code>: its result has none.</p>
 <p>The choice of pseudocount is not neutral: it can distort the results,
 especially for sparse tables. See <code><a href="aitchison.html">aitchison()</a></code> for references.</p>
     </div>

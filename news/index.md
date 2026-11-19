@@ -620,6 +620,31 @@
   `cpus`.
 
 - New
+  [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)
+  replaces the zeros of a count table with small positive values, so
+  that log ratios (`norm = 'clr'`,
+  [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md),
+  [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md),
+  [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md)) can be
+  taken without a pseudocount: its result has no zeros, so they use none
+  and give no warning. It runs any zero replacement method by name, as
+  [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
+  does for ordinations, and
+  [`list_zero_replacements()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md)
+  and
+  [`match_zero_replacement()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md)
+  list and look up the methods. The first is
+  [`replace_zeros_mult()`](https://cmmr.github.io/ecodive/reference/replace_zeros_mult.md),
+  multiplicative replacement (Martín-Fernández et al. 2003): every zero
+  becomes `delta` (one value, or one per sample; scikit-bio’s `1 / D^2`
+  by default) and each sample’s non-zero proportions shrink by the same
+  factor, keeping their ratios. Its results are bit-identical to
+  scikit-bio’s `multi_replace()`. Every method returns a dense matrix of
+  proportions in the input’s orientation, with `method`, its parameters
+  and `n_replaced` attributes, and takes every table type: a sparse
+  2,000 by 5,000 table takes 0.2 seconds.
+
+- New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   returns a count table after any of the transformations that
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),

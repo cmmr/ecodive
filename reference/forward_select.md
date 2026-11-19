@@ -291,7 +291,10 @@ Zeros are undefined in the centered log-ratio (CLR) transformation. If
 detected, the function uses half the minimum non-zero value
 (`min(x[x>0]) / 2`) and issues a warning.
 
-To suppress the warning, provide an explicit value (e.g., `1`).
+To suppress the warning, provide an explicit value (e.g., `1`), or
+replace the zeros first with
+[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md),
+whose result needs no pseudocount.
 
 **Why this matters:** The choice of pseudocount is not neutral; it acts
 as a weighting factor that can significantly distort downstream results,
@@ -352,7 +355,7 @@ of explanatory variables. *Ecology*, 89, 2623-2632.
     fs <- forward_select(bray(counts), ~ ph + temp + depth + site, meta)
     attr(fs, 'selected')
 #> ~ph + temp
-#> <environment: 0x585feae13748>
+#> <environment: 0x5a2f84f8c508>
     varpart(bray(counts), env = attr(fs, 'selected'), site = ~ site, data = meta)
 #> Variation partitioning by db-RDA: 40 samples, 2 sets
 #> Total inertia: 1.5469

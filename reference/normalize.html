@@ -142,7 +142,9 @@ Whichever package was attached last masks the other's, so call
 <code>norm = 'clr'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (<code>min(x[x&gt;0]) / 2</code>) and issues a warning.</p>
-<p>To suppress the warning, provide an explicit value (e.g., <code>1</code>).</p>
+<p>To suppress the warning, provide an explicit value (e.g., <code>1</code>), or
+replace the zeros first with <code><a href="replace_zeros.html">replace_zeros()</a></code>, whose
+result needs no pseudocount.</p>
 <p><strong>Why this matters:</strong> The choice of pseudocount is not neutral; it acts as
 a weighting factor that can significantly distort downstream results,
 especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.

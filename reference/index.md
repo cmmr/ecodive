@@ -156,6 +156,19 @@ Distance measures based on phylogenetic branch lengths (UniFrac family).
 Log ratios for relative abundances. The centered log ratios (clr and
 rclr) are norm choices; see normalize().
 
+### Zeros
+
+Replace zeros before taking log ratios, instead of adding a pseudocount.
+replace_zeros() runs any method by name.
+
+- [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)
+  : Zero Replacement
+- [`replace_zeros_mult()`](https://cmmr.github.io/ecodive/reference/replace_zeros_mult.md)
+  : Multiplicative Zero Replacement
+- [`list_zero_replacements()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md)
+  [`match_zero_replacement()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md)
+  : Find and Browse Zero Replacement Methods
+
 ### Log-ratio transforms
 
 Coordinates for analyses of the transformed features themselves. For

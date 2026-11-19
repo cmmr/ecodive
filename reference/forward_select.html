@@ -293,7 +293,9 @@ seamlessly supports objects from the following biological data packages:</p><ul>
 <code>norm = 'clr'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (<code>min(x[x&gt;0]) / 2</code>) and issues a warning.</p>
-<p>To suppress the warning, provide an explicit value (e.g., <code>1</code>).</p>
+<p>To suppress the warning, provide an explicit value (e.g., <code>1</code>), or
+replace the zeros first with <code><a href="replace_zeros.html">replace_zeros()</a></code>, whose
+result needs no pseudocount.</p>
 <p><strong>Why this matters:</strong> The choice of pseudocount is not neutral; it acts as
 a weighting factor that can significantly distort downstream results,
 especially for sparse datasets. See Gloor et al. (2017) and Kaul et al.
@@ -347,7 +349,7 @@ of explanatory variables. <em>Ecology</em>, 89, 2623-2632.
 <span class="r-in"><span>    <span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu">forward_select</span><span class="op">(</span><span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>, <span class="op">~</span> <span class="va">ph</span> <span class="op">+</span> <span class="va">temp</span> <span class="op">+</span> <span class="va">depth</span> <span class="op">+</span> <span class="va">site</span>, <span class="va">meta</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fs</span>, <span class="st">'selected'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ~ph + temp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x585feae13748&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x5a2f84f8c508&gt;</span>
 <span class="r-in"><span>    <span class="fu"><a href="varpart.html">varpart</a></span><span class="op">(</span><span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>, env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fs</span>, <span class="st">'selected'</span><span class="op">)</span>, site <span class="op">=</span> <span class="op">~</span> <span class="va">site</span>, data <span class="op">=</span> <span class="va">meta</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variation partitioning by db-RDA: 40 samples, 2 sets</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Total inertia: 1.5469</span>
