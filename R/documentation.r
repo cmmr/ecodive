@@ -41,6 +41,28 @@
 #'        Provide a numeric or logical vector specifying positions in the 
 #'        distance matrix to calculate. See examples.
 #' 
+#' @param clust  Whether and how to cluster the samples (rows and columns)
+#'        before returning the distance matrix: `NULL` (the default) or
+#'        `FALSE` to keep them in their input order, or one of
+#'        [stats::hclust()]'s linkage methods, `"average"` (UPGMA),
+#'        `"complete"`, `"single"`, `"ward.D"`, `"ward.D2"`, `"mcquitty"`
+#'        (WPGMA), `"median"` or `"centroid"`, or `"pcoa"` to order them
+#'        along the first axis of [pcoa()]. Clustering **reorders the
+#'        samples** of the result, with their labels (samples without names
+#'        are labelled with their positions in the input): its `dist` record
+#'        (see [ecodive_steps]) gives each one's position in the input as
+#'        `order`, so that `meta[attr(d, "dist")$order, ]` lines metadata up
+#'        with them. ecodive's ordinations and tests put the samples back in
+#'        their input order before analysing them, so give them metadata in
+#'        its usual order. Other packages see the reordered matrix: give
+#'        them metadata reordered by `order`, or matched by name. The
+#'        record's `clust` records `clust`
+#'        (`FALSE` as `"none"`), which [plot.ecodive_dist()] follows: with `NULL` it clusters the samples
+#'        for the heatmap (`"average"`), and with `"none"` it keeps their
+#'        order. `clust` needs every distance, so it cannot be used with
+#'        `pairs`. [rho_p()]'s similarities are clustered as \eqn{1 -
+#'        \rho_p}.
+#'
 #' @param pairwise  Also test each pair of groups: run the same test on just
 #'        the two groups' samples, for every pair, and adjust the pairs'
 #'        p-values for multiple testing with `p_adjust`. See **Pairwise
@@ -99,11 +121,11 @@ NULL
 #' @keywords internal
 #'
 #' @section Ordination result:
-#'   Every ordination function ([pcoa()], [pca()], [rpca()], [dbrda()],
+#'   Every ordination function ([pcoa()], [pca()], [rpca()], [dbrda()], [capda()],
 #'   [capscale()], [mds()], [nmds()], [isomap()], [tsne()], [umap()], and so
 #'   [dist_ord()]) returns the same kind of
 #'   object: a numeric matrix with one row per sample and one column per
-#'   axis, so that it can go straight into `plot()` or a data frame. Rows are
+#'   axis, so that it can go straight into a data frame. Rows are
 #'   named after the samples, when the input has names. Columns are named
 #'   after the method: `"PCoA1"`, `"PC1"`, `"RPCA1"`, `"dbRDA1"` or `"CAP1"`
 #'   (then `"MDS1"` for unconstrained axes), `"MDS1"`, `"NMDS1"`,
@@ -124,10 +146,17 @@ NULL
 #'     axis explains. Unlike `eig`, it is comparable between methods, so use
 #'     it to label axes. `NA` where it isn't defined.
 #'
-#'   Attributes particular to the method follow them. The matrix has class
-#'   `"ecodive_ord"` (as well as `"matrix"`), only so that `print()` lists the
-#'   other attributes by name rather than in full. Subsetting with `[`, or
-#'   `as.data.frame()`, gives a plain matrix or data frame without them.
+#'   Attributes particular to the method follow them, and last, the records
+#'   of how it was made (see [ecodive_steps]): `dist`, the distance
+#'   matrix's, for the methods that take distances, and `ord`, the
+#'   ordination's own (its method, display name and settings). The matrix has class
+#'   `"ecodive_ord"` (as well as `"matrix"`), so that `print()` lists the
+#'   other attributes by name rather than in full, and `plot()` draws the
+#'   samples on the first two axes, labelled from the attributes, with any
+#'   loadings, constraints and centroids on top (see [plot.ecodive_ord()]).
+#'   `plot(ord, "Species", iris)` colours the samples by a column of
+#'   metadata. Subsetting with `[`, or `as.data.frame()`, gives a plain
+#'   matrix or data frame without the attributes.
 NULL
 
 
@@ -187,7 +216,9 @@ NULL
 #'   zeros are detected, the function uses half the minimum non-zero value 
 #'   (\code{min(x[x>0]) / 2}) and issues a warning.
 #'   
-#'   To suppress the warning, provide an explicit value (e.g., \code{1}).
+#'   To suppress the warning, provide an explicit value (e.g., \code{1}), or
+#'   replace the zeros first with \code{\link{replace_zeros}()}, whose
+#'   result needs no pseudocount.
 #'   
 #'   **Why this matters:** The choice of pseudocount is not neutral; it acts as
 #'   a weighting factor that can significantly distort downstream results, 

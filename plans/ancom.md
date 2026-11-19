@@ -166,3 +166,83 @@ A per-feature table, the shared structure in compositional.md:
 - Kaul, A., Mandal, S., Davidov, O., & Peddada, S. D. (2017). Analysis of
   microbiome data in the presence of excess zeros. *Frontiers in
   Microbiology*, 8, 2114.
+
+
+## Decisions made while implementing (2026-11-19)
+
+Asked of the user at the start (all four answered with the recommendation):
+
+- **Result:** as planned: a `data.frame` of class
+  `c('ecodive_ancom', 'data.frame')` with `feature`, `W` (integer) and
+  `reject`, and attributes `groups`, `sig_test`, `p_adjust`, `alpha`, `tau`,
+  `theta`, `cutoff` and `pseudocount`. No print method, no extra columns.
+- **Zero variance:** as SciPy. `'anova'`: a log ratio constant within every
+  group (by exact equality) but different between groups has F = `Inf`, p =
+  0 (counted); one that is the same in every sample is `NaN` (left out of
+  the feature's family, never counted). `'kruskal'`: every value tied is
+  `NaN`. SciPy itself gives `NaN` there only when its numerator rounds to
+  exactly 0; for many sample sizes it gives `Inf` (p = 0, counted as
+  significant), a rounding artefact that ecodive doesn't copy (checked for
+  n = 3 to 600: 162 of the group splits give `Inf` in SciPy).
+- **Kruskal-Wallis ties:** exact floating-point equality of the log ratios,
+  average ranks and SciPy's tie correction, in SciPy's order of operations,
+  so H is bit-identical to SciPy's in every fixture.
+- **Per-pair p-values and `p_adjust`:** p-values only through the internal
+  `ancom_details()` (same arguments; returns the statistics, the raw p-value
+  matrix and each feature's adjusted row). `p_adjust` is `'holm'`,
+  `'bonferroni'`, `'BH'` (`'fdr'` accepted as an alias, reported as `'BH'`),
+  `'BY'` or `'none'`, matched with `pairwise_method()`; `'hochberg'` and
+  `'hommel'` are errors.
+
+Decided along the way:
+
+- **Group order:** a factor keeps its levels' order (unused levels
+  dropped); anything else is `sort(unique(x), method = 'radix')`, as
+  `numpy.unique`. The order changes only the `groups` attribute.
+- **`sig_test`:** `'anova'` (also `'f_oneway'`, scikit-bio's name) or
+  `'kruskal'`, case-insensitive, by prefix.
+- **Zeros:** `log_ratio_input()` with `zero_ok = FALSE`: `pseudocount = 0`
+  is an error ("must be a single positive number"); `NULL` follows the
+  shared rule.
+- **Adjustment in C,** reproducing `p.adjust()`'s arithmetic exactly
+  (`(n + 1 - i) * p` for Holm, `n / i * p` and `q * n / i * p` for BH and BY,
+  with `q` summed in long double as R's `sum()` does): the tests check
+  `identical()` with `p.adjust(c(0, row), method)[-1]` for every row.
+- **The cutoff** uses numpy's `linspace(0.05, 0.25, 5)` values, whose third
+  is `0x1.3333333333334p-3`, one rounding step above `0.15`. It changes
+  `reject` only when a W sits exactly on that boundary; a fixture of 800
+  crafted W vectors (scikit-bio run with `_log_compare()` patched to return a
+  chosen pattern) includes 3 such cases, and all 800 match. The rule is
+  `ancom_cutoff()`, tested on its own.
+- **F statistic:** corrected two-pass sums of squares around the grand mean
+  (group means of `d - mean(d)`, with the mean of those residuals as the
+  correction), not SciPy's one-pass formula. Against exact rational
+  arithmetic on the same log ratios, ecodive's F is within 1.5e-13
+  (relative) in every fixture, and SciPy's within 2.6e-12.
+- **Memory:** the statistics are turned into p-values in place: one packed
+  triangle, 4 D² bytes. Each thread has an n-vector for the log ratio and
+  (Kruskal) an n-vector of (value, group) pairs; the table stays sparse
+  (per-feature lists, as `src/proportionality.c`).
+- **Threads:** phase 1 (statistics) deals the rows of the triangle to
+  threads in turn; p-values on the main thread (`pf()`, `pchisq()`); phase 2
+  (adjustment and W) deals features to threads. Each task depends only on
+  its own pair or feature, so results are identical for any `cpus`
+  (checked for 1, 2, 3, 4 and 8, and for dense, `Matrix`, `slam` and
+  `margin = 2` input).
+- **Kruskal-Wallis sorting:** a quicksort of (value, group) pairs, not
+  stable: tied values share their average rank and rank sums of
+  half-integers are exact in any order. (An index merge sort took 50% more
+  time.)
+- **Timing** (4 cores): 3,000 features × 200 samples, 4.5 million log
+  ratios: 2.6 s with `'anova'` (6 s on 1 core), 10.5 s with `'kruskal'`.
+  scikit-bio would hold all 4.5 million × 200 log ratios in memory (7 GB).
+- **The draft article** `vignettes/articles/compositional.Rmd` (updated
+  upstream for items 14-18 in 885c7a3) still lists `ancom()` as planned and
+  its differential-abundance section doesn't run it yet; not changed here.
+
+For `ancombc()` (item 22): `ancom_p_adjust()` is ANCOM-specific (five
+methods, C adjustment with the diagonal 0); ANCOM-BC adjusts per covariate
+column with no such quirk, so it should call `stats::p.adjust()` (or reuse
+`pairwise_method()` directly). The group handling (`test_group_values()`,
+then radix-sorted levels unless a factor) and `log_ratio_input()` use are
+reusable as they are.

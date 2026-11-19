@@ -212,6 +212,9 @@
 #'     res <- permanova(dm, 'treatment', meta)
 #'     res
 #'
+#'     # The pseudo-F of each permutation, and the observed one.
+#'     plot(res)
+#'
 #'     # The same, with the groups as a vector.
 #'     permanova(dm, meta$treatment)
 #'
@@ -533,6 +536,7 @@ permanova <- function (
 
   new_ecodive_test(
     class       = 'ecodive_permanova',
+    dist        = dv$step,
     title       = 'Permutational multivariate analysis of variance (PERMANOVA)',
     statistic   = c(F = f0),
     p_value     = p_model,

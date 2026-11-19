@@ -191,7 +191,7 @@
 #' @examples
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- dbrda(dm, 'Species', iris)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'
@@ -356,7 +356,8 @@ dbrda_core <- function (
     method   = if (positive) 'capscale' else 'dbrda',
     prefix   = if (positive) 'CAP' else 'dbRDA',
     prefix_u = 'MDS',
-    positive = positive )
+    positive = positive,
+    dist     = dv$step )
 }
 
 

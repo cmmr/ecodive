@@ -67,7 +67,8 @@ particular), **the per-method plans and this README win.**
   - **document how it differs** from the original: say in the file header
     that it is a modified port (e.g. "C port of <function> from <package>
     <version>; restructured for ecodive, see the method's plan"), and list
-    user-visible differences in the Rd's "Differences from ..." section;
+    user-visible differences in the roxygen docs' "Differences from ..."
+    section;
   - **bear a different name** and not stop the original being installed
     (section 4(b)): ecodive is a separate package, so this holds.
 - **Code derived from Artistic-2.0 code** but distributed under a
@@ -85,7 +86,7 @@ particular), **the per-method plans and this README win.**
 | R function and roxygen docs | `R/<name>.r` (one file per method or family) |
 | C code | `src/<name>.c`; register `.Call` entry points in `src/init.c`; shared declarations in `src/ecodive.h` |
 | Exports | `NAMESPACE` **by hand**: it is not roxygen-managed |
-| Rd files | Run `roxygen2::roxygenise()`, then keep only the changed or new Rd files (see "Tooling") |
+| Rd files | Generated: never edit `man/*.Rd` by hand. Run `roxygen2::roxygenise()` once, after the roxygen comments are final, and commit whatever it writes (see "Tooling") |
 | Reference index | `pkgdown/_pkgdown.yml` (the Ordination or Hypothesis Tests section) |
 | News | `NEWS.md`, under the version being developed |
 | Fixture generators | `data-raw/expected/<name>.r`, plus `<name>.py` for Python references, whose text outputs are committed under `data-raw/expected/<name>/` |
@@ -231,25 +232,25 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, `replace_zeros` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
-| Unconstrained, counts | ✓ `pca`, ✓ `rpca`, `rpca_phylo`, `ca`, `dca`, `dpcoa` |
+| Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
-| Constrained | ✓ `dbrda`, ✓ `capscale`, `rda`, `cca`, `principal_response_curves` |
-| Discriminant (`*da`) | `lda`, `plsda`, `oplsda`, `splsda`, `capda` |
+| Constrained | ✓ `dbrda`, ✓ `capscale`, ✓ `rda`, ✓ `cca`, `principal_response_curves` |
+| Discriminant (`*da`) | ✓ `lda`, ✓ `plsda`, ✓ `oplsda`, `splsda`, ✓ `capda` |
 | Fitting onto ordinations | ✓ `envfit`, ✓ `pcoa_biplot` |
-| Comparing ordinations | `procrustes`, `procrustes_test`, `coinertia` |
-| Model building | `varpart`, `forward_select`, `bioenv` |
-| Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, `mantel_partial`, `mirkat` |
+| Comparing ordinations | ✓ `procrustes`, ✓ `procrustes_test`, `coinertia` |
+| Model building | ✓ `varpart`, ✓ `forward_select`, ✓ `bioenv` |
+| Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, ✓ `mantel_partial`, `mirkat` |
 | Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
-| Composition | `simper` |
-| Beta metrics (`beta_div`) | `philr_distance` |
-| Zero replacement (`replace_zeros`) | `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
-| Log-ratio transforms | `alr`, `ilr`, `philr` (clr and rclr stay `norm` choices) |
-| Log ratios | `log_ratio`, `balance` |
-| Proportionality | `vlr`, `rho_p`, `phi_s` |
-| Differential abundance | `ancom`, `ancombc`, `ancombc2`, `ancombc_global`, `ancombc_pairwise`, `ancombc_dunnett`, `ancombc_trend`, `structural_zeros`, `dirmult_ttest` |
-| Absolute abundance | `qmp_scale`, `qmp_rarefy` |
+| Composition | ✓ `simper` |
+| Beta metrics (`beta_div`) | ✓ `philr_distance` |
+| Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
+| Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
+| Log ratios | ✓ `log_ratio`, ✓ `balance` |
+| Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
+| Differential abundance | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest` |
+| Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
 | Spatial | `moran_i`, `dbmem` |
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
 | Source tracking | `sourcetracker`, `feast` |
@@ -265,7 +266,7 @@ Names still worth a word of warning in the docs:
 To check a new alias (run with ecodive installed):
 
 ```r
-for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS'))
+for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS', 'ZERO_REPLACEMENTS'))
   print(grep('^newalias', names(ecodive:::exact_names(reg)), value = TRUE))
 ```
 
@@ -299,13 +300,18 @@ for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS'))
 
 ## Tooling gotchas
 
-- **roxygen:** the local roxygen2 (8.x) is newer than the package's
-  RoxygenNote (7.3.3) and reformats every Rd file. After `roxygenise()`:
-  - `git checkout` every Rd file you didn't mean to change;
-  - revert `DESCRIPTION`'s `RoxygenNote` / `Config/roxygen2/version` edit;
-  - for Rd files that changed only through a shared `@inheritParams`, apply
-    the one-line change by hand rather than keeping roxygen 8's
-    reformatting.
+- **roxygen (set by the user, 2026-11-19):** `man/*.Rd` is generated from
+  the roxygen comments in `R/`, so don't spend time on it.
+  - Never edit an Rd file by hand; change the roxygen comment instead.
+  - Run `roxygen2::roxygenise()` (or `devtools::document()`) **once**, when
+    the roxygen comments are final, and commit everything it writes under
+    `man/` (and `DESCRIPTION`'s `RoxygenNote`, if it changes), as written: no
+    reverting, no hand-curation, even if a different
+    roxygen2 version reformats files you didn't touch.
+  - Don't inspect or diff the Rd output beyond that. `R CMD check` (codoc,
+    examples) is the check that the docs are right.
+  - `man/` stays committed because the GitHub workflows (R CMD check,
+    pkgdown) use it as is and never run `document()`.
 - **Stale object files:** `load_all()` and `roxygenise()` leave `-O0`
   `src/*.o` files, which a later `R CMD INSTALL` silently reuses (benchmarks
   then run about 10× slow). Delete them before installing.

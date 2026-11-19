@@ -255,7 +255,7 @@
   expect_identical(dim(u), c(n1, 2L))
   expect_identical(colnames(u), c('UMAP1', 'UMAP2'))
   expect_identical(
-    names(attributes(u)),
+    names(attributes(no_steps(u))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'a', 'b', 'init', 'n_epochs', 'n_neighbors', 'class') )
   expect_identical(attr(u, 'method'), 'umap')
   expect_identical(attr(u, 'eig'),  c(NA_real_, NA_real_))

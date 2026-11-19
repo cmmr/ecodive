@@ -708,87 +708,33 @@ static void direction(const double *U, const double *RVS, int rows,
 }
 
 
-// Frees new_ecomatrix()'s allocations, then raises an R error.
-#define STOP(...) do { free_all(); error(__VA_ARGS__); } while (0)
-
-
 //======================================================
-// R interface.
+// Filters, as gemelli's rpca_table_processing():
+//   features: total > mfc, and present (> 0) in more
+//     than mff percent of samples;
+//   samples: total over the remaining features > msc;
+//   then features left without any non-zero count.
+// With `drop_single`, also samples with a single
+// non-zero feature, whose rclr carries no information
+// (it is 0); they go to `single` (0-based), and their
+// number to *n_single.
 //
-// `sexp_counts`/`sexp_margin`: anything new_ecomatrix()
-// takes. `sexp_k`: rank. `sexp_iters`, `sexp_tol`:
-// OptSpace's maximum iterations and tol. `sexp_msc`,
-// `sexp_mfc`, `sexp_mff`: gemelli's table filters.
-// `sexp_dm`: also return distances. `sexp_debug`: also
-// return the intermediate results that the tests check
-// against gemelli's. `sexp_step`: OptSpace's step_size
-// (gemelli: 10000; tests use a smaller value to exercise
-// its penalty).
-//
-// Returns list(scores, loadings, eig, samples, features,
-// single, k, cost, n_iters, dist, rclr, u0, v0, u, s, v,
-// ss, lanczos_steps, lanczos_converged, threads): scores
-// n x r (u * s), loadings m x r (v), eig the r values
-// s^2 (largest first), the kept samples and features
-// (1-based), the samples dropped for having a single
-// non-zero feature, the rank r, the fit error after each
-// iteration, and the robust clr values' sum of squares.
+// The table is new_ecomatrix()'s: N0 samples, P0
+// features, sample i's entries at tpos[i] ..
+// tpos[i+1]-1. On return, s_new[i] (f_new[j]) is the
+// sample's (feature's) index among those kept, or -1;
+// *n and *m are the numbers kept. Scratch is R_alloc'd.
 //======================================================
-SEXP C_rpca(
-    SEXP sexp_counts, SEXP sexp_margin,  SEXP sexp_k,
-    SEXP sexp_iters,  SEXP sexp_tol,     SEXP sexp_msc,
-    SEXP sexp_mfc,    SEXP sexp_mff,     SEXP sexp_dm,
-    SEXP sexp_debug,  SEXP sexp_step,    SEXP sexp_n_threads ) {
+void rpca_filter(
+    int N0, int P0, const int *tpos, const int *tidx, const double *tval,
+    double msc, double mfc, double mff, int drop_single,
+    int *s_new, int *f_new, int *single, int *n_single, int *n, int *m ) {
 
-  int    k_req     = asInteger(sexp_k);
-  int    max_iter  = asInteger(sexp_iters);
-  double tol       = asReal(sexp_tol);
-  double msc       = asReal(sexp_msc);
-  double mfc       = asReal(sexp_mfc);
-  double mff       = asReal(sexp_mff);
-  int    want_dm   = asLogical(sexp_dm);
-  int    debug     = asLogical(sexp_debug);
-  int    n_threads = asInteger(sexp_n_threads);
-  step_size        = asReal(sexp_step);
-
-  if (k_req < 1 || k_req > RPCA_MAX_K || max_iter < 1 || n_threads < 1 || !(step_size > 0))
-    error("Invalid arguments to C_rpca()."); // # nocov
-
-
-  //--------------------------------------------------
-  // Read the table: each sample's non-zero entries, in
-  // order of feature, repeats summed.
-  //--------------------------------------------------
-  init_n_ptrs(10);
-  ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
-
-  int           N0   = em->n_samples, P0 = em->n_otus, e1 = em->nnz;
-  const int    *tpos = em->pos_vec, *tidx = em->otu_vec;
-  const double *tval = em->val_vec;
-
-  for (int e = 0; e < e1; e++) {
-    if (!R_FINITE(tval[e])) STOP("`counts` must not contain NA, NaN, or infinite values.");
-    if (tval[e] < 0)        STOP("`counts` must not contain negative values.");
-  }
-
-
-  //--------------------------------------------------
-  // Filters, as gemelli's rpca_table_processing():
-  //   features: total > mfc, and present (> 0) in more
-  //     than mff percent of samples;
-  //   samples: total over the remaining features > msc;
-  //   then features left without any non-zero count.
-  // Also samples with a single non-zero feature, whose
-  // rclr carries no information (it is 0).
-  //--------------------------------------------------
-  double *fsum   = (double *) R_alloc(P0 > 0 ? P0 : 1, sizeof(double));
-  int    *fcnt   = (int *)    R_alloc(P0 > 0 ? P0 : 1, sizeof(int));
-  int    *f_new  = (int *)    R_alloc(P0 > 0 ? P0 : 1, sizeof(int));
-  int    *s_new  = (int *)    R_alloc(N0 > 0 ? N0 : 1, sizeof(int));
-  int    *single = (int *)    R_alloc(N0 > 0 ? N0 : 1, sizeof(int));
+  double *fsum = (double *) R_alloc(P0 > 0 ? P0 : 1, sizeof(double));
+  int    *fcnt = (int *)    R_alloc(P0 > 0 ? P0 : 1, sizeof(int));
 
   for (int j = 0; j < P0; j++) { fsum[j] = 0; fcnt[j] = 0; }
-  for (int e = 0; e < e1; e++) {
+  for (int e = 0; e < tpos[N0]; e++) {
     fsum[tidx[e]] += tval[e];
     fcnt[tidx[e]]++;
   }
@@ -796,7 +742,7 @@ SEXP C_rpca(
   for (int j = 0; j < P0; j++)
     f_new[j] = (fsum[j] > mfc && (double) fcnt[j] / N0 > mff / 100) ? 0 : -1;
 
-  int n_single = 0;
+  int ns = 0;
   for (int i = 0; i < N0; i++) {
     double ss = 0;
     int    nz = 0;
@@ -805,8 +751,8 @@ SEXP C_rpca(
         ss += tval[e];
         nz++;
       }
-    s_new[i] = (ss > msc && nz >= 2) ? 0 : -1;
-    if (ss > msc && nz == 1) single[n_single++] = i;
+    s_new[i] = (ss > msc && (nz >= 2 || !drop_single)) ? 0 : -1;
+    if (drop_single && ss > msc && nz == 1) single[ns++] = i;
   }
 
   // Features present in a kept sample.
@@ -816,59 +762,85 @@ SEXP C_rpca(
       for (int e = tpos[i]; e < tpos[i + 1]; e++)
         fcnt[tidx[e]] = 1;
 
-  int n = 0, m = 0;
-  for (int j = 0; j < P0; j++) f_new[j] = (f_new[j] == 0 && fcnt[j]) ? m++ : -1;
-  for (int i = 0; i < N0; i++) s_new[i] = (s_new[i] == 0) ? n++ : -1;
+  int nn = 0, mm = 0;
+  for (int j = 0; j < P0; j++) f_new[j] = (f_new[j] == 0 && fcnt[j]) ? mm++ : -1;
+  for (int i = 0; i < N0; i++) s_new[i] = (s_new[i] == 0) ? nn++ : -1;
 
-  if (n < 2 || m < 2) {
-    if (n_single > 0)
-      STOP(
-        "After filtering, %d sample%s and %d feature%s remain (%d sample%s "
-        "with a single non-zero feature %s removed); at least 2 of each are needed.",
-        n, (n == 1) ? "" : "s", m, (m == 1) ? "" : "s",
-        n_single, (n_single == 1) ? "" : "s", (n_single == 1) ? "was" : "were" );
-    STOP(
-      "After filtering, %d sample%s and %d feature%s remain; at least 2 of each are needed.",
-      n, (n == 1) ? "" : "s", m, (m == 1) ? "" : "s" );
+  *n = nn; *m = mm; *n_single = ns;
+}
+
+
+//======================================================
+// A copy of the named list `x` with `k` more elements,
+// `vals`, named `names`.
+//======================================================
+SEXP rpca_list_append(SEXP x, const char **names, SEXP *vals, int k) {
+
+  int  n0  = length(x);
+  SEXP res = PROTECT(allocVector(VECSXP, n0 + k));
+  SEXP nms = PROTECT(allocVector(STRSXP, n0 + k));
+  SEXP old = getAttrib(x, R_NamesSymbol);
+
+  for (int i = 0; i < n0; i++) {
+    SET_VECTOR_ELT(res, i, VECTOR_ELT(x, i));
+    SET_STRING_ELT(nms, i, STRING_ELT(old, i));
   }
+  for (int i = 0; i < k; i++) {
+    SET_VECTOR_ELT(res, n0 + i, vals[i]);
+    SET_STRING_ELT(nms, n0 + i, mkChar(names[i]));
+  }
+  setAttrib(res, R_NamesSymbol, nms);
 
-  int r = (k_req < n - 1) ? k_req : n - 1;
-  if (r > m - 1) r = m - 1;
+  UNPROTECT(2);
+  return res;
+}
 
 
-  //--------------------------------------------------
-  // CSR copy of the kept table (rows = samples).
-  //--------------------------------------------------
-  int *s_idx = (int *) R_alloc(n, sizeof(int));
-  int *f_idx = (int *) R_alloc(m, sizeof(int));
-  for (int i = 0; i < N0; i++) if (s_new[i] >= 0) s_idx[s_new[i]] = i;
-  for (int j = 0; j < P0; j++) if (f_new[j] >= 0) f_idx[f_new[j]] = j;
+//======================================================
+// OptSpace and PCA (steps 3 and 4 above) of an n x m
+// table of robust clr values, given as CSR: row k's
+// observed entries are rpos[k] .. rpos[k+1]-1, at
+// columns ridx[] (increasing) with values rval[]. All
+// three are R_alloc'd by the caller; rval is rescaled
+// in place. Rows and columns may have no observed
+// entries (rpca_phylo()'s all-missing columns and
+// rows): m counts every column, and they all take part
+// in OptSpace's scaling, its updates of U and V, and
+// the final centering, as in gemelli. r is the rank,
+// at most min(n, m) - 1. `no_var` is the error message
+// for a table whose observed values are all 0.
+//
+// `step` is OptSpace's step_size (gemelli: 10000;
+// tests use a smaller value to exercise its penalty).
+//
+// Returns list(scores, loadings, eig, k, cost, n_iters,
+// dist, u0, v0, u, s, v, ss, lanczos_steps,
+// lanczos_converged, threads): scores n x r (u * s),
+// loadings m x r (v), eig the r values s^2 (largest
+// first), the rank r, the fit error after each
+// iteration, and the robust clr values' sum of squares.
+// dist, u0, v0, u, s and v are NULL unless asked for.
+//======================================================
+SEXP rpca_core(
+    int n, int m, int *rpos, int *ridx, double *rval,
+    int r, int max_iter, double tol, int want_dm, int debug,
+    double step, int n_threads, const char *no_var ) {
 
-  int nnz = 0;
-  for (int k = 0; k < n; k++)
-    for (int e = tpos[s_idx[k]]; e < tpos[s_idx[k] + 1]; e++)
-      if (f_new[tidx[e]] >= 0) nnz++;
+  if (r < 1 || r > RPCA_MAX_K || r > n - 1 || r > m - 1 || max_iter < 1 ||
+      n_threads < 1 || !(step > 0))
+    error("Invalid arguments to rpca_core()."); // # nocov
+
+  step_size    = step;
+  int    nnz   = rpos[n];
   size_t nnz_z = (size_t) nnz;
-
-  int    *rpos = (int *)    R_alloc((size_t) n + 1, sizeof(int));
-  int    *ridx = (int *)    R_alloc(nnz_z, sizeof(int));
-  double *rval = (double *) R_alloc(nnz_z, sizeof(double));
-
-  nnz = 0;
-  for (int k = 0; k < n; k++) {
-    int i = s_idx[k];
-    rpos[k] = nnz;
-    for (int e = tpos[i]; e < tpos[i + 1]; e++)
-      if (f_new[tidx[e]] >= 0) {
-        ridx[nnz] = f_new[tidx[e]];
-        rval[nnz] = tval[e];
-        nnz++;
-      }
-  }
-  rpos[n] = nnz;
 
   n_rows = n; n_cols = m; rnk = r;
   r_pos = rpos; r_idx = ridx; r_val = rval;
+
+  double ss = 0;
+  for (int e = 0; e < nnz; e++) ss += rval[e] * rval[e];
+
+  if (!(ss > 0)) error("%s", no_var);
 
 
   //--------------------------------------------------
@@ -894,34 +866,7 @@ SEXP C_rpca(
   n_tasks = nnz;
   int nt_max = (nt_rows > nt_cols) ? nt_rows : nt_cols;
 
-
-  //--------------------------------------------------
-  // Robust clr (normalize.c), on a copy that
-  // normalize() makes; then new_ecomatrix()'s memory
-  // can go.
-  //--------------------------------------------------
-  {
-    ecomatrix_t fem = {
-      .n_samples = n, .n_otus = m, .nnz = nnz,
-      .pos_vec = rpos, .otu_vec = ridx, .val_vec = rval };
-    normalize(&fem, RPCA_NORM_RCLR, nt_rows, 0);
-    memcpy(rval, fem.val_vec, nnz_z * sizeof(double));
-  }
-  free_all();
-
-  double ss = 0;
-  for (int e = 0; e < nnz; e++) ss += rval[e] * rval[e];
-
-  if (!(ss > 0))
-    error("There is no variation to ordinate: every sample's non-zero counts are equal.");
-
   int nprot = 0;
-
-  SEXP sexp_rclr = R_NilValue;
-  if (debug) {
-    sexp_rclr = PROTECT(allocVector(REALSXP, nnz)); nprot++;
-    memcpy(REAL(sexp_rclr), rval, nnz_z * sizeof(double));
-  }
 
   double rescal = sqrt((double) nnz * r / ss);
   double eps    = nnz / sqrt((double) m * n);
@@ -1003,7 +948,7 @@ SEXP C_rpca(
     lanczos_t lz = {
       .n = d, .k = r, .dims = d, .deflate = 0, .scale = (double) nnz * r,
       .max_basis = (basis > 60) ? basis : 0,
-      .op = op_b, .ctx = &octx, .vecs = top,
+      .op = op_b, .ctx = &octx, .n_threads = n_threads, .vecs = top,
       .vals  = (double *) R_alloc(r, sizeof(double)),
       .resid = (double *) R_alloc(r, sizeof(double)) };
     lanczos(&lz);
@@ -1257,13 +1202,7 @@ SEXP C_rpca(
   //--------------------------------------------------
   // Results.
   //--------------------------------------------------
-  SEXP sexp_sam    = PROTECT(allocVector(INTSXP, n));          nprot++;
-  SEXP sexp_fea    = PROTECT(allocVector(INTSXP, m));          nprot++;
-  SEXP sexp_single = PROTECT(allocVector(INTSXP, n_single));   nprot++;
-  SEXP sexp_cost   = PROTECT(allocVector(REALSXP, n_iters + 1)); nprot++;
-  for (int k = 0; k < n; k++)        INTEGER(sexp_sam)[k]    = s_idx[k] + 1;
-  for (int l = 0; l < m; l++)        INTEGER(sexp_fea)[l]    = f_idx[l] + 1;
-  for (int i = 0; i < n_single; i++) INTEGER(sexp_single)[i] = single[i] + 1;
+  SEXP sexp_cost = PROTECT(allocVector(REALSXP, n_iters + 1)); nprot++;
   memcpy(REAL(sexp_cost), cost, sizeof(double) * (n_iters + 1));
 
   SEXP sexp_u = R_NilValue, sexp_s = R_NilValue, sexp_v = R_NilValue;
@@ -1280,30 +1219,191 @@ SEXP C_rpca(
   }
 
   const char *names[] = {
-    "scores", "loadings", "eig", "samples", "features", "single", "k",
-    "cost", "n_iters", "dist", "rclr", "u0", "v0", "u", "s", "v",
-    "ss", "lanczos_steps", "lanczos_converged", "threads", "" };
+    "scores", "loadings", "eig", "k", "cost", "n_iters", "dist",
+    "u0", "v0", "u", "s", "v", "ss", "lanczos_steps", "lanczos_converged",
+    "threads", "" };
   SEXP res = PROTECT(mkNamed(VECSXP, names)); nprot++;
   SET_VECTOR_ELT(res,  0, sexp_scores);
   SET_VECTOR_ELT(res,  1, sexp_loadings);
   SET_VECTOR_ELT(res,  2, sexp_eig);
-  SET_VECTOR_ELT(res,  3, sexp_sam);
-  SET_VECTOR_ELT(res,  4, sexp_fea);
-  SET_VECTOR_ELT(res,  5, sexp_single);
-  SET_VECTOR_ELT(res,  6, ScalarInteger(r));
-  SET_VECTOR_ELT(res,  7, sexp_cost);
-  SET_VECTOR_ELT(res,  8, ScalarInteger(n_iters));
-  SET_VECTOR_ELT(res,  9, sexp_dist);
-  SET_VECTOR_ELT(res, 10, sexp_rclr);
-  SET_VECTOR_ELT(res, 11, sexp_u0);
-  SET_VECTOR_ELT(res, 12, sexp_v0);
-  SET_VECTOR_ELT(res, 13, sexp_u);
-  SET_VECTOR_ELT(res, 14, sexp_s);
-  SET_VECTOR_ELT(res, 15, sexp_v);
-  SET_VECTOR_ELT(res, 16, ScalarReal(ss));
-  SET_VECTOR_ELT(res, 17, ScalarInteger(lz_steps));
-  SET_VECTOR_ELT(res, 18, ScalarLogical(lz_conv));
-  SET_VECTOR_ELT(res, 19, ScalarInteger(nt_max));
+  SET_VECTOR_ELT(res,  3, ScalarInteger(r));
+  SET_VECTOR_ELT(res,  4, sexp_cost);
+  SET_VECTOR_ELT(res,  5, ScalarInteger(n_iters));
+  SET_VECTOR_ELT(res,  6, sexp_dist);
+  SET_VECTOR_ELT(res,  7, sexp_u0);
+  SET_VECTOR_ELT(res,  8, sexp_v0);
+  SET_VECTOR_ELT(res,  9, sexp_u);
+  SET_VECTOR_ELT(res, 10, sexp_s);
+  SET_VECTOR_ELT(res, 11, sexp_v);
+  SET_VECTOR_ELT(res, 12, ScalarReal(ss));
+  SET_VECTOR_ELT(res, 13, ScalarInteger(lz_steps));
+  SET_VECTOR_ELT(res, 14, ScalarLogical(lz_conv));
+  SET_VECTOR_ELT(res, 15, ScalarInteger(nt_max));
+
+  UNPROTECT(nprot);
+  return res;
+}
+
+
+
+// Frees new_ecomatrix()'s allocations, then raises an R error.
+#define STOP(...) do { free_all(); error(__VA_ARGS__); } while (0)
+
+
+//======================================================
+// R interface for rpca().
+//
+// `sexp_counts`/`sexp_margin`: anything new_ecomatrix()
+// takes. `sexp_k`: rank. `sexp_iters`, `sexp_tol`:
+// OptSpace's maximum iterations and tol. `sexp_msc`,
+// `sexp_mfc`, `sexp_mff`: gemelli's table filters.
+// `sexp_dm`: also return distances. `sexp_debug`: also
+// return the intermediate results that the tests check
+// against gemelli's. `sexp_step`: OptSpace's step_size.
+//
+// Returns rpca_core()'s list, followed by samples,
+// features, single, rclr: the kept samples and features
+// (1-based), the samples dropped for having a single
+// non-zero feature, and (with `sexp_debug`) the robust
+// clr values in the order of the non-zero counts by
+// sample.
+//======================================================
+SEXP C_rpca(
+    SEXP sexp_counts, SEXP sexp_margin,  SEXP sexp_k,
+    SEXP sexp_iters,  SEXP sexp_tol,     SEXP sexp_msc,
+    SEXP sexp_mfc,    SEXP sexp_mff,     SEXP sexp_dm,
+    SEXP sexp_debug,  SEXP sexp_step,    SEXP sexp_n_threads ) {
+
+  int    k_req     = asInteger(sexp_k);
+  int    max_iter  = asInteger(sexp_iters);
+  double tol       = asReal(sexp_tol);
+  double msc       = asReal(sexp_msc);
+  double mfc       = asReal(sexp_mfc);
+  double mff       = asReal(sexp_mff);
+  int    want_dm   = asLogical(sexp_dm);
+  int    debug     = asLogical(sexp_debug);
+  int    n_threads = asInteger(sexp_n_threads);
+  double step      = asReal(sexp_step);
+
+  if (k_req < 1 || k_req > RPCA_MAX_K || max_iter < 1 || n_threads < 1 || !(step > 0))
+    error("Invalid arguments to C_rpca()."); // # nocov
+
+
+  //--------------------------------------------------
+  // Read the table: each sample's non-zero entries, in
+  // order of feature, repeats summed.
+  //--------------------------------------------------
+  init_n_ptrs(10);
+  ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
+
+  int           N0   = em->n_samples, P0 = em->n_otus, e1 = em->nnz;
+  const int    *tpos = em->pos_vec, *tidx = em->otu_vec;
+  const double *tval = em->val_vec;
+
+  for (int e = 0; e < e1; e++) {
+    if (!R_FINITE(tval[e])) STOP("`counts` must not contain NA, NaN, or infinite values.");
+    if (tval[e] < 0)        STOP("`counts` must not contain negative values.");
+  }
+
+
+  //--------------------------------------------------
+  // Filters.
+  //--------------------------------------------------
+  int *f_new  = (int *) R_alloc(P0 > 0 ? P0 : 1, sizeof(int));
+  int *s_new  = (int *) R_alloc(N0 > 0 ? N0 : 1, sizeof(int));
+  int *single = (int *) R_alloc(N0 > 0 ? N0 : 1, sizeof(int));
+  int  n, m, n_single;
+
+  rpca_filter(N0, P0, tpos, tidx, tval, msc, mfc, mff, 1,
+              s_new, f_new, single, &n_single, &n, &m);
+
+  if (n < 2 || m < 2) {
+    if (n_single > 0)
+      STOP(
+        "After filtering, %d sample%s and %d feature%s remain (%d sample%s "
+        "with a single non-zero feature %s removed); at least 2 of each are needed.",
+        n, (n == 1) ? "" : "s", m, (m == 1) ? "" : "s",
+        n_single, (n_single == 1) ? "" : "s", (n_single == 1) ? "was" : "were" );
+    STOP(
+      "After filtering, %d sample%s and %d feature%s remain; at least 2 of each are needed.",
+      n, (n == 1) ? "" : "s", m, (m == 1) ? "" : "s" );
+  }
+
+  int r = (k_req < n - 1) ? k_req : n - 1;
+  if (r > m - 1) r = m - 1;
+
+
+  //--------------------------------------------------
+  // CSR copy of the kept table (rows = samples).
+  //--------------------------------------------------
+  int *s_idx = (int *) R_alloc(n, sizeof(int));
+  int *f_idx = (int *) R_alloc(m, sizeof(int));
+  for (int i = 0; i < N0; i++) if (s_new[i] >= 0) s_idx[s_new[i]] = i;
+  for (int j = 0; j < P0; j++) if (f_new[j] >= 0) f_idx[f_new[j]] = j;
+
+  int nnz = 0;
+  for (int k = 0; k < n; k++)
+    for (int e = tpos[s_idx[k]]; e < tpos[s_idx[k] + 1]; e++)
+      if (f_new[tidx[e]] >= 0) nnz++;
+  size_t nnz_z = (size_t) nnz;
+
+  int    *rpos = (int *)    R_alloc((size_t) n + 1, sizeof(int));
+  int    *ridx = (int *)    R_alloc(nnz_z, sizeof(int));
+  double *rval = (double *) R_alloc(nnz_z, sizeof(double));
+
+  nnz = 0;
+  for (int k = 0; k < n; k++) {
+    int i = s_idx[k];
+    rpos[k] = nnz;
+    for (int e = tpos[i]; e < tpos[i + 1]; e++)
+      if (f_new[tidx[e]] >= 0) {
+        ridx[nnz] = f_new[tidx[e]];
+        rval[nnz] = tval[e];
+        nnz++;
+      }
+  }
+  rpos[n] = nnz;
+
+
+  //--------------------------------------------------
+  // Robust clr (normalize.c), on a copy that
+  // normalize() makes; then new_ecomatrix()'s memory
+  // can go. Each sample is done by one thread, so the
+  // number of threads doesn't change the result.
+  //--------------------------------------------------
+  {
+    ecomatrix_t fem = {
+      .n_samples = n, .n_otus = m, .nnz = nnz,
+      .pos_vec = rpos, .otu_vec = ridx, .val_vec = rval };
+    int nt = threads_for(n_threads, (double) nnz * (r + 1), RPCA_MIN_WORK);
+    normalize(&fem, RPCA_NORM_RCLR, nt, 0);
+    memcpy(rval, fem.val_vec, nnz_z * sizeof(double));
+  }
+  free_all();
+
+  int nprot = 0;
+
+  SEXP sexp_rclr = R_NilValue;
+  if (debug) {
+    sexp_rclr = PROTECT(allocVector(REALSXP, nnz)); nprot++;
+    memcpy(REAL(sexp_rclr), rval, nnz_z * sizeof(double));
+  }
+
+  SEXP core = PROTECT(rpca_core(
+    n, m, rpos, ridx, rval, r, max_iter, tol, want_dm, debug, step, n_threads,
+    "There is no variation to ordinate: every sample's non-zero counts are equal." ));
+  nprot++;
+
+  SEXP sexp_sam    = PROTECT(allocVector(INTSXP, n));        nprot++;
+  SEXP sexp_fea    = PROTECT(allocVector(INTSXP, m));        nprot++;
+  SEXP sexp_single = PROTECT(allocVector(INTSXP, n_single)); nprot++;
+  for (int k = 0; k < n; k++)        INTEGER(sexp_sam)[k]    = s_idx[k] + 1;
+  for (int l = 0; l < m; l++)        INTEGER(sexp_fea)[l]    = f_idx[l] + 1;
+  for (int i = 0; i < n_single; i++) INTEGER(sexp_single)[i] = single[i] + 1;
+
+  const char *names[] = { "samples", "features", "single", "rclr" };
+  SEXP        vals[]  = { sexp_sam, sexp_fea, sexp_single, sexp_rclr };
+  SEXP        res     = rpca_list_append(core, names, vals, 4);
 
   UNPROTECT(nprot);
   return res;

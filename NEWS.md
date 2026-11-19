@@ -8,6 +8,75 @@
   package title is now "Parallel and Memory-Efficient Ecological Diversity
   Analysis".
 
+* New `plot()` methods draw ecodive's results with base graphics (only
+  'graphics' and 'grDevices', from R 3.6.0 on), taking their titles, axis
+  labels, subtitles and legends from what each result holds, and computing
+  nothing new:
+  * Ordinations (`pcoa()`, `pca()`, `dbrda()`, `nmds()`, `procrustes()`, ...)
+    draw two axes, labelled with their share of the variance, with the
+    method's fit in the subtitle (stress, R-squared, ...). `plot(ord,
+    "Species", iris)` colours the samples by a column of metadata, with a
+    legend, by the same `groups` and `data` as the tests; supervised
+    ordinations colour by their own groups. Loadings, constraint arrows,
+    centroids and a Procrustes rotation's target are drawn on top.
+  * `plot(envfit(...), add = TRUE)` adds the fitted variables to an
+    ordination plot.
+  * Permutation tests show the permutation distribution of their statistic,
+    with the observed value marked; `mrpp()` and `permdisp()` show each
+    group's within-group distance or dispersion, and `procrustes_test()` its
+    Procrustes fit (each with `type = "null"` for the distribution).
+  * `simper()` gives a dot chart of the taxa that contribute most to each
+    pair's dissimilarity, `dirmult_ttest()` a volcano plot, `ancom()` a dot
+    chart of W, `varpart()` a Venn diagram of the fractions (two to four
+    sets), `forward_select()` the adjusted R-squared at each step, and
+    `bioenv()` the best correlation for each number of variables.
+  * Distance matrices give a heatmap, in the samples' order or sorted by
+    `groups`, with a colour key: those of `beta_div()` and every metric
+    function, of `vlr()`, `rho_p()` and `phi_s()` (over features), and
+    `rpca()`'s `dm`. These now have class `c("ecodive_dist", "dist")`, so
+    that `plot()` knows them; base R has no `plot()` method for `dist`
+    objects, and every function for `dist` objects works on them as
+    before. Code that checks `identical(class(d), "dist")` or
+    `class(d) == "dist"` should use `inherits(d, "dist")` instead.
+  * `ancombc()` and `ancombc2()` give a volcano plot of one covariate's log
+    fold changes, `ancombc_pairwise()` and `ancombc_dunnett()` a heatmap of
+    the log fold change of each feature in each comparison, and
+    `ancombc_global()` and `ancombc_trend()` a dot chart of their
+    statistics.
+
+* Every function that returns a distance matrix, `beta_div()` and its 38
+  metric functions, `vlr()`, `rho_p()` and `phi_s()`, takes `clust`, to
+  cluster the samples before returning it: one of `stats::hclust()`'s
+  linkage methods (`"average"`, `"complete"`, `"single"`, `"ward.D"`,
+  `"ward.D2"`, `"mcquitty"`, `"median"`, `"centroid"`), or `"pcoa"` to order
+  them along the first axis of `pcoa()`. Clustering **reorders the
+  samples** of the result, with their labels (unnamed samples are labelled
+  with their input positions); the matrix's `dist` record gives each one's
+  position in the input as `order`, and the method as `clust`. ecodive's
+  ordinations and tests put the samples back in their input order before
+  analysing them, so metadata lines up whether matched by name or by
+  position; for other packages, reorder metadata with
+  `attr(d, "dist")$order`. `clust = NULL`, the default, leaves the
+  matrix as it was, and `plot()` then clusters it by average linkage for
+  the heatmap; `clust = FALSE` (recorded as `"none"`) keeps the input order
+  in the plot too.
+
+* Results record how they were made, one attribute per step, and the
+  records travel with them through later steps (`?ecodive_steps`). A
+  distance matrix has a `dist` record: the metric's display name (such as
+  `"Bray-Curtis Dissimilarity"`, so that other packages can label it
+  without ecodive's table of metrics), its ID, and the `norm`,
+  `pseudocount`, `power`, `alpha` and `clust` it was made with. An
+  ordination adds an `ord` record (its method, display name and settings,
+  such as `n_axes` or `seed`) and keeps its distance matrix's `dist`; the
+  permutation tests keep their distance matrix's `dist`, and `envfit()` its
+  ordination's `dist` and `ord`. Each record is a small list that `str()`
+  and `print()` show on one line, read as `attr(x, "dist")$metric`.
+  `plot()` titles with them, such as "Principal Coordinates Analysis of
+  Bray-Curtis Dissimilarity". `vlr()`, `rho_p()` and `phi_s()` move their
+  `method`, `denominator` and `pseudocount` attributes into their `dist`
+  record (`method` as `metric`).
+
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It
   gives the same coordinates and eigenvalues as `cmdscale()`, `ape::pcoa()`,
@@ -42,7 +111,7 @@
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
   the methods. `count_ord()`, with `list_count_ords()` and
   `match_count_ord()`, does the same for the methods that take a count table
-  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()` and `rpca()`: `count_ord(counts, "pca")` is
+  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`, `rpca()` and `rpca_phylo()`: `count_ord(counts, "pca")` is
   `pca(counts)`. Each wrapper points to the other when given the other's
   method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
@@ -362,6 +431,34 @@
   Results are identical for any number of `cpus`.
   `count_ord(counts, 'lda', groups)` runs it too.
 
+* Ordinations of many axes are faster on several threads. The block
+  Lanczos solver behind `pcoa()`, `pca()`, `dbrda()`, `capscale()`,
+  `rda()`, `cca()`, `rpca()` and `umap()`'s spectral start now splits its
+  own steps on the basis (products with small matrices, dot products and,
+  for more than four axes, block Gram-Schmidt) among `cpus`, each as far
+  as its work is worth it, as well as the products with the data. On 4
+  threads, `pcoa()` of 50 axes takes 1.4 s instead of 2.5 for 1,000
+  samples and 15 s instead of 27 for 5,000, and `dbrda()` of 40 axes for
+  2,000 samples 3.3 s instead of 5.6. Results stay identical for any number
+  of `cpus`; for up to four axes they are unchanged, and for more they
+  differ from before only by rounding.
+
+* New `capda()` runs Anderson & Willis's (2003) discriminant canonical
+  analysis of principal coordinates (CAP, as in PRIMER-PERMANOVA+): `lda()`
+  of the first m axes of `pcoa()`, for any distances, with m chosen by
+  leave-one-out classification success (up to `max_pcoa_axes`, 50 by
+  default; on ties, the smallest m), and a permutation test of the trace
+  statistic (the sum of the squared canonical correlations), with `strata`
+  or a supplied permutation matrix. It gives the same m, classification
+  success, leave-one-out classes, squared canonical correlations and scores
+  as `BiodiversityR::CAPdiscrim()`, whose leave-one-out posteriors underflow
+  for samples far from every group, and which stops at a group of one
+  sample (`capda()` counts such samples as misclassified). The success for
+  every m considered and the leave-one-out table are returned. Results are
+  identical for any number of `cpus`. `dist_ord(dm, 'capda', groups)` runs
+  it too; `'CAP'` still selects `capscale()`, which is db-RDA. `lda()`'s
+  error for a singular within-group covariance now suggests `capda()`.
+
 * New `simper()` runs a similarity percentages analysis (SIMPER): it breaks
   the mean Bray-Curtis dissimilarity between each pair of groups down into
   each taxon's contribution, with its sd, ratio, the groups' mean
@@ -448,6 +545,144 @@
   coordinates are `aitchison()` distances, for any basis. Results are
   identical for any number of `cpus`.
 
+* New `replace_zeros()` replaces the zeros of a count table with small
+  positive values, so that log ratios (`norm = 'clr'`, `aitchison()`,
+  `alr()`, `ilr()`) can be taken without a pseudocount: its result has no
+  zeros, so they use none and give no warning. It runs any zero replacement
+  method by name, as `count_ord()` does for ordinations, and
+  `list_zero_replacements()` and `match_zero_replacement()` list and look
+  up the methods. The first is `replace_zeros_mult()`, multiplicative
+  replacement (Martín-Fernández et al. 2003): every zero becomes `delta`
+  (one value, or one per sample; scikit-bio's `1 / D^2` by default) and
+  each sample's non-zero proportions shrink by the same factor, keeping
+  their ratios. Its results are bit-identical to scikit-bio's
+  `multi_replace()`. Every method returns a dense matrix of proportions in
+  the input's orientation, with `method`, its parameters and `n_replaced`
+  attributes, and takes every table type: a sparse 2,000 by 5,000 table
+  takes 0.2 seconds.
+
+* New `log_ratio()` and `balance()` give one log ratio per sample between
+  a `numerator` and a `denominator` group of features (names, indices or
+  logical vectors), as a named vector that drops straight into metadata or
+  a test. `log_ratio()` is the log of the ratio of summed abundances, as
+  Qurro plots it (identical to Qurro's `qarcoal()`); it needs no
+  pseudocount by default, and gives `NA`, with one warning, where a sum is
+  0. `balance()` is the isometric log-ratio balance, the scaled log ratio
+  of geometric means: bit-identical to the matching coordinate of `ilr()`
+  with a sequential binary partition, and equal to scikit-bio's to 6e-16,
+  without building the full basis; zeros follow the shared `pseudocount`
+  rule over the whole table, and the output of `replace_zeros()` needs
+  none. Both take every table type and keep sparse tables sparse: 2,000
+  samples by 5,000 taxa take under 0.1 seconds.
+
+* New `vlr()`, `rho_p()` and `phi_s()` measure proportionality between
+  every pair of features, the compositionally valid alternative to
+  correlating relative abundances (Lovell et al. 2015). `vlr()` is the
+  variance of the log ratio, equal to scikit-bio's `pairwise_vlr()` to
+  4e-15 but computed from differences rather than a covariance matrix, so
+  nearly proportional pairs keep their precision. `rho_p()` is Erb &
+  Notredame's proportionality correlation (propr's `"rho"`) and `phi_s()`
+  the symmetric phi of Quinn et al. (propr's `"phs"`), against the clr by
+  default or a `denominator` (one feature, an alr, or a set). Each returns
+  a `dist` over the features, ready for `pcoa()` or `hclust()` (`rho_p()`,
+  a similarity, for thresholding). They take every table type and keep it
+  sparse, run in parallel, and give identical results for any `cpus`: all
+  4.5 million pairs of 3,000 taxa in 500 samples take about a second on 4
+  cores.
+
+* New `qmp_scale()` and `qmp_rarefy()` turn relative abundances into
+  absolute abundances when each sample's total microbial `load` was measured
+  (flow cytometry, qPCR, a spike-in). `qmp_scale()` multiplies each sample's
+  relative abundances by its load (Jian et al. 2020); `qmp_rarefy()` is
+  Vandeputte et al.'s (2017) quantitative microbiome profiling, which first
+  rarefies every sample to the same number of reads per unit of load. It
+  follows the authors' `QMP.R` (BSD-3, Raes Lab), with the same sampling
+  depths and targets, but uses ecodive's own rarefaction and `seed`. `load`
+  is matched to the samples by name, or given as a column of `data`. Both
+  keep the table's class and orientation, and sparse tables stay sparse:
+  2,000 samples by 5,000 taxa take under 0.1 seconds.
+
+* New `ancom()` runs ANCOM (Mandal et al. 2015), the analysis of
+  composition of microbiomes: it tests every log ratio between two features
+  for a difference between `groups` (`sig_test = 'anova'`, or `'kruskal'`),
+  adjusts each feature's p-values (`p_adjust`, Holm by default), and
+  declares the features whose W, the number of their significant log
+  ratios, passes scikit-bio's cutoff rule. Its `W` and decisions are
+  identical to scikit-bio's `ancom()` in every reference case, including
+  its quirks (each feature's family includes a 0 for itself; numpy's
+  cutoffs); the Kruskal-Wallis statistics are bit-identical to SciPy's and
+  the F statistics more accurate (SciPy's cancel to 3e-12). It returns a
+  per-feature table (`feature`, `W`, `reject`). Zeros follow the shared
+  `pseudocount` rule, and the output of `replace_zeros()` needs none. The
+  tests run in parallel C straight from the (sparse) table, identical for
+  any `cpus`: all 4.5 million log ratios of 3,000 features in 200 samples
+  take about 3 seconds on 4 cores (10 with `'kruskal'`).
+
+* New `dirmult_ttest()` finds differentially abundant features the ALDEx2
+  way (Fernandes et al. 2013, 2014), as scikit-bio's `dirmult_ttest()`:
+  each sample's proportions are drawn `n_draws` times from their Dirichlet
+  posterior (`pseudocount = 0.5` is the prior), every draw is
+  clr-transformed, each feature is compared between the two sides of a
+  `contrast` with Welch's t-test, and the results are averaged. It returns
+  a per-feature table with the average `t`, `log2_fc` and `p_value`, the
+  conservative interval of scikit-bio (the widest bounds over the draws),
+  `p_adjusted` and `reject`. `contrast = c(treatment, reference)` names the
+  groups; `NA` as the reference pools all other samples, which is also the
+  default (the first group against the rest). Given the same draws, the
+  results are scikit-bio's to about 1e-13. An optional scale model
+  (`scale_sd`, following ALDEx3's `clr.sm()`; Nixon et al. 2025) adds
+  uncertainty about the groups' total loads to every draw, so that a
+  change in load isn't mistaken for changes in the features; it is off by
+  default (`scale_sd = 0`, scikit-bio's procedure), and works best with
+  more draws (ALDEx3 suggests `scale_sd = 0.5`). The draws come from a new Gamma
+  sampler on PCG (Marsaglia & Tsang), with one random stream per sample
+  and draw, so results are identical for any `cpus`: 500 samples by 5,000
+  features, 128 draws, take about 5 seconds on 4 cores.
+
+* New `ancombc()` and `ancombc2()` run ANCOM-BC and ANCOM-BC2 (Lin &
+  Peddada 2020, 2024): each feature's log abundance is fitted with a
+  linear model (`formula` over `data`, any `model.matrix()` formula,
+  treatment contrasts), and each covariate's bias from the samples'
+  differing sampling fractions is estimated by an EM algorithm and removed,
+  giving bias-corrected log fold changes with standard errors, p-values
+  (normal for ANCOM-BC, t for ANCOM-BC2), `p_adjusted` (`p_adjust` within
+  each covariate) and `reject`. `ancombc2()` also corrects each sample for
+  its sampling fraction and refits, widens the variances (`var_quantile`),
+  and by default treats zeros as missing values, including ANCOMBC's
+  handling of failed fits and missing reference levels; `ancombc()` uses
+  the shared `pseudocount` rule. They follow scikit-bio's `ancombc()` and
+  `ancombc2()` (themselves derived from the ANCOMBC package, whose
+  Artistic-2.0 notice they carry) and match them to about 1e-8 in every
+  reference case, and ANCOMBC to about 1e-5 where its EM converges. The
+  result is a per-feature-and-covariate table that also carries the fit
+  (coefficients, variances, covariance matrices, degrees of freedom), for
+  post-hoc tests to come. The fits run in parallel C, identical for any
+  `cpus` and for sparse and dense tables: 500 samples by 5,000 features
+  take about 1 second.
+
+* New post-hoc tests on an `ancombc()` or `ancombc2()` fit, for a factor
+  with three or more levels, as scikit-bio's `ANCOMBCResult` methods:
+  `ancombc_global()` (does the feature differ between any levels?),
+  `ancombc_pairwise()` (every pair of levels, with mixed directional FDR),
+  `ancombc_dunnett()` (every level against the reference, with a
+  bootstrapped mdFDR screen) and `ancombc_trend()` (ordered patterns,
+  increasing or decreasing by default, or your own constraint matrices,
+  with a bootstrapped p-value). The deterministic statistics and p-values
+  match scikit-bio's to about 1e-8, and the bootstrapped ones match exactly
+  on scikit-bio's own null draws; ecodive draws its own on PCG (`seed`),
+  one stream per feature, identical for any `cpus`. Comparisons are
+  labelled with level names (`'severe - mild'`), and any categorical term
+  of the fit can be tested, not only its `groups`. The trend test's
+  constrained estimates come from an exact QP solver written for ecodive.
+  New `structural_zeros()` finds features absent from a group (Kaul et al.
+  2017), as scikit-bio's `struc_zero()`, returning a features-by-groups
+  logical matrix.
+
+* `rarefy(depth =)` now also takes one depth per sample (matched to the
+  samples by name when named). `drop` and `warn` then compare each sample
+  with its own depth. A single depth gives exactly the same results as
+  before.
+
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
   (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),
@@ -497,6 +732,41 @@
   formed. It takes every count-table class that `pca()` takes, and its
   results are identical for any number of `cpus`.
 
+* New `rpca_phylo()` runs a phylogenetic robust Aitchison PCA (Martino et
+  al. 2022), gemelli's `phylogenetic_rpca()`: `rpca()` of a table expanded
+  to every node of a tree, each node holding the counts of the tips below it
+  weighted by its branch length, so that loadings describe clades as well
+  as tips. It cuts the tree down to the tips with counts as gemelli does
+  (with its `min_depth` filter), returns the tree it used with the nodes
+  named as gemelli names them, and optionally the node counts
+  (`node_counts = TRUE`). A C port of gemelli 0.0.13 (with the tree code of
+  scikit-bio and iow it calls), it gives gemelli's results to within
+  rounding error; the node counts are summed in parallel from each sample's
+  non-zero tips, without a dense table. It joins `count_ord()`
+  (`count_ord(counts, "rpca_phylo", tree = tree)`), and its results are
+  identical for any number of `cpus`.
+
+* New `philr()` computes the phylogenetic isometric log-ratio transform
+  (PhILR; Silverman et al. 2017): one balance per internal node of a tree,
+  between its two child clades, with philr's part weights (`'uniform'`,
+  `'gm.counts'`, `'enorm'`, `'anorm'` and their products with `'gm.counts'`,
+  or a vector) and ILR weights (`'uniform'`, `'blw'`, `'blw.sqrt'`,
+  `'mean.descendants'`, or a vector). Written from the paper and checked
+  against philr 1.28.0's outputs, it gives philr's coordinates, in philr's
+  orientation and order, to within 1e-14 for every weighting. Tips that
+  aren't features are pruned from the tree, and polytomies (and an unrooted
+  tree's root) are resolved with zero-length branches as
+  `ape::multi2di(random = FALSE)` does, with a warning; the tree used is
+  returned. Each sample costs O(D), summing over clades from the tips up,
+  with no basis matrix: 2,000 samples by 5,000 taxa (sparse) take 0.2
+  seconds, where philr takes 160. Results are identical for any number of
+  `cpus`.
+  New `philr_distance()`, a phylogenetic beta metric in `beta_div()`
+  (`beta_div(x, "philr", tree = tree)`), is the Euclidean distance between
+  PhILR coordinates with the paper's weights (`'enorm.x.gm.counts'` and
+  `'blw.sqrt'`); with uniform weights, PhILR distances are Aitchison
+  distances.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference
@@ -543,6 +813,10 @@
   the columns of `counts` as samples even when samples are rows
   (`margin = 1`, the default). Out-of-range pairs could crash R, and a table
   with one feature was rejected as having fewer than two samples.
+
+* Fixed `faith()`, the UniFrac family and every other function taking a
+  `tree`, which failed when samples were columns (`margin = 2`) and the tree
+  had tips that were not in the table.
 
 
 

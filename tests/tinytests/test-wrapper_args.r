@@ -1,6 +1,7 @@
 #test_that("wrapper arguments don't shadow the methods' arguments", {
 
-  # dist_ord(), count_ord() and dist_test() pass `...` on to the function of
+  # dist_ord(), count_ord(), dist_test() and replace_zeros() pass `...` on to
+  # the function of
   # the method they run. R matches named arguments to the wrapper's own
   # arguments before `...`, exactly or by prefix, so a method argument that
   # equals or begins a wrapper argument would never reach the method: e.g.
@@ -24,12 +25,14 @@
   expect_identical(shadowed(dist_ord,  list_dist_ords('func')),  character(0))
   expect_identical(shadowed(count_ord, list_count_ords('func')), character(0))
   expect_identical(shadowed(dist_test, list_dist_tests('func'), passed = c('groups', 'data')), character(0))
+  expect_identical(shadowed(replace_zeros, list_zero_replacements('func')), character(0))
 
   # The wrappers' own arguments, which the rule protects. Changing them
   # changes what methods may take.
   expect_identical(names(formals(dist_ord)),  c('dm', 'method', '...'))
   expect_identical(names(formals(count_ord)), c('counts', 'method', '...'))
   expect_identical(names(formals(dist_test)), c('dm', 'test', 'groups', 'data', '...'))
+  expect_identical(names(formals(replace_zeros)), c('counts', 'method', '...'))
 
   # The check itself catches exact names and prefixes, and allows the
   # pass-through ones.
@@ -39,6 +42,7 @@
     exact  = function (dm, method) NULL,
     data   = function (dm, groups, data, te) NULL )
   expect_identical(shadowed(dist_ord, f), c('prefix: m', 'exact: method'))
+  expect_identical(shadowed(replace_zeros, list(z = function (counts, margin, co, delta) NULL)), 'z: co')
   expect_identical(shadowed(dist_test, f['data'], passed = c('groups', 'data')), 'data: te')
 
   # Arguments that do pass through, by name, reach the method.
@@ -47,5 +51,8 @@
   expect_identical(
     dist_test(dm, 'mantel', iris$Petal.Width[1:30], method = 'spearman', permutations = 9, cpus = 1),
     mantel(dm, iris$Petal.Width[1:30], method = 'spearman', permutations = 9, cpus = 1) )
+  x <- matrix(c(0, 1, 2, 3, 0, 5), 2)
+  expect_identical(replace_zeros(x, 'mult', delta = 0.01, margin = 2L),
+                   replace_zeros_mult(x, delta = 0.01, margin = 2L))
 
 #})

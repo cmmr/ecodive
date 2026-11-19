@@ -280,7 +280,7 @@
 #' @examples
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- tsne(dm)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'
@@ -354,7 +354,7 @@ tsne <- function (
 
   result <- function (x, kl_divergence, n_iter) {
     ord_result(
-      ord_flip(x), 'tsne', labels, prefix = 'TSNE',
+      ord_flip(x), 'tsne', labels, prefix = 'TSNE', dist = dv$step,
       kl_divergence = kl_divergence,
       perplexity    = perplexity,
       init          = init,

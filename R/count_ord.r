@@ -24,6 +24,7 @@ COUNT_ORDS <- local({
       Partial Least Squares Discriminant Analysis, plsda, partialleastsquaresda partialleastsquaresdiscriminantanalysis plsdiscriminantanalysis
       Redundancy Analysis,                 rda,  redundancyanalysis tbrda transformationbasedrda
       Robust Aitchison PCA,                rpca, robustpca deicode gemelli
+      Phylogenetic Robust Aitchison PCA,   rpca_phylo, phylogeneticrpca phylorpca phylogeneticdeicode
   " )
 
   return (df)
@@ -39,16 +40,17 @@ COUNT_ORDS <- local({
 #' @inheritParams documentation
 #'
 #' @param method   The name of an ordination method: `"ca"`, `"cca"`, `"lda"`,
-#'        `"oplsda"`, `"pca"`, `"plsda"`, `"rda"`, or `"rpca"`.
+#'        `"oplsda"`, `"pca"`, `"plsda"`, `"rda"`, `"rpca"`, or `"rpca_phylo"`.
 #'        Flexible matching is supported (see below). Programmatic access via
 #'        `list_count_ords()`.
 #'
 #' @param ...   Further arguments for the method's function, such as `n_axes`,
 #'        `margin`, `cpus`, [pca()]'s `norm`, `pseudocount`, and `scale`, or
 #'        [rda()]'s and [cca()]'s `groups`, `data`, and `formula`, or
-#'        [lda()]'s, [plsda()]'s and [oplsda()]'s `groups` and `data`. Each
+#'        [lda()]'s, [plsda()]'s and [oplsda()]'s `groups` and `data`, or
+#'        [rpca_phylo()]'s `tree`. Each
 #'        method keeps its own defaults; see [ca()], [cca()], [lda()],
-#'        [oplsda()], [pca()], [plsda()], [rda()], and [rpca()].
+#'        [oplsda()], [pca()], [plsda()], [rda()], [rpca()], and [rpca_phylo()].
 #'        `seed` is ignored by the methods that have no random parts (all
 #'        but [cca()], whose adjusted \eqn{R^2} is found by permutation), so
 #'        the same arguments can be given to every method.
@@ -70,6 +72,7 @@ COUNT_ORDS <- local({
 #' | `plsda`                | Partial Least Squares Discriminant Analysis (PLS-DA), supervised |
 #' | `rda`                  | Redundancy Analysis (RDA), constrained     |
 #' | `rpca`                 | Robust Aitchison PCA                       |
+#' | `rpca_phylo`           | Phylogenetic Robust Aitchison PCA (needs `tree`) |
 #'
 #' `rda` is constrained by sample metadata, given as further arguments:
 #' `count_ord(counts, 'rda', 'treatment', meta)` is
@@ -78,7 +81,8 @@ COUNT_ORDS <- local({
 #' analysis. `lda`, `plsda` and `oplsda` need the groups to separate, given
 #' the same way: `count_ord(counts, 'plsda', 'treatment', meta)` is
 #' `plsda(counts, 'treatment', meta)`. `oplsda` takes `n_orthogonal` rather
-#' than `n_axes`.
+#' than `n_axes`. `rpca_phylo` needs a phylogenetic tree:
+#' `count_ord(counts, 'rpca_phylo', tree = tree)`.
 #'
 #' Methods that ordinate distances, such as [pcoa()] and [nmds()], are run
 #' by [dist_ord()].
@@ -92,7 +96,8 @@ COUNT_ORDS <- local({
 #' `'transformation-based RDA'` for `rda`; `'canonical correspondence
 #' analysis'` or `'constrained correspondence analysis'` for `cca`;
 #' `'correspondence analysis'` for `ca`; and `'robust PCA'`, `'DEICODE'`,
-#' or `'gemelli'` for `rpca`; and `'PLS-DA'`, `'PLS'`, or `'partial least
+#' or `'gemelli'` for `rpca`; `'phylogenetic RPCA'`, `'phylo-RPCA'`, or
+#' `'phylogenetic DEICODE'` for `rpca_phylo`; and `'PLS-DA'`, `'PLS'`, or `'partial least
 #' squares discriminant analysis'` for `plsda`; and `'LDA'` or `'linear
 #' discriminant analysis'` for `lda`; and `'OPLS-DA'`, `'OPLS'`, or
 #' `'orthogonal PLS-DA'` for `oplsda`. `'CA'` selects `ca`, and
@@ -113,7 +118,7 @@ COUNT_ORDS <- local({
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [ca()], [cca()], [lda()], [oplsda()], [pca()], [plsda()], [rda()], [rpca()], [list_count_ords()]; [dist_ord()] for
+#' @seealso [ca()], [cca()], [lda()], [oplsda()], [pca()], [plsda()], [rda()], [rpca()], [rpca_phylo()], [list_count_ords()]; [dist_ord()] for
 #'   the methods that take distances.
 #'
 #' @export
@@ -123,9 +128,11 @@ COUNT_ORDS <- local({
 #'     str(ord)
 #'
 #'     # The same arguments for every method (but lda, plsda and oplsda,
-#'     # which need groups).
-#'     ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda'))
+#'     # which need groups, and rpca_phylo, which needs a tree).
+#'     ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda', 'rpca_phylo'))
 #'     lapply(ids, function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
+#'
+#'     ord <- count_ord(ex_counts, 'rpca_phylo', tree = ex_tree, n_axes = 2)
 #'
 #'     count_ord(ex_counts, 'plsda', c('a', 'a', 'b', 'b'), n_axes = 1)
 #'

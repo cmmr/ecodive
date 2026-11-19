@@ -261,3 +261,117 @@ must be **established from documentation and outputs only**:
 - Lubbe, S., Filzmoser, P., & Templ, M. (2021). Comparison of zero
   replacement strategies for compositional data with large numbers of
   zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
+
+
+## Decisions made while implementing (item 15)
+
+Asked of the user at the start:
+
+1. **The 80%-zeros warning:** none for `replace_zeros_mult()` (scikit-bio
+   gives none, and in microbiome tables most features are ≥ 80% zeros).
+   Only the Bayesian methods (item 36) warn. The check is ready in
+   `zero_replacement_input(mostly_zero = TRUE)`, covering samples and
+   features: "1 sample ('a') and 1 feature ('f3') are at least 80% zeros,
+   so most of their values will be imputed. Consider filtering them out
+   first." (up to 5 names each, `name_list()`).
+2. **`delta`:** one value, or one per sample (matched to the samples by
+   name when both are named, else in order, through `per_sample()`). Each
+   must be in (0, 1). The `delta` attribute is the scalar, or the
+   per-sample vector in the samples' order, named after them.
+3. **A feature that is zero in every sample:** allowed for mult (replaced
+   like any zero, as scikit-bio does). The Bayesian methods should refuse
+   it: `zero_replacement_input(empty_features_ok = FALSE)` errors, naming
+   the features. A sample with no non-zero value is an error for every
+   method, naming the samples.
+4. **Registry and output, as planned:** `ZERO_REPLACEMENTS` has `name, id,
+   alt_ids`, like `COUNT_ORDS`; the function of row `id` is
+   `replace_zeros_<id>`. The result is a dense base `matrix` of proportions
+   for every input type (sparse too), in the input's orientation with its
+   dimnames; attributes `method`, the method's parameters, then
+   `n_replaced` (a double: the number of zeros replaced).
+
+Made while implementing:
+
+5. **Bit-identical to scikit-bio 0.7.4 `multi_replace()`** on all 21
+   fixture cases (D from 2 to 1037, counts and real values, a zero feature,
+   a given delta, one delta per sample, one sample, no zeros), and on both
+   margins. This needed:
+   - each sample's total summed in **numpy's pairwise order**
+     (`np_pairwise_sum()` in `src/replace_zeros.c`, following numpy's
+     `pairwise_sum_DOUBLE()`: sequential below 8 values, 8 running sums up
+     to 128, halves at a multiple of 8 above). NumPy (BSD-3) is credited in
+     the C header, `inst/COPYRIGHTS` and `Authors@R` (`cph`);
+   - scikit-bio's arithmetic step for step: closure first, zeros counted on
+     the proportions, then `(1 - n_zeros * delta) * p`;
+   - the **default delta from C's `pow(1.0 / D, 2.0)`**, as Python's `**`
+     calls `pow()`, which differs by an ulp from `x * x` (R's `^2`) for 1,701
+     of the D below 2e6 on glibc. The exponent is `volatile` so the
+     compiler can't turn it into `x * x`. On another platform's libm the
+     default may differ from that platform's Python by an ulp.
+6. **zCompositions 1.6.2 `multRepl()`** (output only), given closed
+   proportions, `frac = 1`, `dl = delta` for every part (a matrix for a
+   per-sample delta), `z.warning = 1`, `z.delete = FALSE` (the argument is
+   `z.delete`, not `delete`): within 3.3e-16 relative of scikit-bio (and so
+   of ecodive) on the 16 cases it accepts (it refuses tables without zeros
+   or with an all-zero part); stored and tested at 1e-14.
+7. **A stricter `delta` check than scikit-bio's:** scikit-bio errors only
+   when `1 - n_zeros * delta < 0`; ecodive also refuses `= 0`, which would
+   leave the sample's non-zero parts at 0. The message keeps scikit-bio's
+   words and names the samples: "Multiplicative replacement created
+   negative proportions (or zeros) in 1 sample ('a'): `delta` times a
+   sample's number of zeros must be below 1. Consider using a smaller
+   `delta`."
+8. **Aliases:** the plan's (`multiplicative`, `multreplacement`,
+   `multirepl`) plus `multireplace`, scikit-bio's function name (`'multRepl'`
+   and `'multi_replace'` both select mult). Checked with the README
+   snippet: no alias or planned code (`mult`, `czm`, `gbm`, `sq`, `bl`) is
+   an exact name in another registry, but **`sq` begins METRICS names**
+   (`squared_euclidean`, `squared_chord`, `squared_chisq`, `squares`) and
+   **`mult` begins DIST_TESTS names** (mrpp's "multi-response permutation
+   procedure", permdisp's "multivariate dispersion"). That is harmless:
+   each matcher searches only its own registry by prefix, and the other
+   wrappers look at other registries' exact names only. No cross-wrapper
+   redirects were added (`replace_zeros(x, 'pca')` says "does not match any
+   option: mult"; `count_ord()` etc. are unchanged). `test-replace_zeros.r`
+   builds the planned five-row registry and checks that every code and
+   alias selects its own row, and that the codes are no other registry's
+   exact names.
+9. **No `cpus`:** one single-threaded C pass per sample (densified into a
+   scratch vector). A sparse 2,000 × 5,000 table takes 0.2 s (0.45 s
+   dense), vs 1.3 s for the vectorised R formula.
+10. **`replace_zeros()` without `method`** errors, listing the ids, and
+    passes `...` unchanged (no `seed` dropping, unlike `count_ord()`: no
+    method has random parts). `replace_zeros(counts, method, ...)` is in
+    `test-wrapper_args.r`.
+11. **A vector** is one sample (as `validate_counts()` makes it): a D × 1
+    result, without the vector's names (`validate_counts()` drops them).
+    Integer, logical and data-frame tables are accepted; explicitly stored
+    sparse zeros are zeros.
+12. **Large results:** warn above 1e8 output values, as `alr()` / `ilr()`.
+13. **Docs:** `replace_zeros.Rd` (choice, flexible matching, "Same names in
+    other packages": none, zCompositions / scikit-bio named),
+    `zero_replacements.Rd` (`list_*` / `match_*`), `replace_zeros_mult.Rd`.
+    Both pseudocount sections (`pseudocount_section`,
+    `log_ratio_pseudocount_section`) now point to `replace_zeros()`.
+    pkgdown: "Compositional Data" → "Zeros".
+
+For item 36 (the Bayesian methods and CZM):
+
+- The plan's line "rows get the mult/czm functions in the first item" was
+  superseded by TODO.md: **czm is item 36** too. The registry has only the
+  `mult` row; add one row per method (the planned rows and aliases are in
+  `test-replace_zeros.r`'s `planned` table).
+- Write `replace_zeros_<id>(counts, margin = 1L, ...)`; start with
+  `info <- zero_replacement_input(empty_features_ok = FALSE, whole = TRUE,
+  mostly_zero = TRUE)` (sets `counts`, `margin`; returns `D`, `n`,
+  `features`, `samples`, `sample_zeros`, `feature_nonzeros`) and end with
+  `zero_replacement_result(res, info, margin, '<id>', list(frac = ...,
+  ...))`. `C_zero_counts()` and `dense_sample()` in `src/replace_zeros.c`
+  are reusable. Whether `whole` / `mostly_zero` / `empty_features_ok`
+  apply to CZM is open (CZM uses depths, so `whole = TRUE` likely).
+- Update `replace_zeros()`'s docs (the `method` argument, the method table,
+  flexible matching), the expectations of `df$id == 'mult'` in
+  `test-replace_zeros.r`, `test-smoke.r`'s lines and the pkgdown "Zeros"
+  list.
+- The "confirm" formulas (t, s, the adjust step, CZM's adjust) remain
+  open, as the plan says.

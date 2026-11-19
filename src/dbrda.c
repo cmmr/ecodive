@@ -166,6 +166,7 @@ typedef struct {
   double       *w;     // n x CAP_BLOCK scratch.
   const double *F;     // n x f orthonormal columns to
   int           f;     // project out, or NULL / 0.
+  int           n_threads; // For lanczos()'s own steps.
 } bop_t;
 
 
@@ -252,7 +253,8 @@ static int has_negative(gower_t *g, int n, double trace, double limit, int *step
 
   lanczos_t lz = {
     .n = n, .k = 1, .dims = n - 1, .deflate = 1, .scale = trace,
-    .op = neg_mult, .ctx = g, .vecs = vec, .vals = &val, .resid = &res,
+    .op = neg_mult, .ctx = g, .n_threads = g->n_req,
+    .vecs = vec, .vals = &val, .resid = &res,
     .max_basis = CAP_BASIS, .rr_every = CAP_RR_EVERY,
     .early_stop = 1, .stop_above = limit, .stop_tol = INFINITY,
     .stream = 61u, .max_steps = max };
@@ -1013,7 +1015,7 @@ static SEXP cord_solve(
     lanczos_t lz = {
       .n = n, .k = kr, .dims = dims_r, .deflate = (d->w == NULL),
       .basis = basis, .n_basis = rq + (d->w != NULL), .scale = real_g,
-      .op = bop_mult, .ctx = B,
+      .op = bop_mult, .ctx = B, .n_threads = B->n_threads,
       .vecs = r_vecs, .vals = r_vals,
       .resid = (double *) R_alloc(kr, sizeof(double)) };
 
@@ -1200,7 +1202,7 @@ SEXP C_dbrda(
   //--------------------------------------------------
   int     steps = 0, dense = 0;
   double  real_g = trace_g, imag_g = 0;
-  bop_t   B = { .n = n, .g = &g };
+  bop_t   B = { .n = n, .g = &g, .n_threads = n_threads };
 
   if (positive && trace_g > 0) {
 
@@ -1263,7 +1265,7 @@ SEXP C_rda(
   cord_design_t des;
   cord_design(sexp_x, n, nz, NULL, &des);
 
-  bop_t B = { .n = n, .g = NULL, .tmult = pca_gram_mult, .tctx = tbl.ctx };
+  bop_t B = { .n = n, .g = NULL, .tmult = pca_gram_mult, .tctx = tbl.ctx, .n_threads = n_threads };
 
   SEXP sexp_res = PROTECT(cord_solve(
     &B, &des, k, 1.0 / (n - 1), trace_g, trace_g, 0, 0, 0 ));
@@ -1378,7 +1380,7 @@ SEXP C_cca(
   cord_design_t des;
   cord_design(sexp_x, n, nz, w, &des);
 
-  bop_t B = { .n = n, .g = NULL, .tmult = cca_gram_mult, .tctx = NULL };
+  bop_t B = { .n = n, .g = NULL, .tmult = cca_gram_mult, .tctx = NULL, .n_threads = n_threads };
 
   SEXP sexp_res = PROTECT(cord_solve(&B, &des, k, 1.0, trace_g, trace_g, 0, 0, 0));
 

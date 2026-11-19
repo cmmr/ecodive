@@ -22,7 +22,7 @@ with large datasets. `ecodive` addresses this by providing:
 
 * **Zero Dependencies:** The package has no external R dependencies, making it lightweight, stable, and easy to install. This also makes it an ideal and secure backend for other R packages.
 
-* **Comprehensive Metrics:** It implements 14 alpha and 37 beta diversity metrics, including classic and phylogenetic-aware methods like **Faith's PD** and the **complete UniFrac family**.
+* **Comprehensive Metrics:** It implements 14 alpha and 38 beta diversity metrics, including classic and phylogenetic-aware methods like **Faith's PD**, the **complete UniFrac family** and the compositional **PhILR distance**.
 
 * **Ordination and Statistics:** Ten ordination methods (PCoA, NMDS, UMAP, t-SNE, db-RDA, robust Aitchison PCA, and more), biplots, and five permutation tests (PERMANOVA, PERMDISP, ANOSIM, MRPP, and Mantel), so a whole analysis needs no other package.
 
@@ -38,12 +38,13 @@ with large datasets. `ecodive` addresses this by providing:
 | :-------------------- | :-------------- | :--------------------------------------------------------------------------------------- |
 | Alpha diversity       | `alpha_div()`   | `shannon()`, `simpson()`, `chao1()`, `faith()`, and 10 more                               |
 | Beta diversity        | `beta_div()`    | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 33 more                   |
-| Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`     |
+| Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`, `capda()` |
 | Ordination of counts  | `count_ord()`   | `pca()`, `rpca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`              |
 | Biplots               |                 | `pcoa_biplot()`, `envfit()`                                                              |
 | Comparing ordinations |                 | `procrustes()`, `procrustes_test()`                                                      |
 | Model building        |                 | `varpart()`, `forward_select()`, `bioenv()`                                              |
 | Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`        |
+| Plotting              |                 | `plot()` of distance matrices, ordinations, tests, `envfit()`, `varpart()`, and the other results |
 | Data preparation      |                 | `rarefy()`, `normalize()`, `read_tree()`                                                 |
 
 Each wrapper runs its functions by name, such as `beta_div(counts, 'bray')`
@@ -161,10 +162,10 @@ head(ord, 3)
 round(100 * attr(ord, 'prop'), 1)
 #> [1] 89.0  9.3  2.9
 
-# Any method by name.
-plot(dist_ord(dm, 'pcoa'), col = iris$Species)
-plot(dist_ord(dm, 'nmds'), col = iris$Species)
-plot(dist_ord(dm, 'umap'), col = iris$Species)
+# Any method by name, coloured by a column of metadata.
+plot(dist_ord(dm, 'pcoa'), 'Species', iris)
+plot(dist_ord(dm, 'nmds'), 'Species', iris)
+plot(dist_ord(dm, 'umap'), 'Species', iris)
 ```
 
 <img src="man/figures/README-ordination.png" alt="PCoA, NMDS and UMAP ordinations of the iris data, colored by species" width="100%" />
@@ -230,11 +231,11 @@ list_metrics('beta', 'id')
 #> [16] "jaccard"                   "jensen"                    "jsd"                      
 #> [19] "lorentzian"                "manhattan"                 "matusita"                 
 #> [22] "minkowski"                 "morisita"                  "motyka"                   
-#> [25] "normalized_unifrac"        "ochiai"                    "psym_chisq"               
-#> [28] "robust_aitchison"          "soergel"                   "squared_chisq"            
-#> [31] "squared_chord"             "squared_euclidean"         "topsoe"                   
-#> [34] "unweighted_unifrac"        "variance_adjusted_unifrac" "wave_hedges"              
-#> [37] "weighted_unifrac" 
+#> [25] "normalized_unifrac"        "ochiai"                    "philr_distance"           
+#> [28] "psym_chisq"                "robust_aitchison"          "soergel"                  
+#> [31] "squared_chisq"             "squared_chord"             "squared_euclidean"        
+#> [34] "topsoe"                    "unweighted_unifrac"        "variance_adjusted_unifrac"
+#> [37] "wave_hedges"               "weighted_unifrac"         
 
 # Ordination methods that take distances
 list_dist_ords('id')

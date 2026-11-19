@@ -199,7 +199,7 @@
 #' @examples
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- pcoa(dm)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'
@@ -259,7 +259,7 @@ pcoa <- function (dm, n_axes = 3L, correction = 'none', cpus = n_cpus()) {
   }
 
   ord_result(
-    points, 'pcoa', labels, prefix = 'PCoA',
+    points, 'pcoa', labels, prefix = 'PCoA', dist = dv$step,
     eig        = eig,
     prop       = if (trace > 0) eig / trace else eig,
     trace      = trace,

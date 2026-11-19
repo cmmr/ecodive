@@ -157,7 +157,9 @@
 #'     dm <- bray(counts)
 #'
 #'     # Are samples more alike within treatment groups than between them?
-#'     anosim(dm, 'treatment', meta)
+#'     res <- anosim(dm, 'treatment', meta)
+#'     res
+#'     plot(res)
 #'
 #'     # The same, with the groups as a vector.
 #'     anosim(dm, meta$treatment)
@@ -256,6 +258,7 @@ anosim <- function (
 
   new_ecodive_test(
     class       = 'ecodive_anosim',
+    dist        = dv$step,
     title       = 'Analysis of similarities (ANOSIM)',
     statistic   = c(R = r_obs),
     p_value     = p,

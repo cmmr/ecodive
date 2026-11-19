@@ -228,7 +228,7 @@
 
   expect_true(inherits(ord, 'ecodive_ord') && is.matrix(ord) && is.double(ord))
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings',
       'cost', 'n_iters', 'dm', 'class') )
   expect_identical(dimnames(ord), list(rownames(m), c('RPCA1', 'RPCA2')))
@@ -271,7 +271,7 @@
   o1 <- rpca(m, tol = 10, cpus = 1)
   expect_length(attr(o1, 'cost'), 2L)
   expect_identical(attr(o1, 'n_iters'), 1L)
-  expect_identical(rpca(m, tol = 0, cpus = 1), rpca(m, cpus = 1))
+  expect_identical(no_steps(rpca(m, tol = 0, cpus = 1)), no_steps(rpca(m, cpus = 1)))
 
   # Not one of dist_ord()'s methods: it takes counts.
   expect_error(dist_ord(dist(m), 'rpca'), 'count_ord\\(counts, "rpca"\\)')
@@ -285,14 +285,14 @@
   ord <- rpca(m, cpus = 1)
   mi  <- m; storage.mode(mi) <- 'integer'
   expect_identical(rpca(mi, cpus = 1), ord)
-  expect_identical(rpca(t(m), margin = 2, cpus = 1), ord)
+  expect_identical(no_steps(rpca(t(m), margin = 2, cpus = 1)), no_steps(ord))
   expect_identical(rpca(as.data.frame(m), cpus = 1), ord)
 
   if (requireNamespace('Matrix', quietly = TRUE)) {
 
     sp <- methods::as(m, 'CsparseMatrix')
     expect_identical(rpca(sp, cpus = 1), ord)
-    expect_identical(rpca(Matrix::t(sp), margin = 2, cpus = 1), ord)
+    expect_identical(no_steps(rpca(Matrix::t(sp), margin = 2, cpus = 1)), no_steps(ord))
     expect_identical(rpca(methods::as(sp, 'TsparseMatrix'), cpus = 1), ord)
     expect_identical(rpca(Matrix::Matrix(m, sparse = FALSE), cpus = 1), ord)
     expect_identical(rpca(methods::as(sp, 'RsparseMatrix'), cpus = 1), ord)
@@ -333,7 +333,7 @@
   # Objects that hold a table (here an rbiom-like object holding a data
   # frame, samples in columns).
   rb <- structure(list(counts = as.data.frame(t(m))), class = 'rbiom')
-  expect_identical(rpca(rb, cpus = 1), ord)
+  expect_identical(no_steps(rpca(rb, cpus = 1)), no_steps(ord))
 
   # A slam simple_triplet_matrix (built by hand, as slam may not be
   # installed): 1-based, unsorted, with double, integer or logical values.
@@ -346,7 +346,7 @@
       class = 'simple_triplet_matrix' )
   }
   expect_identical(rpca(stm(m), cpus = 1), ord)
-  expect_identical(rpca(stm(t(m)), margin = 2, cpus = 1), ord)
+  expect_identical(no_steps(rpca(stm(t(m)), margin = 2, cpus = 1)), no_steps(ord))
   expect_identical(rpca(stm(mi, v = mi[mi != 0]), cpus = 1), ord)
   expect_error(rpca(stm(m > 0, v = rep(TRUE, sum(m > 0)))), 'no variation')
   bad_stm <- stm(m); bad_stm$i[1] <- 999L

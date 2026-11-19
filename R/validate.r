@@ -174,19 +174,23 @@ validate_depth <- function (env = parent.frame()) {
       
       if (!is.null(depth)) {
         
+        # One depth for every sample, or one per sample (matched to the
+        # samples in rarefy()).
         stopifnot(is.numeric(depth))
-        stopifnot(length(depth) == 1)
-        stopifnot(!is.na(depth))
-        stopifnot(depth > 0)
-        stopifnot(depth %% 1 == 0)
+        stopifnot(is.null(dim(depth)))
+        stopifnot(length(depth) >= 1)
+        stopifnot(!anyNA(depth))
+        stopifnot(all(depth > 0))
+        stopifnot(all(depth <= .Machine$integer.max))
+        stopifnot(all(depth %% 1 == 0))
         
-        depth <- as.integer(depth)
+        storage.mode(depth) <- 'integer'  # keeping any names
       }
       
     }),
     
     error = function (e) 
-      stop(e$message, '\n`depth` must be a positive integer or NULL.')
+      stop(e$message, '\n`depth` must be a positive integer, one per sample, or NULL.')
   )
 }
 
@@ -333,8 +337,11 @@ validate_pseudocount <- function (env = parent.frame()) {
 # pseudocount to add to every value. NULL gives 0 when there are no zeros,
 # else half the smallest non-zero value, with a warning. `what` ends the
 # error messages ("cannot perform <what>."). `constant_ok = FALSE` (CLR
-# normalization) refuses a table of one repeated value.
-log_pseudocount <- function (counts, pseudocount, what, constant_ok = FALSE) {
+# normalization) refuses a table of one repeated value. `zero_ok = TRUE`
+# (log_ratio(), balance()) also accepts a given pseudocount of 0: none, with
+# the caller dealing with the zeros.
+log_pseudocount <- function (
+    counts, pseudocount, what, constant_ok = FALSE, zero_ok = FALSE ) {
 
   mtx_pkg <- get_matrix_package(counts)
   pc_vals <- stored_values(counts)
@@ -366,10 +373,12 @@ log_pseudocount <- function (counts, pseudocount, what, constant_ok = FALSE) {
         stopifnot(length(pseudocount) == 1)
         stopifnot(!is.na(pseudocount))
         stopifnot(is.finite(pseudocount))
-        stopifnot(isTRUE(pseudocount > 0))
+        stopifnot(isTRUE(pseudocount > 0) || (zero_ok && pseudocount == 0))
       },
       error = function (e) {
-        stop('`pseudocount` must be a single positive number.')
+        stop(
+          if (zero_ok) '`pseudocount` must be a single non-negative number.'
+          else         '`pseudocount` must be a single positive number.' )
     })
 
     return (pseudocount)
@@ -530,7 +539,7 @@ validate_tree <- function (env = parent.frame()) {
               data     = 0, 
               nrow     = length(missing), 
               ncol     = ncol(counts),
-              dimnames = list(missing, rownames(counts)) ))
+              dimnames = list(missing, colnames(counts)) ))
         remove('missing')
         
         counts <- counts[as.character(tree$tip.label),,drop=FALSE]
@@ -588,6 +597,19 @@ assert_integer_counts <- function (env = parent.frame()) {
     remove('all_ints')
   })
 }
+
+# The number of samples of a count table (already through validate_counts())
+# and their names (NULL if none), for per_sample().
+count_samples <- function (counts, margin) {
+  switch(
+    EXPR = get_matrix_package(counts),
+    'base'   = { dims <- dim(counts);                 dn <- dimnames(counts) },
+    'slam'   = { dims <- c(counts$nrow, counts$ncol); dn <- counts$dimnames  },
+    'Matrix' = { dims <- counts@Dim;                  dn <- counts@Dimnames  } )
+  labels <- if (length(dn[[margin]])) as.character(dn[[margin]])
+  list(n = as.integer(dims[[margin]]), labels = labels)
+}
+
 
 get_matrix_package <- function (counts) {
   

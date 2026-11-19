@@ -1,0 +1,17 @@
+table,pc,groups
+skbio1,0x0.0p+0,0 0 0 1 1 1
+skbio2,0x0.0p+0,0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+skbio3,0x0.0p+0,0 0 0 1 1 1
+skbio4,0x0.0p+0,0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+skbio5,0x0.0p+0,0 0 1 0 1 1
+skbio6,0x0.0p+0,0 0 0 0 1 1
+skbio7,0x0.0p+0,a a a a b b
+skbio9,0x0.0p+0,0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+skbio10,0x0.0p+0,0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+doc,0x0.0p+0,treatment treatment treatment placebo placebo placebo
+three,0x0.0p+0,ctl ctl ctl ctl ctl ctl ctl lo lo lo lo lo lo lo lo lo hi hi hi hi hi hi hi hi
+zeros,0x1.0000000000000p-1,A A A A A A A A A A A A B B B B B B B B B B B B
+const,0x0.0p+0,a a a a a b b b b b b
+ties,0x0.0p+0,x x x x x x y y y y y y z z z z z z
+wide,0x0.0p+0,u u u u u u u u u u v v v v v v v v v v v v
+single,0x0.0p+0,p p p p q r r r

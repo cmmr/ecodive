@@ -128,7 +128,10 @@ are the same either way round.
     jc <- pcoa(jaccard(counts), n_axes = 2)
 
     # Do the Bray-Curtis and Jaccard PCoAs agree?
-    procrustes_test(jc, bc)
+    res <- procrustes_test(jc, bc)
+    res
+    plot(res)
+    plot(res, type = 'null')
 
 }
 \references{

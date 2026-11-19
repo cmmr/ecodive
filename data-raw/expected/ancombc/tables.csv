@@ -1,0 +1,9 @@
+name,types,levels
+doc1,status:str,
+doc2,status:str age:num,
+doc3,status:str age:num,
+sim,site:str ph:num smoker:bool,
+sparse,trt:str age:num,
+levels,dose:cat sex:str days:num,dose=low|mid|high
+prop,grp:str,
+struc,grouping:str,

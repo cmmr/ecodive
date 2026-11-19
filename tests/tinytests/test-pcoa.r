@@ -46,9 +46,16 @@
   expect_true(coord_diff(ord, cm$points) < 1e-9)
   expect_equal(attr(ord, 'eig'), cm$eig[1:6], tolerance = 1e-10)
 
+  # More than four axes: Lanczos's blocks are wider than four vectors,
+  # and orthonormalized by block Gram-Schmidt.
+  ord <- pcoa(d, n_axes = 12, cpus = 1)
+  cm  <- cmdscale(d, k = 12, eig = TRUE)
+  expect_true(coord_diff(ord, cm$points) < 1e-9)
+  expect_equal(attr(ord, 'eig'), cm$eig[1:12], tolerance = 1e-10)
+
   # A symmetric matrix gives the same result as a dist.
   m <- as.matrix(d)
-  expect_identical(pcoa(m), pcoa(d))
+  expect_identical(no_steps(pcoa(m)), no_steps(pcoa(d)))
   
   # Labels come from row names, else column names.
   rownames(m) <- NULL
@@ -110,10 +117,23 @@
   expect_identical(pcoa(d, cpus = 1), x)
   expect_identical(pcoa(d, cpus = 2), x)
   expect_identical(pcoa(d, cpus = 4), x)
+  x12 <- pcoa(d, n_axes = 12, cpus = 1)
+  expect_identical(pcoa(d, n_axes = 12, cpus = 2), x12)
+  expect_identical(pcoa(d, n_axes = 12, cpus = 4), x12)
+
+  # Large enough for lanczos() to split its own steps among threads, as
+  # well as the products: still identical. At home only (a few seconds).
+  if (at_home()) {
+    d_big <- bray(rand_counts(1300))
+    x_big <- pcoa(d_big, n_axes = 20, cpus = 1)
+    expect_identical(pcoa(d_big, n_axes = 20, cpus = 2), x_big)
+    expect_identical(pcoa(d_big, n_axes = 20, cpus = 4), x_big)
+    expect_equal(attr(x_big, 'eig'), cmdscale(d_big, k = 20, eig = TRUE)$eig[1:20], tolerance = 1e-10)
+  }
 
   # The shared ordination result format.
   expect_identical(
-    names(attributes(x)),
+    names(attributes(no_steps(x))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'correction', 'constant', 'class') )
   expect_identical(attr(x, 'correction'), 'none')
   expect_identical(attr(x, 'constant'), 0)
@@ -201,7 +221,7 @@
 
   # k larger than n - 1, and integer storage.
   d <- as.dist(matrix(c(0L, 3L, 4L, 3L, 0L, 5L, 4L, 5L, 0L), 3))
-  expect_identical(pcoa(d, n_axes = 10), pcoa(d, n_axes = 2))
+  expect_identical(no_steps(pcoa(d, n_axes = 10)), no_steps(pcoa(d, n_axes = 2)))
   expect_equal(attr(pcoa(d), 'eig'), cmdscale(d, k = 2, eig = TRUE)$eig[1:2])
 
 

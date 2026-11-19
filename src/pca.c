@@ -604,6 +604,7 @@ SEXP C_pca(
   lanczos_t lz = {
     .n = len, .k = k, .dims = side_n ? n - 1 : p, .deflate = side_n,
     .scale = total, .op = side_n ? op_samples : op_features, .ctx = &ctx,
+    .n_threads = n_threads,
     .vecs = side_n ? scores : loadings, .vals = eig, .resid = REAL(sexp_res) };
 
   // No variation at all (e.g., every feature constant): no

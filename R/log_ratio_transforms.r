@@ -254,7 +254,8 @@ ilr <- function (
 #'   pseudocount is added to every value (not only to zeros), as in
 #'   `normalize(norm = 'clr')`. With `pseudocount = NULL` (the default), no
 #'   pseudocount is used when `counts` has no zeros; otherwise half the
-#'   smallest non-zero value is, with a warning.
+#'   smallest non-zero value is, with a warning. To avoid a pseudocount,
+#'   replace the zeros first with [replace_zeros()]: its result has none.
 #'
 #'   The choice of pseudocount is not neutral: it can distort the results,
 #'   especially for sparse tables. See [aitchison()] for references.
@@ -263,14 +264,20 @@ NULL
 
 
 # Checks the count table of a log-ratio transform in the calling function,
-# and sets its `counts` (a matrix the C code reads), `margin`, `cpus` and
+# and sets its `counts` (a matrix the C code reads), `margin`, `cpus` (if any) and
 # `pseudocount`. Returns the table's sizes and names. `what` names the
-# transform in error messages.
-log_ratio_input <- function (what, env = parent.frame()) {
+# transform in error messages. `zero_ok` accepts `pseudocount = 0` (see
+# log_pseudocount()); `dense_out = FALSE` (one value per sample) skips the
+# warning about a large dense result. `check`, if given, is called with the
+# feature names (or NULL) before the pseudocount is resolved, so that its
+# errors come before the warning about zeros; its value is returned as
+# element `check`.
+log_ratio_input <- function (
+    what, env = parent.frame(), zero_ok = FALSE, dense_out = TRUE, check = NULL ) {
 
   validate_counts(env)
   validate_margin(env)
-  validate_cpus(env)
+  if (exists('cpus', envir = env, inherits = FALSE)) validate_cpus(env)
 
   counts <- env$counts
   margin <- env$margin
@@ -299,9 +306,13 @@ log_ratio_input <- function (what, env = parent.frame()) {
   if (D < 2L)
     stop('`counts` must have at least 2 features for ', what, '.', call. = FALSE)
 
-  env$pseudocount <- log_pseudocount(counts, env$pseudocount, what, constant_ok = TRUE)
+  features <- if (length(dn[[3L - margin]])) as.character(dn[[3L - margin]])
+  checked  <- if (is.function(check)) check(features)
 
-  if (as.double(n) * (D - 1) > 1e8)
+  env$pseudocount <- log_pseudocount(
+    counts, env$pseudocount, what, constant_ok = TRUE, zero_ok = zero_ok )
+
+  if (dense_out && as.double(n) * (D - 1) > 1e8)
     warning(
       sprintf('The result is a dense %s x %s matrix (%.1f GB).',
         n, D - 1, as.double(n) * (D - 1) * 8 / 1e9), call. = FALSE )
@@ -309,8 +320,9 @@ log_ratio_input <- function (what, env = parent.frame()) {
   list(
     D        = D,
     n        = n,
-    features = if (length(dn[[3L - margin]])) as.character(dn[[3L - margin]]),
-    samples  = if (length(dn[[margin]]))      as.character(dn[[margin]]) )
+    features = features,
+    samples  = if (length(dn[[margin]])) as.character(dn[[margin]]),
+    check    = checked )
 }
 
 

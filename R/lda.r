@@ -87,10 +87,12 @@
 #' to 1 are). Otherwise `lda()` stops with an error (scikit-learn and
 #' `MASS::lda()` drop the null directions with a warning, but the axes
 #' they then report depend on rounding). Microbiome tables have far more
-#' taxa than samples, so run LDA on a few axes of an unconstrained
-#' ordination instead, such as `pcoa(dm, n_axes = 5)` or [pca()]'s
-#' scores: `lda(pcoa(dm, n_axes = 5), groups)`. This is canonical analysis
-#' of principal coordinates (Anderson & Willis 2003).
+#' taxa than samples, so use [capda()] instead: canonical analysis of
+#' principal coordinates (Anderson & Willis 2003) runs LDA on the first
+#' few axes of [pcoa()], choosing how many by how well they classify the
+#' samples, and tests the separation of the groups by permutation.
+#' `capda(dm, groups, n_pcoa_axes = 5)` gives the same scores as
+#' `lda(pcoa(dm, n_axes = 5), groups)`. A few axes of [pca()] also work.
 #'
 #'
 #' **Validate the separation**
@@ -150,17 +152,18 @@
 #' @inheritSection ordination_section Ordination result
 #' @inheritSection documentation Input Types
 #'
-#' @seealso [plsda()], [pca()], [pcoa()], [permanova()], [count_ord()]
+#' @seealso [capda()], [plsda()], [pca()], [pcoa()], [permanova()], [count_ord()]
 #'
 #' @export
 #' @examples
 #'     # LDA of iris: three groups, so two discriminant axes.
 #'     ord <- lda(iris[, 1:4], 'Species', iris)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord)
 #'     attr(ord, 'prop')
 #'     attr(ord, 'scaling')
 #'
-#'     # Microbiome tables have more taxa than samples: use a few PCoA axes.
+#'     # Microbiome tables have more taxa than samples: use a few PCoA axes,
+#'     # or capda(), which chooses how many.
 #'     grp <- rep(c('a', 'b'), length.out = nrow(ex_counts))
 #'     pc  <- pcoa(bray(ex_counts), n_axes = 2)
 #'     lda(pc, grp)
@@ -236,17 +239,12 @@ lda <- function (
   k <- min(if (is.null(n_axes)) 3L else n_axes, r)
   axes <- if (k > 0) paste0('LD', seq_len(k)) else NULL
 
-  scores  <- fit$scores[,  seq_len(k), drop = FALSE]
-  scaling <- fit$scaling[, seq_len(k), drop = FALSE]
+  flip    <- lda_flip(
+    fit$scores[,  seq_len(k), drop = FALSE],
+    fit$scaling[, seq_len(k), drop = FALSE] )
+  scores  <- flip$scores
+  scaling <- flip$scaling
   eig     <- fit$sv[seq_len(k)]^2
-
-  # Each axis's largest score (in absolute value) is positive.
-  for (a in seq_len(k)) {
-    if (!identical(ord_flip(scores[, a, drop = FALSE]), scores[, a, drop = FALSE])) {
-      scores[,  a] <- -scores[,  a]
-      scaling[, a] <- -scaling[, a]
-    }
-  }
 
   dimnames(scaling)   <- list(dn[[2]], axes)
   dimnames(fit$means) <- list(levels(grp), dn[[2]])
@@ -298,13 +296,28 @@ lda_prior <- function (prior, grp) {
 
 
 
+# Flips each axis so that its largest score (in absolute value) is
+# positive, with its column of `scaling`: lda() and capda().
+lda_flip <- function (scores, scaling) {
+  for (a in seq_len(ncol(scores))) {
+    if (!identical(ord_flip(scores[, a, drop = FALSE]), scores[, a, drop = FALSE])) {
+      scores[,  a] <- -scores[,  a]
+      scaling[, a] <- -scaling[, a]
+    }
+  }
+  list(scores = scores, scaling = scaling)
+}
+
+
+
 lda_singular <- function (n, p, g) {
   stop(
     'The pooled within-group covariance is singular ',
     sprintf('(%d samples, %d groups, %d features): ', n, g, p),
     'LDA needs more samples than features plus groups, and no feature that ',
     'is constant within groups or collinear with others. Use fewer ',
-    'features, such as a few axes of pcoa() or pca().', call. = FALSE )
+    'features, or capda(), which runs LDA on the first few PCoA axes of ',
+    'the distances between samples.', call. = FALSE )
 }
 
 

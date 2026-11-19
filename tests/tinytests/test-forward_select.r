@@ -68,6 +68,10 @@
     expect_identical(attr(fs, 'stop'), 'not significant')
     expect_identical(attr(fs, 'next_best')$variable, 'SubsDens:Topo')  # after its main effects
     expect_true(attr(fs, 'next_best')$p_value > 0.05)
+    # That last candidate is the global model itself: the same terms give
+    # the same numbers whatever order they were chosen in, so it can't
+    # "exceed" the global adjusted R-squared by rounding (as it did on CI).
+    expect_identical(attr(fs, 'next_best')$adj_r_squared_cum, attr(fs, 'global')$adj_r_squared)
 
 
     # adespatial::forward.sel(): the same order, R-squared, and F. Its

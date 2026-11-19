@@ -205,7 +205,9 @@ Zeros are undefined in the centered log-ratio (CLR) transformation. If
 zeros are detected, the function uses half the minimum non-zero value
 (\code{min(x[x>0]) / 2}) and issues a warning.
 
-To suppress the warning, provide an explicit value (e.g., \code{1}).
+To suppress the warning, provide an explicit value (e.g., \code{1}), or
+replace the zeros first with \code{\link{replace_zeros}()}, whose
+result needs no pseudocount.
 
 \strong{Why this matters:} The choice of pseudocount is not neutral; it acts as
 a weighting factor that can significantly distort downstream results,
@@ -232,6 +234,7 @@ See \code{\link{aitchison}} for references.
       counts, env = ~ ph + temp, space = ~ x + y,
       data = meta, norm = 'hellinger' )
     vp
+    plot(vp)
 
     # db-RDA on Bray-Curtis distances; a set may be a matrix.
     varpart(bray(counts), ~ ph + temp, as.matrix(meta[, c('x', 'y')]), data = meta)

@@ -1,0 +1,9 @@
+case,table,groups,treatment,reference,n_draws
+doc,doc,treatment treatment treatment placebo placebo placebo,treatment,placebo,16
+doc_default,doc,treatment treatment treatment placebo placebo placebo,,,8
+small,small,Group1 Group1 Group2 Group2 Group2,Group2,Group1,8
+three_pair,three,ctl ctl ctl ctl ctl lo lo lo lo lo lo lo hi hi hi hi hi hi,hi,lo,8
+three_pool,three,ctl ctl ctl ctl ctl lo lo lo lo lo lo lo hi hi hi hi hi hi,lo,,8
+three_dflt,three,ctl ctl ctl ctl ctl lo lo lo lo lo lo lo hi hi hi hi hi hi,,,8
+single,single,a b b b b b,a,b,4
+wide,wide,x x x x x x x x x y y y y y y y y y y y y y y,y,x,12

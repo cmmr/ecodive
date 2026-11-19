@@ -290,10 +290,10 @@
   }
 
   # A symmetric matrix works like a dist.
-  expect_identical(permdisp(as.matrix(d), g, permutations = 19, cpus = 1), ref)
+  expect_identical(no_steps(permdisp(as.matrix(d), g, permutations = 19, cpus = 1)), no_steps(ref))
   expect_identical(
-    permdisp(as.matrix(d), g, type = 'median', permutations = 19, cpus = 1),
-    permdisp(d, 'trt', meta[36:1, ], type = 'median', permutations = 19, cpus = 1) )
+    no_steps(permdisp(as.matrix(d), g, type = 'median', permutations = 19, cpus = 1)),
+    no_steps(permdisp(d, 'trt', meta[36:1, ], type = 'median', permutations = 19, cpus = 1)) )
 
   # Rows for other samples are ignored, with their levels.
   extra <- rbind(meta, meta[1, ])

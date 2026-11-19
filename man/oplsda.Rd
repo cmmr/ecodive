@@ -209,11 +209,11 @@ run and for any number of \code{cpus}.
 }
 \section{Ordination result}{
 
-Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
+Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capda]{capda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
 \code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
-axis, so that it can go straight into \code{plot()} or a data frame. Rows are
+axis, so that it can go straight into a data frame. Rows are
 named after the samples, when the input has names. Columns are named
 after the method: \code{"PCoA1"}, \code{"PC1"}, \code{"RPCA1"}, \code{"dbRDA1"} or \code{"CAP1"}
 (then \code{"MDS1"} for unconstrained axes), \code{"MDS1"}, \code{"NMDS1"},
@@ -235,10 +235,17 @@ axis explains. Unlike \code{eig}, it is comparable between methods, so use
 it to label axes. \code{NA} where it isn't defined.
 }
 
-Attributes particular to the method follow them. The matrix has class
-\code{"ecodive_ord"} (as well as \code{"matrix"}), only so that \code{print()} lists the
-other attributes by name rather than in full. Subsetting with \code{[}, or
-\code{as.data.frame()}, gives a plain matrix or data frame without them.
+Attributes particular to the method follow them, and last, the records
+of how it was made (see \link{ecodive_steps}): \code{dist}, the distance
+matrix's, for the methods that take distances, and \code{ord}, the
+ordination's own (its method, display name and settings). The matrix has class
+\code{"ecodive_ord"} (as well as \code{"matrix"}), so that \code{print()} lists the
+other attributes by name rather than in full, and \code{plot()} draws the
+samples on the first two axes, labelled from the attributes, with any
+loadings, constraints and centroids on top (see \code{\link[=plot.ecodive_ord]{plot.ecodive_ord()}}).
+\code{plot(ord, "Species", iris)} colours the samples by a column of
+metadata. Subsetting with \code{[}, or \code{as.data.frame()}, gives a plain
+matrix or data frame without the attributes.
 }
 
 \section{Input Types}{
@@ -267,7 +274,9 @@ Zeros are undefined in the centered log-ratio (CLR) transformation. If
 zeros are detected, the function uses half the minimum non-zero value
 (\code{min(x[x>0]) / 2}) and issues a warning.
 
-To suppress the warning, provide an explicit value (e.g., \code{1}).
+To suppress the warning, provide an explicit value (e.g., \code{1}), or
+replace the zeros first with \code{\link{replace_zeros}()}, whose
+result needs no pseudocount.
 
 \strong{Why this matters:} The choice of pseudocount is not neutral; it acts as
 a weighting factor that can significantly distort downstream results,
@@ -283,7 +292,7 @@ See \code{\link{aitchison}} for references.
     two    <- droplevels(subset(iris, Species != 'setosa'))
     counts <- round(two[, 1:4] * 10)
     ord    <- oplsda(counts, 'Species', two)
-    plot(ord, col = two$Species)
+    plot(ord)
     attr(ord, 'r2x')
     attr(ord, 'r2y')
     attr(ord, 'vip')

@@ -247,7 +247,7 @@
 #'     dm  <- bray(iris[, 1:4])
 #'     # Enough neighbours to link setosa to the other two species.
 #'     ord <- isomap(dm, n_neighbors = 50)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'
@@ -351,7 +351,7 @@ isomap <- function (dm, n_axes = 3L, n_neighbors = 5L, radius = NULL, cpus = n_c
   names(membership) <- labels
 
   ord_result(
-    points, 'isomap', labels, prefix = 'Isomap',
+    points, 'isomap', labels, prefix = 'Isomap', dist = dv$step,
     eig         = eig,
     prop        = if (trace > 0) eig / trace else eig,
     trace       = trace,

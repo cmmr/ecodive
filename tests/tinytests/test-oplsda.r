@@ -104,7 +104,7 @@
     }
     if (requireNamespace('slam', quietly = TRUE))
       expect_equal(fit_case(cs, counts = slam::as.simple_triplet_matrix(cs$counts)), ord, tolerance = 1e-12)
-    expect_equal(fit_case(cs, counts = t(cs$counts), margin = 2L), ord, tolerance = 1e-12)
+    expect_equal(no_steps(fit_case(cs, counts = t(cs$counts), margin = 2L)), no_steps(ord), tolerance = 1e-12)
 
 
     # With no orthogonal components: a one-component plsda(), up to scaling
@@ -153,7 +153,7 @@
   # Attributes, groups and centroids. ====
 
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'r2x', 'r2y',
       'loadings', 'weights', 'y_loading', 'vip', 'groups', 'centroids', 'class') )
   expect_identical(attr(ord, 'method'), 'oplsda')
@@ -195,7 +195,7 @@
 
   # Unused factor levels are dropped.
   extra <- factor(cs$groups, levels = c(lev, 'unused'))
-  expect_identical(oplsda(cs$counts, extra, n_orthogonal = 2, cpus = 1), ord)
+  expect_identical(no_steps(oplsda(cs$counts, extra, n_orthogonal = 2, cpus = 1)), no_steps(ord))
 
   # Default: one orthogonal component.
   o1 <- oplsda(cs$counts, cs$groups, cpus = 1)

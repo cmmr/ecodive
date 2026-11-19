@@ -9,8 +9,10 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment  = "#>" )
+  collapse   = TRUE,
+  comment    = "#>",
+  fig.width  = 6,
+  fig.height = 4.5 )
 ```
 
 
@@ -54,13 +56,21 @@ dm <- bray(iris[, 1:4])
 column name of `data`, or as a vector.
 
 ```{r}
-permanova(dm, 'Species', iris)
+res <- permanova(dm, 'Species', iris)
+res
 ```
 
 Species explain most of the variation between flowers (`R2`), and no
 permutation of the labels did as well (`p`). The p-value cannot be smaller
 than 1 / (`permutations` + 1), so use more permutations for a more precise
 one.
+
+`plot()` shows the pseudo-\(F\) of every permutation, and the observed one
+far beyond them:
+
+```{r}
+plot(res)
+```
 
 A `formula` tests several variables at once. `by = 'terms'` tests each in
 turn, as `adonis2()` does, and `strata` restricts permutations to within
@@ -79,7 +89,9 @@ significant result means a PERMANOVA difference may come partly or wholly
 from dispersion.
 
 ```{r}
-permdisp(dm, 'Species', iris)
+res <- permdisp(dm, 'Species', iris)
+res
+plot(res)
 ```
 
 Here the three species are equally spread, so the PERMANOVA result above
@@ -99,7 +111,17 @@ groups would give.
 ```{r}
 anosim(dm, 'Species', iris)
 
-mrpp(dm, 'Species', iris)
+res <- mrpp(dm, 'Species', iris)
+res
+```
+
+`plot()` of an MRPP result shows each group's mean within-group distance,
+with their weighted mean (the observed \(\delta\)) and the mean of all
+distances (the \(\delta\) expected by chance); `type = 'null'` shows the
+permutations instead, as for the other tests.
+
+```{r}
+plot(res)
 ```
 
 
@@ -135,7 +157,9 @@ similar sepals. `method` can be `'pearson'`, `'spearman'`, or `'kendall'`.
 sepals <- bray(iris[, 1:2])
 petals <- bray(iris[, 3:4])
 
-mantel(sepals, petals, method = 'spearman')
+res <- mantel(sepals, petals, method = 'spearman')
+res
+plot(res)
 ```
 
 `mantel_partial()` removes the effect of a third set of distances, `given`:

@@ -155,13 +155,13 @@
   # Every input format gives the same result. ====
 
   x <- pca(m150, norm = 'clr', pseudocount = 1)
-  expect_identical(pca(t(m150), margin = 2, norm = 'clr', pseudocount = 1), x)
+  expect_identical(no_steps(pca(t(m150), margin = 2, norm = 'clr', pseudocount = 1)), no_steps(x))
 
   if (requireNamespace('Matrix', quietly = TRUE)) {
     sp <- Matrix::Matrix(m150, sparse = TRUE)
     expect_identical(pca(sp, norm = 'clr', pseudocount = 1), x)
     expect_identical(pca(methods::as(sp, 'TsparseMatrix'), norm = 'clr', pseudocount = 1), x)
-    expect_identical(pca(Matrix::t(sp), margin = 2, norm = 'clr', pseudocount = 1), x)
+    expect_identical(no_steps(pca(Matrix::t(sp), margin = 2, norm = 'clr', pseudocount = 1)), no_steps(x))
   }
 
   if (requireNamespace('slam', quietly = TRUE)) {
@@ -170,7 +170,7 @@
   }
 
   # Binary is presence/absence.
-  expect_equal(pca(m30, norm = 'binary'), pca((m30 > 0) + 0))
+  expect_equal(no_steps(pca(m30, norm = 'binary')), no_steps(pca((m30 > 0) + 0)))
 
 
 
@@ -185,11 +185,12 @@
 
   # The shared ordination result format.
   expect_identical(
-    names(attributes(x)),
+    names(attributes(no_steps(x))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings', 'class') )
   expect_identical(class(x), c('ecodive_ord', 'matrix', 'array'))
-  # print() lists the loadings by name instead of printing them.
-  expect_true(length(capture.output(print(x))) < nrow(x) + 5)
+  # print() lists the loadings by name instead of printing them (and adds a
+  # line for each record of how it was made).
+  expect_true(length(capture.output(print(x))) < nrow(x) + 7)
   expect_identical(attr(x, 'method'), 'pca')
 
   # Each axis's largest absolute score is positive.
@@ -283,7 +284,7 @@
       d   <- beta_div(cs$counts, cs$metric, pseudocount = 1)
       ord <- unclass(pcoa(d, n_axes = cs$k, cpus = 2))
       attr(ord, 'correction') <- attr(ord, 'constant') <- NULL  # added since
-      expect_equal(ord, cs$expected, tolerance = 1e-12)
+      expect_equal(no_steps(ord), no_steps(cs$expected), tolerance = 1e-12)
     }
   }
 

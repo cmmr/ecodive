@@ -23,15 +23,23 @@ Authors@R: c(
     person(
       "scikit-bio development team",
       role    = c("ctb", "cph"),
-      comment = "PCoA biplot scores, BIOENV, and the alr and ilr transforms, from scikit-bio"),
+      comment = "phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, ANCOM, ANCOM-BC and ANCOM-BC2, and Dirichlet-multinomial t-tests, from scikit-bio"),
+    person(
+      "NumPy Developers",
+      role    = "cph",
+      comment = "numpy's pairwise summation, followed by replace_zeros_mult()"),
     person(
       "Cameron", "Martino",
       role    = c("ctb", "cph"),
-      comment = "'gemelli' robust Aitchison PCA"),
+      comment = "'gemelli' robust Aitchison PCA and phylogenetic robust Aitchison PCA"),
+    person(
+      "Daniel", "McDonald",
+      role    = c("ctb", "cph"),
+      comment = "tree shearing and collapsing, following 'iow' (bp)"),
     person(
       "The SciPy developers",
       role    = c("ctb", "cph"),
-      comment = "Procrustes analysis, following SciPy"),
+      comment = "Procrustes analysis and a Nelder-Mead minimiser, following SciPy"),
     person(
       "Nathan", "Lemoine",
       role    = c("ctb", "cph"),
@@ -40,6 +48,18 @@ Authors@R: c(
       "Wright State University",
       role    = c("ctb", "cph"),
       comment = "OPLS-DA, from 'pyopls'"),
+    person(
+      "Raes Lab",
+      role    = c("ctb", "cph"),
+      comment = "quantitative microbiome profiling, following 'QMP.R'"),
+    person(
+      "Huang", "Lin",
+      role    = c("ctb", "cph"),
+      comment = "ANCOM-BC and ANCOM-BC2 ('ANCOMBC'), via scikit-bio's port"),
+    person(
+      "ALDEx3 authors",
+      role    = c("ctb", "cph"),
+      comment = "the scale model of dirmult_ttest(), following 'ALDEx3'"),
     person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
@@ -52,7 +72,8 @@ Description: Computes alpha and beta diversity metrics in a parallel,
     multidimensional scaling, 'Isomap', 't-SNE' and 'UMAP', and constrains
     them by distance-based redundancy analysis and constrained analysis of
     principal coordinates; ordinates count tables by principal components
-    analysis and robust Aitchison PCA; and fits variables onto ordinations.
+    analysis and robust Aitchison PCA (including its phylogenetic
+    form); and fits variables onto ordinations.
     Tests distances with PERMANOVA, PERMDISP, ANOSIM, MRPP and Mantel tests.
     Several methods are ported from 'scikit-learn', 'scikit-bio', 'gemelli'
     and 'uwot'.
@@ -70,6 +91,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Config/Needs/website: rmarkdown
 Config/testthat/edition: 3
-Imports: parallel, stats, utils
+Imports: graphics, grDevices, parallel, stats, utils
 Suggests: knitr, Matrix, parallelly, rmarkdown, slam, tinytest
 VignetteBuilder: knitr

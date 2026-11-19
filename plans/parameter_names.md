@@ -39,10 +39,11 @@ same thing.
 | `tol` | a convergence tolerance | `mds`, `nmds`, `rpca`; planned `splsda` |
 | `init`, `learning_rate` | starting layout, step size | `tsne`, `umap`; planned `pacmap`, `largevis` |
 | `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights | planned `moran_i`, `dbmem` |
-| `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only); planned `log_ratio`, `balance`, `rho_p`, `phi_s` |
+| `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only), `log_ratio`, `balance`, `rho_p`, `phi_s` (`denominator` only: one feature for an alr, or a set) |
 | `basis` | **(new)** an ILR basis or a sequential binary partition | `ilr` |
-| `load` | **(new)** each sample's measured total microbial load | planned `qmp_scale`, `qmp_rarefy` |
-| `contrast` | **(new)** the samples compared, `c(treatment, reference)` | planned `dirmult_ttest` |
+| `load` | **(new, 2026-11-19)** each sample's measured total microbial load: one finite value > 0 per sample (matched by name, else by position), or a column name of `data`, by the same `per_sample()` rule as `groups` | `qmp_scale`, `qmp_rarefy` |
+| `contrast` | **(new)** the samples compared, `c(treatment, reference)`; `reference = NA` pools all other samples | `dirmult_ttest` |
+| `conf_level` | **(new, 2026-11-19)** the confidence level of an interval, strictly between 0 and 1 (as `t.test(conf.level)`, snake_case) | `dirmult_ttest` |
 | `part_weights`, `ilr_weights` | **(new)** PhILR's taxon and balance weights | planned `philr` |
 | `subjects`, `states` | **(new)** per-sample subject ids and time points / conditions | planned `ctf` |
 | `fit` | **(new)** a fitted result given to a post-hoc test | planned `ancombc_*` |
@@ -141,7 +142,10 @@ don't** (layouts optimised in a fixed number of dimensions).
   `beta_div()`, and would mean Coifman–Lafon's density normalisation in
   `diffusion_map()`. Both are the standard names in their literatures, the
   functions are unrelated, and `diffusion_map()` never passes through
-  `beta_div()`. The docs say which α is meant.
+  `beta_div()`. The docs say which α is meant. In the differential
+  abundance tests (`ancom()`, `dirmult_ttest()`) `alpha` is the
+  significance level, as in statistics generally; those functions never
+  pass through `beta_div()` either.
 - **`sourcetracker(alpha1, alpha2, beta)`** keeps SourceTracker's prior
   names (2026-11-19), which users know from its documentation. None is a
   significance level, and `beta` is not beta diversity; the docs say so.

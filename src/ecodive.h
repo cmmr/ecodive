@@ -119,6 +119,10 @@ typedef struct {
   int          n_ritz_out;//      fixed), and how many were written.
   int          max_steps; // In: give up (not converged) after this many
                           //     products with blocks (default LZ_MAX_STEPS).
+  int          n_threads; // In: the threads the caller may use (default 0:
+                          //     one). Each step on blocks of vectors takes
+                          //     as many as its work is worth (threads_for());
+                          //     results are the same for any number.
 } lanczos_t;
 
 void   lanczos(lanczos_t *lz);
@@ -168,7 +172,8 @@ typedef struct {
   int           f;          //   out of each product, or NULL/0.
   int           max_m;      // Vectors per pass over `dist`.
   double       *xr, *yr;    // n x max_m scratch.
-  int           n_threads;
+  int           n_threads;  // Threads for a pass of GOWER_W vectors.
+  int           n_req;      // Threads asked for.
   double        shift;      // Distances are read as d + shift (default 0;
                             //   set with gower_set_shift()).
   double        max_d;      // Out: the largest distance as given.
@@ -188,6 +193,19 @@ void knn_from_dist(const double *dist, int n, int k, int include_self,
 int64_t kendall_sort_count(int *a, int *buf, size_t len);
 double  kendall_tied_sorted(const int *a, size_t len);
 
+/* --- rng_dist.c: continuous distributions on PCG --- */
+typedef struct {
+  pcg32_random_t pcg;
+  int            has_spare;   // rng_norm()'s second value of a pair
+  double         spare;
+} rng_t;
+
+void   rng_seed(rng_t *r, uint64_t seed, uint64_t stream);
+double rng_unif(rng_t *r);
+double rng_norm(rng_t *r);
+double rng_gamma(rng_t *r, double shape);
+double rng_log_gamma(rng_t *r, double shape);
+
 /* --- memory.c --- */
 void  init_n_ptrs(int n);
 void* safe_malloc(size_t bytes);
@@ -198,6 +216,15 @@ void* maybe_free_one(void *ptr);
 
 /* --- normalize.c --- */
 void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_);
+
+/* --- rpca.c: shared with rpca_phylo.c --- */
+void rpca_filter(int N0, int P0, const int *tpos, const int *tidx, const double *tval,
+                 double msc, double mfc, double mff, int drop_single,
+                 int *s_new, int *f_new, int *single, int *n_single, int *n, int *m);
+SEXP rpca_core(int n, int m, int *rpos, int *ridx, double *rval,
+               int r, int max_iter, double tol, int want_dm, int debug,
+               double step, int n_threads, const char *no_var);
+SEXP rpca_list_append(SEXP x, const char **names, SEXP *vals, int k);
 
 /* --- pca.c: the centred (scaled) table, shared with rda(), plsda() and oplsda() --- */
 typedef struct {

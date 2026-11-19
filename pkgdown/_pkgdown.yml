@@ -10,6 +10,11 @@ template:
     base_font: {google: "Noto Sans"}
     heading_font: {google: "Noto Sans"}
 
+# pkgdown draws figures on a transparent background by default, which is
+# hard to read on the dark theme.
+figures:
+  bg: white
+
 
 reference:
 - title: Alpha Diversity
@@ -46,21 +51,53 @@ reference:
   contents:
   - has_concept('Presence/Absence metrics')
 - subtitle: Phylogenetic metrics
-  desc: Distance measures based on phylogenetic branch lengths (UniFrac family).
+  desc: Distance measures based on phylogenetic branch lengths (the UniFrac family, and the compositional PhILR distance).
   contents:
   - unweighted_unifrac
   - weighted_unifrac
   - normalized_unifrac
   - generalized_unifrac
   - variance_adjusted_unifrac
+  - philr_distance
 
 - title: Compositional Data
   desc: Log ratios for relative abundances. The centered log ratios (clr and rclr) are norm choices; see normalize().
+- subtitle: Zeros
+  desc: Replace zeros before taking log ratios, instead of adding a pseudocount. replace_zeros() runs any method by name.
+  contents:
+  - replace_zeros
+  - replace_zeros_mult
+  - list_zero_replacements
 - subtitle: Log-ratio transforms
   desc: Coordinates for analyses of the transformed features themselves. For distances, use aitchison().
   contents:
   - alr
   - ilr
+  - philr
+- subtitle: Log ratios
+  desc: One log ratio per sample, between two groups of features, to use as a variable in tests and models.
+  contents:
+  - log_ratio
+  - balance
+- subtitle: Proportionality
+  desc: Which features keep a constant ratio across samples, the compositionally valid alternative to correlation. A dist over the features.
+  contents:
+  - vlr
+  - rho_p
+  - phi_s
+- subtitle: Differential abundance
+  desc: Which features' abundances differ between groups, from log ratios or clr values, so that the samples' totals don't matter.
+  contents:
+  - ancom
+  - ancombc
+  - ancombc_global
+  - structural_zeros
+  - dirmult_ttest
+- subtitle: Absolute abundance
+  desc: With each sample's total microbial load measured (cell counts, qPCR, a spike-in), estimate absolute abundances instead of ratios.
+  contents:
+  - qmp_scale
+  - qmp_rarefy
 
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
@@ -81,6 +118,7 @@ reference:
   - ca
   - pca
   - rpca
+  - rpca_phylo
   - envfit
   - bioenv
   - varpart
@@ -93,6 +131,7 @@ reference:
   desc: Ordinations that look for the axes that separate known groups. They always find some, so validate them with a permutation test such as permanova().
   contents:
   - lda
+  - capda
   - plsda
   - oplsda
 
@@ -112,6 +151,22 @@ reference:
   desc: Which taxa drive the differences between groups.
   contents:
   - simper
+
+- title: Plotting
+  desc: plot() methods for ecodive's results. They draw what a result already holds, with titles, labels and legends taken from its attributes, in base graphics.
+  contents:
+  - plot.ecodive_ord
+  - plot.ecodive_dist
+  - plot.ecodive_envfit
+  - plot.ecodive_test
+  - plot.ecodive_simper
+  - plot.ecodive_dirmult_ttest
+  - plot.ecodive_ancom
+  - plot.ecodive_ancombc
+  - plot.ecodive_varpart
+  - plot.ecodive_forward_select
+  - plot.ecodive_bioenv
+  - ecodive_steps
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.

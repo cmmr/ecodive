@@ -3,7 +3,8 @@
 
 #include "ecodive.h"
 
-static uint32_t  target;
+static uint32_t *target_vec; // One per sample, or one for all.
+static int       n_targets;
 static uint64_t  seed;
 static int       margin;
 static SEXP      sexp_val_mtx;
@@ -16,6 +17,9 @@ static int       n_sams;
 static int       n_otus;
 static int       n_vals;
 static uint32_t *depth_vec;
+
+
+#define TARGET(sam) target_vec[(n_targets == 1) ? 0 : (sam)]
 
 
 typedef struct {
@@ -49,7 +53,8 @@ static void *rarefy_dense(void *arg) {
   
   for (int sam = thread_i; sam < n_sams; sam += n_threads) {
     
-    uint32_t depth = depth_vec[sam];
+    uint32_t depth  = depth_vec[sam];
+    uint32_t target = TARGET(sam);
     
     // Sample can be be rarefied.
     if (depth > target) {
@@ -164,7 +169,8 @@ static void *rarefy_triplet(void *arg) {
     if (sam % n_threads == thread_i) {
       
       knuth_t  *knuth = &knuth_vec[sam]; // Tracks: tried, kept, and rng.
-      uint32_t  depth = depth_vec[sam];  // Total observations in sample
+      uint32_t  depth  = depth_vec[sam];  // Total observations in sample
+      uint32_t  target = TARGET(sam);     // Observations to keep
       double    val   = val_vec[i];      // Current OTU # of observations
       double   *res   = res_vec + i;     // Rarefied OTU # of observations
       
@@ -356,6 +362,7 @@ static void *rarefy_compressed (void *arg) {
   for (int sam = thread_i; sam < n_sams; sam += n_threads) {
     
     uint32_t depth     = depth_vec[sam];
+    uint32_t target    = TARGET(sam);
     int      pos_begin = pos_vec[sam];
     int      pos_end   = pos_vec[sam + 1];
     
@@ -616,7 +623,13 @@ SEXP C_rarefy(
   
   init_n_ptrs(10);
   
-  target = (uint32_t) asInteger(sexp_depth);
+  // `depth`: one target for every sample, or one per sample (checked in R).
+  n_targets  = LENGTH(sexp_depth);
+  target_vec = (uint32_t*) safe_malloc(n_targets * sizeof(uint32_t));
+  for (int i = 0; i < n_targets; i++)
+    target_vec[i] = (uint32_t) ((TYPEOF(sexp_depth) == INTSXP) ?
+      INTEGER(sexp_depth)[i] : REAL(sexp_depth)[i]);
+  
   seed   = (uint64_t) asInteger(sexp_seed);
   margin = asInteger(sexp_margin);
   
@@ -646,6 +659,18 @@ SEXP C_rarefy(
   else if (inherits(sexp_otu_mtx, "dgeMatrix"))             { rarefy_func = setup_dgeMatrix(); }
   else   { error("Unrecognized matrix format."); } // # nocov
   
+  // slam's indices are 1-based, so its sample k is at index k.
+  int is_slam = inherits(sexp_otu_mtx, "simple_triplet_matrix");
+  if (n_targets != 1 && n_targets != n_sams - is_slam)
+    error("`depth` must have one value, or one per sample."); // # nocov
+  
+  if (is_slam && n_targets > 1) {
+    uint32_t *shifted = (uint32_t*) safe_malloc(n_sams * sizeof(uint32_t));
+    shifted[0] = 0;
+    for (int i = 1; i < n_sams; i++) shifted[i] = target_vec[i - 1];
+    target_vec = shifted;
+    n_targets  = n_sams;
+  }
   
   run_parallel(rarefy_func, n_threads, n_sams);
   

@@ -14,8 +14,11 @@
 #' @param counts  A numeric matrix or sparse matrix object (e.g., `dgCMatrix`).
 #'        Counts must be integers.
 #' 
-#' @param depth   The number of observations to keep per sample. If `NULL` 
-#'        (the default), a depth is auto-selected to maximize data retention.
+#' @param depth   The number of observations to keep per sample: one number
+#'        for every sample, or one per sample (matched to the samples by name
+#'        when both are named, else in the samples' order), as
+#'        [qmp_rarefy()] uses. If `NULL` (the default), a depth is
+#'        auto-selected to maximize data retention.
 #'     
 #' @param seed    An integer seed for the random number generator. Providing 
 #'        the same seed guarantees reproducible results. Default: `0`
@@ -25,12 +28,16 @@
 #'        sequential (`seed`, `seed + 1`, ...). Default: `NULL`
 #'     
 #' @param drop    Logical. If `TRUE`, samples with fewer than `depth` 
-#'        observations are discarded. If `FALSE`, they are kept with their 
+#'        observations (their own depth, when there is one per sample) are
+#'        discarded. If `FALSE`, they are kept with their 
 #'        original counts. Default: `TRUE`
 #'        
 #' @param warn    Logical. If `TRUE`, emits a warning when samples are dropped 
 #'        or returned unrarefied due to insufficient depth. 
 #'        Default: `interactive()`
+#' 
+#' @seealso [qmp_rarefy()], which rarefies each sample to a depth set by
+#'   its measured microbial load.
 #' 
 #' @return A rarefied matrix. The output class (`matrix`, `dgCMatrix`, etc.) 
 #'         matches the input class.
@@ -38,6 +45,12 @@
 #' @section Auto-Depth Selection:
 #'   If `depth` is `NULL`, the function defaults to the highest depth that retains 
 #'   at least 10% of the total observations in the dataset.
+#' 
+#' @section One Depth per Sample:
+#'   With one `depth` per sample, each sample is rarefied to its own depth,
+#'   and gives exactly what rarefying the table to that sample's depth would
+#'   give it, with the same `seed`. `drop` and `warn` compare each sample with
+#'   its own depth.
 #' 
 #' @section Dropping vs. Retaining Samples:
 #'   If a sample has fewer observations than the specified `depth`:
@@ -71,6 +84,10 @@
 #'     r_mtx
 #'     rowSums(r_mtx)
 #'     
+#'     # One depth per sample, matched by name.
+#'     r_mtx <- rarefy(counts, depth = c(A = 10, B = 15, C = 20, D = 12))
+#'     rowSums(r_mtx)
+#'     
 #'     # Perform 3 independent rarefactions.
 #'     r_list <- rarefy(counts, times = 3)
 #'     length(r_list)
@@ -101,6 +118,16 @@ rarefy <- function (
   }
   else if (inherits(counts, "simple_triplet_matrix")) {
     if (!is.double(counts$v)) counts$v <- as.double(counts$v)
+  }
+  
+  
+  # One depth per sample: matched to the samples by name when both are
+  # named, else in order. A single depth applies to every sample.
+  if (length(depth) > 1L) {
+    info  <- count_samples(counts, margin)
+    depth <- per_sample(
+      depth, 'depth', NULL, NULL, info$labels, info$n, ref = '`counts`' )
+    names(depth) <- info$labels
   }
   
   
@@ -161,10 +188,16 @@ rarefy <- function (
         
         action <- if (isTRUE(drop)) "dropped" else "returned unrarefied"
         
-        warning(sprintf(
-          "%d samples have fewer than %d observations and will be %s.",
-          n_insufficient, depth, action
-        ), call. = FALSE)
+        if (length(depth) == 1L)
+          warning(sprintf(
+            "%d samples have fewer than %d observations and will be %s.",
+            n_insufficient, depth, action
+          ), call. = FALSE)
+        else
+          warning(sprintf(
+            "%d samples have fewer observations than their `depth` and will be %s.",
+            n_insufficient, action
+          ), call. = FALSE)
       }
     }
   }
@@ -191,7 +224,7 @@ rarefy <- function (
         else if (inherits(m, "simple_triplet_matrix")) sums <- slam::row_sums(m)
         else sums <- Matrix::rowSums(m)
         
-        # We must keep samples where sum >= depth
+        # We must keep samples where sum >= depth (each sample's own depth)
         return(m[sums >= depth, , drop = FALSE])
         
       } else {

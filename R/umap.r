@@ -201,7 +201,7 @@
 #' @examples
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- umap(dm)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'
@@ -266,7 +266,7 @@ umap <- function (
         'Try a smaller `learning_rate` or `repulsion_strength`.', call. = FALSE )
     if (n > 0) x <- ord_flip(scale(x, center = TRUE, scale = FALSE))
     ord_result(
-      matrix(x, n, k), 'umap', labels, prefix = 'UMAP',
+      matrix(x, n, k), 'umap', labels, prefix = 'UMAP', dist = dv$step,
       a        = ab[['a']],
       b        = ab[['b']],
       init        = init,

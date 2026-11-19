@@ -290,7 +290,7 @@
 #' @examples
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- nmds(dm)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'
@@ -330,7 +330,7 @@ smacof_fit <- function (dm, k, n_starts, max_iters, tol, seed, cpus, method, tie
     # Each axis's largest absolute coordinate is positive.
     x <- ord_flip(x)
     ord_result(
-      x, method, labels, prefix = toupper(method),
+      x, method, labels, prefix = toupper(method), dist = dv$step,
       stress     = stress,
       converged  = converged,
       n_iters    = n_iter,

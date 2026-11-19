@@ -38,6 +38,19 @@
 
   r <- rarefy(counts, depth = 40, cpus = cpus)
   expect_equal(unname(rowSums(r)), rep(40, 20))
+  r <- rarefy(counts, depth = 31:50, cpus = cpus)
+  expect_equal(unname(rowSums(r)), 31:50)
+
+  # Absolute abundance.
+  load <- seq(1, 2, length.out = 20) * 1e9
+  z <- qmp_scale(counts, load, cpus = cpus)
+  expect_identical(dim(z), dim(counts))
+  expect_true(all(is.finite(z)) && all(z >= 0))
+  z <- qmp_rarefy(counts, load, cpus = cpus)
+  expect_identical(dim(z), dim(counts))
+  expect_true(all(is.finite(z)) && all(z >= 0))
+  expect_identical(length(attr(z, 'target')), 20L)
+  expect_identical(length(attr(z, 'sampling_depth')), 20L)
 
   for (nm in c('percent', 'chord', 'binary', 'clr', 'rclr')) {
     z <- normalize(counts, nm, cpus = cpus)
@@ -55,6 +68,80 @@
     expect_identical(dim(z), c(20L, 11L))
     expect_true(all(is.finite(z)) && identical(dim(attr(z, 'basis')), c(11L, 12L)))
   }
+  z <- philr(ecodive::ex_counts, ecodive::ex_tree, pseudocount = 1,
+             part_weights = 'enorm.x.gm.counts', ilr_weights = 'blw.sqrt', cpus = cpus)
+  expect_identical(dim(z), c(4L, 5L))
+  expect_true(all(is.finite(z)) && identical(attr(z, 'method'), 'philr'))
+  z <- philr_distance(ecodive::ex_counts, ecodive::ex_tree, pseudocount = 1, cpus = cpus)
+  expect_true(inherits(z, 'dist') && attr(z, 'Size') == 4L && all(is.finite(z)))
+
+  # Log ratios.
+  z <- log_ratio(counts, c('F1', 'F2'), 3:5)
+  expect_true(is.numeric(z) && length(z) == 20 && all(is.finite(z)))
+  expect_identical(names(z), rownames(counts))
+  z <- balance(counts, c('F1', 'F2'), 3:5)
+  expect_true(is.numeric(z) && length(z) == 20 && all(is.finite(z)))
+  expect_identical(attr(z, 'method'), 'balance')
+
+  # Proportionality.
+  for (f in c('vlr', 'rho_p', 'phi_s')) {
+    z <- get(f)(counts, cpus = cpus)
+    expect_true(inherits(z, 'dist') && attr(z, 'Size') == 12L && length(z) == 66L, info = f)
+    expect_true(all(is.finite(z)) && identical(attr(z, 'dist')$metric, f), info = f)
+    expect_identical(attr(z, 'Labels'), colnames(counts), info = f)
+  }
+  z <- rho_p(counts, denominator = 'F1', cpus = cpus)
+  expect_true(attr(z, 'Size') == 11L && all(is.finite(z)) && all(abs(z) <= 1))
+
+  # Differential abundance.
+  z <- ancom(counts, 'grp', meta, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancom') && nrow(z) == 12L)
+  expect_identical(z$feature, colnames(counts))
+  expect_true(is.integer(z$W) && all(z$W >= 0L & z$W <= 11L) && is.logical(z$reject))
+  z <- ancom(counts, meta$grp, sig_test = 'kruskal', p_adjust = 'BH', cpus = cpus)
+  expect_true(nrow(z) == 12L && !anyNA(z$reject))
+  z <- dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_dirmult_ttest') && nrow(z) == 12L)
+  expect_identical(z$feature, colnames(counts))
+  expect_true(all(is.finite(as.matrix(z[, 2:7]))) && is.logical(z$reject) && !anyNA(z$reject))
+  expect_true(all(z$ci_lower <= z$log2_fc & z$log2_fc <= z$ci_upper))
+  z <- ancombc(counts, ~ grp + x, meta, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc') && nrow(z) == 36L)
+  expect_identical(z$feature, rep(colnames(counts), each = 3L))
+  expect_identical(unique(z$covariate), c('(Intercept)', 'grpb', 'x'))
+  expect_true(all(is.finite(as.matrix(z[, 3:7]))) && is.logical(z$reject) && !anyNA(z$reject))
+  cz <- counts; cz[cz < 3] <- 0L
+  z <- ancombc2(cz, 'grp', meta, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc') && nrow(z) == 24L && identical(attr(z, 'method'), 'ancombc2'))
+  expect_true(all(z$p_value >= 0 & z$p_value <= 1) && !anyNA(z$reject))
+  expect_true(length(attr(z, 'sample_fractions')) == 20L && all(is.finite(attr(z, 'sample_fractions'))))
+  meta$g3 <- rep(c('a', 'b', 'c', 'd'), 5)
+  fit <- ancombc2(counts, ~ g3 + x, meta, groups = 'g3', cpus = cpus)
+  z <- ancombc_global(fit, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc_global') && nrow(z) == 12L && all(z$p_value >= 0 & z$p_value <= 1))
+  z <- ancombc_pairwise(fit, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc_pairwise') && nrow(z) == 72L && !anyNA(z$reject))
+  z <- ancombc_dunnett(fit, n_bootstraps = 20L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc_dunnett') && nrow(z) == 36L && !anyNA(z$reject))
+  z <- ancombc_trend(fit, n_bootstraps = 20L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc_trend') && nrow(z) == 12L && all(is.finite(z$w)))
+  z <- structural_zeros(cz, 'grp', meta)
+  expect_true(is.logical(z) && identical(dim(z), c(12L, 2L)))
+
+  # Zero replacement.
+  cz <- counts; cz[cz < 4] <- 0L
+  for (m in list_zero_replacements('id')) {
+    z <- replace_zeros(cz, m)
+    expect_identical(dim(z), dim(cz), info = m)
+    expect_true(all(is.finite(z)) && all(z > 0) && identical(attr(z, 'method'), m), info = m)
+  }
+  z <- replace_zeros_mult(cz)
+  expect_true(all(is.finite(z)) && all(z > 0) && identical(dimnames(z), dimnames(cz)))
+  expect_true(is.finite(sum(alr(z, 'F1', cpus = cpus))))
+  expect_true(all(is.finite(balance(z, 1:3, 4:6))))
+  expect_true(all(is.finite(phi_s(z, cpus = cpus))))
+  expect_true('mult' %in% list_zero_replacements('id'))
+  expect_identical(match_zero_replacement('multRepl')$id, 'mult')
 
   tr <- read_tree('((A:1,B:2):1,C:3);')
   expect_inherits(tr, 'phylo')
@@ -80,8 +167,10 @@
   expect_true(is_ord(isomap(dm, cpus = cpus), 'Isomap'))
   expect_true(is_ord(dbrda(dm, 'grp', meta, cpus = cpus), 'dbRDA'))
   expect_true(is_ord(capscale(dm, 'grp', meta, cpus = cpus), 'CAP'))
+  expect_true(is_ord(capda(dm, 'grp', meta, permutations = 9, cpus = cpus), 'CAP'))
   expect_true(is_ord(pca(counts, cpus = cpus), 'PC'))
   expect_true(is_ord(rpca(counts, cpus = cpus), 'RPCA'))
+  expect_true(is_ord(rpca_phylo(ecodive::ex_counts, ecodive::ex_tree, cpus = cpus), 'RPCA', n = 4L))
   expect_true(is_ord(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'RDA'))
   expect_true(is_ord(cca(counts, 'grp', meta, permutations = 9, cpus = cpus), 'CCA'))
   expect_true(is_ord(ca(counts, cpus = cpus), 'CA'))
@@ -92,7 +181,7 @@
   expect_true(all(c('pcoa', 'nmds', 'umap') %in% list_dist_ords('id')))
   expect_identical(match_dist_ord('cmdscale')$id, 'pcoa')
   expect_true(is_ord(count_ord(counts, 'pca', cpus = cpus), 'PC'))
-  expect_identical(list_count_ords('id'), c('ca', 'cca', 'lda', 'oplsda', 'pca', 'plsda', 'rda', 'rpca'))
+  expect_identical(list_count_ords('id'), c('ca', 'cca', 'lda', 'oplsda', 'pca', 'plsda', 'rda', 'rpca', 'rpca_phylo'))
   expect_identical(match_count_ord('prcomp')$id, 'pca')
 
   o  <- pcoa(dm, cpus = cpus)
@@ -163,6 +252,43 @@
     expect_identical(tests[[nm]]$p_adjust, 'holm', info = nm)
   expect_true(all(c('permanova', 'mantel') %in% list_dist_tests()$id))
   expect_identical(match_dist_test('adonis2')$id, 'permanova')
+
+
+
+  # Plots, on a null device: each returns its argument invisibly. ====
+
+  drawn <- function (x, ...) {
+    v <- withVisible(plot(x, ...))
+    identical(v$value, x) && !v$visible
+  }
+  grDevices::pdf(NULL)
+  expect_true(drawn(dm))
+  expect_true(drawn(dm, 'grp', meta))
+  expect_true(drawn(o))
+  expect_true(drawn(o, 'grp', meta))
+  expect_true(drawn(o, 'x', meta, axes = c(1, 3)))
+  expect_true(drawn(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'grp', meta))
+  expect_true(drawn(lda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus)))  # one axis
+  expect_true(drawn(capda(dm, 'grp', meta, permutations = 0, cpus = cpus), 'grp', meta))  # one axis
+  expect_true(drawn(pr))
+  expect_true(drawn(ef))
+  expect_true(drawn(ef, add = TRUE))
+  expect_true(drawn(sp))
+  expect_true(drawn(be))
+  expect_true(drawn(vp))
+  expect_true(drawn(fs))
+  expect_true(drawn(ancom(counts, 'grp', meta, cpus = cpus)))
+  expect_true(drawn(dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)))
+  expect_true(drawn(fit))   # ancombc2()
+  expect_true(drawn(ancombc_global(fit, cpus = cpus)))
+  expect_true(drawn(ancombc_pairwise(fit, cpus = cpus)))
+  expect_true(drawn(ancombc_dunnett(fit, n_bootstraps = 20L, cpus = cpus)))
+  expect_true(drawn(ancombc_trend(fit, n_bootstraps = 20L, cpus = cpus)))
+  for (nm in names(tests)) {
+    expect_true(drawn(tests[[nm]]), info = nm)
+    expect_true(drawn(tests[[nm]], type = 'null'), info = nm)
+  }
+  grDevices::dev.off()
 
 
 

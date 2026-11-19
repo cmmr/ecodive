@@ -190,6 +190,7 @@
 #'       counts, env = ~ ph + temp, space = ~ x + y,
 #'       data = meta, norm = 'hellinger' )
 #'     vp
+#'     plot(vp)
 #'
 #'     # db-RDA on Bray-Curtis distances; a set may be a matrix.
 #'     varpart(bray(counts), ~ ph + temp, as.matrix(meta[, c('x', 'y')]), data = meta)
@@ -530,6 +531,18 @@ varpart_cca <- function (y, X, masks, mask_cols, permutations, seed, cpus) {
 
 
 
+# The sets of each lettered fraction of k sets, in vegan's order (the
+# residuals, last, are not included).
+varpart_regions <- function (k) {
+  switch(
+    k - 1L,
+    list(1, 2, 1:2),
+    list(1, 2, 3, 1:2, 2:3, c(1, 3), 1:3),
+    list(1, 2, 3, 4, 1:2, 2:3, c(1, 3), c(1, 4), c(2, 4), 3:4,
+         c(1, 2, 4), 1:3, 2:4, c(1, 3, 4), 1:4) )
+}
+
+
 #------------------------------------------------------------------------------
 # The Venn fractions, from every union's R-squared, adjusted R-squared, and
 # rank (indexed by bit mask). Fraction W (the region shared by exactly the
@@ -538,14 +551,7 @@ varpart_cca <- function (y, X, masks, mask_cols, permutations, seed, cpus) {
 #------------------------------------------------------------------------------
 varpart_fractions <- function (k, nms, r2, adj, rank) {
 
-  # The sets of each lettered fraction, in vegan's order (the residuals are
-  # last).
-  regions <- switch(
-    k - 1L,
-    list(1, 2, 1:2),
-    list(1, 2, 3, 1:2, 2:3, c(1, 3), 1:3),
-    list(1, 2, 3, 4, 1:2, 2:3, c(1, 3), c(1, 4), c(2, 4), 3:4,
-         c(1, 2, 4), 1:3, 2:4, c(1, 3, 4), 1:4) )
+  regions <- varpart_regions(k)
 
   all_mask <- 2^k - 1
   mask_of  <- function (s) sum(2^(s - 1))

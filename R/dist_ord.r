@@ -17,6 +17,7 @@ ORDINATIONS <- local({
     na.strings       = "",
     text             = "
       name,                                id,   alt_ids
+      Discriminant Canonical Analysis of Principal Coordinates, capda, capdiscriminant discriminantcap
       Constrained Analysis of Principal Coordinates, capscale, cap constrainedanalysisofprincipalcoordinates
       Distance-based Redundancy Analysis,  dbrda, distancebasedrda
       Isometric Feature Mapping,           isomap, isometricmapping
@@ -44,7 +45,7 @@ ORDINATIONS <- local({
 #'        [beta_div()], or a symmetric matrix of distances. Every method
 #'        listed by `list_dist_ords()` takes distances.
 #'
-#' @param method   The name of an ordination method: `"capscale"`,
+#' @param method   The name of an ordination method: `"capda"`, `"capscale"`,
 #'        `"dbrda"`, `"isomap"`, `"mds"`, `"nmds"`, `"pcoa"`, `"tsne"`,
 #'        or `"umap"`. Flexible matching is supported (see below).
 #'        Programmatic access via `list_dist_ords()`.
@@ -53,7 +54,8 @@ ORDINATIONS <- local({
 #'        `seed`, `cpus`, or `pcoa`'s `correction`. Each method keeps its own
 #'        defaults; see [capscale()] and [dbrda()] (which also need `groups`,
 #'        or `data` and `formula`, as in `dist_ord(dm, 'dbrda', 'treatment',
-#'        meta)`), [isomap()], [mds()], [nmds()], [pcoa()], [tsne()], and
+#'        meta)`), [capda()] (which needs `groups`, and `data` if `groups`
+#'        names a column of it), [isomap()], [mds()], [nmds()], [pcoa()], [tsne()], and
 #'        [umap()]. `seed` is ignored by the methods that have no random
 #'        parts (`capscale`, `dbrda`, `isomap` and `pcoa`), so the same
 #'        arguments can be given to every method.
@@ -67,6 +69,7 @@ ORDINATIONS <- local({
 #'
 #' | Option / Function Name | Method Name                                           |
 #' | :--------------------- | :---------------------------------------------------- |
+#' | `capda`                | Discriminant Canonical Analysis of Principal Coordinates (CAP), supervised |
 #' | `capscale`             | Constrained Analysis of Principal Coordinates         |
 #' | `dbrda`                | Distance-based Redundancy Analysis (db-RDA)           |
 #' | `isomap`               | Isometric Feature Mapping (Isomap)                    |
@@ -85,7 +88,8 @@ ORDINATIONS <- local({
 #'
 #' Default numbers of axes differ: `n_axes = 3` for the methods whose axes
 #' have eigenvalues (`capscale`, `dbrda`, `isomap`, `pcoa`, and [pca()] and
-#' [rpca()]), and `n_axes = 2` for those that fit a layout in a fixed number
+#' [rpca()]; `capda` returns up to 3, and at most one fewer than the number
+#' of groups), and `n_axes = 2` for those that fit a layout in a fixed number
 #' of dimensions (`mds`, `nmds`, `tsne`, and `umap`).
 #'
 #'
@@ -99,6 +103,8 @@ ORDINATIONS <- local({
 #' `'Rtsne'`, `'bhtsne'`, or `'Barnes-Hut t-SNE'` for `tsne`; and `'uwot'`
 #' for `umap`. `'dbRDA'` or `'distance-based RDA'` select `dbrda`, and `'CAP'`
 #' selects `capscale` (but `'CA'` names [ca()], which takes a count table).
+#' `'CAPdiscrim'` (BiodiversityR's name) or `'discriminant CAP'` select
+#' `capda`, Anderson & Willis's discriminant CAP.
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
@@ -114,7 +120,7 @@ ORDINATIONS <- local({
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [capscale()], [dbrda()], [isomap()], [mds()], [nmds()], [pcoa()],
+#' @seealso [capda()], [capscale()], [dbrda()], [isomap()], [mds()], [nmds()], [pcoa()],
 #'   [tsne()], [umap()], [list_dist_ords()]; [count_ord()] for [pca()],
 #'   [rda()], [cca()], [ca()] and [rpca()], which take a count table; [dist_test()] for
 #'   ecodive's tests.
@@ -123,7 +129,7 @@ ORDINATIONS <- local({
 #' @examples
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- dist_ord(dm, 'pcoa')
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'

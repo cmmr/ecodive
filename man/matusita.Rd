@@ -4,7 +4,7 @@
 \alias{matusita}
 \title{Matusita distance}
 \usage{
-matusita(counts, margin = 1L, pairs = NULL, cpus = n_cpus())
+matusita(counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
@@ -19,6 +19,28 @@ class (e.g. \code{phyloseq}). Default: \code{1}}
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
 Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.}
+
+\item{clust}{Whether and how to cluster the samples (rows and columns)
+before returning the distance matrix: \code{NULL} (the default) or
+\code{FALSE} to keep them in their input order, or one of
+\code{\link[stats:hclust]{stats::hclust()}}'s linkage methods, \code{"average"} (UPGMA),
+\code{"complete"}, \code{"single"}, \code{"ward.D"}, \code{"ward.D2"}, \code{"mcquitty"}
+(WPGMA), \code{"median"} or \code{"centroid"}, or \code{"pcoa"} to order them
+along the first axis of \code{\link[=pcoa]{pcoa()}}. Clustering \strong{reorders the
+samples} of the result, with their labels (samples without names
+are labelled with their positions in the input): its \code{dist} record
+(see \link{ecodive_steps}) gives each one's position in the input as
+\code{order}, so that \code{meta[attr(d, "dist")$order, ]} lines metadata up
+with them. ecodive's ordinations and tests put the samples back in
+their input order before analysing them, so give them metadata in
+its usual order. Other packages see the reordered matrix: give
+them metadata reordered by \code{order}, or matched by name. The
+record's \code{clust} records \code{clust}
+(\code{FALSE} as \code{"none"}), which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
+for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
+order. \code{clust} needs every distance, so it cannot be used with
+\code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
+       \rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

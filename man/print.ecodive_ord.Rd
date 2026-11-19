@@ -8,7 +8,7 @@
 }
 \arguments{
 \item{x}{An ordination result, from \code{\link[=dist_ord]{dist_ord()}}, \code{\link[=count_ord]{count_ord()}},
-\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}}, \code{\link[=ca]{ca()}}, \code{\link[=lda]{lda()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=oplsda]{oplsda()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capscale]{capscale()}},
+\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=rpca_phylo]{rpca_phylo()}}, \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}}, \code{\link[=ca]{ca()}}, \code{\link[=lda]{lda()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=oplsda]{oplsda()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capscale]{capscale()}},
 \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, or \code{\link[=procrustes]{procrustes()}}.}
 
 \item{...}{Passed on to \code{print()} for the matrix of coordinates.}
@@ -19,6 +19,7 @@
 \description{
 Prints the coordinates, then one line on the axes and the names of the
 other attributes, rather than every attribute in full (such as \code{pca()}'s
-loadings).
+loadings), and last, the records of how it was made (see
+\link{ecodive_steps}), one line each.
 }
 \keyword{internal}
