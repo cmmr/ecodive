@@ -707,6 +707,27 @@
   tables stay sparse: 2,000 samples by 5,000 taxa take under 0.1
   seconds.
 
+- New [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md)
+  runs ANCOM (Mandal et al. 2015), the analysis of composition of
+  microbiomes: it tests every log ratio between two features for a
+  difference between `groups` (`sig_test = 'anova'`, or `'kruskal'`),
+  adjusts each feature’s p-values (`p_adjust`, Holm by default), and
+  declares the features whose W, the number of their significant log
+  ratios, passes scikit-bio’s cutoff rule. Its `W` and decisions are
+  identical to scikit-bio’s
+  [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) in
+  every reference case, including its quirks (each feature’s family
+  includes a 0 for itself; numpy’s cutoffs); the Kruskal-Wallis
+  statistics are bit-identical to SciPy’s and the F statistics more
+  accurate (SciPy’s cancel to 3e-12). It returns a per-feature table
+  (`feature`, `W`, `reject`). Zeros follow the shared `pseudocount`
+  rule, and the output of
+  [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)
+  needs none. The tests run in parallel C straight from the (sparse)
+  table, identical for any `cpus`: all 4.5 million log ratios of 3,000
+  features in 200 samples take about 3 seconds on 4 cores (10 with
+  `'kruskal'`).
+
 - `rarefy(depth =)` now also takes one depth per sample (matched to the
   samples by name when named). `drop` and `warn` then compare each
   sample with its own depth. A single depth gives exactly the same

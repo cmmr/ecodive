@@ -176,7 +176,7 @@ abundance</a></td>
 <td align="left">Which taxa differ?</td>
 <td align="left"></td>
 <td align="left">
-<code>ancom()</code>, <code>ancombc()</code>,
+<code><a href="../reference/ancom.html">ancom()</a></code>, <code>ancombc()</code>,
 <code>ancombc2()</code>, <code>dirmult_ttest()</code>
 </td>
 </tr>
@@ -664,7 +664,7 @@ them.</p>
 <tr class="odd">
 <td align="left">ANCOM</td>
 <td align="left">every other taxon: tests all pairwise log ratios</td>
-<td align="left"><code>ancom()</code></td>
+<td align="left"><code><a href="../reference/ancom.html">ancom()</a></code></td>
 <td align="left">scikit-bio, QIIME 2</td>
 </tr>
 <tr class="even">
@@ -686,7 +686,7 @@ fraction</td>
 </table>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu">ancom</span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancom.html">ancom</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">group</span>, data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">res3</span> <span class="op">&lt;-</span> <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>

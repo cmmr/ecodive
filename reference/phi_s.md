@@ -91,8 +91,8 @@ value is `Inf` or merely very large.
 Lovell et al.'s (2015) original \\\phi = \mathrm{vlr}\_{ij} /
 \mathrm{var}(z_i)\\ is not symmetric (\\\phi\_{ij} \ne \phi\_{ji}\\), so
 it can't be a `dist`; Quinn et al. (2017) replaced it with \\\phi_s\\.
-The values agree with propr's `propr(counts, metric = "phs")` given the
-same zero handling.
+This is the measure that propr computes with
+`propr(counts, metric = "phs")` (see **Zeros** for its zero handling).
 
 ## Zeros
 

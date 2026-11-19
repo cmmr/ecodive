@@ -91,10 +91,11 @@ coefficient of \\z_i\\ and \\z_j\\. Unlike
 on the `denominator`. A pair of features that are both constant relative
 to the reference has no defined \\\rho_p\\ (`NaN`).
 
-The values agree with propr's `propr(counts, metric = "rho")` given the
-same zero handling (see **Zeros**). propr also estimates false discovery
-rates by permutation (`updateCutoffs()`), and offers `ivar = "iqlr"`, a
-clr over the features of mid-range variance; neither is offered here.
+This is the coefficient that propr computes with
+`propr(counts, metric = "rho")` (see **Zeros** for its zero handling).
+propr also estimates false discovery rates by permutation
+(`updateCutoffs()`), and offers `ivar = "iqlr"`, a clr over the features
+of mid-range variance; neither is offered here.
 
 ## Zeros
 

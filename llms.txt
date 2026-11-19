@@ -550,6 +550,14 @@ valid alternative to correlation. A dist over the features.
 - [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) :
   Symmetric Proportionality
 
+### Differential abundance
+
+Which features’ abundances differ between groups, from log ratios, so
+that the samples’ totals don’t matter.
+
+- [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) :
+  Analysis of Composition of Microbiomes (ANCOM)
+
 ### Absolute abundance
 
 With each sample’s total microbial load measured (cell counts, qPCR, a
