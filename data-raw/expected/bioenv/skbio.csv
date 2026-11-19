@@ -1,0 +1,15 @@
+vars,size,correlation
+Al,1,0.277594306912683
+"K, Al",2,0.39403604400622139
+"P, Al, Baresoil",3,0.40739544241663223
+"N, P, Al, Baresoil",4,0.41944207417131613
+"N, P, Al, Mn, Baresoil",5,0.44940854154478388
+"N, P, Al, Mn, Baresoil, Humdepth",6,0.44063868951641677
+"N, P, Al, Fe, Mn, Baresoil, Humdepth",7,0.44072487550120576
+"N, P, Mg, Al, Fe, Mn, Baresoil, Humdepth",8,0.44208102053338288
+"N, P, K, Mg, Al, Fe, Mn, Baresoil, Humdepth",9,0.42419942637804831
+"N, P, K, Mg, S, Al, Fe, Mn, Baresoil, Humdepth",10,0.40335897033432744
+"N, P, K, Mg, S, Al, Fe, Mn, Mo, Baresoil, Humdepth",11,0.37873888785833537
+"N, P, K, Mg, S, Al, Fe, Mn, Zn, Mo, Baresoil, Humdepth",12,0.35665130349167395
+"N, P, K, Ca, Mg, S, Al, Fe, Mn, Zn, Mo, Baresoil, Humdepth",13,0.32245943979109892
+"N, P, K, Ca, Mg, S, Al, Fe, Mn, Zn, Mo, Baresoil, Humdepth, pH",14,0.28379104179449494

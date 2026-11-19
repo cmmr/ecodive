@@ -102,6 +102,11 @@
   expect_identical(dim(sp), c(12L, 10L))
   expect_true(all(is.finite(sp$average)) && all(sp$p_value > 0 & sp$p_value <= 1))
 
+  be <- bioenv(dm, cbind(meta, z = rep(1:4, 5)), cpus = cpus)
+  expect_inherits(be, c('ecodive_bioenv', 'data.frame'))
+  expect_identical(dim(be), c(2L, 3L))
+  expect_true(all(is.finite(be$correlation)) && all(abs(be$correlation) <= 1))
+
 
 
   # Distance-based tests. ====

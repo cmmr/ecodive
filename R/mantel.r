@@ -585,45 +585,58 @@ mantel_cor <- function (x, targets, method, pm, strata, seed, cpus) {
 
   if (method == 'kendall') {
 
-    # Integer codes of the distinct values, and tied pairs.
-    codes <- function (v) match(v, sort.int(unique(v))) - 1L
-    tied  <- function (cnt) sum(cnt * (cnt - 1) / 2)
-
     # x's pairs in order, with its tie groups; the targets' codes.
-    xc  <- codes(x)
+    xc  <- mantel_codes(x)
     cnt <- tabulate(xc + 1L)
-    tcs <- lapply(targets, codes)
+    tcs <- lapply(targets, mantel_codes)
 
     args <- list(
       order(xc, method = 'radix') - 1L,
       tcs,
       as.integer(c(0, cumsum(cnt))),
-      c(tied(as.double(cnt)), vapply(tcs, function (tc) tied(as.double(tabulate(tc + 1L))), 0)) )
+      c(mantel_tied(xc), vapply(tcs, mantel_tied, 0)) )
     meth <- 1L
   }
   else {
 
-    # Centred and scaled to unit length, after ranking for Spearman.
-    std <- function (v) {
-      if (method == 'spearman') v <- rank(v)
-      v  <- v - mean(v)
-      ss <- sum(v * v)
-      # Very small or large values: scale first, so that the sum of squares
-      # neither underflows nor overflows.
-      if (!(is.finite(ss) && ss >= 1e-290) && max(abs(v)) > 0) {
-        v  <- v / max(abs(v))
-        ss <- sum(v * v)
-      }
-      v / sqrt(ss)
-    }
-
-    args <- list(std(x), lapply(targets, std), NULL, NULL)
+    args <- list(
+      mantel_std(x, method),
+      lapply(targets, mantel_std, method = method), NULL, NULL )
     meth <- 0L
   }
 
   .Call(
     C_mantel, args[[1]], args[[2]], args[[3]], args[[4]], pm$perms, strata,
     as.integer(c(n, meth, pm$n_perm, seed, cpus)) )
+}
+
+
+
+#------------------------------------------------------------------------------
+# Distances (or any values) centred and scaled to unit length, after ranking
+# for Spearman: their Pearson correlation is then a dot product. Also
+# bioenv()'s.
+#------------------------------------------------------------------------------
+mantel_std <- function (v, method) {
+  if (method == 'spearman') v <- rank(v)
+  v  <- v - mean(v)
+  ss <- sum(v * v)
+  # Very small or large values: scale first, so that the sum of squares
+  # neither underflows nor overflows.
+  if (!(is.finite(ss) && ss >= 1e-290) && max(abs(v)) > 0) {
+    v  <- v / max(abs(v))
+    ss <- sum(v * v)
+  }
+  v / sqrt(ss)
+}
+
+
+# Kendall: integer codes 0 .. K - 1 of the distinct values, and the pairs of
+# pairs tied in codes. Also bioenv()'s.
+mantel_codes <- function (v) match(v, sort.int(unique(v))) - 1L
+mantel_tied  <- function (codes) {
+  cnt <- as.double(tabulate(codes + 1L))
+  sum(cnt * (cnt - 1) / 2)
 }
 
 

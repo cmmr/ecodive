@@ -184,6 +184,10 @@ void   gower_mult2(const double *V, double *W, double *W2, int m, gower_t *g);
 void knn_from_dist(const double *dist, int n, int k, int include_self,
                    int *idx, double *dd, int n_threads);
 
+/* --- mantel.c: Kendall's tau-b pieces, shared with bioenv.c --- */
+int64_t kendall_sort_count(int *a, int *buf, size_t len);
+double  kendall_tied_sorted(const int *a, size_t len);
+
 /* --- memory.c --- */
 void  init_n_ptrs(int n);
 void* safe_malloc(size_t bytes);

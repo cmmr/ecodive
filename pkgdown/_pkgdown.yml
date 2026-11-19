@@ -74,6 +74,7 @@ reference:
   - pca
   - rpca
   - envfit
+  - bioenv
   - procrustes
   - procrustes_test
   - list_dist_ords

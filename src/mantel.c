@@ -132,9 +132,9 @@ static void pearson_perm(const int *p, const int *q, double *out) {
 //------------------------------------------------------
 // Sort a[0 .. len) with buf (len ints) as scratch.
 // Returns the inversions: pairs with the earlier value
-// strictly greater than the later.
+// strictly greater than the later. Also bioenv()'s.
 //------------------------------------------------------
-static int64_t sort_count(int *a, int *buf, size_t len) {
+int64_t kendall_sort_count(int *a, int *buf, size_t len) {
 
   int64_t inv = 0;
 
@@ -181,7 +181,7 @@ static int64_t sort_count(int *a, int *buf, size_t len) {
 //------------------------------------------------------
 // Pairs with equal values in sorted a[0 .. len).
 //------------------------------------------------------
-static double tied_sorted(const int *a, size_t len) {
+double kendall_tied_sorted(const int *a, size_t len) {
   double ties = 0;
   size_t run  = 1;
   for (size_t t = 1; t < len; t++) {
@@ -265,11 +265,11 @@ static double kendall_perm(const int *q, int c, int *work) {
     for (int g = 0; g < ng; g++) {
       size_t lo = (size_t) gbeg[g], len = (size_t) gbeg[g + 1] - lo;
       if (len < 2) continue;
-      sort_count(seq + lo, buf, len);
-      n3 += tied_sorted(seq + lo, len);
+      kendall_sort_count(seq + lo, buf, len);
+      n3 += kendall_tied_sorted(seq + lo, len);
     }
 
-    disc = (double) sort_count(seq, buf, N);
+    disc = (double) kendall_sort_count(seq, buf, N);
   }
 
   // As stats::cor(): the sum over ordered pairs of pairs

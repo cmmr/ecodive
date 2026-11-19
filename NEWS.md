@@ -352,6 +352,36 @@
   for any number of `cpus`. Its docs explain why SIMPER's ranking mixes up
   differences in mean and in variability (Warton et al. 2012).
 
+* New `bioenv()` finds the subset of environmental variables whose distances
+  among the samples best match the community distances (BIOENV; Clarke &
+  Ainsworth 1993): for each subset size, the subset with the highest rank
+  correlation with `dm`, as one data frame, with the best subset overall as
+  attribute `best`. It follows scikit-bio's `bioenv()` and gives the same
+  subsets and correlations as it and as `vegan::bioenv()`, with vegan's
+  options: `method` (Spearman, Pearson or Kendall), `metric` (`'euclidean'`,
+  `'mahalanobis'`, `'manhattan'` or `'gower'`), `max_vars` (vegan's
+  `upto`) and `given` (vegan's `partial`, also with Kendall, which vegan
+  refuses). Variables come from `data`, by `formula` or as its numeric
+  columns, and samples are matched by name. Every subset is searched in
+  parallel C, with no n-by-n matrix: 100 samples and 12 variables (4,095
+  subsets) take 1.2 seconds on one thread, where `vegan::bioenv()` takes
+  5.5. Results are identical for any number of `cpus`.
+
+* New `normalize()` returns a count table after any of the transformations
+  that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
+  (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),
+  with exactly the values they use. It keeps the table's orientation,
+  dimnames and form: sparse Matrix and slam input stays sparse.
+  `norm = 'clr'` gives a dense matrix, since every zero gets a value; the
+  functions with a `norm` argument avoid that copy.
+
+* New `norm = 'hellinger'` option, wherever `norm` is offered (beta
+  diversity metrics, `pca()`, `pcoa_biplot()`, `envfit()` and
+  `normalize()`): the square root of each sample's relative abundances.
+  Euclidean distances of the result are Hellinger distances, and
+  `pca(counts, norm = 'hellinger')` is the usual Hellinger PCA. Negative
+  values are an error.
+
 * `simper()` and `plsda()` now name `counts`, not `dm`, when `groups`,
   `strata` or the rows of `data` don't match the number of samples.
 
