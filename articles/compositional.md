@@ -30,22 +30,21 @@ abundances or raw read counts. Compositional data analysis (CoDa;
 1982](https://doi.org/10.1111/j.2517-6161.1982.tb01195.x)**) builds
 every method on log ratios.
 
-This article walks through a compositional workflow with ecodive. Some
-of the functions are already in ecodive; others are planned (see the
-package’s development plans). For each planned function the article
-shows the call it will have, marked *planned*, followed by a stand-in
-that runs today: base R, or an established package.
+This article walks through a compositional workflow with ecodive. Most
+of the functions are already in ecodive; the rest are planned. For each
+planned function the article shows the call it will have, marked
+*planned*, followed by an established package that does the job today.
 
-| Step | Question | ecodive | Status |
+| Step | Question | In ecodive now | Planned |
 |:---|:---|:---|:---|
-| [Zeros](#zeros) | How do I take logs of zeros? | `pseudocount`, `norm = 'rclr'`; [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md) | available; planned |
-| [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`; [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md), `philr()` | available; planned |
-| [Beta diversity](#beta-diversity) | Do communities differ? | [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md); `philr_distance()`, `rpca_phylo()` | available; planned |
-| [Log ratios](#log-ratios) | Which taxa shift relative to which? | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) loadings; [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) | available; planned |
-| [Differential abundance](#differential-abundance) | Which taxa differ? | `ancom()`, `ancombc()`, `ancombc2()`, `dirmult_ttest()` | planned |
-| [Co-occurrence](#proportionality) | Which taxa move together? | [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) | planned |
-| [Absolute abundance](#absolute-abundance) | Did taxa really increase? | [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md), [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) | planned |
-| [Repeated measures and multi-omics](#repeated-measures-and-multi-omics) | Subjects over time; several ’omics | `ctf()`, `rpca_joint()` | planned |
+| [Zeros](#zeros) | How do I take logs of zeros? | `pseudocount`, `norm = 'rclr'`, [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md) (`'mult'`) | Bayesian-multiplicative methods (`'gbm'`, …) |
+| [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`, [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) | `philr()` |
+| [Beta diversity](#beta-diversity) | Do communities differ? | [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md) | `philr_distance()`, `rpca_phylo()` |
+| [Log ratios](#log-ratios) | Which taxa shift relative to which? | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) loadings, [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) |  |
+| [Differential abundance](#differential-abundance) | Which taxa differ? |  | `ancom()`, `ancombc()`, `ancombc2()`, `dirmult_ttest()` |
+| [Co-occurrence](#proportionality) | Which taxa move together? | [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) |  |
+| [Absolute abundance](#absolute-abundance) | Did taxa really increase? | [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md), [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) |  |
+| [Repeated measures and multi-omics](#repeated-measures-and-multi-omics) | Subjects over time; several ’omics |  | `ctf()`, `rpca_joint()` |
 
 ## A simulated study
 
@@ -192,8 +191,8 @@ sum(rclr != 0) == sum(counts != 0)   # zeros stay out
 #> [1] TRUE
 ```
 
-**3. Replace zeros multiplicatively** (*planned*:
-[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)).
+**3. Replace zeros multiplicatively**
+([`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)).
 Each zero gets a small value, and the sample’s non-zero parts are shrunk
 by a common factor, so the ratios between them are preserved. The
 Bayesian-multiplicative versions choose each zero’s value from the data
@@ -204,41 +203,36 @@ Bayesian-multiplicative method (GBM) of the zCompositions package
 2015](https://doi.org/10.1016/j.chemolab.2015.02.019)**) is the most
 used in microbiome work.
 
+ecodive has simple multiplicative replacement (the method of
+scikit-bio’s `multi_replace()`), in which every zero gets the same small
+proportion `delta`:
+
 ``` r
 
-# Planned in ecodive:
-zf <- replace_zeros(counts, 'gbm')   # or replace_zeros_gbm(counts)
-zf <- replace_zeros_mult(counts)     # simple multiplicative replacement
+zf <- replace_zeros(counts, 'mult')   # the same as replace_zeros_mult(counts)
+range(rowSums(zf))                    # proportions, with no zeros left
+#> [1] 1 1
+sum(zf == 0)
+#> [1] 0
+```
+
+``` r
+
+# Planned in ecodive: the Bayesian-multiplicative methods
+zf <- replace_zeros(counts, 'gbm')    # or replace_zeros_gbm(counts)
 
 # Available now, in zCompositions (CRAN):
 # (by default it drops taxa or samples that are at least 80% zeros)
 zf <- zCompositions::cmultRepl(counts, method = 'GBM', output = 'prop')
 ```
 
-Until then, simple multiplicative replacement (the method of
-scikit-bio’s `multi_replace()`) takes four lines of base R:
-
-``` r
-
-mult_replace <- function (counts, delta = 1 / ncol(counts)^2) {
-  x <- counts / rowSums(counts)          # proportions
-  z <- x == 0
-  x <- x * (1 - rowSums(z) * delta)      # shrink the non-zero parts
-  x[z] <- delta                          # give each zero the value delta
-  x
-}
-zf <- mult_replace(counts)
-range(rowSums(zf))                       # still proportions
-#> [1] 1 1
-```
-
 A zero-free table needs no pseudocount, so it goes straight into any
 function with `norm = 'clr'`,
 [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md),
-and the planned
 [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md),
-[`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md), `philr()`
-and [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md).
+[`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md),
+[`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md) and
+[`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md).
 
 **Check that your conclusions don’t depend on the choice.** Here is the
 same PERMANOVA under three treatments of zeros. The conclusion holds in
@@ -248,7 +242,7 @@ all three, but the effect size (R²) depends on the choice:
 
 zero_treatments <- list(
   'pseudocount = 1'     = aitchison(counts, pseudocount = 1),
-  'multiplicative'      = aitchison(zf),
+  'multiplicative'      = aitchison(replace_zeros(counts, 'mult')),
   'robust (rclr)'       = robust_aitchison(counts) )
 
 t(sapply(zero_treatments, function (dm) {
@@ -260,11 +254,20 @@ t(sapply(zero_treatments, function (dm) {
 #> robust (rclr)   0.14845324 6.624678 0.001
 ```
 
-When the planned
-[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)
-wrapper arrives,
+As more methods join
+[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md),
 [`list_zero_replacements()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md)
-will make this a loop over every method.
+makes this a loop over all of them.
+
+**Used in practice.** [Schoeler et
+al. (2023)](https://doi.org/10.1038/s41467-023-41074-3) replaced the
+zeros in human shotgun metagenomic counts by geometric
+Bayesian-multiplicative replacement before a clr transform, as did
+[Vervier et al. (2022)](https://doi.org/10.1136/gutjnl-2021-325177) for
+the taxonomic profiles of people with irritable bowel syndrome. [Romano
+et al. (2021)](https://doi.org/10.1038/s41531-021-00156-z) used the
+count-zero multiplicative variant in a 16S meta-analysis of Parkinson’s
+disease.
 
 ## Log-ratio transforms
 
@@ -275,35 +278,53 @@ where ordinary statistics apply.
 |:---|:---|:---|:---|
 | centered log ratio (clr) | `normalize(norm = 'clr')`, or `norm = 'clr'` in [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md), [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), … | one per taxon, relative to the sample’s geometric mean | the most used; its coordinates sum to 0 |
 | robust clr (rclr) | `normalize(norm = 'rclr')` | non-zero taxa only | zeros are missing, not imputed |
-| additive log ratio (alr) | [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) (*planned*) | each taxon relative to one reference taxon | easy to interpret; not isometric |
-| isometric log ratio (ilr) | [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) (*planned*) | D − 1 orthonormal balances | Euclidean distance on ilr = Aitchison distance |
+| additive log ratio (alr) | [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) | each taxon relative to one reference taxon | easy to interpret; not isometric |
+| isometric log ratio (ilr) | [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) | D − 1 orthonormal balances | Euclidean distance on ilr = Aitchison distance |
 | phylogenetic ilr (PhILR) | `philr()` (*planned*) | one balance per internal node of a phylogeny | **[Silverman et al. 2017](https://doi.org/10.7554/eLife.21887)** |
 
 ``` r
 
+a <- alr(counts, denominator = 'ASV001', pseudocount = 1)
+dim(a)
+#> [1]  40 149
+
+# Median group difference of the alr coordinates (treated - control):
+median(colMeans(a[groups == 'treated', ]) - colMeans(a[groups == 'control', ]))
+#> [1] -1.28805
+
+i <- ilr(counts, pseudocount = 1)   # default (Helmert) basis
+dim(i)
+#> [1]  40 149
+
+# Euclidean distances between ilr coordinates are Aitchison distances:
+all.equal(as.vector(dist(i)), as.vector(aitchison(counts, pseudocount = 1)))
+#> [1] TRUE
+```
+
+Here the alr makes the point of the [previous section](#zeros) in
+another way: ASV001 is one of the blooming taxa, so the alr coordinates
+fall in the treated group whether or not the taxa changed (by log 8 ≈
+2.1 for taxa without zeros; less for rare taxa, where zeros and the
+pseudocount damp it). An alr reference should be a taxon that is common
+and stable, which is hard to know in advance.
+
+``` r
+
 # Planned in ecodive:
-a <- alr(counts, denominator = 'ASV050', pseudocount = 1)
-i <- ilr(counts, pseudocount = 1)                # default (Helmert) basis
 p <- philr(counts, tree, pseudocount = 1,
            part_weights = 'enorm.x.gm.counts', ilr_weights = 'blw.sqrt')
-```
 
-Until then, the alr is one line of base R, and PhILR is in the philr
-package (Bioconductor):
-
-``` r
-
-ref <- 'ASV050'
-alr <- log((counts[, colnames(counts) != ref] + 1) / (counts[, ref] + 1))
-dim(alr)
-#> [1]  40 149
-```
-
-``` r
-
+# Available now, in philr (Bioconductor):
 p <- philr::philr(counts, tree, pseudocount = 1,
                   part.weights = 'enorm.x.gm.counts', ilr.weights = 'blw.sqrt')
 ```
+
+**Used in practice.** [Ruuskanen et
+al. (2021)](https://doi.org/10.1080/19490976.2021.1888673)
+PhILR-transformed shotgun metagenomes from the FINRISK cohort and
+modelled the balances to find clades linked to fatty liver; [Worsley et
+al. (2021)](https://doi.org/10.1186/s42523-021-00149-6) used both clr
+and PhILR coordinates of 16S data from a wild bird population.
 
 ## Beta diversity and ordination
 
@@ -398,6 +419,25 @@ ord_phy  <- rpca_phylo(counts, tree, n_axes = 3)
 # `gemelli phylogenetic-rpca`.
 ```
 
+**Used in practice.**
+
+- Aitchison distance and clr PCA: [Bian et al.
+  (2017)](https://doi.org/10.1128/mSphere.00327-17), a 16S study of
+  healthy people aged 3 to over 100; [Romano et al.
+  (2021)](https://doi.org/10.1038/s41531-021-00156-z), with PERMANOVA on
+  Aitchison distances.
+- Robust Aitchison PCA (DEICODE): [Dong et al.
+  (2022)](https://doi.org/10.1080/19490976.2022.2051999), obesity and
+  the brain-gut axis; [Bermudez-Martin et al.
+  (2021)](https://doi.org/10.1186/s40168-021-01103-z), a mouse study, on
+  non-rarefied tables.
+- Phylogenetic RPCA: [Dokoshi et al.
+  (2024)](https://doi.org/10.1038/s41467-024-47072-3), skin injury and
+  the gut microbiome in mice; [DeClercq et al.
+  (2025)](https://doi.org/10.1080/20002297.2025.2499923), the salivary
+  microbiome in inflammatory bowel disease, alongside Aitchison, robust
+  Aitchison, Bray-Curtis and UniFrac distances.
+
 ## Log ratios and balances
 
 Log ratios between groups of taxa are what can be interpreted without
@@ -422,23 +462,17 @@ bottom
 #> [1] "ASV007" "ASV008" "ASV006" "ASV009" "ASV010"
 ```
 
-``` r
-
-# Planned in ecodive:
-lr <- log_ratio(counts, numerator = top, denominator = bottom)   # ratio of sums
-b  <- balance(counts, numerator = top, denominator = bottom)     # ilr balance of geometric means
-```
-
-Until then, the log ratio of sums is one line, and it can go straight
-into any test or model:
+[`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md)
+gives one value per sample, which can go straight into any test or
+model, or into the metadata:
 
 ``` r
 
-lr <- log(rowSums(counts[, top]) / rowSums(counts[, bottom]))
+lr <- log_ratio(counts, numerator = top, denominator = bottom)   # log of summed counts
 tapply(lr, groups, median)
 #>  control  treated 
 #> 1.424839 4.852423
-wilcox.test(lr ~ groups, exact = FALSE)$p.value
+wilcox.test(as.vector(lr) ~ groups, exact = FALSE)$p.value
 #> [1] 6.795615e-08
 ```
 
@@ -452,10 +486,37 @@ fold[match(c(top, bottom), taxa)]
 #>  [1] 8.00 8.00 8.00 8.00 8.00 0.25 0.25 0.25 0.25 0.25
 ```
 
-A **balance** uses geometric means instead of sums, scaled so that
-balances of different sizes are comparable; selbal searches for the
-balance that best predicts an outcome (**[Rivera-Pinto et al.
-2018](https://doi.org/10.1128/mSystems.00053-18)**).
+A **balance**
+([`balance()`](https://cmmr.github.io/ecodive/reference/balance.md))
+uses geometric means instead of sums, scaled so that balances of
+different sizes are comparable; it is one coordinate of an
+[`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md).
+
+``` r
+
+b <- balance(counts, numerator = top, denominator = bottom, pseudocount = 1)
+tapply(b, groups, median)
+#>  control  treated 
+#> 1.984592 7.407924
+```
+
+selbal searches for the balance that best predicts an outcome
+(**[Rivera-Pinto et al.
+2018](https://doi.org/10.1128/mSystems.00053-18)**). coda4microbiome
+does the same for cross-sectional and longitudinal studies (**[Calle et
+al. 2023](https://doi.org/10.1186/s12859-023-05205-3)**).
+
+**Used in practice.** [Taylor et
+al. (2020)](https://doi.org/10.1128/msystems.00901-19) ranked taxa by
+their association with eating fermented plants (Songbird), then compared
+the log ratio of the top- over the bottom-ranked taxa between consumers
+and non-consumers in Qurro. [Xue et al.
+(2025)](https://doi.org/10.1080/19490976.2025.2474142) reported an
+Akkermansiaceae / Muribaculaceae log ratio in a mouse model of sleep
+apnoea. [Trøseid et
+al. (2023)](https://doi.org/10.1186/s13054-023-04356-2) built a
+dysbiosis index for severe COVID-19 as a selbal balance and related it
+to 60-day mortality.
 
 ## Differential abundance
 
@@ -493,6 +554,15 @@ correcting for each sample’s unknown sampling fraction.
 **[ALDEx2](https://doi.org/10.1186/2049-2618-2-15)** (Fernandes et al.
 2014) propagates the uncertainty of low counts through Monte Carlo draws
 from a Dirichlet distribution.
+
+**Used in practice.** [Wallen et
+al. (2022)](https://doi.org/10.1038/s41467-022-34667-x) counted a
+species as associated with Parkinson’s disease only when both ANCOM-BC
+and MaAsLin2 agreed, in shotgun metagenomes from 724 people. [Trøseid et
+al. (2023)](https://doi.org/10.1186/s13054-023-04356-2) used ANCOM-BC2
+in severe COVID-19. [Mueller et
+al. (2021)](https://doi.org/10.2337/dc20-2257) tested metformin’s effect
+on gut taxa in a randomized trial with ALDEx2.
 
 ### Why the reference matters
 
@@ -549,29 +619,25 @@ coefficient (**[Erb & Notredame
 correlation-like range, and is the default of the propr package
 (**[Quinn et al. 2017](https://doi.org/10.1038/s41598-017-16520-0)**).
 
+ecodive’s [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
+[`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
+[`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) compute
+every pair of taxa in parallel C, and return a `dist` object over the
+taxa (here on the zero-free table from the [Zeros](#zeros) section):
+
 ``` r
 
-# Planned in ecodive (dist objects over taxa, computed in parallel C):
-v   <- vlr(zf)
 rho <- rho_p(zf)
-phs <- phi_s(zf)
-```
+length(rho)   # one value for each pair of the 150 taxa
+#> [1] 11175
 
-The formulas are short enough to compute in base R for a few taxa:
-
-``` r
-
-z      <- log(zf)
-clr_zf <- z - rowMeans(z)                # clr of the zero-free table
-top20  <- clr_zf[, 1:20]                 # the 20 most abundant taxa
-cent   <- scale(top20, scale = FALSE)
-vlr    <- as.matrix(dist(t(cent)))^2 / (nrow(top20) - 1)   # var(clr_i - clr_j)
-v      <- apply(top20, 2, var)
-rho    <- 1 - vlr / outer(v, v, '+')
+# A dist object puts 0 on the diagonal; rho is 1 there.
+m <- as.matrix(rho)
+diag(m) <- 1
 
 # Taxa 1-5 bloom together, and 6-10 decline together: each set is
 # proportional within itself, and the two sets are anti-proportional.
-round(rho[1:7, 1:7], 2)
+round(m[1:7, 1:7], 2)
 #>        ASV001 ASV002 ASV003 ASV004 ASV005 ASV006 ASV007
 #> ASV001   1.00   0.61   0.70   0.69   0.83  -0.77  -0.71
 #> ASV002   0.61   1.00   0.72   0.76   0.69  -0.68  -0.79
@@ -581,6 +647,22 @@ round(rho[1:7, 1:7], 2)
 #> ASV006  -0.77  -0.68  -0.67  -0.72  -0.70   1.00   0.75
 #> ASV007  -0.71  -0.79  -0.73  -0.73  -0.69   0.75   1.00
 ```
+
+[`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md) and
+[`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) are
+dissimilarities, so they can go straight into
+[`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) or
+[`hclust()`](https://rdrr.io/r/stats/hclust.html) to ordinate or cluster
+the taxa. ρp is a similarity: threshold it (e.g. `m > 0.7`) to build a
+network, or use `1 - rho` as a dissimilarity.
+
+**Used in practice.** [Auladell et
+al. (2022)](https://doi.org/10.1038/s41396-021-01053-2) used ρ (propr,
+at 5% FDR) to ask whether closely related marine bacteria co-vary
+through the seasons; [Chaudhari et
+al. (2021)](https://doi.org/10.1186/s40793-021-00395-w) built a ρ
+network of genome-resolved groundwater bacteria from metagenomic
+coverages.
 
 ## Absolute abundance
 
@@ -594,35 +676,53 @@ multiplies relative abundances by the load (**[Jian et al.
 original first rarefies every sample to the same number of reads per
 cell.
 
-``` r
-
-# Planned in ecodive:
-q1 <- qmp_scale(counts, load)            # relative abundance x load
-q2 <- qmp_rarefy(counts, load, seed = 1) # Vandeputte et al. (2017)
-```
-
-In base R, with a measured load that has 20% error:
+Here the load is measured with 20% error, as a real measurement would
+be:
 
 ``` r
 
 measured <- load * exp(rnorm(n, 0, 0.2))
-qmp <- counts / rowSums(counts) * measured
+
+q_scale  <- qmp_scale(counts, measured)            # relative abundance x load
+q_rarefy <- qmp_rarefy(counts, measured, seed = 1) # Vandeputte et al. (2017)
+range(attr(q_rarefy, 'target'))                    # reads kept per sample
+#> [1]  720 7386
 
 lfc <- function (x) log2(colMeans(x[groups == 'treated', ]) /
                          colMeans(x[groups == 'control', ]))
 
 # Estimated log2 fold change of the prevalent unchanged taxa (truth: 0)
-rbind(relative = summary(lfc(rel)[ok]),
-      qmp      = summary(lfc(qmp)[ok]))
-#>                Min.    1st Qu.    Median       Mean    3rd Qu.        Max.
-#> relative -2.6546670 -2.2049526 -2.043797 -2.1211625 -2.0181232 -1.76059194
-#> qmp      -0.7922737 -0.3160813 -0.202296 -0.2515328 -0.1495874  0.09553958
+rbind(relative   = summary(lfc(rel)[ok]),
+      qmp_scale  = summary(lfc(q_scale)[ok]),
+      qmp_rarefy = summary(lfc(q_rarefy)[ok]))
+#>                  Min.    1st Qu.     Median       Mean    3rd Qu.        Max.
+#> relative   -2.6546670 -2.2049526 -2.0437969 -2.1211625 -2.0181232 -1.76059194
+#> qmp_scale  -0.7922737 -0.3160813 -0.2022960 -0.2515328 -0.1495874  0.09553958
+#> qmp_rarefy -0.6645386 -0.4037386 -0.2764712 -0.2677907 -0.2104378  0.12918677
 ```
 
 Relative abundances make the unchanged taxa look depleted; with the
-load, they are centred on zero again. QMP data are absolute abundances,
-not compositions, so analyse them with ordinary methods (e.g.
-`bray(qmp)`), not with a clr, which would remove the load again.
+load, they are close to zero again.
+[`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) pays
+for its even detection limit in reads: every sample is cut to the same
+number of reads per cell, which here keeps between 720 and 7,386 reads
+per sample. QMP data are absolute abundances, not compositions, so
+analyse them with ordinary methods (e.g. `bray(q_rarefy)`), not with a
+clr, which would remove the load again.
+
+**Used in practice.** [Vandeputte et
+al. (2017)](https://doi.org/10.1038/nature24460) combined 16S sequencing
+with flow-cytometric cell counts and found up to tenfold differences in
+microbial load between healthy people; [Vandeputte et
+al. (2021)](https://doi.org/10.1038/s41467-021-27098-7) followed 20
+women daily for six weeks with QMP. [Props et al.
+(2017)](https://doi.org/10.1038/ismej.2016.117) showed with flow
+cytometry that a rising relative abundance needn’t mean growth.
+Spike-ins are the other way to measure load: [Stämmler et al.
+(2016)](https://doi.org/10.1186/s40168-016-0175-0) added three bacteria
+to stool samples from stem-cell transplant patients, and [Tkacz et al.
+(2018)](https://doi.org/10.1186/s40168-018-0491-7) added synthetic DNA
+to soils.
 
 ## Repeated measures and multi-omics
 
@@ -644,6 +744,18 @@ fit <- rpca_joint(list(amplicon = counts16s, metabolites = metab), n_axes = 3)
 
 # Available now: QIIME 2's `gemelli ctf` and `gemelli joint-rpca`.
 ```
+
+**Used in practice.** CTF: [Haskey et
+al. (2023)](https://doi.org/10.1093/ecco-jcc/jjad073), a randomised diet
+trial in ulcerative colitis with repeated stool samples; [Liao et
+al. (2023)](https://doi.org/10.1038/s41467-023-40719-7), vaginal
+metagenomes across pregnancy and preterm birth. Joint-RPCA (**[Cordazzo
+Vargas et al. 2026](https://doi.org/10.1038/s44320-026-00236-3)**):
+[Burcham et al. (2024)](https://doi.org/10.1038/s41564-023-01580-y)
+integrated 16S, 18S, metagenome-assembled genomes and metabolomics from
+decomposition soils; [Tang-Wing et
+al. (2024)](https://doi.org/10.1128/msystems.00108-24) linked
+metagenomic and metabolomic features in marmosets after a diet change.
 
 ## A checklist
 
@@ -668,14 +780,218 @@ fit <- rpca_joint(list(amplicon = counts16s, metabolites = metab), n_axes = 3)
 
 ## References
 
+Methods papers and reviews are listed first, then the applied studies.
+All are open access except those marked †, for which a free version is
+noted where one exists.
+
+### Methods and reviews
+
 - Aitchison, J. (1982). The statistical analysis of compositional data.
-  *Journal of the Royal Statistical Society B*, 44, 139–177.
+  *Journal of the Royal Statistical Society B*, 44, 139–160.
   [doi:10.1111/j.2517-6161.1982.tb01195.x](https://doi.org/10.1111/j.2517-6161.1982.tb01195.x)
+  †
 - Anderson, M. J., & Walsh, D. C. I. (2013). PERMANOVA, ANOSIM, and the
-  Mantel test in the face of heterogeneous dispersions. *Ecological
-  Monographs*, 83, 557–574.
-  [doi:10.1890/12-2010.1](https://doi.org/10.1890/12-2010.1)
+  Mantel test in the face of heterogeneous dispersions: what null
+  hypothesis are you testing? *Ecological Monographs*, 83, 557–574.
+  [doi:10.1890/12-2010.1](https://doi.org/10.1890/12-2010.1) †
+- Calle, M. L., Pujolassos, M., & Susin, A. (2023). coda4microbiome:
+  compositional data analysis for microbiome cross-sectional and
+  longitudinal studies. *BMC Bioinformatics*, 24, 82.
+  [doi:10.1186/s12859-023-05205-3](https://doi.org/10.1186/s12859-023-05205-3)
+- Cordazzo Vargas, B., et al. (2026). Joint-RPCA: domain-aware
+  multi-omics integration for systems microbiology. *Molecular Systems
+  Biology*, 22, 1789–1808.
+  [doi:10.1038/s44320-026-00236-3](https://doi.org/10.1038/s44320-026-00236-3)
+- Erb, I., & Notredame, C. (2016). How should we measure proportionality
+  on relative gene expression data? *Theory in Biosciences*, 135, 21–36.
+  [doi:10.1007/s12064-015-0220-8](https://doi.org/10.1007/s12064-015-0220-8)
+- Fedarko, M. W., et al. (2020). Visualizing ’omic feature rankings and
+  log-ratios using Qurro. *NAR Genomics and Bioinformatics*, 2, lqaa023.
+  [doi:10.1093/nargab/lqaa023](https://doi.org/10.1093/nargab/lqaa023)
+- Fernandes, A. D., et al. (2014). Unifying the analysis of
+  high-throughput sequencing datasets: characterizing RNA-seq, 16S rRNA
+  gene sequencing and selective growth experiments by compositional data
+  analysis. *Microbiome*, 2, 15.
+  [doi:10.1186/2049-2618-2-15](https://doi.org/10.1186/2049-2618-2-15)
 - Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J.
   (2017). Microbiome datasets are compositional: and this is not
   optional. *Frontiers in Microbiology*, 8, 2224.
   [doi:10.3389/fmicb.2017.02224](https://doi.org/10.3389/fmicb.2017.02224)
+- Jian, C., et al. (2020). Quantitative PCR provides a simple and
+  accessible method for quantitative microbiota profiling. *PLoS ONE*,
+  15, e0227285.
+  [doi:10.1371/journal.pone.0227285](https://doi.org/10.1371/journal.pone.0227285)
+- Lin, H., & Peddada, S. D. (2020). Analysis of compositions of
+  microbiomes with bias correction. *Nature Communications*, 11, 3514.
+  [doi:10.1038/s41467-020-17041-7](https://doi.org/10.1038/s41467-020-17041-7)
+- Lin, H., & Peddada, S. D. (2024). Multigroup analysis of compositions
+  of microbiomes with covariate adjustments and repeated measures.
+  *Nature Methods*, 21, 83–91.
+  [doi:10.1038/s41592-023-02092-7](https://doi.org/10.1038/s41592-023-02092-7)
+- Lovell, D., et al. (2015). Proportionality: a valid alternative to
+  correlation for relative data. *PLoS Computational Biology*, 11,
+  e1004075.
+  [doi:10.1371/journal.pcbi.1004075](https://doi.org/10.1371/journal.pcbi.1004075)
+- Lubbe, S., Filzmoser, P., & Templ, M. (2021). Comparison of zero
+  replacement strategies for compositional data with large numbers of
+  zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
+  [doi:10.1016/j.chemolab.2021.104248](https://doi.org/10.1016/j.chemolab.2021.104248)
+- Mandal, S., et al. (2015). Analysis of composition of microbiomes: a
+  novel method for studying microbial composition. *Microbial Ecology in
+  Health and Disease*, 26, 27663.
+  [doi:10.3402/mehd.v26.27663](https://doi.org/10.3402/mehd.v26.27663)
+- Martín-Fernández, J. A., Hron, K., Templ, M., Filzmoser, P., &
+  Palarea-Albaladejo, J. (2015). Bayesian-multiplicative treatment of
+  count zeros in compositional data sets. *Statistical Modelling*, 15,
+  134–158.
+  [doi:10.1177/1471082X14535524](https://doi.org/10.1177/1471082X14535524)
+  †
+- Martino, C., et al. (2019). A novel sparse compositional technique
+  reveals microbial perturbations. *mSystems*, 4, e00016-19.
+  [doi:10.1128/mSystems.00016-19](https://doi.org/10.1128/mSystems.00016-19)
+- Martino, C., et al. (2021). Context-aware dimensionality reduction
+  deconvolutes gut microbial community dynamics. *Nature Biotechnology*,
+  39, 165–168.
+  [doi:10.1038/s41587-020-0660-7](https://doi.org/10.1038/s41587-020-0660-7)
+  † (accepted manuscript free in PMC: PMC7878194)
+- Martino, C., et al. (2022). Compositionally aware phylogenetic
+  beta-diversity measures better resolve microbiomes associated with
+  phenotype. *mSystems*, 7, e00050-22.
+  [doi:10.1128/msystems.00050-22](https://doi.org/10.1128/msystems.00050-22)
+- Morton, J. T., et al. (2019). Establishing microbial composition
+  measurement standards with reference frames. *Nature Communications*,
+  10, 2719.
+  [doi:10.1038/s41467-019-10656-5](https://doi.org/10.1038/s41467-019-10656-5)
+- Nearing, J. T., et al. (2022). Microbiome differential abundance
+  methods produce different results across 38 datasets. *Nature
+  Communications*, 13, 342.
+  [doi:10.1038/s41467-022-28034-z](https://doi.org/10.1038/s41467-022-28034-z)
+- Nixon, M. P., Gloor, G. B., & Silverman, J. D. (2025). Incorporating
+  scale uncertainty in microbiome and gene expression analysis as an
+  extension of normalization. *Genome Biology*, 26, 139.
+  [doi:10.1186/s13059-025-03609-3](https://doi.org/10.1186/s13059-025-03609-3)
+- Palarea-Albaladejo, J., & Martín-Fernández, J. A. (2015).
+  zCompositions — R package for multivariate imputation of left-censored
+  data under a compositional approach. *Chemometrics and Intelligent
+  Laboratory Systems*, 143, 85–96.
+  [doi:10.1016/j.chemolab.2015.02.019](https://doi.org/10.1016/j.chemolab.2015.02.019)
+  †
+- Quinn, T. P., et al. (2017). propr: an R-package for identifying
+  proportionally abundant features using compositional data analysis.
+  *Scientific Reports*, 7, 16252.
+  [doi:10.1038/s41598-017-16520-0](https://doi.org/10.1038/s41598-017-16520-0)
+- Quinn, T. P., et al. (2018). Understanding sequencing data as
+  compositions: an outlook and review. *Bioinformatics*, 34, 2870–2878.
+  [doi:10.1093/bioinformatics/bty175](https://doi.org/10.1093/bioinformatics/bty175)
+- Rivera-Pinto, J., et al. (2018). Balances: a new perspective for
+  microbiome analysis. *mSystems*, 3, e00053-18.
+  [doi:10.1128/mSystems.00053-18](https://doi.org/10.1128/mSystems.00053-18)
+- Silverman, J. D., et al. (2017). A phylogenetic transform enhances
+  analysis of compositional microbiota data. *eLife*, 6, e21887.
+  [doi:10.7554/eLife.21887](https://doi.org/10.7554/eLife.21887)
+- Vandeputte, D., et al. (2017). Quantitative microbiome profiling links
+  gut community variation to microbial load. *Nature*, 551, 507–511.
+  [doi:10.1038/nature24460](https://doi.org/10.1038/nature24460) †
+  (submitted version free at
+  [hdl:2078.1/305305](http://hdl.handle.net/2078.1/305305))
+
+### Applied studies
+
+- Auladell, A., et al. (2022). Seasonal niche differentiation among
+  closely related marine bacteria. *The ISME Journal*, 16, 178–189.
+  [doi:10.1038/s41396-021-01053-2](https://doi.org/10.1038/s41396-021-01053-2)
+- Bermudez-Martin, P., et al. (2021). The microbial metabolite p-Cresol
+  induces autistic-like behaviors in mice by remodeling the gut
+  microbiota. *Microbiome*, 9, 157.
+  [doi:10.1186/s40168-021-01103-z](https://doi.org/10.1186/s40168-021-01103-z)
+- Bian, G., et al. (2017). The gut microbiota of healthy aged Chinese is
+  similar to that of the healthy young. *mSphere*, 2, e00327-17.
+  [doi:10.1128/mSphere.00327-17](https://doi.org/10.1128/mSphere.00327-17)
+- Burcham, Z. M., et al. (2024). A conserved interdomain microbial
+  network underpins cadaver decomposition despite environmental
+  variables. *Nature Microbiology*, 9, 595–613.
+  [doi:10.1038/s41564-023-01580-y](https://doi.org/10.1038/s41564-023-01580-y)
+- Chaudhari, N. M., et al. (2021). The economical lifestyle of CPR
+  bacteria in groundwater allows little preference for environmental
+  drivers. *Environmental Microbiome*, 16, 24.
+  [doi:10.1186/s40793-021-00395-w](https://doi.org/10.1186/s40793-021-00395-w)
+- DeClercq, V., et al. (2025). Characterization of the salivary
+  microbiome of adults with inflammatory bowel disease. *Journal of Oral
+  Microbiology*, 17, 2499923.
+  [doi:10.1080/20002297.2025.2499923](https://doi.org/10.1080/20002297.2025.2499923)
+- Dokoshi, T., et al. (2024). Dermal injury drives a skin to gut axis
+  that disrupts the intestinal microbiome and intestinal immune
+  homeostasis in mice. *Nature Communications*, 15, 3009.
+  [doi:10.1038/s41467-024-47072-3](https://doi.org/10.1038/s41467-024-47072-3)
+- Dong, T. S., et al. (2022). Obesity is associated with a distinct
+  brain-gut microbiome signature that connects *Prevotella* and
+  *Bacteroides* to the brain’s reward center. *Gut Microbes*,
+  14, 2051999.
+  [doi:10.1080/19490976.2022.2051999](https://doi.org/10.1080/19490976.2022.2051999)
+- Haskey, N., et al. (2023). A Mediterranean diet pattern improves
+  intestinal inflammation concomitant with reshaping of the bacteriome
+  in ulcerative colitis: a randomised controlled trial. *Journal of
+  Crohn’s and Colitis*, 17, 1569–1578.
+  [doi:10.1093/ecco-jcc/jjad073](https://doi.org/10.1093/ecco-jcc/jjad073)
+- Liao, J., et al. (2023). Microdiversity of the vaginal microbiome is
+  associated with preterm birth. *Nature Communications*, 14, 4997.
+  [doi:10.1038/s41467-023-40719-7](https://doi.org/10.1038/s41467-023-40719-7)
+- Mueller, N. T., et al. (2021). Metformin affects gut microbiome
+  composition and function and circulating short-chain fatty acids: a
+  randomized trial. *Diabetes Care*, 44, 1462–1471.
+  [doi:10.2337/dc20-2257](https://doi.org/10.2337/dc20-2257) (free in
+  PMC: PMC8323185)
+- Props, R., et al. (2017). Absolute quantification of microbial taxon
+  abundances. *The ISME Journal*, 11, 584–587.
+  [doi:10.1038/ismej.2016.117](https://doi.org/10.1038/ismej.2016.117)
+  (free in PMC: PMC5270559)
+- Romano, S., et al. (2021). Meta-analysis of the Parkinson’s disease
+  gut microbiome suggests alterations linked to intestinal inflammation.
+  *npj Parkinson’s Disease*, 7, 27.
+  [doi:10.1038/s41531-021-00156-z](https://doi.org/10.1038/s41531-021-00156-z)
+- Ruuskanen, M. O., et al. (2021). Links between gut microbiome
+  composition and fatty liver disease in a large population sample. *Gut
+  Microbes*, 13, 1888673.
+  [doi:10.1080/19490976.2021.1888673](https://doi.org/10.1080/19490976.2021.1888673)
+- Schoeler, M., et al. (2023). The interplay between dietary fatty acids
+  and gut microbiota influences host metabolism and hepatic steatosis.
+  *Nature Communications*, 14, 5329.
+  [doi:10.1038/s41467-023-41074-3](https://doi.org/10.1038/s41467-023-41074-3)
+- Stämmler, F., et al. (2016). Adjusting microbiome profiles for
+  differences in microbial load by spike-in bacteria. *Microbiome*,
+  4, 28.
+  [doi:10.1186/s40168-016-0175-0](https://doi.org/10.1186/s40168-016-0175-0)
+- Tang-Wing, C., et al. (2024). Impact of diet change on the gut
+  microbiome of common marmosets (*Callithrix jacchus*). *mSystems*, 9,
+  e00108-24.
+  [doi:10.1128/msystems.00108-24](https://doi.org/10.1128/msystems.00108-24)
+- Taylor, B. C., et al. (2020). Consumption of fermented foods is
+  associated with systematic differences in the gut microbiome and
+  metabolome. *mSystems*, 5, e00901-19.
+  [doi:10.1128/msystems.00901-19](https://doi.org/10.1128/msystems.00901-19)
+- Tkacz, A., et al. (2018). Absolute quantitation of microbiota
+  abundance in environmental samples. *Microbiome*, 6, 110.
+  [doi:10.1186/s40168-018-0491-7](https://doi.org/10.1186/s40168-018-0491-7)
+- Trøseid, M., et al. (2023). Gut microbiota composition during
+  hospitalization is associated with 60-day mortality after severe
+  COVID-19. *Critical Care*, 27, 69.
+  [doi:10.1186/s13054-023-04356-2](https://doi.org/10.1186/s13054-023-04356-2)
+- Vandeputte, D., et al. (2021). Temporal variability in quantitative
+  human gut microbiome profiles and implications for clinical research.
+  *Nature Communications*, 12, 6740.
+  [doi:10.1038/s41467-021-27098-7](https://doi.org/10.1038/s41467-021-27098-7)
+- Vervier, K., et al. (2022). Two microbiota subtypes identified in
+  irritable bowel syndrome with distinct responses to the low FODMAP
+  diet. *Gut*, 71, 1821–1830.
+  [doi:10.1136/gutjnl-2021-325177](https://doi.org/10.1136/gutjnl-2021-325177)
+- Wallen, Z. D., et al. (2022). Metagenomics of Parkinson’s disease
+  implicates the gut microbiome in multiple disease mechanisms. *Nature
+  Communications*, 13, 6958.
+  [doi:10.1038/s41467-022-34667-x](https://doi.org/10.1038/s41467-022-34667-x)
+- Worsley, S. F., et al. (2021). Gut microbiome composition, not alpha
+  diversity, is associated with survival in a natural vertebrate
+  population. *Animal Microbiome*, 3, 84.
+  [doi:10.1186/s42523-021-00149-6](https://doi.org/10.1186/s42523-021-00149-6)
+- Xue, J., et al. (2025). Gut microbiota and derived metabolites mediate
+  obstructive sleep apnea induced atherosclerosis. *Gut Microbes*, 17,
+  2474142. [doi:10.1080/19490976.2025.2474142](https://doi.org/10.1080/19490976.2025.2474142)
