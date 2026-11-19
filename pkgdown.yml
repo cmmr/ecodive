@@ -6,12 +6,13 @@ articles:
   articles/bdiv_guide: bdiv_guide.html
   bdiv: bdiv.html
   articles/benchmark: benchmark.html
+  articles/compositional: compositional.html
   ecodive: ecodive.html
   ordination: ordination.html
   performance: performance.html
   stat_tests: stat_tests.html
   articles/unifrac: unifrac.html
-last_built: 2026-11-19T04:39Z
+last_built: 2026-11-19T05:34Z
 urls:
   reference: https://cmmr.github.io/ecodive/reference
   article: https://cmmr.github.io/ecodive/articles

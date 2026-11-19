@@ -7,6 +7,8 @@
   Metric](https://cmmr.github.io/ecodive/articles/bdiv_guide.md):
 - [Beta Diversity](https://cmmr.github.io/ecodive/articles/bdiv.md):
 - [Benchmarks](https://cmmr.github.io/ecodive/articles/benchmark.md):
+- [Compositional Analysis of Microbiome
+  Data](https://cmmr.github.io/ecodive/articles/compositional.md):
 - [Introduction to
   ecodive](https://cmmr.github.io/ecodive/articles/ecodive.md):
 - [Ordination](https://cmmr.github.io/ecodive/articles/ordination.md):
