@@ -1,6 +1,6 @@
 # `rpca_phylo()`: phylogenetic robust Aitchison PCA
 
-**Priority:** 19. **Tier:** port (gemelli 0.0.13,
+**Priority:** 21. **Tier:** port (gemelli 0.0.13,
 `phylogenetic_rpca()`, BSD-3; its tree code comes from scikit-bio 0.7.4,
 BSD-3, and iow 1.0.8 `bp`, BSD-3), built on ecodive's existing `rpca()`.
 Read [README.md](README.md) first, and [compositional.md](compositional.md)

@@ -1,6 +1,6 @@
 # `vlr()`, `rho_p()` and `phi_s()`: proportionality between features
 
-**Priority:** 15. **Tier:** port (`vlr()` from
+**Priority:** 17. **Tier:** port (`vlr()` from
 scikit-bio's `vlr` / `pairwise_vlr`, BSD-3) + formula (`rho_p()`, `phi_s()`;
 propr is GPL and output-only). Read [README.md](README.md) first, and
 [compositional.md](compositional.md) for the conventions the compositional

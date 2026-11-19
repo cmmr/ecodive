@@ -1,6 +1,6 @@
 # `ancom()`: analysis of composition of microbiomes
 
-**Priority:** 17. **Tier:** port (scikit-bio 0.7.4,
+**Priority:** 19. **Tier:** port (scikit-bio 0.7.4,
 `skbio/stats/composition/_ancom.py`, BSD-3). Read [README.md](README.md)
 first, and [compositional.md](compositional.md) for the conventions the
 compositional plans share.

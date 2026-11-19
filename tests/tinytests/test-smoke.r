@@ -109,6 +109,18 @@
   expect_identical(dim(be), c(2L, 3L))
   expect_true(all(is.finite(be$correlation)) && all(abs(be$correlation) <= 1))
 
+  vp <- varpart(counts, ~ grp, ~ x, data = meta, norm = 'hellinger', cpus = cpus)
+  expect_inherits(vp, c('ecodive_varpart', 'data.frame'))
+  expect_identical(dim(vp), c(4L, 5L))
+  expect_true(all(is.finite(vp$adj_r_squared)))
+  expect_true(any(grepl('[a]', capture.output(print(vp)), fixed = TRUE)))
+
+  fs <- forward_select(counts, ~ grp + x, meta, norm = 'hellinger', permutations = 9, alpha = 1, cpus = cpus)
+  expect_inherits(fs, c('ecodive_forward_select', 'data.frame'))
+  expect_identical(ncol(fs), 8L)
+  expect_true(is.finite(attr(fs, 'global')$adj_r_squared))
+  expect_true(any(grepl('Forward selection', capture.output(print(fs)), fixed = TRUE)))
+
 
 
   # Distance-based tests. ====

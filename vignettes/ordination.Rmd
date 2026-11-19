@@ -209,8 +209,51 @@ c(rda = attr(ord, 'r_squared'), dbrda = attr(dbrda(hd, 'Species', iris), 'r_squa
 permanova(hd, 'Species', iris, permutations = 99)
 ```
 
-`varpart()`, `forward_select()` and `principal_response_curves()`, which
-are planned, will build on `rda()`.
+### Partitioning variation
+
+`varpart()` splits the variation that two to four sets of variables
+explain (say, environment and space) into the part each explains on its
+own, the parts they share, and what none of them explains (Borcard et al.
+1992), as `vegan::varpart()` does. Each fraction is an adjusted \(R^2\)
+from a series of (partial) RDAs of a count table (with `norm`), db-RDAs of
+distances, or, with `chisquare = TRUE`, CCAs. Here the petal measurements
+are partitioned between species and sepal size:
+
+```{r}
+vp <- varpart(
+  iris[, 3:4], species = ~ Species, sepal = ~ Sepal.Length + Sepal.Width,
+  data = iris, norm = 'hellinger' )
+vp
+```
+
+Only the unique fractions (`[a]` and `[b]` here, marked `testable`) can be
+tested, each by its set conditioned on the others; here `[b]`, sepal size
+given species:
+
+```{r}
+permanova(
+  euclidean(iris[, 3:4], norm = 'hellinger'), data = iris,
+  formula = ~ Sepal.Length + Sepal.Width + Condition(Species), permutations = 99 )
+```
+
+Before partitioning, `forward_select()` can choose which variables of a
+set to keep (Blanchet et al. 2008), as `vegan::ordiR2step()` does: at each
+step it adds the variable that raises the adjusted \(R^2\) most, if a
+permutation test of it, given those already chosen, is significant, and
+stops before the adjusted \(R^2\) would exceed that of all the candidates
+together. By default it first tests the global model, all candidates
+together, and selects nothing if that is not significant:
+
+```{r}
+fs <- forward_select(
+  iris[, 3:4], ~ Species + Sepal.Length + Sepal.Width, iris,
+  norm = 'hellinger', permutations = 99 )
+fs
+attr(fs, 'selected')
+```
+
+`principal_response_curves()`, which is planned, will also build on
+`rda()`.
 
 `cca()`, canonical **correspondence** analysis (not canonical correlation
 analysis), is the unimodal counterpart of RDA: it constrains a

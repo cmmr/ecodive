@@ -1,6 +1,6 @@
 # `dirmult_ttest()`: Dirichlet-multinomial Welch t-tests on clr draws
 
-**Priority:** 18. **Tier:** port (scikit-bio 0.7.4,
+**Priority:** 20. **Tier:** port (scikit-bio 0.7.4,
 `skbio/stats/composition/_dirmult.py`, BSD-3), with an optional
 scale-uncertainty addition ported from ALDEx3 (CRAN 1.4.0, **MIT**;
 ALDEx2 itself is GPL and output-only). Read [README.md](README.md) first, and

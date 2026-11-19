@@ -1,6 +1,6 @@
 # `qmp_scale()` and `qmp_rarefy()`: quantitative microbiome profiling
 
-**Priority:** 16. **Tier:** port (`qmp_rarefy()`:
+**Priority:** 18. **Tier:** port (`qmp_rarefy()`:
 the authors' `QMP.R`, raeslab/QMP, BSD-3, © 2017 Raes Lab) and formula
 (`qmp_scale()`), both a few lines over ecodive's own `rarefy()` C code. Read [README.md](README.md)
 first, and [compositional.md](compositional.md) for the conventions the

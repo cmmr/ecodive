@@ -286,7 +286,7 @@ cca <- function (
   else {
     res <- .Call(
       C_cca, counts, margin, d$design, ncol(d$z), k,
-      if (n_perm > 0) pm$perms, n_perm, seed, cpus )
+      if (n_perm > 0) pm$perms, n_perm, seed, FALSE, cpus )
 
     if (!is.null(res$empty))
       stop(cca_empty_msg(res$empty, dn[[1]]), call. = FALSE)
@@ -453,7 +453,7 @@ ca <- function (counts, margin = 1L, n_axes = 3L, cpus = n_cpus()) {
   else {
     res <- .Call(
       C_cca, counts, margin, matrix(0, n, 0), 0L, k,
-      NULL, 0L, 0L, cpus )
+      NULL, 0L, 0L, FALSE, cpus )
 
     if (!is.null(res$empty))
       stop(cca_empty_msg(res$empty, dn[[1]], 'CA'), call. = FALSE)
