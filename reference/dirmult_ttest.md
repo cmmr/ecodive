@@ -6,8 +6,9 @@ carrying the uncertainty of low counts and zeros through the test
 times from their Dirichlet posterior given its counts; every draw is
 clr-transformed and each feature is compared with Welch's t-test; and
 the results are averaged over the draws. This is the ALDEx2 approach, as
-scikit-bio implements it, with ALDEx2's and ALDEx3's scale model, which
-allows for uncertainty in the samples' total loads (Nixon et al. 2025).
+scikit-bio implements it, optionally with ALDEx2's and ALDEx3's scale
+model, which allows for uncertainty in the samples' total loads (Nixon
+et al. 2025).
 
 ## Usage
 
@@ -19,7 +20,7 @@ dirmult_ttest(
   contrast = NULL,
   margin = 1L,
   pseudocount = 0.5,
-  scale_sd = 0.5,
+  scale_sd = 0,
   n_draws = 128L,
   alpha = 0.05,
   conf_level = 0.95,
@@ -84,10 +85,12 @@ dirmult_ttest(
 
   The scale model's uncertainty: the standard deviation, in log2 units,
   of a random difference in total load between the two sides, drawn
-  afresh for each draw (see **Details**). `0` assumes the clr's
-  reference (the geometric mean) is the same on both sides, as
-  scikit-bio's `dirmult_ttest()` and ALDEx2's default do. Default:
-  `0.5`, as Nixon et al. (2025) and ALDEx3 recommend.
+  afresh for each draw (see **Details**). `0` (the default) assumes the
+  clr's reference (the geometric mean) is the same on both sides, as
+  scikit-bio's `dirmult_ttest()` and ALDEx2's default do. Nixon et
+  al. (2025) and ALDEx3 suggest `0.5`; use it with more draws
+  (`n_draws = 1000` or more) and judge by `p_adjusted` (see
+  **Details**).
 
 - n_draws:
 
@@ -209,8 +212,12 @@ intervals. Because the interval is the envelope of the draws' intervals,
 with `scale_sd > 0` it keeps widening as `n_draws` grows (it reaches the
 most extreme shifts drawn), so `reject` becomes stricter with more
 draws; the averaged p-values converge instead, though slowly, being
-driven by the rare large shifts. For decisions that don't depend on
-`n_draws`, filter on `p_adjusted` alone (as ALDEx2 does).
+driven by the rare large shifts (ALDEx3 uses 2,000 draws). So with a
+scale model, use a larger `n_draws` and, for decisions that don't depend
+on it, filter on `p_adjusted` alone (as ALDEx2 and ALDEx3 do). The shift
+is drawn for the group that comes first (in sorted order, or a factor's
+level order) against the other, so reversing a `contrast` of two groups
+gives exactly the mirror image, with or without a scale model.
 [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) tests log
 ratios without the assumption, but gives no effect sizes.
 
@@ -229,10 +236,10 @@ Monte Carlo error only. The t distribution is R's
 and `stdtrit()` in scikit-bio), and `p_adjust` is
 [`stats::p.adjust()`](https://rdrr.io/r/stats/p.adjust.html), with `NaN`
 p-values left out of the family, as scikit-bio. Differences from
-scikit-bio: the scale model, on by default (scikit-bio has none: use
-`scale_sd = 0`); `alpha` and `conf_level` are arguments (scikit-bio
-fixes them at 0.05 and 0.95); `pseudocount` must be positive; and `seed`
-defaults to `0`, not to a random seed.
+scikit-bio: the optional scale model (scikit-bio has none); `alpha` and
+`conf_level` are arguments (scikit-bio fixes them at 0.05 and 0.95);
+`pseudocount` must be positive; and `seed` defaults to `0`, not to a
+random seed.
 
 **ALDEx2** (Bioconductor) follows the same idea, but differs in its
 details: it reports both Welch's and Wilcoxon's tests, averages
@@ -311,8 +318,7 @@ scale uncertainty into differential expression analyses using ALDEx2.
     colnames(x) <- paste0('b', 1:7)
     grp <- rep(c('treatment', 'placebo'), each = 3)
 
-    # scikit-bio's procedure: no scale model.
-    dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0)
+    dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
 #>   feature          t   log2_fc   ci_lower  ci_upper     p_value  p_adjusted
 #> 1      b1 -15.441403 -4.999191 -7.8190476 -2.300428 0.003106233 0.018637397
 #> 2      b2 -16.971123 -2.521372 -3.7194332 -1.332911 0.001024445 0.007171115
@@ -330,17 +336,17 @@ scale uncertainty into differential expression analyses using ALDEx2.
 #> 6  FALSE
 #> 7  FALSE
 
-    # With the default scale model, the intervals widen and fewer features
-    # are rejected.
-    dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
-#>   feature          t   log2_fc  ci_lower   ci_upper     p_value  p_adjusted
-#> 1      b1 -15.522155 -5.028255 -8.855489 -2.0445536 0.003163409 0.018980454
-#> 2      b2 -17.098749 -2.550436 -4.328113 -0.3888796 0.001262841 0.008839884
-#> 3      b3   6.720047  1.583016 -1.361214  4.9453424 0.041126335 0.146227355
-#> 4      b4   6.635623  1.673860 -1.202496  4.7583920 0.029245471 0.146227355
-#> 5      b5   6.083155  1.493604 -1.213579  5.6638998 0.034459579 0.146227355
-#> 6      b6   3.459734  1.121362 -1.304194  4.2040766 0.118520082 0.146227355
-#> 7      b7   8.268640  1.503402 -1.447919  4.3489758 0.039517963 0.146227355
+    # With a scale model, the intervals widen and fewer features are
+    # rejected.
+    dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0.5)
+#>   feature          t   log2_fc   ci_lower   ci_upper     p_value p_adjusted
+#> 1      b1 -15.360651 -4.970128 -8.0452745 -1.8335001 0.003310788 0.01986473
+#> 2      b2 -16.843497 -2.492309 -4.5153161 -0.3869114 0.001542506 0.01079754
+#> 3      b3   7.076442  1.641144 -1.6546879  4.9946721 0.040226050 0.13875915
+#> 4      b4   6.864439  1.731988 -1.1794280  4.3070830 0.027751830 0.13875915
+#> 5      b5   6.435113  1.551732 -2.4053156  4.8504523 0.039672811 0.13875915
+#> 6      b6   3.677914  1.179490 -1.8103652  3.6006556 0.102469710 0.13875915
+#> 7      b7   8.371599  1.561530 -0.7739019  4.5681716 0.027913829 0.13875915
 #>   reject
 #> 1   TRUE
 #> 2   TRUE
@@ -353,5 +359,5 @@ scale uncertainty into differential expression analyses using ALDEx2.
     # The default contrast: the first group ('placebo', in sorted order)
     # against the rest.
     dirmult_ttest(x, grp, n_draws = 32)$log2_fc
-#> [1]  4.797480  2.356041 -1.796252 -1.925009 -1.727231 -1.351802 -1.674718
+#> [1]  4.986264  2.544825 -1.607468 -1.736224 -1.538447 -1.163018 -1.485933
 ```

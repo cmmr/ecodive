@@ -5,15 +5,17 @@ carrying the uncertainty of low counts and zeros through the test
 times from their Dirichlet posterior given its counts; every draw is
 clr-transformed and each feature is compared with Welch's t-test; and the
 results are averaged over the draws. This is the ALDEx2 approach, as
-scikit-bio implements it, with ALDEx2's and ALDEx3's scale model, which
-allows for uncertainty in the samples' total loads (Nixon et al. 2025)."><meta property="og:description" content="Finds features whose abundance differs between two sets of samples,
+scikit-bio implements it, optionally with ALDEx2's and ALDEx3's scale
+model, which allows for uncertainty in the samples' total loads (Nixon et
+al. 2025)."><meta property="og:description" content="Finds features whose abundance differs between two sets of samples,
 carrying the uncertainty of low counts and zeros through the test
 (Fernandes et al. 2013, 2014). Each sample's proportions are drawn many
 times from their Dirichlet posterior given its counts; every draw is
 clr-transformed and each feature is compared with Welch's t-test; and the
 results are averaged over the draws. This is the ALDEx2 approach, as
-scikit-bio implements it, with ALDEx2's and ALDEx3's scale model, which
-allows for uncertainty in the samples' total loads (Nixon et al. 2025)."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.png"></head><body>
+scikit-bio implements it, optionally with ALDEx2's and ALDEx3's scale
+model, which allows for uncertainty in the samples' total loads (Nixon et
+al. 2025)."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -66,8 +68,9 @@ carrying the uncertainty of low counts and zeros through the test
 times from their Dirichlet posterior given its counts; every draw is
 clr-transformed and each feature is compared with Welch's t-test; and the
 results are averaged over the draws. This is the ALDEx2 approach, as
-scikit-bio implements it, with ALDEx2's and ALDEx3's scale model, which
-allows for uncertainty in the samples' total loads (Nixon et al. 2025).</p>
+scikit-bio implements it, optionally with ALDEx2's and ALDEx3's scale
+model, which allows for uncertainty in the samples' total loads (Nixon et
+al. 2025).</p>
     </div>
 
     <div class="section level2">
@@ -79,7 +82,7 @@ allows for uncertainty in the samples' total loads (Nixon et al. 2025).</p>
 <span>  contrast <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  pseudocount <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  scale_sd <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  scale_sd <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  n_draws <span class="op">=</span> <span class="fl">128L</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
@@ -146,10 +149,12 @@ and ALDEx2. This is not the zero patch that other functions'
 <dt id="arg-scale-sd">scale_sd<a class="anchor" aria-label="anchor" href="#arg-scale-sd"></a></dt>
 <dd><p>The scale model's uncertainty: the standard deviation, in
 log2 units, of a random difference in total load between the two
-sides, drawn afresh for each draw (see <strong>Details</strong>). <code>0</code> assumes
-the clr's reference (the geometric mean) is the same on both
-sides, as scikit-bio's <code>dirmult_ttest()</code> and ALDEx2's default do.
-Default: <code>0.5</code>, as Nixon et al. (2025) and ALDEx3 recommend.</p></dd>
+sides, drawn afresh for each draw (see <strong>Details</strong>). <code>0</code> (the
+default) assumes the clr's reference (the geometric mean) is the
+same on both sides, as scikit-bio's <code>dirmult_ttest()</code> and ALDEx2's
+default do. Nixon et al. (2025) and ALDEx3 suggest <code>0.5</code>; use it
+with more draws (<code>n_draws = 1000</code> or more) and judge by
+<code>p_adjusted</code> (see <strong>Details</strong>).</p></dd>
 
 
 <dt id="arg-n-draws">n_draws<a class="anchor" aria-label="anchor" href="#arg-n-draws"></a></dt>
@@ -256,8 +261,12 @@ Because the interval is the envelope of the draws' intervals, with
 <code>scale_sd &gt; 0</code> it keeps widening as <code>n_draws</code> grows (it reaches the most
 extreme shifts drawn), so <code>reject</code> becomes stricter with more draws; the
 averaged p-values converge instead, though slowly, being driven by the
-rare large shifts. For decisions that don't depend on <code>n_draws</code>, filter
-on <code>p_adjusted</code> alone (as ALDEx2 does). <code><a href="ancom.html">ancom()</a></code> tests log ratios
+rare large shifts (ALDEx3 uses 2,000 draws). So with a scale model, use
+a larger <code>n_draws</code> and, for decisions that don't depend on it, filter on
+<code>p_adjusted</code> alone (as ALDEx2 and ALDEx3 do). The shift is drawn for the
+group that comes first (in sorted order, or a factor's level order)
+against the other, so reversing a <code>contrast</code> of two groups gives exactly
+the mirror image, with or without a scale model. <code><a href="ancom.html">ancom()</a></code> tests log ratios
 without the assumption, but gives no effect sizes.</p>
 <p>A side with a single sample has no variance: its features' <code>t</code>,
 <code>p_value</code>, intervals and <code>p_adjusted</code> are <code>NaN</code>, with a warning, and none
@@ -270,8 +279,8 @@ the same data the results differ from scikit-bio's by Monte Carlo error
 only. The t distribution is R's <code><a href="https://rdrr.io/r/stats/TDist.html" class="external-link">stats::pt()</a></code> and <code><a href="https://rdrr.io/r/stats/TDist.html" class="external-link">stats::qt()</a></code> (SciPy's
 <code>stdtr()</code> and <code>stdtrit()</code> in scikit-bio), and <code>p_adjust</code> is
 <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust()</a></code>, with <code>NaN</code> p-values left out of the family, as
-scikit-bio. Differences from scikit-bio: the scale model, on by
-default (scikit-bio has none: use <code>scale_sd = 0</code>); <code>alpha</code> and
+scikit-bio. Differences from scikit-bio: the optional scale model
+(scikit-bio has none); <code>alpha</code> and
 <code>conf_level</code> are arguments (scikit-bio fixes them at 0.05 and 0.95);
 <code>pseudocount</code> must be positive; and <code>seed</code> defaults to <code>0</code>, not to a
 random seed.</p>
@@ -343,8 +352,7 @@ scale uncertainty into differential expression analyses using ALDEx2.
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'b'</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">grp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treatment'</span>, <span class="st">'placebo'</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># scikit-bio's procedure: no scale model.</span></span></span>
-<span class="r-in"><span>    <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">x</span>, <span class="va">grp</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treatment'</span>, <span class="st">'placebo'</span><span class="op">)</span>, scale_sd <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">x</span>, <span class="va">grp</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treatment'</span>, <span class="st">'placebo'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   feature          t   log2_fc   ci_lower  ci_upper     p_value  p_adjusted</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1      b1 -15.441403 -4.999191 -7.8190476 -2.300428 0.003106233 0.018637397</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2      b2 -16.971123 -2.521372 -3.7194332 -1.332911 0.001024445 0.007171115</span>
@@ -362,17 +370,17 @@ scale uncertainty into differential expression analyses using ALDEx2.
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6  FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7  FALSE</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># With the default scale model, the intervals widen and fewer features</span></span></span>
-<span class="r-in"><span>    <span class="co"># are rejected.</span></span></span>
-<span class="r-in"><span>    <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">x</span>, <span class="va">grp</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treatment'</span>, <span class="st">'placebo'</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   feature          t   log2_fc  ci_lower   ci_upper     p_value  p_adjusted</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      b1 -15.522155 -5.028255 -8.855489 -2.0445536 0.003163409 0.018980454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      b2 -17.098749 -2.550436 -4.328113 -0.3888796 0.001262841 0.008839884</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      b3   6.720047  1.583016 -1.361214  4.9453424 0.041126335 0.146227355</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      b4   6.635623  1.673860 -1.202496  4.7583920 0.029245471 0.146227355</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      b5   6.083155  1.493604 -1.213579  5.6638998 0.034459579 0.146227355</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      b6   3.459734  1.121362 -1.304194  4.2040766 0.118520082 0.146227355</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7      b7   8.268640  1.503402 -1.447919  4.3489758 0.039517963 0.146227355</span>
+<span class="r-in"><span>    <span class="co"># With a scale model, the intervals widen and fewer features are</span></span></span>
+<span class="r-in"><span>    <span class="co"># rejected.</span></span></span>
+<span class="r-in"><span>    <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">x</span>, <span class="va">grp</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treatment'</span>, <span class="st">'placebo'</span><span class="op">)</span>, scale_sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   feature          t   log2_fc   ci_lower   ci_upper     p_value p_adjusted</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      b1 -15.360651 -4.970128 -8.0452745 -1.8335001 0.003310788 0.01986473</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      b2 -16.843497 -2.492309 -4.5153161 -0.3869114 0.001542506 0.01079754</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      b3   7.076442  1.641144 -1.6546879  4.9946721 0.040226050 0.13875915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      b4   6.864439  1.731988 -1.1794280  4.3070830 0.027751830 0.13875915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      b5   6.435113  1.551732 -2.4053156  4.8504523 0.039672811 0.13875915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6      b6   3.677914  1.179490 -1.8103652  3.6006556 0.102469710 0.13875915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7      b7   8.371599  1.561530 -0.7739019  4.5681716 0.027913829 0.13875915</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   reject</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   TRUE</span>
@@ -385,7 +393,7 @@ scale uncertainty into differential expression analyses using ALDEx2.
 <span class="r-in"><span>    <span class="co"># The default contrast: the first group ('placebo', in sorted order)</span></span></span>
 <span class="r-in"><span>    <span class="co"># against the rest.</span></span></span>
 <span class="r-in"><span>    <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">x</span>, <span class="va">grp</span>, n_draws <span class="op">=</span> <span class="fl">32</span><span class="op">)</span><span class="op">$</span><span class="va">log2_fc</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  4.797480  2.356041 -1.796252 -1.925009 -1.727231 -1.351802 -1.674718</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  4.986264  2.544825 -1.607468 -1.736224 -1.538447 -1.163018 -1.485933</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
