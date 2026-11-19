@@ -106,15 +106,16 @@ be applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="ex
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A data.frame of all available methods.</span></span></span>
 <span class="r-in"><span>    <span class="fu">list_dist_ords</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                            name       id</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Constrained Analysis of Principal Coordinates capscale</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2            Distance-based Redundancy Analysis    dbrda</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                     Isometric Feature Mapping   isomap</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4               Metric Multidimensional Scaling      mds</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5           Non-metric Multidimensional Scaling     nmds</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                Principal Coordinates Analysis     pcoa</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   t-distributed Stochastic Neighbor Embedding     tsne</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8 Uniform Manifold Approximation and Projection     umap</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                       name       id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Discriminant Canonical Analysis of Principal Coordinates    capda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2            Constrained Analysis of Principal Coordinates capscale</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                       Distance-based Redundancy Analysis    dbrda</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                Isometric Feature Mapping   isomap</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                          Metric Multidimensional Scaling      mds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                      Non-metric Multidimensional Scaling     nmds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                           Principal Coordinates Analysis     pcoa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8              t-distributed Stochastic Neighbor Embedding     tsne</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9            Uniform Manifold Approximation and Projection     umap</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Find the method for 'MDS'.</span></span></span>
 <span class="r-in"><span>    <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">match_dist_ord</span><span class="op">(</span><span class="st">'MDS'</span><span class="op">)</span></span></span>

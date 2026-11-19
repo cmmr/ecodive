@@ -315,13 +315,17 @@ function.</p>
 <h2 id="ordination">Ordination<a class="anchor" aria-label="anchor" href="#ordination"></a>
 </h2>
 <p>An ordination turns a distance matrix into coordinates for a plot.
-ecodive has eight methods that take distances, run by name with
+ecodive has nine methods that take distances, run by name with
 <code><a href="../reference/dist_ord.html">dist_ord()</a></code> or directly by their own functions, and eight
 (<code><a href="../reference/pca.html">pca()</a></code>, <code><a href="../reference/rpca.html">rpca()</a></code>, <code><a href="../reference/rda.html">rda()</a></code>,
 <code><a href="../reference/cca.html">cca()</a></code>, <code><a href="../reference/ca.html">ca()</a></code>, <code><a href="../reference/lda.html">lda()</a></code>,
 <code><a href="../reference/plsda.html">plsda()</a></code> and <code><a href="../reference/oplsda.html">oplsda()</a></code>) that take the count
 table itself, run by name with <code><a href="../reference/count_ord.html">count_ord()</a></code>.</p>
 <table class="table">
+<colgroup>
+<col width="20%">
+<col width="79%">
+</colgroup>
 <thead><tr class="header">
 <th align="left">Function</th>
 <th align="left">Method</th>
@@ -360,34 +364,39 @@ table itself, run by name with <code><a href="../reference/count_ord.html">count
 <td align="left">Constrained Analysis of Principal Coordinates</td>
 </tr>
 <tr class="odd">
+<td align="left"><code><a href="../reference/capda.html">capda()</a></code></td>
+<td align="left">Discriminant Canonical Analysis of Principal
+Coordinates (CAP)</td>
+</tr>
+<tr class="even">
 <td align="left"><code><a href="../reference/pca.html">pca()</a></code></td>
 <td align="left">Principal Component Analysis (PCA)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code><a href="../reference/rpca.html">rpca()</a></code></td>
 <td align="left">Robust Aitchison PCA</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><code><a href="../reference/rda.html">rda()</a></code></td>
 <td align="left">Redundancy Analysis (RDA)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code><a href="../reference/cca.html">cca()</a></code></td>
 <td align="left">Canonical Correspondence Analysis (CCA)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><code><a href="../reference/ca.html">ca()</a></code></td>
 <td align="left">Correspondence Analysis (CA)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code><a href="../reference/lda.html">lda()</a></code></td>
 <td align="left">Linear Discriminant Analysis (LDA)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><code><a href="../reference/plsda.html">plsda()</a></code></td>
 <td align="left">Partial Least Squares Discriminant Analysis</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><code><a href="../reference/oplsda.html">oplsda()</a></code></td>
 <td align="left">Orthogonal PLS Discriminant Analysis (OPLS-DA)</td>
 </tr>

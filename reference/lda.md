@@ -167,12 +167,15 @@ combination of others within groups (as relative abundances that add up
 to 1 are). Otherwise `lda()` stops with an error (scikit-learn and
 [`MASS::lda()`](https://rdrr.io/pkg/MASS/man/lda.html) drop the null
 directions with a warning, but the axes they then report depend on
-rounding). Microbiome tables have far more taxa than samples, so run LDA
-on a few axes of an unconstrained ordination instead, such as
-`pcoa(dm, n_axes = 5)` or
-[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)'s scores:
-`lda(pcoa(dm, n_axes = 5), groups)`. This is canonical analysis of
-principal coordinates (Anderson & Willis 2003).
+rounding). Microbiome tables have far more taxa than samples, so use
+[`capda()`](https://cmmr.github.io/ecodive/reference/capda.md) instead:
+canonical analysis of principal coordinates (Anderson & Willis 2003)
+runs LDA on the first few axes of
+[`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), choosing
+how many by how well they classify the samples, and tests the separation
+of the groups by permutation. `capda(dm, groups, n_pcoa_axes = 5)` gives
+the same scores as `lda(pcoa(dm, n_axes = 5), groups)`. A few axes of
+[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) also work.
 
 **Validate the separation**
 
@@ -223,6 +226,7 @@ Every ordination function
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
+[`capda()`](https://cmmr.github.io/ecodive/reference/capda.md),
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
 [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md),
 [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
@@ -340,6 +344,7 @@ Pedregosa, F., et al. (2011). Scikit-learn: machine learning in Python.
 
 ## See also
 
+[`capda()`](https://cmmr.github.io/ecodive/reference/capda.md),
 [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
@@ -362,7 +367,8 @@ Pedregosa, F., et al. (2011). Scikit-learn: machine learning in Python.
 #> Petal.Length -2.2012117 -0.93192121
 #> Petal.Width  -2.8104603  2.83918785
 
-    # Microbiome tables have more taxa than samples: use a few PCoA axes.
+    # Microbiome tables have more taxa than samples: use a few PCoA axes,
+    # or capda(), which chooses how many.
     grp <- rep(c('a', 'b'), length.out = nrow(ex_counts))
     pc  <- pcoa(bray(ex_counts), n_axes = 2)
     lda(pc, grp)

@@ -252,6 +252,7 @@ Every ordination function
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
+[`capda()`](https://cmmr.github.io/ecodive/reference/capda.md),
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
 [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md),
 [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),

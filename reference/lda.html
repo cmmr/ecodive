@@ -202,10 +202,12 @@ combination of others within groups (as relative abundances that add up
 to 1 are). Otherwise <code>lda()</code> stops with an error (scikit-learn and
 <code><a href="https://rdrr.io/pkg/MASS/man/lda.html" class="external-link">MASS::lda()</a></code> drop the null directions with a warning, but the axes
 they then report depend on rounding). Microbiome tables have far more
-taxa than samples, so run LDA on a few axes of an unconstrained
-ordination instead, such as <code>pcoa(dm, n_axes = 5)</code> or <code><a href="pca.html">pca()</a></code>'s
-scores: <code>lda(pcoa(dm, n_axes = 5), groups)</code>. This is canonical analysis
-of principal coordinates (Anderson &amp; Willis 2003).</p>
+taxa than samples, so use <code><a href="capda.html">capda()</a></code> instead: canonical analysis of
+principal coordinates (Anderson &amp; Willis 2003) runs LDA on the first
+few axes of <code><a href="pcoa.html">pcoa()</a></code>, choosing how many by how well they classify the
+samples, and tests the separation of the groups by permutation.
+<code>capda(dm, groups, n_pcoa_axes = 5)</code> gives the same scores as
+<code>lda(pcoa(dm, n_axes = 5), groups)</code>. A few axes of <code><a href="pca.html">pca()</a></code> also work.</p>
 <p><strong>Validate the separation</strong></p>
 <p>LDA is supervised: it looks for the directions that separate the
 groups, so its plots separate them, if not as readily as <code><a href="plsda.html">plsda()</a></code>'s,
@@ -239,7 +241,7 @@ with it. Results are identical from run to run and for any number of
     <h2 id="ordination-result">Ordination result<a class="anchor" aria-label="anchor" href="#ordination-result"></a></h2>
 
 
-<p>Every ordination function (<code><a href="pcoa.html">pcoa()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>,
+<p>Every ordination function (<code><a href="pcoa.html">pcoa()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>, <code><a href="dbrda.html">dbrda()</a></code>, <code><a href="capda.html">capda()</a></code>,
 <code><a href="capscale.html">capscale()</a></code>, <code><a href="mds.html">mds()</a></code>, <code><a href="nmds.html">nmds()</a></code>, <code><a href="isomap.html">isomap()</a></code>, <code><a href="tsne.html">tsne()</a></code>, <code><a href="umap.html">umap()</a></code>, and so
 <code><a href="dist_ord.html">dist_ord()</a></code>) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
@@ -317,7 +319,7 @@ S</em> (4th ed.). Springer. <a href="https://doi.org/10.1007/978-0-387-21706-2" 
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="plsda.html">plsda()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>, <code><a href="permanova.html">permanova()</a></code>, <code><a href="count_ord.html">count_ord()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="capda.html">capda()</a></code>, <code><a href="plsda.html">plsda()</a></code>, <code><a href="pca.html">pca()</a></code>, <code><a href="pcoa.html">pcoa()</a></code>, <code><a href="permanova.html">permanova()</a></code>, <code><a href="count_ord.html">count_ord()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -335,7 +337,8 @@ S</em> (4th ed.). Springer. <a href="https://doi.org/10.1007/978-0-387-21706-2" 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length -2.2012117 -0.93192121</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width  -2.8104603  2.83918785</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># Microbiome tables have more taxa than samples: use a few PCoA axes.</span></span></span>
+<span class="r-in"><span>    <span class="co"># Microbiome tables have more taxa than samples: use a few PCoA axes,</span></span></span>
+<span class="r-in"><span>    <span class="co"># or capda(), which chooses how many.</span></span></span>
 <span class="r-in"><span>    <span class="va">grp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span>, <span class="st">'b'</span><span class="op">)</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">pc</span>  <span class="op">&lt;-</span> <span class="fu"><a href="pcoa.html">pcoa</a></span><span class="op">(</span><span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu">lda</span><span class="op">(</span><span class="va">pc</span>, <span class="va">grp</span><span class="op">)</span></span></span>

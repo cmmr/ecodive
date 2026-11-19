@@ -299,6 +299,8 @@ permanova().
 
 - [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md) : Linear
   Discriminant Analysis (LDA)
+- [`capda()`](https://cmmr.github.io/ecodive/reference/capda.md) :
+  Discriminant Canonical Analysis of Principal Coordinates (CAP)
 - [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) :
   Partial Least Squares Discriminant Analysis (PLS-DA)
 - [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) :

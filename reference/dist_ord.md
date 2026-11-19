@@ -29,9 +29,9 @@ dist_ord(dm, method, ...)
 
 - method:
 
-  The name of an ordination method: `"capscale"`, `"dbrda"`, `"isomap"`,
-  `"mds"`, `"nmds"`, `"pcoa"`, `"tsne"`, or `"umap"`. Flexible matching
-  is supported (see below). Programmatic access via
+  The name of an ordination method: `"capda"`, `"capscale"`, `"dbrda"`,
+  `"isomap"`, `"mds"`, `"nmds"`, `"pcoa"`, `"tsne"`, or `"umap"`.
+  Flexible matching is supported (see below). Programmatic access via
   [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md).
 
 - ...:
@@ -43,6 +43,8 @@ dist_ord(dm, method, ...)
   and [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)
   (which also need `groups`, or `data` and `formula`, as in
   `dist_ord(dm, 'dbrda', 'treatment', meta)`),
+  [`capda()`](https://cmmr.github.io/ecodive/reference/capda.md) (which
+  needs `groups`, and `data` if `groups` names a column of it),
   [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),
   [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md),
   [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
@@ -65,6 +67,7 @@ The method's result, as described in "Ordination result" below.
 |  |  |
 |----|----|
 | Option / Function Name | Method Name |
+| `capda` | Discriminant Canonical Analysis of Principal Coordinates (CAP), supervised |
 | `capscale` | Constrained Analysis of Principal Coordinates |
 | `dbrda` | Distance-based Redundancy Analysis (db-RDA) |
 | `isomap` | Isometric Feature Mapping (Isomap) |
@@ -93,7 +96,8 @@ and ecodive's other tests are run by
 Default numbers of axes differ: `n_axes = 3` for the methods whose axes
 have eigenvalues (`capscale`, `dbrda`, `isomap`, `pcoa`, and
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
-[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)), and
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md); `capda`
+returns up to 3, and at most one fewer than the number of groups), and
 `n_axes = 2` for those that fit a layout in a fixed number of dimensions
 (`mds`, `nmds`, `tsne`, and `umap`).
 
@@ -109,7 +113,9 @@ other names also work: `'PCO'`, `'cmdscale'`, or `'classical MDS'` for
 `'distance-based RDA'` select `dbrda`, and `'CAP'` selects `capscale`
 (but `'CA'` names
 [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), which takes a
-count table).
+count table). `'CAPdiscrim'` (BiodiversityR's name) or
+`'discriminant CAP'` select `capda`, Anderson & Willis's discriminant
+CAP.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -130,6 +136,7 @@ Every ordination function
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
+[`capda()`](https://cmmr.github.io/ecodive/reference/capda.md),
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
 [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md),
 [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md),
@@ -187,6 +194,7 @@ plain matrix or data frame without the attributes.
 
 ## See also
 
+[`capda()`](https://cmmr.github.io/ecodive/reference/capda.md),
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
 [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md),

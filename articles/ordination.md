@@ -68,6 +68,7 @@ plot(dm, 'Species', iris)
 | [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md) | Uniform Manifold Approximation and Projection | `dm` | Clusters, with more of the global layout kept than t-SNE. |
 | [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) | Distance-based Redundancy Analysis (db-RDA) | `dm` | Axes that sample metadata explain (a constrained ordination). |
 | [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) | Constrained Analysis of Principal Coordinates | `dm` | The same, as `vegan::capscale()` computes it. |
+| [`capda()`](https://cmmr.github.io/ecodive/reference/capda.md) | Discriminant CAP (Anderson & Willis) | `dm` | Axes that best separate known groups, from any distances (supervised). |
 | [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) | Redundancy Analysis (RDA) | counts | Axes of (transformed) counts that sample metadata explain. |
 | [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) | Canonical Correspondence Analysis (CCA) | counts | The same in the chi-square metric, for species with unimodal responses. |
 | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) | Principal Component Analysis (PCA) | counts | Euclidean geometry of (transformed) counts, with feature loadings. |
@@ -172,15 +173,16 @@ by `list_dist_ords('id')`.
 ``` r
 
 list_dist_ords()
-#>                                            name       id
-#> 1 Constrained Analysis of Principal Coordinates capscale
-#> 2            Distance-based Redundancy Analysis    dbrda
-#> 3                     Isometric Feature Mapping   isomap
-#> 4               Metric Multidimensional Scaling      mds
-#> 5           Non-metric Multidimensional Scaling     nmds
-#> 6                Principal Coordinates Analysis     pcoa
-#> 7   t-distributed Stochastic Neighbor Embedding     tsne
-#> 8 Uniform Manifold Approximation and Projection     umap
+#>                                                       name       id
+#> 1 Discriminant Canonical Analysis of Principal Coordinates    capda
+#> 2            Constrained Analysis of Principal Coordinates capscale
+#> 3                       Distance-based Redundancy Analysis    dbrda
+#> 4                                Isometric Feature Mapping   isomap
+#> 5                          Metric Multidimensional Scaling      mds
+#> 6                      Non-metric Multidimensional Scaling     nmds
+#> 7                           Principal Coordinates Analysis     pcoa
+#> 8              t-distributed Stochastic Neighbor Embedding     tsne
+#> 9            Uniform Manifold Approximation and Projection     umap
 ```
 
 ## Non-Euclidean distances
@@ -488,16 +490,41 @@ attr(ord, 'vip')
 discriminant analysis (LDA), finds Fisher’s discriminant axes: those
 along which the groups are furthest apart relative to the variation
 within them, as [`MASS::lda()`](https://rdrr.io/pkg/MASS/man/lda.html)
-computes them. It needs more samples than features, so for microbiome
-tables run it on a few axes of an unconstrained ordination, such as
-[`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), rather
-than on the taxa.
+computes them. It needs more samples than features, so it suits a few
+measurements, not the taxa of a microbiome table.
 
 ``` r
 
 ord <- lda(iris[, 1:4], 'Species', iris)
 attr(ord, 'prop')
 #> [1] 0.991212605 0.008787395
+```
+
+For microbiome tables, and any distances, use
+[`capda()`](https://cmmr.github.io/ecodive/reference/capda.md):
+canonical analysis of principal coordinates (CAP; Anderson & Willis
+2003), the discriminant analysis of the first *m* axes of
+[`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md). It chooses
+*m* as the number of axes that classifies the most samples correctly
+when each is left out in turn, reports that success, and tests the
+separation of the groups by permutation, as
+`BiodiversityR::CAPdiscrim()` does. It is not
+[`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
+which is a constrained ordination (db-RDA) under a similar name.
+
+``` r
+
+ord <- capda(dm, 'Species', iris, permutations = 199)
+attr(ord, 'n_pcoa_axes')
+#> [1] 12
+attr(ord, 'loo_table')
+#>             loo_class
+#> group        setosa versicolor virginica
+#>   setosa         50          0         0
+#>   versicolor      0         47         3
+#>   virginica       0          0        50
+attr(ord, 'p_value')
+#> [1] 0.005
 ```
 
 [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md),
@@ -516,7 +543,7 @@ ord <- oplsda(round(two[, 1:4] * 10), 'Species', two)
 plot(ord)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-23-1.png)
+![](ordination_files/figure-html/unnamed-chunk-24-1.png)
 
 ``` r
 
@@ -527,7 +554,7 @@ c(r2x = attr(ord, 'r2x'), r2y = attr(ord, 'r2y'))
 
 A supervised ordination always separates the groups it is given: it
 looks for exactly that, and with more features than samples it finds a
-separation even in random data. So a PLS-DA or OPLS-DA plot is no
+separation even in random data. So a PLS-DA, OPLS-DA or CAP plot is no
 evidence that the groups differ. Test the difference with a permutation
 test of the distances, such as
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
@@ -581,7 +608,7 @@ attr(ord, 'loadings')
 plot(ord, 'Species', iris)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-25-1.png)
+![](ordination_files/figure-html/unnamed-chunk-26-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -658,7 +685,7 @@ plot(ord, 'Species', iris)
 plot(fit, add = TRUE)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-29-1.png)
+![](ordination_files/figure-html/unnamed-chunk-30-1.png)
 
 ## Comparing two ordinations
 
@@ -708,7 +735,7 @@ two metrics disagree.
 plot(fit)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-31-1.png)
+![](ordination_files/figure-html/unnamed-chunk-32-1.png)
 
 ## Speed and reproducibility
 

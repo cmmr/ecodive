@@ -77,15 +77,16 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_dist_ords()
-#>                                            name       id
-#> 1 Constrained Analysis of Principal Coordinates capscale
-#> 2            Distance-based Redundancy Analysis    dbrda
-#> 3                     Isometric Feature Mapping   isomap
-#> 4               Metric Multidimensional Scaling      mds
-#> 5           Non-metric Multidimensional Scaling     nmds
-#> 6                Principal Coordinates Analysis     pcoa
-#> 7   t-distributed Stochastic Neighbor Embedding     tsne
-#> 8 Uniform Manifold Approximation and Projection     umap
+#>                                                       name       id
+#> 1 Discriminant Canonical Analysis of Principal Coordinates    capda
+#> 2            Constrained Analysis of Principal Coordinates capscale
+#> 3                       Distance-based Redundancy Analysis    dbrda
+#> 4                                Isometric Feature Mapping   isomap
+#> 5                          Metric Multidimensional Scaling      mds
+#> 6                      Non-metric Multidimensional Scaling     nmds
+#> 7                           Principal Coordinates Analysis     pcoa
+#> 8              t-distributed Stochastic Neighbor Embedding     tsne
+#> 9            Uniform Manifold Approximation and Projection     umap
 
     # Find the method for 'MDS'.
     m <- match_dist_ord('MDS')
