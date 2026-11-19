@@ -117,7 +117,9 @@ identified. Its attributes are:
 - `n_iters`: The number of OptSpace iterations run.
 
 - `dm`: Only with `distances = TRUE`. A `dist` object of distances
-  between the kept samples.
+  between the kept samples, of class `c("ecodive_dist", "dist")`, as
+  [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
+  returns.
 
 ## Details
 

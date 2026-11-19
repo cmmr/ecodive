@@ -399,6 +399,12 @@ Methods</em>, 21, 83–91.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7  3.964549e-21   TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12 3.275213e-02   TRUE</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># A volcano plot of one covariate, here the first: moderate vs mild.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="ancombc-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">'age'</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="ancombc-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># ANCOM-BC2, with zeros as missing values.</span></span></span>
 <span class="r-in"><span>    <span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">x</span>, <span class="op">~</span> <span class="va">status</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta</span>, groups <span class="op">=</span> <span class="st">'status'</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span></span>

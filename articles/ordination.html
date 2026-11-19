@@ -117,6 +117,13 @@ such as a matrix, a sparse matrix, or a <code>phyloseq</code> or
 <span><span class="co">#&gt; 6          5.4         3.9          1.7         0.4  setosa</span></span>
 <span></span>
 <span><span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the distances as a heatmap. Sorted by
+species, the three species show as blocks of short distances along the
+diagonal, and setosa stands far from the other two: the structure that
+an ordination lays out on a few axes.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ordination_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="480"></p>
 </div>
 <div class="section level2">
 <h2 id="choosing-a-method">Choosing a method<a class="anchor" aria-label="anchor" href="#choosing-a-method"></a>
@@ -257,7 +264,7 @@ with the other names each one answers to.</p>
 <p>Every method returns the same kind of object: a matrix with one row
 per sample and one column per axis, so it goes straight into
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or a data frame.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          PCoA1       PCoA2        PCoA3</span></span>
@@ -271,7 +278,7 @@ per sample and one column per axis, so it goes straight into
 They always begin with <code>method</code>, <code>eig</code> (the
 eigenvalues), and <code>prop</code> (the proportion of variance on each
 axis), followed by the method’s own.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  'ecodive_ord' num [1:150, 1:3] 0.169 0.171 0.187 0.18 0.176 ...</span></span>
 <span><span class="co">#&gt;  - attr(*, "dimnames")=List of 2</span></span>
@@ -289,9 +296,9 @@ share of the variance from <code>prop</code>. Give <code>groups</code>
 (and <code>data</code>) as for the tests to colour the samples, with a
 legend. The axes share one scale (<code>asp = 1</code>), to keep
 distances true.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="480"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="480"></p>
 <p>Any argument of <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, such as <code>main</code>,
 <code>xlim</code> or <code>cex</code>, replaces the default, and
 <code>axes = c(1, 3)</code> plots other axes. See
@@ -305,7 +312,7 @@ distances true.</p>
 keeps its own arguments and defaults, and <code>seed</code> is accepted
 (and ignored) by the methods that have no random parts, so one call can
 run them all.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ords</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">'PCoA'</span>   <span class="op">=</span> <span class="fu"><a href="../reference/dist_ord.html">dist_ord</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'pcoa'</span><span class="op">)</span>,</span>
 <span>  <span class="st">'MDS'</span>    <span class="op">=</span> <span class="fu"><a href="../reference/dist_ord.html">dist_ord</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'mds'</span>,    seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -317,12 +324,12 @@ run them all.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">nm</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ords</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ords</span><span class="op">[[</span><span class="va">nm</span><span class="op">]</span><span class="op">]</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, main <span class="op">=</span> <span class="va">nm</span>, xlab <span class="op">=</span> <span class="st">''</span>, ylab <span class="op">=</span> <span class="st">''</span>, sub <span class="op">=</span> <span class="st">''</span>, legend <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="672"></p>
 <p>Names are matched forgivingly, so <code>'PCoA'</code>,
 <code>'cmdscale'</code>, <code>'metaMDS'</code>, and
 <code>'t-SNE'</code> all work. Finished code should use the primary
 names shown by <code>list_dist_ords('id')</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_ords.html">list_dist_ords</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                            name       id</span></span>
 <span><span class="co">#&gt; 1 Constrained Analysis of Principal Coordinates capscale</span></span>
@@ -342,14 +349,14 @@ UniFrac, are not Euclidean: PCoA then finds negative eigenvalues, which
 cannot be drawn. <code>correction = 'lingoes'</code> or
 <code>'cailliez'</code> adds the smallest constant that removes them, as
 <code>ape::pcoa()</code> does.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm</span>, correction <span class="op">=</span> <span class="st">'cailliez'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'constant'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.2866821</span></span></code></pre></div>
 <p>NMDS sidesteps the question by fitting only the rank order of the
 distances. Its <code>stress</code> attribute measures how well it did:
 below 0.1 is good, and below 0.05 is excellent.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="../reference/nmds.html">nmds</a></span><span class="op">(</span><span class="va">dm</span><span class="op">)</span>, <span class="st">'stress'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.03775687</span></span></code></pre></div>
 </div>
@@ -359,7 +366,7 @@ below 0.1 is good, and below 0.05 is excellent.</p>
 <p><code><a href="../reference/dbrda.html">dbrda()</a></code> and <code><a href="../reference/capscale.html">capscale()</a></code> find the axes of
 <code>dm</code> that sample metadata explain. Give one variable as
 <code>groups</code>, or several in a <code>formula</code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dbrda.html">dbrda</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'r_squared'</span><span class="op">)</span></span>
@@ -371,15 +378,15 @@ below 0.1 is good, and below 0.05 is excellent.</p>
 <span><span class="co">#&gt; Speciesversicolor -0.1411505  0.4943388    0</span></span>
 <span><span class="co">#&gt; Speciesvirginica  -0.3575347 -0.3694093    0</span></span></code></pre></div>
 <p>Its plot labels the centroid of each species, and gives the <span class="math inline">R^2</span> below:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="480"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="480"></p>
 <p>The first two axes (<code>dbRDA1</code>, <code>dbRDA2</code>) are
 constrained by species, and the third (<code>MDS1</code>) is the largest
 remaining variation. A formula can hold several variables, and
 <code>Condition()</code> removes the effect of one before the others are
 fitted, as in <code>vegan</code>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dbrda.html">dbrda</a></span><span class="op">(</span><span class="va">dm</span>, data <span class="op">=</span> <span class="va">iris</span>, formula <span class="op">=</span> <span class="op">~</span> <span class="va">Species</span> <span class="op">+</span> <span class="fu">Condition</span><span class="op">(</span><span class="va">Sepal.Width</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'inertia'</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   conditional   constrained unconstrained </span></span>
@@ -391,7 +398,7 @@ the usual choice for community data, and it takes <code>groups</code>,
 <code>formula</code> and <code>Condition()</code> as
 <code><a href="../reference/dbrda.html">dbrda()</a></code> does. Its <code>loadings</code> attribute holds the
 features’ (species) scores, for a biplot.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rda.html">rda</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, norm <span class="op">=</span> <span class="st">'hellinger'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'r_squared'</span><span class="op">)</span></span>
@@ -405,13 +412,13 @@ features’ (species) scores, for a biplot.</p>
 <span><span class="co">#&gt; Petal.Width  -0.7519133 -0.03006730  0.19051616</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="480"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="480"></p>
 <p>db-RDA of Euclidean distances is RDA, so
 <code>rda(counts, ..., norm = 'hellinger')</code> has the same axes and
 <span class="math inline">R^2</span> as <code><a href="../reference/dbrda.html">dbrda()</a></code> of the
 Hellinger distances, <code>euclidean(counts, norm = 'hellinger')</code>.
 Its permutation test is <code><a href="../reference/permanova.html">permanova()</a></code> of those distances.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/euclidean.html">euclidean</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, norm <span class="op">=</span> <span class="st">'hellinger'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'r_squared'</span><span class="op">)</span>, dbrda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="../reference/dbrda.html">dbrda</a></span><span class="op">(</span><span class="va">hd</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span>, <span class="st">'r_squared'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       rda     dbrda </span></span>
@@ -442,7 +449,7 @@ series of (partial) RDAs of a count table (with <code>norm</code>),
 db-RDAs of distances, or, with <code>chisquare = TRUE</code>, CCAs. Here
 the petal measurements are partitioned between species and sepal
 size:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/varpart.html">varpart</a></span><span class="op">(</span></span>
 <span>  <span class="va">iris</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, species <span class="op">=</span> <span class="op">~</span> <span class="va">Species</span>, sepal <span class="op">=</span> <span class="op">~</span> <span class="va">Sepal.Length</span> <span class="op">+</span> <span class="va">Sepal.Width</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">iris</span>, norm <span class="op">=</span> <span class="st">'hellinger'</span> <span class="op">)</span></span>
@@ -469,12 +476,12 @@ size:</p>
 <span><span class="co">#&gt; [c] species &amp; sepal NA    0.4919        0.4886    FALSE</span></span>
 <span><span class="co">#&gt; [d]       residuals NA    0.2596        0.2668    FALSE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">vp</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="480"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="" width="480"></p>
 <p>Only the unique fractions (<code>[a]</code> and <code>[b]</code>
 here, marked <code>testable</code>) can be tested, each by its set
 conditioned on the others; here <code>[b]</code>, sepal size given
 species:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/euclidean.html">euclidean</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, norm <span class="op">=</span> <span class="st">'hellinger'</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">iris</span>,</span>
 <span>  formula <span class="op">=</span> <span class="op">~</span> <span class="va">Sepal.Length</span> <span class="op">+</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="fu">Condition</span><span class="op">(</span><span class="va">Species</span><span class="op">)</span>, permutations <span class="op">=</span> <span class="fl">99</span> <span class="op">)</span></span>
@@ -501,7 +508,7 @@ stops before the adjusted <span class="math inline">R^2</span> would
 exceed that of all the candidates together. By default it first tests
 the global model, all candidates together, and selects nothing if that
 is not significant:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/forward_select.html">forward_select</a></span><span class="op">(</span></span>
 <span>  <span class="va">iris</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="op">~</span> <span class="va">Species</span> <span class="op">+</span> <span class="va">Sepal.Length</span> <span class="op">+</span> <span class="va">Sepal.Width</span>, <span class="va">iris</span>,</span>
 <span>  norm <span class="op">=</span> <span class="st">'hellinger'</span>, permutations <span class="op">=</span> <span class="fl">99</span> <span class="op">)</span></span>
@@ -523,7 +530,7 @@ is not significant:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fs</span>, <span class="st">'selected'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ~Species + Sepal.Width</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fs</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="480"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="480"></p>
 <p><code>principal_response_curves()</code>, which is planned, will also
 build on <code><a href="../reference/rda.html">rda()</a></code>.</p>
 <p><code><a href="../reference/cca.html">cca()</a></code>, canonical <strong>correspondence</strong>
@@ -538,7 +545,7 @@ species a large weight, can be sensitive to them. It takes the same
 <code>groups</code>, <code>formula</code> and <code>Condition()</code>,
 and its <code>adj_r_squared</code> is estimated by permutation, as
 <code>vegan::RsquareAdj()</code> does.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cca.html">cca</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'r_squared'</span><span class="op">)</span></span>
@@ -553,7 +560,7 @@ species turnover, and a linear one (PCA, RDA) on transformed counts for
 short gradients; and a constrained method (RDA, CCA) to ask how much of
 the variation metadata explain, and an unconstrained one (PCA, CA) to
 see its main patterns, whatever drives them.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ca.html">ca</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.95585403 0.03431714</span></span></code></pre></div>
@@ -570,11 +577,11 @@ scikit-learn’s <code>PLSRegression</code> and
 <code>norm = 'clr'</code> (with a <code>pseudocount</code>) is the usual
 choice. Its <code>vip</code> attribute ranks the features by their
 importance to the separation.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plsda.html">plsda</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="480"></p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<p><img src="ordination_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" alt="" width="480"></p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'vip'</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 PLSDA1    PLSDA2</span></span>
 <span><span class="co">#&gt; Sepal.Length 0.9429260 0.8933652</span></span>
@@ -587,7 +594,7 @@ apart relative to the variation within them, as <code><a href="https://rdrr.io/p
 computes them. It needs more samples than features, so for microbiome
 tables run it on a few axes of an unconstrained ordination, such as
 <code><a href="../reference/pcoa.html">pcoa()</a></code>, rather than on the taxa.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lda.html">lda</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.991212605 0.008787395</span></span></code></pre></div>
@@ -599,12 +606,12 @@ other variation, unrelated to the groups, on orthogonal axes
 one-component PLS-DA; the rotation makes the plot easier to read. Its
 <code>r2x</code> and <code>r2y</code> attributes give the variance of
 the table, and of the groups, that the model explains.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">two</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/droplevels.html" class="external-link">droplevels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">iris</span>, <span class="va">Species</span> <span class="op">!=</span> <span class="st">'setosa'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/oplsda.html">oplsda</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">two</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span>, <span class="st">'Species'</span>, <span class="va">two</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" alt="" width="480"></p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<p><img src="ordination_files/figure-html/unnamed-chunk-23-1.png" class="r-plt" alt="" width="480"></p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>r2x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'r2x'</span><span class="op">)</span>, r2y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'r2y'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       r2x       r2y </span></span>
 <span><span class="co">#&gt; 0.8608168 0.7746364</span></span></code></pre></div>
@@ -614,7 +621,7 @@ separation even in random data. So a PLS-DA or OPLS-DA plot is no
 evidence that the groups differ. Test the difference with a permutation
 test of the distances, such as <code><a href="../reference/permanova.html">permanova()</a></code>, or estimate how
 well the groups of new samples are predicted by cross-validation.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">grp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span>, <span class="st">'b'</span><span class="op">)</span>, <span class="fl">75</span><span class="op">)</span><span class="op">)</span>  <span class="co"># Random groups.</span></span>
 <span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plsda.html">plsda</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span>, <span class="va">grp</span><span class="op">)</span></span>
@@ -638,7 +645,7 @@ works on any of ecodive’s transformations, such as
 <code>loadings</code> attribute holds each feature’s direction, and
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws them as arrows, for a biplot (the ten longest,
 by default; <code>loadings = Inf</code> draws them all).</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'loadings'</span><span class="op">)</span></span>
@@ -649,18 +656,18 @@ by default; <code>loadings = Inf</code> draws them all).</p>
 <span><span class="co">#&gt; Petal.Width   0.5648565 0.06694199  0.6342727</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-24-1.png" class="r-plt" alt="" width="480"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-25-1.png" class="r-plt" alt="" width="480"></p>
 <p>PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign. <code><a href="../reference/pca.html">pca()</a></code> also returns the loadings, and
 never forms the 150-by-150 distance matrix.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="../reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="fu"><a href="../reference/euclidean.html">euclidean</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p><code><a href="../reference/rpca.html">rpca()</a></code> is robust Aitchison PCA (as in the
 <code>gemelli</code> Python package and QIIME 2’s DEICODE). It treats
 zeros as missing rather than adding a pseudocount, which suits sparse
 microbiome counts.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca.html">rpca</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 96.8  2.7  0.5</span></span></code></pre></div>
@@ -670,7 +677,7 @@ microbiome counts.</p>
 </h2>
 <p><code><a href="../reference/pcoa_biplot.html">pcoa_biplot()</a></code> projects each feature of a table onto a
 PCoA, giving an arrow for each one, as scikit-bio does.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span>    <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span>
 <span><span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcoa_biplot.html">pcoa_biplot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">scores</span></span>
@@ -685,7 +692,7 @@ PCoA, giving an arrow for each one, as scikit-bio does.</p>
 any ordination. Numeric variables get an arrow and r-squared, factors a
 centroid per level, and each one a permutation p-value, as
 <code>vegan::envfit()</code> gives.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/envfit.html">envfit</a></span><span class="op">(</span><span class="va">ord</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
 <span><span class="co">#&gt;                       variable      level       PCoA1       PCoA2        PCoA3</span></span>
@@ -709,7 +716,7 @@ centroid per level, and each one a permutation p-value, as
 <span><span class="co"># each species' centroid.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-28-1.png" class="r-plt" alt="" width="480"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-29-1.png" class="r-plt" alt="" width="480"></p>
 </div>
 <div class="section level2">
 <h2 id="comparing-two-ordinations">Comparing two ordinations<a class="anchor" aria-label="anchor" href="#comparing-two-ordinations"></a>
@@ -722,7 +729,7 @@ asks whether they agree better than chance (PROTEST), as
 UniFrac PCoAs of 30 simulated samples of the six taxa in ecodive’s
 example tree, along a gradient that favours some taxa at one end and
 others at the other:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">taxa</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span>
 <span><span class="va">grad</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, length.out <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
@@ -748,9 +755,9 @@ others at the other:</p>
 Bray-Curtis ones it was fitted to are its <code>target</code> attribute.
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws an arrow from each sample’s rotated point to
 its target, which shows where the two metrics disagree.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ordination_files/figure-html/unnamed-chunk-30-1.png" class="r-plt" alt="" width="480"></p>
+<p><img src="ordination_files/figure-html/unnamed-chunk-31-1.png" class="r-plt" alt="" width="480"></p>
 </div>
 <div class="section level2">
 <h2 id="speed-and-reproducibility">Speed and reproducibility<a class="anchor" aria-label="anchor" href="#speed-and-reproducibility"></a>
@@ -760,7 +767,7 @@ its target, which shows where the two metrics disagree.</p>
 threads. Methods with random starts (<code><a href="../reference/mds.html">mds()</a></code>,
 <code><a href="../reference/nmds.html">nmds()</a></code>, <code><a href="../reference/tsne.html">tsne()</a></code>, and <code><a href="../reference/umap.html">umap()</a></code>) take
 a <code>seed</code>, so a seed always gives the same result.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="../reference/nmds.html">nmds</a></span><span class="op">(</span><span class="va">dm</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="../reference/nmds.html">nmds</a></span><span class="op">(</span><span class="va">dm</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 </div>

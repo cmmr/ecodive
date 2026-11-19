@@ -341,6 +341,8 @@ base graphics.
 
 - [`plot(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)
   : Plot an ordination
+- [`plot(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
+  : Plot a distance matrix
 - [`plot(`*`<ecodive_envfit>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.md)
   : Plot fitted variables
 - [`plot(`*`<ecodive_test>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_test.md)
@@ -354,6 +356,12 @@ base graphics.
   : Plot a Dirichlet-multinomial t-test
 - [`plot(`*`<ecodive_ancom>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.md)
   : Plot an ANCOM result
+- [`plot(`*`<ecodive_ancombc>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  [`plot(`*`<ecodive_ancombc_pairwise>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  [`plot(`*`<ecodive_ancombc_dunnett>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  [`plot(`*`<ecodive_ancombc_global>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  [`plot(`*`<ecodive_ancombc_trend>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  : Plot an ANCOM-BC result
 - [`plot(`*`<ecodive_varpart>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.md)
   : Plot a variation partitioning
 - [`plot(`*`<ecodive_forward_select>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.md)

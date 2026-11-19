@@ -100,7 +100,18 @@ beta_div(
 
 ## Value
 
-A numeric vector.
+A distance matrix: a `dist` object with one distance per pair of samples
+(the packed lower triangle), labelled with the sample names, as
+[`stats::dist()`](https://rdrr.io/r/stats/dist.html) returns. Its class
+is `c("ecodive_dist", "dist")`, so that
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws it as a
+heatmap (see
+[`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md));
+every function for `dist` objects, such as
+[`as.matrix()`](https://rdrr.io/r/base/matrix.html), works on it as
+before. Each metric's own function, such as
+[`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), returns
+the same.
 
 ## Details
 
@@ -218,11 +229,16 @@ for references.
 #> Stool               1
     
     # Bray-Curtis distances
-    beta_div(ex_counts, 'bray')
+    dm <- beta_div(ex_counts, 'bray')
+    dm
 #>          Saliva      Gums      Nose
 #> Gums  0.5905768                    
 #> Nose  0.9601770 0.9704797          
 #> Stool 0.9916667 0.9906729 0.9926199
+
+    # As a heatmap.
+    plot(dm)
+
     
     # Generalized UniFrac distances
     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)

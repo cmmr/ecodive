@@ -620,7 +620,12 @@ table(changed = changed, rejected = res_ancom$reject)
 #> changed FALSE TRUE
 #>   FALSE   140    0
 #>   TRUE      8    2
+plot(res_ancom)
 ```
+
+![Dot chart of ANCOM's W for each taxon, largest first, with the
+rejected taxa highlighted and a dashed line at the
+cutoff.](compositional_files/figure-html/ancom-1.png)
 
 W ranks the ten changed taxa first, but ANCOM’s cutoff rule declares
 only two of them: it is conservative, and gives no effect sizes.
@@ -656,7 +661,13 @@ table(changed = changed, rejected = res_dm$reject)
 #> changed FALSE TRUE
 #>   FALSE   140    0
 #>   TRUE      0   10
+plot(res_dm)
 ```
+
+![Volcano plot of the Dirichlet-multinomial t-test: each taxon's log2
+fold change against its adjusted p-value, with the differentially
+abundant taxa highlighted and
+named.](compositional_files/figure-html/dirmult-1.png)
 
 It finds all ten changed taxa and nothing else. But compare its fold
 changes with the truth, log2(8) = 3 for the blooms and log2(1/4) = −2

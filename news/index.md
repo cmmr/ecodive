@@ -54,6 +54,35 @@
     the adjusted R-squared at each step, and
     [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) the
     best correlation for each number of variables.
+  - Distance matrices give a heatmap, in the samples’ order or sorted by
+    `groups`, with a colour key: those of
+    [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
+    and every metric function, of
+    [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
+    [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
+    [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) (over
+    features), and
+    [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)’s `dm`.
+    These now have class `c("ecodive_dist", "dist")`, so that
+    [`plot()`](https://rdrr.io/r/graphics/plot.default.html) knows them;
+    base R has no
+    [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method for
+    `dist` objects, and every function for `dist` objects works on them
+    as before. Code that checks `identical(class(d), "dist")` or
+    `class(d) == "dist"` should use `inherits(d, "dist")` instead.
+  - [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
+    and
+    [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
+    give a volcano plot of one covariate’s log fold changes,
+    [`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+    and
+    [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+    a heatmap of the log fold change of each feature in each comparison,
+    and
+    [`ancombc_global()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+    and
+    [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+    a dot chart of their statistics.
 
 - New [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) runs
   a principal coordinates analysis (classical multidimensional scaling)

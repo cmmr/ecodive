@@ -41,6 +41,18 @@ head(iris)
 dm <- bray(iris[, 1:4])
 ```
 
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+distances as a heatmap. Sorted by species, the three species show as
+blocks of short distances along the diagonal, and setosa stands far from
+the other two: the structure that an ordination lays out on a few axes.
+
+``` r
+
+plot(dm, 'Species', iris)
+```
+
+![](ordination_files/figure-html/unnamed-chunk-3-1.png)
+
 ## Choosing a method
 
 | Function | Method | Input | Best for |
@@ -116,7 +128,7 @@ legend. The axes share one scale (`asp = 1`), to keep distances true.
 plot(ord, 'Species', iris)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-5-1.png)
+![](ordination_files/figure-html/unnamed-chunk-6-1.png)
 
 Any argument of
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html), such as
@@ -148,7 +160,7 @@ for (nm in names(ords))
   plot(ords[[nm]], 'Species', iris, main = nm, xlab = '', ylab = '', sub = '', legend = NULL)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-6-1.png)
+![](ordination_files/figure-html/unnamed-chunk-7-1.png)
 
 Names are matched forgivingly, so `'PCoA'`, `'cmdscale'`, `'metaMDS'`,
 and `'t-SNE'` all work. Finished code should use the primary names shown
@@ -220,7 +232,7 @@ Its plot labels the centroid of each species, and gives the R^2 below:
 plot(ord, 'Species', iris)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-11-1.png)
+![](ordination_files/figure-html/unnamed-chunk-12-1.png)
 
 The first two axes (`dbRDA1`, `dbRDA2`) are constrained by species, and
 the third (`MDS1`) is the largest remaining variation. A formula can
@@ -260,7 +272,7 @@ head(attr(ord, 'loadings'))
 plot(ord, 'Species', iris)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-13-1.png)
+![](ordination_files/figure-html/unnamed-chunk-14-1.png)
 
 db-RDA of Euclidean distances is RDA, so
 `rda(counts, ..., norm = 'hellinger')` has the same axes and R^2 as
@@ -333,7 +345,7 @@ vp
 plot(vp)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-15-1.png)
+![](ordination_files/figure-html/unnamed-chunk-16-1.png)
 
 Only the unique fractions (`[a]` and `[b]` here, marked `testable`) can
 be tested, each by its set conditioned on the others; here `[b]`, sepal
@@ -395,7 +407,7 @@ attr(fs, 'selected')
 plot(fs)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-17-1.png)
+![](ordination_files/figure-html/unnamed-chunk-18-1.png)
 
 `principal_response_curves()`, which is planned, will also build on
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md).
@@ -457,7 +469,7 @@ ord <- plsda(round(iris[, 1:4] * 10), 'Species', iris)
 plot(ord)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-20-1.png)
+![](ordination_files/figure-html/unnamed-chunk-21-1.png)
 
 ``` r
 
@@ -501,7 +513,7 @@ ord <- oplsda(round(two[, 1:4] * 10), 'Species', two)
 plot(ord)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-22-1.png)
+![](ordination_files/figure-html/unnamed-chunk-23-1.png)
 
 ``` r
 
@@ -566,7 +578,7 @@ attr(ord, 'loadings')
 plot(ord, 'Species', iris)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-24-1.png)
+![](ordination_files/figure-html/unnamed-chunk-25-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -643,7 +655,7 @@ plot(ord, 'Species', iris)
 plot(fit, add = TRUE)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-28-1.png)
+![](ordination_files/figure-html/unnamed-chunk-29-1.png)
 
 ## Comparing two ordinations
 
@@ -693,7 +705,7 @@ two metrics disagree.
 plot(fit)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-30-1.png)
+![](ordination_files/figure-html/unnamed-chunk-31-1.png)
 
 ## Speed and reproducibility
 

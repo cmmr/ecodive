@@ -45,8 +45,12 @@ vlr(counts, margin = 1L, pseudocount = NULL, cpus = n_cpus())
 
 A `dist` object **over the features** (the packed lower triangle, as
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
-returns over samples), labelled with the feature names. Attributes,
-besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`:
+returns over samples), labelled with the feature names, of class
+`c("ecodive_dist", "dist")`, so that
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws it as a
+heatmap (see
+[`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)).
+Attributes, besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`:
 
 - `method`: `'vlr'`.
 

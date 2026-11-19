@@ -52,7 +52,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 | Comparing ordinations |  | [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md), [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md) |
 | Model building |  | [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md), [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md), [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) |
 | Statistical tests | [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md) | [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md), [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md), [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md), [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md), [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md) |
-| Plotting |  | [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of ordinations, tests, [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md), [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md), [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md), and the other results |
+| Plotting |  | [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of distance matrices, ordinations, tests, [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md), [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md), and the other results |
 | Data preparation |  | [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md), [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md), [`read_tree()`](https://cmmr.github.io/ecodive/reference/read_tree.md) |
 
 Each wrapper runs its functions by name, such as
@@ -691,6 +691,8 @@ base graphics.
 
 - [`plot(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)
   : Plot an ordination
+- [`plot(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
+  : Plot a distance matrix
 - [`plot(`*`<ecodive_envfit>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.md)
   : Plot fitted variables
 - [`plot(`*`<ecodive_test>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_test.md)
@@ -704,6 +706,12 @@ base graphics.
   : Plot a Dirichlet-multinomial t-test
 - [`plot(`*`<ecodive_ancom>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.md)
   : Plot an ANCOM result
+- [`plot(`*`<ecodive_ancombc>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  [`plot(`*`<ecodive_ancombc_pairwise>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  [`plot(`*`<ecodive_ancombc_dunnett>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  [`plot(`*`<ecodive_ancombc_global>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  [`plot(`*`<ecodive_ancombc_trend>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
+  : Plot an ANCOM-BC result
 - [`plot(`*`<ecodive_varpart>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.md)
   : Plot a variation partitioning
 - [`plot(`*`<ecodive_forward_select>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.md)

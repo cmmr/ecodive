@@ -755,7 +755,9 @@ largest W differentially abundant:</p>
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>
 <span><span class="co">#&gt;   FALSE   140    0</span></span>
-<span><span class="co">#&gt;   TRUE      8    2</span></span></code></pre></div>
+<span><span class="co">#&gt;   TRUE      8    2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_ancom</span><span class="op">)</span></span></code></pre></div>
+<p><img src="compositional_files/figure-html/ancom-1.png" class="r-plt" alt="Dot chart of ANCOM's W for each taxon, largest first, with the rejected taxa highlighted and a dashed line at the cutoff." width="576"></p>
 <p>W ranks the ten changed taxa first, but ANCOM’s cutoff rule declares
 only two of them: it is conservative, and gives no effect sizes.</p>
 <p><strong><a href="https://doi.org/10.1186/2049-2618-2-15" class="external-link">ALDEx2</a></strong>
@@ -785,7 +787,9 @@ version, with Welch’s t-test; <code>contrast</code> is
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>
 <span><span class="co">#&gt;   FALSE   140    0</span></span>
-<span><span class="co">#&gt;   TRUE      0   10</span></span></code></pre></div>
+<span><span class="co">#&gt;   TRUE      0   10</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">)</span></span></code></pre></div>
+<p><img src="compositional_files/figure-html/dirmult-1.png" class="r-plt" alt="Volcano plot of the Dirichlet-multinomial t-test: each taxon's log2 fold change against its adjusted p-value, with the differentially abundant taxa highlighted and named." width="576"></p>
 <p>It finds all ten changed taxa and nothing else. But compare its fold
 changes with the truth, log2(8) = 3 for the blooms and log2(1/4) = −2
 for the declines:</p>

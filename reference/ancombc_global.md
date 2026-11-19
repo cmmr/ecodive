@@ -228,7 +228,8 @@ to gene expression data on ordered categories. *Biometrics*, 66,
       row.names = rownames(x) )
     fit <- ancombc2(x, ~ status + age, meta, groups = 'status')
 
-    ancombc_global(fit)
+    res <- ancombc_global(fit)
+    res
 #>   feature           w      p_value   p_adjusted reject
 #> 1      F1  1.78597500 4.568396e-01 1.000000e+00  FALSE
 #> 2      F2 60.28742380 2.361777e-06 1.889422e-05   TRUE
@@ -238,6 +239,9 @@ to gene expression data on ordered categories. *Biometrics*, 66,
 #> 6      F6 25.90625478 2.216400e-04 1.551480e-03   TRUE
 #> 7      F7  0.86510213 9.745627e-01 1.000000e+00  FALSE
 #> 8      F8  1.58903521 5.128828e-01 1.000000e+00  FALSE
+    plot(res)
+
+
     res <- ancombc_pairwise(fit)
     res[res$reject, ]
 #>    feature        comparison    log_fc        se         w      p_value
@@ -250,6 +254,9 @@ to gene expression data on ordered categories. *Biometrics*, 66,
 #> 5  0.0007287618   TRUE
 #> 17 0.0060623903   TRUE
 #> 18 0.0229527490   TRUE
+    plot(res)
+
+
     ancombc_dunnett(fit)
 #>    feature      comparison       log_fc        se           w      p_value
 #> 1       F1 moderate - mild -0.130278285 0.4277787 -0.30454595 1.000000e+00

@@ -137,7 +137,12 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A numeric vector.</p>
+    <p>A distance matrix: a <code>dist</code> object with one distance per pair of
+samples (the packed lower triangle), labelled with the sample names, as
+<code><a href="https://rdrr.io/r/stats/dist.html" class="external-link">stats::dist()</a></code> returns. Its class is <code>c("ecodive_dist", "dist")</code>, so
+that <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws it as a heatmap (see <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code>); every
+function for <code>dist</code> objects, such as <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>, works on it as
+before. Each metric's own function, such as <code><a href="bray.html">bray()</a></code>, returns the same.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -200,11 +205,16 @@ Costea et al. (2014) for the impact on community clustering.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Stool               1</span>
 <span class="r-in"><span>    </span></span>
 <span class="r-in"><span>    <span class="co"># Bray-Curtis distances</span></span></span>
-<span class="r-in"><span>    <span class="fu">beta_div</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'bray'</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu">beta_div</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'bray'</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">dm</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          Saliva      Gums      Nose</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gums  0.5905768                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Nose  0.9601770 0.9704797          </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Stool 0.9916667 0.9906729 0.9926199</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># As a heatmap.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="beta_div-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span>    </span></span>
 <span class="r-in"><span>    <span class="co"># Generalized UniFrac distances</span></span></span>
 <span class="r-in"><span>    <span class="fu">beta_div</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'GUniFrac'</span>, tree <span class="op">=</span> <span class="va">ex_tree</span><span class="op">)</span></span></span>

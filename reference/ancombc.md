@@ -389,6 +389,12 @@ Methods*, 21, 83–91.
 #> 7  3.964549e-21   TRUE
 #> 12 3.275213e-02   TRUE
 
+    # A volcano plot of one covariate, here the first: moderate vs mild.
+    plot(res)
+
+    plot(res, 'age')
+
+
     # ANCOM-BC2, with zeros as missing values.
     res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
     head(res2)

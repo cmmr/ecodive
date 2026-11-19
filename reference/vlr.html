@@ -94,7 +94,9 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>dist</code> object <strong>over the features</strong> (the packed lower triangle,
-as <code><a href="beta_div.html">beta_div()</a></code> returns over samples), labelled with the feature names.
+as <code><a href="beta_div.html">beta_div()</a></code> returns over samples), labelled with the feature names,
+of class <code>c("ecodive_dist", "dist")</code>, so that <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws it as a
+heatmap (see <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code>).
 Attributes, besides <code>dist</code>'s <code>Size</code>, <code>Labels</code>, <code>Diag</code> and <code>Upper</code>:</p><ul><li><p><code>method</code>: <code>'vlr'</code>.</p></li>
 <li><p><code>pseudocount</code>: the pseudocount used (<code>0</code> for none).</p></li>
 </ul><p>It is a dissimilarity, so it can be given as <code>dm</code> to <code><a href="pcoa.html">pcoa()</a></code>,
