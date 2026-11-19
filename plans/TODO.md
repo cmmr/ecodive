@@ -31,7 +31,7 @@ meaningful sense, so they sit just after the methods they build on.
 | 8 | [x] `simper()` (dbf0c2b) | [simper.md](simper.md) | port (ecopy, MIT) + Clarke's permutation p-values | High demand in community ecology; simple. |
 | 9 | [x] `bioenv()` (96381a6) | [bioenv.md](bioenv.md) | port (skbio) | In QIIME 2; simple. |
 | 10 | [x] `lda()` (7323057) | [lda_capda.md](lda_capda.md) | port (scikit-learn) | Simple; `capda()` needs it. |
-| 11 | [ ] `oplsda()` | [plsda_oplsda.md](plsda_oplsda.md) | port (pyopls, MIT) | Metabolomics demand; small on top of `plsda()`. |
+| 11 | [x] `oplsda()` (4c7e646) | [plsda_oplsda.md](plsda_oplsda.md) | port (pyopls, MIT) | Metabolomics demand; small on top of `plsda()`. |
 | 12 | [ ] `varpart()` | [varpart_forward_select.md](varpart_forward_select.md) | derived (on `rda()` / `dbrda()`) | High demand in ecology; formulas only. |
 | 13 | [ ] `forward_select()` | [varpart_forward_select.md](varpart_forward_select.md) | derived (on `rda()` / `dbrda()`) | Usually used alongside varpart. |
 | 14 | [ ] `capda()` | [lda_capda.md](lda_capda.md) | derived (`pcoa()` + `lda()`) | Anderson's CAP, popular in marine ecology. |
