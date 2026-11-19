@@ -305,5 +305,5 @@ Pedregosa, F., et al. (2011). Scikit-learn: machine learning in Python.
 \emph{Journal of Machine Learning Research}, 12, 2825-2830.
 }
 \seealso{
-\code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=count_ord]{count_ord()}}
+\code{\link[=oplsda]{oplsda()}}, \code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=count_ord]{count_ord()}}
 }

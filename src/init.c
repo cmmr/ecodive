@@ -24,6 +24,7 @@ extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_oplsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_plsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa(SEXP, SEXP, SEXP, SEXP);
@@ -70,6 +71,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_nmds",      (DL_FUNC) &C_nmds,      6},
   {"C_normalize", (DL_FUNC) &C_normalize, 6},
   {"C_pca",       (DL_FUNC) &C_pca,       7},
+  {"C_oplsda",    (DL_FUNC) &C_oplsda,    8},
   {"C_plsda",     (DL_FUNC) &C_plsda,     8},
   {"C_rda",       (DL_FUNC) &C_rda,       9},
   {"C_pcoa",      (DL_FUNC) &C_pcoa,      4},

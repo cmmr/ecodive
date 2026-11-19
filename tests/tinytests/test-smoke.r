@@ -76,11 +76,12 @@
   expect_true(is_ord(ca(counts, cpus = cpus), 'CA'))
   expect_true(is_ord(lda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'LD'))
   expect_true(is_ord(plsda(counts, 'grp', meta, norm = 'clr', pseudocount = 1, cpus = cpus), 'PLSDA'))
+  expect_true(is_ord(oplsda(counts, 'grp', meta, norm = 'clr', pseudocount = 1, cpus = cpus), 'p1'))
   expect_true(is_ord(dist_ord(dm, 'pcoa', cpus = cpus), 'PCoA'))
   expect_true(all(c('pcoa', 'nmds', 'umap') %in% list_dist_ords('id')))
   expect_identical(match_dist_ord('cmdscale')$id, 'pcoa')
   expect_true(is_ord(count_ord(counts, 'pca', cpus = cpus), 'PC'))
-  expect_identical(list_count_ords('id'), c('ca', 'cca', 'lda', 'pca', 'plsda', 'rda', 'rpca'))
+  expect_identical(list_count_ords('id'), c('ca', 'cca', 'lda', 'oplsda', 'pca', 'plsda', 'rda', 'rpca'))
   expect_identical(match_count_ord('prcomp')$id, 'pca')
 
   o  <- pcoa(dm, cpus = cpus)

@@ -19,10 +19,12 @@
   expect_identical(count_ord(m, 'pca', seed = 1, cpus = 1), pca(m, cpus = 1))
 
   # Every method returns the common attributes first, in the same order.
-  # lda() and plsda() need groups; the others run without them.
+  # lda() and plsda() need groups; the others run without them. oplsda()
+  # needs two groups, and takes `n_orthogonal` rather than `n_axes`.
   grp <- rep(c('a', 'b', 'c'), 10)
   for (id in list_count_ords(val = 'id')) {
     ord <- if (id %in% c('lda', 'plsda')) count_ord(m, id, grp, n_axes = 2, seed = 1, cpus = 1)
+           else if (id == 'oplsda') count_ord(m, id, rep(c('a', 'b'), 15), n_orthogonal = 1, cpus = 1)
            else count_ord(m, id, n_axes = 2, seed = 1, cpus = 1)
     expect_true(is.matrix(ord) && is.double(ord), info = id)
     expect_identical(rownames(ord), rownames(m), info = id)
@@ -68,6 +70,11 @@
   expect_identical(mo('Partial Least Squares Discriminant Analysis'), 'plsda')
   expect_identical(mo('PLS discriminant analysis'), 'plsda')
   expect_error(match_count_ord('p'), 'matches multiple options: pca, plsda')
+  expect_identical(mo('OPLS-DA'),             'oplsda')
+  expect_identical(mo('opls'),                'oplsda')
+  expect_identical(mo('orthogonal PLS-DA'),   'oplsda')
+  expect_identical(mo('orthogonal partial least squares DA'), 'oplsda')
+  expect_identical(mo('Orthogonal Partial Least Squares Discriminant Analysis'), 'oplsda')
   expect_identical(mo('LDA'),                 'lda')
   expect_identical(mo('linear discriminant'), 'lda')
   expect_identical(mo('l'),                   'lda')
@@ -86,18 +93,18 @@
   df <- list_count_ords()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id'))
-  expect_identical(df$id, c('ca', 'cca', 'lda', 'pca', 'plsda', 'rda', 'rpca'))
-  expect_identical(rownames(list_count_ords(nm = 'id')), c('ca', 'cca', 'lda', 'pca', 'plsda', 'rda', 'rpca'))
+  expect_identical(df$id, c('ca', 'cca', 'lda', 'oplsda', 'pca', 'plsda', 'rda', 'rpca'))
+  expect_identical(rownames(list_count_ords(nm = 'id')), c('ca', 'cca', 'lda', 'oplsda', 'pca', 'plsda', 'rda', 'rpca'))
   expect_identical(list_count_ords(val = 'id', nm = 'name'),
-    c('Correspondence Analysis' = 'ca', 'Canonical Correspondence Analysis' = 'cca', 'Linear Discriminant Analysis' = 'lda', 'Principal Component Analysis' = 'pca', 'Partial Least Squares Discriminant Analysis' = 'plsda', 'Redundancy Analysis' = 'rda', 'Robust Aitchison PCA' = 'rpca'))
-  expect_identical(list_count_ords(val = 'func'), list(ca = ca, cca = cca, lda = lda, pca = pca, plsda = plsda, rda = rda, rpca = rpca))
+    c('Correspondence Analysis' = 'ca', 'Canonical Correspondence Analysis' = 'cca', 'Linear Discriminant Analysis' = 'lda', 'Orthogonal Partial Least Squares Discriminant Analysis' = 'oplsda', 'Principal Component Analysis' = 'pca', 'Partial Least Squares Discriminant Analysis' = 'plsda', 'Redundancy Analysis' = 'rda', 'Robust Aitchison PCA' = 'rpca'))
+  expect_identical(list_count_ords(val = 'func'), list(ca = ca, cca = cca, lda = lda, oplsda = oplsda, pca = pca, plsda = plsda, rda = rda, rpca = rpca))
   expect_identical(list_count_ords(val = 'list')$pca, match_count_ord('pca'))
-  expect_identical(list_count_ords('name'), c('Correspondence Analysis', 'Canonical Correspondence Analysis', 'Linear Discriminant Analysis', 'Principal Component Analysis', 'Partial Least Squares Discriminant Analysis', 'Redundancy Analysis', 'Robust Aitchison PCA'))
+  expect_identical(list_count_ords('name'), c('Correspondence Analysis', 'Canonical Correspondence Analysis', 'Linear Discriminant Analysis', 'Orthogonal Partial Least Squares Discriminant Analysis', 'Principal Component Analysis', 'Partial Least Squares Discriminant Analysis', 'Redundancy Analysis', 'Robust Aitchison PCA'))
 
 
   # Invalid input, and methods of the other wrappers. ====
 
-  expect_error(count_ord(m, 'xyz'),   'does not match any option: ca, cca, lda, pca, plsda, rda, rpca')
+  expect_error(count_ord(m, 'xyz'),   'does not match any option: ca, cca, lda, oplsda, pca, plsda, rda, rpca')
   expect_error(count_ord(m, 123),     'character')
   expect_error(count_ord(m, c('pca', 'rpca')), 'length 1')
   expect_error(count_ord(m, '-'),     'alphabetic')

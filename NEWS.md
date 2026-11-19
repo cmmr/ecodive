@@ -42,7 +42,7 @@
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
   the methods. `count_ord()`, with `list_count_ords()` and
   `match_count_ord()`, does the same for the methods that take a count table
-  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()` and `rpca()`: `count_ord(counts, "pca")` is
+  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()` and `rpca()`: `count_ord(counts, "pca")` is
   `pca(counts)`. Each wrapper points to the other when given the other's
   method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
@@ -332,6 +332,20 @@
   any number of `cpus`. `count_ord(counts, 'plsda', groups)` runs it too.
   Like every supervised method, it separates any groups it is given, so
   validate the separation (e.g. with `permanova()`).
+
+* New `oplsda()` runs an orthogonal PLS discriminant analysis (OPLS-DA) of
+  two groups: one predictive component (`p1`) that separates them and
+  orthogonal components (`o1`, `o2`, ...) for the rest of the table's
+  variation (ported from pyopls). It gives the same orthogonal scores,
+  weights and loadings as pyopls, and the same scores, loadings, weights,
+  R2X, R2Y and VIP as `ropls::opls()` (up to each component's sign), and
+  also returns each group's centroid. It takes `groups`, `data`, every
+  `norm` and every table type as `plsda()` does, and never makes a sparse
+  table dense: 1,000 samples, 5,000 taxa and two orthogonal components
+  take about a tenth of a second, where `ropls::opls()` takes 8 (including
+  its cross-validation). Results are identical for any number of `cpus`.
+  `count_ord(counts, 'oplsda', groups)` runs it too. For more than two
+  groups, use `plsda()`.
 
 * New `lda()` runs a linear discriminant analysis (Fisher's discriminant
   axes, ported from scikit-learn's `LinearDiscriminantAnalysis` with its

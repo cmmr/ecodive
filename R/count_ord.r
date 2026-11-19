@@ -19,6 +19,7 @@ COUNT_ORDS <- local({
       Correspondence Analysis,             ca,   correspondenceanalysis
       Canonical Correspondence Analysis,   cca,  canonicalcorrespondenceanalysis constrainedcorrespondenceanalysis
       Linear Discriminant Analysis,        lda,  lineardiscriminantanalysis
+      Orthogonal Partial Least Squares Discriminant Analysis, oplsda, opls orthogonalplsda orthogonalpartialleastsquaresda orthogonalpartialleastsquaresdiscriminantanalysis
       Principal Component Analysis,        pca,  principalcomponents prcomp
       Partial Least Squares Discriminant Analysis, plsda, partialleastsquaresda partialleastsquaresdiscriminantanalysis plsdiscriminantanalysis
       Redundancy Analysis,                 rda,  redundancyanalysis tbrda transformationbasedrda
@@ -38,16 +39,16 @@ COUNT_ORDS <- local({
 #' @inheritParams documentation
 #'
 #' @param method   The name of an ordination method: `"ca"`, `"cca"`, `"lda"`,
-#'        `"pca"`, `"plsda"`, `"rda"`, or `"rpca"`.
+#'        `"oplsda"`, `"pca"`, `"plsda"`, `"rda"`, or `"rpca"`.
 #'        Flexible matching is supported (see below). Programmatic access via
 #'        `list_count_ords()`.
 #'
 #' @param ...   Further arguments for the method's function, such as `n_axes`,
 #'        `margin`, `cpus`, [pca()]'s `norm`, `pseudocount`, and `scale`, or
 #'        [rda()]'s and [cca()]'s `groups`, `data`, and `formula`, or
-#'        [lda()]'s and [plsda()]'s `groups` and `data`. Each method keeps its
-#'        own defaults; see [ca()], [cca()], [lda()], [pca()], [plsda()],
-#'        [rda()], and [rpca()].
+#'        [lda()]'s, [plsda()]'s and [oplsda()]'s `groups` and `data`. Each
+#'        method keeps its own defaults; see [ca()], [cca()], [lda()],
+#'        [oplsda()], [pca()], [plsda()], [rda()], and [rpca()].
 #'        `seed` is ignored by the methods that have no random parts (all
 #'        but [cca()], whose adjusted \eqn{R^2} is found by permutation), so
 #'        the same arguments can be given to every method.
@@ -64,6 +65,7 @@ COUNT_ORDS <- local({
 #' | `ca`                   | Correspondence Analysis (CA)               |
 #' | `cca`                  | Canonical Correspondence Analysis (CCA), constrained |
 #' | `lda`                  | Linear Discriminant Analysis (LDA), supervised |
+#' | `oplsda`               | Orthogonal PLS Discriminant Analysis (OPLS-DA), supervised |
 #' | `pca`                  | Principal Component Analysis (PCA)         |
 #' | `plsda`                | Partial Least Squares Discriminant Analysis (PLS-DA), supervised |
 #' | `rda`                  | Redundancy Analysis (RDA), constrained     |
@@ -73,9 +75,10 @@ COUNT_ORDS <- local({
 #' `count_ord(counts, 'rda', 'treatment', meta)` is
 #' `rda(counts, 'treatment', meta)`. Without them, it is a PCA. `cca` is
 #' constrained the same way; without constraints, it is a correspondence
-#' analysis. `lda` and `plsda` need the groups to separate, given the same
-#' way: `count_ord(counts, 'plsda', 'treatment', meta)` is
-#' `plsda(counts, 'treatment', meta)`.
+#' analysis. `lda`, `plsda` and `oplsda` need the groups to separate, given
+#' the same way: `count_ord(counts, 'plsda', 'treatment', meta)` is
+#' `plsda(counts, 'treatment', meta)`. `oplsda` takes `n_orthogonal` rather
+#' than `n_axes`.
 #'
 #' Methods that ordinate distances, such as [pcoa()] and [nmds()], are run
 #' by [dist_ord()].
@@ -91,7 +94,8 @@ COUNT_ORDS <- local({
 #' `'correspondence analysis'` for `ca`; and `'robust PCA'`, `'DEICODE'`,
 #' or `'gemelli'` for `rpca`; and `'PLS-DA'`, `'PLS'`, or `'partial least
 #' squares discriminant analysis'` for `plsda`; and `'LDA'` or `'linear
-#' discriminant analysis'` for `lda`. `'CA'` selects `ca`, and
+#' discriminant analysis'` for `lda`; and `'OPLS-DA'`, `'OPLS'`, or
+#' `'orthogonal PLS-DA'` for `oplsda`. `'CA'` selects `ca`, and
 #' `'CCA'` selects `cca`.
 #'
 #' Finished code should always use the full primary option name to avoid
@@ -109,7 +113,7 @@ COUNT_ORDS <- local({
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [ca()], [cca()], [lda()], [pca()], [plsda()], [rda()], [rpca()], [list_count_ords()]; [dist_ord()] for
+#' @seealso [ca()], [cca()], [lda()], [oplsda()], [pca()], [plsda()], [rda()], [rpca()], [list_count_ords()]; [dist_ord()] for
 #'   the methods that take distances.
 #'
 #' @export
@@ -118,9 +122,9 @@ COUNT_ORDS <- local({
 #'     head(ord)
 #'     str(ord)
 #'
-#'     # The same arguments for every method (but lda and plsda, which need
-#'     # groups).
-#'     ids <- setdiff(list_count_ords('id'), c('lda', 'plsda'))
+#'     # The same arguments for every method (but lda, plsda and oplsda,
+#'     # which need groups).
+#'     ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda'))
 #'     lapply(ids, function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 #'
 #'     count_ord(ex_counts, 'plsda', c('a', 'a', 'b', 'b'), n_axes = 1)

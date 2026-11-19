@@ -242,3 +242,101 @@ Made while implementing:
     (its method list was already incomplete for `rda()`/`cca()`/`ca()`);
     `plsda()`'s own docs define its `eig`. The benchmark article's
     reference table was not updated (as for `rda()`/`cca()`).
+
+
+## Decisions made while implementing (oplsda)
+
+Item 11 (`oplsda()` only; sparse PLS-DA is [splsda.md](splsda.md)).
+
+Asked of the user at the start (2026-11-19), and answered:
+
+1. **Columns are `p1`, `o1`, `o2`, ...** (ropls's and SIMCA's labels), not
+   `OPLS1`/`ORTH1`, so `plot(ord)` is the usual OPLS-DA score plot.
+2. **R²X and R²Y as ropls (and SIMCA) report them.** `prop` is each
+   component's R²X, |t|²|p|² over the total sum of squares of the scaled
+   table (ropls's `modelDF$R2X`); `eig` = |t|²|p|² / (n − 1) and `trace`
+   as in `plsda()`; `r2x` = `sum(prop)` (`R2X(cum)`); `r2y` = the R² of
+   the fitted values t_p q, which is ropls's `R2Y(cum)` and pyopls's
+   `OPLSValidator.r_squared_Y_` (the same in both). pyopls's own R²X
+   (`OPLS.score()`, the share of X left after filtering, which divides a
+   scaled residual by the unscaled X when `scale = True`) is not reported;
+   the docs say it would be `1 - sum(prop[-1])`.
+3. **Two groups only.** More is an error: "`groups` has 3 different
+   values, but oplsda() takes exactly two; use plsda() for more."
+4. **No Q² or cross-validation, and no orthogonal VIP** (the user asked for
+   no extras). The predictive VIP stays, since the plan lists VIP and it
+   is what OPLS-DA users rank features by.
+
+Made while implementing:
+
+5. **Port scope and licensing.** Ported from pyopls 20.3.post1 (MIT, ©
+   2019 Wright State University), `OPLS.fit()` and `_center_scale_xy()` in
+   `pyopls/opls.py`; the MIT text is in `src/oplsda.c`'s header, a new
+   `Files: src/oplsda.c R/oplsda.r` stanza is in `inst/COPYRIGHTS`, and
+   "Wright State University" (ctb, cph) is in `Authors@R`.
+6. **The predictive component is Trygg & Wold's:** t_p = X_k w,
+   p_p = X_kᵀt_p / |t_p|², q = yᵀt_p / |t_p|² on the filtered table X_k,
+   with w = Xᵀy / |Xᵀy| fixed (X_kᵀy = Xᵀy). pyopls only filters; its
+   README fits `PLSRegression(1)` with the default `scale = True` to the
+   filtered table, which rescales the filtered features. The fixture uses
+   `PLSRegression(1, scale = False)` instead, which is Trygg & Wold's (and
+   ropls's) predictive component.
+7. **Reuses plsda.c's core** (`pls_x_t`, `pls_x_mult()`, `pls_xt_mult()`,
+   `pls_x_deflate()`, `pls_weights()` with g = 1) and `pca_table_init()`:
+   matrix-free, sparse input never densified, every `norm`, constant
+   features dropped under `scale = TRUE` (zero weights, loadings and VIP;
+   P in VIP counts every feature, as in `plsda()`). No changes to
+   plsda.c. 1,000 samples × 5,000 taxa, 2 orthogonal components: 0.13 s
+   dense, 0.06 s from a sparse Matrix, vs 8.2 s for `ropls::opls()`
+   (whose time includes its 7-fold cross-validation).
+8. **y** is the 0/1 indicator of the second group (factor level order),
+   centred and, with `scale = TRUE`, scaled (ddof = 1), as pyopls's
+   `_center_scale_xy()` does. Swapping the groups changes only the sign of
+   `y_loading`.
+9. **Signs:** each component, predictive and orthogonal, is flipped so its
+   largest |score| is positive (ecodive's rule), with its weights and
+   loadings (and q for p1). ropls and pyopls are sign-matched in tests.
+10. **`n_orthogonal`** (default 1) may be 0 (a one-component `plsda()`,
+    tested to match). It is capped silently at min(n − 2, p − 1), so that
+    a predictive component is always left. Orthogonal fitting stops with a
+    warning ("only k of the first m orthogonal components could be fitted")
+    when |w_o| before normalizing is at most √ε |p|. No `n_axes` argument:
+    `count_ord(m, 'oplsda', g, n_orthogonal = 2)`; the `count_ord()`
+    example and test loop treat it like `lda`/`plsda`.
+11. **No covariance with the groups is an error** ("the table has no
+    covariance with `groups` (for instance, every feature is constant)"),
+    when |Xᵀy| ≤ √ε |X|_F |y|, rather than `plsda()`'s 0-column result with
+    a warning, because an OPLS-DA without a predictive component has
+    nothing to report.
+12. **VIP** (predictive only) is √P |p_pj| / |p_p| (Galindo-Prieto et al.
+    2014 with one predictive component), a named vector; it matches ropls's
+    `vipVn` to 4e-14. (ropls's VIP uses the loadings p, not the weights w.)
+13. **Attributes, in order:** `method`, `eig`, `prop`, `trace`, `r2x`,
+    `r2y`, `loadings` (p × (1 + k): p_p, then the p_o), `weights` (w, then
+    the w_o), `y_loading` (q, a number), `vip`, `groups` (two-level factor,
+    named by sample), `centroids` (2 × (1 + k)).
+14. **Registry:** `oplsda` sits between `lda` and `pca` in `COUNT_ORDS`,
+    with aliases `opls`, `orthogonalplsda`,
+    `orthogonalpartialleastsquaresda` and
+    `orthogonalpartialleastsquaresdiscriminantanalysis`; `'pls'` still
+    selects only `plsda`, and `'p'` stays ambiguous (`pca`, `plsda`). No
+    alias collides with the other three registries.
+15. **Fixtures:** `data-raw/expected/oplsda.r` (inputs, ropls, folding)
+    and `oplsda.py` (pyopls 20.3.post1 + scikit-learn 1.9.1, both
+    asserted), CSVs in `data-raw/expected/oplsda/`. ropls is **1.34.0**
+    (Bioconductor 3.18, the newest for the container's R 4.3.3), not the
+    plan's 1.44. ropls rounds R2X/R2Y to 3 digits, so the fixture also
+    derives unrounded ones from its outputs (|t|²|p|² over its scaled
+    table `xModelMN`; R² of its fitted values `yPreMN`). Cases: dune by
+    management (natural vs managed) with 1 and 2 orthogonal components,
+    the same with constant and all-zero features added, Hellinger with
+    `scale = FALSE` (hayfield vs other), CLR by moisture (wet vs dry) with
+    3, and a 110 × 40 sparse table with 4 (also run as Matrix,
+    TsparseMatrix, slam and `margin = 2`). Largest relative differences:
+    pyopls 6.8e-14 (orthogonal weights, CLR case), ropls 1.5e-13
+    (weights, big case); R²X and R²Y 6.7e-15.
+16. **Docs:** in the "Supervised" pkgdown group after `plsda`; a paragraph
+    and example in `vignette("ordination")`'s "Supervised ordination"
+    section; rows in the README and `vignette("ecodive")` tables;
+    `count_ord()` docs; NEWS under 2.4.0. `oplsda()` docs say Q² is not
+    computed and point to `permanova()` or cross-validation.

@@ -37,6 +37,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "SIMPER, following 'ecopy'"),
     person(
+      "Wright State University",
+      role    = c("ctb", "cph"),
+      comment = "OPLS-DA, from 'pyopls'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

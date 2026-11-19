@@ -12,16 +12,16 @@ Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
 
 \item{method}{The name of an ordination method: \code{"ca"}, \code{"cca"}, \code{"lda"},
-\code{"pca"}, \code{"plsda"}, \code{"rda"}, or \code{"rpca"}.
+\code{"oplsda"}, \code{"pca"}, \code{"plsda"}, \code{"rda"}, or \code{"rpca"}.
 Flexible matching is supported (see below). Programmatic access via
 \code{list_count_ords()}.}
 
 \item{...}{Further arguments for the method's function, such as \code{n_axes},
 \code{margin}, \code{cpus}, \code{\link[=pca]{pca()}}'s \code{norm}, \code{pseudocount}, and \code{scale}, or
 \code{\link[=rda]{rda()}}'s and \code{\link[=cca]{cca()}}'s \code{groups}, \code{data}, and \code{formula}, or
-\code{\link[=lda]{lda()}}'s and \code{\link[=plsda]{plsda()}}'s \code{groups} and \code{data}. Each method keeps its
-own defaults; see \code{\link[=ca]{ca()}}, \code{\link[=cca]{cca()}}, \code{\link[=lda]{lda()}}, \code{\link[=pca]{pca()}}, \code{\link[=plsda]{plsda()}},
-\code{\link[=rda]{rda()}}, and \code{\link[=rpca]{rpca()}}.
+\code{\link[=lda]{lda()}}'s, \code{\link[=plsda]{plsda()}}'s and \code{\link[=oplsda]{oplsda()}}'s \code{groups} and \code{data}. Each
+method keeps its own defaults; see \code{\link[=ca]{ca()}}, \code{\link[=cca]{cca()}}, \code{\link[=lda]{lda()}},
+\code{\link[=oplsda]{oplsda()}}, \code{\link[=pca]{pca()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=rda]{rda()}}, and \code{\link[=rpca]{rpca()}}.
 \code{seed} is ignored by the methods that have no random parts (all
 but \code{\link[=cca]{cca()}}, whose adjusted \eqn{R^2} is found by permutation), so
 the same arguments can be given to every method.}
@@ -40,6 +40,7 @@ as \code{\link[=dist_ord]{dist_ord()}} does for the methods that take distances.
    \code{ca} \tab Correspondence Analysis (CA) \cr
    \code{cca} \tab Canonical Correspondence Analysis (CCA), constrained \cr
    \code{lda} \tab Linear Discriminant Analysis (LDA), supervised \cr
+   \code{oplsda} \tab Orthogonal PLS Discriminant Analysis (OPLS-DA), supervised \cr
    \code{pca} \tab Principal Component Analysis (PCA) \cr
    \code{plsda} \tab Partial Least Squares Discriminant Analysis (PLS-DA), supervised \cr
    \code{rda} \tab Redundancy Analysis (RDA), constrained \cr
@@ -51,9 +52,10 @@ as \code{\link[=dist_ord]{dist_ord()}} does for the methods that take distances.
 \code{count_ord(counts, 'rda', 'treatment', meta)} is
 \code{rda(counts, 'treatment', meta)}. Without them, it is a PCA. \code{cca} is
 constrained the same way; without constraints, it is a correspondence
-analysis. \code{lda} and \code{plsda} need the groups to separate, given the same
-way: \code{count_ord(counts, 'plsda', 'treatment', meta)} is
-\code{plsda(counts, 'treatment', meta)}.
+analysis. \code{lda}, \code{plsda} and \code{oplsda} need the groups to separate, given
+the same way: \code{count_ord(counts, 'plsda', 'treatment', meta)} is
+\code{plsda(counts, 'treatment', meta)}. \code{oplsda} takes \code{n_orthogonal} rather
+than \code{n_axes}.
 
 Methods that ordinate distances, such as \code{\link[=pcoa]{pcoa()}} and \code{\link[=nmds]{nmds()}}, are run
 by \code{\link[=dist_ord]{dist_ord()}}.
@@ -65,7 +67,8 @@ Case insensitive and partial matching, ignoring anything but letters. E.g.
 also work: \code{'prcomp'} for \code{pca}; \code{'redundancy analysis'}, \code{'tbRDA'}, or
 \code{'transformation-based RDA'} for \code{rda}; \code{'canonical correspondence analysis'} or \code{'constrained correspondence analysis'} for \code{cca};
 \code{'correspondence analysis'} for \code{ca}; and \code{'robust PCA'}, \code{'DEICODE'},
-or \code{'gemelli'} for \code{rpca}; and \code{'PLS-DA'}, \code{'PLS'}, or \code{'partial least squares discriminant analysis'} for \code{plsda}; and \code{'LDA'} or \code{'linear discriminant analysis'} for \code{lda}. \code{'CA'} selects \code{ca}, and
+or \code{'gemelli'} for \code{rpca}; and \code{'PLS-DA'}, \code{'PLS'}, or \code{'partial least squares discriminant analysis'} for \code{plsda}; and \code{'LDA'} or \code{'linear discriminant analysis'} for \code{lda}; and \code{'OPLS-DA'}, \code{'OPLS'}, or
+\code{'orthogonal PLS-DA'} for \code{oplsda}. \code{'CA'} selects \code{ca}, and
 \code{'CCA'} selects \code{cca}.
 
 Finished code should always use the full primary option name to avoid
@@ -119,15 +122,15 @@ other attributes by name rather than in full. Subsetting with \code{[}, or
     head(ord)
     str(ord)
 
-    # The same arguments for every method (but lda and plsda, which need
-    # groups).
-    ids <- setdiff(list_count_ords('id'), c('lda', 'plsda'))
+    # The same arguments for every method (but lda, plsda and oplsda,
+    # which need groups).
+    ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda'))
     lapply(ids, function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 
     count_ord(ex_counts, 'plsda', c('a', 'a', 'b', 'b'), n_axes = 1)
 
 }
 \seealso{
-\code{\link[=ca]{ca()}}, \code{\link[=cca]{cca()}}, \code{\link[=lda]{lda()}}, \code{\link[=pca]{pca()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=rda]{rda()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=list_count_ords]{list_count_ords()}}; \code{\link[=dist_ord]{dist_ord()}} for
+\code{\link[=ca]{ca()}}, \code{\link[=cca]{cca()}}, \code{\link[=lda]{lda()}}, \code{\link[=oplsda]{oplsda()}}, \code{\link[=pca]{pca()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=rda]{rda()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=list_count_ords]{list_count_ords()}}; \code{\link[=dist_ord]{dist_ord()}} for
 the methods that take distances.
 }

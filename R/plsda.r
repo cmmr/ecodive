@@ -188,7 +188,7 @@
 #' @inheritSection ordination_section Ordination result
 #' @inheritSection documentation Input Types
 #'
-#' @seealso [pca()], [rda()], [permanova()], [count_ord()]
+#' @seealso [oplsda()], [pca()], [rda()], [permanova()], [count_ord()]
 #'
 #' @export
 #' @examples

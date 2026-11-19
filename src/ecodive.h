@@ -199,7 +199,7 @@ void* maybe_free_one(void *ptr);
 /* --- normalize.c --- */
 void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_);
 
-/* --- pca.c: the centred (scaled) table, shared with rda() and plsda() --- */
+/* --- pca.c: the centred (scaled) table, shared with rda(), plsda() and oplsda() --- */
 typedef struct {
   int           n, p, nnz;  // Samples, features, non-zeros.
   const double *w_feat;     // 1 / sd per feature (scale), or NULL.
@@ -212,7 +212,7 @@ void   pca_gram_mult(const double *V, double *W, int m, void *ctx);
 void   pca_cross(const double *U, int m, double *L, int n_threads);
 void   pca_mult(const double *V, int m, double *S, int n_threads);
 
-/* --- plsda.c: PLS on pca.c's table, for plsda() (and oplsda()) --- */
+/* --- plsda.c: PLS on pca.c's table, for plsda() and oplsda() --- */
 // The deflated table X_a = A - T P', A being pca_table_init()'s.
 typedef struct {
   int     n, p;       // Samples, features.
