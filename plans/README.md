@@ -234,7 +234,7 @@ can't be mistaken for one another:
 |:-------|:----------|
 | Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
-| Unconstrained, counts | ✓ `pca`, ✓ `rpca`, `rpca_phylo`, ✓ `ca`, `dca`, `dpcoa` |
+| Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
 | Constrained | ✓ `dbrda`, ✓ `capscale`, ✓ `rda`, ✓ `cca`, `principal_response_curves` |
 | Discriminant (`*da`) | ✓ `lda`, ✓ `plsda`, ✓ `oplsda`, `splsda`, `capda` |
