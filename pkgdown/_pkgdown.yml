@@ -51,13 +51,14 @@ reference:
   contents:
   - has_concept('Presence/Absence metrics')
 - subtitle: Phylogenetic metrics
-  desc: Distance measures based on phylogenetic branch lengths (UniFrac family).
+  desc: Distance measures based on phylogenetic branch lengths (the UniFrac family, and the compositional PhILR distance).
   contents:
   - unweighted_unifrac
   - weighted_unifrac
   - normalized_unifrac
   - generalized_unifrac
   - variance_adjusted_unifrac
+  - philr_distance
 
 - title: Compositional Data
   desc: Log ratios for relative abundances. The centered log ratios (clr and rclr) are norm choices; see normalize().
@@ -72,6 +73,7 @@ reference:
   contents:
   - alr
   - ilr
+  - philr
 - subtitle: Log ratios
   desc: One log ratio per sample, between two groups of features, to use as a variable in tests and models.
   contents:

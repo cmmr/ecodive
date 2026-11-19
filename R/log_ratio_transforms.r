@@ -268,9 +268,12 @@ NULL
 # `pseudocount`. Returns the table's sizes and names. `what` names the
 # transform in error messages. `zero_ok` accepts `pseudocount = 0` (see
 # log_pseudocount()); `dense_out = FALSE` (one value per sample) skips the
-# warning about a large dense result.
+# warning about a large dense result. `check`, if given, is called with the
+# feature names (or NULL) before the pseudocount is resolved, so that its
+# errors come before the warning about zeros; its value is returned as
+# element `check`.
 log_ratio_input <- function (
-    what, env = parent.frame(), zero_ok = FALSE, dense_out = TRUE ) {
+    what, env = parent.frame(), zero_ok = FALSE, dense_out = TRUE, check = NULL ) {
 
   validate_counts(env)
   validate_margin(env)
@@ -303,6 +306,9 @@ log_ratio_input <- function (
   if (D < 2L)
     stop('`counts` must have at least 2 features for ', what, '.', call. = FALSE)
 
+  features <- if (length(dn[[3L - margin]])) as.character(dn[[3L - margin]])
+  checked  <- if (is.function(check)) check(features)
+
   env$pseudocount <- log_pseudocount(
     counts, env$pseudocount, what, constant_ok = TRUE, zero_ok = zero_ok )
 
@@ -314,8 +320,9 @@ log_ratio_input <- function (
   list(
     D        = D,
     n        = n,
-    features = if (length(dn[[3L - margin]])) as.character(dn[[3L - margin]]),
-    samples  = if (length(dn[[margin]]))      as.character(dn[[margin]]) )
+    features = features,
+    samples  = if (length(dn[[margin]])) as.character(dn[[margin]]),
+    check    = checked )
 }
 
 

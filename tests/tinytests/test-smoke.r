@@ -68,6 +68,12 @@
     expect_identical(dim(z), c(20L, 11L))
     expect_true(all(is.finite(z)) && identical(dim(attr(z, 'basis')), c(11L, 12L)))
   }
+  z <- philr(ecodive::ex_counts, ecodive::ex_tree, pseudocount = 1,
+             part_weights = 'enorm.x.gm.counts', ilr_weights = 'blw.sqrt', cpus = cpus)
+  expect_identical(dim(z), c(4L, 5L))
+  expect_true(all(is.finite(z)) && identical(attr(z, 'method'), 'philr'))
+  z <- philr_distance(ecodive::ex_counts, ecodive::ex_tree, pseudocount = 1, cpus = cpus)
+  expect_true(inherits(z, 'dist') && attr(z, 'Size') == 4L && all(is.finite(z)))
 
   # Log ratios.
   z <- log_ratio(counts, c('F1', 'F2'), 3:5)

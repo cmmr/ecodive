@@ -53,6 +53,7 @@ METRICS <- local({
       Normalized Weighted UniFrac,                   normalized_unifrac,        YES,   YES,      NO,       YES,         beta,  nunifrac
       Observed Features,                             observed,                  NO,    NO,       NO,       NA,          alpha, otus asvs
       Otsuka-Ochiai Dissimilarity,                   ochiai,                    NO,    NO,       NO,       NO,          beta,  
+      PhILR Distance,                                philr_distance,            YES,   YES,      NO,       YES,         beta,  philr phylogeneticilr
       Probabilistic Symmetric Chi-Squared Distance,  psym_chisq,                NO,    YES,      NO,       NO,          beta,  
       Robust Aitchison Distance,                     robust_aitchison,          NO,    YES,      NO,       NO,          beta,  raitchison
       Shannon Diversity Index,                       shannon,                   NO,    YES,      NO,       NA,          alpha, 

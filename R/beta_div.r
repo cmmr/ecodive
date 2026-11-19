@@ -116,6 +116,7 @@ V_UNIFRAC <- 5L
 #' | `motyka`                    | Motyka dissimilarity                             |
 #' | `normalized_unifrac`        | Normalized Weighted UniFrac                      |
 #' | `ochiai`                    | Otsuka-Ochiai dissimilarity                      |
+#' | `philr_distance`            | PhILR distance                                   |
 #' | `psym_chisq`                | Probabilistic Symmetric Chi-Squared distance     |
 #' | `soergel`                   | Soergel distance                                 |
 #' | `sorensen`                  | Dice-Sorensen dissimilarity                      |

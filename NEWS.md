@@ -44,7 +44,7 @@
     `ancombc_global()` and `ancombc_trend()` a dot chart of their
     statistics.
 
-* Every function that returns a distance matrix, `beta_div()` and its 37
+* Every function that returns a distance matrix, `beta_div()` and its 38
   metric functions, `vlr()`, `rho_p()` and `phi_s()`, takes `clust`, to
   cluster the samples before returning it: one of `stats::hclust()`'s
   linkage methods (`"average"`, `"complete"`, `"single"`, `"ward.D"`,
@@ -745,6 +745,27 @@
   non-zero tips, without a dense table. It joins `count_ord()`
   (`count_ord(counts, "rpca_phylo", tree = tree)`), and its results are
   identical for any number of `cpus`.
+
+* New `philr()` computes the phylogenetic isometric log-ratio transform
+  (PhILR; Silverman et al. 2017): one balance per internal node of a tree,
+  between its two child clades, with philr's part weights (`'uniform'`,
+  `'gm.counts'`, `'enorm'`, `'anorm'` and their products with `'gm.counts'`,
+  or a vector) and ILR weights (`'uniform'`, `'blw'`, `'blw.sqrt'`,
+  `'mean.descendants'`, or a vector). Written from the paper and checked
+  against philr 1.28.0's outputs, it gives philr's coordinates, in philr's
+  orientation and order, to within 1e-14 for every weighting. Tips that
+  aren't features are pruned from the tree, and polytomies (and an unrooted
+  tree's root) are resolved with zero-length branches as
+  `ape::multi2di(random = FALSE)` does, with a warning; the tree used is
+  returned. Each sample costs O(D), summing over clades from the tips up,
+  with no basis matrix: 2,000 samples by 5,000 taxa (sparse) take 0.2
+  seconds, where philr takes 160. Results are identical for any number of
+  `cpus`.
+  New `philr_distance()`, a phylogenetic beta metric in `beta_div()`
+  (`beta_div(x, "philr", tree = tree)`), is the Euclidean distance between
+  PhILR coordinates with the paper's weights (`'enorm.x.gm.counts'` and
+  `'blw.sqrt'`); with uniform weights, PhILR distances are Aitchison
+  distances.
 
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and

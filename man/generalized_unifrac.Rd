@@ -48,9 +48,11 @@ samples} of the result, with their labels (samples without names
 are labelled with their positions in the input): its \code{dist} record
 (see \link{ecodive_steps}) gives each one's position in the input as
 \code{order}, so that \code{meta[attr(d, "dist")$order, ]} lines metadata up
-with them. Tests such as \code{\link[=permanova]{permanova()}} match named samples to
-\code{data} by name, but a vector of groups without names is matched by
-position, so reorder it too. The record's \code{clust} records \code{clust}
+with them. ecodive's ordinations and tests put the samples back in
+their input order before analysing them, so give them metadata in
+its usual order. Other packages see the reordered matrix: give
+them metadata reordered by \code{order}, or matched by name. The
+record's \code{clust} records \code{clust}
 (\code{FALSE} as \code{"none"}), which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
@@ -108,6 +110,7 @@ Chen, J., Bittinger, K., Charlson, E. S., Hoffmann, C., Lewis, J., Wu, G. D., ..
 Other Phylogenetic metrics: 
 \code{\link{faith}()},
 \code{\link{normalized_unifrac}()},
+\code{\link{philr_distance}()},
 \code{\link{unweighted_unifrac}()},
 \code{\link{variance_adjusted_unifrac}()},
 \code{\link{weighted_unifrac}()}

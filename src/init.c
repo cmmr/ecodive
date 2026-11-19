@@ -38,6 +38,9 @@ extern SEXP C_mult_default_delta(SEXP);
 extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_philr_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_philr_stats(SEXP, SEXP, SEXP);
+extern SEXP C_philr_tree(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_proportionality(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_oplsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_plsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -105,6 +108,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_nmds",      (DL_FUNC) &C_nmds,      6},
   {"C_normalize", (DL_FUNC) &C_normalize, 6},
   {"C_pca",       (DL_FUNC) &C_pca,       7},
+  {"C_philr_coords", (DL_FUNC) &C_philr_coords, 9},
+  {"C_philr_stats",  (DL_FUNC) &C_philr_stats,  3},
+  {"C_philr_tree",   (DL_FUNC) &C_philr_tree,   4},
   {"C_proportionality", (DL_FUNC) &C_proportionality, 8},
   {"C_oplsda",    (DL_FUNC) &C_oplsda,    8},
   {"C_plsda",     (DL_FUNC) &C_plsda,     8},
