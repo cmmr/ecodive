@@ -226,6 +226,35 @@
 
 
 
+  # Plots, on a null device: each returns its argument invisibly. ====
+
+  drawn <- function (x, ...) {
+    v <- withVisible(plot(x, ...))
+    identical(v$value, x) && !v$visible
+  }
+  grDevices::pdf(NULL)
+  expect_true(drawn(o))
+  expect_true(drawn(o, 'grp', meta))
+  expect_true(drawn(o, 'x', meta, axes = c(1, 3)))
+  expect_true(drawn(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'grp', meta))
+  expect_true(drawn(lda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus)))  # one axis
+  expect_true(drawn(pr))
+  expect_true(drawn(ef))
+  expect_true(drawn(ef, add = TRUE))
+  expect_true(drawn(sp))
+  expect_true(drawn(be))
+  expect_true(drawn(vp))
+  expect_true(drawn(fs))
+  expect_true(drawn(ancom(counts, 'grp', meta, cpus = cpus)))
+  expect_true(drawn(dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)))
+  for (nm in names(tests)) {
+    expect_true(drawn(tests[[nm]]), info = nm)
+    expect_true(drawn(tests[[nm]], type = 'null'), info = nm)
+  }
+  grDevices::dev.off()
+
+
+
   # Input checks. ====
 
   bad <- dm

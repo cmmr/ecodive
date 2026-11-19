@@ -132,10 +132,21 @@ plot_arrow_mul <- function (a, ext, frac = 0.8) {
 }
 
 
+# Which arrows from (x0, y0) to (x1, y1) are long enough to draw: at least
+# 1/100 inch on the device. graphics::arrows() skips those under 1/1000
+# inch, with a warning.
+plot_arrow_keep <- function (x0, y0, x1, y1) {
+  dx <- graphics::grconvertX(x1, 'user', 'inches') - graphics::grconvertX(x0, 'user', 'inches')
+  dy <- graphics::grconvertY(y1, 'user', 'inches') - graphics::grconvertY(y0, 'user', 'inches')
+  len <- sqrt(dx ^ 2 + dy ^ 2)
+  is.finite(len) & len >= 0.01
+}
+
+
 # Draws arrows from the origin to the rows of `a` (already scaled), with
-# their row names at their tips. Zero-length arrows are left out.
+# their row names at their tips. Arrows too short to draw are left out.
 plot_arrows <- function (a, col, cex = 0.8) {
-  keep <- rowSums(a ^ 2) > 0
+  keep <- plot_arrow_keep(0, 0, a[, 1], a[, 2])
   a    <- a[keep, , drop = FALSE]
   if (nrow(a) == 0) return (invisible())
   graphics::arrows(0, 0, a[, 1], a[, 2], length = 0.08, col = col)

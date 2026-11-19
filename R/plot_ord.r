@@ -229,16 +229,25 @@ plot.ecodive_ord <- function (
 
 
 
-# Labels each centroid with a cross. The centroids of the plotted groups
-# are labelled with the group and coloured as its samples: those of
-# plsda() and oplsda() (named by group), and those of a constrained
-# ordination's factor when `groups` names the same column of `data` (named
-# by the column and the level pasted together, as in vegan). Others are
-# labelled with their row names.
+# Labels each centroid with a cross (see ord_centroid_labels()).
 ord_plot_centroids <- function (cen, g, look) {
+  lc <- ord_centroid_labels(rownames(cen), g, look)
+  graphics::points(cen[, 1], cen[, 2], pch = 3, col = lc$col, cex = 1.2, lwd = 2)
+  plot_label(cen[, 1], cen[, 2], lc$labels, col = lc$col, pos = 3, font = 2)
+  invisible()
+}
 
-  lab <- rownames(cen)
-  col <- rep(PLOT_HIGHLIGHT, nrow(cen))
+
+# The labels and colours of centroids named `nms`. The centroids of the
+# plotted groups are labelled with the group and coloured as its samples:
+# those of plsda() and oplsda() (named by group), and those of a
+# constrained ordination's factor when `groups` names the same column of
+# `data` (named by the column and the level pasted together, as in vegan).
+# Others keep their names. Returns list(labels, col).
+ord_centroid_labels <- function (nms, g, look) {
+
+  lab <- nms
+  col <- rep(PLOT_HIGHLIGHT, length(nms))
 
   if (!is.null(g$f)) {
     lev <- levels(g$f)
@@ -250,9 +259,7 @@ ord_plot_centroids <- function (cen, g, look) {
     col[hit] <- look$pal[i[hit]]
   }
 
-  graphics::points(cen[, 1], cen[, 2], pch = 3, col = col, cex = 1.2, lwd = 2)
-  plot_label(cen[, 1], cen[, 2], lab, col = col, pos = 3, font = 2)
-  invisible()
+  list(labels = lab, col = col)
 }
 
 
@@ -440,10 +447,10 @@ ord_plot_biplot <- function (bp, axes, cen) {
 }
 
 
-# procrustes(): an arrow from each sample to its place in the target.
+# procrustes(): an arrow from each sample to its place in the target (if
+# far enough away to draw one).
 ord_plot_target <- function (pts, tgt) {
-  d    <- (tgt[, 1] - pts[, 1]) ^ 2 + (tgt[, 2] - pts[, 2]) ^ 2
-  keep <- is.finite(d) & d > 0
+  keep <- plot_arrow_keep(pts[, 1], pts[, 2], tgt[, 1], tgt[, 2])
   if (any(keep))
     graphics::arrows(
       pts[keep, 1], pts[keep, 2], tgt[keep, 1], tgt[keep, 2],
