@@ -153,6 +153,7 @@ reference:
   - plot.ecodive_simper
   - plot.ecodive_dirmult_ttest
   - plot.ecodive_ancom
+  - plot.ecodive_ancombc
   - plot.ecodive_varpart
   - plot.ecodive_forward_select
   - plot.ecodive_bioenv

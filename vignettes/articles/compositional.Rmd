@@ -509,10 +509,11 @@ counts, for each taxon, how many of its log ratios with other taxa differ
 between groups (its W), and declares the taxa with the largest W
 differentially abundant:
 
-```{r ancom}
+```{r ancom, fig.alt = "Dot chart of ANCOM's W for each taxon, largest first, with the rejected taxa highlighted and a dashed line at the cutoff."}
 res_ancom <- ancom(counts, groups, pseudocount = 1)
 head(res_ancom[order(-res_ancom$W), ], 12)
 table(changed = changed, rejected = res_ancom$reject)
+plot(res_ancom)
 ```
 
 W ranks the ten changed taxa first, but ANCOM's cutoff rule declares only
@@ -524,11 +525,12 @@ from a Dirichlet distribution, takes the clr of each draw, and tests each
 taxon. `dirmult_ttest()` is scikit-bio's version, with Welch's t-test;
 `contrast` is `c(treatment, reference)`:
 
-```{r dirmult}
+```{r dirmult, fig.alt = "Volcano plot of the Dirichlet-multinomial t-test: each taxon's log2 fold change against its adjusted p-value, with the differentially abundant taxa highlighted and named."}
 res_dm <- dirmult_ttest(counts, groups, contrast = c('treated', 'control'))
 cols <- c('feature', 'log2_fc', 'ci_lower', 'ci_upper', 'p_adjusted', 'reject')
 head(res_dm[order(res_dm$p_adjusted), cols], 12)
 table(changed = changed, rejected = res_dm$reject)
+plot(res_dm)
 ```
 
 It finds all ten changed taxa and nothing else. But compare its fold

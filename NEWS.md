@@ -30,6 +30,11 @@
     chart of W, `varpart()` a Venn diagram of the fractions (two to four
     sets), `forward_select()` the adjusted R-squared at each step, and
     `bioenv()` the best correlation for each number of variables.
+  * `ancombc()` and `ancombc2()` give a volcano plot of one covariate's log
+    fold changes, `ancombc_pairwise()` and `ancombc_dunnett()` a heatmap of
+    the log fold change of each feature in each comparison, and
+    `ancombc_global()` and `ancombc_trend()` a dot chart of their
+    statistics.
 
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It

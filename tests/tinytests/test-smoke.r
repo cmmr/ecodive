@@ -269,6 +269,11 @@
   expect_true(drawn(fs))
   expect_true(drawn(ancom(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)))
+  expect_true(drawn(fit))   # ancombc2()
+  expect_true(drawn(ancombc_global(fit, cpus = cpus)))
+  expect_true(drawn(ancombc_pairwise(fit, cpus = cpus)))
+  expect_true(drawn(ancombc_dunnett(fit, n_bootstraps = 20L, cpus = cpus)))
+  expect_true(drawn(ancombc_trend(fit, n_bootstraps = 20L, cpus = cpus)))
   for (nm in names(tests)) {
     expect_true(drawn(tests[[nm]]), info = nm)
     expect_true(drawn(tests[[nm]], type = 'null'), info = nm)

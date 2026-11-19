@@ -278,6 +278,10 @@
 #'     res <- ancombc(x + 1, ~ status + age, meta)
 #'     res[res$reject & res$covariate != '(Intercept)', ]
 #'
+#'     # A volcano plot of one covariate, here the first: moderate vs mild.
+#'     plot(res)
+#'     plot(res, 'age')
+#'
 #'     # ANCOM-BC2, with zeros as missing values.
 #'     res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
 #'     head(res2)
