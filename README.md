@@ -44,6 +44,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Comparing ordinations |                 | `procrustes()`, `procrustes_test()`                                                      |
 | Model building        |                 | `varpart()`, `forward_select()`, `bioenv()`                                              |
 | Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`        |
+| Plotting              |                 | `plot()` of ordinations, tests, `envfit()`, `simper()`, `varpart()`, and the other results |
 | Data preparation      |                 | `rarefy()`, `normalize()`, `read_tree()`                                                 |
 
 Each wrapper runs its functions by name, such as `beta_div(counts, 'bray')`
@@ -161,10 +162,10 @@ head(ord, 3)
 round(100 * attr(ord, 'prop'), 1)
 #> [1] 89.0  9.3  2.9
 
-# Any method by name.
-plot(dist_ord(dm, 'pcoa'), col = iris$Species)
-plot(dist_ord(dm, 'nmds'), col = iris$Species)
-plot(dist_ord(dm, 'umap'), col = iris$Species)
+# Any method by name, coloured by a column of metadata.
+plot(dist_ord(dm, 'pcoa'), 'Species', iris)
+plot(dist_ord(dm, 'nmds'), 'Species', iris)
+plot(dist_ord(dm, 'umap'), 'Species', iris)
 ```
 
 <img src="man/figures/README-ordination.png" alt="PCoA, NMDS and UMAP ordinations of the iris data, colored by species" width="100%" />

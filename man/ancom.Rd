@@ -214,7 +214,9 @@ For large datasets, standard matrix operations may be slow. See
       c(23, 21, 14, 10, 10, 10, 10) )
     colnames(x) <- paste0('b', 1:7)
     grp <- rep(c('treatment', 'placebo'), each = 3)
-    ancom(x, grp)
+    res <- ancom(x, grp)
+    res
+    plot(res)
 
     # A table with zeros: replace them first.
     grp <- c('oral', 'oral', 'other', 'other')

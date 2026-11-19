@@ -234,6 +234,7 @@ See \code{\link{aitchison}} for references.
       counts, env = ~ ph + temp, space = ~ x + y,
       data = meta, norm = 'hellinger' )
     vp
+    plot(vp)
 
     # db-RDA on Bray-Curtis distances; a set may be a matrix.
     varpart(bray(counts), ~ ph + temp, as.matrix(meta[, c('x', 'y')]), data = meta)

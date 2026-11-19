@@ -123,7 +123,9 @@ with fewer axes with zeros. Give \code{axes} to do the same.
 \item \code{ord} and \code{target} may be \code{dist} objects, and their samples are
 matched by name.
 \item The result is the rotated ordination itself, with the rest as
-attributes. There are no \code{plot()} or \code{fitted()} methods.
+attributes. \code{plot()} draws it with an arrow from each sample to its
+place in \code{target} (see \code{\link[=plot.ecodive_ord]{plot.ecodive_ord()}}); there is no \code{fitted()}
+method.
 }
 
 \strong{Same names in other packages}
@@ -146,6 +148,9 @@ other: call \code{ecodive::procrustes()} to be sure.
     fit <- procrustes(jc, bc)
     attr(fit, 'ss')
     attr(fit, 'residuals')
+
+    # Each sample's arrow points to where it lies in the target.
+    plot(fit)
 
     # Symmetric: m^2 between 0 and 1.
     attr(procrustes(jc, bc, symmetric = TRUE), 'ss')

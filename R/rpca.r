@@ -182,16 +182,13 @@
 #' vectors \eqn{v}: a distance (form) biplot, in which distances between
 #' samples are preserved and each feature's arrow shows the direction in
 #' which its robust clr increases. (gemelli, and QIIME 2's Emperor, plot
-#' \eqn{u} and \eqn{v}.) The loadings are much shorter than the scores, so
-#' scale them for display, e.g.
+#' \eqn{u} and \eqn{v}.) The loadings are much shorter than the scores;
+#' `plot(ord)` scales them to fit among the samples and draws them as
+#' arrows (see [plot.ecodive_ord()]):
 #'
 #' ```r
-#' ord  <- rpca(ex_counts, n_axes = 2)
-#' load <- attr(ord, 'loadings')
-#' f    <- 0.8 * max(abs(ord)) / max(abs(load))
-#' plot(ord, asp = 1)
-#' arrows(0, 0, f * load[, 1], f * load[, 2], length = 0.05, col = 'grey')
-#' text(f * load, rownames(load), cex = 0.7)
+#' ord <- rpca(ex_counts, n_axes = 2)
+#' plot(ord)
 #' ```
 #'
 #'
@@ -296,7 +293,7 @@
 #' @export
 #' @examples
 #'     ord <- rpca(iris[, 1:4])
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'

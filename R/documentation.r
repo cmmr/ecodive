@@ -103,7 +103,7 @@ NULL
 #'   [capscale()], [mds()], [nmds()], [isomap()], [tsne()], [umap()], and so
 #'   [dist_ord()]) returns the same kind of
 #'   object: a numeric matrix with one row per sample and one column per
-#'   axis, so that it can go straight into `plot()` or a data frame. Rows are
+#'   axis, so that it can go straight into a data frame. Rows are
 #'   named after the samples, when the input has names. Columns are named
 #'   after the method: `"PCoA1"`, `"PC1"`, `"RPCA1"`, `"dbRDA1"` or `"CAP1"`
 #'   (then `"MDS1"` for unconstrained axes), `"MDS1"`, `"NMDS1"`,
@@ -125,9 +125,13 @@ NULL
 #'     it to label axes. `NA` where it isn't defined.
 #'
 #'   Attributes particular to the method follow them. The matrix has class
-#'   `"ecodive_ord"` (as well as `"matrix"`), only so that `print()` lists the
-#'   other attributes by name rather than in full. Subsetting with `[`, or
-#'   `as.data.frame()`, gives a plain matrix or data frame without them.
+#'   `"ecodive_ord"` (as well as `"matrix"`), so that `print()` lists the
+#'   other attributes by name rather than in full, and `plot()` draws the
+#'   samples on the first two axes, labelled from the attributes, with any
+#'   loadings, constraints and centroids on top (see [plot.ecodive_ord()]).
+#'   `plot(ord, "Species", iris)` colours the samples by a column of
+#'   metadata. Subsetting with `[`, or `as.data.frame()`, gives a plain
+#'   matrix or data frame without the attributes.
 NULL
 
 
