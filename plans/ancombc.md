@@ -1,6 +1,6 @@
 # `ancombc()` and `ancombc2()`: ANCOM with bias correction
 
-**Priority:** 24 (`ancombc()`, `ancombc2()`) and 25 (the post-hoc tests
+**Priority:** 22 (`ancombc()`, `ancombc2()`) and 23 (the post-hoc tests
 and `structural_zeros()`). **Tier:** port (scikit-bio 0.7.4,
 `skbio/stats/composition/_ancombc.py`, BSD-3, itself derived from the
 Artistic-2.0 R package ANCOMBC; both notices apply, see "Licensing"). Read [README.md](README.md) first, and

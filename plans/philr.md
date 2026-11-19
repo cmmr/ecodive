@@ -1,6 +1,6 @@
 # `philr()` and `philr_distance()`: phylogenetic isometric log-ratio transform
 
-**Priority:** 34. **Tier:** formula, clean room.
+**Priority:** 32. **Tier:** formula, clean room.
 philr (Bioconductor, GPL-3) is output-only; the formulas are in the
 open-access paper (Silverman et al. 2017, eLife, CC-BY). scikit-bio's
 `tree_basis()` (BSD-3) is a permissive reference for the unweighted basis,
@@ -353,7 +353,7 @@ Reference results (fixtures `data-raw/expected/philr.r` and `philr.py`):
 - **Identities:** uniform-weight distances equal `aitchison()` (1.8e-15),
   coordinates equal `ilr()` with the tree's SBP (1e-12 tested).
 
-For `dpcoa()` (item 35): `C_philr_tree()` is a general "binary tree for
+For `dpcoa()` (item 36): `C_philr_tree()` is a general "binary tree for
 these features" preparation (prune to features, collapse single-child
 nodes summing lengths, resolve polytomies, internal nodes numbered in
 preorder so every child's id is above its parent's, tips mapped to feature

@@ -1,6 +1,6 @@
 # `mantel_correlogram()`: Mantel correlogram
 
-**Priority:** 28. **Tier:** *derived*, built from `mantel()` against
+**Priority:** 26. **Tier:** *derived*, built from `mantel()` against
 distance-class indicator matrices; no permissive code exists. Read
 [README.md](README.md) first. Part of the `mantel_*` family:
 `mantel()`, `mantel_partial()`, `mantel_correlogram()` and

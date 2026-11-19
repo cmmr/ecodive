@@ -1,6 +1,6 @@
 # `pacmap()`: Pairwise Controlled Manifold Approximation
 
-**Priority:** 31. **Tier:** port from PaCMAP (Apache-2.0). Read
+**Priority:** 29. **Tier:** port from PaCMAP (Apache-2.0). Read
 [README.md](README.md) first.
 
 

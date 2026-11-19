@@ -1,6 +1,6 @@
 # `dpcoa()`: double principal coordinate analysis
 
-**Priority:** 35, second of the clean-room methods (after `philr()`). **Tier:** clean
+**Priority:** 36, third of the clean-room methods (after `philr()` and `feast()`). **Tier:** clean
 room. No permissive implementation exists, so write it from Pavoine,
 Dufour & Chessel (2004). The reference, ade4 `dpcoa()` (GPL), is
 output-only: run it for fixtures, but don't read its source. Read
