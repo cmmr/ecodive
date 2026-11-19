@@ -244,7 +244,7 @@ static double neg_largest(
 
   lanczos_t lz = {
     .n = n, .k = 1, .dims = n - 1, .deflate = 1, .scale = trace,
-    .op = neg_gower_mult, .ctx = g,
+    .op = neg_gower_mult, .ctx = g, .n_threads = g->n_req,
     .vecs = vec, .vals = &val, .resid = &res,
     .max_basis = PC_BASIS_MIN, .rr_every = PC_RR_EVERY, .tol = tol,
     .early_stop = early_stop, .stop_above = stop_above, .stop_tol = stop_tol,

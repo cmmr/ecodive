@@ -587,7 +587,7 @@ SEXP C_umap_spectral(SEXP sexp_graph, SEXP sexp_k, SEXP sexp_n_threads) {
   // B's eigenvalues are in [-1, 1], so its scale is 1.
   lanczos_t lz = {
     .n = n, .k = nev, .dims = n, .deflate = 0, .scale = 1,
-    .op = spectral_op, .ctx = &ctx,
+    .op = spectral_op, .ctx = &ctx, .n_threads = n_threads,
     .vecs = vec, .vals = val,
     .resid = (double *) R_alloc(nev, sizeof(double)) };
 

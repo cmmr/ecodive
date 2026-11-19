@@ -176,10 +176,9 @@ int lz_orthonormalize(
 // passes), with dot products and products with V split
 // among threads (see lz_nt); then off each other, one
 // column at a time. Results are the same for any number
-// of threads. It runs only for callers that set
-// lanczos_t.n_threads (pcoa()), and only for blocks wider
-// than LZ_BLOCK (k > LZ_BLOCK): which version runs never
-// depends on the number of threads, and k <= LZ_BLOCK
+// of threads. It runs for blocks wider than LZ_BLOCK
+// (k > LZ_BLOCK): which version runs depends only on the
+// block, never on the number of threads, and k <= LZ_BLOCK
 // runs exactly as before.
 //------------------------------------------------------
 static void combine_ld(
@@ -858,8 +857,7 @@ void lanczos(lanczos_t *lz) {
   size_t  nb_max = (size_t) ((M > f) ? M : f) * p;
   double *Hb     = NULL, *nb0 = NULL;
   const double **ab = NULL, **bb = NULL;
-  int block_ok = (lz->n_threads >= 1);  // the caller opted in
-  if (block_ok && p > LZ_BLOCK) {
+  if (p > LZ_BLOCK) {
     cx_max  = nb_max;
     cx_part = (double *) R_alloc(nb_max * (size_t) ((n + LZ_ROWS - 1) / LZ_ROWS), sizeof(double));
     Hb  = (double *) R_alloc(nb_max, sizeof(double));
@@ -867,7 +865,7 @@ void lanczos(lanczos_t *lz) {
     ab  = (const double **) R_alloc(nb_max, sizeof(double *));
     bb  = (const double **) R_alloc(nb_max, sizeof(double *));
   }
-  #define ORTHO(Vb, sb, Rb, mb) ((block_ok && (mb) > LZ_BLOCK) \
+  #define ORTHO(Vb, sb, Rb, mb) (((mb) > LZ_BLOCK) \
     ? orthonormalize_block(Vb, sb, Rb, mb, n, deflate, F, f, &rng, Hb, nb0, ab, bb) \
     : orthonormalize(Vb, sb, Rb, mb, n, deflate, F, f, &rng))
 

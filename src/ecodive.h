@@ -119,10 +119,10 @@ typedef struct {
   int          n_ritz_out;//      fixed), and how many were written.
   int          max_steps; // In: give up (not converged) after this many
                           //     products with blocks (default LZ_MAX_STEPS).
-  int          n_threads; // In: 0 (default): as before, on one thread. >= 1:
-                          //     threads for the steps on blocks of vectors,
-                          //     and, for k > 4, block Gram-Schmidt; results
-                          //     are the same for any value >= 1.
+  int          n_threads; // In: the threads the caller may use (default 0:
+                          //     one). Each step on blocks of vectors takes
+                          //     as many as its work is worth (threads_for());
+                          //     results are the same for any number.
 } lanczos_t;
 
 void   lanczos(lanczos_t *lz);

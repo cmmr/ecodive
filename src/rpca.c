@@ -948,7 +948,7 @@ SEXP rpca_core(
     lanczos_t lz = {
       .n = d, .k = r, .dims = d, .deflate = 0, .scale = (double) nnz * r,
       .max_basis = (basis > 60) ? basis : 0,
-      .op = op_b, .ctx = &octx, .vecs = top,
+      .op = op_b, .ctx = &octx, .n_threads = n_threads, .vecs = top,
       .vals  = (double *) R_alloc(r, sizeof(double)),
       .resid = (double *) R_alloc(r, sizeof(double)) };
     lanczos(&lz);

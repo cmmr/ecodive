@@ -431,13 +431,17 @@
   Results are identical for any number of `cpus`.
   `count_ord(counts, 'lda', groups)` runs it too.
 
-* `pcoa()` of many axes is faster on several threads: the block Lanczos
-  solver now splits its own steps on the basis (products with small
-  matrices, dot products and, for more than four axes, block Gram-Schmidt)
-  among `cpus`, as well as the products with the distance matrix. 50 axes
-  of 1,000 samples take 1.4 s instead of 2.5 on 4 threads, and of 5,000
-  samples 15 s instead of 27. Results stay identical for any number of
-  `cpus`, and those for up to four axes are unchanged.
+* Ordinations of many axes are faster on several threads. The block
+  Lanczos solver behind `pcoa()`, `pca()`, `dbrda()`, `capscale()`,
+  `rda()`, `cca()`, `rpca()` and `umap()`'s spectral start now splits its
+  own steps on the basis (products with small matrices, dot products and,
+  for more than four axes, block Gram-Schmidt) among `cpus`, each as far
+  as its work is worth it, as well as the products with the data. On 4
+  threads, `pcoa()` of 50 axes takes 1.4 s instead of 2.5 for 1,000
+  samples and 15 s instead of 27 for 5,000, and `dbrda()` of 40 axes for
+  2,000 samples 3.3 s instead of 5.6. Results stay identical for any number
+  of `cpus`; for up to four axes they are unchanged, and for more they
+  differ from before only by rounding.
 
 * New `capda()` runs Anderson & Willis's (2003) discriminant canonical
   analysis of principal coordinates (CAP, as in PRIMER-PERMANOVA+): `lda()`
