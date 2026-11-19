@@ -276,8 +276,73 @@ permanova(hd, 'Species', iris, permutations = 99)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-`varpart()`, `forward_select()` and `principal_response_curves()`, which
-are planned, will build on
+### Partitioning variation
+
+[`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md)
+splits the variation that two to four sets of variables explain (say,
+environment and space) into the part each explains on its own, the parts
+they share, and what none of them explains (Borcard et al. 1992), as
+`vegan::varpart()` does. Each fraction is an adjusted R^2 from a series
+of (partial) RDAs of a count table (with `norm`), db-RDAs of distances,
+or, with `chisquare = TRUE`, CCAs. Here the petal measurements are
+partitioned between species and sepal size:
+
+``` r
+
+vp <- varpart(
+  iris[, 3:4], species = ~ Species, sepal = ~ Sepal.Length + Sepal.Width,
+  data = iris, norm = 'hellinger' )
+vp
+#> Variation partitioning by RDA (hellinger): 150 samples, 2 sets
+#> Total inertia: 1.00683 (sum of squares; variance 0.00675722)
+#> 
+#>   species  ~Species                       2 df, adj. R-squared 0.7169
+#>   sepal    ~Sepal.Length + Sepal.Width    2 df, adj. R-squared 0.5050
+#>   All                                     4 df, adj. R-squared 0.7332
+#> 
+#>   +- species -----------------+
+#>   |               +-----------+---------------+
+#>   |  [a]          | [c]       |               |
+#>   |   0.2282      |  0.4886   |  [b]          |
+#>   |               |           |   0.0164      |
+#>   +---------------+-----------+               |
+#>                   +- sepal -------------------+
+#>   Residuals [d] 0.2668
+#> 
+#>                sets df r_squared adj_r_squared testable
+#> [a]         species  2    0.2287        0.2282     TRUE
+#> [b]           sepal  2    0.0197        0.0164     TRUE
+#> [c] species & sepal NA    0.4919        0.4886    FALSE
+#> [d]       residuals NA    0.2596        0.2668    FALSE
+```
+
+Only the unique fractions (`[a]` and `[b]` here, marked `testable`) can
+be tested, each by its set conditioned on the others; here `[b]`, sepal
+size given species:
+
+``` r
+
+permanova(
+  euclidean(iris[, 3:4], norm = 'hellinger'), data = iris,
+  formula = ~ Sepal.Length + Sepal.Width + Condition(Species), permutations = 99 )
+#> Permutational multivariate analysis of variance (PERMANOVA)
+#> 
+#> F = 5.514, p = 0.01, z = 5.142
+#> Permutations: 99 (free)
+#> 
+#> Model R2 = 0.01974. Model tested as a whole:
+#> 
+#>              Df SumOfSqs     R2     F Pr(>F)   
+#> Conditional   2   0.7256 0.7207                
+#> Model         2   0.0199 0.0197 5.514   0.01 **
+#> Residual    145   0.2614 0.2596                
+#> Total       149   1.0068 1.0000                
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+`forward_select()` and `principal_response_curves()`, which are planned,
+will also build on
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md).
 
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), canonical
@@ -337,7 +402,7 @@ ord <- plsda(round(iris[, 1:4] * 10), 'Species', iris)
 plot(ord, col = iris$Species)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-16-1.png)
+![](ordination_files/figure-html/unnamed-chunk-18-1.png)
 
 ``` r
 
@@ -381,7 +446,7 @@ ord <- oplsda(round(two[, 1:4] * 10), 'Species', two)
 plot(ord, col = two$Species)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-18-1.png)
+![](ordination_files/figure-html/unnamed-chunk-20-1.png)
 
 ``` r
 
@@ -446,7 +511,7 @@ arrows(0, 0, load[, 1], load[, 2], length = 0.1)
 text(load[, 1:2], labels = rownames(load), pos = 4)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-20-1.png)
+![](ordination_files/figure-html/unnamed-chunk-22-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -525,7 +590,7 @@ arrows(0, 0, xy$PCoA1, xy$PCoA2, length = 0.1)
 text(xy, labels = vec$variable, pos = 1, cex = 0.8)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-24-1.png)
+![](ordination_files/figure-html/unnamed-chunk-26-1.png)
 
 ## Comparing two ordinations
 
@@ -576,7 +641,7 @@ plot(xy, asp = 1, pch = 16, xlab = 'Axis 1', ylab = 'Axis 2')
 arrows(xy[, 1], xy[, 2], fit[, 1], fit[, 2], length = 0.05, col = 'grey40')
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-26-1.png)
+![](ordination_files/figure-html/unnamed-chunk-28-1.png)
 
 ## Speed and reproducibility
 

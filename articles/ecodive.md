@@ -284,6 +284,9 @@ arrows for the features or metadata that drive the axes.
 and
 [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
 compare two ordinations of the same samples.
+[`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md)
+splits the variation that two to four sets of metadata explain into the
+parts each explains alone and the parts they share.
 
 Four samples are too few to ordinate, so this example uses R’s built-in
 `iris` data: 150 flowers, four measurements each, and three species.

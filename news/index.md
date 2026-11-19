@@ -547,6 +547,25 @@
   seconds on one thread, where `vegan::bioenv()` takes 5.5. Results are
   identical for any number of `cpus`.
 
+- New [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md)
+  partitions the variation in a community among two to four sets of
+  explanatory variables (Borcard et al. 1992): the fractions each set
+  explains on its own, those they share, and the residuals, from the
+  adjusted R-squared of (partial) RDAs of a count table (with `norm`,
+  such as `"hellinger"`), db-RDAs of a `dist`, or, with
+  `chisquare = TRUE`, CCAs with permutation-estimated adjusted R-squared
+  (Peres-Neto et al. 2006). It gives the same fractions as
+  `vegan::varpart()` with two, three and four sets, as one data frame
+  named with vegan’s letters (`[a]`, `[b]`, …), with vegan’s union and
+  conditional fractions as attributes and a text Venn diagram when
+  printed. Each set is a formula over `data`, a data frame, a matrix, or
+  a vector, matched to the samples by name. For RDA and db-RDA, one pass
+  over the data gives every union’s R-squared, with no n-by-n matrix and
+  sparse tables kept sparse: with 3,000 samples, 2,000 taxa (5%
+  non-zero) and three sets, it takes 0.13 seconds on 4 threads
+  (Hellinger table or Bray-Curtis distances), where `vegan::varpart()`
+  takes 3.5. Results are identical for any number of `cpus`.
+
 - New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   returns a count table after any of the transformations that

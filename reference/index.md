@@ -193,6 +193,8 @@ take the count table.
   Variables or Taxa onto an Ordination
 - [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) :
   Best Subset of Environmental Variables (BIOENV)
+- [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md) :
+  Variation Partitioning
 - [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
   : Procrustes Rotation of One Ordination onto Another
 - [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)

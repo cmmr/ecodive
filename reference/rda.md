@@ -249,8 +249,9 @@ distances.
   Its \\R^2\\ is `rda()`'s `r_squared`, and its pseudo-F and p-value
   those of `anova(vegan::rda(...))` for the same permutations.
 
-`varpart()`, `forward_select()` and `principal_response_curves()`, which
-are planned for ecodive, will build on `rda()`.
+[`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md),
+`forward_select()` and `principal_response_curves()`, which are planned
+for ecodive, will build on `rda()`.
 
 **Matching vegan**
 
