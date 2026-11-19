@@ -263,13 +263,19 @@ SEXP C_proportionality(
   double work = (double) n_dist * (n < 1 ? 1 : n);
   run_parallel(pair_worker, threads_for(n_thr, work, 1e6), K - 1 < 100 ? 100 : K - 1);
 
-  setAttrib(result, install("Size"),   ScalarInteger(K));
+  // Each value protected while install() may allocate (rchk).
+  SEXP sexp_size  = PROTECT(ScalarInteger(K));
+  SEXP sexp_diag  = PROTECT(ScalarLogical(0));
+  SEXP sexp_upper = PROTECT(ScalarLogical(0));
+  SEXP sexp_class = PROTECT(mkString("dist"));
+
+  setAttrib(result, install("Size"),   sexp_size);
   setAttrib(result, install("Labels"), sexp_labels);
-  setAttrib(result, install("Diag"),   ScalarLogical(0));
-  setAttrib(result, install("Upper"),  ScalarLogical(0));
-  setAttrib(result, R_ClassSymbol,     mkString("dist"));
+  setAttrib(result, install("Diag"),   sexp_diag);
+  setAttrib(result, install("Upper"),  sexp_upper);
+  setAttrib(result, R_ClassSymbol,     sexp_class);
 
   free_all();
-  UNPROTECT(1);
+  UNPROTECT(5);
   return result;
 }
