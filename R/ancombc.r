@@ -87,12 +87,15 @@
 #'        `'hommel'`, `'bonferroni'`, `'BH'`, `'BY'`, `'fdr'`, `'none'`).
 #'
 #' @param sensitivity  The pseudocount sensitivity analysis (see **False
-#'        discoveries**): `FALSE` (the default) for none; `TRUE` to refit with
-#'        pseudocounts `0.1`, `0.5` and `1` added to every value, as ANCOMBC
-#'        does; or a vector of positive pseudocounts to use instead (on the
-#'        scale of `counts`, so give your own for proportions). With it, the
-#'        table gains `passed_ss` and `reject_robust`. **Recommended**: it
-#'        takes one more fit per pseudocount.
+#'        discoveries**): `TRUE` to refit with pseudocounts `0.1`, `0.5` and
+#'        `1` added to every value, as ANCOMBC does (the default for
+#'        `ancombc2()`, as in ANCOMBC); `FALSE` for none (the default for
+#'        `ancombc()`, for which neither ANCOMBC nor scikit-bio offers it);
+#'        or a vector of positive pseudocounts to use instead. The default
+#'        pseudocounts are on the scale of counts: for proportions or other
+#'        scaled values, give your own (a warning says so). With it, the
+#'        table gains `passed_ss` and `reject_robust`. It takes one more fit
+#'        per pseudocount.
 #'
 #' @return A data frame of class `c('ecodive_ancombc', 'data.frame')`, one
 #'   row per feature and covariate (the covariates of the first feature,
@@ -210,10 +213,12 @@
 #'   2025), ANCOM-BC2's findings replicated least often of 14 methods: treat
 #'   them with caution, and compare them with another method's.
 #'
-#'   It is off by default here only because scikit-bio, whose results these
-#'   are, leaves it to the user; set `sensitivity = TRUE`. It follows ANCOMBC
-#'   2.10.1 and later (and scikit-bio's example): each pseudocount is added
-#'   to every value before the whole analysis, which is repeated, and the
+#'   `ancombc2()` runs it by default, as ANCOMBC does; scikit-bio leaves it
+#'   to the user (its results are the main columns, which it doesn't
+#'   change). For `ancombc()` it is off by default, as neither reference
+#'   offers it there; set `sensitivity = TRUE`. It follows ANCOMBC 2.10.1
+#'   and later (and scikit-bio's example): each pseudocount is added to
+#'   every value before the whole analysis, which is repeated, and the
 #'   post-hoc tests ([ancombc_global()], ...) repeat themselves on each fit.
 #'
 #' @section Covariates:
@@ -262,8 +267,9 @@
 #'     scikit-bio's `aggregator`, ANCOMBC's data preprocessing (`prv_cut`,
 #'     `lib_cut`, `tax_level`; see the examples) and its structural-zero
 #'     detection (see [structural_zeros()]).
-#'   * The sensitivity analysis is off by default (ANCOMBC: on), and is
-#'     available for `ancombc()` too (ANCOMBC: `ancombc2()` only).
+#'   * The sensitivity analysis is on by default for `ancombc2()`, as in
+#'     ANCOMBC (scikit-bio: not built in), and available for `ancombc()`
+#'     too (ANCOMBC: `ancombc2()` only).
 #'   * A design with as many columns as samples, or more, is an error (the
 #'     residuals would all be zero); a rank-deficient design gives a
 #'     warning.
@@ -328,10 +334,10 @@
 #'     plot(res)
 #'     plot(res, 'age')
 #'
-#'     # ANCOM-BC2, with zeros as missing values, and the sensitivity
-#'     # analysis (recommended): only decisions that hold at pseudocounts
-#'     # 0.1, 0.5 and 1 too are kept in `reject_robust`.
-#'     res2 <- ancombc2(x, ~ status + age, meta, groups = 'status', sensitivity = TRUE)
+#'     # ANCOM-BC2, with zeros as missing values, and (by default) the
+#'     # sensitivity analysis: only decisions that hold at pseudocounts 0.1,
+#'     # 0.5 and 1 too are kept in `reject_robust`.
+#'     res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
 #'     res2[res2$reject, ]
 #'
 #'     # ANCOMBC's preprocessing, done first: keep features present in at
@@ -355,7 +361,7 @@ ancombc <- function (
 ancombc2 <- function (
     counts, formula, data, groups = NULL, margin = 1L, pseudocount = 0,
     var_quantile = 0.05, max_iters = 100L, tol = 1e-5, alpha = 0.05,
-    p_adjust = 'holm', sensitivity = FALSE, cpus = n_cpus() ) {
+    p_adjust = 'holm', sensitivity = TRUE, cpus = n_cpus() ) {
 
   ancombc_fit(environment(), v2 = TRUE)
 }
@@ -410,6 +416,17 @@ ancombc_fit <- function (env, v2) {
 
   p_adjust <- pairwise_method(TRUE, env$p_adjust, TRUE)
   sens_pc  <- ancombc_sensitivity_arg(env$sensitivity)
+
+  # The default pseudocounts are on the scale of counts.
+  if (isTRUE(env$sensitivity)) {
+    vals <- stored_values(counts)
+    if (any(vals != round(vals)))
+      warning(
+        '`counts` are not whole numbers, but the sensitivity analysis\'s ',
+        'pseudocounts (0.1, 0.5, 1) are on the scale of counts: give ',
+        '`sensitivity` pseudocounts on the scale of your data, or ',
+        '`sensitivity = FALSE`.', call. = FALSE )
+  }
 
 
   #--------------------------------------------------------

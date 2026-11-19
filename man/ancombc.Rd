@@ -32,7 +32,7 @@ ancombc2(
   tol = 1e-05,
   alpha = 0.05,
   p_adjust = "holm",
-  sensitivity = FALSE,
+  sensitivity = TRUE,
   cpus = n_cpus()
 )
 }
@@ -90,12 +90,15 @@ the features, separately for each covariate: any method of
 \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'}, \code{'fdr'}, \code{'none'}).}
 
 \item{sensitivity}{The pseudocount sensitivity analysis (see \strong{False
-discoveries}): \code{FALSE} (the default) for none; \code{TRUE} to refit with
-pseudocounts \code{0.1}, \code{0.5} and \code{1} added to every value, as ANCOMBC
-does; or a vector of positive pseudocounts to use instead (on the
-scale of \code{counts}, so give your own for proportions). With it, the
-table gains \code{passed_ss} and \code{reject_robust}. \strong{Recommended}: it
-takes one more fit per pseudocount.}
+discoveries}): \code{TRUE} to refit with pseudocounts \code{0.1}, \code{0.5} and
+\code{1} added to every value, as ANCOMBC does (the default for
+\code{ancombc2()}, as in ANCOMBC); \code{FALSE} for none (the default for
+\code{ancombc()}, for which neither ANCOMBC nor scikit-bio offers it);
+or a vector of positive pseudocounts to use instead. The default
+pseudocounts are on the scale of counts: for proportions or other
+scaled values, give your own (a warning says so). With it, the
+table gains \code{passed_ss} and \code{reject_robust}. It takes one more fit
+per pseudocount.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -237,10 +240,12 @@ with it and greatly inflated without it. Even so, in a comparison over
 2025), ANCOM-BC2's findings replicated least often of 14 methods: treat
 them with caution, and compare them with another method's.
 
-It is off by default here only because scikit-bio, whose results these
-are, leaves it to the user; set \code{sensitivity = TRUE}. It follows ANCOMBC
-2.10.1 and later (and scikit-bio's example): each pseudocount is added
-to every value before the whole analysis, which is repeated, and the
+\code{ancombc2()} runs it by default, as ANCOMBC does; scikit-bio leaves it
+to the user (its results are the main columns, which it doesn't
+change). For \code{ancombc()} it is off by default, as neither reference
+offers it there; set \code{sensitivity = TRUE}. It follows ANCOMBC 2.10.1
+and later (and scikit-bio's example): each pseudocount is added to
+every value before the whole analysis, which is repeated, and the
 post-hoc tests (\code{\link[=ancombc_global]{ancombc_global()}}, ...) repeat themselves on each fit.
 }
 
@@ -293,8 +298,9 @@ shared pseudocount rule (see \code{pseudocount}).
 scikit-bio's \code{aggregator}, ANCOMBC's data preprocessing (\code{prv_cut},
 \code{lib_cut}, \code{tax_level}; see the examples) and its structural-zero
 detection (see \code{\link[=structural_zeros]{structural_zeros()}}).
-\item The sensitivity analysis is off by default (ANCOMBC: on), and is
-available for \code{ancombc()} too (ANCOMBC: \code{ancombc2()} only).
+\item The sensitivity analysis is on by default for \code{ancombc2()}, as in
+ANCOMBC (scikit-bio: not built in), and available for \code{ancombc()}
+too (ANCOMBC: \code{ancombc2()} only).
 \item A design with as many columns as samples, or more, is an error (the
 residuals would all be zero); a rank-deficient design gives a
 warning.
@@ -359,10 +365,10 @@ For large datasets, standard matrix operations may be slow. See
     plot(res)
     plot(res, 'age')
 
-    # ANCOM-BC2, with zeros as missing values, and the sensitivity
-    # analysis (recommended): only decisions that hold at pseudocounts
-    # 0.1, 0.5 and 1 too are kept in `reject_robust`.
-    res2 <- ancombc2(x, ~ status + age, meta, groups = 'status', sensitivity = TRUE)
+    # ANCOM-BC2, with zeros as missing values, and (by default) the
+    # sensitivity analysis: only decisions that hold at pseudocounts 0.1,
+    # 0.5 and 1 too are kept in `reject_robust`.
+    res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
     res2[res2$reject, ]
 
     # ANCOMBC's preprocessing, done first: keep features present in at

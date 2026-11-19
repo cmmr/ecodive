@@ -16,7 +16,7 @@
     args <- list(
       tb$counts, s$formula, tb$data, groups = s$groups,
       pseudocount = s$pseudocount, max_iters = s$max_iters, tol = s$tol,
-      alpha = s$alpha, p_adjust = s$p_adjust, cpus = 1L )
+      alpha = s$alpha, p_adjust = s$p_adjust, sensitivity = FALSE, cpus = 1L )
     if (s$method == 'ancombc2') args$var_quantile <- s$var_quantile
     do.call(fn, utils::modifyList(args, list(...)))
   }
@@ -143,7 +143,15 @@
     expect_identical(f(sl, ~ site + ph + smoker, meta, groups = 'site', pseudocount = pc, cpus = 2L), r1, info = fn)
     expect_identical(f(t(x), ~ site + ph + smoker, meta, groups = 'site', margin = 2L, pseudocount = pc, cpus = 2L), r1, info = fn)
     expect_identical(f(Matrix::t(sp), ~ site + ph + smoker, meta, groups = 'site', margin = 2L, pseudocount = pc, cpus = 4L), r1, info = fn)
-    no_f <- function (r) { attr(r, 'formula') <- NULL; r }
+    no_f <- function (r) {   # the formula's environment differs
+      attr(r, 'formula') <- NULL
+      sens <- attr(r, 'sensitivity')
+      if (!is.null(sens)) {
+        sens$fits <- lapply(sens$fits, function (g) { attr(g, 'formula') <- NULL; g })
+        attr(r, 'sensitivity') <- sens
+      }
+      r
+    }
     expect_identical(no_f(f(x, 'site + ph + smoker', meta, groups = 'site', pseudocount = pc, cpus = 1L)), no_f(r1), info = fn)
     expect_identical(no_f(f(x, '~ site + ph + smoker', meta, groups = 'site', pseudocount = pc, cpus = 1L)), no_f(r1), info = fn)
   }
@@ -154,10 +162,10 @@
   big <- matrix(rpois(30 * 300, rep(rexp(300, 0.05), each = 30)), 30, 300)
   big[sample(length(big), 800)] <- 0L
   bmeta <- data.frame(g = rep(c('a', 'b', 'c'), 10), z = rnorm(30))
-  r1 <- ancombc2(big, ~ g + z, bmeta, groups = 'g', cpus = 1L)
+  r1 <- ancombc2(big, ~ g + z, bmeta, groups = 'g', sensitivity = FALSE, cpus = 1L)
   for (cpus in c(2L, 4L))
-    expect_identical(ancombc2(big, ~ g + z, bmeta, groups = 'g', cpus = cpus), r1, info = cpus)
-  expect_identical(ancombc2(Matrix::Matrix(big, sparse = TRUE), ~ g + z, bmeta, groups = 'g', cpus = 3L), r1)
+    expect_identical(ancombc2(big, ~ g + z, bmeta, groups = 'g', sensitivity = FALSE, cpus = cpus), r1, info = cpus)
+  expect_identical(ancombc2(Matrix::Matrix(big, sparse = TRUE), ~ g + z, bmeta, groups = 'g', sensitivity = FALSE, cpus = 3L), r1)
 
 
   # -----------------------------------------------------------------------
@@ -168,8 +176,8 @@
   m  <- ref$tables$prop$data
   sc <- x * exp(seq(-2, 3, length.out = nrow(x)))
   for (fn in c('ancombc', 'ancombc2')) {
-    a <- get(fn)(x,  ~ grp, m, cpus = 1L)
-    b <- get(fn)(sc, ~ grp, m, cpus = 1L)
+    a <- get(fn)(x,  ~ grp, m, sensitivity = FALSE, cpus = 1L)
+    b <- get(fn)(sc, ~ grp, m, sensitivity = FALSE, cpus = 1L)
     k <- a$covariate != '(Intercept)'
     # Rescaling shifts every slope by one constant, which the bias EM
     # absorbs to its tolerance (1e-5).
@@ -181,8 +189,8 @@
   # (scikit-bio's results move as much for per-sample scales).
   x  <- ref$tables$sparse$counts
   m  <- ref$tables$sparse$data
-  a  <- ancombc2(x, ~ trt + age, m, cpus = 1L)
-  b  <- ancombc2(x * 7, ~ trt + age, m, cpus = 1L)
+  a  <- ancombc2(x, ~ trt + age, m, sensitivity = FALSE, cpus = 1L)
+  b  <- ancombc2(x * 7, ~ trt + age, m, sensitivity = FALSE, cpus = 1L)
   k  <- a$covariate != '(Intercept)'
   expect_equal(b$log_fc[k], a$log_fc[k], tolerance = 1e-8)
   expect_equal(b$p_value, a$p_value, tolerance = 1e-8)
@@ -293,10 +301,15 @@
   # -----------------------------------------------------------------------
 
   tb  <- ref$tables$doc3
-  f0  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', cpus = 1L)
-  fs  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', sensitivity = TRUE, cpus = 1L)
+  f0  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', sensitivity = FALSE, cpus = 1L)
+  fs  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', cpus = 1L)
 
-  # Off by default; on, the main columns are unchanged and two are added.
+  # On by default for ancombc2() (as ANCOMBC), off for ancombc(); the main
+  # columns are the same either way, and two are added.
+  expect_identical(formals(ancombc2)$sensitivity, TRUE)
+  expect_identical(formals(ancombc)$sensitivity, FALSE)
+  expect_identical(fs, ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', sensitivity = TRUE, cpus = 1L))
+  expect_null(attr(ancombc(tb$counts + 1L, ~ status, tb$data, cpus = 1L), 'sensitivity'))
   expect_identical(names(f0), c('feature', 'covariate', 'log_fc', 'se', 'w', 'p_value', 'p_adjusted', 'reject'))
   expect_null(attr(f0, 'sensitivity'))
   expect_identical(names(fs), c(names(f0), 'passed_ss', 'reject_robust'))
@@ -309,7 +322,7 @@
 
   # The rule: the decision is the same in the fits at 0.1, 0.5 and 1.
   man <- lapply(c(0.1, 0.5, 1), function (pc)
-    ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', pseudocount = pc, cpus = 1L) )
+    ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', pseudocount = pc, sensitivity = FALSE, cpus = 1L) )
   passed <- Reduce(`&`, lapply(man, function (m) m$reject == f0$reject))
   expect_identical(fs$passed_ss, passed)
   expect_identical(fs$reject_robust, f0$reject & passed)
@@ -330,6 +343,14 @@
 
   for (v in list('yes', c(0, 1), -1, NA, numeric(0), Inf))
     expect_error(ancombc2(tb$counts, ~ status, tb$data, sensitivity = v), '`sensitivity`')
+
+  # The default pseudocounts assume counts: a warning for other values,
+  # none when pseudocounts are given or the analysis is off.
+  px <- ref$tables$prop$counts
+  pm <- ref$tables$prop$data
+  expect_warning(ancombc2(px, ~ grp, pm, cpus = 1L), 'not whole numbers')
+  expect_silent(ancombc2(px, ~ grp, pm, sensitivity = c(1e-4, 1e-3), cpus = 1L))
+  expect_silent(ancombc2(px, ~ grp, pm, sensitivity = FALSE, cpus = 1L))
 
   # Plots flag the robust decisions.
   grDevices::pdf(NULL)

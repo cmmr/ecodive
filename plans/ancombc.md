@@ -616,3 +616,15 @@ page has a section "False discoveries: the sensitivity analysis", saying
 plainly that without it the decisions can include many false discoveries.
 Checked against scikit-bio's docstring (doc3: three significant, none
 robust) and against separately run fits.
+
+**Default changed (same day, the user's decision):** the user asked why
+the reference's default hadn't been followed. ANCOMBC's `ancombc2()` has
+`pseudo_sens = TRUE` by default and scikit-bio has no such option; the port
+followed scikit-bio, and item 22 listed the analysis as "not carried over"
+without asking (it should have been asked, since one reference has it on
+by default). Now `ancombc2(sensitivity = TRUE)` by default, as ANCOMBC,
+with a warning when `counts` isn't whole numbers and the default
+pseudocounts are used (they are on the scale of counts); `ancombc()` stays
+`sensitivity = FALSE` (neither reference offers it there). scikit-bio's
+columns are unchanged; the fixture comparisons pass `sensitivity = FALSE`.
+The default roughly quadruples `ancombc2()`'s time and fit memory.

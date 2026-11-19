@@ -17,7 +17,7 @@
     args <- list(
       tb$counts, s$formula, tb$data, groups = s$groups,
       pseudocount = s$pseudocount, max_iters = s$max_iters, tol = s$tol,
-      alpha = s$alpha, p_adjust = s$p_adjust, cpus = 1L )
+      alpha = s$alpha, p_adjust = s$p_adjust, sensitivity = FALSE, cpus = 1L )
     if (s$method == 'ancombc2') args$var_quantile <- s$var_quantile
     do.call(fn, args)
   }
@@ -176,7 +176,7 @@
   x4   <- ref$tables$sparse$counts
   m4   <- ref$tables$sparse$data
   m4$trt4 <- rep(c('a', 'b', 'c', 'd'), length.out = nrow(x4))
-  fit4 <- ancombc2(x4, ~ trt4 + age, m4, groups = 'trt4', cpus = 1L)
+  fit4 <- ancombc2(x4, ~ trt4 + age, m4, groups = 'trt4', sensitivity = FALSE, cpus = 1L)
   tr4  <- ancombc_trend(fit4, patterns = list(umbrella = umb), n_bootstraps = 10L, cpus = 1L)
   cf4  <- attr(fit4, 'coef')[, 2:4]
   vc4  <- attr(fit4, 'vcov')[, 2:4, 2:4]
@@ -230,7 +230,7 @@
   expect_identical(unique(ancombc_dunnett(fit0)$comparison), c('gut', 'oral', 'skin'))
   expect_identical(unique(ancombc_pairwise(fit0)$comparison), c('gut', 'oral', 'skin', 'oral - gut', 'skin - gut', 'skin - oral'))
   tb  <- ref$tables$sim
-  fnog <- ancombc2(tb$counts, ~ site + ph + smoker, tb$data, cpus = 1L)
+  fnog <- ancombc2(tb$counts, ~ site + ph + smoker, tb$data, sensitivity = FALSE, cpus = 1L)
   expect_error(ancombc_global(fnog), '`groups` is required')
   expect_identical(ancombc_global(fnog, groups = 'site'), ancombc_global(fit))
   expect_identical(ancombc_pairwise(fnog, groups = 'site'), ancombc_pairwise(fit))
@@ -333,8 +333,8 @@
   # -----------------------------------------------------------------------
 
   tb  <- ref$tables$doc3
-  f0  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', cpus = 1L)
-  fs  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', sensitivity = TRUE, cpus = 1L)
+  f0  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', sensitivity = FALSE, cpus = 1L)
+  fs  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', cpus = 1L)
   fits <- attr(fs, 'sensitivity')$fits
   same <- function (main, rerun) Reduce(`&`, lapply(fits, function (f) rerun(f)$reject == main))
 
@@ -356,7 +356,7 @@
   expect_identical(tr$reject_robust, tr$reject & g$passed_ss)
 
   # A grouping given at post-hoc time works on the stored fits too.
-  fn <- ancombc2(tb$counts, ~ status + age, tb$data, sensitivity = TRUE, cpus = 1L)
+  fn <- ancombc2(tb$counts, ~ status + age, tb$data, cpus = 1L)
   expect_identical(ancombc_global(fn, groups = 'status'), ancombc_global(fs))
 
   grDevices::pdf(NULL)
@@ -383,7 +383,7 @@
   expect_error(ancombc_trend(fit, patterns = 'up'), 'patterns')
   m2 <- ref$tables$doc3$data
   m2$two <- rep(c('u', 'v', 'u'), 5)
-  f2 <- ancombc2(ref$tables$doc3$counts, ~ two + status, m2, cpus = 1L)
+  f2 <- ancombc2(ref$tables$doc3$counts, ~ two + status, m2, sensitivity = FALSE, cpus = 1L)
   expect_error(ancombc_global(f2, groups = 'two'), 'three')
   expect_error(structural_zeros(x), 'groups')
   expect_error(structural_zeros(x, grp, neg_lb = NA), '`neg_lb`')

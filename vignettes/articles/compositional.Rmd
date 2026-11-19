@@ -638,7 +638,10 @@ plot(fit)
 ```
 
 The bias correction recovers the true fold changes almost exactly, where
-the clr-based estimates above were off by the shift. ANCOM-BC
+the clr-based estimates above were off by the shift. `ancombc2()` also
+runs the R package's sensitivity analysis by default: it refits with
+pseudocounts 0.1, 0.5 and 1, and `reject_robust` keeps only the decisions
+that hold in every fit, which are the ones to report. ANCOM-BC
 (`ancombc()`) does a little less well on this table, with two false
 positives and estimates further from the truth. It needs a pseudocount
 for the zeros, and the bias a pseudocount introduces differs between rare
