@@ -728,6 +728,31 @@
   features in 200 samples take about 3 seconds on 4 cores (10 with
   `'kruskal'`).
 
+- New
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+  finds differentially abundant features the ALDEx2 way (Fernandes et
+  al. 2013, 2014), as scikit-bio’s
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md):
+  each sample’s proportions are drawn `n_draws` times from their
+  Dirichlet posterior (`pseudocount = 0.5` is the prior), every draw is
+  clr-transformed, each feature is compared between the two sides of a
+  `contrast` with Welch’s t-test, and the results are averaged. It
+  returns a per-feature table with the average `t`, `log2_fc` and
+  `p_value`, the conservative interval of scikit-bio (the widest bounds
+  over the draws), `p_adjusted` and `reject`.
+  `contrast = c(treatment, reference)` names the groups; `NA` as the
+  reference pools all other samples, which is also the default (the
+  first group against the rest). Given the same draws, the results are
+  scikit-bio’s to about 1e-13. Its scale model (`scale_sd`, following
+  ALDEx3’s `clr.sm()`; Nixon et al. 2025) adds uncertainty about the
+  groups’ total loads to every draw, so that a change in load isn’t
+  mistaken for changes in the features; it is on by default
+  (`scale_sd = 0.5`, as ALDEx3 recommends), and `scale_sd = 0` gives
+  scikit-bio’s procedure. The draws come from a new Gamma sampler on PCG
+  (Marsaglia & Tsang), with one random stream per sample and draw, so
+  results are identical for any `cpus`: 500 samples by 5,000 features,
+  128 draws, take about 5 seconds on 4 cores.
+
 - `rarefy(depth =)` now also takes one depth per sample (matched to the
   samples by name when named). `drop` and `warn` then compare each
   sample with its own depth. A single depth gives exactly the same

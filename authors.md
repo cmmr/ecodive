@@ -17,8 +17,8 @@
 
 - **scikit-bio development team**. Contributor, copyright holder.  
   PCoA biplot scores, BIOENV, the alr and ilr transforms and balances,
-  multiplicative zero replacement, the variance of log ratios, and
-  ANCOM, from scikit-bio
+  multiplicative zero replacement, the variance of log ratios, ANCOM,
+  and Dirichlet-multinomial t-tests, from scikit-bio
 
 - **NumPy Developers**. Copyright holder.  
   numpy's pairwise summation, followed by replace_zeros_mult()
@@ -37,6 +37,9 @@
 
 - **Raes Lab**. Contributor, copyright holder.  
   quantitative microbiome profiling, following 'QMP.R'
+
+- **ALDEx3 authors**. Contributor, copyright holder.  
+  the scale model of dirmult_ttest(), following 'ALDEx3'
 
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.

@@ -127,8 +127,9 @@ pseudocount used; `0` for none).
 
 ANCOM gives **no effect size and no p-value per feature**, only \\W\\
 and a decision. For effect sizes and their uncertainty, see
-`dirmult_ttest()`; for bias-corrected estimates of each feature's log
-fold change, with p-values, see `ancombc()` and `ancombc2()` (planned).
+[`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md);
+for bias-corrected estimates of each feature's log fold change, with
+p-values, see `ancombc()` and `ancombc2()` (planned).
 
 ## Details
 

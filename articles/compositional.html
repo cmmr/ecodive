@@ -177,7 +177,7 @@ abundance</a></td>
 <td align="left"></td>
 <td align="left">
 <code><a href="../reference/ancom.html">ancom()</a></code>, <code>ancombc()</code>,
-<code>ancombc2()</code>, <code>dirmult_ttest()</code>
+<code>ancombc2()</code>, <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>
 </td>
 </tr>
 <tr class="even">
@@ -679,7 +679,7 @@ fraction</td>
 <tr class="odd">
 <td align="left">ALDEx2-style</td>
 <td align="left">clr of Dirichlet Monte Carlo draws</td>
-<td align="left"><code>dirmult_ttest()</code></td>
+<td align="left"><code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code></td>
 <td align="left">ALDEx2 (Bioconductor), scikit-bio</td>
 </tr>
 </tbody>
@@ -688,7 +688,7 @@ fraction</td>
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
 <span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancom.html">ancom</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">group</span>, data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">res3</span> <span class="op">&lt;-</span> <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">res3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Available now:</span></span>
 <span><span class="va">res4</span> <span class="op">&lt;-</span> <span class="fu">ALDEx2</span><span class="fu">::</span><span class="fu">aldex</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span>, <span class="va">groups</span>, test <span class="op">=</span> <span class="st">'t'</span>, effect <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -743,7 +743,7 @@ either fails, it reports which taxa moved <strong>relative to the
 average taxon</strong>, not in absolute terms. ANCOM-BC estimates the
 shift as a bias and removes it; the scale models of <strong><a href="https://doi.org/10.1186/s13059-025-03609-3" class="external-link">Nixon, Gloor &amp;
 Silverman (2025)</a></strong> (in ALDEx2, and planned for
-<code>dirmult_ttest()</code>) add explicit uncertainty about it; and
+<code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>) add explicit uncertainty about it; and
 measuring total load removes it outright (see <a href="#absolute-abundance">Absolute abundance</a>).</p>
 </div>
 </div>

@@ -552,11 +552,13 @@ valid alternative to correlation. A dist over the features.
 
 ### Differential abundance
 
-Which features’ abundances differ between groups, from log ratios, so
-that the samples’ totals don’t matter.
+Which features’ abundances differ between groups, from log ratios or clr
+values, so that the samples’ totals don’t matter.
 
 - [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) :
   Analysis of Composition of Microbiomes (ANCOM)
+- [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+  : Dirichlet-multinomial Welch t-tests (ALDEx2-style)
 
 ### Absolute abundance
 

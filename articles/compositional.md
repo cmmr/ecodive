@@ -41,7 +41,7 @@ planned function the article shows the call it will have, marked
 | [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`, [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) | `philr()` |
 | [Beta diversity](#beta-diversity) | Do communities differ? | [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md) | `philr_distance()`, `rpca_phylo()` |
 | [Log ratios](#log-ratios) | Which taxa shift relative to which? | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) loadings, [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) |  |
-| [Differential abundance](#differential-abundance) | Which taxa differ? |  | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md), `ancombc()`, `ancombc2()`, `dirmult_ttest()` |
+| [Differential abundance](#differential-abundance) | Which taxa differ? |  | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md), `ancombc()`, `ancombc2()`, [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md) |
 | [Co-occurrence](#proportionality) | Which taxa move together? | [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) |  |
 | [Absolute abundance](#absolute-abundance) | Did taxa really increase? | [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md), [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) |  |
 | [Repeated measures and multi-omics](#repeated-measures-and-multi-omics) | Subjects over time; several ’omics |  | `ctf()`, `rpca_joint()` |
@@ -530,7 +530,7 @@ that agree across two or more of them.
 |:---|:---|:---|:---|
 | ANCOM | every other taxon: tests all pairwise log ratios | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) | scikit-bio, QIIME 2 |
 | ANCOM-BC / ANCOM-BC2 | estimates and removes each sample’s sampling fraction | `ancombc()`, `ancombc2()` | ANCOMBC (Bioconductor), scikit-bio |
-| ALDEx2-style | clr of Dirichlet Monte Carlo draws | `dirmult_ttest()` | ALDEx2 (Bioconductor), scikit-bio |
+| ALDEx2-style | clr of Dirichlet Monte Carlo draws | [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md) | ALDEx2 (Bioconductor), scikit-bio |
 
 ``` r
 
@@ -604,9 +604,10 @@ either fails, it reports which taxa moved **relative to the average
 taxon**, not in absolute terms. ANCOM-BC estimates the shift as a bias
 and removes it; the scale models of **[Nixon, Gloor & Silverman
 (2025)](https://doi.org/10.1186/s13059-025-03609-3)** (in ALDEx2, and
-planned for `dirmult_ttest()`) add explicit uncertainty about it; and
-measuring total load removes it outright (see [Absolute
-abundance](#absolute-abundance)).
+planned for
+[`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md))
+add explicit uncertainty about it; and measuring total load removes it
+outright (see [Absolute abundance](#absolute-abundance)).
 
 ## Co-occurrence: proportionality
 
