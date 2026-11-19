@@ -9,7 +9,9 @@ without the conversation that produced it. Start with:
 3. **The method's own plan**, linked from TODO.md.
 
 [new_methods.md](new_methods.md) is the original survey and
-decision record, kept for reference. The per-method plans hold everything
+decision record, kept for reference. [compositional.md](compositional.md)
+is the same for the compositional-data methods (zeros, log ratios,
+proportionality, differential abundance, QMP and the gemelli ports). The per-method plans hold everything
 from it that a method needs. **Where they differ** (function names, in
 particular), **the per-method plans and this README win.**
 
@@ -126,7 +128,9 @@ particular), **the per-method plans and this README win.**
   UniFrac family does (`unweighted_unifrac()`, `weighted_unifrac()`, ...).
   Use an argument only for options that every reference also treats as an
   argument (e.g. `pcoa(correction)`, `permdisp(type)`, `mantel(method)`).
-- **Ordinations of distances** join `dist_ord()`: add a row to `ORDINATIONS`
+- **Zero replacements** join `replace_zeros()`: add a row to
+  `ZERO_REPLACEMENTS` (see [zero_replacement.md](zero_replacement.md)).
+  **Ordinations of distances** join `dist_ord()`: add a row to `ORDINATIONS`
   in `R/dist_ord.r`. **Ordinations of a count table** join `count_ord()`:
   add a row to `COUNT_ORDS` in `R/count_ord.r`. **Tests of `dm` against
   one variable** join `dist_test()`: add a row to `DIST_TESTS` in
@@ -136,7 +140,7 @@ particular), **the per-method plans and this README win.**
   - Matching tries an exact name or alias first (`match_name()` in
     `R/utils.r`), then prefixes.
   - Keep `cap` for `capscale`.
-  - Check every new alias against all four registries with the snippet
+  - Check every new alias against all the registries with the snippet
     below.
   - If a wrapper's matcher should point to another wrapper, follow how
     `match_dist_ord()` and `match_count_ord()` do it.
@@ -160,6 +164,7 @@ particular), **the per-method plans and this README win.**
   | `dist_ord()` | `dm`, `method` | an argument named `method`, or any prefix of `method` or `dm` (`m`, `me`, `d`, ...) |
   | `count_ord()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
   | `dist_test()` | `dm`, `test`, `groups`, `data` | an argument named `test`, or any prefix of `test`, `groups` or `data` (`t`, `g`, `gr`, `d`, `da`, ...) |
+  | `replace_zeros()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
 
   `groups` and `data` themselves are fine in `dist_test()`: it passes
   them through on purpose. Tests may take a `method` argument (as
@@ -211,9 +216,10 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, `replace_zeros` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
-| Unconstrained, counts | ✓ `pca`, ✓ `rpca`, `ca`, `dca`, `dpcoa` |
+| Unconstrained, counts | ✓ `pca`, ✓ `rpca`, `rpca_phylo`, `ca`, `dca`, `dpcoa` |
+| Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
 | Constrained | ✓ `dbrda`, ✓ `capscale`, `rda`, `cca`, `principal_response_curves` |
 | Discriminant (`*da`) | `lda`, `plsda`, `oplsda`, `splsda`, `capda` |
 | Fitting onto ordinations | ✓ `envfit`, ✓ `pcoa_biplot` |
@@ -222,6 +228,13 @@ can't be mistaken for one another:
 | Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, `mantel_partial`, `mirkat` |
 | Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
 | Composition | `simper` |
+| Beta metrics (`beta_div`) | `philr_distance` |
+| Zero replacement (`replace_zeros`) | `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
+| Log-ratio transforms | `alr`, `ilr`, `philr` (clr and rclr stay `norm` choices) |
+| Log ratios | `log_ratio`, `balance` |
+| Proportionality | `vlr`, `rho_p`, `phi_s` |
+| Differential abundance | `ancom`, `dirmult_ttest` |
+| Absolute abundance | `qmp_scale`, `qmp_rarefy` |
 | Spatial | `moran_i`, `dbmem` |
 
 Names still worth a word of warning in the docs:
