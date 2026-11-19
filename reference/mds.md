@@ -274,8 +274,12 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them. The matrix has class
-`"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last, the records
+of how it was made (see
+[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
+`dist`, the distance matrix's, for the methods that take distances, and
+`ord`, the ordination's own (its method, display name and settings). The
+matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -342,4 +346,6 @@ scikit-learn developers).
 #>  - attr(*, "n_starts")= int 4
 #>  - attr(*, "best_start")= int 0
 #>  - attr(*, "n_best")= int 1
+#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
+#>  - attr(*, "ord")= Metric Multidimensional Scaling (method = mds, n_axes = 2, n_starts = 4, max_iters = 1000, tol = 1e-07, seed = 0)
 ```

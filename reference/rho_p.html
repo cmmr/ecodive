@@ -117,12 +117,13 @@ before returning the distance matrix: <code>NULL</code> (the default) or
 (WPGMA), <code>"median"</code> or <code>"centroid"</code>, or <code>"pcoa"</code> to order them
 along the first axis of <code><a href="pcoa.html">pcoa()</a></code>. Clustering <strong>reorders the
 samples</strong> of the result, with their labels (samples without names
-are labelled with their positions in the input): attribute <code>order</code>
-gives each one's position in the input, so that <code>meta[attr(d, "order"), ]</code> lines metadata up with them. Tests such as <code><a href="permanova.html">permanova()</a></code> match
-named samples to <code>data</code> by name, but a vector of groups without
-names is matched by position, so reorder it too. The result's
-attribute <code>clust</code> records <code>clust</code> (<code>FALSE</code> as <code>"none"</code>), which
-<code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
+are labelled with their positions in the input): its <code>dist</code> record
+(see <a href="ecodive_steps.html">ecodive_steps</a>) gives each one's position in the input as
+<code>order</code>, so that <code>meta[attr(d, "dist")$order, ]</code> lines metadata up
+with them. Tests such as <code><a href="permanova.html">permanova()</a></code> match named samples to
+<code>data</code> by name, but a vector of groups without names is matched by
+position, so reorder it too. The record's <code>clust</code> records <code>clust</code>
+(<code>FALSE</code> as <code>"none"</code>), which <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
 for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
 order. <code>clust</code> needs every distance, so it cannot be used with
 <code>pairs</code>. <code>rho_p()</code>'s similarities are clustered as \(1 -
@@ -136,10 +137,11 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>dist</code> object over the features, as <code><a href="vlr.html">vlr()</a></code> returns, with
-attributes <code>method</code> (<code>'rho_p'</code>), <code>denominator</code> (absent for the clr;
-otherwise the reference features' names, or their indices when the
-features have no names) and <code>pseudocount</code>.</p>
+    <p>A <code>dist</code> object over the features, as <code><a href="vlr.html">vlr()</a></code> returns, whose
+<code>dist</code> record (see <a href="ecodive_steps.html">ecodive_steps</a>) has <code>metric</code> <code>"rho_p"</code>, the
+<code>denominator</code> (absent for the clr; otherwise the reference features'
+names, or their indices when the features have no names) and the
+<code>pseudocount</code>.</p>
 <p>\(\rho_p\) is a <strong>similarity</strong> in a <code>dist</code> container: <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>
 puts 0 on the diagonal, where \(\rho_p\) is 1, and it must not be
 given as <code>dm</code> to an ordination or test. Threshold it to find

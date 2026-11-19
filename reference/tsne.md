@@ -345,8 +345,12 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them. The matrix has class
-`"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last, the records
+of how it was made (see
+[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
+`dist`, the distance matrix's, for the methods that take distances, and
+`ord`, the ordination's own (its method, display name and settings). The
+matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -420,4 +424,6 @@ Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python.
 #>  - attr(*, "n_iters")= int 1000
 #>  - attr(*, "learning_rate")= num 50
 #>  - attr(*, "gradient")= chr "exact"
+#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
+#>  - attr(*, "ord")= t-distributed Stochastic Neighbor Embedding (method = tsne, n_axes = 2, perplexity = 30, theta = 0.5, gradient = auto, init = pcoa, max_iters = 1000, early_exaggeration = 12, learning_rate = 50, seed = 0)
 ```

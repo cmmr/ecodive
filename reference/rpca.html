@@ -326,7 +326,10 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them. The matrix has class
+</ul><p>Attributes particular to the method follow them, and last, the records
+of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
+matrix's, for the methods that take distances, and <code>ord</code>, the
+ordination's own (its method, display name and settings). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -398,6 +401,7 @@ phylogenetic tree; <code><a href="pcoa.html">pcoa()</a></code>; <code><a href="r
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:3] "RPCA1" "RPCA2" "RPCA3"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "cost")= num [1:2] 2.67e-15 2.62e-15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "n_iters")= int 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ord")= Robust Aitchison PCA (method = rpca, margin = 1, n_axes = 3, max_iters = 5, tol = 1e-05, min_sample_count = 0, min_feature_count = 0, min_feature_frequency = 0, distances = FALSE)</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

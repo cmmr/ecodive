@@ -105,13 +105,15 @@ beta_div(
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (samples without names are labelled with their positions in the
-  input): attribute `order` gives each one's position in the input, so
-  that `meta[attr(d, "order"), ]` lines metadata up with them. Tests
+  input): its `dist` record (see
+  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
+  gives each one's position in the input as `order`, so that
+  `meta[attr(d, "dist")$order, ]` lines metadata up with them. Tests
   such as
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
   match named samples to `data` by name, but a vector of groups without
-  names is matched by position, so reorder it too. The result's
-  attribute `clust` records `clust` (`FALSE` as `"none"`), which
+  names is matched by position, so reorder it too. The record's `clust`
+  records `clust` (`FALSE` as `"none"`), which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -140,31 +142,13 @@ before. Each metric's own function, such as
 [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), returns
 the same.
 
-Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, its attributes
-record how it was made:
-
-- `metric`: The metric's ID, such as `"bray"`.
-
-- `metric_name`: Its display name, such as
-  `"Bray-Curtis Dissimilarity"`, as
-  [`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md)
-  gives it, so that any package can label it without ecodive's table.
-
-- `norm`: The normalization applied before computing it (by name, such
-  as `"percent"`), whether chosen with `norm` or fixed by the metric
-  (such as
-  [`hellinger()`](https://cmmr.github.io/ecodive/reference/hellinger.md)'s).
-  Absent for the UniFrac metrics.
-
-- `pseudocount`: The pseudocount used (`0` for none), for the metrics
-  that take one.
-
-- `power`, `alpha`: For
-  [`minkowski()`](https://cmmr.github.io/ecodive/reference/minkowski.md)
-  and
-  [`generalized_unifrac()`](https://cmmr.github.io/ecodive/reference/generalized_unifrac.md).
-
-- `clust`, `order`: With `clust`; see its description.
+Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, it has attribute
+`dist`, the record of how it was made (see
+[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
+the metric's display name (`attr(d, "dist")$name`, such as
+`"Bray-Curtis Dissimilarity"`) and ID (`$metric`), the `norm` applied,
+the `pseudocount`, `power` or `alpha` used, and with `clust`, `$clust`
+and `$order`. Ordinations and tests of the matrix keep the record.
 
 ## Details
 

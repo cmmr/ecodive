@@ -47,13 +47,15 @@ vlr(counts, margin = 1L, pseudocount = NULL, clust = NULL, cpus = n_cpus())
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (samples without names are labelled with their positions in the
-  input): attribute `order` gives each one's position in the input, so
-  that `meta[attr(d, "order"), ]` lines metadata up with them. Tests
+  input): its `dist` record (see
+  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
+  gives each one's position in the input as `order`, so that
+  `meta[attr(d, "dist")$order, ]` lines metadata up with them. Tests
   such as
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
   match named samples to `data` by name, but a vector of groups without
-  names is matched by position, so reorder it too. The result's
-  attribute `clust` records `clust` (`FALSE` as `"none"`), which
+  names is matched by position, so reorder it too. The record's `clust`
+  records `clust` (`FALSE` as `"none"`), which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -76,16 +78,13 @@ returns over samples), labelled with the feature names, of class
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws it as a
 heatmap (see
 [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)).
-Attributes, besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`:
-
-- `metric`: `'vlr'`, and `metric_name`, its display name,
-  `'Variance of Log Ratios'`, as
-  [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)'s
-  results have them.
-
-- `method`: `'vlr'`.
-
-- `pseudocount`: the pseudocount used (`0` for none).
+Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, it has attribute
+`dist`, the record of how it was made (see
+[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)),
+as
+[`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)'s
+results do: its display name (`"Variance of Log Ratios"`), `metric`
+(`"vlr"`), and the `pseudocount` used (`0` for none).
 
 It is a dissimilarity, so it can be given as `dm` to
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),

@@ -720,6 +720,8 @@ base graphics.
   : Plot a forward selection
 - [`plot(`*`<ecodive_bioenv>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.md)
   : Plot a BIO-ENV result
+- [`ecodive_steps`](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)
+  : How a result was made
 
 ## Utilities & Helpers
 

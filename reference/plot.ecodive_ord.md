@@ -174,7 +174,10 @@ The plot is made of what `x` holds:
   [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
   and
   [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md)
-  give it.
+  give it, and for an ordination of distances, the distances' metric,
+  from the records of how `x` was made (see
+  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
+  such as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity".
 
 - **Axis labels**: the axes' names, with the percentage of the variance
   each explains (the `prop` attribute), for methods that have one.

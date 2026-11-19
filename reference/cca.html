@@ -295,7 +295,10 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them. The matrix has class
+</ul><p>Attributes particular to the method follow them, and last, the records
+of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
+matrix's, for the methods that take distances, and <code>ord</code>, the
+ordination's own (its method, display name and settings). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -379,6 +382,7 @@ Chapman &amp; Hall/CRC.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "Sepal.Length" "Sepal.Width" "Petal.Length" "Petal.Width"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:2] "CCA1" "CA1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ord")= Canonical Correspondence Analysis (method = cca, formula = ~Petal.Width, margin = 1, n_axes = 2, permutations = 1000, seed = 0)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Without constraints, a correspondence analysis.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">cca</span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span></span>

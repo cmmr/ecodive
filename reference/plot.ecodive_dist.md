@@ -70,7 +70,9 @@ plot(x, groups = NULL, data = NULL, col = NULL, key = TRUE, ...)
 ## Details
 
 **Order.** The samples are ordered by the `clust` argument of the
-function that made `x`, recorded in its `clust` attribute:
+function that made `x`, recorded in its `dist` record
+(`attr(x, "dist")$clust`; see
+[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
 
 - Not set (`clust = NULL`, the default): the plot clusters them itself,
   by average linkage (UPGMA,
@@ -81,12 +83,14 @@ function that made `x`, recorded in its `clust` attribute:
 
 - A clustering method: `x` is already in that order, which is kept.
 
-To plot a matrix in its own order, set `attr(x, "clust") <- "none"`.
+To plot a matrix in its own order, make it with `clust = FALSE`.
 
-**Title.** The metric's display name, from the `metric_name` attribute
-(such as `"Bray-Curtis Dissimilarity"`), or else its `metric` or
-`method` attribute; `"Distances"` without any of them. With `groups`,
-the samples are sorted by group, keeping that order within each group.
+**Title.** The metric's display name, from the `dist` record (see
+[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)),
+such as `"Bray-Curtis Dissimilarity"`; or else the `method` attribute
+that [`stats::dist()`](https://rdrr.io/r/stats/dist.html) sets;
+`"Distances"` without either. With `groups`, the samples are sorted by
+group, keeping that order within each group.
 
 The rows run from the first sample at the top to the last at the bottom,
 and the columns from left to right in the same order, so the matrix is
@@ -119,7 +123,7 @@ before.
 
     # Clustered by Ward's method when computed: the result is reordered.
     dm <- bray(iris[, 1:4], clust = 'ward.D2')
-    head(attr(dm, 'order'))
+    head(attr(dm, 'dist')$order)
 #> [1] 13  2 46 30 31 26
     plot(dm, 'Species', iris)
 

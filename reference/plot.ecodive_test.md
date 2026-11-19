@@ -75,8 +75,11 @@ plot(x, type = c("fit", "null"), ...)
 
 ## Details
 
-The title is the test's name, and the subtitle its statistic, p-value
-and standardized effect size \\z\\, as printed.
+The title is the test's name, with the metric of the distances it tested
+(from their `dist` record; see
+[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)),
+and the subtitle its statistic, p-value and standardized effect size
+\\z\\, as printed.
 
 - `"null"`: a histogram of the statistic in each permutation (the
   `f_perm`, `r_perm` or `delta_perm` attribute), with a line at the

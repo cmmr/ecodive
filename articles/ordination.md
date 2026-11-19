@@ -119,6 +119,8 @@ str(ord)
 #>  - attr(*, "trace")= num 2.64
 #>  - attr(*, "correction")= chr "none"
 #>  - attr(*, "constant")= num 0
+#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
+#>  - attr(*, "ord")= Principal Coordinates Analysis (method = pcoa, n_axes = 3, correction = none)
 ```
 
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the first

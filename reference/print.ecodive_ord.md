@@ -2,7 +2,10 @@
 
 Prints the coordinates, then one line on the axes and the names of the
 other attributes, rather than every attribute in full (such as
-[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)'s loadings).
+[`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)'s loadings),
+and last, the records of how it was made (see
+[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)),
+one line each.
 
 ## Usage
 
