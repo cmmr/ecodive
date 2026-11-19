@@ -133,10 +133,10 @@ variable named <code>group</code>.</p></dd>
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
 <dd><p><code>NULL</code> (the default), or the name of a categorical
 variable of <code>data</code> that is a term of <code>formula</code>, with at least
-three levels: the grouping the post-hoc tests (planned:
-<code>ancombc_global()</code>, <code>ancombc_pairwise()</code>, <code>ancombc_dunnett()</code>,
-<code>ancombc_trend()</code>) compare. It doesn't change the results
-(scikit-bio's <code>grouping</code>).</p></dd>
+three levels: the grouping the post-hoc tests
+(<code><a href="ancombc_global.html">ancombc_global()</a></code>, <code><a href="ancombc_global.html">ancombc_pairwise()</a></code>, <code><a href="ancombc_global.html">ancombc_dunnett()</a></code>,
+<code><a href="ancombc_global.html">ancombc_trend()</a></code>) compare by default. It doesn't change the
+results (scikit-bio's <code>grouping</code>).</p></dd>
 
 
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
@@ -228,7 +228,8 @@ for <code>ancombc2()</code>), <code>estimable</code> (<code>NULL</code> when eve
 be estimated, else a logical features \(\times\) covariates
 matrix), and <code>design</code> (the samples \(\times\) covariates model
 matrix, with <code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">stats::model.matrix()</a></code>'s <code>assign</code> and <code>contrasts</code>
-attributes).</p></li>
+attributes, the formula's <code>term.labels</code>, and <code>xlevels</code>, the levels
+of each factor).</p></li>
 <li><p><code>bias</code>: covariates \(\times\) 3, each covariate's estimated bias
 (<code>delta_em</code>, subtracted from the coefficients), its weighted least
 squares estimate (<code>delta_wls</code>) and that estimate's variance

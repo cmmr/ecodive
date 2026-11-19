@@ -212,6 +212,13 @@ values, so that the samples’ totals don’t matter.
   [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) :
   Analysis of Compositions of Microbiomes with Bias Correction
   (ANCOM-BC)
+- [`ancombc_global()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+  [`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+  [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+  [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+  : Post-hoc tests for ANCOM-BC and ANCOM-BC2
+- [`structural_zeros()`](https://cmmr.github.io/ecodive/reference/structural_zeros.md)
+  : Structural zeros
 - [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
   : Dirichlet-multinomial Welch t-tests (ALDEx2-style)
 

@@ -74,9 +74,13 @@ ancombc2(
 
   `NULL` (the default), or the name of a categorical variable of `data`
   that is a term of `formula`, with at least three levels: the grouping
-  the post-hoc tests (planned: `ancombc_global()`, `ancombc_pairwise()`,
-  `ancombc_dunnett()`, `ancombc_trend()`) compare. It doesn't change the
-  results (scikit-bio's `grouping`).
+  the post-hoc tests
+  ([`ancombc_global()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
+  [`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
+  [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
+  [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md))
+  compare by default. It doesn't change the results (scikit-bio's
+  `grouping`).
 
 - margin:
 
@@ -184,7 +188,8 @@ Attributes:
   logical features \\\times\\ covariates matrix), and `design` (the
   samples \\\times\\ covariates model matrix, with
   [`stats::model.matrix()`](https://rdrr.io/r/stats/model.matrix.html)'s
-  `assign` and `contrasts` attributes).
+  `assign` and `contrasts` attributes, the formula's `term.labels`, and
+  `xlevels`, the levels of each factor).
 
 - `bias`: covariates \\\times\\ 3, each covariate's estimated bias
   (`delta_em`, subtracted from the coefficients), its weighted least

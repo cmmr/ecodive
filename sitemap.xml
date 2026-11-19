@@ -26,6 +26,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/alr.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ancombc.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/ancombc_global.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/anosim.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/balance.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_assert_integer.html</loc></url>
@@ -141,6 +142,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/squared_chord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/squared_euclidean.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/squares.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/structural_zeros.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/topsoe.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/tsne.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/umap.html</loc></url>
