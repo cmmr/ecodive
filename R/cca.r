@@ -217,7 +217,7 @@
 #' @examples
 #'     counts <- round(iris[, 1:4] * 10)
 #'     ord    <- cca(counts, 'Species', iris)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     attr(ord, 'r_squared')
 #'     attr(ord, 'loadings')
 #'

@@ -156,7 +156,7 @@
 #' @examples
 #'     # LDA of iris: three groups, so two discriminant axes.
 #'     ord <- lda(iris[, 1:4], 'Species', iris)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord)
 #'     attr(ord, 'prop')
 #'     attr(ord, 'scaling')
 #'

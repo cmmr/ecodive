@@ -163,7 +163,9 @@ sure.
     dm <- bray(counts)
 
     # The best subset of each size.
-    bioenv(dm, env)
+    res <- bioenv(dm, env)
+    res
+    plot(res)
 
     # Only some variables, transformed, with subsets of up to two.
     bioenv(dm, env, ~ ph + log(n) + p, max_vars = 2)

@@ -117,7 +117,9 @@
 #' * `ord` and `target` may be `dist` objects, and their samples are
 #'   matched by name.
 #' * The result is the rotated ordination itself, with the rest as
-#'   attributes. There are no `plot()` or `fitted()` methods.
+#'   attributes. `plot()` draws it with an arrow from each sample to its
+#'   place in `target` (see [plot.ecodive_ord()]); there is no `fitted()`
+#'   method.
 #'
 #'
 #' **Same names in other packages**
@@ -155,6 +157,9 @@
 #'     fit <- procrustes(jc, bc)
 #'     attr(fit, 'ss')
 #'     attr(fit, 'residuals')
+#'
+#'     # Each sample's arrow points to where it lies in the target.
+#'     plot(fit)
 #'
 #'     # Symmetric: m^2 between 0 and 1.
 #'     attr(procrustes(jc, bc, symmetric = TRUE), 'ss')
@@ -280,7 +285,10 @@ procrustes <- function (
 #'     jc <- pcoa(jaccard(counts), n_axes = 2)
 #'
 #'     # Do the Bray-Curtis and Jaccard PCoAs agree?
-#'     procrustes_test(jc, bc)
+#'     res <- procrustes_test(jc, bc)
+#'     res
+#'     plot(res)
+#'     plot(res, type = 'null')
 #'
 procrustes_test <- function (
     ord, target, axes = NULL, n_axes = 3L, permutations = 999L,

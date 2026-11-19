@@ -326,14 +326,13 @@ taxon loadings for a biplot. It is the method of DEICODE and of QIIME 2's
 gemelli plugin (**[Martino et al.
 2019](https://doi.org/10.1128/mSystems.00016-19)**).
 
-```{r rpca, fig.alt = "RPCA ordination of the simulated samples, coloured by group."}
+```{r rpca, fig.alt = "RPCA biplot of the simulated samples, coloured by group, with arrows for the taxa with the longest loadings."}
 ord <- rpca(counts, n_axes = 2)
 round(attr(ord, 'prop'), 3)   # proportion of variance per axis
 
-grp <- factor(groups[match(rownames(ord), rownames(counts))])
-plot(ord[, 1], ord[, 2], col = c('#4E9FDE', '#E8854A')[grp], pch = 19,
-     xlab = 'RPCA1', ylab = 'RPCA2', main = 'Robust Aitchison PCA')
-legend('topright', levels(grp), col = c('#4E9FDE', '#E8854A'), pch = 19)
+# A biplot: the samples by group, and the ten longest taxon loadings.
+grp <- groups[match(rownames(ord), rownames(counts))]
+plot(ord, grp, col = c('#4E9FDE', '#E8854A'))
 ```
 
 A clr PCA (`pca(counts, norm = 'clr', pseudocount = 1)`) or a PCoA of

@@ -178,7 +178,12 @@
 #'     dm <- bray(counts)
 #'
 #'     # Are samples more alike within treatment groups?
-#'     mrpp(dm, 'treatment', meta)
+#'     res <- mrpp(dm, 'treatment', meta)
+#'     res
+#'
+#'     # Each group's mean within-group distance, and the permutations.
+#'     plot(res)
+#'     plot(res, type = 'null')
 #'
 #'     # The same, with the groups as a vector.
 #'     res <- mrpp(dm, meta$treatment)

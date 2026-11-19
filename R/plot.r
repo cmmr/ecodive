@@ -13,10 +13,30 @@
 # Calls `fun` with `args` (a list, usually list(...) from the user), and with
 # each of `defaults` that `args` doesn't name. So the user's main =, xlab =,
 # col =, ... replace ecodive's defaults, as with any base plot().
+#
+# A default `main` that is too wide for the plot is wrapped onto more lines.
 plot_do <- function (fun, args, defaults) {
   given <- names(args)
   if (is.null(given)) given <- character(0)
+  if (!'main' %in% given && !is.null(defaults$main))
+    defaults$main <- plot_fit_title(defaults$main)
   do.call(fun, c(args, defaults[setdiff(names(defaults), given)]))
+}
+
+
+# `main`, wrapped at spaces onto as many lines as it takes to fit the width
+# of the current figure's plot region (and a little of its margins).
+plot_fit_title <- function (main) {
+  if (!is.character(main) || length(main) != 1 || is.na(main)) return (main)
+  w <- tryCatch(
+    graphics::strwidth(
+      main, units = 'inches',
+      cex = graphics::par('cex.main'), font = graphics::par('font.main') ),
+    error = function (e) NA_real_ )
+  avail <- 1.1 * graphics::par('pin')[[1]]
+  if (!isTRUE(w > avail) || !(avail > 0)) return (main)
+  n <- ceiling(w / avail)
+  paste(strwrap(main, width = ceiling(nchar(main) / n) + 1L), collapse = '\n')
 }
 
 

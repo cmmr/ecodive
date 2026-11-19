@@ -189,7 +189,7 @@ See \code{\link{aitchison}} for references.
 
     # Scale the arrows to the samples' spread, and draw them.
     xy <- scores[, 1:2] * 0.8 * max(abs(ord[, 1:2])) / max(abs(scores[, 1:2]))
-    plot(ord, col = iris$Species)
+    plot(ord, 'Species', iris)
     arrows(0, 0, xy[, 1], xy[, 2], length = 0.1)
     text(xy, labels = rownames(xy), pos = 3)
 

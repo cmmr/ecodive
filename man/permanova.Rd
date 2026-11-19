@@ -266,6 +266,9 @@ names the method, and \code{print()} shows both.
     res <- permanova(dm, 'treatment', meta)
     res
 
+    # The pseudo-F of each permutation, and the observed one.
+    plot(res)
+
     # The same, with the groups as a vector.
     permanova(dm, meta$treatment)
 

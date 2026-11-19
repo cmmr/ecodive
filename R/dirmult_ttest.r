@@ -227,7 +227,9 @@
 #'     colnames(x) <- paste0('b', 1:7)
 #'     grp <- rep(c('treatment', 'placebo'), each = 3)
 #'
-#'     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
+#'     res <- dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
+#'     res
+#'     plot(res)
 #'
 #'     # With a scale model, the intervals widen and fewer features are
 #'     # rejected.

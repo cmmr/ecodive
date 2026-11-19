@@ -221,7 +221,7 @@
 #'     # tb-RDA: RDA of Hellinger-transformed abundances.
 #'     counts <- round(iris[, 1:4] * 10)
 #'     ord    <- rda(counts, 'Species', iris, norm = 'hellinger')
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     attr(ord, 'r_squared')
 #'     attr(ord, 'loadings')
 #'

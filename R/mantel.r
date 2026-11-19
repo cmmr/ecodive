@@ -143,7 +143,9 @@
 #'
 #'     # Are samples that differ more in pH also more different in
 #'     # community composition?
-#'     mantel(dm, ph)
+#'     res <- mantel(dm, ph)
+#'     res
+#'     plot(res)
 #'
 #'     # With rank correlation.
 #'     mantel(dm, ph, method = 'spearman')

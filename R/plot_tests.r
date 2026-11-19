@@ -92,7 +92,7 @@ plot.ecodive_mrpp <- function (x, type = c('groups', 'null'), ...) {
     list(
       main = attr(x, 'title', exact = TRUE), sub = test_subtitle(x),
       ylab = 'Mean within-group distance', col = 'grey85',
-      ylim = c(0, 1.3 * top), las = 1 ))
+      ylim = c(0, 1.5 * top), las = 1 ))
 
   graphics::abline(h = obs, col = PLOT_HIGHLIGHT, lwd = 2)
   graphics::abline(h = exp_, lty = 2, lwd = 2)

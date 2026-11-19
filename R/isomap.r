@@ -247,7 +247,7 @@
 #'     dm  <- bray(iris[, 1:4])
 #'     # Enough neighbours to link setosa to the other two species.
 #'     ord <- isomap(dm, n_neighbors = 50)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'

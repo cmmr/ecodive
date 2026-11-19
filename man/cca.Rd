@@ -218,7 +218,7 @@ Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
 \code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
-axis, so that it can go straight into \code{plot()} or a data frame. Rows are
+axis, so that it can go straight into a data frame. Rows are
 named after the samples, when the input has names. Columns are named
 after the method: \code{"PCoA1"}, \code{"PC1"}, \code{"RPCA1"}, \code{"dbRDA1"} or \code{"CAP1"}
 (then \code{"MDS1"} for unconstrained axes), \code{"MDS1"}, \code{"NMDS1"},
@@ -241,9 +241,13 @@ it to label axes. \code{NA} where it isn't defined.
 }
 
 Attributes particular to the method follow them. The matrix has class
-\code{"ecodive_ord"} (as well as \code{"matrix"}), only so that \code{print()} lists the
-other attributes by name rather than in full. Subsetting with \code{[}, or
-\code{as.data.frame()}, gives a plain matrix or data frame without them.
+\code{"ecodive_ord"} (as well as \code{"matrix"}), so that \code{print()} lists the
+other attributes by name rather than in full, and \code{plot()} draws the
+samples on the first two axes, labelled from the attributes, with any
+loadings, constraints and centroids on top (see \code{\link[=plot.ecodive_ord]{plot.ecodive_ord()}}).
+\code{plot(ord, "Species", iris)} colours the samples by a column of
+metadata. Subsetting with \code{[}, or \code{as.data.frame()}, gives a plain
+matrix or data frame without the attributes.
 }
 
 \section{Input Types}{
@@ -266,7 +270,7 @@ For large datasets, standard matrix operations may be slow. See
 \examples{
     counts <- round(iris[, 1:4] * 10)
     ord    <- cca(counts, 'Species', iris)
-    plot(ord, col = iris$Species)
+    plot(ord, 'Species', iris)
     attr(ord, 'r_squared')
     attr(ord, 'loadings')
 

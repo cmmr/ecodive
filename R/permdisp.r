@@ -232,6 +232,7 @@
 #'
 #'     # Each group's mean distance to its centroid.
 #'     res$dispersions
+#'     plot(res)
 #'
 #'     # Distances to spatial medians, as vegan::betadisper()'s default,
 #'     # with each pair of groups tested.

@@ -157,7 +157,9 @@
 #'     dm <- bray(counts)
 #'
 #'     # Are samples more alike within treatment groups than between them?
-#'     anosim(dm, 'treatment', meta)
+#'     res <- anosim(dm, 'treatment', meta)
+#'     res
+#'     plot(res)
 #'
 #'     # The same, with the groups as a vector.
 #'     anosim(dm, meta$treatment)

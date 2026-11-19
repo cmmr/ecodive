@@ -96,18 +96,18 @@ proportion of variance on each axis), followed by the method's own.
 str(ord)
 ```
 
-`prop` makes informative axis labels. PCoA axes share one scale, so plot
-them with `asp = 1` to keep distances true.
+`plot()` draws the first two axes, and takes its labels from the
+attributes: the title from `method`, and each axis's share of the variance
+from `prop`. Give `groups` (and `data`) as for the tests to colour the
+samples, with a legend. The axes share one scale (`asp = 1`), to keep
+distances true.
 
 ```{r}
-pct <- round(100 * attr(ord, 'prop'), 1)
-
-plot(
-  ord, col = iris$Species, asp = 1,
-  xlab = paste0('PCoA1 (', pct[1], '%)'),
-  ylab = paste0('PCoA2 (', pct[2], '%)') )
-legend('topleft', levels(iris$Species), col = 1:3, pch = 1)
+plot(ord, 'Species', iris)
 ```
+
+Any argument of `plot()`, such as `main`, `xlim` or `cex`, replaces the
+default, and `axes = c(1, 3)` plots other axes. See `?plot.ecodive_ord`.
 
 
 ## Running methods by name
@@ -128,7 +128,7 @@ ords <- list(
 
 par(mfrow = c(2, 3), mar = c(2, 2, 2, 1))
 for (nm in names(ords))
-  plot(ords[[nm]], col = iris$Species, main = nm, xlab = '', ylab = '')
+  plot(ords[[nm]], 'Species', iris, main = nm, xlab = '', ylab = '', sub = '', legend = NULL)
 ```
 
 Names are matched forgivingly, so `'PCoA'`, `'cmdscale'`, `'metaMDS'`, and
@@ -174,6 +174,13 @@ attr(ord, 'r_squared')
 attr(ord, 'centroids')
 ```
 
+Its plot labels the centroid of each species, and gives the
+\(R^2\) below:
+
+```{r}
+plot(ord, 'Species', iris)
+```
+
 The first two axes (`dbRDA1`, `dbRDA2`) are constrained by species, and the
 third (`MDS1`) is the largest remaining variation. A formula can hold
 several variables, and `Condition()` removes the effect of one before the
@@ -196,6 +203,8 @@ ord <- rda(iris[, 1:4], 'Species', iris, norm = 'hellinger')
 attr(ord, 'r_squared')
 
 head(attr(ord, 'loadings'))
+
+plot(ord, 'Species', iris)
 ```
 
 db-RDA of Euclidean distances is RDA, so `rda(counts, ..., norm =
@@ -224,6 +233,7 @@ vp <- varpart(
   iris[, 3:4], species = ~ Species, sepal = ~ Sepal.Length + Sepal.Width,
   data = iris, norm = 'hellinger' )
 vp
+plot(vp)
 ```
 
 Only the unique fractions (`[a]` and `[b]` here, marked `testable`) can be
@@ -250,6 +260,7 @@ fs <- forward_select(
   norm = 'hellinger', permutations = 99 )
 fs
 attr(fs, 'selected')
+plot(fs)
 ```
 
 `principal_response_curves()`, which is planned, will also build on
@@ -298,7 +309,7 @@ attribute ranks the features by their importance to the separation.
 
 ```{r}
 ord <- plsda(round(iris[, 1:4] * 10), 'Species', iris)
-plot(ord, col = iris$Species)
+plot(ord)
 attr(ord, 'vip')
 ```
 
@@ -324,7 +335,7 @@ groups, that the model explains.
 ```{r}
 two <- droplevels(subset(iris, Species != 'setosa'))
 ord <- oplsda(round(two[, 1:4] * 10), 'Species', two)
-plot(ord, col = two$Species)
+plot(ord)
 c(r2x = attr(ord, 'r2x'), r2y = attr(ord, 'r2y'))
 ```
 
@@ -353,17 +364,15 @@ log-ratios, with a `pseudocount` for zeros) or `norm = 'hellinger'`
 (square-root proportions, a common choice for community data);
 `scale = TRUE` gives every
 feature equal weight. The `loadings` attribute holds each feature's
-direction, for a biplot.
+direction, and `plot()` draws them as arrows, for a biplot (the ten
+longest, by default; `loadings = Inf` draws them all).
 
 ```{r}
 ord <- pca(iris[, 1:4], scale = TRUE)
 
 attr(ord, 'loadings')
 
-load <- attr(ord, 'loadings') * 3
-plot(ord, col = iris$Species, asp = 1)
-arrows(0, 0, load[, 1], load[, 2], length = 0.1)
-text(load[, 1:2], labels = rownames(load), pos = 4)
+plot(ord, 'Species', iris)
 ```
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to each
@@ -403,12 +412,10 @@ and each one a permutation p-value, as `vegan::envfit()` gives.
 fit <- envfit(ord, iris)
 fit
 
-# An arrow for each measurement, longer for a better fit.
-vec <- fit[is.na(fit$level), ]
-xy  <- vec[, c('PCoA1', 'PCoA2')] * sqrt(vec$r2) * 0.1
-plot(ord, col = iris$Species, asp = 1)
-arrows(0, 0, xy$PCoA1, xy$PCoA2, length = 0.1)
-text(xy, labels = vec$variable, pos = 1, cex = 0.8)
+# An arrow for each measurement, longer for a better fit, and a label for
+# each species' centroid.
+plot(ord, 'Species', iris)
+plot(fit, add = TRUE)
 ```
 
 
@@ -439,13 +446,12 @@ procrustes_test(uf, bc)
 ```
 
 The rotated UniFrac coordinates are the result itself, and the Bray-Curtis
-ones it was fitted to are its `target` attribute, so a line from each
-sample's one point to the other shows where the two metrics disagree.
+ones it was fitted to are its `target` attribute. `plot()` draws an arrow
+from each sample's rotated point to its target, which shows where the two
+metrics disagree.
 
 ```{r}
-xy <- attr(fit, 'target')
-plot(xy, asp = 1, pch = 16, xlab = 'Axis 1', ylab = 'Axis 2')
-arrows(xy[, 1], xy[, 2], fit[, 1], fit[, 2], length = 0.05, col = 'grey40')
+plot(fit)
 ```
 
 

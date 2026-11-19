@@ -198,7 +198,7 @@
 #'     two    <- droplevels(subset(iris, Species != 'setosa'))
 #'     counts <- round(two[, 1:4] * 10)
 #'     ord    <- oplsda(counts, 'Species', two)
-#'     plot(ord, col = two$Species)
+#'     plot(ord)
 #'     attr(ord, 'r2x')
 #'     attr(ord, 'r2y')
 #'     attr(ord, 'vip')

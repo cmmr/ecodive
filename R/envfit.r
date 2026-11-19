@@ -174,10 +174,9 @@
 #'     fit <- envfit(ord, iris)
 #'     fit
 #'
-#'     # A biplot of the measurements.
-#'     vec <- fit[is.na(fit$level), ]
-#'     plot(ord, col = iris$Species)
-#'     arrows(0, 0, vec$PCoA1 * sqrt(vec$r2) * 0.1, vec$PCoA2 * sqrt(vec$r2) * 0.1)
+#'     # A biplot: the fit drawn on the ordination.
+#'     plot(ord, 'Species', iris)
+#'     plot(fit, add = TRUE)
 #'
 envfit <- function (
     ord, data = NULL, counts = NULL, margin = 1L, norm = 'none',

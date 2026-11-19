@@ -211,6 +211,7 @@ be sure.
     # Four samples are far too few for permutation p-values.
     res <- simper(ex_counts, grp, permutations = 0, cpus = 1)
     res
+    plot(res)
 
     # The averages sum to the mean between-group Bray-Curtis dissimilarity.
     sum(res$average)

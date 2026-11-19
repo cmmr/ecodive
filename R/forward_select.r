@@ -187,6 +187,7 @@
 #'     # tb-RDA on the Hellinger-normalized table.
 #'     fs <- forward_select(counts, ~ ph + temp + depth + site, meta, norm = 'hellinger')
 #'     fs
+#'     plot(fs)
 #'
 #'     # db-RDA on Bray-Curtis distances, then partition the variation.
 #'     fs <- forward_select(bray(counts), ~ ph + temp + depth + site, meta)

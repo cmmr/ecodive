@@ -169,7 +169,7 @@ plot.ecodive_ord <- function (
         method = 'overplot', vertical = TRUE, pch = look$pch,
         col = if (is.null(g$f)) look$col else look$pal,
         xlim = c(0.5, length(s) + 0.5), main = main, sub = sub, ylab = labs[[1]],
-        group.names = if (is.null(g$f)) '' else levels(g$f), las = 1 ))
+        group.names = if (is.null(g$f)) '' else levels(g$f) ))
     return (invisible(x))
   }
 
@@ -195,7 +195,7 @@ plot.ecodive_ord <- function (
   plot_do(
     graphics::plot.default, c(list(pts[, 1], pts[, 2]), args),
     list(
-      col = look$col, pch = look$pch, asp = 1, las = 1, main = main, sub = sub,
+      col = look$col, pch = look$pch, asp = 1, main = main, sub = sub,
       xlab = labs[[axes[[1]]]], ylab = labs[[axes[[2]]]],
       xlim = range(all_xy[, 1], finite = TRUE),
       ylim = range(all_xy[, 2], finite = TRUE) ))

@@ -201,7 +201,7 @@
 #' @examples
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- umap(dm)
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'

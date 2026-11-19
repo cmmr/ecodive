@@ -120,7 +120,7 @@
 #' @export
 #' @examples
 #'     ord <- pca(iris[, 1:4])
-#'     plot(ord, col = iris$Species)
+#'     plot(ord, 'Species', iris)
 #'     head(ord)
 #'     str(ord)
 #'
