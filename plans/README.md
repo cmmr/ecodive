@@ -247,7 +247,7 @@ can't be mistaken for one another:
 | Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance` |
-| Proportionality | `vlr`, `rho_p`, `phi_s` |
+| Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
 | Differential abundance | `ancom`, `ancombc`, `ancombc2`, `ancombc_global`, `ancombc_pairwise`, `ancombc_dunnett`, `ancombc_trend`, `structural_zeros`, `dirmult_ttest` |
 | Absolute abundance | `qmp_scale`, `qmp_rarefy` |
 | Spatial | `moran_i`, `dbmem` |
