@@ -45,6 +45,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "OPLS-DA, from 'pyopls'"),
     person(
+      "Raes Lab",
+      role    = c("ctb", "cph"),
+      comment = "quantitative microbiome profiling, following 'QMP.R'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

@@ -44,6 +44,7 @@ extern SEXP C_permdisp_perm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pair_seed(SEXP, SEXP);
 extern SEXP C_pthreads(void);
 extern SEXP C_stop_thread_pool(void);
+extern SEXP C_qmp_scale(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rpca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_simper(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -100,6 +101,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_pair_seed",     (DL_FUNC) &C_pair_seed,     2},
   {"C_pthreads",  (DL_FUNC) &C_pthreads,  0},
   {"C_stop_thread_pool", (DL_FUNC) &C_stop_thread_pool, 0},
+  {"C_qmp_scale", (DL_FUNC) &C_qmp_scale, 5},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},

@@ -114,5 +114,5 @@ See \code{\link{aitchison}} for references.
 
 }
 \seealso{
-\code{\link[=beta_div]{beta_div()}}, \code{\link[=pca]{pca()}}, \code{\link[=envfit]{envfit()}}, \code{\link[=rarefy]{rarefy()}}
+\code{\link[=beta_div]{beta_div()}}, \code{\link[=pca]{pca()}}, \code{\link[=envfit]{envfit()}}, \code{\link[=rarefy]{rarefy()}}, \code{\link[=qmp_scale]{qmp_scale()}}
 }

@@ -237,30 +237,18 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
 
 
 //======================================================
-// R interface, for normalize(): the normalized table, in
-// the input's orientation (samples in rows for margin 1,
-// in columns for margin 2).
+// An ecomatrix as a table in the input's orientation
+// (samples in rows for margin 1, in columns for margin 2),
+// for normalize() and qmp_scale().
 //
 // dense = 1: an n_rows x n_cols double matrix, with zeros
-//            (or, for CLR, each sample's value for zero).
+//            (or, with z0, each sample's value for zero).
 // dense = 0: list(i, j, x), the non-zero entries' 0-based
 //            row and column, and value, in column-major
 //            order.
 //======================================================
-SEXP C_normalize(
-    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_norm,
-    SEXP sexp_pseudocount, SEXP sexp_dense, SEXP sexp_n_threads ) {
-
-  int    margin = asInteger(sexp_margin);
-  int    norm   = asInteger(sexp_norm);
-  double pc     = asReal(sexp_pseudocount);
-  int    dense  = asLogical(sexp_dense);
-  int    n_thr  = asInteger(sexp_n_threads);
-
-  init_n_ptrs(10);
-
-  ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
-  if (norm) normalize(em, norm, n_thr, pc);
+static SEXP ecomatrix_table(
+    ecomatrix_t *em, int margin, int dense, const double *z0 ) {
 
   int        ns  = em->n_samples;
   int        no  = em->n_otus;
@@ -268,7 +256,6 @@ SEXP C_normalize(
   const int *pos = em->pos_vec;
   const int *otu = em->otu_vec;
   const double *val = em->val_vec;
-  const double *z0  = (norm == NORM_CLR) ? em->clr_vec : NULL;
 
   int n_rows = (margin == 1) ? ns : no;
   SEXP result;
@@ -331,7 +318,99 @@ SEXP C_normalize(
     }
   }
 
+  UNPROTECT(1);
+  return result;
+}
+
+
+//======================================================
+// R interface, for normalize(): the normalized table
+// (see ecomatrix_table()).
+//======================================================
+SEXP C_normalize(
+    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_norm,
+    SEXP sexp_pseudocount, SEXP sexp_dense, SEXP sexp_n_threads ) {
+
+  int    margin = asInteger(sexp_margin);
+  int    norm   = asInteger(sexp_norm);
+  double pc     = asReal(sexp_pseudocount);
+  int    dense  = asLogical(sexp_dense);
+  int    n_thr  = asInteger(sexp_n_threads);
+
+  init_n_ptrs(10);
+
+  ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
+  if (norm) normalize(em, norm, n_thr, pc);
+
+  const double *z0 = (norm == NORM_CLR) ? em->clr_vec : NULL;
+  SEXP result = PROTECT(ecomatrix_table(em, margin, dense, z0));
+
   free_all();
   UNPROTECT(1);
+  return result;
+}
+
+
+//======================================================
+// Scaling to a measured load (qmp_scale(), qmp_rarefy()):
+// x / sum(x) * load, per sample. Each sample's total is
+// written to scale_total_vec; a sample with total 0 is
+// left as it is (R reports it).
+//======================================================
+static const double *scale_load_vec;
+static double       *scale_total_vec;
+
+static void *norm_scale(void *arg) {
+  FOREACH_SAMPLE(
+    double depth = 0;
+    FOREACH_VAL(depth += *val);
+    scale_total_vec[sam] = depth;
+    if (depth > 0) {
+      double load = scale_load_vec[sam];
+      FOREACH_VAL(*val = *val / depth * load);
+    }
+  );
+  return NULL;
+}
+
+
+//======================================================
+// R interface, for qmp_scale() and qmp_rarefy(): the
+// scaled table (see ecomatrix_table()), with attribute
+// "totals", each sample's total before scaling.
+//======================================================
+SEXP C_qmp_scale(
+    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_load,
+    SEXP sexp_dense, SEXP sexp_n_threads ) {
+
+  int margin = asInteger(sexp_margin);
+  int dense  = asLogical(sexp_dense);
+  int n_thr  = asInteger(sexp_n_threads);
+
+  init_n_ptrs(10);
+
+  ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
+
+  if (LENGTH(sexp_load) != em->n_samples) {
+    free_all();                                                    // # nocov
+    error("`load` must have one value per sample.");               // # nocov
+  }
+
+  SEXP sexp_totals = PROTECT(allocVector(REALSXP, em->n_samples));
+
+  n_samples       = em->n_samples;
+  n_otus          = em->n_otus;
+  pos_vec         = em->pos_vec;
+  val_vec         = rw_val_vec(em);
+  scale_load_vec  = REAL(sexp_load);
+  scale_total_vec = REAL(sexp_totals);
+
+  run_parallel(norm_scale, n_thr, n_samples);
+
+  SEXP result = PROTECT(ecomatrix_table(em, margin, dense, NULL));
+  setAttrib(result, install("totals"), sexp_totals);
+
+  free_all();
+  UNPROTECT(2);
   return result;
 }

@@ -61,7 +61,7 @@
 #' Whichever package was attached last masks the other's, so call
 #' `ecodive::normalize()` to be sure of getting this one.
 #'
-#' @seealso [beta_div()], [pca()], [envfit()], [rarefy()]
+#' @seealso [beta_div()], [pca()], [envfit()], [rarefy()], [qmp_scale()]
 #'
 #' @export
 #' @examples
@@ -121,9 +121,36 @@ normalize <- function (
   res <- .Call(
     C_normalize, counts, margin, norm, as.double(pseudocount), dense, cpus )
 
+  table_output(res, counts, dims, dense, keep_class = !clr)
+}
+
+
+
+#------------------------------------------------------------------------------
+# A table computed in C (C_normalize(), C_qmp_scale()) in the form of
+# `counts`, for normalize(), qmp_scale() and qmp_rarefy().
+#
+#   res         dense: a double matrix in counts' orientation; otherwise
+#               list(i, j, x), the 0-based rows and columns, and the values,
+#               of the non-zero entries in column-major order.
+#   counts      The input table (after validate_counts()).
+#   dims        Its dimensions.
+#   dense       Whether `res` is a dense matrix.
+#   keep_class  For a dense `res` from a dgeMatrix: return a dgeMatrix
+#               (FALSE: the base matrix, as for norm = 'clr').
+#
+# The result has counts' class, orientation and dimnames. Sparse classes are
+# rebuilt from the non-zero entries, so zeros are not stored.
+#------------------------------------------------------------------------------
+table_output <- function (res, counts, dims, dense, keep_class = TRUE) {
+
+  pkg <- get_matrix_package(counts)
+  dn  <- switch(pkg, base = dimnames(counts), slam = counts$dimnames, Matrix = counts@Dimnames)
+
   if (dense) {
+    attr(res, 'totals') <- NULL
     dimnames(res) <- if (is.null(dn) || all(vapply(dn, is.null, logical(1)))) NULL else dn
-    if (!clr && inherits(counts, 'dgeMatrix')) {
+    if (keep_class && inherits(counts, 'dgeMatrix')) {
       counts@x <- as.vector(res)
       counts@factors <- list()
       return (counts)

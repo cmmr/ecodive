@@ -256,3 +256,104 @@
   expect_true(length(r_big_slam$v) < length(big_slam$v))
   
 #})
+  
+  
+  # -----------------------------------------------------------------------
+  # A single depth: bit-identical to ecodive before rarefy(depth =) took
+  # one depth per sample (data-raw/expected/rarefy.r), for every class,
+  # margin and cpus.
+  # -----------------------------------------------------------------------
+  
+  fx <- readRDS(file.path('expected', 'rarefy.rds'))
+  fx_classes <- list(
+    matrix = identity,
+    dgC    = function (m) as(m, COMPRESSED),
+    dgT    = function (m) as(m, TRIPLET),
+    dge    = function (m) as(m, UNPACKED),
+    slam   = slam::as.simple_triplet_matrix )
+  
+  for (key in names(fx$results)) {
+    p <- regmatches(key, regexec('^(.*)_m(\\d)_d(\\d+)_s(\\d+)$', key))[[1]]
+    m <- if (p[[3]] == '1') fx$counts else t(fx$counts)
+    for (cpus in c(1L, 2L, 4L)) {
+      r <- rarefy(
+        fx_classes[[p[[2]]]](m), depth = as.integer(p[[4]]), seed = as.integer(p[[5]]),
+        margin = as.integer(p[[3]]), drop = FALSE, warn = FALSE, cpus = cpus )
+      expect_identical(as.matrix(r), fx$results[[key]], info = paste(key, cpus))
+    }
+  }
+  
+  
+  # -----------------------------------------------------------------------
+  # One depth per sample
+  # -----------------------------------------------------------------------
+  
+  x  <- fx$counts
+  n  <- rowSums(x)
+  d  <- as.integer(pmax(1, floor(n * seq(0.2, 0.95, length.out = nrow(x)))))
+  rd <- rarefy(x, depth = d, seed = 3, drop = FALSE, warn = FALSE)
+  expect_equal(unname(rowSums(rd)), d)
+  
+  # The same as rarefying with each sample's depth on its own.
+  for (i in seq_len(nrow(x)))
+    expect_identical(rd[i, ], rarefy(x, depth = d[[i]], seed = 3, drop = FALSE, warn = FALSE)[i, ])
+  
+  # Any cpus, any class (slam's draws are seeded by 1-based sample number,
+  # so they differ from the others', as with a single depth).
+  for (cpus in c(1L, 2L, 4L)) {
+    expect_identical(rarefy(x, depth = d, seed = 3, drop = FALSE, warn = FALSE, cpus = cpus), rd)
+    for (cl in c('dgC', 'dgT', 'dge')) {
+      expect_identical(
+        as.matrix(rarefy(fx_classes[[cl]](x), depth = d, seed = 3, drop = FALSE, warn = FALSE, cpus = cpus)),
+        rd, info = cl )
+      expect_identical(
+        as.matrix(rarefy(fx_classes[[cl]](t(x)), depth = d, seed = 3, margin = 2L, drop = FALSE, warn = FALSE, cpus = cpus)),
+        t(rd), info = cl )
+    }
+    rs <- rarefy(fx_classes$slam(x), depth = d, seed = 3, drop = FALSE, warn = FALSE, cpus = cpus)
+    expect_inherits(rs, 'simple_triplet_matrix')
+    expect_equal(unname(slam::row_sums(rs)), d)
+    for (i in c(1L, 17L, 30L))
+      expect_identical(
+        as.matrix(rs)[i, ],
+        as.matrix(rarefy(fx_classes$slam(x), depth = d[[i]], seed = 3, drop = FALSE, warn = FALSE))[i, ] )
+  }
+  
+  # Matched by name when named; reordered names give the same result.
+  dn <- stats::setNames(d, rownames(x))
+  o  <- rev(seq_along(dn))
+  expect_identical(rarefy(x, depth = dn[o], seed = 3, drop = FALSE, warn = FALSE), rd)
+  expect_identical(rarefy(x, depth = unname(d), seed = 3, drop = FALSE, warn = FALSE), rd)
+  expect_error(
+    rarefy(x, depth = stats::setNames(d, paste0('X', seq_along(d))), warn = FALSE),
+    'samples in `counts` have no value in `depth`' )
+  expect_error(rarefy(x, depth = d[-1], warn = FALSE), '`depth` has 29 values, but `counts` has 30 samples')
+  expect_error(rarefy(x, depth = c(d[-1], NA), warn = FALSE), '`depth` must be a positive integer, one per sample')
+  expect_error(rarefy(x, depth = c(d[-1], 0), warn = FALSE), '`depth` must be a positive integer, one per sample')
+  expect_error(rarefy(x, depth = c(d[-1], 2.5), warn = FALSE), '`depth` must be a positive integer, one per sample')
+  expect_error(rarefy(x, depth = matrix(d), warn = FALSE), '`depth` must be a positive integer, one per sample')
+  
+  # drop and warn compare each sample with its own depth: A (13) and D (15)
+  # are short of 14 and 16; B (18) and C (21) have enough for 18 and 20.
+  dd <- c(A = 14, B = 18, C = 20, D = 16)
+  expect_warning(
+    r <- rarefy(counts, depth = dd, drop = TRUE, warn = TRUE),
+    '2 samples have fewer observations than their `depth` and will be dropped' )
+  expect_identical(rownames(r), c('B', 'C'))
+  expect_equal(rowSums(r), c(B = 18, C = 20))
+  expect_warning(
+    r <- rarefy(counts, depth = dd, drop = FALSE, warn = TRUE),
+    'returned unrarefied' )
+  expect_equal(rowSums(r), c(A = 13, B = 18, C = 20, D = 15))
+  expect_silent(r <- rarefy(counts, depth = c(13, 15, 13, 15), warn = TRUE))
+  expect_equal(unname(rowSums(r)), c(13, 15, 13, 15))
+  r <- rarefy(t(counts), depth = dd, margin = 2L, drop = TRUE, warn = FALSE)
+  expect_identical(colnames(r), c('B', 'C'))
+  r <- rarefy(counts, depth = dd, times = 2, drop = TRUE, warn = FALSE)
+  expect_length(r, 2)
+  expect_identical(rownames(r[[2]]), c('B', 'C'))
+  
+  # Unnamed samples: by position.
+  expect_equal(
+    unname(rowSums(rarefy(unname(counts), depth = c(5, 6, 7, 8), warn = FALSE))),
+    c(5, 6, 7, 8) )

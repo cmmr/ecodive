@@ -38,6 +38,19 @@
 
   r <- rarefy(counts, depth = 40, cpus = cpus)
   expect_equal(unname(rowSums(r)), rep(40, 20))
+  r <- rarefy(counts, depth = 31:50, cpus = cpus)
+  expect_equal(unname(rowSums(r)), 31:50)
+
+  # Absolute abundance.
+  load <- seq(1, 2, length.out = 20) * 1e9
+  z <- qmp_scale(counts, load, cpus = cpus)
+  expect_identical(dim(z), dim(counts))
+  expect_true(all(is.finite(z)) && all(z >= 0))
+  z <- qmp_rarefy(counts, load, cpus = cpus)
+  expect_identical(dim(z), dim(counts))
+  expect_true(all(is.finite(z)) && all(z >= 0))
+  expect_identical(length(attr(z, 'target')), 20L)
+  expect_identical(length(attr(z, 'sampling_depth')), 20L)
 
   for (nm in c('percent', 'chord', 'binary', 'clr', 'rclr')) {
     z <- normalize(counts, nm, cpus = cpus)

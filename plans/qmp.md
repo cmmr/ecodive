@@ -189,3 +189,81 @@ worth it.
 - Props, R., Kerckhof, F.-M., Rubbens, P., et al. (2017). Absolute
   quantification of microbial taxon abundances. *The ISME Journal*, 11,
   584–587.
+
+
+## Decisions made while implementing (2026-11-19)
+
+Asked of the user at the start (all answered with the recommendation):
+
+- **Integer counts:** `qmp_rarefy()` requires whole numbers (as
+  `rarefy()`); it does not apply the script's `ceiling()`. The docs show
+  `qmp_rarefy(ceiling(x), load)` to do as the script does.
+- **Non-integer targets:** floored, as the script's
+  `phyloseq::rarefy_even_depth()` truncates them (confirmed from its
+  output: 3.53 → 3, 7.41 → 7). But a value within 1e-9 (relative) of a whole
+  number counts as that number, and targets are capped at \eqn{n_i}.
+  Running the script showed why: \eqn{(n/L) \times L} for the
+  smallest-depth sample came out as 101.99999… for \eqn{n = 102}, and the
+  script rarefied it to 101 reads. In the fixtures, ecodive keeps 3 reads
+  that the script loses (`expected/qmp.rds`, cases `random` and `hair`).
+- **A target of 0 reads** (a load so small that \eqn{s_{min} L_i < 1}) is
+  an error naming the samples (the script returns `NaN`s). So is an empty
+  sample, in both functions.
+- **Attributes:** `sampling_depth` and `target` (integer), named by sample,
+  are attached to every output class. The docs say that subsetting or
+  converting a Matrix/slam object drops them.
+- **`rarefy(depth =)` with one depth per sample:** matched by name when both
+  are named, else by position, by `per_sample()` (messages name `counts`).
+  A length-1 `depth` keeps its old meaning even if named. `drop` and `warn`
+  compare each sample with its own depth; the warning then reads "N samples
+  have fewer observations than their `depth` and will be ...". No `data`
+  argument was added to `rarefy()`.
+
+Made while implementing:
+
+- **`QMP.R` was fetched** (jsDelivr's GitHub mirror) and read; it is BSD-3.
+  `R/qmp.r` ports its steps, so it carries the licence text, with a
+  "modified port" note; `inst/COPYRIGHTS` has a `Files: R/qmp.r` stanza, and
+  `Authors@R` credits "Raes Lab" (ctb, cph). A copy of the script and its
+  licence is in `data-raw/expected/qmp/` for the fixture generator.
+- **`C_rarefy`** now takes a vector of targets (length 1, or one per sample)
+  in place of the static `target`; per-sample PCG seeding is unchanged. slam
+  input indexes samples from 1 in that code, so its per-sample targets are
+  shifted to match. A fixture of the pre-change outputs
+  (`expected/rarefy.rds`, from `data-raw/expected/rarefy.r` run at 4600cb8)
+  checks that a single depth is bit-identical for every class, both
+  margins, and `cpus` 1, 2 and 4.
+- **`qmp_scale()` runs in C** (`C_qmp_scale` in `src/normalize.c`, one pass
+  per sample: `x / total * load`, as R evaluates `x / rowSums(x) * load`). It
+  does *not* reuse `normalize(norm = 'percent')`, which leaves samples
+  already summing to 1 (within 1e-6) as they are, so it would miss the
+  1e-15 target. Its output goes through `ecomatrix_table()`, the code
+  factored out of `C_normalize`, and then through `table_output()`, the R
+  output code factored out of `normalize()`. Both functions return what
+  `normalize()` returns: the same class, orientation and dimnames, with
+  zeros not stored. `qmp_rarefy()` rarefies with `C_rarefy`, then scales
+  with `C_qmp_scale`, dividing by the achieved total, which equals the
+  target.
+- **`counts`** may be any non-negative finite values for `qmp_scale()`
+  (proportions give the same result as counts); negative values or NA are
+  errors.
+- **`load`** must be numeric (not a factor), finite and > 0, and errors name
+  the samples. When `load` comes from `data`, messages name the column.
+- **slam draws differ from the other classes'**, for `rarefy()` (already
+  the case before this item) and so for `qmp_rarefy()`: slam's samples seed
+  their PCG streams by 1-based index. That was left as it is, since changing
+  it would change `rarefy()`'s results for slam input. Targets, depths and
+  scaling agree for every class.
+- **Reference testing:** the script was run on phyloseq 1.46.0 (output
+  only). Its sampling depths and targets match exactly, apart from the
+  rounding rescue above. Its scaling equals `qmp_scale()` of its own
+  rarefied counts to 1e-15. With ecodive's rarefied counts substituted for
+  phyloseq's, the script's output equals `qmp_rarefy()`'s with relative
+  difference 0. Over 400 seeds, both means agree with each other and with
+  \eqn{x / n \times L} (largest |z| 2.2 against the expectation, 2.1
+  against the script, over 48 cells).
+- **Test-environment note:** Debian's tinytest 1.4.1 exits a test file at
+  any `exit_if_not()` call, even a passing one, so the Matrix/slam parts of
+  several test files (and all of `test-qmp.r`) don't run with it. With
+  tinytest 1.4.3 (CRAN) the suite gave 10,893 results at home and 246 in
+  CRAN mode after this item; with 1.4.1, 10,213 at home (10,206 before).

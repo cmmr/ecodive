@@ -41,7 +41,7 @@ same thing.
 | `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights | planned `moran_i`, `dbmem` |
 | `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only), `log_ratio`, `balance`, `rho_p`, `phi_s` (`denominator` only: one feature for an alr, or a set) |
 | `basis` | **(new)** an ILR basis or a sequential binary partition | `ilr` |
-| `load` | **(new)** each sample's measured total microbial load | planned `qmp_scale`, `qmp_rarefy` |
+| `load` | **(new, 2026-11-19)** each sample's measured total microbial load: one finite value > 0 per sample (matched by name, else by position), or a column name of `data`, by the same `per_sample()` rule as `groups` | `qmp_scale`, `qmp_rarefy` |
 | `contrast` | **(new)** the samples compared, `c(treatment, reference)` | planned `dirmult_ttest` |
 | `part_weights`, `ilr_weights` | **(new)** PhILR's taxon and balance weights | planned `philr` |
 | `subjects`, `states` | **(new)** per-sample subject ids and time points / conditions | planned `ctf` |

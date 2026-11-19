@@ -19,8 +19,11 @@ rarefy(
 \item{counts}{A numeric matrix or sparse matrix object (e.g., \code{dgCMatrix}).
 Counts must be integers.}
 
-\item{depth}{The number of observations to keep per sample. If \code{NULL}
-(the default), a depth is auto-selected to maximize data retention.}
+\item{depth}{The number of observations to keep per sample: one number
+for every sample, or one per sample (matched to the samples by name
+when both are named, else in the samples' order), as
+\code{\link[=qmp_rarefy]{qmp_rarefy()}} uses. If \code{NULL} (the default), a depth is
+auto-selected to maximize data retention.}
 
 \item{seed}{An integer seed for the random number generator. Providing
 the same seed guarantees reproducible results. Default: \code{0}}
@@ -30,7 +33,8 @@ returns a list of matrices. Seeds for subsequent iterations are
 sequential (\code{seed}, \code{seed + 1}, ...). Default: \code{NULL}}
 
 \item{drop}{Logical. If \code{TRUE}, samples with fewer than \code{depth}
-observations are discarded. If \code{FALSE}, they are kept with their
+observations (their own depth, when there is one per sample) are
+discarded. If \code{FALSE}, they are kept with their
 original counts. Default: \code{TRUE}}
 
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
@@ -57,6 +61,14 @@ replacement.
 
 If \code{depth} is \code{NULL}, the function defaults to the highest depth that retains
 at least 10\% of the total observations in the dataset.
+}
+
+\section{One Depth per Sample}{
+
+With one \code{depth} per sample, each sample is rarefied to its own depth,
+and gives exactly what rarefying the table to that sample's depth would
+give it, with the same \code{seed}. \code{drop} and \code{warn} compare each sample with
+its own depth.
 }
 
 \section{Dropping vs. Retaining Samples}{
@@ -112,6 +124,10 @@ For large datasets, standard matrix operations may be slow. See
     r_mtx
     rowSums(r_mtx)
     
+    # One depth per sample, matched by name.
+    r_mtx <- rarefy(counts, depth = c(A = 10, B = 15, C = 20, D = 12))
+    rowSums(r_mtx)
+    
     # Perform 3 independent rarefactions.
     r_list <- rarefy(counts, times = 3)
     length(r_list)
@@ -122,4 +138,8 @@ For large datasets, standard matrix operations may be slow. See
       str(rarefy(counts_dgC))
     }
 
+}
+\seealso{
+\code{\link[=qmp_rarefy]{qmp_rarefy()}}, which rarefies each sample to a depth set by
+its measured microbial load.
 }

@@ -78,6 +78,11 @@ reference:
   - vlr
   - rho_p
   - phi_s
+- subtitle: Absolute abundance
+  desc: With each sample's total microbial load measured (cell counts, qPCR, a spike-in), estimate absolute abundances instead of ratios.
+  contents:
+  - qmp_scale
+  - qmp_rarefy
 
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.

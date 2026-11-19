@@ -493,6 +493,23 @@
   4.5 million pairs of 3,000 taxa in 500 samples take about a second on 4
   cores.
 
+* New `qmp_scale()` and `qmp_rarefy()` turn relative abundances into
+  absolute abundances when each sample's total microbial `load` was measured
+  (flow cytometry, qPCR, a spike-in). `qmp_scale()` multiplies each sample's
+  relative abundances by its load (Jian et al. 2020); `qmp_rarefy()` is
+  Vandeputte et al.'s (2017) quantitative microbiome profiling, which first
+  rarefies every sample to the same number of reads per unit of load. It
+  follows the authors' `QMP.R` (BSD-3, Raes Lab), with the same sampling
+  depths and targets, but uses ecodive's own rarefaction and `seed`. `load`
+  is matched to the samples by name, or given as a column of `data`. Both
+  keep the table's class and orientation, and sparse tables stay sparse:
+  2,000 samples by 5,000 taxa take under 0.1 seconds.
+
+* `rarefy(depth =)` now also takes one depth per sample (matched to the
+  samples by name when named). `drop` and `warn` then compare each sample
+  with its own depth. A single depth gives exactly the same results as
+  before.
+
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
   (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),
