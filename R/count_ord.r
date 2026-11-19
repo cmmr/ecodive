@@ -18,6 +18,7 @@ COUNT_ORDS <- local({
       name,                                id,   alt_ids
       Correspondence Analysis,             ca,   correspondenceanalysis
       Canonical Correspondence Analysis,   cca,  canonicalcorrespondenceanalysis constrainedcorrespondenceanalysis
+      Double Principal Coordinate Analysis, dpcoa, doubleprincipalcoordinateanalysis doubleprincipalcoordinatesanalysis
       Linear Discriminant Analysis,        lda,  lineardiscriminantanalysis
       Orthogonal Partial Least Squares Discriminant Analysis, oplsda, opls orthogonalplsda orthogonalpartialleastsquaresda orthogonalpartialleastsquaresdiscriminantanalysis
       Principal Component Analysis,        pca,  principalcomponents prcomp
@@ -39,7 +40,7 @@ COUNT_ORDS <- local({
 #'
 #' @inheritParams documentation
 #'
-#' @param method   The name of an ordination method: `"ca"`, `"cca"`, `"lda"`,
+#' @param method   The name of an ordination method: `"ca"`, `"cca"`, `"dpcoa"`, `"lda"`,
 #'        `"oplsda"`, `"pca"`, `"plsda"`, `"rda"`, `"rpca"`, or `"rpca_phylo"`.
 #'        Flexible matching is supported (see below). Programmatic access via
 #'        `list_count_ords()`.
@@ -48,8 +49,8 @@ COUNT_ORDS <- local({
 #'        `margin`, `cpus`, [pca()]'s `norm`, `pseudocount`, and `scale`, or
 #'        [rda()]'s and [cca()]'s `groups`, `data`, and `formula`, or
 #'        [lda()]'s, [plsda()]'s and [oplsda()]'s `groups` and `data`, or
-#'        [rpca_phylo()]'s `tree`. Each
-#'        method keeps its own defaults; see [ca()], [cca()], [lda()],
+#'        [rpca_phylo()]'s `tree`, or [dpcoa()]'s `tree` or `taxa_dm`. Each
+#'        method keeps its own defaults; see [ca()], [cca()], [dpcoa()], [lda()],
 #'        [oplsda()], [pca()], [plsda()], [rda()], [rpca()], and [rpca_phylo()].
 #'        `seed` is ignored by the methods that have no random parts (all
 #'        but [cca()], whose adjusted \eqn{R^2} is found by permutation), so
@@ -66,6 +67,7 @@ COUNT_ORDS <- local({
 #' | :--------------------- | :----------------------------------------- |
 #' | `ca`                   | Correspondence Analysis (CA)               |
 #' | `cca`                  | Canonical Correspondence Analysis (CCA), constrained |
+#' | `dpcoa`                | Double Principal Coordinate Analysis (DPCoA) (needs `tree` or `taxa_dm`) |
 #' | `lda`                  | Linear Discriminant Analysis (LDA), supervised |
 #' | `oplsda`               | Orthogonal PLS Discriminant Analysis (OPLS-DA), supervised |
 #' | `pca`                  | Principal Component Analysis (PCA)         |
@@ -82,7 +84,9 @@ COUNT_ORDS <- local({
 #' the same way: `count_ord(counts, 'plsda', 'treatment', meta)` is
 #' `plsda(counts, 'treatment', meta)`. `oplsda` takes `n_orthogonal` rather
 #' than `n_axes`. `rpca_phylo` needs a phylogenetic tree:
-#' `count_ord(counts, 'rpca_phylo', tree = tree)`.
+#' `count_ord(counts, 'rpca_phylo', tree = tree)`, and so does `dpcoa`
+#' (or the dissimilarities among the taxa, `taxa_dm`):
+#' `count_ord(counts, 'dpcoa', tree = tree)`.
 #'
 #' Methods that ordinate distances, such as [pcoa()] and [nmds()], are run
 #' by [dist_ord()].
@@ -97,7 +101,8 @@ COUNT_ORDS <- local({
 #' analysis'` or `'constrained correspondence analysis'` for `cca`;
 #' `'correspondence analysis'` for `ca`; and `'robust PCA'`, `'DEICODE'`,
 #' or `'gemelli'` for `rpca`; `'phylogenetic RPCA'`, `'phylo-RPCA'`, or
-#' `'phylogenetic DEICODE'` for `rpca_phylo`; and `'PLS-DA'`, `'PLS'`, or `'partial least
+#' `'phylogenetic DEICODE'` for `rpca_phylo`; `'DPCoA'` or `'double principal
+#' coordinate analysis'` for `dpcoa`; and `'PLS-DA'`, `'PLS'`, or `'partial least
 #' squares discriminant analysis'` for `plsda`; and `'LDA'` or `'linear
 #' discriminant analysis'` for `lda`; and `'OPLS-DA'`, `'OPLS'`, or
 #' `'orthogonal PLS-DA'` for `oplsda`. `'CA'` selects `ca`, and
@@ -111,14 +116,14 @@ COUNT_ORDS <- local({
 #'
 #' `vegan::pca()`, `vegan::rda()`, `vegan::cca()` and `vegan::ca()` (and
 #' `ca::ca()`) share their names with ecodive's [pca()], [rda()], [cca()]
-#' and [ca()], as `mixOmics::plsda()` and `caret::plsda()` do with
+#' and [ca()], as `ade4::dpcoa()` does with [dpcoa()], `mixOmics::plsda()` and `caret::plsda()` do with
 #' [plsda()] and `MASS::lda()` with [lda()], and whichever package was attached last masks the other's. Write `ecodive::pca()` and so on, or use
 #' `count_ord()`, which
 #' always runs ecodive's, to be sure.
 #'
 #' @inheritSection ordination_section Ordination result
 #'
-#' @seealso [ca()], [cca()], [lda()], [oplsda()], [pca()], [plsda()], [rda()], [rpca()], [rpca_phylo()], [list_count_ords()]; [dist_ord()] for
+#' @seealso [ca()], [cca()], [dpcoa()], [lda()], [oplsda()], [pca()], [plsda()], [rda()], [rpca()], [rpca_phylo()], [list_count_ords()]; [dist_ord()] for
 #'   the methods that take distances.
 #'
 #' @export
@@ -128,11 +133,12 @@ COUNT_ORDS <- local({
 #'     str(ord)
 #'
 #'     # The same arguments for every method (but lda, plsda and oplsda,
-#'     # which need groups, and rpca_phylo, which needs a tree).
-#'     ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda', 'rpca_phylo'))
+#'     # which need groups, and rpca_phylo and dpcoa, which need a tree).
+#'     ids <- setdiff(list_count_ords('id'), c('dpcoa', 'lda', 'oplsda', 'plsda', 'rpca_phylo'))
 #'     lapply(ids, function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 #'
 #'     ord <- count_ord(ex_counts, 'rpca_phylo', tree = ex_tree, n_axes = 2)
+#'     ord <- count_ord(ex_counts, 'dpcoa', tree = ex_tree, n_axes = 2)
 #'
 #'     count_ord(ex_counts, 'plsda', c('a', 'a', 'b', 'b'), n_axes = 1)
 #'

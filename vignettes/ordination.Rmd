@@ -81,6 +81,7 @@ plot(dm, 'Species', iris)
 | `pca()`      | Principal Component Analysis (PCA)             | counts | Euclidean geometry of (transformed) counts, with feature loadings.      |
 | `ca()`       | Correspondence Analysis (CA)                   | counts | The chi-square geometry of species profiles, for unimodal responses.    |
 | `rpca()`     | Robust Aitchison PCA                           | counts | Sparse compositional data, such as microbiome counts.                   |
+| `dpcoa()`    | Double Principal Coordinate Analysis (DPCoA)   | counts | Samples and taxa together, in a space shaped by the phylogeny.          |
 | `lda()`      | Linear Discriminant Analysis (LDA)             | counts | Axes that best separate known groups, from a few features (supervised). |
 | `plsda()`    | Partial Least Squares Discriminant Analysis    | counts | Axes that best separate known groups (a supervised ordination).         |
 | `oplsda()`   | Orthogonal PLS Discriminant Analysis (OPLS-DA) | counts | One axis that separates two groups, and others for the rest (supervised). |
@@ -384,7 +385,7 @@ permanova(euclidean(scale(iris[, 1:4])), grp, permutations = 199)$p_value
 
 ## Ordinating counts directly
 
-`pca()`, `rpca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()` and `oplsda()` take the count table rather than distances.
+`pca()`, `rpca()`, `dpcoa()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()` and `oplsda()` take the count table rather than distances.
 `count_ord()` runs them by name, as `dist_ord()` does for the methods that
 take distances: `count_ord(counts, 'pca')` is `pca(counts)`. PCA
 works on any of ecodive's transformations, such as `norm = 'clr'` (centered
@@ -418,6 +419,18 @@ pseudocount, which suits sparse microbiome counts.
 ```{r}
 ord <- rpca(iris[, 1:4])
 round(100 * attr(ord, 'prop'), 1)
+```
+
+`dpcoa()`, double principal coordinate analysis (as in `ade4` and
+phyloseq's `ordinate(method = "DPCoA")`), is the phylogeny-aware ordination
+of counts: the taxa are placed by their distances along the tree, each
+sample at the abundance-weighted centre of its taxa, so samples and taxa
+share one space. The `taxa` attribute holds the taxa's coordinates, and
+`rao` each sample's Rao quadratic entropy, a phylogenetic diversity.
+
+```{r}
+ord <- dpcoa(ex_counts, ex_tree, n_axes = 2)
+attr(ord, 'rao')
 ```
 
 

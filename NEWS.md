@@ -767,6 +767,26 @@
   `'blw.sqrt'`); with uniform weights, PhILR distances are Aitchison
   distances.
 
+* New `dpcoa()` runs a double principal coordinate analysis (DPCoA;
+  Pavoine, Dufour & Chessel 2004), ade4's `dpcoa()` and phyloseq's
+  `ordinate(method = "DPCoA")`: samples and taxa in one space, the taxa
+  placed by the square roots of their distances along a tree (or by any
+  Euclidean dissimilarity among them, `taxa_dm`), each sample at the
+  abundance-weighted centre of its taxa. It returns the sample coordinates,
+  the taxa's on the same axes (`taxa`), and each sample's Rao quadratic
+  entropy (`rao`). Written from the paper and checked against ade4 1.7-24's
+  and phyloseq 1.46.0's outputs, it matches them to within 1e-12. With a
+  tree, no taxa-by-taxa matrix is formed: block Lanczos runs on products
+  computed from the sparse table with sums up and down the tree, so each
+  costs time proportional to the non-zero counts plus the tree's size
+  (300 samples by 1,000 taxa: 0.02 seconds, where ade4 takes 250; 5,000
+  by 20,000, sparse: 0.5 seconds).
+  Tips that aren't taxa are dropped, and polytomies and unrooted trees are
+  accepted as they are (they don't change path lengths). Taxa absent from
+  every sample, which ade4 refuses, are kept with weight 0 and placed on
+  the axes. It joins `count_ord()` (`count_ord(counts, "dpcoa", tree =
+  tree)`), and its results are identical for any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference

@@ -266,7 +266,7 @@ ord_result <- function (
 #' [ecodive_steps]), one line each.
 #'
 #' @param x  An ordination result, from [dist_ord()], [count_ord()],
-#'        [pcoa()], [pca()], [rpca()], [rpca_phylo()], [rda()], [cca()], [ca()], [lda()], [plsda()], [oplsda()], [dbrda()], [capscale()],
+#'        [pcoa()], [pca()], [rpca()], [rpca_phylo()], [dpcoa()], [rda()], [cca()], [ca()], [lda()], [plsda()], [oplsda()], [dbrda()], [capscale()],
 #'        [mds()], [nmds()], [isomap()], [tsne()], [umap()], or [procrustes()].
 #'
 #' @param ...  Passed on to `print()` for the matrix of coordinates.

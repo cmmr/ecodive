@@ -11,7 +11,7 @@ count_ord(counts, method, ...)
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
 
-\item{method}{The name of an ordination method: \code{"ca"}, \code{"cca"}, \code{"lda"},
+\item{method}{The name of an ordination method: \code{"ca"}, \code{"cca"}, \code{"dpcoa"}, \code{"lda"},
 \code{"oplsda"}, \code{"pca"}, \code{"plsda"}, \code{"rda"}, \code{"rpca"}, or \code{"rpca_phylo"}.
 Flexible matching is supported (see below). Programmatic access via
 \code{list_count_ords()}.}
@@ -20,8 +20,8 @@ Flexible matching is supported (see below). Programmatic access via
 \code{margin}, \code{cpus}, \code{\link[=pca]{pca()}}'s \code{norm}, \code{pseudocount}, and \code{scale}, or
 \code{\link[=rda]{rda()}}'s and \code{\link[=cca]{cca()}}'s \code{groups}, \code{data}, and \code{formula}, or
 \code{\link[=lda]{lda()}}'s, \code{\link[=plsda]{plsda()}}'s and \code{\link[=oplsda]{oplsda()}}'s \code{groups} and \code{data}, or
-\code{\link[=rpca_phylo]{rpca_phylo()}}'s \code{tree}. Each
-method keeps its own defaults; see \code{\link[=ca]{ca()}}, \code{\link[=cca]{cca()}}, \code{\link[=lda]{lda()}},
+\code{\link[=rpca_phylo]{rpca_phylo()}}'s \code{tree}, or \code{\link[=dpcoa]{dpcoa()}}'s \code{tree} or \code{taxa_dm}. Each
+method keeps its own defaults; see \code{\link[=ca]{ca()}}, \code{\link[=cca]{cca()}}, \code{\link[=dpcoa]{dpcoa()}}, \code{\link[=lda]{lda()}},
 \code{\link[=oplsda]{oplsda()}}, \code{\link[=pca]{pca()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=rda]{rda()}}, \code{\link[=rpca]{rpca()}}, and \code{\link[=rpca_phylo]{rpca_phylo()}}.
 \code{seed} is ignored by the methods that have no random parts (all
 but \code{\link[=cca]{cca()}}, whose adjusted \eqn{R^2} is found by permutation), so
@@ -40,6 +40,7 @@ as \code{\link[=dist_ord]{dist_ord()}} does for the methods that take distances.
    Option / Function Name \tab Method Name \cr
    \code{ca} \tab Correspondence Analysis (CA) \cr
    \code{cca} \tab Canonical Correspondence Analysis (CCA), constrained \cr
+   \code{dpcoa} \tab Double Principal Coordinate Analysis (DPCoA) (needs \code{tree} or \code{taxa_dm}) \cr
    \code{lda} \tab Linear Discriminant Analysis (LDA), supervised \cr
    \code{oplsda} \tab Orthogonal PLS Discriminant Analysis (OPLS-DA), supervised \cr
    \code{pca} \tab Principal Component Analysis (PCA) \cr
@@ -58,7 +59,9 @@ analysis. \code{lda}, \code{plsda} and \code{oplsda} need the groups to separate
 the same way: \code{count_ord(counts, 'plsda', 'treatment', meta)} is
 \code{plsda(counts, 'treatment', meta)}. \code{oplsda} takes \code{n_orthogonal} rather
 than \code{n_axes}. \code{rpca_phylo} needs a phylogenetic tree:
-\code{count_ord(counts, 'rpca_phylo', tree = tree)}.
+\code{count_ord(counts, 'rpca_phylo', tree = tree)}, and so does \code{dpcoa}
+(or the dissimilarities among the taxa, \code{taxa_dm}):
+\code{count_ord(counts, 'dpcoa', tree = tree)}.
 
 Methods that ordinate distances, such as \code{\link[=pcoa]{pcoa()}} and \code{\link[=nmds]{nmds()}}, are run
 by \code{\link[=dist_ord]{dist_ord()}}.
@@ -71,7 +74,7 @@ also work: \code{'prcomp'} for \code{pca}; \code{'redundancy analysis'}, \code{'
 \code{'transformation-based RDA'} for \code{rda}; \code{'canonical correspondence analysis'} or \code{'constrained correspondence analysis'} for \code{cca};
 \code{'correspondence analysis'} for \code{ca}; and \code{'robust PCA'}, \code{'DEICODE'},
 or \code{'gemelli'} for \code{rpca}; \code{'phylogenetic RPCA'}, \code{'phylo-RPCA'}, or
-\code{'phylogenetic DEICODE'} for \code{rpca_phylo}; and \code{'PLS-DA'}, \code{'PLS'}, or \code{'partial least squares discriminant analysis'} for \code{plsda}; and \code{'LDA'} or \code{'linear discriminant analysis'} for \code{lda}; and \code{'OPLS-DA'}, \code{'OPLS'}, or
+\code{'phylogenetic DEICODE'} for \code{rpca_phylo}; \code{'DPCoA'} or \code{'double principal coordinate analysis'} for \code{dpcoa}; and \code{'PLS-DA'}, \code{'PLS'}, or \code{'partial least squares discriminant analysis'} for \code{plsda}; and \code{'LDA'} or \code{'linear discriminant analysis'} for \code{lda}; and \code{'OPLS-DA'}, \code{'OPLS'}, or
 \code{'orthogonal PLS-DA'} for \code{oplsda}. \code{'CA'} selects \code{ca}, and
 \code{'CCA'} selects \code{cca}.
 
@@ -82,7 +85,7 @@ ambiguity with future additions to the list of methods.
 
 \code{vegan::pca()}, \code{vegan::rda()}, \code{vegan::cca()} and \code{vegan::ca()} (and
 \code{ca::ca()}) share their names with ecodive's \code{\link[=pca]{pca()}}, \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}}
-and \code{\link[=ca]{ca()}}, as \code{mixOmics::plsda()} and \code{caret::plsda()} do with
+and \code{\link[=ca]{ca()}}, as \code{ade4::dpcoa()} does with \code{\link[=dpcoa]{dpcoa()}}, \code{mixOmics::plsda()} and \code{caret::plsda()} do with
 \code{\link[=plsda]{plsda()}} and \code{MASS::lda()} with \code{\link[=lda]{lda()}}, and whichever package was attached last masks the other's. Write \code{ecodive::pca()} and so on, or use
 \code{count_ord()}, which
 always runs ecodive's, to be sure.
@@ -134,16 +137,17 @@ matrix or data frame without the attributes.
     str(ord)
 
     # The same arguments for every method (but lda, plsda and oplsda,
-    # which need groups, and rpca_phylo, which needs a tree).
-    ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda', 'rpca_phylo'))
+    # which need groups, and rpca_phylo and dpcoa, which need a tree).
+    ids <- setdiff(list_count_ords('id'), c('dpcoa', 'lda', 'oplsda', 'plsda', 'rpca_phylo'))
     lapply(ids, function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 
     ord <- count_ord(ex_counts, 'rpca_phylo', tree = ex_tree, n_axes = 2)
+    ord <- count_ord(ex_counts, 'dpcoa', tree = ex_tree, n_axes = 2)
 
     count_ord(ex_counts, 'plsda', c('a', 'a', 'b', 'b'), n_axes = 1)
 
 }
 \seealso{
-\code{\link[=ca]{ca()}}, \code{\link[=cca]{cca()}}, \code{\link[=lda]{lda()}}, \code{\link[=oplsda]{oplsda()}}, \code{\link[=pca]{pca()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=rda]{rda()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=rpca_phylo]{rpca_phylo()}}, \code{\link[=list_count_ords]{list_count_ords()}}; \code{\link[=dist_ord]{dist_ord()}} for
+\code{\link[=ca]{ca()}}, \code{\link[=cca]{cca()}}, \code{\link[=dpcoa]{dpcoa()}}, \code{\link[=lda]{lda()}}, \code{\link[=oplsda]{oplsda()}}, \code{\link[=pca]{pca()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=rda]{rda()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=rpca_phylo]{rpca_phylo()}}, \code{\link[=list_count_ords]{list_count_ords()}}; \code{\link[=dist_ord]{dist_ord()}} for
 the methods that take distances.
 }

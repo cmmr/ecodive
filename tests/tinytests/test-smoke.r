@@ -171,6 +171,7 @@
   expect_true(is_ord(pca(counts, cpus = cpus), 'PC'))
   expect_true(is_ord(rpca(counts, cpus = cpus), 'RPCA'))
   expect_true(is_ord(rpca_phylo(ecodive::ex_counts, ecodive::ex_tree, cpus = cpus), 'RPCA', n = 4L))
+  expect_true(is_ord(dpcoa(ecodive::ex_counts, ecodive::ex_tree, cpus = cpus), 'DPCoA', n = 4L))
   expect_true(is_ord(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'RDA'))
   expect_true(is_ord(cca(counts, 'grp', meta, permutations = 9, cpus = cpus), 'CCA'))
   expect_true(is_ord(ca(counts, cpus = cpus), 'CA'))
@@ -181,7 +182,7 @@
   expect_true(all(c('pcoa', 'nmds', 'umap') %in% list_dist_ords('id')))
   expect_identical(match_dist_ord('cmdscale')$id, 'pcoa')
   expect_true(is_ord(count_ord(counts, 'pca', cpus = cpus), 'PC'))
-  expect_identical(list_count_ords('id'), c('ca', 'cca', 'lda', 'oplsda', 'pca', 'plsda', 'rda', 'rpca', 'rpca_phylo'))
+  expect_identical(list_count_ords('id'), c('ca', 'cca', 'dpcoa', 'lda', 'oplsda', 'pca', 'plsda', 'rda', 'rpca', 'rpca_phylo'))
   expect_identical(match_count_ord('prcomp')$id, 'pca')
 
   o  <- pcoa(dm, cpus = cpus)

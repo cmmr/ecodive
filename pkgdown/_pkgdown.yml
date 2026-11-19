@@ -119,6 +119,7 @@ reference:
   - pca
   - rpca
   - rpca_phylo
+  - dpcoa
   - envfit
   - bioenv
   - varpart

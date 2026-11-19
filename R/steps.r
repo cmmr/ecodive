@@ -146,7 +146,7 @@ ord_step <- function (method, ...) {
 # the single values among its arguments `nms`, formulas as text,
 # normalizations by name, and whole numbers as integers. Data arguments and
 # `cpus` are left out.
-STEP_SKIP <- c('counts', 'dm', 'data', 'ord', 'target', 'tree', 'cpus', '...', 'x', 'y', 'given')
+STEP_SKIP <- c('counts', 'dm', 'data', 'ord', 'target', 'tree', 'taxa_dm', 'cpus', '...', 'x', 'y', 'given')
 
 step_settings <- function (env, nms) {
   out <- list()
