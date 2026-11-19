@@ -262,8 +262,12 @@ forward_select <- function (
   r2z   <- fit_z$inertia / total
   adjz  <- if (rz > 0) adj_r_squared(r2z, n, rz) else 0
 
+  # The terms are taken in their formula order, whatever order they were
+  # chosen in, so that the same terms always give the same numbers: the
+  # last candidate can be the global model itself, whose adjusted R-squared
+  # it must not "exceed" by rounding.
   fit_terms <- function (ts) {
-    cols <- c(zcols, unlist(tcols[ts]))
+    cols <- c(zcols, unlist(tcols[sort(ts)]))
     f    <- subset_inertia(model, cols)
     rk   <- f$rank - rz
     r2   <- f$inertia / total - r2z
