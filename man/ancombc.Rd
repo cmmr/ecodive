@@ -55,10 +55,10 @@ variable named \code{group}.}
 
 \item{groups}{\code{NULL} (the default), or the name of a categorical
 variable of \code{data} that is a term of \code{formula}, with at least
-three levels: the grouping the post-hoc tests (planned:
-\code{ancombc_global()}, \code{ancombc_pairwise()}, \code{ancombc_dunnett()},
-\code{ancombc_trend()}) compare. It doesn't change the results
-(scikit-bio's \code{grouping}).}
+three levels: the grouping the post-hoc tests
+(\code{\link[=ancombc_global]{ancombc_global()}}, \code{\link[=ancombc_pairwise]{ancombc_pairwise()}}, \code{\link[=ancombc_dunnett]{ancombc_dunnett()}},
+\code{\link[=ancombc_trend]{ancombc_trend()}}) compare by default. It doesn't change the
+results (scikit-bio's \code{grouping}).}
 
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
@@ -139,7 +139,8 @@ for \code{ancombc2()}), \code{estimable} (\code{NULL} when every coefficient cou
 be estimated, else a logical features \eqn{\times} covariates
 matrix), and \code{design} (the samples \eqn{\times} covariates model
 matrix, with \code{\link[stats:model.matrix]{stats::model.matrix()}}'s \code{assign} and \code{contrasts}
-attributes).
+attributes, the formula's \code{term.labels}, and \code{xlevels}, the levels
+of each factor).
 \item \code{bias}: covariates \eqn{\times} 3, each covariate's estimated bias
 (\code{delta_em}, subtracted from the coefficients), its weighted least
 squares estimate (\code{delta_wls}) and that estimate's variance

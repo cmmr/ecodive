@@ -44,6 +44,29 @@ ancombc.rds):
   sf.csv            case, sample (0-based), theta: ANCOM-BC2's sampling
                     fractions (_sample_fractions()).
 
+  Post-hoc tests, for the cases with a grouping (alpha and p_adjust the
+  fit's):
+
+  ph_global.csv     case, feature, w, p, q, signif: global_test().
+
+  ph_pairs.csv      case, test ('pairwise' or 'dunnett'), feature,
+                    comparison (scikit-bio's name), lfc, se, w, p, q,
+                    signif: pairwise_test() and dunnett_test(bootstraps=50).
+
+  ph_trend.csv      case, feature, w, p, q, signif: trend_test(bootstraps=50).
+
+  ph_draws.csv      case, test, b, feature, j, value: for three cases
+                    (DRAW_CASES), the null draws that dunnett_test() and
+                    trend_test() used (scikit-bio's generator wrapped to
+                    record them; trend: estimable features only), so that
+                    ecodive can be given the same.
+
+  ph_trend_big.csv  case, feature, p: trend_test(bootstraps=20000, seed=1)
+                    on doc3, to compare ecodive's own draws in distribution.
+
+  struc.csv         table, groups (space-separated), neg_lb, feature, then
+                    one 0/1 per group: struc_zero().
+
 Prerequisites: Python 3 with numpy, pandas, scipy, patsy and scikit-bio
 0.7.4 (the version the fixtures were made with). Run from the repository
 root:
@@ -324,8 +347,51 @@ f_fit = open(os.path.join(OUT, "fit.csv"), "w", newline="")
 f_vcov = open(os.path.join(OUT, "vcov.csv"), "w", newline="")
 f_dof = open(os.path.join(OUT, "dof.csv"), "w", newline="")
 f_sf = open(os.path.join(OUT, "sf.csv"), "w", newline="")
+f_pg = open(os.path.join(OUT, "ph_global.csv"), "w", newline="")
+f_pp = open(os.path.join(OUT, "ph_pairs.csv"), "w", newline="")
+f_pt = open(os.path.join(OUT, "ph_trend.csv"), "w", newline="")
+f_pd = open(os.path.join(OUT, "ph_draws.csv"), "w", newline="")
 W = {k: csv.writer(v, lineterminator="\n") for k, v in dict(cases=f_cases, res=f_res, bias=f_bias, fit=f_fit,
-                                       vcov=f_vcov, dof=f_dof, sf=f_sf).items()}
+                                       vcov=f_vcov, dof=f_dof, sf=f_sf, pg=f_pg, pp=f_pp,
+                                       pt=f_pt, pd=f_pd).items()}
+W["pg"].writerow(["case", "feature", "w", "p", "q", "signif"])
+W["pp"].writerow(["case", "test", "feature", "comparison", "lfc", "se", "w", "p", "q", "signif"])
+W["pt"].writerow(["case", "feature", "w", "p", "q", "signif"])
+W["pd"].writerow(["case", "test", "b", "feature", "j", "value"])
+
+
+# Cases whose null draws are recorded (the others' bootstrapped results are
+# compared only in their deterministic parts).
+DRAW_CASES = {"doc2", "doc3", "sparse_bc2"}
+
+
+class Recorder:
+    """A NumPy generator that records the draws it hands out."""
+
+    def __init__(self, seed):
+        self.rng = np.random.default_rng(seed)
+        self.draws = []
+
+    def standard_t(self, df, size):
+        x = self.rng.standard_t(df, size=size)
+        self.draws.append(np.array(x))
+        return x
+
+    def standard_normal(self, size):
+        x = self.rng.standard_normal(size=size)
+        self.draws.append(np.array(x))
+        return x
+
+
+def recorded(fun, seed):
+    rec = Recorder(seed)
+    orig = AB.get_rng
+    AB.get_rng = lambda s: rec
+    try:
+        out = fun()
+    finally:
+        AB.get_rng = orig
+    return out, rec.draws
 W["cases"].writerow(["case", "table", "method", "formula", "grouping", "added",
                      "pseudocount", "var_quantile", "p_adjust", "alpha", "max_iter", "tol"])
 W["res"].writerow(["case", "feature", "covariate", "lfc", "se", "w", "p", "q", "signif"])
@@ -386,8 +452,78 @@ for c in CASES:
             e = 1 if est is None else int(np.all(est[f]))
             W["dof"].writerow([c["case"], f, hx(d), e])
 
-for fh in (f_cases, f_res, f_bias, f_fit, f_vcov, f_dof, f_sf):
+        # Post-hoc tests.
+        g = res.global_test()
+        for f, (_, row) in enumerate(g.iterrows()):
+            W["pg"].writerow([c["case"], f, hx(row["W"]), hx(row["pvalue"]),
+                              hx(row["qvalue"]), int(bool(row["Signif"]))])
+
+        def write_pairs(test, tab):
+            fidx = {fid: i for i, fid in enumerate(dict.fromkeys(tab.index.get_level_values(0)))}
+            for (fid, comp), row in tab.iterrows():
+                W["pp"].writerow([c["case"], test, fidx[fid], comp, hx(row["Log(FC)"]),
+                                  hx(row["SE"]), hx(row["W"]), hx(row["pvalue"]),
+                                  hx(row["qvalue"]), int(bool(row["Signif"]))])
+
+        write_pairs("pairwise", res.pairwise_test())
+
+        keep = c["case"] in DRAW_CASES
+        dn, draws = recorded(lambda: res.dunnett_test(bootstraps=50, seed=0), 11)
+        write_pairs("dunnett", dn)
+        for b, d in enumerate(draws if keep else []):
+            for f in range(d.shape[0]):
+                for j in range(d.shape[1]):
+                    W["pd"].writerow([c["case"], "dunnett", b, f, j, hx(d[f, j])])
+
+        tr, draws = recorded(lambda: res.trend_test(bootstraps=50, seed=0), 12)
+        for f, (_, row) in enumerate(tr.iterrows()):
+            W["pt"].writerow([c["case"], f, hx(row["W"]), hx(row["pvalue"]),
+                              hx(row["qvalue"]), int(bool(row["Signif"]))])
+        valid = res._posthoc_estimable()
+        work = np.arange(beta.shape[0]) if valid is None else np.flatnonzero(valid)
+        for b, d in enumerate(draws if keep else []):
+            for r in range(d.shape[0]):
+                for j in range(d.shape[1]):
+                    W["pd"].writerow([c["case"], "trend", b, work[r], j, hx(d[r, j])])
+
+        if c["case"] == "doc3":
+            big = res.trend_test(bootstraps=20000, seed=1)
+            with open(os.path.join(OUT, "ph_trend_big.csv"), "w", newline="") as fh:
+                wb = csv.writer(fh, lineterminator="\n")
+                wb.writerow(["case", "feature", "p"])
+                for f, (_, row) in enumerate(big.iterrows()):
+                    wb.writerow([c["case"], f, hx(row["pvalue"])])
+
+for fh in (f_cases, f_res, f_bias, f_fit, f_vcov, f_dof, f_sf, f_pg, f_pp, f_pt, f_pd):
     fh.close()
+
+
+# ---------------------------------------------------------------------------
+# struc_zero(): its docstring example, and the sparse tables.
+# ---------------------------------------------------------------------------
+from skbio.stats.composition import struc_zero
+
+x = np.array([[7, 1, 0, 11, 3, 1], [1, 1, 0, 13, 13, 0], [11, 5, 0, 1, 4, 1],
+              [2, 2, 0, 16, 4, 0], [0, 1, 0, 0, 6, 0], [14, 8, 7, 9, 0, 5],
+              [0, 7, 4, 1, 0, 26], [8, 1, 4, 28, 0, 10], [2, 2, 2, 4, 0, 5],
+              [6, 4, 10, 1, 0, 9]])
+add_table("struc", x, pd.DataFrame({"grouping": ["treatment"] * 5 + ["placebo"] * 5}),
+          {"grouping": "str"})
+with open(os.path.join(OUT, "tables.csv"), "a", newline="") as fh:
+    csv.writer(fh, lineterminator="\n").writerow(["struc", "grouping:str", ""])
+write_table("struc", x, TABLES["struc"][1], TABLES["struc"][2], {})
+
+with open(os.path.join(OUT, "struc.csv"), "w", newline="") as fh:
+    w = csv.writer(fh, lineterminator="\n")
+    w.writerow(["table", "grouping", "neg_lb", "groups", "feature", "zero"])
+    for name, grouping in (("struc", "grouping"), ("doc2", "status"), ("doc3", "status"),
+                           ("sparse", "trt"), ("levels", "dose"), ("sim", "site")):
+        xx, meta = TABLES[name][0], TABLES[name][1]
+        for neg_lb in (False, True):
+            z = struc_zero(xx, meta, grouping, neg_lb=neg_lb)
+            for f in range(z.shape[0]):
+                w.writerow([name, grouping, int(neg_lb), " ".join(map(str, z.columns)), f,
+                            " ".join(str(int(v)) for v in z.iloc[f].values)])
 
 print("scikit-bio", skbio.__version__, "numpy", np.__version__, "scipy",
       scipy.__version__, "pandas", pd.__version__)

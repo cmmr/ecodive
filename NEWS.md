@@ -563,6 +563,24 @@
   `cpus` and for sparse and dense tables: 500 samples by 5,000 features
   take about 1 second.
 
+* New post-hoc tests on an `ancombc()` or `ancombc2()` fit, for a factor
+  with three or more levels, as scikit-bio's `ANCOMBCResult` methods:
+  `ancombc_global()` (does the feature differ between any levels?),
+  `ancombc_pairwise()` (every pair of levels, with mixed directional FDR),
+  `ancombc_dunnett()` (every level against the reference, with a
+  bootstrapped mdFDR screen) and `ancombc_trend()` (ordered patterns,
+  increasing or decreasing by default, or your own constraint matrices,
+  with a bootstrapped p-value). The deterministic statistics and p-values
+  match scikit-bio's to about 1e-8, and the bootstrapped ones match exactly
+  on scikit-bio's own null draws; ecodive draws its own on PCG (`seed`),
+  one stream per feature, identical for any `cpus`. Comparisons are
+  labelled with level names (`'severe - mild'`), and any categorical term
+  of the fit can be tested, not only its `groups`. The trend test's
+  constrained estimates come from an exact QP solver written for ecodive.
+  New `structural_zeros()` finds features absent from a group (Kaul et al.
+  2017), as scikit-bio's `struc_zero()`, returning a features-by-groups
+  logical matrix.
+
 * `rarefy(depth =)` now also takes one depth per sample (matched to the
   samples by name when named). `drop` and `warn` then compare each sample
   with its own depth. A single depth gives exactly the same results as

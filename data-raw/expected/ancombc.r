@@ -32,6 +32,12 @@ fit     <- csv('fit.csv')
 vcv     <- csv('vcov.csv')
 dofs    <- csv('dof.csv')
 sfs     <- csv('sf.csv')
+pglob   <- csv('ph_global.csv')
+ppairs  <- csv('ph_pairs.csv')
+ptrend  <- csv('ph_trend.csv')
+pdraws  <- csv('ph_draws.csv')
+pbig    <- csv('ph_trend_big.csv')
+struc   <- csv('struc.csv')
 
 read_table <- function (nm) {
   m <- as.matrix(read.csv(
@@ -140,9 +146,49 @@ ref <- lapply(setNames(cases$case, cases$case), function (cs) {
     dr <- dr[order(as.integer(dr$feature)), ]
     out$dof       <- if (cr$method == 'ancombc2') hex(dr$dof)
     out$estimable <- dr$estimable == '1'
+
+    # Post-hoc tests.
+    g <- pglob[pglob$case == cs, ]
+    g <- g[order(as.integer(g$feature)), ]
+    out$global <- data.frame(w = hex(g$w), p = hex(g$p), q = hex(g$q), reject = g$signif == '1')
+
+    for (test in c('pairwise', 'dunnett')) {
+      pp <- ppairs[ppairs$case == cs & ppairs$test == test, ]
+      out[[test]] <- data.frame(
+        feature = as.integer(pp$feature) + 1L, comparison = pp$comparison,
+        log_fc = hex(pp$lfc), se = hex(pp$se), w = hex(pp$w), p = hex(pp$p),
+        q = hex(pp$q), reject = pp$signif == '1', stringsAsFactors = FALSE )
+    }
+
+    tt <- ptrend[ptrend$case == cs, ]
+    tt <- tt[order(as.integer(tt$feature)), ]
+    out$trend <- data.frame(w = hex(tt$w), p = hex(tt$p), q = hex(tt$q), reject = tt$signif == '1')
+
+    # The null draws, as features x k x bootstraps arrays (0 where none).
+    for (test in c('dunnett', 'trend')) {
+      dd <- pdraws[pdraws$case == cs & pdraws$test == test, ]
+      if (!nrow(dd)) next
+      B  <- max(as.integer(dd$b)) + 1L
+      a  <- array(0, c(D, k, B))
+      a[cbind(as.integer(dd$feature) + 1L, as.integer(dd$j) + 1L, as.integer(dd$b) + 1L)] <- hex(dd$value)
+      out[[paste0(test, '_draws')]] <- a
+    }
+
+    bg <- pbig[pbig$case == cs, ]
+    if (nrow(bg)) out$trend_big <- hex(bg$p)[order(as.integer(bg$feature))]
   }
 
   out
+})
+
+
+# struc_zero(): one logical matrix per table, grouping and neg_lb.
+struc_ref <- lapply(split(struc, paste(struc$table, struc$neg_lb)), function (z) {
+  z   <- z[order(as.integer(z$feature)), ]
+  lev <- strsplit(z$groups[[1]], ' ', fixed = TRUE)[[1]]
+  m   <- do.call(rbind, lapply(strsplit(z$zero, ' ', fixed = TRUE), function (v) v == '1'))
+  colnames(m) <- lev
+  list(table = z$table[[1]], groups = z$grouping[[1]], neg_lb = z$neg_lb[[1]] == '1', zero = m)
 })
 
 
@@ -174,7 +220,7 @@ for (cs in cases$case) {
       data = x, taxa_are_rows = FALSE, meta_data = meta, formula = cr$formula,
       p_adj_method = cr$p_adjust, prv_cut = 0, lib_cut = 0, group = grp,
       struc_zero = FALSE, tol = 1e-5, max_iter = 100, conserve = FALSE,
-      alpha = hex(cr$alpha), global = FALSE, n_cl = 1, verbose = FALSE )))
+      alpha = hex(cr$alpha), global = !is.null(grp), n_cl = 1, verbose = FALSE )))
     rr  <- res$res
     get <- function (what) {
       m <- as.matrix(rr[[what]][, -1, drop = FALSE])
@@ -184,18 +230,28 @@ for (cs in cases$case) {
     out <- list(
       log_fc = get('lfc'), se = get('se'), w = get('W'), p_value = get('p_val'),
       p_adjusted = get('q_val'), reject = get('diff_abn'),
-      bias = as.matrix(res$delta_em), sample_fractions = res$samp_frac )
+      bias = as.matrix(res$delta_em), sample_fractions = res$samp_frac,
+      global = res$res_global )
   }
   else {
-    set.seed(1)   # ANCOMBC's %dorng% (nothing random is used)
+    # ANCOMBC's %dorng%: the Dunnett and trend bootstraps. Only the trend
+    # test's (deterministic) statistic is compared, so it gets 2 bootstraps:
+    # each is a CVXR solve per feature and pattern, too slow for 100.
+    set.seed(1)
+    post <- !is.null(grp)
+    k    <- if (post) nlevels(factor(meta[[grp]])) - 1L else 0L
+    inc  <- if (post) { m <- diag(k); m[cbind(2:k, 1:(k - 1L))] <- -1; m }
     res <- suppressWarnings(suppressMessages(ANCOMBC::ancombc2(
       data = x, taxa_are_rows = FALSE, meta_data = meta,
       fix_formula = cr$formula, p_adj_method = cr$p_adjust,
       pseudo = hex(cr$pseudocount), pseudo_sens = FALSE, prv_cut = 0,
       lib_cut = 0, s0_perc = hex(cr$var_quantile), group = grp,
       struc_zero = FALSE, alpha = hex(cr$alpha), n_cl = 1, verbose = FALSE,
-      global = FALSE, pairwise = FALSE, dunnet = FALSE, trend = FALSE,
-      em_control = list(tol = 1e-5, max_iter = 100) )))
+      global = post, pairwise = post, dunnet = post, trend = post,
+      em_control = list(tol = 1e-5, max_iter = 100),
+      mdfdr_control = list(fwer_ctrl_method = cr$p_adjust, B = 100),
+      trend_control = if (post) list(
+        contrast = list(inc, -inc), node = list(k, k), solver = 'ECOS', B = 2) )))
     rr  <- res$res
     get <- function (prefix) {
       cols <- grep(paste0('^', prefix, '_'), names(rr), value = TRUE)
@@ -208,6 +264,12 @@ for (cs in cases$case) {
       log_fc = get('lfc'), se = get('se'), w = get('W'), p_value = get('p'),
       p_adjusted = get('q'), reject = get('diff'),
       sample_fractions = res$samp_frac )
+    if (post) {
+      out$global   <- res$res_global
+      out$pairwise <- res$res_pair
+      out$dunnett  <- res$res_dunn
+      out$trend    <- res$res_trend
+    }
   }
 
   ancombc_ref[[cs]] <- out
@@ -237,6 +299,7 @@ saveRDS(
   list(
     tables  = tables,
     skbio   = ref,
+    struc   = struc_ref,
     ancombc = ancombc_ref,
     versions = c(skbio = '0.7.4', ANCOMBC = ancombc_version) ),
   file.path('tests', 'tinytests', 'expected', 'ancombc.rds'),

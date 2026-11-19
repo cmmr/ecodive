@@ -424,7 +424,7 @@ License:
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: src/ancombc.c R/ancombc.r
+Files: src/ancombc.c R/ancombc.r R/ancombc_posthoc.r
 Copyright: 2013-- scikit-bio development team; Huang Lin
 Comment: ancombc() and ancombc2() are a C/R port of ancombc(), ancombc2() and
  _ancombc_core() with their helpers (_transform_data(), _estimate_params_dense(),
@@ -433,7 +433,14 @@ Comment: ancombc() and ancombc2() are a C/R port of ancombc(), ancombc2() and
  _calc_grouped_var_cov(), _estimate_bias_em(), _init_bias_params(),
  _estimate_bias_var(), _sample_fractions(), _adjust_variance(),
  _calc_statistics(), _calc_pvalues()) from scikit-bio 0.7.4
- (skbio/stats/composition/_ancombc.py), released by scikit-bio under the BSD-3
+ (skbio/stats/composition/_ancombc.py); ancombc_global(), ancombc_pairwise(),
+ ancombc_dunnett(), ancombc_trend() and structural_zeros() port the
+ ANCOMBCResult methods global_test(), pairwise_test(), dunnett_test() and
+ trend_test() (_global_stats(), _pairwise_test(), _mdfdr_pairwise(),
+ _dunnett_test(), _mdfdr_dunnett(), _dunn_global(), _trend_test(),
+ _constrain_est(), _constrain_est_identity(), _safe_inverse_spd(),
+ _l_infty()) and struc_zero() from the same file. All are released by
+ scikit-bio under the BSD-3
  license below. scikit-bio's implementation "is based on an analysis of the
  source code of the R package ANCOMBC" (Bioconductor, by Huang Lin), which is
  under the Artistic License 2.0, so these files carry both notices. ANCOMBC's
@@ -445,7 +452,12 @@ Comment: ancombc() and ancombc2() are a C/R port of ancombc(), ancombc2() and
  (one-sided Jacobi) of each feature's masked design, and SciPy's Nelder-Mead
  rules (see the SciPy stanza) for the EM's minimisations as scikit-bio uses;
  the design is built with R's model.matrix() instead of patsy (covariates named
- and ordered as in R); the result is ecodive's per-feature data frame; and
+ and ordered as in R); the post-hoc bootstraps draw from ecodive's PCG
+ samplers (src/rng_dist.c), one stream per feature; the trend test's
+ constrained estimates come from a primal active-set QP solver written for
+ ecodive (qp_solve() in src/ancombc.c) in place of SLSQP or quadprog;
+ comparisons are labelled with level names; the result is ecodive's
+ per-feature data frame; and
  random effects, scikit-bio's aggregator and ANCOMBC's preprocessing,
  structural zeros and sensitivity analysis are not included. The user-visible
  differences are listed in the documentation (?ancombc, "Differences from

@@ -52,10 +52,10 @@
 #'
 #' @param groups  `NULL` (the default), or the name of a categorical
 #'        variable of `data` that is a term of `formula`, with at least
-#'        three levels: the grouping the post-hoc tests (planned:
-#'        `ancombc_global()`, `ancombc_pairwise()`, `ancombc_dunnett()`,
-#'        `ancombc_trend()`) compare. It doesn't change the results
-#'        (scikit-bio's `grouping`).
+#'        three levels: the grouping the post-hoc tests
+#'        ([ancombc_global()], [ancombc_pairwise()], [ancombc_dunnett()],
+#'        [ancombc_trend()]) compare by default. It doesn't change the
+#'        results (scikit-bio's `grouping`).
 #'
 #' @param pseudocount  The value added to every abundance before taking
 #'        logs. For `ancombc()`, `NULL` (the default) follows the shared
@@ -127,7 +127,8 @@
 #'     be estimated, else a logical features \eqn{\times} covariates
 #'     matrix), and `design` (the samples \eqn{\times} covariates model
 #'     matrix, with [stats::model.matrix()]'s `assign` and `contrasts`
-#'     attributes).
+#'     attributes, the formula's `term.labels`, and `xlevels`, the levels
+#'     of each factor).
 #'   * `bias`: covariates \eqn{\times} 3, each covariate's estimated bias
 #'     (`delta_em`, subtracted from the coefficients), its weighted least
 #'     squares estimate (`delta_wls`) and that estimate's variance
@@ -684,6 +685,10 @@ ancombc_design <- function (formula, data, labels, n, groups) {
         '`groups` (', name_list(groups), ') gives fewer than two design columns: ',
         'it must be categorical.', call. = FALSE )
   }
+
+  # For the post-hoc tests: the terms, and the levels of each factor.
+  attr(X, 'term.labels') <- attr(tt, 'term.labels')
+  attr(X, 'xlevels')     <- lapply(mf[is_fac], levels)
 
   list(
     X         = X,

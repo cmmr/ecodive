@@ -109,6 +109,18 @@
   expect_true(inherits(z, 'ecodive_ancombc') && nrow(z) == 24L && identical(attr(z, 'method'), 'ancombc2'))
   expect_true(all(z$p_value >= 0 & z$p_value <= 1) && !anyNA(z$reject))
   expect_true(length(attr(z, 'sample_fractions')) == 20L && all(is.finite(attr(z, 'sample_fractions'))))
+  meta$g3 <- rep(c('a', 'b', 'c', 'd'), 5)
+  fit <- ancombc2(counts, ~ g3 + x, meta, groups = 'g3', cpus = cpus)
+  z <- ancombc_global(fit, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc_global') && nrow(z) == 12L && all(z$p_value >= 0 & z$p_value <= 1))
+  z <- ancombc_pairwise(fit, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc_pairwise') && nrow(z) == 72L && !anyNA(z$reject))
+  z <- ancombc_dunnett(fit, n_bootstraps = 20L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc_dunnett') && nrow(z) == 36L && !anyNA(z$reject))
+  z <- ancombc_trend(fit, n_bootstraps = 20L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc_trend') && nrow(z) == 12L && all(is.finite(z$w)))
+  z <- structural_zeros(cz, 'grp', meta)
+  expect_true(is.logical(z) && identical(dim(z), c(12L, 2L)))
 
   # Zero replacement.
   cz <- counts; cz[cz < 4] <- 0L

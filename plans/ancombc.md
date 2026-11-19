@@ -396,3 +396,133 @@ fit (with or without `groups`):
   `ancombc()` / `ancombc2()` as planned (its chunk is `eval = FALSE`; its
   call `ancombc2(counts, ~ group, data = ...)` matches the signature). Left
   for the article's own update, as items 19 and 20 did.
+
+
+## Decisions made while implementing (item 23)
+
+Item 23 was given to the item-22 session after item 22 was pushed (the user's
+message). Asked of the user at the start (all four answered with the
+recommendation):
+
+- **Comparison labels:** level names, `'moderate - mild'` (the first more
+  abundant when `log_fc > 0`); pairs as `'severe - moderate'`. Without an
+  intercept (full coding) a level's own coefficient is labelled with the
+  level alone (`'gut'`). scikit-bio: `status[T.severe]_status[T.moderate]`.
+- **`structural_zeros()` returns a logical matrix**, features × groups with
+  dimnames.
+- **`groups` can be overridden** at post-hoc time (`groups =
+  attr(fit, 'groups')` by default): any categorical main-effect term with ≥ 3
+  observed levels and ≥ 2 design columns. A fit without `groups` needs one
+  given ("`groups` is required").
+- **`n_bootstraps = 100`** for Dunnett's and the trend test (scikit-bio's and
+  ANCOMBC's default); the docs recommend about 10,000 for the trend test.
+
+Decided along the way:
+
+- **Signatures:** `ancombc_global(fit, groups, alpha, p_adjust, cpus)`,
+  `ancombc_pairwise(...)` (same), `ancombc_dunnett(..., n_bootstraps =
+  100L, seed = 0L, cpus)`, `ancombc_trend(..., patterns = NULL, nodes =
+  NULL, n_bootstraps = 100L, seed = 0L, cpus)`, with `alpha` and `p_adjust`
+  defaulting to the fit's; `structural_zeros(counts, groups, data = NULL,
+  margin = 1L, neg_lb = FALSE)`. `n_bootstraps` follows the `n_<unit>` rule
+  (`n_draws`, `n_starts`). `patterns` / `nodes` replace scikit-bio's
+  `trend_contrast` / `trend_node` (`contrast` already means the two groups of
+  `dirmult_ttest()`): a named list of constraint matrices (`C %*% beta >= 0`,
+  one column per coefficient of `groups`) and 1-based node indices
+  (default: the last). Default patterns `increasing` (`diag(k)` with -1 on
+  the subdiagonal) and `decreasing` (its negative), as scikit-bio.
+- **Pairwise is deterministic** (scikit-bio and ANCOMBC screen it with the
+  global F/χ² test, not a bootstrap), so it takes no `seed`; only Dunnett's
+  and the trend test draw.
+- **Results:** data frames of class `c('ecodive_ancombc_<test>',
+  'data.frame')`: global and trend one row per feature (`feature`, trend's
+  `pattern`, `w`, `p_value`, `p_adjusted`, `reject`); pairwise and Dunnett
+  one row per feature × comparison (`feature`, `comparison`, `log_fc`, `se`,
+  `w`, `p_value`, `p_adjusted`, `reject`). Attributes `method`, `groups`,
+  `alpha`, `p_adjust` (+ `n_bootstraps`, `seed`); the trend test also
+  `patterns`, `nodes` and `coef` (each feature's constrained estimates of
+  its winning pattern). The `pattern` column is new (scikit-bio computes it
+  and drops it).
+- **scikit-bio's rules kept, quirks included:** the global p-value is
+  `2 min(P, 1 - P)` (as ANCOMBC); mdFDR's screening uses BH whatever
+  `p_adjust` is; `p_value` in the pairwise/Dunnett tables is the screened
+  value (1 for unscreened features, and 0 or NaN become 1, as ANCOMBC);
+  each row is adjusted with `p.adjust(n = m D / R)` (fractional `n`, as R's
+  `p.adjust()` allows, which is what scikit-bio reproduces); NaN adjusted
+  values become 1; non-estimable features get p = 1.
+- **The item-22 fit gained two design attributes** for this:
+  `attr(design, 'term.labels')` (so `~ .` formulas work) and
+  `attr(design, 'xlevels')` (each factor's levels, for the labels). Nothing
+  else in `ancombc()` / `ancombc2()` changed.
+- **C** (appended to `src/ancombc.c`, reusing its Jacobi SVD):
+  `C_ancombc_global` (b' V⁺ b with numpy's 1e-15 pinv cutoff),
+  `C_ancombc_dunnett` (exceedance counts), `C_ancombc_trend` (constrained
+  estimates, statistics, exceedance counts), `C_ancombc_nonzero` (non-zero
+  counts per feature and group, any table type). One task per feature;
+  each feature's draws come from PCG stream (seed, feature index), so
+  results are identical for any `cpus` (checked for 1–4) and a feature's
+  results don't depend on the other features (tested). The mdFDR and
+  p-value steps are in R.
+- **Samplers** (`src/rng_dist.c`, item 20): N(0, 1) by `rng_norm()`; t(ν)
+  as `Z / sqrt(2 G(ν/2) / ν)` with `rng_gamma()` (NumPy's construction);
+  failed fits' NaN dof are 999, as scikit-bio and ANCOMBC. Checked by
+  distribution: with 200,000 draws the exceedance rate of |t| matches
+  `2 pt(-w, ν)` within 5 SE for ν = 3, 12.5, 999 and ∞, w = 0.5, 1.5, 2.5.
+- **QP solver** (ecodive's own, MIT): a primal active-set method (Nocedal &
+  Wright 2006, Alg. 16.3) for `min 0.5 x'Gx + c'x` s.t. `Cx >= 0`, started
+  at x = 0 (always feasible: the constraints are homogeneous), with the
+  working-set multipliers from a pseudoinverse (dependent constraints
+  allowed). It solves both the observed problems (G = 2V⁻¹ + 1e-10 I, as
+  scikit-bio and ANCOMBC) and the bootstrap projections (G = I). Exact up to
+  rounding: matches brute force over every active set to 1e-9 on all
+  features of two tables, including a custom 5-constraint pattern on 3
+  coefficients. V⁻¹ by Cholesky, or (V + 1e-8 I)⁻¹ by Gauss-Jordan when it
+  isn't positive definite (`_safe_inverse_spd()`). No port, so no licence
+  question (quadprog is GPL; SciPy's SLSQP would have been a large port).
+- **`structural_zeros()`:** groups as `ancom()` (factor levels kept, unused
+  dropped; else `sort(method = 'radix')`). scikit-bio sorts even a pandas
+  Categorical's categories; ecodive keeps a factor's level order. NA in
+  `counts` is an error (scikit-bio counts it as 0).
+
+### Reference results
+
+- **scikit-bio 0.7.4**, every fixture case with a grouping (19):
+  - Global test: W within 1.8e-8 (relative), p 2.8e-8, decisions
+    identical. Pairwise: `log_fc` 8e-9 (absolute), `se` 4.6e-10,
+    `p_adjusted` 3.1e-8 (relative), decisions identical. Dunnett's:
+    `log_fc`, `se`, `w` likewise. All inherit the fit's 1e-8; on the
+    converged cases they agree to 1e-11–1e-13.
+  - **Bootstraps on scikit-bio's own null draws** (its generator wrapped to
+    record them; cases doc2 (z), doc3 (t) and sparse_bc2 (non-estimable
+    features)): Dunnett's `p_adjusted` within 2.5e-12, trend p-values
+    identical, decisions identical.
+  - **Trend statistic:** within 3.2e-7, except the no-intercept case, 5.4e-5:
+    SLSQP (ftol 1e-12) stops short of the exact solution; ecodive's is the
+    minimum (feasible, and 20,000 random feasible perturbations never lower
+    the objective).
+  - **Trend p-values with ecodive's own draws:** 20,000 bootstraps each, on
+    doc3, within 5 SE of scikit-bio's.
+  - Docstring values reproduced (global, pairwise, trend W; struc_zero's
+    example).
+  - `struc_zero()`: identical on 6 tables × `neg_lb` (columns by name).
+- **ANCOMBC 2.8.1** (`ancombc2(global, pairwise, dunnet, trend = TRUE)`,
+  `mdfdr_control$fwer_ctrl_method = p_adjust`; trend with CVXR/ECOS), where
+  its EM converges (doc3 with pseudocounts 0.1/0.5/1, sim_bc2_pc; doc2's
+  `ancombc(global = TRUE)`): global W within 4e-8, pairwise `log_fc` 3.5e-9
+  and `q` 2.7e-8, decisions identical; trend W within 3.9e-5 (ECOS's
+  precision); Dunnett's decisions identical except one (sim_bc2_pc), from
+  the random screen. ANCOMBC's trend bootstrap is one CVXR solve per
+  feature, pattern and draw, so the fixture script runs it with 2
+  bootstraps (only the statistic is compared).
+- **Timing** (500 samples × 5,000 features, 4 groups, an `ancombc2()` fit):
+  global 0.01 s, pairwise 0.2 s, Dunnett 0.3 s (the per-feature
+  `p.adjust()` loop in R dominates both), trend 0.7 s on 1 core / 0.25 s on
+  4 with 100 bootstraps, 64 s / 22 s with 10,000.
+
+### Open
+
+- `tests/tinytests/expected/ancombc.rds` is now 266 KB (xz), the largest
+  fixture: scikit-bio's post-hoc tables and the recorded null draws of
+  three cases. It could be trimmed (fewer cases with draws) if CRAN's
+  tarball size matters.
+- The draft article still lists the ANCOM-BC functions as planned.

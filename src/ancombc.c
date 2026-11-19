@@ -1323,3 +1323,544 @@ SEXP C_ancombc(
   UNPROTECT(12);
   return result;
 }
+
+
+
+//======================================================================
+// Post-hoc tests (ancombc_global(), ancombc_dunnett(), ancombc_trend())
+// and structural_zeros(): scikit-bio's _global_stats(), _dunn_global(),
+// _trend_test(), _constrain_est(), _constrain_est_identity(),
+// _safe_inverse_spd(), _l_infty() and struc_zero(). The p-values,
+// adjustments and mdFDR rules are in R/ancombc_posthoc.r.
+//
+// Each feature is one task, with its own PCG stream (seed, feature), so
+// results are identical for any number of threads, and a feature's
+// bootstrap doesn't depend on the other features.
+//======================================================================
+
+// Moore-Penrose inverse of a k x k matrix A (numpy.linalg.pinv: SVD, cutoff
+// 1e-15 times the largest singular value). w: 2 k k + k doubles.
+static void small_pinv (const double *A, int k, double *out, double *w) {
+  double *U = w, *V = w + k * k, *S = w + 2 * k * k;
+  for (int i = 0; i < k * k; i++) U[i] = A[i];
+  jacobi_svd(U, k, k, V, S);
+  double cut = 1e-15 * S[0];
+  for (int p = 0; p < k; p++)
+    for (int q = 0; q < k; q++) {
+      double t = 0;
+      for (int j = 0; j < k; j++)
+        if (S[j] > cut) t += V[p + j * k] * (U[q + j * k] / S[j]) / S[j];
+      out[p + q * k] = t;
+    }
+}
+
+
+// Cholesky factorisation of the symmetric positive definite k x k matrix A
+// (lower triangle into L). Returns 0 if A isn't positive definite.
+static int cholesky (const double *A, int k, double *L) {
+  for (int i = 0; i < k * k; i++) L[i] = 0;
+  for (int j = 0; j < k; j++) {
+    double s = A[j + j * k];
+    for (int m = 0; m < j; m++) s -= L[j + m * k] * L[j + m * k];
+    if (!(s > 0)) return 0;
+    double d = sqrt(s);
+    L[j + j * k] = d;
+    for (int i = j + 1; i < k; i++) {
+      double t = A[i + j * k];
+      for (int m = 0; m < j; m++) t -= L[i + m * k] * L[j + m * k];
+      L[i + j * k] = t / d;
+    }
+  }
+  return 1;
+}
+
+// Inverse from a Cholesky factor. w: k doubles.
+static void chol_inverse (const double *L, int k, double *out, double *w) {
+  for (int c = 0; c < k; c++) {
+    // Solve L y = e_c, then L' x = y.
+    for (int i = 0; i < k; i++) {
+      double t = (i == c) ? 1 : 0;
+      for (int m = 0; m < i; m++) t -= L[i + m * k] * w[m];
+      w[i] = t / L[i + i * k];
+    }
+    for (int i = k - 1; i >= 0; i--) {
+      double t = w[i];
+      for (int m = i + 1; m < k; m++) t -= L[m + i * k] * out[m + c * k];
+      out[i + c * k] = t / L[i + i * k];
+    }
+  }
+}
+
+// Gauss-Jordan inverse with partial pivoting; returns 0 if singular.
+// w: k k doubles.
+static int gj_inverse (const double *A, int k, double *out, double *w) {
+  for (int i = 0; i < k * k; i++) { w[i] = A[i]; out[i] = 0; }
+  for (int i = 0; i < k; i++) out[i + i * k] = 1;
+  for (int c = 0; c < k; c++) {
+    int piv = c;
+    for (int r = c + 1; r < k; r++) if (fabs(w[r + c * k]) > fabs(w[piv + c * k])) piv = r;
+    if (w[piv + c * k] == 0) return 0;
+    if (piv != c)
+      for (int j = 0; j < k; j++) {
+        double t = w[c + j * k]; w[c + j * k] = w[piv + j * k]; w[piv + j * k] = t;
+        t = out[c + j * k]; out[c + j * k] = out[piv + j * k]; out[piv + j * k] = t;
+      }
+    double d = w[c + c * k];
+    for (int j = 0; j < k; j++) { w[c + j * k] /= d; out[c + j * k] /= d; }
+    for (int r = 0; r < k; r++) {
+      if (r == c) continue;
+      double f = w[r + c * k];
+      if (f == 0) continue;
+      for (int j = 0; j < k; j++) { w[r + j * k] -= f * w[c + j * k]; out[r + j * k] -= f * out[c + j * k]; }
+    }
+  }
+  return 1;
+}
+
+
+//======================================================
+// A small dense convex QP with homogeneous inequality
+// constraints, by a primal active-set method (Nocedal &
+// Wright 2006, Algorithm 16.3), starting from x = 0,
+// which is always feasible:
+//
+//   minimise 0.5 x' G x + c' x   subject to  C x >= 0
+//
+// G (k x k, positive definite) is given with its inverse
+// Gi; C is m x k (column-major). The minimiser is unique,
+// so it is the solution SLSQP (scikit-bio) and
+// quadprog::solve.QP (ANCOMBC) approximate. Returns 1 on
+// success (x set), 0 if it didn't converge.
+// w: qp_wlen(m, k) doubles, iw: 2 m ints.
+//======================================================
+static int qp_solve (
+    const double *G, const double *Gi, const double *c, const double *C,
+    int m, int k, double *x, double *w, int *iw ) {
+
+  double *g   = w;            // k
+  double *p   = g + k;        // k
+  double *gig = p + k;        // k: Gi g
+  double *t   = gig + k;      // k
+  double *lam = t + k;        // m
+  double *r   = lam + m;      // m
+  double *S   = r + m;        // m x m
+  double *Si  = S + m * m;    // m x m
+  double *sw  = Si + m * m;   // 2 m m + m: small_pinv() scratch
+  int    *act = iw;           // working set, nW entries
+  int    *inW = iw + m;       // m flags
+  int     nW  = 0;
+
+  // Scale for the tolerances: the unconstrained solution's size.
+  double scale = 0;
+  for (int i = 0; i < k; i++) {
+    double s = 0;
+    for (int j = 0; j < k; j++) s += Gi[i + j * k] * c[j];
+    scale += s * s;
+  }
+  scale = sqrt(scale) + 1e-300;
+
+  for (int i = 0; i < k; i++) x[i] = 0;
+  for (int i = 0; i < m; i++) inW[i] = 0;
+
+  for (int iter = 0; iter < 50 + 10 * (m + k); iter++) {
+
+    for (int i = 0; i < k; i++) {
+      double s = c[i];
+      for (int j = 0; j < k; j++) s += G[i + j * k] * x[j];
+      g[i] = s;
+    }
+    for (int i = 0; i < k; i++) {
+      double s = 0;
+      for (int j = 0; j < k; j++) s += Gi[i + j * k] * g[j];
+      gig[i] = s;
+    }
+
+    // The equality-constrained step: p = Gi (A' lam - g), with
+    // (A Gi A') lam = A Gi g, for the working set's rows A.
+    if (nW == 0) {
+      for (int i = 0; i < k; i++) p[i] = -gig[i];
+    }
+    else {
+      for (int a = 0; a < nW; a++) {
+        const int ra = act[a];
+        double s = 0;
+        for (int j = 0; j < k; j++) s += C[ra + j * m] * gig[j];
+        r[a] = s;
+        for (int b = 0; b < nW; b++) {
+          const int rb = act[b];
+          double v = 0;
+          for (int i = 0; i < k; i++) {
+            double gi_cb = 0;
+            for (int j = 0; j < k; j++) gi_cb += Gi[i + j * k] * C[rb + j * m];
+            v += C[ra + i * m] * gi_cb;
+          }
+          S[a + b * nW] = v;
+        }
+      }
+      small_pinv(S, nW, Si, sw);
+      for (int a = 0; a < nW; a++) {
+        double s = 0;
+        for (int b = 0; b < nW; b++) s += Si[a + b * nW] * r[b];
+        lam[a] = s;
+      }
+      for (int i = 0; i < k; i++) {
+        double s = -g[i];
+        for (int a = 0; a < nW; a++) s += C[act[a] + i * m] * lam[a];
+        t[i] = s;
+      }
+      for (int i = 0; i < k; i++) {
+        double s = 0;
+        for (int j = 0; j < k; j++) s += Gi[i + j * k] * t[j];
+        p[i] = s;
+      }
+    }
+
+    double pn = 0, xn = 0;
+    for (int i = 0; i < k; i++) { pn += p[i] * p[i]; xn += x[i] * x[i]; }
+    pn = sqrt(pn);
+
+    if (pn <= 1e-12 * (scale + sqrt(xn))) {
+      if (nW == 0) return 1;
+      int    worst = -1;
+      double lmin  = -1e-12 * (1 + fabs(lam[0]));
+      for (int a = 0; a < nW; a++) if (lam[a] < lmin) { lmin = lam[a]; worst = a; }
+      if (worst < 0) return 1;
+      inW[act[worst]] = 0;
+      for (int a = worst; a < nW - 1; a++) act[a] = act[a + 1];
+      nW--;
+      continue;
+    }
+
+    double alpha = 1;
+    int    block = -1;
+    for (int i = 0; i < m; i++) {
+      if (inW[i]) continue;
+      double ap = 0, ax = 0;
+      for (int j = 0; j < k; j++) { ap += C[i + j * m] * p[j]; ax += C[i + j * m] * x[j]; }
+      if (ap < -1e-14 * pn) {
+        double st = -ax / ap;
+        if (st < 0) st = 0;
+        if (st < alpha) { alpha = st; block = i; }
+      }
+    }
+    for (int i = 0; i < k; i++) x[i] += alpha * p[i];
+    if (block >= 0) { inW[block] = 1; act[nW++] = block; }
+  }
+
+  return 0;
+}
+
+static int qp_wlen (int m, int k) { return 4 * k + 3 * m + 4 * m * m + 4; }
+
+
+
+//======================================================
+// R interface: the global test's quadratic forms,
+// W_f = b_f' pinv(V_f) b_f, over the k grouping
+// coefficients (beta: D x k; vcov: D x k x k). NaN where
+// `valid` (logical D, or NULL) is FALSE.
+//======================================================
+static const double *ph_beta, *ph_vcov, *ph_var, *ph_W, *ph_dof, *ph_draws;
+static const int    *ph_valid;
+static int           ph_D, ph_k, ph_B, ph_npat;
+static uint64_t      ph_seed;
+static double       *ph_out, *ph_out2;
+static int          *ph_iout;
+static const double **ph_pmat;   // each pattern's m_i x k matrix
+static const int    *ph_pm;      // its m_i
+static const int    *ph_nodes;
+static double       *ph_scr;
+static int           ph_scr_len;
+
+static void *global_worker (void *arg) {
+  worker_t *wk = (worker_t *) arg;
+  int D = ph_D, k = ph_k;
+  double *V  = ph_scr + (size_t) wk->i * ph_scr_len;
+  double *Vi = V + k * k, *w = Vi + k * k;
+  for (int f = wk->i; f < D; f += wk->n) {
+    if (ph_valid && !ph_valid[f]) { ph_out[f] = R_NaN; continue; }
+    for (int p = 0; p < k; p++)
+      for (int q = 0; q < k; q++)
+        V[p + q * k] = ph_vcov[f + (size_t) p * D + (size_t) q * D * k];
+    small_pinv(V, k, Vi, w);
+    double s = 0;
+    for (int p = 0; p < k; p++) {
+      double t = 0;
+      for (int q = 0; q < k; q++) t += Vi[p + q * k] * ph_beta[f + (size_t) q * D];
+      s += ph_beta[f + (size_t) p * D] * t;
+    }
+    ph_out[f] = s;
+  }
+  return NULL;
+}
+
+SEXP C_ancombc_global (SEXP sexp_beta, SEXP sexp_vcov, SEXP sexp_valid, SEXP sexp_n_threads) {
+  ph_D = nrows(sexp_beta); ph_k = ncols(sexp_beta);
+  ph_beta = REAL(sexp_beta); ph_vcov = REAL(sexp_vcov);
+  ph_valid = isNull(sexp_valid) ? NULL : LOGICAL(sexp_valid);
+  SEXP res = PROTECT(allocVector(REALSXP, ph_D));
+  ph_out = REAL(res);
+  int nt = threads_for(asInteger(sexp_n_threads), (double) ph_D * ph_k * ph_k * ph_k * 20, 1e5);
+  ph_scr_len = 4 * ph_k * ph_k + ph_k;
+  ph_scr = (double *) R_alloc((size_t) nt * ph_scr_len, sizeof(double));
+  run_parallel(global_worker, nt, ph_D);
+  UNPROTECT(1);
+  return res;
+}
+
+
+
+//======================================================
+// R interface: Dunnett's global screen (_dunn_global()),
+// the number of bootstraps whose max |W_null| over the k
+// comparisons exceeds the observed max |W|, per feature.
+// W_null is t(dof_f) (dof NaN: 999), or N(0, 1) when dof
+// is NULL; draws (k x B values per feature, as a D x k x B
+// array) replace the sampler when given (tests).
+//======================================================
+static void *dunnett_worker (void *arg) {
+  worker_t *wk = (worker_t *) arg;
+  int D = ph_D, k = ph_k, B = ph_B;
+  for (int f = wk->i; f < D; f += wk->n) {
+    double obs = R_NegInf;
+    int    nan = 0;
+    for (int j = 0; j < k; j++) {
+      double a = fabs(ph_W[f + (size_t) j * D]);
+      if (ISNAN(a)) nan = 1; else if (a > obs) obs = a;
+    }
+    rng_t rng;
+    rng_seed(&rng, ph_seed, (uint64_t) f);
+    double nu = ph_dof ? (ISNAN(ph_dof[f]) ? 999.0 : ph_dof[f]) : 0;
+    int exceed = 0;
+    for (int b = 0; b < B; b++) {
+      double mx = R_NegInf;
+      for (int j = 0; j < k; j++) {
+        double z;
+        if (ph_draws) z = ph_draws[f + (size_t) j * D + (size_t) b * D * k];
+        else if (ph_dof) z = rng_norm(&rng) / sqrt(2 * rng_gamma(&rng, nu / 2) / nu);
+        else z = rng_norm(&rng);
+        z = fabs(z);
+        if (ISNAN(z) || z > mx) mx = z;
+      }
+      // numpy: max propagates NaN, and a NaN comparison is FALSE.
+      if (!nan && !ISNAN(mx) && mx > obs) exceed++;
+    }
+    ph_iout[f] = exceed;
+  }
+  return NULL;
+}
+
+SEXP C_ancombc_dunnett (
+    SEXP sexp_W, SEXP sexp_dof, SEXP sexp_B, SEXP sexp_seed, SEXP sexp_draws,
+    SEXP sexp_n_threads ) {
+  ph_D = nrows(sexp_W); ph_k = ncols(sexp_W);
+  ph_W = REAL(sexp_W);
+  ph_dof = isNull(sexp_dof) ? NULL : REAL(sexp_dof);
+  ph_B = asInteger(sexp_B);
+  ph_seed = (uint64_t) (uint32_t) asInteger(sexp_seed);
+  ph_draws = isNull(sexp_draws) ? NULL : REAL(sexp_draws);
+  SEXP res = PROTECT(allocVector(INTSXP, ph_D));
+  ph_iout = INTEGER(res);
+  int nt = threads_for(asInteger(sexp_n_threads), (double) ph_D * ph_k * ph_B * 50, 1e5);
+  run_parallel(dunnett_worker, nt, ph_D);
+  UNPROTECT(1);
+  return res;
+}
+
+
+
+//======================================================
+// R interface: the trend test (_trend_test()).
+//
+//   beta, var  D x k; vcov D x k x k (the grouping block).
+//   valid      logical D, or NULL.
+//   patterns   list of m_i x k constraint matrices (C x >= 0).
+//   nodes      0-based node of each pattern.
+//   draws      NULL, or a D x k x B array of N(0, 1) null draws.
+//
+// Returns list(W (D), exceed (D, integer), beta (D x k: the
+// constrained estimates of the winning pattern), pattern (D,
+// 1-based)). For each valid feature: P = V^-1 (Cholesky, or
+// (V + 1e-8 I)^-1), G = (2P + 2P')/2 + 1e-10 I, and for each
+// pattern x = argmin 0.5 x'Gx - (2Pb)'x s.t. C x >= 0 (zeros
+// if the solver fails); l = max(|x_node|, |x_node - x_k|);
+// W = max l (first on ties). Each bootstrap draws z ~ N(0, I_k),
+// projects it onto each pattern's cone (identity metric),
+// scales it by sqrt(var) (var NaN: 1), takes the same l, and
+// counts max l > W.
+//======================================================
+static void *trend_worker (void *arg) {
+
+  worker_t *wk = (worker_t *) arg;
+  int D = ph_D, k = ph_k, B = ph_B, np = ph_npat;
+  int mmax = 0;
+  for (int t = 0; t < np; t++) if (ph_pm[t] > mmax) mmax = ph_pm[t];
+
+  double *w   = ph_scr + (size_t) wk->i * ph_scr_len;
+  double *V   = w;             // k k
+  double *P   = V + k * k;     // k k
+  double *G   = P + k * k;     // k k
+  double *Gi  = G + k * k;     // k k
+  double *L   = Gi + k * k;    // k k
+  double *I   = L + k * k;     // k k (identity)
+  double *c   = I + k * k;     // k
+  double *x   = c + k;         // k
+  double *xb  = x + k;         // k: best pattern's x
+  double *z   = xb + k;        // k
+  double *sd  = z + k;         // k
+  double *qw  = sd + k;        // qp work
+  int    *iw  = (int *) (qw + qp_wlen(mmax, k) + 4 * k * k + k);
+
+  for (int i = 0; i < k * k; i++) I[i] = 0;
+  for (int i = 0; i < k; i++) I[i + i * k] = 1;
+
+  for (int f = wk->i; f < D; f += wk->n) {
+
+    if (ph_valid && !ph_valid[f]) {
+      ph_out[f] = R_NaN; ph_iout[f] = 0; ph_iout[D + f] = NA_INTEGER;
+      for (int j = 0; j < k; j++) ph_out2[f + (size_t) j * D] = R_NaN;
+      continue;
+    }
+
+    // _safe_inverse_spd()
+    for (int p = 0; p < k; p++)
+      for (int q = 0; q < k; q++) {
+        double a = ph_vcov[f + (size_t) p * D + (size_t) q * D * k];
+        double b = ph_vcov[f + (size_t) q * D + (size_t) p * D * k];
+        V[p + q * k] = (a + b) / 2;
+      }
+    if (cholesky(V, k, L)) chol_inverse(L, k, P, qw);
+    else {
+      for (int i = 0; i < k; i++) V[i + i * k] += 1e-8;
+      if (!gj_inverse(V, k, P, qw)) for (int i = 0; i < k * k; i++) P[i] = R_NaN;
+    }
+
+    // Dmat, dvec
+    for (int p = 0; p < k; p++)
+      for (int q = 0; q < k; q++)
+        G[p + q * k] = (2 * P[p + q * k] + 2 * P[q + p * k]) / 2 + (p == q ? 1e-10 : 0);
+    for (int p = 0; p < k; p++) {
+      double s = 0;
+      for (int q = 0; q < k; q++) s += 2 * P[p + q * k] * ph_beta[f + (size_t) q * D];
+      c[p] = -s;
+    }
+    int gok = cholesky(G, k, L);
+    if (gok) chol_inverse(L, k, Gi, qw);
+
+    // numpy.argmax(): the first largest (a NaN wins, as the first NaN).
+    double best = R_NegInf;
+    int    bpat = 0;
+    for (int t = 0; t < np; t++) {
+      if (!gok || !qp_solve(G, Gi, c, ph_pmat[t], ph_pm[t], k, x, qw, iw))
+        for (int j = 0; j < k; j++) x[j] = 0;
+      int nd = ph_nodes[t];
+      double l1 = fabs(x[nd]), l2 = fabs(x[nd] - x[k - 1]);
+      double l  = (l2 > l1) ? l2 : l1;     // Python's max(l1, l2)
+      if (t == 0 || (!ISNAN(best) && (l > best || ISNAN(l)))) {
+        best = l; bpat = t;
+        for (int j = 0; j < k; j++) xb[j] = x[j];
+      }
+    }
+    ph_out[f] = best;
+    ph_iout[D + f] = bpat + 1;
+    for (int j = 0; j < k; j++) ph_out2[f + (size_t) j * D] = xb[j];
+
+    // Bootstrap.
+    for (int j = 0; j < k; j++) {
+      double v = ph_var[f + (size_t) j * D];
+      if (ISNAN(v)) v = 1;
+      sd[j] = sqrt(v > 0 ? v : 0);
+    }
+    rng_t rng;
+    rng_seed(&rng, ph_seed, (uint64_t) f);
+    int exceed = 0;
+    for (int b = 0; b < B; b++) {
+      for (int j = 0; j < k; j++)
+        z[j] = ph_draws ? ph_draws[f + (size_t) j * D + (size_t) b * D * k] : rng_norm(&rng);
+      for (int j = 0; j < k; j++) c[j] = -z[j];
+      double lmax = R_NegInf;
+      for (int t = 0; t < np; t++) {
+        if (!qp_solve(I, I, c, ph_pmat[t], ph_pm[t], k, x, qw, iw))
+          for (int j = 0; j < k; j++) x[j] = 0;
+        int nd = ph_nodes[t];
+        double a = x[nd] * sd[nd], e = x[k - 1] * sd[k - 1];
+        double l1 = fabs(a), l2 = fabs(a - e);
+        double l  = (ISNAN(l1) || ISNAN(l2)) ? R_NaN : (l1 >= l2 ? l1 : l2);
+        if (ISNAN(l) || l > lmax) lmax = l;
+      }
+      if (lmax > best) exceed++;            // FALSE for NaN
+    }
+    ph_iout[f] = exceed;
+  }
+
+  return NULL;
+}
+
+SEXP C_ancombc_trend (
+    SEXP sexp_beta, SEXP sexp_var, SEXP sexp_vcov, SEXP sexp_valid,
+    SEXP sexp_patterns, SEXP sexp_nodes, SEXP sexp_B, SEXP sexp_seed,
+    SEXP sexp_draws, SEXP sexp_n_threads ) {
+
+  ph_D = nrows(sexp_beta); ph_k = ncols(sexp_beta);
+  ph_beta = REAL(sexp_beta); ph_var = REAL(sexp_var); ph_vcov = REAL(sexp_vcov);
+  ph_valid = isNull(sexp_valid) ? NULL : LOGICAL(sexp_valid);
+  ph_npat = length(sexp_patterns);
+  ph_pmat = (const double **) R_alloc((size_t) ph_npat + 1, sizeof(double *));
+  int *pm = (int *) R_alloc((size_t) ph_npat + 1, sizeof(int));
+  for (int t = 0; t < ph_npat; t++) {
+    ph_pmat[t] = REAL(VECTOR_ELT(sexp_patterns, t));
+    pm[t]      = nrows(VECTOR_ELT(sexp_patterns, t));
+  }
+  ph_pm = pm;
+  ph_nodes = INTEGER(sexp_nodes);
+  ph_B = asInteger(sexp_B);
+  ph_seed = (uint64_t) (uint32_t) asInteger(sexp_seed);
+  ph_draws = isNull(sexp_draws) ? NULL : REAL(sexp_draws);
+
+  int mmax = 0;
+  for (int t = 0; t < ph_npat; t++) if (ph_pm[t] > mmax) mmax = ph_pm[t];
+
+  SEXP sexp_W    = PROTECT(allocVector(REALSXP, ph_D));
+  SEXP sexp_ex   = PROTECT(allocVector(INTSXP, 2 * (R_xlen_t) ph_D));
+  SEXP sexp_beta2 = PROTECT(allocMatrix(REALSXP, ph_D, ph_k));
+  ph_out = REAL(sexp_W); ph_iout = INTEGER(sexp_ex); ph_out2 = REAL(sexp_beta2);
+
+  int k = ph_k;
+  int nt = threads_for(asInteger(sexp_n_threads),
+                       (double) ph_D * (ph_B + 1) * ph_npat * (k + mmax) * k * k * 4, 1e5);
+  ph_scr_len = 6 * k * k + 5 * k + qp_wlen(mmax, k) + 4 * k * k + k + 2 * mmax + 8;
+  ph_scr = (double *) R_alloc((size_t) nt * ph_scr_len, sizeof(double));
+  run_parallel(trend_worker, nt, ph_D);
+
+  SEXP res = PROTECT(allocVector(VECSXP, 4));
+  SEXP nms = PROTECT(allocVector(STRSXP, 4));
+  SET_VECTOR_ELT(res, 0, sexp_W);   SET_STRING_ELT(nms, 0, mkChar("W"));
+  SET_VECTOR_ELT(res, 1, sexp_ex);  SET_STRING_ELT(nms, 1, mkChar("counts"));
+  SET_VECTOR_ELT(res, 2, sexp_beta2); SET_STRING_ELT(nms, 2, mkChar("beta"));
+  setAttrib(res, R_NamesSymbol, nms);
+  UNPROTECT(5);
+  return res;
+}
+
+
+
+//======================================================
+// R interface: structural_zeros()'s counts: the number of
+// non-zero values of each feature in each group (D x n_groups,
+// integer); groups are 0-based codes per sample.
+//======================================================
+SEXP C_ancombc_nonzero (SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_groups, SEXP sexp_n_groups) {
+  init_n_ptrs(20);
+  ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
+  int D = em->n_otus, G = asInteger(sexp_n_groups);
+  const int *g = INTEGER(sexp_groups);
+  SEXP res = PROTECT(allocMatrix(INTSXP, D, G));
+  int *out = INTEGER(res);
+  for (size_t i = 0; i < (size_t) D * G; i++) out[i] = 0;
+  for (int s = 0; s < em->n_samples; s++)
+    for (int e = em->pos_vec[s]; e < em->pos_vec[s + 1]; e++)
+      if (em->val_vec[e] != 0) out[em->otu_vec[e] + (size_t) g[s] * D]++;
+  free_all();
+  UNPROTECT(1);
+  return res;
+}
