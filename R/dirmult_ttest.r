@@ -5,7 +5,9 @@
 # (skbio/stats/composition/_dirmult.py) and _check_trt_ref_groups() and
 # _adjust_pvalues() (_utils.py), Copyright (c) 2013--, scikit-bio
 # development team, under the BSD-3 license given in src/dirmult.c and
-# inst/COPYRIGHTS.
+# inst/COPYRIGHTS. Its scale model (scale_sd) follows clr.sm() from ALDEx3
+# 1.4.0 (R/scale.R), Copyright (c) 2026 ALDEx3 authors, under the MIT
+# license given in src/dirmult.c and inst/COPYRIGHTS.
 
 
 
@@ -17,7 +19,8 @@
 #' times from their Dirichlet posterior given its counts; every draw is
 #' clr-transformed and each feature is compared with Welch's t-test; and the
 #' results are averaged over the draws. This is the ALDEx2 approach, as
-#' scikit-bio implements it.
+#' scikit-bio implements it, with ALDEx2's and ALDEx3's scale model, which
+#' allows for uncertainty in the samples' total loads (Nixon et al. 2025).
 #'
 #' @inheritParams ancom
 #'
@@ -41,6 +44,13 @@
 #'        value, zero or not, before drawing. Default: `0.5`, as scikit-bio
 #'        and ALDEx2. This is not the zero patch that other functions'
 #'        `pseudocount` is (no `NULL` rule): every value gets it.
+#'
+#' @param scale_sd  The scale model's uncertainty: the standard deviation, in
+#'        log2 units, of a random difference in total load between the two
+#'        sides, drawn afresh for each draw (see **Details**). `0` assumes
+#'        the clr's reference (the geometric mean) is the same on both
+#'        sides, as scikit-bio's `dirmult_ttest()` and ALDEx2's default do.
+#'        Default: `0.5`, as Nixon et al. (2025) and ALDEx3 recommend.
 #'
 #' @param n_draws  The number of Monte Carlo draws from the Dirichlet
 #'        posterior (scikit-bio's `draws`). Default: `128`.
@@ -83,8 +93,8 @@
 #'
 #'   Attributes: `contrast` (the treatment and reference groups; the
 #'   reference is `NA` when all other samples were pooled), `n` (the number
-#'   of samples on each side), `n_draws`, `pseudocount`, `alpha`,
-#'   `conf_level`, `p_adjust` and `seed`.
+#'   of samples on each side), `n_draws`, `pseudocount`, `scale_sd`,
+#'   `alpha`, `conf_level`, `p_adjust` and `seed`.
 #'
 #' @details
 #' With \eqn{x_{sf}} the abundance of feature \eqn{f} in sample \eqn{s} and
@@ -102,7 +112,9 @@
 #'    Welch-Satterthwaite degrees of freedom \eqn{\nu}, \eqn{t = \Delta /
 #'    se}, the two-sided p-value, and the interval \eqn{\Delta \pm
 #'    t_{\nu}\, se}, with \eqn{t_\nu} the \eqn{(1 + }`conf_level`\eqn{)/2}
-#'    quantile of Student's t distribution.
+#'    quantile of Student's t distribution. With `scale_sd` \eqn{> 0}, a
+#'    random \eqn{\Lambda \log 2} is first added to \eqn{\Delta} (see
+#'    **Scale uncertainty** below).
 #'
 #' `t`, `log2_fc` and `p_value` are the averages over the draws (`log2_fc`
 #' divided by \eqn{\log 2}). The interval is **not** a quantile of the
@@ -111,34 +123,56 @@
 #' interval includes 0. This conservative envelope guards against false
 #' positives among rare features, whose draws vary most.
 #'
-#' **The reference frame is the geometric mean.** A clr difference is a log
-#' fold change only if the groups' geometric means are the same, i.e. if the
-#' typical feature doesn't change; when the total load differs between the
-#' groups, every `log2_fc` is shifted by the same amount (the order of the
-#' features stays meaningful). [ancom()] tests log ratios without that
-#' assumption, but gives no effect sizes.
+#' **Scale uncertainty.** A clr difference is a log fold change of the
+#' features' absolute abundances only if the groups' geometric means are
+#' the same, i.e. if the typical feature doesn't change; when the total
+#' load differs between the groups, every difference is off by the same
+#' unknown amount, and treating it as known gives false positives (Nixon et
+#' al. 2025). The scale model makes it uncertain instead: in each draw, the
+#' log2 difference in scale between the treatment and the reference is
+#' \eqn{\Lambda \sim N(0,} `scale_sd`\eqn{^2)}, shared by every sample on
+#' a side and every feature, and \eqn{\Lambda \log 2} is added to every
+#' \eqn{\Delta} (the variances, within sides, don't change). The draws'
+#' intervals then spread, so a feature is rejected only when its change is
+#' clear of plausible changes in load. This is ALDEx3's `clr.sm()` (ALDEx2's
+#' `aldex.clr(gamma =)`) for the design "treatment versus reference":
+#' ALDEx3 also draws a shift for the intercept, which cancels from every
+#' difference. `scale_sd = 0` assumes no change in load (the clr as it is);
+#' larger values express less confidence in that. `log2_fc` has the same
+#' expected value either way: the shifts average out of `log2_fc` and `t` as
+#' the draws increase, but not out of the p-values or the intervals.
+#' Because the interval is the envelope of the draws' intervals, with
+#' `scale_sd > 0` it keeps widening as `n_draws` grows (it reaches the most
+#' extreme shifts drawn), so `reject` becomes stricter with more draws; the
+#' averaged p-values converge instead, though slowly, being driven by the
+#' rare large shifts. For decisions that don't depend on `n_draws`, filter
+#' on `p_adjusted` alone (as ALDEx2 does). [ancom()] tests log ratios
+#' without the assumption, but gives no effect sizes.
 #'
 #' A side with a single sample has no variance: its features' `t`,
 #' `p_value`, intervals and `p_adjusted` are `NaN`, with a warning, and none
 #' are rejected (as scikit-bio's, which gives them silently).
 #'
-#' **Matching scikit-bio.** Given the same Gamma draws, the results are
-#' those of scikit-bio's `dirmult_ttest()` (0.7.4) to about `1e-13`: the
-#' tests feed both the same draws. The draws themselves come from ecodive's
+#' **Matching scikit-bio.** With `scale_sd = 0` and the same Gamma draws,
+#' the results are those of scikit-bio's `dirmult_ttest()` (0.7.4) to about
+#' `1e-13`: the tests feed both the same draws. The draws themselves come from ecodive's
 #' own Gamma sampler (Marsaglia & Tsang 2000, on PCG), not NumPy's, so for
 #' the same data the results differ from scikit-bio's by Monte Carlo error
 #' only. The t distribution is R's [stats::pt()] and [stats::qt()] (SciPy's
 #' `stdtr()` and `stdtrit()` in scikit-bio), and `p_adjust` is
 #' [stats::p.adjust()], with `NaN` p-values left out of the family, as
-#' scikit-bio. Differences from scikit-bio: `alpha` and `conf_level` are
-#' arguments (scikit-bio fixes them at 0.05 and 0.95); `pseudocount` must be
-#' positive; and `seed` defaults to `0`, not to a random seed.
+#' scikit-bio. Differences from scikit-bio: the scale model, on by
+#' default (scikit-bio has none: use `scale_sd = 0`); `alpha` and
+#' `conf_level` are arguments (scikit-bio fixes them at 0.05 and 0.95);
+#' `pseudocount` must be positive; and `seed` defaults to `0`, not to a
+#' random seed.
 #'
 #' **ALDEx2** (Bioconductor) follows the same idea, but differs in its
 #' details: it reports both Welch's and Wilcoxon's tests, averages
 #' Benjamini-Hochberg adjusted p-values over the draws, and gives its own
-#' effect size. Its results agree with this function's in direction and
-#' rough size, not exactly.
+#' effect size; its scale model (`gamma`) is off by default. ALDEx3 fits
+#' linear models to each draw instead of t-tests. Their results agree with
+#' this function's in direction and rough size, not exactly.
 #'
 #' **Computation.** The draws run in parallel C, one draw at a time, with
 #' memory for one draw (8 bytes per value of the samples in the contrast).
@@ -167,6 +201,10 @@
 #' gamma variables. *ACM Transactions on Mathematical Software*, 26,
 #' 363-372.
 #'
+#' Nixon, M. P., Gloor, G. B., & Silverman, J. D. (2025). Incorporating
+#' scale uncertainty into differential expression analyses using ALDEx2.
+#' *Genome Biology*, 26, 139. \doi{10.1186/s13059-025-03609-3}
+#'
 #' @seealso [ancom()], [replace_zeros()].
 #'
 #' @export
@@ -181,6 +219,12 @@
 #'       c(203, 201,  14,  10,  10,  13,  12) )
 #'     colnames(x) <- paste0('b', 1:7)
 #'     grp <- rep(c('treatment', 'placebo'), each = 3)
+#'
+#'     # scikit-bio's procedure: no scale model.
+#'     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0)
+#'
+#'     # With the default scale model, the intervals widen and fewer features
+#'     # are rejected.
 #'     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
 #'
 #'     # The default contrast: the first group ('placebo', in sorted order)
@@ -189,8 +233,8 @@
 #'
 dirmult_ttest <- function (
     counts, groups, data = NULL, contrast = NULL, margin = 1L,
-    pseudocount = 0.5, n_draws = 128L, alpha = 0.05, conf_level = 0.95,
-    p_adjust = 'holm', seed = 0L, cpus = n_cpus() ) {
+    pseudocount = 0.5, scale_sd = 0.5, n_draws = 128L, alpha = 0.05,
+    conf_level = 0.95, p_adjust = 'holm', seed = 0L, cpus = n_cpus() ) {
 
   if (missing(groups)) groups <- NULL
   dirmult_ttest_fit(environment())
@@ -201,12 +245,14 @@ dirmult_ttest <- function (
 # dirmult_ttest() for the tests: the same arguments, plus `gamma_draws` (an
 # n x D x n_draws array of Gamma draws to use instead of sampling, samples
 # and features as in `counts`' default orientation); returns list(result,
-# draws), `draws` holding each draw's diff, se, dof, t, p_tail (one-sided),
-# lower and upper (n_draws x D matrices, natural logs).
+# draws, shift), `draws` holding each draw's diff, se, dof, t, p_tail
+# (one-sided), lower and upper (n_draws x D matrices, natural logs), and
+# `shift` each draw's scale shift (natural logs; 0 with scale_sd = 0).
 dirmult_ttest_details <- function (
     counts, groups, data = NULL, contrast = NULL, margin = 1L,
-    pseudocount = 0.5, n_draws = 128L, alpha = 0.05, conf_level = 0.95,
-    p_adjust = 'holm', seed = 0L, cpus = n_cpus(), gamma_draws = NULL ) {
+    pseudocount = 0.5, scale_sd = 0.5, n_draws = 128L, alpha = 0.05,
+    conf_level = 0.95, p_adjust = 'holm', seed = 0L, cpus = n_cpus(),
+    gamma_draws = NULL ) {
 
   if (missing(groups)) groups <- NULL
   dirmult_ttest_fit(environment(), details = TRUE, gamma_draws = gamma_draws)
@@ -227,6 +273,11 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
   if (!is.numeric(pc) || length(pc) != 1L || !is.finite(pc) || pc <= 0)
     stop('`pseudocount` must be a single positive number.', call. = FALSE)
   pc <- as.double(pc)
+
+  scale_sd <- env$scale_sd
+  if (!is.numeric(scale_sd) || length(scale_sd) != 1L || !is.finite(scale_sd) || scale_sd < 0)
+    stop('`scale_sd` must be a single non-negative number.', call. = FALSE)
+  scale_sd <- as.double(scale_sd)
 
   n_draws <- env$n_draws
   if (!is.numeric(n_draws) || length(n_draws) != 1L || !is.finite(n_draws) ||
@@ -272,7 +323,7 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
 
   res <- .Call(
     C_dirmult_ttest, counts, margin, ct$side, pc, n_draws,
-    (1 + conf_level) / 2, seed, gamma_draws, details, cpus )
+    (1 + conf_level) / 2, scale_sd, seed, gamma_draws, details, cpus )
 
   p_adjusted <- stats::p.adjust(res$p_value, p_adjust)
 
@@ -299,6 +350,7 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
   attr(out, 'n')           <- c(treatment = n1, reference = n2)
   attr(out, 'n_draws')     <- n_draws
   attr(out, 'pseudocount') <- pc
+  attr(out, 'scale_sd')    <- scale_sd
   attr(out, 'alpha')       <- alpha
   attr(out, 'conf_level')  <- conf_level
   attr(out, 'p_adjust')    <- p_adjust
@@ -308,7 +360,7 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
   if (!details) return (out)
 
   draws <- lapply(res$draws, function (m) { colnames(m) <- features; m })
-  list(result = out, draws = draws)
+  list(result = out, draws = draws, shift = res$shift)
 }
 
 

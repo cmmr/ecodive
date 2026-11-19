@@ -302,3 +302,62 @@ Decided along the way:
   by hand with 1e7 draws over 5 seeds.
 - **Timing** (4 cores, -O2): 500 samples × 5,000 features (22% zeros), 128
   draws: 16 s on 1 core, 4.8 s on 4. About 50 ns per Gamma draw.
+
+### Scale model (`scale_sd`, second commit)
+
+- **Port:** ALDEx3 1.4.0's `clr.sm()` (CRAN, MIT; its code read, credited in
+  `inst/COPYRIGHTS`, the `src/dirmult.c` and `R/dirmult_ttest.r` headers
+  and `Authors@R` as "ALDEx3 authors", ctb/cph). ALDEx2's code stayed
+  unread. `clr.sm()` draws **one N(0, gamma²) coefficient per row of the
+  design per Monte Carlo draw** (`logScale = -colMeans(logComp) + t(X) %*%
+  Lambda`), so samples with the same design share the shift: per
+  condition, not per sample. Followed: for a contrast the design is
+  intercept + treatment indicator; the intercept's shift cancels from
+  every difference and isn't drawn, and the treatment's Λ (log2 units) is
+  added, times log 2, to every feature's difference in that draw. Within-
+  side variances don't change. A pooled reference is one condition (one
+  shift), not one per group.
+- **Stream:** Λ for draw d is the first polar normal of stream
+  `d * (n + 1) + n` (the stream the port left free), so it doesn't depend
+  on the Gamma draws (the same with `gamma_draws` given), the Gamma draws
+  are the same with and without the scale model, and it is the same for
+  any `cpus`.
+- **Default 0.5** (the user's choice; ALDEx3's documented example value and
+  Nixon et al.'s recommendation). So `dirmult_ttest()`'s default result
+  differs from scikit-bio's; the tests compare with scikit-bio at
+  `scale_sd = 0`, and the docs and the example say so.
+- **Not mirrored:** reversing the contrast with the same seed doesn't
+  negate Λ (same stream), so with `scale_sd > 0` the two results are
+  equivalent in distribution, not exact mirror images (they are at
+  `scale_sd = 0`, which the tests check).
+- **The envelope widens with `n_draws` under the scale model** (found while
+  testing, kept as scikit-bio's rule and documented): the interval is the
+  min/max over the draws' intervals, so it reaches the most extreme Λ
+  drawn, and `reject` gets stricter as draws are added. On the deep table
+  (true log2 changes about ±1.1 to 1.5 and -0.22), rejections at
+  `scale_sd` 0 / 0.25 / 0.5 / 1 were 12/12/12/12, 4/4/4, 4/4/0 and 0/0/0
+  for 32/128/512 draws. The averaged p-values converge, slowly (rare large
+  shifts drive them). The docs suggest filtering on `p_adjusted` alone (as
+  ALDEx2 does) for decisions that don't depend on `n_draws`. A future
+  option could be a quantile interval, or an interval from the averaged
+  draws, but neither is scikit-bio's or ALDEx3's.
+- **Cross-check with ALDEx3** (output only, by distribution;
+  `aldex(t(x), ~cond, nsample = 2000, scale = clr.sm, gamma =, test = 't')`
+  against 2000 ecodive draws): the per-draw spread of each feature's
+  difference matches (ratio of SDs, median 0.995–1.013, range 0.947–1.045,
+  over three tables at `gamma` 0 and 0.5; Monte Carlo error about ±3%), the
+  mean log2 fold changes differ by at most 0.064 (sparse table; 0.002 on the
+  deep one), and -log p-values correlate 0.95–0.99 (ALDEx3's are OLS t, not
+  Welch).
+- **Cross-check with ALDEx2 1.34.0** (Bioconductor, GPL: output only;
+  `aldex(test = 't', effect = TRUE, mc.samples = 512)` against
+  `scale_sd = 0`, 512 draws, on four of the fixture tables): ALDEx2's
+  `diff.btw` (a median of differences, not a difference of means)
+  correlates 0.989–1.000 with `log2_fc` (largest difference 0.56, on the
+  sparse three-group table; 0.002 on the deep one), the signs agree on 55
+  of 56 features, and -log of ALDEx2's expected Welch p (`we.ep`)
+  correlates 0.993–0.999 with -log `p_value`.
+- **Not changed:** the draft article `vignettes/articles/compositional.Rmd`
+  still lists `dirmult_ttest()` (and `ancom()`) as planned and says the
+  scale model is "planned for `dirmult_ttest()`"; its differential-abundance
+  chunk is `eval = FALSE`. Left for the article's own update, as item 19 did.

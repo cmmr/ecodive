@@ -18,7 +18,7 @@ extern SEXP C_blas_threads(SEXP);
 extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cord_cross(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP C_dirmult_ttest(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_dirmult_ttest(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_helmert_basis(SEXP);
@@ -78,7 +78,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_cca",       (DL_FUNC) &C_cca,      10},
   {"C_cord_cross", (DL_FUNC) &C_cord_cross, 8},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
-  {"C_dirmult_ttest", (DL_FUNC) &C_dirmult_ttest, 10},
+  {"C_dirmult_ttest", (DL_FUNC) &C_dirmult_ttest, 11},
   {"C_envfit",    (DL_FUNC) &C_envfit,   12},
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},
   {"C_lda",       (DL_FUNC) &C_lda,       5},

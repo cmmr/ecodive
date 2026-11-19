@@ -11,6 +11,7 @@ dirmult_ttest(
   contrast = NULL,
   margin = 1L,
   pseudocount = 0.5,
+  scale_sd = 0.5,
   n_draws = 128L,
   alpha = 0.05,
   conf_level = 0.95,
@@ -58,6 +59,13 @@ value, zero or not, before drawing. Default: \code{0.5}, as scikit-bio
 and ALDEx2. This is not the zero patch that other functions'
 \code{pseudocount} is (no \code{NULL} rule): every value gets it.}
 
+\item{scale_sd}{The scale model's uncertainty: the standard deviation, in
+log2 units, of a random difference in total load between the two
+sides, drawn afresh for each draw (see \strong{Details}). \code{0} assumes
+the clr's reference (the geometric mean) is the same on both
+sides, as scikit-bio's \code{dirmult_ttest()} and ALDEx2's default do.
+Default: \code{0.5}, as Nixon et al. (2025) and ALDEx3 recommend.}
+
 \item{n_draws}{The number of Monte Carlo draws from the Dirichlet
 posterior (scikit-bio's \code{draws}). Default: \code{128}.}
 
@@ -104,8 +112,8 @@ bound of the draws' intervals for that difference, in log2 units
 
 Attributes: \code{contrast} (the treatment and reference groups; the
 reference is \code{NA} when all other samples were pooled), \code{n} (the number
-of samples on each side), \code{n_draws}, \code{pseudocount}, \code{alpha},
-\code{conf_level}, \code{p_adjust} and \code{seed}.
+of samples on each side), \code{n_draws}, \code{pseudocount}, \code{scale_sd},
+\code{alpha}, \code{conf_level}, \code{p_adjust} and \code{seed}.
 }
 \description{
 Finds features whose abundance differs between two sets of samples,
@@ -114,7 +122,8 @@ carrying the uncertainty of low counts and zeros through the test
 times from their Dirichlet posterior given its counts; every draw is
 clr-transformed and each feature is compared with Welch's t-test; and the
 results are averaged over the draws. This is the ALDEx2 approach, as
-scikit-bio implements it.
+scikit-bio implements it, with ALDEx2's and ALDEx3's scale model, which
+allows for uncertainty in the samples' total loads (Nixon et al. 2025).
 }
 \details{
 With \eqn{x_{sf}} the abundance of feature \eqn{f} in sample \eqn{s} and
@@ -132,7 +141,9 @@ its standard error \eqn{se = \sqrt{s_1^2/n_1 + s_2^2/n_2}}, the
 Welch-Satterthwaite degrees of freedom \eqn{\nu}, \eqn{t = \Delta /
    se}, the two-sided p-value, and the interval \eqn{\Delta \pm
    t_{\nu}\, se}, with \eqn{t_\nu} the \eqn{(1 + }\code{conf_level}\eqn{)/2}
-quantile of Student's t distribution.
+quantile of Student's t distribution. With \code{scale_sd} \eqn{> 0}, a
+random \eqn{\Lambda \log 2} is first added to \eqn{\Delta} (see
+\strong{Scale uncertainty} below).
 }
 
 \code{t}, \code{log2_fc} and \code{p_value} are the averages over the draws (\code{log2_fc}
@@ -142,34 +153,56 @@ any draw, as scikit-bio's, so a feature is only rejected when no draw's
 interval includes 0. This conservative envelope guards against false
 positives among rare features, whose draws vary most.
 
-\strong{The reference frame is the geometric mean.} A clr difference is a log
-fold change only if the groups' geometric means are the same, i.e. if the
-typical feature doesn't change; when the total load differs between the
-groups, every \code{log2_fc} is shifted by the same amount (the order of the
-features stays meaningful). \code{\link[=ancom]{ancom()}} tests log ratios without that
-assumption, but gives no effect sizes.
+\strong{Scale uncertainty.} A clr difference is a log fold change of the
+features' absolute abundances only if the groups' geometric means are
+the same, i.e. if the typical feature doesn't change; when the total
+load differs between the groups, every difference is off by the same
+unknown amount, and treating it as known gives false positives (Nixon et
+al. 2025). The scale model makes it uncertain instead: in each draw, the
+log2 difference in scale between the treatment and the reference is
+\eqn{\Lambda \sim N(0,} \code{scale_sd}\eqn{^2)}, shared by every sample on
+a side and every feature, and \eqn{\Lambda \log 2} is added to every
+\eqn{\Delta} (the variances, within sides, don't change). The draws'
+intervals then spread, so a feature is rejected only when its change is
+clear of plausible changes in load. This is ALDEx3's \code{clr.sm()} (ALDEx2's
+\code{aldex.clr(gamma =)}) for the design "treatment versus reference":
+ALDEx3 also draws a shift for the intercept, which cancels from every
+difference. \code{scale_sd = 0} assumes no change in load (the clr as it is);
+larger values express less confidence in that. \code{log2_fc} has the same
+expected value either way: the shifts average out of \code{log2_fc} and \code{t} as
+the draws increase, but not out of the p-values or the intervals.
+Because the interval is the envelope of the draws' intervals, with
+\code{scale_sd > 0} it keeps widening as \code{n_draws} grows (it reaches the most
+extreme shifts drawn), so \code{reject} becomes stricter with more draws; the
+averaged p-values converge instead, though slowly, being driven by the
+rare large shifts. For decisions that don't depend on \code{n_draws}, filter
+on \code{p_adjusted} alone (as ALDEx2 does). \code{\link[=ancom]{ancom()}} tests log ratios
+without the assumption, but gives no effect sizes.
 
 A side with a single sample has no variance: its features' \code{t},
 \code{p_value}, intervals and \code{p_adjusted} are \code{NaN}, with a warning, and none
 are rejected (as scikit-bio's, which gives them silently).
 
-\strong{Matching scikit-bio.} Given the same Gamma draws, the results are
-those of scikit-bio's \code{dirmult_ttest()} (0.7.4) to about \code{1e-13}: the
-tests feed both the same draws. The draws themselves come from ecodive's
+\strong{Matching scikit-bio.} With \code{scale_sd = 0} and the same Gamma draws,
+the results are those of scikit-bio's \code{dirmult_ttest()} (0.7.4) to about
+\code{1e-13}: the tests feed both the same draws. The draws themselves come from ecodive's
 own Gamma sampler (Marsaglia & Tsang 2000, on PCG), not NumPy's, so for
 the same data the results differ from scikit-bio's by Monte Carlo error
 only. The t distribution is R's \code{\link[stats:TDist]{stats::pt()}} and \code{\link[stats:TDist]{stats::qt()}} (SciPy's
 \code{stdtr()} and \code{stdtrit()} in scikit-bio), and \code{p_adjust} is
 \code{\link[stats:p.adjust]{stats::p.adjust()}}, with \code{NaN} p-values left out of the family, as
-scikit-bio. Differences from scikit-bio: \code{alpha} and \code{conf_level} are
-arguments (scikit-bio fixes them at 0.05 and 0.95); \code{pseudocount} must be
-positive; and \code{seed} defaults to \code{0}, not to a random seed.
+scikit-bio. Differences from scikit-bio: the scale model, on by
+default (scikit-bio has none: use \code{scale_sd = 0}); \code{alpha} and
+\code{conf_level} are arguments (scikit-bio fixes them at 0.05 and 0.95);
+\code{pseudocount} must be positive; and \code{seed} defaults to \code{0}, not to a
+random seed.
 
 \strong{ALDEx2} (Bioconductor) follows the same idea, but differs in its
 details: it reports both Welch's and Wilcoxon's tests, averages
 Benjamini-Hochberg adjusted p-values over the draws, and gives its own
-effect size. Its results agree with this function's in direction and
-rough size, not exactly.
+effect size; its scale model (\code{gamma}) is off by default. ALDEx3 fits
+linear models to each draw instead of t-tests. Their results agree with
+this function's in direction and rough size, not exactly.
 
 \strong{Computation.} The draws run in parallel C, one draw at a time, with
 memory for one draw (8 bytes per value of the samples in the contrast).
@@ -211,6 +244,12 @@ For large datasets, standard matrix operations may be slow. See
       c(203, 201,  14,  10,  10,  13,  12) )
     colnames(x) <- paste0('b', 1:7)
     grp <- rep(c('treatment', 'placebo'), each = 3)
+
+    # scikit-bio's procedure: no scale model.
+    dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0)
+
+    # With the default scale model, the intervals widen and fewer features
+    # are rejected.
     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
 
     # The default contrast: the first group ('placebo', in sorted order)
@@ -232,6 +271,10 @@ analysis. \emph{Microbiome}, 2, 15.
 Marsaglia, G., & Tsang, W. W. (2000). A simple method for generating
 gamma variables. \emph{ACM Transactions on Mathematical Software}, 26,
 363-372.
+
+Nixon, M. P., Gloor, G. B., & Silverman, J. D. (2025). Incorporating
+scale uncertainty into differential expression analyses using ALDEx2.
+\emph{Genome Biology}, 26, 139. \doi{10.1186/s13059-025-03609-3}
 }
 \seealso{
 \code{\link[=ancom]{ancom()}}, \code{\link[=replace_zeros]{replace_zeros()}}.

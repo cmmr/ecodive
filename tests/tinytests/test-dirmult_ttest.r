@@ -8,10 +8,11 @@
 
   ref <- readRDS(file.path('expected', 'dirmult_ttest.rds'))
 
-  given <- function (r, contrast = r$contrast, ...)
+  given <- function (r, contrast = r$contrast, scale_sd = 0, ...)
     suppressWarnings(dirmult_ttest_details(
       ref$tables[[r$table]], r$groups, contrast = contrast,
-      n_draws = r$n_draws, gamma_draws = r$gamma, cpus = 1L, ... ))
+      scale_sd = scale_sd, n_draws = r$n_draws, gamma_draws = r$gamma,
+      cpus = 1L, ... ))
 
   maxrel <- function (a, b, floor = 1e-300) {
     a <- as.vector(a); b <- as.vector(b)
@@ -22,13 +23,15 @@
 
   cols <- c('t', 'log2_fc', 'ci_lower', 'ci_upper', 'p_value', 'p_adjusted')
 
+  ks <- function (x, ...) suppressWarnings(stats::ks.test(x, ...)$p.value)
+
   rd <- function (n, dist, param = 0, seed = 0L, stream = 0)
     .Call(C_rng_dist, as.integer(n), as.integer(dist), as.double(param),
           as.integer(seed), as.double(stream))
 
 
   # -----------------------------------------------------------------------
-  # scikit-bio, on the same draws
+  # scikit-bio, on the same draws (no scale model)
   # -----------------------------------------------------------------------
 
   for (cs in names(ref$cases)) {
@@ -57,7 +60,7 @@
   expect_warning(
     res <- dirmult_ttest_details(
       ref$tables$single, r$groups, contrast = r$contrast, n_draws = r$n_draws,
-      gamma_draws = r$gamma, cpus = 1L )$result,
+      scale_sd = 0, gamma_draws = r$gamma, cpus = 1L )$result,
     'single sample' )
   expect_true(all(is.finite(res$log2_fc)))
   for (k in setdiff(cols, 'log2_fc')) expect_true(all(is.nan(res[[k]])), info = k)
@@ -83,6 +86,58 @@
 
 
   # -----------------------------------------------------------------------
+  # The scale model (ALDEx3's clr.sm()): one shift per draw, added to every
+  # difference
+  # -----------------------------------------------------------------------
+
+  r  <- ref$cases$wide
+  x  <- given(r, scale_sd = 0.7, seed = 4L)
+  sh <- x$shift
+  expect_true(length(sh) == r$n_draws && all(sh != 0))
+  dsh <- r$draws$diff + sh                       # recycled down the columns
+  tt  <- dsh / r$draws$se
+  q   <- qt(0.975, r$draws$dof) * r$draws$se
+  expect_true(maxrel(x$draws$diff, dsh, floor = 1) < 1e-12)   # sums near 0
+  expect_true(maxrel(x$draws$t, tt, floor = max(abs(tt))) < 1e-12)
+  expect_true(maxrel(x$result$t, colMeans(tt), floor = max(abs(tt))) < 1e-12)
+  expect_true(maxrel(x$result$log2_fc, colMeans(dsh) / log(2), floor = 1) < 1e-12)
+  expect_true(maxrel(x$result$p_value, 2 * colMeans(pt(-abs(tt), r$draws$dof))) < 1e-12)
+  expect_true(maxrel(x$result$ci_lower, apply(dsh - q, 2, min) / log(2), floor = 1) < 1e-12)
+  expect_true(maxrel(x$result$ci_upper, apply(dsh + q, 2, max) / log(2), floor = 1) < 1e-12)
+  expect_identical(x$result$p_adjusted, p.adjust(x$result$p_value, 'holm'))
+  expect_identical(attr(x$result, 'scale_sd'), 0.7)
+  expect_identical(given(r, scale_sd = 0)$shift, rep(0, r$n_draws))
+
+  # The shift doesn't depend on the Gamma draws, and is drawn on a stream of
+  # its own: the same with and without given draws, and the Gamma draws are
+  # the same with and without the scale model.
+  w <- function (sd) dirmult_ttest_details(
+    ref$tables$wide, r$groups, contrast = r$contrast, n_draws = r$n_draws,
+    scale_sd = sd, seed = 4L, cpus = 1L )
+  a <- w(0.7)
+  b <- w(0)
+  expect_identical(a$shift, sh)
+  expect_true(max(abs(a$draws$diff - b$draws$diff - a$shift)) < 1e-12)
+  expect_identical(a$draws$se, b$draws$se)
+  expect_identical(a$draws$dof, b$draws$dof)
+
+  big0 <- matrix(rpois(10 * 6, 30), 10, 6)
+  g0   <- rep(c('a', 'b'), each = 5)
+
+  # The shifts are N(0, (scale_sd * log 2)^2).
+  z <- dirmult_ttest_details(big0, g0, n_draws = 4000L, scale_sd = 0.5, seed = 9L)$shift / (0.5 * log(2))
+  expect_true(abs(mean(z)) < 4 * sqrt(1 / 4000))
+  expect_true(abs(var(z) - 1) < 4 * sqrt(2 / 4000))
+  expect_true(ks(z, 'pnorm') > 1e-3)
+
+  # The default is 0.5.
+  expect_identical(attr(dirmult_ttest(big0, g0, n_draws = 2L), 'scale_sd'), 0.5)
+  expect_identical(
+    dirmult_ttest(big0, g0, n_draws = 3L),
+    dirmult_ttest(big0, g0, n_draws = 3L, scale_sd = 0.5) )
+
+
+  # -----------------------------------------------------------------------
   # SciPy's t distribution: R's pt() and qt()
   # -----------------------------------------------------------------------
 
@@ -97,7 +152,7 @@
   # -----------------------------------------------------------------------
 
   s   <- ref$sampled
-  res <- dirmult_ttest(ref$tables[[s$table]], s$groups, contrast = s$contrast, cpus = 2L)
+  res <- dirmult_ttest(ref$tables[[s$table]], s$groups, contrast = s$contrast, scale_sd = 0, cpus = 2L)
   expect_true(max(abs(res$log2_fc - s$result$log2_fc)) < 1e-2)
   expect_true(max(abs(res$ci_lower - s$result$ci_lower)) < 2e-2)
   expect_true(max(abs(res$ci_upper - s$result$ci_upper)) < 2e-2)
@@ -108,8 +163,6 @@
   # -----------------------------------------------------------------------
   # The samplers
   # -----------------------------------------------------------------------
-
-  ks <- function (x, ...) suppressWarnings(stats::ks.test(x, ...)$p.value)
 
   u <- rd(2e5, 1)
   expect_true(all(u > 0 & u < 1))
@@ -200,6 +253,7 @@
   expect_identical(attr(res, 'n'), c(treatment = 12L, reference = 15L))
   expect_identical(attr(res, 'n_draws'), 10L)
   expect_identical(attr(res, 'pseudocount'), 0.5)
+  expect_identical(attr(res, 'scale_sd'), 0.5)
   expect_identical(attr(res, 'alpha'), 0.05)
   expect_identical(attr(res, 'conf_level'), 0.95)
   expect_identical(attr(res, 'p_adjust'), 'holm')
@@ -207,8 +261,10 @@
   expect_true(all(res$ci_lower <= res$log2_fc & res$log2_fc <= res$ci_upper))
   expect_identical(res$p_adjusted, p.adjust(res$p_value, 'holm'))
 
-  # The reversed contrast mirrors the differences, from the same draws.
-  rev <- dirmult_ttest(big, bg, contrast = c('u', 'w'), n_draws = 10L, cpus = 2L)
+  # Without the scale model, the reversed contrast mirrors the differences,
+  # from the same draws.
+  res <- dirmult_ttest(big, bg, contrast = c('w', 'u'), scale_sd = 0, n_draws = 10L, cpus = 2L)
+  rev <- dirmult_ttest(big, bg, contrast = c('u', 'w'), scale_sd = 0, n_draws = 10L, cpus = 2L)
   expect_true(max(abs(rev$log2_fc + res$log2_fc)) < 1e-12)
   expect_true(max(abs(rev$ci_lower + res$ci_upper)) < 1e-12)
   expect_true(max(abs(rev$p_value - res$p_value)) < 1e-12)
@@ -261,6 +317,8 @@
 
   for (v in list(0, -1, NA, Inf, 'a', c(1, 2)))
     expect_error(dirmult_ttest(big, bg, pseudocount = v), 'pseudocount')
+  for (v in list(-0.1, NA, Inf, 'a', c(1, 2)))
+    expect_error(dirmult_ttest(big, bg, scale_sd = v), 'scale_sd')
   for (v in list(0, -1, 1.5, NA, Inf, 'a', c(1, 2)))
     expect_error(dirmult_ttest(big, bg, n_draws = v), 'n_draws')
   for (arg in c('alpha', 'conf_level'))

@@ -35,6 +35,39 @@
 //   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+// Its scale model (scale_sd) follows clr.sm() from ALDEx3 1.4.0
+// (R/scale.R), under this license:
+//
+//   Copyright (c) 2026 ALDEx3 authors
+//
+//   Permission is hereby granted, free of charge, to any person obtaining a
+//   copy of this software and associated documentation files (the
+//   "Software"), to deal in the Software without restriction, including
+//   without limitation the rights to use, copy, modify, merge, publish,
+//   distribute, sublicense, and/or sell copies of the Software, and to
+//   permit persons to whom the Software is furnished to do so, subject to
+//   the following conditions:
+//
+//   The above copyright notice and this permission notice shall be included
+//   in all copies or substantial portions of the Software.
+//
+//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+//   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+//   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+//   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+//   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+//   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+// clr.sm() gives each sample the log2 scale -mean(log2 composition) + X' L,
+// with one N(0, gamma^2) coefficient per row of the design X per Monte
+// Carlo draw: samples with the same design share the shift. For the two
+// sides of a contrast (X = intercept + treatment indicator), the
+// intercept's shift cancels from every difference, and the treatment's,
+// L ~ N(0, scale_sd^2) in log2 units, is added to each draw's difference
+// of clr means (scaled by log 2 here, which works in natural logs); the
+// variances, being within sides, don't change.
+//
 // The rest of this file is Copyright 2026 ecodive authors, under the MIT
 // license above. The Gamma draws are rng_dist.c's (on PCG, not NumPy's
 // PCG64 sampler, so the draws themselves differ from scikit-bio's); the
@@ -53,7 +86,8 @@
 //   in scikit-bio's order of operations.
 //
 //   Then, on this thread (R's pt() and qt() are not thread-safe when they
-//   warn): t, the one-sided tail probability, the interval's bounds, and
+//   warn): the scale model's shift of every difference (one normal draw
+//   from stream (seed, d * (n + 1) + n)), t, the one-sided tail probability, the interval's bounds, and
 //   the running sums, minima and maxima across draws, in draw order, as
 //   scikit-bio's loop.
 //
@@ -183,23 +217,27 @@ static inline double nan_max (double a, double b) {
 //               2 reference, 0 not in the contrast.
 // sexp_prob:    the t quantile of the interval (0.975 for
 //               a 95% interval).
+// sexp_scale:   the scale model's sd, in log2 units (0 for
+//               none).
 // sexp_given:   NULL, or n x D x n_draws Gamma draws to use
 //               instead of sampling (tests).
 // sexp_details: TRUE also returns each draw's difference,
 //               se, dof, t, tail probability and bounds
-//               (n_draws x D matrices, natural logs).
+//               (n_draws x D matrices, natural logs), and
+//               each draw's scale shift.
 //
 // Returns list(t, log2_fc, ci_lower, ci_upper, p_value[,
-// draws]).
+// draws, shift]).
 //======================================================
 SEXP C_dirmult_ttest(
     SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_side, SEXP sexp_pseudocount,
-    SEXP sexp_n_draws, SEXP sexp_prob, SEXP sexp_seed, SEXP sexp_given,
-    SEXP sexp_details, SEXP sexp_n_threads ) {
+    SEXP sexp_n_draws, SEXP sexp_prob, SEXP sexp_scale, SEXP sexp_seed,
+    SEXP sexp_given, SEXP sexp_details, SEXP sexp_n_threads ) {
 
   double pc      = asReal(sexp_pseudocount);
   int    n_draws = asInteger(sexp_n_draws);
   double prob    = asReal(sexp_prob);
+  double sc_sd   = asReal(sexp_scale);
   int    details = asLogical(sexp_details);
   int    n_thr   = asInteger(sexp_n_threads);
   if (n_thr < 1) n_thr = 1;
@@ -301,11 +339,25 @@ SEXP C_dirmult_ttest(
     PROTECT(sexp_draws);
   }
 
+  SEXP sexp_shift = PROTECT(allocVector(REALSXP, n_draws));
+  double *shift_d = REAL(sexp_shift);
+  double  log2_   = log(2.0);
+
   for (int d = 0; d < n_draws; d++) {
 
     dm_draw = d;
     run_parallel(draw_worker,  nt_a, m < 100 ? 100 : m);
     run_parallel(welch_worker, nt_b, n_blocks < 100 ? 100 : n_blocks);
+
+    // The scale model: the same shift of every difference in this draw.
+    double shift = 0;
+    if (sc_sd > 0) {
+      rng_t rng;
+      rng_seed(&rng, dm_seed, (uint64_t) d * (dm_n + 1) + dm_n);
+      shift = rng_norm(&rng) * sc_sd * log2_;
+      for (int f = 0; f < D; f++) diff[f] += shift;
+    }
+    shift_d[d] = shift;
 
     for (int f = 0; f < D; f++) {
 
@@ -338,13 +390,12 @@ SEXP C_dirmult_ttest(
     }
 
     if (d + 1 < n_draws && user_interrupted()) {
-      UNPROTECT(6);
+      UNPROTECT(7);
       error("Interrupted.");
     }
   }
 
   // Averages across draws, then base 2, in scikit-bio's order.
-  double log2_ = log(2.0);
   for (int f = 0; f < D; f++) {
     delta_sum[f] /= n_draws;
     tstat_sum[f] /= n_draws;
@@ -354,7 +405,7 @@ SEXP C_dirmult_ttest(
     lower[f]     /= log2_;
   }
 
-  int  n_out  = details ? 6 : 5;
+  int  n_out  = details ? 7 : 5;
   SEXP result = PROTECT(allocVector(VECSXP, n_out));
   SEXP names  = PROTECT(allocVector(STRSXP, n_out));
   SET_VECTOR_ELT(result, 0, sexp_t);     SET_STRING_ELT(names, 0, mkChar("t"));
@@ -365,9 +416,11 @@ SEXP C_dirmult_ttest(
   if (details) {
     SET_VECTOR_ELT(result, 5, sexp_draws);
     SET_STRING_ELT(names, 5, mkChar("draws"));
+    SET_VECTOR_ELT(result, 6, sexp_shift);
+    SET_STRING_ELT(names, 6, mkChar("shift"));
   }
   setAttrib(result, R_NamesSymbol, names);
 
-  UNPROTECT(8);
+  UNPROTECT(9);
   return result;
 }
