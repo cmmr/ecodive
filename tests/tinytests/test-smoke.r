@@ -99,6 +99,16 @@
   expect_identical(z$feature, colnames(counts))
   expect_true(all(is.finite(as.matrix(z[, 2:7]))) && is.logical(z$reject) && !anyNA(z$reject))
   expect_true(all(z$ci_lower <= z$log2_fc & z$log2_fc <= z$ci_upper))
+  z <- ancombc(counts, ~ grp + x, meta, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc') && nrow(z) == 36L)
+  expect_identical(z$feature, rep(colnames(counts), each = 3L))
+  expect_identical(unique(z$covariate), c('(Intercept)', 'grpb', 'x'))
+  expect_true(all(is.finite(as.matrix(z[, 3:7]))) && is.logical(z$reject) && !anyNA(z$reject))
+  cz <- counts; cz[cz < 3] <- 0L
+  z <- ancombc2(cz, 'grp', meta, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancombc') && nrow(z) == 24L && identical(attr(z, 'method'), 'ancombc2'))
+  expect_true(all(z$p_value >= 0 & z$p_value <= 1) && !anyNA(z$reject))
+  expect_true(length(attr(z, 'sample_fractions')) == 20L && all(is.finite(attr(z, 'sample_fractions'))))
 
   # Zero replacement.
   cz <- counts; cz[cz < 4] <- 0L

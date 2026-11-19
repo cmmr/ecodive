@@ -96,7 +96,7 @@ pseudocount used; \code{0} for none).
 ANCOM gives \strong{no effect size and no p-value per feature}, only \eqn{W}
 and a decision. For effect sizes and their uncertainty, see
 \code{dirmult_ttest()}; for bias-corrected estimates of each feature's log
-fold change, with p-values, see \code{ancombc()} and \code{ancombc2()} (planned).
+fold change, with p-values, see \code{\link[=ancombc]{ancombc()}} and \code{\link[=ancombc2]{ancombc2()}}.
 }
 \description{
 Finds features whose abundance differs between groups without assuming

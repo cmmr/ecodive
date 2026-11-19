@@ -208,3 +208,191 @@ safeguards that parity depends on.
 - Nearing, J. T., Douglas, G. M., Hayes, M. G., et al. (2022). Microbiome
   differential abundance methods produce different results across 38
   datasets. *Nature Communications*, 13, 342.
+
+
+## Decisions made while implementing (item 22)
+
+Asked of the user at the start (all four answered with the recommendation):
+
+- **Covariate names:** R's `model.matrix()` names (`(Intercept)`,
+  `statusmoderate`, `age`, `statusmoderate:age`, `flagTRUE`), in R's order
+  (patsy puts categorical terms before numeric ones; R follows the formula).
+  The design is `model.matrix()` with treatment contrasts forced for every
+  factor (ordered ones too), so its columns are patsy's; any formula
+  `model.matrix()` takes is allowed, including interactions and `- 1`.
+  Intercept rows are kept, as both references report them. Fixtures are
+  matched by translating patsy's names (`status[T.moderate]` →
+  `statusmoderate`, `[T.True]` → `TRUE`, `Intercept` → `(Intercept)`).
+- **Non-estimable coefficients:** as scikit-bio and ANCOMBC: `log_fc`, `se`,
+  `w` NaN, `p_value` 1 (counted in the adjustment), `reject` FALSE.
+- **The fit is always stored, in full** (attributes): `coef` (D × P,
+  bias-corrected, unmasked, as scikit-bio's `_beta_hat`), `var` (D × P;
+  `ancombc2()`'s adjusted variances, as `_var_hat`), `vcov` (D × P × P, every
+  feature's full covariance, `var` on the diagonal; scikit-bio keeps only the
+  `grouping` block), `dof` (NULL for `ancombc()`; a per-feature vector for
+  `ancombc2()`, NaN where observed samples ≤ rank), `estimable` (NULL, or a
+  logical D × P matrix, rows all TRUE or all FALSE), `design` (the n × P
+  model matrix with `assign` and `contrasts`), `groups` (the term name or
+  NULL), plus `bias` (P × 3: `delta_em`, `delta_wls`, `var_delta`),
+  `n_iters` (EM iterations per covariate) and, for `ancombc2()`,
+  `sample_fractions`. Memory 8 D P² bytes for `vcov`.
+- **`ancombc()` zeros:** the shared rule (`pseudocount = NULL`: nothing
+  added without zeros, else half the smallest non-zero value with a
+  warning). An explicit `pseudocount = 0` is allowed for a zero-free table
+  and an error otherwise ("`counts` has zeros, and `pseudocount = 0` leaves
+  their logs undefined.").
+
+Decided along the way:
+
+- **Signatures** as planned: `ancombc(counts, formula, data, groups = NULL,
+  margin, pseudocount = NULL, max_iters = 100L, tol = 1e-5, alpha = 0.05,
+  p_adjust = 'holm', cpus)`; `ancombc2()` adds `var_quantile = 0.05` and has
+  `pseudocount = 0`. `formula` and `data` are required. `formula` may be a
+  string, with or without `~` (scikit-bio takes `'status + age'`); a
+  left-hand side is dropped. `data` may be a vector (one variable,
+  `group`), and is matched to the samples by row name (`match_rows()`).
+  `ancombc2(pseudocount = NULL)` is an error (no shared rule there).
+- **Design helper:** `ancombc_design()` in `R/ancombc.r`, not
+  `model_design()` (which centres and drops the intercept). It reuses
+  `match_rows()` and `model_design()`'s checks and messages (variables not in
+  `data`, NA, Inf). Character columns → factors with `sort(method =
+  'radix')` levels; logical → factor(FALSE, TRUE); factors keep their level
+  order, with unused levels dropped and ordered-ness removed. A categorical
+  variable with one value is an error. `n <= P` is an error ("needs more
+  samples than design columns"); a rank-deficient design is a warning (its
+  coefficients come from the pseudoinverse, as scikit-bio's).
+- **`groups` checks** (scikit-bio's `_validate_grouping()`): a column of
+  `data`, a term label of `formula`, at least 3 distinct values, and at least
+  2 design columns. It changes nothing else.
+- **p-values:** z (`2 pnorm(-|w|)`) for `ancombc()`, t with each feature's
+  dof for `ancombc2()`; `stats::p.adjust()` per covariate over the
+  non-NaN p-values (scikit-bio's rule; R's default would count NaNs in `n`),
+  any `p.adjust.methods` via `pairwise_method()`. `reject = p_adjusted <=
+  alpha` (scikit-bio's `<=`, unlike `ancom()`'s `<`).
+- **Quantiles:** numpy's linear method, including its interpolation form
+  (`b - d (1 - t)` for `t >= 0.5`), in C (EM) and in R (`np_quantile()`, for
+  `var_quantile`).
+- **C (`src/ancombc.c`), one entry point `C_ancombc`:** the log table (n × D
+  doubles, NaN = missing), the initial fit, the EM, the sampling fractions and
+  the final fit; R builds the design, its pseudoinverse and `(X'X)+ 1` with
+  `svd()` (numpy's 1e-15 cutoff), and does the variance adjustment and the
+  statistics. Features are split into blocks of 64; per-sample sums over
+  features (θ, sampling fractions, the convergence sums) are kept per block
+  and added in block order, so results are identical for any `cpus`
+  (checked for 1, 2, 3, 4, 8) and for dense, `Matrix`, `slam` and `margin =
+  2` input. The EM runs one covariate per task.
+- **Per-feature masked-design SVD:** a one-sided Jacobi SVD written for
+  ecodive (no LAPACK in C), with scikit-bio's rank rule, its compact operator
+  `V S⁻² V' X'r`, and the full pseudoinverse for features whose retained
+  condition number exceeds 1e4. Computed once and reused by ANCOM-BC2's
+  final fit (same missing pattern).
+- **R-compatible failed fits and rebasing** (`_r_fit_info()` /
+  `_r_rebase_categorical()`, scikit-bio's `match_r = True`, its only mode):
+  R passes, per factor with a main-effect term, its level codes, its columns,
+  whether it is treatment-coded (L − 1 columns; full coding without an
+  intercept is the "custom" path: only the ≥ 2 observed levels check), and
+  whether it may be rebased (intercept present, not in an interaction).
+- **EM minimiser:** a port of SciPy 1.18.1's `_minimize_neldermead()` for
+  one variable with bounds [0, ∞) (clipping, the 1.05 / 0.00025 initial
+  simplex, 200 evaluations, xatol = fatol = 1e-8, numpy's argsort order for
+  ties and NaN), credited to SciPy (`inst/COPYRIGHTS`, `Authors@R`).
+- **Licensing:** `src/ancombc.c` and `R/ancombc.r` carry scikit-bio's BSD-3
+  text, ANCOMBC's Artistic-2.0 notice (copyright "Huang Lin": ANCOMBC's
+  DESCRIPTION names him as author and gives no years) with the "modified
+  version" statement, and SciPy's BSD-3 (C file). One `inst/COPYRIGHTS`
+  stanza holds both licences in full (the Artistic-2.0 text from R's
+  `share/licenses`); SciPy's stanza now also lists `src/ancombc.c`. Huang
+  Lin is `ctb`/`cph` in `Authors@R`.
+- **ANCOMBC reference:** 2.14.0 (Bioconductor 3.23) needs R ≥ 4.5, so the
+  fixtures use **2.8.1** (Bioconductor 3.20), the newest that installs on
+  R 4.3.3 (with CVXR 1.0-15 from the CRAN archive: CVXR 1.0-17 needs
+  Matrix ≥ 1.7). Its `R/ancombc_bias_correct.R` (`.iter_mle()`,
+  `.bias_em()`) is identical to 2.14.0's; `ancombc2()`'s flow around it was
+  restructured in 2.14.0 but computes the same quantities. `ancombc()` there
+  always adds 1, so it is compared only where scikit-bio's table had 1
+  added. ANCOMBC drops a one-column `meta_data` to a vector; the fixture
+  script adds a `sample_id` column.
+
+### Reference results
+
+- **scikit-bio 0.7.4** (NumPy 2.5.5, SciPy 1.18.1, pandas 3.1.1, patsy
+  1.0.3), 24 cases (both docstring examples, a 42 × 60 three-site table with
+  numeric and logical covariates, a 30 × 25 sparse table with features
+  missing from the reference group, from all but one group, or observed once,
+  a factor with its own level order plus a covariate in the tens of
+  thousands, interactions, a no-intercept model, proportions; `p_adjust`
+  holm / BH / bonferroni / BY / none, `var_quantile` 0 / 0.05 / 0.1 / 0.2,
+  pseudocounts 0 / 0.1 / 0.5 / 1, `max_iters = 3`): largest differences
+  `log_fc` 8e-9 (absolute), `se` 7.9e-10 (relative), p-values 3.1e-8
+  (relative), the biases 8e-9, sampling fractions 4.3e-9, `coef` 8e-9, `var`
+  and `vcov` 1.6e-9 (relative); `reject`, `dof` and `estimable` identical
+  everywhere. The EM's iteration counts are equal except one covariate (93 vs
+  92, at the tolerance's edge). Where the EM converges early the agreement is
+  1e-12 to 1e-14; the 1e-8 cases are those where it runs to `max_iters`, and
+  the difference is summation order (numpy's pairwise and BLAS sums) moving
+  the Nelder-Mead path.
+- **ANCOMBC 2.8.1**, 16 comparable cases: where its EM converges for every
+  covariate (7 cases, tested), `log_fc` within 3e-6, `se` 3e-6 (relative),
+  p-values 4e-5 (relative), `reject` identical: nloptr's Nelder-Mead
+  (default tolerances) vs SciPy's. Larger differences, all explained:
+  - **EM not converged** (a covariate reaching 100 iterations): `log_fc` up to
+    0.02 (`doc3`; 4e-3 `sim_bc2`, 2e-3 `sparse_bc2`). Running ANCOMBC's
+    `.iter_mle()` on `doc3` gives scikit-bio's initial fit to every printed
+    digit, and its `.bias_em()` on those inputs gives scikit-bio's bias to
+    1e-8–1e-13 for the converged covariates and 0.02 off for the one that
+    isn't.
+  - **`var_quantile = 0`:** ANCOMBC's `s0_perc = 0` adds the smallest
+    variance (`quantile(x, 0)`), scikit-bio's `if var_quantile:` adds
+    nothing (se up to 41% apart).
+  - **Interactions with zeros as missing:** scikit-bio deliberately doesn't
+    rebase factors in interactions; R's `lm()` does in effect (one feature
+    each in `sim_bc2_ia` and `levels_bc2_ia`).
+  - **A covariate in the tens of thousands** (`levels_bc2`, `days`):
+    ANCOMBC's `MASS::ginv(X'X)` (tolerance 1.5e-8) drops 4 of the Gram
+    matrix's 5 singular values (they span 1e-10), so its standard errors are
+    wrong (74 decisions differ); scikit-bio's pseudoinverse of X (1e-15 on
+    singular values spanning 1e-5) keeps them. Documented.
+- **Scale invariance:** without missing values, rescaling samples changes
+  the slopes by < 1e-6 (tested). With zeros as missing values, the
+  alternating fit stops at ANCOMBC's 0.01 tolerance, so per-sample rescaling
+  moves `log_fc` by up to 0.12 in the `sparse` table: scikit-bio moves by the
+  same 0.12 (ecodive's rescaled results equal scikit-bio's rescaled ones).
+  Tested with a common factor instead; documented.
+- **Timing** (500 samples × 5,000 features, 2% zeros, 5 covariates, -O2):
+  `ancombc()` 0.5 s on 1 core, 0.4 s on 4; `ancombc2()` with zeros as
+  missing 1.0 s / 0.5 s. scikit-bio 0.7.4 (vectorised NumPy): 0.5 s and
+  1.2 s. Memory: the n × D log table, 8 D P² bytes for `vcov`, and with
+  missing values 8 D P² more for the per-feature SVDs.
+
+### For item 23 (post-hoc tests)
+
+The result carries everything scikit-bio's `ANCOMBCResult` keeps, for any
+fit (with or without `groups`):
+
+- `attr(fit, 'coef')` = `_beta_hat` (D × P, R covariate names as
+  colnames), `attr(fit, 'var')` = `_var_hat`, `attr(fit, 'dof')` = `_dof`
+  (NULL for ANCOM-BC, which uses z; a length-D vector for ANCOM-BC2),
+  `attr(fit, 'estimable')` = `_estimable` (NULL = all), `attr(fit,
+  'alpha')`, `attr(fit, 'p_adjust')`, `attr(fit, 'method')`.
+- `_vcov_hat` is `attr(fit, 'vcov')[, gi, gi]`, where the grouping's
+  columns are `gi <- which(attr(attr(fit, 'design'), 'assign') ==
+  match(attr(fit, 'groups'), attr(terms(attr(fit, 'formula')),
+  'term.labels')))` — scikit-bio's `_groups` (0-based there). Because the
+  full covariance is stored, a post-hoc test could also accept a `groups`
+  term the fit wasn't given (validate it as `ancombc_design()` does).
+  `_posthoc_estimable()` is `apply(estimable[, gi], 1, all)`.
+- `attr(fit, 'design')` is `_dmat` (the model matrix; its `assign`,
+  `contrasts`, and the column names give the comparisons' labels).
+- The tests compare `coef`, `var`, `vcov` (grouping block), `dof` and
+  `estimable` with scikit-bio's `_beta_hat`, `_var_hat`, `_vcov_hat`,
+  `_dof`, `_estimable` for every fixture case with a grouping (in
+  `tests/tinytests/expected/ancombc.rds`, `$skbio[[case]]$coef` etc.), so
+  item 23's fixtures can start from the same cases (`data-raw/expected/
+  ancombc.py` builds them; the post-hoc calls can be added there).
+
+### Not changed
+
+- The draft article `vignettes/articles/compositional.Rmd` still lists
+  `ancombc()` / `ancombc2()` as planned (its chunk is `eval = FALSE`; its
+  call `ancombc2(counts, ~ group, data = ...)` matches the signature). Left
+  for the article's own update, as items 19 and 20 did.
