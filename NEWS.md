@@ -565,6 +565,27 @@
   and draw, so results are identical for any `cpus`: 500 samples by 5,000
   features, 128 draws, take about 5 seconds on 4 cores.
 
+* New `ancombc()` and `ancombc2()` run ANCOM-BC and ANCOM-BC2 (Lin &
+  Peddada 2020, 2024): each feature's log abundance is fitted with a
+  linear model (`formula` over `data`, any `model.matrix()` formula,
+  treatment contrasts), and each covariate's bias from the samples'
+  differing sampling fractions is estimated by an EM algorithm and removed,
+  giving bias-corrected log fold changes with standard errors, p-values
+  (normal for ANCOM-BC, t for ANCOM-BC2), `p_adjusted` (`p_adjust` within
+  each covariate) and `reject`. `ancombc2()` also corrects each sample for
+  its sampling fraction and refits, widens the variances (`var_quantile`),
+  and by default treats zeros as missing values, including ANCOMBC's
+  handling of failed fits and missing reference levels; `ancombc()` uses
+  the shared `pseudocount` rule. They follow scikit-bio's `ancombc()` and
+  `ancombc2()` (themselves derived from the ANCOMBC package, whose
+  Artistic-2.0 notice they carry) and match them to about 1e-8 in every
+  reference case, and ANCOMBC to about 1e-5 where its EM converges. The
+  result is a per-feature-and-covariate table that also carries the fit
+  (coefficients, variances, covariance matrices, degrees of freedom), for
+  post-hoc tests to come. The fits run in parallel C, identical for any
+  `cpus` and for sparse and dense tables: 500 samples by 5,000 features
+  take about 1 second.
+
 * `rarefy(depth =)` now also takes one depth per sample (matched to the
   samples by name when named). `drop` and `warn` then compare each sample
   with its own depth. A single depth gives exactly the same results as

@@ -9,6 +9,7 @@
 
 extern SEXP C_alpha_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_ancom(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_ancombc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_anosim(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_beta_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_balance(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -70,6 +71,7 @@ extern void init_blas_threads(void);
 static const R_CallMethodDef CallEntries[] = {
   {"C_alpha_div", (DL_FUNC) &C_alpha_div, 6},
   {"C_ancom",     (DL_FUNC) &C_ancom,     10},
+  {"C_ancombc",   (DL_FUNC) &C_ancombc,   12},
   {"C_anosim",    (DL_FUNC) &C_anosim,    6},
   {"C_beta_div",  (DL_FUNC) &C_beta_div,  8},
   {"C_balance",   (DL_FUNC) &C_balance,   5},

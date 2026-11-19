@@ -23,7 +23,7 @@ Authors@R: c(
     person(
       "scikit-bio development team",
       role    = c("ctb", "cph"),
-      comment = "phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, ANCOM, and Dirichlet-multinomial t-tests, from scikit-bio"),
+      comment = "phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, ANCOM, ANCOM-BC and ANCOM-BC2, and Dirichlet-multinomial t-tests, from scikit-bio"),
     person(
       "NumPy Developers",
       role    = "cph",
@@ -39,7 +39,7 @@ Authors@R: c(
     person(
       "The SciPy developers",
       role    = c("ctb", "cph"),
-      comment = "Procrustes analysis, following SciPy"),
+      comment = "Procrustes analysis and a Nelder-Mead minimiser, following SciPy"),
     person(
       "Nathan", "Lemoine",
       role    = c("ctb", "cph"),
@@ -52,6 +52,10 @@ Authors@R: c(
       "Raes Lab",
       role    = c("ctb", "cph"),
       comment = "quantitative microbiome profiling, following 'QMP.R'"),
+    person(
+      "Huang", "Lin",
+      role    = c("ctb", "cph"),
+      comment = "ANCOM-BC and ANCOM-BC2 ('ANCOMBC'), via scikit-bio's port"),
     person(
       "ALDEx3 authors",
       role    = c("ctb", "cph"),

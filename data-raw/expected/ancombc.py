@@ -1,0 +1,394 @@
+"""Reference fixtures for ecodive's ancombc() and ancombc2().
+
+Writes, under data-raw/expected/ancombc/ (then data-raw/expected/ancombc.r
+converts them, with ANCOMBC's results, to tests/tinytests/expected/
+ancombc.rds):
+
+  table-<name>.csv  The input tables (samples x features): integer counts,
+                    or hexadecimal floats (float.hex(), which R reads back
+                    exactly).
+
+  meta-<name>.csv   Their metadata: one column per variable; numbers as hex
+                    floats. Column types are in tables.csv.
+
+  tables.csv        name, types (space-separated name:type, type one of
+                    'str' (sorted categories), 'cat' (a pandas Categorical,
+                    levels in the order given by `levels`), 'num', 'bool'),
+                    levels (name=a|b|c, space-separated, for 'cat').
+
+  cases.csv         One row per run: case, table, method ('ancombc' or
+                    'ancombc2'), formula (patsy), grouping ('' for None),
+                    added (hex: added to the table before calling
+                    ancombc(), as its docs ask; 0 for ancombc2),
+                    pseudocount (hex: ancombc2's argument), var_quantile,
+                    p_adjust (R's name), alpha, max_iter, tol (hex).
+
+  results.csv       case, feature (1-based), covariate (patsy's name),
+                    lfc, se, w, p, q (hex), signif (0/1): the primary table,
+                    in its (feature, covariate) order.
+
+  bias.csv          case, covariate (0-based), delta_em, delta_wls,
+                    var_delta, n_iter: each covariate's _estimate_bias_em()
+                    result, and its EM iterations (counted by wrapping
+                    scipy's minimize()).
+
+  fit.csv           case, feature, covariate (0-based), beta, var: the
+                    fitted _beta_hat and _var_hat (with `grouping`).
+
+  vcov.csv          case, feature, i, j (0-based within the grouping's
+                    columns), value: _vcov_hat.
+
+  dof.csv           case, feature, dof (hex; ancombc2), estimable (the
+                    feature's coefficients are estimable: 0/1).
+
+  sf.csv            case, sample (0-based), theta: ANCOM-BC2's sampling
+                    fractions (_sample_fractions()).
+
+Prerequisites: Python 3 with numpy, pandas, scipy, patsy and scikit-bio
+0.7.4 (the version the fixtures were made with). Run from the repository
+root:
+
+    python data-raw/expected/ancombc.py
+    Rscript data-raw/expected/ancombc.r
+"""
+
+import csv
+import os
+import warnings
+
+import numpy as np
+import pandas as pd
+import scipy
+import scipy.optimize
+import skbio
+import skbio.stats.composition._ancombc as AB
+from skbio.stats.composition import ancombc, ancombc2
+
+assert skbio.__version__ == "0.7.4", skbio.__version__
+
+warnings.simplefilter("ignore")
+
+OUT = os.path.join("data-raw", "expected", "ancombc")
+os.makedirs(OUT, exist_ok=True)
+
+rng = np.random.default_rng(20261119)
+
+
+def hx(x):
+    return float(x).hex()
+
+
+# ---------------------------------------------------------------------------
+# Instrumentation: the EM's results and iterations, the sampling fractions.
+# ---------------------------------------------------------------------------
+CAPTURE = {}
+
+_orig_em = AB._estimate_bias_em
+_orig_sf = AB._sample_fractions
+
+
+def _em(beta, var_hat, tol=1e-5, max_iter=100):
+    # Count EM iterations: two minimize() calls per iteration.
+    calls = [0]
+    orig_min = AB.minimize
+
+    def counting(*a, **k):
+        calls[0] += 1
+        return orig_min(*a, **k)
+
+    AB.minimize = counting
+    try:
+        out = _orig_em(beta, var_hat, tol=tol, max_iter=max_iter)
+    finally:
+        AB.minimize = orig_min
+    CAPTURE.setdefault("bias", []).append((*out, calls[0] // 2))
+    return out
+
+
+def _sf(*a, **k):
+    out = _orig_sf(*a, **k)
+    CAPTURE["sf"] = np.array(out)
+    return out
+
+
+AB._estimate_bias_em = _em
+AB._sample_fractions = _sf
+
+
+# ---------------------------------------------------------------------------
+# Tables.
+# ---------------------------------------------------------------------------
+TABLES = {}
+
+
+def add_table(name, x, meta, types, levels=None):
+    TABLES[name] = (np.asarray(x), meta, types, levels or {})
+
+
+# scikit-bio's ancombc() docstring examples.
+x = np.array([[2, 0, 4, 7, 0, 0, 1], [1, 1, 0, 6, 5, 1, 10], [3, 0, 2, 9, 6, 0, 1],
+              [0, 12, 1, 2, 0, 3, 2], [2, 2, 37, 0, 0, 7, 3], [10, 1, 0, 0, 4, 4, 3]])
+add_table("doc1", x, pd.DataFrame({"status": ["healthy"] * 3 + ["sick"] * 3}),
+          {"status": "str"})
+
+x = np.array([[2, 0, 7, 0, 0, 2, 3, 2], [0, 2, 0, 1, 1, 2, 0, 0], [3, 1, 0, 9, 0, 1, 1, 0],
+              [2, 0, 1, 8, 1, 0, 11, 46], [1, 0, 1, 1, 0, 0, 2, 2], [0, 3, 22, 1, 1, 1, 3, 0],
+              [1, 7, 16, 1, 0, 0, 2, 2], [0, 5, 6, 1, 2, 1, 0, 1], [1, 7, 0, 2, 1, 0, 3, 2],
+              [0, 6, 4, 2, 0, 2, 2, 1], [3, 13, 7, 0, 0, 0, 3, 9], [1, 8, 5, 1, 0, 0, 0, 0],
+              [0, 5, 14, 1, 0, 1, 0, 1], [5, 26, 3, 2, 0, 3, 1, 3], [0, 18, 7, 0, 0, 3, 1, 0]])
+add_table("doc2", x, pd.DataFrame({
+    "status": ["mild"] * 5 + ["moderate"] * 5 + ["severe"] * 5,
+    "age": [39., 19, 20, 31, 15, 37, 27, 47, 26, 23, 39, 48, 46, 33, 36]}),
+    {"status": "str", "age": "num"})
+
+# scikit-bio's ancombc2() docstring example.
+x = np.array([[1, 10, 16, 0, 0, 12, 0, 7], [0, 10, 45, 2, 1, 25, 1, 9], [4, 8, 22, 1, 5, 14, 1, 5],
+              [1, 11, 22, 1, 4, 14, 1, 3], [4, 7, 36, 0, 0, 19, 0, 9], [2, 30, 26, 0, 0, 12, 1, 0],
+              [1, 36, 10, 1, 5, 15, 2, 9], [1, 25, 11, 2, 2, 8, 0, 5], [1, 36, 23, 0, 2, 11, 1, 2],
+              [3, 60, 33, 3, 4, 14, 1, 6], [3, 57, 30, 3, 1, 3, 0, 4], [0, 65, 23, 0, 2, 2, 0, 8],
+              [2, 46, 19, 0, 1, 2, 0, 1], [0, 41, 26, 0, 2, 0, 0, 3], [3, 46, 20, 0, 0, 3, 0, 0]])
+add_table("doc3", x, pd.DataFrame({
+    "status": ["mild"] * 5 + ["moderate"] * 5 + ["severe"] * 5,
+    "age": [25., 48, 23, 35, 52, 51, 18, 29, 40, 29, 44, 39, 26, 37, 46]}),
+    {"status": "str", "age": "num"})
+
+
+def sim_table(n, D, groups, effects, zero_frac, depth, seed_shift=0):
+    """Negative-binomial-ish counts with group effects and dropouts."""
+    base = rng.normal(0, 1.5, D)
+    sf = rng.normal(0, 0.6, n)
+    mu = np.exp(base[None, :] + sf[:, None] + effects[groups])
+    mu = mu / mu.sum(axis=1, keepdims=True) * depth[:, None]
+    lam = rng.gamma(4.0, mu / 4.0)
+    x = rng.poisson(lam)
+    drop = rng.random((n, D)) < zero_frac
+    x[drop] = 0
+    return x
+
+
+# A larger table: 3 sites, a numeric covariate and a binary one.
+n, D = 42, 60
+site = np.repeat(np.array(["gut", "oral", "skin"]), 14)
+gi = np.repeat(np.arange(3), 14)
+eff = np.zeros((3, D))
+eff[1, :8] = 1.5
+eff[2, 8:14] = -1.8
+eff[2, 14:18] = 2.2
+x = sim_table(n, D, gi, eff, 0.15, rng.integers(2000, 20000, n))
+ph = np.round(rng.normal(6.5, 0.6, n), 2)
+smoker = rng.random(n) < 0.4
+add_table("sim", x, pd.DataFrame({"site": site, "ph": ph, "smoker": smoker}),
+          {"site": "str", "ph": "num", "smoker": "bool"})
+
+# Sparse: features absent from a whole group, one present in one group only,
+# one observed in a single sample, and an all-but-one-zero sample.
+n, D = 30, 25
+trt = np.repeat(np.array(["ctrl", "dose_hi", "dose_lo"]), 10)
+gi = np.repeat(np.arange(3), 10)
+eff = np.zeros((3, D))
+eff[1, :4] = 1.2
+eff[2, 4:7] = -1.0
+x = sim_table(n, D, gi, eff, 0.3, rng.integers(500, 5000, n))
+x[x.sum(axis=1) == 0, 0] = 1
+x[0:10, 7] = 0            # absent from the reference group (ctrl)
+x[10:20, 7] = rng.integers(1, 9, 10)
+x[0:10, 8] = 0            # only in dose_lo
+x[10:20, 8] = 0
+x[20:30, 8] = rng.integers(1, 9, 10)
+x[:, 9] = 0
+x[4, 9] = 7               # one sample
+x[0:10, 10] = 0           # absent from ctrl and dose_hi, but one in dose_hi
+x[10:20, 10] = 0
+x[13, 10] = 3
+x[20:30, 10] = rng.integers(1, 9, 10)
+age = np.round(rng.uniform(20, 70, n))
+add_table("sparse", x, pd.DataFrame({"trt": trt, "age": age}),
+          {"trt": "str", "age": "num"})
+
+# A factor with its own level order (a pandas Categorical), an interaction,
+# and a covariate on a large scale (an ill-conditioned design).
+n, D = 36, 30
+dose = np.tile(np.array(["low", "mid", "high"]), 12)
+sex = np.repeat(np.array(["f", "m"]), 18)
+gi = np.tile(np.arange(3), 12)
+eff = np.zeros((3, D))
+eff[2, :5] = 1.4
+eff[1, 5:8] = -1.1
+x = sim_table(n, D, gi, eff, 0.2, rng.integers(1000, 8000, n))
+days = np.round(rng.uniform(5000, 30000, n))
+add_table("levels", x, pd.DataFrame({
+    "dose": pd.Categorical(dose, categories=["low", "mid", "high"]),
+    "sex": sex, "days": days}),
+    {"dose": "cat", "sex": "str", "days": "num"}, {"dose": ["low", "mid", "high"]})
+
+# Proportions with no zeros (a replace_zeros()-like table).
+n, D = 20, 15
+grp = np.repeat(np.array(["a", "b"]), 10)
+gi = np.repeat(np.arange(2), 10)
+eff = np.zeros((2, D))
+eff[1, :3] = 1.0
+x = sim_table(n, D, gi, eff, 0.0, rng.integers(3000, 6000, n)) + 0.5
+x = x / x.sum(axis=1, keepdims=True)
+add_table("prop", x, pd.DataFrame({"grp": grp}), {"grp": "str"})
+
+
+# ---------------------------------------------------------------------------
+# Cases.
+# ---------------------------------------------------------------------------
+CASES = []
+
+
+def case(name, table, method, formula, grouping=None, added=0.0, pseudocount=0.0,
+         var_quantile=0.05, p_adjust="holm", alpha=0.05, max_iter=100, tol=1e-5):
+    CASES.append(dict(case=name, table=table, method=method, formula=formula,
+                      grouping=grouping, added=added, pseudocount=pseudocount,
+                      var_quantile=var_quantile, p_adjust=p_adjust, alpha=alpha,
+                      max_iter=max_iter, tol=tol))
+
+
+case("doc1", "doc1", "ancombc", "status", added=1.0)
+case("doc2", "doc2", "ancombc", "status + age", "status", added=1.0)
+case("doc3", "doc3", "ancombc2", "status + age", "status")
+for pc in (0.1, 0.5, 1.0):
+    case(f"doc3_pc{pc}", "doc3", "ancombc2", "status + age", "status", pseudocount=pc)
+case("doc3_bc", "doc3", "ancombc", "status + age", "status", added=0.5)
+
+case("sim_bc", "sim", "ancombc", "site + ph + smoker", "site", added=0.5)
+case("sim_bc_bh", "sim", "ancombc", "site + ph", None, added=0.5, p_adjust="BH",
+     alpha=0.1)
+case("sim_bc_it", "sim", "ancombc", "site + ph", "site", added=0.5, max_iter=3,
+     tol=1e-3, p_adjust="bonferroni")
+case("sim_bc2", "sim", "ancombc2", "site + ph + smoker", "site")
+case("sim_bc2_pc", "sim", "ancombc2", "site + ph", "site", pseudocount=1.0,
+     var_quantile=0.2, p_adjust="BY")
+case("sim_bc2_vq0", "sim", "ancombc2", "site + ph", None, var_quantile=0.0,
+     p_adjust="none")
+case("sim_bc2_ia", "sim", "ancombc2", "site * smoker", "site")
+case("sim_bc_ia", "sim", "ancombc", "site * ph", "site", added=0.5)
+case("sim_bc2_noint", "sim", "ancombc2", "0 + site + ph", "site")
+
+case("sparse_bc2", "sparse", "ancombc2", "trt + age", "trt")
+case("sparse_bc2_one", "sparse", "ancombc2", "trt", "trt", var_quantile=0.1)
+case("sparse_bc", "sparse", "ancombc", "trt + age", "trt", added=1.0)
+
+case("levels_bc2", "levels", "ancombc2", "dose + sex + days", "dose")
+case("levels_bc", "levels", "ancombc", "dose + sex + days", "dose", added=0.5)
+case("levels_bc2_ia", "levels", "ancombc2", "dose * sex", "dose")
+
+case("prop_bc", "prop", "ancombc", "grp")
+case("prop_bc2", "prop", "ancombc2", "grp")
+
+
+# ---------------------------------------------------------------------------
+# Run and write.
+# ---------------------------------------------------------------------------
+SKBIO_ADJ = {"holm": "holm", "BH": "bh", "bonferroni": "bonferroni",
+             "BY": "by", "none": None}
+
+
+def write_table(name, x, meta, types, levels):
+    with open(os.path.join(OUT, f"table-{name}.csv"), "w", newline="") as fh:
+        w = csv.writer(fh, lineterminator="\n")
+        integer = np.issubdtype(x.dtype, np.integer)
+        for row in x:
+            w.writerow([str(int(v)) if integer else hx(v) for v in row])
+    with open(os.path.join(OUT, f"meta-{name}.csv"), "w", newline="") as fh:
+        w = csv.writer(fh, lineterminator="\n")
+        w.writerow(list(meta.columns))
+        for i in range(meta.shape[0]):
+            row = []
+            for c in meta.columns:
+                v = meta[c].iloc[i]
+                t = types[c]
+                if t == "num":
+                    row.append(hx(v))
+                elif t == "bool":
+                    row.append("TRUE" if v else "FALSE")
+                else:
+                    row.append(str(v))
+            w.writerow(row)
+
+
+with open(os.path.join(OUT, "tables.csv"), "w", newline="") as fh:
+    w = csv.writer(fh, lineterminator="\n")
+    w.writerow(["name", "types", "levels"])
+    for name, (x, meta, types, levels) in TABLES.items():
+        write_table(name, x, meta, types, levels)
+        w.writerow([name, " ".join(f"{k}:{v}" for k, v in types.items()),
+                    " ".join(f"{k}={'|'.join(v)}" for k, v in levels.items())])
+
+f_cases = open(os.path.join(OUT, "cases.csv"), "w", newline="")
+f_res = open(os.path.join(OUT, "results.csv"), "w", newline="")
+f_bias = open(os.path.join(OUT, "bias.csv"), "w", newline="")
+f_fit = open(os.path.join(OUT, "fit.csv"), "w", newline="")
+f_vcov = open(os.path.join(OUT, "vcov.csv"), "w", newline="")
+f_dof = open(os.path.join(OUT, "dof.csv"), "w", newline="")
+f_sf = open(os.path.join(OUT, "sf.csv"), "w", newline="")
+W = {k: csv.writer(v, lineterminator="\n") for k, v in dict(cases=f_cases, res=f_res, bias=f_bias, fit=f_fit,
+                                       vcov=f_vcov, dof=f_dof, sf=f_sf).items()}
+W["cases"].writerow(["case", "table", "method", "formula", "grouping", "added",
+                     "pseudocount", "var_quantile", "p_adjust", "alpha", "max_iter", "tol"])
+W["res"].writerow(["case", "feature", "covariate", "lfc", "se", "w", "p", "q", "signif"])
+W["bias"].writerow(["case", "covariate", "delta_em", "delta_wls", "var_delta", "n_iter"])
+W["fit"].writerow(["case", "feature", "covariate", "beta", "var"])
+W["vcov"].writerow(["case", "feature", "i", "j", "value"])
+W["dof"].writerow(["case", "feature", "dof", "estimable"])
+W["sf"].writerow(["case", "sample", "theta"])
+
+for c in CASES:
+    x, meta, types, levels = TABLES[c["table"]]
+    CAPTURE.clear()
+    xin = x + c["added"] if c["added"] else x
+    if c["method"] == "ancombc":
+        res = ancombc(xin, meta, c["formula"], grouping=c["grouping"],
+                      max_iter=c["max_iter"], tol=c["tol"], alpha=c["alpha"],
+                      p_adjust=SKBIO_ADJ[c["p_adjust"]])
+    else:
+        res = ancombc2(x, meta, c["formula"], grouping=c["grouping"],
+                       pseudocount=c["pseudocount"], var_quantile=c["var_quantile"],
+                       max_iter=c["max_iter"], tol=c["tol"], alpha=c["alpha"],
+                       p_adjust=SKBIO_ADJ[c["p_adjust"]])
+
+    W["cases"].writerow([c["case"], c["table"], c["method"], c["formula"],
+                         c["grouping"] or "", hx(c["added"]), hx(c["pseudocount"]),
+                         hx(c["var_quantile"]), c["p_adjust"], hx(c["alpha"]),
+                         c["max_iter"], hx(c["tol"])])
+
+    tab = res.result
+    feats = list(tab.index.get_level_values(0))
+    fidx = {f: i for i, f in enumerate(dict.fromkeys(feats))}
+    for (f, cov), row in tab.iterrows():
+        W["res"].writerow([c["case"], fidx[f] + 1, cov, hx(row["Log(FC)"]), hx(row["SE"]),
+                           hx(row["W"]), hx(row["pvalue"]), hx(row["qvalue"]),
+                           int(bool(row["Signif"]))])
+
+    for i, b in enumerate(CAPTURE["bias"]):
+        W["bias"].writerow([c["case"], i, hx(b[0]), hx(b[1]), hx(b[2]), b[3]])
+
+    if "sf" in CAPTURE:
+        for s, t in enumerate(CAPTURE["sf"]):
+            W["sf"].writerow([c["case"], s, hx(t)])
+
+    if c["grouping"]:
+        beta, var = res._beta_hat, res._var_hat
+        for f in range(beta.shape[0]):
+            for p in range(beta.shape[1]):
+                W["fit"].writerow([c["case"], f, p, hx(beta[f, p]), hx(var[f, p])])
+        vc = res._vcov_hat
+        for f in range(vc.shape[0]):
+            for i in range(vc.shape[1]):
+                for j in range(vc.shape[2]):
+                    W["vcov"].writerow([c["case"], f, i, j, hx(vc[f, i, j])])
+        dof = res._dof
+        est = res._estimable
+        for f in range(beta.shape[0]):
+            d = np.nan if dof is None else (dof if np.isscalar(dof) else dof[f])
+            e = 1 if est is None else int(np.all(est[f]))
+            W["dof"].writerow([c["case"], f, hx(d), e])
+
+for fh in (f_cases, f_res, f_bias, f_fit, f_vcov, f_dof, f_sf):
+    fh.close()
+
+print("scikit-bio", skbio.__version__, "numpy", np.__version__, "scipy",
+      scipy.__version__, "pandas", pd.__version__)
+print(len(CASES), "cases")

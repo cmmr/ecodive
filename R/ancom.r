@@ -71,7 +71,7 @@
 #'   ANCOM gives **no effect size and no p-value per feature**, only \eqn{W}
 #'   and a decision. For effect sizes and their uncertainty, see
 #'   `dirmult_ttest()`; for bias-corrected estimates of each feature's log
-#'   fold change, with p-values, see `ancombc()` and `ancombc2()` (planned).
+#'   fold change, with p-values, see [ancombc()] and [ancombc2()].
 #'
 #' @details
 #' With \eqn{L = \log(x + c)} (natural logs, \eqn{c} the pseudocount) and
