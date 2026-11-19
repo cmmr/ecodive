@@ -233,20 +233,20 @@ can't be mistaken for one another:
 |:-------|:----------|
 | Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
-| Unconstrained, counts | ✓ `pca`, ✓ `rpca`, `rpca_phylo`, `ca`, `dca`, `dpcoa` |
+| Unconstrained, counts | ✓ `pca`, ✓ `rpca`, `rpca_phylo`, ✓ `ca`, `dca`, `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
-| Constrained | ✓ `dbrda`, ✓ `capscale`, `rda`, `cca`, `principal_response_curves` |
-| Discriminant (`*da`) | `lda`, `plsda`, `oplsda`, `splsda`, `capda` |
+| Constrained | ✓ `dbrda`, ✓ `capscale`, ✓ `rda`, ✓ `cca`, `principal_response_curves` |
+| Discriminant (`*da`) | ✓ `lda`, ✓ `plsda`, ✓ `oplsda`, `splsda`, `capda` |
 | Fitting onto ordinations | ✓ `envfit`, ✓ `pcoa_biplot` |
-| Comparing ordinations | `procrustes`, `procrustes_test`, `coinertia` |
-| Model building | `varpart`, `forward_select`, `bioenv` |
-| Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, `mantel_partial`, `mirkat` |
+| Comparing ordinations | ✓ `procrustes`, ✓ `procrustes_test`, `coinertia` |
+| Model building | ✓ `varpart`, ✓ `forward_select`, ✓ `bioenv` |
+| Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, ✓ `mantel_partial`, `mirkat` |
 | Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
-| Composition | `simper` |
+| Composition | ✓ `simper` |
 | Beta metrics (`beta_div`) | `philr_distance` |
 | Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
-| Log-ratio transforms | `alr`, `ilr`, `philr` (clr and rclr stay `norm` choices) |
-| Log ratios | `log_ratio`, `balance` |
+| Log-ratio transforms | ✓ `alr`, ✓ `ilr`, `philr` (clr and rclr stay `norm` choices) |
+| Log ratios | ✓ `log_ratio`, ✓ `balance` |
 | Proportionality | `vlr`, `rho_p`, `phi_s` |
 | Differential abundance | `ancom`, `ancombc`, `ancombc2`, `ancombc_global`, `ancombc_pairwise`, `ancombc_dunnett`, `ancombc_trend`, `structural_zeros`, `dirmult_ttest` |
 | Absolute abundance | `qmp_scale`, `qmp_rarefy` |
