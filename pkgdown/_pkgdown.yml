@@ -10,6 +10,11 @@ template:
     base_font: {google: "Noto Sans"}
     heading_font: {google: "Noto Sans"}
 
+# pkgdown draws figures on a transparent background by default, which is
+# hard to read on the dark theme.
+figures:
+  bg: white
+
 
 reference:
 - title: Alpha Diversity
