@@ -119,3 +119,129 @@ for `capscale()`, as already documented, so this is **`capda()`**.
   *Ecology*, 84, 511–525.
 - Anderson, M. J., Gorley, R. N., & Clarke, K. R. (2008). *PERMANOVA+ for
   PRIMER: Guide to Software and Statistical Methods*. PRIMER-E.
+
+
+## Decisions made while implementing (lda)
+
+Item 10 (`lda()` only; `capda()` is item 14 and still open).
+
+Asked of the user at the start (2026-11-19), and answered:
+
+1. **Scores are scaled as MASS scales them** (the user's choice, had the
+   two differed). Checked: they do differ, by a constant. scikit-learn
+   1.9.1's `_solve_svd()` divides the within-group scatter by n
+   (`fac = 1 / n_samples`), MASS by n − g, so scikit-learn's `transform()`
+   scores and `scalings_` are MASS's times √(n / (n − g)) (1.0102 for
+   iris), and its between-group singular values² are MASS's `svd`² times
+   n / (n − g). `explained_variance_ratio_` equals MASS's proportion of
+   trace. The port divides by n − g; everything else follows scikit-learn.
+   So the pooled within-group covariance of the scores is the identity.
+2. **`eig` is MASS's `svd`²**: the between- over within-group mean square
+   of each axis's scores (the "canonical F"), not the SS-ratio eigenvalues
+   of W⁻¹B. `prop = eig / sum(eig over all min(g, p) axes)`.
+3. **`prior = NULL` argument**: the group proportions by default, else one
+   positive value per group, named by group (any order) or in level order;
+   it must add up to 1 within 1e-5 (MASS errors, scikit-learn rescales with
+   a warning; here it is an error), and is then rescaled to exactly 1.
+   Zero priors are rejected (MASS allows them). Priors set the centre
+   x̄ = Σ πₖmₖ and weight the between-group term, as in both references.
+4. **No public prediction.** No `predict()` method and no new S3 class
+   (as `plsda()`). Instead an internal, exact leave-one-out classifier
+   (`lda_loo()` in R, `C_lda_loo` in C) for `capda()`, tested against
+   `MASS::lda(CV = TRUE)`.
+
+The plan's own call, not re-asked: **a singular within-group covariance is
+an error** (scikit-learn and MASS warn and drop null directions).
+
+Made while implementing:
+
+5. **Port scope and licensing.** Ported from scikit-learn 1.9.1
+   `sklearn/discriminant_analysis.py` (BSD-3):
+   `LinearDiscriminantAnalysis._solve_svd()`, the priors handling in
+   `fit()`, and `transform()`. The BSD-3 text is in `src/lda.c`'s header;
+   `src/lda.c` and `R/lda.r` were added to the existing scikit-learn stanza
+   of `inst/COPYRIGHTS`, and the scikit-learn `Authors@R` comment now
+   mentions LDA (no new person). While copying the licence text, the last
+   line of the BSD notice ("OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE.") was found missing from `src/plsda.c`'s
+   header (item 7) and was restored.
+6. **Dense, small linear algebra in C, no LAPACK.** LDA needs p ≤ n − g, so
+   the normalized table is made dense (n × p ≤ n²) through `C_normalize`
+   (every table type, `margin`, every `norm`). The SVDs are a Householder
+   QR of the scaled residuals Z (n × p, the reflections applied to the
+   columns in parallel), then one-sided (Hestenes) Jacobi on the p × p R;
+   and one-sided Jacobi on the g × p matrix of sphered weighted group
+   means. Both give singular values to full relative accuracy, without
+   forming W or B. Scores are computed in parallel over samples. Columns
+   at rounding level (norm² ≤ ε²‖A‖²_F) are skipped by Jacobi (B has rank
+   ≤ g − 1). 5,000 × 200 with 5 groups: 0.2 s vs 0.77 s for `MASS::lda()`.
+7. **Rank and tolerances.** As scikit-learn: within-group rank = number of
+   singular values of Z (each feature scaled by its within-group sd,
+   divisor n; Z divided by √(n − g)) above `tol = 1e-4`; if below p, error.
+   p > n − g errors before the table is made dense. Between-group axes are
+   kept if their singular value is above 1e-4 times the first **and above
+   1e-8** (the latter is new: groups with identical means give no axes,
+   with a warning, "there are no discriminant axes", and a 0-column
+   result, rather than an axis of rounding noise). n ≤ g is an error
+   (scikit-learn's rule).
+8. **The singular error message** suggests "a few axes of pcoa() or pca()".
+   The plan says to suggest `capda()`, which doesn't exist yet;
+   **item 14 should add `capda()` to `lda_singular()`'s message and to
+   the "Singular tables" section of `lda()`'s docs**, and to the
+   vignette's LDA paragraph (the plan's "point to `capda()` for microbiome
+   tables").
+9. **Signs:** each axis is flipped so that its largest |score| is
+   positive (`ord_flip()`'s rule), with its column of `scaling`.
+10. **`n_axes`:** `NULL` means min(3, number of axes); an explicit value is
+    capped silently at the number of discriminant axes (≤ min(g − 1, p)).
+11. **Attributes, in order:** `method`, `eig`, `prop`, `scaling` (p × k,
+    columns `LD1..`), `means` (g × p), `prior` (named), `groups` (a factor,
+    named by sample). `eig`, `prop` and `scaling` cover the returned axes
+    only.
+12. **Groups:** through `test_groups()`, as `plsda()`: every distinct value
+    is a group, unused levels dropped, at least two groups, NAs an error.
+    A singleton group is fine for the fit (it adds nothing to W).
+13. **Leave-one-out core for `capda()`** (`lda_loo(x, grp, prior, cpus)`,
+    in `R/lda.r`; C in `src/lda.c`). For a dense n × p `x`, it returns
+    `class`, an n × p integer matrix of level codes whose column m is the
+    LOO class using the **first m columns** (for every m = 1..p at once),
+    and `posterior` (n × g) for all p columns. It is exact: the fit without
+    sample i (group means and pooled covariance, divisor n − 1 − g),
+    with the **same priors** (MASS's `CV = TRUE`; checked equal to
+    refitting MASS without i with `prior =` the full-data priors, 2e-15).
+    It spheres by the R of a QR of the residuals (nested: R⁻ᵀ is lower
+    triangular, so the first m sphered coordinates use only the first m
+    columns), and downdates by Sherman–Morrison, so every m costs O(g)
+    more per sample: 5,000 × 200, all 200 values of m, 0.1 s on 4 threads
+    (MASS takes 0.9 s for one m). Classification uses the full-rank
+    Mahalanobis rule, which equals classifying on all the discriminant
+    axes. NA where a fit is singular: from the first m whose R[m, m] is
+    below 1e-4·√(n − g), where x_i alone spans a direction
+    (1 − c·u'u ≤ √ε), when n − 1 − g < 1, and **for a sample alone in its
+    group** (as MASS, which returns NA there). Ties go to the first group.
+    `capda()` must decide how to count NAs in its success rate.
+14. **Registry:** `lda` in `COUNT_ORDS` (between `cca` and `pca`), alias
+    `lineardiscriminantanalysis`. `'l'` and `'LDA'` select it; no alias
+    collides with the other registries. `count_ord(m, 'lda', groups,
+    data)` passes `groups`/`data` through `...`; the `count_ord()` example
+    skips `lda` in its loop, as `plsda`.
+15. **Fixtures:** `data-raw/expected/lda.r` (inputs, MASS 7.3-60.0.1) and
+    `lda.py` (scikit-learn, asserts 1.9.1), CSVs in
+    `data-raw/expected/lda/`. Cases: iris; iris with priors (.2, .3, .5);
+    iris two species (one axis); classical PCoA (cmdscale of Bray-Curtis,
+    6 axes) of dune by Management (capda's input); Hellinger of 8 common
+    dune species by Moisture; a 151 × 12 sparse Poisson table with 4
+    unequal groups including a singleton (also run as Matrix,
+    TsparseMatrix, slam and `margin = 2`). MASS: scores, scaling, svd²,
+    prop, means, prior, and `CV = TRUE` classes for every m and posteriors.
+    scikit-learn: scores and `scalings_` (÷ √(n / (n − g))),
+    `explained_variance_ratio_`, `means_`, `xbar_`. Largest relative
+    differences: MASS 1.1e-14 (scaling, iris with priors), 4.5e-15
+    (scores); scikit-learn 8.5e-15 (scores), 8.4e-16 (prop); LOO
+    posteriors 5.4e-15, classes identical.
+16. **Docs:** `lda()` joins the "Supervised" subtitle in
+    `pkgdown/_pkgdown.yml`; a paragraph and table row in
+    `vignette("ordination")`; rows in the README and `vignette("ecodive")`
+    tables; `count_ord()`'s docs; NEWS under 2.4.0. "Same names in other
+    packages" covers `MASS::lda()`, latent Dirichlet allocation and LEfSe's
+    LDA score. The benchmark article was not updated.

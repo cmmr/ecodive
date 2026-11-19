@@ -17,6 +17,8 @@ extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_lda(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_lda_loo(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -61,6 +63,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
   {"C_envfit",    (DL_FUNC) &C_envfit,   12},
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},
+  {"C_lda",       (DL_FUNC) &C_lda,       5},
+  {"C_lda_loo",   (DL_FUNC) &C_lda_loo,   5},
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
   {"C_nmds",      (DL_FUNC) &C_nmds,      6},

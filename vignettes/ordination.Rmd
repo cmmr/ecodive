@@ -69,6 +69,7 @@ dm <- bray(iris[, 1:4])
 | `pca()`      | Principal Component Analysis (PCA)             | counts | Euclidean geometry of (transformed) counts, with feature loadings.      |
 | `ca()`       | Correspondence Analysis (CA)                   | counts | The chi-square geometry of species profiles, for unimodal responses.    |
 | `rpca()`     | Robust Aitchison PCA                           | counts | Sparse compositional data, such as microbiome counts.                   |
+| `lda()`      | Linear Discriminant Analysis (LDA)             | counts | Axes that best separate known groups, from a few features (supervised). |
 | `plsda()`    | Partial Least Squares Discriminant Analysis    | counts | Axes that best separate known groups (a supervised ordination).         |
 
 `list_dist_ords()` lists the methods that take distances, with the other
@@ -257,6 +258,17 @@ plot(ord, col = iris$Species)
 attr(ord, 'vip')
 ```
 
+`lda()`, linear discriminant analysis (LDA), finds Fisher's discriminant
+axes: those along which the groups are furthest apart relative to the
+variation within them, as `MASS::lda()` computes them. It needs more
+samples than features, so for microbiome tables run it on a few axes of an
+unconstrained ordination, such as `pcoa()`, rather than on the taxa.
+
+```{r}
+ord <- lda(iris[, 1:4], 'Species', iris)
+attr(ord, 'prop')
+```
+
 A supervised ordination always separates the groups it is given: it looks
 for exactly that, and with more features than samples it finds a
 separation even in random data. So a PLS-DA plot is no evidence that the
@@ -274,7 +286,7 @@ permanova(euclidean(scale(iris[, 1:4])), grp, permutations = 199)$p_value
 
 ## Ordinating counts directly
 
-`pca()`, `rpca()`, `rda()`, `cca()`, `ca()` and `plsda()` take the count table rather than distances.
+`pca()`, `rpca()`, `rda()`, `cca()`, `ca()`, `lda()` and `plsda()` take the count table rather than distances.
 `count_ord()` runs them by name, as `dist_ord()` does for the methods that
 take distances: `count_ord(counts, 'pca')` is `pca(counts)`. PCA
 works on any of ecodive's transformations, such as `norm = 'clr'` (centered

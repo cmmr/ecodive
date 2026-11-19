@@ -42,7 +42,7 @@
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
   the methods. `count_ord()`, with `list_count_ords()` and
   `match_count_ord()`, does the same for the methods that take a count table
-  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `plsda()` and `rpca()`: `count_ord(counts, "pca")` is
+  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()` and `rpca()`: `count_ord(counts, "pca")` is
   `pca(counts)`. Each wrapper points to the other when given the other's
   method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
@@ -332,6 +332,21 @@
   any number of `cpus`. `count_ord(counts, 'plsda', groups)` runs it too.
   Like every supervised method, it separates any groups it is given, so
   validate the separation (e.g. with `permanova()`).
+
+* New `lda()` runs a linear discriminant analysis (Fisher's discriminant
+  axes, ported from scikit-learn's `LinearDiscriminantAnalysis` with its
+  `"svd"` solver). It gives the same scores, coefficients (`scaling`),
+  group means and proportion of trace as `MASS::lda()` and its
+  `predict()` (up to each axis's sign), with optional `prior`
+  probabilities, and the same scores as scikit-learn up to a constant
+  factor (scikit-learn divides the within-group covariance by n, not
+  n - g). It takes `groups` and `data` as `plsda()` does, every `norm` and
+  every table type, and stops with an error when the within-group
+  covariance is singular, as it is for microbiome tables with more taxa
+  than samples: run it on a few PCoA or PCA axes instead. 5,000 samples
+  and 200 features take 0.2 seconds, where `MASS::lda()` takes 0.8.
+  Results are identical for any number of `cpus`.
+  `count_ord(counts, 'lda', groups)` runs it too.
 
 * New `simper()` runs a similarity percentages analysis (SIMPER): it breaks
   the mean Bray-Curtis dissimilarity between each pair of groups down into
