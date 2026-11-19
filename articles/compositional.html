@@ -172,11 +172,11 @@ today.</p>
 abundance</a></td>
 <td align="left">Which taxa differ?</td>
 <td align="left">
-<code><a href="../reference/ancom.html">ancom()</a></code>, <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>
+<code><a href="../reference/ancom.html">ancom()</a></code>, <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>,
+<code><a href="../reference/ancombc.html">ancombc()</a></code>, <code><a href="../reference/ancombc.html">ancombc2()</a></code> and their post-hoc
+tests, <code><a href="../reference/structural_zeros.html">structural_zeros()</a></code>
 </td>
-<td align="left">
-<code><a href="../reference/ancombc.html">ancombc()</a></code>, <code><a href="../reference/ancombc.html">ancombc2()</a></code>
-</td>
+<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="#proportionality">Co-occurrence</a></td>
@@ -722,11 +722,11 @@ them.</p>
 </tr>
 <tr class="odd">
 <td align="left">ANCOM-BC / ANCOM-BC2</td>
-<td align="left">estimates and removes each sample’s sampling
-fraction</td>
+<td align="left">estimates the shift shared by all taxa as a bias, and
+removes it</td>
 <td align="left">
 <code><a href="../reference/ancombc.html">ancombc()</a></code>, <code><a href="../reference/ancombc.html">ancombc2()</a></code>
-(<em>planned</em>)</td>
+</td>
 <td align="left">ANCOMBC (Bioconductor), scikit-bio</td>
 </tr>
 </tbody>
@@ -799,24 +799,6 @@ for the declines:</p>
 <span><span class="co">#&gt; -2.672671  2.277540</span></span></code></pre></div>
 <p>Every estimate is shifted down by about 0.7 log2 units, which is the
 subject of the next section.</p>
-<p><strong><a href="https://doi.org/10.1038/s41467-020-17041-7" class="external-link">ANCOM-BC</a></strong>
-(Lin &amp; Peddada 2020) and <strong><a href="https://doi.org/10.1038/s41592-023-02092-7" class="external-link">ANCOM-BC2</a></strong>
-(Lin &amp; Peddada 2024) estimate log fold changes with covariates,
-after correcting for each sample’s unknown sampling fraction. They are
-planned for ecodive:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">res_bc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc2</a></span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">group</span>, data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Available now: ANCOMBC::ancombc2() (Bioconductor), on a</span></span>
-<span><span class="co"># TreeSummarizedExperiment or phyloseq object.</span></span></code></pre></div>
-<p><strong>Used in practice.</strong> <a href="https://doi.org/10.1038/s41467-022-34667-x" class="external-link">Wallen et
-al. (2022)</a> counted a species as associated with Parkinson’s disease
-only when both ANCOM-BC and MaAsLin2 agreed, in shotgun metagenomes from
-724 people. <a href="https://doi.org/10.1186/s13054-023-04356-2" class="external-link">Trøseid
-et al. (2023)</a> used ANCOM-BC2 in severe COVID-19. <a href="https://doi.org/10.2337/dc20-2257" class="external-link">Mueller et al. (2021)</a>
-tested metformin’s effect on gut taxa in a randomized trial with
-ALDEx2.</p>
 <div class="section level3">
 <h3 id="why-the-reference-matters">Why the reference matters<a class="anchor" aria-label="anchor" href="#why-the-reference-matters"></a>
 </h3>
@@ -825,7 +807,7 @@ relative abundances the reference is the sample’s total, which the bloom
 inflates; with the clr it is the sample’s geometric mean over all taxa.
 Compare the estimated group difference (natural log) for the prevalent
 unchanged taxa, whose true difference is 0:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ok</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="va">changed</span> <span class="op">&amp;</span> <span class="va">prevalent</span></span>
 <span><span class="va">d_rel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rel</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'treated'</span>, <span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span></span>
 <span>         <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rel</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'control'</span>, <span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
@@ -852,15 +834,15 @@ don’t change (or that changes balance out), and the zero treatment. When
 either fails, it reports which taxa moved <strong>relative to the
 average taxon</strong>, not in absolute terms. That is the shift seen in
 <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>’s fold changes above. ANCOM-BC estimates
-the shift as a bias and removes it; measuring total load removes it
-outright (see <a href="#absolute-abundance">Absolute abundance</a>); and
-<strong>scale models</strong> (<strong><a href="https://doi.org/10.1186/s13059-025-03609-3" class="external-link">Nixon, Gloor &amp;
+the shift as a bias and removes it (next section); measuring total load
+removes it outright (see <a href="#absolute-abundance">Absolute
+abundance</a>); and <strong>scale models</strong> (<strong><a href="https://doi.org/10.1186/s13059-025-03609-3" class="external-link">Nixon, Gloor &amp;
 Silverman 2025</a></strong>) make it uncertain instead of assuming it is
 zero. In <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>, <code>scale_sd</code> is the
 standard deviation, in log2 units, of a random shift in the typical
 taxon’s abundance between the groups, drawn afresh in every Monte Carlo
 draw. Nixon et al. suggest 0.5; use more draws with it:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_sm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">sd</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span>,</span>
 <span>                scale_sd <span class="op">=</span> <span class="va">sd</span>, n_draws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">)</span></span>
@@ -881,6 +863,116 @@ log2 units is plausible, and none does. Choose <code>scale_sd</code>
 from what you know about how much total load could differ between your
 groups.</p>
 </div>
+<div class="section level3">
+<h3 id="removing-the-shift-ancom-bc">Removing the shift: ANCOM-BC<a class="anchor" aria-label="anchor" href="#removing-the-shift-ancom-bc"></a>
+</h3>
+<p><strong><a href="https://doi.org/10.1038/s41467-020-17041-7" class="external-link">ANCOM-BC</a></strong>
+(<code><a href="../reference/ancombc.html">ancombc()</a></code>; Lin &amp; Peddada 2020) and <strong><a href="https://doi.org/10.1038/s41592-023-02092-7" class="external-link">ANCOM-BC2</a></strong>
+(<code><a href="../reference/ancombc.html">ancombc2()</a></code>; Lin &amp; Peddada 2024) fit a linear model of
+each taxon’s log abundance, with any covariates in a formula, and
+estimate the shift shared by all taxa as a bias, from the taxa that
+don’t change, then subtract it. ANCOM-BC2 also treats zeros as missing
+values rather than adding a pseudocount, and regularises the variances
+of rare taxa.</p>
+<p>As in the R package (its <code>prv_cut</code>), first drop rare taxa:
+they are too sparse to estimate well, and here they are the source of
+every false positive (without the filter, ANCOM-BC2 calls 7 of
+them).</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">counts</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">0.7</span>   <span class="co"># taxa in at least 70% of samples</span></span>
+<span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc2</a></span><span class="op">(</span><span class="va">counts</span><span class="op">[</span>, <span class="va">keep</span><span class="op">]</span>, <span class="op">~</span> <span class="va">group</span>, <span class="va">meta</span><span class="op">)</span></span>
+<span><span class="va">res_bc</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">[</span><span class="va">fit</span><span class="op">$</span><span class="va">covariate</span> <span class="op">==</span> <span class="st">'grouptreated'</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_bc</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_bc</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     feature    covariate     log_fc        se         w      p_value</span></span>
+<span><span class="co">#&gt; 8    ASV004 grouptreated  2.2269477 0.2161342 10.303540 1.477387e-12</span></span>
+<span><span class="co">#&gt; 6    ASV003 grouptreated  2.0585156 0.2169332  9.489169 1.436190e-11</span></span>
+<span><span class="co">#&gt; 4    ASV002 grouptreated  2.1765173 0.2309273  9.425117 1.723747e-11</span></span>
+<span><span class="co">#&gt; 10   ASV005 grouptreated  2.0108898 0.2299505  8.744881 1.236170e-10</span></span>
+<span><span class="co">#&gt; 2    ASV001 grouptreated  2.0220426 0.2386440  8.473049 2.759710e-10</span></span>
+<span><span class="co">#&gt; 16   ASV008 grouptreated -1.6849103 0.2587505 -6.511718 1.134068e-07</span></span>
+<span><span class="co">#&gt; 14   ASV007 grouptreated -1.5590213 0.2560695 -6.088273 4.307705e-07</span></span>
+<span><span class="co">#&gt; 18   ASV009 grouptreated -1.3000957 0.2420488 -5.371214 4.142970e-06</span></span>
+<span><span class="co">#&gt; 12   ASV006 grouptreated -1.3679346 0.2570957 -5.320722 4.856494e-06</span></span>
+<span><span class="co">#&gt; 20   ASV010 grouptreated -1.2558726 0.2497938 -5.027638 1.217797e-05</span></span>
+<span><span class="co">#&gt; 116  ASV116 grouptreated  0.9178394 0.2488831  3.687833 1.049483e-03</span></span>
+<span><span class="co">#&gt; 48   ASV027 grouptreated  0.6429064 0.2184252  2.943370 6.749844e-03</span></span>
+<span><span class="co">#&gt;       p_adjusted reject</span></span>
+<span><span class="co">#&gt; 8   8.568846e-11   TRUE</span></span>
+<span><span class="co">#&gt; 6   8.186282e-10   TRUE</span></span>
+<span><span class="co">#&gt; 4   9.652985e-10   TRUE</span></span>
+<span><span class="co">#&gt; 10  6.798933e-09   TRUE</span></span>
+<span><span class="co">#&gt; 2   1.490243e-08   TRUE</span></span>
+<span><span class="co">#&gt; 16  6.010560e-06   TRUE</span></span>
+<span><span class="co">#&gt; 14  2.240007e-05   TRUE</span></span>
+<span><span class="co">#&gt; 18  2.112915e-04   TRUE</span></span>
+<span><span class="co">#&gt; 12  2.428247e-04   TRUE</span></span>
+<span><span class="co">#&gt; 20  5.967208e-04   TRUE</span></span>
+<span><span class="co">#&gt; 116 5.037521e-02  FALSE</span></span>
+<span><span class="co">#&gt; 48  3.172427e-01  FALSE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, rejected <span class="op">=</span> <span class="va">res_bc</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        rejected</span></span>
+<span><span class="co">#&gt; changed FALSE TRUE</span></span>
+<span><span class="co">#&gt;   FALSE    48    0</span></span>
+<span><span class="co">#&gt;   TRUE      0   10</span></span>
+<span></span>
+<span><span class="co"># Estimated log fold changes of the changed taxa, against the truth</span></span>
+<span><span class="co"># (natural logs: log(1/4) = -1.39, log(8) = 2.08):</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">res_bc</span><span class="op">$</span><span class="va">log_fc</span><span class="op">[</span><span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span><span class="op">]</span>, <span class="va">fold</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span><span class="op">[</span><span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span><span class="op">]</span>, <span class="va">median</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      0.25         8 </span></span>
+<span><span class="co">#&gt; -1.367935  2.058516</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
+<p><img src="compositional_files/figure-html/ancombc2-1.png" class="r-plt" alt="Volcano plot of ANCOM-BC2's bias-corrected log fold changes against their adjusted p-values, with the differentially abundant taxa highlighted and named." width="576"></p>
+<p>The bias correction recovers the true fold changes almost exactly,
+where the clr-based estimates above were off by the shift. ANCOM-BC
+(<code><a href="../reference/ancombc.html">ancombc()</a></code>) does a little less well on this table, with two
+false positives and estimates further from the truth. It needs a
+pseudocount for the zeros, and the bias a pseudocount introduces differs
+between rare and abundant taxa, so a single shift can’t remove it
+all:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc</a></span><span class="op">(</span><span class="va">counts</span><span class="op">[</span>, <span class="va">keep</span><span class="op">]</span>, <span class="op">~</span> <span class="va">group</span>, <span class="va">meta</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="va">fit1</span><span class="op">[</span><span class="va">fit1</span><span class="op">$</span><span class="va">covariate</span> <span class="op">==</span> <span class="st">'grouptreated'</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, rejected <span class="op">=</span> <span class="va">res1</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        rejected</span></span>
+<span><span class="co">#&gt; changed FALSE TRUE</span></span>
+<span><span class="co">#&gt;   FALSE    46    2</span></span>
+<span><span class="co">#&gt;   TRUE      0   10</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">res1</span><span class="op">$</span><span class="va">log_fc</span><span class="op">[</span><span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span><span class="op">]</span>, <span class="va">fold</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span><span class="op">[</span><span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span><span class="op">]</span>, <span class="va">median</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      0.25         8 </span></span>
+<span><span class="co">#&gt; -1.471240  1.895599</span></span></code></pre></div>
+<p><strong>Structural zeros.</strong> A taxon absent from every sample
+of a group has no log fold change to estimate.
+<code><a href="../reference/structural_zeros.html">structural_zeros()</a></code> finds such taxa, so they can be reported
+as present in one group only:</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/structural_zeros.html">structural_zeros</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span><span class="op">)</span></span>
+<span><span class="va">sz</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">sz</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span><span class="co">#&gt;        control treated</span></span>
+<span><span class="co">#&gt; ASV147   FALSE    TRUE</span></span>
+<span><span class="co">#&gt; ASV150   FALSE    TRUE</span></span></code></pre></div>
+<p>Here two rare taxa were never seen in a treated sample.</p>
+<p><strong>More than two groups.</strong> With a factor of three or more
+levels in the formula, name it as <code>groups</code> and run the
+post-hoc tests on the fit: <code><a href="../reference/ancombc_global.html">ancombc_global()</a></code> (does the taxon
+differ between any groups?), <code><a href="../reference/ancombc_global.html">ancombc_pairwise()</a></code> (every pair
+of levels), <code><a href="../reference/ancombc_global.html">ancombc_dunnett()</a></code> (each level against the
+reference) and <code><a href="../reference/ancombc_global.html">ancombc_trend()</a></code> (a monotone trend across
+ordered levels). Each has a <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc2</a></span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">diet</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta3</span>, groups <span class="op">=</span> <span class="st">'diet'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/ancombc_global.html">ancombc_global</a></span><span class="op">(</span><span class="va">fit3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/ancombc_global.html">ancombc_pairwise</a></span><span class="op">(</span><span class="va">fit3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Used in practice.</strong> <a href="https://doi.org/10.1038/s41467-022-34667-x" class="external-link">Wallen et
+al. (2022)</a> counted a species as associated with Parkinson’s disease
+only when both ANCOM-BC and MaAsLin2 agreed, in shotgun metagenomes from
+724 people. <a href="https://doi.org/10.1186/s13054-023-04356-2" class="external-link">Trøseid
+et al. (2023)</a> used ANCOM-BC2 in severe COVID-19. <a href="https://doi.org/10.2337/dc20-2257" class="external-link">Mueller et al. (2021)</a>
+tested metformin’s effect on gut taxa in a randomized trial with
+ALDEx2.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="proportionality">Co-occurrence: proportionality<a class="anchor" aria-label="anchor" href="#proportionality"></a>
@@ -896,7 +988,7 @@ al. 2017</a></strong>).</p>
 <code><a href="../reference/phi_s.html">phi_s()</a></code> compute every pair of taxa in parallel C, and
 return a <code>dist</code> object over the taxa (here on the zero-free
 table from the <a href="#zeros">Zeros</a> section):</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rho</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rho_p.html">rho_p</a></span><span class="op">(</span><span class="va">zf</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">rho</span><span class="op">)</span>   <span class="co"># one value for each pair of the 150 taxa</span></span>
 <span><span class="co">#&gt; [1] 11175</span></span>
@@ -941,7 +1033,7 @@ abundances by the load (<strong><a href="https://doi.org/10.1371/journal.pone.02
 the same number of reads per cell.</p>
 <p>Here the load is measured with 20% error, as a real measurement would
 be:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measured</span> <span class="op">&lt;-</span> <span class="va">load</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">0</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">q_scale</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qmp.html">qmp_scale</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">measured</span><span class="op">)</span>            <span class="co"># relative abundance x load</span></span>
@@ -992,7 +1084,7 @@ separates differences between subjects from changes over time.</li>
 several tables measured on the same samples (e.g. 16S, metagenomics and
 metabolomics) with shared sample scores.</li>
 </ul>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">ctf</span><span class="op">(</span><span class="va">counts</span>, subjects <span class="op">=</span> <span class="st">'subject_id'</span>, states <span class="op">=</span> <span class="st">'week'</span>, data <span class="op">=</span> <span class="va">meta</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">rpca_joint</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>amplicon <span class="op">=</span> <span class="va">counts16s</span>, metabolites <span class="op">=</span> <span class="va">metab</span><span class="op">)</span>, n_axes <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>

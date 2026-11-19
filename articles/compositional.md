@@ -41,7 +41,7 @@ planned function the article shows the call it will have, marked
 | [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`, [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) | `philr()` |
 | [Beta diversity](#beta-diversity) | Do communities differ? | [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md) | `philr_distance()` |
 | [Log ratios](#log-ratios) | Which taxa shift relative to which? | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) loadings, [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) |  |
-| [Differential abundance](#differential-abundance) | Which taxa differ? | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md), [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md) | [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md), [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) |
+| [Differential abundance](#differential-abundance) | Which taxa differ? | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md), [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md), [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md), [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) and their post-hoc tests, [`structural_zeros()`](https://cmmr.github.io/ecodive/reference/structural_zeros.md) |  |
 | [Co-occurrence](#proportionality) | Which taxa move together? | [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) |  |
 | [Absolute abundance](#absolute-abundance) | Did taxa really increase? | [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md), [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) |  |
 | [Repeated measures and multi-omics](#repeated-measures-and-multi-omics) | Subjects over time; several ’omics |  | `ctf()`, `rpca_joint()` |
@@ -591,7 +591,7 @@ that agree across two or more of them.
 |:---|:---|:---|:---|
 | ANCOM | every other taxon: tests all pairwise log ratios | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) | scikit-bio, QIIME 2 |
 | ALDEx2-style | clr of Dirichlet Monte Carlo draws | [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md) | ALDEx2 (Bioconductor), scikit-bio |
-| ANCOM-BC / ANCOM-BC2 | estimates and removes each sample’s sampling fraction | [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md), [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) (*planned*) | ANCOMBC (Bioconductor), scikit-bio |
+| ANCOM-BC / ANCOM-BC2 | estimates the shift shared by all taxa as a bias, and removes it | [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md), [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) | ANCOMBC (Bioconductor), scikit-bio |
 
 **[ANCOM](https://doi.org/10.3402/mehd.v26.27663)** (Mandal et al. 2015)
 counts, for each taxon, how many of its log ratios with other taxa
@@ -683,31 +683,6 @@ tapply(res_dm$log2_fc[changed], fold[changed], median)
 Every estimate is shifted down by about 0.7 log2 units, which is the
 subject of the next section.
 
-**[ANCOM-BC](https://doi.org/10.1038/s41467-020-17041-7)** (Lin &
-Peddada 2020) and
-**[ANCOM-BC2](https://doi.org/10.1038/s41592-023-02092-7)** (Lin &
-Peddada 2024) estimate log fold changes with covariates, after
-correcting for each sample’s unknown sampling fraction. They are planned
-for ecodive:
-
-``` r
-
-# Planned in ecodive:
-res_bc <- ancombc2(counts, ~ group, data = data.frame(group = groups, row.names = samples))
-
-# Available now: ANCOMBC::ancombc2() (Bioconductor), on a
-# TreeSummarizedExperiment or phyloseq object.
-```
-
-**Used in practice.** [Wallen et
-al. (2022)](https://doi.org/10.1038/s41467-022-34667-x) counted a
-species as associated with Parkinson’s disease only when both ANCOM-BC
-and MaAsLin2 agreed, in shotgun metagenomes from 724 people. [Trøseid et
-al. (2023)](https://doi.org/10.1186/s13054-023-04356-2) used ANCOM-BC2
-in severe COVID-19. [Mueller et
-al. (2021)](https://doi.org/10.2337/dc20-2257) tested metformin’s effect
-on gut taxa in a randomized trial with ALDEx2.
-
 ### Why the reference matters
 
 Every per-taxon method compares each taxon with some reference. With
@@ -748,10 +723,11 @@ either fails, it reports which taxa moved **relative to the average
 taxon**, not in absolute terms. That is the shift seen in
 [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)’s
 fold changes above. ANCOM-BC estimates the shift as a bias and removes
-it; measuring total load removes it outright (see [Absolute
-abundance](#absolute-abundance)); and **scale models** (**[Nixon, Gloor
-& Silverman 2025](https://doi.org/10.1186/s13059-025-03609-3)**) make it
-uncertain instead of assuming it is zero. In
+it (next section); measuring total load removes it outright (see
+[Absolute abundance](#absolute-abundance)); and **scale models**
+(**[Nixon, Gloor & Silverman
+2025](https://doi.org/10.1186/s13059-025-03609-3)**) make it uncertain
+instead of assuming it is zero. In
 [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
 `scale_sd` is the standard deviation, in log2 units, of a random shift
 in the typical taxon’s abundance between the groups, drawn afresh in
@@ -780,6 +756,142 @@ changed when its change is clear of plausible shifts in the reference.
 At 0.5 all ten true changes survive; at 1, a shift of 2 log2 units is
 plausible, and none does. Choose `scale_sd` from what you know about how
 much total load could differ between your groups.
+
+### Removing the shift: ANCOM-BC
+
+**[ANCOM-BC](https://doi.org/10.1038/s41467-020-17041-7)**
+([`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md); Lin
+& Peddada 2020) and
+**[ANCOM-BC2](https://doi.org/10.1038/s41592-023-02092-7)**
+([`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md);
+Lin & Peddada 2024) fit a linear model of each taxon’s log abundance,
+with any covariates in a formula, and estimate the shift shared by all
+taxa as a bias, from the taxa that don’t change, then subtract it.
+ANCOM-BC2 also treats zeros as missing values rather than adding a
+pseudocount, and regularises the variances of rare taxa.
+
+As in the R package (its `prv_cut`), first drop rare taxa: they are too
+sparse to estimate well, and here they are the source of every false
+positive (without the filter, ANCOM-BC2 calls 7 of them).
+
+``` r
+
+keep <- colMeans(counts > 0) >= 0.7   # taxa in at least 70% of samples
+meta <- data.frame(group = groups, row.names = samples)
+
+fit <- ancombc2(counts[, keep], ~ group, meta)
+res_bc <- fit[fit$covariate == 'grouptreated', ]
+head(res_bc[order(res_bc$p_adjusted), ], 12)
+#>     feature    covariate     log_fc        se         w      p_value
+#> 8    ASV004 grouptreated  2.2269477 0.2161342 10.303540 1.477387e-12
+#> 6    ASV003 grouptreated  2.0585156 0.2169332  9.489169 1.436190e-11
+#> 4    ASV002 grouptreated  2.1765173 0.2309273  9.425117 1.723747e-11
+#> 10   ASV005 grouptreated  2.0108898 0.2299505  8.744881 1.236170e-10
+#> 2    ASV001 grouptreated  2.0220426 0.2386440  8.473049 2.759710e-10
+#> 16   ASV008 grouptreated -1.6849103 0.2587505 -6.511718 1.134068e-07
+#> 14   ASV007 grouptreated -1.5590213 0.2560695 -6.088273 4.307705e-07
+#> 18   ASV009 grouptreated -1.3000957 0.2420488 -5.371214 4.142970e-06
+#> 12   ASV006 grouptreated -1.3679346 0.2570957 -5.320722 4.856494e-06
+#> 20   ASV010 grouptreated -1.2558726 0.2497938 -5.027638 1.217797e-05
+#> 116  ASV116 grouptreated  0.9178394 0.2488831  3.687833 1.049483e-03
+#> 48   ASV027 grouptreated  0.6429064 0.2184252  2.943370 6.749844e-03
+#>       p_adjusted reject
+#> 8   8.568846e-11   TRUE
+#> 6   8.186282e-10   TRUE
+#> 4   9.652985e-10   TRUE
+#> 10  6.798933e-09   TRUE
+#> 2   1.490243e-08   TRUE
+#> 16  6.010560e-06   TRUE
+#> 14  2.240007e-05   TRUE
+#> 18  2.112915e-04   TRUE
+#> 12  2.428247e-04   TRUE
+#> 20  5.967208e-04   TRUE
+#> 116 5.037521e-02  FALSE
+#> 48  3.172427e-01  FALSE
+table(changed = changed[keep], rejected = res_bc$reject)
+#>        rejected
+#> changed FALSE TRUE
+#>   FALSE    48    0
+#>   TRUE      0   10
+
+# Estimated log fold changes of the changed taxa, against the truth
+# (natural logs: log(1/4) = -1.39, log(8) = 2.08):
+tapply(res_bc$log_fc[changed[keep]], fold[keep][changed[keep]], median)
+#>      0.25         8 
+#> -1.367935  2.058516
+
+plot(fit)
+```
+
+![Volcano plot of ANCOM-BC2's bias-corrected log fold changes against
+their adjusted p-values, with the differentially abundant taxa
+highlighted and named.](compositional_files/figure-html/ancombc2-1.png)
+
+The bias correction recovers the true fold changes almost exactly, where
+the clr-based estimates above were off by the shift. ANCOM-BC
+([`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md))
+does a little less well on this table, with two false positives and
+estimates further from the truth. It needs a pseudocount for the zeros,
+and the bias a pseudocount introduces differs between rare and abundant
+taxa, so a single shift can’t remove it all:
+
+``` r
+
+fit1 <- ancombc(counts[, keep], ~ group, meta, pseudocount = 1)
+res1 <- fit1[fit1$covariate == 'grouptreated', ]
+table(changed = changed[keep], rejected = res1$reject)
+#>        rejected
+#> changed FALSE TRUE
+#>   FALSE    46    2
+#>   TRUE      0   10
+tapply(res1$log_fc[changed[keep]], fold[keep][changed[keep]], median)
+#>      0.25         8 
+#> -1.471240  1.895599
+```
+
+**Structural zeros.** A taxon absent from every sample of a group has no
+log fold change to estimate.
+[`structural_zeros()`](https://cmmr.github.io/ecodive/reference/structural_zeros.md)
+finds such taxa, so they can be reported as present in one group only:
+
+``` r
+
+sz <- structural_zeros(counts, groups)
+sz[rowSums(sz) > 0, , drop = FALSE]
+#>        control treated
+#> ASV147   FALSE    TRUE
+#> ASV150   FALSE    TRUE
+```
+
+Here two rare taxa were never seen in a treated sample.
+
+**More than two groups.** With a factor of three or more levels in the
+formula, name it as `groups` and run the post-hoc tests on the fit:
+[`ancombc_global()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+(does the taxon differ between any groups?),
+[`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+(every pair of levels),
+[`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+(each level against the reference) and
+[`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+(a monotone trend across ordered levels). Each has a
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) method.
+
+``` r
+
+fit3 <- ancombc2(counts, ~ diet + age, meta3, groups = 'diet')
+ancombc_global(fit3)
+plot(ancombc_pairwise(fit3))
+```
+
+**Used in practice.** [Wallen et
+al. (2022)](https://doi.org/10.1038/s41467-022-34667-x) counted a
+species as associated with Parkinson’s disease only when both ANCOM-BC
+and MaAsLin2 agreed, in shotgun metagenomes from 724 people. [Trøseid et
+al. (2023)](https://doi.org/10.1186/s13054-023-04356-2) used ANCOM-BC2
+in severe COVID-19. [Mueller et
+al. (2021)](https://doi.org/10.2337/dc20-2257) tested metformin’s effect
+on gut taxa in a randomized trial with ALDEx2.
 
 ## Co-occurrence: proportionality
 
