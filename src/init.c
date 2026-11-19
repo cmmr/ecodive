@@ -49,6 +49,7 @@ extern SEXP C_stop_thread_pool(void);
 extern SEXP C_qmp_scale(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rpca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rpca_phylo(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_simper(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
@@ -112,6 +113,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
   {"C_rng_dist",  (DL_FUNC) &C_rng_dist,  5},
   {"C_rpca",      (DL_FUNC) &C_rpca,     12},
+  {"C_rpca_phylo", (DL_FUNC) &C_rpca_phylo, 18},
   {"C_simper",    (DL_FUNC) &C_simper,    7},
   {"C_tsne_p",    (DL_FUNC) &C_tsne_p,    7},
   {"C_tsne_run",  (DL_FUNC) &C_tsne_run,  4},

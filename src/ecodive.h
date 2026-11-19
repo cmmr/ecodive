@@ -212,6 +212,15 @@ void* maybe_free_one(void *ptr);
 /* --- normalize.c --- */
 void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_);
 
+/* --- rpca.c: shared with rpca_phylo.c --- */
+void rpca_filter(int N0, int P0, const int *tpos, const int *tidx, const double *tval,
+                 double msc, double mfc, double mff, int drop_single,
+                 int *s_new, int *f_new, int *single, int *n_single, int *n, int *m);
+SEXP rpca_core(int n, int m, int *rpos, int *ridx, double *rval,
+               int r, int max_iter, double tol, int want_dm, int debug,
+               double step, int n_threads, const char *no_var);
+SEXP rpca_list_append(SEXP x, const char **names, SEXP *vals, int k);
+
 /* --- pca.c: the centred (scaled) table, shared with rda(), plsda() and oplsda() --- */
 typedef struct {
   int           n, p, nnz;  // Samples, features, non-zeros.

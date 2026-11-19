@@ -539,7 +539,7 @@ validate_tree <- function (env = parent.frame()) {
               data     = 0, 
               nrow     = length(missing), 
               ncol     = ncol(counts),
-              dimnames = list(missing, rownames(counts)) ))
+              dimnames = list(missing, colnames(counts)) ))
         remove('missing')
         
         counts <- counts[as.character(tree$tip.label),,drop=FALSE]

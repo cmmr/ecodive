@@ -42,7 +42,7 @@
   is `nmds(dm)`. `list_dist_ords()` and `match_dist_ord()` list and look up
   the methods. `count_ord()`, with `list_count_ords()` and
   `match_count_ord()`, does the same for the methods that take a count table
-  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()` and `rpca()`: `count_ord(counts, "pca")` is
+  rather than distances, `pca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`, `rpca()` and `rpca_phylo()`: `count_ord(counts, "pca")` is
   `pca(counts)`. Each wrapper points to the other when given the other's
   method, and to `dist_test()` when given a test.
   Every ordination method returns the same kind of result: a sample-by-axis
@@ -596,6 +596,20 @@
   formed. It takes every count-table class that `pca()` takes, and its
   results are identical for any number of `cpus`.
 
+* New `rpca_phylo()` runs a phylogenetic robust Aitchison PCA (Martino et
+  al. 2022), gemelli's `phylogenetic_rpca()`: `rpca()` of a table expanded
+  to every node of a tree, each node holding the counts of the tips below it
+  weighted by its branch length, so that loadings describe clades as well
+  as tips. It cuts the tree down to the tips with counts as gemelli does
+  (with its `min_depth` filter), returns the tree it used with the nodes
+  named as gemelli names them, and optionally the node counts
+  (`node_counts = TRUE`). A C port of gemelli 0.0.13 (with the tree code of
+  scikit-bio and iow it calls), it gives gemelli's results to within
+  rounding error; the node counts are summed in parallel from each sample's
+  non-zero tips, without a dense table. It joins `count_ord()`
+  (`count_ord(counts, "rpca_phylo", tree = tree)`), and its results are
+  identical for any number of `cpus`.
+
 * New `blas_threads()` gets or sets how many threads R's BLAS/LAPACK library
   uses, while R is running. It works with OpenBLAS, Intel MKL, BLIS, and
   FlexiBLAS, returns `NA` where the count can't be read (e.g. R's reference
@@ -642,6 +656,10 @@
   the columns of `counts` as samples even when samples are rows
   (`margin = 1`, the default). Out-of-range pairs could crash R, and a table
   with one feature was rejected as having fewer than two samples.
+
+* Fixed `faith()`, the UniFrac family and every other function taking a
+  `tree`, which failed when samples were columns (`margin = 2`) and the tree
+  had tips that were not in the table.
 
 
 

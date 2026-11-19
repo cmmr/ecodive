@@ -290,7 +290,8 @@
 #' @inheritSection documentation Input Types
 #'
 #' @seealso [pca()], which with `norm = 'rclr'` keeps zeros as 0 rather than
-#'   completing them; [pcoa()]; [robust_aitchison()].
+#'   completing them; [rpca_phylo()], the same over the nodes of a
+#'   phylogenetic tree; [pcoa()]; [robust_aitchison()].
 #'
 #' @export
 #' @examples
@@ -348,12 +349,6 @@ rpca <- function (
     distances, FALSE, 1e4, cpus )
 
 
-  if (!res$lanczos_converged) # nocov start
-    warning(
-      call. = FALSE,
-      "OptSpace's initial SVD did not converge; results may differ from gemelli's." )
-  # nocov end
-
   if (length(res$single) > 0)
     warning(
       call. = FALSE,
@@ -361,14 +356,33 @@ rpca <- function (
       'removed (their robust clr is 0, which carries no information): ',
       rpca_list(sam_names[res$single]) )
 
+  rpca_finish(
+    res, k, 'rpca', sam_names[res$samples], fea_names[res$features],
+    'features', distances )
+}
+
+
+
+# The ordination from C_rpca()'s or C_rpca_phylo()'s list `res`: warnings,
+# dropping rounding-error axes, and the result. `k` is the rank asked for,
+# `samples` and `features` the kept samples' and features' names, `what` the
+# word for features in a warning, and `...` further attributes.
+rpca_finish <- function (res, k, method, samples, features, what, distances, ...) {
+
+  if (!res$lanczos_converged) # nocov start
+    warning(
+      call. = FALSE,
+      "OptSpace's initial SVD did not converge; results may differ from gemelli's." )
+  # nocov end
+
   if (res$k < k)
     warning(
       call. = FALSE,
       '`n_axes` reduced to ', res$k, ': at most one less than the number of ',
-      'samples and of features (', length(res$samples), ' and ',
-      length(res$features), ' after filtering).' )
+      'samples and of ', what, ' (', length(samples), ' and ',
+      length(features), ' after filtering).' )
 
-  n     <- length(res$samples)
+  n     <- length(samples)
   s2    <- res$eig    # s^2, largest first
   total <- sum(s2)
 
@@ -385,30 +399,31 @@ rpca <- function (
 
   s2       <- s2[keep]
   loadings <- res$loadings[, keep, drop = FALSE]
-  dimnames(loadings) <- list(fea_names[res$features], paste0('RPCA', seq_len(sum(keep))))
+  dimnames(loadings) <- list(features, paste0('RPCA', seq_len(sum(keep))))
 
   dm <- NULL
   if (distances)
     dm <- structure(
       .Data  = res$dist,
       Size   = n,
-      Labels = sam_names[res$samples],
+      Labels = samples,
       Diag   = FALSE,
       Upper  = FALSE,
-      method = 'rpca',
+      method = method,
       class  = 'dist' )
 
   denom <- n - 1L
 
   ord_result(
-    res$scores[, keep, drop = FALSE], 'rpca', sam_names[res$samples], prefix = 'RPCA',
+    res$scores[, keep, drop = FALSE], method, samples, prefix = 'RPCA',
     eig      = s2 / denom,
     prop     = s2 / total,
     trace    = total / denom,
     loadings = loadings,
     cost     = res$cost,
     n_iters  = res$n_iters,
-    dm       = dm )
+    dm       = dm,
+    ... )
 }
 
 

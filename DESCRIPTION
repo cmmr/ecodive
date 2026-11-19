@@ -23,7 +23,7 @@ Authors@R: c(
     person(
       "scikit-bio development team",
       role    = c("ctb", "cph"),
-      comment = "PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, ANCOM, and Dirichlet-multinomial t-tests, from scikit-bio"),
+      comment = "phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, ANCOM, and Dirichlet-multinomial t-tests, from scikit-bio"),
     person(
       "NumPy Developers",
       role    = "cph",
@@ -31,7 +31,11 @@ Authors@R: c(
     person(
       "Cameron", "Martino",
       role    = c("ctb", "cph"),
-      comment = "'gemelli' robust Aitchison PCA"),
+      comment = "'gemelli' robust Aitchison PCA and phylogenetic robust Aitchison PCA"),
+    person(
+      "Daniel", "McDonald",
+      role    = c("ctb", "cph"),
+      comment = "tree shearing and collapsing, following 'iow' (bp)"),
     person(
       "The SciPy developers",
       role    = c("ctb", "cph"),
@@ -64,7 +68,8 @@ Description: Computes alpha and beta diversity metrics in a parallel,
     multidimensional scaling, 'Isomap', 't-SNE' and 'UMAP', and constrains
     them by distance-based redundancy analysis and constrained analysis of
     principal coordinates; ordinates count tables by principal components
-    analysis and robust Aitchison PCA; and fits variables onto ordinations.
+    analysis and robust Aitchison PCA (including its phylogenetic
+    form); and fits variables onto ordinations.
     Tests distances with PERMANOVA, PERMDISP, ANOSIM, MRPP and Mantel tests.
     Several methods are ported from 'scikit-learn', 'scikit-bio', 'gemelli'
     and 'uwot'.

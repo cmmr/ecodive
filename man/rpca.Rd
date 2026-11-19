@@ -327,5 +327,6 @@ Martino, C. (2019). \emph{gemelli} (Python package, version 0.0.13). BSD
 }
 \seealso{
 \code{\link[=pca]{pca()}}, which with \code{norm = 'rclr'} keeps zeros as 0 rather than
-completing them; \code{\link[=pcoa]{pcoa()}}; \code{\link[=robust_aitchison]{robust_aitchison()}}.
+completing them; \code{\link[=rpca_phylo]{rpca_phylo()}}, the same over the nodes of a
+phylogenetic tree; \code{\link[=pcoa]{pcoa()}}; \code{\link[=robust_aitchison]{robust_aitchison()}}.
 }
