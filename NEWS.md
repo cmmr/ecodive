@@ -464,6 +464,20 @@
   attributes, and takes every table type: a sparse 2,000 by 5,000 table
   takes 0.2 seconds.
 
+* New `log_ratio()` and `balance()` give one log ratio per sample between
+  a `numerator` and a `denominator` group of features (names, indices or
+  logical vectors), as a named vector that drops straight into metadata or
+  a test. `log_ratio()` is the log of the ratio of summed abundances, as
+  Qurro plots it (identical to Qurro's `qarcoal()`); it needs no
+  pseudocount by default, and gives `NA`, with one warning, where a sum is
+  0. `balance()` is the isometric log-ratio balance, the scaled log ratio
+  of geometric means: bit-identical to the matching coordinate of `ilr()`
+  with a sequential binary partition, and equal to scikit-bio's to 6e-16,
+  without building the full basis; zeros follow the shared `pseudocount`
+  rule over the whole table, and the output of `replace_zeros()` needs
+  none. Both take every table type and keep sparse tables sparse: 2,000
+  samples by 5,000 taxa take under 0.1 seconds.
+
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
   (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),

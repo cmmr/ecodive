@@ -39,7 +39,7 @@ same thing.
 | `tol` | a convergence tolerance | `mds`, `nmds`, `rpca`; planned `splsda` |
 | `init`, `learning_rate` | starting layout, step size | `tsne`, `umap`; planned `pacmap`, `largevis` |
 | `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights | planned `moran_i`, `dbmem` |
-| `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only); planned `log_ratio`, `balance`, `rho_p`, `phi_s` |
+| `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only), `log_ratio`, `balance`; planned `rho_p`, `phi_s` |
 | `basis` | **(new)** an ILR basis or a sequential binary partition | `ilr` |
 | `load` | **(new)** each sample's measured total microbial load | planned `qmp_scale`, `qmp_rarefy` |
 | `contrast` | **(new)** the samples compared, `c(treatment, reference)` | planned `dirmult_ttest` |

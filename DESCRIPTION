@@ -23,7 +23,7 @@ Authors@R: c(
     person(
       "scikit-bio development team",
       role    = c("ctb", "cph"),
-      comment = "PCoA biplot scores, BIOENV, the alr and ilr transforms, and multiplicative zero replacement, from scikit-bio"),
+      comment = "PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, and multiplicative zero replacement, from scikit-bio"),
     person(
       "NumPy Developers",
       role    = "cph",

@@ -374,13 +374,15 @@ License:
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: src/log_ratio_transforms.c R/log_ratio_transforms.r
+Files: src/log_ratio_transforms.c R/log_ratio_transforms.r src/log_ratio.c R/log_ratio.r
 Copyright: 2013-- scikit-bio development team
 Comment: alr() and ilr(), with their default (Gram-Schmidt / Helmert) basis,
  the conversion of a sequential binary partition and the basis checks, follow
  alr(), ilr(), _gram_schmidt_basis(), sbp_basis() and _check_basis() from
- scikit-bio 0.7.4 (skbio/stats/composition/_base.py). The rest of these
- files is Copyright 2026 ecodive authors, under the MIT license above.
+ scikit-bio 0.7.4 (skbio/stats/composition/_base.py). balance() is one
+ coordinate of ilr() with a sequential binary partition, through the same
+ sbp_basis(). The rest of these files, including log_ratio(), is Copyright
+ 2026 ecodive authors, under the MIT license above.
 License:
    Copyright (c) 2013--, scikit-bio development team.
    All rights reserved.

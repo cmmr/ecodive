@@ -152,3 +152,107 @@ balance  (counts, numerator, denominator, margin = 1L, pseudocount = NULL)
 - Rivera-Pinto, J., Egozcue, J. J., Pawlowsky-Glahn, V., et al. (2018).
   Balances: a new perspective for microbiome analysis. *mSystems*, 3,
   e00053-18.
+
+
+## Decisions made while implementing (item 16, 2026-11-19)
+
+Asked of the user at the start (all four answered with the recommended
+option):
+
+1. **`log_ratio(pseudocount = 0)`** stays the default, unlike the other
+   compositional functions' `NULL`: summing removes the need in almost
+   every case. A sample whose numerator or denominator sum is 0 gets `NA`
+   with one warning naming up to 5 samples (indices when unnamed): "1
+   sample ('s1') has a numerator or denominator that sums to 0, so its log
+   ratio is NA. A positive `pseudocount` gives it a value." `pseudocount =
+   NULL` is accepted too and applies the shared rule to the whole table.
+2. **Mixed selector forms** are allowed: each side is resolved on its own
+   (`numerator = c('a', 'b')`, `denominator = 5:7`).
+3. **`margin = 2`** returns the same named vector (one value per sample,
+   named after the columns): a vector has no orientation.
+4. **`balance(pseudocount = 0)`** is accepted (no pseudocount): a sample
+   with a zero in a selected feature gets `NA` with one warning ("... has a
+   zero in a numerator or denominator feature, so its balance is NA. Use
+   `pseudocount = NULL`, or replace_zeros() first, to give it a value.").
+   Zeros only in other features don't matter: the clr is then undefined,
+   but the balance is computed from the uncentred logs (the basis row sums
+   to 0, so centring cancels). `log_pseudocount()` gained `zero_ok = TRUE`
+   for this ("`pseudocount` must be a single non-negative number.");
+   `alr()`, `ilr()` and `norm = 'clr'` still refuse 0.
+
+Made while implementing:
+
+5. **Selectors: `feature_set(x, features, D, arg)`** in `R/log_ratio.r`,
+   beside `feature_index()` (unchanged, so `alr()` accepts exactly what it
+   did). Names, 1-based whole-number indices or a logical vector of length
+   D; factors become character. Errors: missing argument ("`numerator` is
+   required"), empty or all-FALSE, NA, a non-atomic value, unknown names
+   (up to 5 listed), indices outside 1..D (negative indices are not
+   exclusions), duplicates, names when `counts` has none, a logical of the
+   wrong length, and overlap ("must not share features, but they share 2
+   features: 'f2', 'f3'."). The `numerator` / `denominator` attributes are
+   the features **in the order of `counts`** (not the order given), names
+   or integer indices when unnamed.
+6. **C, not R, single-threaded, no `cpus`** (`src/log_ratio.c`:
+   `C_log_ratio()`, `C_balance()`), so every table type goes through
+   `new_ecomatrix()` and sparse tables stay sparse. `log_ratio_input()`
+   validates `cpus` only when the caller has one, and takes `dense_out =
+   FALSE` to skip the large-dense-result warning.
+   - `log_ratio`: `log(sum_N(x + c) / sum_D(x + c))`, sums in feature
+     order, Qurro's `log(Num_Sum / Denom_Sum)`.
+   - `balance`: the SBP row from `sbp_basis()` (as `ilr_basis()` stores
+     it), dotted with the clr of **all** D features computed exactly as
+     `ilr()`'s worker does, so `balance()` is **bit-identical** to the
+     matching `ilr()` coordinate (tested on every fixture case and after
+     `replace_zeros()`), and its sign flip is exact.
+   - Sparse 2,000 × 5,000 (10% dense), 1,500 selected features: 0.04 s
+     (log_ratio), 0.07 s (balance); dense input ~0.3 s, mostly validation
+     and conversion.
+7. **References** (`data-raw/expected/log_ratio.py` / `.r`, 20 cases over
+   5 tables: counts with zeros, scaled, sparse, wide (D = 60) and Dirichlet
+   proportions; two features, small groups, every feature, random sizes;
+   hex floats):
+   - scikit-bio 0.7.4 `ilr(x + pc, sbp_basis(sbp))[:, 0]`, the SBP's first
+     row being the balance and the rest completing it: max abs difference
+     **5.6e-16**.
+   - The closed form in numpy: 2.4e-15.
+   - **Qurro 0.9.0 `qarcoal()`** (BSD-3, licence checked in the PyPI sdist;
+     qiime2 stubbed, being only a type annotation): **bit-identical**,
+     including `NA` exactly where Qurro drops samples.
+   - `np.log(sum(x_N + 1) / sum(x_D + 1))`: 2.2e-16. Base R's
+     `log(rowSums / rowSums)`: within 1e-14 (rowSums uses long doubles).
+   - compositions 2.0.9 `balance(acomp(x), ~ (F1*F2)/(F3))` (GPL, output
+     only): 1.3e-15, same sign; stored in the fixture and tested.
+8. **Nothing is ported from Qurro** (its formula is one line), so Qurro
+   gets no `Authors@R` entry, file header or `inst/COPYRIGHTS` stanza; the
+   docs cite the paper. The balance's basis row is scikit-bio's
+   `sbp_basis()`, already credited: `src/log_ratio.c` carries the BSD-3
+   text, `R/log_ratio.r` points to it, the existing scikit-bio stanza now
+   lists both files, and the `Authors@R` comment mentions balances.
+9. **selbal and coda4microbiome were not run.** selbal's repository
+   (UVic-omics/selbal) wasn't reachable from this session, so its licence
+   is unchecked (treat it as output-only); selbal selects balances rather
+   than computing a given one. coda4microbiome is MIT (CRAN DESCRIPTION)
+   but needs Bioconductor's ComplexHeatmap, and its log-contrasts are
+   weighted `1/k` sums, a different scale. compositions' `balance()` covers
+   the cross-check instead.
+10. **A vector** is one sample (as `validate_counts()` makes it): a
+    length-1 result, unnamed.
+11. **Docs:** `log_ratio.Rd` (Zeros section; when to prefer which),
+    `balance.Rd` (Pseudocount section; "Same names": `compositions::
+    balance()`); pkgdown "Compositional Data" → "Log ratios"; NEWS;
+    `parameter_names.md` updated. `vlr()` / `rho_p()` are mentioned as
+    plain code, not links, until they exist.
+
+For later items:
+
+- **`vlr()` / `rho_p()` / `phi_s()` (`denominator`, `NULL` = the clr's
+  geometric mean):** use `feature_set()` for a multi-feature denominator,
+  and `log_ratio_input(what, zero_ok = , dense_out = )` for validation
+  (`cpus` is validated only when the function has one). Note that
+  `log_pseudocount(zero_ok = TRUE)` returns 0 for an explicit 0 without
+  checking for zeros: the caller must handle them.
+- **`philr()`:** a balance is the dot product of one CSR row with the clr;
+  `C_balance()` takes any (feature, coefficient) row, so a weighted PhILR
+  row can be checked against it, and `C_log_ratio_coords()` remains the
+  fast path for all D − 1 balances.

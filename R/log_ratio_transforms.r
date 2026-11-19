@@ -264,14 +264,17 @@ NULL
 
 
 # Checks the count table of a log-ratio transform in the calling function,
-# and sets its `counts` (a matrix the C code reads), `margin`, `cpus` and
+# and sets its `counts` (a matrix the C code reads), `margin`, `cpus` (if any) and
 # `pseudocount`. Returns the table's sizes and names. `what` names the
-# transform in error messages.
-log_ratio_input <- function (what, env = parent.frame()) {
+# transform in error messages. `zero_ok` accepts `pseudocount = 0` (see
+# log_pseudocount()); `dense_out = FALSE` (one value per sample) skips the
+# warning about a large dense result.
+log_ratio_input <- function (
+    what, env = parent.frame(), zero_ok = FALSE, dense_out = TRUE ) {
 
   validate_counts(env)
   validate_margin(env)
-  validate_cpus(env)
+  if (exists('cpus', envir = env, inherits = FALSE)) validate_cpus(env)
 
   counts <- env$counts
   margin <- env$margin
@@ -300,9 +303,10 @@ log_ratio_input <- function (what, env = parent.frame()) {
   if (D < 2L)
     stop('`counts` must have at least 2 features for ', what, '.', call. = FALSE)
 
-  env$pseudocount <- log_pseudocount(counts, env$pseudocount, what, constant_ok = TRUE)
+  env$pseudocount <- log_pseudocount(
+    counts, env$pseudocount, what, constant_ok = TRUE, zero_ok = zero_ok )
 
-  if (as.double(n) * (D - 1) > 1e8)
+  if (dense_out && as.double(n) * (D - 1) > 1e8)
     warning(
       sprintf('The result is a dense %s x %s matrix (%.1f GB).',
         n, D - 1, as.double(n) * (D - 1) * 8 / 1e9), call. = FALSE )

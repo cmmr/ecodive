@@ -333,8 +333,11 @@ validate_pseudocount <- function (env = parent.frame()) {
 # pseudocount to add to every value. NULL gives 0 when there are no zeros,
 # else half the smallest non-zero value, with a warning. `what` ends the
 # error messages ("cannot perform <what>."). `constant_ok = FALSE` (CLR
-# normalization) refuses a table of one repeated value.
-log_pseudocount <- function (counts, pseudocount, what, constant_ok = FALSE) {
+# normalization) refuses a table of one repeated value. `zero_ok = TRUE`
+# (log_ratio(), balance()) also accepts a given pseudocount of 0: none, with
+# the caller dealing with the zeros.
+log_pseudocount <- function (
+    counts, pseudocount, what, constant_ok = FALSE, zero_ok = FALSE ) {
 
   mtx_pkg <- get_matrix_package(counts)
   pc_vals <- stored_values(counts)
@@ -366,10 +369,12 @@ log_pseudocount <- function (counts, pseudocount, what, constant_ok = FALSE) {
         stopifnot(length(pseudocount) == 1)
         stopifnot(!is.na(pseudocount))
         stopifnot(is.finite(pseudocount))
-        stopifnot(isTRUE(pseudocount > 0))
+        stopifnot(isTRUE(pseudocount > 0) || (zero_ok && pseudocount == 0))
       },
       error = function (e) {
-        stop('`pseudocount` must be a single positive number.')
+        stop(
+          if (zero_ok) '`pseudocount` must be a single non-negative number.'
+          else         '`pseudocount` must be a single positive number.' )
     })
 
     return (pseudocount)

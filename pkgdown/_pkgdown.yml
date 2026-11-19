@@ -67,6 +67,11 @@ reference:
   contents:
   - alr
   - ilr
+- subtitle: Log ratios
+  desc: One log ratio per sample, between two groups of features, to use as a variable in tests and models.
+  contents:
+  - log_ratio
+  - balance
 
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.

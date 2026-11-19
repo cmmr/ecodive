@@ -56,6 +56,14 @@
     expect_true(all(is.finite(z)) && identical(dim(attr(z, 'basis')), c(11L, 12L)))
   }
 
+  # Log ratios.
+  z <- log_ratio(counts, c('F1', 'F2'), 3:5)
+  expect_true(is.numeric(z) && length(z) == 20 && all(is.finite(z)))
+  expect_identical(names(z), rownames(counts))
+  z <- balance(counts, c('F1', 'F2'), 3:5)
+  expect_true(is.numeric(z) && length(z) == 20 && all(is.finite(z)))
+  expect_identical(attr(z, 'method'), 'balance')
+
   # Zero replacement.
   cz <- counts; cz[cz < 4] <- 0L
   for (m in list_zero_replacements('id')) {
@@ -66,6 +74,7 @@
   z <- replace_zeros_mult(cz)
   expect_true(all(is.finite(z)) && all(z > 0) && identical(dimnames(z), dimnames(cz)))
   expect_true(is.finite(sum(alr(z, 'F1', cpus = cpus))))
+  expect_true(all(is.finite(balance(z, 1:3, 4:6))))
   expect_true('mult' %in% list_zero_replacements('id'))
   expect_identical(match_zero_replacement('multRepl')$id, 'mult')
 

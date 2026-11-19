@@ -10,6 +10,7 @@
 extern SEXP C_alpha_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_anosim(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_beta_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_balance(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_bioenv(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_blas_settable(void);
 extern SEXP C_blas_threads(SEXP);
@@ -21,6 +22,7 @@ extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_helmert_basis(SEXP);
 extern SEXP C_lda(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lda_loo(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_log_ratio(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_log_ratio_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -63,6 +65,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_alpha_div", (DL_FUNC) &C_alpha_div, 6},
   {"C_anosim",    (DL_FUNC) &C_anosim,    6},
   {"C_beta_div",  (DL_FUNC) &C_beta_div,  8},
+  {"C_balance",   (DL_FUNC) &C_balance,   5},
   {"C_bioenv",    (DL_FUNC) &C_bioenv,    5},
   {"C_blas_settable", (DL_FUNC) &C_blas_settable, 0},
   {"C_blas_threads",  (DL_FUNC) &C_blas_threads,  1},
@@ -74,6 +77,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_lda",       (DL_FUNC) &C_lda,       5},
   {"C_helmert_basis", (DL_FUNC) &C_helmert_basis, 1},
   {"C_lda_loo",   (DL_FUNC) &C_lda_loo,   5},
+  {"C_log_ratio", (DL_FUNC) &C_log_ratio, 5},
   {"C_log_ratio_coords", (DL_FUNC) &C_log_ratio_coords, 6},
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
