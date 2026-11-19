@@ -44,8 +44,8 @@ particular), **the per-method plans and this README win.**
 ## Licensing (read before porting anything)
 
 - ecodive is MIT. Port code **only** from permissively licensed sources:
-  MIT, BSD-2/3, Apache-2.0 or public domain. Each method plan names the
-  source and its license.
+  MIT, BSD-2/3, Apache-2.0, Artistic-2.0 or public domain. Each method plan
+  names the source and its license.
 - **GPL / LGPL / AGPL / CeCILL / non-commercial code is output-only:** run
   it to make test fixtures, but don't read its source to write ecodive's.
   This covers vegan, ade4, adespatial, ecodist, BiodiversityR, mixOmics,
@@ -61,6 +61,21 @@ particular), **the per-method plans and this README win.**
     isn't already credited.
 - Apache-2.0 code keeps the Apache text and notices (as
   `src/pcg_basic.c` does); it can't be relabelled MIT.
+- **Artistic-2.0 code** (allowed since 2026-11-19) keeps the Artistic text
+  and its copyright notice in each ported file; it can't be relabelled MIT.
+  Its section 4 also asks a modified version to:
+  - **document how it differs** from the original: say in the file header
+    that it is a modified port (e.g. "C port of <function> from <package>
+    <version>; restructured for ecodive, see the method's plan"), and list
+    user-visible differences in the Rd's "Differences from ..." section;
+  - **bear a different name** and not stop the original being installed
+    (section 4(b)): ecodive is a separate package, so this holds.
+- **Code derived from Artistic-2.0 code** but distributed under a
+  permissive licence (e.g. scikit-bio's `ancombc()`, written from ANCOMBC's
+  source and released as BSD-3) carries **both** notices: the permissive
+  one it was released under, and the Artistic-2.0 one of the code it came
+  from, with the "how it differs" line above. Then the file complies
+  whichever licence is held to apply.
 
 
 ## Where things go
