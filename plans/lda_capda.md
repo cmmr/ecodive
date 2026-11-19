@@ -1,6 +1,6 @@
 # `lda()` and `capda()`: linear discriminant analysis, and discriminant canonical analysis of principal coordinates
 
-**Priority:** 10 (`lda`) and 14 (`capda`). **Tier:**
+**Priority:** 10 (`lda`) and 24 (`capda`). **Tier:**
 - `lda()` is ported from scikit-learn (BSD-3).
 - `capda()` is *derived*: `pcoa()` followed by `lda()`, with the
   number of axes chosen as Anderson & Willis (2003) describe.
@@ -123,7 +123,7 @@ for `capscale()`, as already documented, so this is **`capda()`**.
 
 ## Decisions made while implementing (lda)
 
-Item 10 (`lda()` only; `capda()` is item 14 and still open).
+Item 10 (`lda()` only; `capda()` is item 24 and still open).
 
 Asked of the user at the start (2026-11-19), and answered:
 
@@ -186,7 +186,7 @@ Made while implementing:
    (scikit-learn's rule).
 8. **The singular error message** suggests "a few axes of pcoa() or pca()".
    The plan says to suggest `capda()`, which doesn't exist yet;
-   **item 14 should add `capda()` to `lda_singular()`'s message and to
+   **item 24 (formerly 14) should add `capda()` to `lda_singular()`'s message and to
    the "Singular tables" section of `lda()`'s docs**, and to the
    vignette's LDA paragraph (the plan's "point to `capda()` for microbiome
    tables").

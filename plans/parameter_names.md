@@ -39,6 +39,13 @@ same thing.
 | `tol` | a convergence tolerance | `mds`, `nmds`, `rpca`; planned `splsda` |
 | `init`, `learning_rate` | starting layout, step size | `tsne`, `umap`; planned `pacmap`, `largevis` |
 | `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights | planned `moran_i`, `dbmem` |
+| `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | planned `log_ratio`, `balance`, `alr`, `rho_p`, `phi_s` |
+| `basis` | **(new)** an ILR basis or a sequential binary partition | planned `ilr` |
+| `load` | **(new)** each sample's measured total microbial load | planned `qmp_scale`, `qmp_rarefy` |
+| `contrast` | **(new)** the samples compared, `c(treatment, reference)` | planned `dirmult_ttest` |
+| `part_weights`, `ilr_weights` | **(new)** PhILR's taxon and balance weights | planned `philr` |
+| `subjects`, `states` | **(new)** per-sample subject ids and time points / conditions | planned `ctf` |
+| `fit` | **(new)** a fitted result given to a post-hoc test | planned `ancombc_*` |
 | `cpus` | threads (always last) | everything threaded |
 
 
@@ -142,3 +149,18 @@ don't** (layouts optimised in a fixed number of dimensions).
   `n_` / `max_` rule.
 - **Method-specific `n_neighbors` defaults** (isomap 5, umap 15, pacmap
   10, phate 5, diffusion_map 15) follow each reference.
+
+
+## 5. Compositional plans (2026-11-19)
+
+The plans in [compositional.md](compositional.md) follow §1 and add the
+rows marked "(new)". Two choices worth recording:
+
+- **`reference` is not used as an argument name.** It would mean a
+  feature in `alr()` (scikit-bio's `ref_idx`) and a group in
+  `dirmult_ttest()` (scikit-bio's `reference`). They become `denominator`
+  and `contrast`.
+- **`n_draws`, `max_power_iters`, `n_test_samples`** follow the
+  `n_<unit>` / `max_<unit>` rule, renaming scikit-bio's `draws` and
+  gemelli's `max_iterations_rptm` / `n_test_samples`. `ctf()` takes
+  `n_starts` for gemelli's `n_initializations` (as in `mds()` / `nmds()`).

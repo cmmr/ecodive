@@ -29,7 +29,8 @@ gaps around them.
 | [proportionality.md](proportionality.md) | `vlr()`, `rho_p()`, `phi_s()` | port (scikit-bio `vlr`) + formula (propr output-only) |
 | [qmp.md](qmp.md) | `qmp_scale()`, `qmp_rarefy()`; per-sample `rarefy(depth =)` | formula over ecodive's `rarefy()` |
 | [ancom.md](ancom.md) | `ancom()` | port (scikit-bio) |
-| [dirmult_ttest.md](dirmult_ttest.md) | `dirmult_ttest()` | port (scikit-bio) |
+| [dirmult_ttest.md](dirmult_ttest.md) | `dirmult_ttest()` | port (scikit-bio; scale model from ALDEx3, MIT) |
+| [ancombc.md](ancombc.md) | `ancombc()`, `ancombc2()`; post-hoc `ancombc_global()`, `ancombc_pairwise()`, `ancombc_dunnett()`, `ancombc_trend()`; `structural_zeros()` | port (scikit-bio; derived from Artistic-2.0 ANCOMBC: user to confirm) |
 | [philr.md](philr.md) | `philr()`, `philr_distance()` | port (basis, scikit-bio / gneiss) + formula (weights; philr output-only) |
 | [rpca_phylo.md](rpca_phylo.md) | `rpca_phylo()` | port (gemelli) on ecodive's `rpca()` |
 | [rpca_joint.md](rpca_joint.md) | `rpca_joint()` | port (gemelli) |
@@ -39,14 +40,20 @@ gaps around them.
 
 **Not planned** (reasons in the method plans that mention them):
 
-- **SparCC:** no clearly permissive reference (the original's license is
-  unclear; FastSpar is GPL-3), and it's an iterative approximation that
-  `rho_p()` largely replaces for the same question.
-- **ANCOM-BC / ANCOM-BC2:** Artistic-2.0, which README.md doesn't list as
-  permissive, and a substantial clean-room estimator. Revisit only on
-  request.
-- **scikit-bio `dirmult_lme()`:** needs a linear mixed-model fitter
-  (statsmodels), which ecodive doesn't have.
+- **SparCC:** the original's license is unknown (its Bitbucket repository
+  is gone), FastSpar and SpiecEasi are GPL-3, and the MIT/BSD Python ports
+  (dlegor/SparCC, fast_sparCC) say they follow the original closely, so
+  their provenance is unclear. It could be written clean-room from
+  Friedman & Alm (2012, CC-BY); not planned now, since `rho_p()` answers
+  the same question without SparCC's sparsity assumption.
+- **ALDEx2 itself, LinDA, MaAsLin2/3:** `dirmult_ttest()` covers the
+  ALDEx2 approach; LinDA is GPL-3; MaAsLin2/3 are MIT and could be ported
+  later, but they are general regression frameworks rather than
+  compositional methods.
+- **scikit-bio `dirmult_lme()`:** its default path is a closed-form
+  random-intercept REML fit (`_lme.py`) that could be ported, but parity
+  needs its grid and golden-section search and statsmodels-style standard
+  errors reproduced exactly; revisit after `dirmult_ttest()`.
 - **Compositional alpha diversity:** Shannon, Simpson and the Hill numbers
   are computed from proportions already, so they are scale invariant.
 - **New compositional tests:** PERMANOVA, PERMDISP, ANOSIM, MRPP and the
@@ -59,7 +66,9 @@ gaps around them.
 - **Families share a prefix** (rule 2), so they sort together:
   `replace_zeros_*`, `qmp_*`, `rpca_*`.
 - **Standard acronyms stay** where the field uses them as function names
-  (rule 1): `alr`, `ilr`, `philr`, `vlr`, `ancom`, `ctf`.
+  (rule 1): `alr`, `ilr`, `philr`, `vlr`, `ancom`, `ancombc`, `ancombc2`,
+  `ctf`. ANCOM-BC's post-hoc tests take its fitted result, so they are
+  `ancombc_<test>` (rule 2); `structural_zeros()` is spelled out (rule 4).
 - **Spelled out or qualified where an acronym would mislead** (rule 4):
   - `rho_p()`, not `rho()` (Spearman's ρ) — the ρp of Erb & Notredame
     (2016);
@@ -88,7 +97,11 @@ gaps around them.
 | `basis` | an ILR basis, or a sequential binary partition | `ilr` |
 | `load` | each sample's measured total microbial load | `qmp_scale`, `qmp_rarefy` |
 | `contrast` | the samples to compare, `c(treatment, reference)`; `reference = NA` pools all other samples | `dirmult_ttest` |
-| `part_weights`, `ilr_weights` | PhILR's taxon and balance weights (philr's `part.weights`, `ilr.weights`) | `philr`, `philr_distance` |
+| `part_weights`, `ilr_weights` | PhILR's taxon and balance weights (philr's `part.weights`, `ilr.weights`) | `philr` |
+| `subjects`, `states` | per-sample subject ids and time points / conditions | `ctf` |
+| `test_samples`, `n_test_samples` | held-out samples for cross-validation | `rpca_joint` |
+| `max_power_iters` | a cap on power-method iterations (`max_<unit>` rule) | `ctf` |
+| `fit` | a fitted result passed to a post-hoc test | `ancombc_global`, `ancombc_pairwise`, `ancombc_dunnett`, `ancombc_trend` |
 | `n_draws` | an exact number of Monte Carlo draws (`n_<unit>` rule) | `dirmult_ttest` |
 | `delta`, `frac` | the replacement value (proportion) and the fraction of the detection limit | `replace_zeros_mult` (`delta`), `replace_zeros_czm` (`frac`) |
 
@@ -129,7 +142,7 @@ say which.
 | Sample distances | `dist` | `philr_distance()` | every `dm` function, `dist_ord()`, `dist_test()` |
 | Feature associations | `dist` over **features** (packed lower triangle, as `beta_div()`), attribute `method` | `vlr()`, `rho_p()`, `phi_s()` | `pcoa()`/`hclust()` of features (`vlr`, `phi_s`); thresholding into networks (`rho_p`) |
 | Ordinations | `ecodive_ord` from `ord_result()` (`method`, `eig`, `prop`, then extras such as `loadings`) | `rpca_phylo()`, `rpca_joint()`, `ctf()` | `envfit()`, `procrustes()`, plotting; `pcoa_biplot()`-style use of `loadings` |
-| Per-feature results | `data.frame` of class `c('ecodive_<name>', 'data.frame')`, one row per feature; first column `feature`; then the method's statistics; then `p_value`, `p_adjusted` (where defined) and `reject` (logical) | `ancom()`, `dirmult_ttest()` | filtering, plotting; the shared columns let a future wrapper combine them |
+| Per-feature results | `data.frame` of class `c('ecodive_<name>', 'data.frame')`, one row per feature (per feature × covariate for model-based methods, with a `covariate` column second); first column `feature`; then the method's statistics; then `p_value`, `p_adjusted` (where defined) and `reject` (logical) | `ancom()`, `dirmult_ttest()`, `ancombc()`, `ancombc2()` and their post-hoc tests | filtering, plotting; the shared columns let a future wrapper combine them |
 
 `replace_zeros_*()` return proportions (each sample sums to 1), as
 scikit-bio's `multi_replace()` and zCompositions' default `output =
@@ -163,9 +176,10 @@ proportions lose nothing.
   - `vlr()`, `rho_p()`, `phi_s()`: three functions with one signature, so
     a wrapper is possible (`propr()` is one). Not yet: revisit if more
     feature-association measures arrive.
-  - `ancom()`, `dirmult_ttest()`: per-feature tables, which README.md keeps
-    out of wrappers. Their shared columns (above) leave room for a
-    `feature_test()` wrapper later if a third method joins.
+  - `ancom()`, `dirmult_ttest()`, `ancombc()`, `ancombc2()`: per-feature
+    tables, which README.md keeps out of wrappers, and their inputs differ
+    (`groups` vs `formula`). Their shared columns (above) leave room for a
+    differential-abundance wrapper later if the user wants one.
   - `qmp_scale()`, `qmp_rarefy()`: need `load`.
   - `rpca_joint()` (several tables) and `ctf()` (subjects × times): two
     inputs or a different output; README.md keeps those as plain
@@ -198,7 +212,8 @@ Nothing needs splitting.
     `normalize` (clr, rclr);
   - *Log ratios*: `log_ratio`, `balance`;
   - *Proportionality*: `vlr`, `rho_p`, `phi_s`;
-  - *Differential abundance*: `ancom`, `dirmult_ttest`;
+  - *Differential abundance*: `ancom`, `ancombc`, `ancombc2`, the
+    `ancombc_*` post-hoc tests, `structural_zeros`, `dirmult_ttest`;
   - *Absolute abundance*: `qmp_scale`, `qmp_rarefy`.
   `philr_distance` goes under Beta Diversity → Phylogenetic metrics; the
   `rpca_*` and `ctf` under Ordination.

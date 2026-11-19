@@ -1,6 +1,6 @@
 # `varpart()` and `forward_select()`: variation partitioning and forward selection
 
-**Priority:** 12 (`varpart`) and 13 (`forward_select`). **Tier:**
+**Priority:** 22 (`varpart`) and 23 (`forward_select`). **Tier:**
 *derived*. No permissive code exists, but both are thin layers over
 `rda()` and `dbrda()` plus published formulas. **Requires
 [rda.md](rda.md) first** (partial RDA). Read [README.md](README.md) first.

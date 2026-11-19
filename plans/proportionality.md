@@ -1,6 +1,6 @@
 # `vlr()`, `rho_p()` and `phi_s()`: proportionality between features
 
-**Priority:** see [TODO.md](TODO.md). **Tier:** port (`vlr()` from
+**Priority:** 15. **Tier:** port (`vlr()` from
 scikit-bio's `vlr` / `pairwise_vlr`, BSD-3) + formula (`rho_p()`, `phi_s()`;
 propr is GPL and output-only). Read [README.md](README.md) first, and
 [compositional.md](compositional.md) for the conventions the compositional
@@ -63,9 +63,12 @@ phi_s(counts, margin = 1L, denominator = NULL, pseudocount = NULL, cpus = n_cpus
   - propr's `ivar = "iqlr"` (a clr over the features with mid-range
     variance) isn't planned; mention it.
 - `pseudocount`: the shared rule (see compositional.md). The recommended
-  input is a `replace_zeros_*()` result. **Check what propr does with
-  zeros** (from its documentation only: it is GPL) and say in the docs
-  how to reproduce it (e.g. `pseudocount = 1`).
+  input is a `replace_zeros_*()` result. Quinn et al. (2017) say propr
+  "automatically replaces all zero values with 1" (check that propr 5.x
+  still does, from its documentation or outputs only: it is GPL); the docs
+  should say how to reproduce it. Replacing only the zeros by 1 isn't
+  `pseudocount = 1` (which adds 1 everywhere), so fixtures use zero-free
+  tables.
 - Pairs are taken **between features** (columns when `margin = 1`); the
   variance is over samples.
 
@@ -156,7 +159,9 @@ association measures are added.
   Generated fixtures committed as text under
   `data-raw/expected/proportionality/`.
 - **`rho_p()`, `phi_s()`:** formulas from Erb & Notredame (2016) and Quinn
-  et al. (2017). propr (GPL-2/3; check) is **output-only**: fixtures from
+  et al. (2017, Eqs. 4 and 5; note \eqn{\phi_s = (1 - \rho_p)/(1 + \rho_p)}).
+  propr (GPL-2; archived from CRAN on 2022-11-10, now GitHub tpq/propr
+  5.1.8) is **output-only**: install it from GitHub; fixtures from
   `propr::propr(counts, metric = "rho")` and `metric = "phs"`, with
   `ivar = "clr"` and with an alr index, matched at 1e-10 after the same
   zero handling.

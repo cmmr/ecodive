@@ -1,6 +1,6 @@
 # `ancom()`: analysis of composition of microbiomes
 
-**Priority:** see [TODO.md](TODO.md). **Tier:** port (scikit-bio 0.7.4,
+**Priority:** 17. **Tier:** port (scikit-bio 0.7.4,
 `skbio/stats/composition/_ancom.py`, BSD-3). Read [README.md](README.md)
 first, and [compositional.md](compositional.md) for the conventions the
 compositional plans share.
@@ -17,8 +17,8 @@ and features with a large W are declared differentially abundant.
 
 It was the first widely used compositionally aware differential-abundance
 method and is still in QIIME 2 (`composition ancom`). ANCOM-BC / ANCOM-BC2
-(Lin & Peddada 2020, 2024) are its successors; they aren't planned
-(Artistic-2.0; see compositional.md).
+(Lin & Peddada 2020, 2024) are its successors, planned separately as
+`ancombc()` / `ancombc2()` (see [ancombc.md](ancombc.md)).
 
 The work is \eqn{D(D-1)/2} independent tests, which suits ecodive's
 threaded C well: scikit-bio's version is slow on thousands of features.
@@ -151,8 +151,8 @@ A per-feature table, the shared structure in compositional.md:
 
 - Rd page in "Compositional Data", subtitle "Differential abundance".
 - Say that ANCOM gives no effect size or p-value per feature, only W and a
-  decision; point to `dirmult_ttest()` for effect sizes and to ANCOM-BC2
-  (another package) for bias-corrected estimates.
+  decision; point to `dirmult_ttest()` for effect sizes and to `ancombc()` /
+  `ancombc2()` for bias-corrected estimates.
 - Document the row-adjustment quirk and that ecodive keeps it to match.
 - NEWS.
 

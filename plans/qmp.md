@@ -1,7 +1,8 @@
 # `qmp_scale()` and `qmp_rarefy()`: quantitative microbiome profiling
 
-**Priority:** see [TODO.md](TODO.md). **Tier:** formula (both are a few
-lines over ecodive's own `rarefy()` C code). Read [README.md](README.md)
+**Priority:** 16. **Tier:** port (`qmp_rarefy()`:
+the authors' `QMP.R`, raeslab/QMP, BSD-3, © 2017 Raes Lab) and formula
+(`qmp_scale()`), both a few lines over ecodive's own `rarefy()` C code. Read [README.md](README.md)
 first, and [compositional.md](compositional.md) for the conventions the
 compositional plans share.
 
@@ -83,12 +84,18 @@ Vandeputte et al. (2017), Methods, "Quantitative microbiome profiling":
 4. Scale the rarefied counts to the load:
    \eqn{q_{ij} = r_{ij} / t_i \times L_i}.
 
-- **Check steps 3 and 4 against the authors' script** (raeslab's `QMP`
-  R code, `rarefy_even_sampling_depth()`), whose license must be
-  established before reading it (see "References"): whether it uses
-  floor or round in step 3, and whether step 4 divides by \eqn{t_i} (as
-  above) or by \eqn{s_{min}} (the two differ only by the rounding in
-  step 3). Match it.
+- **The authors' script** (`QMP.R`, BSD-3; read): rounds the
+  (copy-number corrected) table **up** with `ceiling()` first; computes
+  \eqn{s_i} and the targets \eqn{L_i s_{min}} as above; rarefies each
+  sample with `phyloseq::rarefy_even_depth(rngseed = 711)` (phyloseq is
+  AGPL: don't read it; ecodive's own `rarefy()` replaces it); and returns
+  the rarefied counts **divided by their row sum** times \eqn{L_i} (so
+  step 4 divides by the achieved total, \eqn{t_i}). Two things to settle
+  from outputs: how a non-integer target is turned into a whole number of
+  reads (floor is the natural reading; run the script on a table where it
+  matters), and whether `qmp_rarefy()` should apply the `ceiling()` too
+  (recommended: no, require integer counts and say how to reproduce the
+  script with `ceiling()`).
 - Counts must be integers (`assert_integer_counts()`, as `rarefy()`).
 - **Reuse `src/rarefy.c`.** Generalise `C_rarefy` to take a per-sample
   target (a vector; a length-1 vector keeps today's behaviour) in place of
@@ -131,12 +138,11 @@ worth it.
 
 ## Reference implementations
 
-- **`qmp_rarefy()`:** the authors' R script, `rarefy_even_sampling_depth()`
-  (GitHub, raeslab/QMP). **Before reading its source, check its license.**
-  If it is MIT/BSD/Apache, port it and credit it as README.md requires.
-  If it is GPL or unlicensed, it is output-only: write the function from
-  the paper (the four steps above) and use the script only to make
-  fixtures. Rarefaction is random, so compare only the deterministic parts
+- **`qmp_rarefy()`:** the authors' `QMP.R` (https://github.com/raeslab/QMP,
+  BSD-3, © 2017 Raes Lab): port it and credit it in `inst/COPYRIGHTS` and
+  `Authors@R` as README.md requires. Its rarefaction calls phyloseq (AGPL,
+  output-only), so fixtures come from running the script; rarefaction is
+  random, so compare only the deterministic parts
   exactly (\eqn{s_i}, \eqn{t_i}, each sample's total after rarefying) and
   the rest by distribution (the mean over many seeds approaches
   \eqn{x_{ij} / n_i \times L_i}).

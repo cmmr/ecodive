@@ -1,6 +1,6 @@
 # `log_ratio()` and `balance()`: one log ratio per sample
 
-**Priority:** see [TODO.md](TODO.md). **Tier:** port (Qurro, BSD-3, for
+**Priority:** 14. **Tier:** port (Qurro, BSD-3, for
 `log_ratio()`; scikit-bio / gneiss, BSD-3, for the balance formula).
 Read [README.md](README.md) first, and [compositional.md](compositional.md)
 for the conventions the compositional plans share.

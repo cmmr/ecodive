@@ -1,6 +1,6 @@
 # `dca()`: detrended correspondence analysis
 
-**Priority:** 27. **Tier:** clean room, and **superseded**. vegan
+**Priority:** 41. **Tier:** clean room, and **superseded**. vegan
 `decorana()` (GPL-2) is output-only. **Build after `ca()`**
 ([cca_ca.md](cca_ca.md)). Read [README.md](README.md) first.
 

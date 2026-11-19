@@ -1,6 +1,6 @@
 # `coinertia()`: co-inertia analysis, with the RV coefficient and its test
 
-**Priority:** 24. **Tier:** clean room for the weighted analysis; port the
+**Priority:** 38. **Tier:** clean room for the weighted analysis; port the
 RV coefficient from hoggorm (BSD-2). ade4 (GPL) is output-only. Read
 [README.md](README.md) first.
 

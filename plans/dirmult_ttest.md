@@ -1,9 +1,9 @@
 # `dirmult_ttest()`: Dirichlet-multinomial Welch t-tests on clr draws
 
-**Priority:** see [TODO.md](TODO.md). **Tier:** port (scikit-bio 0.7.4,
+**Priority:** 18. **Tier:** port (scikit-bio 0.7.4,
 `skbio/stats/composition/_dirmult.py`, BSD-3), with an optional
-clean-room addition (ALDEx2-style scale uncertainty; ALDEx2 is
-output-only). Read [README.md](README.md) first, and
+scale-uncertainty addition ported from ALDEx3 (CRAN 1.4.0, **MIT**;
+ALDEx2 itself is GPL and output-only). Read [README.md](README.md) first, and
 [compositional.md](compositional.md) for the conventions the
 compositional plans share.
 
@@ -132,9 +132,19 @@ controls false positives. ALDEx2 exposes it as `aldex.clr(gamma = )`.
   `scale_sd = 0` (no scale model, scikit-bio's behaviour). Not `gamma`,
   which `phate()` uses for something else, and not `scale`, which means
   standardisation (parameter_names.md).
-- Write it from Nixon et al. (2024) and ALDEx2's **documentation**
-  (ALDEx2 is GPL: no source). Fixtures from `ALDEx2::aldex.clr(gamma =)`
-  can only be compared by distribution.
+- The model (Nixon, Gloor & Silverman 2025, Methods; ALDEx2 vignette):
+  per Monte Carlo draw, \eqn{\log_2 W^\perp_n = -\overline{\log_2
+  W^\parallel_{\cdot n}} + \Lambda x_n} with \eqn{\Lambda \sim N(0,
+  \gamma^2)} drawn **once per draw and shared within a condition**
+  (\eqn{x_n} the 0/1 condition code); \eqn{\gamma = 0} gives back the
+  clr. Recommended \eqn{\gamma = 0.5}. Base-2 logs: convert to natural
+  logs carefully.
+- **Port from ALDEx3** (MIT; `clr.sm(X, logComp, gamma = 0.5)` and
+  related scale-model functions): read its code, credit it in
+  `inst/COPYRIGHTS`. Check whether it draws the noise per condition or per
+  sample (ALDEx2's numeric-`gamma` path is undocumented on this) and
+  follow ALDEx3. ALDEx2's own code stays unread (GPL); fixtures from
+  `ALDEx2::aldex.clr(gamma =)` / ALDEx3 compare by distribution.
 - Ship the port first; add this in a second commit.
 
 ### Result
@@ -196,9 +206,12 @@ The shared per-feature structure (compositional.md):
 - Fernandes, A. D., Reid, J. N. S., Macklaim, J. M., McMurrough, T. A.,
   Edgell, D. R., & Gloor, G. B. (2014). Unifying the analysis of
   high-throughput sequencing datasets. *Microbiome*, 2, 15.
+- Nixon, M. P., Gloor, G. B., & Silverman, J. D. (2025). Incorporating
+  scale uncertainty into differential expression analyses using ALDEx2.
+  *Genome Biology*, 26, 139. doi:10.1186/s13059-025-03609-3
 - Nixon, M. P., McGovern, K. C., Letourneau, J., David, L. A., Lazar, N.
   A., Mukherjee, S., & Silverman, J. D. (2024). Scale reliant inference.
-  *arXiv*:2201.03616 (check for the journal version).
+  *arXiv*:2201.03616.
 - Nearing, J. T., Douglas, G. M., Hayes, M. G., et al. (2022). Microbiome
   differential abundance methods produce different results across 38
   datasets. *Nature Communications*, 13, 342.

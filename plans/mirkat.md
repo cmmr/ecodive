@@ -1,6 +1,6 @@
 # `mirkat()`: microbiome regression-based kernel association test
 
-**Priority:** 22. **Tier:** clean room. Write it from Zhao et al. (2015),
+**Priority:** 36. **Tier:** clean room. Write it from Zhao et al. (2015),
 with p-values from Davies (1980) or Liu, Tang & Zhang (2009). MiRKAT (GPL)
 and CompQuadForm (GPL) are output-only. Read [README.md](README.md) first.
 

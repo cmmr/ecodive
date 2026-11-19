@@ -1,6 +1,6 @@
 # `alr()` and `ilr()`: log-ratio coordinates
 
-**Priority:** see [TODO.md](TODO.md). **Tier:** port (scikit-bio 0.7.4,
+**Priority:** 12. **Tier:** port (scikit-bio 0.7.4,
 `skbio/stats/composition/_base.py`, BSD-3). Read [README.md](README.md)
 first, and [compositional.md](compositional.md) for the conventions the
 compositional plans share.
