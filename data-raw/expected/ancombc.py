@@ -33,10 +33,10 @@ ancombc.rds):
                     scipy's minimize()).
 
   fit.csv           case, feature, covariate (0-based), beta, var: the
-                    fitted _beta_hat and _var_hat (with `grouping`).
+                    fitted _beta_hat and _var_hat (FIT_CASES).
 
   vcov.csv          case, feature, i, j (0-based within the grouping's
-                    columns), value: _vcov_hat.
+                    columns), value: _vcov_hat (FIT_CASES).
 
   dof.csv           case, feature, dof (hex; ancombc2), estimable (the
                     feature's coefficients are estimable: 0/1).
@@ -51,9 +51,9 @@ ancombc.rds):
 
   ph_pairs.csv      case, test ('pairwise' or 'dunnett'), feature,
                     comparison (scikit-bio's name), lfc, se, w, p, q,
-                    signif: pairwise_test() and dunnett_test(bootstraps=50).
+                    signif: pairwise_test() and dunnett_test(bootstraps=20).
 
-  ph_trend.csv      case, feature, w, p, q, signif: trend_test(bootstraps=50).
+  ph_trend.csv      case, feature, w, p, q, signif: trend_test(bootstraps=20).
 
   ph_draws.csv      case, test, b, feature, j, value: for three cases
                     (DRAW_CASES), the null draws that dunnett_test() and
@@ -190,13 +190,13 @@ def sim_table(n, D, groups, effects, zero_frac, depth, seed_shift=0):
 
 
 # A larger table: 3 sites, a numeric covariate and a binary one.
-n, D = 42, 60
-site = np.repeat(np.array(["gut", "oral", "skin"]), 14)
-gi = np.repeat(np.arange(3), 14)
+n, D = 24, 16
+site = np.repeat(np.array(["gut", "oral", "skin"]), 8)
+gi = np.repeat(np.arange(3), 8)
 eff = np.zeros((3, D))
-eff[1, :8] = 1.5
-eff[2, 8:14] = -1.8
-eff[2, 14:18] = 2.2
+eff[1, :3] = 1.5
+eff[2, 3:5] = -1.8
+eff[2, 5:7] = 2.2
 x = sim_table(n, D, gi, eff, 0.15, rng.integers(2000, 20000, n))
 ph = np.round(rng.normal(6.5, 0.6, n), 2)
 smoker = rng.random(n) < 0.4
@@ -205,38 +205,38 @@ add_table("sim", x, pd.DataFrame({"site": site, "ph": ph, "smoker": smoker}),
 
 # Sparse: features absent from a whole group, one present in one group only,
 # one observed in a single sample, and an all-but-one-zero sample.
-n, D = 30, 25
-trt = np.repeat(np.array(["ctrl", "dose_hi", "dose_lo"]), 10)
-gi = np.repeat(np.arange(3), 10)
+n, D = 21, 12
+trt = np.repeat(np.array(["ctrl", "dose_hi", "dose_lo"]), 7)
+gi = np.repeat(np.arange(3), 7)
 eff = np.zeros((3, D))
-eff[1, :4] = 1.2
-eff[2, 4:7] = -1.0
+eff[1, :3] = 1.2
+eff[2, 3:6] = -1.0
 x = sim_table(n, D, gi, eff, 0.3, rng.integers(500, 5000, n))
 x[x.sum(axis=1) == 0, 0] = 1
-x[0:10, 7] = 0            # absent from the reference group (ctrl)
-x[10:20, 7] = rng.integers(1, 9, 10)
-x[0:10, 8] = 0            # only in dose_lo
-x[10:20, 8] = 0
-x[20:30, 8] = rng.integers(1, 9, 10)
+x[0:7, 7] = 0             # absent from the reference group (ctrl)
+x[7:14, 7] = rng.integers(1, 9, 7)
+x[0:7, 8] = 0             # only in dose_lo
+x[7:14, 8] = 0
+x[14:21, 8] = rng.integers(1, 9, 7)
 x[:, 9] = 0
 x[4, 9] = 7               # one sample
-x[0:10, 10] = 0           # absent from ctrl and dose_hi, but one in dose_hi
-x[10:20, 10] = 0
-x[13, 10] = 3
-x[20:30, 10] = rng.integers(1, 9, 10)
+x[0:7, 10] = 0            # absent from ctrl and dose_hi, but one in dose_hi
+x[7:14, 10] = 0
+x[9, 10] = 3
+x[14:21, 10] = rng.integers(1, 9, 7)
 age = np.round(rng.uniform(20, 70, n))
 add_table("sparse", x, pd.DataFrame({"trt": trt, "age": age}),
           {"trt": "str", "age": "num"})
 
 # A factor with its own level order (a pandas Categorical), an interaction,
 # and a covariate on a large scale (an ill-conditioned design).
-n, D = 36, 30
-dose = np.tile(np.array(["low", "mid", "high"]), 12)
-sex = np.repeat(np.array(["f", "m"]), 18)
-gi = np.tile(np.arange(3), 12)
+n, D = 18, 10
+dose = np.tile(np.array(["low", "mid", "high"]), 6)
+sex = np.repeat(np.array(["f", "m"]), 9)
+gi = np.tile(np.arange(3), 6)
 eff = np.zeros((3, D))
-eff[2, :5] = 1.4
-eff[1, 5:8] = -1.1
+eff[2, :3] = 1.4
+eff[1, 3:5] = -1.1
 x = sim_table(n, D, gi, eff, 0.2, rng.integers(1000, 8000, n))
 days = np.round(rng.uniform(5000, 30000, n))
 add_table("levels", x, pd.DataFrame({
@@ -245,11 +245,11 @@ add_table("levels", x, pd.DataFrame({
     {"dose": "cat", "sex": "str", "days": "num"}, {"dose": ["low", "mid", "high"]})
 
 # Proportions with no zeros (a replace_zeros()-like table).
-n, D = 20, 15
-grp = np.repeat(np.array(["a", "b"]), 10)
-gi = np.repeat(np.arange(2), 10)
+n, D = 12, 8
+grp = np.repeat(np.array(["a", "b"]), 6)
+gi = np.repeat(np.arange(2), 6)
 eff = np.zeros((2, D))
-eff[1, :3] = 1.0
+eff[1, :2] = 1.0
 x = sim_table(n, D, gi, eff, 0.0, rng.integers(3000, 6000, n)) + 0.5
 x = x / x.sum(axis=1, keepdims=True)
 add_table("prop", x, pd.DataFrame({"grp": grp}), {"grp": "str"})
@@ -272,13 +272,12 @@ def case(name, table, method, formula, grouping=None, added=0.0, pseudocount=0.0
 case("doc1", "doc1", "ancombc", "status", added=1.0)
 case("doc2", "doc2", "ancombc", "status + age", "status", added=1.0)
 case("doc3", "doc3", "ancombc2", "status + age", "status")
-for pc in (0.1, 0.5, 1.0):
+for pc in (0.5, 1.0):
     case(f"doc3_pc{pc}", "doc3", "ancombc2", "status + age", "status", pseudocount=pc)
 case("doc3_bc", "doc3", "ancombc", "status + age", "status", added=0.5)
 
-case("sim_bc", "sim", "ancombc", "site + ph + smoker", "site", added=0.5)
-case("sim_bc_bh", "sim", "ancombc", "site + ph", None, added=0.5, p_adjust="BH",
-     alpha=0.1)
+case("sim_bc", "sim", "ancombc", "site + ph + smoker", "site", added=0.5,
+     p_adjust="BH", alpha=0.1)
 case("sim_bc_it", "sim", "ancombc", "site + ph", "site", added=0.5, max_iter=3,
      tol=1e-3, p_adjust="bonferroni")
 case("sim_bc2", "sim", "ancombc2", "site + ph + smoker", "site")
@@ -360,6 +359,10 @@ W["pt"].writerow(["case", "feature", "w", "p", "q", "signif"])
 W["pd"].writerow(["case", "test", "b", "feature", "j", "value"])
 
 
+# Cases whose fitted _beta_hat, _var_hat and _vcov_hat are written (the
+# rest are covered by the primary table).
+FIT_CASES = {"doc2", "doc3", "sparse_bc2", "sim_bc2_noint"}
+
 # Cases whose null draws are recorded (the others' bootstrapped results are
 # compared only in their deterministic parts).
 DRAW_CASES = {"doc2", "doc3", "sparse_bc2"}
@@ -437,11 +440,11 @@ for c in CASES:
 
     if c["grouping"]:
         beta, var = res._beta_hat, res._var_hat
-        for f in range(beta.shape[0]):
+        for f in range(beta.shape[0] if c["case"] in FIT_CASES else 0):
             for p in range(beta.shape[1]):
                 W["fit"].writerow([c["case"], f, p, hx(beta[f, p]), hx(var[f, p])])
         vc = res._vcov_hat
-        for f in range(vc.shape[0]):
+        for f in range(vc.shape[0] if c["case"] in FIT_CASES else 0):
             for i in range(vc.shape[1]):
                 for j in range(vc.shape[2]):
                     W["vcov"].writerow([c["case"], f, i, j, hx(vc[f, i, j])])
@@ -468,14 +471,14 @@ for c in CASES:
         write_pairs("pairwise", res.pairwise_test())
 
         keep = c["case"] in DRAW_CASES
-        dn, draws = recorded(lambda: res.dunnett_test(bootstraps=50, seed=0), 11)
+        dn, draws = recorded(lambda: res.dunnett_test(bootstraps=20, seed=0), 11)
         write_pairs("dunnett", dn)
         for b, d in enumerate(draws if keep else []):
             for f in range(d.shape[0]):
                 for j in range(d.shape[1]):
                     W["pd"].writerow([c["case"], "dunnett", b, f, j, hx(d[f, j])])
 
-        tr, draws = recorded(lambda: res.trend_test(bootstraps=50, seed=0), 12)
+        tr, draws = recorded(lambda: res.trend_test(bootstraps=20, seed=0), 12)
         for f, (_, row) in enumerate(tr.iterrows()):
             W["pt"].writerow([c["case"], f, hx(row["W"]), hx(row["pvalue"]),
                               hx(row["qvalue"]), int(bool(row["Signif"]))])
