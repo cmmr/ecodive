@@ -24,8 +24,10 @@
 #'        factor, character or logical vector gives each value its own
 #'        colour, in the order of a factor's levels; a numeric vector gives a
 #'        colour gradient (convert it with `factor()` for one colour per
-#'        value). By default, the groups that [lda()], [plsda()] and
-#'        [oplsda()] store in their `groups` attribute, if any.
+#'        value). A factor's unused levels keep their colours, so that
+#'        plots of subsets match, but are left out of the legend. By
+#'        default, the groups that [lda()], [plsda()] and [oplsda()] store in
+#'        their `groups` attribute, if any.
 #'
 #' @param data  A data frame of sample metadata, with one row per sample
 #'        (matched by row name, else in order), when `groups` names one of
@@ -33,7 +35,8 @@
 #'
 #' @param axes  Which two axes to plot, by number, as in [envfit()]. Default
 #'        `c(1, 2)`. A result with only one axis (such as [lda()] of two
-#'        groups) is drawn as a strip chart, with one strip per group.
+#'        groups) is drawn as a strip chart, with one strip per group (in
+#'        which case `axes` is not used).
 #'
 #' @param loadings  How many of the features in the `loadings` attribute to
 #'        draw, those furthest from the origin on the plotted axes first: a
@@ -161,15 +164,17 @@ plot.ecodive_ord <- function (
   # One axis: a strip chart, one strip per group.
   #--------------------------------------------------
   if (ncol(x) == 1) {
-    v <- xy[, 1]
-    s <- if (is.null(g$f)) list(v) else split(v, g$f)
+    strip <- if (is.null(g$f)) rep(1L, nrow(x)) else match(as.integer(g$f), which(look$used))
     plot_do(
-      graphics::stripchart, c(list(s), args),
+      graphics::plot.default, c(list(strip, xy[, 1]), args),
       list(
-        method = 'overplot', vertical = TRUE, pch = look$pch,
-        col = if (is.null(g$f)) look$col else look$pal,
-        xlim = c(0.5, length(s) + 0.5), main = main, sub = sub, ylab = labs[[1]],
-        group.names = if (is.null(g$f)) '' else levels(g$f) ))
+        col = look$col, pch = look$pch, xaxt = 'n',
+        xlim = c(0.5, max(strip, 1L) + 0.5), main = main, sub = sub,
+        xlab = '', ylab = labs[[1]] ))
+    if (!is.null(g$f) && plot_x_axis(args))
+      graphics::axis(1, at = seq_along(look$legend), labels = look$legend)
+    if (!is.null(g$values))
+      plot_legend(pos, look$legend, look$legend_col, look$legend_pch, g$title)
     return (invisible(x))
   }
 
@@ -365,7 +370,8 @@ ord_plot_groups <- function (x, groups, data) {
   if (is.numeric(v) && !is.factor(v))
     return (list(f = NULL, values = as.double(v), numeric = TRUE, title = title))
 
-  f <- if (is.factor(v)) droplevels(v) else factor(v)
+  # A factor keeps its unused levels, for their colours.
+  f <- if (is.factor(v)) v else factor(v)
   if (anyNA(f)) f <- addNA(f, ifany = TRUE)
 
   list(f = f, values = NULL, numeric = FALSE, title = title)
@@ -374,8 +380,9 @@ ord_plot_groups <- function (x, groups, data) {
 
 
 # Colours and symbols of the points, and of the legend. Returns list(col,
-# pch (the points'), pal (one colour per level), legend, legend_col,
-# legend_pch).
+# pch (the points'), pal (one colour per level), used (which levels have
+# samples), legend, legend_col, legend_pch). The legend has the used levels
+# only.
 ord_plot_look <- function (g, col, pch) {
 
   # No groups: the user's col and pch, as plot() takes them.
@@ -392,16 +399,20 @@ ord_plot_look <- function (g, col, pch) {
     v    <- g$values
     ramp <- if (is.null(col)) grDevices::hcl.colors(100, 'Viridis')
             else grDevices::colorRampPalette(col)(100)
-    rng  <- range(v, na.rm = TRUE)
-    if (!all(is.finite(rng)))
-      return (list(col = PLOT_MUTED, pch = pch, legend = NULL))
-    step <- if (rng[2] > rng[1]) (v - rng[1]) / (rng[2] - rng[1]) else v * 0 + 0.5
+    if (!any(is.finite(v)))
+      return (list(col = rep(PLOT_MUTED, length(v)), pch = pch, legend = NULL))
+    rng  <- range(v[is.finite(v)])
+    wide <- rng[2] > rng[1]
+    step <- if (wide) (v - rng[1]) / (rng[2] - rng[1]) else v * 0 + 0.5
     pcol <- ramp[1 + round(99 * step)]
     pcol[is.na(pcol)] <- PLOT_MUTED
-    at   <- pretty(rng, 4)
-    at   <- at[at >= rng[1] & at <= rng[2]]
-    if (length(at) < 2) at <- rng
-    lcol <- ramp[1 + round(99 * (if (rng[2] > rng[1]) (at - rng[1]) / (rng[2] - rng[1]) else 0.5))]
+    at   <- rng[1]
+    if (wide) {
+      at <- pretty(rng, 4)
+      at <- at[at >= rng[1] & at <= rng[2]]
+      if (length(at) < 2) at <- rng
+    }
+    lcol <- ramp[1 + round(99 * (if (wide) (at - rng[1]) / (rng[2] - rng[1]) else 0.5))]
     return (list(
       col = pcol, pch = pch,
       legend = format(at, trim = TRUE), legend_col = lcol, legend_pch = pch[[1]] ))
@@ -416,10 +427,12 @@ ord_plot_look <- function (g, col, pch) {
   pal[is.na(pal)] <- PLOT_MUTED
   pal <- unname(pal)
 
-  lpch <- if (length(pch) == k) pch else pch[[1]]
+  used <- tabulate(as.integer(g$f), k) > 0
+  lpch <- if (length(pch) == k) pch[used] else pch[[1]]
   list(
     col = pal[as.integer(g$f)], pch = if (length(pch) == k) pch[as.integer(g$f)] else pch,
-    pal = pal, legend = ifelse(is.na(lev), 'NA', lev), legend_col = pal, legend_pch = lpch )
+    pal = pal, used = used, legend = ifelse(is.na(lev), 'NA', lev)[used],
+    legend_col = pal[used], legend_pch = lpch )
 }
 
 

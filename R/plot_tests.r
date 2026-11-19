@@ -171,14 +171,18 @@ test_plot_null <- function (x, ...) {
       'There are no permutations to plot: run the test with `permutations` ',
       'above 0.', call. = FALSE )
 
-  obs <- stat[[1]]
+  obs  <- stat[[1]]
+  args <- list(...)
+
+  # The x axis spans the histogram's breaks, and the observed statistic.
+  brk  <- graphics::hist(perm, breaks = plot_arg(args, 'breaks', 'Sturges'), plot = FALSE)$breaks
 
   plot_do(
-    graphics::hist, c(list(perm), list(...)),
+    graphics::hist, c(list(perm), args),
     list(
       main = attr(x, 'title', exact = TRUE), sub = test_subtitle(x),
       xlab = sprintf('%s (%d permutations, %s)', nm, x$n_perm, x$permutation),
-      xlim = range(perm, if (is.finite(obs)) obs),
+      xlim = range(brk, if (is.finite(obs)) obs),
       col = 'grey85', border = 'grey45', las = 1 ))
 
   if (is.finite(obs)) {

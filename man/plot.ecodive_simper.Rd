@@ -19,7 +19,7 @@ average contributions. Default \code{10}; \code{Inf} for all.}
 filled points. Default \code{0.05}.}
 
 \item{...}{Passed on to \code{\link[graphics:dotchart]{graphics::dotchart()}}, such as \code{main}, \code{xlab},
-\code{cex} or \code{color}; and \code{sub}, to \code{\link[graphics:title]{graphics::title()}}.}
+\code{cex} or \code{col} (its \code{color}); and \code{sub}, to \code{\link[graphics:title]{graphics::title()}}.}
 }
 \value{
 \code{x}, invisibly.

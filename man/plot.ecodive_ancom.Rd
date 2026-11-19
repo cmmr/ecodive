@@ -13,7 +13,8 @@
 \eqn{W}. Default \code{30}; \code{Inf} for all.}
 
 \item{...}{Passed on to \code{\link[graphics:dotchart]{graphics::dotchart()}}, such as \code{main}, \code{xlab},
-or \code{cex}; and \code{sub}, to \code{\link[graphics:title]{graphics::title()}}.}
+\code{cex} or \code{col} (its \code{color}, replacing the highlighting); and
+\code{sub}, to \code{\link[graphics:title]{graphics::title()}}.}
 }
 \value{
 \code{x}, invisibly.

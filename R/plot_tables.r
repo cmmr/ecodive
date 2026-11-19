@@ -133,7 +133,7 @@ plot.ecodive_envfit <- function (
 #'        filled points. Default `0.05`.
 #'
 #' @param ...  Passed on to [graphics::dotchart()], such as `main`, `xlab`,
-#'        `cex` or `color`; and `sub`, to [graphics::title()].
+#'        `cex` or `col` (its `color`); and `sub`, to [graphics::title()].
 #'
 #' @details
 #' Each pair's label gives its mean between-group Bray-Curtis dissimilarity
@@ -151,6 +151,8 @@ plot.ecodive_simper <- function (x, n_taxa = 10, pairs = NULL, alpha = 0.05, ...
 
   n_taxa <- plot_count(n_taxa, 'n_taxa')
   args   <- list(...)
+  if (n_taxa < 1)
+    stop('`n_taxa` must be at least 1.', call. = FALSE)
 
   all_pairs <- unique(x$pair)
   if (is.null(pairs)) pairs <- all_pairs
@@ -159,12 +161,9 @@ plot.ecodive_simper <- function (x, n_taxa = 10, pairs = NULL, alpha = 0.05, ...
   pairs <- all_pairs[all_pairs %in% pairs]
 
   overall <- attr(x, 'overall', exact = TRUE)
-
-  # dotchart() draws each group's values from the bottom up and the groups
-  # from the top down; so reverse each pair's rows to put its largest first.
-  rows <- lapply(pairs, function (p) rev(utils::head(which(x$pair == p), n_taxa)))
-  idx  <- unlist(rows)
-  grp  <- factor(rep(pairs, lengths(rows)), levels = pairs)
+  rows    <- simper_plot_rows(x$pair, pairs, n_taxa)
+  idx     <- rows$idx
+  grp     <- rows$groups
   levels(grp) <- sprintf('%s (%s)', pairs, vapply(pairs, function (p) plot_num(overall[[p]]), ''))
 
   sig <- !is.na(x$p_adjusted[idx]) & x$p_adjusted[idx] <= alpha
@@ -172,7 +171,7 @@ plot.ecodive_simper <- function (x, n_taxa = 10, pairs = NULL, alpha = 0.05, ...
     sprintf('Filled: adjusted p <= %s', format(alpha))
 
   plot_do(
-    graphics::dotchart, c(list(x$average[idx]), plot_drop(args, 'sub')),
+    graphics::dotchart, c(list(x$average[idx]), plot_dot_args(args)),
     list(
       labels = x$taxon[idx], groups = grp, pch = ifelse(sig, 19, 1),
       xlim = c(0, max(x$average[idx], na.rm = TRUE)),
@@ -181,6 +180,22 @@ plot.ecodive_simper <- function (x, n_taxa = 10, pairs = NULL, alpha = 0.05, ...
   graphics::title(sub = plot_arg(args, 'sub', sub))
 
   invisible(x)
+}
+
+
+
+# The rows of a simper() result to plot (the first n of each pair, which has
+# its taxa largest first) in the order dotchart() wants them, and their
+# pairs, a factor with levels `pairs`. dotchart() draws each group's values
+# from the bottom up, so each pair's rows are reversed to put its largest at
+# the top. It also sorts the rows by group, last group first, and before R
+# 3.6.2 didn't sort `pch` with them; so the pairs are given in that order
+# already, and the sort leaves them in place. Returns list(idx, groups).
+simper_plot_rows <- function (pair, pairs, n) {
+  rows <- lapply(rev(pairs), function (p) rev(utils::head(which(pair == p), n)))
+  list(
+    idx    = unlist(rows),
+    groups = factor(rep(rev(pairs), lengths(rows)), levels = pairs) )
 }
 
 
@@ -263,7 +278,8 @@ plot.ecodive_dirmult_ttest <- function (x, labels = 10, ...) {
 #'        \eqn{W}. Default `30`; `Inf` for all.
 #'
 #' @param ...  Passed on to [graphics::dotchart()], such as `main`, `xlab`,
-#'        or `cex`; and `sub`, to [graphics::title()].
+#'        `cex` or `col` (its `color`, replacing the highlighting); and
+#'        `sub`, to [graphics::title()].
 #'
 #' @details
 #' A feature's \eqn{W} is the number of other features whose log ratio with
@@ -286,6 +302,8 @@ plot.ecodive_ancom <- function (x, n_features = 30, ...) {
 
   n_features <- plot_count(n_features, 'n_features')
   args       <- list(...)
+  if (n_features < 1)
+    stop('`n_features` must be at least 1.', call. = FALSE)
 
   D   <- nrow(x)
   cut <- attr(x, 'cutoff', exact = TRUE)
@@ -298,7 +316,7 @@ plot.ecodive_ancom <- function (x, n_features = 30, ...) {
     if (length(ord) < D) sprintf('; top %d shown', length(ord)) else '' )
 
   plot_do(
-    graphics::dotchart, c(list(x$W[idx]), plot_drop(args, 'sub')),
+    graphics::dotchart, c(list(x$W[idx]), plot_dot_args(args)),
     list(
       labels = x$feature[idx], pch = 19,
       color  = ifelse(rej, PLOT_HIGHLIGHT, PLOT_MUTED),
@@ -334,11 +352,12 @@ plot.ecodive_ancom <- function (x, n_features = 30, ...) {
 #'     plot(res)
 plot.ecodive_bioenv <- function (x, ...) {
 
+  args <- list(...)
   best <- attr(x, 'best', exact = TRUE)
   i    <- match(length(best), x$size)
 
   plot_do(
-    graphics::plot.default, c(list(x$size, x$correlation), list(...)),
+    graphics::plot.default, c(list(x$size, x$correlation), args),
     list(
       type = 'b', pch = 16, xaxt = 'n', las = 1,
       main = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
@@ -346,7 +365,7 @@ plot.ecodive_bioenv <- function (x, ...) {
       xlab = 'Number of variables',
       ylab = sprintf('%s correlation with distances', plot_cap(attr(x, 'method', exact = TRUE))) ))
 
-  graphics::axis(1, at = x$size)
+  if (plot_x_axis(args)) graphics::axis(1, at = x$size)
   if (!is.na(i))
     graphics::points(x$size[[i]], x$correlation[[i]], cex = 2.5, lwd = 2, col = PLOT_HIGHLIGHT)
 
@@ -377,6 +396,7 @@ plot.ecodive_bioenv <- function (x, ...) {
 #'     plot(fs)
 plot.ecodive_forward_select <- function (x, ...) {
 
+  args <- list(...)
   g    <- attr(x, 'global', exact = TRUE)
   nb   <- attr(x, 'next_best', exact = TRUE)
   k    <- nrow(x)
@@ -388,7 +408,7 @@ plot.ecodive_forward_select <- function (x, ...) {
   glob <- if (!is.null(g)) g$adj_r_squared[[1]]
 
   plot_do(
-    graphics::plot.default, c(list(step, y), list(...)),
+    graphics::plot.default, c(list(step, y), args),
     list(
       type = 'b', pch = 16, xaxt = 'n', las = 1,
       xlim = c(-0.3, k + if (!is.null(nb_y)) 1.3 else 0.3),
@@ -397,7 +417,7 @@ plot.ecodive_forward_select <- function (x, ...) {
       sub  = sprintf('Stopped: %s', attr(x, 'stop', exact = TRUE)),
       xlab = 'Variables selected', ylab = expression('Cumulative adjusted' ~ R^2) ))
 
-  graphics::axis(1, at = c(step, if (!is.null(nb_y)) k + 1))
+  if (plot_x_axis(args)) graphics::axis(1, at = c(step, if (!is.null(nb_y)) k + 1))
   graphics::text(step, y, labs, pos = 1, cex = 0.8, xpd = NA)
 
   if (!is.null(nb_y) && is.finite(nb_y)) {

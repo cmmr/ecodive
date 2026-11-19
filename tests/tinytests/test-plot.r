@@ -60,12 +60,18 @@
     expect_true(invisibly(o, loadings = Inf, biplot = FALSE, centroids = FALSE, target = FALSE), info = nm)
   }
 
-  # One axis: a strip chart, by group.
+  # One axis: a strip chart, by group, with the same colours, symbols and
+  # legends as two.
   ord1 <- lda(two[, 1:4], 'Species', two)
   expect_identical(ncol(ord1), 1L)
   expect_true(invisibly(ord1))
   expect_true(invisibly(ord1, groups = NULL, legend = NULL))
-  expect_true(invisibly(pca(iris[, 1:4], n_axes = 1, cpus = cpus)))
+  expect_silent(plot(ord1, pch = c(1, 2)))
+  pc1 <- pca(iris[, 1:4], n_axes = 1, cpus = cpus)
+  expect_true(invisibly(pc1))
+  expect_silent(plot(pc1, iris$Sepal.Length))
+  expect_silent(plot(pc1, col = iris$Species))
+  expect_silent(plot(pc1, 'Species', iris, xaxt = 'n'))
 
   # Titles and labels, from the attributes.
   expect_identical(ord_method_name('pcoa'), 'Principal Coordinates Analysis')
@@ -113,6 +119,14 @@
   expect_null(g$f)
   expect_identical(g$values, iris$Sepal.Length)
 
+  # Unused levels keep their colours, and are left out of the legend.
+  f    <- factor(rep(c('a', 'c'), 75), levels = c('a', 'b', 'c'))
+  look <- ord_plot_look(ord_plot_groups(ord, f, NULL), c('red', 'green', 'blue'), NULL)
+  expect_identical(unique(look$col), c('red', 'blue'))
+  expect_identical(look$legend, c('a', 'c'))
+  expect_identical(look$legend_col, c('red', 'blue'))
+  expect_identical(look$used, c(TRUE, FALSE, TRUE))
+
   # Colours: one per level, the user's (by name or in order) or the palette.
   g    <- ord_plot_groups(ord, 'Species', iris)
   look <- ord_plot_look(g, NULL, NULL)
@@ -135,6 +149,14 @@
   expect_identical(look$col[which.max(iris$Sepal.Length)], '#000000')
   at <- as.numeric(look$legend)
   expect_true(all(at >= min(iris$Sepal.Length) & at <= max(iris$Sepal.Length)))
+
+  # A constant one has one value in its legend; one of NAs, none.
+  look <- ord_plot_look(ord_plot_groups(ord, rep(3, 150), NULL), NULL, NULL)
+  expect_identical(look$legend, '3')
+  look <- ord_plot_look(ord_plot_groups(ord, rep(NA_real_, 150), NULL), NULL, NULL)
+  expect_null(look$legend)
+  expect_identical(look$col, rep(PLOT_MUTED, 150))
+  expect_silent(plot(ord, rep(NA_real_, 150)))
 
   # Centroids of the plotted groups are labelled with the group.
   g    <- ord_plot_groups(ords$dbrda, 'Species', iris)
@@ -207,6 +229,16 @@
   expect_error(
     plot(permanova(dm, 'Species', iris, permutations = 0, cpus = cpus)),
     'no permutations to plot' )
+
+  # The x axis spans the whole histogram, and the observed statistic.
+  plot(res$mantel)
+  usr <- graphics::par('usr')
+  brk <- graphics::hist(attr(res$mantel, 'r_perm'), plot = FALSE)$breaks
+  expect_true(usr[[1]] <= min(brk) && usr[[2]] >= max(brk, res$mantel$statistic))
+  plot(res$mantel, breaks = 3)
+  usr <- graphics::par('usr')
+  brk <- graphics::hist(attr(res$mantel, 'r_perm'), breaks = 3, plot = FALSE)$breaks
+  expect_true(usr[[1]] <= min(brk) && usr[[2]] >= max(brk))
   # Without permutations, MRPP and PERMDISP still have their groups.
   expect_true(invisibly(mrpp(dm, 'Species', iris, permutations = 0, cpus = cpus)))
 
@@ -234,8 +266,21 @@
   expect_true(invisibly(sp))
   expect_true(invisibly(sp, n_taxa = 2, pairs = 'setosa-virginica', sub = 'x'))
   expect_true(invisibly(simper(cnt, 'Species', iris, permutations = 0, cpus = cpus)))
+  expect_silent(plot(sp, col = 'grey40'))
   expect_error(plot(sp, pairs = 'a-b'), '`pairs` must be among')
   expect_error(plot(sp, n_taxa = NA), '`n_taxa` must be a number')
+  expect_error(plot(sp, n_taxa = 0), '`n_taxa` must be at least 1')
+
+  # The rows go to dotchart() in the order it sorts them to, last pair
+  # first, so that it moves none of them (R < 3.6.2 didn't move `pch`), each
+  # pair's largest last (at the top).
+  rows <- simper_plot_rows(sp$pair, unique(sp$pair), 2)
+  expect_identical(sort.list(as.numeric(rows$groups), decreasing = TRUE), seq_along(rows$groups))
+  expect_identical(levels(rows$groups), unique(sp$pair))
+  for (p in unique(sp$pair)) {
+    a <- sp$average[rows$idx[rows$groups == p]]
+    expect_identical(a, sort(sp$average[sp$pair == p], decreasing = TRUE)[2:1], info = p)
+  }
 
   dt <- dirmult_ttest(cnt, 'Species', iris, cpus = cpus)
   expect_true(invisibly(dt))
@@ -248,6 +293,8 @@
   an <- ancom(x, rep(c('a', 'b'), each = 5), cpus = cpus)
   expect_true(invisibly(an))
   expect_true(invisibly(an, n_features = 5, sub = 'x'))
+  expect_silent(plot(an, col = 'red'))
+  expect_error(plot(an, n_features = 0), '`n_features` must be at least 1')
   an0 <- an
   attr(an0, 'cutoff') <- NA_real_   # nothing could be rejected
   an0$reject <- FALSE
@@ -259,6 +306,7 @@
 
   be <- bioenv(dm, iris[, 1:4], cpus = cpus)
   expect_true(invisibly(be))
+  expect_true(invisibly(be, xaxt = 'n'))
   expect_true(invisibly(bioenv(dm, iris[, 1:4], given = 'Sepal.Width', cpus = cpus)))
 
   fs <- forward_select(
@@ -327,6 +375,11 @@
   expect_identical(plot_do(f, list(main = NULL), list(main = 'd')), list(main = NULL))
   expect_identical(plot_arg(list(sub = 's'), 'sub', 'd'), 's')
   expect_identical(plot_arg(list(), 'sub', 'd'), 'd')
+  expect_true(plot_x_axis(list()))
+  expect_false(plot_x_axis(list(axes = FALSE)))
+  expect_false(plot_x_axis(list(xaxt = 'n')))
+  expect_identical(plot_dot_args(list(col = 'r', sub = 's', cex = 1)), list(cex = 1, color = 'r'))
+  expect_identical(plot_dot_args(list(col = 'r', color = 'b')), list(color = 'b'))
 
   grDevices::dev.off()
 

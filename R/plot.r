@@ -46,6 +46,23 @@ plot_drop <- function (args, drop) {
 }
 
 
+# Whether the user's arguments `args` (list(...)) leave the x axis to be
+# drawn: neither `axes = FALSE` nor `xaxt = "n"`.
+plot_x_axis <- function (args) {
+  !isFALSE(args[['axes']]) && !identical(args[['xaxt']], 'n')
+}
+
+
+# The user's arguments for graphics::dotchart(), which takes the points'
+# colours as `color`: a `col` is given as `color`, and `sub` is left out (for
+# graphics::title()).
+plot_dot_args <- function (args) {
+  if ('col' %in% names(args) && !'color' %in% names(args))
+    args[['color']] <- args[['col']]
+  args[setdiff(names(args), c('col', 'sub'))]
+}
+
+
 # The user's value for argument `nm` from `args` (list(...)), else `default`.
 plot_arg <- function (args, nm, default) {
   if (nm %in% names(args)) args[[nm]] else default

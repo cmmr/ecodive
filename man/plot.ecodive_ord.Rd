@@ -32,8 +32,10 @@ the samples by name when both are named, as for \code{\link[=permanova]{permanov
 factor, character or logical vector gives each value its own
 colour, in the order of a factor's levels; a numeric vector gives a
 colour gradient (convert it with \code{factor()} for one colour per
-value). By default, the groups that \code{\link[=lda]{lda()}}, \code{\link[=plsda]{plsda()}} and
-\code{\link[=oplsda]{oplsda()}} store in their \code{groups} attribute, if any.}
+value). A factor's unused levels keep their colours, so that
+plots of subsets match, but are left out of the legend. By
+default, the groups that \code{\link[=lda]{lda()}}, \code{\link[=plsda]{plsda()}} and \code{\link[=oplsda]{oplsda()}} store in
+their \code{groups} attribute, if any.}
 
 \item{data}{A data frame of sample metadata, with one row per sample
 (matched by row name, else in order), when \code{groups} names one of
@@ -41,7 +43,8 @@ its columns.}
 
 \item{axes}{Which two axes to plot, by number, as in \code{\link[=envfit]{envfit()}}. Default
 \code{c(1, 2)}. A result with only one axis (such as \code{\link[=lda]{lda()}} of two
-groups) is drawn as a strip chart, with one strip per group.}
+groups) is drawn as a strip chart, with one strip per group (in
+which case \code{axes} is not used).}
 
 \item{loadings}{How many of the features in the \code{loadings} attribute to
 draw, those furthest from the origin on the plotted axes first: a
