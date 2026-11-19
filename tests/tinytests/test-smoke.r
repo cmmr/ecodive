@@ -45,6 +45,17 @@
     expect_true(all(is.finite(as.matrix(z))), info = nm)
   }
 
+  # Log-ratio transforms.
+  z <- alr(counts, denominator = 'F1', cpus = cpus)
+  expect_identical(dim(z), c(20L, 11L))
+  expect_true(all(is.finite(z)) && identical(attr(z, 'method'), 'alr'))
+  sbp <- t(vapply(1:11, function (j) c(rep(0, j - 1), 1, rep(-1, 12 - j)), numeric(12)))
+  for (b in list(NULL, sbp)) {
+    z <- ilr(counts, basis = b, cpus = cpus)
+    expect_identical(dim(z), c(20L, 11L))
+    expect_true(all(is.finite(z)) && identical(dim(attr(z, 'basis')), c(11L, 12L)))
+  }
+
   tr <- read_tree('((A:1,B:2):1,C:3);')
   expect_inherits(tr, 'phylo')
   expect_identical(sort(tr$tip.label), c('A', 'B', 'C'))

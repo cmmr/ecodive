@@ -23,7 +23,7 @@ Authors@R: c(
     person(
       "scikit-bio development team",
       role    = c("ctb", "cph"),
-      comment = "PCoA biplot scores and BIOENV, from scikit-bio"),
+      comment = "PCoA biplot scores, BIOENV, and the alr and ilr transforms, from scikit-bio"),
     person(
       "Cameron", "Martino",
       role    = c("ctb", "cph"),

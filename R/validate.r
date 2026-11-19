@@ -322,82 +322,82 @@ validate_pseudocount <- function (env = parent.frame()) {
     }
 
     else {
-
-      mtx_pkg <- get_matrix_package(counts)
-      pc_vals <- stored_values(counts)
-
-      val_range <- range(pc_vals)
-      
-      if (length(val_range) == 2 && !all(is.finite(val_range)))
-        stop('`counts` contains non-finite values; cannot perform CLR normalization.')
-      
-      min_val <- val_range[1]
-      max_val <- val_range[2]
-      
-      if (min_val < 0)
-        stop('`counts` contains negative values; cannot perform CLR normalization.')
-      
-      if (max_val == 0)
-        stop('`counts` contains only zeros; cannot perform CLR normalization.')
-      
-      if (min_val == max_val)
-        stop('`counts` contains a single unique value; cannot perform CLR normalization.')
-      
-      
-      if (!is.null(pseudocount)) {
-        
-        tryCatch(
-          expr = {
-            stopifnot(is.numeric(pseudocount))
-            pseudocount <- as.double(pseudocount)
-            stopifnot(length(pseudocount) == 1)
-            stopifnot(!is.na(pseudocount))
-            stopifnot(is.finite(pseudocount))
-            stopifnot(isTRUE(pseudocount > 0))
-          },
-          error = function (e) {
-            stop('`pseudocount` must be a single positive number.')
-        })
-        
-      }
-      else {
-        
-        has_zeros <- min_val == 0
-        
-        # Check for zeros in sparse matrices: cells not stored.
-        if (!has_zeros && mtx_pkg != 'base')
-          has_zeros <- sum(pc_vals != 0) < switch(
-            mtx_pkg,
-            'slam'   = as.double(counts$nrow) * counts$ncol,
-            'Matrix' = prod(as.double(dim(counts))) )
-        
-        
-        if (!has_zeros) {
-          
-          pseudocount <- 0
-          
-        } else {
-          
-          # Calculate a "smart" default (half the smallest non-zero value)
-          # This is generally safer than '1' for proportional data.
-          pseudocount <- min(pc_vals[pc_vals > 0])
-          
-          pseudocount <- pseudocount / 2
-          
-          warning(
-            call. = FALSE, 
-            paste0(
-              "Zeros detected in data. Using pseudocount = ", format(pseudocount, digits = 3), "\n",
-              "Calculated using formula: min(counts[counts > 0]) / 2\n",
-              "To suppress this warning, provide an explicit `pseudocount` argument." ))
-        }
-        
-        remove('has_zeros')
-      }
-      
-      remove('mtx_pkg', 'val_range', 'min_val', 'pc_vals')
+      pseudocount <- log_pseudocount(counts, pseudocount, 'CLR normalization')
     }
   })
+}
+
+
+# The shared zero rule of every log-ratio method (CLR normalization, alr(),
+# ilr(), ...): checks the stored values of `counts`, and returns the
+# pseudocount to add to every value. NULL gives 0 when there are no zeros,
+# else half the smallest non-zero value, with a warning. `what` ends the
+# error messages ("cannot perform <what>."). `constant_ok = FALSE` (CLR
+# normalization) refuses a table of one repeated value.
+log_pseudocount <- function (counts, pseudocount, what, constant_ok = FALSE) {
+
+  mtx_pkg <- get_matrix_package(counts)
+  pc_vals <- stored_values(counts)
+
+  val_range <- range(pc_vals)
+
+  if (length(val_range) == 2 && !all(is.finite(val_range)))
+    stop('`counts` contains non-finite values; cannot perform ', what, '.')
+
+  min_val <- val_range[1]
+  max_val <- val_range[2]
+
+  if (min_val < 0)
+    stop('`counts` contains negative values; cannot perform ', what, '.')
+
+  if (max_val == 0)
+    stop('`counts` contains only zeros; cannot perform ', what, '.')
+
+  if (!constant_ok && min_val == max_val)
+    stop('`counts` contains a single unique value; cannot perform ', what, '.')
+
+
+  if (!is.null(pseudocount)) {
+
+    tryCatch(
+      expr = {
+        stopifnot(is.numeric(pseudocount))
+        pseudocount <- as.double(pseudocount)
+        stopifnot(length(pseudocount) == 1)
+        stopifnot(!is.na(pseudocount))
+        stopifnot(is.finite(pseudocount))
+        stopifnot(isTRUE(pseudocount > 0))
+      },
+      error = function (e) {
+        stop('`pseudocount` must be a single positive number.')
+    })
+
+    return (pseudocount)
+  }
+
+  has_zeros <- min_val == 0
+
+  # Check for zeros in sparse matrices: cells not stored.
+  if (!has_zeros && mtx_pkg != 'base')
+    has_zeros <- sum(pc_vals != 0) < switch(
+      mtx_pkg,
+      'slam'   = as.double(counts$nrow) * counts$ncol,
+      'Matrix' = prod(as.double(dim(counts))) )
+
+  if (!has_zeros) return (0)
+
+  # Calculate a "smart" default (half the smallest non-zero value)
+  # This is generally safer than '1' for proportional data.
+  pseudocount <- min(pc_vals[pc_vals > 0]) / 2
+
+  warning(
+    call. = FALSE,
+    paste0(
+      "Zeros detected in data. Using pseudocount = ", format(pseudocount, digits = 3), "\n",
+      "Calculated using formula: min(counts[counts > 0]) / 2\n",
+      "To suppress this warning, provide an explicit `pseudocount` argument." ))
+
+  pseudocount
 }
 
 

@@ -175,3 +175,99 @@ ilr(counts, basis = NULL, margin = 1L, pseudocount = NULL, cpus = n_cpus())
 - Egozcue, J. J., & Pawlowsky-Glahn, V. (2005). Groups of parts and their
   balances in compositional data analysis. *Mathematical Geology*, 37,
   795–828.
+
+
+## Decisions made while implementing (2026-11-19)
+
+Asked of the user at the start (all four answered with the recommended
+option):
+
+1. **Zeros with `pseudocount = NULL`:** the shared rule (half the smallest
+   non-zero value, with a warning; none when there are no zeros). The rule
+   now lives in `log_pseudocount(counts, pseudocount, what, constant_ok)` in
+   `R/validate.r`; `validate_pseudocount()`'s clr branch calls it, with its
+   messages unchanged. `alr()` / `ilr()` pass `constant_ok = TRUE`: a table
+   of one repeated value gives coordinates of 0, where `norm = 'clr'` still
+   refuses it. The pseudocount is added to every value, as `norm = 'clr'`
+   does, so `alr(x, pseudocount = c)` is scikit-bio's `alr(x + c)`.
+2. **Orientation:** the input's (`margin = 2` gives coordinates ×
+   samples). A plain vector is one sample in a column (`validate_counts()`
+   sets `margin = 2`), so it gives a (D − 1) × 1 matrix.
+3. **Coordinate names:** alr, the numerator features' names, or `alr<k>`
+   numbered by the feature's position when `counts` has no feature names
+   (denominator 2 of 4 gives `alr1`, `alr3`, `alr4`); ilr,
+   `rownames(basis)`, or `ilr1` .. `ilr<D-1>`.
+4. **Trees:** `ilr()` takes no tree; that is `philr()`'s job.
+
+Made while implementing:
+
+5. **`denominator`** is a name, a 1-based index, or a logical vector with
+   one `TRUE` (`feature_index()`). The `denominator` attribute is the name,
+   or the integer index when the features have no names. No warning when
+   the denominator has zeros (the pseudocount warning covers zeros).
+6. **Basis checks.** A matrix whose entries are all in {−1, 0, 1} is an SBP
+   (checked first); each SBP row needs both signs ("row k has no 1 / -1").
+   Then, for any basis, scikit-bio's orthonormality test (|ΨΨᵀ − I| <
+   1e-4 I + 1e-6), and **one check scikit-bio lacks**: every row must sum
+   to 0 (|row sum| < 1e-6 √D), i.e. lie in clr space; without it the
+   coordinates aren't isometric. An orthogonal but non-hierarchical
+   partition (Hadamard-like) passes: it still gives a valid orthonormal
+   basis. A failing SBP says "not a valid sequential binary partition: its
+   balances are not orthogonal". A `data.frame` or Matrix-package basis is
+   coerced with `as.matrix()`. A D × (D − 1) basis gets a "Transposed?"
+   hint. Columns match features by name when both have names (same set, no
+   duplicates, else an error naming up to 5 missing / extra), by position
+   otherwise.
+7. **The `basis` attribute** is the (D − 1) × D matrix used, columns in the
+   features' order with their names, rows named as the coordinates. For the
+   **default basis with D > 1000** (more than 1e6 values, 8 MB) it is the
+   string `'helmert'` instead, so that a 5,000-taxon table doesn't carry a
+   200 MB attribute. User bases and SBPs are always stored (the user's
+   input was already that size).
+8. **No BLAS.** `src/log_ratio_transforms.c` (`C_log_ratio_coords`) does one
+   sample per task with a per-thread dense scratch vector: alr subtracts
+   logs; ilr computes the clr (sequential sum, as `normalize()`), then
+   either the Helmert recurrence (running sum of the clr values,
+   `a_j * S_j + b_j * c_{j+1}`, with skbio's entries) or a loop over the
+   basis's non-zeros by row (CSR, built in R by `ilr_basis()`), so an SBP
+   costs its non-zeros and no BLAS call runs inside worker threads.
+   Results are identical for any `cpus`. 2,000 × 5,000 sparse table: 0.2 s
+   (vs 30 s for `normalize(x, 'clr') %*% t(basis)` on reference BLAS).
+9. **Parity.** `helmert_basis(D)` and `sbp_basis()` reproduce
+   `_gram_schmidt_basis(D)` and `sbp_basis()` **bit for bit** (same
+   arithmetic: `(1 / i) * sqrt(i / (i + 1))`; `sbp * sqrt((s / r) ^ sbp /
+   sum(abs(sbp)))`, where R's `^` and numpy's `**` both call `pow()`). `alr()`
+   is **bit-identical** to scikit-bio's `alr()`. `ilr()` is not bit-identical
+   (numpy's pairwise mean and BLAS dot products vs sequential sums): max
+   absolute difference 1.3e-15 over the fixtures (default, SBP and random
+   orthonormal bases, D up to 60). Fixtures use hexadecimal floats
+   (`float.hex()`, read exactly by `as.numeric()` in R).
+10. **compositions 2.0.9 (output only):** `compositions::alr()` = `alr(x,
+    D)` (last part) and `compositions::ilr()` = `-ilr(x)` (the default
+    basis is skbio's negated, **same coordinate order**, not reversed),
+    both to 1.3e-15; stored in the fixture and tested.
+11. **`sbp_basis()` stays internal** (README's function list doesn't have
+    it); the `basis` attribute shows the converted basis.
+12. **Large results:** warn above 1e8 output values, as `normalize(norm =
+    'clr')` does.
+
+For later compositional items, the reusable internals (all in
+`R/log_ratio_transforms.r` unless noted):
+
+- `log_pseudocount()` (`R/validate.r`): the shared zero rule; call it with
+  `what` naming the method and `constant_ok = TRUE`.
+- `log_ratio_input(what)`: validates a count table in the caller's frame
+  (counts, margin, cpus, finiteness, ≥ 2 features, pseudocount, large-output
+  warning) and returns `D`, `n`, `features`, `samples`.
+- `feature_index(x, features, D, arg)`: one feature by name, index or
+  logical. `log_ratio()` / `balance()` need a multi-feature version (sets
+  of features); write it beside this one.
+- `helmert_basis(D)`, `sbp_basis(sbp)` (any number of rows, so a one-row
+  SBP gives one balance vector for `balance()`), and `ilr_basis(basis, D,
+  features)` (checks, name matching, CSR) returning `basis`, `names`, `csr`,
+  `sbp`.
+- `C_log_ratio_coords(counts, margin, den, csr, pseudocount, cpus)`: alr
+  when `den >= 0` (0-based), else ilr with a CSR basis (`list(p, i, x)`,
+  rows of any count) or `NULL` for Helmert. `philr()` can feed it a
+  tree-derived SBP's CSR (O(nnz) per sample, no dense basis) if it doesn't
+  write its own O(D) recurrence; `balance()` can pass a one-row CSR.

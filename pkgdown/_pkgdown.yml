@@ -54,6 +54,14 @@ reference:
   - generalized_unifrac
   - variance_adjusted_unifrac
 
+- title: Compositional Data
+  desc: Log ratios for relative abundances. The centered log ratios (clr and rclr) are norm choices; see normalize().
+- subtitle: Log-ratio transforms
+  desc: Coordinates for analyses of the transformed features themselves. For distances, use aitchison().
+  contents:
+  - alr
+  - ilr
+
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
   contents:
