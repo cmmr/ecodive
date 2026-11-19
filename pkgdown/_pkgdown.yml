@@ -56,6 +56,12 @@ reference:
 
 - title: Compositional Data
   desc: Log ratios for relative abundances. The centered log ratios (clr and rclr) are norm choices; see normalize().
+- subtitle: Zeros
+  desc: Replace zeros before taking log ratios, instead of adding a pseudocount. replace_zeros() runs any method by name.
+  contents:
+  - replace_zeros
+  - replace_zeros_mult
+  - list_zero_replacements
 - subtitle: Log-ratio transforms
   desc: Coordinates for analyses of the transformed features themselves. For distances, use aitchison().
   contents:

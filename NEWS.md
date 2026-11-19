@@ -448,6 +448,22 @@
   coordinates are `aitchison()` distances, for any basis. Results are
   identical for any number of `cpus`.
 
+* New `replace_zeros()` replaces the zeros of a count table with small
+  positive values, so that log ratios (`norm = 'clr'`, `aitchison()`,
+  `alr()`, `ilr()`) can be taken without a pseudocount: its result has no
+  zeros, so they use none and give no warning. It runs any zero replacement
+  method by name, as `count_ord()` does for ordinations, and
+  `list_zero_replacements()` and `match_zero_replacement()` list and look
+  up the methods. The first is `replace_zeros_mult()`, multiplicative
+  replacement (Martín-Fernández et al. 2003): every zero becomes `delta`
+  (one value, or one per sample; scikit-bio's `1 / D^2` by default) and
+  each sample's non-zero proportions shrink by the same factor, keeping
+  their ratios. Its results are bit-identical to scikit-bio's
+  `multi_replace()`. Every method returns a dense matrix of proportions in
+  the input's orientation, with `method`, its parameters and `n_replaced`
+  attributes, and takes every table type: a sparse 2,000 by 5,000 table
+  takes 0.2 seconds.
+
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
   (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),

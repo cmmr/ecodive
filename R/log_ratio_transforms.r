@@ -254,7 +254,8 @@ ilr <- function (
 #'   pseudocount is added to every value (not only to zeros), as in
 #'   `normalize(norm = 'clr')`. With `pseudocount = NULL` (the default), no
 #'   pseudocount is used when `counts` has no zeros; otherwise half the
-#'   smallest non-zero value is, with a warning.
+#'   smallest non-zero value is, with a warning. To avoid a pseudocount,
+#'   replace the zeros first with [replace_zeros()]: its result has none.
 #'
 #'   The choice of pseudocount is not neutral: it can distort the results,
 #'   especially for sparse tables. See [aitchison()] for references.

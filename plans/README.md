@@ -231,7 +231,7 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, `replace_zeros` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
 | Unconstrained, counts | ✓ `pca`, ✓ `rpca`, `rpca_phylo`, `ca`, `dca`, `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
@@ -244,7 +244,7 @@ can't be mistaken for one another:
 | Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
 | Composition | `simper` |
 | Beta metrics (`beta_div`) | `philr_distance` |
-| Zero replacement (`replace_zeros`) | `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
+| Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
 | Log-ratio transforms | `alr`, `ilr`, `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | `log_ratio`, `balance` |
 | Proportionality | `vlr`, `rho_p`, `phi_s` |
@@ -263,7 +263,7 @@ Names still worth a word of warning in the docs:
 To check a new alias (run with ecodive installed):
 
 ```r
-for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS'))
+for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS', 'ZERO_REPLACEMENTS'))
   print(grep('^newalias', names(ecodive:::exact_names(reg)), value = TRUE))
 ```
 

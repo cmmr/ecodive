@@ -23,7 +23,11 @@ Authors@R: c(
     person(
       "scikit-bio development team",
       role    = c("ctb", "cph"),
-      comment = "PCoA biplot scores, BIOENV, and the alr and ilr transforms, from scikit-bio"),
+      comment = "PCoA biplot scores, BIOENV, the alr and ilr transforms, and multiplicative zero replacement, from scikit-bio"),
+    person(
+      "NumPy Developers",
+      role    = "cph",
+      comment = "numpy's pairwise summation, followed by replace_zeros_mult()"),
     person(
       "Cameron", "Martino",
       role    = c("ctb", "cph"),

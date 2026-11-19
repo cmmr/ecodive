@@ -56,6 +56,19 @@
     expect_true(all(is.finite(z)) && identical(dim(attr(z, 'basis')), c(11L, 12L)))
   }
 
+  # Zero replacement.
+  cz <- counts; cz[cz < 4] <- 0L
+  for (m in list_zero_replacements('id')) {
+    z <- replace_zeros(cz, m)
+    expect_identical(dim(z), dim(cz), info = m)
+    expect_true(all(is.finite(z)) && all(z > 0) && identical(attr(z, 'method'), m), info = m)
+  }
+  z <- replace_zeros_mult(cz)
+  expect_true(all(is.finite(z)) && all(z > 0) && identical(dimnames(z), dimnames(cz)))
+  expect_true(is.finite(sum(alr(z, 'F1', cpus = cpus))))
+  expect_true('mult' %in% list_zero_replacements('id'))
+  expect_identical(match_zero_replacement('multRepl')$id, 'mult')
+
   tr <- read_tree('((A:1,B:2):1,C:3);')
   expect_inherits(tr, 'phylo')
   expect_identical(sort(tr$tip.label), c('A', 'B', 'C'))

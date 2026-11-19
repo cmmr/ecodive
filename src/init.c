@@ -24,6 +24,7 @@ extern SEXP C_lda_loo(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_log_ratio_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_mult_default_delta(SEXP);
 extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -44,6 +45,7 @@ extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rpca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_simper(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
+extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
 extern SEXP C_tsne_p(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_run(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_ab(SEXP, SEXP);
@@ -52,6 +54,7 @@ extern SEXP C_umap_rand(SEXP, SEXP, SEXP);
 extern SEXP C_umap_sgd(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_spectral(SEXP, SEXP, SEXP);
 extern SEXP C_unifrac(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_zero_counts(SEXP, SEXP);
 
 extern void init_blas_threads(void);
 
@@ -74,6 +77,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_log_ratio_coords", (DL_FUNC) &C_log_ratio_coords, 6},
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
+  {"C_mult_default_delta", (DL_FUNC) &C_mult_default_delta, 1},
   {"C_nmds",      (DL_FUNC) &C_nmds,      6},
   {"C_normalize", (DL_FUNC) &C_normalize, 6},
   {"C_pca",       (DL_FUNC) &C_pca,       7},
@@ -92,6 +96,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_stop_thread_pool", (DL_FUNC) &C_stop_thread_pool, 0},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
+  {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
   {"C_rpca",      (DL_FUNC) &C_rpca,     12},
   {"C_simper",    (DL_FUNC) &C_simper,    7},
   {"C_tsne_p",    (DL_FUNC) &C_tsne_p,    7},
@@ -102,6 +107,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_umap_sgd",      (DL_FUNC) &C_umap_sgd,      6},
   {"C_umap_spectral", (DL_FUNC) &C_umap_spectral, 3},
   {"C_unifrac",   (DL_FUNC) &C_unifrac,   7},
+  {"C_zero_counts", (DL_FUNC) &C_zero_counts, 2},
   {NULL, NULL, 0}
 };
 
