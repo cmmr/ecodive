@@ -224,10 +224,10 @@ The shared per-feature structure (compositional.md):
 
 Asked of the user at the start:
 
-- **Scale model:** yes, as `scale_sd`, in a second commit, with default
-  **0.5** (ALDEx3's and Nixon et al.'s recommendation), not 0: the default
-  result therefore differs from scikit-bio's by design; `scale_sd = 0`
-  gives scikit-bio's procedure. (Details below.)
+- **Scale model:** yes, as `scale_sd`, in a second commit. The user first
+  chose a default of 0.5 (ALDEx3's and Nixon et al.'s recommendation); after
+  review (see "Changed after review" below) the default is **0**,
+  scikit-bio's procedure, and the scale model is opt-in. (Details below.)
 - **Default contrast:** scikit-bio's rule. Treatment = the first group
   (`sort(method = 'radix')`, as `numpy.unique`; a factor's first level),
   reference = all other samples pooled. With two groups that is first vs
@@ -322,14 +322,7 @@ Decided along the way:
   on the Gamma draws (the same with `gamma_draws` given), the Gamma draws
   are the same with and without the scale model, and it is the same for
   any `cpus`.
-- **Default 0.5** (the user's choice; ALDEx3's documented example value and
-  Nixon et al.'s recommendation). So `dirmult_ttest()`'s default result
-  differs from scikit-bio's; the tests compare with scikit-bio at
-  `scale_sd = 0`, and the docs and the example say so.
-- **Not mirrored:** reversing the contrast with the same seed doesn't
-  negate Λ (same stream), so with `scale_sd > 0` the two results are
-  equivalent in distribution, not exact mirror images (they are at
-  `scale_sd = 0`, which the tests check).
+- **Default:** first 0.5 (c88b95b), then 0 (see below).
 - **The envelope widens with `n_draws` under the scale model** (found while
   testing, kept as scikit-bio's rule and documented): the interval is the
   min/max over the draws' intervals, so it reaches the most extreme Λ
@@ -361,3 +354,25 @@ Decided along the way:
   still lists `dirmult_ttest()` (and `ancom()`) as planned and says the
   scale model is "planned for `dirmult_ttest()`"; its differential-abundance
   chunk is `eval = FALSE`. Left for the article's own update, as item 19 did.
+
+### Changed after review (2026-11-19, the user's go-ahead)
+
+- **Default `scale_sd = 0`** (was 0.5 in c88b95b). With scikit-bio's
+  min/max envelope, a scale model makes `reject` stricter as `n_draws`
+  grows, and its averaged p-values need many draws (ALDEx3 uses 2,000), so
+  a default of 0.5 neither matched the reference nor gave decisions stable
+  in `n_draws`. Now the default is scikit-bio's procedure, and the docs
+  recommend `n_draws = 1000` or more, and judging by `p_adjusted`, with
+  `scale_sd = 0.5`.
+- **Mirrored contrasts:** the shift is drawn for the group that comes first
+  (radix-sorted, or a factor's level order) against the other: R passes
+  `scale_sd * sign` to C, with sign -1 when the reference group comes before
+  the treatment (a pooled reference keeps +1). So reversing a pair negates
+  every shift and the results are exact mirror images with or without the
+  scale model (tested at 0 and 0.5), and the shifts of `c('a', 'b')`,
+  `c('b', 'a')` and `c('c', 'b')` are the same draws up to sign.
+- **Considered, not done:** an analytic scale model (adding (scale_sd log
+  2)^2 to each draw's variance, with Satterthwaite degrees of freedom),
+  which would remove both problems but depart from ALDEx3's sampled model;
+  and a mixture-quantile interval, which needs every draw's statistics
+  stored and many more `pt()` calls.

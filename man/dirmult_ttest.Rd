@@ -11,7 +11,7 @@ dirmult_ttest(
   contrast = NULL,
   margin = 1L,
   pseudocount = 0.5,
-  scale_sd = 0.5,
+  scale_sd = 0,
   n_draws = 128L,
   alpha = 0.05,
   conf_level = 0.95,
@@ -61,10 +61,12 @@ and ALDEx2. This is not the zero patch that other functions'
 
 \item{scale_sd}{The scale model's uncertainty: the standard deviation, in
 log2 units, of a random difference in total load between the two
-sides, drawn afresh for each draw (see \strong{Details}). \code{0} assumes
-the clr's reference (the geometric mean) is the same on both
-sides, as scikit-bio's \code{dirmult_ttest()} and ALDEx2's default do.
-Default: \code{0.5}, as Nixon et al. (2025) and ALDEx3 recommend.}
+sides, drawn afresh for each draw (see \strong{Details}). \code{0} (the
+default) assumes the clr's reference (the geometric mean) is the
+same on both sides, as scikit-bio's \code{dirmult_ttest()} and ALDEx2's
+default do. Nixon et al. (2025) and ALDEx3 suggest \code{0.5}; use it
+with more draws (\code{n_draws = 1000} or more) and judge by
+\code{p_adjusted} (see \strong{Details}).}
 
 \item{n_draws}{The number of Monte Carlo draws from the Dirichlet
 posterior (scikit-bio's \code{draws}). Default: \code{128}.}
@@ -122,8 +124,9 @@ carrying the uncertainty of low counts and zeros through the test
 times from their Dirichlet posterior given its counts; every draw is
 clr-transformed and each feature is compared with Welch's t-test; and the
 results are averaged over the draws. This is the ALDEx2 approach, as
-scikit-bio implements it, with ALDEx2's and ALDEx3's scale model, which
-allows for uncertainty in the samples' total loads (Nixon et al. 2025).
+scikit-bio implements it, optionally with ALDEx2's and ALDEx3's scale
+model, which allows for uncertainty in the samples' total loads (Nixon et
+al. 2025).
 }
 \details{
 With \eqn{x_{sf}} the abundance of feature \eqn{f} in sample \eqn{s} and
@@ -175,8 +178,12 @@ Because the interval is the envelope of the draws' intervals, with
 \code{scale_sd > 0} it keeps widening as \code{n_draws} grows (it reaches the most
 extreme shifts drawn), so \code{reject} becomes stricter with more draws; the
 averaged p-values converge instead, though slowly, being driven by the
-rare large shifts. For decisions that don't depend on \code{n_draws}, filter
-on \code{p_adjusted} alone (as ALDEx2 does). \code{\link[=ancom]{ancom()}} tests log ratios
+rare large shifts (ALDEx3 uses 2,000 draws). So with a scale model, use
+a larger \code{n_draws} and, for decisions that don't depend on it, filter on
+\code{p_adjusted} alone (as ALDEx2 and ALDEx3 do). The shift is drawn for the
+group that comes first (in sorted order, or a factor's level order)
+against the other, so reversing a \code{contrast} of two groups gives exactly
+the mirror image, with or without a scale model. \code{\link[=ancom]{ancom()}} tests log ratios
 without the assumption, but gives no effect sizes.
 
 A side with a single sample has no variance: its features' \code{t},
@@ -191,8 +198,8 @@ the same data the results differ from scikit-bio's by Monte Carlo error
 only. The t distribution is R's \code{\link[stats:TDist]{stats::pt()}} and \code{\link[stats:TDist]{stats::qt()}} (SciPy's
 \code{stdtr()} and \code{stdtrit()} in scikit-bio), and \code{p_adjust} is
 \code{\link[stats:p.adjust]{stats::p.adjust()}}, with \code{NaN} p-values left out of the family, as
-scikit-bio. Differences from scikit-bio: the scale model, on by
-default (scikit-bio has none: use \code{scale_sd = 0}); \code{alpha} and
+scikit-bio. Differences from scikit-bio: the optional scale model
+(scikit-bio has none); \code{alpha} and
 \code{conf_level} are arguments (scikit-bio fixes them at 0.05 and 0.95);
 \code{pseudocount} must be positive; and \code{seed} defaults to \code{0}, not to a
 random seed.
@@ -245,12 +252,11 @@ For large datasets, standard matrix operations may be slow. See
     colnames(x) <- paste0('b', 1:7)
     grp <- rep(c('treatment', 'placebo'), each = 3)
 
-    # scikit-bio's procedure: no scale model.
-    dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0)
-
-    # With the default scale model, the intervals widen and fewer features
-    # are rejected.
     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
+
+    # With a scale model, the intervals widen and fewer features are
+    # rejected.
+    dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0.5)
 
     # The default contrast: the first group ('placebo', in sorted order)
     # against the rest.

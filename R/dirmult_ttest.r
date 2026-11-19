@@ -19,8 +19,9 @@
 #' times from their Dirichlet posterior given its counts; every draw is
 #' clr-transformed and each feature is compared with Welch's t-test; and the
 #' results are averaged over the draws. This is the ALDEx2 approach, as
-#' scikit-bio implements it, with ALDEx2's and ALDEx3's scale model, which
-#' allows for uncertainty in the samples' total loads (Nixon et al. 2025).
+#' scikit-bio implements it, optionally with ALDEx2's and ALDEx3's scale
+#' model, which allows for uncertainty in the samples' total loads (Nixon et
+#' al. 2025).
 #'
 #' @inheritParams ancom
 #'
@@ -47,10 +48,12 @@
 #'
 #' @param scale_sd  The scale model's uncertainty: the standard deviation, in
 #'        log2 units, of a random difference in total load between the two
-#'        sides, drawn afresh for each draw (see **Details**). `0` assumes
-#'        the clr's reference (the geometric mean) is the same on both
-#'        sides, as scikit-bio's `dirmult_ttest()` and ALDEx2's default do.
-#'        Default: `0.5`, as Nixon et al. (2025) and ALDEx3 recommend.
+#'        sides, drawn afresh for each draw (see **Details**). `0` (the
+#'        default) assumes the clr's reference (the geometric mean) is the
+#'        same on both sides, as scikit-bio's `dirmult_ttest()` and ALDEx2's
+#'        default do. Nixon et al. (2025) and ALDEx3 suggest `0.5`; use it
+#'        with more draws (`n_draws = 1000` or more) and judge by
+#'        `p_adjusted` (see **Details**).
 #'
 #' @param n_draws  The number of Monte Carlo draws from the Dirichlet
 #'        posterior (scikit-bio's `draws`). Default: `128`.
@@ -145,8 +148,12 @@
 #' `scale_sd > 0` it keeps widening as `n_draws` grows (it reaches the most
 #' extreme shifts drawn), so `reject` becomes stricter with more draws; the
 #' averaged p-values converge instead, though slowly, being driven by the
-#' rare large shifts. For decisions that don't depend on `n_draws`, filter
-#' on `p_adjusted` alone (as ALDEx2 does). [ancom()] tests log ratios
+#' rare large shifts (ALDEx3 uses 2,000 draws). So with a scale model, use
+#' a larger `n_draws` and, for decisions that don't depend on it, filter on
+#' `p_adjusted` alone (as ALDEx2 and ALDEx3 do). The shift is drawn for the
+#' group that comes first (in sorted order, or a factor's level order)
+#' against the other, so reversing a `contrast` of two groups gives exactly
+#' the mirror image, with or without a scale model. [ancom()] tests log ratios
 #' without the assumption, but gives no effect sizes.
 #'
 #' A side with a single sample has no variance: its features' `t`,
@@ -161,8 +168,8 @@
 #' only. The t distribution is R's [stats::pt()] and [stats::qt()] (SciPy's
 #' `stdtr()` and `stdtrit()` in scikit-bio), and `p_adjust` is
 #' [stats::p.adjust()], with `NaN` p-values left out of the family, as
-#' scikit-bio. Differences from scikit-bio: the scale model, on by
-#' default (scikit-bio has none: use `scale_sd = 0`); `alpha` and
+#' scikit-bio. Differences from scikit-bio: the optional scale model
+#' (scikit-bio has none); `alpha` and
 #' `conf_level` are arguments (scikit-bio fixes them at 0.05 and 0.95);
 #' `pseudocount` must be positive; and `seed` defaults to `0`, not to a
 #' random seed.
@@ -220,12 +227,11 @@
 #'     colnames(x) <- paste0('b', 1:7)
 #'     grp <- rep(c('treatment', 'placebo'), each = 3)
 #'
-#'     # scikit-bio's procedure: no scale model.
-#'     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0)
-#'
-#'     # With the default scale model, the intervals widen and fewer features
-#'     # are rejected.
 #'     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
+#'
+#'     # With a scale model, the intervals widen and fewer features are
+#'     # rejected.
+#'     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0.5)
 #'
 #'     # The default contrast: the first group ('placebo', in sorted order)
 #'     # against the rest.
@@ -233,7 +239,7 @@
 #'
 dirmult_ttest <- function (
     counts, groups, data = NULL, contrast = NULL, margin = 1L,
-    pseudocount = 0.5, scale_sd = 0.5, n_draws = 128L, alpha = 0.05,
+    pseudocount = 0.5, scale_sd = 0, n_draws = 128L, alpha = 0.05,
     conf_level = 0.95, p_adjust = 'holm', seed = 0L, cpus = n_cpus() ) {
 
   if (missing(groups)) groups <- NULL
@@ -250,7 +256,7 @@ dirmult_ttest <- function (
 # `shift` each draw's scale shift (natural logs; 0 with scale_sd = 0).
 dirmult_ttest_details <- function (
     counts, groups, data = NULL, contrast = NULL, margin = 1L,
-    pseudocount = 0.5, scale_sd = 0.5, n_draws = 128L, alpha = 0.05,
+    pseudocount = 0.5, scale_sd = 0, n_draws = 128L, alpha = 0.05,
     conf_level = 0.95, p_adjust = 'holm', seed = 0L, cpus = n_cpus(),
     gamma_draws = NULL ) {
 
@@ -323,7 +329,8 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
 
   res <- .Call(
     C_dirmult_ttest, counts, margin, ct$side, pc, n_draws,
-    (1 + conf_level) / 2, scale_sd, seed, gamma_draws, details, cpus )
+    (1 + conf_level) / 2, scale_sd * ct$scale_sign, seed, gamma_draws,
+    details, cpus )
 
   p_adjusted <- stats::p.adjust(res$p_value, p_adjust)
 
@@ -412,7 +419,9 @@ dirmult_input <- function (env) {
 
 
 # Each sample's side of the contrast (1 treatment, 2 reference, 0 left
-# out), as scikit-bio's _check_trt_ref_groups(), and the contrast's labels.
+# out), as scikit-bio's _check_trt_ref_groups(), the contrast's labels, and
+# the sign of the scale model's shift (-1 when the reference group comes
+# before the treatment).
 # `val` is each sample's group (unused factor levels dropped).
 dirmult_contrast <- function (val, contrast) {
 
@@ -454,7 +463,10 @@ dirmult_contrast <- function (val, contrast) {
   if (is.na(ref)) side[gi != trt] <- 2L
   else            side[gi == ref] <- 2L
 
+  # The scale model's shift is drawn for the earlier group against the
+  # later one, so that reversing a pair mirrors the results exactly.
   list(
-    side     = side,
-    contrast = c(treatment = lab[[trt]], reference = if (is.na(ref)) NA_character_ else lab[[ref]]) )
+    side       = side,
+    scale_sign = if (!is.na(ref) && ref < trt) -1 else 1,
+    contrast   = c(treatment = lab[[trt]], reference = if (is.na(ref)) NA_character_ else lab[[ref]]) )
 }

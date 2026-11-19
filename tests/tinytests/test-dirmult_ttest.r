@@ -130,11 +130,27 @@
   expect_true(abs(var(z) - 1) < 4 * sqrt(2 / 4000))
   expect_true(ks(z, 'pnorm') > 1e-3)
 
-  # The default is 0.5.
-  expect_identical(attr(dirmult_ttest(big0, g0, n_draws = 2L), 'scale_sd'), 0.5)
+  # The default is 0: no scale model.
+  expect_identical(attr(dirmult_ttest(big0, g0, n_draws = 2L), 'scale_sd'), 0)
   expect_identical(
     dirmult_ttest(big0, g0, n_draws = 3L),
-    dirmult_ttest(big0, g0, n_draws = 3L, scale_sd = 0.5) )
+    dirmult_ttest(big0, g0, n_draws = 3L, scale_sd = 0) )
+  expect_identical(dirmult_ttest_details(big0, g0, n_draws = 3L)$shift, rep(0, 3))
+
+  # The shift is drawn for the earlier group against the later one: a
+  # reversed pair gets the opposite shifts, a pooled reference the drawn
+  # ones.
+  g3 <- rep(c('a', 'b', 'c'), c(3, 3, 4))
+  sab <- dirmult_ttest_details(big0, g3, contrast = c('a', 'b'), n_draws = 4L, scale_sd = 0.5)$shift
+  sba <- dirmult_ttest_details(big0, g3, contrast = c('b', 'a'), n_draws = 4L, scale_sd = 0.5)$shift
+  scb <- dirmult_ttest_details(big0, g3, contrast = c('c', 'b'), n_draws = 4L, scale_sd = 0.5)$shift
+  sbn <- dirmult_ttest_details(big0, g3, contrast = c('b', NA),  n_draws = 4L, scale_sd = 0.5)$shift
+  expect_true(all(sab != 0))
+  expect_identical(sba, -sab)
+  expect_identical(scb, -sab)
+  expect_identical(sbn, sab)
+  fg3 <- factor(g3, levels = c('c', 'b', 'a'))     # level order decides
+  expect_identical(dirmult_ttest_details(big0, fg3, contrast = c('c', 'b'), n_draws = 4L, scale_sd = 0.5)$shift, sab)
 
 
   # -----------------------------------------------------------------------
@@ -211,6 +227,13 @@
       dirmult_ttest_details(big, bg, contrast = c('v', NA), n_draws = 20L, cpus = cpus),
       d1, info = cpus )
 
+  # With the scale model too.
+  d2 <- dirmult_ttest_details(big, bg, contrast = c('w', 'u'), scale_sd = 0.5, n_draws = 20L, cpus = 1L)
+  for (cpus in c(2L, 4L))
+    expect_identical(
+      dirmult_ttest_details(big, bg, contrast = c('w', 'u'), scale_sd = 0.5, n_draws = 20L, cpus = cpus),
+      d2, info = cpus )
+
   sp <- Matrix::Matrix(big, sparse = TRUE)
   sl <- slam::as.simple_triplet_matrix(big)
   f  <- function (x, ...) dirmult_ttest_details(x, bg, contrast = c('v', NA), n_draws = 20L, ...)
@@ -253,7 +276,7 @@
   expect_identical(attr(res, 'n'), c(treatment = 12L, reference = 15L))
   expect_identical(attr(res, 'n_draws'), 10L)
   expect_identical(attr(res, 'pseudocount'), 0.5)
-  expect_identical(attr(res, 'scale_sd'), 0.5)
+  expect_identical(attr(res, 'scale_sd'), 0)
   expect_identical(attr(res, 'alpha'), 0.05)
   expect_identical(attr(res, 'conf_level'), 0.95)
   expect_identical(attr(res, 'p_adjust'), 'holm')
@@ -261,13 +284,18 @@
   expect_true(all(res$ci_lower <= res$log2_fc & res$log2_fc <= res$ci_upper))
   expect_identical(res$p_adjusted, p.adjust(res$p_value, 'holm'))
 
-  # Without the scale model, the reversed contrast mirrors the differences,
-  # from the same draws.
-  res <- dirmult_ttest(big, bg, contrast = c('w', 'u'), scale_sd = 0, n_draws = 10L, cpus = 2L)
-  rev <- dirmult_ttest(big, bg, contrast = c('u', 'w'), scale_sd = 0, n_draws = 10L, cpus = 2L)
-  expect_true(max(abs(rev$log2_fc + res$log2_fc)) < 1e-12)
-  expect_true(max(abs(rev$ci_lower + res$ci_upper)) < 1e-12)
-  expect_true(max(abs(rev$p_value - res$p_value)) < 1e-12)
+  # The reversed contrast mirrors the results, from the same draws, with or
+  # without the scale model.
+  for (sd in c(0, 0.5)) {
+    res <- dirmult_ttest(big, bg, contrast = c('w', 'u'), scale_sd = sd, n_draws = 10L, cpus = 2L)
+    rev <- dirmult_ttest(big, bg, contrast = c('u', 'w'), scale_sd = sd, n_draws = 10L, cpus = 2L)
+    expect_true(max(abs(rev$log2_fc + res$log2_fc)) < 1e-12, info = sd)
+    expect_true(max(abs(rev$t + res$t)) < 1e-12, info = sd)
+    expect_true(max(abs(rev$ci_lower + res$ci_upper)) < 1e-12, info = sd)
+    expect_true(max(abs(rev$ci_upper + res$ci_lower)) < 1e-12, info = sd)
+    expect_true(max(abs(rev$p_value - res$p_value)) < 1e-12, info = sd)
+    expect_identical(rev$reject, res$reject, info = sd)
+  }
 
   # n_draws = 1, and no feature names.
   one <- dirmult_ttest(unname(big), bg, n_draws = 1L, cpus = 1L)

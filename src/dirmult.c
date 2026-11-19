@@ -218,7 +218,8 @@ static inline double nan_max (double a, double b) {
 // sexp_prob:    the t quantile of the interval (0.975 for
 //               a 95% interval).
 // sexp_scale:   the scale model's sd, in log2 units (0 for
-//               none).
+//               none), negative to negate the shifts (when
+//               the reference group sorts first).
 // sexp_given:   NULL, or n x D x n_draws Gamma draws to use
 //               instead of sampling (tests).
 // sexp_details: TRUE also returns each draw's difference,
@@ -351,7 +352,7 @@ SEXP C_dirmult_ttest(
 
     // The scale model: the same shift of every difference in this draw.
     double shift = 0;
-    if (sc_sd > 0) {
+    if (sc_sd != 0) {
       rng_t rng;
       rng_seed(&rng, dm_seed, (uint64_t) d * (dm_n + 1) + dm_n);
       shift = rng_norm(&rng) * sc_sd * log2_;
