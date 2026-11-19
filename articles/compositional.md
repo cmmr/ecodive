@@ -39,9 +39,9 @@ planned function the article shows the call it will have, marked
 |:---|:---|:---|:---|
 | [Zeros](#zeros) | How do I take logs of zeros? | `pseudocount`, `norm = 'rclr'`, [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md) (`'mult'`) | Bayesian-multiplicative methods (`'gbm'`, …) |
 | [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`, [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) | `philr()` |
-| [Beta diversity](#beta-diversity) | Do communities differ? | [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md) | `philr_distance()`, [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md) |
+| [Beta diversity](#beta-diversity) | Do communities differ? | [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md) | `philr_distance()` |
 | [Log ratios](#log-ratios) | Which taxa shift relative to which? | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) loadings, [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) |  |
-| [Differential abundance](#differential-abundance) | Which taxa differ? |  | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md), `ancombc()`, `ancombc2()`, [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md) |
+| [Differential abundance](#differential-abundance) | Which taxa differ? | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md), [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md) | `ancombc()`, `ancombc2()` |
 | [Co-occurrence](#proportionality) | Which taxa move together? | [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) |  |
 | [Absolute abundance](#absolute-abundance) | Did taxa really increase? | [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md), [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) |  |
 | [Repeated measures and multi-omics](#repeated-measures-and-multi-omics) | Subjects over time; several ’omics |  | `ctf()`, `rpca_joint()` |
@@ -403,20 +403,81 @@ A clr PCA (`pca(counts, norm = 'clr', pseudocount = 1)`) or a PCoA of
 the Aitchison distances (`pcoa(dm_ait)`) gives the classic “Aitchison
 PCA” with a pseudocount instead.
 
-**Phylogenetic, compositional distances** are planned: the PhILR
-distance (Euclidean distance on PhILR coordinates with the weights of
-Silverman et al. 2017) and phylogenetic RPCA (**[Martino et al.
-2022](https://doi.org/10.1128/msystems.00050-22)**), which runs RPCA on
-counts summed over every clade of the tree.
+**Phylogenetic RPCA**
+([`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md);
+**[Martino et al. 2022](https://doi.org/10.1128/msystems.00050-22)**)
+runs RPCA on counts summed over every clade of a phylogeny, weighted by
+branch length, so clades that shift together show up as single features.
+It’s the compositional counterpart of a UniFrac PCoA, and gives loadings
+for every clade as well as every tip.
+
+The simulated taxa need a tree. This one puts the five blooming taxa in
+one clade and the five declining taxa in another, and joins the other
+140 at random:
+
+``` r
+
+set.seed(7)
+random_clade <- function (tips) {
+  len <- runif(1, 0.05, 0.3)
+  if (length(tips) == 1) return (sprintf('%s:%.3f', tips, len))
+  k <- sample(length(tips) - 1, 1)
+  sprintf('(%s,%s):%.3f', random_clade(tips[1:k]), random_clade(tips[-(1:k)]), len)
+}
+tree <- read_tree(sprintf('(%s,(%s,%s):0.2);',
+  random_clade(taxa[1:5]), random_clade(taxa[6:10]),
+  random_clade(sample(taxa[-(1:10)])) ))
+c(tips = length(tree$tip.label), internal_nodes = tree$Nnode)
+#>           tips internal_nodes 
+#>            150            149
+```
+
+As in the [log ratios](#log-ratios) below, rare tips get large loadings
+from noise alone, so leave out tips present in half the samples or fewer
+(`min_feature_frequency`, a percentage, as in
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)):
+
+``` r
+
+ord_phy <- rpca_phylo(counts, tree, n_axes = 2, min_feature_frequency = 50)
+round(attr(ord_phy, 'prop'), 3)
+#> [1] 0.947 0.053
+
+# The nodes with the largest loadings on the first axis:
+load_phy <- attr(ord_phy, 'loadings')[, 1]
+round(head(load_phy[order(-abs(load_phy))], 6), 3)
+#>   n232 ASV002     n2     n6 ASV004     n7 
+#>  0.226  0.223  0.220  0.219  0.215  0.215
+
+# Internal nodes are named "n<id>"; this lists the tips below one.
+tips_below <- function (tree, node) {
+  ntip <- length(tree$tip.label)
+  ids  <- ntip + match(node, tree$node.label)
+  repeat {
+    more <- union(ids, tree$edge[tree$edge[, 1] %in% ids, 2])
+    if (length(more) == length(ids)) break
+    ids <- more
+  }
+  sort(tree$tip.label[ids[ids <= ntip]])
+}
+top_node <- names(load_phy)[which.max(abs(load_phy))]
+tips_below(attr(ord_phy, 'tree'), top_node)
+#> [1] "ASV001" "ASV002" "ASV003" "ASV004" "ASV005"
+```
+
+The top node is the clade of the five blooming taxa.
+`attr(ord_phy, 'tree')` is the tree as it was used (pruned to the kept
+tips), with its internal nodes named as in the loadings.
+
+The **PhILR distance** (Euclidean distance on PhILR coordinates, with
+the weights of Silverman et al. 2017) is planned:
 
 ``` r
 
 # Planned in ecodive:
-dm_philr <- philr_distance(counts, tree)       # also beta_div(counts, 'philr', tree = tree)
-ord_phy  <- rpca_phylo(counts, tree, n_axes = 3)
+dm_philr <- philr_distance(counts, tree)   # also beta_div(counts, 'philr', tree = tree)
 
-# Available now: philr (Bioconductor) + dist(), and QIIME 2's
-# `gemelli phylogenetic-rpca`.
+# Available now: philr (Bioconductor), then dist() on its coordinates.
 ```
 
 **Used in practice.**
@@ -526,34 +587,106 @@ give different answers on the same data (**[Nearing et al.
 2022](https://doi.org/10.1038/s41467-022-28034-z)**), so report results
 that agree across two or more of them.
 
-| Method | Reference | ecodive (*planned*) | Available now |
+| Method | Reference | ecodive | Elsewhere |
 |:---|:---|:---|:---|
 | ANCOM | every other taxon: tests all pairwise log ratios | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) | scikit-bio, QIIME 2 |
-| ANCOM-BC / ANCOM-BC2 | estimates and removes each sample’s sampling fraction | `ancombc()`, `ancombc2()` | ANCOMBC (Bioconductor), scikit-bio |
 | ALDEx2-style | clr of Dirichlet Monte Carlo draws | [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md) | ALDEx2 (Bioconductor), scikit-bio |
-
-``` r
-
-# Planned in ecodive:
-res1 <- ancom(counts, groups, pseudocount = 1)
-res2 <- ancombc2(counts, ~ group, data = data.frame(group = groups, row.names = samples))
-res3 <- dirmult_ttest(counts, groups, contrast = c('treated', 'control'))
-
-# Available now:
-res4 <- ALDEx2::aldex(as.data.frame(t(counts)), groups, test = 't', effect = TRUE)
-```
+| ANCOM-BC / ANCOM-BC2 | estimates and removes each sample’s sampling fraction | `ancombc()`, `ancombc2()` (*planned*) | ANCOMBC (Bioconductor), scikit-bio |
 
 **[ANCOM](https://doi.org/10.3402/mehd.v26.27663)** (Mandal et al. 2015)
 counts, for each taxon, how many of its log ratios with other taxa
-differ between groups.
+differ between groups (its W), and declares the taxa with the largest W
+differentially abundant:
+
+``` r
+
+res_ancom <- ancom(counts, groups, pseudocount = 1)
+head(res_ancom[order(-res_ancom$W), ], 12)
+#>    feature   W reject
+#> 8   ASV008 131   TRUE
+#> 7   ASV007 120   TRUE
+#> 9   ASV009 111  FALSE
+#> 6   ASV006 110  FALSE
+#> 10  ASV010 110  FALSE
+#> 4   ASV004  85  FALSE
+#> 2   ASV002  79  FALSE
+#> 3   ASV003  58  FALSE
+#> 1   ASV001  54  FALSE
+#> 5   ASV005  51  FALSE
+#> 12  ASV012  40  FALSE
+#> 14  ASV014  38  FALSE
+table(changed = changed, rejected = res_ancom$reject)
+#>        rejected
+#> changed FALSE TRUE
+#>   FALSE   140    0
+#>   TRUE      8    2
+```
+
+W ranks the ten changed taxa first, but ANCOM’s cutoff rule declares
+only two of them: it is conservative, and gives no effect sizes.
+
+**[ALDEx2](https://doi.org/10.1186/2049-2618-2-15)** (Fernandes et al.
+2014) carries the uncertainty of low counts through Monte Carlo draws
+from a Dirichlet distribution, takes the clr of each draw, and tests
+each taxon.
+[`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+is scikit-bio’s version, with Welch’s t-test; `contrast` is
+`c(treatment, reference)`:
+
+``` r
+
+res_dm <- dirmult_ttest(counts, groups, contrast = c('treated', 'control'))
+cols <- c('feature', 'log2_fc', 'ci_lower', 'ci_upper', 'p_adjusted', 'reject')
+head(res_dm[order(res_dm$p_adjusted), cols], 12)
+#>    feature    log2_fc  ci_lower   ci_upper   p_adjusted reject
+#> 4   ASV004  2.5202899  1.961037  3.0618609 5.264583e-12   TRUE
+#> 2   ASV002  2.4474258  1.808636  3.0412890 3.443408e-10   TRUE
+#> 8   ASV008 -3.1138914 -4.010513 -2.3116801 1.656216e-09   TRUE
+#> 3   ASV003  2.2775399  1.660345  2.8540378 4.957579e-09   TRUE
+#> 1   ASV001  2.2245643  1.554660  2.8607141 2.798873e-08   TRUE
+#> 10  ASV010 -2.5056683 -3.321620 -1.7311392 8.303254e-08   TRUE
+#> 9   ASV009 -2.5722890 -3.486387 -1.7212250 8.555397e-08   TRUE
+#> 5   ASV005  2.2081455  1.494890  2.8810657 3.011255e-07   TRUE
+#> 7   ASV007 -2.9353056 -4.017622 -2.0322304 3.991538e-07   TRUE
+#> 6   ASV006 -2.6726712 -3.747770 -1.8288617 1.007440e-06   TRUE
+#> 12  ASV012 -1.1412728 -1.956878 -0.3571674 6.200273e-02  FALSE
+#> 14  ASV014 -0.8150652 -1.509735 -0.1587740 2.216853e-01  FALSE
+table(changed = changed, rejected = res_dm$reject)
+#>        rejected
+#> changed FALSE TRUE
+#>   FALSE   140    0
+#>   TRUE      0   10
+```
+
+It finds all ten changed taxa and nothing else. But compare its fold
+changes with the truth, log2(8) = 3 for the blooms and log2(1/4) = −2
+for the declines:
+
+``` r
+
+tapply(res_dm$log2_fc[changed], fold[changed], median)
+#>      0.25         8 
+#> -2.672671  2.277540
+```
+
+Every estimate is shifted down by about 0.7 log2 units, which is the
+subject of the next section.
+
 **[ANCOM-BC](https://doi.org/10.1038/s41467-020-17041-7)** (Lin &
 Peddada 2020) and
 **[ANCOM-BC2](https://doi.org/10.1038/s41592-023-02092-7)** (Lin &
 Peddada 2024) estimate log fold changes with covariates, after
-correcting for each sample’s unknown sampling fraction.
-**[ALDEx2](https://doi.org/10.1186/2049-2618-2-15)** (Fernandes et al.
-2014) propagates the uncertainty of low counts through Monte Carlo draws
-from a Dirichlet distribution.
+correcting for each sample’s unknown sampling fraction. They are planned
+for ecodive:
+
+``` r
+
+# Planned in ecodive:
+res_bc <- ancombc2(counts, ~ group, data = data.frame(group = groups, row.names = samples))
+
+# Available now: ANCOMBC::ancombc2() (Bioconductor), on a
+# TreeSummarizedExperiment or phyloseq object.
+```
 
 **Used in practice.** [Wallen et
 al. (2022)](https://doi.org/10.1038/s41467-022-34667-x) counted a
@@ -601,13 +734,41 @@ abundant taxa do.
 So a clr-based test rests on two things: an assumption that most taxa
 don’t change (or that changes balance out), and the zero treatment. When
 either fails, it reports which taxa moved **relative to the average
-taxon**, not in absolute terms. ANCOM-BC estimates the shift as a bias
-and removes it; the scale models of **[Nixon, Gloor & Silverman
-(2025)](https://doi.org/10.1186/s13059-025-03609-3)** (in ALDEx2, and
-planned for
-[`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md))
-add explicit uncertainty about it; and measuring total load removes it
-outright (see [Absolute abundance](#absolute-abundance)).
+taxon**, not in absolute terms. That is the shift seen in
+[`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)’s
+fold changes above. ANCOM-BC estimates the shift as a bias and removes
+it; measuring total load removes it outright (see [Absolute
+abundance](#absolute-abundance)); and **scale models** (**[Nixon, Gloor
+& Silverman 2025](https://doi.org/10.1186/s13059-025-03609-3)**) make it
+uncertain instead of assuming it is zero. In
+[`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+`scale_sd` is the standard deviation, in log2 units, of a random shift
+in the typical taxon’s abundance between the groups, drawn afresh in
+every Monte Carlo draw. Nixon et al. suggest 0.5; use more draws with
+it:
+
+``` r
+
+res_sm <- lapply(c(0, 0.5, 1), function (sd)
+  dirmult_ttest(counts, groups, contrast = c('treated', 'control'),
+                scale_sd = sd, n_draws = 1000) )
+
+data.frame(
+  scale_sd       = c(0, 0.5, 1),
+  rejected       = sapply(res_sm, function (r) sum(r$reject)),
+  false_positive = sapply(res_sm, function (r) sum(r$reject & !changed)),
+  ci_width       = sapply(res_sm, function (r) median((r$ci_upper - r$ci_lower)[changed])) )
+#>   scale_sd rejected false_positive ci_width
+#> 1      0.0       10              0 1.649865
+#> 2      0.5       10              0 4.241770
+#> 3      1.0        0              0 7.299840
+```
+
+The intervals widen as `scale_sd` grows, so a taxon is only declared
+changed when its change is clear of plausible shifts in the reference.
+At 0.5 all ten true changes survive; at 1, a shift of 2 log2 units is
+plausible, and none does. Choose `scale_sd` from what you know about how
+much total load could differ between your groups.
 
 ## Co-occurrence: proportionality
 
@@ -687,7 +848,7 @@ measured <- load * exp(rnorm(n, 0, 0.2))
 q_scale  <- qmp_scale(counts, measured)            # relative abundance x load
 q_rarefy <- qmp_rarefy(counts, measured, seed = 1) # Vandeputte et al. (2017)
 range(attr(q_rarefy, 'target'))                    # reads kept per sample
-#> [1]  720 7386
+#> [1]  553 6298
 
 lfc <- function (x) log2(colMeans(x[groups == 'treated', ]) /
                          colMeans(x[groups == 'control', ]))
@@ -696,10 +857,10 @@ lfc <- function (x) log2(colMeans(x[groups == 'treated', ]) /
 rbind(relative   = summary(lfc(rel)[ok]),
       qmp_scale  = summary(lfc(q_scale)[ok]),
       qmp_rarefy = summary(lfc(q_rarefy)[ok]))
-#>                  Min.    1st Qu.     Median       Mean    3rd Qu.        Max.
-#> relative   -2.6546670 -2.2049526 -2.0437969 -2.1211625 -2.0181232 -1.76059194
-#> qmp_scale  -0.7922737 -0.3160813 -0.2022960 -0.2515328 -0.1495874  0.09553958
-#> qmp_rarefy -0.6645386 -0.4037386 -0.2764712 -0.2677907 -0.2104378  0.12918677
+#>                  Min.    1st Qu.      Median        Mean     3rd Qu.       Max.
+#> relative   -2.6546670 -2.2049526 -2.04379685 -2.12116248 -2.01812324 -1.7605919
+#> qmp_scale  -0.6076387 -0.1464251 -0.07958192 -0.08188523  0.01122376  0.3444001
+#> qmp_rarefy -0.3713600 -0.2395838 -0.15865785 -0.11736648 -0.03074940  0.2944085
 ```
 
 Relative abundances make the unchanged taxa look depleted; with the

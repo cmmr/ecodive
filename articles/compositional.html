@@ -153,13 +153,10 @@ today.</p>
 <td align="left">
 <code><a href="../reference/aitchison.html">aitchison()</a></code>,
 <code><a href="../reference/robust_aitchison.html">robust_aitchison()</a></code>, <code><a href="../reference/rpca.html">rpca()</a></code>,
-<code><a href="../reference/pca.html">pca()</a></code>, <code><a href="../reference/permanova.html">permanova()</a></code>,
+<code><a href="../reference/rpca_phylo.html">rpca_phylo()</a></code>, <code><a href="../reference/pca.html">pca()</a></code>, <code><a href="../reference/permanova.html">permanova()</a></code>,
 <code><a href="../reference/permdisp.html">permdisp()</a></code>
 </td>
-<td align="left">
-<code>philr_distance()</code>,
-<code><a href="../reference/rpca_phylo.html">rpca_phylo()</a></code>
-</td>
+<td align="left"><code>philr_distance()</code></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="#log-ratios">Log ratios</a></td>
@@ -174,10 +171,11 @@ today.</p>
 <td align="left"><a href="#differential-abundance">Differential
 abundance</a></td>
 <td align="left">Which taxa differ?</td>
-<td align="left"></td>
 <td align="left">
-<code><a href="../reference/ancom.html">ancom()</a></code>, <code>ancombc()</code>,
-<code>ancombc2()</code>, <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>
+<code><a href="../reference/ancom.html">ancom()</a></code>, <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>
+</td>
+<td align="left">
+<code>ancombc()</code>, <code>ancombc2()</code>
 </td>
 </tr>
 <tr class="even">
@@ -555,18 +553,68 @@ method of DEICODE and of QIIME 2’s gemelli plugin (<strong><a href="https://do
 <p>A clr PCA (<code>pca(counts, norm = 'clr', pseudocount = 1)</code>)
 or a PCoA of the Aitchison distances (<code>pcoa(dm_ait)</code>) gives
 the classic “Aitchison PCA” with a pseudocount instead.</p>
-<p><strong>Phylogenetic, compositional distances</strong> are planned:
-the PhILR distance (Euclidean distance on PhILR coordinates with the
-weights of Silverman et al. 2017) and phylogenetic RPCA (<strong><a href="https://doi.org/10.1128/msystems.00050-22" class="external-link">Martino et al.
-2022</a></strong>), which runs RPCA on counts summed over every clade of
-the tree.</p>
+<p><strong>Phylogenetic RPCA</strong> (<code><a href="../reference/rpca_phylo.html">rpca_phylo()</a></code>;
+<strong><a href="https://doi.org/10.1128/msystems.00050-22" class="external-link">Martino et
+al. 2022</a></strong>) runs RPCA on counts summed over every clade of a
+phylogeny, weighted by branch length, so clades that shift together show
+up as single features. It’s the compositional counterpart of a UniFrac
+PCoA, and gives loadings for every clade as well as every tip.</p>
+<p>The simulated taxa need a tree. This one puts the five blooming taxa
+in one clade and the five declining taxa in another, and joins the other
+140 at random:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">dm_philr</span> <span class="op">&lt;-</span> <span class="fu">philr_distance</span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span><span class="op">)</span>       <span class="co"># also beta_div(counts, 'philr', tree = tree)</span></span>
-<span><span class="va">ord_phy</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca_phylo.html">rpca_phylo</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, n_axes <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
+<span><span class="va">random_clade</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">len</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.05</span>, <span class="fl">0.3</span><span class="op">)</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'%s:%.3f'</span>, <span class="va">tips</span>, <span class="va">len</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'(%s,%s):%.3f'</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">tips</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">]</span><span class="op">)</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">tips</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>, <span class="va">len</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_tree.html">read_tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'(%s,(%s,%s):0.2);'</span>,</span>
+<span>  <span class="fu">random_clade</span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  <span class="fu">random_clade</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>tips <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span>, internal_nodes <span class="op">=</span> <span class="va">tree</span><span class="op">$</span><span class="va">Nnode</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           tips internal_nodes </span></span>
+<span><span class="co">#&gt;            150            149</span></span></code></pre></div>
+<p>As in the <a href="#log-ratios">log ratios</a> below, rare tips get
+large loadings from noise alone, so leave out tips present in half the
+samples or fewer (<code>min_feature_frequency</code>, a percentage, as
+in <code><a href="../reference/rpca.html">rpca()</a></code>):</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ord_phy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca_phylo.html">rpca_phylo</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, n_axes <span class="op">=</span> <span class="fl">2</span>, min_feature_frequency <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord_phy</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.947 0.053</span></span>
 <span></span>
-<span><span class="co"># Available now: philr (Bioconductor) + dist(), and QIIME 2's</span></span>
-<span><span class="co"># `gemelli phylogenetic-rpca`.</span></span></code></pre></div>
+<span><span class="co"># The nodes with the largest loadings on the first axis:</span></span>
+<span><span class="va">load_phy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord_phy</span>, <span class="st">'loadings'</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">load_phy</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">load_phy</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">6</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   n232 ASV002     n2     n6 ASV004     n7 </span></span>
+<span><span class="co">#&gt;  0.226  0.223  0.220  0.219  0.215  0.215</span></span>
+<span></span>
+<span><span class="co"># Internal nodes are named "n&lt;id&gt;"; this lists the tips below one.</span></span>
+<span><span class="va">tips_below</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">tree</span>, <span class="va">node</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">ntip</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span></span>
+<span>  <span class="va">ids</span>  <span class="op">&lt;-</span> <span class="va">ntip</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">node</span>, <span class="va">tree</span><span class="op">$</span><span class="va">node.label</span><span class="op">)</span></span>
+<span>  <span class="kw">repeat</span> <span class="op">{</span></span>
+<span>    <span class="va">more</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">union</a></span><span class="op">(</span><span class="va">ids</span>, <span class="va">tree</span><span class="op">$</span><span class="va">edge</span><span class="op">[</span><span class="va">tree</span><span class="op">$</span><span class="va">edge</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">ids</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">more</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ids</span><span class="op">)</span><span class="op">)</span> <span class="kw">break</span></span>
+<span>    <span class="va">ids</span> <span class="op">&lt;-</span> <span class="va">more</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">[</span><span class="va">ids</span><span class="op">[</span><span class="va">ids</span> <span class="op">&lt;=</span> <span class="va">ntip</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">top_node</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">load_phy</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">load_phy</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu">tips_below</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord_phy</span>, <span class="st">'tree'</span><span class="op">)</span>, <span class="va">top_node</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "ASV001" "ASV002" "ASV003" "ASV004" "ASV005"</span></span></code></pre></div>
+<p>The top node is the clade of the five blooming taxa.
+<code>attr(ord_phy, 'tree')</code> is the tree as it was used (pruned to
+the kept tips), with its internal nodes named as in the loadings.</p>
+<p>The <strong>PhILR distance</strong> (Euclidean distance on PhILR
+coordinates, with the weights of Silverman et al. 2017) is planned:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
+<span><span class="va">dm_philr</span> <span class="op">&lt;-</span> <span class="fu">philr_distance</span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span><span class="op">)</span>   <span class="co"># also beta_div(counts, 'philr', tree = tree)</span></span>
+<span></span>
+<span><span class="co"># Available now: philr (Bioconductor), then dist() on its coordinates.</span></span></code></pre></div>
 <p><strong>Used in practice.</strong></p>
 <ul>
 <li>Aitchison distance and clr PCA: <a href="https://doi.org/10.1128/mSphere.00327-17" class="external-link">Bian et al. (2017)</a>,
@@ -593,7 +641,7 @@ log ratio of the top ones over the bottom ones as a single per-sample
 variable. Qurro does this interactively (<strong><a href="https://doi.org/10.1093/nargab/lqaa023" class="external-link">Fedarko et
 al. 2020</a></strong>). Choose among prevalent taxa: rare taxa can have
 large loadings from noise alone, and their sums are often zero.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">load_ax1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'loadings'</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">load_ax1</span> <span class="op">&lt;-</span> <span class="va">load_ax1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">load_ax1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">taxa</span><span class="op">[</span><span class="va">prevalent</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">top</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">load_ax1</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
@@ -604,7 +652,7 @@ large loadings from noise alone, and their sums are often zero.</p>
 <span><span class="co">#&gt; [1] "ASV007" "ASV008" "ASV006" "ASV009" "ASV010"</span></span></code></pre></div>
 <p><code><a href="../reference/log_ratio.html">log_ratio()</a></code> gives one value per sample, which can go
 straight into any test or model, or into the metadata:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/log_ratio.html">log_ratio</a></span><span class="op">(</span><span class="va">counts</span>, numerator <span class="op">=</span> <span class="va">top</span>, denominator <span class="op">=</span> <span class="va">bottom</span><span class="op">)</span>   <span class="co"># log of summed counts</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">lr</span>, <span class="va">groups</span>, <span class="va">median</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  control  treated </span></span>
@@ -614,13 +662,13 @@ straight into any test or model, or into the metadata:</p>
 <p>Which way the axis points depends on its sign, so check which group
 the “top” taxa belong to before interpreting (here, compare with the
 true <code>fold</code>):</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fold</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">top</span>, <span class="va">bottom</span><span class="op">)</span>, <span class="va">taxa</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;  [1] 8.00 8.00 8.00 8.00 8.00 0.25 0.25 0.25 0.25 0.25</span></span></code></pre></div>
 <p>A <strong>balance</strong> (<code><a href="../reference/balance.html">balance()</a></code>) uses geometric
 means instead of sums, scaled so that balances of different sizes are
 comparable; it is one coordinate of an <code><a href="../reference/ilr.html">ilr()</a></code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/balance.html">balance</a></span><span class="op">(</span><span class="va">counts</span>, numerator <span class="op">=</span> <span class="va">top</span>, denominator <span class="op">=</span> <span class="va">bottom</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">b</span>, <span class="va">groups</span>, <span class="va">median</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  control  treated </span></span>
@@ -649,16 +697,16 @@ methods give different answers on the same data (<strong><a href="https://doi.or
 them.</p>
 <table class="table">
 <colgroup>
-<col width="14%">
 <col width="20%">
-<col width="38%">
-<col width="27%">
+<col width="28%">
+<col width="23%">
+<col width="28%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Method</th>
 <th align="left">Reference</th>
-<th align="left">ecodive (<em>planned</em>)</th>
-<th align="left">Available now</th>
+<th align="left">ecodive</th>
+<th align="left">Elsewhere</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -668,38 +716,97 @@ them.</p>
 <td align="left">scikit-bio, QIIME 2</td>
 </tr>
 <tr class="even">
-<td align="left">ANCOM-BC / ANCOM-BC2</td>
-<td align="left">estimates and removes each sample’s sampling
-fraction</td>
-<td align="left">
-<code>ancombc()</code>, <code>ancombc2()</code>
-</td>
-<td align="left">ANCOMBC (Bioconductor), scikit-bio</td>
-</tr>
-<tr class="odd">
 <td align="left">ALDEx2-style</td>
 <td align="left">clr of Dirichlet Monte Carlo draws</td>
 <td align="left"><code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code></td>
 <td align="left">ALDEx2 (Bioconductor), scikit-bio</td>
 </tr>
+<tr class="odd">
+<td align="left">ANCOM-BC / ANCOM-BC2</td>
+<td align="left">estimates and removes each sample’s sampling
+fraction</td>
+<td align="left">
+<code>ancombc()</code>, <code>ancombc2()</code>
+(<em>planned</em>)</td>
+<td align="left">ANCOMBC (Bioconductor), scikit-bio</td>
+</tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancom.html">ancom</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">group</span>, data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">res3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Available now:</span></span>
-<span><span class="va">res4</span> <span class="op">&lt;-</span> <span class="fu">ALDEx2</span><span class="fu">::</span><span class="fu">aldex</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span>, <span class="va">groups</span>, test <span class="op">=</span> <span class="st">'t'</span>, effect <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><strong><a href="https://doi.org/10.3402/mehd.v26.27663" class="external-link">ANCOM</a></strong> (Mandal
 et al. 2015) counts, for each taxon, how many of its log ratios with
-other taxa differ between groups. <strong><a href="https://doi.org/10.1038/s41467-020-17041-7" class="external-link">ANCOM-BC</a></strong>
+other taxa differ between groups (its W), and declares the taxa with the
+largest W differentially abundant:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_ancom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancom.html">ancom</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_ancom</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">res_ancom</span><span class="op">$</span><span class="va">W</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    feature   W reject</span></span>
+<span><span class="co">#&gt; 8   ASV008 131   TRUE</span></span>
+<span><span class="co">#&gt; 7   ASV007 120   TRUE</span></span>
+<span><span class="co">#&gt; 9   ASV009 111  FALSE</span></span>
+<span><span class="co">#&gt; 6   ASV006 110  FALSE</span></span>
+<span><span class="co">#&gt; 10  ASV010 110  FALSE</span></span>
+<span><span class="co">#&gt; 4   ASV004  85  FALSE</span></span>
+<span><span class="co">#&gt; 2   ASV002  79  FALSE</span></span>
+<span><span class="co">#&gt; 3   ASV003  58  FALSE</span></span>
+<span><span class="co">#&gt; 1   ASV001  54  FALSE</span></span>
+<span><span class="co">#&gt; 5   ASV005  51  FALSE</span></span>
+<span><span class="co">#&gt; 12  ASV012  40  FALSE</span></span>
+<span><span class="co">#&gt; 14  ASV014  38  FALSE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span>, rejected <span class="op">=</span> <span class="va">res_ancom</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        rejected</span></span>
+<span><span class="co">#&gt; changed FALSE TRUE</span></span>
+<span><span class="co">#&gt;   FALSE   140    0</span></span>
+<span><span class="co">#&gt;   TRUE      8    2</span></span></code></pre></div>
+<p>W ranks the ten changed taxa first, but ANCOM’s cutoff rule declares
+only two of them: it is conservative, and gives no effect sizes.</p>
+<p><strong><a href="https://doi.org/10.1186/2049-2618-2-15" class="external-link">ALDEx2</a></strong>
+(Fernandes et al. 2014) carries the uncertainty of low counts through
+Monte Carlo draws from a Dirichlet distribution, takes the clr of each
+draw, and tests each taxon. <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code> is scikit-bio’s
+version, with Welch’s t-test; <code>contrast</code> is
+<code>c(treatment, reference)</code>:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'feature'</span>, <span class="st">'log2_fc'</span>, <span class="st">'ci_lower'</span>, <span class="st">'ci_upper'</span>, <span class="st">'p_adjusted'</span>, <span class="st">'reject'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="va">cols</span><span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    feature    log2_fc  ci_lower   ci_upper   p_adjusted reject</span></span>
+<span><span class="co">#&gt; 4   ASV004  2.5202899  1.961037  3.0618609 5.264583e-12   TRUE</span></span>
+<span><span class="co">#&gt; 2   ASV002  2.4474258  1.808636  3.0412890 3.443408e-10   TRUE</span></span>
+<span><span class="co">#&gt; 8   ASV008 -3.1138914 -4.010513 -2.3116801 1.656216e-09   TRUE</span></span>
+<span><span class="co">#&gt; 3   ASV003  2.2775399  1.660345  2.8540378 4.957579e-09   TRUE</span></span>
+<span><span class="co">#&gt; 1   ASV001  2.2245643  1.554660  2.8607141 2.798873e-08   TRUE</span></span>
+<span><span class="co">#&gt; 10  ASV010 -2.5056683 -3.321620 -1.7311392 8.303254e-08   TRUE</span></span>
+<span><span class="co">#&gt; 9   ASV009 -2.5722890 -3.486387 -1.7212250 8.555397e-08   TRUE</span></span>
+<span><span class="co">#&gt; 5   ASV005  2.2081455  1.494890  2.8810657 3.011255e-07   TRUE</span></span>
+<span><span class="co">#&gt; 7   ASV007 -2.9353056 -4.017622 -2.0322304 3.991538e-07   TRUE</span></span>
+<span><span class="co">#&gt; 6   ASV006 -2.6726712 -3.747770 -1.8288617 1.007440e-06   TRUE</span></span>
+<span><span class="co">#&gt; 12  ASV012 -1.1412728 -1.956878 -0.3571674 6.200273e-02  FALSE</span></span>
+<span><span class="co">#&gt; 14  ASV014 -0.8150652 -1.509735 -0.1587740 2.216853e-01  FALSE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span>, rejected <span class="op">=</span> <span class="va">res_dm</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        rejected</span></span>
+<span><span class="co">#&gt; changed FALSE TRUE</span></span>
+<span><span class="co">#&gt;   FALSE   140    0</span></span>
+<span><span class="co">#&gt;   TRUE      0   10</span></span></code></pre></div>
+<p>It finds all ten changed taxa and nothing else. But compare its fold
+changes with the truth, log2(8) = 3 for the blooms and log2(1/4) = −2
+for the declines:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">$</span><span class="va">log2_fc</span><span class="op">[</span><span class="va">changed</span><span class="op">]</span>, <span class="va">fold</span><span class="op">[</span><span class="va">changed</span><span class="op">]</span>, <span class="va">median</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      0.25         8 </span></span>
+<span><span class="co">#&gt; -2.672671  2.277540</span></span></code></pre></div>
+<p>Every estimate is shifted down by about 0.7 log2 units, which is the
+subject of the next section.</p>
+<p><strong><a href="https://doi.org/10.1038/s41467-020-17041-7" class="external-link">ANCOM-BC</a></strong>
 (Lin &amp; Peddada 2020) and <strong><a href="https://doi.org/10.1038/s41592-023-02092-7" class="external-link">ANCOM-BC2</a></strong>
 (Lin &amp; Peddada 2024) estimate log fold changes with covariates,
-after correcting for each sample’s unknown sampling fraction. <strong><a href="https://doi.org/10.1186/2049-2618-2-15" class="external-link">ALDEx2</a></strong>
-(Fernandes et al. 2014) propagates the uncertainty of low counts through
-Monte Carlo draws from a Dirichlet distribution.</p>
+after correcting for each sample’s unknown sampling fraction. They are
+planned for ecodive:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
+<span><span class="va">res_bc</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">group</span>, data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Available now: ANCOMBC::ancombc2() (Bioconductor), on a</span></span>
+<span><span class="co"># TreeSummarizedExperiment or phyloseq object.</span></span></code></pre></div>
 <p><strong>Used in practice.</strong> <a href="https://doi.org/10.1038/s41467-022-34667-x" class="external-link">Wallen et
 al. (2022)</a> counted a species as associated with Parkinson’s disease
 only when both ANCOM-BC and MaAsLin2 agreed, in shotgun metagenomes from
@@ -715,7 +822,7 @@ relative abundances the reference is the sample’s total, which the bloom
 inflates; with the clr it is the sample’s geometric mean over all taxa.
 Compare the estimated group difference (natural log) for the prevalent
 unchanged taxa, whose true difference is 0:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ok</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="va">changed</span> <span class="op">&amp;</span> <span class="va">prevalent</span></span>
 <span><span class="va">d_rel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rel</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'treated'</span>, <span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span></span>
 <span>         <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rel</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'control'</span>, <span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
@@ -740,11 +847,36 @@ than the abundant taxa do.</p>
 <p>So a clr-based test rests on two things: an assumption that most taxa
 don’t change (or that changes balance out), and the zero treatment. When
 either fails, it reports which taxa moved <strong>relative to the
-average taxon</strong>, not in absolute terms. ANCOM-BC estimates the
-shift as a bias and removes it; the scale models of <strong><a href="https://doi.org/10.1186/s13059-025-03609-3" class="external-link">Nixon, Gloor &amp;
-Silverman (2025)</a></strong> (in ALDEx2, and planned for
-<code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>) add explicit uncertainty about it; and
-measuring total load removes it outright (see <a href="#absolute-abundance">Absolute abundance</a>).</p>
+average taxon</strong>, not in absolute terms. That is the shift seen in
+<code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>’s fold changes above. ANCOM-BC estimates
+the shift as a bias and removes it; measuring total load removes it
+outright (see <a href="#absolute-abundance">Absolute abundance</a>); and
+<strong>scale models</strong> (<strong><a href="https://doi.org/10.1186/s13059-025-03609-3" class="external-link">Nixon, Gloor &amp;
+Silverman 2025</a></strong>) make it uncertain instead of assuming it is
+zero. In <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>, <code>scale_sd</code> is the
+standard deviation, in log2 units, of a random shift in the typical
+taxon’s abundance between the groups, drawn afresh in every Monte Carlo
+draw. Nixon et al. suggest 0.5; use more draws with it:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_sm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">sd</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span>,</span>
+<span>                scale_sd <span class="op">=</span> <span class="va">sd</span>, n_draws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  scale_sd       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  rejected       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">res_sm</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  false_positive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">res_sm</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">reject</span> <span class="op">&amp;</span> <span class="op">!</span><span class="va">changed</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  ci_width       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">res_sm</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">ci_upper</span> <span class="op">-</span> <span class="va">r</span><span class="op">$</span><span class="va">ci_lower</span><span class="op">)</span><span class="op">[</span><span class="va">changed</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="co">#&gt;   scale_sd rejected false_positive ci_width</span></span>
+<span><span class="co">#&gt; 1      0.0       10              0 1.649865</span></span>
+<span><span class="co">#&gt; 2      0.5       10              0 4.241770</span></span>
+<span><span class="co">#&gt; 3      1.0        0              0 7.299840</span></span></code></pre></div>
+<p>The intervals widen as <code>scale_sd</code> grows, so a taxon is
+only declared changed when its change is clear of plausible shifts in
+the reference. At 0.5 all ten true changes survive; at 1, a shift of 2
+log2 units is plausible, and none does. Choose <code>scale_sd</code>
+from what you know about how much total load could differ between your
+groups.</p>
 </div>
 </div>
 <div class="section level2">
@@ -761,7 +893,7 @@ al. 2017</a></strong>).</p>
 <code><a href="../reference/phi_s.html">phi_s()</a></code> compute every pair of taxa in parallel C, and
 return a <code>dist</code> object over the taxa (here on the zero-free
 table from the <a href="#zeros">Zeros</a> section):</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rho</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rho_p.html">rho_p</a></span><span class="op">(</span><span class="va">zf</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">rho</span><span class="op">)</span>   <span class="co"># one value for each pair of the 150 taxa</span></span>
 <span><span class="co">#&gt; [1] 11175</span></span>
@@ -806,13 +938,13 @@ abundances by the load (<strong><a href="https://doi.org/10.1371/journal.pone.02
 the same number of reads per cell.</p>
 <p>Here the load is measured with 20% error, as a real measurement would
 be:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measured</span> <span class="op">&lt;-</span> <span class="va">load</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">0</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">q_scale</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qmp.html">qmp_scale</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">measured</span><span class="op">)</span>            <span class="co"># relative abundance x load</span></span>
 <span><span class="va">q_rarefy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qmp.html">qmp_rarefy</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">measured</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># Vandeputte et al. (2017)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">q_rarefy</span>, <span class="st">'target'</span><span class="op">)</span><span class="op">)</span>                    <span class="co"># reads kept per sample</span></span>
-<span><span class="co">#&gt; [1]  720 7386</span></span>
+<span><span class="co">#&gt; [1]  553 6298</span></span>
 <span></span>
 <span><span class="va">lfc</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'treated'</span>, <span class="op">]</span><span class="op">)</span> <span class="op">/</span></span>
 <span>                         <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'control'</span>, <span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
@@ -821,10 +953,10 @@ be:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>relative   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu">lfc</span><span class="op">(</span><span class="va">rel</span><span class="op">)</span><span class="op">[</span><span class="va">ok</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>      qmp_scale  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu">lfc</span><span class="op">(</span><span class="va">q_scale</span><span class="op">)</span><span class="op">[</span><span class="va">ok</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>      qmp_rarefy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu">lfc</span><span class="op">(</span><span class="va">q_rarefy</span><span class="op">)</span><span class="op">[</span><span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                  Min.    1st Qu.     Median       Mean    3rd Qu.        Max.</span></span>
-<span><span class="co">#&gt; relative   -2.6546670 -2.2049526 -2.0437969 -2.1211625 -2.0181232 -1.76059194</span></span>
-<span><span class="co">#&gt; qmp_scale  -0.7922737 -0.3160813 -0.2022960 -0.2515328 -0.1495874  0.09553958</span></span>
-<span><span class="co">#&gt; qmp_rarefy -0.6645386 -0.4037386 -0.2764712 -0.2677907 -0.2104378  0.12918677</span></span></code></pre></div>
+<span><span class="co">#&gt;                  Min.    1st Qu.      Median        Mean     3rd Qu.       Max.</span></span>
+<span><span class="co">#&gt; relative   -2.6546670 -2.2049526 -2.04379685 -2.12116248 -2.01812324 -1.7605919</span></span>
+<span><span class="co">#&gt; qmp_scale  -0.6076387 -0.1464251 -0.07958192 -0.08188523  0.01122376  0.3444001</span></span>
+<span><span class="co">#&gt; qmp_rarefy -0.3713600 -0.2395838 -0.15865785 -0.11736648 -0.03074940  0.2944085</span></span></code></pre></div>
 <p>Relative abundances make the unchanged taxa look depleted; with the
 load, they are close to zero again. <code><a href="../reference/qmp.html">qmp_rarefy()</a></code> pays for
 its even detection limit in reads: every sample is cut to the same
@@ -857,7 +989,7 @@ separates differences between subjects from changes over time.</li>
 several tables measured on the same samples (e.g. 16S, metagenomics and
 metabolomics) with shared sample scores.</li>
 </ul>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">ctf</span><span class="op">(</span><span class="va">counts</span>, subjects <span class="op">=</span> <span class="st">'subject_id'</span>, states <span class="op">=</span> <span class="st">'week'</span>, data <span class="op">=</span> <span class="va">meta</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">rpca_joint</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>amplicon <span class="op">=</span> <span class="va">counts16s</span>, metabolites <span class="op">=</span> <span class="va">metab</span><span class="op">)</span>, n_axes <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
