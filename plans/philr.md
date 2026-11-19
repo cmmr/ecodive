@@ -353,7 +353,7 @@ Reference results (fixtures `data-raw/expected/philr.r` and `philr.py`):
 - **Identities:** uniform-weight distances equal `aitchison()` (1.8e-15),
   coordinates equal `ilr()` with the tree's SBP (1e-12 tested).
 
-For `dpcoa()` (item 36): `C_philr_tree()` is a general "binary tree for
+For `dpcoa()` (item 33): `C_philr_tree()` is a general "binary tree for
 these features" preparation (prune to features, collapse single-child
 nodes summing lengths, resolve polytomies, internal nodes numbered in
 preorder so every child's id is above its parent's, tips mapped to feature

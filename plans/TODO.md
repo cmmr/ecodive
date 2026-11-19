@@ -53,11 +53,11 @@ meaningful sense, so they sit just after the methods they build on.
 | 30 | [ ] `rpca_joint()` | [rpca_joint.md](rpca_joint.md) | port (gemelli, BSD-3) | Multi-omics; a large port (~1,000 C lines) on `rpca()`'s OptSpace code. |
 | 31 | [ ] `ctf()` | [ctf.md](ctf.md) | port (gemelli, BSD-3) | Longitudinal designs; the largest gemelli port, with reference quirks to settle with the user first. |
 | 32 | [x] `philr()`, `philr_distance()` (5f8d7bb) | [philr.md](philr.md) | **clean room** (philr GPL-3; formulas from the open-access paper) | First among the clean-room methods: phylogeny-aware, high demand, and an O(D) formula per sample. |
-| 33 | [ ] `sourcetracker()` | [source_tracking.md](source_tracking.md) | port (SourceTracker2, BSD-3) | Source tracking is in steady high demand (Knights 2011: ~200 citations a year); simple; SourceTracker2's per-read Python loop is slow and its `multiprocessing` isn't reproducible, so threaded C with per-sink PCG streams is a clear win. |
-| 34 | [ ] `coda_lasso()`, then `coda_lasso_pairwise()` | [coda_lasso.md](coda_lasso.md) | port (zeroSum MIT; coda4microbiome MIT; glmnet output-only) | Compositional ML: log-contrast lasso / elastic net for prediction and taxon selection, in active use (coda4microbiome, selbal); builds on the log-ratio conventions; CV folds thread naturally. |
-| 35 | [ ] `feast()` | [source_tracking.md](source_tracking.md) | **clean room** (FEAST is CC BY-NC-SA: non-commercial; even its outputs as fixtures need the user's OK) | FEAST is the other standard source-tracking method, rising (~140 citations a year); an EM fully stated in the paper, but its initialisation must be settled first. |
-| 36 | [ ] `dpcoa()` | [dpcoa.md](dpcoa.md) | **clean room** | Third among the clean-room methods, after `philr()` and `feast()`: phyloseq "DPCoA", phylogeny-aware. |
-| 37 | [ ] `replace_zeros_czm()`, `replace_zeros_gbm()`, `replace_zeros_sq()`, `replace_zeros_bl()` | [zero_replacement.md](zero_replacement.md) | **clean room** (zCompositions GPL; the defining paper is closed access, so formulas are confirmed from outputs) | Simple once the formulas are pinned down; `cmultRepl()`'s GBM is the field's default. |
+| 33 | [ ] `dpcoa()` | [dpcoa.md](dpcoa.md) | **clean room** | Second among the clean-room methods, after `philr()`: phyloseq "DPCoA", phylogeny-aware. |
+| 34 | [ ] `replace_zeros_czm()`, `replace_zeros_gbm()`, `replace_zeros_sq()`, `replace_zeros_bl()` | [zero_replacement.md](zero_replacement.md) | **clean room** (zCompositions GPL; the defining paper is closed access, so formulas are confirmed from outputs) | Simple once the formulas are pinned down; `cmultRepl()`'s GBM is the field's default. |
+| 35 | [ ] `sourcetracker()` | [source_tracking.md](source_tracking.md) | port (SourceTracker2, BSD-3) | Source tracking is in steady high demand (Knights 2011: ~200 citations a year); simple; SourceTracker2's per-read Python loop is slow and its `multiprocessing` isn't reproducible, so threaded C with per-sink PCG streams is a clear win. |
+| 36 | [ ] `coda_lasso()`, then `coda_lasso_pairwise()` | [coda_lasso.md](coda_lasso.md) | port (zeroSum MIT; coda4microbiome MIT; glmnet output-only) | Compositional ML: log-contrast lasso / elastic net for prediction and taxon selection, in active use (coda4microbiome, selbal); builds on the log-ratio conventions; CV folds thread naturally. |
+| 37 | [ ] `feast()` | [source_tracking.md](source_tracking.md) | **clean room** (FEAST is CC BY-NC-SA: non-commercial; even its outputs as fixtures need the user's OK) | FEAST is the other standard source-tracking method, rising (~140 citations a year); an EM fully stated in the paper, but its initialisation must be settled first. |
 | 38 | [ ] `mantel_regression()` (MRM) | [mantel_regression.md](mantel_regression.md) | clean room | Simple algebra; biogeography. |
 | 39 | [ ] `mirkat()` | [mirkat.md](mirkat.md) | clean room | In demand in microbiome methods work; needs Davies or Liu p-values written from the papers. |
 | 40 | [ ] `splsda()` | [splsda.md](splsda.md) | clean room | mixOmics users; sparse PLS-DA is its own algorithm. |
@@ -83,13 +83,14 @@ are too small for deep learning, and ranger and XGBoost are already fast,
 multithreaded and reproducible. The answer was yes for costly methods
 specific to microbiome data, which don't yet have a fast, reproducible
 implementation. Two of those weren't planned yet. The user had them
-placed after item 32 (`philr()`, the last item done when they were added),
-so that no completed item is renumbered:
-- `sourcetracker()` (33) and `coda_lasso()` (34) are permissive ports in
+placed after item 34, so that no item that is done or in progress is
+renumbered (`dpcoa()`, item 33, was being implemented when they were
+added):
+- `sourcetracker()` (35) and `coda_lasso()` (36) are permissive ports in
   high demand;
-- `feast()` (35) is clean room.
+- `feast()` (37) is clean room.
 
-`dpcoa()` and every item after it moved down by three. SparCC stays
+Items from `mantel_regression()` on moved down by three. SparCC stays
 unplanned, for the reasons in [compositional.md](compositional.md).
 
 Dropped: `ordisurf()` (it would need a GAM written in C; the user dropped
