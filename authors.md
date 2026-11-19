@@ -19,7 +19,8 @@
   phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA
   biplot scores, BIOENV, the alr and ilr transforms and balances,
   multiplicative zero replacement, the variance of log ratios, ANCOM,
-  and Dirichlet-multinomial t-tests, from scikit-bio
+  ANCOM-BC and ANCOM-BC2, and Dirichlet-multinomial t-tests, from
+  scikit-bio
 
 - **NumPy Developers**. Copyright holder.  
   numpy's pairwise summation, followed by replace_zeros_mult()
@@ -31,7 +32,7 @@
   tree shearing and collapsing, following 'iow' (bp)
 
 - **The SciPy developers**. Contributor, copyright holder.  
-  Procrustes analysis, following SciPy
+  Procrustes analysis and a Nelder-Mead minimiser, following SciPy
 
 - **Nathan Lemoine**. Contributor, copyright holder.  
   SIMPER, following 'ecopy'
@@ -41,6 +42,9 @@
 
 - **Raes Lab**. Contributor, copyright holder.  
   quantitative microbiome profiling, following 'QMP.R'
+
+- **Huang Lin**. Contributor, copyright holder.  
+  ANCOM-BC and ANCOM-BC2 ('ANCOMBC'), via scikit-bio's port
 
 - **ALDEx3 authors**. Contributor, copyright holder.  
   the scale model of dirmult_ttest(), following 'ALDEx3'

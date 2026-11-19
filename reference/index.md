@@ -208,6 +208,10 @@ values, so that the samples’ totals don’t matter.
 
 - [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) :
   Analysis of Composition of Microbiomes (ANCOM)
+- [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) :
+  Analysis of Compositions of Microbiomes with Bias Correction
+  (ANCOM-BC)
 - [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
   : Dirichlet-multinomial Welch t-tests (ALDEx2-style)
 

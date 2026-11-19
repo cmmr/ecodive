@@ -175,7 +175,7 @@ abundance</a></td>
 <code><a href="../reference/ancom.html">ancom()</a></code>, <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code>
 </td>
 <td align="left">
-<code>ancombc()</code>, <code>ancombc2()</code>
+<code><a href="../reference/ancombc.html">ancombc()</a></code>, <code><a href="../reference/ancombc.html">ancombc2()</a></code>
 </td>
 </tr>
 <tr class="even">
@@ -726,7 +726,7 @@ them.</p>
 <td align="left">estimates and removes each sample’s sampling
 fraction</td>
 <td align="left">
-<code>ancombc()</code>, <code>ancombc2()</code>
+<code><a href="../reference/ancombc.html">ancombc()</a></code>, <code><a href="../reference/ancombc.html">ancombc2()</a></code>
 (<em>planned</em>)</td>
 <td align="left">ANCOMBC (Bioconductor), scikit-bio</td>
 </tr>
@@ -803,7 +803,7 @@ after correcting for each sample’s unknown sampling fraction. They are
 planned for ecodive:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">res_bc</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">group</span>, data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">res_bc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc2</a></span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">group</span>, data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Available now: ANCOMBC::ancombc2() (Bioconductor), on a</span></span>
 <span><span class="co"># TreeSummarizedExperiment or phyloseq object.</span></span></code></pre></div>
