@@ -478,6 +478,21 @@
   none. Both take every table type and keep sparse tables sparse: 2,000
   samples by 5,000 taxa take under 0.1 seconds.
 
+* New `vlr()`, `rho_p()` and `phi_s()` measure proportionality between
+  every pair of features, the compositionally valid alternative to
+  correlating relative abundances (Lovell et al. 2015). `vlr()` is the
+  variance of the log ratio, equal to scikit-bio's `pairwise_vlr()` to
+  4e-15 but computed from differences rather than a covariance matrix, so
+  nearly proportional pairs keep their precision. `rho_p()` is Erb &
+  Notredame's proportionality correlation (propr's `"rho"`) and `phi_s()`
+  the symmetric phi of Quinn et al. (propr's `"phs"`), against the clr by
+  default or a `denominator` (one feature, an alr, or a set). Each returns
+  a `dist` over the features, ready for `pcoa()` or `hclust()` (`rho_p()`,
+  a similarity, for thresholding). They take every table type and keep it
+  sparse, run in parallel, and give identical results for any `cpus`: all
+  4.5 million pairs of 3,000 taxa in 500 samples take about a second on 4
+  cores.
+
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
   (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),

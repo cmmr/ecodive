@@ -93,7 +93,7 @@
 #' Bioinformatics*, 2, lqaa023.
 #'
 #' @seealso [balance()] for the ratio of geometric means; [alr()] for every
-#'   feature against one; `vlr()` and `rho_p()` (planned) for finding
+#'   feature against one; [vlr()], [rho_p()] and [phi_s()] for finding
 #'   features that move together.
 #'
 #' @export
@@ -211,7 +211,9 @@ log_ratio <- function (
 #' e00053-18.
 #'
 #' @seealso [log_ratio()] for the ratio of sums; [ilr()] for all the
-#'   balances of a sequential binary partition at once; [replace_zeros()].
+#'   balances of a sequential binary partition at once; [replace_zeros()];
+#'   [vlr()], [rho_p()] and [phi_s()] for finding features that move
+#'   together.
 #'
 #' @export
 #' @examples

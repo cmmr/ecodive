@@ -125,6 +125,6 @@ Bioinformatics}, 2, lqaa023.
 }
 \seealso{
 \code{\link[=balance]{balance()}} for the ratio of geometric means; \code{\link[=alr]{alr()}} for every
-feature against one; \code{vlr()} and \code{rho_p()} (planned) for finding
+feature against one; \code{\link[=vlr]{vlr()}}, \code{\link[=rho_p]{rho_p()}} and \code{\link[=phi_s]{phi_s()}} for finding
 features that move together.
 }

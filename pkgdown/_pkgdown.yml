@@ -72,6 +72,12 @@ reference:
   contents:
   - log_ratio
   - balance
+- subtitle: Proportionality
+  desc: Which features keep a constant ratio across samples, the compositionally valid alternative to correlation. A dist over the features.
+  contents:
+  - vlr
+  - rho_p
+  - phi_s
 
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.

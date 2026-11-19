@@ -64,6 +64,16 @@
   expect_true(is.numeric(z) && length(z) == 20 && all(is.finite(z)))
   expect_identical(attr(z, 'method'), 'balance')
 
+  # Proportionality.
+  for (f in c('vlr', 'rho_p', 'phi_s')) {
+    z <- get(f)(counts, cpus = cpus)
+    expect_true(inherits(z, 'dist') && attr(z, 'Size') == 12L && length(z) == 66L, info = f)
+    expect_true(all(is.finite(z)) && identical(attr(z, 'method'), f), info = f)
+    expect_identical(attr(z, 'Labels'), colnames(counts), info = f)
+  }
+  z <- rho_p(counts, denominator = 'F1', cpus = cpus)
+  expect_true(attr(z, 'Size') == 11L && all(is.finite(z)) && all(abs(z) <= 1))
+
   # Zero replacement.
   cz <- counts; cz[cz < 4] <- 0L
   for (m in list_zero_replacements('id')) {
@@ -75,6 +85,7 @@
   expect_true(all(is.finite(z)) && all(z > 0) && identical(dimnames(z), dimnames(cz)))
   expect_true(is.finite(sum(alr(z, 'F1', cpus = cpus))))
   expect_true(all(is.finite(balance(z, 1:3, 4:6))))
+  expect_true(all(is.finite(phi_s(z, cpus = cpus))))
   expect_true('mult' %in% list_zero_replacements('id'))
   expect_identical(match_zero_replacement('multRepl')$id, 'mult')
 

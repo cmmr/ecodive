@@ -204,3 +204,112 @@ association measures are added.
 - Quinn, T. P., Richardson, M. F., Lovell, D., & Crowley, T. M. (2017).
   propr: an R-package for identifying proportionally abundant features
   using compositional data analysis. *Scientific Reports*, 7, 16252.
+
+
+## Decisions made while implementing (item 17, 2026-11-19)
+
+Asked of the user at the start:
+
+1. **`rho_p()` returns a `dist`** (as `vlr()` and `phi_s()`), not a dense
+   matrix: one output structure, half the memory. The docs say that
+   `as.matrix()` puts 0 on the diagonal, that it isn't a `dm`, and to
+   threshold it or use `1 - rho_p(x)`.
+2. **Zeros:** `pseudocount = NULL` is the shared rule (`log_pseudocount()`:
+   none without zeros; else half the smallest non-zero value, added to
+   every value, with a warning). An explicit `pseudocount = 0` is accepted
+   only for a zero-free table (e.g. `replace_zeros()` output, which goes in
+   silently with `pseudocount` attribute 0); with zeros it is an error:
+   "`counts` has zeros, and `pseudocount = 0` leaves their logs undefined.
+   Use `pseudocount = NULL` or a positive pseudocount, or replace_zeros()
+   first." (checked in C, `nnz < n * D`). The Zeros section shows how to
+   reproduce propr's handling (zeros alone replaced by 1: `x[x == 0] <- 1`).
+3. **Large D: no size check or warning** (the user's choice, against the
+   plan's 1e8-pair warning). The docs' Size section gives the cost
+   (20,000 features, 1.6 GB) and suggests filtering rare features.
+4. **`denominator` is one feature or a set** (`feature_set()`: names,
+   indices or a logical vector, any order, stored increasing). One feature
+   is the alr, and that feature is left out of the result (its alr is 0);
+   a set of two or more uses their mean log (geometric mean) per sample and
+   keeps every feature. A set of every feature equals the clr (to
+   rounding). The `denominator` attribute is the set's names (indices when
+   unnamed), absent for the clr. With one feature, at least 2 others are
+   needed.
+
+Made while implementing:
+
+5. **C, sparse, no dense copy** (`src/proportionality.c`,
+   `C_proportionality()`). The table is transposed into per-feature lists of
+   centred logs of the non-zero values; every zero of feature f has the one
+   centred value `log(pc) - mean_f`. A pair walks both lists in sample
+   order (`pair_ss()`), then adds `n_both_zero * (z_i - z_j)^2`. So the
+   memory is O(nnz + n + D) besides the output, and no n x D dense copy is
+   ever made (rather than the plan's "densify per block"). `beta_div()`'s
+   squared-Euclidean kernel wasn't reused: it runs over samples with a
+   per-sample zero value, and here the zero value is per feature (the
+   transposed problem). Explicit zeros are dropped by `new_ecomatrix()`, so
+   dense, Matrix and slam input give **identical** results.
+6. **Each variance from differences**, never `c_ii + c_jj - 2c_ij`:
+   SS_ij = Σ(a_i − a_j)²; vlr = SS / (n − 1); V_f = Σ(a_f − g)² with g the
+   centred reference; ρp = 1 − SS / (V_i + V_j); φs = SS / (2V_i + 2V_j −
+   SS). Divisor n − 1 (scikit-bio's `ddof = 1`; no `ddof` argument).
+   - φs's denominator (var(z_i + z_j)) is ≤ 0 only by rounding, for exactly
+     reciprocal pairs (z_i = −z_j, e.g. the two features of a two-feature
+     `denominator`): those give `Inf` (`NaN` if SS is 0 too); near-reciprocal
+     pairs give a very large, rounding-dominated value. Documented.
+   - ρp is `NaN` for two features both constant relative to the reference
+     (0/0). Documented.
+7. **Threads:** one task per row of the packed triangle (pairs i, j > i),
+   rows dealt round-robin; each pair is summed in one fixed order and
+   written to its own slot, so results are **identical for any `cpus`**
+   (tested for 1, 2, 3, 4, 8 on 150 × 300, sparse and dense, both margins).
+   `threads_for(cpus, pairs × n, 1e6)` keeps small jobs serial. Timing:
+   500 × 3,000, 10% non-zero, 4.5 M pairs: 3.0 s on 1 thread, 0.8–1.0 s on
+   4; dense 500 × 3,000: 1.0 s on 4 threads (`cor()` takes 2.6 s).
+8. **Labels:** the kept features' names; for unnamed features, no labels,
+   except after an alr drop, when the kept features' positions
+   (`"1", "3", ...`) label the result, so it stays unambiguous.
+9. **Errors:** fewer than 2 samples or 2 features; fewer than 2 features
+   besides a one-feature `denominator`; the `feature_set()` errors (unknown
+   names, out-of-range indices, duplicates, NA, empty, names without
+   feature names); and the shared count checks.
+10. **References:**
+    - **scikit-bio 0.7.4** (`data-raw/expected/proportionality.py` / `.r`,
+      hex floats): `pairwise_vlr()` and per-pair `vlr()` on 6 tables
+      (scikit-bio's own 3 × 3 example; counts 12 × 6; counts with zeros
+      30 × 20 plus the default pseudocount; wide 10 × 60; Dirichlet
+      proportions 15 × 25; nearly proportional features, 20 × 8, log-ratio
+      sd 1e-4). Max abs difference **3.6e-15** (largest values ~10); on
+      the nearly proportional table, 1.1e-15 absolute, 3.7e-12 relative,
+      from scikit-bio's covariance route (tested at 1e-14 absolute
+      everywhere, 1e-12 relative except there). scikit-bio's test values
+      (`0.0655828061998637`, condensed sum `0.2857382286903922`) are
+      matched at 1e-14.
+    - **propr: not run.** Its GitHub repository isn't accessible from this
+      session, and installing the CRAN-archived 4.2.6 was not permitted in
+      the session either. `rho_p()` and `phi_s()` are tested instead against
+      base-R implementations of the published formulas (`1 - var(z_i -
+      z_j) / (var(z_i) + var(z_j))`, `var(z_i - z_j) / var(z_i + z_j)`)
+      for the clr, an alr at either end, a three-feature set and the full
+      set, on five tables (1e-12, or 1e-10 on the nearly proportional one,
+      where base R's `var()` rounds), plus the identities `φs = (1 − ρp) /
+      (1 + ρp)` and `1 − ρp = vlr / (v_i + v_j)`. The docs say these are
+      the coefficients propr computes with `metric = "rho"` / `"phs"`, as
+      its paper defines them, without claiming a numeric comparison. A
+      later session with propr available should add fixtures from
+      `propr(counts, metric = "rho")` / `"phs"`, with `ivar = "clr"` and an
+      index, on a zero-free table.
+11. **Licensing:** `src/proportionality.c` carries scikit-bio's BSD-3
+    text; `R/proportionality.r` points to it; the scikit-bio stanza in
+    `inst/COPYRIGHTS` lists both files; the `Authors@R` comment for
+    scikit-bio mentions the variance of log ratios.
+12. **Docs:** `vlr.Rd` (why not correlation, Zeros, Size; alias
+    "proportionality"), `rho_p.Rd` (alias "propr"; similarity caveats;
+    `iqlr` and `updateCutoffs()` named as not offered), `phi_s.Rd`
+    (Lovell's asymmetric φ not offered; reciprocal pairs). `log_ratio()`
+    and `balance()` now link to all three. pkgdown "Compositional Data" →
+    "Proportionality". NEWS. `parameter_names.md` updated. Regenerating
+    `balance.Rd` also picked up a "Same names" sentence that had changed
+    in `R/log_ratio.r` without its Rd being rebuilt.
+
+Still for later (unchanged): the permutation FDR (`rho_p_fdr()`), an
+`iqlr` option, and a `metric` wrapper.
