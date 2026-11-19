@@ -33,7 +33,7 @@ meaningful sense, so they sit just after the methods they build on.
 | 10 | [x] `lda()` (7323057) | [lda_capda.md](lda_capda.md) | port (scikit-learn) | Simple; `capda()` needs it. |
 | 11 | [x] `oplsda()` (4c7e646) | [plsda_oplsda.md](plsda_oplsda.md) | port (pyopls, MIT) | Metabolomics demand; small on top of `plsda()`. |
 | 12 | [x] `varpart()` (eb06b58) | [varpart_forward_select.md](varpart_forward_select.md) | derived (on `rda()` / `dbrda()`) | High demand in ecology; formulas only. |
-| 13 | [ ] `forward_select()` | [varpart_forward_select.md](varpart_forward_select.md) | derived (on `rda()` / `dbrda()`) | Usually used alongside varpart. |
+| 13 | [x] `forward_select()` (d0b6339) | [varpart_forward_select.md](varpart_forward_select.md) | derived (on `rda()` / `dbrda()`) | Usually used alongside varpart. |
 | 14 | [ ] `capda()` | [lda_capda.md](lda_capda.md) | derived (`pcoa()` + `lda()`) | Anderson's CAP, popular in marine ecology. |
 | 15 | [ ] `principal_response_curves()` | [principal_response_curves.md](principal_response_curves.md) | derived (partial `rda()`) | Experiments over time. |
 | 16 | [ ] `mantel_correlogram()` | [mantel_correlogram.md](mantel_correlogram.md) | derived (`mantel()` on distance classes) | Distance decay, biogeography. |
