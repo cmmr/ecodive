@@ -111,6 +111,7 @@ export(list_zero_replacements)
 export(match_zero_replacement)
 
 export(blas_threads)
+export(capda)
 export(capscale)
 export(cca)
 export(count_ord)

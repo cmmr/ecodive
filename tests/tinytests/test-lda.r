@@ -228,7 +228,7 @@
   expect_error(lda(m, c('a', 'a', 'a', 'b', 'b', 'b'), norm = 'percent', cpus = 1), 'singular')
   expect_error(lda(m[1:2, ], c('a', 'b'), cpus = 1), 'more samples than groups')
   expect_error(lda(case('iris')$counts, case('iris')$groups, norm = 'clr', pseudocount = 1, cpus = 1),
-               'pcoa\\(\\) or pca\\(\\)')
+               'or capda\\(\\), which runs LDA on the first few PCoA axes')
 
   # Unnamed input.
   o <- lda(unname(m[, 1:2]), c('a', 'a', 'a', 'b', 'b', 'b'), cpus = 1)

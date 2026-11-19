@@ -124,6 +124,7 @@ reference:
   desc: Ordinations that look for the axes that separate known groups. They always find some, so validate them with a permutation test such as permanova().
   contents:
   - lda
+  - capda
   - plsda
   - oplsda
 

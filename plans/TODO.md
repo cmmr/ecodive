@@ -44,7 +44,7 @@ meaningful sense, so they sit just after the methods they build on.
 | 21 | [x] `rpca_phylo()` (4b259ba) | [rpca_phylo.md](rpca_phylo.md) | port (gemelli, BSD-3) on `rpca()` | QIIME 2's phylogenetic RPCA; reuses `rpca()` and the UniFrac tree walk. Phylogeny-aware. |
 | 22 | [x] `ancombc()`, `ancombc2()` (49a6e59) | [ancombc.md](ancombc.md) | port (scikit-bio, BSD-3, derived from Artistic-2.0 ANCOMBC: keep both notices) | Among the most used DA methods now; large (~1,000 lines of core). |
 | 23 | [x] `ancombc_global()`, `ancombc_pairwise()`, `ancombc_dunnett()`, `ancombc_trend()`, `structural_zeros()` (7d9b859) | [ancombc.md](ancombc.md) | port (scikit-bio + ANCOMBC notices), as above | Post-hoc tests on a fitted `ancombc()` / `ancombc2()`; `ancombc_trend()` needs a small QP solver. |
-| 24 | [ ] `capda()` | [lda_capda.md](lda_capda.md) | derived (`pcoa()` + `lda()`) | Anderson's CAP, popular in marine ecology. |
+| 24 | [x] `capda()` (06f2fbf) | [lda_capda.md](lda_capda.md) | derived (`pcoa()` + `lda()`) | Anderson's CAP, popular in marine ecology. |
 | 25 | [ ] `principal_response_curves()` | [principal_response_curves.md](principal_response_curves.md) | derived (partial `rda()`) | Experiments over time. |
 | 26 | [ ] `mantel_correlogram()` | [mantel_correlogram.md](mantel_correlogram.md) | derived (`mantel()` on distance classes) | Distance decay, biogeography. |
 | 27 | [ ] `moran_i()` | [moran_i.md](moran_i.md) | port (PySAL esda, BSD-3) | Simple; `dbmem()` needs it. |

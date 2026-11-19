@@ -20,6 +20,7 @@ extern SEXP C_balance(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_bioenv(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_blas_settable(void);
 extern SEXP C_blas_threads(SEXP);
+extern SEXP C_capda_trace(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cord_cross(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -86,6 +87,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_bioenv",    (DL_FUNC) &C_bioenv,    5},
   {"C_blas_settable", (DL_FUNC) &C_blas_settable, 0},
   {"C_blas_threads",  (DL_FUNC) &C_blas_threads,  1},
+  {"C_capda_trace", (DL_FUNC) &C_capda_trace, 6},
   {"C_cca",       (DL_FUNC) &C_cca,      10},
   {"C_cord_cross", (DL_FUNC) &C_cord_cross, 8},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},

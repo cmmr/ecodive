@@ -135,10 +135,12 @@ combination of others within groups (as relative abundances that add up
 to 1 are). Otherwise \code{lda()} stops with an error (scikit-learn and
 \code{MASS::lda()} drop the null directions with a warning, but the axes
 they then report depend on rounding). Microbiome tables have far more
-taxa than samples, so run LDA on a few axes of an unconstrained
-ordination instead, such as \code{pcoa(dm, n_axes = 5)} or \code{\link[=pca]{pca()}}'s
-scores: \code{lda(pcoa(dm, n_axes = 5), groups)}. This is canonical analysis
-of principal coordinates (Anderson & Willis 2003).
+taxa than samples, so use \code{\link[=capda]{capda()}} instead: canonical analysis of
+principal coordinates (Anderson & Willis 2003) runs LDA on the first
+few axes of \code{\link[=pcoa]{pcoa()}}, choosing how many by how well they classify the
+samples, and tests the separation of the groups by permutation.
+\code{capda(dm, groups, n_pcoa_axes = 5)} gives the same scores as
+\code{lda(pcoa(dm, n_axes = 5), groups)}. A few axes of \code{\link[=pca]{pca()}} also work.
 
 \strong{Validate the separation}
 
@@ -178,7 +180,7 @@ with it. Results are identical from run to run and for any number of
 }
 \section{Ordination result}{
 
-Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}},
+Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capda]{capda()}},
 \code{\link[=capscale]{capscale()}}, \code{\link[=mds]{mds()}}, \code{\link[=nmds]{nmds()}}, \code{\link[=isomap]{isomap()}}, \code{\link[=tsne]{tsne()}}, \code{\link[=umap]{umap()}}, and so
 \code{\link[=dist_ord]{dist_ord()}}) returns the same kind of
 object: a numeric matrix with one row per sample and one column per
@@ -263,7 +265,8 @@ See \code{\link{aitchison}} for references.
     attr(ord, 'prop')
     attr(ord, 'scaling')
 
-    # Microbiome tables have more taxa than samples: use a few PCoA axes.
+    # Microbiome tables have more taxa than samples: use a few PCoA axes,
+    # or capda(), which chooses how many.
     grp <- rep(c('a', 'b'), length.out = nrow(ex_counts))
     pc  <- pcoa(bray(ex_counts), n_axes = 2)
     lda(pc, grp)
@@ -288,5 +291,5 @@ Pedregosa, F., et al. (2011). Scikit-learn: machine learning in Python.
 \emph{Journal of Machine Learning Research}, 12, 2825-2830.
 }
 \seealso{
-\code{\link[=plsda]{plsda()}}, \code{\link[=pca]{pca()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=count_ord]{count_ord()}}
+\code{\link[=capda]{capda()}}, \code{\link[=plsda]{plsda()}}, \code{\link[=pca]{pca()}}, \code{\link[=pcoa]{pcoa()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=count_ord]{count_ord()}}
 }

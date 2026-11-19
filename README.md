@@ -38,7 +38,7 @@ with large datasets. `ecodive` addresses this by providing:
 | :-------------------- | :-------------- | :--------------------------------------------------------------------------------------- |
 | Alpha diversity       | `alpha_div()`   | `shannon()`, `simpson()`, `chao1()`, `faith()`, and 10 more                               |
 | Beta diversity        | `beta_div()`    | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 33 more                   |
-| Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`     |
+| Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`, `capda()` |
 | Ordination of counts  | `count_ord()`   | `pca()`, `rpca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`              |
 | Biplots               |                 | `pcoa_biplot()`, `envfit()`                                                              |
 | Comparing ordinations |                 | `procrustes()`, `procrustes_test()`                                                      |
