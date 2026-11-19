@@ -26,6 +26,7 @@ print(x, ...)
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
   [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
   [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md),
+  [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md),
   [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
   [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
   [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md),

@@ -246,14 +246,15 @@ mtx['Saliva', 'Nose']
 An ordination turns a distance matrix into coordinates for a plot.
 ecodive has eight methods that take distances, run by name with
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) or
-directly by their own functions, and seven
+directly by their own functions, and eight
 ([`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
 [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
-[`lda()`](https://cmmr.github.io/ecodive/reference/lda.md) and
-[`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md)) that
+[`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
+[`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) and
+[`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md)) that
 take the count table itself, run by name with
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md).
 
@@ -274,6 +275,7 @@ take the count table itself, run by name with
 | [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) | Correspondence Analysis (CA) |
 | [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md) | Linear Discriminant Analysis (LDA) |
 | [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) | Partial Least Squares Discriminant Analysis |
+| [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) | Orthogonal PLS Discriminant Analysis (OPLS-DA) |
 
 [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
 and [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) add

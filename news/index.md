@@ -84,7 +84,8 @@
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
   [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
-  [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) and
+  [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md),
+  [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) and
   [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md):
   `count_ord(counts, "pca")` is `pca(counts)`. Each wrapper points to
   the other when given the other’s method, and to
@@ -466,6 +467,24 @@
   Like every supervised method, it separates any groups it is given, so
   validate the separation (e.g. with
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)).
+
+- New [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md)
+  runs an orthogonal PLS discriminant analysis (OPLS-DA) of two groups:
+  one predictive component (`p1`) that separates them and orthogonal
+  components (`o1`, `o2`, …) for the rest of the table’s variation
+  (ported from pyopls). It gives the same orthogonal scores, weights and
+  loadings as pyopls, and the same scores, loadings, weights, R2X, R2Y
+  and VIP as `ropls::opls()` (up to each component’s sign), and also
+  returns each group’s centroid. It takes `groups`, `data`, every `norm`
+  and every table type as
+  [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) does,
+  and never makes a sparse table dense: 1,000 samples, 5,000 taxa and
+  two orthogonal components take about a tenth of a second, where
+  `ropls::opls()` takes 8 (including its cross-validation). Results are
+  identical for any number of `cpus`.
+  `count_ord(counts, 'oplsda', groups)` runs it too. For more than two
+  groups, use
+  [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md).
 
 - New [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md) runs a
   linear discriminant analysis (Fisher’s discriminant axes, ported from

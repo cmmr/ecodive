@@ -353,6 +353,7 @@ Pedregosa, F., et al. (2011). Scikit-learn: machine learning in Python.
 
 ## See also
 
+[`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),

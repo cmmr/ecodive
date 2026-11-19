@@ -214,6 +214,8 @@ permanova().
   Discriminant Analysis (LDA)
 - [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) :
   Partial Least Squares Discriminant Analysis (PLS-DA)
+- [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) :
+  Orthogonal Partial Least Squares Discriminant Analysis (OPLS-DA)
 
 ## Hypothesis Tests
 

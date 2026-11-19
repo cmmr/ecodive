@@ -27,6 +27,9 @@
 - **Nathan Lemoine**. Contributor, copyright holder.  
   SIMPER, following 'ecopy'
 
+- **Wright State University**. Contributor, copyright holder.  
+  OPLS-DA, from 'pyopls'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 
