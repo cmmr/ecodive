@@ -21,6 +21,7 @@ print(x, ...)
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
+  [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md),
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),

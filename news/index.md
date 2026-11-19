@@ -85,8 +85,9 @@
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
   [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
   [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md),
-  [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) and
-  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md):
+  [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md),
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) and
+  [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md):
   `count_ord(counts, "pca")` is `pca(counts)`. Each wrapper points to
   the other when given the other’s method, and to
   [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)
@@ -839,6 +840,25 @@
   its results are identical for any number of `cpus`.
 
 - New
+  [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md)
+  runs a phylogenetic robust Aitchison PCA (Martino et al. 2022),
+  gemelli’s `phylogenetic_rpca()`:
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) of a
+  table expanded to every node of a tree, each node holding the counts
+  of the tips below it weighted by its branch length, so that loadings
+  describe clades as well as tips. It cuts the tree down to the tips
+  with counts as gemelli does (with its `min_depth` filter), returns the
+  tree it used with the nodes named as gemelli names them, and
+  optionally the node counts (`node_counts = TRUE`). A C port of gemelli
+  0.0.13 (with the tree code of scikit-bio and iow it calls), it gives
+  gemelli’s results to within rounding error; the node counts are summed
+  in parallel from each sample’s non-zero tips, without a dense table.
+  It joins
+  [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
+  (`count_ord(counts, "rpca_phylo", tree = tree)`), and its results are
+  identical for any number of `cpus`.
+
+- New
   [`blas_threads()`](https://cmmr.github.io/ecodive/reference/blas_threads.md)
   gets or sets how many threads R’s BLAS/LAPACK library uses, while R is
   running. It works with OpenBLAS, Intel MKL, BLIS, and FlexiBLAS,
@@ -892,6 +912,11 @@
   counted the columns of `counts` as samples even when samples are rows
   (`margin = 1`, the default). Out-of-range pairs could crash R, and a
   table with one feature was rejected as having fewer than two samples.
+
+- Fixed [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md),
+  the UniFrac family and every other function taking a `tree`, which
+  failed when samples were columns (`margin = 2`) and the tree had tips
+  that were not in the table.
 
 ## ecodive 2.3.2
 

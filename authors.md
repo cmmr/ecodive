@@ -16,7 +16,8 @@
   uwot's C++ header library, followed by the UMAP code
 
 - **scikit-bio development team**. Contributor, copyright holder.  
-  PCoA biplot scores, BIOENV, the alr and ilr transforms and balances,
+  phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA
+  biplot scores, BIOENV, the alr and ilr transforms and balances,
   multiplicative zero replacement, the variance of log ratios, ANCOM,
   and Dirichlet-multinomial t-tests, from scikit-bio
 
@@ -24,7 +25,10 @@
   numpy's pairwise summation, followed by replace_zeros_mult()
 
 - **Cameron Martino**. Contributor, copyright holder.  
-  'gemelli' robust Aitchison PCA
+  'gemelli' robust Aitchison PCA and phylogenetic robust Aitchison PCA
+
+- **Daniel McDonald**. Contributor, copyright holder.  
+  tree shearing and collapsing, following 'iow' (bp)
 
 - **The SciPy developers**. Contributor, copyright holder.  
   Procrustes analysis, following SciPy

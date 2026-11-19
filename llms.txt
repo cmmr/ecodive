@@ -608,6 +608,8 @@ take the count table.
   Component Analysis (PCA)
 - [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) : Robust
   Aitchison PCA (RPCA)
+- [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md)
+  : Phylogenetic Robust Aitchison PCA
 - [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) : Fit
   Variables or Taxa onto an Ordination
 - [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) :

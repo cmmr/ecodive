@@ -402,6 +402,8 @@ Martino, C. (2019). *gemelli* (Python package, version 0.0.13). BSD
 
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), which with
 `norm = 'rclr'` keeps zeros as 0 rather than completing them;
+[`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md),
+the same over the nodes of a phylogenetic tree;
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md);
 [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md).
 

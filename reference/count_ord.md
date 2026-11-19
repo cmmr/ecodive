@@ -22,8 +22,8 @@ count_ord(counts, method, ...)
 - method:
 
   The name of an ordination method: `"ca"`, `"cca"`, `"lda"`,
-  `"oplsda"`, `"pca"`, `"plsda"`, `"rda"`, or `"rpca"`. Flexible
-  matching is supported (see below). Programmatic access via
+  `"oplsda"`, `"pca"`, `"plsda"`, `"rda"`, `"rpca"`, or `"rpca_phylo"`.
+  Flexible matching is supported (see below). Programmatic access via
   [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md).
 
 - ...:
@@ -38,16 +38,19 @@ count_ord(counts, method, ...)
   [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md)'s,
   [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md)'s and
   [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md)'s
-  `groups` and `data`. Each method keeps its own defaults; see
+  `groups` and `data`, or
+  [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md)'s
+  `tree`. Each method keeps its own defaults; see
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
   [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
   [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md),
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md),
-  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), and
-  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md). `seed`
-  is ignored by the methods that have no random parts (all but
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), and
+  [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md).
+  `seed` is ignored by the methods that have no random parts (all but
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), whose
   adjusted \\R^2\\ is found by permutation), so the same arguments can
   be given to every method.
@@ -72,6 +75,7 @@ The method's result, as described in "Ordination result" below.
 | `plsda` | Partial Least Squares Discriminant Analysis (PLS-DA), supervised |
 | `rda` | Redundancy Analysis (RDA), constrained |
 | `rpca` | Robust Aitchison PCA |
+| `rpca_phylo` | Phylogenetic Robust Aitchison PCA (needs `tree`) |
 
 `rda` is constrained by sample metadata, given as further arguments:
 `count_ord(counts, 'rda', 'treatment', meta)` is
@@ -80,7 +84,8 @@ constrained the same way; without constraints, it is a correspondence
 analysis. `lda`, `plsda` and `oplsda` need the groups to separate, given
 the same way: `count_ord(counts, 'plsda', 'treatment', meta)` is
 `plsda(counts, 'treatment', meta)`. `oplsda` takes `n_orthogonal` rather
-than `n_axes`.
+than `n_axes`. `rpca_phylo` needs a phylogenetic tree:
+`count_ord(counts, 'rpca_phylo', tree = tree)`.
 
 Methods that ordinate distances, such as
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) and
@@ -96,7 +101,8 @@ names also work: `'prcomp'` for `pca`; `'redundancy analysis'`,
 `'canonical correspondence analysis'` or
 `'constrained correspondence analysis'` for `cca`;
 `'correspondence analysis'` for `ca`; and `'robust PCA'`, `'DEICODE'`,
-or `'gemelli'` for `rpca`; and `'PLS-DA'`, `'PLS'`, or
+or `'gemelli'` for `rpca`; `'phylogenetic RPCA'`, `'phylo-RPCA'`, or
+`'phylogenetic DEICODE'` for `rpca_phylo`; and `'PLS-DA'`, `'PLS'`, or
 `'partial least squares discriminant analysis'` for `plsda`; and `'LDA'`
 or `'linear discriminant analysis'` for `lda`; and `'OPLS-DA'`,
 `'OPLS'`, or `'orthogonal PLS-DA'` for `oplsda`. `'CA'` selects `ca`,
@@ -188,6 +194,7 @@ plain matrix or data frame without them.
 [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
+[`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md),
 [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md);
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) for
 the methods that take distances.
@@ -217,8 +224,8 @@ the methods that take distances.
 #>   .. ..$ : chr [1:3] "PC1" "PC2" "PC3"
 
     # The same arguments for every method (but lda, plsda and oplsda,
-    # which need groups).
-    ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda'))
+    # which need groups, and rpca_phylo, which needs a tree).
+    ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda', 'rpca_phylo'))
     lapply(ids, function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 #> [[1]]
 #> [1] 0.4572664 0.4438732
@@ -235,6 +242,8 @@ the methods that take distances.
 #> [[5]]
 #> [1] 0.5737685 0.4262315
 #> 
+
+    ord <- count_ord(ex_counts, 'rpca_phylo', tree = ex_tree, n_axes = 2)
 
     count_ord(ex_counts, 'plsda', c('a', 'a', 'b', 'b'), n_axes = 1)
 #>            PLSDA1
