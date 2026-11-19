@@ -431,6 +431,14 @@
   Results are identical for any number of `cpus`.
   `count_ord(counts, 'lda', groups)` runs it too.
 
+* `pcoa()` of many axes is faster on several threads: the block Lanczos
+  solver now splits its own steps on the basis (products with small
+  matrices, dot products and, for more than four axes, block Gram-Schmidt)
+  among `cpus`, as well as the products with the distance matrix. 50 axes
+  of 1,000 samples take 1.4 s instead of 2.5 on 4 threads, and of 5,000
+  samples 15 s instead of 27. Results stay identical for any number of
+  `cpus`, and those for up to four axes are unchanged.
+
 * New `capda()` runs Anderson & Willis's (2003) discriminant canonical
   analysis of principal coordinates (CAP, as in PRIMER-PERMANOVA+): `lda()`
   of the first m axes of `pcoa()`, for any distances, with m chosen by

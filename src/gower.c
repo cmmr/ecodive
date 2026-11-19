@@ -337,6 +337,7 @@ double gower_init(gower_t *g, const double *dist, int n, int max_m, int n_thread
   g->xr        = (double *) R_alloc((size_t) n * g->max_m, sizeof(double));
   g->yr        = (double *) R_alloc((size_t) n * g->max_m, sizeof(double));
   g->n_threads = threads_for(n_threads, 0.5 * n * (n - 1.0) * GOWER_W, 1e6);
+  g->n_req     = n_threads;
   g->shift     = 0;
   g->max_d     = 0;
   g->yr2       = NULL;
@@ -446,7 +447,11 @@ void gower_mult(const double *V, double *W, int m, void *ctx) {
     int mc    = (m - v0 < g->max_m) ? m - v0 : g->max_m;
     int width = gower_load(g, V, v0, mc);
 
-    run_parallel((g->shift == 0) ? mult_a : mult_a_shift, g->n_threads, n);
+    // Threads for this pass's work: `width` vectors, not
+    // just GOWER_W. (Results are the same for any number.)
+    int nt = threads_for(g->n_req, 0.5 * n * (n - 1.0) * width, 1e6);
+    if (nt < g->n_threads) nt = g->n_threads;
+    run_parallel((g->shift == 0) ? mult_a : mult_a_shift, nt, n);
 
     for (int v = 0; v < mc; v++)
       gower_finish(g, g->yr, width, v, W + (size_t) (v0 + v) * n);

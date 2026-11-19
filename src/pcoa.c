@@ -130,7 +130,7 @@ static void top_axes(
 
   lanczos_t lz = {
     .n = n, .k = k, .dims = n - 1, .deflate = 1, .scale = trace,
-    .op = gower_mult, .ctx = g,
+    .op = gower_mult, .ctx = g, .n_threads = g->n_req,
     .vecs = vecs, .vals = eig, .resid = res };
 
   lanczos(&lz);

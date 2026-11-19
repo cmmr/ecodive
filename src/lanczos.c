@@ -33,10 +33,16 @@
  * MathWorks and the National Institute of Standards and
  * Technology), and themselves follow EISPACK.
  *
- * Determinism: everything here runs on the main thread, in
- * a fixed order, and the starting vectors come from a fixed
- * PCG stream. The product function must be deterministic
- * too (see pcoa.c and pca.c).
+ * Determinism: the starting vectors come from a fixed PCG
+ * stream, and every value is computed in a fixed order.
+ * With lanczos_t.n_threads > 1, the steps on blocks of
+ * vectors (products of the basis with small matrices, and
+ * dot products) are split among threads by rows or by dot
+ * product, but each element is still computed by one
+ * thread, in the same order as with one: the results are
+ * bit-identical for any number of threads. The product
+ * function must be deterministic too (see pcoa.c and
+ * pca.c).
  */
 
 #include "ecodive.h"
@@ -154,6 +160,105 @@ int lz_orthonormalize(
         kept++;
         break;
       }
+    }
+  }
+
+  return kept;
+}
+
+
+//------------------------------------------------------
+// As lz_orthonormalize(), for lanczos()'s blocks of more
+// than LZ_BLOCK vectors: block classical Gram-Schmidt,
+// applied twice (CGS2, as stable as the two passes of the
+// one-column-at-a-time version). All m columns are
+// projected off the ones vector, F and V at once (two
+// passes), with dot products and products with V split
+// among threads (see lz_nt); then off each other, one
+// column at a time. Results are the same for any number
+// of threads. It runs only for callers that set
+// lanczos_t.n_threads (pcoa()), and only for blocks wider
+// than LZ_BLOCK (k > LZ_BLOCK): which version runs never
+// depends on the number of threads, and k <= LZ_BLOCK
+// runs exactly as before.
+//------------------------------------------------------
+static void combine_ld(
+    const double *V, int n, int s, const double *Y, int ldy, int m,
+    double *X, int sub );
+static void dots(const double **a, const double **b, double *out, int nd, int n);
+static void cross_tn(const double *Q, int nq, const double *R, int m, int n, double *H);
+
+// H, a and b need room for max(s, f, 1) * m values,
+// norm0 for m.
+static int orthonormalize_block(
+    const double *V, int s, double *R, int m, int n,
+    int deflate, const double *F, int f, pcg32_random_t *rng,
+    double *H, double *norm0, const double **a, const double **b ) {
+
+  // Each column's norm before projection.
+  for (int c = 0; c < m; c++) a[c] = b[c] = R + (size_t) c * n;
+  dots(a, b, norm0, m, n);
+  for (int c = 0; c < m; c++) norm0[c] = sqrt(norm0[c]);
+
+  for (int pass = 0; pass < 2; pass++) {
+    if (deflate)
+      for (int c = 0; c < m; c++) center(R + (size_t) c * n, n);
+    for (int z = 0; z < 2; z++) {
+      const double *Q  = z ? V : F;
+      int           nq = z ? s : f;
+      if (nq == 0 || !Q) continue;
+      // H = Q' R (nq x m), then R -= Q H.
+      cross_tn(Q, nq, R, m, n, H);
+      combine_ld(Q, n, nq, H, nq, m, R, 1);
+    }
+  }
+
+  // Then off each other.
+  int kept = 0;
+  for (int c = 0; c < m; c++) {
+
+    double *r = R + (size_t) kept * n;
+    if (c != kept) memcpy(r, R + (size_t) c * n, (size_t) n * sizeof(double));
+
+    for (int pass = 0; pass < 2 && kept > 0; pass++) {
+      cross_tn(R, kept, r, 1, n, H);
+      combine_ld(R, n, kept, H, kept, 1, r, 1);
+    }
+
+    double norm = sqrt(dot(r, r, n));
+
+    if (norm > 1e-8 * norm0[c]) {
+      for (int i = 0; i < n; i++) r[i] /= norm;
+      kept++;
+      continue;
+    }
+
+    // In the span: a random column instead, projected as
+    // lz_orthonormalize() does (rare; on this thread).
+    fill_random(r, n, rng);
+    double n0 = sqrt(dot(r, r, n));
+    for (int pass = 0; pass < 2; pass++) {
+      if (deflate) center(r, n);
+      for (int j = 0; j < f; j++) {
+        const double *q = F + (size_t) j * n;
+        double        h = dot(q, r, n);
+        for (int i = 0; i < n; i++) r[i] -= h * q[i];
+      }
+      for (int j = 0; j < s; j++) {
+        const double *q = V + (size_t) j * n;
+        double        h = dot(q, r, n);
+        for (int i = 0; i < n; i++) r[i] -= h * q[i];
+      }
+      for (int j = 0; j < kept; j++) {
+        const double *q = R + (size_t) j * n;
+        double        h = dot(q, r, n);
+        for (int i = 0; i < n; i++) r[i] -= h * q[i];
+      }
+    }
+    norm = sqrt(dot(r, r, n));
+    if (norm > 1e-8 * n0) {
+      for (int i = 0; i < n; i++) r[i] /= norm;
+      kept++;
     }
   }
 
@@ -360,18 +465,191 @@ int sym_eigen(const double *A, int s, double *vals, double *vecs, double *tmp) {
 
 
 //------------------------------------------------------
-// X = V * Y[, 0:m), for V n x s and Y s x s.
+// Threads for the steps on blocks of vectors. lanczos()
+// sets lz_nt from lanczos_t.n_threads for its run, and
+// resets it to 1; the exported helpers called from
+// elsewhere run on the calling thread.
+//
+// Work is split into pieces that don't depend on the
+// number of threads: blocks of LZ_ROWS rows, or whole dot
+// products. Each element is computed by one thread, in the
+// same order as on one thread.
 //------------------------------------------------------
-void combine(const double *V, int n, int s, const double *Y, int m, double *X) {
+#define LZ_ROWS 256
+
+static int lz_nt = 1;
+
+// How many threads for `work` multiply-adds: at least
+// ~1e6 each (as threads_for()), else one.
+static int lz_threads(double work) {
+  return (lz_nt > 1) ? threads_for(lz_nt, work, 1e6) : 1;
+}
+
+// X[, c] = V * Y[, c] (sub = 0) or X[, c] -= V * Y[, c]
+// (sub = 1), for c < m, for rows r0 .. r1 - 1. Y has
+// leading dimension ldy.
+static void combine_rows(
+    const double *V, int n, int s, const double *Y, int ldy, int m,
+    double *X, int sub, int r0, int r1 ) {
+
   for (int c = 0; c < m; c++) {
     double       *x = X + (size_t) c * n;
-    const double *y = Y + (size_t) c * s;
-    memset(x, 0, (size_t) n * sizeof(double));
+    const double *y = Y + (size_t) c * ldy;
+    if (!sub) memset(x + r0, 0, (size_t) (r1 - r0) * sizeof(double));
     for (int j = 0; j < s; j++) {
       const double *v = V + (size_t) j * n;
       double        a = y[j];
-      for (int i = 0; i < n; i++) x[i] += a * v[i];
+      if (sub) for (int i = r0; i < r1; i++) x[i] -= a * v[i];
+      else     for (int i = r0; i < r1; i++) x[i] += a * v[i];
     }
+  }
+}
+
+static struct {
+  const double *V, *Y;
+  double       *X;
+  int           n, s, ldy, m, sub;
+} cb;
+
+static void *combine_worker(void *arg) {
+  int thread_i  = ((worker_t *) arg)->i;
+  int n_threads = ((worker_t *) arg)->n;
+  int n_blocks  = (cb.n + LZ_ROWS - 1) / LZ_ROWS;
+  for (int b = thread_i; b < n_blocks; b += n_threads) {
+    int r0 = b * LZ_ROWS;
+    int r1 = (r0 + LZ_ROWS < cb.n) ? r0 + LZ_ROWS : cb.n;
+    combine_rows(cb.V, cb.n, cb.s, cb.Y, cb.ldy, cb.m, cb.X, cb.sub, r0, r1);
+  }
+  return NULL;
+}
+
+static void combine_ld(
+    const double *V, int n, int s, const double *Y, int ldy, int m,
+    double *X, int sub ) {
+
+  if (s == 0 || m == 0) return;
+  int nt = lz_threads((double) n * s * m);
+  if (nt <= 1) { combine_rows(V, n, s, Y, ldy, m, X, sub, 0, n); return; }
+
+  cb.V = V; cb.n = n; cb.s = s; cb.Y = Y; cb.ldy = ldy; cb.m = m;
+  cb.X = X; cb.sub = sub;
+  run_parallel(combine_worker, nt, 100);
+}
+
+
+//------------------------------------------------------
+// X = V * Y[, 0:m), for V n x s and Y s x s.
+//------------------------------------------------------
+void combine(const double *V, int n, int s, const double *Y, int m, double *X) {
+  combine_ld(V, n, s, Y, s, m, X, 0);
+}
+
+
+//------------------------------------------------------
+// out[t] = dot(a[t], b[t], n) for t < nd, each by one
+// thread, in lz_dot()'s order.
+//------------------------------------------------------
+static struct {
+  const double **a, **b;
+  double        *out;
+  int            n, nd;
+} dt;
+
+static void *dots_worker(void *arg) {
+  int thread_i  = ((worker_t *) arg)->i;
+  int n_threads = ((worker_t *) arg)->n;
+  for (int t = thread_i; t < dt.nd; t += n_threads)
+    dt.out[t] = dot(dt.a[t], dt.b[t], dt.n);
+  return NULL;
+}
+
+static void dots(const double **a, const double **b, double *out, int nd, int n) {
+  int nt = lz_threads((double) n * nd);
+  if (nt > nd) nt = nd;
+  if (nt <= 1) { for (int t = 0; t < nd; t++) out[t] = dot(a[t], b[t], n); return; }
+  dt.a = a; dt.b = b; dt.out = out; dt.n = n; dt.nd = nd;
+  run_parallel(dots_worker, nt, 100);
+}
+
+// Room for the dot products of one step (set by lanczos()).
+static const double **dt_a, **dt_b;
+static double        *dt_out;
+static int            dt_max = 0;
+
+
+//------------------------------------------------------
+// H = Q' R (nq x m, column-major), for Q n x nq and R
+// n x m: each block of LZ_ROWS rows' part by one thread
+// (to cx_part), then added up in block order. So the
+// result depends only on n, not on the threads, and each
+// block of Q is read once for all m columns of R.
+//------------------------------------------------------
+static double *cx_part = NULL;   // n_blocks x (nq x m), set by lanczos()
+static size_t  cx_max  = 0;      //   room per block
+
+static struct {
+  const double *Q, *R;
+  int           n, nq, m;
+} cx;
+
+static void cross_rows(int r0, int r1, double *P) {
+  int n = cx.n, nq = cx.nq, m = cx.m, len = r1 - r0;
+  for (int c = 0; c < m; c++) {
+    const double *rc = cx.R + (size_t) c * n + r0;
+    int j = 0;
+    for (; j + 3 < nq; j += 4) {
+      const double *q0 = cx.Q + (size_t) j * n + r0;
+      const double *q1 = q0 + n, *q2 = q1 + n, *q3 = q2 + n;
+      double s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+      for (int i = 0; i < len; i++) {
+        double x = rc[i];
+        s0 += q0[i] * x; s1 += q1[i] * x; s2 += q2[i] * x; s3 += q3[i] * x;
+      }
+      P[(size_t) c * nq + j]     = s0;
+      P[(size_t) c * nq + j + 1] = s1;
+      P[(size_t) c * nq + j + 2] = s2;
+      P[(size_t) c * nq + j + 3] = s3;
+    }
+    for (; j < nq; j++) {
+      const double *q = cx.Q + (size_t) j * n + r0;
+      double s0 = 0;
+      for (int i = 0; i < len; i++) s0 += q[i] * rc[i];
+      P[(size_t) c * nq + j] = s0;
+    }
+  }
+}
+
+static void *cross_worker(void *arg) {
+  int thread_i  = ((worker_t *) arg)->i;
+  int n_threads = ((worker_t *) arg)->n;
+  int n_blocks  = (cx.n + LZ_ROWS - 1) / LZ_ROWS;
+  size_t sz     = (size_t) cx.nq * cx.m;
+  for (int b = thread_i; b < n_blocks; b += n_threads) {
+    int r0 = b * LZ_ROWS;
+    int r1 = (r0 + LZ_ROWS < cx.n) ? r0 + LZ_ROWS : cx.n;
+    cross_rows(r0, r1, cx_part + (size_t) b * sz);
+  }
+  return NULL;
+}
+
+static void cross_tn(const double *Q, int nq, const double *R, int m, int n, double *H) {
+
+  size_t sz       = (size_t) nq * m;
+  int    n_blocks = (n + LZ_ROWS - 1) / LZ_ROWS;
+  if (sz == 0) return;
+  if (sz > cx_max) error("lanczos: cross_tn() scratch too small."); // # nocov
+
+  cx.Q = Q; cx.R = R; cx.n = n; cx.nq = nq; cx.m = m;
+
+  int nt = lz_threads((double) n * sz);
+  if (nt > n_blocks) nt = n_blocks;
+  if (nt > 1) run_parallel(cross_worker, nt, 100);
+  else        { worker_t w = { .i = 0, .n = 1 }; cross_worker(&w); }
+
+  memcpy(H, cx_part, sz * sizeof(double));
+  for (int b = 1; b < n_blocks; b++) {
+    const double *P = cx_part + (size_t) b * sz;
+    for (size_t t = 0; t < sz; t++) H[t] += P[t];
   }
 }
 
@@ -384,9 +662,25 @@ void lz_extend_h(
     const double *V, const double *W, double *H,
     int M, int s_w, int s_v, int n ) {
 
-  for (int b = s_w; b < s_v; b++)
-    for (int a = 0; a < s_v; a++)
-      H[(size_t) b * M + a] = dot(V + (size_t) n * a, W + (size_t) n * b, n);
+  int nd = (s_v - s_w) * s_v;
+  if (lz_nt > 1 && nd <= dt_max) {
+    int t = 0;
+    for (int b = s_w; b < s_v; b++)
+      for (int a = 0; a < s_v; a++, t++) {
+        dt_a[t] = V + (size_t) n * a;
+        dt_b[t] = W + (size_t) n * b;
+      }
+    dots(dt_a, dt_b, dt_out, nd, n);
+    t = 0;
+    for (int b = s_w; b < s_v; b++)
+      for (int a = 0; a < s_v; a++, t++)
+        H[(size_t) b * M + a] = dt_out[t];
+  }
+  else {
+    for (int b = s_w; b < s_v; b++)
+      for (int a = 0; a < s_v; a++)
+        H[(size_t) b * M + a] = dot(V + (size_t) n * a, W + (size_t) n * b, n);
+  }
 
   for (int b = s_w; b < s_v; b++) {
     for (int a = 0; a < s_w; a++)
@@ -405,6 +699,26 @@ void lz_extend_h(
 // after a thick restart.
 //------------------------------------------------------
 void lz_restart_h(const double *V, const double *W, double *H, int M, int keep, int n) {
+
+  // V'W in full, then symmetrized as below.
+  if (lz_nt > 1 && keep * keep <= dt_max) {
+    int t = 0;
+    for (int b = 0; b < keep; b++)
+      for (int a = 0; a < keep; a++, t++) {
+        dt_a[t] = V + (size_t) n * a;
+        dt_b[t] = W + (size_t) n * b;
+      }
+    dots(dt_a, dt_b, dt_out, keep * keep, n);
+    for (int b = 0; b < keep; b++)
+      for (int a = 0; a <= b; a++) {
+        double h = (a == b) ? dt_out[(size_t) b * keep + a]
+          : (dt_out[(size_t) b * keep + a] + dt_out[(size_t) a * keep + b]) / 2;
+        H[(size_t) b * M + a] = h;
+        H[(size_t) a * M + b] = h;
+      }
+    return;
+  }
+
   for (int b = 0; b < keep; b++)
     for (int a = 0; a <= b; a++) {
       double h = (a == b)
@@ -439,6 +753,26 @@ static double rayleigh_ritz(
     if (fabs(eig[j]) > scale) scale = fabs(eig[j]);
 
   double worst = 0;
+
+  if (lz_nt > 1 && k <= dt_max) {
+    // All k at once: U = V Y, BU = W Y (u and bu have room
+    // for n x k), then each residual's norm.
+    combine(V, n, s, Y, k, u);
+    combine(W, n, s, Y, k, bu);
+    for (int j = 0; j < k; j++) {
+      double       *r = bu + (size_t) j * n;
+      const double *x = u  + (size_t) j * n;
+      for (int i = 0; i < n; i++) r[i] -= eig[j] * x[i];
+      dt_a[j] = dt_b[j] = r;
+    }
+    dots(dt_a, dt_b, dt_out, k, n);
+    for (int j = 0; j < k; j++) {
+      res[j] = sqrt(dt_out[j]) / scale;
+      if (res[j] > worst) worst = res[j];
+    }
+    return worst;
+  }
+
   for (int j = 0; j < k; j++) {
     combine(V, n, s, Y + (size_t) j * s, 1, u);
     combine(W, n, s, Y + (size_t) j * s, 1, bu);
@@ -498,8 +832,19 @@ void lanczos(lanczos_t *lz) {
   double *tmp = (double *) R_alloc((size_t) 2 * M, sizeof(double));
   double *eig = (double *) R_alloc(M, sizeof(double));
   double *res = lz->resid;
-  double *u   = (double *) R_alloc(n, sizeof(double));
-  double *bu  = (double *) R_alloc(n, sizeof(double));
+  // Threads for the steps on blocks (see lz_nt). With more
+  // than one, u and bu hold all k Ritz vectors at once.
+  lz_nt  = (lz->n_threads > 1) ? lz->n_threads : 1;
+  dt_max = 0;
+  int ku = (lz_nt > 1) ? k : 1;
+  double *u   = (double *) R_alloc((size_t) n * ku, sizeof(double));
+  double *bu  = (double *) R_alloc((size_t) n * ku, sizeof(double));
+  if (lz_nt > 1) {
+    dt_max = M * M;
+    dt_a   = (const double **) R_alloc(dt_max, sizeof(double *));
+    dt_b   = (const double **) R_alloc(dt_max, sizeof(double *));
+    dt_out = (double *)        R_alloc(dt_max, sizeof(double));
+  }
 
   pcg32_random_t rng;
   pcg32_srandom_r(&rng, 20260116u, lz->stream ? lz->stream : 54u);
@@ -508,8 +853,26 @@ void lanczos(lanczos_t *lz) {
   //--------------------------------------------------
   // Starting block.
   //--------------------------------------------------
+  // Scratch for orthonormalize_block(), for blocks of up to
+  // p columns against up to max(M, f) others.
+  size_t  nb_max = (size_t) ((M > f) ? M : f) * p;
+  double *Hb     = NULL, *nb0 = NULL;
+  const double **ab = NULL, **bb = NULL;
+  int block_ok = (lz->n_threads >= 1);  // the caller opted in
+  if (block_ok && p > LZ_BLOCK) {
+    cx_max  = nb_max;
+    cx_part = (double *) R_alloc(nb_max * (size_t) ((n + LZ_ROWS - 1) / LZ_ROWS), sizeof(double));
+    Hb  = (double *) R_alloc(nb_max, sizeof(double));
+    nb0 = (double *) R_alloc(p,      sizeof(double));
+    ab  = (const double **) R_alloc(nb_max, sizeof(double *));
+    bb  = (const double **) R_alloc(nb_max, sizeof(double *));
+  }
+  #define ORTHO(Vb, sb, Rb, mb) ((block_ok && (mb) > LZ_BLOCK) \
+    ? orthonormalize_block(Vb, sb, Rb, mb, n, deflate, F, f, &rng, Hb, nb0, ab, bb) \
+    : orthonormalize(Vb, sb, Rb, mb, n, deflate, F, f, &rng))
+
   fill_random(R, (size_t) n * p, &rng);
-  int s_v = orthonormalize(V, 0, R, p, n, deflate, F, f, &rng); // columns in V
+  int s_v = ORTHO(V, 0, R, p); // columns in V
   int s_w = 0;                                            // ... with W = B * V
   memcpy(V, R, (size_t) n * s_v * sizeof(double));
 
@@ -557,7 +920,7 @@ void lanczos(lanczos_t *lz) {
     }
 
     // pca() holds malloc'd buffers (memory.c): free them first.
-    if (user_interrupted()) { free_all(); error("Interrupted."); } // # nocov
+    if (user_interrupted()) { lz_nt = 1; dt_max = 0; cx_max = 0; cx_part = NULL; free_all(); error("Interrupted."); } // # nocov
 
 
     //------------------------------------------------
@@ -565,7 +928,7 @@ void lanczos(lanczos_t *lz) {
     // against the basis.
     //------------------------------------------------
     memcpy(R, W + (size_t) n * (s_w - m), (size_t) n * m * sizeof(double));
-    int r = orthonormalize(V, s_v, R, m, n, deflate, F, f, &rng);
+    int r = ORTHO(V, s_v, R, m);
     if (r == 0) { // # nocov start: only if the space is exhausted,
       if (!fresh) // which makes Rayleigh-Ritz exact.
         rayleigh_ritz(V, W, H, M, s_w, n, k, trace, Hc, eig, Y, tmp, u, bu, res, &ql_failed);
@@ -613,6 +976,11 @@ void lanczos(lanczos_t *lz) {
 
   lz->steps     = steps;
   lz->converged = converged;
+
+  lz_nt   = 1;
+  dt_max  = 0;
+  cx_max  = 0;
+  cx_part = NULL;
 }
 
 

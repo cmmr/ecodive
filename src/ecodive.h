@@ -119,6 +119,10 @@ typedef struct {
   int          n_ritz_out;//      fixed), and how many were written.
   int          max_steps; // In: give up (not converged) after this many
                           //     products with blocks (default LZ_MAX_STEPS).
+  int          n_threads; // In: 0 (default): as before, on one thread. >= 1:
+                          //     threads for the steps on blocks of vectors,
+                          //     and, for k > 4, block Gram-Schmidt; results
+                          //     are the same for any value >= 1.
 } lanczos_t;
 
 void   lanczos(lanczos_t *lz);
@@ -168,7 +172,8 @@ typedef struct {
   int           f;          //   out of each product, or NULL/0.
   int           max_m;      // Vectors per pass over `dist`.
   double       *xr, *yr;    // n x max_m scratch.
-  int           n_threads;
+  int           n_threads;  // Threads for a pass of GOWER_W vectors.
+  int           n_req;      // Threads asked for.
   double        shift;      // Distances are read as d + shift (default 0;
                             //   set with gower_set_shift()).
   double        max_d;      // Out: the largest distance as given.
