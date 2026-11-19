@@ -191,8 +191,8 @@ abundance</a></td>
 abundance</a></td>
 <td align="left">Did taxa really increase?</td>
 <td align="left">
-<code>qmp_scale()</code>,
-<code>qmp_rarefy()</code>
+<code><a href="../reference/qmp.html">qmp_scale()</a></code>,
+<code><a href="../reference/qmp.html">qmp_rarefy()</a></code>
 </td>
 <td align="left">planned</td>
 </tr>
@@ -742,8 +742,8 @@ abundances by the load (<strong><a href="https://doi.org/10.1371/journal.pone.02
 the same number of reads per cell.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu">qmp_scale</span><span class="op">(</span><span class="va">counts</span>, <span class="va">load</span><span class="op">)</span>            <span class="co"># relative abundance x load</span></span>
-<span><span class="va">q2</span> <span class="op">&lt;-</span> <span class="fu">qmp_rarefy</span><span class="op">(</span><span class="va">counts</span>, <span class="va">load</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># Vandeputte et al. (2017)</span></span></code></pre></div>
+<span><span class="va">q1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qmp.html">qmp_scale</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">load</span><span class="op">)</span>            <span class="co"># relative abundance x load</span></span>
+<span><span class="va">q2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qmp.html">qmp_rarefy</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">load</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># Vandeputte et al. (2017)</span></span></code></pre></div>
 <p>In base R, with a measured load that has 20% error:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measured</span> <span class="op">&lt;-</span> <span class="va">load</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">0</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>

@@ -44,7 +44,7 @@ that runs today: base R, or an established package.
 | [Log ratios](#log-ratios) | Which taxa shift relative to which? | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) loadings; [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) | available; planned |
 | [Differential abundance](#differential-abundance) | Which taxa differ? | `ancom()`, `ancombc()`, `ancombc2()`, `dirmult_ttest()` | planned |
 | [Co-occurrence](#proportionality) | Which taxa move together? | [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) | planned |
-| [Absolute abundance](#absolute-abundance) | Did taxa really increase? | `qmp_scale()`, `qmp_rarefy()` | planned |
+| [Absolute abundance](#absolute-abundance) | Did taxa really increase? | [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md), [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) | planned |
 | [Repeated measures and multi-omics](#repeated-measures-and-multi-omics) | Subjects over time; several ’omics | `ctf()`, `rpca_joint()` | planned |
 
 ## A simulated study

@@ -550,6 +550,16 @@ valid alternative to correlation. A dist over the features.
 - [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) :
   Symmetric Proportionality
 
+### Absolute abundance
+
+With each sample’s total microbial load measured (cell counts, qPCR, a
+spike-in), estimate absolute abundances instead of ratios.
+
+- [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md)
+  [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) :
+  Quantitative Microbiome Profiling: Absolute Abundances from a Measured
+  Load
+
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods

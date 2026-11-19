@@ -28,8 +28,12 @@ rarefy(
 
 - depth:
 
-  The number of observations to keep per sample. If `NULL` (the
-  default), a depth is auto-selected to maximize data retention.
+  The number of observations to keep per sample: one number for every
+  sample, or one per sample (matched to the samples by name when both
+  are named, else in the samples' order), as
+  [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md)
+  uses. If `NULL` (the default), a depth is auto-selected to maximize
+  data retention.
 
 - seed:
 
@@ -44,9 +48,9 @@ rarefy(
 
 - drop:
 
-  Logical. If `TRUE`, samples with fewer than `depth` observations are
-  discarded. If `FALSE`, they are kept with their original counts.
-  Default: `TRUE`
+  Logical. If `TRUE`, samples with fewer than `depth` observations
+  (their own depth, when there is one per sample) are discarded. If
+  `FALSE`, they are kept with their original counts. Default: `TRUE`
 
 - margin:
 
@@ -75,6 +79,13 @@ matches the input class.
 
 If `depth` is `NULL`, the function defaults to the highest depth that
 retains at least 10% of the total observations in the dataset.
+
+## One Depth per Sample
+
+With one `depth` per sample, each sample is rarefied to its own depth,
+and gives exactly what rarefying the table to that sample's depth would
+give it, with the same `seed`. `drop` and `warn` compare each sample
+with its own depth.
 
 ## Dropping vs. Retaining Samples
 
@@ -110,6 +121,11 @@ For large datasets, standard matrix operations may be slow. See
 [`vignette('performance')`](https://cmmr.github.io/ecodive/articles/performance.md)
 for details on using optimized formats (e.g. sparse matrices) and
 parallel processing.
+
+## See also
+
+[`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md), which
+rarefies each sample to a depth set by its measured microbial load.
 
 ## Examples
 
@@ -150,6 +166,12 @@ parallel processing.
     rowSums(r_mtx)
 #>  A  B  C  D 
 #> 13 18 18 15 
+    
+    # One depth per sample, matched by name.
+    r_mtx <- rarefy(counts, depth = c(A = 10, B = 15, C = 20, D = 12))
+    rowSums(r_mtx)
+#>  A  B  C  D 
+#> 10 15 20 12 
     
     # Perform 3 independent rarefactions.
     r_list <- rarefy(counts, times = 3)

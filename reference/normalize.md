@@ -130,7 +130,8 @@ for references.
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),
-[`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md)
+[`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md),
+[`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md)
 
 ## Examples
 

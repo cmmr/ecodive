@@ -35,6 +35,9 @@
 - **Wright State University**. Contributor, copyright holder.  
   OPLS-DA, from 'pyopls'
 
+- **Raes Lab**. Contributor, copyright holder.  
+  quantitative microbiome profiling, following 'QMP.R'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 
