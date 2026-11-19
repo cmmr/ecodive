@@ -53,6 +53,7 @@ of class \code{c("ecodive_dist", "dist")}, so that \code{plot()} draws it as a
 heatmap (see \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}).
 Attributes, besides \code{dist}'s \code{Size}, \code{Labels}, \code{Diag} and \code{Upper}:
 \itemize{
+\item \code{metric}: \code{'vlr'}, and \code{metric_name}, its display name, \code{'Variance of Log Ratios'}, as \code{\link[=beta_div]{beta_div()}}'s results have them.
 \item \code{method}: \code{'vlr'}.
 \item \code{pseudocount}: the pseudocount used (\code{0} for none).
 }

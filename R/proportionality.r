@@ -35,6 +35,8 @@
 #'   heatmap (see [plot.ecodive_dist()]).
 #'   Attributes, besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`:
 #'
+#'   * `metric`: `'vlr'`, and `metric_name`, its display name, `'Variance of
+#'     Log Ratios'`, as [beta_div()]'s results have them.
 #'   * `method`: `'vlr'`.
 #'   * `pseudocount`: the pseudocount used (`0` for none).
 #'
@@ -324,6 +326,12 @@ proportionality <- function (method, what, denominator, env = parent.frame()) {
     switch(method, vlr = 1L, rho_p = 2L, phi_s = 3L),
     if (!is.null(ref)) ref - 1L, keep - 1L, labels, pseudocount, cpus )
 
+  attr(res, 'metric')      <- method
+  attr(res, 'metric_name') <- switch(
+    method,
+    vlr   = 'Variance of Log Ratios',
+    rho_p = 'Proportionality (rho_p)',
+    phi_s = 'Proportionality (phi_s)' )
   attr(res, 'method') <- method
   if (!is.null(ref))
     attr(res, 'denominator') <- if (is.null(info$features)) ref else info$features[ref]

@@ -329,9 +329,12 @@
   expect_true(invisibly(dm, useRaster = FALSE))
 
   # Titles from the method, if any.
-  expect_identical(dist_plot_name(dm)$title, 'Distances')
-  expect_identical(dist_plot_name(rho)$title, 'Proportionality (rho)')
+  expect_identical(dist_plot_name(dm)$title, 'Bray-Curtis Dissimilarity')
+  expect_identical(dist_plot_name(rho)$title, 'Proportionality (rho_p)')
   expect_identical(dist_plot_name(rho)$unit, 'features')
+  expect_identical(dist_plot_name(rho)$key, 'rho_p')
+  expect_identical(dist_plot_name(stats::dist(1:3))$title, 'euclidean')   # its `method`
+  expect_identical(dist_plot_name(structure(1:3, Size = 3L, class = 'dist'))$title, 'Distances')
 
   # The heatmap restores the margins it widened.
   mai <- graphics::par('mai')

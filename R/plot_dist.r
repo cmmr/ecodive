@@ -47,6 +47,10 @@
 #' * A clustering method: `x` is already in that order, which is kept.
 #'
 #' To plot a matrix in its own order, set `attr(x, "clust") <- "none"`.
+#'
+#' **Title.** The metric's display name, from the `metric_name` attribute
+#' (such as `"Bray-Curtis Dissimilarity"`), or else its `metric` or `method`
+#' attribute; `"Distances"` without any of them.
 #' With `groups`, the samples are sorted by group, keeping that order within
 #' each group.
 #'
@@ -199,19 +203,23 @@ dist_plot_order_name <- function (clust) {
 
 
 # The title, the unit (samples or features) and the colour key's title of a
-# distance matrix, from its `method` attribute, if any.
+# distance matrix: the title from its `metric_name` attribute (the metric's
+# display name), the rest from `metric` (or `method`, as results from before
+# ecodive 2.4.0 have it). Without either, "Distances".
 dist_plot_name <- function (x) {
-  m <- attr(x, 'method', exact = TRUE)
-  m <- if (is.character(m) && length(m) == 1) m else ''
-  switch(
-    m,
-    vlr        = list(title = 'Variance of log ratios', unit = 'features', key = 'vlr'),
-    rho_p      = list(title = 'Proportionality (rho)',  unit = 'features', key = 'rho'),
-    phi_s      = list(title = 'Proportionality (symmetric phi)', unit = 'features', key = 'phi_s'),
-    rpca       = list(title = 'Robust Aitchison distances', unit = 'samples', key = 'Distance'),
-    rpca_phylo = list(title = 'Phylogenetic robust Aitchison distances', unit = 'samples', key = 'Distance'),
-    list(title = 'Distances', unit = 'samples', key = 'Distance') )
+  m <- attr(x, 'metric', exact = TRUE)
+  if (is.null(m)) m <- attr(x, 'method', exact = TRUE)
+  m <- if (is.character(m) && length(m) == 1 && !is.na(m)) m else ''
+  title <- attr(x, 'metric_name', exact = TRUE)
+  if (!is.character(title) || length(title) != 1 || is.na(title))
+    title <- if (nzchar(m)) m else 'Distances'
+  features <- m %in% c('vlr', 'rho_p', 'phi_s')
+  list(
+    title = title,
+    unit  = if (features) 'features' else 'samples',
+    key   = if (features) m else 'Distance' )
 }
+
 
 
 # A vertical colour key in the right margin: one box per colour of `pal`

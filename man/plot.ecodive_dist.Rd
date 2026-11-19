@@ -55,6 +55,10 @@ sit together. \code{x} is not changed.
 }
 
 To plot a matrix in its own order, set \code{attr(x, "clust") <- "none"}.
+
+\strong{Title.} The metric's display name, from the \code{metric_name} attribute
+(such as \code{"Bray-Curtis Dissimilarity"}), or else its \code{metric} or \code{method}
+attribute; \code{"Distances"} without any of them.
 With \code{groups}, the samples are sorted by group, keeping that order within
 each group.
 

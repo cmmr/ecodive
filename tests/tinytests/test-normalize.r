@@ -50,22 +50,28 @@
   expect_identical(
     pca(x, norm = 'percent', n_axes = 2, cpus = 1),
     pca(normalize(x, 'percent', cpus = 1), n_axes = 2, cpus = 1) )
+  # Distances made two ways record different metrics and normalizations;
+  # their values and samples must be the same.
+  dvals <- function (d) {
+    for (a in c('metric', 'metric_name', 'norm', 'pseudocount')) attr(d, a) <- NULL
+    d
+  }
   expect_identical(
-    bray(x, norm = 'percent', cpus = 1),
-    bray(normalize(x, 'percent', cpus = 1), cpus = 1) )
+    dvals(bray(x, norm = 'percent', cpus = 1)),
+    dvals(bray(normalize(x, 'percent', cpus = 1), cpus = 1)) )
   expect_identical(
-    euclidean(x, norm = 'rclr', cpus = 1),
-    euclidean(normalize(x, 'rclr', cpus = 1), cpus = 1) )
+    dvals(euclidean(x, norm = 'rclr', cpus = 1)),
+    dvals(euclidean(normalize(x, 'rclr', cpus = 1), cpus = 1)) )
   expect_equal(
-    aitchison(x, pseudocount = 1, cpus = 1),
-    euclidean(normalize(x, 'clr', pseudocount = 1, cpus = 1), cpus = 1), tolerance = 1e-12 )
+    dvals(aitchison(x, pseudocount = 1, cpus = 1)),
+    dvals(euclidean(normalize(x, 'clr', pseudocount = 1, cpus = 1), cpus = 1)), tolerance = 1e-12 )
 
   # Hellinger: Euclidean distances of the transformed table are Hellinger
   # distances, and PCA of it is the usual Hellinger PCA.
   expect_identical(
-    euclidean(x, norm = 'hellinger', cpus = 1),
-    euclidean(normalize(x, 'hellinger', cpus = 1), cpus = 1) )
-  expect_equal(euclidean(x, norm = 'hellinger', cpus = 1), hellinger(x, cpus = 1), tolerance = 1e-12)
+    dvals(euclidean(x, norm = 'hellinger', cpus = 1)),
+    dvals(euclidean(normalize(x, 'hellinger', cpus = 1), cpus = 1)) )
+  expect_equal(dvals(euclidean(x, norm = 'hellinger', cpus = 1)), dvals(hellinger(x, cpus = 1)), tolerance = 1e-12)
   hp <- unclass(pca(x, norm = 'hellinger', n_axes = 2, cpus = 1))[, ]
   pr <- stats::prcomp(sqrt(pct), rank. = 2)$x
   pr <- sweep(pr, 2, sign(colSums(pr * hp)), '*')  # match each axis's sign

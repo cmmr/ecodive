@@ -113,6 +113,40 @@
 
 
 
+  # How each matrix was made: the metric's ID and display name, and its
+  # settings. ====
+
+  for (f in list_metrics('beta', 'func')) {
+    id <- names(which(vapply(list_metrics('beta', 'func'), identical, TRUE, f)))
+    d  <- if (id %in% list_metrics('beta', 'id', phylo = TRUE))
+      f(ex + 1, tree = ecodive::ex_tree, cpus = cpus) else f(ex + 1, cpus = cpus)
+    expect_identical(attr(d, 'metric'), id, info = id)
+    expect_identical(attr(d, 'metric_name'), match_metric(id)$name, info = id)
+    if ('norm' %in% names(formals(f)) || exists('norm', envir = environment(f), inherits = FALSE))
+      expect_true(is.null(attr(d, 'norm')) || is.character(attr(d, 'norm')), info = id)
+  }
+  d <- bray(x, norm = 'percent', cpus = cpus)
+  expect_identical(attr(d, 'norm'), 'percent')
+  expect_identical(attr(d, 'pseudocount'), 0)
+  expect_identical(attr(hellinger(x, cpus = cpus), 'norm'), 'percent')
+  expect_identical(attr(aitchison(ex, pseudocount = 1, cpus = cpus), 'pseudocount'), 1)
+  expect_identical(attr(minkowski(x, power = 3, cpus = cpus), 'power'), 3)
+  expect_identical(attr(generalized_unifrac(ex, tree = ecodive::ex_tree, alpha = 0.3, cpus = cpus), 'alpha'), 0.3)
+  expect_identical(attr(beta_div(x, 'Bray-Curtis', cpus = cpus), 'metric'), 'bray')
+  # Clustering keeps them.
+  d <- bray(x, clust = 'average', cpus = cpus)
+  expect_identical(attr(d, 'metric_name'), 'Bray-Curtis Dissimilarity')
+  for (f in c('vlr', 'rho_p', 'phi_s')) {
+    d <- get(f)(ex + 1, cpus = cpus)
+    expect_identical(attr(d, 'metric'), f)
+    expect_true(is.character(attr(d, 'metric_name')) && nzchar(attr(d, 'metric_name')))
+  }
+  d <- attr(rpca(cnt <- round(x * 10), distances = TRUE, cpus = cpus), 'dm')
+  expect_identical(attr(d, 'metric'), 'rpca')
+  expect_identical(attr(d, 'metric_name'), 'Robust Aitchison Distance (RPCA)')
+
+
+
   # plot(): clusters by average linkage when `clust` isn't set; keeps the
   # order otherwise. ====
 

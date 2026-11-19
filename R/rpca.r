@@ -407,8 +407,11 @@ rpca_finish <- function (res, k, method, samples, features, what, distances, ...
       Labels = samples,
       Diag   = FALSE,
       Upper  = FALSE,
-      method = method,
-      class  = c('ecodive_dist', 'dist') )
+      metric      = method,
+      metric_name = if (method == 'rpca_phylo') 'Phylogenetic Robust Aitchison Distance'
+                    else 'Robust Aitchison Distance (RPCA)',
+      method      = method,
+      class       = c('ecodive_dist', 'dist') )
 
   denom <- n - 1L
 

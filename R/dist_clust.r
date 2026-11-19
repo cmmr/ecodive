@@ -6,10 +6,43 @@
 # beta_div(), its metric functions, vlr(), rho_p() and phi_s(), and the
 # default order of plot.ecodive_dist().
 #
+#   dist_result()        records how a distance matrix was made, then
+#                        applies `clust`: the end of every metric function.
 #   validate_clust()     checks `clust` (validate_args() calls it).
 #   dist_clust()         reorders a distance matrix by `clust`.
 #   dist_clust_order()   the order of the samples that `clust` gives.
 #   dist_reorder()       a distance matrix with its samples in a new order.
+
+
+# The distance matrix `d` from metric `metric` (its ID, such as 'bray'), with
+# attributes on how it was made, from the metric function's frame `env`:
+# `metric`, `metric_name` (its display name, as list_metrics() gives it, so
+# that other packages can show it without ecodive's table), and those of
+# `norm` (the normalization applied, whether chosen or fixed by the metric,
+# by name), `pseudocount` (0 for none), `power` and `alpha` that the
+# function has and that aren't NULL. Then clustered by `clust`.
+dist_result <- function (d, metric, env = parent.frame()) {
+  attr(d, 'metric')      <- metric
+  attr(d, 'metric_name') <- METRICS$name[match(metric, METRICS$id)]
+  for (nm in c('norm', 'pseudocount', 'power', 'alpha')) {
+    if (exists(nm, envir = env, inherits = FALSE)) {
+      v <- get(nm, envir = env, inherits = FALSE)
+      if (nm == 'norm' && is.numeric(v)) v <- norm_name(v)  # validate_norm() made it a code
+      if (!is.null(v)) attr(d, nm) <- v
+    }
+  }
+  dist_clust(d, get('clust', envir = env), get('cpus', envir = env))
+}
+
+
+# The name of a normalization from its code (NORM_PERCENT -> 'percent').
+norm_name <- function (code) {
+  codes <- c(
+    none = NORM_NONE, percent = NORM_PERCENT, clr = NORM_CLR, chord = NORM_CHORD,
+    binary = NORM_BINARY, rclr = NORM_RCLR, hellinger = NORM_HELLINGER )
+  names(codes)[match(code, codes)]
+}
+
 
 
 # The values `clust` can take, besides NULL and FALSE: stats::hclust()'s

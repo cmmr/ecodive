@@ -76,6 +76,21 @@ V_UNIFRAC <- 5L
 #'   that `plot()` draws it as a heatmap (see [plot.ecodive_dist()]); every
 #'   function for `dist` objects, such as `as.matrix()`, works on it as
 #'   before. Each metric's own function, such as [bray()], returns the same.
+#'
+#'   Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, its attributes
+#'   record how it was made:
+#'
+#'   * `metric`: The metric's ID, such as `"bray"`.
+#'   * `metric_name`: Its display name, such as `"Bray-Curtis
+#'     Dissimilarity"`, as [list_metrics()] gives it, so that any package
+#'     can label it without ecodive's table.
+#'   * `norm`: The normalization applied before computing it (by name, such
+#'     as `"percent"`), whether chosen with `norm` or fixed by the metric
+#'     (such as [hellinger()]'s). Absent for the UniFrac metrics.
+#'   * `pseudocount`: The pseudocount used (`0` for none), for the metrics
+#'     that take one.
+#'   * `power`, `alpha`: For [minkowski()] and [generalized_unifrac()].
+#'   * `clust`, `order`: With `clust`; see its description.
 #' 
 #' 
 #' @details
@@ -230,7 +245,7 @@ aitchison <- function (counts, margin = 1L, pseudocount = NULL, pairs = NULL, cl
   norm <- 'clr'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'aitchison')
 }
 
 
@@ -270,7 +285,7 @@ bhattacharyya <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus
   norm <- 'percent'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, 0, NULL), 'bhattacharyya')
 }
 
 
@@ -308,7 +323,7 @@ bhattacharyya <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus
 bray <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_BRAY, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_BRAY, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'bray')
 }
 
 
@@ -346,7 +361,7 @@ bray <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs 
 canberra <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_CANBERRA, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_CANBERRA, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'canberra')
 }
 
 
@@ -383,7 +398,7 @@ canberra <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pa
 chebyshev <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_CHEBYSHEV, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_CHEBYSHEV, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'chebyshev')
 }
 
 
@@ -422,7 +437,7 @@ chord <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpu
   norm <- 'chord'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL), 'chord')
 }
 
 
@@ -460,7 +475,7 @@ chord <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpu
 clark <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_CLARK, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_CLARK, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'clark')
 }
 
 
@@ -501,7 +516,7 @@ divergence <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, 
   norm <- 'percent'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_DIVERGENCE, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_DIVERGENCE, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'divergence')
 }
 
 
@@ -539,7 +554,7 @@ divergence <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, 
 euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'euclidean')
 }
 
 
@@ -583,7 +598,7 @@ gower <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs
   
   # range_vec <- apply(counts, 2L, function (x) diff(range(x)))
   
-  dist_clust(.Call(C_beta_div, BDIV_GOWER, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_GOWER, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'gower')
 }
 
 
@@ -627,7 +642,7 @@ hellinger <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n
   
   sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  dist_clust(sqrt(sqc), clust, cpus)
+  dist_result(sqrt(sqc), 'hellinger')
 }
 
 
@@ -666,7 +681,7 @@ hellinger <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n
 horn <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_HORN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_HORN, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'horn')
 }
 
 
@@ -708,7 +723,7 @@ jensen <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cp
   
   jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  dist_clust(sqrt(jsd), clust, cpus)
+  dist_result(sqrt(jsd), 'jensen')
 }
 
 
@@ -748,7 +763,7 @@ jsd <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus(
   norm <- 'percent'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL), 'jsd')
 }
 
 
@@ -786,7 +801,7 @@ jsd <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus(
 lorentzian <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_LORENTZIAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_LORENTZIAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'lorentzian')
 }
 
 
@@ -824,7 +839,7 @@ lorentzian <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, 
 manhattan <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_MANHATTAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_MANHATTAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'manhattan')
 }
 
 
@@ -866,7 +881,7 @@ matusita <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_
   
   sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  dist_clust(sqrt(sqc), clust, cpus)
+  dist_result(sqrt(sqc), 'matusita')
 }
 
 
@@ -918,7 +933,7 @@ matusita <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_
 minkowski <- function (counts, margin = 1L, power = 1.5, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_MINKOWSKI, counts, margin, norm, pairs, cpus, pseudocount, power), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_MINKOWSKI, counts, margin, norm, pairs, cpus, pseudocount, power), 'minkowski')
 }
 
 
@@ -963,7 +978,7 @@ morisita <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_
   
   assert_integer_counts()
   
-  dist_clust(.Call(C_beta_div, BDIV_MORISITA, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_MORISITA, counts, margin, norm, pairs, cpus, 0, NULL), 'morisita')
 }
 
 
@@ -1001,7 +1016,7 @@ morisita <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_
 motyka <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_MOTYKA, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_MOTYKA, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'motyka')
 }
 
 
@@ -1043,7 +1058,7 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = 
   
   scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  dist_clust(2 * scs, clust, cpus)
+  dist_result(2 * scs, 'psym_chisq')
 }
 
 
@@ -1090,7 +1105,7 @@ robust_aitchison <- function (counts, margin = 1L, pairs = NULL, clust = NULL, c
   norm <- 'rclr'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL), 'robust_aitchison')
 }
 
 
@@ -1128,7 +1143,7 @@ robust_aitchison <- function (counts, margin = 1L, pairs = NULL, clust = NULL, c
 soergel <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_SOERGEL, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_SOERGEL, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'soergel')
 }
 
 
@@ -1168,7 +1183,7 @@ squared_chisq <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus
   norm <- 'percent'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL), 'squared_chisq')
 }
 
 
@@ -1208,7 +1223,7 @@ squared_chord <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus
   norm <- 'percent'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL), 'squared_chord')
 }
 
 
@@ -1249,7 +1264,7 @@ squared_euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount =
   
   euc <- .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
   
-  dist_clust(euc ^ 2, clust, cpus)
+  dist_result(euc ^ 2, 'squared_euclidean')
 }
 
 
@@ -1291,7 +1306,7 @@ topsoe <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cp
   
   jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  dist_clust(2 * jsd, clust, cpus)
+  dist_result(2 * jsd, 'topsoe')
 }
 
 
@@ -1329,7 +1344,7 @@ topsoe <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cp
 wave_hedges <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  dist_clust(.Call(C_beta_div, BDIV_WAVE_HEDGES, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_WAVE_HEDGES, counts, margin, norm, pairs, cpus, pseudocount, NULL), 'wave_hedges')
 }
 
 
@@ -1374,7 +1389,7 @@ hamming <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_c
   norm <- 'none'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_HAMMING, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_HAMMING, counts, margin, norm, pairs, cpus, 0, NULL), 'hamming')
 }
 
 
@@ -1416,7 +1431,7 @@ jaccard <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_c
   norm <- 'none'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_JACCARD, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_JACCARD, counts, margin, norm, pairs, cpus, 0, NULL), 'jaccard')
 }
 
 
@@ -1456,7 +1471,7 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cp
   norm <- 'none'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_OCHIAI, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_OCHIAI, counts, margin, norm, pairs, cpus, 0, NULL), 'ochiai')
 }
 
 
@@ -1498,7 +1513,7 @@ sorensen <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_
   norm <- 'none'
   validate_args()
   
-  dist_clust(.Call(C_beta_div, BDIV_SORENSEN, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
+  dist_result(.Call(C_beta_div, BDIV_SORENSEN, counts, margin, norm, pairs, cpus, 0, NULL), 'sorensen')
 }
 
 
@@ -1535,7 +1550,7 @@ unweighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
   
   validate_args()
   
-  dist_clust(.Call(C_unifrac, U_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), clust, cpus)
+  dist_result(.Call(C_unifrac, U_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), 'unweighted_unifrac')
 }
 
 
@@ -1568,7 +1583,7 @@ weighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, cl
   
   validate_args()
   
-  dist_clust(.Call(C_unifrac, W_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), clust, cpus)
+  dist_result(.Call(C_unifrac, W_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), 'weighted_unifrac')
 }
 
 
@@ -1601,7 +1616,7 @@ normalized_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
   
   validate_args()
   
-  dist_clust(.Call(C_unifrac, N_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), clust, cpus)
+  dist_result(.Call(C_unifrac, N_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), 'normalized_unifrac')
 }
 
 
@@ -1639,7 +1654,7 @@ generalized_unifrac <- function (counts, tree = NULL, alpha = 0.5, margin = 1L, 
   
   validate_args()
   
-  dist_clust(.Call(C_unifrac, G_UNIFRAC, counts, tree, margin, pairs, cpus, alpha), clust, cpus)
+  dist_result(.Call(C_unifrac, G_UNIFRAC, counts, tree, margin, pairs, cpus, alpha), 'generalized_unifrac')
 }
 
 
@@ -1672,5 +1687,5 @@ variance_adjusted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs =
   
   validate_args()
   
-  dist_clust(.Call(C_unifrac, V_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), clust, cpus)
+  dist_result(.Call(C_unifrac, V_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), 'variance_adjusted_unifrac')
 }

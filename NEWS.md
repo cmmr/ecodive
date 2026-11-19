@@ -59,6 +59,13 @@
   the heatmap; `clust = FALSE` (recorded as `"none"`) keeps the input order
   in the plot too.
 
+* Every distance matrix records how it was made, in attributes: `metric`
+  (the metric's ID, such as `"bray"`) and `metric_name` (its display name,
+  such as `"Bray-Curtis Dissimilarity"`, so that other packages can label
+  it without ecodive's table of metrics), and, where they apply, `norm` (the
+  normalization, by name), `pseudocount`, `power` and `alpha`. `plot()`
+  titles its heatmap with `metric_name`.
+
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It
   gives the same coordinates and eigenvalues as `cmdscale()`, `ape::pcoa()`,
