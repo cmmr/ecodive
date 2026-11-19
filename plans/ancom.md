@@ -236,9 +236,9 @@ Decided along the way:
 - **Timing** (4 cores): 3,000 features × 200 samples, 4.5 million log
   ratios: 2.6 s with `'anova'` (6 s on 1 core), 10.5 s with `'kruskal'`.
   scikit-bio would hold all 4.5 million × 200 log ratios in memory (7 GB).
-- **The draft article** `vignettes/articles/compositional.Rmd` still marks
-  `ancom()` as planned, as it does `vlr()` and `qmp_*()` from items 17-18;
-  left for whoever finishes the article.
+- **The draft article** `vignettes/articles/compositional.Rmd` (updated
+  upstream for items 14-18 in 885c7a3) still lists `ancom()` as planned and
+  its differential-abundance section doesn't run it yet; not changed here.
 
 For `ancombc()` (item 22): `ancom_p_adjust()` is ANCOM-specific (five
 methods, C adjustment with the diagonal 0); ANCOM-BC adjusts per covariate

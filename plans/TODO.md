@@ -39,7 +39,7 @@ meaningful sense, so they sit just after the methods they build on.
 | 16 | [x] `log_ratio()`, `balance()` (c56ea2a) | [log_ratio.md](log_ratio.md) | port (Qurro / scikit-bio, BSD-3) | Trivial; log ratios are what current compositional guidance recommends analysing. |
 | 17 | [x] `vlr()`, `rho_p()`, `phi_s()` (60d304e) | [proportionality.md](proportionality.md) | port (scikit-bio `vlr`) + formula (propr output-only) | High demand (propr); all-pairs C over features is ecodive's strength. |
 | 18 | [x] `qmp_scale()`, `qmp_rarefy()`; per-sample `rarefy(depth =)` (068453a) | [qmp.md](qmp.md) | port (raeslab QMP.R, BSD-3) + formula | Simple, over `rarefy()`'s C; the absolute-abundance side of the debate. |
-| 19 | [ ] `ancom()` | [ancom.md](ancom.md) | port (scikit-bio, BSD-3) | In QIIME 2 and widely used; D² independent tests suit threaded C. |
+| 19 | [x] `ancom()` (63822a8) | [ancom.md](ancom.md) | port (scikit-bio, BSD-3) | In QIIME 2 and widely used; D² independent tests suit threaded C. |
 | 20 | [ ] `dirmult_ttest()` (then its optional scale model) | [dirmult_ttest.md](dirmult_ttest.md) | port (scikit-bio, BSD-3; scale model from ALDEx3, MIT) | ALDEx2-style effect sizes, high demand; needs a PCG Gamma sampler. |
 | 21 | [ ] `rpca_phylo()` | [rpca_phylo.md](rpca_phylo.md) | port (gemelli, BSD-3) on `rpca()` | QIIME 2's phylogenetic RPCA; reuses `rpca()` and the UniFrac tree walk. Phylogeny-aware. |
 | 22 | [ ] `ancombc()`, `ancombc2()` | [ancombc.md](ancombc.md) | port (scikit-bio, BSD-3, derived from Artistic-2.0 ANCOMBC: keep both notices) | Among the most used DA methods now; large (~1,000 lines of core). |
