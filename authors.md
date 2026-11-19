@@ -16,8 +16,8 @@
   uwot's C++ header library, followed by the UMAP code
 
 - **scikit-bio development team**. Contributor, copyright holder.  
-  PCoA biplot scores, BIOENV, the alr and ilr transforms, and
-  multiplicative zero replacement, from scikit-bio
+  PCoA biplot scores, BIOENV, the alr and ilr transforms and balances,
+  and multiplicative zero replacement, from scikit-bio
 
 - **NumPy Developers**. Copyright holder.  
   numpy's pairwise summation, followed by replace_zeros_mult()

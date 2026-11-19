@@ -528,6 +528,16 @@ distances, use aitchison().
 - [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) : Isometric
   Log-Ratio Transform
 
+### Log ratios
+
+One log ratio per sample, between two groups of features, to use as a
+variable in tests and models.
+
+- [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md)
+  : Log Ratio of Summed Abundances
+- [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) :
+  Isometric Log-Ratio Balance
+
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods

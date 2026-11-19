@@ -645,6 +645,28 @@
   2,000 by 5,000 table takes 0.2 seconds.
 
 - New
+  [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md)
+  and [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md)
+  give one log ratio per sample between a `numerator` and a
+  `denominator` group of features (names, indices or logical vectors),
+  as a named vector that drops straight into metadata or a test.
+  [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md)
+  is the log of the ratio of summed abundances, as Qurro plots it
+  (identical to Qurro’s `qarcoal()`); it needs no pseudocount by
+  default, and gives `NA`, with one warning, where a sum is
+
+  0.  [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md)
+      is the isometric log-ratio balance, the scaled log ratio of
+      geometric means: bit-identical to the matching coordinate of
+      [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) with a
+      sequential binary partition, and equal to scikit-bio’s to 6e-16,
+      without building the full basis; zeros follow the shared
+      `pseudocount` rule over the whole table, and the output of
+      [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)
+      needs none. Both take every table type and keep sparse tables
+      sparse: 2,000 samples by 5,000 taxa take under 0.1 seconds.
+
+- New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   returns a count table after any of the transformations that
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
