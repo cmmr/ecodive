@@ -23,6 +23,7 @@ ancombc(
   tol = 1e-05,
   alpha = 0.05,
   p_adjust = "holm",
+  sensitivity = FALSE,
   cpus = n_cpus()
 )
 
@@ -38,6 +39,7 @@ ancombc2(
   tol = 1e-05,
   alpha = 0.05,
   p_adjust = "holm",
+  sensitivity = FALSE,
   cpus = n_cpus()
 )
 ```
@@ -120,6 +122,16 @@ ancombc2(
   (`'holm'`, the default, `'hochberg'`, `'hommel'`, `'bonferroni'`,
   `'BH'`, `'BY'`, `'fdr'`, `'none'`).
 
+- sensitivity:
+
+  The pseudocount sensitivity analysis (see **False discoveries**):
+  `FALSE` (the default) for none; `TRUE` to refit with pseudocounts
+  `0.1`, `0.5` and `1` added to every value, as ANCOMBC does; or a
+  vector of positive pseudocounts to use instead (on the scale of
+  `counts`, so give your own for proportions). With it, the table gains
+  `passed_ss` and `reject_robust`. **Recommended**: it takes one more
+  fit per pseudocount.
+
 - cpus:
 
   How many parallel processing threads should be used. The default,
@@ -164,6 +176,11 @@ of the second, and so on), with columns:
 
 - `reject`: `TRUE` when `p_adjusted <= alpha`.
 
+- With `sensitivity`: `passed_ss`, `TRUE` when `reject` is the same in
+  the fits at every pseudocount (ANCOMBC's `passed_ss`), and
+  `reject_robust`, `reject & passed_ss` (ANCOMBC's `diff_robust`): the
+  decisions to use.
+
 A coefficient that can't be estimated (with zeros as missing values, a
 feature whose observed samples leave a factor with fewer than two
 levels, or no samples at all) has `NaN` for `log_fc`, `se` and `w`, a
@@ -198,6 +215,10 @@ Attributes:
 
 - `sample_fractions` (`ancombc2()`): each sample's estimated log
   sampling fraction.
+
+- With `sensitivity`: `sensitivity`, a list of `pseudocounts` and `fits`
+  (the result of the same call at each of them, without a sensitivity
+  analysis of its own), which the post-hoc tests repeat themselves on.
 
 ## Details
 
@@ -245,6 +266,31 @@ The EM stops after `max_iters` iterations even if it hasn't converged
 (`attr(, 'n_iters')` shows how many ran). Its estimate then depends on
 the exact path of its minimisations, so it can differ from ANCOMBC's by
 much more than when it converges (by 0.02 in one test).
+
+## False discoveries
+
+the sensitivity analysis: **Without the sensitivity analysis,
+ANCOM-BC2's (and ANCOM-BC's) decisions can include a high proportion of
+false discoveries.** Taking logs needs something done about zeros, and
+the results can depend on that choice: a feature can be significant only
+because of how its zeros were treated. The analysis refits with each
+pseudocount in `sensitivity` added to every value and keeps a decision
+only if it is the same in every fit (`reject_robust`). ANCOMBC runs it
+by default and its authors strongly recommend it, unless power matters
+most; a 2026 benchmark (preprint) found ANCOM-BC2's false discovery rate
+controlled with it and greatly inflated without it. Even so, in a
+comparison over 69 gut microbiome datasets with ANCOMBC's default
+settings (Pelto et al. 2025), ANCOM-BC2's findings replicated least
+often of 14 methods: treat them with caution, and compare them with
+another method's.
+
+It is off by default here only because scikit-bio, whose results these
+are, leaves it to the user; set `sensitivity = TRUE`. It follows ANCOMBC
+2.10.1 and later (and scikit-bio's example): each pseudocount is added
+to every value before the whole analysis, which is repeated, and the
+post-hoc tests
+([`ancombc_global()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
+...) repeat themselves on each fit.
 
 ## Covariates
 
@@ -300,9 +346,12 @@ And unlike both:
 
 - Not carried over: random effects (ANCOMBC's `rand_formula`),
   scikit-bio's `aggregator`, ANCOMBC's data preprocessing (`prv_cut`,
-  `lib_cut`, `tax_level`; see the examples), its structural-zero
-  detection and its pseudocount sensitivity analysis (repeat the call
-  with other `pseudocount` values).
+  `lib_cut`, `tax_level`; see the examples) and its structural-zero
+  detection (see
+  [`structural_zeros()`](https://cmmr.github.io/ecodive/reference/structural_zeros.md)).
+
+- The sensitivity analysis is off by default (ANCOMBC: on), and is
+  available for `ancombc()` too (ANCOMBC: `ancombc2()` only).
 
 - A design with as many columns as samples, or more, is an error (the
   residuals would all be zero); a rank-deficient design gives a warning.
@@ -353,6 +402,14 @@ Lin, H., & Peddada, S. D. (2024). Multigroup analysis of compositions of
 microbiomes with covariate adjustments and repeated measures. *Nature
 Methods*, 21, 83–91.
 
+Pelto, J., Auranen, K., Kujala, J. V., & Lahti, L. (2025). Elementary
+methods provide more replicable results in microbial differential
+abundance analysis. *Briefings in Bioinformatics*, 26, bbaf130.
+
+A configuration-resolved benchmark of differential abundance analysis
+methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
+(preprint). doi:10.64898/2026.09.01.748571
+
 ## See also
 
 [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md),
@@ -395,23 +452,14 @@ Methods*, 21, 83–91.
     plot(res, 'age')
 
 
-    # ANCOM-BC2, with zeros as missing values.
-    res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
-    head(res2)
-#>   feature      covariate      log_fc         se          w    p_value
-#> 1      F1    (Intercept)  0.47551804 1.43509935  0.3313485 0.75381787
-#> 2      F1 statusmoderate -0.29466034 1.04951557 -0.2807584 0.79014246
-#> 3      F1   statussevere  0.85379160 1.57309664  0.5427458 0.61061281
-#> 4      F1            age -0.03289532 0.06543709 -0.5027015 0.63652850
-#> 5      F2    (Intercept) -1.44347145 1.28795186 -1.1207495 0.29490815
-#> 6      F2 statusmoderate  1.96595194 0.91658832  2.1448582 0.06428813
-#>   p_adjusted reject
-#> 1   1.000000  FALSE
-#> 2   1.000000  FALSE
-#> 3   1.000000  FALSE
-#> 4   1.000000  FALSE
-#> 5   1.000000  FALSE
-#> 6   0.514305  FALSE
+    # ANCOM-BC2, with zeros as missing values, and the sensitivity
+    # analysis (recommended): only decisions that hold at pseudocounts
+    # 0.1, 0.5 and 1 too are kept in `reject_robust`.
+    res2 <- ancombc2(x, ~ status + age, meta, groups = 'status', sensitivity = TRUE)
+    res2[res2$reject, ]
+#>  [1] feature       covariate     log_fc        se            w            
+#>  [6] p_value       p_adjusted    reject        passed_ss     reject_robust
+#> <0 rows> (or 0-length row.names)
 
     # ANCOMBC's preprocessing, done first: keep features present in at
     # least 10% of samples (prv_cut = 0.1), and samples with at least 10

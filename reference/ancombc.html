@@ -83,6 +83,7 @@ follow scikit-bio's <code>ancombc()</code> and <code>ancombc2()</code>.</p>
 <span>  tol <span class="op">=</span> <span class="fl">1e-05</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  p_adjust <span class="op">=</span> <span class="st">"holm"</span>,</span>
+<span>  sensitivity <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -98,6 +99,7 @@ follow scikit-bio's <code>ancombc()</code> and <code>ancombc2()</code>.</p>
 <span>  tol <span class="op">=</span> <span class="fl">1e-05</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  p_adjust <span class="op">=</span> <span class="st">"holm"</span>,</span>
+<span>  sensitivity <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -178,6 +180,16 @@ the features, separately for each covariate: any method of
 <code>'hommel'</code>, <code>'bonferroni'</code>, <code>'BH'</code>, <code>'BY'</code>, <code>'fdr'</code>, <code>'none'</code>).</p></dd>
 
 
+<dt id="arg-sensitivity">sensitivity<a class="anchor" aria-label="anchor" href="#arg-sensitivity"></a></dt>
+<dd><p>The pseudocount sensitivity analysis (see <strong>False
+discoveries</strong>): <code>FALSE</code> (the default) for none; <code>TRUE</code> to refit with
+pseudocounts <code>0.1</code>, <code>0.5</code> and <code>1</code> added to every value, as ANCOMBC
+does; or a vector of positive pseudocounts to use instead (on the
+scale of <code>counts</code>, so give your own for proportions). With it, the
+table gains <code>passed_ss</code> and <code>reject_robust</code>. <strong>Recommended</strong>: it
+takes one more fit per pseudocount.</p></dd>
+
+
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
 <dd><p>How many parallel processing threads should be used. The
 default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical CPU cores.</p></dd>
@@ -209,6 +221,10 @@ distribution (<code>ancombc2()</code>).</p></li>
 <li><p><code>p_adjusted</code>: <code>p_value</code> adjusted with <code>p_adjust</code>, within each
 covariate.</p></li>
 <li><p><code>reject</code>: <code>TRUE</code> when <code>p_adjusted &lt;= alpha</code>.</p></li>
+<li><p>With <code>sensitivity</code>: <code>passed_ss</code>, <code>TRUE</code> when <code>reject</code> is the same in
+the fits at every pseudocount (ANCOMBC's <code>passed_ss</code>), and
+<code>reject_robust</code>, <code>reject &amp; passed_ss</code> (ANCOMBC's <code>diff_robust</code>): the
+decisions to use.</p></li>
 </ul><p>A coefficient that can't be estimated (with zeros as missing values, a
 feature whose observed samples leave a factor with fewer than two
 levels, or no samples at all) has <code>NaN</code> for <code>log_fc</code>, <code>se</code> and <code>w</code>, a
@@ -236,6 +252,10 @@ squares estimate (<code>delta_wls</code>) and that estimate's variance
 (<code>var_delta</code>); <code>n_iters</code>: the EM iterations run per covariate.</p></li>
 <li><p><code>sample_fractions</code> (<code>ancombc2()</code>): each sample's estimated log
 sampling fraction.</p></li>
+<li><p>With <code>sensitivity</code>: <code>sensitivity</code>, a list of <code>pseudocounts</code> and
+<code>fits</code> (the result of the same call at each of them, without a
+sensitivity analysis of its own), which the post-hoc tests repeat
+themselves on.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -275,6 +295,28 @@ scaling is absorbed exactly.</p>
 (<code>attr(, 'n_iters')</code> shows how many ran). Its estimate then depends on the
 exact path of its minimisations, so it can differ from ANCOMBC's by much
 more than when it converges (by 0.02 in one test).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="false-discoveries">False discoveries<a class="anchor" aria-label="anchor" href="#false-discoveries"></a></h2>
+    <p>the sensitivity analysis:
+<strong>Without the sensitivity analysis, ANCOM-BC2's (and ANCOM-BC's)
+decisions can include a high proportion of false discoveries.</strong> Taking
+logs needs something done about zeros, and the results can depend on
+that choice: a feature can be significant only because of how its
+zeros were treated. The analysis refits with each pseudocount in
+<code>sensitivity</code> added to every value and keeps a decision only if it is
+the same in every fit (<code>reject_robust</code>). ANCOMBC runs it by default and
+its authors strongly recommend it, unless power matters most; a 2026
+benchmark (preprint) found ANCOM-BC2's false discovery rate controlled
+with it and greatly inflated without it. Even so, in a comparison over
+69 gut microbiome datasets with ANCOMBC's default settings (Pelto et al.
+2025), ANCOM-BC2's findings replicated least often of 14 methods: treat
+them with caution, and compare them with another method's.</p>
+<p>It is off by default here only because scikit-bio, whose results these
+are, leaves it to the user; set <code>sensitivity = TRUE</code>. It follows ANCOMBC
+2.10.1 and later (and scikit-bio's example): each pseudocount is added
+to every value before the whole analysis, which is repeated, and the
+post-hoc tests (<code><a href="ancombc_global.html">ancombc_global()</a></code>, ...) repeat themselves on each fit.</p>
     </div>
     <div class="section level2">
     <h2 id="covariates">Covariates<a class="anchor" aria-label="anchor" href="#covariates"></a></h2>
@@ -319,9 +361,10 @@ ordered as in R (patsy puts categorical terms before numeric ones).</p></li>
 shared pseudocount rule (see <code>pseudocount</code>).</p></li>
 <li><p>Not carried over: random effects (ANCOMBC's <code>rand_formula</code>),
 scikit-bio's <code>aggregator</code>, ANCOMBC's data preprocessing (<code>prv_cut</code>,
-<code>lib_cut</code>, <code>tax_level</code>; see the examples), its structural-zero
-detection and its pseudocount sensitivity analysis (repeat the call
-with other <code>pseudocount</code> values).</p></li>
+<code>lib_cut</code>, <code>tax_level</code>; see the examples) and its structural-zero
+detection (see <code><a href="structural_zeros.html">structural_zeros()</a></code>).</p></li>
+<li><p>The sensitivity analysis is off by default (ANCOMBC: on), and is
+available for <code>ancombc()</code> too (ANCOMBC: <code>ancombc2()</code> only).</p></li>
 <li><p>A design with as many columns as samples, or more, is an error (the
 residuals would all be zero); a rank-deficient design gives a
 warning.</p></li>
@@ -364,6 +407,12 @@ microbiomes with bias correction. <em>Nature Communications</em>, 11, 3514.</p>
 <p>Lin, H., &amp; Peddada, S. D. (2024). Multigroup analysis of compositions of
 microbiomes with covariate adjustments and repeated measures. <em>Nature
 Methods</em>, 21, 83–91.</p>
+<p>Pelto, J., Auranen, K., Kujala, J. V., &amp; Lahti, L. (2025). Elementary
+methods provide more replicable results in microbial differential
+abundance analysis. <em>Briefings in Bioinformatics</em>, 26, bbaf130.</p>
+<p>A configuration-resolved benchmark of differential abundance analysis
+methods for human gut 16S rRNA microbiome data (2026). <em>bioRxiv</em>
+(preprint). doi:10.64898/2026.09.01.748571</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -405,23 +454,14 @@ Methods</em>, 21, 83–91.</p>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">'age'</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ancombc-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># ANCOM-BC2, with zeros as missing values.</span></span></span>
-<span class="r-in"><span>    <span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">x</span>, <span class="op">~</span> <span class="va">status</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta</span>, groups <span class="op">=</span> <span class="st">'status'</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   feature      covariate      log_fc         se          w    p_value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      F1    (Intercept)  0.47551804 1.43509935  0.3313485 0.75381787</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      F1 statusmoderate -0.29466034 1.04951557 -0.2807584 0.79014246</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      F1   statussevere  0.85379160 1.57309664  0.5427458 0.61061281</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      F1            age -0.03289532 0.06543709 -0.5027015 0.63652850</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      F2    (Intercept) -1.44347145 1.28795186 -1.1207495 0.29490815</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      F2 statusmoderate  1.96595194 0.91658832  2.1448582 0.06428813</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   p_adjusted reject</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1.000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1.000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   1.000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   1.000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   1.000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   0.514305  FALSE</span>
+<span class="r-in"><span>    <span class="co"># ANCOM-BC2, with zeros as missing values, and the sensitivity</span></span></span>
+<span class="r-in"><span>    <span class="co"># analysis (recommended): only decisions that hold at pseudocounts</span></span></span>
+<span class="r-in"><span>    <span class="co"># 0.1, 0.5 and 1 too are kept in `reject_robust`.</span></span></span>
+<span class="r-in"><span>    <span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">x</span>, <span class="op">~</span> <span class="va">status</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta</span>, groups <span class="op">=</span> <span class="st">'status'</span>, sensitivity <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">res2</span><span class="op">[</span><span class="va">res2</span><span class="op">$</span><span class="va">reject</span>, <span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] feature       covariate     log_fc        se            w            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] p_value       p_adjusted    reject        passed_ss     reject_robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;0 rows&gt; (or 0-length row.names)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># ANCOMBC's preprocessing, done first: keep features present in at</span></span></span>
 <span class="r-in"><span>    <span class="co"># least 10% of samples (prv_cut = 0.1), and samples with at least 10</span></span></span>

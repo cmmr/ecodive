@@ -170,8 +170,14 @@ level a; with no intercept, a level alone is its own coefficient),
 scikit-bio and ANCOMBC, <code>p_value</code> is set to 1 for the features that
 the screening global test didn't find (and wherever it would be 0 or
 <code>NaN</code>), and <code>p_adjusted</code> is the mdFDR-adjusted value.</p>
-<p>Attributes: <code>method</code> (the fit's), <code>groups</code>, <code>alpha</code>, <code>p_adjust</code>, and
-for the bootstrapped tests <code>n_bootstraps</code> and <code>seed</code>.</p>
+<p>When the fit was made with <code>sensitivity</code> (see <code><a href="ancombc.html">ancombc()</a></code>), each test
+is repeated on the fit at every pseudocount, and the table gains
+<code>passed_ss</code> (the decision is the same in every fit; for the trend test,
+the global test's decision, as in ANCOMBC) and <code>reject_robust</code>
+(<code>reject &amp; passed_ss</code>), the decisions to use.</p>
+<p>Attributes: <code>method</code> (the fit's), <code>groups</code>, <code>alpha</code>, <code>p_adjust</code>, for
+the bootstrapped tests <code>n_bootstraps</code> and <code>seed</code>, and with the
+sensitivity analysis <code>sensitivity</code> (its pseudocounts).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

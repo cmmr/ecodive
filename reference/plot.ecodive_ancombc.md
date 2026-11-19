@@ -98,7 +98,12 @@ plot(x, n_features = 30, ...)
   a dot chart of each feature's test statistic, largest first.
 
 Features declared differentially abundant (`reject = TRUE`) are
-highlighted in all of them.
+highlighted in all of them. When the fit was made with a sensitivity
+analysis (`sensitivity`, see
+[`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)), the
+robust decisions (`reject_robust`) are drawn filled (in bold in the
+heatmap) and named, and the others that are significant hollow (in
+italics).
 
 Log fold changes are natural logs, as ANCOM-BC estimates them. In the
 volcano plot, the y axis is \\-\log\_{10}\\ of `p_adjusted`, with a

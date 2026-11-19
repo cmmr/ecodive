@@ -124,8 +124,16 @@ scikit-bio and ANCOMBC, `p_value` is set to 1 for the features that the
 screening global test didn't find (and wherever it would be 0 or `NaN`),
 and `p_adjusted` is the mdFDR-adjusted value.
 
-Attributes: `method` (the fit's), `groups`, `alpha`, `p_adjust`, and for
-the bootstrapped tests `n_bootstraps` and `seed`.
+When the fit was made with `sensitivity` (see
+[`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)),
+each test is repeated on the fit at every pseudocount, and the table
+gains `passed_ss` (the decision is the same in every fit; for the trend
+test, the global test's decision, as in ANCOMBC) and `reject_robust`
+(`reject & passed_ss`), the decisions to use.
+
+Attributes: `method` (the fit's), `groups`, `alpha`, `p_adjust`, for the
+bootstrapped tests `n_bootstraps` and `seed`, and with the sensitivity
+analysis `sensitivity` (its pseudocounts).
 
 ## Details
 
