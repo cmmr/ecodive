@@ -40,11 +40,24 @@ A heatmap of a distance matrix from \code{\link[=beta_div]{beta_div()}} or any o
 functions (such as \code{\link[=bray]{bray()}} or \code{\link[=unweighted_unifrac]{unweighted_unifrac()}}), or of the
 proportionality of features from \code{\link[=vlr]{vlr()}}, \code{\link[=rho_p]{rho_p()}} or \code{\link[=phi_s]{phi_s()}}: one row
 and one column per sample (or feature), each cell coloured by the
-distance between its row's and its column's. Nothing is recomputed: the
-samples are drawn in their order, or sorted by \code{groups}, and not
-clustered.
+distance between its row's and its column's, with the samples ordered as
+the matrix's \code{clust} attribute says.
 }
 \details{
+\strong{Order.} The samples are ordered by the \code{clust} argument of the
+function that made \code{x}, recorded in its \code{clust} attribute:
+\itemize{
+\item Not set (\code{clust = NULL}, the default): the plot clusters them itself,
+by average linkage (UPGMA, \code{\link[stats:hclust]{stats::hclust()}}), so that similar samples
+sit together. \code{x} is not changed.
+\item \code{"none"} (\code{clust = FALSE}): their order in \code{x}, which is the input's.
+\item A clustering method: \code{x} is already in that order, which is kept.
+}
+
+To plot a matrix in its own order, set \code{attr(x, "clust") <- "none"}.
+With \code{groups}, the samples are sorted by group, keeping that order within
+each group.
+
 The rows run from the first sample at the top to the last at the bottom,
 and the columns from left to right in the same order, so the matrix is
 symmetric about the diagonal from the top left; only the rows are
@@ -64,6 +77,14 @@ as before.
     plot(dm)
 
     # Sorted by species: three blocks along the diagonal.
+    plot(dm, 'Species', iris)
+
+    # In the input's order, not clustered.
+    plot(bray(iris[, 1:4], clust = FALSE))
+
+    # Clustered by Ward's method when computed: the result is reordered.
+    dm <- bray(iris[, 1:4], clust = 'ward.D2')
+    head(attr(dm, 'order'))
     plot(dm, 'Species', iris)
 
     # Proportionality, with negative values.

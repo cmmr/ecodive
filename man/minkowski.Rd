@@ -11,6 +11,7 @@ minkowski(
   norm = "none",
   pseudocount = NULL,
   pairs = NULL,
+  clust = NULL,
   cpus = n_cpus()
 )
 }
@@ -47,6 +48,25 @@ Default: \code{'none'}.}
 calculated for? The default value (\code{NULL}) calculates all-vs-all.
 Provide a numeric or logical vector specifying positions in the
 distance matrix to calculate. See examples.}
+
+\item{clust}{Whether and how to cluster the samples (rows and columns)
+before returning the distance matrix: \code{NULL} (the default) or
+\code{FALSE} to keep them in their input order, or one of
+\code{\link[stats:hclust]{stats::hclust()}}'s linkage methods, \code{"average"} (UPGMA),
+\code{"complete"}, \code{"single"}, \code{"ward.D"}, \code{"ward.D2"}, \code{"mcquitty"}
+(WPGMA), \code{"median"} or \code{"centroid"}, or \code{"pcoa"} to order them
+along the first axis of \code{\link[=pcoa]{pcoa()}}. Clustering \strong{reorders the
+samples} of the result, with their labels (samples without names
+are labelled with their positions in the input): attribute \code{order}
+gives each one's position in the input, so that \code{meta[attr(d, "order"), ]} lines metadata up with them. Tests such as \code{\link[=permanova]{permanova()}} match
+named samples to \code{data} by name, but a vector of groups without
+names is matched by position, so reorder it too. The result's
+attribute \code{clust} records \code{clust} (\code{FALSE} as \code{"none"}), which
+\code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
+for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
+order. \code{clust} needs every distance, so it cannot be used with
+\code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
+       \rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

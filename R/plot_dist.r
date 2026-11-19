@@ -8,9 +8,8 @@
 #' functions (such as [bray()] or [unweighted_unifrac()]), or of the
 #' proportionality of features from [vlr()], [rho_p()] or [phi_s()]: one row
 #' and one column per sample (or feature), each cell coloured by the
-#' distance between its row's and its column's. Nothing is recomputed: the
-#' samples are drawn in their order, or sorted by `groups`, and not
-#' clustered.
+#' distance between its row's and its column's, with the samples ordered as
+#' the matrix's `clust` attribute says.
 #'
 #' @param x  A distance matrix of class `ecodive_dist`, as ecodive's
 #'        distance functions return. (`plot(as.dist(m))` of another matrix
@@ -38,6 +37,19 @@
 #'        `useRaster`.
 #'
 #' @details
+#' **Order.** The samples are ordered by the `clust` argument of the
+#' function that made `x`, recorded in its `clust` attribute:
+#'
+#' * Not set (`clust = NULL`, the default): the plot clusters them itself,
+#'   by average linkage (UPGMA, [stats::hclust()]), so that similar samples
+#'   sit together. `x` is not changed.
+#' * `"none"` (`clust = FALSE`): their order in `x`, which is the input's.
+#' * A clustering method: `x` is already in that order, which is kept.
+#'
+#' To plot a matrix in its own order, set `attr(x, "clust") <- "none"`.
+#' With `groups`, the samples are sorted by group, keeping that order within
+#' each group.
+#'
 #' The rows run from the first sample at the top to the last at the bottom,
 #' and the columns from left to right in the same order, so the matrix is
 #' symmetric about the diagonal from the top left; only the rows are
@@ -62,6 +74,14 @@
 #'     # Sorted by species: three blocks along the diagonal.
 #'     plot(dm, 'Species', iris)
 #'
+#'     # In the input's order, not clustered.
+#'     plot(bray(iris[, 1:4], clust = FALSE))
+#'
+#'     # Clustered by Ward's method when computed: the result is reordered.
+#'     dm <- bray(iris[, 1:4], clust = 'ward.D2')
+#'     head(attr(dm, 'order'))
+#'     plot(dm, 'Species', iris)
+#'
 #'     # Proportionality, with negative values.
 #'     plot(rho_p(ex_counts + 1))
 plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = TRUE, ...) {
@@ -79,13 +99,18 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
 
 
   #--------------------------------------------------
-  # The order of the samples: as given, or by group.
+  # The order of the samples: as `clust` says (clustered here when it isn't
+  # set), then by group.
   #--------------------------------------------------
+  cl   <- attr(x, 'clust', exact = TRUE)
+  base <- if (is.null(cl) && !anyNA(x)) dist_clust_order(x, 'average') else seq_len(n)
+  how  <- dist_plot_order_name(if (is.null(cl) && !anyNA(x)) 'average' else cl)
+
   g      <- plot_groups(n, labels, groups, data)
-  ord    <- seq_len(n)
+  ord    <- base
   blocks <- NULL
   if (!is.null(g$f)) {
-    ord    <- order(as.integer(g$f))  # stable: samples keep their order within groups
+    ord    <- base[order(as.integer(g$f)[base])]  # stable: keeps `base` within groups
     runs   <- rle(as.integer(g$f[ord]))
     lev    <- levels(g$f)
     blocks <- list(
@@ -94,7 +119,7 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
     blocks$mids <- blocks$ends - (runs$lengths - 1) / 2
   }
   else if (!is.null(g$values)) {
-    ord <- order(g$values)
+    ord <- base[order(g$values[base])]
   }
 
   m <- as.matrix(x)[ord, ord, drop = FALSE]
@@ -142,7 +167,8 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
       sub = paste0(
         n, ' ', what$unit,
         if (!is.null(g$title)) paste0(', by ', g$title)
-        else if (!is.null(groups)) ', by group' ) ))
+        else if (!is.null(groups)) ', by group',
+        if (!is.null(how)) paste0(', ', how) ) ))
 
   if (is.null(blocks)) {
     graphics::axis(2, at = n - seq_len(n) + 1, labels = names_, las = 1, tick = FALSE, cex.axis = 0.7)
@@ -161,6 +187,15 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
   invisible(x)
 }
 
+
+
+# How the samples were ordered, for the subtitle, from a `clust` value: NULL
+# for their own order.
+dist_plot_order_name <- function (clust) {
+  if (is.null(clust) || identical(clust, 'none')) return (NULL)
+  if (identical(clust, 'pcoa')) return ('ordered by PCoA axis 1')
+  sprintf('clustered (%s linkage)', clust)
+}
 
 
 # The title, the unit (samples or features) and the colour key's title of a

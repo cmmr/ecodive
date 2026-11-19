@@ -41,6 +41,26 @@
 #'        Provide a numeric or logical vector specifying positions in the 
 #'        distance matrix to calculate. See examples.
 #' 
+#' @param clust  Whether and how to cluster the samples (rows and columns)
+#'        before returning the distance matrix: `NULL` (the default) or
+#'        `FALSE` to keep them in their input order, or one of
+#'        [stats::hclust()]'s linkage methods, `"average"` (UPGMA),
+#'        `"complete"`, `"single"`, `"ward.D"`, `"ward.D2"`, `"mcquitty"`
+#'        (WPGMA), `"median"` or `"centroid"`, or `"pcoa"` to order them
+#'        along the first axis of [pcoa()]. Clustering **reorders the
+#'        samples** of the result, with their labels (samples without names
+#'        are labelled with their positions in the input): attribute `order`
+#'        gives each one's position in the input, so that `meta[attr(d,
+#'        "order"), ]` lines metadata up with them. Tests such as [permanova()] match
+#'        named samples to `data` by name, but a vector of groups without
+#'        names is matched by position, so reorder it too. The result's
+#'        attribute `clust` records `clust` (`FALSE` as `"none"`), which
+#'        [plot.ecodive_dist()] follows: with `NULL` it clusters the samples
+#'        for the heatmap (`"average"`), and with `"none"` it keeps their
+#'        order. `clust` needs every distance, so it cannot be used with
+#'        `pairs`. [rho_p()]'s similarities are clustered as \eqn{1 -
+#'        \rho_p}.
+#'
 #' @param pairwise  Also test each pair of groups: run the same test on just
 #'        the two groups' samples, for every pair, and adjust the pairs'
 #'        p-values for multiple testing with `p_adjust`. See **Pairwise

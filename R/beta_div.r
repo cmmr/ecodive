@@ -161,6 +161,7 @@ beta_div <- function (
     alpha       = 0.5, 
     tree        = NULL, 
     pairs       = NULL, 
+    clust       = NULL, 
     cpus        = n_cpus() ) {
   
   metric <- match_metric(metric, div = 'beta')
@@ -224,12 +225,12 @@ beta_div <- function (
 #' @export
 #' @examples
 #'     aitchison(ex_counts, pseudocount = 1)
-aitchison <- function (counts, margin = 1L, pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+aitchison <- function (counts, margin = 1L, pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'clr'
   validate_args()
   
-  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -264,12 +265,12 @@ aitchison <- function (counts, margin = 1L, pseudocount = NULL, pairs = NULL, cp
 #' @export
 #' @examples
 #'     bhattacharyya(ex_counts)
-bhattacharyya <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+bhattacharyya <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_BHATTACHARYYA, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -304,10 +305,10 @@ bhattacharyya <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     bray(ex_counts)
-bray <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+bray <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_BRAY, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_BRAY, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -342,10 +343,10 @@ bray <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs 
 #' @export
 #' @examples
 #'     canberra(ex_counts)
-canberra <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+canberra <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_CANBERRA, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_CANBERRA, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -379,10 +380,10 @@ canberra <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pa
 #' @export
 #' @examples
 #'     chebyshev(ex_counts)
-chebyshev <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+chebyshev <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_CHEBYSHEV, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_CHEBYSHEV, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -416,12 +417,12 @@ chebyshev <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, p
 #' @export
 #' @examples
 #'     chord(ex_counts)
-chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+chord <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'chord'
   validate_args()
   
-  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -456,10 +457,10 @@ chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     clark(ex_counts)
-clark <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+clark <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_CLARK, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_CLARK, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -495,12 +496,12 @@ clark <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs
 #' @export
 #' @examples
 #'     divergence(ex_counts)
-divergence <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+divergence <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_DIVERGENCE, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_DIVERGENCE, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -535,10 +536,10 @@ divergence <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, 
 #' @export
 #' @examples
 #'     euclidean(ex_counts)
-euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -576,13 +577,13 @@ euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, p
 #' @export
 #' @examples
 #'     gower(ex_counts)
-gower <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+gower <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
   
   # range_vec <- apply(counts, 2L, function (x) diff(range(x)))
   
-  .Call(C_beta_div, BDIV_GOWER, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_GOWER, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -619,14 +620,14 @@ gower <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs
 #' @export
 #' @examples
 #'     hellinger(ex_counts)
-hellinger <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+hellinger <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
   sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  sqrt(sqc)
+  dist_clust(sqrt(sqc), clust, cpus)
 }
 
 
@@ -662,10 +663,10 @@ hellinger <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     horn(ex_counts)
-horn <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+horn <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_HORN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_HORN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -700,14 +701,14 @@ horn <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs 
 #' @export
 #' @examples
 #'     jensen(ex_counts)
-jensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+jensen <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
   jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  sqrt(jsd)
+  dist_clust(sqrt(jsd), clust, cpus)
 }
 
 
@@ -742,12 +743,12 @@ jensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     jsd(ex_counts)
-jsd <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+jsd <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -782,10 +783,10 @@ jsd <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     lorentzian(ex_counts)
-lorentzian <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+lorentzian <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_LORENTZIAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_LORENTZIAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -820,10 +821,10 @@ lorentzian <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, 
 #' @export
 #' @examples
 #'     manhattan(ex_counts)
-manhattan <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+manhattan <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_MANHATTAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_MANHATTAN, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -858,14 +859,14 @@ manhattan <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, p
 #' @export
 #' @examples
 #'     matusita(ex_counts)
-matusita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+matusita <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
   sqc <- .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  sqrt(sqc)
+  dist_clust(sqrt(sqc), clust, cpus)
 }
 
 
@@ -914,10 +915,10 @@ matusita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     minkowski(ex_counts, power = 2) # Equivalent to Euclidean
-minkowski <- function (counts, margin = 1L, power = 1.5, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+minkowski <- function (counts, margin = 1L, power = 1.5, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_MINKOWSKI, counts, margin, norm, pairs, cpus, pseudocount, power)
+  dist_clust(.Call(C_beta_div, BDIV_MINKOWSKI, counts, margin, norm, pairs, cpus, pseudocount, power), clust, cpus)
 }
 
 
@@ -955,14 +956,14 @@ minkowski <- function (counts, margin = 1L, power = 1.5, norm = 'none', pseudoco
 #' @export
 #' @examples
 #'     morisita(ex_counts)
-morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+morisita <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'none'
   validate_args()
   
   assert_integer_counts()
   
-  .Call(C_beta_div, BDIV_MORISITA, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_MORISITA, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -997,10 +998,10 @@ morisita <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     motyka(ex_counts)
-motyka <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+motyka <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_MOTYKA, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_MOTYKA, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -1035,14 +1036,14 @@ motyka <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pair
 #' @export
 #' @examples
 #'     psym_chisq(ex_counts)
-psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+psym_chisq <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
   scs <- .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  2 * scs
+  dist_clust(2 * scs, clust, cpus)
 }
 
 
@@ -1084,12 +1085,12 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     robust_aitchison(ex_counts)
-robust_aitchison <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+robust_aitchison <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'rclr'
   validate_args()
   
-  .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -1124,10 +1125,10 @@ robust_aitchison <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()
 #' @export
 #' @examples
 #'     soergel(ex_counts)
-soergel <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+soergel <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_SOERGEL, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_SOERGEL, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -1162,12 +1163,12 @@ soergel <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pai
 #' @export
 #' @examples
 #'     squared_chisq(ex_counts)
-squared_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+squared_chisq <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_SQUARED_CHISQ, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -1202,12 +1203,12 @@ squared_chisq <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     squared_chord(ex_counts)
-squared_chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+squared_chord <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_SQUARED_CHORD, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -1242,13 +1243,13 @@ squared_chord <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     squared_euclidean(ex_counts)
-squared_euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+squared_euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
   
   euc <- .Call(C_beta_div, BDIV_EUCLIDEAN, counts, margin, norm, pairs, cpus, pseudocount, NULL)
   
-  euc ^ 2
+  dist_clust(euc ^ 2, clust, cpus)
 }
 
 
@@ -1283,14 +1284,14 @@ squared_euclidean <- function (counts, margin = 1L, norm = 'none', pseudocount =
 #' @export
 #' @examples
 #'     topsoe(ex_counts)
-topsoe <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+topsoe <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'percent'
   validate_args()
   
   jsd <- .Call(C_beta_div, BDIV_JSD, counts, margin, norm, pairs, cpus, 0, NULL)
   
-  2 * jsd
+  dist_clust(2 * jsd, clust, cpus)
 }
 
 
@@ -1325,10 +1326,10 @@ topsoe <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     wave_hedges(ex_counts)
-wave_hedges <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, cpus = n_cpus()) {
+wave_hedges <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
-  .Call(C_beta_div, BDIV_WAVE_HEDGES, counts, margin, norm, pairs, cpus, pseudocount, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_WAVE_HEDGES, counts, margin, norm, pairs, cpus, pseudocount, NULL), clust, cpus)
 }
 
 
@@ -1368,12 +1369,12 @@ wave_hedges <- function (counts, margin = 1L, norm = 'none', pseudocount = NULL,
 #' @export
 #' @examples
 #'     hamming(ex_counts)
-hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+hamming <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_HAMMING, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_HAMMING, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -1410,12 +1411,12 @@ hamming <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     jaccard(ex_counts)
-jaccard <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+jaccard <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_JACCARD, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_JACCARD, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -1450,12 +1451,12 @@ jaccard <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     ochiai(ex_counts)
-ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+ochiai <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_OCHIAI, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_OCHIAI, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -1492,12 +1493,12 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     sorensen(ex_counts)
-sorensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+sorensen <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   norm <- 'none'
   validate_args()
   
-  .Call(C_beta_div, BDIV_SORENSEN, counts, margin, norm, pairs, cpus, 0, NULL)
+  dist_clust(.Call(C_beta_div, BDIV_SORENSEN, counts, margin, norm, pairs, cpus, 0, NULL), clust, cpus)
 }
 
 
@@ -1530,11 +1531,11 @@ sorensen <- function (counts, margin = 1L, pairs = NULL, cpus = n_cpus()) {
 #' @export
 #' @examples
 #'     unweighted_unifrac(ex_counts, tree = ex_tree)
-unweighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+unweighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
   
-  .Call(C_unifrac, U_UNIFRAC, counts, tree, margin, pairs, cpus, NULL)
+  dist_clust(.Call(C_unifrac, U_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), clust, cpus)
 }
 
 
@@ -1563,11 +1564,11 @@ unweighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
 #' @export
 #' @examples
 #'     weighted_unifrac(ex_counts, tree = ex_tree)
-weighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+weighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
   
-  .Call(C_unifrac, W_UNIFRAC, counts, tree, margin, pairs, cpus, NULL)
+  dist_clust(.Call(C_unifrac, W_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), clust, cpus)
 }
 
 
@@ -1596,12 +1597,12 @@ weighted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, cp
 #' @export
 #' @examples
 #'     normalized_unifrac(ex_counts, tree = ex_tree)
-normalized_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+normalized_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
   
-  .Call(C_unifrac, N_UNIFRAC, counts, tree, margin, pairs, cpus, NULL)
-} 
+  dist_clust(.Call(C_unifrac, N_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), clust, cpus)
+}
 
 
 #' Generalized UniFrac (GUniFrac)
@@ -1634,11 +1635,11 @@ normalized_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, 
 #' @export
 #' @examples
 #'     generalized_unifrac(ex_counts, tree = ex_tree, alpha = 0.5)
-generalized_unifrac <- function (counts, tree = NULL, alpha = 0.5, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+generalized_unifrac <- function (counts, tree = NULL, alpha = 0.5, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
   
-  .Call(C_unifrac, G_UNIFRAC, counts, tree, margin, pairs, cpus, alpha)
+  dist_clust(.Call(C_unifrac, G_UNIFRAC, counts, tree, margin, pairs, cpus, alpha), clust, cpus)
 }
 
 
@@ -1667,9 +1668,9 @@ generalized_unifrac <- function (counts, tree = NULL, alpha = 0.5, margin = 1L, 
 #' @export
 #' @examples
 #'     variance_adjusted_unifrac(ex_counts, tree = ex_tree)
-variance_adjusted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, cpus = n_cpus()) {
+variance_adjusted_unifrac <- function (counts, tree = NULL, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus()) {
   
   validate_args()
   
-  .Call(C_unifrac, V_UNIFRAC, counts, tree, margin, pairs, cpus, NULL)
+  dist_clust(.Call(C_unifrac, V_UNIFRAC, counts, tree, margin, pairs, cpus, NULL), clust, cpus)
 }

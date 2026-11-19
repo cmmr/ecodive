@@ -51,10 +51,12 @@ head(iris)
 dm <- bray(iris[, 1:4])
 ```
 
-`plot()` draws the distances as a heatmap. Sorted by species, the three
-species show as blocks of short distances along the diagonal, and setosa
-stands far from the other two: the structure that an ordination lays out
-on a few axes.
+`plot()` draws the distances as a heatmap, with the samples clustered (by
+average linkage) so that similar ones sit together. Sorted by species, the
+three species show as blocks of short distances along the diagonal, and
+setosa stands far from the other two: the structure that an ordination
+lays out on a few axes. To cluster the samples of the matrix itself, give
+the distance function `clust`, such as `bray(counts, clust = 'average')`.
 
 ```{r}
 plot(dm, 'Species', iris)

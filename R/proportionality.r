@@ -123,7 +123,7 @@
 #'     plot(hclust(vlr(x)))
 #'
 vlr <- function (
-    counts, margin = 1L, pseudocount = NULL, cpus = n_cpus() ) {
+    counts, margin = 1L, pseudocount = NULL, clust = NULL, cpus = n_cpus() ) {
 
   proportionality('vlr', 'the variance of log ratios', denominator = NULL)
 }
@@ -214,7 +214,7 @@ vlr <- function (
 #'
 rho_p <- function (
     counts, margin = 1L, denominator = NULL, pseudocount = NULL,
-    cpus = n_cpus() ) {
+    clust = NULL, cpus = n_cpus() ) {
 
   proportionality('rho_p', 'proportionality', denominator)
 }
@@ -280,7 +280,7 @@ rho_p <- function (
 #'
 phi_s <- function (
     counts, margin = 1L, denominator = NULL, pseudocount = NULL,
-    cpus = n_cpus() ) {
+    clust = NULL, cpus = n_cpus() ) {
 
   proportionality('phi_s', 'proportionality', denominator)
 }
@@ -291,6 +291,7 @@ phi_s <- function (
 # (for counts, margin, pseudocount and cpus).
 proportionality <- function (method, what, denominator, env = parent.frame()) {
 
+  validate_clust(env)
   info <- log_ratio_input(what, env = env, zero_ok = TRUE, dense_out = FALSE)
   counts      <- env$counts
   margin      <- env$margin
@@ -327,5 +328,5 @@ proportionality <- function (method, what, denominator, env = parent.frame()) {
   if (!is.null(ref))
     attr(res, 'denominator') <- if (is.null(info$features)) ref else info$features[ref]
   attr(res, 'pseudocount') <- pseudocount
-  res
+  dist_clust(res, env$clust, cpus)
 }

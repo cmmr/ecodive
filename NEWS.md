@@ -44,6 +44,21 @@
     `ancombc_global()` and `ancombc_trend()` a dot chart of their
     statistics.
 
+* Every function that returns a distance matrix, `beta_div()` and its 37
+  metric functions, `vlr()`, `rho_p()` and `phi_s()`, takes `clust`, to
+  cluster the samples before returning it: one of `stats::hclust()`'s
+  linkage methods (`"average"`, `"complete"`, `"single"`, `"ward.D"`,
+  `"ward.D2"`, `"mcquitty"`, `"median"`, `"centroid"`), or `"pcoa"` to order
+  them along the first axis of `pcoa()`. Clustering **reorders the
+  samples** of the result, with their labels (unnamed samples are labelled
+  with their input positions); attribute `order` gives each one's position
+  in the input, and attribute `clust` records the method. Tests match named
+  samples to metadata by name, but metadata matched by position must be
+  reordered with `attr(d, "order")`. `clust = NULL`, the default, leaves the
+  matrix as it was, and `plot()` then clusters it by average linkage for
+  the heatmap; `clust = FALSE` (recorded as `"none"`) keeps the input order
+  in the plot too.
+
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It
   gives the same coordinates and eigenvalues as `cmdscale()`, `ape::pcoa()`,
