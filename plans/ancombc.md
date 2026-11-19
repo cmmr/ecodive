@@ -526,3 +526,43 @@ Decided along the way:
   three cases. It could be trimmed (fewer cases with draws) if CRAN's
   tarball size matters.
 - The draft article still lists the ANCOM-BC functions as planned.
+
+
+## Fixtures slimmed (2026-11-19, the user's request)
+
+The tests should be small and quick, so `tests/tinytests/expected/ancombc.rds`
+went from 266 KB to 73 KB (xz), and `data-raw/expected/ancombc/` from 1.8 MB
+to 0.6 MB:
+
+- **Smaller tables:** `sim` 24 × 16 (was 42 × 60), `sparse` 21 × 12 (30 ×
+  25, its special features kept), `levels` 18 × 10 (36 × 30), `prop` 12 × 8
+  (20 × 15); 121 samples over all tables.
+- **Fewer cases (22):** `doc3_pc0.1` and `sim_bc_bh` dropped (`sim_bc` now
+  uses BH and alpha 0.1).
+- **Less stored:** no `w` (tested as `log_fc / se`); `_beta_hat`,
+  `_var_hat` and `_vcov_hat` for four cases (`FIT_CASES`); Dunnett's
+  tables only where draws are recorded (its `log_fc` and `se` are the
+  pairwise table's level-against-reference rows, tested as such); the
+  trend test's statistic everywhere, its p-values only with draws; 20
+  recorded null draws (was 50); ANCOMBC only the compared columns.
+- **ANCOMBC cases** are chosen by the fixture script: those whose primary
+  `log_fc` agree with scikit-bio's to 1e-5 (9 cases, 4 with post-hoc
+  tests). On the new `sim_bc2_pc`, ANCOMBC's post-hoc step fails (its mdFDR
+  calls `p.adjust(n = Inf)` with BY when no feature passes its screen), so
+  the script runs it without post-hoc tests there.
+- **Lighter Monte Carlo checks:** the t / normal sampler with 50,000 draws
+  per setting (was 200,000); the trend p-values in distribution with 4,000
+  of ecodive's draws against scikit-bio's 20,000; the many-feature
+  threading table 30 × 300 (was 40 × 700).
+- **Two tolerances, with reasons in the tests:** scale invariance of
+  `log_fc` to 1e-4 (the EM absorbs the rescaling's common shift only to its
+  tolerance, 1e-5; on the smaller `prop` table its iteration count changes);
+  the trend statistic against scikit-bio to 1e-3 (SLSQP stops up to 1.8e-4
+  short; brute force over the active sets now also checks the no-intercept
+  case).
+
+Results on the slimmed fixtures: scikit-bio `log_fc` within 2.1e-8, `se`
+2.5e-9, p-values 2.5e-8, global W 1.1e-8, pairwise `p_adjusted` 1.2e-8,
+decisions identical; ANCOMBC `log_fc` within 2.4e-6, `se` 2.6e-6, p-values
+4.4e-5. In the full suite the two test files take 1.0 s and 1.2 s (1,119
+results); the suite has 15,185 results at home and 297 in CRAN mode, all OK.

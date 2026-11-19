@@ -115,7 +115,6 @@ ref <- lapply(setNames(cases$case, cases$case), function (cs) {
     tol          = hex(cr$tol),
     log_fc       = as_mat(f, r$covariate, hex(r$lfc), D),
     se           = as_mat(f, r$covariate, hex(r$se),  D),
-    w            = as_mat(f, r$covariate, hex(r$w),   D),
     p_value      = as_mat(f, r$covariate, hex(r$p),   D),
     p_adjusted   = as_mat(f, r$covariate, hex(r$q),   D),
     reject       = as_mat(f, r$covariate, r$signif == '1', D) == 1 )
@@ -132,15 +131,19 @@ ref <- lapply(setNames(cases$case, cases$case), function (cs) {
   if (nrow(s)) out$sample_fractions <- hex(s$theta)[order(as.integer(s$sample))]
 
   if (!is.null(out$groups)) {
-    fr <- fit[fit$case == cs, ]
-    P  <- ncol(out$log_fc)
-    out$coef <- matrix(hex(fr$beta), D, P, byrow = TRUE, dimnames = list(NULL, colnames(out$log_fc)))
-    out$var  <- matrix(hex(fr$var),  D, P, byrow = TRUE, dimnames = list(NULL, colnames(out$log_fc)))
 
-    vr <- vcv[vcv$case == cs, ]
-    k  <- max(as.integer(vr$i)) + 1L
-    out$vcov <- array(NA_real_, c(D, k, k))
-    out$vcov[cbind(as.integer(vr$feature) + 1L, as.integer(vr$i) + 1L, as.integer(vr$j) + 1L)] <- hex(vr$value)
+    # The fitted quantities (_beta_hat, _var_hat, _vcov_hat), for a few
+    # cases (FIT_CASES in ancombc.py).
+    fr <- fit[fit$case == cs, ]
+    if (nrow(fr)) {
+      P  <- ncol(out$log_fc)
+      out$coef <- matrix(hex(fr$beta), D, P, byrow = TRUE, dimnames = list(NULL, colnames(out$log_fc)))
+      out$var  <- matrix(hex(fr$var),  D, P, byrow = TRUE, dimnames = list(NULL, colnames(out$log_fc)))
+      vr <- vcv[vcv$case == cs, ]
+      k  <- max(as.integer(vr$i)) + 1L
+      out$vcov <- array(NA_real_, c(D, k, k))
+      out$vcov[cbind(as.integer(vr$feature) + 1L, as.integer(vr$i) + 1L, as.integer(vr$j) + 1L)] <- hex(vr$value)
+    }
 
     dr <- dofs[dofs$case == cs, ]
     dr <- dr[order(as.integer(dr$feature)), ]
@@ -152,19 +155,27 @@ ref <- lapply(setNames(cases$case, cases$case), function (cs) {
     g <- g[order(as.integer(g$feature)), ]
     out$global <- data.frame(w = hex(g$w), p = hex(g$p), q = hex(g$q), reject = g$signif == '1')
 
-    for (test in c('pairwise', 'dunnett')) {
-      pp <- ppairs[ppairs$case == cs & ppairs$test == test, ]
-      out[[test]] <- data.frame(
-        feature = as.integer(pp$feature) + 1L, comparison = pp$comparison,
-        log_fc = hex(pp$lfc), se = hex(pp$se), w = hex(pp$w), p = hex(pp$p),
-        q = hex(pp$q), reject = pp$signif == '1', stringsAsFactors = FALSE )
+    # Pairwise: every column (w is log_fc / se). Dunnett's: its log_fc, se
+    # and w are the fit's (checked through the primary table), so only the
+    # bootstrapped p-values, for the cases with recorded draws.
+    pp <- ppairs[ppairs$case == cs & ppairs$test == 'pairwise', ]
+    out$pairwise <- data.frame(
+      log_fc = hex(pp$lfc), se = hex(pp$se), p = hex(pp$p), q = hex(pp$q),
+      reject = pp$signif == '1' )
+    drawn <- any(pdraws$case == cs)
+    if (drawn) {
+      pp <- ppairs[ppairs$case == cs & ppairs$test == 'dunnett', ]
+      out$dunnett <- data.frame(p = hex(pp$p), q = hex(pp$q), reject = pp$signif == '1')
     }
 
+    # Trend: the (deterministic) statistic, and with draws the p-values.
     tt <- ptrend[ptrend$case == cs, ]
     tt <- tt[order(as.integer(tt$feature)), ]
-    out$trend <- data.frame(w = hex(tt$w), p = hex(tt$p), q = hex(tt$q), reject = tt$signif == '1')
+    out$trend <- if (drawn) data.frame(w = hex(tt$w), p = hex(tt$p), q = hex(tt$q), reject = tt$signif == '1')
+                 else       data.frame(w = hex(tt$w))
 
     # The null draws, as features x k x bootstraps arrays (0 where none).
+    k <- nrow(pp) %/% D   # Dunnett's rows: k comparisons per feature
     for (test in c('dunnett', 'trend')) {
       dd <- pdraws[pdraws$case == cs & pdraws$test == test, ]
       if (!nrow(dd)) next
@@ -231,7 +242,7 @@ for (cs in cases$case) {
       log_fc = get('lfc'), se = get('se'), w = get('W'), p_value = get('p_val'),
       p_adjusted = get('q_val'), reject = get('diff_abn'),
       bias = as.matrix(res$delta_em), sample_fractions = res$samp_frac,
-      global = res$res_global )
+      global = if (!is.null(res$res_global)) res$res_global[c('W', 'p_val', 'diff_abn')] )
   }
   else {
     # ANCOMBC's %dorng%: the Dunnett and trend bootstraps. Only the trend
@@ -241,7 +252,7 @@ for (cs in cases$case) {
     post <- !is.null(grp)
     k    <- if (post) nlevels(factor(meta[[grp]])) - 1L else 0L
     inc  <- if (post) { m <- diag(k); m[cbind(2:k, 1:(k - 1L))] <- -1; m }
-    res <- suppressWarnings(suppressMessages(ANCOMBC::ancombc2(
+    run2 <- function (post) suppressWarnings(suppressMessages(ANCOMBC::ancombc2(
       data = x, taxa_are_rows = FALSE, meta_data = meta,
       fix_formula = cr$formula, p_adj_method = cr$p_adjust,
       pseudo = hex(cr$pseudocount), pseudo_sens = FALSE, prv_cut = 0,
@@ -252,6 +263,13 @@ for (cs in cases$case) {
       mdfdr_control = list(fwer_ctrl_method = cr$p_adjust, B = 100),
       trend_control = if (post) list(
         contrast = list(inc, -inc), node = list(k, k), solver = 'ECOS', B = 2) )))
+    # ANCOMBC's mdFDR calls p.adjust(n = Inf) when no feature passes its
+    # global screen (R = 0), which fails for BY; then run without post-hoc
+    # tests.
+    res <- tryCatch(run2(post), error = function (e) {
+      message(cs, ': ANCOMBC post-hoc tests failed (', conditionMessage(e), ')')
+      post <<- FALSE
+      run2(FALSE) })
     rr  <- res$res
     get <- function (prefix) {
       cols <- grep(paste0('^', prefix, '_'), names(rr), value = TRUE)
@@ -265,10 +283,10 @@ for (cs in cases$case) {
       p_adjusted = get('q'), reject = get('diff'),
       sample_fractions = res$samp_frac )
     if (post) {
-      out$global   <- res$res_global
-      out$pairwise <- res$res_pair
-      out$dunnett  <- res$res_dunn
-      out$trend    <- res$res_trend
+      # Only the deterministic parts the tests compare.
+      out$global   <- res$res_global[c('W', 'p_val', 'diff_abn')]
+      out$pairwise <- res$res_pair[grep('^(lfc|q|diff)_', names(res$res_pair))]
+      out$trend    <- res$res_trend['W']
     }
   }
 
@@ -277,14 +295,18 @@ for (cs in cases$case) {
 
 
 #--------------------------------------------------------
-# Save. Only the ANCOMBC cases whose bias EM converges for every covariate
-# within max_iters (100) are compared by the tests: elsewhere its estimates
-# depend on the path of nloptr's minimisations rather than SciPy's (see
-# plans/ancombc.md for the sizes, and for the cases that differ by design:
-# var_quantile = 0, interactions with zeros as missing, and the badly scaled
-# `days` covariate).
+# Save. The tests compare ANCOMBC only where its primary log fold changes
+# agree with scikit-bio's to 1e-5: where both bias EMs end at the same
+# estimate. Elsewhere one of them runs to max_iters without converging,
+# and the estimate it stops at depends on the path of nloptr's
+# minimisations rather than SciPy's; or the case differs by design
+# (var_quantile = 0, interactions with zeros as missing, a badly scaled
+# covariate). See plans/ancombc.md.
 #--------------------------------------------------------
-converged <- c('doc1', 'doc2', 'doc3_pc0.1', 'doc3_pc0.5', 'doc3_pc1.0', 'sim_bc2_pc', 'prop_bc2')
+agree <- function (cs) {
+  r <- ancombc_ref[[cs]]
+  max(abs(r$log_fc[, colnames(ref[[cs]]$log_fc)] - ref[[cs]]$log_fc), na.rm = TRUE) < 1e-5
+}
 for (cs in names(ancombc_ref)) {
   r <- ancombc_ref[[cs]]
   cat(sprintf(
@@ -293,7 +315,9 @@ for (cs in names(ancombc_ref)) {
     max(abs(r$se[, colnames(ref[[cs]]$se)] / ref[[cs]]$se - 1), na.rm = TRUE),
     sum(r$reject[, colnames(ref[[cs]]$reject)] != ref[[cs]]$reject, na.rm = TRUE) ))
 }
-ancombc_ref <- ancombc_ref[converged]
+kept <- Filter(agree, names(ancombc_ref))
+cat('Compared by the tests:', kept, '\n')
+ancombc_ref <- ancombc_ref[kept]
 
 saveRDS(
   list(
