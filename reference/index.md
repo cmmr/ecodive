@@ -191,6 +191,8 @@ take the count table.
   Aitchison PCA (RPCA)
 - [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) : Fit
   Variables or Taxa onto an Ordination
+- [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) :
+  Best Subset of Environmental Variables (BIOENV)
 - [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
   : Procrustes Rotation of One Ordination onto Another
 - [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
