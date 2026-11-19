@@ -86,7 +86,7 @@
 
 - Every function that returns a distance matrix,
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
-  and its 37 metric functions,
+  and its 38 metric functions,
   [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
   [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
   [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md), takes
@@ -625,6 +625,28 @@
   Results are identical for any number of `cpus`.
   `count_ord(counts, 'lda', groups)` runs it too.
 
+- Ordinations of many axes are faster on several threads. The block
+  Lanczos solver behind
+  [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
+  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+  [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md),
+  [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md),
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
+  [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) and
+  [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md)’s
+  spectral start now splits its own steps on the basis (products with
+  small matrices, dot products and, for more than four axes, block
+  Gram-Schmidt) among `cpus`, each as far as its work is worth it, as
+  well as the products with the data. On 4 threads,
+  [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) of 50
+  axes takes 1.4 s instead of 2.5 for 1,000 samples and 15 s instead of
+  27 for 5,000, and
+  [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) of 40
+  axes for 2,000 samples 3.3 s instead of 5.6. Results stay identical
+  for any number of `cpus`; for up to four axes they are unchanged, and
+  for more they differ from before only by rounding.
+
 - New [`capda()`](https://cmmr.github.io/ecodive/reference/capda.md)
   runs Anderson & Willis’s (2003) discriminant canonical analysis of
   principal coordinates (CAP, as in PRIMER-PERMANOVA+):
@@ -1057,6 +1079,30 @@
   [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
   (`count_ord(counts, "rpca_phylo", tree = tree)`), and its results are
   identical for any number of `cpus`.
+
+- New [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md)
+  computes the phylogenetic isometric log-ratio transform (PhILR;
+  Silverman et al. 2017): one balance per internal node of a tree,
+  between its two child clades, with philr’s part weights (`'uniform'`,
+  `'gm.counts'`, `'enorm'`, `'anorm'` and their products with
+  `'gm.counts'`, or a vector) and ILR weights (`'uniform'`, `'blw'`,
+  `'blw.sqrt'`, `'mean.descendants'`, or a vector). Written from the
+  paper and checked against philr 1.28.0’s outputs, it gives philr’s
+  coordinates, in philr’s orientation and order, to within 1e-14 for
+  every weighting. Tips that aren’t features are pruned from the tree,
+  and polytomies (and an unrooted tree’s root) are resolved with
+  zero-length branches as `ape::multi2di(random = FALSE)` does, with a
+  warning; the tree used is returned. Each sample costs O(D), summing
+  over clades from the tips up, with no basis matrix: 2,000 samples by
+  5,000 taxa (sparse) take 0.2 seconds, where philr takes 160. Results
+  are identical for any number of `cpus`. New
+  [`philr_distance()`](https://cmmr.github.io/ecodive/reference/philr_distance.md),
+  a phylogenetic beta metric in
+  [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
+  (`beta_div(x, "philr", tree = tree)`), is the Euclidean distance
+  between PhILR coordinates with the paper’s weights
+  (`'enorm.x.gm.counts'` and `'blw.sqrt'`); with uniform weights, PhILR
+  distances are Aitchison distances.
 
 - New
   [`blas_threads()`](https://cmmr.github.io/ecodive/reference/blas_threads.md)

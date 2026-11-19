@@ -108,12 +108,12 @@ beta_div(
   input): its `dist` record (see
   [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
   gives each one's position in the input as `order`, so that
-  `meta[attr(d, "dist")$order, ]` lines metadata up with them. Tests
-  such as
-  [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
-  match named samples to `data` by name, but a vector of groups without
-  names is matched by position, so reorder it too. The record's `clust`
-  records `clust` (`FALSE` as `"none"`), which
+  `meta[attr(d, "dist")$order, ]` lines metadata up with them. ecodive's
+  ordinations and tests put the samples back in their input order before
+  analysing them, so give them metadata in its usual order. Other
+  packages see the reordered matrix: give them metadata reordered by
+  `order`, or matched by name. The record's `clust` records `clust`
+  (`FALSE` as `"none"`), which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -182,6 +182,7 @@ and `$order`. Ordinations and tests of the matrix keep the record.
 | `motyka` | Motyka dissimilarity |
 | `normalized_unifrac` | Normalized Weighted UniFrac |
 | `ochiai` | Otsuka-Ochiai dissimilarity |
+| `philr_distance` | PhILR distance |
 | `psym_chisq` | Probabilistic Symmetric Chi-Squared distance |
 | `soergel` | Soergel distance |
 | `sorensen` | Dice-Sorensen dissimilarity |

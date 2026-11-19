@@ -84,7 +84,7 @@
 <ul>
 <li><p><strong>High Performance:</strong> <code>ecodive</code> is written in C and parallelized using pthreads, making it dramatically faster than other R packages. <a href="https://cmmr.github.io/ecodive/articles/benchmark.html">Benchmarks</a> show it can be up to <strong>14,000x faster</strong> and use up to <strong>200,000x less memory</strong>.</p></li>
 <li><p><strong>Zero Dependencies:</strong> The package has no external R dependencies, making it lightweight, stable, and easy to install. This also makes it an ideal and secure backend for other R packages.</p></li>
-<li><p><strong>Comprehensive Metrics:</strong> It implements 14 alpha and 37 beta diversity metrics, including classic and phylogenetic-aware methods like <strong>Faith’s PD</strong> and the <strong>complete UniFrac family</strong>.</p></li>
+<li><p><strong>Comprehensive Metrics:</strong> It implements 14 alpha and 38 beta diversity metrics, including classic and phylogenetic-aware methods like <strong>Faith’s PD</strong>, the <strong>complete UniFrac family</strong> and the compositional <strong>PhILR distance</strong>.</p></li>
 <li><p><strong>Ordination and Statistics:</strong> Ten ordination methods (PCoA, NMDS, UMAP, t-SNE, db-RDA, robust Aitchison PCA, and more), biplots, and five permutation tests (PERMANOVA, PERMDISP, ANOSIM, MRPP, and Mantel), so a whole analysis needs no other package.</p></li>
 <li><p><strong>Trusted Results:</strong> Every method is tested against the established package it replaces, such as <code>vegan</code>, <code>ape</code>, <code>scikit-bio</code>, <code>scikit-learn</code>, <code>uwot</code>, and <code>gemelli</code>. Results are identical for any number of threads, and random methods take a <code>seed</code>.</p></li>
 <li><p><strong>Ease of Use:</strong> The API is simple and integrates seamlessly with popular bioinformatics packages like <a href="http://joey711.github.io/phyloseq/" class="external-link"><code>phyloseq</code></a> and <a href="https://cmmr.github.io/rbiom/" class="external-link"><code>rbiom</code></a>.</p></li>
@@ -332,11 +332,11 @@
 <span><span class="co">#&gt; [16] "jaccard"                   "jensen"                    "jsd"                      </span></span>
 <span><span class="co">#&gt; [19] "lorentzian"                "manhattan"                 "matusita"                 </span></span>
 <span><span class="co">#&gt; [22] "minkowski"                 "morisita"                  "motyka"                   </span></span>
-<span><span class="co">#&gt; [25] "normalized_unifrac"        "ochiai"                    "psym_chisq"               </span></span>
-<span><span class="co">#&gt; [28] "robust_aitchison"          "soergel"                   "squared_chisq"            </span></span>
-<span><span class="co">#&gt; [31] "squared_chord"             "squared_euclidean"         "topsoe"                   </span></span>
-<span><span class="co">#&gt; [34] "unweighted_unifrac"        "variance_adjusted_unifrac" "wave_hedges"              </span></span>
-<span><span class="co">#&gt; [37] "weighted_unifrac" </span></span>
+<span><span class="co">#&gt; [25] "normalized_unifrac"        "ochiai"                    "philr_distance"           </span></span>
+<span><span class="co">#&gt; [28] "psym_chisq"                "robust_aitchison"          "soergel"                  </span></span>
+<span><span class="co">#&gt; [31] "squared_chisq"             "squared_chord"             "squared_euclidean"        </span></span>
+<span><span class="co">#&gt; [34] "topsoe"                    "unweighted_unifrac"        "variance_adjusted_unifrac"</span></span>
+<span><span class="co">#&gt; [37] "wave_hedges"               "weighted_unifrac"         </span></span>
 <span></span>
 <span><span class="co"># Ordination methods that take distances</span></span>
 <span><span class="fu"><a href="reference/dist_ords.html">list_dist_ords</a></span><span class="op">(</span><span class="st">'id'</span><span class="op">)</span></span>

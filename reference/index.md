@@ -138,7 +138,8 @@ Distance measures using binary (presence/absence) data.
 
 ### Phylogenetic metrics
 
-Distance measures based on phylogenetic branch lengths (UniFrac family).
+Distance measures based on phylogenetic branch lengths (the UniFrac
+family, and the compositional PhILR distance).
 
 - [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md)
   : Unweighted UniFrac
@@ -150,6 +151,8 @@ Distance measures based on phylogenetic branch lengths (UniFrac family).
   : Generalized UniFrac (GUniFrac)
 - [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.md)
   : Variance-Adjusted Weighted UniFrac
+- [`philr_distance()`](https://cmmr.github.io/ecodive/reference/philr_distance.md)
+  : PhILR Distance
 
 ## Compositional Data
 
@@ -178,6 +181,8 @@ distances, use aitchison().
   Log-Ratio Transform
 - [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) : Isometric
   Log-Ratio Transform
+- [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md) :
+  Phylogenetic Isometric Log-Ratio Transform (PhILR)
 
 ### Log ratios
 

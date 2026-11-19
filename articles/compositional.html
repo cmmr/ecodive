@@ -145,7 +145,7 @@ today.</p>
 <code>normalize(norm = 'clr' / 'rclr')</code>,
 <code><a href="../reference/alr.html">alr()</a></code>, <code><a href="../reference/ilr.html">ilr()</a></code>
 </td>
-<td align="left"><code>philr()</code></td>
+<td align="left"><code><a href="../reference/philr.html">philr()</a></code></td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="#beta-diversity">Beta diversity</a></td>
@@ -156,7 +156,7 @@ today.</p>
 <code><a href="../reference/rpca_phylo.html">rpca_phylo()</a></code>, <code><a href="../reference/pca.html">pca()</a></code>, <code><a href="../reference/permanova.html">permanova()</a></code>,
 <code><a href="../reference/permdisp.html">permdisp()</a></code>
 </td>
-<td align="left"><code>philr_distance()</code></td>
+<td align="left"><code><a href="../reference/philr_distance.html">philr_distance()</a></code></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="#log-ratios">Log ratios</a></td>
@@ -445,7 +445,7 @@ mean</td>
 <tr class="odd">
 <td align="left">phylogenetic ilr (PhILR)</td>
 <td align="left">
-<code>philr()</code> (<em>planned</em>)</td>
+<code><a href="../reference/philr.html">philr()</a></code> (<em>planned</em>)</td>
 <td align="left">one balance per internal node of a phylogeny</td>
 <td align="left"><strong><a href="https://doi.org/10.7554/eLife.21887" class="external-link">Silverman et
 al. 2017</a></strong></td>
@@ -476,7 +476,7 @@ where zeros and the pseudocount damp it). An alr reference should be a
 taxon that is common and stable, which is hard to know in advance.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">philr</span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>,</span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/philr.html">philr</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>           part_weights <span class="op">=</span> <span class="st">'enorm.x.gm.counts'</span>, ilr_weights <span class="op">=</span> <span class="st">'blw.sqrt'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Available now, in philr (Bioconductor):</span></span>
@@ -611,7 +611,7 @@ the kept tips), with its internal nodes named as in the loadings.</p>
 coordinates, with the weights of Silverman et al. 2017) is planned:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">dm_philr</span> <span class="op">&lt;-</span> <span class="fu">philr_distance</span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span><span class="op">)</span>   <span class="co"># also beta_div(counts, 'philr', tree = tree)</span></span>
+<span><span class="va">dm_philr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/philr_distance.html">philr_distance</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span><span class="op">)</span>   <span class="co"># also beta_div(counts, 'philr', tree = tree)</span></span>
 <span></span>
 <span><span class="co"># Available now: philr (Bioconductor), then dist() on its coordinates.</span></span></code></pre></div>
 <p><strong>Used in practice.</strong></p>

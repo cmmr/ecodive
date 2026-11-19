@@ -114,9 +114,11 @@ samples</strong> of the result, with their labels (samples without names
 are labelled with their positions in the input): its <code>dist</code> record
 (see <a href="ecodive_steps.html">ecodive_steps</a>) gives each one's position in the input as
 <code>order</code>, so that <code>meta[attr(d, "dist")$order, ]</code> lines metadata up
-with them. Tests such as <code><a href="permanova.html">permanova()</a></code> match named samples to
-<code>data</code> by name, but a vector of groups without names is matched by
-position, so reorder it too. The record's <code>clust</code> records <code>clust</code>
+with them. ecodive's ordinations and tests put the samples back in
+their input order before analysing them, so give them metadata in
+its usual order. Other packages see the reordered matrix: give
+them metadata reordered by <code>order</code>, or matched by name. The
+record's <code>clust</code> records <code>clust</code>
 (<code>FALSE</code> as <code>"none"</code>), which <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
 for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
 order. <code>clust</code> needs every distance, so it cannot be used with

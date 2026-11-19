@@ -21,9 +21,10 @@ especially with large datasets. `ecodive` addresses this by providing:
   making it lightweight, stable, and easy to install. This also makes it
   an ideal and secure backend for other R packages.
 
-- **Comprehensive Metrics:** It implements 14 alpha and 37 beta
+- **Comprehensive Metrics:** It implements 14 alpha and 38 beta
   diversity metrics, including classic and phylogenetic-aware methods
-  like **Faith’s PD** and the **complete UniFrac family**.
+  like **Faith’s PD**, the **complete UniFrac family** and the
+  compositional **PhILR distance**.
 
 - **Ordination and Statistics:** Ten ordination methods (PCoA, NMDS,
   UMAP, t-SNE, db-RDA, robust Aitchison PCA, and more), biplots, and
@@ -253,11 +254,11 @@ list_metrics('beta', 'id')
 #> [16] "jaccard"                   "jensen"                    "jsd"                      
 #> [19] "lorentzian"                "manhattan"                 "matusita"                 
 #> [22] "minkowski"                 "morisita"                  "motyka"                   
-#> [25] "normalized_unifrac"        "ochiai"                    "psym_chisq"               
-#> [28] "robust_aitchison"          "soergel"                   "squared_chisq"            
-#> [31] "squared_chord"             "squared_euclidean"         "topsoe"                   
-#> [34] "unweighted_unifrac"        "variance_adjusted_unifrac" "wave_hedges"              
-#> [37] "weighted_unifrac" 
+#> [25] "normalized_unifrac"        "ochiai"                    "philr_distance"           
+#> [28] "psym_chisq"                "robust_aitchison"          "soergel"                  
+#> [31] "squared_chisq"             "squared_chord"             "squared_euclidean"        
+#> [34] "topsoe"                    "unweighted_unifrac"        "variance_adjusted_unifrac"
+#> [37] "wave_hedges"               "weighted_unifrac"         
 
 # Ordination methods that take distances
 list_dist_ords('id')
