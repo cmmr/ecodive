@@ -267,7 +267,9 @@ SEXP C_proportionality(
   SEXP sexp_size  = PROTECT(ScalarInteger(K));
   SEXP sexp_diag  = PROTECT(ScalarLogical(0));
   SEXP sexp_upper = PROTECT(ScalarLogical(0));
-  SEXP sexp_class = PROTECT(mkString("dist"));
+  SEXP sexp_class = PROTECT(allocVector(STRSXP, 2));
+  SET_STRING_ELT(sexp_class, 0, mkChar("ecodive_dist"));
+  SET_STRING_ELT(sexp_class, 1, mkChar("dist"));
 
   setAttrib(result, install("Size"),   sexp_size);
   setAttrib(result, install("Labels"), sexp_labels);

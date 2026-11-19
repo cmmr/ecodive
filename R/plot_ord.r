@@ -344,13 +344,18 @@ ord_subtitle <- function (x) {
 # level, if any), or NULL; values = numeric values, for a gradient, or NULL;
 # numeric; title = the legend's title, or NULL).
 ord_plot_groups <- function (x, groups, data) {
+  plot_groups(nrow(x), rownames(x), groups, data, attr(x, 'groups', exact = TRUE))
+}
 
-  n      <- nrow(x)
-  labels <- rownames(x)
-  title  <- NULL
+
+# The groups of `n` samples named `labels` (or NULL), from `groups` and
+# `data` (by per_sample()'s rule), or else `stored`. As ord_plot_groups().
+plot_groups <- function (n, labels, groups, data, stored = NULL) {
+
+  title <- NULL
 
   if (is.null(groups)) {
-    v <- attr(x, 'groups', exact = TRUE)
+    v <- stored
     if (is.null(v)) return (list(f = NULL, values = NULL, numeric = FALSE, title = NULL))
   }
   else {

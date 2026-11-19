@@ -302,6 +302,107 @@
 
 
 
+  # Distance matrices. ====
+
+  # ecodive's distances have class c('ecodive_dist', 'dist'), and every
+  # function for dist objects works on them.
+  rho <- rho_p(ecodive::ex_counts + 1)
+  for (d in list(
+      dm, bray(ecodive::ex_counts), beta_div(ecodive::ex_counts, 'jaccard'),
+      unweighted_unifrac(ecodive::ex_counts, tree = ecodive::ex_tree),
+      weighted_unifrac(ecodive::ex_counts, tree = ecodive::ex_tree),
+      vlr(ecodive::ex_counts + 1), rho, phi_s(ecodive::ex_counts + 1),
+      attr(rpca(cnt, distances = TRUE, cpus = cpus), 'dm') )) {
+    expect_identical(class(d), c('ecodive_dist', 'dist'))
+    expect_identical(dim(as.matrix(d)), rep(attr(d, 'Size'), 2))
+    expect_true(invisibly(d))
+  }
+  m  <- as.matrix(bray(ecodive::ex_counts))
+  d0 <- stats::as.dist(m)
+  expect_equal(as.vector(bray(ecodive::ex_counts)), as.vector(d0))
+  expect_identical(class(stats::as.dist(bray(ecodive::ex_counts))), c('ecodive_dist', 'dist'))
+  expect_true(any(grepl('Saliva', capture.output(print(bray(ecodive::ex_counts))))))
+
+  expect_true(invisibly(dm, 'Species', iris))
+  expect_true(invisibly(dm, iris$Sepal.Length, key = FALSE, main = 'x'))
+  expect_true(invisibly(dm, 'Species', iris, col = grDevices::gray.colors(10)))
+  expect_true(invisibly(dm, useRaster = FALSE))
+
+  # Titles from the method, if any.
+  expect_identical(dist_plot_name(dm)$title, 'Distances')
+  expect_identical(dist_plot_name(rho)$title, 'Proportionality (rho)')
+  expect_identical(dist_plot_name(rho)$unit, 'features')
+
+  # The heatmap restores the margins it widened.
+  mai <- graphics::par('mai')
+  plot(dm, 'Species', iris)
+  expect_equal(graphics::par('mai'), mai)
+
+  expect_error(plot(dm, key = NA), '`key` must be TRUE or FALSE')
+  expect_error(plot(dm, iris$Species[1:10]), 'has 10 values, but `x` has 150 samples')
+  one <- structure(numeric(0), Size = 1L, class = c('ecodive_dist', 'dist'))
+  expect_error(plot(one), 'at least 2 samples')
+
+
+
+  # ancombc() and its post-hoc tests. ====
+
+  ax <- rbind(
+    c(1, 10, 16, 0, 0, 12, 0, 7), c(0, 10, 45, 2, 1, 25, 1, 9),
+    c(4,  8, 22, 1, 5, 14, 1, 5), c(1, 11, 22, 1, 4, 14, 1, 3),
+    c(4,  7, 36, 0, 0, 19, 0, 9), c(2, 30, 26, 0, 0, 12, 1, 0),
+    c(1, 36, 10, 1, 5, 15, 2, 9), c(1, 25, 11, 2, 2,  8, 0, 5),
+    c(1, 36, 23, 0, 2, 11, 1, 2), c(3, 60, 33, 3, 4, 14, 1, 6),
+    c(3, 57, 30, 3, 1,  3, 0, 4), c(0, 65, 23, 0, 2,  2, 0, 8),
+    c(2, 46, 19, 0, 1,  2, 0, 1), c(0, 41, 26, 0, 2,  0, 0, 3),
+    c(3, 46, 20, 0, 0,  3, 0, 0) )
+  dimnames(ax) <- list(paste0('S', 1:15), paste0('F', 1:8))
+  am <- data.frame(
+    status = rep(c('mild', 'moderate', 'severe'), each = 5),
+    age    = c(25, 48, 23, 35, 52, 51, 18, 29, 40, 29, 44, 39, 26, 37, 46),
+    row.names = rownames(ax) )
+  fit  <- ancombc2(ax, ~ status + age, am, groups = 'status', cpus = cpus)
+  fit1 <- ancombc(ax + 1, ~ status + age, am, cpus = cpus)
+
+  # Volcano plots, of the first covariate after the intercept by default.
+  expect_true(invisibly(fit))
+  expect_true(invisibly(fit1, 'age', labels = 0, main = 'x'))
+  expect_true(invisibly(fit, '(Intercept)'))
+  expect_identical(ancombc_plot_name(fit), 'ANCOM-BC2')
+  expect_identical(ancombc_plot_name(fit1), 'ANCOM-BC')
+  expect_identical(ancombc_plot_groups(fit), 'status')
+  expect_identical(ancombc_plot_groups(fit1), 'the groups')
+  expect_error(plot(fit, 'nope'), '`covariate` must be one of')
+  expect_error(plot(fit, c('age', 'statussevere')), '`covariate` must be one of')
+
+  # Heatmaps of the comparisons; dot charts of the global and trend tests.
+  ap <- ancombc_pairwise(fit, cpus = cpus)
+  ad <- ancombc_dunnett(fit, n_bootstraps = 20L, cpus = cpus)
+  ag <- ancombc_global(fit, cpus = cpus)
+  at <- ancombc_trend(fit, n_bootstraps = 20L, cpus = cpus)
+  for (r in list(ap, ad, ag, at)) {
+    expect_true(invisibly(r), info = class(r)[[1]])
+    expect_true(invisibly(r, n_features = 3, main = 'x', sub = 'y'), info = class(r)[[1]])
+    expect_error(plot(r, n_features = 0), '`n_features` must be at least 1', info = class(r)[[1]])
+  }
+  expect_true(invisibly(ap, digits = 0, col = grDevices::gray.colors(5)))
+  expect_error(plot(ap, digits = -1), '`digits` must be a number')
+
+  # The heatmap restores the margins it widened.
+  mai <- graphics::par('mai')
+  plot(ap)
+  expect_equal(graphics::par('mai'), mai)
+
+  # Features with no estimate, and a feature that's all NA, are drawn blank.
+  ap_na <- ap
+  ap_na$log_fc[ap_na$feature == 'F1'] <- NaN
+  ap_na$p_adjusted[ap_na$feature == 'F1'] <- NA
+  expect_silent(plot(ap_na))
+  ap_na$log_fc <- NaN
+  expect_silent(plot(ap_na))
+
+
+
   # bioenv(), forward_select(), varpart(). ====
 
   be <- bioenv(dm, iris[, 1:4], cpus = cpus)

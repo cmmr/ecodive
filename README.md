@@ -44,7 +44,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Comparing ordinations |                 | `procrustes()`, `procrustes_test()`                                                      |
 | Model building        |                 | `varpart()`, `forward_select()`, `bioenv()`                                              |
 | Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`        |
-| Plotting              |                 | `plot()` of ordinations, tests, `envfit()`, `simper()`, `varpart()`, and the other results |
+| Plotting              |                 | `plot()` of distance matrices, ordinations, tests, `envfit()`, `varpart()`, and the other results |
 | Data preparation      |                 | `rarefy()`, `normalize()`, `read_tree()`                                                 |
 
 Each wrapper runs its functions by name, such as `beta_div(counts, 'bray')`

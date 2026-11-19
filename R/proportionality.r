@@ -30,7 +30,9 @@
 #'        nothing, and is an error when `counts` has zeros. See **Zeros**.
 #'
 #' @return A `dist` object **over the features** (the packed lower triangle,
-#'   as [beta_div()] returns over samples), labelled with the feature names.
+#'   as [beta_div()] returns over samples), labelled with the feature names,
+#'   of class `c("ecodive_dist", "dist")`, so that `plot()` draws it as a
+#'   heatmap (see [plot.ecodive_dist()]).
 #'   Attributes, besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`:
 #'
 #'   * `method`: `'vlr'`.

@@ -232,22 +232,37 @@ plot.ecodive_dirmult_ttest <- function (x, labels = 10, ...) {
 
   labels <- plot_count(labels, 'labels')
 
-  ct    <- attr(x, 'contrast', exact = TRUE)
-  n     <- attr(x, 'n', exact = TRUE)
-  alpha <- attr(x, 'alpha', exact = TRUE)
-  ref   <- if (is.na(ct[[2]])) 'all others' else ct[[2]]
+  ct  <- attr(x, 'contrast', exact = TRUE)
+  n   <- attr(x, 'n', exact = TRUE)
+  ref <- if (is.na(ct[[2]])) 'all others' else ct[[2]]
 
-  y   <- -log10(pmax(x$p_adjusted, .Machine$double.xmin))
-  rej <- x$reject %in% TRUE
+  plot_volcano(
+    x$log2_fc, x$p_adjusted, x$reject, x$feature, attr(x, 'alpha', exact = TRUE),
+    labels, list(...),
+    main = 'Dirichlet-multinomial t-test',
+    xlab = sprintf('log2 fold change, %s (n = %d) / %s (n = %d)', ct[[1]], n[[1]], ref, n[[2]]) )
+
+  invisible(x)
+}
+
+
+
+# A volcano plot: log fold changes `lfc` against -log10 of the adjusted
+# p-values `p`, with the features that `reject` highlighted, the `labels`
+# most significant of them named, and dashed lines at `alpha` and 0. `args`
+# are the user's arguments for graphics::plot.default(). The subtitle counts
+# the features rejected.
+plot_volcano <- function (lfc, p, reject, feature, alpha, labels, args, main, xlab) {
+
+  y   <- -log10(pmax(p, .Machine$double.xmin))
+  rej <- reject %in% TRUE
 
   plot_do(
-    graphics::plot.default, c(list(x$log2_fc, y), list(...)),
+    graphics::plot.default, c(list(lfc, y), args),
     list(
       col  = ifelse(rej, PLOT_HIGHLIGHT, PLOT_MUTED), pch = 16, las = 1,
-      ylim = range(0, y, finite = TRUE),
-      main = 'Dirichlet-multinomial t-test',
-      sub  = sprintf('%d of %d features differentially abundant', sum(rej), nrow(x)),
-      xlab = sprintf('log2 fold change, %s (n = %d) / %s (n = %d)', ct[[1]], n[[1]], ref, n[[2]]),
+      ylim = range(0, y, finite = TRUE), main = main, xlab = xlab,
+      sub  = sprintf('%d of %d features differentially abundant', sum(rej), length(rej)),
       ylab = expression(-log[10] ~ (adjusted ~ italic(p))) ))
 
   graphics::abline(v = 0, lty = 3, col = 'grey70')
@@ -256,11 +271,11 @@ plot.ecodive_dirmult_ttest <- function (x, labels = 10, ...) {
 
   if (labels > 0 && any(rej)) {
     i <- which(rej)
-    i <- utils::head(i[order(x$p_adjusted[i])], labels)
-    graphics::text(x$log2_fc[i], y[i], x$feature[i], pos = 3, cex = 0.75, xpd = NA)
+    i <- utils::head(i[order(p[i])], labels)
+    graphics::text(lfc[i], y[i], feature[i], pos = 3, cex = 0.75, xpd = NA)
   }
 
-  invisible(x)
+  invisible()
 }
 
 
@@ -300,35 +315,54 @@ plot.ecodive_dirmult_ttest <- function (x, labels = 10, ...) {
 #'     plot(res)
 plot.ecodive_ancom <- function (x, n_features = 30, ...) {
 
-  n_features <- plot_count(n_features, 'n_features')
-  args       <- list(...)
-  if (n_features < 1)
-    stop('`n_features` must be at least 1.', call. = FALSE)
-
   D   <- nrow(x)
   cut <- attr(x, 'cutoff', exact = TRUE)
-  ord <- utils::head(order(x$W, decreasing = TRUE), n_features)
-  idx <- rev(ord)  # dotchart() draws from the bottom up.
-  rej <- x$reject[idx] %in% TRUE
 
-  sub <- sprintf(
-    '%d of %d features differentially abundant%s', sum(x$reject %in% TRUE), D,
-    if (length(ord) < D) sprintf('; top %d shown', length(ord)) else '' )
-
-  plot_do(
-    graphics::dotchart, c(list(x$W[idx]), plot_dot_args(args)),
-    list(
-      labels = x$feature[idx], pch = 19,
-      color  = ifelse(rej, PLOT_HIGHLIGHT, PLOT_MUTED),
-      xlim   = c(0, max(D - 1, 1)),
-      main   = sprintf('ANCOM: %s', paste(attr(x, 'groups', exact = TRUE), collapse = ' vs ')),
-      xlab   = sprintf('W (of %d log ratios)', D - 1) ))
-
-  graphics::title(sub = plot_arg(args, 'sub', sub))
-  if (length(cut) && !is.na(cut))
-    graphics::abline(v = cut * D, lty = 2, col = 'grey40')
+  plot_ranked(
+    x$W, x$feature, x$reject, n_features, list(...),
+    main = sprintf('ANCOM: %s', paste(attr(x, 'groups', exact = TRUE), collapse = ' vs ')),
+    xlab = sprintf('W (of %d log ratios)', D - 1),
+    xlim = c(0, max(D - 1, 1)),
+    line = if (length(cut) && !is.na(cut)) cut * D )
 
   invisible(x)
+}
+
+
+
+# A dot chart of the `n` features with the largest `stat` (largest at the
+# top), labelled with `labels`, those that `reject` highlighted, and a
+# dashed line at `line` (if not NULL). `args` are the user's arguments for
+# graphics::dotchart(). The subtitle counts the features rejected.
+plot_ranked <- function (stat, labels, reject, n, args, main, xlab, xlim = NULL, line = NULL) {
+
+  n <- plot_count(n, 'n_features')
+  if (n < 1)
+    stop('`n_features` must be at least 1.', call. = FALSE)
+
+  D   <- length(stat)
+  ord <- utils::head(order(stat, decreasing = TRUE), n)
+  idx <- rev(ord)  # dotchart() draws from the bottom up.
+  rej <- reject[idx] %in% TRUE
+
+  sub <- sprintf(
+    '%d of %d features differentially abundant%s', sum(reject %in% TRUE), D,
+    if (length(ord) < D) sprintf('; top %d shown', length(ord)) else '' )
+
+  if (is.null(xlim)) xlim <- range(0, stat[idx], finite = TRUE)
+
+  plot_do(
+    graphics::dotchart, c(list(stat[idx]), plot_dot_args(args)),
+    list(
+      labels = labels[idx], pch = 19,
+      color  = ifelse(rej, PLOT_HIGHLIGHT, PLOT_MUTED),
+      xlim   = xlim, main = main, xlab = xlab ))
+
+  graphics::title(sub = plot_arg(args, 'sub', sub))
+  if (length(line) && is.finite(line))
+    graphics::abline(v = line, lty = 2, col = 'grey40')
+
+  invisible()
 }
 
 

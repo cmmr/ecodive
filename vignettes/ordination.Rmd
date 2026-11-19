@@ -51,6 +51,15 @@ head(iris)
 dm <- bray(iris[, 1:4])
 ```
 
+`plot()` draws the distances as a heatmap. Sorted by species, the three
+species show as blocks of short distances along the diagonal, and setosa
+stands far from the other two: the structure that an ordination lays out
+on a few axes.
+
+```{r}
+plot(dm, 'Species', iris)
+```
+
 
 ## Choosing a method
 

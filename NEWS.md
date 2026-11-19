@@ -30,6 +30,19 @@
     chart of W, `varpart()` a Venn diagram of the fractions (two to four
     sets), `forward_select()` the adjusted R-squared at each step, and
     `bioenv()` the best correlation for each number of variables.
+  * Distance matrices give a heatmap, in the samples' order or sorted by
+    `groups`, with a colour key: those of `beta_div()` and every metric
+    function, of `vlr()`, `rho_p()` and `phi_s()` (over features), and
+    `rpca()`'s `dm`. These now have class `c("ecodive_dist", "dist")`, so
+    that `plot()` knows them; base R has no `plot()` method for `dist`
+    objects, and every function for `dist` objects works on them as
+    before. Code that checks `identical(class(d), "dist")` or
+    `class(d) == "dist"` should use `inherits(d, "dist")` instead.
+  * `ancombc()` and `ancombc2()` give a volcano plot of one covariate's log
+    fold changes, `ancombc_pairwise()` and `ancombc_dunnett()` a heatmap of
+    the log fold change of each feature in each comparison, and
+    `ancombc_global()` and `ancombc_trend()` a dot chart of their
+    statistics.
 
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It

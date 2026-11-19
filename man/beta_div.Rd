@@ -69,7 +69,12 @@ distance matrix to calculate. See examples.}
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
-A numeric vector.
+A distance matrix: a \code{dist} object with one distance per pair of
+samples (the packed lower triangle), labelled with the sample names, as
+\code{\link[stats:dist]{stats::dist()}} returns. Its class is \code{c("ecodive_dist", "dist")}, so
+that \code{plot()} draws it as a heatmap (see \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}); every
+function for \code{dist} objects, such as \code{as.matrix()}, works on it as
+before. Each metric's own function, such as \code{\link[=bray]{bray()}}, returns the same.
 }
 \description{
 Beta Diversity Wrapper Function
@@ -172,7 +177,11 @@ See \code{\link{aitchison}} for references.
     ex_counts
     
     # Bray-Curtis distances
-    beta_div(ex_counts, 'bray')
+    dm <- beta_div(ex_counts, 'bray')
+    dm
+
+    # As a heatmap.
+    plot(dm)
     
     # Generalized UniFrac distances
     beta_div(ex_counts, 'GUniFrac', tree = ex_tree)

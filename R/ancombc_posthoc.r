@@ -167,9 +167,14 @@
 #'       row.names = rownames(x) )
 #'     fit <- ancombc2(x, ~ status + age, meta, groups = 'status')
 #'
-#'     ancombc_global(fit)
+#'     res <- ancombc_global(fit)
+#'     res
+#'     plot(res)
+#'
 #'     res <- ancombc_pairwise(fit)
 #'     res[res$reject, ]
+#'     plot(res)
+#'
 #'     ancombc_dunnett(fit)
 #'     ancombc_trend(fit, n_bootstraps = 1000)
 #'
