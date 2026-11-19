@@ -70,8 +70,7 @@ dominates: their value is \code{Inf} or merely very large.
 Lovell et al.'s (2015) original \eqn{\phi = \mathrm{vlr}_{ij} /
 \mathrm{var}(z_i)} is not symmetric (\eqn{\phi_{ij} \ne \phi_{ji}}), so
 it can't be a \code{dist}; Quinn et al. (2017) replaced it with \eqn{\phi_s}.
-The values agree with propr's \code{propr(counts, metric = "phs")} given the
-same zero handling.
+This is the measure that propr computes with \code{propr(counts, metric = "phs")} (see \strong{Zeros} for its zero handling).
 }
 \section{Zeros}{
 

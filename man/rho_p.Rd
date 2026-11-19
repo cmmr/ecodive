@@ -74,8 +74,7 @@ where \eqn{\mathrm{var}(z_i - z_j)} is \code{\link[=vlr]{vlr()}}. It lies in \eq
 A pair of features that are both constant relative to the reference has
 no defined \eqn{\rho_p} (\code{NaN}).
 
-The values agree with propr's \code{propr(counts, metric = "rho")} given the
-same zero handling (see \strong{Zeros}). propr also estimates false discovery
+This is the coefficient that propr computes with \code{propr(counts, metric = "rho")} (see \strong{Zeros} for its zero handling). propr also estimates false discovery
 rates by permutation (\code{updateCutoffs()}), and offers \code{ivar = "iqlr"}, a
 clr over the features of mid-range variance; neither is offered here.
 }

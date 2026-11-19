@@ -23,7 +23,7 @@ Authors@R: c(
     person(
       "scikit-bio development team",
       role    = c("ctb", "cph"),
-      comment = "PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, and the variance of log ratios, from scikit-bio"),
+      comment = "PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, and ANCOM, from scikit-bio"),
     person(
       "NumPy Developers",
       role    = "cph",

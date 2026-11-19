@@ -87,6 +87,14 @@
   z <- rho_p(counts, denominator = 'F1', cpus = cpus)
   expect_true(attr(z, 'Size') == 11L && all(is.finite(z)) && all(abs(z) <= 1))
 
+  # Differential abundance.
+  z <- ancom(counts, 'grp', meta, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_ancom') && nrow(z) == 12L)
+  expect_identical(z$feature, colnames(counts))
+  expect_true(is.integer(z$W) && all(z$W >= 0L & z$W <= 11L) && is.logical(z$reject))
+  z <- ancom(counts, meta$grp, sig_test = 'kruskal', p_adjust = 'BH', cpus = cpus)
+  expect_true(nrow(z) == 12L && !anyNA(z$reject))
+
   # Zero replacement.
   cz <- counts; cz[cz < 4] <- 0L
   for (m in list_zero_replacements('id')) {

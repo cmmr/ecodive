@@ -375,7 +375,7 @@ License:
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Files: src/log_ratio_transforms.c R/log_ratio_transforms.r src/log_ratio.c R/log_ratio.r
- src/proportionality.c R/proportionality.r
+ src/proportionality.c R/proportionality.r src/ancom.c R/ancom.r
 Copyright: 2013-- scikit-bio development team
 Comment: alr() and ilr(), with their default (Gram-Schmidt / Helmert) basis,
  the conversion of a sequential binary partition and the basis checks, follow
@@ -384,8 +384,12 @@ Comment: alr() and ilr(), with their default (Gram-Schmidt / Helmert) basis,
  coordinate of ilr() with a sequential binary partition, through the same
  sbp_basis(). vlr() follows vlr() and pairwise_vlr() from the same file,
  computing each variance from differences of centred logs rather than from a
- covariance matrix. The rest of these files, including log_ratio(), rho_p()
- and phi_s(), is Copyright 2026 ecodive authors, under the MIT license above.
+ covariance matrix. ancom() follows ancom() and _log_compare() from
+ skbio/stats/composition/_ancom.py, with the per-feature p-value adjustment
+ of _adjust_pvalues() and the grouping checks of _check_grouping() from
+ _utils.py; its tests compute each log ratio's statistic directly, in C.
+ The rest of these files, including log_ratio(), rho_p() and phi_s(), is
+ Copyright 2026 ecodive authors, under the MIT license above.
 License:
    Copyright (c) 2013--, scikit-bio development team.
    All rights reserved.
