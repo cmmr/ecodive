@@ -178,9 +178,21 @@ procrustes <- function (
   if (!is.logical(dilate) || length(dilate) != 1 || is.na(dilate))
     stop('`dilate` must be TRUE or FALSE.', call. = FALSE)
 
-  cf <- procrustes_inputs(ord, target, axes, n_axes, cpus)
+  cf   <- procrustes_inputs(ord, target, axes, n_axes, cpus)
+  step <- ord_step(
+    'procrustes', ord = procrustes_what(ord), target = procrustes_what(target) )
 
-  procrustes_fit(cf, symmetric, dilate)
+  procrustes_fit(cf, symmetric, dilate, step)
+}
+
+
+# What a Procrustes input is, for the `ord` record (?ecodive_steps): such as
+# "Principal Coordinates Analysis of Bray-Curtis Dissimilarity", from its
+# records; NULL for a plain matrix.
+procrustes_what <- function (x) {
+  d <- attr(x, 'dist', exact = TRUE)
+  o <- attr(x, 'ord', exact = TRUE)
+  if (inherits(o, 'ecodive_step')) step_title(step_name(o), d) else step_name(d)
 }
 
 
@@ -306,7 +318,11 @@ procrustes_test <- function (
   if (!is.null(pm$perms) && !is.null(strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
 
-  fit <- procrustes_fit(cf, symmetric = TRUE, dilate = TRUE)
+  fit <- procrustes_fit(
+    cf, symmetric = TRUE, dilate = TRUE,
+    step = ecodive_step(
+      ord_method_name('procrustes'), method = 'procrustes', symmetric = TRUE,
+      ord = procrustes_what(ord), target = procrustes_what(target) ))
   ss  <- attr(fit, 'ss')
   r   <- sqrt(max(0, 1 - ss))
 
@@ -481,7 +497,7 @@ procrustes_coords <- function (v, arg, n_axes, cpus) {
 # The Procrustes fit of cf$y (ord) onto cf$x (target), as procrustes()
 # returns it.
 #------------------------------------------------------------------------------
-procrustes_fit <- function (cf, symmetric, dilate) {
+procrustes_fit <- function (cf, symmetric, dilate, step = NULL) {
 
   x <- cf$x
   y <- cf$y
@@ -530,5 +546,6 @@ procrustes_fit <- function (cf, symmetric, dilate) {
     dilation    = dil,
     residuals   = resid,
     symmetric   = symmetric,
-    target      = x )
+    target      = x,
+    ord         = step )
 }

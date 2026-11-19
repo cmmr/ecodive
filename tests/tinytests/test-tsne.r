@@ -319,7 +319,7 @@
   expect_identical(dim(ord), c(60L, 2L))
   expect_identical(dimnames(ord), list(paste0('S', 1:60), c('TSNE1', 'TSNE2')))
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'kl_divergence',
       'perplexity', 'init', 'n_iters', 'learning_rate', 'gradient', 'class') )
   expect_identical(attr(ord, 'method'), 'tsne')
@@ -338,7 +338,7 @@
   expect_true(all(apply(x, 2, function (v) v[which(abs(v) >= max(abs(v)) * (1 - 1e-8))[[1]]] > 0)))
 
   # A symmetric matrix gives the same result; dist_ord() too.
-  expect_identical(tsne(as.matrix(d60), cpus = 1), ord)
+  expect_identical(no_steps(tsne(as.matrix(d60), cpus = 1)), no_steps(ord))
   expect_identical(dist_ord(d60, 'tsne', cpus = 1), ord)
   expect_identical(dist_ord(d60, 't-SNE', cpus = 1), ord)
 
@@ -380,7 +380,7 @@
   o <- tsne(d60, init = y0, cpus = 1)
   expect_identical(attr(o, 'init'), 'matrix')
   attr(o, 'init') <- 'pcoa'
-  expect_identical(o, ord)
+  expect_identical(no_steps(o), no_steps(ord))
   expect_identical(tsne(d60, init = as.data.frame(y0), cpus = 1), tsne(d60, init = y0, cpus = 1))
   r1 <- tsne(d60, init = 'random', cpus = 1)
   expect_identical(attr(r1, 'init'), 'random')
@@ -388,7 +388,7 @@
   expect_identical(tsne(d60, init = 'random', cpus = 1), r1)
   expect_false(identical(tsne(d60, init = 'random', seed = 1, cpus = 1), r1))
   # The seed doesn't matter for a PCoA start with every axis.
-  expect_identical(tsne(d60, seed = 5, cpus = 1), ord)
+  expect_identical(no_steps(tsne(d60, seed = 5, cpus = 1)), no_steps(ord))
 
   # PCoA with fewer positive axes than k: a random start instead.
   d <- dist(matrix(c(0, 1, 2, 4), 4))  # On a line: one axis.

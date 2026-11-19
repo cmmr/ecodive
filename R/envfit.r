@@ -281,6 +281,9 @@ envfit <- function (
   rownames(out) <- make.unique(as.character(rn))
   attr(out, 'r2_perm') <- r2_perm
   attr(out, 'n_perm')  <- pm$n_perm
+  # How the ordination was made (?ecodive_steps).
+  for (a in c('dist', 'ord'))
+    if (inherits(attr(ord, a, exact = TRUE), 'ecodive_step')) attr(out, a) <- attr(ord, a, exact = TRUE)
   class(out) <- c('ecodive_envfit', 'data.frame')
   out
 }

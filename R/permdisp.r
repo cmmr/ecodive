@@ -424,6 +424,7 @@ permdisp <- function (
 
   res <- new_ecodive_test(
     class       = 'ecodive_permdisp',
+    dist        = dv$step,
     title       = 'Homogeneity of multivariate dispersions (PERMDISP)',
     statistic   = c(F = f_obs),
     p_value     = p_obs,

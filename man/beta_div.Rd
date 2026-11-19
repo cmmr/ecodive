@@ -74,12 +74,13 @@ before returning the distance matrix: \code{NULL} (the default) or
 (WPGMA), \code{"median"} or \code{"centroid"}, or \code{"pcoa"} to order them
 along the first axis of \code{\link[=pcoa]{pcoa()}}. Clustering \strong{reorders the
 samples} of the result, with their labels (samples without names
-are labelled with their positions in the input): attribute \code{order}
-gives each one's position in the input, so that \code{meta[attr(d, "order"), ]} lines metadata up with them. Tests such as \code{\link[=permanova]{permanova()}} match
-named samples to \code{data} by name, but a vector of groups without
-names is matched by position, so reorder it too. The result's
-attribute \code{clust} records \code{clust} (\code{FALSE} as \code{"none"}), which
-\code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
+are labelled with their positions in the input): its \code{dist} record
+(see \link{ecodive_steps}) gives each one's position in the input as
+\code{order}, so that \code{meta[attr(d, "dist")$order, ]} lines metadata up
+with them. Tests such as \code{\link[=permanova]{permanova()}} match named samples to
+\code{data} by name, but a vector of groups without names is matched by
+position, so reorder it too. The record's \code{clust} records \code{clust}
+(\code{FALSE} as \code{"none"}), which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
@@ -96,20 +97,11 @@ that \code{plot()} draws it as a heatmap (see \code{\link[=plot.ecodive_dist]{pl
 function for \code{dist} objects, such as \code{as.matrix()}, works on it as
 before. Each metric's own function, such as \code{\link[=bray]{bray()}}, returns the same.
 
-Besides \code{dist}'s \code{Size}, \code{Labels}, \code{Diag} and \code{Upper}, its attributes
-record how it was made:
-\itemize{
-\item \code{metric}: The metric's ID, such as \code{"bray"}.
-\item \code{metric_name}: Its display name, such as \code{"Bray-Curtis Dissimilarity"}, as \code{\link[=list_metrics]{list_metrics()}} gives it, so that any package
-can label it without ecodive's table.
-\item \code{norm}: The normalization applied before computing it (by name, such
-as \code{"percent"}), whether chosen with \code{norm} or fixed by the metric
-(such as \code{\link[=hellinger]{hellinger()}}'s). Absent for the UniFrac metrics.
-\item \code{pseudocount}: The pseudocount used (\code{0} for none), for the metrics
-that take one.
-\item \code{power}, \code{alpha}: For \code{\link[=minkowski]{minkowski()}} and \code{\link[=generalized_unifrac]{generalized_unifrac()}}.
-\item \code{clust}, \code{order}: With \code{clust}; see its description.
-}
+Besides \code{dist}'s \code{Size}, \code{Labels}, \code{Diag} and \code{Upper}, it has attribute
+\code{dist}, the record of how it was made (see \link{ecodive_steps}): the
+metric's display name (\code{attr(d, "dist")$name}, such as \code{"Bray-Curtis Dissimilarity"}) and ID (\verb{$metric}), the \code{norm} applied, the
+\code{pseudocount}, \code{power} or \code{alpha} used, and with \code{clust}, \verb{$clust} and
+\verb{$order}. Ordinations and tests of the matrix keep the record.
 }
 \description{
 Beta Diversity Wrapper Function

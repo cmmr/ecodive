@@ -206,7 +206,7 @@
   expect_identical(sort(chr$class_delta), sort(ref$class_delta))
 
   # A symmetric matrix works like a dist.
-  expect_identical(mrpp(as.matrix(d), 'trt', meta, permutations = 19, cpus = 1), ref)
+  expect_identical(no_steps(mrpp(as.matrix(d), 'trt', meta, permutations = 19, cpus = 1)), no_steps(ref))
 
   # Rows for other samples are ignored, even with NAs, and so are their
   # factor levels.

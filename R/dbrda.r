@@ -356,7 +356,8 @@ dbrda_core <- function (
     method   = if (positive) 'capscale' else 'dbrda',
     prefix   = if (positive) 'CAP' else 'dbRDA',
     prefix_u = 'MDS',
-    positive = positive )
+    positive = positive,
+    dist     = dv$step )
 }
 
 

@@ -38,7 +38,8 @@
 #'
 #' @details
 #' **Order.** The samples are ordered by the `clust` argument of the
-#' function that made `x`, recorded in its `clust` attribute:
+#' function that made `x`, recorded in its `dist` record
+#' (`attr(x, "dist")$clust`; see [ecodive_steps]):
 #'
 #' * Not set (`clust = NULL`, the default): the plot clusters them itself,
 #'   by average linkage (UPGMA, [stats::hclust()]), so that similar samples
@@ -46,11 +47,12 @@
 #' * `"none"` (`clust = FALSE`): their order in `x`, which is the input's.
 #' * A clustering method: `x` is already in that order, which is kept.
 #'
-#' To plot a matrix in its own order, set `attr(x, "clust") <- "none"`.
+#' To plot a matrix in its own order, make it with `clust = FALSE`.
 #'
-#' **Title.** The metric's display name, from the `metric_name` attribute
-#' (such as `"Bray-Curtis Dissimilarity"`), or else its `metric` or `method`
-#' attribute; `"Distances"` without any of them.
+#' **Title.** The metric's display name, from the `dist` record (see
+#' [ecodive_steps]), such as `"Bray-Curtis Dissimilarity"`; or else the
+#' `method` attribute that [stats::dist()] sets; `"Distances"` without
+#' either.
 #' With `groups`, the samples are sorted by group, keeping that order within
 #' each group.
 #'
@@ -83,7 +85,7 @@
 #'
 #'     # Clustered by Ward's method when computed: the result is reordered.
 #'     dm <- bray(iris[, 1:4], clust = 'ward.D2')
-#'     head(attr(dm, 'order'))
+#'     head(attr(dm, 'dist')$order)
 #'     plot(dm, 'Species', iris)
 #'
 #'     # Proportionality, with negative values.
@@ -106,11 +108,11 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
   # The order of the samples: as `clust` says (clustered here when it isn't
   # set), then by group.
   #--------------------------------------------------
-  cl   <- attr(x, 'clust', exact = TRUE)
+  cl   <- dist_clust_of(x)
   base <- if (is.null(cl) && !anyNA(x)) dist_clust_order(x, 'average') else seq_len(n)
   how  <- dist_plot_order_name(if (is.null(cl) && !anyNA(x)) 'average' else cl)
 
-  g      <- plot_groups(n, labels, groups, data)
+  g      <- dist_plot_groups(x, n, labels, groups, data)
   ord    <- base
   blocks <- NULL
   if (!is.null(g$f)) {
@@ -193,6 +195,23 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
 
 
 
+# The groups of the samples of `x`, for `groups` and `data` as plot_groups()
+# takes them. When `clust` reordered `x`, metadata is in the input's order,
+# so the groups are found for the samples in that order (by their labels, or
+# by position for samples that had none) and then put in `x`'s.
+dist_plot_groups <- function (x, n, labels, groups, data) {
+  o <- attr(x, 'dist', exact = TRUE)$order
+  if (is.null(o) || length(o) != n || anyDuplicated(o) || !all(o %in% seq_len(n)))
+    return (plot_groups(n, labels, groups, data))
+  input <- if (is.null(labels) || identical(as.character(labels), as.character(o))) NULL
+           else labels[order(o)]
+  g <- plot_groups(n, input, groups, data)
+  if (!is.null(g$f))      g$f      <- g$f[o]
+  if (!is.null(g$values)) g$values <- g$values[o]
+  g
+}
+
+
 # How the samples were ordered, for the subtitle, from a `clust` value: NULL
 # for their own order.
 dist_plot_order_name <- function (clust) {
@@ -203,16 +222,13 @@ dist_plot_order_name <- function (clust) {
 
 
 # The title, the unit (samples or features) and the colour key's title of a
-# distance matrix: the title from its `metric_name` attribute (the metric's
-# display name), the rest from `metric` (or `method`, as results from before
-# ecodive 2.4.0 have it). Without either, "Distances".
+# distance matrix: the title from its `dist` record's name (the metric's
+# display name), the rest from its metric (or the `method` attribute that
+# stats::dist() sets). Without either, "Distances".
 dist_plot_name <- function (x) {
-  m <- attr(x, 'metric', exact = TRUE)
-  if (is.null(m)) m <- attr(x, 'method', exact = TRUE)
-  m <- if (is.character(m) && length(m) == 1 && !is.na(m)) m else ''
-  title <- attr(x, 'metric_name', exact = TRUE)
-  if (!is.character(title) || length(title) != 1 || is.na(title))
-    title <- if (nzchar(m)) m else 'Distances'
+  m     <- dist_metric_of(x)
+  title <- step_name(attr(x, 'dist', exact = TRUE))
+  if (is.null(title)) title <- if (nzchar(m)) m else 'Distances'
   features <- m %in% c('vlr', 'rho_p', 'phi_s')
   list(
     title = title,

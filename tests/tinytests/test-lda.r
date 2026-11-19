@@ -86,7 +86,7 @@
     }
     if (requireNamespace('slam', quietly = TRUE))
       expect_equal(fit_case(cs, counts = slam::as.simple_triplet_matrix(cs$counts)), ord, tolerance = 1e-12)
-    expect_equal(fit_case(cs, counts = t(cs$counts), margin = 2L), ord, tolerance = 1e-12)
+    expect_equal(no_steps(fit_case(cs, counts = t(cs$counts), margin = 2L)), no_steps(ord), tolerance = 1e-12)
   }
 
 
@@ -121,7 +121,7 @@
 
   expect_identical(class(ord), c('ecodive_ord', 'matrix', 'array'))
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'scaling', 'means', 'prior',
       'groups', 'class') )
   expect_identical(attr(ord, 'method'), 'lda')
@@ -151,11 +151,11 @@
   # Groups given as a column of `data`, a factor, characters, numbers, or
   # through count_ord(): all the same. A data frame is a table too.
   meta <- data.frame(row.names = rownames(cs$counts), sp = cs$groups, num = as.integer(cs$groups))
-  expect_identical(lda(cs$counts, 'sp', meta, cpus = 1), ord)
+  expect_identical(no_steps(lda(cs$counts, 'sp', meta, cpus = 1)), no_steps(ord))
   expect_identical(lda(cs$counts, meta$sp, cpus = 1), ord)
   expect_identical(lda(as.data.frame(cs$counts), meta$sp, cpus = 1), ord)
-  expect_identical(count_ord(cs$counts, 'lda', 'sp', meta, cpus = 1), ord)
-  expect_identical(count_ord(cs$counts, 'Linear Discriminant Analysis', 'sp', meta, cpus = 1), ord)
+  expect_identical(no_steps(count_ord(cs$counts, 'lda', 'sp', meta, cpus = 1)), no_steps(ord))
+  expect_identical(no_steps(count_ord(cs$counts, 'Linear Discriminant Analysis', 'sp', meta, cpus = 1)), no_steps(ord))
   by_chr <- lda(cs$counts, as.character(cs$groups), cpus = 1)
   expect_equal(unclass(by_chr)[, ], unclass(ord)[, ])
   by_num <- lda(cs$counts, 'num', meta, cpus = 1)
@@ -164,7 +164,7 @@
 
   # Metadata rows are matched by name; unused levels are dropped.
   shuffled <- meta[rev(seq_len(nrow(meta))), , drop = FALSE]
-  expect_identical(lda(cs$counts, 'sp', shuffled, cpus = 1), ord)
+  expect_identical(no_steps(lda(cs$counts, 'sp', shuffled, cpus = 1)), no_steps(ord))
   expect_identical(lda(cs$counts, factor(cs$groups, levels = c(lev, 'x')), cpus = 1), ord)
 
   # n_axes: fewer axes, the same values; more than there are, capped.

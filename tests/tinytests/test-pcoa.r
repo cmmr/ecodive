@@ -48,7 +48,7 @@
 
   # A symmetric matrix gives the same result as a dist.
   m <- as.matrix(d)
-  expect_identical(pcoa(m), pcoa(d))
+  expect_identical(no_steps(pcoa(m)), no_steps(pcoa(d)))
   
   # Labels come from row names, else column names.
   rownames(m) <- NULL
@@ -113,7 +113,7 @@
 
   # The shared ordination result format.
   expect_identical(
-    names(attributes(x)),
+    names(attributes(no_steps(x))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'correction', 'constant', 'class') )
   expect_identical(attr(x, 'correction'), 'none')
   expect_identical(attr(x, 'constant'), 0)
@@ -201,7 +201,7 @@
 
   # k larger than n - 1, and integer storage.
   d <- as.dist(matrix(c(0L, 3L, 4L, 3L, 0L, 5L, 4L, 5L, 0L), 3))
-  expect_identical(pcoa(d, n_axes = 10), pcoa(d, n_axes = 2))
+  expect_identical(no_steps(pcoa(d, n_axes = 10)), no_steps(pcoa(d, n_axes = 2)))
   expect_equal(attr(pcoa(d), 'eig'), cmdscale(d, k = 2, eig = TRUE)$eig[1:2])
 
 

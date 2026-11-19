@@ -77,20 +77,12 @@ V_UNIFRAC <- 5L
 #'   function for `dist` objects, such as `as.matrix()`, works on it as
 #'   before. Each metric's own function, such as [bray()], returns the same.
 #'
-#'   Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, its attributes
-#'   record how it was made:
-#'
-#'   * `metric`: The metric's ID, such as `"bray"`.
-#'   * `metric_name`: Its display name, such as `"Bray-Curtis
-#'     Dissimilarity"`, as [list_metrics()] gives it, so that any package
-#'     can label it without ecodive's table.
-#'   * `norm`: The normalization applied before computing it (by name, such
-#'     as `"percent"`), whether chosen with `norm` or fixed by the metric
-#'     (such as [hellinger()]'s). Absent for the UniFrac metrics.
-#'   * `pseudocount`: The pseudocount used (`0` for none), for the metrics
-#'     that take one.
-#'   * `power`, `alpha`: For [minkowski()] and [generalized_unifrac()].
-#'   * `clust`, `order`: With `clust`; see its description.
+#'   Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, it has attribute
+#'   `dist`, the record of how it was made (see [ecodive_steps]): the
+#'   metric's display name (`attr(d, "dist")$name`, such as `"Bray-Curtis
+#'   Dissimilarity"`) and ID (`$metric`), the `norm` applied, the
+#'   `pseudocount`, `power` or `alpha` used, and with `clust`, `$clust` and
+#'   `$order`. Ordinations and tests of the matrix keep the record.
 #' 
 #' 
 #' @details

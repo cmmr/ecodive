@@ -29,8 +29,9 @@
 #'        `col` or `breaks`; they replace the defaults made from `x`.
 #'
 #' @details
-#' The title is the test's name, and the subtitle its statistic, p-value
-#' and standardized effect size \eqn{z}, as printed.
+#' The title is the test's name, with the metric of the distances it tested
+#' (from their `dist` record; see [ecodive_steps]), and the subtitle its
+#' statistic, p-value and standardized effect size \eqn{z}, as printed.
 #'
 #' * `"null"`: a histogram of the statistic in each permutation (the
 #'   `f_perm`, `r_perm` or `delta_perm` attribute), with a line at the
@@ -90,7 +91,7 @@ plot.ecodive_mrpp <- function (x, type = c('groups', 'null'), ...) {
   plot_do(
     graphics::barplot, c(list(d), list(...)),
     list(
-      main = attr(x, 'title', exact = TRUE), sub = test_subtitle(x),
+      main = test_title(x), sub = test_subtitle(x),
       ylab = 'Mean within-group distance', col = 'grey85',
       ylim = c(0, 1.5 * top), las = 1 ))
 
@@ -116,7 +117,7 @@ plot.ecodive_permdisp <- function (x, type = c('groups', 'null'), ...) {
   plot_do(
     graphics::barplot, c(list(d), list(...)),
     list(
-      main = attr(x, 'title', exact = TRUE), sub = test_subtitle(x),
+      main = test_title(x), sub = test_subtitle(x),
       ylab = sprintf('Mean distance to group %s', if (identical(x$type, 'median')) 'median' else 'centroid'),
       col = 'grey85', ylim = c(0, 1.1 * max(d, na.rm = TRUE)), las = 1 ))
 
@@ -133,7 +134,7 @@ plot.ecodive_procrustes_test <- function (x, type = c('fit', 'null'), ...) {
 
   plot_do(
     plot.ecodive_ord, c(list(x$procrustes), list(...)),
-    list(main = attr(x, 'title', exact = TRUE), sub = test_subtitle(x)) )
+    list(main = test_title(x), sub = test_subtitle(x)) )
 
   invisible(x)
 }
@@ -146,6 +147,13 @@ test_plot_type <- function (type, choices) {
   if (!is.character(type) || length(type) != 1 || !type %in% choices)
     stop('`type` must be ', paste0('"', choices, '"', collapse = ' or '), '.', call. = FALSE)
   type
+}
+
+
+# The test's title, and the distances it tested, from their `dist` record
+# (?ecodive_steps): "... (PERMANOVA) of Bray-Curtis Dissimilarity".
+test_title <- function (x) {
+  step_title(attr(x, 'title', exact = TRUE), attr(x, 'dist', exact = TRUE))
 }
 
 
@@ -180,7 +188,7 @@ test_plot_null <- function (x, ...) {
   plot_do(
     graphics::hist, c(list(perm), args),
     list(
-      main = attr(x, 'title', exact = TRUE), sub = test_subtitle(x),
+      main = test_title(x), sub = test_subtitle(x),
       xlab = sprintf('%s (%d permutations, %s)', nm, x$n_perm, x$permutation),
       xlim = range(brk, if (is.finite(obs)) obs),
       col = 'grey85', border = 'grey45', las = 1 ))

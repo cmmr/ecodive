@@ -42,10 +42,12 @@
 #   perm         The permuted statistics (numeric vector, length n_perm).
 #                Stored as attribute <tolower(names(statistic))>_perm.
 #   permutation  'free', 'within strata', or 'supplied matrix'.
+#   dist         The distance matrix's `dist` record (dist_vector()'s
+#                `step`), kept as attribute `dist` (?ecodive_steps).
 #------------------------------------------------------------------------------
 new_ecodive_test <- function (
     class, title, statistic, p_value, z, n_perm, ..., perm,
-    permutation = 'free' ) {
+    permutation = 'free', dist = NULL ) {
 
   stopifnot(
     is.character(class), length(class) >= 1,
@@ -61,6 +63,7 @@ new_ecodive_test <- function (
 
   attr(res, paste0(tolower(names(statistic)), '_perm')) <- as.double(perm)
   attr(res, 'title') <- title
+  if (inherits(dist, 'ecodive_step')) attr(res, 'dist') <- dist
   class(res) <- c(class, 'ecodive_test')
 
   res

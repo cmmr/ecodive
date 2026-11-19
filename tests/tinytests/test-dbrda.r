@@ -89,7 +89,7 @@
   ord <- fit_case(cs)
   expect_true(is.matrix(ord) && is.double(ord))
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'inertia',
       'constrained_eig', 'r_squared', 'adj_r_squared', 'biplot', 'centroids', 'class') )
   expect_identical(attr(ord, 'method'), 'dbrda')
@@ -115,7 +115,7 @@
 
   # `groups`: a column of `data`, a vector parallel to its rows, or a vector
   # with one value per sample.
-  expect_identical(dbrda(d, 'Management', meta, cpus = 1), one)
+  expect_identical(no_steps(dbrda(d, 'Management', meta, cpus = 1)), no_steps(one))
   expect_equal(unclass(dbrda(d, meta$Management, meta, cpus = 1))[, ], unclass(one)[, ])
   expect_equal(unclass(dbrda(d, setNames(meta$Management, rownames(meta)), cpus = 1))[, ], unclass(one)[, ])
   expect_equal(unclass(dbrda(d, meta$Management, cpus = 1))[, ], unclass(one)[, ])
@@ -123,25 +123,25 @@
   # vegan's style: the distances on the formula's left-hand side, with the
   # metadata second or named.
   dmx <- d
-  expect_identical(dbrda(dmx ~ Management, meta, cpus = 1), one)
-  expect_identical(dbrda(dmx ~ Management, data = meta, cpus = 1), one)
-  expect_identical(dbrda(dmx ~ Management + A1, meta, cpus = 1), ord)
+  expect_identical(no_steps(dbrda(dmx ~ Management, meta, cpus = 1)), no_steps(one))
+  expect_identical(no_steps(dbrda(dmx ~ Management, data = meta, cpus = 1)), no_steps(one))
+  expect_identical(no_steps(dbrda(dmx ~ Management + A1, meta, cpus = 1)), no_steps(ord))
   expect_error(dbrda(dmx ~ A1, meta, ~ A1), 'Name the formula argument')
   expect_error(dbrda(dmx ~ A1, data = meta, formula = ~ A1), 'not both')
 
   # dist_ord() passes the same arguments on.
-  expect_identical(dist_ord(d, 'dbrda', 'Management', meta, cpus = 1), one)
+  expect_identical(no_steps(dist_ord(d, 'dbrda', 'Management', meta, cpus = 1)), no_steps(one))
   expect_identical(dist_ord(d, 'dbrda', data = meta, formula = ~ Management, cpus = 1), one)
   expect_identical(match_dist_ord('distance-based RDA')$id, 'dbrda')
 
   # dist_ord() drops `seed` for dbrda, which has no random parts.
-  expect_identical(dist_ord(d, 'dbrda', 'Management', meta, seed = 1, cpus = 1), one)
+  expect_identical(no_steps(dist_ord(d, 'dbrda', 'Management', meta, seed = 1, cpus = 1)), no_steps(one))
 
   # A symmetric matrix gives the same result as a dist.
-  expect_identical(dbrda(as.matrix(d), 'Management', meta, cpus = 1), one)
+  expect_identical(no_steps(dbrda(as.matrix(d), 'Management', meta, cpus = 1)), no_steps(one))
 
   # Rows of `data` are matched to the samples by name.
-  expect_identical(dbrda(d, 'Management', meta[rev(seq_len(nrow(meta))), ], cpus = 1), one)
+  expect_identical(no_steps(dbrda(d, 'Management', meta[rev(seq_len(nrow(meta))), ], cpus = 1)), no_steps(one))
 
   # A model is required: no default formula, and an explicit (misspelled)
   # NULL `groups` is an error.

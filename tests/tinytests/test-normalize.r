@@ -43,17 +43,23 @@
 
   # pca()'s CLR path keeps the table sparse, with each sample's value for
   # zeros as an offset, so it sums in another order: equal to rounding.
+  # Results made two ways record different settings (?ecodive_steps); their
+  # values must be the same.
+  ovals <- function (o) {
+    attr(o, 'ord') <- NULL
+    o
+  }
   expect_equal(
-    pca(x, norm = 'clr', pseudocount = 1, n_axes = 2, cpus = 1),
-    pca(normalize(x, 'clr', pseudocount = 1, cpus = 1), n_axes = 2, cpus = 1),
+    ovals(pca(x, norm = 'clr', pseudocount = 1, n_axes = 2, cpus = 1)),
+    ovals(pca(normalize(x, 'clr', pseudocount = 1, cpus = 1), n_axes = 2, cpus = 1)),
     tolerance = 1e-12 )
   expect_identical(
-    pca(x, norm = 'percent', n_axes = 2, cpus = 1),
-    pca(normalize(x, 'percent', cpus = 1), n_axes = 2, cpus = 1) )
+    ovals(pca(x, norm = 'percent', n_axes = 2, cpus = 1)),
+    ovals(pca(normalize(x, 'percent', cpus = 1), n_axes = 2, cpus = 1)) )
   # Distances made two ways record different metrics and normalizations;
   # their values and samples must be the same.
   dvals <- function (d) {
-    for (a in c('metric', 'metric_name', 'norm', 'pseudocount')) attr(d, a) <- NULL
+    attr(d, 'dist') <- NULL
     d
   }
   expect_identical(

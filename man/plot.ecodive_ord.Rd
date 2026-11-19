@@ -102,7 +102,10 @@ this is a quick look at results already in hand.
 The plot is made of what \code{x} holds:
 \itemize{
 \item \strong{Title}: the method's name, as \code{\link[=list_dist_ords]{list_dist_ords()}} and
-\code{\link[=list_count_ords]{list_count_ords()}} give it.
+\code{\link[=list_count_ords]{list_count_ords()}} give it, and for an ordination of distances, the
+distances' metric, from the records of how \code{x} was made (see
+\link{ecodive_steps}): such as "Principal Coordinates Analysis of
+Bray-Curtis Dissimilarity".
 \item \strong{Axis labels}: the axes' names, with the percentage of the variance
 each explains (the \code{prop} attribute), for methods that have one.
 \item \strong{Subtitle}: how well the method fit, for methods that measure it: the

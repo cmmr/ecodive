@@ -49,13 +49,15 @@
 #'        (WPGMA), `"median"` or `"centroid"`, or `"pcoa"` to order them
 #'        along the first axis of [pcoa()]. Clustering **reorders the
 #'        samples** of the result, with their labels (samples without names
-#'        are labelled with their positions in the input): attribute `order`
-#'        gives each one's position in the input, so that `meta[attr(d,
-#'        "order"), ]` lines metadata up with them. Tests such as [permanova()] match
-#'        named samples to `data` by name, but a vector of groups without
-#'        names is matched by position, so reorder it too. The result's
-#'        attribute `clust` records `clust` (`FALSE` as `"none"`), which
-#'        [plot.ecodive_dist()] follows: with `NULL` it clusters the samples
+#'        are labelled with their positions in the input): its `dist` record
+#'        (see [ecodive_steps]) gives each one's position in the input as
+#'        `order`, so that `meta[attr(d, "dist")$order, ]` lines metadata up
+#'        with them. ecodive's ordinations and tests put the samples back in
+#'        their input order before analysing them, so give them metadata in
+#'        its usual order. Other packages see the reordered matrix: give
+#'        them metadata reordered by `order`, or matched by name. The
+#'        record's `clust` records `clust`
+#'        (`FALSE` as `"none"`), which [plot.ecodive_dist()] follows: with `NULL` it clusters the samples
 #'        for the heatmap (`"average"`), and with `"none"` it keeps their
 #'        order. `clust` needs every distance, so it cannot be used with
 #'        `pairs`. [rho_p()]'s similarities are clustered as \eqn{1 -
@@ -144,7 +146,10 @@ NULL
 #'     axis explains. Unlike `eig`, it is comparable between methods, so use
 #'     it to label axes. `NA` where it isn't defined.
 #'
-#'   Attributes particular to the method follow them. The matrix has class
+#'   Attributes particular to the method follow them, and last, the records
+#'   of how it was made (see [ecodive_steps]): `dist`, the distance
+#'   matrix's, for the methods that take distances, and `ord`, the
+#'   ordination's own (its method, display name and settings). The matrix has class
 #'   `"ecodive_ord"` (as well as `"matrix"`), so that `print()` lists the
 #'   other attributes by name rather than in full, and `plot()` draws the
 #'   samples on the first two axes, labelled from the attributes, with any

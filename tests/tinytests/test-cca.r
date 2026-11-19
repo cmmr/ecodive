@@ -120,7 +120,7 @@
   ord <- fit_case(cs)
   expect_true(is.matrix(ord) && is.double(ord))
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'inertia',
       'constrained_eig', 'r_squared', 'adj_r_squared', 'biplot', 'centroids',
       'loadings', 'class') )
@@ -204,7 +204,7 @@
   counts <- x
   one    <- cca(counts, data = meta, formula = ~ Management, cpus = 1)
 
-  expect_identical(cca(counts, 'Management', meta, cpus = 1), one)
+  expect_identical(no_steps(cca(counts, 'Management', meta, cpus = 1)), no_steps(one))
   expect_equal(unclass(cca(counts, meta$Management, cpus = 1))[, ], unclass(one)[, ])
 
   # vegan's style: the table on the formula's left-hand side.
@@ -214,7 +214,7 @@
   expect_error(cca(counts ~ A1, data = meta, formula = ~ A1), 'not both')
 
   # count_ord() passes the same arguments on, including `seed`.
-  expect_identical(count_ord(counts, 'cca', 'Management', meta, cpus = 1), one)
+  expect_identical(no_steps(count_ord(counts, 'cca', 'Management', meta, cpus = 1)), no_steps(one))
   expect_identical(count_ord(counts, 'canonical correspondence analysis', data = meta, formula = ~ Management, cpus = 1), one)
   expect_identical(
     count_ord(counts, 'cca', 'Management', meta, seed = 3L, cpus = 1),
@@ -222,7 +222,7 @@
   expect_error(dist_ord(bray(counts), 'cca'), 'count_ord')
 
   # Rows of `data` are matched to the samples by name.
-  expect_identical(cca(counts, 'Management', meta[rev(seq_len(nrow(meta))), ], cpus = 1), one)
+  expect_identical(no_steps(cca(counts, 'Management', meta[rev(seq_len(nrow(meta))), ], cpus = 1)), no_steps(one))
 
   # Errors in the model.
   expect_error(cca(counts, meta$Managment, meta),         '`groups` is NULL')
@@ -282,13 +282,13 @@
 
   d1 <- cca(counts, data = meta, formula = ~ Management + Condition(A1), n_axes = 5, cpus = 1)
   tc <- t(counts)
-  expect_identical(cca(tc, data = meta, formula = ~ Management + Condition(A1), margin = 2,
-                       n_axes = 5, cpus = 1), d1)
+  expect_identical(no_steps(cca(tc, data = meta, formula = ~ Management + Condition(A1), margin = 2,
+                       n_axes = 5, cpus = 1)), no_steps(d1))
   if (requireNamespace('Matrix', quietly = TRUE)) {
     sp <- Matrix::Matrix(tc, sparse = TRUE)
     expect_true(inherits(sp, 'dgCMatrix'))
-    expect_equal(cca(sp, data = meta, formula = ~ Management + Condition(A1), margin = 2,
-                     n_axes = 5, cpus = 1), d1, tolerance = 1e-12)
+    expect_equal(no_steps(cca(sp, data = meta, formula = ~ Management + Condition(A1), margin = 2,
+                     n_axes = 5, cpus = 1)), no_steps(d1), tolerance = 1e-12)
   }
   if (requireNamespace('slam', quietly = TRUE)) {
     st <- slam::as.simple_triplet_matrix(counts)

@@ -45,7 +45,8 @@ the matrix's \code{clust} attribute says.
 }
 \details{
 \strong{Order.} The samples are ordered by the \code{clust} argument of the
-function that made \code{x}, recorded in its \code{clust} attribute:
+function that made \code{x}, recorded in its \code{dist} record
+(\code{attr(x, "dist")$clust}; see \link{ecodive_steps}):
 \itemize{
 \item Not set (\code{clust = NULL}, the default): the plot clusters them itself,
 by average linkage (UPGMA, \code{\link[stats:hclust]{stats::hclust()}}), so that similar samples
@@ -54,11 +55,12 @@ sit together. \code{x} is not changed.
 \item A clustering method: \code{x} is already in that order, which is kept.
 }
 
-To plot a matrix in its own order, set \code{attr(x, "clust") <- "none"}.
+To plot a matrix in its own order, make it with \code{clust = FALSE}.
 
-\strong{Title.} The metric's display name, from the \code{metric_name} attribute
-(such as \code{"Bray-Curtis Dissimilarity"}), or else its \code{metric} or \code{method}
-attribute; \code{"Distances"} without any of them.
+\strong{Title.} The metric's display name, from the \code{dist} record (see
+\link{ecodive_steps}), such as \code{"Bray-Curtis Dissimilarity"}; or else the
+\code{method} attribute that \code{\link[stats:dist]{stats::dist()}} sets; \code{"Distances"} without
+either.
 With \code{groups}, the samples are sorted by group, keeping that order within
 each group.
 
@@ -88,7 +90,7 @@ as before.
 
     # Clustered by Ward's method when computed: the result is reordered.
     dm <- bray(iris[, 1:4], clust = 'ward.D2')
-    head(attr(dm, 'order'))
+    head(attr(dm, 'dist')$order)
     plot(dm, 'Species', iris)
 
     # Proportionality, with negative values.

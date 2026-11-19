@@ -272,7 +272,7 @@
   expect_identical(dim(ord), c(60L, 2L))
   expect_identical(dimnames(ord), list(attr(d_bray, 'Labels'), c('NMDS1', 'NMDS2')))
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged',
       'n_iters', 'n_starts', 'best_start', 'n_best', 'ties', 'class') )
   expect_identical(class(ord), c('ecodive_ord', 'matrix', 'array'))
@@ -313,7 +313,7 @@
   expect_true(attr(ord4, 'stress') < attr(ord3, 'stress'))
   expect_true(attr(ord3, 'stress') < attr(ord, 'stress'))
   expect_identical(dim(nmds(d_pln, n_axes = 1, n_starts = 1)), c(40L, 1L))
-  expect_identical(nmds(as.matrix(d_bray), n_starts = 1), nmds(d_bray, n_starts = 1))
+  expect_identical(no_steps(nmds(as.matrix(d_bray), n_starts = 1)), no_steps(nmds(d_bray, n_starts = 1)))
 
   # max_iters = 0: the starting configurations themselves.
   ord0 <- nmds(d_bray, max_iters = 0, n_starts = 0)
@@ -454,7 +454,7 @@
   expect_identical(attr(ord, 'stress'), 0)
   expect_identical(attr(ord, 'n_best'), 1L)
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged',
       'n_iters', 'n_starts', 'best_start', 'n_best', 'ties', 'class') )
 
@@ -472,11 +472,11 @@
 
   # k larger than n - 1 (even huge), and integer storage.
   d <- as.dist(matrix(c(0L, 3L, 4L, 3L, 0L, 5L, 4L, 5L, 0L), 3))
-  expect_identical(nmds(d, n_axes = 10), nmds(d, n_axes = 2))
-  expect_identical(nmds(d, n_axes = 1e12), nmds(d, n_axes = 2))
+  expect_identical(no_steps(nmds(d, n_axes = 10)), no_steps(nmds(d, n_axes = 2)))
+  expect_identical(no_steps(nmds(d, n_axes = 1e12)), no_steps(nmds(d, n_axes = 2)))
 
   # Huge max_iters still converges; cpus larger than n.
-  expect_identical(nmds(d_pln, max_iters = 1e12), nmds(d_pln, max_iters = 1e6))
+  expect_identical(no_steps(nmds(d_pln, max_iters = 1e12)), no_steps(nmds(d_pln, max_iters = 1e6)))
   expect_identical(nmds(d, cpus = 100), nmds(d, cpus = 1))
   expect_identical(nmds(d_bray, n_starts = 1, max_iters = 5, cpus = 1e5), nmds(d_bray, n_starts = 1, max_iters = 5, cpus = 1))
 

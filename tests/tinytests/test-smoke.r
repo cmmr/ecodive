@@ -81,7 +81,7 @@
   for (f in c('vlr', 'rho_p', 'phi_s')) {
     z <- get(f)(counts, cpus = cpus)
     expect_true(inherits(z, 'dist') && attr(z, 'Size') == 12L && length(z) == 66L, info = f)
-    expect_true(all(is.finite(z)) && identical(attr(z, 'method'), f), info = f)
+    expect_true(all(is.finite(z)) && identical(attr(z, 'dist')$metric, f), info = f)
     expect_identical(attr(z, 'Labels'), colnames(counts), info = f)
   }
   z <- rho_p(counts, denominator = 'F1', cpus = cpus)

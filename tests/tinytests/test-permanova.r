@@ -314,7 +314,7 @@
   expect_identical(permanova(d, data = unnamed, formula = ~ trt + ph, permutations = 19, cpus = 1), ref)
 
   # A symmetric matrix works like a dist.
-  expect_identical(permanova(as.matrix(d), data = meta, formula = ~ trt + ph, permutations = 19, cpus = 1), ref)
+  expect_identical(no_steps(permanova(as.matrix(d), data = meta, formula = ~ trt + ph, permutations = 19, cpus = 1)), no_steps(ref))
 
   # A left-hand side is ignored; character columns are factors.
   expect_identical(permanova(d, data = meta, formula = dm ~ trt + ph, permutations = 19, cpus = 1), ref)

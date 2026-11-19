@@ -214,7 +214,7 @@
     anosim(d, meta$site, permutations = 19, cpus = 1)$statistic[['R']] )
 
   # A symmetric matrix works like a dist; a data matrix like a data frame.
-  expect_identical(anosim(as.matrix(d), meta$trt, permutations = 19, cpus = 1), ref)
+  expect_identical(no_steps(anosim(as.matrix(d), meta$trt, permutations = 19, cpus = 1)), no_steps(ref))
   mm <- as.matrix(meta[c('trt', 'site')])
   expect_identical(anosim(d, 'site', mm, permutations = 19, cpus = 1)$statistic[['R']], anosim(d, meta$site, permutations = 0)$statistic[['R']])
 

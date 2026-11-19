@@ -19,3 +19,14 @@ nz_counts_p <- t(apply(nz_counts, 1L, function (x) x / sum(x)))
 tree_str <- "((OTU4:0.676,(('OTU2':0.548,OTU3:0.629):0.25,OTU1:0.751):0.276):0.056,OTU5:0.432);"
 tree     <- read_tree(tree_str)
 
+
+
+# A result without the records of how it was made (?ecodive_steps): to
+# compare results made in different ways, whose records differ.
+no_steps <- function (x) {
+  attr(x, 'dist') <- NULL
+  attr(x, 'ord')  <- NULL
+  if (inherits(x, 'ecodive_test') && inherits(x$procrustes, 'ecodive_ord'))
+    x$procrustes <- no_steps(x$procrustes)
+  x
+}

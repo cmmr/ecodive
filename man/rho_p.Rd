@@ -49,12 +49,13 @@ before returning the distance matrix: \code{NULL} (the default) or
 (WPGMA), \code{"median"} or \code{"centroid"}, or \code{"pcoa"} to order them
 along the first axis of \code{\link[=pcoa]{pcoa()}}. Clustering \strong{reorders the
 samples} of the result, with their labels (samples without names
-are labelled with their positions in the input): attribute \code{order}
-gives each one's position in the input, so that \code{meta[attr(d, "order"), ]} lines metadata up with them. Tests such as \code{\link[=permanova]{permanova()}} match
-named samples to \code{data} by name, but a vector of groups without
-names is matched by position, so reorder it too. The result's
-attribute \code{clust} records \code{clust} (\code{FALSE} as \code{"none"}), which
-\code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
+are labelled with their positions in the input): its \code{dist} record
+(see \link{ecodive_steps}) gives each one's position in the input as
+\code{order}, so that \code{meta[attr(d, "dist")$order, ]} lines metadata up
+with them. Tests such as \code{\link[=permanova]{permanova()}} match named samples to
+\code{data} by name, but a vector of groups without names is matched by
+position, so reorder it too. The record's \code{clust} records \code{clust}
+(\code{FALSE} as \code{"none"}), which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
@@ -64,10 +65,11 @@ order. \code{clust} needs every distance, so it cannot be used with
 default, \code{n_cpus()}, will use all logical CPU cores.}
 }
 \value{
-A \code{dist} object over the features, as \code{\link[=vlr]{vlr()}} returns, with
-attributes \code{method} (\code{'rho_p'}), \code{denominator} (absent for the clr;
-otherwise the reference features' names, or their indices when the
-features have no names) and \code{pseudocount}.
+A \code{dist} object over the features, as \code{\link[=vlr]{vlr()}} returns, whose
+\code{dist} record (see \link{ecodive_steps}) has \code{metric} \code{"rho_p"}, the
+\code{denominator} (absent for the clr; otherwise the reference features'
+names, or their indices when the features have no names) and the
+\code{pseudocount}.
 
 \eqn{\rho_p} is a \strong{similarity} in a \code{dist} container: \code{as.matrix()}
 puts 0 on the diagonal, where \eqn{\rho_p} is 1, and it must not be

@@ -51,20 +51,31 @@
   `"ward.D2"`, `"mcquitty"`, `"median"`, `"centroid"`), or `"pcoa"` to order
   them along the first axis of `pcoa()`. Clustering **reorders the
   samples** of the result, with their labels (unnamed samples are labelled
-  with their input positions); attribute `order` gives each one's position
-  in the input, and attribute `clust` records the method. Tests match named
-  samples to metadata by name, but metadata matched by position must be
-  reordered with `attr(d, "order")`. `clust = NULL`, the default, leaves the
+  with their input positions); the matrix's `dist` record gives each one's
+  position in the input as `order`, and the method as `clust`. ecodive's
+  ordinations and tests put the samples back in their input order before
+  analysing them, so metadata lines up whether matched by name or by
+  position; for other packages, reorder metadata with
+  `attr(d, "dist")$order`. `clust = NULL`, the default, leaves the
   matrix as it was, and `plot()` then clusters it by average linkage for
   the heatmap; `clust = FALSE` (recorded as `"none"`) keeps the input order
   in the plot too.
 
-* Every distance matrix records how it was made, in attributes: `metric`
-  (the metric's ID, such as `"bray"`) and `metric_name` (its display name,
-  such as `"Bray-Curtis Dissimilarity"`, so that other packages can label
-  it without ecodive's table of metrics), and, where they apply, `norm` (the
-  normalization, by name), `pseudocount`, `power` and `alpha`. `plot()`
-  titles its heatmap with `metric_name`.
+* Results record how they were made, one attribute per step, and the
+  records travel with them through later steps (`?ecodive_steps`). A
+  distance matrix has a `dist` record: the metric's display name (such as
+  `"Bray-Curtis Dissimilarity"`, so that other packages can label it
+  without ecodive's table of metrics), its ID, and the `norm`,
+  `pseudocount`, `power`, `alpha` and `clust` it was made with. An
+  ordination adds an `ord` record (its method, display name and settings,
+  such as `n_axes` or `seed`) and keeps its distance matrix's `dist`; the
+  permutation tests keep their distance matrix's `dist`, and `envfit()` its
+  ordination's `dist` and `ord`. Each record is a small list that `str()`
+  and `print()` show on one line, read as `attr(x, "dist")$metric`.
+  `plot()` titles with them, such as "Principal Coordinates Analysis of
+  Bray-Curtis Dissimilarity". `vlr()`, `rho_p()` and `phi_s()` move their
+  `method`, `denominator` and `pseudocount` attributes into their `dist`
+  record (`method` as `metric`).
 
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It

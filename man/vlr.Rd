@@ -32,12 +32,13 @@ before returning the distance matrix: \code{NULL} (the default) or
 (WPGMA), \code{"median"} or \code{"centroid"}, or \code{"pcoa"} to order them
 along the first axis of \code{\link[=pcoa]{pcoa()}}. Clustering \strong{reorders the
 samples} of the result, with their labels (samples without names
-are labelled with their positions in the input): attribute \code{order}
-gives each one's position in the input, so that \code{meta[attr(d, "order"), ]} lines metadata up with them. Tests such as \code{\link[=permanova]{permanova()}} match
-named samples to \code{data} by name, but a vector of groups without
-names is matched by position, so reorder it too. The result's
-attribute \code{clust} records \code{clust} (\code{FALSE} as \code{"none"}), which
-\code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
+are labelled with their positions in the input): its \code{dist} record
+(see \link{ecodive_steps}) gives each one's position in the input as
+\code{order}, so that \code{meta[attr(d, "dist")$order, ]} lines metadata up
+with them. Tests such as \code{\link[=permanova]{permanova()}} match named samples to
+\code{data} by name, but a vector of groups without names is matched by
+position, so reorder it too. The record's \code{clust} records \code{clust}
+(\code{FALSE} as \code{"none"}), which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
@@ -50,13 +51,11 @@ default, \code{n_cpus()}, will use all logical CPU cores.}
 A \code{dist} object \strong{over the features} (the packed lower triangle,
 as \code{\link[=beta_div]{beta_div()}} returns over samples), labelled with the feature names,
 of class \code{c("ecodive_dist", "dist")}, so that \code{plot()} draws it as a
-heatmap (see \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}).
-Attributes, besides \code{dist}'s \code{Size}, \code{Labels}, \code{Diag} and \code{Upper}:
-\itemize{
-\item \code{metric}: \code{'vlr'}, and \code{metric_name}, its display name, \code{'Variance of Log Ratios'}, as \code{\link[=beta_div]{beta_div()}}'s results have them.
-\item \code{method}: \code{'vlr'}.
-\item \code{pseudocount}: the pseudocount used (\code{0} for none).
-}
+heatmap (see \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}). Besides \code{dist}'s \code{Size}, \code{Labels},
+\code{Diag} and \code{Upper}, it has attribute \code{dist}, the record of how it was
+made (see \link{ecodive_steps}), as \code{\link[=beta_div]{beta_div()}}'s results do: its display
+name (\code{"Variance of Log Ratios"}), \code{metric} (\code{"vlr"}), and the
+\code{pseudocount} used (\code{0} for none).
 
 It is a dissimilarity, so it can be given as \code{dm} to \code{\link[=pcoa]{pcoa()}},
 \code{\link[=dist_ord]{dist_ord()}} or \code{\link[stats:hclust]{stats::hclust()}} to ordinate or cluster the features.

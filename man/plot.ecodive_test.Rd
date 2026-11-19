@@ -45,8 +45,9 @@ Procrustes fit. \code{type = "null"} shows the permutation distribution for any
 of them. Nothing is recomputed: the plot is made from the stored results.
 }
 \details{
-The title is the test's name, and the subtitle its statistic, p-value
-and standardized effect size \eqn{z}, as printed.
+The title is the test's name, with the metric of the distances it tested
+(from their \code{dist} record; see \link{ecodive_steps}), and the subtitle its
+statistic, p-value and standardized effect size \eqn{z}, as printed.
 \itemize{
 \item \code{"null"}: a histogram of the statistic in each permutation (the
 \code{f_perm}, \code{r_perm} or \code{delta_perm} attribute), with a line at the

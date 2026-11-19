@@ -32,13 +32,11 @@
 #' @return A `dist` object **over the features** (the packed lower triangle,
 #'   as [beta_div()] returns over samples), labelled with the feature names,
 #'   of class `c("ecodive_dist", "dist")`, so that `plot()` draws it as a
-#'   heatmap (see [plot.ecodive_dist()]).
-#'   Attributes, besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`:
-#'
-#'   * `metric`: `'vlr'`, and `metric_name`, its display name, `'Variance of
-#'     Log Ratios'`, as [beta_div()]'s results have them.
-#'   * `method`: `'vlr'`.
-#'   * `pseudocount`: the pseudocount used (`0` for none).
+#'   heatmap (see [plot.ecodive_dist()]). Besides `dist`'s `Size`, `Labels`,
+#'   `Diag` and `Upper`, it has attribute `dist`, the record of how it was
+#'   made (see [ecodive_steps]), as [beta_div()]'s results do: its display
+#'   name (`"Variance of Log Ratios"`), `metric` (`"vlr"`), and the
+#'   `pseudocount` used (`0` for none).
 #'
 #'   It is a dissimilarity, so it can be given as `dm` to [pcoa()],
 #'   [dist_ord()] or [stats::hclust()] to ordinate or cluster the features.
@@ -152,10 +150,11 @@ vlr <- function (
 #'        result (its alr is 0 in every sample); with several, every feature
 #'        is kept.
 #'
-#' @return A `dist` object over the features, as [vlr()] returns, with
-#'   attributes `method` (`'rho_p'`), `denominator` (absent for the clr;
-#'   otherwise the reference features' names, or their indices when the
-#'   features have no names) and `pseudocount`.
+#' @return A `dist` object over the features, as [vlr()] returns, whose
+#'   `dist` record (see [ecodive_steps]) has `metric` `"rho_p"`, the
+#'   `denominator` (absent for the clr; otherwise the reference features'
+#'   names, or their indices when the features have no names) and the
+#'   `pseudocount`.
 #'
 #'   \eqn{\rho_p} is a **similarity** in a `dist` container: `as.matrix()`
 #'   puts 0 on the diagonal, where \eqn{\rho_p} is 1, and it must not be
@@ -231,8 +230,8 @@ rho_p <- function (
 #'
 #' @inheritParams rho_p
 #'
-#' @return A `dist` object over the features, as [rho_p()] returns, with
-#'   `method` `'phi_s'`. It is a dissimilarity, so it can be given as `dm`
+#' @return A `dist` object over the features, as [rho_p()] returns, whose
+#'   `dist` record has `metric` `"phi_s"`. It is a dissimilarity, so it can be given as `dm`
 #'   to [pcoa()], [dist_ord()] or [stats::hclust()].
 #'
 #' @details
@@ -326,15 +325,14 @@ proportionality <- function (method, what, denominator, env = parent.frame()) {
     switch(method, vlr = 1L, rho_p = 2L, phi_s = 3L),
     if (!is.null(ref)) ref - 1L, keep - 1L, labels, pseudocount, cpus )
 
-  attr(res, 'metric')      <- method
-  attr(res, 'metric_name') <- switch(
-    method,
-    vlr   = 'Variance of Log Ratios',
-    rho_p = 'Proportionality (rho_p)',
-    phi_s = 'Proportionality (phi_s)' )
-  attr(res, 'method') <- method
-  if (!is.null(ref))
-    attr(res, 'denominator') <- if (is.null(info$features)) ref else info$features[ref]
-  attr(res, 'pseudocount') <- pseudocount
+  attr(res, 'dist') <- ecodive_step(
+    switch(
+      method,
+      vlr   = 'Variance of Log Ratios',
+      rho_p = 'Proportionality (rho_p)',
+      phi_s = 'Proportionality (phi_s)' ),
+    metric      = method,
+    denominator = if (!is.null(ref)) { if (is.null(info$features)) ref else info$features[ref] },
+    pseudocount = pseudocount )
   dist_clust(res, env$clust, cpus)
 }

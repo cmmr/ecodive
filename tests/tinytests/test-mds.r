@@ -188,7 +188,7 @@
   expect_identical(dim(ord), c(60L, 2L))
   expect_identical(dimnames(ord), list(attr(d_bray, 'Labels'), c('MDS1', 'MDS2')))
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged',
       'n_iters', 'n_starts', 'best_start', 'n_best', 'class') )
   expect_identical(class(ord), c('ecodive_ord', 'matrix', 'array'))
@@ -229,7 +229,7 @@
   expect_identical(colnames(ord4), paste0('MDS', 1:4))
   expect_true(attr(ord4, 'stress') < attr(ord3, 'stress'))
   expect_true(attr(ord3, 'stress') < attr(ord, 'stress'))
-  expect_identical(mds(as.matrix(d_bray), n_starts = 1), mds(d_bray, n_starts = 1))
+  expect_identical(no_steps(mds(as.matrix(d_bray), n_starts = 1)), no_steps(mds(d_bray, n_starts = 1)))
 
   # max_iters = 0, small max_iters, and tol = 0.
   ord0 <- mds(d_bray, max_iters = 0, n_starts = 0)
@@ -319,7 +319,7 @@
   expect_identical(attr(ord, 'method'), 'mds')
   expect_identical(attr(ord, 'stress'), 0)
   expect_identical(
-    names(attributes(ord)),
+    names(attributes(no_steps(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'stress', 'converged',
       'n_iters', 'n_starts', 'best_start', 'n_best', 'class') )
   ord <- mds(dist(c(a = 1, b = 4)))
@@ -331,7 +331,7 @@
   expect_identical(dim(ord), c(3L, 2L))
   expect_equal(as.double(dist(ord)), c(3, 4, 5), tolerance = 1e-6)
   expect_identical(mds(d, cpus = 100), mds(d, cpus = 1))
-  expect_identical(mds(d_bray, max_iters = 1e12, n_starts = 0), mds(d_bray, max_iters = 1e6, n_starts = 0))
+  expect_identical(no_steps(mds(d_bray, max_iters = 1e12, n_starts = 0)), no_steps(mds(d_bray, max_iters = 1e6, n_starts = 0)))
 
   # A start whose points all collapse together: stress 1.
   d    <- as.dist(matrix(c(0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0), 4))
