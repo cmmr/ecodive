@@ -210,6 +210,8 @@ Ordinations that look for the axes that separate known groups. They
 always find some, so validate them with a permutation test such as
 permanova().
 
+- [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md) : Linear
+  Discriminant Analysis (LDA)
 - [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) :
   Partial Least Squares Discriminant Analysis (PLS-DA)
 

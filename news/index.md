@@ -83,6 +83,7 @@
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
+  [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
   [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) and
   [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md):
   `count_ord(counts, "pca")` is `pca(counts)`. Each wrapper points to
@@ -465,6 +466,25 @@
   Like every supervised method, it separates any groups it is given, so
   validate the separation (e.g. with
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)).
+
+- New [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md) runs a
+  linear discriminant analysis (Fisher’s discriminant axes, ported from
+  scikit-learn’s `LinearDiscriminantAnalysis` with its `"svd"` solver).
+  It gives the same scores, coefficients (`scaling`), group means and
+  proportion of trace as
+  [`MASS::lda()`](https://rdrr.io/pkg/MASS/man/lda.html) and its
+  [`predict()`](https://rdrr.io/r/stats/predict.html) (up to each axis’s
+  sign), with optional `prior` probabilities, and the same scores as
+  scikit-learn up to a constant factor (scikit-learn divides the
+  within-group covariance by n, not n - g). It takes `groups` and `data`
+  as [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md)
+  does, every `norm` and every table type, and stops with an error when
+  the within-group covariance is singular, as it is for microbiome
+  tables with more taxa than samples: run it on a few PCoA or PCA axes
+  instead. 5,000 samples and 200 features take 0.2 seconds, where
+  [`MASS::lda()`](https://rdrr.io/pkg/MASS/man/lda.html) takes 0.8.
+  Results are identical for any number of `cpus`.
+  `count_ord(counts, 'lda', groups)` runs it too.
 
 - New [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md)
   runs a similarity percentages analysis (SIMPER): it breaks the mean

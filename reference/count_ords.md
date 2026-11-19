@@ -80,10 +80,11 @@ will be applied to the
 #>                                          name    id
 #> 1                     Correspondence Analysis    ca
 #> 2           Canonical Correspondence Analysis   cca
-#> 3                Principal Component Analysis   pca
-#> 4 Partial Least Squares Discriminant Analysis plsda
-#> 5                         Redundancy Analysis   rda
-#> 6                        Robust Aitchison PCA  rpca
+#> 3                Linear Discriminant Analysis   lda
+#> 4                Principal Component Analysis   pca
+#> 5 Partial Least Squares Discriminant Analysis plsda
+#> 6                         Redundancy Analysis   rda
+#> 7                        Robust Aitchison PCA  rpca
 
     # Find the method for 'prcomp'.
     m <- match_count_ord('prcomp')

@@ -21,9 +21,9 @@ count_ord(counts, method, ...)
 
 - method:
 
-  The name of an ordination method: `"ca"`, `"cca"`, `"pca"`, `"plsda"`,
-  `"rda"`, or `"rpca"`. Flexible matching is supported (see below).
-  Programmatic access via
+  The name of an ordination method: `"ca"`, `"cca"`, `"lda"`, `"pca"`,
+  `"plsda"`, `"rda"`, or `"rpca"`. Flexible matching is supported (see
+  below). Programmatic access via
   [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md).
 
 - ...:
@@ -35,10 +35,12 @@ count_ord(counts, method, ...)
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md)'s and
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md)'s `groups`,
   `data`, and `formula`, or
+  [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md)'s and
   [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md)'s
   `groups` and `data`. Each method keeps its own defaults; see
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+  [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md),
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), and
@@ -62,6 +64,7 @@ The method's result, as described in "Ordination result" below.
 | Option / Function Name | Method Name |
 | `ca` | Correspondence Analysis (CA) |
 | `cca` | Canonical Correspondence Analysis (CCA), constrained |
+| `lda` | Linear Discriminant Analysis (LDA), supervised |
 | `pca` | Principal Component Analysis (PCA) |
 | `plsda` | Partial Least Squares Discriminant Analysis (PLS-DA), supervised |
 | `rda` | Redundancy Analysis (RDA), constrained |
@@ -71,8 +74,8 @@ The method's result, as described in "Ordination result" below.
 `count_ord(counts, 'rda', 'treatment', meta)` is
 `rda(counts, 'treatment', meta)`. Without them, it is a PCA. `cca` is
 constrained the same way; without constraints, it is a correspondence
-analysis. `plsda` needs the groups to separate, given the same way:
-`count_ord(counts, 'plsda', 'treatment', meta)` is
+analysis. `lda` and `plsda` need the groups to separate, given the same
+way: `count_ord(counts, 'plsda', 'treatment', meta)` is
 `plsda(counts, 'treatment', meta)`.
 
 Methods that ordinate distances, such as
@@ -90,8 +93,9 @@ names also work: `'prcomp'` for `pca`; `'redundancy analysis'`,
 `'constrained correspondence analysis'` for `cca`;
 `'correspondence analysis'` for `ca`; and `'robust PCA'`, `'DEICODE'`,
 or `'gemelli'` for `rpca`; and `'PLS-DA'`, `'PLS'`, or
-`'partial least squares discriminant analysis'` for `plsda`. `'CA'`
-selects `ca`, and `'CCA'` selects `cca`.
+`'partial least squares discriminant analysis'` for `plsda`; and `'LDA'`
+or `'linear discriminant analysis'` for `lda`. `'CA'` selects `ca`, and
+`'CCA'` selects `cca`.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -105,7 +109,9 @@ ambiguity with future additions to the list of methods.
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
 [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), as
 `mixOmics::plsda()` and `caret::plsda()` do with
-[`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md), and
+[`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) and
+[`MASS::lda()`](https://rdrr.io/pkg/MASS/man/lda.html) with
+[`lda()`](https://cmmr.github.io/ecodive/reference/lda.md), and
 whichever package was attached last masks the other's. Write
 [`ecodive::pca()`](https://cmmr.github.io/ecodive/reference/pca.md) and
 so on, or use `count_ord()`, which always runs ecodive's, to be sure.
@@ -171,6 +177,7 @@ plain matrix or data frame without them.
 
 [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+[`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
@@ -203,8 +210,9 @@ the methods that take distances.
 #>   .. ..$ : chr [1:6] "Streptococcus" "Bacteroides" "Corynebacterium" "Haemophilus" ...
 #>   .. ..$ : chr [1:3] "PC1" "PC2" "PC3"
 
-    # The same arguments for every method (but plsda, which needs groups).
-    ids <- setdiff(list_count_ords('id'), 'plsda')
+    # The same arguments for every method (but lda and plsda, which need
+    # groups).
+    ids <- setdiff(list_count_ords('id'), c('lda', 'plsda'))
     lapply(ids, function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 #> [[1]]
 #> [1] 0.4572664 0.4438732
