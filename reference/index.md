@@ -189,6 +189,18 @@ variable in tests and models.
 - [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) :
   Isometric Log-Ratio Balance
 
+### Proportionality
+
+Which features keep a constant ratio across samples, the compositionally
+valid alternative to correlation. A dist over the features.
+
+- [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md) : Variance
+  of Log Ratios
+- [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) :
+  Proportionality Correlation
+- [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) :
+  Symmetric Proportionality
+
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods

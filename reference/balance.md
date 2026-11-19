@@ -85,9 +85,10 @@ Balances are what selbal (Rivera-Pinto et al. 2018) selects, gneiss and
 PhILR build from trees, and coda4microbiome generalizes to
 log-contrasts.
 
-**Same names in other packages**: `compositions::balance()` computes
-balances from a formula (`~ A/B`); whichever package was attached last
-masks the other's. Write `ecodive::balance()` to be sure.
+**Same names in other packages**: `compositions::balance()` computes the
+same balances, with the same sign, from a formula (`~ (A*B)/C`);
+whichever package was attached last masks the other's. Write
+`ecodive::balance()` to be sure.
 
 ## Pseudocount
 
@@ -144,7 +145,11 @@ e00053-18.
 for the ratio of sums;
 [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) for all the
 balances of a sequential binary partition at once;
-[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md).
+[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md);
+[`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
+[`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
+[`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) for
+finding features that move together.
 
 ## Examples
 

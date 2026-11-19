@@ -130,8 +130,11 @@ Bioinformatics*, 2, lqaa023.
 [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) for
 the ratio of geometric means;
 [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) for every
-feature against one; `vlr()` and `rho_p()` (planned) for finding
-features that move together.
+feature against one;
+[`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
+[`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
+[`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) for
+finding features that move together.
 
 ## Examples
 

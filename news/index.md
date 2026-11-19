@@ -666,6 +666,29 @@
       needs none. Both take every table type and keep sparse tables
       sparse: 2,000 samples by 5,000 taxa take under 0.1 seconds.
 
+- New [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
+  [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) measure
+  proportionality between every pair of features, the compositionally
+  valid alternative to correlating relative abundances (Lovell et
+  al. 2015). [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md)
+  is the variance of the log ratio, equal to scikit-bio’s
+  `pairwise_vlr()` to 4e-15 but computed from differences rather than a
+  covariance matrix, so nearly proportional pairs keep their precision.
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) is Erb
+  & Notredame’s proportionality correlation (propr’s `"rho"`) and
+  [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) the
+  symmetric phi of Quinn et al. (propr’s `"phs"`), against the clr by
+  default or a `denominator` (one feature, an alr, or a set). Each
+  returns a `dist` over the features, ready for
+  [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) or
+  [`hclust()`](https://rdrr.io/r/stats/hclust.html)
+  ([`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), a
+  similarity, for thresholding). They take every table type and keep it
+  sparse, run in parallel, and give identical results for any `cpus`:
+  all 4.5 million pairs of 3,000 taxa in 500 samples take about a second
+  on 4 cores.
+
 - New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   returns a count table after any of the transformations that

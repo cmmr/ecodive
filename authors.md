@@ -17,7 +17,8 @@
 
 - **scikit-bio development team**. Contributor, copyright holder.  
   PCoA biplot scores, BIOENV, the alr and ilr transforms and balances,
-  and multiplicative zero replacement, from scikit-bio
+  multiplicative zero replacement, and the variance of log ratios, from
+  scikit-bio
 
 - **NumPy Developers**. Copyright holder.  
   numpy's pairwise summation, followed by replace_zeros_mult()

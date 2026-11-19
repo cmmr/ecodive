@@ -102,6 +102,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/pcoa_biplot.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/permanova.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/permdisp.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/phi_s.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plsda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/print.ecodive_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/procrustes.html</loc></url>
@@ -113,6 +114,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/read_tree.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/replace_zeros.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/replace_zeros_mult.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/rho_p.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/robust_aitchison.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rpca.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/shannon.html</loc></url>
@@ -130,6 +132,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/unweighted_unifrac.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/varpart.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/vlr.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/wave_hedges.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/weighted_unifrac.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/zero_replacements.html</loc></url>

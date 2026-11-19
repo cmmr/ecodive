@@ -131,8 +131,9 @@ pseudocount). See <code><a href="log_ratio.html">log_ratio()</a></code> for when
 <p>Balances are what selbal (Rivera-Pinto et al. 2018) selects, gneiss and
 PhILR build from trees, and coda4microbiome generalizes to log-contrasts.</p>
 <p><strong>Same names in other packages</strong>: <code>compositions::balance()</code> computes
-balances from a formula (<code>~ A/B</code>); whichever package was attached last
-masks the other's. Write <code>ecodive::balance()</code> to be sure.</p>
+the same balances, with the same sign, from a formula (<code>~ (A*B)/C</code>);
+whichever package was attached last masks the other's. Write
+<code>ecodive::balance()</code> to be sure.</p>
     </div>
     <div class="section level2">
     <h2 id="pseudocount">Pseudocount<a class="anchor" aria-label="anchor" href="#pseudocount"></a></h2>
@@ -176,7 +177,9 @@ e00053-18.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="log_ratio.html">log_ratio()</a></code> for the ratio of sums; <code><a href="ilr.html">ilr()</a></code> for all the
-balances of a sequential binary partition at once; <code><a href="replace_zeros.html">replace_zeros()</a></code>.</p></div>
+balances of a sequential binary partition at once; <code><a href="replace_zeros.html">replace_zeros()</a></code>;
+<code><a href="vlr.html">vlr()</a></code>, <code><a href="rho_p.html">rho_p()</a></code> and <code><a href="phi_s.html">phi_s()</a></code> for finding features that move
+together.</p></div>
     </div>
 
     <div class="section level2">
