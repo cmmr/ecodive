@@ -277,6 +277,8 @@ take the count table.
   Aitchison PCA (RPCA)
 - [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md)
   : Phylogenetic Robust Aitchison PCA
+- [`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md) :
+  Double Principal Coordinate Analysis
 - [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) : Fit
   Variables or Taxa onto an Ordination
 - [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) :

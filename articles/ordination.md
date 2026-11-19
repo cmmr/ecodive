@@ -74,6 +74,7 @@ plot(dm, 'Species', iris)
 | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) | Principal Component Analysis (PCA) | counts | Euclidean geometry of (transformed) counts, with feature loadings. |
 | [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) | Correspondence Analysis (CA) | counts | The chi-square geometry of species profiles, for unimodal responses. |
 | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) | Robust Aitchison PCA | counts | Sparse compositional data, such as microbiome counts. |
+| [`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md) | Double Principal Coordinate Analysis (DPCoA) | counts | Samples and taxa together, in a space shaped by the phylogeny. |
 | [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md) | Linear Discriminant Analysis (LDA) | counts | Axes that best separate known groups, from a few features (supervised). |
 | [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) | Partial Least Squares Discriminant Analysis | counts | Axes that best separate known groups (a supervised ordination). |
 | [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) | Orthogonal PLS Discriminant Analysis (OPLS-DA) | counts | One axis that separates two groups, and others for the rest (supervised). |
@@ -576,6 +577,7 @@ permanova(euclidean(scale(iris[, 1:4])), grp, permutations = 199)$p_value
 
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
+[`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
 [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
@@ -635,6 +637,22 @@ round(100 * attr(ord, 'prop'), 1)
 #> [1] 96.8  2.7  0.5
 ```
 
+[`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md), double
+principal coordinate analysis (as in `ade4` and phyloseq’s
+`ordinate(method = "DPCoA")`), is the phylogeny-aware ordination of
+counts: the taxa are placed by their distances along the tree, each
+sample at the abundance-weighted centre of its taxa, so samples and taxa
+share one space. The `taxa` attribute holds the taxa’s coordinates, and
+`rao` each sample’s Rao quadratic entropy, a phylogenetic diversity.
+
+``` r
+
+ord <- dpcoa(ex_counts, ex_tree, n_axes = 2)
+attr(ord, 'rao')
+#>     Saliva       Gums       Nose      Stool 
+#> 22.1557320  8.2482955 15.6334954  0.7183502
+```
+
 ## What drives the axes?
 
 [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
@@ -687,7 +705,7 @@ plot(ord, 'Species', iris)
 plot(fit, add = TRUE)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-30-1.png)
+![](ordination_files/figure-html/unnamed-chunk-31-1.png)
 
 ## Comparing two ordinations
 
@@ -737,7 +755,7 @@ two metrics disagree.
 plot(fit)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-32-1.png)
+![](ordination_files/figure-html/unnamed-chunk-33-1.png)
 
 ## Speed and reproducibility
 

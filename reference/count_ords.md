@@ -77,16 +77,17 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_count_ords()
-#>                                                     name         id
-#> 1                                Correspondence Analysis         ca
-#> 2                      Canonical Correspondence Analysis        cca
-#> 3                           Linear Discriminant Analysis        lda
-#> 4 Orthogonal Partial Least Squares Discriminant Analysis     oplsda
-#> 5                           Principal Component Analysis        pca
-#> 6            Partial Least Squares Discriminant Analysis      plsda
-#> 7                                    Redundancy Analysis        rda
-#> 8                                   Robust Aitchison PCA       rpca
-#> 9                      Phylogenetic Robust Aitchison PCA rpca_phylo
+#>                                                      name         id
+#> 1                                 Correspondence Analysis         ca
+#> 2                       Canonical Correspondence Analysis        cca
+#> 3                    Double Principal Coordinate Analysis      dpcoa
+#> 4                            Linear Discriminant Analysis        lda
+#> 5  Orthogonal Partial Least Squares Discriminant Analysis     oplsda
+#> 6                            Principal Component Analysis        pca
+#> 7             Partial Least Squares Discriminant Analysis      plsda
+#> 8                                     Redundancy Analysis        rda
+#> 9                                    Robust Aitchison PCA       rpca
+#> 10                      Phylogenetic Robust Aitchison PCA rpca_phylo
 
     # Find the method for 'prcomp'.
     m <- match_count_ord('prcomp')

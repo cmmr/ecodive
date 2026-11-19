@@ -21,7 +21,7 @@ count_ord(counts, method, ...)
 
 - method:
 
-  The name of an ordination method: `"ca"`, `"cca"`, `"lda"`,
+  The name of an ordination method: `"ca"`, `"cca"`, `"dpcoa"`, `"lda"`,
   `"oplsda"`, `"pca"`, `"plsda"`, `"rda"`, `"rpca"`, or `"rpca_phylo"`.
   Flexible matching is supported (see below). Programmatic access via
   [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md).
@@ -40,9 +40,12 @@ count_ord(counts, method, ...)
   [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md)'s
   `groups` and `data`, or
   [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md)'s
-  `tree`. Each method keeps its own defaults; see
+  `tree`, or
+  [`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md)'s
+  `tree` or `taxa_dm`. Each method keeps its own defaults; see
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+  [`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md),
   [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
   [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md),
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
@@ -69,6 +72,7 @@ The method's result, as described in "Ordination result" below.
 | Option / Function Name | Method Name |
 | `ca` | Correspondence Analysis (CA) |
 | `cca` | Canonical Correspondence Analysis (CCA), constrained |
+| `dpcoa` | Double Principal Coordinate Analysis (DPCoA) (needs `tree` or `taxa_dm`) |
 | `lda` | Linear Discriminant Analysis (LDA), supervised |
 | `oplsda` | Orthogonal PLS Discriminant Analysis (OPLS-DA), supervised |
 | `pca` | Principal Component Analysis (PCA) |
@@ -85,7 +89,9 @@ analysis. `lda`, `plsda` and `oplsda` need the groups to separate, given
 the same way: `count_ord(counts, 'plsda', 'treatment', meta)` is
 `plsda(counts, 'treatment', meta)`. `oplsda` takes `n_orthogonal` rather
 than `n_axes`. `rpca_phylo` needs a phylogenetic tree:
-`count_ord(counts, 'rpca_phylo', tree = tree)`.
+`count_ord(counts, 'rpca_phylo', tree = tree)`, and so does `dpcoa` (or
+the dissimilarities among the taxa, `taxa_dm`):
+`count_ord(counts, 'dpcoa', tree = tree)`.
 
 Methods that ordinate distances, such as
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) and
@@ -102,11 +108,12 @@ names also work: `'prcomp'` for `pca`; `'redundancy analysis'`,
 `'constrained correspondence analysis'` for `cca`;
 `'correspondence analysis'` for `ca`; and `'robust PCA'`, `'DEICODE'`,
 or `'gemelli'` for `rpca`; `'phylogenetic RPCA'`, `'phylo-RPCA'`, or
-`'phylogenetic DEICODE'` for `rpca_phylo`; and `'PLS-DA'`, `'PLS'`, or
-`'partial least squares discriminant analysis'` for `plsda`; and `'LDA'`
-or `'linear discriminant analysis'` for `lda`; and `'OPLS-DA'`,
-`'OPLS'`, or `'orthogonal PLS-DA'` for `oplsda`. `'CA'` selects `ca`,
-and `'CCA'` selects `cca`.
+`'phylogenetic DEICODE'` for `rpca_phylo`; `'DPCoA'` or
+`'double principal coordinate analysis'` for `dpcoa`; and `'PLS-DA'`,
+`'PLS'`, or `'partial least squares discriminant analysis'` for `plsda`;
+and `'LDA'` or `'linear discriminant analysis'` for `lda`; and
+`'OPLS-DA'`, `'OPLS'`, or `'orthogonal PLS-DA'` for `oplsda`. `'CA'`
+selects `ca`, and `'CCA'` selects `cca`.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -119,6 +126,8 @@ ambiguity with future additions to the list of methods.
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
 [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), as
+`ade4::dpcoa()` does with
+[`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md),
 `mixOmics::plsda()` and `caret::plsda()` do with
 [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) and
 [`MASS::lda()`](https://rdrr.io/pkg/MASS/man/lda.html) with
@@ -198,6 +207,7 @@ plain matrix or data frame without the attributes.
 
 [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md),
+[`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md),
 [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md),
 [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
@@ -235,8 +245,8 @@ the methods that take distances.
 #>  - attr(*, "ord")= Principal Component Analysis (method = pca, margin = 1, norm = clr, pseudocount = 1, n_axes = 3, scale = FALSE)
 
     # The same arguments for every method (but lda, plsda and oplsda,
-    # which need groups, and rpca_phylo, which needs a tree).
-    ids <- setdiff(list_count_ords('id'), c('lda', 'oplsda', 'plsda', 'rpca_phylo'))
+    # which need groups, and rpca_phylo and dpcoa, which need a tree).
+    ids <- setdiff(list_count_ords('id'), c('dpcoa', 'lda', 'oplsda', 'plsda', 'rpca_phylo'))
     lapply(ids, function (m) attr(count_ord(ex_counts, m, n_axes = 2), 'prop'))
 #> [[1]]
 #> [1] 0.4572664 0.4438732
@@ -255,6 +265,7 @@ the methods that take distances.
 #> 
 
     ord <- count_ord(ex_counts, 'rpca_phylo', tree = ex_tree, n_axes = 2)
+    ord <- count_ord(ex_counts, 'dpcoa', tree = ex_tree, n_axes = 2)
 
     count_ord(ex_counts, 'plsda', c('a', 'a', 'b', 'b'), n_axes = 1)
 #>            PLSDA1
