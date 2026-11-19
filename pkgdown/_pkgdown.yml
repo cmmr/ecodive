@@ -76,6 +76,7 @@ reference:
   - envfit
   - bioenv
   - varpart
+  - forward_select
   - procrustes
   - procrustes_test
   - list_dist_ords

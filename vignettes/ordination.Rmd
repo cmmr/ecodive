@@ -236,8 +236,24 @@ permanova(
   formula = ~ Sepal.Length + Sepal.Width + Condition(Species), permutations = 99 )
 ```
 
-`forward_select()` and `principal_response_curves()`, which are planned,
-will also build on `rda()`.
+Before partitioning, `forward_select()` can choose which variables of a
+set to keep (Blanchet et al. 2008), as `vegan::ordiR2step()` does: at each
+step it adds the variable that raises the adjusted \(R^2\) most, if a
+permutation test of it, given those already chosen, is significant, and
+stops before the adjusted \(R^2\) would exceed that of all the candidates
+together. By default it first tests the global model, all candidates
+together, and selects nothing if that is not significant:
+
+```{r}
+fs <- forward_select(
+  iris[, 3:4], ~ Species + Sepal.Length + Sepal.Width, iris,
+  norm = 'hellinger', permutations = 99 )
+fs
+attr(fs, 'selected')
+```
+
+`principal_response_curves()`, which is planned, will also build on
+`rda()`.
 
 `cca()`, canonical **correspondence** analysis (not canonical correlation
 analysis), is the unimodal counterpart of RDA: it constrains a

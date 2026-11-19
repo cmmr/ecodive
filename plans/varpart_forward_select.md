@@ -253,3 +253,122 @@ Reference results:
   (4-level factor), `~ z` and 10 random columns: `varpart()` 0.13 s on 4
   threads for the Hellinger table and 0.12 s for Bray-Curtis distances;
   `vegan::varpart()` 3.5 s and 3.6 s. Fractions equal to rounding.
+
+
+## Decisions made while implementing (forward_select)
+
+Item 13 (`forward_select()`).
+
+Asked of the user at the start (2026-11-19), and answered:
+
+1. **No CCA mode.** RDA of a count table (with `norm`) and db-RDA of a
+   `dist` only. CCA's adjusted R² is itself estimated by permutation, and
+   ecodive has no CCA permutation F test; users can use a Hellinger RDA.
+2. **`ordiR2step()`'s stopping rules, plus `max_vars`** (default `NULL`,
+   no cap), as adespatial's `forward.sel(K)`. No other `forward.sel()`
+   options (`R2more`, `adjR2thresh`, `R2thresh`).
+3. **The global model is tested first** (`global_test = TRUE`): if its p >
+   `alpha`, nothing is selected and a warning says so (Blanchet et al.
+   2008). `global_test = FALSE` reproduces `ordiR2step()`, which does not
+   test it. The global model's `df`, R², adjusted R², F and p are attribute
+   `global`.
+4. **`strata`:** a column of `data` or a vector, permuting freely within
+   strata, as `permanova()` does; or a `shuffleSet()` `permutations`
+   matrix for other designs (not both).
+
+Made while implementing:
+
+5. **Signature:** `forward_select(x, formula = NULL, data, norm = 'none',
+   pseudocount = NULL, margin = 1L, alpha = 0.05, max_vars = NULL,
+   global_test = TRUE, permutations = 999L, strata = NULL, seed = 0L, cpus
+   = n_cpus())`. `formula = NULL` takes every column of `data` (except a
+   `strata` column), as `bioenv()` and `permanova()` do; rows of `data` are
+   matched by name (`model_design()`).
+6. **Candidates are the formula's terms.** Factors enter whole; an
+   interaction is a candidate only once its marginal terms are in
+   (`stats::add.scope()`, as vegan's step functions), checked against
+   `ordiR2step()` on `~ SubsDens * Topo + WatrCont + Shrub`.
+   **`Condition()` terms** are covariables of every model: adjusted R² is
+   then adj(Z + S) − adj(Z), as `RsquareAdj()` gives for partial models,
+   matching `ordiR2step()` started from `rda(Y ~ Condition(Z))`.
+7. **Result:** a data frame of class `c('ecodive_forward_select',
+   'data.frame')`, one row per selected term: `variable`, `df`,
+   `r_squared` (the increase), `r_squared_cum`, `adj_r_squared` (the
+   increase), `adj_r_squared_cum` (`ordiR2step()`'s `R2.adj`), `F`,
+   `p_value` (forward.sel()'s columns, plus df and the adjusted increase).
+   Attributes: `selected` (formula of the chosen terms, `~ 1` if none, in
+   the caller's environment, without `Condition()` terms), `global`,
+   `stop` (the reason), `next_best` (the candidate that failed, as a row:
+   `p_value` `NA` if it failed an R² rule before being tested), `method`,
+   `norm`, `n`, `n_perm`, `permutation`. A print method.
+8. **Stopping, in order:** no candidates left; `max_vars` reached; the
+   best candidate's adjusted R² is not higher than the current model's;
+   it would exceed the global model's (strictly greater; ties are added,
+   so adding every candidate is possible); its p > `alpha`. Only the best
+   candidate of each step is tested, as in `ordiR2step()`.
+9. **The step test is vegan's nested-model `anova()`, not a partial
+   `anova.cca()`** (found from outputs only). `ordiR2step()`'s p-values
+   differ from `anova(rda(Y ~ t + Condition(S)))` (= `permanova()` with
+   `Condition(S)`); they equal `anova(m_S, m_S+t)`, where each model's
+   constrained sum of squares is permuted as in a single-model test
+   (reduced model with respect to the `Condition()` terms Z only), and F =
+   ((SS_{S+t}* − SS_S*) / q) / ((SS_total − SS_Z − SS_{S+t}*) / df_res).
+   Without Z this is a plain permutation of the data. Implemented with one
+   `perm_ss()` call per step: one set of design columns [S, t] whose
+   within-set Gram-Schmidt (against Z) makes the first rank(S) columns
+   span the permuted S, so both models' sums of squares come from one
+   pass. Reproduced by hand in R (several schemes tried) before coding.
+   The global test is `anova.cca()` of the whole model (= `permanova()`).
+10. **F and adjusted R² come from one `response_cross()` pass** (item
+    12's helpers); F is reported even when not tested. Tests need the
+    distances: db-RDA uses `x`, RDA the Euclidean distances among the
+    normalized samples (`euclidean()`, a packed triangle), which give the
+    same F and p-values (tested).
+11. **`permutations = 0`** runs no tests: selection by the adjusted-R²
+    rules alone, p-values `NA` (used to compare with `forward.sel()`,
+    whose p-values come from its own permutations).
+12. **Saturated global model** (no residual df): `ordiR2step()` stops
+    with an error; here a warning says the global adjusted R² rule (and
+    the global test) is skipped, and selection continues with the other
+    rules.
+13. **Errors:** `alpha` not in (0, 1]; bad `max_vars` or `global_test`;
+    no `data`; `data` given as a formula or not a data frame; fewer than 3
+    samples; `x` without variation; no candidate varying (or all aliased
+    with `Condition()` terms); `strata` with a `permutations` matrix;
+    plus `model_design()`'s and `varpart_response()`'s.
+14. **Docs:** `man/forward_select.Rd`, NEWS (2.4.0), README's "Model
+    building" row, the `ecodive` vignette (one clause), the `ordination`
+    vignette (a paragraph and example before varpart's test), pkgdown
+    (after `varpart`).
+15. **Fixtures** use vegan 2.7.8, permute 0.10.0 and adespatial 0.3-30
+    (scratch library); `data-raw/expected/forward_select.r` writes
+    `tests/tinytests/expected/forward_select.rds` (48 kB).
+
+Reference results:
+
+- **vegan 2.7.8** `ordiR2step()`, 7 cases with stored `shuffleSet()`
+  matrices (199 permutations for mite, 499 for varespec): mite on
+  `mite.env` + the first six `mite.pcnm` columns, as a Hellinger table
+  and as Bray-Curtis distances; partial selections with `Condition()`
+  (Hellinger and Bray-Curtis); an interaction (`SubsDens * Topo`, which
+  becomes a candidate after its main effects); varespec / varechem
+  (Hellinger and Bray-Curtis), where the global adjusted-R² rule stops
+  selection. Same variables in the same order and the same stopping point
+  in every case; p-values identical; largest differences: adjusted R²
+  1.4e-15 (absolute), F 1.6e-14 (relative), global adjusted R² 4.6e-15.
+- **adespatial 0.3-30** `forward.sel()` (mite, Hellinger, numeric
+  candidates): the same 7 variables in the same order; R², cumulative
+  adjusted R² within 4.7e-15, F within 1.2e-13 (relative). (Its p-values
+  come from its own permutations; it stopped at alpha on the 8th.)
+- **ecodive's own methods:** RDA of the Hellinger table equals db-RDA of
+  the Euclidean distances among its samples (variables, F, p identical);
+  the global test equals `permanova()`'s; the last term's F equals
+  `permanova(by = 'terms')`'s; the first step's p-value equals
+  `permanova()`'s.
+- **Speed:** 1,000 samples × 500 taxa (12% non-zero), 11 candidates (one a
+  4-level factor), 199 permutations: 0.17 s on 4 threads for the
+  Hellinger table (vegan 58 s) and 0.08 s for Bray-Curtis distances
+  (vegan 85 s), with the same selections.
+- **Tests:** 9,171 results at home and 211 in CRAN mode (from 9,014 and
+  207). `R CMD check --no-manual --ignore-vignettes`: only the known
+  en_US.UTF-8 locale WARNING.

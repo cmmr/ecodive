@@ -115,6 +115,12 @@
   expect_true(all(is.finite(vp$adj_r_squared)))
   expect_true(any(grepl('[a]', capture.output(print(vp)), fixed = TRUE)))
 
+  fs <- forward_select(counts, ~ grp + x, meta, norm = 'hellinger', permutations = 9, alpha = 1, cpus = cpus)
+  expect_inherits(fs, c('ecodive_forward_select', 'data.frame'))
+  expect_identical(ncol(fs), 8L)
+  expect_true(is.finite(attr(fs, 'global')$adj_r_squared))
+  expect_true(any(grepl('Forward selection', capture.output(print(fs)), fixed = TRUE)))
+
 
 
   # Distance-based tests. ====

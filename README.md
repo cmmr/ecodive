@@ -42,7 +42,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Ordination of counts  | `count_ord()`   | `pca()`, `rpca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`              |
 | Biplots               |                 | `pcoa_biplot()`, `envfit()`                                                              |
 | Comparing ordinations |                 | `procrustes()`, `procrustes_test()`                                                      |
-| Model building        |                 | `varpart()`, `bioenv()`                                                                  |
+| Model building        |                 | `varpart()`, `forward_select()`, `bioenv()`                                              |
 | Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`        |
 | Data preparation      |                 | `rarefy()`, `normalize()`, `read_tree()`                                                 |
 
