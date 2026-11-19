@@ -374,9 +374,21 @@ Made while implementing:
     `vignette("ecodive")` tables, `dist_ord()`'s docs, the "Supervised"
     group of `pkgdown/_pkgdown.yml`, the ordination section's list, and
     NEWS.
-15. **Speed:** most of the time is `pcoa()` of up to 50 axes. n = 1,000
-    with 5 groups: 2.4 s by default (`pcoa(n_axes = 50)` alone 2.5 s here,
-    with no gain from `cpus`; full `eigen()` 1.0 s), 0.34 s with
-    `max_pcoa_axes = 10` and 999 permutations, where `CAPdiscrim(mmax = 10)`
-    takes 1.6 s without permutations. n = 5,000: 26 s on 4 threads. The
+15. **Speed:** most of the time is `pcoa()` of up to 50 axes (random
+    Poisson counts, Bray-Curtis, 5 groups, a flat spectrum: Lanczos's slow
+    case). n = 1,000: 2.4 s by default, 0.34 s with `max_pcoa_axes = 10`
+    and 999 permutations, where `CAPdiscrim(mmax = 10)` takes 1.6 s without
+    permutations. n = 5,000: 26 s on 4 threads, 42 s on 1. The
     leave-one-out step and the 999 permutations take milliseconds.
+    `pcoa()` is multithreaded, but only its Gower products are:
+    `pcoa(n_axes = 50)` takes 2.5 s on 1 or 4 threads at n = 1,000 (full
+    `eigen()` 1.0 s), and 44.6 s vs 25.4 s at n = 5,000 (1.75x); n_axes = 3
+    at n = 5,000: 5.7 s vs 2.6 s. Callgrind (n = 1,000, 50 axes, 1 thread):
+    the Gower products are 21% of the run, and `lanczos()`'s serial steps
+    the rest: orthonormalizing the basis 26%, Rayleigh-Ritz (`lz_combine`)
+    25%, `lz_sym_eigen` 13%, `lz_extend_h` / `lz_restart_h` 8%. At 50 axes
+    the block is 50 vectors and the basis 200, so those O(n M^2) and O(M^3)
+    steps outweigh the O(n^2) products; at n = 1,000 `threads_for()` also
+    gives the products only 2 threads. (An earlier version of this note
+    said `pcoa()` gained nothing from `cpus`; that holds only at
+    n = 1,000.)
