@@ -2,26 +2,40 @@
 
 **Priority:** 22 (`ancombc()`, `ancombc2()`) and 23 (the post-hoc tests
 and `structural_zeros()`). **Tier:** port (scikit-bio 0.7.4,
-`skbio/stats/composition/_ancombc.py`, BSD-3), **with a provenance
-question for the user** (below). Read [README.md](README.md) first, and
+`skbio/stats/composition/_ancombc.py`, BSD-3, itself derived from the
+Artistic-2.0 R package ANCOMBC; both notices apply, see "Licensing"). Read [README.md](README.md) first, and
 [compositional.md](compositional.md) for the conventions the compositional
 plans share.
 
 
-## Provenance: ask the user before starting
+## Licensing (decided by the user, 2026-11-19)
 
 scikit-bio's file header says its implementation "is based on an analysis
 of the source code of the R package ANCOMBC", which is **Artistic-2.0**,
-and thanks ANCOMBC's author for advice. scikit-bio distributes it under
-BSD-3. Whether a BSD-3 port of that port is fine for ecodive (MIT) is the
-user's call: README.md lists only MIT/BSD/Apache/public domain as
-portable, and lists nothing about code derived from Artistic-2.0 code.
+and thanks ANCOMBC's author for advice; scikit-bio releases it as BSD-3.
+The user has allowed Artistic-2.0 code in ecodive (README.md, "Licensing"),
+so the port goes ahead with **both notices**, and it complies whichever
+licence is held to apply:
 
-- If **yes**: port from scikit-bio as below; credit scikit-bio in
-  `inst/COPYRIGHTS` and mention ANCOMBC's authorship in the Rd.
-- If **no**: this becomes a clean-room implementation from Lin & Peddada
-  (2020, 2024) and ANCOMBC's documentation, with ANCOMBC (and scikit-bio)
-  output-only; move both TODO items down to the clean-room group.
+- Every ported file (`src/ancombc.c`, `R/ancombc.r`, ...) carries
+  scikit-bio's BSD-3 notice ("Copyright (c) 2013--, scikit-bio development
+  team.") **and** ANCOMBC's Artistic-2.0 notice. Take ANCOMBC's copyright
+  line from its DESCRIPTION / LICENSE (Bioconductor; Huang Lin is the
+  author and maintainer), and include the Artistic-2.0 text.
+- Each file header says how it differs from the original (Artistic-2.0
+  section 4), e.g. "C/R port of ANCOM-BC from scikit-bio 0.7.4
+  (`_ancombc.py`), itself derived from the R package ANCOMBC
+  <version>; restructured for ecodive." User-visible differences go in the
+  Rd's "Differences from ANCOMBC / scikit-bio" section.
+- `inst/COPYRIGHTS`: one `Files:` stanza for these files with both
+  licences. `Authors@R`: scikit-bio is already credited; add Huang Lin as
+  `ctb`/`cph` ("ANCOM-BC, via scikit-bio's port").
+- Because ANCOMBC is now portable under README.md's rule, its R source may
+  be **read** to resolve differences between scikit-bio and ANCOMBC
+  outputs (not only run for fixtures). Port from scikit-bio first: it's
+  restructured for batching and already matched to ANCOMBC.
+- Optional courtesy (the user's call): tell Huang Lin about the port; a
+  permission to use MIT would let the Artistic notice go.
 
 
 ## What it is
@@ -152,12 +166,13 @@ safeguards that parity depends on.
 
 ## Reference implementations
 
-- **Port from:** scikit-bio 0.7.4 `_ancombc.py` (BSD-3; see Provenance).
+- **Port from:** scikit-bio 0.7.4 `_ancombc.py` (BSD-3, derived from
+  Artistic-2.0 ANCOMBC; see "Licensing").
 - **Fixtures:** `data-raw/expected/ancombc.py` with scikit-bio (one and
   two covariates, a categorical with 3 levels and a numeric, zeros
   handled by pseudocount for `ancombc()` and as missing for `ancombc2()`,
   each post-hoc test); and `data-raw/expected/ancombc.r` with the R
-  package ANCOMBC (Artistic-2.0, **output-only**) on the same data, since
+  package ANCOMBC (Artistic-2.0, portable; see "Licensing") on the same data, since
   scikit-bio says it matches it. Compare at 1e-8 (the EM is iterative).
 
 

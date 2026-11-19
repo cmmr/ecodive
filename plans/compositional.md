@@ -30,7 +30,7 @@ gaps around them.
 | [qmp.md](qmp.md) | `qmp_scale()`, `qmp_rarefy()`; per-sample `rarefy(depth =)` | formula over ecodive's `rarefy()` |
 | [ancom.md](ancom.md) | `ancom()` | port (scikit-bio) |
 | [dirmult_ttest.md](dirmult_ttest.md) | `dirmult_ttest()` | port (scikit-bio; scale model from ALDEx3, MIT) |
-| [ancombc.md](ancombc.md) | `ancombc()`, `ancombc2()`; post-hoc `ancombc_global()`, `ancombc_pairwise()`, `ancombc_dunnett()`, `ancombc_trend()`; `structural_zeros()` | port (scikit-bio; derived from Artistic-2.0 ANCOMBC: user to confirm) |
+| [ancombc.md](ancombc.md) | `ancombc()`, `ancombc2()`; post-hoc `ancombc_global()`, `ancombc_pairwise()`, `ancombc_dunnett()`, `ancombc_trend()`; `structural_zeros()` | port (scikit-bio, BSD-3; derived from Artistic-2.0 ANCOMBC: both notices) |
 | [philr.md](philr.md) | `philr()`, `philr_distance()` | port (basis, scikit-bio / gneiss) + formula (weights; philr output-only) |
 | [rpca_phylo.md](rpca_phylo.md) | `rpca_phylo()` | port (gemelli) on ecodive's `rpca()` |
 | [rpca_joint.md](rpca_joint.md) | `rpca_joint()` | port (gemelli) |
