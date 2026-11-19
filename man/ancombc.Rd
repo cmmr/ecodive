@@ -16,6 +16,7 @@ ancombc(
   tol = 1e-05,
   alpha = 0.05,
   p_adjust = "holm",
+  sensitivity = FALSE,
   cpus = n_cpus()
 )
 
@@ -31,6 +32,7 @@ ancombc2(
   tol = 1e-05,
   alpha = 0.05,
   p_adjust = "holm",
+  sensitivity = FALSE,
   cpus = n_cpus()
 )
 }
@@ -87,6 +89,14 @@ the features, separately for each covariate: any method of
 \code{\link[stats:p.adjust]{stats::p.adjust()}} (\code{'holm'}, the default, \code{'hochberg'},
 \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'}, \code{'fdr'}, \code{'none'}).}
 
+\item{sensitivity}{The pseudocount sensitivity analysis (see \strong{False
+discoveries}): \code{FALSE} (the default) for none; \code{TRUE} to refit with
+pseudocounts \code{0.1}, \code{0.5} and \code{1} added to every value, as ANCOMBC
+does; or a vector of positive pseudocounts to use instead (on the
+scale of \code{counts}, so give your own for proportions). With it, the
+table gains \code{passed_ss} and \code{reject_robust}. \strong{Recommended}: it
+takes one more fit per pseudocount.}
+
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
 
@@ -115,6 +125,10 @@ distribution (\code{ancombc2()}).
 \item \code{p_adjusted}: \code{p_value} adjusted with \code{p_adjust}, within each
 covariate.
 \item \code{reject}: \code{TRUE} when \code{p_adjusted <= alpha}.
+\item With \code{sensitivity}: \code{passed_ss}, \code{TRUE} when \code{reject} is the same in
+the fits at every pseudocount (ANCOMBC's \code{passed_ss}), and
+\code{reject_robust}, \code{reject & passed_ss} (ANCOMBC's \code{diff_robust}): the
+decisions to use.
 }
 
 A coefficient that can't be estimated (with zeros as missing values, a
@@ -147,6 +161,10 @@ squares estimate (\code{delta_wls}) and that estimate's variance
 (\code{var_delta}); \code{n_iters}: the EM iterations run per covariate.
 \item \code{sample_fractions} (\code{ancombc2()}): each sample's estimated log
 sampling fraction.
+\item With \code{sensitivity}: \code{sensitivity}, a list of \code{pseudocounts} and
+\code{fits} (the result of the same call at each of them, without a
+sensitivity analysis of its own), which the post-hoc tests repeat
+themselves on.
 }
 }
 \description{
@@ -203,6 +221,29 @@ The EM stops after \code{max_iters} iterations even if it hasn't converged
 exact path of its minimisations, so it can differ from ANCOMBC's by much
 more than when it converges (by 0.02 in one test).
 }
+\section{False discoveries}{
+ the sensitivity analysis:
+\strong{Without the sensitivity analysis, ANCOM-BC2's (and ANCOM-BC's)
+decisions can include a high proportion of false discoveries.} Taking
+logs needs something done about zeros, and the results can depend on
+that choice: a feature can be significant only because of how its
+zeros were treated. The analysis refits with each pseudocount in
+\code{sensitivity} added to every value and keeps a decision only if it is
+the same in every fit (\code{reject_robust}). ANCOMBC runs it by default and
+its authors strongly recommend it, unless power matters most; a 2026
+benchmark (preprint) found ANCOM-BC2's false discovery rate controlled
+with it and greatly inflated without it. Even so, in a comparison over
+69 gut microbiome datasets with ANCOMBC's default settings (Pelto et al.
+2025), ANCOM-BC2's findings replicated least often of 14 methods: treat
+them with caution, and compare them with another method's.
+
+It is off by default here only because scikit-bio, whose results these
+are, leaves it to the user; set \code{sensitivity = TRUE}. It follows ANCOMBC
+2.10.1 and later (and scikit-bio's example): each pseudocount is added
+to every value before the whole analysis, which is repeated, and the
+post-hoc tests (\code{\link[=ancombc_global]{ancombc_global()}}, ...) repeat themselves on each fit.
+}
+
 \section{Covariates}{
 
 Character and logical variables become factors; every factor is coded
@@ -250,9 +291,10 @@ ordered as in R (patsy puts categorical terms before numeric ones).
 shared pseudocount rule (see \code{pseudocount}).
 \item Not carried over: random effects (ANCOMBC's \code{rand_formula}),
 scikit-bio's \code{aggregator}, ANCOMBC's data preprocessing (\code{prv_cut},
-\code{lib_cut}, \code{tax_level}; see the examples), its structural-zero
-detection and its pseudocount sensitivity analysis (repeat the call
-with other \code{pseudocount} values).
+\code{lib_cut}, \code{tax_level}; see the examples) and its structural-zero
+detection (see \code{\link[=structural_zeros]{structural_zeros()}}).
+\item The sensitivity analysis is off by default (ANCOMBC: on), and is
+available for \code{ancombc()} too (ANCOMBC: \code{ancombc2()} only).
 \item A design with as many columns as samples, or more, is an error (the
 residuals would all be zero); a rank-deficient design gives a
 warning.
@@ -317,9 +359,11 @@ For large datasets, standard matrix operations may be slow. See
     plot(res)
     plot(res, 'age')
 
-    # ANCOM-BC2, with zeros as missing values.
-    res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
-    head(res2)
+    # ANCOM-BC2, with zeros as missing values, and the sensitivity
+    # analysis (recommended): only decisions that hold at pseudocounts
+    # 0.1, 0.5 and 1 too are kept in `reject_robust`.
+    res2 <- ancombc2(x, ~ status + age, meta, groups = 'status', sensitivity = TRUE)
+    res2[res2$reject, ]
 
     # ANCOMBC's preprocessing, done first: keep features present in at
     # least 10\% of samples (prv_cut = 0.1), and samples with at least 10
@@ -335,6 +379,14 @@ microbiomes with bias correction. \emph{Nature Communications}, 11, 3514.
 Lin, H., & Peddada, S. D. (2024). Multigroup analysis of compositions of
 microbiomes with covariate adjustments and repeated measures. \emph{Nature
 Methods}, 21, 83–91.
+
+Pelto, J., Auranen, K., Kujala, J. V., & Lahti, L. (2025). Elementary
+methods provide more replicable results in microbial differential
+abundance analysis. \emph{Briefings in Bioinformatics}, 26, bbaf130.
+
+A configuration-resolved benchmark of differential abundance analysis
+methods for human gut 16S rRNA microbiome data (2026). \emph{bioRxiv}
+(preprint). doi:10.64898/2026.09.01.748571
 }
 \seealso{
 \code{\link[=ancom]{ancom()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=replace_zeros]{replace_zeros()}}.

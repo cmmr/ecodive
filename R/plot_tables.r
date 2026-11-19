@@ -256,17 +256,28 @@ plot.ecodive_dirmult_ttest <- function (x, labels = 10, ...) {
 # most significant of them named, and dashed lines at `alpha` and 0. `args`
 # are the user's arguments for graphics::plot.default(). The subtitle counts
 # the features rejected.
-plot_volcano <- function (lfc, p, reject, feature, alpha, labels, args, main, xlab) {
+plot_volcano <- function (
+    lfc, p, reject, feature, alpha, labels, args, main, xlab, robust = NULL ) {
 
   y   <- -log10(pmax(p, .Machine$double.xmin))
   rej <- reject %in% TRUE
 
+  # With a sensitivity analysis: the robust decisions filled, the others
+  # that are significant hollow, and only the robust ones named.
+  sub <- sprintf('%d of %d features differentially abundant', sum(rej), length(rej))
+  pch <- 16
+  if (!is.null(robust)) {
+    rob <- robust %in% TRUE
+    pch <- ifelse(rej & !rob, 1, 16)
+    sub <- sprintf('%s, %d robust to the pseudocount (filled)', sub, sum(rob))
+    rej <- rob
+  }
+
   plot_do(
     graphics::plot.default, c(list(lfc, y), args),
     list(
-      col  = ifelse(rej, PLOT_HIGHLIGHT, PLOT_MUTED), pch = 16, las = 1,
-      ylim = range(0, y, finite = TRUE), main = main, xlab = xlab,
-      sub  = sprintf('%d of %d features differentially abundant', sum(rej), length(rej)),
+      col  = ifelse(reject %in% TRUE, PLOT_HIGHLIGHT, PLOT_MUTED), pch = pch, las = 1,
+      ylim = range(0, y, finite = TRUE), main = main, xlab = xlab, sub = sub,
       ylab = expression(-log[10] ~ (adjusted ~ italic(p))) ))
 
   graphics::abline(v = 0, lty = 3, col = 'grey70')
@@ -338,7 +349,9 @@ plot.ecodive_ancom <- function (x, n_features = 30, ...) {
 # top), labelled with `labels`, those that `reject` highlighted, and a
 # dashed line at `line` (if not NULL). `args` are the user's arguments for
 # graphics::dotchart(). The subtitle counts the features rejected.
-plot_ranked <- function (stat, labels, reject, n, args, main, xlab, xlim = NULL, line = NULL) {
+plot_ranked <- function (
+    stat, labels, reject, n, args, main, xlab, xlim = NULL, line = NULL,
+    robust = NULL ) {
 
   n <- plot_count(n, 'n_features')
   if (n < 1)
@@ -350,15 +363,19 @@ plot_ranked <- function (stat, labels, reject, n, args, main, xlab, xlim = NULL,
   rej <- reject[idx] %in% TRUE
 
   sub <- sprintf(
-    '%d of %d features differentially abundant%s', sum(reject %in% TRUE), D,
+    '%d of %d features differentially abundant%s%s', sum(reject %in% TRUE), D,
+    if (is.null(robust)) '' else sprintf(', %d robust to the pseudocount (filled)', sum(robust %in% TRUE)),
     if (length(ord) < D) sprintf('; top %d shown', length(ord)) else '' )
+
+  # With a sensitivity analysis, significant but not robust: hollow.
+  pch <- if (is.null(robust)) 19 else ifelse(rej & !(robust[idx] %in% TRUE), 1, 19)
 
   if (is.null(xlim)) xlim <- range(0, stat[idx], finite = TRUE)
 
   plot_do(
     graphics::dotchart, c(list(stat[idx]), plot_dot_args(args)),
     list(
-      labels = labels[idx], pch = 19,
+      labels = labels[idx], pch = pch,
       color  = ifelse(rej, PLOT_HIGHLIGHT, PLOT_MUTED),
       xlim   = xlim, main = main, xlab = xlab ))
 

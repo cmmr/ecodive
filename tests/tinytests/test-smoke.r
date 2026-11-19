@@ -117,6 +117,8 @@
   expect_true(length(attr(z, 'sample_fractions')) == 20L && all(is.finite(attr(z, 'sample_fractions'))))
   meta$g3 <- rep(c('a', 'b', 'c', 'd'), 5)
   fit <- ancombc2(counts, ~ g3 + x, meta, groups = 'g3', cpus = cpus)
+  z <- ancombc2(counts, ~ g3 + x, meta, groups = 'g3', sensitivity = c(0.5, 1), cpus = cpus)
+  expect_true(is.logical(z$passed_ss) && identical(z$reject_robust, z$reject & z$passed_ss))
   z <- ancombc_global(fit, cpus = cpus)
   expect_true(inherits(z, 'ecodive_ancombc_global') && nrow(z) == 12L && all(z$p_value >= 0 & z$p_value <= 1))
   z <- ancombc_pairwise(fit, cpus = cpus)

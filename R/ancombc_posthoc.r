@@ -90,8 +90,15 @@
 #'   the screening global test didn't find (and wherever it would be 0 or
 #'   `NaN`), and `p_adjusted` is the mdFDR-adjusted value.
 #'
-#'   Attributes: `method` (the fit's), `groups`, `alpha`, `p_adjust`, and
-#'   for the bootstrapped tests `n_bootstraps` and `seed`.
+#'   When the fit was made with `sensitivity` (see [ancombc()]), each test
+#'   is repeated on the fit at every pseudocount, and the table gains
+#'   `passed_ss` (the decision is the same in every fit; for the trend test,
+#'   the global test's decision, as in ANCOMBC) and `reject_robust`
+#'   (`reject & passed_ss`), the decisions to use.
+#'
+#'   Attributes: `method` (the fit's), `groups`, `alpha`, `p_adjust`, for
+#'   the bootstrapped tests `n_bootstraps` and `seed`, and with the
+#'   sensitivity analysis `sensitivity` (its pseudocounts).
 #'
 #' @details
 #' With \eqn{\hat\beta_f} the feature's \eqn{k} coefficients of `groups`
@@ -193,7 +200,9 @@ ancombc_global <- function (
     p_adjusted = res$q,
     reject     = res$reject,
     stringsAsFactors = FALSE )
-  posthoc_result(out, ph, 'global')
+  out <- posthoc_result(out, ph, 'global')
+  posthoc_sensitivity(out, ph, function (f)
+    ancombc_global(f, ph$groups, ph$alpha, ph$p_adjust, ph$cpus) )
 }
 
 
@@ -236,7 +245,9 @@ ancombc_pairwise <- function (
   st     <- posthoc_global_stats(ph)
   screen <- posthoc_adjust_global(st$p, 'BH', ph$alpha)$reject
 
-  posthoc_mdfdr(ph, beta, var, labels, screen, 'pairwise')
+  out <- posthoc_mdfdr(ph, beta, var, labels, screen, 'pairwise')
+  posthoc_sensitivity(out, ph, function (f)
+    ancombc_pairwise(f, ph$groups, ph$alpha, ph$p_adjust, ph$cpus) )
 }
 
 
@@ -310,7 +321,9 @@ ancombc_dunnett_fit <- function (env, null_draws) {
   if (!is.null(ph$valid)) p_global[!ph$valid] <- 1
   screen <- posthoc_adjust_global(p_global, 'BH', ph$alpha)$reject
 
-  posthoc_mdfdr(ph, beta, var, ph$labels, screen, 'dunnett')
+  out <- posthoc_mdfdr(ph, beta, var, ph$labels, screen, 'dunnett')
+  posthoc_sensitivity(out, ph, function (f)
+    ancombc_dunnett(f, ph$groups, ph$alpha, ph$p_adjust, ph$n_bootstraps, ph$seed, ph$cpus) )
 }
 
 
@@ -380,6 +393,12 @@ ancombc_trend_fit <- function (env, null_draws) {
     stringsAsFactors = FALSE )
 
   out <- posthoc_result(out, ph, 'trend')
+
+  # The sensitivity analysis uses the global test's decisions, as ANCOMBC's
+  # (its trend test is random).
+  glob <- function (f) ancombc_global(f, ph$groups, ph$alpha, ph$p_adjust, ph$cpus)
+  if (!is.null(ph$sensitivity))
+    out <- posthoc_sensitivity(out, ph, glob, main_reject = glob(ph$fit)$reject)
   attr(out, 'patterns') <- patterns
   attr(out, 'nodes')    <- stats::setNames(as.integer(nodes), nms)
   beta <- res$beta
@@ -474,7 +493,9 @@ posthoc_setup <- function (env, boot = FALSE) {
     alpha    = as.double(alpha),
     p_adjust = p_adjust,
     method   = attr(fit, 'method'),
-    cpus     = env$cpus )
+    cpus     = env$cpus,
+    fit      = fit,
+    sensitivity = attr(fit, 'sensitivity') )
 
   if (boot) {
     n_boot <- env$n_bootstraps
@@ -555,6 +576,23 @@ posthoc_mdfdr <- function (ph, beta, var, labels, screen, test) {
     stringsAsFactors = FALSE )
 
   posthoc_result(out, ph, test)
+}
+
+
+# The sensitivity analysis of a post-hoc result, when the fit has one: the
+# same test (`rerun`, a function of a fit) on the fit at each pseudocount;
+# `passed_ss` is TRUE where its decision (or, for the trend test, the global
+# test's, `main_reject`) is the same in every fit, and `reject_robust` is
+# reject & passed_ss.
+posthoc_sensitivity <- function (out, ph, rerun, main_reject = out$reject) {
+  sens <- ph$sensitivity
+  if (is.null(sens)) return (out)
+  passed <- rep(TRUE, nrow(out))
+  for (f in sens$fits) passed <- passed & (rerun(f)$reject == main_reject)
+  out$passed_ss     <- passed
+  out$reject_robust <- out$reject & passed
+  attr(out, 'sensitivity') <- sens$pseudocounts
+  out
 }
 
 

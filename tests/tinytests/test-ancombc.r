@@ -289,6 +289,56 @@
 
 
   # -----------------------------------------------------------------------
+  # The pseudocount sensitivity analysis
+  # -----------------------------------------------------------------------
+
+  tb  <- ref$tables$doc3
+  f0  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', cpus = 1L)
+  fs  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', sensitivity = TRUE, cpus = 1L)
+
+  # Off by default; on, the main columns are unchanged and two are added.
+  expect_identical(names(f0), c('feature', 'covariate', 'log_fc', 'se', 'w', 'p_value', 'p_adjusted', 'reject'))
+  expect_null(attr(f0, 'sensitivity'))
+  expect_identical(names(fs), c(names(f0), 'passed_ss', 'reject_robust'))
+  expect_identical(plain(fs)[names(f0)], plain(f0))
+  expect_inherits(fs, c('ecodive_ancombc', 'data.frame'))
+
+  # scikit-bio's docstring: none of the three significant results is robust.
+  expect_identical(sum(fs$reject), 3L)
+  expect_identical(sum(fs$reject_robust), 0L)
+
+  # The rule: the decision is the same in the fits at 0.1, 0.5 and 1.
+  man <- lapply(c(0.1, 0.5, 1), function (pc)
+    ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', pseudocount = pc, cpus = 1L) )
+  passed <- Reduce(`&`, lapply(man, function (m) m$reject == f0$reject))
+  expect_identical(fs$passed_ss, passed)
+  expect_identical(fs$reject_robust, f0$reject & passed)
+  sens <- attr(fs, 'sensitivity')
+  expect_identical(sens$pseudocounts, c(0.1, 0.5, 1))
+  no_f <- function (r) { attr(r, 'formula') <- NULL; r }   # its environment differs
+  for (i in 1:3) expect_identical(no_f(sens$fits[[i]]), no_f(man[[i]]))
+
+  # Custom pseudocounts, ancombc() too, threads.
+  x1 <- ref$tables$sim$counts
+  m1 <- ref$tables$sim$data
+  f1 <- ancombc(x1, ~ site + ph, m1, pseudocount = 0.5, sensitivity = c(1, 2), cpus = 1L)
+  m  <- lapply(c(1, 2), function (pc) ancombc(x1, ~ site + ph, m1, pseudocount = pc, cpus = 1L))
+  expect_identical(f1$passed_ss, m[[1]]$reject == f1$reject & m[[2]]$reject == f1$reject)
+  expect_identical(attr(f1, 'sensitivity')$pseudocounts, c(1, 2))
+  expect_identical(ancombc(x1, ~ site + ph, m1, pseudocount = 0.5, sensitivity = c(1, 2), cpus = 4L), f1)
+  expect_identical(attr(ancombc(x1, ~ site + ph, m1, pseudocount = 0.5, sensitivity = FALSE, cpus = 1L), 'sensitivity'), NULL)
+
+  for (v in list('yes', c(0, 1), -1, NA, numeric(0), Inf))
+    expect_error(ancombc2(tb$counts, ~ status, tb$data, sensitivity = v), '`sensitivity`')
+
+  # Plots flag the robust decisions.
+  grDevices::pdf(NULL)
+  expect_silent(plot(fs))
+  expect_silent(plot(f1, 'siteskin'))
+  grDevices::dev.off()
+
+
+  # -----------------------------------------------------------------------
   # Argument checks
   # -----------------------------------------------------------------------
 

@@ -64,7 +64,10 @@ test statistic, largest first.
 }
 
 Features declared differentially abundant (\code{reject = TRUE}) are
-highlighted in all of them.
+highlighted in all of them. When the fit was made with a sensitivity
+analysis (\code{sensitivity}, see \code{\link[=ancombc]{ancombc()}}), the robust decisions
+(\code{reject_robust}) are drawn filled (in bold in the heatmap) and named,
+and the others that are significant hollow (in italics).
 
 Log fold changes are natural logs, as ANCOM-BC estimates them. In the
 volcano plot, the y axis is \eqn{-\log_{10}} of \code{p_adjusted}, with a

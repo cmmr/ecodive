@@ -16,7 +16,10 @@
 #'   test statistic, largest first.
 #'
 #' Features declared differentially abundant (`reject = TRUE`) are
-#' highlighted in all of them.
+#' highlighted in all of them. When the fit was made with a sensitivity
+#' analysis (`sensitivity`, see [ancombc()]), the robust decisions
+#' (`reject_robust`) are drawn filled (in bold in the heatmap) and named,
+#' and the others that are significant hollow (in italics).
 #'
 #' @param x  The result of [ancombc()], [ancombc2()], [ancombc_global()],
 #'        [ancombc_pairwise()], [ancombc_dunnett()], or [ancombc_trend()].
@@ -99,7 +102,7 @@ plot.ecodive_ancombc <- function (x, covariate = NULL, labels = 10, ...) {
 
   plot_volcano(
     r$log_fc, r$p_adjusted, r$reject, r$feature, attr(x, 'alpha', exact = TRUE),
-    labels, list(...),
+    labels, list(...), robust = r$reject_robust,
     main = ancombc_plot_name(x),
     xlab = sprintf('Log fold change, %s', covariate) )
 
@@ -127,7 +130,7 @@ plot.ecodive_ancombc_dunnett <- function (x, n_features = 30, digits = 2L, ...) 
 #' @export
 plot.ecodive_ancombc_global <- function (x, n_features = 30, ...) {
   plot_ranked(
-    x$w, x$feature, x$reject, n_features, list(...),
+    x$w, x$feature, x$reject, n_features, list(...), robust = x$reject_robust,
     main = sprintf('%s global test', ancombc_plot_name(x)),
     xlab = sprintf('W, any difference between the levels of %s', ancombc_plot_groups(x)) )
   invisible(x)
@@ -139,6 +142,7 @@ plot.ecodive_ancombc_global <- function (x, n_features = 30, ...) {
 plot.ecodive_ancombc_trend <- function (x, n_features = 30, ...) {
   plot_ranked(
     x$w, sprintf('%s (%s)', x$feature, x$pattern), x$reject, n_features, list(...),
+    robust = x$reject_robust,
     main = sprintf('%s trend test', ancombc_plot_name(x)),
     xlab = sprintf('W, a trend over the levels of %s', ancombc_plot_groups(x)) )
   invisible(x)
@@ -194,6 +198,10 @@ ancombc_plot_heatmap <- function (x, n, digits, args, what) {
   lfc <- cell(x$log_fc)
   rej <- cell(x$reject %in% TRUE)
   rej[is.na(rej)] <- FALSE
+  # With a sensitivity analysis, significant but not robust: italic.
+  sens <- !is.null(x$reject_robust)
+  rob  <- if (sens) cell(x$reject_robust %in% TRUE) else rej
+  rob[is.na(rob)] <- FALSE
 
   # Rows from the top: image() draws its first row at the bottom.
   rows <- rev(seq_along(keep))
@@ -212,8 +220,10 @@ ancombc_plot_heatmap <- function (x, n, digits, args, what) {
 
   n_rej <- length(unique(x$feature[x$reject %in% TRUE]))
   sub   <- sprintf(
-    'Log fold changes; bold: differentially abundant (%d of %d features)%s',
-    n_rej, length(feats), if (length(keep) < length(feats)) sprintf('; top %d shown', length(keep)) else '' )
+    'Log fold changes; bold: differentially abundant (%d of %d features)%s%s',
+    n_rej, length(feats),
+    if (sens) '; italic: not robust to the pseudocount' else '',
+    if (length(keep) < length(feats)) sprintf('; top %d shown', length(keep)) else '' )
 
   plot_do(
     graphics::image, c(list(seq_along(comps), seq_along(keep), t(lfc[rows, , drop = FALSE])), args),
@@ -230,13 +240,14 @@ ancombc_plot_heatmap <- function (x, n, digits, args, what) {
   xy  <- expand.grid(r = seq_along(keep), c = seq_along(comps))
   val <- lfc[cbind(rows[xy$r], xy$c)]
   hit <- rej[cbind(rows[xy$r], xy$c)]
+  rbs <- rob[cbind(rows[xy$r], xy$c)]
   ok  <- is.finite(val)
   if (any(ok)) {
     v   <- round(val[ok], digits)
     v[v == 0] <- 0  # not "-0.00"
     graphics::text(
       xy$c[ok], xy$r[ok], formatC(v, format = 'f', digits = digits),
-      font = ifelse(hit[ok], 2, 1), cex = 0.75,
+      font = ifelse(hit[ok], ifelse(rbs[ok], 2, 3), 1), cex = 0.75,
       col  = ifelse(abs(val[ok]) > 0.55 * top, 'white', ifelse(hit[ok], 'black', 'grey30')) )
   }
 

@@ -86,6 +86,14 @@
 #'        [stats::p.adjust()] (`'holm'`, the default, `'hochberg'`,
 #'        `'hommel'`, `'bonferroni'`, `'BH'`, `'BY'`, `'fdr'`, `'none'`).
 #'
+#' @param sensitivity  The pseudocount sensitivity analysis (see **False
+#'        discoveries**): `FALSE` (the default) for none; `TRUE` to refit with
+#'        pseudocounts `0.1`, `0.5` and `1` added to every value, as ANCOMBC
+#'        does; or a vector of positive pseudocounts to use instead (on the
+#'        scale of `counts`, so give your own for proportions). With it, the
+#'        table gains `passed_ss` and `reject_robust`. **Recommended**: it
+#'        takes one more fit per pseudocount.
+#'
 #' @return A data frame of class `c('ecodive_ancombc', 'data.frame')`, one
 #'   row per feature and covariate (the covariates of the first feature,
 #'   then those of the second, and so on), with columns:
@@ -104,6 +112,10 @@
 #'   * `p_adjusted`: `p_value` adjusted with `p_adjust`, within each
 #'     covariate.
 #'   * `reject`: `TRUE` when `p_adjusted <= alpha`.
+#'   * With `sensitivity`: `passed_ss`, `TRUE` when `reject` is the same in
+#'     the fits at every pseudocount (ANCOMBC's `passed_ss`), and
+#'     `reject_robust`, `reject & passed_ss` (ANCOMBC's `diff_robust`): the
+#'     decisions to use.
 #'
 #'   A coefficient that can't be estimated (with zeros as missing values, a
 #'   feature whose observed samples leave a factor with fewer than two
@@ -135,6 +147,10 @@
 #'     (`var_delta`); `n_iters`: the EM iterations run per covariate.
 #'   * `sample_fractions` (`ancombc2()`): each sample's estimated log
 #'     sampling fraction.
+#'   * With `sensitivity`: `sensitivity`, a list of `pseudocounts` and
+#'     `fits` (the result of the same call at each of them, without a
+#'     sensitivity analysis of its own), which the post-hoc tests repeat
+#'     themselves on.
 #'
 #' @details
 #' **The sampling fraction.** A sample's sequencing reads are an unknown
@@ -178,6 +194,27 @@
 #' (`attr(, 'n_iters')` shows how many ran). Its estimate then depends on the
 #' exact path of its minimisations, so it can differ from ANCOMBC's by much
 #' more than when it converges (by 0.02 in one test).
+#'
+#' @section False discoveries: the sensitivity analysis:
+#'   **Without the sensitivity analysis, ANCOM-BC2's (and ANCOM-BC's)
+#'   decisions can include a high proportion of false discoveries.** Taking
+#'   logs needs something done about zeros, and the results can depend on
+#'   that choice: a feature can be significant only because of how its
+#'   zeros were treated. The analysis refits with each pseudocount in
+#'   `sensitivity` added to every value and keeps a decision only if it is
+#'   the same in every fit (`reject_robust`). ANCOMBC runs it by default and
+#'   its authors strongly recommend it, unless power matters most; a 2026
+#'   benchmark (preprint) found ANCOM-BC2's false discovery rate controlled
+#'   with it and greatly inflated without it. Even so, in a comparison over
+#'   69 gut microbiome datasets with ANCOMBC's default settings (Pelto et al.
+#'   2025), ANCOM-BC2's findings replicated least often of 14 methods: treat
+#'   them with caution, and compare them with another method's.
+#'
+#'   It is off by default here only because scikit-bio, whose results these
+#'   are, leaves it to the user; set `sensitivity = TRUE`. It follows ANCOMBC
+#'   2.10.1 and later (and scikit-bio's example): each pseudocount is added
+#'   to every value before the whole analysis, which is repeated, and the
+#'   post-hoc tests ([ancombc_global()], ...) repeat themselves on each fit.
 #'
 #' @section Covariates:
 #'   Character and logical variables become factors; every factor is coded
@@ -223,9 +260,10 @@
 #'     shared pseudocount rule (see `pseudocount`).
 #'   * Not carried over: random effects (ANCOMBC's `rand_formula`),
 #'     scikit-bio's `aggregator`, ANCOMBC's data preprocessing (`prv_cut`,
-#'     `lib_cut`, `tax_level`; see the examples), its structural-zero
-#'     detection and its pseudocount sensitivity analysis (repeat the call
-#'     with other `pseudocount` values).
+#'     `lib_cut`, `tax_level`; see the examples) and its structural-zero
+#'     detection (see [structural_zeros()]).
+#'   * The sensitivity analysis is off by default (ANCOMBC: on), and is
+#'     available for `ancombc()` too (ANCOMBC: `ancombc2()` only).
 #'   * A design with as many columns as samples, or more, is an error (the
 #'     residuals would all be zero); a rank-deficient design gives a
 #'     warning.
@@ -255,6 +293,14 @@
 #' microbiomes with covariate adjustments and repeated measures. *Nature
 #' Methods*, 21, 83–91.
 #'
+#' Pelto, J., Auranen, K., Kujala, J. V., & Lahti, L. (2025). Elementary
+#' methods provide more replicable results in microbial differential
+#' abundance analysis. *Briefings in Bioinformatics*, 26, bbaf130.
+#'
+#' A configuration-resolved benchmark of differential abundance analysis
+#' methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
+#' (preprint). doi:10.64898/2026.09.01.748571
+#'
 #' @seealso [ancom()], [dirmult_ttest()], [replace_zeros()].
 #'
 #' @export
@@ -282,9 +328,11 @@
 #'     plot(res)
 #'     plot(res, 'age')
 #'
-#'     # ANCOM-BC2, with zeros as missing values.
-#'     res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
-#'     head(res2)
+#'     # ANCOM-BC2, with zeros as missing values, and the sensitivity
+#'     # analysis (recommended): only decisions that hold at pseudocounts
+#'     # 0.1, 0.5 and 1 too are kept in `reject_robust`.
+#'     res2 <- ancombc2(x, ~ status + age, meta, groups = 'status', sensitivity = TRUE)
+#'     res2[res2$reject, ]
 #'
 #'     # ANCOMBC's preprocessing, done first: keep features present in at
 #'     # least 10% of samples (prv_cut = 0.1), and samples with at least 10
@@ -295,7 +343,7 @@
 ancombc <- function (
     counts, formula, data, groups = NULL, margin = 1L, pseudocount = NULL,
     max_iters = 100L, tol = 1e-5, alpha = 0.05, p_adjust = 'holm',
-    cpus = n_cpus() ) {
+    sensitivity = FALSE, cpus = n_cpus() ) {
 
   ancombc_fit(environment(), v2 = FALSE)
 }
@@ -307,7 +355,7 @@ ancombc <- function (
 ancombc2 <- function (
     counts, formula, data, groups = NULL, margin = 1L, pseudocount = 0,
     var_quantile = 0.05, max_iters = 100L, tol = 1e-5, alpha = 0.05,
-    p_adjust = 'holm', cpus = n_cpus() ) {
+    p_adjust = 'holm', sensitivity = FALSE, cpus = n_cpus() ) {
 
   ancombc_fit(environment(), v2 = TRUE)
 }
@@ -361,6 +409,7 @@ ancombc_fit <- function (env, v2) {
   }
 
   p_adjust <- pairwise_method(TRUE, env$p_adjust, TRUE)
+  sens_pc  <- ancombc_sensitivity_arg(env$sensitivity)
 
 
   #--------------------------------------------------------
@@ -502,6 +551,51 @@ ancombc_fit <- function (env, v2) {
   }
   class(out) <- c('ecodive_ancombc', 'data.frame')
 
+  if (length(sens_pc)) out <- ancombc_sensitivity(out, env, v2, sens_pc)
+
+  out
+}
+
+
+
+# The `sensitivity` argument as a vector of pseudocounts (empty for none).
+ancombc_sensitivity_arg <- function (x) {
+  if (isFALSE(x) || is.null(x)) return (numeric(0))
+  if (isTRUE(x)) return (c(0.1, 0.5, 1))
+  if (!is.numeric(x) || length(x) < 1L || any(!is.finite(x)) || any(x <= 0))
+    stop(
+      '`sensitivity` must be TRUE, FALSE, or a vector of positive ',
+      'pseudocounts.', call. = FALSE )
+  as.double(x)
+}
+
+
+
+# ANCOMBC's pseudocount sensitivity analysis (ancombc2(pseudo_sens = TRUE),
+# 2.10.1 and later): the same call at each pseudocount in `pcs` (added to
+# every value), then `passed_ss` (the decision is the same in every fit,
+# the main one included) and `reject_robust` (reject & passed_ss). The fits
+# are kept for the post-hoc tests.
+ancombc_sensitivity <- function (out, env, v2, pcs) {
+
+  args <- list(
+    counts = env$counts, formula = env$formula, data = env$data,
+    groups = env$groups, margin = env$margin, max_iters = env$max_iters,
+    tol = env$tol, alpha = env$alpha, p_adjust = env$p_adjust,
+    sensitivity = FALSE, cpus = env$cpus )
+  if (v2) args$var_quantile <- env$var_quantile
+  f <- if (v2) ancombc2 else ancombc
+
+  # The main fit has already warned about its design.
+  fits <- lapply(pcs, function (pc)
+    suppressWarnings(do.call(f, c(args, list(pseudocount = pc)))) )
+
+  passed <- rep(TRUE, nrow(out))
+  for (r in fits) passed <- passed & (r$reject == out$reject)
+  out$passed_ss     <- passed
+  out$reject_robust <- out$reject & passed
+
+  attr(out, 'sensitivity') <- list(pseudocounts = pcs, fits = fits)
   out
 }
 

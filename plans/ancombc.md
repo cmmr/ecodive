@@ -566,3 +566,53 @@ Results on the slimmed fixtures: scikit-bio `log_fc` within 2.1e-8, `se`
 decisions identical; ANCOMBC `log_fc` within 2.4e-6, `se` 2.6e-6, p-values
 4.4e-5. In the full suite the two test files take 1.0 s and 1.2 s (1,119
 results); the suite has 15,185 results at home and 297 in CRAN mode, all OK.
+
+
+## Sensitivity analysis (2026-11-19, after another session's finding)
+
+Another session reported that ANCOM-BC2 needs ANCOMBC's pseudocount
+sensitivity filter. Checked before acting:
+
+- **ANCOMBC** (2.4.0 to 2.14.0): `pseudo_sens = TRUE` is the default in every
+  release; 2.14.0 warns when it is off ("essential for reducing false
+  positives"). Its procedure (2.10.1 and later, read in 2.14.0's
+  `ancombc2.R`): the whole analysis again with pseudocounts 0.1, 0.5 and 1
+  added to every value; `passed_ss` when the q-value is significant in all
+  four fits or in none; `diff_robust = diff & passed_ss`; the same for the
+  global, pairwise and Dunnett's tests, and the trend test takes the global
+  test's `passed_ss`. scikit-bio leaves it out of `ancombc2()` but shows the
+  same procedure in its docstring ("strongly recommend").
+- **Pelto et al. 2025** (Brief. Bioinform. 26, bbaf130): quotes verified
+  (ANCOM-BC2's split-data replication 35%, 21% between studies; "highly
+  inconsistent", said of ANCOM-BC2, DESeq2 and edgeR). They used default
+  settings, so most likely with the filter on: evidence that ANCOM-BC2 is
+  inconsistent, not that the filter fixes it.
+- **The 2026 preprint** (doi:10.64898/2026.09.01.748571, "A
+  configuration-resolved benchmark of differential abundance analysis
+  methods for human gut 16S rRNA microbiome data"): exists; search snippets
+  say the filter controls the FDR and dropping it inflates it. bioRxiv
+  rate-limited every fetch, so its 0.02 / 0.82 figures weren't read
+  directly; the docs cite it without numbers. A LOCOM2 preprint (2026)
+  reportedly found ANCOM-BC2's FDR inflated even with the filter when
+  effects are small or absent.
+- The "forest plot and sensitivity plot" the finding mentions don't exist;
+  ecodive's plots are a volcano plot, heatmaps and dot charts.
+
+The user's decisions: an argument, **off by default** (scikit-bio's
+results stay the default); `reject` kept, with `passed_ss` and
+`reject_robust` added; the refits stored so that the post-hoc tests use
+them; for `ancombc()` too.
+
+Done: `sensitivity = FALSE` on `ancombc()` and `ancombc2()` (`TRUE` = 0.1,
+0.5, 1; or a vector of positive pseudocounts). Each refit is the same call
+with that `pseudocount` and `sensitivity = FALSE` (warnings already given by
+the main fit are suppressed), kept in `attr(fit, 'sensitivity')` (a list of
+`pseudocounts` and `fits`). Significance in each fit is its `reject`. The
+post-hoc tests repeat themselves on the stored fits with the same
+`groups`, `alpha`, `p_adjust` (and `n_bootstraps`, `seed`); the trend test
+takes the global test's check. Plots: robust decisions filled (bold in the
+heatmap) and named, significant but not robust hollow (italic). The help
+page has a section "False discoveries: the sensitivity analysis", saying
+plainly that without it the decisions can include many false discoveries.
+Checked against scikit-bio's docstring (doc3: three significant, none
+robust) and against separately run fits.

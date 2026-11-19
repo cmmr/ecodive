@@ -100,8 +100,15 @@ scikit-bio and ANCOMBC, \code{p_value} is set to 1 for the features that
 the screening global test didn't find (and wherever it would be 0 or
 \code{NaN}), and \code{p_adjusted} is the mdFDR-adjusted value.
 
-Attributes: \code{method} (the fit's), \code{groups}, \code{alpha}, \code{p_adjust}, and
-for the bootstrapped tests \code{n_bootstraps} and \code{seed}.
+When the fit was made with \code{sensitivity} (see \code{\link[=ancombc]{ancombc()}}), each test
+is repeated on the fit at every pseudocount, and the table gains
+\code{passed_ss} (the decision is the same in every fit; for the trend test,
+the global test's decision, as in ANCOMBC) and \code{reject_robust}
+(\code{reject & passed_ss}), the decisions to use.
+
+Attributes: \code{method} (the fit's), \code{groups}, \code{alpha}, \code{p_adjust}, for
+the bootstrapped tests \code{n_bootstraps} and \code{seed}, and with the
+sensitivity analysis \code{sensitivity} (its pseudocounts).
 }
 \description{
 Multigroup tests on a fit from \code{\link[=ancombc]{ancombc()}} or \code{\link[=ancombc2]{ancombc2()}}, for a

@@ -329,6 +329,42 @@
 
 
   # -----------------------------------------------------------------------
+  # The pseudocount sensitivity analysis
+  # -----------------------------------------------------------------------
+
+  tb  <- ref$tables$doc3
+  f0  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', cpus = 1L)
+  fs  <- ancombc2(tb$counts, ~ status + age, tb$data, groups = 'status', sensitivity = TRUE, cpus = 1L)
+  fits <- attr(fs, 'sensitivity')$fits
+  same <- function (main, rerun) Reduce(`&`, lapply(fits, function (f) rerun(f)$reject == main))
+
+  for (test in list(ancombc_global, ancombc_pairwise, ancombc_dunnett)) {
+    r0 <- test(f0, cpus = 1L)
+    rs <- test(fs, cpus = 1L)
+    expect_identical(names(rs), c(names(r0), 'passed_ss', 'reject_robust'))
+    expect_identical(rs$reject, r0$reject)
+    expect_identical(rs$passed_ss, same(r0$reject, function (f) test(f, cpus = 1L)))
+    expect_identical(rs$reject_robust, rs$reject & rs$passed_ss)
+    expect_identical(attr(rs, 'sensitivity'), c(0.1, 0.5, 1))
+  }
+  expect_false(any(ancombc_pairwise(fs)$reject_robust))   # as the primary results
+
+  # The trend test uses the global test's decisions, as ANCOMBC does.
+  tr <- ancombc_trend(fs, cpus = 1L)
+  g  <- ancombc_global(fs, cpus = 1L)
+  expect_identical(tr$passed_ss, g$passed_ss)
+  expect_identical(tr$reject_robust, tr$reject & g$passed_ss)
+
+  # A grouping given at post-hoc time works on the stored fits too.
+  fn <- ancombc2(tb$counts, ~ status + age, tb$data, sensitivity = TRUE, cpus = 1L)
+  expect_identical(ancombc_global(fn, groups = 'status'), ancombc_global(fs))
+
+  grDevices::pdf(NULL)
+  for (r in list(g, tr, ancombc_pairwise(fs), ancombc_dunnett(fs))) expect_silent(plot(r))
+  grDevices::dev.off()
+
+
+  # -----------------------------------------------------------------------
   # Argument checks
   # -----------------------------------------------------------------------
 
