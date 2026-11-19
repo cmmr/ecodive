@@ -274,7 +274,9 @@ that take the count table itself, run by name with `count_ord()`.
 
 `pcoa_biplot()` and `envfit()` add arrows for the features or metadata that
 drive the axes. `procrustes()` and `procrustes_test()` compare two ordinations of the
-same samples.
+same samples. `varpart()` splits the variation that two to four sets of
+metadata explain into the parts each explains alone and the parts they
+share.
 
 Four samples are too few to ordinate, so this example uses R's built-in
 `iris` data: 150 flowers, four measurements each, and three species. Every

@@ -75,6 +75,7 @@ reference:
   - rpca
   - envfit
   - bioenv
+  - varpart
   - procrustes
   - procrustes_test
   - list_dist_ords

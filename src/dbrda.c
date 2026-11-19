@@ -1322,14 +1322,17 @@ SEXP C_rda(
 //   sexp_perms   n x n_perm 0-based permutations, or NULL;
 //   sexp_n_perm  permutations for the adjusted R-squared
 //                (0 for none);
-//   sexp_seed    their seed, when sexp_perms is NULL.
+//   sexp_seed    their seed, when sexp_perms is NULL;
+//   sexp_fixed   TRUE to permute Qbar's rows against the
+//                fixed design even without conditions
+//                (varpart(chisquare = TRUE), as vegan's).
 //
 // Returns C_dbrda()'s list, plus
 //   loadings      p x m: vegan's species scores, scaling 2;
 //   w             sqrt(r), n;
 //   perm_inertia  the constrained inertia for each
-//                 permutation (n_perm): with conditions,
-//                 that of conditions and constraints
+//                 permutation (n_perm): with conditions
+//                 (or sexp_fixed), that of conditions and constraints
 //                 together, with Qbar's rows permuted
 //                 against the fixed design;
 //   perm_cond     ... and of the conditions alone (only
@@ -1340,8 +1343,9 @@ SEXP C_rda(
 SEXP C_cca(
     SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_x, SEXP sexp_nz,
     SEXP sexp_k, SEXP sexp_perms, SEXP sexp_n_perm, SEXP sexp_seed,
-    SEXP sexp_n_threads ) {
+    SEXP sexp_fixed, SEXP sexp_n_threads ) {
 
+  int fixed     = asLogical(sexp_fixed) == TRUE;
   int nz        = asInteger(sexp_nz);
   int k         = asInteger(sexp_k);
   int n_perm    = asInteger(sexp_n_perm);
@@ -1413,7 +1417,7 @@ SEXP C_cca(
   if (n_perm > 0 && des.rx > 0) {
     perm_source_t ps;
     perm_source_init(&ps, n, sexp_perms, R_NilValue, asInteger(sexp_seed));
-    if (des.rz > 0)
+    if (des.rz > 0 || fixed)
       cca_perm_inertia_fixed(des.Q, des.rq, des.rz, &ps, n_perm, REAL(sexp_pi), REAL(sexp_pc));
     else
       cca_perm_inertia(REAL(sexp_x) + (size_t) n * nz, px, &ps, n_perm, REAL(sexp_pi));
@@ -1440,5 +1444,122 @@ SEXP C_cca(
   setAttrib(out, R_NamesSymbol, names);
 
   UNPROTECT(7);
+  return out;
+}
+
+
+
+
+//======================================================
+// varpart() (and forward_select()): the inertia that any
+// set of design columns explains, from one pass over the
+// data. With Xc the design's columns centred, returns
+//
+//   total   trace(B), unscaled (vegan's SS.Y), and
+//   cross   Xc' B Xc (m x m),
+//
+// for B = G (Gower's matrix, from distances) or B = A A'
+// (the centred, normalized count table, as in rda()). The
+// inertia explained by any subset S of the columns is then
+// trace(R^-T Xc_S' B Xc_S R^-1), for the QR factor R of
+// Xc_S, without another pass over the data.
+//
+//   sexp_mode        0: sexp_y is a packed lower triangle
+//                    of distances, for sexp_n samples;
+//                    1: sexp_y is a count table, read with
+//                    sexp_margin, sexp_norm, sexp_pseudocount
+//                    as for C_pca() (no scaling).
+//   sexp_x           n x m design (double), centred here.
+//
+// Deterministic for any number of threads: products with
+// B are (gower.c, pca.c), and the cross products are
+// summed here on one thread in a fixed order.
+//======================================================
+SEXP C_cord_cross(
+    SEXP sexp_mode, SEXP sexp_y, SEXP sexp_n, SEXP sexp_margin,
+    SEXP sexp_norm, SEXP sexp_pseudocount, SEXP sexp_x,
+    SEXP sexp_n_threads ) {
+
+  int mode      = asInteger(sexp_mode);
+  int n_threads = asInteger(sexp_n_threads);
+
+  if ((mode != 0 && mode != 1) || n_threads < 1 || !isReal(sexp_x) || !isMatrix(sexp_x))
+    error("Invalid arguments to C_cord_cross()."); // # nocov
+
+  int n = nrows(sexp_x), m = ncols(sexp_x);
+
+  if (n < 2) error("Invalid arguments to C_cord_cross()."); // # nocov
+
+  double *Xc    = (double *) R_alloc((size_t) n * m + 1, sizeof(double));
+  SEXP    sexp_cross = PROTECT(allocMatrix(REALSXP, m, m));
+  double *cross = REAL(sexp_cross);
+  double  total;
+
+  if (m > 0) memcpy(Xc, REAL(sexp_x), (size_t) n * m * sizeof(double));
+  for (size_t i = 0; i < (size_t) n * m; i++)
+    if (!R_FINITE(Xc[i]))
+      error("The design must not contain NA, NaN, or infinite values.");
+  for (int c = 0; c < m; c++) center(Xc + (size_t) c * n, n);
+
+
+  if (mode == 0) {
+
+    if (asInteger(sexp_n) != n || XLENGTH(sexp_y) != (R_xlen_t) n * (n - 1) / 2 || !isReal(sexp_y))
+      error("Invalid arguments to C_cord_cross()."); // # nocov
+
+    gower_t g;
+    int     max_m = (m < 16) ? 16 : m;
+    if (max_m > n) max_m = n;
+    total = gower_init(&g, REAL(sexp_y), n, max_m, n_threads);
+
+    double *GX = (double *) R_alloc((size_t) n * m + 1, sizeof(double));
+    if (m > 0) gower_mult(Xc, GX, m, &g);
+
+    for (int b = 0; b < m; b++)
+      for (int a = b; a < m; a++) {
+        double h = (a == b)
+          ? dot(Xc + (size_t) n * a, GX + (size_t) n * b, n)
+          : (dot(Xc + (size_t) n * a, GX + (size_t) n * b, n) +
+             dot(Xc + (size_t) n * b, GX + (size_t) n * a, n)) / 2;
+        cross[(size_t) b * m + a] = h;
+        cross[(size_t) a * m + b] = h;
+      }
+  }
+
+  else {
+
+    init_n_ptrs(10);
+
+    pca_table_t tbl;
+    total = pca_table_init(
+      sexp_y, sexp_margin, asInteger(sexp_norm), asReal(sexp_pseudocount),
+      0, n_threads, &tbl );
+
+    if (tbl.n != n) {
+      free_all();
+      error("Invalid arguments to C_cord_cross()."); // # nocov
+    }
+
+    // L = A' Xc (p x m), then cross = L' L.
+    int     p = tbl.p;
+    double *L = (double *) R_alloc((size_t) p * m + 1, sizeof(double));
+    if (m > 0) pca_cross(Xc, m, L, n_threads);
+
+    free_all();
+
+    for (int b = 0; b < m; b++)
+      for (int a = b; a < m; a++) {
+        double h = dot(L + (size_t) p * a, L + (size_t) p * b, p);
+        cross[(size_t) b * m + a] = h;
+        cross[(size_t) a * m + b] = h;
+      }
+  }
+
+  const char *names[] = { "total", "cross", "" };
+  SEXP out = PROTECT(mkNamed(VECSXP, names));
+  SET_VECTOR_ELT(out, 0, ScalarReal(total));
+  SET_VECTOR_ELT(out, 1, sexp_cross);
+
+  UNPROTECT(2);
   return out;
 }

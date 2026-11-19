@@ -109,6 +109,12 @@
   expect_identical(dim(be), c(2L, 3L))
   expect_true(all(is.finite(be$correlation)) && all(abs(be$correlation) <= 1))
 
+  vp <- varpart(counts, ~ grp, ~ x, data = meta, norm = 'hellinger', cpus = cpus)
+  expect_inherits(vp, c('ecodive_varpart', 'data.frame'))
+  expect_identical(dim(vp), c(4L, 5L))
+  expect_true(all(is.finite(vp$adj_r_squared)))
+  expect_true(any(grepl('[a]', capture.output(print(vp)), fixed = TRUE)))
+
 
 
   # Distance-based tests. ====
