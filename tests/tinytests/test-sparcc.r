@@ -366,7 +366,7 @@
   grDevices::dev.off()
 
   # No registry has an alias starting with 'spar'.
-  for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS', 'ZERO_REPLACEMENTS'))
+  for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS', 'ZERO_REPLACEMENTS', 'DA_TESTS'))
     if (exists(reg)) expect_identical(grep('^spar', names(exact_names(reg)), value = TRUE), character(0), info = reg)
 
   # dist_reorder() reorders the attributes parallel to the triangle.
