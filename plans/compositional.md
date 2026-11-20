@@ -62,7 +62,7 @@ typing), and recorded two findings about methods ecodive already has. See
 | [maaslin3.md](maaslin3.md) | `maaslin3()` (**scope decision for the user**) | port (maaslin3, MIT) |
 | [community_typing.md](community_typing.md) | `enterotype()`, `valencia()`, `dmm()` | clean room (PAM; DMM) + port (VALENCIA, MIT) |
 | [dirmult_lm.md](dirmult_lm.md) | `dirmult_lm()` | port (ALDEx3, MIT) |
-| [normalization_factors.md](normalization_factors.md) | new `norm` choices (CSS, TMM, RLE, GMPR) | port (CSS, Artistic-2.0) + clean room |
+| [normalization_factors.md](normalization_factors.md) | new `norm` choices (`'css'`, `'tmm'`, `'rle'`, `'rle_poscounts'`, `'gmpr'`); `size_factors()` | port (CSS, Artistic-2.0) + clean room |
 | [fastancom.md](fastancom.md) | `fastancom()` | clean room (GPL) |
 | [spiec_easi.md](spiec_easi.md) | `spiec_easi_mb()`, `spiec_easi_glasso()` | clean room (SpiecEasi GPL) |
 | [secom.md](secom.md) | `secom_pearson()`, `secom_distance()` | port (ANCOMBC, Artistic-2.0) |

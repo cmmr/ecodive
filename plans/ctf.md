@@ -180,6 +180,8 @@ port).
 
 ## Docs
 
+- Include the sequencing-depth caveat that [compositional_docs.md](compositional_docs.md)
+  sets for the RPCA family (Schloss 2024, 2026).
 - Rd page under Ordination → "Several tables or time series", with
   `rpca_joint()`; a "Differences from gemelli" section listing every
   decision above.

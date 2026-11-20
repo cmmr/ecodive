@@ -149,6 +149,10 @@ gemelli's `feature_covariance_table()` (\eqn{V\,\mathrm{diag}(s)^2 V^T}).
 
 ## Docs
 
+- Include the sequencing-depth caveat that [compositional_docs.md](compositional_docs.md)
+  sets for the RPCA family (Schloss 2024, 2026), and cite the method's
+  peer-reviewed paper: Cordazzo Vargas et al. (2026), *Molecular Systems
+  Biology*, doi:10.1038/s44320-026-00236-3.
 - Rd page under Ordination (a "Several tables or time series" subtitle,
   with `ctf()`), cross-linked with `rpca()`, `procrustes()` and the
   planned `coinertia()` (the classical alternatives for paired tables).
