@@ -65,11 +65,11 @@ Gamito, S. (2010). Caution is needed when applying Margalef diversity index. \em
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Richness metrics: 
-\code{\link{ace}()},
-\code{\link{chao1}()},
-\code{\link{menhinick}()},
-\code{\link{observed}()},
-\code{\link{squares}()}
+Other Richness metrics:
+\code{\link[=ace]{ace()}},
+\code{\link[=chao1]{chao1()}},
+\code{\link[=menhinick]{menhinick()}},
+\code{\link[=observed]{observed()}},
+\code{\link[=squares]{squares()}}
 }
 \concept{Richness metrics}

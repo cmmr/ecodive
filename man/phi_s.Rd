@@ -60,7 +60,7 @@ which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-       \rho_p}.}
+\rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}

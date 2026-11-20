@@ -66,10 +66,10 @@ Fisher, R. A., Corbet, A. S., & Williams, C. B. (1943). The relation between the
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Diversity metrics: 
-\code{\link{brillouin}()},
-\code{\link{inv_simpson}()},
-\code{\link{shannon}()},
-\code{\link{simpson}()}
+Other Diversity metrics:
+\code{\link[=brillouin]{brillouin()}},
+\code{\link[=inv_simpson]{inv_simpson()}},
+\code{\link[=shannon]{shannon()}},
+\code{\link[=simpson]{simpson()}}
 }
 \concept{Diversity metrics}

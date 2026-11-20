@@ -176,7 +176,7 @@ and reference samples are compared:
 \itemize{
 \item \code{da_wilcoxon()}: \code{wilcox.test(trt, ref)}, two-sided, with its defaults
 as of R 4.6.0: when both sides have fewer than 50 values, the exact
-p-value (\code{\link[stats:Wilcoxon]{stats::pwilcox()}} without ties; with ties, the exact
+p-value (\code{\link[stats:pwilcox]{stats::pwilcox()}} without ties; with ties, the exact
 distribution of the rank sum given the ties, as the Streitberg-Rohmel
 shift algorithm computes it, twice the smaller tail); otherwise the
 normal approximation, with the variance corrected for ties and a

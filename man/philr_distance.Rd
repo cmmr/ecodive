@@ -59,7 +59,7 @@ which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-       \rho_p}.}
+\rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -138,12 +138,12 @@ microbiota data. \emph{eLife}, 6, e21887. \doi{10.7554/eLife.21887}
 \seealso{
 \code{\link[=philr]{philr()}}, \code{beta_div()}, \code{\link[=aitchison]{aitchison()}}, \code{\link[=weighted_unifrac]{weighted_unifrac()}}
 
-Other Phylogenetic metrics: 
-\code{\link{faith}()},
-\code{\link{generalized_unifrac}()},
-\code{\link{normalized_unifrac}()},
-\code{\link{unweighted_unifrac}()},
-\code{\link{variance_adjusted_unifrac}()},
-\code{\link{weighted_unifrac}()}
+Other Phylogenetic metrics:
+\code{\link[=faith]{faith()}},
+\code{\link[=generalized_unifrac]{generalized_unifrac()}},
+\code{\link[=normalized_unifrac]{normalized_unifrac()}},
+\code{\link[=unweighted_unifrac]{unweighted_unifrac()}},
+\code{\link[=variance_adjusted_unifrac]{variance_adjusted_unifrac()}},
+\code{\link[=weighted_unifrac]{weighted_unifrac()}}
 }
 \concept{Phylogenetic metrics}

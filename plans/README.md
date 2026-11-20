@@ -409,11 +409,17 @@ for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS', 'ZERO_REPLAC
 - **roxygen (set by the user, 2026-11-19):** `man/*.Rd` is generated from
   the roxygen comments in `R/`, so don't spend time on it.
   - Never edit an Rd file by hand; change the roxygen comment instead.
+  - **Use the roxygen2 version named in `DESCRIPTION`'s
+    `Config/roxygen2/version`** (8.1.1 as of 2026-11-20), installed from CRAN
+    into a scratch library: e.g.
+    `install.packages("roxygen2", lib = "<scratch lib>")`, then run with that
+    library first in `R_LIBS`. An older roxygen2 (such as Debian's 7.3.1)
+    rewrites dozens of Rd files you didn't touch and adds a `RoxygenNote`
+    line to `DESCRIPTION`; if that happens, you used the wrong version.
+    `DESCRIPTION` has no `RoxygenNote` line; don't add one.
   - Run `roxygen2::roxygenise()` (or `devtools::document()`) **once**, when
     the roxygen comments are final, and commit everything it writes under
-    `man/` (and `DESCRIPTION`'s `RoxygenNote`, if it changes), as written: no
-    reverting, no hand-curation, even if a different
-    roxygen2 version reformats files you didn't touch.
+    `man/` as written: no reverting, no hand-curation.
   - Don't inspect or diff the Rd output beyond that. `R CMD check` (codoc,
     examples) is the check that the docs are right.
   - `man/` stays committed because the GitHub workflows (R CMD check,

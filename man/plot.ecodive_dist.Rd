@@ -23,7 +23,7 @@ sort the samples from smallest to largest.}
 \code{groups} names one of its columns.}
 
 \item{col}{The colour scale, from the smallest value to the largest.
-Defaults to \code{\link[grDevices:palettes]{grDevices::hcl.colors()}}'s \code{"YlOrRd"} palette, light
+Defaults to \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}}'s \code{"YlOrRd"} palette, light
 for near and dark for far; or, for correlations such as \code{\link[=rho_p]{rho_p()}}
 and \code{\link[=sparcc]{sparcc()}} (at least from -1 to 1, with the diagonal at 1), and
 when some values are negative, its \code{"Blue-Red 3"} palette,

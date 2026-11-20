@@ -38,8 +38,6 @@ ZERO_REPLACEMENTS <- local({
 #' log ratios can be taken without a pseudocount. Runs any of ecodive's zero
 #' replacement methods by name, as [count_ord()] does for ordinations.
 #'
-#' @inheritParams documentation
-#'
 #' @param counts  A numeric matrix of non-negative abundances (samples
 #'        \eqn{\times} features), or any of the objects listed under **Input
 #'        Types**. Counts or proportions.

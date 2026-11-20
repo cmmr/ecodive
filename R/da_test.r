@@ -50,8 +50,6 @@ DA_TESTS <- local({
 #' [count_ord()] does for ordinations, with one convention for the groups
 #' or model to compare.
 #'
-#' @inheritParams documentation
-#'
 #' @param counts  A numeric matrix of non-negative abundances (samples
 #'        \eqn{\times} features), or any of the objects listed under **Input
 #'        Types**.
