@@ -87,7 +87,7 @@ differs significantly between the groups (integer, \code{0} to \eqn{D -
 (scikit-bio's \code{Signif}).
 }
 
-Attributes: \code{groups} (the groups, in order), \code{sig_test}, \code{p_adjust},
+Attributes: \code{method} (\code{"ancom"}), \code{groups} (the groups, in order), \code{sig_test}, \code{p_adjust},
 \code{alpha}, \code{tau}, \code{theta}, \code{cutoff} (the chosen \eqn{\nu}, as a proportion
 of the number of features, or \code{NA} when nothing could be rejected
 because the largest \eqn{W} was below \code{theta}), and \code{pseudocount} (the
@@ -149,8 +149,8 @@ never counted in \eqn{W}. The Kruskal-Wallis test uses average ranks for
 ties and SciPy's tie correction, with ties by exact equality, as SciPy's
 \code{kruskal()}; a log ratio with every value tied has no p-value (SciPy
 sometimes returns an infinite statistic there, by rounding, and so a
-p-value of 0). The F and \eqn{\chi^2} p-values are R's \code{\link[stats:pf]{stats::pf()}} and
-\code{\link[stats:pchisq]{stats::pchisq()}}, which agree with SciPy's to about \code{1e-13}. The F
+p-value of 0). The F and \eqn{\chi^2} p-values are R's \code{\link[stats:Fdist]{stats::pf()}} and
+\code{\link[stats:Chisquare]{stats::pchisq()}}, which agree with SciPy's to about \code{1e-13}. The F
 statistics come from two-pass sums of squares; SciPy's one-pass ones
 differ from them by up to about \code{1e-12} (relative), from rounding.
 

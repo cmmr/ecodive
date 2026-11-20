@@ -62,7 +62,7 @@
 #'   * `reject`: `TRUE` for the features declared differentially abundant
 #'     (scikit-bio's `Signif`).
 #'
-#'   Attributes: `groups` (the groups, in order), `sig_test`, `p_adjust`,
+#'   Attributes: `method` (`"ancom"`), `groups` (the groups, in order), `sig_test`, `p_adjust`,
 #'   `alpha`, `tau`, `theta`, `cutoff` (the chosen \eqn{\nu}, as a proportion
 #'   of the number of features, or `NA` when nothing could be rejected
 #'   because the largest \eqn{W} was below `theta`), and `pseudocount` (the
@@ -263,6 +263,7 @@ ancom_fit <- function (env, details) {
     feature = features, W = W, reject = reject,
     stringsAsFactors = FALSE )
 
+  attr(out, 'method')      <- 'ancom'
   attr(out, 'groups')      <- if (is.factor(val)) lev else as.character(lev)
   attr(out, 'sig_test')    <- sig_test
   attr(out, 'p_adjust')    <- p_adjust

@@ -280,10 +280,11 @@ plots read.
   | `count_ord()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
   | `dist_test()` | `dm`, `test`, `groups`, `data` | an argument named `test`, or any prefix of `test`, `groups` or `data` (`t`, `g`, `gr`, `d`, `da`, ...) |
   | `replace_zeros()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
-  | `da_test()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
+  | `da_test()` | `counts`, `method`, `groups`, `data`, `formula` | an argument named `method`, or any prefix of `method`, `counts`, `groups`, `data` or `formula` other than the pass-through `groups`, `data`, `formula` themselves (`m`, `c`, `co`, `g`, `gr`, `d`, `da`, `f`, `fo`, ...) |
 
   `groups` and `data` themselves are fine in `dist_test()`: it passes
-  them through on purpose. Tests may take a `method` argument (as
+  them through on purpose, as `da_test()` passes `groups`, `data` and
+  `formula`. Tests may take a `method` argument (as
   `mantel()` does, for the correlation), because `dist_test()` names its
   selector `test`. Plain functions with no wrapper are free of this
   constraint. `tests/tinytests/test-wrapper_args.r` enforces the rule for

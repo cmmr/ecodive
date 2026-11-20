@@ -28,6 +28,24 @@
     r }))
   expect_equal(normalize(x, 'rclr', cpus = 1), rclr)
 
+  # 'log': the log of each sample's proportions after the pseudocount, which
+  # is the clr shifted by a constant per sample.
+  lg <- log((x + 1) / rowSums(x + 1))
+  expect_equal(normalize(x, 'log', pseudocount = 1, cpus = 1), lg, tolerance = 1e-14)
+  expect_equal(lg - rowMeans(lg), clr, tolerance = 1e-14)
+  expect_warning(lw <- normalize(x, 'log', cpus = 1), 'pseudocount = 0.5')
+  expect_equal(lw, log((x + 0.5) / rowSums(x + 0.5)), tolerance = 1e-14)
+  expect_equal(normalize(x + 1, 'log', cpus = 1), log((x + 1) / rowSums(x + 1)), tolerance = 1e-14)
+
+  # Every function with `norm` takes it, with the same values.
+  expect_equal(
+    pca(x, norm = 'log', pseudocount = 1, n_axes = 2, cpus = 1),
+    pca(lg, n_axes = 2, cpus = 1), tolerance = 1e-12 )
+  expect_equal(
+    as.vector(euclidean(x, norm = 'log', pseudocount = 1, cpus = 1)),
+    as.vector(stats::dist(lg)), tolerance = 1e-12 )
+  expect_error(simper(x, rep(1:2, 6), norm = 'log'), 'negative values')
+
   # Already proportions: left as they are, as in the norm = paths.
   expect_identical(normalize(pct, 'percent', cpus = 1), pct)
 
@@ -134,6 +152,9 @@
     cl <- normalize(sp, 'clr', pseudocount = 1, cpus = 1)
     expect_true(is.matrix(cl) && is.double(cl))
     expect_equal(cl, clr)
+    lgs <- normalize(sp, 'log', pseudocount = 1, cpus = 1)
+    expect_true(is.matrix(lgs) && is.double(lgs))
+    expect_equal(lgs, lg, tolerance = 1e-14)
 
     # The input isn't changed.
     expect_identical(sp, Matrix::Matrix(x, sparse = TRUE))
@@ -151,7 +172,7 @@
   # The same for any number of cpus.
   big <- matrix(rpois(300 * 50, 1), 300, 50)
   big[, 1] <- big[, 1] + 1L
-  for (nm in c('percent', 'clr', 'rclr'))
+  for (nm in c('percent', 'clr', 'rclr', 'log'))
     expect_identical(
       suppressWarnings(normalize(big, nm, cpus = 1)),
       suppressWarnings(normalize(big, nm, cpus = 2)), info = nm )
@@ -162,7 +183,7 @@
 
   expect_error(normalize(x), '`norm` is required')
   expect_error(normalize(x, 1), '`norm` must be')
-  expect_error(normalize(x, 'log'))
+  expect_error(normalize(x, 'logit'))
   expect_error(normalize(x, 'percent', margin = 3), 'margin')
   expect_error(normalize(x, 'percent', cpus = 0), 'cpus')
   expect_warning(normalize(x, 'clr', cpus = 1), 'pseudocount')
@@ -170,7 +191,7 @@
 
   # NA, NaN and Inf are errors, for every norm (as in pca() and envfit()).
   xna <- matrix(c(NA, 2, 0, 3), 2)
-  for (nm in c('none', 'percent', 'chord', 'binary', 'clr', 'rclr')) {
+  for (nm in c('none', 'percent', 'chord', 'binary', 'clr', 'rclr', 'log')) {
     expect_error(normalize(xna, nm, cpus = 1), 'must not contain NA', info = nm)
     expect_error(normalize(xna * Inf, nm, cpus = 1), 'must not contain NA', info = nm)
   }

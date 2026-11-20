@@ -363,7 +363,7 @@
   # Argument checks
   # -----------------------------------------------------------------------
 
-  expect_error(ancombc(x), '`formula` is required')
+  expect_error(ancombc(x), '`formula` or `groups` is required')
   expect_error(ancombc(x, ~ status), '`data` is required')
   expect_error(ancombc(x, ~ status + nope, meta), "Not found in `data`: 'nope'")
   expect_error(ancombc(x, 3, meta), 'must be a formula')
@@ -378,11 +378,14 @@
   expect_error(ancombc(x[c(1, 2, 6, 11), ], ~ status + age, meta), 'more samples than design columns')
   m3 <- meta; m3$age2 <- m3$age * 2
   expect_warning(ancombc(x, ~ age + age2, m3, cpus = 1L), 'rank deficient')
-  expect_error(ancombc(x, ~ status + age, meta, groups = 'age'), 'categorical')
+  # The term of interest's checks are the post-hoc tests' (da_test.md).
+  fa <- ancombc(x, ~ status + age, meta, groups = 'age', cpus = 1L)
+  expect_identical(attr(fa, 'groups'), 'age')
+  expect_error(ancombc_global(fa), 'categorical')
   expect_error(ancombc(x, ~ status + age, meta, groups = 'nope'), 'column of `data`')
   m3 <- meta; m3$two <- rep(c('u', 'v', 'u'), 5)
   expect_error(ancombc(x, ~ status + age, m3, groups = 'two'), 'term in `formula`')
-  expect_error(ancombc(x, ~ two + age, m3, groups = 'two'), 'three')
+  expect_error(ancombc_global(ancombc(x, ~ two + age, m3, groups = 'two', cpus = 1L)), 'three')
   expect_error(ancombc(x, ~ status, meta, groups = 1), 'name')
   for (arg in c('alpha')) for (v in list(0, 1, NA, 'a', c(0.1, 0.2)))
     expect_error(do.call(ancombc, setNames(list(x, ~ status, meta, v), c('counts', 'formula', 'data', arg))), 'between 0 and 1')

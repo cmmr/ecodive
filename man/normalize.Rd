@@ -27,6 +27,11 @@ too, so the result is dense. See \strong{Pseudocount} below.
 \item \code{'rclr'}: Robust centered log ratio: \eqn{\log(x)} minus the mean
 log of the sample's non-zero counts, for non-zero counts only; zeros
 stay 0.
+\item \code{'log'}: Log relative abundance (log-TSS): \eqn{\log} of each
+sample's proportions after adding \code{pseudocount} to every value,
+\eqn{\log((x + pseudocount) / \sum (x + pseudocount))}. It is the
+clr shifted by one constant per sample. Zeros get a value too, so the
+result is dense. See \strong{Pseudocount} below.
 \item \code{'none'}: No transformation.
 }}
 
@@ -35,7 +40,7 @@ stay 0.
 class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{pseudocount}{Value added to counts to handle zeros when
-\code{norm = 'clr'}. Ignored for other normalization methods. See
+\code{norm = 'clr'} or \code{'log'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
 \item{cpus}{How many parallel processing threads should be used. The
@@ -55,7 +60,7 @@ normalized count matrix (not the object), in that object's
 orientation.
 }
 
-\code{norm = 'clr'} always gives a dense base \code{matrix}, since every zero
+\code{norm = 'clr'} (and \code{'log'}) always gives a dense base \code{matrix}, since every zero
 becomes a (usually negative) value, which can take far more memory than
 a sparse input. \code{\link[=beta_div]{beta_div()}}, \code{\link[=pca]{pca()}}, and \code{\link[=envfit]{envfit()}} accept \code{norm = 'clr'} themselves and never make that dense copy, so prefer them where
 you can. \code{normalize()} warns when the result would have more than
@@ -79,10 +84,12 @@ Whichever package was attached last masks the other's, so call
 }
 \section{Pseudocount}{
 
-The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}.
+The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}
+or \code{norm = 'log'}.
 
-Zeros are undefined in the centered log-ratio (CLR) transformation. If
-\code{norm = 'clr'}, \code{pseudocount} is \code{NULL} (the default), and
+Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If \code{norm} is \code{'clr'} or
+\code{'log'}, \code{pseudocount} is \code{NULL} (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (\code{min(x[x>0]) / 2}) and issues a warning.
 

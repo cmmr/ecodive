@@ -129,6 +129,19 @@
   expect_true(inherits(z, 'ecodive_ancombc_trend') && nrow(z) == 12L && all(is.finite(z$w)))
   z <- structural_zeros(cz, 'grp', meta)
   expect_true(is.logical(z) && identical(dim(z), c(12L, 2L)))
+  z <- da_wilcoxon(cz, 'grp', meta, pseudocount = 1, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_da_wilcoxon') && nrow(z) == 12L && identical(attr(z, 'method'), 'da_wilcoxon'))
+  expect_true(all(z$p_value >= 0 & z$p_value <= 1) && is.logical(z$reject) && !anyNA(z$reject))
+  z <- da_ttest(cz, 'grp', meta, norm = 'percent', cpus = cpus)
+  expect_true(inherits(z, 'ecodive_da_ttest') && nrow(z) == 12L && all(is.finite(as.matrix(z[, 2:10]))))
+  expect_true(all(z$ci_lower <= z$diff & z$diff <= z$ci_upper))
+  z <- da_lm(cz, ~ grp + x, meta, norm = 'rclr', cpus = cpus)
+  expect_true(inherits(z, 'ecodive_da_lm') && nrow(z) == 36L && !anyNA(z$reject))
+  expect_identical(unique(z$covariate), c('(Intercept)', 'grpb', 'x'))
+  z <- da_test(counts, 'da_lm', 'grp', meta, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_da_lm') && nrow(z) == 24L)
+  expect_true(is.data.frame(list_da_tests()) && 'da_ttest' %in% list_da_tests('id'))
+  expect_identical(match_da_test('Mann-Whitney')$id, 'da_wilcoxon')
 
   # Zero replacement.
   cz <- counts; cz[cz < 4] <- 0L
@@ -287,6 +300,9 @@
   expect_true(drawn(ancombc_pairwise(fit, cpus = cpus)))
   expect_true(drawn(ancombc_dunnett(fit, n_bootstraps = 20L, cpus = cpus)))
   expect_true(drawn(ancombc_trend(fit, n_bootstraps = 20L, cpus = cpus)))
+  expect_true(drawn(da_wilcoxon(counts, 'grp', meta, cpus = cpus)))
+  expect_true(drawn(da_ttest(counts, 'grp', meta, cpus = cpus)))
+  expect_true(drawn(da_lm(counts, ~ grp + x, meta, cpus = cpus)))
   for (nm in names(tests)) {
     expect_true(drawn(tests[[nm]]), info = nm)
     expect_true(drawn(tests[[nm]], type = 'null'), info = nm)

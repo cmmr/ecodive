@@ -61,7 +61,7 @@
 #'
 #' @param norm  Normalize `counts` before fitting them, as in
 #'        [beta_div()]: `'none'`, `'percent'`, `'chord'`, `'hellinger'`,
-#'        `'binary'`, `'clr'`, or `'rclr'`. Default: `'none'`. `margin`, `norm`, and
+#'        `'binary'`, `'clr'`, `'rclr'`, or `'log'`. Default: `'none'`. `margin`, `norm`, and
 #'        `pseudocount` apply only to `counts`.
 #'
 #' @param na.rm  Leave out samples with missing values (`NA`) in `ord` or in

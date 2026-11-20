@@ -32,12 +32,14 @@ transformation).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
 \item \code{'rclr'}: Robust centered log ratio.
+\item \code{'log'}: Log relative abundance (log-TSS), with \code{pseudocount} added
+to every value first.
 }
 
 Default: \code{'none'}.}
 
 \item{pseudocount}{Value added to counts to handle zeros when
-\code{norm = 'clr'}. Ignored for other normalization methods. See
+\code{norm = 'clr'} or \code{'log'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
 \item{pairs}{Which combinations of samples should distances be
@@ -65,7 +67,7 @@ which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-\rho_p}.}
+       \rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -109,10 +111,12 @@ For large datasets, standard matrix operations may be slow. See
 
 \section{Pseudocount}{
 
-The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}.
+The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}
+or \code{norm = 'log'}.
 
-Zeros are undefined in the centered log-ratio (CLR) transformation. If
-\code{norm = 'clr'}, \code{pseudocount} is \code{NULL} (the default), and
+Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If \code{norm} is \code{'clr'} or
+\code{'log'}, \code{pseudocount} is \code{NULL} (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (\code{min(x[x>0]) / 2}) and issues a warning.
 
@@ -138,33 +142,33 @@ Legendre, P., & Legendre, L. (2012). Numerical ecology. Elsevier.
 \seealso{
 \code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
-Other Abundance metrics:
-\code{\link[=aitchison]{aitchison()}},
-\code{\link[=bhattacharyya]{bhattacharyya()}},
-\code{\link[=bray]{bray()}},
-\code{\link[=canberra]{canberra()}},
-\code{\link[=chebyshev]{chebyshev()}},
-\code{\link[=chord]{chord()}},
-\code{\link[=clark]{clark()}},
-\code{\link[=divergence]{divergence()}},
-\code{\link[=euclidean]{euclidean()}},
-\code{\link[=gower]{gower()}},
-\code{\link[=hellinger]{hellinger()}},
-\code{\link[=horn]{horn()}},
-\code{\link[=jensen]{jensen()}},
-\code{\link[=jsd]{jsd()}},
-\code{\link[=lorentzian]{lorentzian()}},
-\code{\link[=manhattan]{manhattan()}},
-\code{\link[=matusita]{matusita()}},
-\code{\link[=minkowski]{minkowski()}},
-\code{\link[=morisita]{morisita()}},
-\code{\link[=motyka]{motyka()}},
-\code{\link[=psym_chisq]{psym_chisq()}},
-\code{\link[=robust_aitchison]{robust_aitchison()}},
-\code{\link[=soergel]{soergel()}},
-\code{\link[=squared_chisq]{squared_chisq()}},
-\code{\link[=squared_chord]{squared_chord()}},
-\code{\link[=topsoe]{topsoe()}},
-\code{\link[=wave_hedges]{wave_hedges()}}
+Other Abundance metrics: 
+\code{\link{aitchison}()},
+\code{\link{bhattacharyya}()},
+\code{\link{bray}()},
+\code{\link{canberra}()},
+\code{\link{chebyshev}()},
+\code{\link{chord}()},
+\code{\link{clark}()},
+\code{\link{divergence}()},
+\code{\link{euclidean}()},
+\code{\link{gower}()},
+\code{\link{hellinger}()},
+\code{\link{horn}()},
+\code{\link{jensen}()},
+\code{\link{jsd}()},
+\code{\link{lorentzian}()},
+\code{\link{manhattan}()},
+\code{\link{matusita}()},
+\code{\link{minkowski}()},
+\code{\link{morisita}()},
+\code{\link{motyka}()},
+\code{\link{psym_chisq}()},
+\code{\link{robust_aitchison}()},
+\code{\link{soergel}()},
+\code{\link{squared_chisq}()},
+\code{\link{squared_chord}()},
+\code{\link{topsoe}()},
+\code{\link{wave_hedges}()}
 }
 \concept{Abundance metrics}

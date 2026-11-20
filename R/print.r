@@ -278,6 +278,13 @@ print_df_label <- function (x) {
       if (is.character(g) && length(g)) paste('ANCOM:', paste(g, collapse = ' vs ')) else 'ANCOM'
     },
     ecodive_dirmult_ttest = 'Dirichlet-multinomial t-test',
+    ecodive_da_wilcoxon   = ,
+    ecodive_da_ttest      = ,
+    ecodive_da_lm         = {
+      # Subsetting rows with `[` drops the `method` attribute.
+      m <- attr(x, 'method', exact = TRUE)
+      if (is.null(m)) NULL else da_method_name(m)
+    },
     ecodive_simper        = 'SIMPER',
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
     NULL )
@@ -314,6 +321,12 @@ print.ecodive_ancombc_dunnett  <- print_table_result
 print.ecodive_ancombc_trend    <- print_table_result
 #' @export
 print.ecodive_dirmult_ttest    <- print_table_result
+#' @export
+print.ecodive_da_wilcoxon      <- print_table_result
+#' @export
+print.ecodive_da_ttest         <- print_table_result
+#' @export
+print.ecodive_da_lm            <- print_table_result
 #' @export
 print.ecodive_simper           <- print_table_result
 #' @export

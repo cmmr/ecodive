@@ -86,13 +86,16 @@ reference:
   - rho_p
   - phi_s
 - subtitle: Differential abundance
-  desc: Which features' abundances differ between groups, from log ratios or clr values, so that the samples' totals don't matter.
+  desc: Which features' abundances differ between groups. da_test() runs any method by name; the classical per-feature tests compare normalized values, the others log ratios or clr values, so that the samples' totals don't matter.
   contents:
+  - da_test
+  - list_da_tests
   - ancom
   - ancombc
   - ancombc_global
   - structural_zeros
   - dirmult_ttest
+  - da_wilcoxon
 - subtitle: Absolute abundance
   desc: With each sample's total microbial load measured (cell counts, qPCR, a spike-in), estimate absolute abundances instead of ratios.
   contents:
@@ -164,6 +167,7 @@ reference:
   - plot.ecodive_dirmult_ttest
   - plot.ecodive_ancom
   - plot.ecodive_ancombc
+  - plot.ecodive_da_ttest
   - plot.ecodive_varpart
   - plot.ecodive_forward_select
   - plot.ecodive_bioenv

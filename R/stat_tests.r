@@ -339,6 +339,13 @@ match_dist_test <- function (test, groups = NULL) {
   needle <- gsub('[^a-z]', '', tolower(test))
   if (nchar(needle) == 0) stop('`test` must contain alphabetic characters')
 
+  # Methods of the other wrappers.
+  if (needle %in% names(exact_names('DA_TESTS')) &&
+      !needle %in% names(exact_names('DIST_TESTS')))
+    stop(
+      '`test = "', test, '"` is a differential abundance test of a count ',
+      'table: use da_test().', call. = FALSE )
+
   match <- match_name(needle, 'DIST_TESTS', df$id)
 
   if (length(match) > 1) stop(

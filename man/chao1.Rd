@@ -64,11 +64,11 @@ Chao, A. (1984). Nonparametric estimation of the number of classes in a populati
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Richness metrics:
-\code{\link[=ace]{ace()}},
-\code{\link[=margalef]{margalef()}},
-\code{\link[=menhinick]{menhinick()}},
-\code{\link[=observed]{observed()}},
-\code{\link[=squares]{squares()}}
+Other Richness metrics: 
+\code{\link{ace}()},
+\code{\link{margalef}()},
+\code{\link{menhinick}()},
+\code{\link{observed}()},
+\code{\link{squares}()}
 }
 \concept{Richness metrics}
