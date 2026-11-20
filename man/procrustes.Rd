@@ -136,8 +136,9 @@ above). When both packages are attached, the one attached last masks the
 other: call \code{ecodive::procrustes()} to be sure.
 }
 \examples{
-    # The same samples under two beta diversity metrics: 30 samples along a gradient that favours some genera at one end
-    # and others at the other.
+    # The same samples under two beta diversity metrics: 30 samples
+    # along a gradient that favours some genera at one end and others
+    # at the other.
     set.seed(1)
     grad   <- seq(-2, 2, length.out = 30)
     counts <- sapply(1:20, function (j) rpois(30, 5 * exp(grad * (j - 10.5) / 5)))
