@@ -138,8 +138,9 @@ forward_select(
 - cpus:
 
   How many parallel processing threads should be used. The default,
-  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), will
-  use all logical CPU cores.
+  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), is
+  the CPU cores this R process may use, within any limits set on it.
+  Results are the same for any `cpus`.
 
 ## Value
 
@@ -362,7 +363,7 @@ of explanatory variables. *Ecology*, 89, 2623-2632.
     fs <- forward_select(bray(counts), ~ ph + temp + depth + site, meta)
     attr(fs, 'selected')
 #> ~ph + temp
-#> <environment: 0x625f0faa5e80>
+#> <environment: 0x6074e2d356d8>
     varpart(bray(counts), env = attr(fs, 'selected'), site = ~ site, data = meta)
 #> Variation partitioning by db-RDA: 40 samples, 2 sets
 #> Total inertia: 1.5469

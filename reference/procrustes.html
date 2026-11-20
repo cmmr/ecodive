@@ -132,7 +132,8 @@ Default: <code>3</code>.</p></dd>
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
 <dd><p>How many parallel processing threads should be used. The
-default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical CPU cores.</p></dd>
+default, <code><a href="n_cpus.html">n_cpus()</a></code>, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any <code>cpus</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -218,8 +219,9 @@ the Mantel test. <em>Oecologia</em>, 129(2), 169-178.
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="co"># The same samples under two beta diversity metrics: 30 samples along a gradient that favours some genera at one end</span></span></span>
-<span class="r-in"><span>    <span class="co"># and others at the other.</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="co"># The same samples under two beta diversity metrics: 30 samples</span></span></span>
+<span class="r-in"><span>    <span class="co"># along a gradient that favours some genera at one end and others</span></span></span>
+<span class="r-in"><span>    <span class="co"># at the other.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">grad</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, length.out <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">j</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">grad</span> <span class="op">*</span> <span class="op">(</span><span class="va">j</span> <span class="op">-</span> <span class="fl">10.5</span><span class="op">)</span> <span class="op">/</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>

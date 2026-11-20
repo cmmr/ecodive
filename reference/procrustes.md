@@ -78,8 +78,9 @@ procrustes(
 - cpus:
 
   How many parallel processing threads should be used. The default,
-  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), will
-  use all logical CPU cores.
+  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), is
+  the CPU cores this R process may use, within any limits set on it.
+  Results are the same for any `cpus`.
 
 ## Value
 
@@ -195,8 +196,9 @@ approach over the Mantel test. *Oecologia*, 129(2), 169-178.
 ## Examples
 
 ``` r
-    # The same samples under two beta diversity metrics: 30 samples along a gradient that favours some genera at one end
-    # and others at the other.
+    # The same samples under two beta diversity metrics: 30 samples
+    # along a gradient that favours some genera at one end and others
+    # at the other.
     set.seed(1)
     grad   <- seq(-2, 2, length.out = 30)
     counts <- sapply(1:20, function (j) rpois(30, 5 * exp(grad * (j - 10.5) / 5)))

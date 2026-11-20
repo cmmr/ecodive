@@ -1529,13 +1529,27 @@
   took 16 s), and small jobs no longer start threads at all. Results are
   unchanged, and still the same for any `cpus`.
 
-- Every function’s `cpus` is now capped at
-  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), the
-  cores available, so that asking for more threads than that costs
-  nothing. Results are the same for any `cpus`. Without the parallelly
-  package,
-  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md) now
-  returns at most 2 under `R CMD check --as-cran`, as parallelly’s does.
+- [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md) no
+  longer uses the parallelly package, and ecodive no longer imports
+  parallel. It reads the process’s CPU affinity, cgroup CPU quota (or
+  Windows job object CPU cap) and core counts from the operating system,
+  and follows the same job schedulers (Slurm, PBS, LSF, SGE, PJM,
+  HTCondor), options, environment variables and
+  `parallelly.availableCores.*` settings as
+  `parallelly::availableCores()`, giving the same counts, in about 25
+  microseconds rather than a few milliseconds. In a worker process (one
+  forked by `mclapply()` and the like, or a worker of a socket cluster,
+  mirai or clustermq), it returns 1. `options(ecodive.cpus = n)` or
+  `R_ECODIVE_CPUS` caps ecodive’s threads.
+
+- Every function’s `cpus` is now capped at the cores the process may
+  use: its affinity, quota, scheduler allocation, `R CMD check`’s limit
+  of 2 and `ecodive.cpus`. Settings such as `mc.cores` only lower the
+  default,
+  [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md), so
+  that more threads can still be asked for, e.g. in a worker. Asking for
+  more threads than the cap costs nothing; results are the same for any
+  `cpus`.
 
 - Fixed `NA` in an integer or logical count table being read as
   -2147483648: every alpha and beta diversity function now treats it as
