@@ -97,10 +97,12 @@ A `dist` object over the features, as
 \\\rho_p\\ is a **similarity** in a `dist` container:
 [`as.matrix()`](https://rdrr.io/r/base/matrix.html) puts 0 on the
 diagonal, where \\\rho_p\\ is 1, and it must not be given as `dm` to an
-ordination or test. Threshold it to find proportional pairs
-(`which(rho > 0.7)`, or `as.matrix(rho) > 0.7` for an adjacency matrix),
-or use `1 - rho_p(x)` (which is \\\mathrm{vlr}\_{ij} /
-(\mathrm{var}(z_i) + \mathrm{var}(z_j))\\) for a dissimilarity.
+ordination or test.
+[`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md)
+lists the most proportional pairs, such as
+`assoc_pairs(rho, threshold = 0.7)`, and `as.matrix(rho) > 0.7` gives an
+adjacency matrix. For a dissimilarity, use `1 - rho_p(x)`, which is
+\\\mathrm{vlr}\_{ij} / (\mathrm{var}(z_i) + \mathrm{var}(z_j))\\.
 
 ## Details
 
@@ -217,12 +219,20 @@ using compositional data analysis. *Scientific Reports*, 7, 16252.
 #> # Attributes: method
 
     # Pairs above a cutoff
-    m <- as.matrix(rho)
-    which(m > 0.5 & upper.tri(m), arr.ind = TRUE)
-#>                   row col
-#> Streptococcus       1   4
-#> Corynebacterium     3   6
-#> Propionibacterium   5   6
+    assoc_pairs(rho, threshold = 0.5)
+#> # A data.frame: 8 × 3
+#> # Proportionality (rho_p): pairs with |r| >= 0.5
+#>   from              to                association
+#>   <chr>             <chr>                   <dbl>
+#> 1 Haemophilus       Propionibacterium      -0.983
+#> 2 Streptococcus     Propionibacterium      -0.935
+#> 3 Streptococcus     Haemophilus             0.865
+#> 4 Corynebacterium   Staphylococcus          0.652
+#> 5 Bacteroides       Corynebacterium        -0.646
+#> 6 Propionibacterium Staphylococcus          0.537
+#> 7 Haemophilus       Staphylococcus         -0.536
+#> 8 Streptococcus     Bacteroides            -0.504
+#> # Attributes: method, threshold
 
     # Relative to one feature (alr): that feature is left out
     rho_p(x, denominator = 'Streptococcus')

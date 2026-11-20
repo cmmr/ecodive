@@ -40,7 +40,9 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
   [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md),
   [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md),
-  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) or
+  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),
+  [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md)
+  or
   [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md).
   A community-types result (see
   [ecodive_types](https://cmmr.github.io/ecodive/reference/ecodive_types.md))

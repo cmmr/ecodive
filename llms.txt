@@ -584,10 +584,13 @@ valid alternative to correlation. A dist over the features.
 ### Associations and networks
 
 Correlations between features’ absolute abundances, estimated from
-relative abundances. A dist over the features.
+relative abundances (a dist over the features), and the pairs above a
+cutoff.
 
 - [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md) :
   SparCC Correlation
+- [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md)
+  : Strongly Associated Pairs of Features
 
 ### Differential abundance
 

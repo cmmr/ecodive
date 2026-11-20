@@ -120,12 +120,11 @@ are:
 The correlations are a **similarity** in a `dist` container:
 [`as.matrix()`](https://rdrr.io/r/base/matrix.html) puts 0 on the
 diagonal, where they are 1, and they must not be given as `dm` to an
-ordination or test. To find strongly associated pairs, threshold them:
-`which(abs(r) > 0.3)` gives their positions in the triangle, and
-`abs(as.matrix(r)) > 0.3` an adjacency matrix. For a dissimilarity, use
-`1 - r`. With p-values, `p <- p.adjust(attr(r, "p_value"), "BH")`
-adjusts them for testing every pair, and `r[p <= 0.05]` keeps the
-significant pairs.
+ordination or test.
+[`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md)
+lists the strongly associated pairs, as a data frame, optionally only
+the significant ones; `abs(as.matrix(r)) > 0.3` gives an adjacency
+matrix. For a dissimilarity, use `1 - r`.
 
 ## Details
 
@@ -282,6 +281,8 @@ data. *Bioinformatics*, 35, 1064–1066.
 
 ## See also
 
+[`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md),
+the pairs above a cutoff;
 [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md),
 proportionality of features;
 [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), the
@@ -337,15 +338,32 @@ variation matrix;
 #> 1.5975580 0.8801285 1.0327013 1.3007508 
 
     # Pairs above a cutoff
-    m <- as.matrix(r)
-    which(abs(m) > 0.5 & upper.tri(m), arr.ind = TRUE)
-#>      row col
-#> OTU1   1   2
+    assoc_pairs(r, threshold = 0.5)
+#> # A data.frame: 1 × 3
+#> # SparCC Correlation: pairs with |r| >= 0.5
+#>   from  to    association
+#>   <chr> <chr>       <dbl>
+#> 1 OTU1  OTU2        0.881
+#> # Attributes: method, threshold
 
-    # With p-values from 99 null datasets
+    # With p-values from 99 null datasets (see assoc_pairs() for how
+    # many are needed for significance after adjustment)
     r <- sparcc(counts, n_draws = 10, permutations = 99)
-    head(attr(r, 'p_value'))
-#> [1] 0.01 0.99 0.46 0.29 0.28 0.61
+    assoc_pairs(r)
+#> # A data.frame: 9 × 5
+#> # SparCC Correlation: pairs with |r| >= 0.3
+#>   from  to    association p_value p_adjusted
+#>   <chr> <chr>       <dbl>   <dbl>      <dbl>
+#> 1 OTU1  OTU2        0.881    0.01      0.38
+#> 2 OTU14 OTU18      -0.505    0.01      0.38
+#> 3 OTU11 OTU13       0.381    0.01      0.38
+#> 4 OTU14 OTU16       0.381    0.01      0.38
+#> 5 OTU17 OTU19       0.377    0.01      0.38
+#> 6 OTU4  OTU5       -0.331    0.03      0.633
+#> 7 OTU1  OTU19       0.323    0.05      0.679
+#> 8 OTU7  OTU17       0.318    0.03      0.633
+#> 9 OTU18 OTU20      -0.309    0.06      0.739
+#> # Attributes: method, threshold, p_adjust
 
     plot(r)
 

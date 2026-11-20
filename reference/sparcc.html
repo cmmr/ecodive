@@ -163,12 +163,10 @@ every pair: see <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="ext
 <li><p><code>order</code>: with <code>clust</code>, each feature's position in the input.</p></li>
 </ul><p>The correlations are a <strong>similarity</strong> in a <code>dist</code> container:
 <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> puts 0 on the diagonal, where they are 1, and they must
-not be given as <code>dm</code> to an ordination or test. To find strongly
-associated pairs, threshold them: <code>which(abs(r) &gt; 0.3)</code> gives their
-positions in the triangle, and <code>abs(as.matrix(r)) &gt; 0.3</code> an adjacency
-matrix. For a dissimilarity, use <code>1 - r</code>. With p-values,
-<code>p &lt;- p.adjust(attr(r, "p_value"), "BH")</code> adjusts them for testing
-every pair, and <code>r[p &lt;= 0.05]</code> keeps the significant pairs.</p>
+not be given as <code>dm</code> to an ordination or test. <code><a href="assoc_pairs.html">assoc_pairs()</a></code> lists
+the strongly associated pairs, as a data frame, optionally only the
+significant ones; <code>abs(as.matrix(r)) &gt; 0.3</code> gives an adjacency matrix.
+For a dissimilarity, use <code>1 - r</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -317,8 +315,9 @@ rapid and scalable correlation estimation for compositional data.
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="rho_p.html">rho_p()</a></code>, proportionality of features; <code><a href="vlr.html">vlr()</a></code>, the variation
-matrix; <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code>.</p></div>
+    <div class="dont-index"><p><code><a href="assoc_pairs.html">assoc_pairs()</a></code>, the pairs above a cutoff; <code><a href="rho_p.html">rho_p()</a></code>,
+proportionality of features; <code><a href="vlr.html">vlr()</a></code>, the variation matrix;
+<code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code>.</p></div>
     </div>
 
     <div class="section level2">
@@ -369,15 +368,32 @@ matrix; <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code>.</
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1.5975580 0.8801285 1.0327013 1.3007508 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Pairs above a cutoff</span></span></span>
-<span class="r-in"><span>    <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.5</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>, arr.ind <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      row col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OTU1   1   2</span>
+<span class="r-in"><span>    <span class="fu"><a href="assoc_pairs.html">assoc_pairs</a></span><span class="op">(</span><span class="va">r</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 1 × 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # SparCC Correlation: pairs with |r| &gt;= 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   from  to    association</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 OTU1  OTU2        0.881</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, threshold</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># With p-values from 99 null datasets</span></span></span>
+<span class="r-in"><span>    <span class="co"># With p-values from 99 null datasets (see assoc_pairs() for how</span></span></span>
+<span class="r-in"><span>    <span class="co"># many are needed for significance after adjustment)</span></span></span>
 <span class="r-in"><span>    <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu">sparcc</span><span class="op">(</span><span class="va">counts</span>, n_draws <span class="op">=</span> <span class="fl">10</span>, permutations <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">r</span>, <span class="st">'p_value'</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.01 0.99 0.46 0.29 0.28 0.61</span>
+<span class="r-in"><span>    <span class="fu"><a href="assoc_pairs.html">assoc_pairs</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 9 × 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # SparCC Correlation: pairs with |r| &gt;= 0.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   from  to    association p_value p_adjusted</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 OTU1  OTU2        0.881    0.01      0.38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 OTU14 OTU18      -0.505    0.01      0.38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 OTU11 OTU13       0.381    0.01      0.38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 OTU14 OTU16       0.381    0.01      0.38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 OTU17 OTU19       0.377    0.01      0.38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 OTU4  OTU5       -0.331    0.03      0.633</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7 OTU1  OTU19       0.323    0.05      0.679</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8 OTU7  OTU17       0.318    0.03      0.633</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9 OTU18 OTU20      -0.309    0.06      0.739</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, threshold, p_adjust</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="sparcc-1.png" alt="" width="700" height="433"></span>

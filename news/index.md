@@ -896,6 +896,18 @@
   explain how it differs from
   [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md).
 
+- New
+  [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md)
+  lists the pairs of features whose correlation, from
+  [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md) or
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) (or a
+  correlation matrix), is at least a cutoff in absolute value, strongest
+  first, as a data frame of `from`, `to` and `association`. With
+  [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md)’s
+  p-values it adds `p_value` and `p_adjusted` (adjusted over all pairs
+  by `p_adjust`, Benjamini-Hochberg by default), and `alpha` keeps only
+  the significant pairs.
+
 - New [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md)
   and [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md)
   turn relative abundances into absolute abundances when each sample’s
