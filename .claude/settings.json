@@ -1,0 +1,19 @@
+{
+    "permissions": {
+        "allow": [
+            "WebFetch",
+            "Bash(curl:*)",
+            "Bash(wget:*)",
+            "Bash(tar:*)",
+            "Bash(unzip:*)",
+            "Bash(apt-get:*)",
+            "Bash(apt:*)",
+            "Bash(pip:*)",
+            "Bash(pip3:*)",
+            "Bash(python:*)",
+            "Bash(python3:*)",
+            "Bash(R:*)",
+            "Bash(Rscript:*)"
+        ]
+    }
+}
