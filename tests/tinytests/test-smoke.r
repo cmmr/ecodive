@@ -145,6 +145,11 @@
   expect_identical(z$feature, rep(colnames(counts), each = 3L))
   expect_identical(unique(z$covariate), c('(Intercept)', 'grpb', 'x'))
   expect_true(all(is.finite(as.matrix(z[, 3:7]))) && is.logical(z$reject) && !anyNA(z$reject))
+
+  # Source tracking.
+  st <- sourcetracker(counts, ifelse(meta$x < 0.8, meta$grp, NA), depth = 20L, n_restarts = 1L, n_burnin = 5L, cpus = cpus)
+  expect_true(inherits(st, 'ecodive_source') && identical(dim(st), c(4L, 3L)) && all(is.finite(st)))
+  expect_true(all(abs(rowSums(st) - 1) < 1e-12) && identical(colnames(st), c('a', 'b', 'Unknown')))
   cz <- counts; cz[cz < 3] <- 0L
   z <- ancombc2(cz, 'grp', meta, cpus = cpus)
   expect_true(inherits(z, 'ecodive_ancombc') && nrow(z) == 24L && identical(attr(z, 'method'), 'ancombc2'))
@@ -175,6 +180,9 @@
   expect_identical(unique(z$covariate), c('(Intercept)', 'grpb', 'x'))
   z <- da_test(counts, 'da_lm', 'grp', meta, cpus = cpus)
   expect_true(inherits(z, 'ecodive_da_lm') && nrow(z) == 24L)
+  z <- suppressWarnings(linda(cz, ~ grp + x, meta, cpus = cpus))
+  expect_true(inherits(z, 'ecodive_linda') && nrow(z) == 24L && !anyNA(z$reject))
+  expect_true(all(is.finite(z$log2_fc)) && all(z$p_value >= 0 & z$p_value <= 1))
   expect_true(is.data.frame(list_da_tests()) && 'da_ttest' %in% list_da_tests('id'))
   expect_identical(match_da_test('Mann-Whitney')$id, 'da_wilcoxon')
   z <- da_sensitivity(counts, 'da_ttest', 'grp', meta, pseudocounts = TRUE, cpus = cpus)
@@ -343,6 +351,7 @@
   expect_true(drawn(ancom(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)))
   expect_true(drawn(sparcc(counts, n_draws = 5L, cpus = cpus)))
+  expect_true(drawn(st))   # sourcetracker()
   expect_true(drawn(fit))   # ancombc2()
   expect_true(drawn(ancombc_global(fit, cpus = cpus)))
   expect_true(drawn(ancombc_pairwise(fit, cpus = cpus)))
@@ -351,6 +360,7 @@
   expect_true(drawn(da_wilcoxon(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(da_ttest(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(da_lm(counts, ~ grp + x, meta, cpus = cpus)))
+  expect_true(drawn(linda(counts, ~ grp + x, meta, cpus = cpus)))
   for (nm in names(tests)) {
     expect_true(drawn(tests[[nm]]), info = nm)
     expect_true(drawn(tests[[nm]], type = 'null'), info = nm)

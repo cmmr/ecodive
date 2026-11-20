@@ -89,8 +89,8 @@
 #'     statistic: the treatment's rank sum minus its smallest possible
 #'     value); `auc`, \eqn{W / (n_1 n_2)}, the probability that a
 #'     treatment sample's value is above a reference sample's (ties count
-#'     half); and `median_diff`, the treatment's median minus the
-#'     reference's.
+#'     half); `median_diff`, the treatment's median minus the
+#'     reference's; and `mean`, the mean of both groups' values.
 #'   * `da_ttest()`: `diff`, the treatment's mean minus the reference's;
 #'     `ci_lower`, `ci_upper`, its confidence interval; `t`; `dof`, the
 #'     degrees of freedom (Welch-Satterthwaite's, or \eqn{n_1 + n_2 - 2});
@@ -424,6 +424,7 @@ da_two_sample <- function (env, id) {
       w           = W,
       auc         = W / (m1 * m2),
       median_diff = res[, 5] - res[, 6],
+      mean        = res[, 9],
       p_value     = p,
       p_adjusted  = adj$p_adjusted,
       reject      = adj$reject,

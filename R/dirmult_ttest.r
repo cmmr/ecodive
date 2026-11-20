@@ -6,8 +6,10 @@
 # _adjust_pvalues() (_utils.py), Copyright (c) 2013--, scikit-bio
 # development team, under the BSD-3 license given in src/dirmult.c and
 # inst/COPYRIGHTS. Its scale model (scale_sd) follows clr.sm() from ALDEx3
-# 1.4.0 (R/scale.R), Copyright (c) 2026 ALDEx3 authors, under the MIT
-# license given in src/dirmult.c and inst/COPYRIGHTS.
+# 1.4.0 (R/scale.R), and its pooled_sd and effect columns aldex.effect()
+# and .aldex_pooled_var() (R/aldex-summary.R), Copyright (c) 2026 ALDEx3
+# authors, under the MIT license given in src/dirmult.c and
+# inst/COPYRIGHTS.
 
 
 
@@ -88,6 +90,20 @@
 #'   * `ci_lower`, `ci_upper`: the lowest lower bound and the highest upper
 #'     bound of the draws' intervals for that difference, in log2 units
 #'     (`CI(2.5)`, `CI(97.5)` for the default `conf_level`).
+#'   * `pooled_sd`: the pooled within-group standard deviation of the
+#'     feature's clr values, \eqn{\sqrt{(q_1 + q_2) / (n_1 + n_2 - 2)}}
+#'     with \eqn{q} each side's sum of squared deviations from its mean,
+#'     averaged over the draws, in log2 units (ALDEx3's `pooled.SD`). The
+#'     scale model doesn't change it. `NaN` when each side has one sample.
+#'   * `mean`: the feature's mean clr value over the samples in the
+#'     contrast, averaged over the draws, in log2 units: its typical
+#'     abundance relative to the sample's geometric mean, the x axis of an
+#'     MA plot. With two named groups, the samples in other groups are not
+#'     included.
+#'   * `effect`: each draw's difference (with the scale model's shift)
+#'     divided by its pooled standard deviation, averaged over the draws:
+#'     a standardised effect size, Cohen's \eqn{d} (ALDEx3's `cohens.d`).
+#'     Not `log2_fc / pooled_sd`, which is a ratio of averages.
 #'   * `p_value`: Welch's two-sided p-value, averaged over the draws
 #'     (`pvalue`).
 #'   * `p_adjusted`: `p_value` adjusted across the features with `p_adjust`
@@ -197,6 +213,26 @@
 #' linear models to each draw instead of t-tests. Their results agree with
 #' this function's in direction and rough size, not exactly.
 #'
+#' **Effect sizes.** `pooled_sd`, `mean` and `effect` describe each feature
+#' for the effect and MA plots ([plot.ecodive_dirmult_ttest()]).
+#' `pooled_sd` and `effect` are ALDEx3's `aldex.effect()` statistics, and
+#' match them for the same draws. ALDEx2's `aldex.effect()` reports
+#' related but different quantities, from random pairs of draws and
+#' medians. Its `diff.btw` is the median difference between the groups,
+#' like `log2_fc`. Its `diff.win`, "the per-feature maximum median
+#' difference between Dirichlet instances within conditions", measures the
+#' spread within the groups as `pooled_sd` does, but on another scale: for
+#' normal data, the median absolute difference of two values is
+#' \eqn{0.954\sigma}, and taking the larger of the two groups' values
+#' makes it larger still (1.2 to 1.5 times `pooled_sd` on a test table
+#' with six samples a group). So ALDEx2's `effect`, the median ratio of
+#' the two, is smaller than `effect` (by about a quarter on that table)
+#' and ranks the features almost the same way (correlation 0.998). Its
+#' `rab.all` is a median over all samples, where `mean` is a mean over
+#' those in the contrast. Features with \eqn{|}`effect`\eqn{| > 1}
+#' differ between the groups by more than they vary within them, as with
+#' ALDEx2's rule of thumb.
+#'
 #' **Computation.** The draws run in parallel C, one draw at a time, with
 #' memory for one draw (8 bytes per value of the samples in the contrast).
 #' Every sample of every draw has its own random stream, so results are
@@ -259,6 +295,9 @@
 #'     res
 #'     plot(res)
 #'
+#'     # Each feature's difference against its spread within the groups.
+#'     plot(res, 'effect')
+#'
 #'     # With a scale model, the intervals widen and fewer features are
 #'     # rejected.
 #'     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0.5)
@@ -287,8 +326,9 @@ dirmult_ttest <- function (
 # n x D x n_draws array of Gamma draws to use instead of sampling, samples
 # and features as in `counts`' default orientation); returns list(result,
 # draws, shift), `draws` holding each draw's diff, se, dof, t, p_tail
-# (one-sided), lower and upper (n_draws x D matrices, natural logs), and
-# `shift` each draw's scale shift (natural logs; 0 with scale_sd = 0).
+# (one-sided), lower, upper, pooled_sd and mean (n_draws x D matrices,
+# natural logs), and `shift` each draw's scale shift (natural logs; 0 with
+# scale_sd = 0).
 dirmult_ttest_details <- function (
     counts, groups, data = NULL, contrast = NULL, margin = 1L,
     pseudocount = 0.5, scale_sd = 0, n_draws = 128L, alpha = 0.05,
@@ -383,6 +423,9 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
     log2_fc    = res$log2_fc,
     ci_lower   = lo,
     ci_upper   = hi,
+    pooled_sd  = res$pooled_sd,
+    mean       = res$mean,
+    effect     = res$effect,
     p_value    = res$p_value,
     p_adjusted = p_adjusted,
     reject     = reject,

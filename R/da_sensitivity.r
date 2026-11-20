@@ -16,8 +16,8 @@
 #'
 #' @param method   The name of a DA method, as for [da_test()]: `"ancom"`,
 #'        `"ancombc"`, `"ancombc2"`, `"da_lm"`, `"da_ttest"`,
-#'        `"da_wilcoxon"`, or `"dirmult_ttest"`. Flexible matching is
-#'        supported.
+#'        `"da_wilcoxon"`, `"dirmult_ttest"`, or `"linda"`. Flexible
+#'        matching is supported.
 #'
 #' @param ...   The base run: everything [da_test()] takes after `method`
 #'        (`groups`, `data`, `formula`) and the method's own arguments
@@ -125,7 +125,10 @@
 #'   [ancombc()]
 #'   and [ancombc2()] it is added to every value, as in ANCOMBC's own
 #'   sensitivity analysis. For [dirmult_ttest()] it is the Dirichlet
-#'   prior, added to the counts before the posterior draws.
+#'   prior, added to the counts before the posterior draws. For [linda()]
+#'   it is added to every count when the zeros get a pseudocount
+#'   (`zero_handling = 'pseudocount'`, or `'adaptive'` choosing it); when
+#'   they are imputed, every run is the same.
 #' * `zeros`: replaces the zeros with [replace_zeros()] instead of a
 #'   pseudocount, for the methods that take any table of positive values.
 #' * `scale_sds`: [dirmult_ttest()]'s scale model, the standard deviation of
@@ -412,6 +415,17 @@ da_sens_grids <- function (method, args, pseudocounts, zeros, scale_sds) {
           '`pseudocounts`: with `norm = "', norm, '"`, `', id, '` adds no ',
           'pseudocount, so every run would be the same. Use `norm = "clr"` ',
           'or `"log"`.', call. = FALSE )
+    }
+
+    # linda() with imputed zeros adds no pseudocount either.
+    if ('zero_handling' %in% method$params && 'zero_handling' %in% names(args)) {
+      zh <- args$zero_handling
+      if (is.character(zh) && length(zh) == 1L && !is.na(zh) &&
+          startsWith('imputation', tolower(zh)) && nzchar(zh))
+        stop(
+          '`pseudocounts`: with `zero_handling = "imputation"`, `', id, '` adds ',
+          'no pseudocount, so every run would be the same. Use ',
+          '`zero_handling = "pseudocount"`.', call. = FALSE )
     }
   }
 

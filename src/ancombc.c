@@ -169,6 +169,7 @@ typedef struct {
   // Variances and covariances.
   double       *var;      // D x P
   double       *cov;      // D x P x P, or NULL.
+  double       *rss;      // D: the residual sums of squares (NaN if failed).
 
   // Sampling fractions.
   const double *delta;    // P: the EM biases.
@@ -739,7 +740,8 @@ static void *fit_worker (void *arg) {
 // from the squared residuals r2 = (y - X beta - theta)^2
 // (0 where missing): var_fp = sum_s r2_s H_sp^2, cov_fpq
 // = sum_s r2_s H_sp H_sq, plus R's corrections for
-// missing values and failed fits (sparse).
+// missing values and failed fits (sparse); and the
+// residual sum of squares, sum_s r2_s.
 //======================================================
 static void *var_worker (void *arg) {
 
@@ -763,6 +765,10 @@ static void *var_worker (void *arg) {
         if (ab.theta) r -= ab.theta[s];
         r2[s] = r * r;
       }
+
+      double rss = 0;
+      for (int s = 0; s < n; s++) rss += r2[s];
+      ab.rss[f] = (ab.valid && !ab.valid[f]) ? R_NaN : rss;
 
       for (int i = 0; i < P * P; i++) acc[i] = 0;
       for (int s = 0; s < n; s++) {
@@ -947,6 +953,9 @@ static void swap_beta (void) {
 //   n_iters    P integer: EM iterations.
 //   n_used     P integer: features in each covariate's EM.
 //   theta      n sampling fractions (ANCOM-BC2), else NULL.
+//   rss        D residual sums of squares of the fit whose variances
+//              these are (NaN for failed fits).
+//   mean       D mean clr values (rclr with missing values).
 //======================================================
 SEXP C_ancombc(
     SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_pc, SEXP sexp_v2,
@@ -1021,6 +1030,28 @@ SEXP C_ancombc(
           "every sample needs a non-zero value.");
       }
     }
+
+  // Each feature's mean clr (rclr with missing values): the mean over its
+  // observed samples of its log minus the sample's mean log over the
+  // features observed in it.
+  SEXP sexp_mclr = PROTECT(allocVector(REALSXP, D));
+  {
+    double *smean = (double *) R_alloc((size_t) n + 1, sizeof(double));
+    for (int s = 0; s < n; s++) {
+      double t = 0; int c = 0;
+      for (int f = 0; f < D; f++) {
+        double v = data[s + (size_t) f * n];
+        if (!ISNAN(v)) { t += v; c++; }
+      }
+      smean[s] = c ? t / c : R_NaN;
+    }
+    for (int f = 0; f < D; f++) {
+      const double *y = data + (size_t) f * n;
+      double t = 0; int c = 0;
+      for (int s = 0; s < n; s++) if (!ISNAN(y[s])) { t += y[s] - smean[s]; c++; }
+      REAL(sexp_mclr)[f] = c ? t / c : R_NaN;
+    }
+  }
 
   if (v2)
     for (int f = 0; f < D; f++) {
@@ -1179,7 +1210,9 @@ SEXP C_ancombc(
 
   SEXP sexp_var  = PROTECT(allocMatrix(REALSXP, D, P));
   SEXP sexp_cov  = PROTECT(alloc3DArray(REALSXP, D, P, P));
+  SEXP sexp_rss  = PROTECT(allocVector(REALSXP, D));
   ab.var = REAL(sexp_var);
+  ab.rss = REAL(sexp_rss);
   for (size_t i = 0; i < (size_t) D * P * P; i++) REAL(sexp_cov)[i] = R_NaN;
 
 
@@ -1306,21 +1339,21 @@ SEXP C_ancombc(
 
   const char *nms[] = {
     "beta", "var", "vcov", "valid", "rank", "n_missing", "bias", "n_iters",
-    "n_used", "theta" };
+    "n_used", "theta", "rss", "mean" };
   SEXP vals[] = {
     sexp_beta, sexp_var, sexp_cov, sexp_valid, sexp_rank, sexp_nmiss,
-    sexp_bias, sexp_iters, sexp_used, sexp_theta };
+    sexp_bias, sexp_iters, sexp_used, sexp_theta, sexp_rss, sexp_mclr };
 
-  SEXP result = PROTECT(allocVector(VECSXP, 10));
-  SEXP names  = PROTECT(allocVector(STRSXP, 10));
-  for (int i = 0; i < 10; i++) {
+  SEXP result = PROTECT(allocVector(VECSXP, 12));
+  SEXP names  = PROTECT(allocVector(STRSXP, 12));
+  for (int i = 0; i < 12; i++) {
     SET_VECTOR_ELT(result, i, vals[i]);
     SET_STRING_ELT(names, i, mkChar(nms[i]));
   }
   setAttrib(result, R_NamesSymbol, names);
 
   free_all();
-  UNPROTECT(12);
+  UNPROTECT(14);
   return result;
 }
 

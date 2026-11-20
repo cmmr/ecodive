@@ -371,3 +371,104 @@ Follows [README.md](README.md) § "Result attributes and plots".
   Methods*, 16, 627–632.
 - An, U., Shenhav, L., Olson, C. A., et al. (2022). STENSL: microbial
   source tracking with ENvironment SeLection. *mSystems*, 7, e00995-21.
+
+
+## Decisions made while implementing (sourcetracker)
+
+Item 47, 2026-11-20. Asked of the user at the start:
+
+1. **No `sinks =` selector** (user's choice): `NA` in `sources` marks a
+   sink; to leave a sample out, subset `counts`.
+2. **`n_burnin` and `thin`** (user's choice), not SourceTracker's `burnin`
+   and `delay`. The docs give the SourceTracker names.
+3. **`features` returns means over the draws** (user's choice), so each
+   sink's environment × feature matrix sums to its depth. The docs say
+   SourceTracker2 sums, and that `* attr(x, "n_draws")` gives its tables.
+4. **A class, `ecodive_source`** (user's choice), on the plain matrix:
+   `c('ecodive_source', 'matrix', 'array')`, with `print()` and a
+   stacked-bar `plot()` (unknown last, in grey; legend outside on the
+   right; `horiz`, `legend`, `...` to `barplot()`). It is still a matrix.
+   `feast()` should return the same class; both methods are shared.
+
+Made while implementing:
+
+5. **Random streams.** Rarefying sink row r of `counts` uses stream r, the
+   stream `rarefy()` gives sample r, so a sink is rarefied exactly as
+   `rarefy(counts, sink_depth, seed)` rarefies it (tested). A pooled
+   environment e uses stream `1 << 56 | e`; the chain of sink row r and
+   restart k `2 << 56 | r << 24 | k`; under `loo`, environment e's chain
+   `3 << 56 | e << 24 | k`. The tags keep the streams apart (the plan's
+   `sink * n_restarts + restart` would collide with the rarefaction
+   streams and change every chain when `n_restarts` changes). `n_restarts`
+   is capped at 2^24 - 1. A chain draws: each read's start
+   (`pcg32_bounded(V)`), then per pass a Fisher–Yates shuffle
+   (`pcg32_bounded`), then one `rng_unif()` per read. Because the stream is
+   keyed by the sink's row in `counts`, a sink's result is unchanged when
+   sinks *after* it are added or removed (tested), not when rows before it
+   are; keying by sample name was considered and rejected (duplicates,
+   unnamed tables, and `rarefy()`'s position-based streams).
+6. **Rarefaction is done in `src/sourcetracker.c`** with the same Knuth
+   selection sampling as `src/rarefy.c` (so identical draws), rather than
+   by calling `rarefy()`, to choose the environments' streams.
+7. **`sd` is the standard deviation (ddof 0) of the per-draw proportions,**
+   as the plan says. SourceTracker2's `mps` divides each draw's counts by
+   the total over *all* draws first, so its values are ours divided by the
+   number of draws: a scaling bug. The docs say so, and the tests compare
+   our `sd` with SourceTracker2's `mps × n_draws` (ratio within 0.75–1.33).
+8. **Attributes:** `sd`, `n_draws`, `features` (when asked) and `method`
+   only. The plan's `depth`, `sink_depth`, `alpha1`, `alpha2`, `beta` and
+   `seed` attributes are left out under README's rule 1 (set 2026-11-20,
+   after the plan): they are the caller's arguments, not results.
+9. **Environment order:** a factor's levels (unused ones dropped), else
+   sorted by name in the C locale (`sort(method = 'radix')`), as
+   SourceTracker2's `groupby()`. `"Unknown"` as an environment name is an
+   error.
+10. **Argument ranges:** `alpha1 >= 0`; `alpha2 > 0` and `beta > 0`
+    (SourceTracker2 allows 0, which gives 0/0 weights); `n_burnin >= 0`
+    (SourceTracker2 wants > 0; 0 is harmless). A pooled environment with no
+    reads is an error when `alpha1 = 0` (0/0) or under `loo` (an empty
+    sink); with `alpha1 > 0` it is allowed (a uniform source), as in
+    SourceTracker2. A sink with no reads (`sink_depth = NULL`) is an error
+    naming it. Too-shallow sources and sinks are errors naming them.
+11. **`loo`:** samples with `NA` are ignored; the result is environments ×
+    (environments, `"Unknown"`) with 0 in each environment's own column
+    (and its `sd`), and with `features`, a zero row for the held-out
+    environment, as SourceTracker2's `collate_gibbs_results()`.
+12. **Per-feature output** is a list of dense (environments + Unknown) ×
+    features matrices, named by sink, with every feature column (so they
+    line up with `counts`). Inside C, each (sink, restart) unit accumulates
+    only the sink's own features.
+13. **Threads:** units are (sink, restart) pairs, striped over the threads
+    in blocks (so the user can interrupt between blocks); each unit writes
+    only its own outputs, so the result is identical for any `cpus`
+    (tested for 1, 2, 4, 7, also with `loo`). `threads_for()` keeps small
+    jobs on one thread.
+14. **The weights drop SourceTracker2's common denominator**
+    `n - 1 + beta V`; `C_st_cond_prob()` (for the tests) divides by it to
+    compare with `ConditionalProbability` at 1e-10.
+15. **Unnamed tables:** sinks are named by their row number in `counts`.
+16. **Reference testing.** SourceTracker2's `_sourcetracker.py` was run
+    (numpy 2.5.5, pandas 2.3.3, scikit-bio 0.7.4) by
+    `data-raw/expected/sourcetracker.py`: collapse (exact), conditional
+    probabilities (max relative difference 4.6e-13), the schedule (exact,
+    found by running `gibbs_sampler()` with a one-hot probability per pass),
+    and `gibbs()` with 40 seeds per setting (default; 4 restarts × 3 draws
+    with burnin 20, delay 5; leave-one-out) on 6 simulated sinks of 400
+    reads from 3 sources of 2000 reads and an unknown source.
+    **SourceTracker2's own leave-one-out fails** (`gibbs(sources, None)`):
+    `sources[lambda x: x != source]` masks values instead of dropping the
+    held-out row, so its sampler gets one source too many and
+    `collate_gibbs_results()` raises. The loo fixture runs what it means to
+    (`gibbs_sampler()` on `sources.drop(index=source)`, then
+    `collate_gibbs_results(loo = TRUE)`). The docs' "Differences from
+    SourceTracker2" say ecodive's `loo` works.
+    **SourceTracker 1.0** (GPL, github.com/danknights/sourcetracker,
+    `src/SourceTracker.r`) was run for its outputs only, by
+    `data-raw/expected/sourcetracker.r` with `SOURCETRACKER_V1` set: 20 seeds
+    of R's generator on the same simulated tables, `delay = 1`, other
+    settings as SourceTracker2's defaults. Only its README, `example.r`'s
+    calls and the two functions' argument lists were read. Its means are
+    within 0.0038 of ecodive's (max z 2.1) and 0.0045 of SourceTracker2's;
+    the test checks both within 0.02. (A first attempt to run it was refused
+    by the session's permission checks; the user then asked for it, and it
+    ran.)

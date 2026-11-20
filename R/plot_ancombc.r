@@ -7,8 +7,13 @@
 #' Plots the results of [ancombc()] and [ancombc2()] and of their post-hoc
 #' tests, from what each holds:
 #'
-#' * [ancombc()], [ancombc2()]: a volcano plot of one covariate's
-#'   bias-corrected log fold changes against their adjusted p-values.
+#' * [ancombc()], [ancombc2()]: one covariate's bias-corrected log fold
+#'   changes, as one of four plots (`type`): `"volcano"` (the default),
+#'   against their adjusted p-values; `"effect"`, against each feature's
+#'   residual standard deviation (Gloor et al. 2016; ALDEx2's `"MW"`
+#'   plot), for a two-level comparison; `"ma"`, against each feature's mean
+#'   clr abundance (ALDEx2's `"MA"` plot); or `"forest"`, with their
+#'   confidence intervals, for the `n_features` most significant features.
 #' * [ancombc_pairwise()], [ancombc_dunnett()]: a heatmap of the log fold
 #'   change of each feature (rows) in each comparison (columns), with the
 #'   significant ones in bold.
@@ -29,20 +34,28 @@
 #'        (such as `"statusmoderate"` or `"age"`). Defaults to the first
 #'        covariate that isn't the intercept.
 #'
-#' @param labels  For [ancombc()] and [ancombc2()]: how many of the
-#'        differentially abundant features to name, those with the smallest
-#'        adjusted p-values. Default `10`; `0` for none.
+#' @param type  For [ancombc()] and [ancombc2()]: the plot, `"volcano"`
+#'        (the default), `"effect"`, `"ma"`, or `"forest"`.
 #'
-#' @param n_features  How many features to show: for the heatmap, those
-#'        with the smallest adjusted p-value in any comparison; for the dot
-#'        chart, those with the largest statistic. Default `30`; `Inf` for
-#'        all.
+#' @param labels  For [ancombc()] and [ancombc2()]: how many of the
+#'        differentially abundant features to name (in the volcano, effect
+#'        and MA plots), those with the smallest adjusted p-values. Default
+#'        `10`; `0` for none.
+#'
+#' @param n_features  How many features to show: for the forest plot, those
+#'        with the smallest adjusted p-value (ties in the table's order);
+#'        for the heatmap, those with the smallest adjusted p-value in any
+#'        comparison; for the dot chart, those with the largest statistic.
+#'        Default `30`; `Inf` for all.
+#'
+#' @param conf_level  For the forest plot: the confidence level of the
+#'        intervals. Default `0.95`.
 #'
 #' @param digits  For the heatmap: the number of decimal places of the log
 #'        fold changes written in its cells. Default `2`.
 #'
-#' @param ...  Passed on to [graphics::plot.default()] for the volcano plot,
-#'        [graphics::image()] for the heatmap (where `col` is the colour
+#' @param ...  Passed on to [graphics::plot.default()] for the volcano,
+#'        effect, MA and forest plots, [graphics::image()] for the heatmap (where `col` is the colour
 #'        scale, from most negative to most positive), and
 #'        [graphics::dotchart()] for the dot chart (`col` as its `color`),
 #'        such as `main`, `sub`, `xlab` or `cex`.
@@ -50,10 +63,28 @@
 #' @details
 #' Log fold changes are natural logs, as ANCOM-BC estimates them; the axis
 #' label and the heatmap's subtitle say so from the result's `log_base`
-#' attribute. In the
-#' volcano plot, the y axis is \eqn{-\log_{10}} of `p_adjusted`, with a
-#' dashed line at `alpha`; coefficients that couldn't be estimated (`NaN`)
-#' are left out. In the heatmap, red cells are increases and blue cells
+#' attribute. Coefficients that couldn't be estimated (`NaN`) are left out.
+#'
+#' * **Volcano plot.** The y axis is \eqn{-\log_{10}} of `p_adjusted`,
+#'   with a dashed line at `alpha`.
+#' * **Effect plot.** The x axis is the feature's residual standard
+#'   deviation (the `resid_sd` attribute, natural logs); the dashed lines
+#'   are \eqn{y = \pm x}, so features beyond them differ by more than they
+#'   vary within the groups. Only for a covariate whose design column is 0
+#'   or 1 (a factor's level against its reference): for a model of that
+#'   factor alone, `resid_sd` is the pooled within-group standard
+#'   deviation; with other covariates, it is the spread left after them.
+#' * **MA plot.** The x axis is the feature's mean clr abundance (the `mean`
+#'   attribute; the rclr with zeros as missing values).
+#' * **Forest plot.** Bars over Wald intervals, \eqn{\mathrm{log\_fc} \pm
+#'   q\,\mathrm{se}}, with \eqn{q} the \eqn{(1 + }`conf_level`\eqn{)/2}
+#'   quantile of the standard normal (`ancombc()`) or of the t distribution
+#'   with the feature's `dof` (`ancombc2()`), as the p-values; they aren't
+#'   adjusted for testing many features, so a bar can miss 0 while the
+#'   feature isn't rejected. The ANCOM-BC2 vignette's bar charts of log
+#'   fold changes and standard errors show the same.
+#'
+#' In the heatmap, red cells are increases and blue cells
 #' decreases, on a scale symmetric about 0, and the value of each cell is
 #' written in it, in bold when that comparison is significant for that
 #' feature. For [ancombc_trend()], each feature's label gives the pattern
@@ -83,14 +114,23 @@
 #'     plot(fit)
 #'     plot(fit, 'age')
 #'
+#'     # Each feature's difference against its spread, its abundance, and
+#'     # with its interval.
+#'     plot(fit, type = 'effect')
+#'     plot(fit, type = 'ma')
+#'     plot(fit, 'age', type = 'forest')
+#'
 #'     # Every pair of groups.
 #'     plot(ancombc_pairwise(fit))
 #'
 #'     # Any difference between the groups.
 #'     plot(ancombc_global(fit))
-plot.ecodive_ancombc <- function (x, covariate = NULL, labels = 10, ...) {
+plot.ecodive_ancombc <- function (
+    x, covariate = NULL, type = c('volcano', 'effect', 'ma', 'forest'),
+    labels = 10, n_features = 30, conf_level = 0.95, ... ) {
 
-  labels <- plot_count(labels, 'labels')
+  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest'))
+  da_plot_need(x, type, c(effect = 'resid_sd', ma = 'mean'), column = FALSE)
 
   covs <- unique(x$covariate)
   if (is.null(covariate)) {
@@ -99,14 +139,33 @@ plot.ecodive_ancombc <- function (x, covariate = NULL, labels = 10, ...) {
   }
   if (!is.character(covariate) || length(covariate) != 1 || !covariate %in% covs)
     stop('`covariate` must be one of ', name_list(covs), '.', call. = FALSE)
+  if (type == 'effect') da_plot_binary(x, covariate)
 
-  r <- x[x$covariate == covariate & is.finite(x$log_fc), , drop = FALSE]
+  if (!is.numeric(conf_level) || length(conf_level) != 1L || is.na(conf_level) ||
+      !(conf_level > 0 && conf_level < 1))
+    stop('`conf_level` must be a single number strictly between 0 and 1.', call. = FALSE)
 
-  plot_volcano(
-    r$log_fc, r$p_adjusted, r$reject, r$feature, attr(x, 'alpha', exact = TRUE),
-    labels, list(...), robust = r$reject_robust,
-    main = ancombc_plot_name(x),
-    xlab = sprintf('%s, %s', lfc_label(x), covariate) )
+  # Wald intervals, with the p-values' distribution.
+  r   <- x[x$covariate == covariate, , drop = FALSE]
+  dof <- attr(x, 'dof', exact = TRUE)
+  q   <- if (is.null(dof)) stats::qnorm((1 + conf_level) / 2)
+         else suppressWarnings(stats::qt((1 + conf_level) / 2, dof))
+  v2  <- !is.null(dof)
+
+  mean_lab <- sprintf(
+    'Mean abundance (%s, natural log)',
+    if (v2 && isTRUE(attr(x, 'pseudocount', exact = TRUE) == 0)) 'rclr' else 'clr' )
+
+  da_plot(
+    x, type, labels, n_features, list(...),
+    est = r$log_fc, p = r$p_adjusted, reject = r$reject, feature = r$feature,
+    sd = attr(x, 'resid_sd', exact = TRUE), mean = attr(x, 'mean', exact = TRUE),
+    lo = r$log_fc - q * r$se, hi = r$log_fc + q * r$se, robust = r$reject_robust,
+    what     = covariate,
+    est_lab  = lfc_label(x),
+    sd_lab   = 'Residual standard deviation (natural log)',
+    mean_lab = mean_lab,
+    interval = sprintf('unadjusted %s Wald intervals', plot_pct(conf_level)) )
 
   invisible(x)
 }

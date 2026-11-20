@@ -156,6 +156,17 @@
 #'     (`delta_em`, subtracted from the coefficients), its weighted least
 #'     squares estimate (`delta_wls`) and that estimate's variance
 #'     (`var_delta`); `n_iters`: the EM iterations run per covariate.
+#'   * Per feature (named by feature), for the effect and MA plots
+#'     ([plot.ecodive_ancombc()]): `resid_sd`, the residual standard
+#'     deviation of the fit behind the variances, \eqn{\sqrt{\mathrm{RSS}
+#'     / (n_{obs} - \mathrm{rank})}} over the feature's observed samples
+#'     (ANCOM-BC: the initial fit, about each sample's estimated sampling
+#'     fraction; ANCOM-BC2: the final fit), in natural logs; `NaN` for a
+#'     fit that failed or has no residual degrees of freedom. For a design
+#'     of one two-level factor, it is the pooled within-group standard
+#'     deviation. And `mean`, the feature's mean clr value (natural logs,
+#'     with `pseudocount`), or with zeros as missing values (`ancombc2()`,
+#'     `pseudocount = 0`) its mean rclr value, over its observed samples.
 #'   * `sample_fractions` (`ancombc2()`): each sample's estimated log
 #'     sampling fraction.
 #'   * With `sensitivity`: `sensitivity`, a list of `pseudocounts` and
@@ -547,6 +558,16 @@ ancombc_fit <- function (env, v2) {
   if (!is.null(estimable)) dimnames(estimable) <- dn
   if (!is.null(dof)) names(dof) <- features
 
+  # The residual standard deviation of the fit behind the variances (the
+  # initial, theta-centred fit for ANCOM-BC; the final fit for ANCOM-BC2),
+  # with each feature's observed samples and the rank of its design.
+  rank_x   <- if (!is.null(res$rank)) res$rank else rep(sum(dinv > 0), D)
+  n_obs    <- if (!is.null(res$n_missing)) n - res$n_missing else rep(n, D)
+  resid_sd <- ifelse(n_obs > rank_x, sqrt(res$rss / (n_obs - rank_x)), NaN)
+  resid_sd[is.na(resid_sd)] <- NaN
+  mean_clr <- res$mean
+  mean_clr[is.na(mean_clr)] <- NaN
+
   attr(out, 'method')      <- if (v2) 'ancombc2' else 'ancombc'
   attr(out, 'formula')     <- des$formula
   attr(out, 'groups')      <- des$groups
@@ -565,6 +586,8 @@ ancombc_fit <- function (env, v2) {
   attr(out, 'design')      <- X
   attr(out, 'bias')        <- bias
   attr(out, 'n_iters')     <- stats::setNames(res$n_iters, covariates)
+  attr(out, 'resid_sd')    <- stats::setNames(resid_sd, features)
+  attr(out, 'mean')        <- stats::setNames(mean_clr, features)
   if (v2) {
     sf <- res$theta
     if (!is.null(info$samples)) names(sf) <- info$samples

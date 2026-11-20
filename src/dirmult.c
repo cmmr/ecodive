@@ -36,7 +36,9 @@
 //   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Its scale model (scale_sd) follows clr.sm() from ALDEx3 1.4.0
-// (R/scale.R), under this license:
+// (R/scale.R), and its pooled_sd, mean and effect follow aldex.effect()
+// and .aldex_pooled_var() from ALDEx3 1.4.0 (R/aldex-summary.R), under
+// this license:
 //
 //   Copyright (c) 2026 ALDEx3 authors
 //
@@ -68,6 +70,16 @@
 // of clr means (scaled by log 2 here, which works in natural logs); the
 // variances, being within sides, don't change.
 //
+// aldex.effect() reports, per feature, the mean over the draws of the
+// pooled within-group standard deviation, sqrt(((n0 - 1) var0 + (n1 - 1)
+// var1) / (n0 + n1 - 2)) of the log abundances (clr plus the scale shift,
+// which a side shares, so the clr's variances), and the mean over the
+// draws of the coefficient divided by it (cohens.d), the coefficient being
+// the difference of the sides' means for the design "treatment versus
+// reference". Here: pooled_sd and effect, with the scale model's shift in
+// the difference; and mean, the mean clr over the samples of the contrast,
+// averaged over the draws.
+//
 // The rest of this file is Copyright 2026 ecodive authors, under the MIT
 // license above. The Gamma draws are rng_dist.c's (on PCG, not NumPy's
 // PCG64 sampler, so the draws themselves differ from scikit-bio's); the
@@ -83,13 +95,15 @@
 //
 //   Phase B (threads, one task per block of features): Welch's difference
 //   (treatment minus reference), standard error and degrees of freedom,
-//   in scikit-bio's order of operations.
+//   in scikit-bio's order of operations; and the pooled standard deviation
+//   and the mean of both sides.
 //
 //   Then, on this thread (R's pt() and qt() are not thread-safe when they
 //   warn): the scale model's shift of every difference (one normal draw
-//   from stream (seed, d * (n + 1) + n)), t, the one-sided tail probability, the interval's bounds, and
-//   the running sums, minima and maxima across draws, in draw order, as
-//   scikit-bio's loop.
+//   from stream (seed, d * (n + 1) + n)), t, the one-sided tail
+//   probability, the interval's bounds, the effect (the shifted difference
+//   over the pooled standard deviation), and the running sums, minima and
+//   maxima across draws, in draw order, as scikit-bio's loop.
 //
 // Every task depends only on its own sample or features, and the sums run
 // in draw order on one thread, so results are identical for any number of
@@ -115,6 +129,7 @@ static int           dm_draw;
 static const double *dm_given;      // n x D x n_draws given G, or NULL
 static double       *dm_clr;        // m x D, row by row
 static double       *dm_diff, *dm_se, *dm_dof;
+static double       *dm_psd, *dm_mean;  // pooled sd, mean of both sides
 
 
 // Phase A: each sample's row of clr values.
@@ -188,6 +203,8 @@ static void *welch_worker (void *arg) {
     }
 
     for (int k = 0; k < nf; k++) {
+      dm_psd[f0 + k]  = sqrt((q1[k] + q2[k]) / (n1 + n2 - 2));
+      dm_mean[f0 + k] = (n1 * s1[k] + n2 * s2[k]) / (n1 + n2);
       double vn1 = (q1[k] / (n1 - 1)) / n1;
       double vn2 = (q2[k] / (n2 - 1)) / n2;
       double var_sum = vn1 + vn2;
@@ -223,12 +240,12 @@ static inline double nan_max (double a, double b) {
 // sexp_given:   NULL, or n x D x n_draws Gamma draws to use
 //               instead of sampling (tests).
 // sexp_details: TRUE also returns each draw's difference,
-//               se, dof, t, tail probability and bounds
-//               (n_draws x D matrices, natural logs), and
-//               each draw's scale shift.
+//               se, dof, t, tail probability, bounds,
+//               pooled sd and mean (n_draws x D matrices,
+//               natural logs), and each draw's scale shift.
 //
-// Returns list(t, log2_fc, ci_lower, ci_upper, p_value[,
-// draws, shift]).
+// Returns list(t, log2_fc, ci_lower, ci_upper, p_value,
+// pooled_sd, mean, effect[, draws, shift]).
 //======================================================
 SEXP C_dirmult_ttest(
     SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_side, SEXP sexp_pseudocount,
@@ -278,6 +295,8 @@ SEXP C_dirmult_ttest(
   double *diff = (double *) R_alloc((size_t) D, sizeof(double));
   double *se   = (double *) R_alloc((size_t) D, sizeof(double));
   double *dof  = (double *) R_alloc((size_t) D, sizeof(double));
+  double *psd  = (double *) R_alloc((size_t) D, sizeof(double));
+  double *mn   = (double *) R_alloc((size_t) D, sizeof(double));
 
   dm_D     = D;
   dm_m     = m;
@@ -296,6 +315,8 @@ SEXP C_dirmult_ttest(
   dm_diff  = diff;
   dm_se    = se;
   dm_dof   = dof;
+  dm_psd   = psd;
+  dm_mean  = mn;
 
   // Threads only for enough work: about 30 ns per Gamma draw, 3 ns per
   // value in phase B.
@@ -309,25 +330,33 @@ SEXP C_dirmult_ttest(
   SEXP sexp_lower = PROTECT(allocVector(REALSXP, D));
   SEXP sexp_upper = PROTECT(allocVector(REALSXP, D));
   SEXP sexp_pval  = PROTECT(allocVector(REALSXP, D));
+  SEXP sexp_psd   = PROTECT(allocVector(REALSXP, D));
+  SEXP sexp_mean  = PROTECT(allocVector(REALSXP, D));
+  SEXP sexp_eff   = PROTECT(allocVector(REALSXP, D));
   double *tstat_sum = REAL(sexp_t),     *delta_sum = REAL(sexp_delta);
   double *lower     = REAL(sexp_lower), *upper     = REAL(sexp_upper);
   double *pval_sum  = REAL(sexp_pval);
+  double *psd_sum   = REAL(sexp_psd),   *mean_sum  = REAL(sexp_mean);
+  double *eff_sum   = REAL(sexp_eff);
   for (int f = 0; f < D; f++) {
     tstat_sum[f] = delta_sum[f] = pval_sum[f] = 0;
+    psd_sum[f] = mean_sum[f] = eff_sum[f] = 0;
     lower[f] = R_PosInf;
     upper[f] = R_NegInf;
   }
 
   SEXP sexp_draws = R_NilValue;
   double *d_diff = NULL, *d_se = NULL, *d_dof = NULL, *d_t = NULL,
-         *d_p = NULL, *d_lo = NULL, *d_hi = NULL;
+         *d_p = NULL, *d_lo = NULL, *d_hi = NULL, *d_psd = NULL, *d_mean = NULL;
   if (details) {
-    sexp_draws = allocVector(VECSXP, 7);
+    sexp_draws = allocVector(VECSXP, 9);
     PROTECT(sexp_draws);
-    const char *nms[] = { "diff", "se", "dof", "t", "p_tail", "lower", "upper" };
-    double    **ptr[] = { &d_diff, &d_se, &d_dof, &d_t, &d_p, &d_lo, &d_hi };
-    SEXP names = PROTECT(allocVector(STRSXP, 7));
-    for (int k = 0; k < 7; k++) {
+    const char *nms[] = {
+      "diff", "se", "dof", "t", "p_tail", "lower", "upper", "pooled_sd", "mean" };
+    double    **ptr[] = {
+      &d_diff, &d_se, &d_dof, &d_t, &d_p, &d_lo, &d_hi, &d_psd, &d_mean };
+    SEXP names = PROTECT(allocVector(STRSXP, 9));
+    for (int k = 0; k < 9; k++) {
       SEXP mat = allocMatrix(REALSXP, n_draws, D);
       SET_VECTOR_ELT(sexp_draws, k, mat);
       *ptr[k] = REAL(mat);
@@ -383,15 +412,20 @@ SEXP C_dirmult_ttest(
 
       delta_sum[f] += diff[f];
 
+      psd_sum[f]  += psd[f];
+      mean_sum[f] += mn[f];
+      eff_sum[f]  += diff[f] / psd[f];
+
       if (details) {
         size_t k = (size_t) f * n_draws + d;
         d_diff[k] = diff[f]; d_se[k] = se[f]; d_dof[k] = dof[f];
         d_t[k] = t; d_p[k] = p; d_lo[k] = lo; d_hi[k] = hi;
+        d_psd[k] = psd[f]; d_mean[k] = mn[f];
       }
     }
 
     if (d + 1 < n_draws && user_interrupted()) {
-      UNPROTECT(7);
+      UNPROTECT(10);
       error("Interrupted.");
     }
   }
@@ -404,9 +438,14 @@ SEXP C_dirmult_ttest(
     delta_sum[f] /= log2_;
     upper[f]     /= log2_;
     lower[f]     /= log2_;
+    psd_sum[f]   /= n_draws;
+    mean_sum[f]  /= n_draws;
+    eff_sum[f]   /= n_draws;
+    psd_sum[f]   /= log2_;
+    mean_sum[f]  /= log2_;
   }
 
-  int  n_out  = details ? 7 : 5;
+  int  n_out  = details ? 10 : 8;
   SEXP result = PROTECT(allocVector(VECSXP, n_out));
   SEXP names  = PROTECT(allocVector(STRSXP, n_out));
   SET_VECTOR_ELT(result, 0, sexp_t);     SET_STRING_ELT(names, 0, mkChar("t"));
@@ -414,14 +453,17 @@ SEXP C_dirmult_ttest(
   SET_VECTOR_ELT(result, 2, sexp_lower); SET_STRING_ELT(names, 2, mkChar("ci_lower"));
   SET_VECTOR_ELT(result, 3, sexp_upper); SET_STRING_ELT(names, 3, mkChar("ci_upper"));
   SET_VECTOR_ELT(result, 4, sexp_pval);  SET_STRING_ELT(names, 4, mkChar("p_value"));
+  SET_VECTOR_ELT(result, 5, sexp_psd);   SET_STRING_ELT(names, 5, mkChar("pooled_sd"));
+  SET_VECTOR_ELT(result, 6, sexp_mean);  SET_STRING_ELT(names, 6, mkChar("mean"));
+  SET_VECTOR_ELT(result, 7, sexp_eff);   SET_STRING_ELT(names, 7, mkChar("effect"));
   if (details) {
-    SET_VECTOR_ELT(result, 5, sexp_draws);
-    SET_STRING_ELT(names, 5, mkChar("draws"));
-    SET_VECTOR_ELT(result, 6, sexp_shift);
-    SET_STRING_ELT(names, 6, mkChar("shift"));
+    SET_VECTOR_ELT(result, 8, sexp_draws);
+    SET_STRING_ELT(names, 8, mkChar("draws"));
+    SET_VECTOR_ELT(result, 9, sexp_shift);
+    SET_STRING_ELT(names, 9, mkChar("shift"));
   }
   setAttrib(result, R_NamesSymbol, names);
 
-  UNPROTECT(9);
+  UNPROTECT(12);
   return result;
 }
