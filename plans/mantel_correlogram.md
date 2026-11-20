@@ -56,13 +56,16 @@ ecodist `mgram()`.
   - ecodist `mgram()` as a second check.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- The result is a data frame, not an `ecodive_test`: keep `dm`'s `dist`
-  record as `dist` and `y`'s (when `y` is a dist) as `dist_y`, so
-  `plot()` titles "Mantel Correlogram of <dm> by <y>".
+- The result is a data frame, not an `ecodive_test`, so no constructor
+  titles it. Set `display$title` with `set_display()` and `title_of()`,
+  naming both matrices as `mantel()` does when both have titles: "Mantel
+  correlogram of Bray-Curtis Dissimilarity and Euclidean Distance"; with
+  a title on `dm` only (`y` coordinates or a column of `data`), "Mantel
+  correlogram of Bray-Curtis Dissimilarity".
 - Store what the plot needs: the classes' breaks and midpoints, the
   per-class statistics and `p_adjusted` in plotting order, `alpha` for
   filled vs open points.

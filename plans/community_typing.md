@@ -282,24 +282,25 @@ n = 120) and on ecodive's `ex_counts` aggregated to 30 features. Save
 
 ---
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`types` record** on each result: "Enterotypes" (`k`, `k_max`,
-  `criterion` — Calinski-Harabasz or silhouette —, the distance's
-  `metric`), "VALENCIA Community State Types" (centroid set version), and
-  "Dirichlet-Multinomial Mixtures" (`k`, `criterion` — Laplace, AIC or
-  BIC —, `seed`). `enterotype()` keeps the `dist` record of the
-  Jensen-Shannon distance it computed; all keep the input's `transform`
-  record.
-- **Plot parameters stored on the result**: the per-`k` criterion values
-  (for the model-selection plot), the chosen `k`, per-type mean
-  composition (for the barplot of type profiles), and a stable type order
-  and colour key so every plot of the same result agrees.
-- The assignment can be passed as `groups` to tests and ordination plots;
-  give it a `factor` with the type names as levels, and keep the `types`
-  record on the factor too, so `plot(ord, types)` can title its legend.
+- Title: `enterotype()` names its input, so it sets `display$title` with
+  `set_display()` and `title_of("Enterotypes", <the distance's title>)`:
+  "Enterotypes of Jensen-Shannon Distance" for counts (from the `jensen()`
+  result it computed), or the given `dist`'s title. `valencia()` and
+  `dmm()` take counts, which have no title, so their plots build the
+  title from `method`: "VALENCIA Community State Types",
+  "Dirichlet-Multinomial Mixtures".
+- What the plots read, all stored when the result is made: `selection`
+  (the per-`k` criterion values and the chosen `k`, for the
+  model-selection plot), `profiles` (per-type mean composition, for the
+  type profiles), `scores` (valencia), and the `type` factor's levels,
+  a stable type order from which the colour key follows, so every plot of
+  the same result agrees.
+- The assignment can be passed as `groups` to tests and ordination plots:
+  `res$type` is a plain `factor` with the type names as levels.
 
 ## Tests (all three)
 

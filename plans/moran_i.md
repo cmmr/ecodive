@@ -56,16 +56,16 @@ which eigenvectors to keep ([dbmem.md](dbmem.md)).
   fixed weights, to check row standardisation and the analytic p-values.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- An `ecodive_test`: when `x` is a distance matrix, keep its `dist` record
-  through `new_ecodive_test(dist = )`; when `space` came from `dbmem()`,
-  keep its `space` record. Record whether `space` was coordinates,
-  distances or weights as `space_type` in the result.
-- `plot()` (the permutation null, as other tests) titles "Moran's I of
-  <x's record>".
+- An `ecodive_test`, so `new_ecodive_test()` sets the title. `x` is a
+  numeric vector with no title, so it is the method's name alone:
+  "Moran's I".
+- Store whether `space` was coordinates, distances or weights as
+  `space_type` in the result: it says how the weights behind I were made.
+- `plot()` draws the permutation null, as for other tests, from `i_perm`.
 
 ## Tests
 

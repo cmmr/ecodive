@@ -157,26 +157,27 @@ plot.ecodive_ancombc(x, covariate = NULL,
   only as a sanity check.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- Needs item 34's retrofit (`da` records, `log_base` on `dirmult_ttest()`
-  and ANCOM-BC results). The new columns (`pooled_sd`, `mean_clr`,
-  `effect`) and attributes (`resid_sd`, `mean_clr`) are computed when the
-  result is made; `plot()` only reads them.
-- **Titles**: `main = step_title(<type label>, attr(x, 'da'))`, for
-  example "Effect plot of ANCOM-BC2", with the covariate or contrast in
-  the subtitle (`attr(x, 'contrast')`, or the `covariate` chosen), and the
-  input's `transform` record, if any, after it.
+- Needs item 34's `log_base` attribute on `dirmult_ttest()` and ANCOM-BC
+  results. The new columns (`pooled_sd`, `mean_clr`, `effect`) and
+  attributes (`resid_sd`, `mean_clr`) are computed when the result is
+  made; `plot()` only reads them.
+- **Titles**: the type label, " of ", and the method's display name from
+  `DA_TESTS` (by `method`), for example "Effect plot of ANCOM-BC2", with
+  the covariate or contrast in the subtitle (`attr(x, 'contrast')`, or the
+  `covariate` chosen). No `display` needed.
 - **Guides and units**: `alpha` → the significance line (volcano) and
   highlight rule; `conf_level` → the forest plot's interval label;
   `log_base` → "log2 fold change" vs "log fold change"; `|effect| = 1`
   guides (effect plot) are fixed.
-- **Highlights**: `reject`, plus `reject_robust` / `passed_ss` when
-  `attr(x, 'sensitivity')` exists (solid vs open symbols, as the existing
+- **Highlights**: `reject`, plus the `reject_robust` / `passed_ss`
+  columns when they exist (solid vs open symbols, as the existing
   ANCOM-BC plots do).
-- Tests: each `type` titles from the record; axis label follows `log_base`.
+- Tests: each `type`'s title names the method; axis label follows
+  `log_base`.
 
 ## Tests
 

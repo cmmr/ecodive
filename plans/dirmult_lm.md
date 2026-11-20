@@ -165,17 +165,17 @@ the closed-form random-intercept fit. Separate step.
   `tss.sm`, `sample.sm` draws captured the same way.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`da` record** "Dirichlet-Multinomial Linear Model" via `call_step()`:
-  `formula`, `scale_sd`, `load_sd`, the scale model (`"clr"`, `"tss"`,
-  `"load"`), `se_type`, `n_draws`, `pseudocount`, `p_adjust`, `seed`.
-- Attributes for plots: `alpha`, `log_base` (`2`, as ALDEx3), `conf_level`
-  if intervals are returned; the input's `transform` record; and, when a
-  measured or predicted `load` was used, its source in the record
-  (`load_from`: `"measured"` or `"predicted"`), so titles can say so.
+- Title: the type label, " of " and the `DA_TESTS` name for `method`
+  (`"dirmult_lm"`), for example "Volcano plot of Dirichlet-Multinomial
+  Linear Model". The input is a count table, so no `display`.
+- Attributes plots read: `alpha`, `log_base` (`2`, as ALDEx3),
+  `conf_level` if intervals are returned; and the scale assumption that
+  qualifies every estimate (`scale_model`: `"clr"`, `"tss"`, or `"load"`
+  when `load` was given; `scale_sd`), which the subtitle shows.
 - `plot()`: [da_plots.md](da_plots.md)'s types per covariate.
 
 ## Tests

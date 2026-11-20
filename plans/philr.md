@@ -283,7 +283,8 @@ Made while implementing:
     unchanged.
 11. **`philr_distance()`** computes the coordinates, then `C_beta_div()`'s
     Euclidean kernel on them, so `pairs` and `clust` work as for every
-    metric, and the `dist` record carries the pseudocount used. It is
+    metric (a step record of the pseudocount was removed on 2026-11-20
+    with the other step records). It is
     identical to `euclidean(philr(x, tree, 'enorm.x.gm.counts',
     'blw.sqrt'))` (tested). In `METRICS` with the plan's row; the aliases
     `philr` and `phylogeneticilr` collide with nothing in any registry

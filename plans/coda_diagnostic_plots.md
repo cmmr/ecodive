@@ -65,9 +65,9 @@ variation_array(counts, margin = 1L, pseudocount = NULL, clust = NULL,
   Element `[i, j]`, \eqn{i < j}: \eqn{\tau_{ij}}; \eqn{i > j}:
   \eqn{\xi_{ij} = } mean of \eqn{\log(x_i / x_j)}, **row over column**;
   diagonal `NA`. Attributes: `clr_var` (named), `total_var`,
-  `pseudocount`, `n` (samples), and a `dist`-style step record
-  `ecodive_step('Variation Array', metric = 'variation_array', pseudocount
-  = )` so titles work.
+  `pseudocount`, `n` (samples), `method = 'variation_array'`, and
+  `display = list(title = 'Variation Array', clust = ...)` so titles
+  work.
   - \eqn{\mathrm{clr\_var}_i = (\sum_j \tau_{ij} - \mathrm{totvar})/D},
     \eqn{\mathrm{totvar} = \frac{1}{2D}\sum_{i,j}\tau_{ij} = \sum_i
     \mathrm{clr\_var}_i} (since \eqn{\sum_j \tau_{ij} = D\,v_i + \sum_k
@@ -75,7 +75,8 @@ variation_array(counts, margin = 1L, pseudocount = NULL, clust = NULL,
 - **`clust`:** as in `beta_div()` (`validate_clust()`, `DIST_CLUST`):
   reorders the features by the clustering of \eqn{\sqrt{\tau}} (a Euclidean
   distance between the features' centred log vectors, so `ward.D2` is
-  valid) or by `'pcoa'`, recorded as `clust` and `order`.
+  valid) or by `'pcoa'`, recorded as `order` (top level) and
+  `display$clust`.
 - **Size:** dense \eqn{D^2}; above 2,000 features warn once, as large-dense
   results do elsewhere (`log_ratio_input(dense_out =)`), and point to
   filtering.
@@ -99,7 +100,8 @@ put means in the lower triangle but the text doesn't say whether
   \eqn{D \le 15}.
 - Right margin: a column of bars, `clr_var / total_var` in % ("% clr var",
   as the 2011 figure), then two keys (`dist_plot_key()`), upper half for
-  \eqn{\tau}, lower half for \eqn{\xi}. Title "Variation array"; subtitle
+  \eqn{\tau}, lower half for \eqn{\xi}. Title `display$title` ("Variation
+  Array"); subtitle
   "D features, n samples, total variance 2.55; upper: var(log ratio),
   lower: mean log(row / column)".
 - Margins restored with `on.exit(par(opar))`. Returns `x` invisibly.
@@ -155,18 +157,16 @@ zero_pattern(counts, margin = 1L)
   `data-raw/expected/coda_diagnostics.r` if run; not required.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- `variation_array()`: the `dist`-style record above is its record (with
-  `features = TRUE`); keep the input's `transform` record beside it.
-- `zero_pattern()`: a record of a new kind, attribute **`zeros`**:
-  `ecodive_step("Zero Patterns", n_patterns =, n_features =, n_samples =)`
-  (add the kind to `?ecodive_steps` when this lands); keep the input's
-  `transform` record beside it.
-- Both `plot()` methods title from their own record, then the input's
-  `transform` record ("Zero Patterns of <the table's transform>").
+- `variation_array()`: sets `method = 'variation_array'` and `display =
+  list(title = 'Variation Array', clust = ...)` with `set_display()`; its
+  plot reads `display$title`, `order`, `clr_var`, `total_var` and `n`.
+- `zero_pattern()`: no `display`; its input is a count table, which has no
+  title, so the plot titles itself "Zero patterns". It reads `patterns`,
+  `n_samples`, `zeros`, `n` and `D`.
 
 ## Tests (`test-coda_diagnostics.r`)
 
@@ -174,7 +174,8 @@ Follow [compositional.md](compositional.md) § "Step records and what plots read
   (same worker); lower equals `outer(m, m, '-')` of column mean logs at
   1e-14; `clr_var` equals `apply(clr, 2, var)` at 1e-12 and sums to
   `total_var`; dense, sparse, `margin = 2` identical; `cpus` 1, 2, 4
-  identical; `clust` reorders and records; pseudocount rule and warning as
+  identical; `clust` reorders and sets `order` and `display$clust`;
+  `display$title` is "Variation Array"; pseudocount rule and warning as
   `vlr()`.
 - `zero_pattern()`: a hand-built 6 × 4 table with known patterns, ids and
   counts; sparse = dense; no zeros → one pattern; `margin = 2`.

@@ -83,16 +83,18 @@ named `mirkat_<variant>()`, later.
   `liu()` for the mixture p-values themselves.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- Tests carry their distance matrix's `dist` record through
-  `new_ecodive_test(dist = )`, so `plot()` titles "MiRKAT of <metric>".
-- Store what the plot needs on the result (named below).
-
-- Omnibus over several kernels: keep each kernel's `dist` record in the
-  `kernels` table (a `metric` column) for per-kernel labels.
+- The title is automatic: `new_ecodive_test(from = dv$title)` gives
+  "Microbiome Regression-based Kernel Association Test of Bray-Curtis
+  Dissimilarity" for one kernel.
+- Store what the plot needs on the result (see Result).
+- Omnibus over several kernels: no single input title, so the title is
+  the method's name alone. The `kernels` table gets a `metric` column,
+  each kernel's name in the `dm` list (else its `method`), for
+  per-kernel labels.
 
 ## Tests
 

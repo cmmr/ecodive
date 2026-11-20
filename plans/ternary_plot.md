@@ -162,15 +162,17 @@ group).
   Hotelling's F or a χ² radius; ecodive documents its own (F).
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- A plotting function: it sets no record on the data, but returns its
-  coordinates invisibly with a small `ecodive_step("Ternary Plot", parts =,
-  centre =, ...)` attribute named `plot`, so the drawing can be reproduced.
-- Title: `step_title("Ternary Plot", attr(counts, 'transform'))` when the
-  input had a `transform` record (for example a zero-replaced table).
+- A plotting function: it draws, then returns its coordinates (see
+  Value) invisibly, with no `display` attribute; nothing plots that table
+  again.
+- Title from the parts and mode, as in Drawing ("Ternary plot of a, b,
+  c" / "Mean relative abundance in A, B, C"). Counts have no title, so
+  nothing is added from the input, and an earlier zero replacement is not
+  named.
 
 ## Tests (`test-ternary_plot.r`)
 

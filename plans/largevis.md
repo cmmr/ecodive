@@ -56,17 +56,16 @@ contain LargeVis's gradient.
   `umap()` uses.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- Ordination results get their `ord` record from `ord_result()`
-  (`ord_step()` captures the single-valued arguments); pass the input
-  distance matrix's record through `dist =` (from `dist_vector()`'s
-  `step`), and copy a count table's `transform` record (item 34).
-- The existing `plot.ecodive_ord()` titles from them, e.g. "LargeVis of
-  Bray-Curtis Dissimilarity"; store anything extra that a plot type of this
-  method needs as an attribute of the result (named below).
+- The title comes from `ord_result()` automatically: pass
+  `from = dv$title` (the input distance matrix's title, from
+  `dist_vector()`), e.g. "LargeVis of Bray-Curtis Dissimilarity". The
+  existing `plot.ecodive_ord()` uses it.
+- The existing plot types need no extra attributes.
+- Test: `display$title` for one call.
 
 ## Tests
 

@@ -55,20 +55,17 @@ sampled over time. vegan `prc()`.
   `scaling = 2` output. Check this numerically.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- Ordination results get their `ord` record from `ord_result()`
-  (`ord_step()` captures the single-valued arguments); pass the input
-  distance matrix's record through `dist =` (from `dist_vector()`'s
-  `step`), and copy a count table's `transform` record (item 34).
-- The existing `plot.ecodive_ord()` titles from them, e.g. "Principal Response Curves of
-  Bray-Curtis Dissimilarity"; store anything extra that a plot type of this
-  method needs as an attribute of the result (named below).
-
-- Extra: the per-time treatment coefficients and the time order, for the
-  response-curve plot type.
+- The result is a list, not made by `ord_result()`, and plotting is out
+  of scope for v1 (see Design). The `rda` element keeps the title its
+  constructor gives it.
+- If a `plot()` method is added later: its title is the method's name,
+  "Principal Response Curves" (count tables have no title, so no
+  `display` is needed), and the response-curve plot reads `coefficients`
+  (one row per treatment × time, in time order).
 
 ## Tests
 

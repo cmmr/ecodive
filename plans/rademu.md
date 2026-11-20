@@ -151,16 +151,17 @@ test, radEmu's `score_test_hyperparams$converged`), `penalize`,
   `score_test_hyperparams`.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`da` record** "radEmu" via `call_step()`: `formula`, `constraint`
-  (reference rule), `test` settings, `p_adjust`, `alpha`.
-- Attributes for plots: `alpha`, `log_base` (`exp(1)`), `conf_level`; the
-  input's `transform` record.
+- Attributes plots read: `alpha`, `log_base` (`exp(1)`), `conf_level`,
+  and `constraint_param` (what each estimate is relative to), which the
+  subtitle names.
 - `plot()`: [da_plots.md](da_plots.md)'s forest type (estimates with
-  intervals are radEmu's main output).
+  intervals are radEmu's main output), titled from `method` via
+  `DA_TESTS`, for example "Forest plot of radEmu". The input is a count
+  table, so no `display`.
 
 ## Tests
 

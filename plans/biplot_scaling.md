@@ -102,11 +102,11 @@ For \eqn{n} samples (rows of `x`), axes \eqn{a, b} = `axes`:
 
 | Method | scores | `loadings` | `eig` | notes |
 |:-------|:-------|:-----------|:------|:------|
-| `pca()` | \eqn{US} (prcomp's `x`) | \eqn{V} (unit) | \eqn{s^2/(n-1)} | `attr(x, 'ord')$norm`, `$scale` record the transform (see `?ecodive_steps`) |
+| `pca()` | \eqn{US} (prcomp's `x`) | \eqn{V} (unit) | \eqn{s^2/(n-1)} | `attr(x, 'norm')`, `attr(x, 'scale')`: added by this plan (see "Plotting") |
 | `rpca()`, `rpca_phylo()` | \eqn{u\,\mathrm{diag}(s)} | \eqn{v} (unit) | \eqn{s^2/(n-1)} | `prop` is relative to the rank-`n_axes` completed matrix |
 
 So \eqn{\lambda_k} = `eig[k]`, \eqn{\sqrt{\lambda_k} = s_k/\sqrt{n-1}},
-and **nothing needs adding**: every scaling is a column rescale of stored
+and **no matrix needs adding**: every scaling is a column rescale of stored
 matrices. Let \eqn{S} = `x[, axes]`, \eqn{V} = `loadings[, axes]`,
 \eqn{\ell = \sqrt{\lambda_{axes}}}.
 
@@ -146,9 +146,9 @@ Features named in `links` are always drawn.
 - Drawn as dashed `segments()` in `PLOT_HIGHLIGHT`, with the planar length
   (`plot_num(len, 2)`) written at the midpoint with `plot_label()`. The
   docs say the full-space value is larger ("from below").
-- **When links mean log ratios:** `pca()` with `ord$norm == 'clr'` and
-  `ord$scale` FALSE; `rpca()` and `rpca_phylo()` (their completed rclr
-  matrix is row-centred; for `rpca_phylo()` the features are
+- **When links mean log ratios:** `pca()` with `attr(x, 'norm') == 'clr'`
+  and `attr(x, 'scale')` FALSE; `rpca()` and `rpca_phylo()` (their
+  completed rclr matrix is row-centred; for `rpca_phylo()` the features are
   branch-length-weighted node counts, which the docs say). Any other `pca()`
   input: one warning, "links of `pca(norm = 'hellinger')` show standard
   deviations of differences of hellinger values, not of log ratios." Methods
@@ -178,19 +178,22 @@ validates and draws. One-axis results ignore `scaling` (strip chart).
   `princomp`. Not needed as fixtures: the identities below are exact.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- No new record: the scaling is a display choice, not part of the
-  result. `plot()` reads the existing `ord` record to decide whether links
-  are log-ratio SDs: `attr(x, 'ord')$method` in the rpca family, or
-  `$method == "pca"` with `$norm == "clr"` and `$scale == FALSE`; anything
-  else gets a warning instead of link annotations.
-- The subtitle names the scaling ("covariance biplot") and, when the input
-  table had a `transform` record (item 34), its name.
-- Tests: the link check follows the record, not the result's column
-  names.
+- Nothing new on the result for the scaling: it is a display choice, an
+  argument of `plot()`. The title is the ordination's `display$title`,
+  set by `ord_result()` (e.g. "Principal Component Analysis"); the
+  subtitle names the scaling ("covariance biplot").
+- `plot()` decides whether links are log-ratio SDs from top-level
+  attributes: `method` in the rpca family, or `method == "pca"` with
+  `norm == "clr"` and `scale == FALSE`; anything else gets a warning
+  instead of link annotations.
+- So `pca()`'s result gains top-level `norm` and `scale` attributes (the
+  transform that qualifies its loadings), passed through `ord_result()`.
+- Tests: the link check follows `method`, `norm` and `scale`, not the
+  result's column names.
 
 ## Tests (`tests/tinytests/test-plot.r`, section "Biplot scalings")
 

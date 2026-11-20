@@ -40,15 +40,21 @@ compositional.md left a wrapper for `vlr()` / `rho_p()` / `phi_s()` to
 one output structure. The wrapper is also *needed*: `assoc_network_compare()`'s
 group-permutation test must re-run "whatever association made these networks"
 on permuted samples, and a registry is the clean way to call a method by
-name with its recorded settings. **Recommend** adding it, as part of this item
+name with the caller's settings. **Recommend** adding it, as part of this item
 or just before it:
 
 - `feature_assoc(counts, method, ...)` with registry `FEATURE_ASSOCS` and
   `list_feature_assocs()` / `match_feature_assoc()`, shaped like `count_ord()`.
 - Registry columns: `id`, `name`, `alt_ids`, `fun`, plus `kind`
   (`'dissimilarity'` for vlr and phi_s; `'similarity'` for the rest), `range`
-  (`'[-1,1]'`, `'[0,1]'`, `'[0,Inf)'`) and `fisher_z` (TRUE only for
-  Pearson-type correlations: `sparcc`, `secom_pearson`).
+  (`'[-1,1]'`, `'[0,1]'`, `'[0,Inf)'`), `fisher_z` (TRUE only for
+  Pearson-type correlations: `sparcc`, `secom_pearson`), `sparse` (TRUE
+  for `spiec_easi_*`: non-zero entries are the selected graph) and
+  `strict` (TRUE for `secom_pearson`: its threshold keeps |r| > t).
+- A row in the registry means "over features": `dist_clust.r` and
+  `plot_dist.r` look up `method` here instead of testing names. These
+  facts never sit on the result as flags (README.md § "Result attributes
+  and plots").
 - **Not `assoc()`:** that masks `vcd::assoc()` (mosaic association plots),
   which is widely used and means something else. `feature_assoc` follows the
   `<input>_<kind>` pattern of `dist_ord` / `count_ord` and says what is
@@ -63,14 +69,15 @@ or just before it:
 
 ### Input: association results (from sparcc.md)
 
-An `ecodive_dist` over features whose `dist` record says `similarity = TRUE`
-and `features = TRUE`, optionally with a parallel `p_value` attribute and
-`n_samples`. `assoc_network()` accepts results of kind `similarity` with
-values in [−1, 1] or [0, 1]. For `vlr()` / `phi_s()` (unbounded
-dissimilarities) it errors: "use rho_p(), or convert with 1/(1 + x)". A plain
-symmetric matrix with unit diagonal is also accepted (converted with
-`as.dist()`), so users can bring their own correlations; it then has no
-record, so `fisher_z` and `n_samples` must be supplied.
+An `ecodive_dist` over features whose `method` has a `FEATURE_ASSOCS` row
+of kind `similarity`, with a top-level `n_samples` and optionally a
+parallel `p_value` attribute. `assoc_network()` accepts results of kind
+`similarity` with values in [−1, 1] or [0, 1]. For `vlr()` / `phi_s()`
+(unbounded dissimilarities) it errors: "use rho_p(), or convert with
+1/(1 + x)". A plain symmetric matrix with unit diagonal is also accepted
+(converted with `as.dist()`), so users can bring their own correlations;
+it then has no `method` or `n_samples`, so `fisher_z` and `n_samples` must
+be supplied.
 
 ### `assoc_network()`
 
@@ -140,10 +147,9 @@ assoc_network(x, threshold = NULL, alpha = NULL, p_adjust = 'BH',
 - `nodes`: a data.frame `feature`, `degree`, `betweenness`, `closeness`,
   `eigenvector`, `cluster` (integer), `hub` (logical), `in_lcc`;
 - `global`: a named numeric vector;
-- attributes `network` (its step record, an `ecodive_step` with the
-  arguments) and `dist` (the input's `dist` record, which has the
-  association method, its settings and `n_samples`); see "Step records and
-  plotting" below.
+- attributes `method` (the input's association method, e.g. `"sparcc"`),
+  `n_samples`, `threshold` (the cutoff used, including one the result
+  chose itself) and `display`; see "Plotting" below.
 
 Plus a `print` method (counts, hubs) and `as.data.frame()` (the `nodes`
 table).
@@ -158,6 +164,7 @@ accumulator), so results are identical for any `cpus`.
 ```r
 assoc_network_compare(x, y, quantile = 0.75, permutations = 1000L,
                       counts = NULL, groups = NULL, data = NULL,
+                      assoc_args = list(), network_args = list(),
                       p_adjust = 'BH', seed = 0L, cpus = n_cpus())
 ```
 
@@ -181,8 +188,11 @@ error if the sets differ).
     the second.
   - Each permutation shuffles the group labels (keeping group sizes; reuse
     `perm_matrix()` / `src/permute.c`), re-estimates **both** associations
-    through `feature_assoc()` with the recorded method and settings, and
-    rebuilds both networks with the recorded `assoc_network()` settings.
+    through `feature_assoc()` with the networks' `method` (which must
+    match) and the settings in `assoc_args`, and rebuilds both networks
+    with `assoc_network()` and the settings in `network_args`. Results
+    don't record the settings they were made with, so the caller passes
+    the same ones again.
   - p-values: `perm_p(|diff_b|, |diff|)`, adjusted over nodes by `p_adjust`.
     NetCoMi defaults `permTest = FALSE`, `nPerm = 1000`.
   - Each permutation is a task with its own seed stream. A SparCC stream must
@@ -194,7 +204,9 @@ error if the sets differ).
     `p_value` / `p_adjusted` when tested);
   - `global` (property, x, y, difference, p-value);
   - `jaccard` (set, jaccard, p_less, p_greater);
-  - `ari` (value, p_value).
+  - `ari` (value, p_value);
+  - `edges_x`, `edges_y` (the two networks' `edges`, which its plot
+    draws).
 
 ### `assoc_network_diff()`: differential associations (Fisher's z)
 
@@ -205,7 +217,7 @@ assoc_network_diff(x, y, alpha = 0.05, p_adjust = 'BH')
 `x`, `y` are two **association results** (not networks) from the same
 method, with `fisher_z = TRUE` in its registry row.
 - \eqn{z = (\mathrm{atanh}\,r_x - \mathrm{atanh}\,r_y)/\sqrt{1/(n_x-3) +
-  1/(n_y-3)}}, with n from each record's `n_samples`, or from a parallel
+  1/(n_y-3)}}, with n from each result's `n_samples`, or from a parallel
   `n_pairs` attribute where a method uses pairwise-complete samples (SECOM).
   The p-value is two-sided normal; values with \eqn{|r| \ge 1} give `NA` and
   a warning.
@@ -268,21 +280,25 @@ method, with `fisher_z = TRUE` in its registry row.
   serve as a second check of the textbook formulas.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`network` record** `ecodive_step("Association Network", threshold =,
-  sparsify =, cluster =, hub_quantile =, ...)`, with the input's `dist`
-  record (the association method) kept beside it. `assoc_network_compare()` and `assoc_network_diff()` results
-  keep both networks' records (`network_x`, `network_y` hold the two
-  `network` records; their `dist` records stay inside them as `from`).
-- **Plot parameters stored on the result**: the circular layout's node
-  order (by cluster) as `layout`, so plots of compared networks reuse it;
-  `threshold` (legend), the edge `sign` (colour), node `hub` (size/label).
-- Title: `step_title("Association Network", attr(x, 'dist'))`, e.g.
-  "Association Network of SparCC Correlation"; subtitle the threshold and
-  number of edges.
+- Title: `assoc_network()` sets `display$title` with `set_display()` and
+  `title_of("Association Network", <the input's display$title>)`, e.g.
+  "Association Network of SparCC Correlation". A plain matrix input has
+  no title, so the title is "Association Network". The subtitle is the
+  top-level `threshold` and `global['n_edges']`.
+- `assoc_network_diff()` titles its result the same way from x's title
+  ("Differential Associations of SparCC Correlation");
+  `assoc_network_compare()` from x's network title ("Comparison of
+  Association Network of SparCC Correlation"), with panels labelled by
+  the levels of `groups`, or "x" and "y".
+- What the plots read: the edge `sign` (colour) and `association` (width)
+  columns, node `cluster`, `degree` and `hub` (order, size, labels), and
+  `threshold` (legend). The circular layout is built from those columns,
+  so no layout is stored; the compare plot builds one from x's clusters
+  and draws `edges_x` and `edges_y` on it.
 
 ## Tests
 
@@ -311,8 +327,9 @@ Follow [compositional.md](compositional.md) § "Step records and what plots read
   the colours.
 - `feature_assoc()` gets its own page if accepted.
 - pkgdown "Compositional Data" → *Associations and networks*. NEWS.
-- Add `threshold`, `quantile`, `hub_quantile`, `sign`, `clusters`, `hubs`
-  and `weighted_degree` to parameter_names.md.
+- Add `threshold`, `quantile`, `hub_quantile`, `sign`, `clusters`, `hubs`,
+  `weighted_degree`, `assoc_args` and `network_args` to
+  parameter_names.md.
 
 
 ## References

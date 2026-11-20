@@ -228,19 +228,16 @@ counts 2–40 to pin down TMM's trim rule. Keep them small
 (`saveRDS(version = 2)`).
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- The new norms join the existing records: inside metrics and ordinations
-  they appear as the `norm` setting of `dist` / `ord` records (by name,
-  through `norm_name()`, which gains the new codes); `normalize()`'s table
-  gets the `transform` record (item 34) with the norm's display name
-  ("Cumulative Sum Scaling", "Trimmed Mean of M-values", "Relative Log
-  Expression", "Geometric Mean of Pairwise Ratios").
-- `size_factors()` returns a named vector with a `transform`-kind record of
-  its own (`method`, `norm`), so a later scale model can say which factors
-  centred it.
+- No plots. `normalize()` returns a plain table, as today: no `display`
+  and no attributes saying how it was normalized. A metric or ordination
+  run with `norm = 'tmm'` records nothing about the norm either.
+- `size_factors()` returns the named vector with only its result
+  attributes: `norm`, plus the computed values in the table above
+  (`norm_factors`, `quantile`, `lib_size`, `reference`).
 
 ## Tests (`tests/tinytests/test-normalization_factors.r`)
 

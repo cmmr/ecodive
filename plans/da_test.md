@@ -191,24 +191,25 @@ no license issue. The registry and wrapper copy `R/count_ord.r`'s
 structure.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`da` record** on every per-feature result, from `call_step(method,
-  da_method_name(method))`, where `da_method_name()` reads the `DA_TESTS`
-  registry's `name` column (as `ord_method_name()` reads the ordination
-  registries). `da_test()` itself adds no record: the method's own record
-  is the record, so `da_test(x, 'ancombc2')` and `ancombc2(x)` give
+- Every per-feature result has a top-level `method` attribute (its
+  `DA_TESTS` id). `da_method_name()` reads the registry's `name` column
+  for it (as `ord_method_name()` reads the ordination registries); that is
+  where plots get the display name. `da_test()` adds nothing: the result
+  is the method's own, so `da_test(x, 'ancombc2')` and `ancombc2(x)` give
   identical results, attributes included (test with `identical()`).
-- `da_wilcoxon()`, `da_ttest()`, `da_lm()`: settings `norm`,
-  `pseudocount`, `p_adjust`, `alpha`, `formula` (text) or `groups` (when a
-  column name), `contrast`; attributes `contrast`, `alpha`, `log_base`
-  (`exp(1)`: differences of natural-log transformed values) and the input's
-  `transform` record.
+- `da_wilcoxon()`, `da_ttest()`, `da_lm()`: attributes `method`,
+  `contrast`, `alpha` (behind `reject`), `conf_level` (behind the
+  intervals; `da_ttest()`, `da_lm()`) and `log_base` (`exp(1)`:
+  differences of natural-log transformed values).
 - **Plots**: each new class gets a `plot()` method sharing
-  [da_plots.md](da_plots.md)'s types (volcano default), titled
-  `step_title(<type>, attr(x, 'da'))`.
+  [da_plots.md](da_plots.md)'s types (volcano default). The title is the
+  type label, " of " and `da_method_name(attr(x, 'method'))`, for example
+  "Volcano plot of Welch t-test"; the inputs are count tables with no
+  title, so these results set no `display`.
 
 ## Tests
 

@@ -186,32 +186,33 @@ biased estimator with Phipson & Smyth (2010).
 ### Result (the shared "feature correlations" structure)
 
 As `rho_p()`: a `dist` **over features** of class `c("ecodive_dist", "dist")`,
-a **similarity** in a dist container. Its `dist` record (`ecodive_step`)
-holds:
+a **similarity** in a dist container. Attributes:
 
-- `"SparCC Correlation"`, `metric = "sparcc"`;
-- **`similarity = TRUE`** (new; see below);
+- `method = "sparcc"`, and `display$title` "SparCC Correlation" (from
+  `dist_result()`);
 - `n_samples`;
-- `n_draws`, `max_exclusions`, `exclusion_threshold`, `permutations`, `seed`.
-
-Attributes:
-
 - `p_value`: a numeric vector **parallel to the packed triangle** (same
   length and order), present only when `permutations > 0`;
 - `variances`: the named per-feature median \eqn{\omega^2}.
 
+That it is a similarity over features is a fact about the method, kept in
+the `FEATURE_ASSOCS` registry (planned in
+[assoc_network.md](assoc_network.md); add it with this item if it hasn't
+landed), not a flag on the result.
+
 This is the convention that `spiec_easi_*()` and `secom_*()` follow and that
 `assoc_network()` reads. It needs two small changes to existing code:
 
-- **`similarity` flag.** `dist_clust_order()` (R/dist_clust.r) and
+- **Registry lookups.** `dist_clust_order()` (R/dist_clust.r) and
   `plot.ecodive_dist()` (R/plot_dist.r, the `features <- m %in% c('vlr',
-  'rho_p', 'phi_s')` line) test for the metric `rho_p` by name. Make them
-  read the record's `similarity` flag (and a `features = TRUE` flag), and set
-  both flags in `proportionality()` for `rho_p`. `vlr` and `phi_s` get
-  `features = TRUE` only.
+  'rho_p', 'phi_s')` line) test `method` against `vlr`, `rho_p` and
+  `phi_s` by name. Replace those tests with lookups of `method` in the
+  registry: over features when it has a row, and a similarity when its
+  `kind` is `'similarity'` (`rho_p`, `sparcc`, ...; not `vlr` or `phi_s`).
 - **`dist_reorder()`** keeps attributes but doesn't reorder parallel packed
-  vectors. Make it reorder every attribute named in the record's
-  `parallel = c("p_value")`, so `clust = "average"` keeps p-values aligned.
+  vectors. Make it reorder every attribute named in an internal constant
+  (`DIST_PARALLEL = c("p_value", "stability", "n_pairs")`) with the
+  triangle, so `clust = "average"` keeps p-values aligned.
 
 
 ## Reference implementations (output-only)
@@ -230,19 +231,21 @@ This is the convention that `spiec_easi_*()` and `secom_*()` follow and that
   it at 1e-12 (exclusion order and \eqn{\rho}).
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- The `dist` record described above is the record (`similarity = TRUE`,
-  `features = TRUE`, `n_samples`, `n_draws`, `max_exclusions`,
-  `exclusion_threshold`, `permutations`, `seed`), plus the input's
-  `transform` record copied beside it.
-- `plot()`: the existing `plot.ecodive_dist()` heatmap, which must read
-  `similarity` (diverging colour scale centred on 0, diagonal 1) and
-  `features` (axis labels say "features"); title from the record's name.
-- `p_value` is reordered with the triangle by `dist_reorder()` (`clust`).
-- Downstream: `assoc_network()` keeps this record as its input record.
+- Title: `dist_result()` sets `display$title` "SparCC Correlation"
+  automatically.
+- `plot()`: the existing `plot.ecodive_dist()` heatmap, which looks up
+  `method` in the registry: a similarity gets a diverging colour scale
+  centred on 0 (diagonal 1), and over features the axis labels say
+  "features".
+- `p_value` is reordered with the triangle by `dist_reorder()` (`clust`),
+  since it is in `DIST_PARALLEL`.
+- Downstream: `assoc_network()` reads `method`, `n_samples` and
+  `p_value`, and titles its network "Association Network of SparCC
+  Correlation".
 
 ## Tests
 

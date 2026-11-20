@@ -57,18 +57,17 @@ model spatial structure. The steps are:
   truncation step.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- Not an ordination, so no `ord` record: a record of a new kind, attribute
-  **`space`**: `ecodive_step("Moran's Eigenvector Maps", threshold =,
-  moran_positive =, n_mem =)` (add the kind to `?ecodive_steps` when this
-  lands). Functions that take `space` (`moran_i()`, constrained
-  ordinations given MEMs as `data`) keep it when they can.
-- Store what a plot needs: `values`, `moran_i` and `threshold` are
-  already attributes; a `plot()` method (MEMs mapped over coordinates, or
-  their Moran's I) titles from the record.
+- Not an ordination, so not made by `ord_result()`. Its attributes are
+  results: `values`, `moran_i` (one per MEM), and `threshold` (it
+  qualifies the MEMs), plus `method = 'dbmem'`.
+- A `plot()` method (MEMs mapped over coordinates, or their Moran's I)
+  reads only those. Its title is the method's name, "Moran's Eigenvector
+  Maps"; it names no input (positions have no title), so no `display` is
+  needed.
 
 ## Tests
 

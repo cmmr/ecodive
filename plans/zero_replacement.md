@@ -170,10 +170,11 @@ must be **established from documentation and outputs only**:
   rounding), in the input's orientation (`margin`), with its dimnames.
   Dense, because every zero gets a value. (zCompositions' `output =
   "p-counts"` isn't offered: every log-ratio method is scale invariant.)
-- Attributes: `method` (`'mult'`, `'czm'`, `'gbm'`, `'sq'`, `'bl'`) and
-  the parameters used (`delta` with its resolved value; `frac`,
-  `threshold`, `adjust`), and `n_replaced` (the number of zeros
-  replaced).
+- Attributes: `method` (`'mult'`, `'czm'`, `'gbm'`, `'sq'`, `'bl'`), as
+  `replace_zeros_mult()` already sets it, then results only: for mult
+  `delta` (the value the zeros got, resolved from the data when not
+  given), and `n_replaced` (the number of zeros replaced). The settings
+  passed (`frac`, `threshold`, `adjust`) aren't echoed.
 - `phyloseq`, `rbiom`, `SummarizedExperiment` input gives the matrix, as
   `normalize()` does.
 - Warn above 1e8 values, as `normalize(norm = 'clr')`.
@@ -218,17 +219,16 @@ must be **established from documentation and outputs only**:
   Martín-Fernández (2015) for the zCompositions documentation.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- The Bayesian-multiplicative functions set the same `transform` record
-  as `replace_zeros_mult()` does after item 34: names from the
-  `ZERO_REPLACEMENTS` registry ("Geometric Bayesian-Multiplicative
-  Replacement", ...), settings `method`, `frac`, `threshold`, `adjust`;
-  `from` the input's `transform` record.
+- No plots. Every `replace_zeros_*()` function returns a plain table: no
+  `display`, nothing saying how it was made, only the result attributes
+  above. Later results computed from it don't mention the replacement.
 - [da_sensitivity.md](da_sensitivity.md) labels its zero-treatment
-  settings from these records.
+  settings from the `ZERO_REPLACEMENTS` registry's `name` column, by the
+  id it passed.
 
 ## Tests
 
@@ -300,7 +300,9 @@ Asked of the user at the start:
    `replace_zeros_<id>`. The result is a dense base `matrix` of proportions
    for every input type (sparse too), in the input's orientation with its
    dimnames; attributes `method`, the method's parameters, then
-   `n_replaced` (a double: the number of zeros replaced).
+   `n_replaced` (a double: the number of zeros replaced). (Superseded on
+   2026-11-20 by README.md § "Result attributes and plots": keep only
+   `method`, `delta` and `n_replaced`; see "Result" above.)
 
 Made while implementing:
 
@@ -377,9 +379,10 @@ For item 46 (the Bayesian methods and CZM):
   `info <- zero_replacement_input(empty_features_ok = FALSE, whole = TRUE,
   mostly_zero = TRUE)` (sets `counts`, `margin`; returns `D`, `n`,
   `features`, `samples`, `sample_zeros`, `feature_nonzeros`) and end with
-  `zero_replacement_result(res, info, margin, '<id>', list(frac = ...,
-  ...))`. `C_zero_counts()` and `dense_sample()` in `src/replace_zeros.c`
-  are reusable. Whether `whole` / `mostly_zero` / `empty_features_ok`
+  `zero_replacement_result()`, passing no echoed settings (`frac`,
+  `threshold`, `adjust` are not attributes; see "Result" above).
+  `C_zero_counts()` and `dense_sample()` in `src/replace_zeros.c` are
+  reusable. Whether `whole` / `mostly_zero` / `empty_features_ok`
   apply to CZM is open (CZM uses depths, so `whole = TRUE` likely).
 - Update `replace_zeros()`'s docs (the `method` argument, the method table,
   flexible matching), the expectations of `df$id == 'mult'` in

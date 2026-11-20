@@ -281,18 +281,19 @@ re-estimated together with the mixing proportions.
   `COVERAGE` set to its depth, so rarefaction drops out).
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`model` record** per function ("SourceTracker", "FEAST"):
-  `n_burnins`, `n_draws` / iterations, `alpha` priors, `rarefaction_depth`,
-  `seed`, and the number of sources; keep the sink and source tables'
-  `transform` records (as `from_sinks`, `from_sources` when they differ).
+- Attribute `method` (`'sourcetracker'` or `'feast'`). The inputs are
+  count tables, which have no title, so the plot title is built from the
+  registry's display name for `method`: "Source contributions
+  (SourceTracker)", "Source contributions (FEAST)"; no `display`
+  attribute.
 - Store what plots need: per-sink source proportions (and their SDs, for
   SourceTracker's draws) in a fixed source order with an `unknown` source
   last, so a stacked-bar `plot()` of source contributions agrees across
-  calls; title `step_title("Source contributions", attr(x, 'model'))`.
+  calls.
 
 ## Tests (`sourcetracker()`)
 

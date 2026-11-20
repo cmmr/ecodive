@@ -332,17 +332,20 @@ coda4microbiome's two standard figures, side by side
   - `data-raw/expected/coda_lasso.py`: c-lasso R1 path breakpoints.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`model` record** per function ("Compositional Lasso", "Compositional
-  Lasso (pairwise log ratios)"): `family`, `l1_ratio`, the chosen `lambda`
-  and the rule that chose it (`lambda_rule`), `n_folds`, `seed`; keep the
-  input's `transform` record.
-- The signature plot reads only the result: the selected coefficients, the
-  `y` attribute (added for the signature plot) and the record's name for
-  its title.
+- Attribute `method` (`'coda_lasso'` or `'coda_lasso_pairwise'`). The
+  input is a count table, which has no title, so the plot title is the
+  display name the registry gives that `method` ("Compositional Lasso",
+  "Compositional Lasso (pairwise log ratios)"); no `display` attribute.
+- The chosen `lambda` and `select` (the rule that chose it), `family`
+  and `l1_ratio` qualify the coefficients, so they stay top-level
+  attributes, as in Result.
+- The signature plot reads only the result: the selected coefficients,
+  `fitted`, `performance` and the `y` attribute (added for the signature
+  plot).
 
 ## Tests
 

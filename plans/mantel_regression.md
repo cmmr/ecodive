@@ -61,15 +61,19 @@ to separate the effects of environment and space.
   on |b|) against ecodist's documented output.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- The result is a list of class `ecodive_mantel_regression`: keep the
-  response's `dist` record as `dist`, and each predictor's as a named list
-  attribute `dists`, so coefficient tables and plots can name them.
-- `plot()` (coefficients with their permutation p-values) titles
-  "Multiple Regression on Distance Matrices of <response>".
+- The result is a list of class `ecodive_mantel_regression`, not an
+  `ecodive_test`, so no constructor titles it. Set `display$title` with
+  `set_display()` and `title_of()` from the response's title: "Multiple
+  Regression on Distance Matrices of Bray-Curtis Dissimilarity"; without
+  one, just the method's name.
+- Coefficient tables and plots name the predictors by the `term` column:
+  the names given in `...` or the formula's terms.
+- `plot()` draws the coefficients with their permutation p-values, read
+  from `coefficients`.
 
 ## Fixtures and tests
 

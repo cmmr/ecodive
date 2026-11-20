@@ -96,17 +96,11 @@ particular), **the per-method plans and this README win.**
 
 ## Internals worth reusing
 
-- **Step records (provenance):** every result records how it was made in
-  one attribute per kind of step, an `ecodive_step` (`R/steps.r`,
-  `?ecodive_steps`): `dist` and `ord` today; `transform`, `da`,
-  `log_ratio`, `network`, `types`, `sensitivity`, `model`, `zeros` and
-  `space` by the
-  convention in [compositional.md](compositional.md) § "Step records and
-  what plots read". Ordinations get `ord` for free from `ord_result()`
-  (pass the distance matrix's record as `dist =`); tests keep their
-  matrix's `dist` through `new_ecodive_test(dist =)`. Every new function
-  sets its record, copies its inputs' records, and stores what its `plot()`
-  method needs (titles from records, guides and units from attributes).
+- **Result attributes and titles:** see "Result attributes and plots"
+  below. `ord_result(from =)`, `new_ecodive_test(from =)` and
+  `dist_result()` set `display$title` for every ordination, test and
+  distance matrix; pass the input distance matrix's title
+  (`dist_vector()`'s `title`) as `from`.
 - **Ordination results:** `ord_result()` in `R/ord_utils.r` builds the
   sample × axis matrix of class `ecodive_ord`. Its attributes start with
   `method`, `eig` and `prop` (`NA` where undefined); method-specific
@@ -146,6 +140,87 @@ particular), **the per-method plans and this README win.**
   distance sums that mrpp, anosim and permdisp share.
 - **The uwot SGD port:** `src/umap.c`, which follows uwot's BSD-2 C++
   headers.
+
+
+## Result attributes and plots (set 2026-11-20)
+
+ecodive results **describe themselves; they don't record how they were
+made.** The `ecodive_step` records (`dist`, `ord`, and the planned
+`transform`, `da`, `log_ratio`, `network`, ... kinds) were removed on
+2026-11-20, before any release; don't bring them back. A result has only
+these attributes:
+
+1. **Results**, at the top level: what the function computed or chose
+   from the data (`eig`, `prop`, `loadings`, `stress`, `n_iters`,
+   `constant`, a `p_value` parallel to a distance triangle, `n_samples`);
+   the settings that qualify those results, as reference packages return
+   them (`pcoa()`'s `correction`, `tsne()`'s `perplexity`, a DA method's
+   `alpha` behind its `reject` column, a network's `threshold`); and the
+   units needed to read a column (`log_base`).
+2. **Identity and layout**, at the top level: `method`, the ID of the
+   function or metric that made the result (distance matrices set it as
+   `stats::dist()` and `vegan::vegdist()` do, so `hclust()` reports it);
+   R's own conventions (`Size`, `Labels`, `dim`); and `order` on a
+   clustered distance matrix (each sample's input position).
+3. **`display`**: one plain named list (no class, no `str()` method) of
+   what exists only for ecodive's own `plot()` and `print()`:
+   - `title`: the default title. The method's display name, then " of "
+     and the `display$title` of its **direct** input when that has one:
+     "Principal Coordinates Analysis of Bray-Curtis Dissimilarity",
+     "Permutational multivariate analysis of variance (PERMANOVA) of
+     Bray-Curtis Dissimilarity", "Fitted variables on Principal
+     Coordinates Analysis of ...". `title_of()` composes it. The input's
+     title is the only thing ever copied from an input.
+   - `clust` on a distance matrix: how the heatmap orders it.
+   - A setting that only a subtitle or legend shows, and that isn't a
+     result under rule 1. This is rare; most plots read results.
+
+   `R/display.r` has `set_display()`, `get_display()`, `display_title()`
+   and `title_of()`; users read about it at `?ecodive_display`.
+
+Nothing else is recorded: not the other arguments the caller passed (the
+caller has them), not the inputs' attributes, and not earlier steps
+(normalization, rarefaction, zero replacement, log-ratio transforms).
+Count tables are plain matrices, and `[`, `validate_counts()` and
+phyloseq conversion drop attributes, so a record of those steps would be
+missing in some results and wrong in others. A title must be right or
+absent. Users relabel with `main =` or `attr(x, "display")$title <- ...`.
+
+Rules:
+
+- **Facts about a method live in a registry keyed by `method`**, never as
+  flags on the result: display names (`METRICS`, `list_dist_ords()`,
+  `DA_TESTS`), similarity versus dissimilarity, over features versus over
+  samples, sparse, Fisher-z-able (the planned `FEATURE_ASSOCS`). Today
+  `dist_clust.r` and `plot_dist.r` test `method %in% c('vlr', 'rho_p',
+  'phi_s')`; registry columns replace those tests when the registry lands.
+- **Computations never read `display`.** Only `plot()` and `print()` do.
+  Anything a computation needs is a top-level attribute (rule 1 or 2).
+- **Constructors set titles:** `dist_result()` (and `dist_clust()`),
+  `ord_result()` and `new_ecodive_test()`. A new distance, ordination or
+  test gets its title from them; other results set `display` with
+  `set_display()` only when their `plot()` title names their input.
+- **Arithmetic drops the label.** `Ops` and `Math` on an `ecodive_dist`
+  remove `method` and `display$title` but keep `clust` and `order`, so
+  `sqrt(d)` plots as "Distances" and `1 - rho_p(x)` isn't clustered as a
+  similarity.
+- **Attributes parallel to a distance triangle** (`p_value`,
+  `stability`, `n_pairs`) are listed in an internal constant that
+  `dist_reorder()` reorders with the triangle. They aren't listed on the
+  object, and aren't found by length: at n = 3, the triangle and `order`
+  both have length 3.
+- **What plots read:** the title from `display$title` (falling back on the
+  registry's display name); subtitles from results (stress, R², fit) and
+  from `display`; guides, cutoffs and units from top-level attributes
+  (`alpha`, `threshold`, `cutoff`, `conf_level`, `log_base`); highlights
+  from columns (`reject`, `reject_robust`, `passed_ss`); and per-feature
+  quantities (mean abundance, dispersion, per-sample log ratios) stored
+  when the result is made. `plot()` never recomputes from the data.
+- **Tests** check `display$title` for one call of each new function, and
+  that `plot()` uses it. Don't test echoed settings.
+
+Each plan's "Plotting" section names its title and the attributes its
+plots read.
 
 
 ## Naming and wrappers

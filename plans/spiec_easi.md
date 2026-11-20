@@ -141,22 +141,21 @@ spiec_easi_glasso(counts, margin = 1L, pseudocount = 1,
 ### Result (feature-correlation structure from sparcc.md)
 
 An `ecodive_dist` over features, a **similarity**: partial correlations
-(glasso) or symmetrised β (MB), 0 for non-edges. Its `dist` record holds:
+(glasso) or symmetrised β (MB), 0 for non-edges. Attributes:
 
-- `metric = "spiec_easi_mb"` / `"spiec_easi_glasso"`;
-- `similarity = TRUE`, `features = TRUE`;
+- `method = "spiec_easi_mb"` / `"spiec_easi_glasso"`;
 - `n_samples`;
-- `pseudocount`, `rule`, `lambda_selected`, `n_subsamples`, `subsample_size`,
-  `max_instability`, `seed`;
-- `sparse = TRUE`, telling `assoc_network(threshold = NULL)` to take
-  non-zero entries as edges.
-
-Attributes:
-
-- `stability`: parallel packed edge frequencies at the selected λ, listed
-  in the record's `parallel` (see sparcc.md);
+- `lambda_selected`: the chosen λ, and `max_instability`, the cap that
+  qualifies it;
+- `stability`: parallel packed edge frequencies at the selected λ (in the
+  internal `DIST_PARALLEL`, so `dist_reorder()` reorders it; see
+  sparcc.md);
 - `lambda`: the path;
 - `instability`: \eqn{\bar D} per λ.
+
+The `FEATURE_ASSOCS` registry rows (see assoc_network.md) mark both as
+similarities over features with `sparse = TRUE`, telling
+`assoc_network(threshold = NULL)` to take non-zero entries as edges.
 
 There are no p-values: SPIEC-EASI gives none. A `plot()` of the λ path
 against instability would be a small extra (`plot.ecodive_dist` stays the
@@ -190,17 +189,18 @@ heatmap); leave it for later.
   indices it draws itself, using the huge path on each subsample.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`dist` record** per function ("SPIEC-EASI (neighbourhood selection)",
-  "SPIEC-EASI (graphical lasso)"): `similarity = TRUE`, `features = TRUE`,
-  the chosen `lambda`, `stars_threshold`, `n_subsamples`, `seed`; the
-  input's `transform` record beside it.
-- Store the StARS path (lambda vs instability) as an attribute, so a
-  `plot(type = 'stability')` can show the selection; the default plot is
-  the `plot.ecodive_dist()` heatmap of the selected network's weights.
+- Title: `dist_result()` sets `display$title` automatically, e.g.
+  "SPIEC-EASI (neighbourhood selection)" or "SPIEC-EASI (graphical
+  lasso)".
+- The default plot is the `plot.ecodive_dist()` heatmap of the selected
+  network's weights (similarity scale, feature labels, from the registry).
+- The StARS path is stored as results (`lambda`, `instability`,
+  `lambda_selected`, `max_instability`), so a `plot(type = 'stability')`
+  can show the selection and the cap.
 
 ## Tests
 

@@ -56,21 +56,20 @@ rows to test it. It's used for multi-omics integration.
   - FactoMineR `coeffRV()` as an RV cross-check.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- Ordination results get their `ord` record from `ord_result()`
-  (`ord_step()` captures the single-valued arguments); pass the input
-  distance matrix's record through `dist =` (from `dist_vector()`'s
-  `step`), and copy a count table's `transform` record (item 34).
-- The existing `plot.ecodive_ord()` titles from them, e.g. "Co-inertia Analysis of
-  Bray-Curtis Dissimilarity"; store anything extra that a plot type of this
-  method needs as an attribute of the result (named below).
-
-- Two inputs: keep both inputs' records, as `dist_x` / `dist_y` (or
-  `transform_x` / `transform_y` for tables), and the RV coefficient for the
-  subtitle.
+- `x_scores` and `y_scores` get their titles from `ord_result()`
+  automatically: "Co-inertia Analysis", plus " of " and that side's
+  title when it has one (pass `from =` that title: `dv$title` for a
+  `dist`, `display$title` for an ordination result; tables have none).
+- The whole result's `display$title` names both inputs when both have
+  titles: `title_of()` on the two titles joined with "and", e.g.
+  "Co-inertia Analysis of Bray-Curtis Dissimilarity and Euclidean
+  Distance". Otherwise it is "Co-inertia Analysis".
+- The subtitle shows `rv`, the RV coefficient (a result).
+- Test: `display$title` for one call with two titled inputs.
 
 ## Tests
 

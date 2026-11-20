@@ -165,20 +165,16 @@ port).
   per the decisions.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- Ordination results get their `ord` record from `ord_result()`
-  (`ord_step()` captures the single-valued arguments); pass the input
-  distance matrix's record through `dist =` (from `dist_vector()`'s
-  `step`), and copy a count table's `transform` record (item 34).
-- The existing `plot.ecodive_ord()` titles from them, e.g. "Compositional Tensor Factorization of
-  Bray-Curtis Dissimilarity"; store anything extra that a plot type of this
-  method needs as an attribute of the result (named below).
-
-- Extra: `state_loadings` and `trajectories` (for trajectory plot types),
-  with the state order used.
+- The title comes from `ord_result()` automatically. Count tables have
+  no title, so it is the method's name: "Compositional Tensor
+  Factorization". The existing `plot.ecodive_ord()` uses it.
+- Trajectory plot types read `state_loadings` and `trajectories` (result
+  attributes, above), with states in the order used.
+- Test: `display$title` for one call.
 
 ## Tests
 

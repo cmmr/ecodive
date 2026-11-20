@@ -106,9 +106,10 @@ format, one row per feature × [covariate ×] run:
   registry's `effect` column; `NA` for `ancom`), `p_adjusted` (`NA` for
   `ancom`), `reject` (the method's own `reject`; for ANCOM-BC not
   `reject_robust`).
-- Attributes: `method`, `effect_name`, `log_base`, `runs` (a data frame:
-  `run`, `pseudocount`, `zeros`, `scale_sd`, `setting`), `fits` (the
-  results, a list by run; documented as memory-heavy), and **`summary`**:
+- Attributes: `method`, `effect_name`, `alpha`, `log_base`, `runs` (a
+  data frame: `run`, `pseudocount`, `zeros`, `scale_sd`, `setting`),
+  `fits` (the results, a list by run; documented as memory-heavy), and
+  **`summary`**:
   per feature [× covariate] `n_runs`, `n_reject`, `prop_reject`,
   `passed` (the decision is the same in every run, ANCOMBC's `passed_ss`
   generalised), `robust` (`passed & base reject`), `sign_stable` (effect
@@ -155,21 +156,21 @@ plot.ecodive_da_sensitivity(x, type = c('tiles', 'traces'),
   direct call".
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`sensitivity` record** "Sensitivity Analysis" (`n_settings`,
-  `crossed`, and which grids were given), plus the base method's `da`
-  record, taken from the first fit, beside it.
 - Each row of the tidy table names its setting in plain text (for example
   `"pseudocount 0.5"`, `"zeros: mult"`, `"scale_sd 1"`) so the tile plot's
   columns need no lookup; replacement settings take their names from the
-  `ZERO_REPLACEMENTS` registry, or from the replaced table's `transform`
-  record.
-- `plot()` (`'tiles'`, `'traces'`): title `step_title("Sensitivity of",
-  attr(x, 'da'))`; `alpha` and `log_base` come from the base method's
-  attributes, stored on the result.
+  `ZERO_REPLACEMENTS` registry.
+- `plot()` (`'tiles'`, `'traces'`): title "Sensitivity of " and the base
+  method's display name from `DA_TESTS` (by the `method` attribute), for
+  example "Sensitivity of ANCOM-BC2"; no `display` needed. `alpha` and
+  `log_base` are copied from the base fit to top-level attributes of the
+  result, for the effect axis label and the reject rule's legend.
+- Bold row labels and filled points read `summary$passed` and the
+  `reject` column; `plot()` recomputes nothing.
 
 ## Tests
 

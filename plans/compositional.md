@@ -225,93 +225,16 @@ scikit-bio's `multi_replace()` and zCompositions' default `output =
 proportions lose nothing.
 
 
-## Step records and what plots read (2026-11-20)
+## Result attributes and what plots read
 
-ecodive results record **how they were made** (`R/steps.r`,
-`?ecodive_steps`): one attribute per kind of step, each an `ecodive_step`
-list made with `ecodive_step(name, ..., settings = )`, whose first element
-`name` is a display name and the rest the step's single-valued settings.
-`str()` and `print()` show a record on one line. Records **accumulate**:
-a result keeps its inputs' records beside its own (an ordination of a
-distance matrix has both `dist` and `ord`; a permutation test keeps its
-matrix's `dist`), and `plot()` builds its titles from them with
-`step_title()`, such as "Principal Coordinates Analysis of Bray-Curtis
-Dissimilarity". Today only `dist` (distance matrices, `vlr()`, `rho_p()`,
-`phi_s()`) and `ord` (every ordination, via `ord_result()` / `ord_step()`)
-exist. Every plan in the second batch, and every pending plan, attaches
-records by these rules.
-
-### Record kinds
-
-| Attribute | Set by (existing ✓ and planned) | `name` (examples) | Settings |
-|:----------|:--------------------------------|:------------------|:---------|
-| `dist` ✓ | `beta_div()` and its metrics ✓, `vlr()` / `rho_p()` / `phi_s()` ✓, `philr_distance()` ✓; planned `sparcc()`, `spiec_easi_*()`, `secom_*()`, `beta_div_rarefied()`, `variation_array()` | the metric's display name ("SparCC Correlation") | `metric` (its ID), `norm`, `pseudocount`, `clust`/`order`, as today; **new flags** `similarity = TRUE` for correlations and `features = TRUE` for matrices over features (set in [sparcc.md](sparcc.md); they replace today's hard-coded `rho_p` checks in `dist_clust.r` and `plot_dist.r`), plus the method's own settings |
-| `ord` ✓ | every ordination ✓; planned `rpca_joint()`, `ctf()`, `diffusion_map()`, `pacmap()`, ... | the method's display name | from `ord_step()`, automatically |
-| `transform` (new) | tables made from a count table: `replace_zeros_*()`, `alr()`, `ilr()`, `philr()`, `qmp_scale()`, `qmp_rarefy()`, `normalize()`, `rarefy()` (retrofit, item 34); planned `size_factors()`-based norms | "Multiplicative Replacement", "Isometric Log Ratio", "Quantitative Microbiome Profiling (rarefied)" | `method` (the function's name) and its single-valued arguments (`pseudocount`, `delta`, `norm`, `depth`, `seed`, ...); **`from`**: the input's own `transform` record, if it had one, so chains nest (`format()` already prints a nested record as `from = <name>`) |
-| `da` (new) | per-feature results: `ancom()`, `ancombc()`, `ancombc2()`, `dirmult_ttest()` (retrofit, item 34); planned `da_*()`, `linda()`, `maaslin3()`, `fastancom()`, `dirmult_lm()`, `rademu()` | the `DA_TESTS` display name ("ANCOM-BC2") | `method` and the call's single-valued arguments, read from its frame as `ord_step()` does (formula as text, `groups` when it is a column name, `contrast` as `"treated vs control"`, `pseudocount`, `p_adjust`, `alpha`, `norm`, `scale_sd`, `n_draws`, `seed`, ...). Post-hoc tests keep their fit's `da` record |
-| `log_ratio` (new) | `log_ratio()`, `balance()` (retrofit, item 34) | "Log Ratio", "Balance" | `method`, `n_numerator`, `n_denominator`, `pseudocount`; `from`: the record of the result the features were picked from (`log_ratio_features()`, item 44) |
-| `network` (new) | planned `assoc_network()` | "Association Network" | `threshold`, sparsification, clustering, hub rule; keeps the association's `dist` record |
-| `types` (new) | planned `enterotype()`, `valencia()`, `dmm()` | "Enterotypes", "VALENCIA Community State Types", "Dirichlet-Multinomial Mixtures" | the chosen number of types, the selection criterion, `seed`; keeps the distance's `dist` record (`enterotype()`) |
-| `sensitivity` (new) | planned `da_sensitivity()` | "Sensitivity Analysis" | the grids' sizes and `crossed`; keeps the base method's `da` record |
-| `model` (new) | planned `coda_lasso()`, `coda_lasso_pairwise()`, `sourcetracker()`, `feast()` | the method's display name | its single-valued arguments, the chosen `lambda`, `seed` |
-| `zeros` (new) | planned `zero_pattern()` | "Zero Patterns" | `n_patterns`, `n_features`, `n_samples` |
-| `space` (new) | planned `dbmem()` | "Moran's Eigenvector Maps" | `threshold`, `moran_positive`, `n_mem` |
-
-Rules:
-
-- **One helper for all kinds.** Generalise `ord_step(method, ...)` into
-  `call_step(method, name, ...)` (read the calling function's frame with
-  `step_settings()`, as `ord_step()` does), and keep `ord_step()` as
-  `call_step(method, ord_method_name(method), ...)`. Add `da_step()`,
-  `transform_step()` and so on as one-liners. Extend `STEP_SKIP` with the
-  new data arguments that are never settings (`fit`, `basis`, `load`,
-  `subjects`, `states`, `numerator`, `denominator`; a single denominator
-  feature is recorded explicitly).
-- **Read input records first.** `validate_counts()` converts phyloseq,
-  rbiom, SummarizedExperiment and sparse inputs, which drops attributes, so
-  a function reads `attr(counts, 'transform')` (and `attr(dm, 'dist')`)
-  before validating, then copies it onto its result. A helper
-  `keep_steps(res, ...)` does the copying.
-- **Propagate `transform` everywhere `counts` goes.** Every function that
-  takes `counts` (metrics, ordinations of counts, DA methods, typing,
-  associations) copies its input's `transform` record onto its result
-  beside its own, so `str()` shows the whole chain and a title can read
-  "Principal Component Analysis of Isometric Log Ratio". Base matrices
-  carry attributes; check whether `Matrix` objects keep an added attribute
-  through ecodive's code, and if not, document that records ride on base
-  matrices only.
-- **Document each new kind** as a section of `?ecodive_steps`, like "The
-  `dist` record" and "The `ord` record", when the first function that sets
-  it lands (the retrofit in item 34 adds `transform`, `da` and `log_ratio`).
-- **Never let a record change a result.** Records describe; computations
-  never read them, except `plot()` and `print()`.
-
-### What plots read
-
-`plot()` methods draw from what the result holds and never recompute from
-the data, so each plan stores what its plots need:
-
-- **Titles** from records: `main = step_title(<own record's name>, <input
-  record>)`; a subtitle from the key settings (as `ord_subtitle()` does),
-  such as "pseudocount 0.5; Holm; alpha 0.05".
-- **Guides and cutoffs** from attributes: `alpha` (significance lines),
-  `threshold` (edges), `cutoff` (ANCOM's W), `conf_level`.
-- **Units** from attributes: `log_base` (`2` for `dirmult_ttest()`'s
-  `log2_fc`, `exp(1)` for ANCOM-BC's `log_fc`) so axis labels say "log2
-  fold change" or "log fold change" without guessing from column names.
-- **Labels and order** from attributes: `contrast` (axis and legend text),
-  group levels in order, sample `order` from `clust`.
-- **Highlights** from columns: `reject`, and `reject_robust` / `passed_ss`
-  where a sensitivity analysis ran.
-- **Per-feature quantities a plot needs** (mean abundance for MA plots,
-  dispersion for effect plots, per-sample values for log-ratio strips) are
-  columns or attributes of the result, computed when it is made.
-
-Every plan's tests check: the record exists, has class `ecodive_step`, the
-right `name` and settings, prints on one line in `str()`, survives the next
-step (for example `pcoa()` of a `sparcc()` result keeps its `dist`
-record; `beta_div()` of a `replace_zeros()` result keeps `transform`), and
-that `plot()` titles use it.
+Results carry no records of how they were made. Every plan in this batch
+follows [README.md](README.md) § "Result attributes and plots": results
+and `method` as top-level attributes, the title (and any plot-only
+setting) in the `display` list, facts about a method in its registry, and
+no propagation of anything from inputs except the direct input's title.
+Transforms of count tables (`replace_zeros_*()`, `alr()`, `ilr()`,
+`philr()`, `qmp_*()`, `normalize()`, `rarefy()`) return plain tables
+with no `display`, and later steps don't mention them.
 
 
 ## Wrappers

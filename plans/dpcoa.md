@@ -177,8 +177,8 @@ Made while implementing:
    id `dpcoa`, aliases `doubleprincipalcoordinateanalysis` and
    `doubleprincipalcoordinatesanalysis`. The README snippet finds no
    collision in any registry; `'double'` prefix-matches only `dpcoa`.
-   `taxa_dm` was added to `STEP_SKIP` (a 2-taxon dist has length 1 and
-   would otherwise be recorded in the `ord` record).
+   (A step-record exclusion for `taxa_dm` went with the step records,
+   which were removed on 2026-11-20.)
 10. **Masking:** documented in "Same names in other packages" of `?dpcoa`
     and `?count_ord` (`ade4::dpcoa()`).
 

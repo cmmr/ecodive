@@ -136,13 +136,13 @@ R's RNG is never touched.
 ### Output
 
 - **Beta:** a `dist` of class `c('ecodive_dist', 'dist')` over the kept
-  samples. Its `dist` record is `beta_div()`'s, plus the settings
-  `depth`, `times`, `average` and `seed` (`ecodive_step(settings =)`).
-  Document them in `R/steps.r` § "The `dist` record". Further attributes:
-  `sd` (a `dist`, with `sd = TRUE`), `dropped`, and `medoid`.
+  samples, with `beta_div()`'s `method` (the metric ID) and a
+  `display$title` naming the rarefaction (see "Plotting"). Further
+  attributes: `depth` (the depth used, chosen from the totals when
+  `NULL`), `sd` (a `dist`, with `sd = TRUE`), `dropped`, and `medoid`.
 - **Alpha:** a named numeric vector over the kept samples, as
-  `alpha_div()`, with attributes `depth`, `times`, `average`, `seed`,
-  `dropped`, and `sd` (with `sd = TRUE`).
+  `alpha_div()`, with attributes `depth`, `dropped`, and `sd` (with
+  `sd = TRUE`).
 
 ### Depth-sensitivity check (no new export)
 
@@ -171,21 +171,20 @@ Revisit a `plot(ord, depth = )` overlay only if users ask for one.
   R's RNG, so its results agree only within Monte Carlo error.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`dist` record** (beta): `beta_div()`'s, plus `depth`, `times`,
-  `average`, `seed`, with the name changed to "<metric name> (rarefied
-  <times>×)" so titles say so; the `sd` dist carries the same record with
-  `sd = TRUE`.
-- **Alpha**: a record of its own kind would be new; instead attach the
-  `transform` record of the rarefaction ("Repeated Rarefaction"; `depth`,
-  `times`, `average`, `seed`) to the vector, as item 34 does for
-  `rarefy()`, so a plot or test of it can label it.
-- Downstream: `pcoa()` / `permanova()` of the beta result keep the record
-  and their titles read "Principal Coordinates Analysis of Bray-Curtis
-  Dissimilarity (rarefied 100×)". Test that.
+- **Beta:** `dist_result()` titles the matrix from the metric; then
+  `set_display()` changes `display$title` to "<metric name> (rarefied
+  <times>×)", e.g. "Bray-Curtis Dissimilarity (rarefied 100×)", so titles
+  say so. The `sd` dist gets `title_of("SD", <that title>)`. `clust` sets
+  `order` and `display$clust` as usual.
+- **Alpha:** no `display`; it is a plain vector like `alpha_div()`'s.
+- Downstream: `pcoa()` / `permanova()` of the beta result take its title
+  through `ord_result(from =)` / `new_ecodive_test(from =)`, so theirs
+  read "Principal Coordinates Analysis of Bray-Curtis Dissimilarity
+  (rarefied 100×)". Test that.
 
 ## Tests (`tests/tinytests/test-rarefied_diversity.r`)
 

@@ -178,24 +178,24 @@ must give bit-identical permutation decisions, or the tolerance in
 ### Result (feature-correlation structure from sparcc.md)
 
 An `ecodive_dist` over features, a **similarity**: ANCOMBC's `corr` /
-`dcorr` after the false-positive filter. Its record holds:
+`dcorr` after the false-positive filter. Attributes:
 
-- `metric = "secom_pearson"` / `"secom_distance"`;
-- `similarity = TRUE`, `features = TRUE`;
+- `method = "secom_pearson"` / `"secom_distance"`;
 - `n_samples`;
-- the settings;
-- for Pearson, `cv_threshold` (ANCOMBC's `thresh_opt`) with
-  `threshold_strict = TRUE`. ANCOMBC zeroes |r| **≤** the threshold, so
-  `assoc_network(threshold = NULL)` must keep |r| **>** it here, unlike its
-  usual ≥. Note it in both plans' docs.
+- for Pearson, `cv_threshold` (ANCOMBC's `thresh_opt`), chosen from the
+  data.
 
-Parallel attributes (listed in `parallel`): `p_value` (`corr_p` / `dcorr_p`)
-and `n_pairs` (`mat_cooccur`, used by `assoc_network_diff()`'s Fisher z).
-Other attributes:
+Parallel attributes (in the internal `DIST_PARALLEL`; see sparcc.md):
+`p_value` (`corr_p` / `dcorr_p`) and `n_pairs` (`mat_cooccur`, used by
+`assoc_network_diff()`'s Fisher z). Other attributes:
 - `bias`: \eqn{\hat s}, named by sample;
 - for Pearson: `cv_error` (mean loss per threshold) and `thresholds`.
 
-The registry marks `fisher_z = TRUE` for `secom_pearson` only.
+The `FEATURE_ASSOCS` registry (see assoc_network.md) marks both as
+similarities over features, `fisher_z = TRUE` for `secom_pearson` only,
+and `strict = TRUE` for `secom_pearson`: ANCOMBC zeroes |r| **≤** the
+threshold, so `assoc_network(threshold = NULL)` must keep |r| **>**
+`cv_threshold` here, unlike its usual ≥. Note it in both plans' docs.
 
 
 ## Licensing (as `ancombc()`)
@@ -240,19 +240,17 @@ The registry marks `fisher_z = TRUE` for `secom_pearson` only.
   implementation of the permutation test.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`dist` record** per function ("SECOM (Pearson)", "SECOM (distance
-  correlation)"): `similarity = TRUE`, `features = TRUE`, the bias
-  estimate's settings, `bias_counts`, filters, `seed` where permutations
-  are used; keep the input's `transform` record.
+- Title: `dist_result()` sets `display$title` automatically, "SECOM
+  (Pearson)" or "SECOM (distance correlation)".
 - `p_value` attribute parallel to the triangle (as in
   [sparcc.md](sparcc.md)), reordered by `clust`.
-- Plots: `plot.ecodive_dist()` (similarity scale) and, via
-  `assoc_network()`, the network plot titled "Association Network of SECOM
-  (Pearson)".
+- Plots: `plot.ecodive_dist()` (similarity scale, from the registry) and,
+  via `assoc_network()`, the network plot titled "Association Network of
+  SECOM (Pearson)".
 
 ## Tests
 

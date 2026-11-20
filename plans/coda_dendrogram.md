@@ -172,16 +172,16 @@ SBP row name, else `b1`, `b2`, ... in preorder), `numerator`,
   against identities.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- A plotting function: returns its layout invisibly with a `plot`
-  attribute `ecodive_step("CoDa-Dendrogram", partition =, ...)` (partition
-  from `"basis"`, `"tree"` or `"ward"`).
-- Title from the input's `transform` record; when the partition comes from
-  a `philr()` result, use its `transform` record's weights in the
-  subtitle.
+- A plotting function: it draws, then returns the node summaries (see
+  Value) invisibly, with no `display` attribute; nothing plots that table
+  again.
+- Title "CoDa-dendrogram", the method's display name: counts have no
+  title, so nothing is added from the input. The subtitle names the
+  partition (Ward clustering, the tree, or given), from the arguments.
 
 ## Tests (`test-coda_dendrogram.r`)
 

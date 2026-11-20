@@ -126,16 +126,18 @@ composition_barplot(counts, groups = NULL, data = NULL, feature_groups = NULL,
   `pcoa()`, `normalize()`).
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- A plotting function: no record on the data. It reads the input's
-  `transform` record for its subtitle and returns the drawn proportions and
-  sample order invisibly, with a `plot` attribute
-  `ecodive_step("Composition Barplot", order =, n_taxa =, ...)`.
-- When samples are ordered by `clust`, reuse the `dist` record's `order`
-  rather than recomputing it, and name the ordering in the subtitle.
+- A plotting function: it draws, then returns the drawn proportions,
+  colours and sample order invisibly (see Value), with no `display`
+  attribute; nothing plots that list again.
+- Title: the method's display name ("Composition Barplot"); counts have
+  no title, so nothing is added from the input.
+- When samples are ordered by `clust`, take the order from
+  `dist_clust_order()`, the same order `dist_clust()` stores as `order`,
+  and name the ordering in the subtitle from the `clust` argument.
 
 ## Tests (`test-composition_barplot.r`)
 

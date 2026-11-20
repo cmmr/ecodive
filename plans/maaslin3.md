@@ -195,18 +195,19 @@ work. Separate step, after the fixed-effects port.
   order) and pass those draws to an internal `maaslin3_details(sims = )`.
 
 
-## Step records and plotting
+## Plotting
 
-Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+Follows [README.md](README.md) § "Result attributes and plots".
 
-- **`da` record** "MaAsLin 3" via `call_step()`: `formula`, transform
-  and normalization settings, `p_adjust`, `alpha`, median-comparison
-  settings, `seed` (its Monte Carlo covariance).
-- Two models in one table: a `model` column (`"abundance"`,
-  `"prevalence"`) lets `plot()` facet or colour by model; store `log_base`
-  (`2`, as MaAsLin 3 reports log2 coefficients — check) and `alpha`.
+- Two models in one table: the `_abundance` and `_prevalence` columns sit
+  side by side, and `plot(model = )` picks which to draw, highlighting
+  from `reject_abundance` or `reject_prevalence`. Store `log_base` (`2`
+  for the abundance coefficients, as MaAsLin 3 reports log2 — check;
+  prevalence coefficients are log odds) and `alpha`.
 - `plot()`: [da_plots.md](da_plots.md)'s volcano and forest types, one
-  panel per model, titled "MaAsLin 3: <covariate>".
+  panel per model, titled from `method` via `DA_TESTS`, for example
+  "Volcano plot of MaAsLin 3", with the model and covariate in the
+  subtitle. The input is a count table, so no `display`.
 
 ## Tests
 
