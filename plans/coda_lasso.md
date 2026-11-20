@@ -1,6 +1,6 @@
 # `coda_lasso()` and `coda_lasso_pairwise()`: penalized log-contrast regression
 
-**Priority:** 36. **Tier:** port. `coda_lasso()` ports zeroSum 2.0.7's
+**Priority:** 48. **Tier:** port. `coda_lasso()` ports zeroSum 2.0.7's
 solver (R/C++, **MIT**, github.com/rehbergT/zeroSum). `coda_lasso_pairwise()`
 ports coda4microbiome 0.2.4's model setup (CRAN, **MIT**) on ecodive's own
 coordinate descent. glmnet (GPL-2) is output-only. Read
@@ -248,6 +248,58 @@ The shared per-feature structure (compositional.md):
   (β < 0) groups, which is how coda4microbiome presents the signature.
 - **No plots.** ecodive doesn't plot. The docs show how to draw
   coda4microbiome's signature plot from the result.
+
+
+## Plot method: signature plot
+
+(Added 2026-11-20 from the compositional-visualization review; it
+supersedes the "No plots" bullet above and the Docs bullet on drawing the
+signature plot by hand: ecodive has `plot()` methods now.)
+
+```r
+plot.ecodive_coda_lasso(x, n_features = 30, ...)   # and, same Rd page,
+plot.ecodive_coda_lasso_pairwise(x, n_features = 30, ...)
+```
+
+coda4microbiome's two standard figures, side by side
+(`layout(matrix(1:2, 1), widths = c(1, 1.2))`, `par()` restored on exit):
+
+- **Left, the signature:** horizontal bars of the non-zero `coefficient`s,
+  largest positive at the top, most negative at the bottom; positive
+  (numerator) bars `PLOT_HIGHLIGHT`, negative (denominator) bars
+  `'royalblue3'` (the colours of the rank plot in
+  [log_ratio_plots.md](log_ratio_plots.md)); each value written at its bar
+  end to 2 decimals; a line at 0. More than `n_features` selected taxa:
+  the largest |β|, with "k of m selected taxa shown" in the subtitle.
+  Coefficients are drawn as stored. coda4microbiome rescales them to
+  \eqn{\sum|\beta| = 2} before plotting (positive ones sum to 1, negative
+  to −1); the docs say this changes neither signs nor order.
+- **Right, the signature score by outcome:** the per-sample linear
+  predictor (`attr(x, 'fitted')`). Binomial: a box plot per class with the
+  samples as points, spread deterministically as in
+  `plot.ecodive_log_ratio()` (no RNG). Gaussian: score (x) against the
+  observed outcome (y). No fitted line or correlation (plot methods compute
+  nothing new); the subtitle gives the stored `performance`: apparent and
+  cross-validated AUC (mean ± sd) or apparent R² and CV MSE.
+- This needs the outcome in the result: add attribute **`y`** (the outcome
+  as fitted, one value per sample; a factor for binomial) to the Result
+  list above when implementing.
+- No taxa selected at the chosen λ: the left panel says so in text and the
+  right panel is left empty (coda4microbiome prints a message and skips
+  both plots); no error.
+- Returns `x` invisibly. Rd in "Plotting"; tests as in `test-plot.r`
+  (gaussian and binomial fits, `n_features = 2`, no selection,
+  `.Random.seed` and `par('mfrow')` unchanged, `n_features = 0` error).
+- **Reference:** coda4microbiome 0.2.4 (CRAN tarball; MIT, `LICENSE`
+  "YEAR: 2022, COPYRIGHT HOLDER: coda4microbiome authors"; checked
+  2026-11-20), `R/coda4microbiome_functions.R`: `plot_signature()` (ggpubr
+  bar chart, sorted ascending, horizontal, filled by sign, labels rounded to
+  2 digits), `plot_prediction()` (binary: box plot by outcome plus a
+  density plot; continuous: scatter with a regression line and Pearson r),
+  and `coda_glmnet()` (calls both; the ±1 rescaling). Nothing is copied
+  (its code is ggplot2), so no notice beyond the credit this plan already
+  gives coda4microbiome. Calle et al. (2023) describe the figures; 91
+  citations, rising from a small base.
 
 
 ## Reference implementations

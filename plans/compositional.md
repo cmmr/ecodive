@@ -73,7 +73,7 @@ Visualizations:
 | Plan | Functions | Tier |
 |:-----|:----------|:-----|
 | [biplot_scaling.md](biplot_scaling.md) | `plot(ord, scaling = )` for `pca()` / `rpca()` results, with links | formula |
-| [log_ratio_plots.md](log_ratio_plots.md) | rank plots of DA effects and loadings; `plot()` of `log_ratio()` / `balance()` results | port (Qurro, BSD) |
+| [log_ratio_plots.md](log_ratio_plots.md) | rank plots of DA effects and loadings (`plot(type = 'rank')`); `plot()` of `log_ratio()` / `balance()` results; `log_ratio_features()` | port (Qurro, BSD) |
 | [ternary_plot.md](ternary_plot.md) | `ternary_plot()` | clean room |
 | [coda_diagnostic_plots.md](coda_diagnostic_plots.md) | `variation_array()`, `zero_pattern()` | clean room |
 | [composition_barplot.md](composition_barplot.md) | `composition_barplot()` | port (microshades idea, MIT) |
