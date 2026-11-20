@@ -29,8 +29,9 @@ th>.eg {
 /* Target the specific container for the reference index */
 .template-reference-index dl {
   display: grid !important;
-  /* 1st col: fits content (function name), 2nd col: takes remaining space */
-  grid-template-columns: max-content auto !important; 
+  /* 1st col: as wide as the longest function name, but at most half the
+     width; 2nd col (the title): the rest, never overflowing */
+  grid-template-columns: fit-content(50%) minmax(0, 1fr) !important;
   column-gap: 3rem;
   row-gap: 0.5rem;
   align-items: baseline; /* Aligns the text baselines of name and description */
@@ -41,6 +42,17 @@ th>.eg {
   float: none !important; /* Reset any floats from legacy styles */
   width: auto !important;
   font-weight: bold;
+}
+
+/* One function name per line, when a manual page documents several, so
+   they don't widen the first column and squeeze the titles. */
+.template-reference-index dt > code {
+  display: block;
+  width: fit-content;
+}
+
+.template-reference-index dt > code + code {
+  margin-top: 0.25rem;
 }
 
 .template-reference-index dd {
