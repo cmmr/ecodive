@@ -281,6 +281,7 @@ plots read.
   | `dist_test()` | `dm`, `test`, `groups`, `data` | an argument named `test`, or any prefix of `test`, `groups` or `data` (`t`, `g`, `gr`, `d`, `da`, ...) |
   | `replace_zeros()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
   | `da_test()` | `counts`, `method`, `groups`, `data`, `formula` | an argument named `method`, or any prefix of `method`, `counts`, `groups`, `data` or `formula` other than the pass-through `groups`, `data`, `formula` themselves (`m`, `c`, `co`, `g`, `gr`, `d`, `da`, `f`, `fo`, ...) |
+  | `da_sensitivity()` | `counts`, `method`, then (after `...`, so matched only exactly) `pseudocounts`, `zeros`, `scale_sds`, `crossed` | what `da_test()` forbids, and an argument named exactly `pseudocounts`, `zeros`, `scale_sds` or `crossed` |
 
   `groups` and `data` themselves are fine in `dist_test()`: it passes
   them through on purpose, as `da_test()` passes `groups`, `data` and

@@ -763,6 +763,18 @@
   are left out, ...). Their results print as tables and `plot()` as volcano
   plots.
 
+* New `da_sensitivity()` reruns any `da_test()` method over the settings
+  that have no right value, `pseudocounts`, zero replacements (`zeros`,
+  through `replace_zeros()`) and `dirmult_ttest()`'s scale uncertainty
+  (`scale_sds`), one at a time or `crossed`, and reports each feature's
+  decision in every run: one tidy table, a per-feature `summary` (`passed`
+  when every run agrees, ANCOMBC's `passed_ss` generalised, and `robust`),
+  and two plots, tiles of the decisions and traces of the effects against a
+  setting (for `scale_sds`, the display of ALDEx2's `plotGamma()`). Every
+  run is identical to the direct call with its setting, keeps the base
+  run's `seed`, and is the same for any `cpus`; ANCOM-BC's pseudocount runs
+  are the fits behind its `passed_ss`, reused when the base run made them.
+
 * New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
   `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's
   proportions after adding `pseudocount` (log-TSS), with the same

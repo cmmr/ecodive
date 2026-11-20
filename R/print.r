@@ -291,6 +291,10 @@ print_df_label <- function (x) {
       m <- attr(x, 'method', exact = TRUE)
       if (is.null(m)) NULL else da_method_name(m)
     },
+    ecodive_da_sensitivity = {
+      m <- attr(x, 'method', exact = TRUE)
+      if (is.null(m)) NULL else paste('Sensitivity of', da_method_name(m))
+    },
     ecodive_simper        = 'SIMPER',
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
     NULL )
@@ -333,6 +337,8 @@ print.ecodive_da_wilcoxon      <- print_table_result
 print.ecodive_da_ttest         <- print_table_result
 #' @export
 print.ecodive_da_lm            <- print_table_result
+#' @export
+print.ecodive_da_sensitivity   <- print_table_result
 #' @export
 print.ecodive_simper           <- print_table_result
 #' @export

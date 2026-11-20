@@ -156,6 +156,9 @@
   expect_true(inherits(z, 'ecodive_da_lm') && nrow(z) == 24L)
   expect_true(is.data.frame(list_da_tests()) && 'da_ttest' %in% list_da_tests('id'))
   expect_identical(match_da_test('Mann-Whitney')$id, 'da_wilcoxon')
+  z <- da_sensitivity(counts, 'da_ttest', 'grp', meta, pseudocounts = TRUE, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_da_sensitivity') && nrow(z) == 48L && identical(sort(unique(z$run)), 0:3))
+  expect_true(is.data.frame(attr(z, 'summary')) && nrow(attr(z, 'summary')) == 12L && is.logical(attr(z, 'summary')$passed))
 
   # Zero replacement.
   cz <- counts; cz[cz < 4] <- 0L

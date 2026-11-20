@@ -212,7 +212,7 @@
 #' scale uncertainty into differential expression analyses using ALDEx2.
 #' *Genome Biology*, 26, 139. \doi{10.1186/s13059-025-03609-3}
 #'
-#' @seealso [ancom()], [replace_zeros()].
+#' @seealso [ancom()], [replace_zeros()], [da_sensitivity()].
 #'
 #' @export
 #' @examples
@@ -238,6 +238,11 @@
 #'     # The default contrast: the first group ('placebo', in sorted order)
 #'     # against the rest.
 #'     dirmult_ttest(x, grp, n_draws = 32)$log2_fc
+#'
+#'     # Which decisions hold over a range of scale uncertainties (ALDEx2's
+#'     # gamma): see da_sensitivity().
+#'     res <- da_sensitivity(x, 'dirmult_ttest', grp, scale_sds = TRUE, n_draws = 32)
+#'     plot(res, 'traces')
 #'
 dirmult_ttest <- function (
     counts, groups, data = NULL, contrast = NULL, margin = 1L,

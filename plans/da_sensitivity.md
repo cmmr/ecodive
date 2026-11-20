@@ -223,3 +223,128 @@ both plots; that `passed` is ANCOMBC's `passed_ss` generalised. Add a
   differential abundance analysis methods for human gut 16S rRNA microbiome
   data. *bioRxiv* (preprint, not peer reviewed).
   doi:10.64898/2026.09.01.748571.
+
+
+## Decisions made while implementing (2026-11-20)
+
+Asked of the user at the start (all three answered with the
+recommendation):
+
+- **Grid names: plural** (`pseudocounts`, `zeros`, `scale_sds`, `crossed`),
+  as the plan proposed. `test-wrapper_args.r` checks that
+  `da_sensitivity()`'s arguments are `counts, method, ...` and these four,
+  and that no DA method takes one of the four; README.md's shadowing table
+  has a `da_sensitivity()` row.
+- **`crossed = TRUE`: pseudocounts and zero replacements are alternatives**
+  (one "zero treatment" factor), each crossed with every `scale_sds`; no run
+  adds a pseudocount to a zero-replaced table. Runs are (number of
+  pseudocounts + number of zero replacements) × number of scale_sds, plus
+  the base (a grid not given counts as one level). With one grid, crossed
+  and one-at-a-time give the same runs.
+- **Printing: `print.ecodive_da_sensitivity <- print_table_result`** (the
+  README's 2026-11-20 rule), header "Sensitivity of <registry name>"
+  (`print_df_label()`). No `summary()` method: the summary stays an
+  attribute, as planned.
+
+Made while implementing:
+
+- **Runs.** The base run is `da_test(counts, method, ...)`; every other run
+  is the same call with its settings set by name in `...`. Names in `...`
+  that partially match one of the method's arguments are completed first
+  (`pseudo = 1` becomes `pseudocount = 1`), so a run's setting replaces the
+  base's instead of being given twice. A run equal to the base (e.g.
+  `pseudocount = 0.5` for `dirmult_ttest()`, whose default is 0.5) is run
+  anyway, as ANCOMBC does.
+- **Zero-replacement runs** give the method `replace_zeros(counts, z, margin
+  = m)` with the base's `pseudocount` **dropped**, so the method's default
+  applies; for every `zero_free_ok` method that default (`NULL`, or 0 for
+  `ancombc2()`) adds nothing to a table without zeros (an explicit 0 is
+  refused by the da_* tests' shared rule, so dropping it is the only form
+  that works for all). Any input type is first converted as the methods
+  convert it (`validate_counts()`, which also takes a phyloseq / rbiom /
+  SummarizedExperiment object's orientation), and the run gets that
+  `margin`.
+- **ANCOM-BC reuse.** For `ancombc` / `ancombc2`, a pseudocount run (not
+  crossed with anything) whose value is one of the base run's own
+  `attr(fit, 'sensitivity')$pseudocounts` takes that stored fit; any other
+  is fitted directly with `pseudocount = pc, sensitivity = FALSE`, which is
+  the same call `ancombc_sensitivity()` makes. So with `ancombc2()`'s
+  default (`sensitivity = TRUE`) and `pseudocounts = TRUE`, the pseudocount
+  runs cost nothing. Every non-base ANCOM-BC run has `sensitivity = FALSE`.
+- **Checks before running:** at least one grid; `pseudocounts` positive,
+  finite, not repeated, and only for methods with a `pseudocount` formal;
+  for methods with `norm`, refused unless the base norm (given or default)
+  is `clr` or `log`, since every other norm ignores the pseudocount and all
+  runs would be the same; `scale_sds` non-negative, only for methods with
+  `scale_sd` (the error lists them, from the registry's functions); `zeros`
+  `TRUE` or names matched with `match_zero_replacement()` (flexible
+  matching, duplicates after matching refused), and refused for
+  `zero_free_ok = FALSE` (the error lists the methods that can).
+- **Warnings.** The base run's warnings are given as usual. The other runs'
+  are collected and given once each after the loop, leaving out any the
+  base run already gave (so a "Zeros detected" warning isn't repeated per
+  run). An error in a run is re-raised as "The run with <setting> failed:
+  <message>". `pseudocounts = TRUE` on a table that isn't whole numbers
+  warns, as `ancombc2(sensitivity = TRUE)` does.
+- **Setting labels** use the argument form: `"base"`, `"pseudocount =
+  0.5"`, `"zeros = mult"` (the registry id), `"scale_sd = 1"`, and crossed
+  runs joined by ", ". `parameter` is `'crossed'` only for runs that set
+  two or more settings.
+- **Table.** `covariate` is always a column (`NA` for the group methods),
+  so every result has the same columns; intercept rows are dropped. Rows
+  are run by run, each in the method's row order. `p_adjusted` and `effect`
+  are `NA` for ancom.
+- **Attributes:** `method`, `effect_name`, `alpha` (the base fit's),
+  `log_base` (the base fit's `log_base` attribute when present, else from
+  the registry's `base`: `'e'` → `exp(1)`, `'2'` → 2; so it is right
+  before item 34 adds `log_base` to ancombc / dirmult results), `covariate`
+  (model methods only: the first design column of `groups`'s term, else
+  the first non-intercept column; `da_term_covariate()`, the rule of
+  `plot.ecodive_da_lm()`), `runs`, `fits` and `summary`.
+- **Summary** rows are the (feature, covariate) pairs in the base run's
+  order. `n_runs` counts the runs with a row for the pair; `passed` is
+  `n_reject` 0 or `n_runs`; `robust` is `passed` and rejected in the base
+  run; `sign_stable` compares `sign()` of the finite effects (`NA` when none
+  is finite, e.g. ancom).
+- **Tiles plot:** cell codes drawn with `image()` (red / blue ends of
+  `hcl.colors(11, 'Blue-Red 3')`, `grey90`, `grey35` for a rejection with
+  no effect sign, i.e. ancom; white for no result), thin white lines
+  between cells, black lines between parameter groups, the group names
+  above, the setting's value below (the full setting for crossed runs).
+  With no feature rejected in any run, the top `n_features` by base
+  |effect| are shown (all grey) and the key says so. The key (colours,
+  bold, counts, covariate, alpha) is an `mtext()` line under the labels;
+  `sub =` replaces it.
+- **Traces plot:** x on a log scale for pseudocounts (they span orders of
+  magnitude; `log = ''` overrides), categorical for zeros; features are
+  those rejected in the base run, else in any run, else all, largest base
+  |effect| first; labels at the right end, bold when `passed`. With
+  crossed runs, the other setting is held at its first value (named in the
+  subtitle).
+- **Title** "Sensitivity of " + the registry name, from
+  `da_sens_plot_title()` (tested).
+- **Docs:** cross-references from `da_test()`'s and `dirmult_ttest()`'s
+  "See also", and a γ example in `dirmult_ttest()`'s examples, kept small
+  because item 34 is editing those pages. Glossary row in
+  parameter_names.md; NEWS; pkgdown (`da_sensitivity` under Differential
+  abundance, its plot method under Plotting).
+
+### Reference results
+
+- **Each run equals the direct call** (`identical()` on the whole result,
+  attributes included, so the table's `effect`, `p_adjusted` and `reject`
+  too): ancom, ancombc, ancombc2, dirmult_ttest, da_wilcoxon, da_ttest and
+  da_lm; base, pseudocount, zero-replacement and scale runs; dense,
+  `Matrix` and transposed (`margin = 2`) input on a 30 × 200 table (135 of
+  135 comparisons identical), plus the test file's 16 × 12 table.
+- **ANCOM-BC2's `passed_ss`:** with pseudocounts 0.1, 0.5, 1, the
+  pseudocount runs are `identical()` to `attr(ancombc2(..., sensitivity =
+  c(0.1, 0.5, 1)), 'sensitivity')$fits` both when reused from the base run
+  and when fitted directly (base `sensitivity = FALSE`), and
+  `summary$passed` / `summary$robust` are identical to `passed_ss` /
+  `reject_robust` (40 × 150 table, `~ grp` and `~ grp + age`: 20 base
+  rejections, 19 robust, 1 not passed). Same for `ancombc()`.
+- **Threads:** results `identical()` for `cpus` 1, 2 and 4 (ancom,
+  ancombc2, dirmult_ttest, da_lm in the tests; every method on the larger
+  table).
+- No numerical differences anywhere: every comparison is exact.

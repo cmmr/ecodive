@@ -154,5 +154,6 @@ abundance analysis. \emph{Briefings in Bioinformatics}, 26, bbaf130.
 \seealso{
 \code{\link[=ancom]{ancom()}}, \code{\link[=ancombc]{ancombc()}}, \code{\link[=da_lm]{da_lm()}}, \code{\link[=da_ttest]{da_ttest()}},
 \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=list_da_tests]{list_da_tests()}};
-\code{\link[=replace_zeros]{replace_zeros()}} for the zeros.
+\code{\link[=replace_zeros]{replace_zeros()}} for the zeros; \code{\link[=da_sensitivity]{da_sensitivity()}} to rerun a method
+over pseudocounts, zero replacements and scale uncertainties.
 }

@@ -94,6 +94,7 @@ reference:
   contents:
   - da_test
   - list_da_tests
+  - da_sensitivity
   - ancom
   - ancombc
   - ancombc_global
@@ -177,6 +178,7 @@ reference:
   - plot.ecodive_ancom
   - plot.ecodive_ancombc
   - plot.ecodive_da_ttest
+  - plot.ecodive_da_sensitivity
   - plot.ecodive_varpart
   - plot.ecodive_forward_select
   - plot.ecodive_bioenv

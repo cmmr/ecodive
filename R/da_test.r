@@ -157,7 +157,8 @@ DA_TESTS <- local({
 #'
 #' @seealso [ancom()], [ancombc()], [da_lm()], [da_ttest()],
 #'   [da_wilcoxon()], [dirmult_ttest()], [list_da_tests()];
-#'   [replace_zeros()] for the zeros.
+#'   [replace_zeros()] for the zeros; [da_sensitivity()] to rerun a method
+#'   over pseudocounts, zero replacements and scale uncertainties.
 #'
 #' @export
 #' @examples

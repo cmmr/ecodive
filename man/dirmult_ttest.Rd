@@ -264,6 +264,11 @@ For large datasets, standard matrix operations may be slow. See
     # against the rest.
     dirmult_ttest(x, grp, n_draws = 32)$log2_fc
 
+    # Which decisions hold over a range of scale uncertainties (ALDEx2's
+    # gamma): see da_sensitivity().
+    res <- da_sensitivity(x, 'dirmult_ttest', grp, scale_sds = TRUE, n_draws = 32)
+    plot(res, 'traces')
+
 }
 \references{
 Fernandes, A. D., Macklaim, J. M., Linn, T. G., Reid, G., & Gloor, G. B.
@@ -285,5 +290,5 @@ scale uncertainty into differential expression analyses using ALDEx2.
 \emph{Genome Biology}, 26, 139. \doi{10.1186/s13059-025-03609-3}
 }
 \seealso{
-\code{\link[=ancom]{ancom()}}, \code{\link[=replace_zeros]{replace_zeros()}}.
+\code{\link[=ancom]{ancom()}}, \code{\link[=replace_zeros]{replace_zeros()}}, \code{\link[=da_sensitivity]{da_sensitivity()}}.
 }

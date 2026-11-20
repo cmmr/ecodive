@@ -28,6 +28,16 @@
   expect_identical(shadowed(replace_zeros, list_zero_replacements('func')), character(0))
   expect_identical(shadowed(da_test, list_da_tests('func'), passed = c('groups', 'data', 'formula')), character(0))
 
+  # da_sensitivity() passes `...` to da_test() and takes its grids after
+  # `...`, where they match only by exact name: no method may take an
+  # argument named exactly `pseudocounts`, `zeros`, `scale_sds` or
+  # `crossed`, or da_sensitivity() would capture it.
+  grids <- setdiff(names(formals(da_sensitivity)), names(formals(da_test)))
+  expect_identical(grids, c('pseudocounts', 'zeros', 'scale_sds', 'crossed'))
+  expect_identical(names(formals(da_sensitivity))[1:3], c('counts', 'method', '...'))
+  taken <- unlist(lapply(list_da_tests('func'), function (f) intersect(names(formals(f)), grids)))
+  expect_identical(length(taken), 0L)
+
   # The wrappers' own arguments, which the rule protects. Changing them
   # changes what methods may take.
   expect_identical(names(formals(dist_ord)),  c('dm', 'method', '...'))
