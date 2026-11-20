@@ -105,6 +105,20 @@ treatment minus reference, in log2 units, averaged over the draws
 \item \code{ci_lower}, \code{ci_upper}: the lowest lower bound and the highest upper
 bound of the draws' intervals for that difference, in log2 units
 (\code{CI(2.5)}, \code{CI(97.5)} for the default \code{conf_level}).
+\item \code{pooled_sd}: the pooled within-group standard deviation of the
+feature's clr values, \eqn{\sqrt{(q_1 + q_2) / (n_1 + n_2 - 2)}}
+with \eqn{q} each side's sum of squared deviations from its mean,
+averaged over the draws, in log2 units (ALDEx3's \code{pooled.SD}). The
+scale model doesn't change it. \code{NaN} when each side has one sample.
+\item \code{mean}: the feature's mean clr value over the samples in the
+contrast, averaged over the draws, in log2 units: its typical
+abundance relative to the sample's geometric mean, the x axis of an
+MA plot. With two named groups, the samples in other groups are not
+included.
+\item \code{effect}: each draw's difference (with the scale model's shift)
+divided by its pooled standard deviation, averaged over the draws:
+a standardised effect size, Cohen's \eqn{d} (ALDEx3's \code{cohens.d}).
+Not \code{log2_fc / pooled_sd}, which is a ratio of averages.
 \item \code{p_value}: Welch's two-sided p-value, averaged over the draws
 (\code{pvalue}).
 \item \code{p_adjusted}: \code{p_value} adjusted across the features with \code{p_adjust}
@@ -227,6 +241,26 @@ effect size; its scale model (\code{gamma}) is off by default. ALDEx3 fits
 linear models to each draw instead of t-tests. Their results agree with
 this function's in direction and rough size, not exactly.
 
+\strong{Effect sizes.} \code{pooled_sd}, \code{mean} and \code{effect} describe each feature
+for the effect and MA plots (\code{\link[=plot.ecodive_dirmult_ttest]{plot.ecodive_dirmult_ttest()}}).
+\code{pooled_sd} and \code{effect} are ALDEx3's \code{aldex.effect()} statistics, and
+match them for the same draws. ALDEx2's \code{aldex.effect()} reports
+related but different quantities, from random pairs of draws and
+medians. Its \code{diff.btw} is the median difference between the groups,
+like \code{log2_fc}. Its \code{diff.win}, "the per-feature maximum median
+difference between Dirichlet instances within conditions", measures the
+spread within the groups as \code{pooled_sd} does, but on another scale: for
+normal data, the median absolute difference of two values is
+\eqn{0.954\sigma}, and taking the larger of the two groups' values
+makes it larger still (1.2 to 1.5 times \code{pooled_sd} on a test table
+with six samples a group). So ALDEx2's \code{effect}, the median ratio of
+the two, is smaller than \code{effect} (by about a quarter on that table)
+and ranks the features almost the same way (correlation 0.998). Its
+\code{rab.all} is a median over all samples, where \code{mean} is a mean over
+those in the contrast. Features with \eqn{|}\code{effect}\eqn{| > 1}
+differ between the groups by more than they vary within them, as with
+ALDEx2's rule of thumb.
+
 \strong{Computation.} The draws run in parallel C, one draw at a time, with
 memory for one draw (8 bytes per value of the samples in the contrast).
 Every sample of every draw has its own random stream, so results are
@@ -271,6 +305,9 @@ For large datasets, standard matrix operations may be slow. See
     res <- dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
     res
     plot(res)
+
+    # Each feature's difference against its spread within the groups.
+    plot(res, 'effect')
 
     # With a scale model, the intervals widen and fewer features are
     # rejected.

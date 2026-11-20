@@ -4,34 +4,90 @@
 \alias{plot.ecodive_dirmult_ttest}
 \title{Plot a Dirichlet-multinomial t-test}
 \usage{
-\method{plot}{ecodive_dirmult_ttest}(x, labels = 10, ...)
+\method{plot}{ecodive_dirmult_ttest}(
+  x,
+  type = c("volcano", "effect", "ma", "forest"),
+  labels = 10,
+  n_features = 30,
+  ...
+)
 }
 \arguments{
 \item{x}{The result of \code{\link[=dirmult_ttest]{dirmult_ttest()}}.}
 
-\item{labels}{How many of the differentially abundant features to name,
-those with the smallest adjusted p-values. Default \code{10}; \code{0} for
-none.}
+\item{type}{The plot: \code{"volcano"} (the default), \code{"effect"}, \code{"ma"}, or
+\code{"forest"}.}
+
+\item{labels}{How many of the differentially abundant features to name
+(in the volcano, effect and MA plots), those with the smallest
+adjusted p-values. Default \code{10}; \code{0} for none.}
+
+\item{n_features}{For \code{"forest"}: how many features to show, those with
+the smallest adjusted p-values (ties in the table's order).
+Default \code{30}; \code{Inf} for all.}
 
 \item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}}, such as \code{main},
-\code{xlab}, \code{xlim} or \code{cex}.}
+\code{sub}, \code{xlab}, \code{xlim} or \code{cex}.}
 }
 \value{
 \code{x}, invisibly.
 }
 \description{
-A volcano plot of \code{\link[=dirmult_ttest]{dirmult_ttest()}}'s results: each feature's log2 fold
-change against its adjusted p-value, with the features that differ (those
-with \code{reject = TRUE}) highlighted, and the most significant of them named.
+Four views of \code{\link[=dirmult_ttest]{dirmult_ttest()}}'s results, each feature a point (or a
+row), with the features that differ (\code{reject = TRUE}) highlighted and
+the most significant of them named:
 }
 \details{
-The y axis is \eqn{-\log_{10}} of \code{p_adjusted} (an adjusted p-value of 0
-is drawn at the smallest positive double). The dashed line marks \code{alpha};
-a feature also needs its confidence interval for the log2 fold change to
-exclude 0 to count as differentially abundant, so some features above the
-line may not be highlighted.
+\itemize{
+\item \code{"volcano"} (the default): the log2 fold change against the adjusted
+p-value.
+\item \code{"effect"}: the log2 fold change against the pooled within-group
+standard deviation (Gloor et al. 2016; ALDEx2's \code{"MW"} plot).
+\item \code{"ma"}: the log2 fold change against the mean clr abundance (ALDEx2's
+\code{"MA"} plot).
+\item \code{"forest"}: the log2 fold changes and their intervals of the
+\code{n_features} most significant features, largest at the top.
+}
+
+\strong{Volcano plot.} The y axis is \eqn{-\log_{10}} of \code{p_adjusted} (an
+adjusted p-value of 0 is drawn at the smallest positive double). The
+dashed line marks \code{alpha}; a feature also needs its interval for the
+log2 fold change to exclude 0 to count as differentially abundant, so
+some features above the line may not be highlighted. Gloor et al.
+(2016) argue that volcano plots mislead: with many samples, tiny
+differences reach small p-values, so read them with the effect plot.
+
+\strong{Effect plot.} Each feature's difference between the groups (y,
+\code{log2_fc}) against its dispersion within them (x, \code{pooled_sd}), both in
+log2 units. The dashed lines are \eqn{y = \pm x}: features beyond them
+differ between the groups by more than they vary within them (an
+average \code{effect} of about 1 or more). Features near the y axis vary
+little, so a small difference can be significant; features far to the
+right need a large difference. This is ALDEx2's \code{aldex.plot(type = "MW")}, with ALDEx3's pooled standard deviation in place of ALDEx2's
+\code{diff.win} (see \code{\link[=dirmult_ttest]{dirmult_ttest()}}'s \strong{Effect sizes}).
+
+\strong{MA plot.} The log2 fold change against the feature's mean clr value
+(\code{mean}): how the differences depend on abundance. Rare features (on
+the left) vary most, from sampling alone.
+
+\strong{Forest plot.} A point at each feature's \code{log2_fc} and a bar from
+\code{ci_lower} to \code{ci_upper}, which are the envelope of the draws'
+intervals (the lowest lower and highest upper bound), not an interval
+of one draw: wider than a single confidence interval.
+
+Features whose value is \code{NaN} are left out of each plot. The subtitle
+names the contrast and counts the features rejected.
 }
 \examples{
     res <- dirmult_ttest(round(iris[, 1:4] * 10), 'Species', iris)
     plot(res)
+    plot(res, 'effect')
+    plot(res, 'ma')
+    plot(res, 'forest')
+}
+\references{
+Gloor, G. B., Macklaim, J. M., & Fernandes, A. D. (2016). Displaying
+variation in large datasets: plotting a visual summary of effect sizes.
+\emph{Journal of Computational and Graphical Statistics}, 25, 971-979.
+\doi{10.1080/10618600.2015.1131161}
 }

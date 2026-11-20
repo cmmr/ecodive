@@ -424,7 +424,7 @@
   expect_true(any(grepl('Welch t-test', utils::capture.output(print(r)))))
 
   r <- da_wilcoxon(x, 'grp', meta, pseudocount = pc, cpus = 1L)
-  expect_identical(names(r), c('feature', 'w', 'auc', 'median_diff', 'p_value', 'p_adjusted', 'reject'))
+  expect_identical(names(r), c('feature', 'w', 'auc', 'median_diff', 'mean', 'p_value', 'p_adjusted', 'reject'))
   expect_identical(class(r), c('ecodive_da_wilcoxon', 'data.frame'))
   expect_true(any(grepl('Wilcoxon Rank-Sum Test', utils::capture.output(print(r)))))
 

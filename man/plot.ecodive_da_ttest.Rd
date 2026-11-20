@@ -6,18 +6,38 @@
 \alias{plot.ecodive_da_lm}
 \title{Plot a Per-feature Test Result}
 \usage{
-\method{plot}{ecodive_da_ttest}(x, labels = 10, ...)
+\method{plot}{ecodive_da_ttest}(
+  x,
+  type = c("volcano", "effect", "ma", "forest"),
+  labels = 10,
+  n_features = 30,
+  ...
+)
 
-\method{plot}{ecodive_da_wilcoxon}(x, labels = 10, ...)
+\method{plot}{ecodive_da_wilcoxon}(x, type = c("volcano", "ma"), labels = 10, ...)
 
-\method{plot}{ecodive_da_lm}(x, covariate = NULL, labels = 10, ...)
+\method{plot}{ecodive_da_lm}(
+  x,
+  covariate = NULL,
+  type = c("volcano", "effect", "ma", "forest"),
+  labels = 10,
+  n_features = 30,
+  ...
+)
 }
 \arguments{
 \item{x}{The result of \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=da_ttest]{da_ttest()}}, or \code{\link[=da_lm]{da_lm()}}.}
 
-\item{labels}{How many of the differentially abundant features to name,
-those with the smallest adjusted p-values. Default \code{10}; \code{0} for
-none.}
+\item{type}{The plot: \code{"volcano"} (the default), \code{"effect"}, \code{"ma"}, or
+\code{"forest"} (for \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{"volcano"} or \code{"ma"}).}
+
+\item{labels}{How many of the differentially abundant features to name
+(in the volcano, effect and MA plots), those with the smallest
+adjusted p-values. Default \code{10}; \code{0} for none.}
+
+\item{n_features}{For \code{"forest"}: how many features to show, those with
+the smallest adjusted p-values (ties in the table's order).
+Default \code{30}; \code{Inf} for all.}
 
 \item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}}, such as \code{main},
 \code{sub}, \code{xlab}, \code{xlim} or \code{cex}.}
@@ -32,22 +52,63 @@ isn't the intercept.}
 \code{x}, invisibly.
 }
 \description{
-A volcano plot of the results of \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=da_ttest]{da_ttest()}} or
-\code{\link[=da_lm]{da_lm()}}: each feature's effect against its adjusted p-value, with the
-features declared differentially abundant (\code{reject = TRUE}) highlighted
-and the most significant of them named.
+Views of the results of \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=da_ttest]{da_ttest()}} or \code{\link[=da_lm]{da_lm()}}, each
+feature a point (or a row), with the features declared differentially
+abundant (\code{reject = TRUE}) highlighted and the most significant of them
+named:
 }
 \details{
-The x axis is the effect: the difference in medians (\code{\link[=da_wilcoxon]{da_wilcoxon()}}),
-in means (\code{\link[=da_ttest]{da_ttest()}}), or the coefficient (\code{\link[=da_lm]{da_lm()}}), in the units of
-the result's \code{norm} (natural logs for \code{'clr'}, \code{'rclr'} and \code{'log'}).
-The y axis is \eqn{-\log_{10}} of \code{p_adjusted} (an adjusted p-value of
-0 is drawn at the smallest positive double), with a dashed line at
-\code{alpha}. Features whose effect or p-value is \code{NaN} are left out.
+\itemize{
+\item \code{"volcano"} (the default): the effect against the adjusted p-value.
+\item \code{"effect"} (\code{\link[=da_ttest]{da_ttest()}}, \code{\link[=da_lm]{da_lm()}}): the effect against the
+within-group standard deviation (Gloor et al. 2016; ALDEx2's \code{"MW"}
+plot).
+\item \code{"ma"}: the effect against the mean abundance (ALDEx2's \code{"MA"} plot).
+\item \code{"forest"} (\code{\link[=da_ttest]{da_ttest()}}, \code{\link[=da_lm]{da_lm()}}): the effects and their confidence
+intervals of the \code{n_features} most significant features, largest at
+the top.
+}
+
+The effect is the difference in medians (\code{\link[=da_wilcoxon]{da_wilcoxon()}}), in means
+(\code{\link[=da_ttest]{da_ttest()}}), or the coefficient (\code{\link[=da_lm]{da_lm()}}), in the units of the
+result's \code{norm}: a log fold change for \code{'clr'}, \code{'rclr'} and \code{'log'}
+(natural logs, from the \code{log_base} attribute), a difference in
+proportions for \code{'percent'}.
+\itemize{
+\item \strong{Volcano plot.} The y axis is \eqn{-\log_{10}} of \code{p_adjusted} (an
+adjusted p-value of 0 is drawn at the smallest positive double), with
+a dashed line at \code{alpha}.
+\item \strong{Effect plot.} The x axis is the within-group dispersion:
+\code{\link[=da_ttest]{da_ttest()}}'s \code{pooled_sd}, or \code{\link[=da_lm]{da_lm()}}'s \code{resid_sd} attribute (the
+residual standard deviation, which for a model of one two-level factor
+is the pooled within-group standard deviation). The dashed lines are
+\eqn{y = \pm x}: features beyond them differ between the groups by
+more than they vary within them. For \code{\link[=da_lm]{da_lm()}}, only a covariate whose
+design column is 0 or 1 (a factor's level against its reference) has
+one; use \code{"ma"} or \code{"forest"} for others.
+\item \strong{MA plot.} The x axis is the feature's mean transformed abundance:
+the \code{mean} column (\code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=da_ttest]{da_ttest()}}) or attribute
+(\code{\link[=da_lm]{da_lm()}}).
+\item \strong{Forest plot.} Points at the effects, bars over their confidence
+intervals (\code{ci_lower}, \code{ci_upper}, at the result's \code{conf_level}, not
+adjusted for testing many features).
+}
+
+Features whose values are \code{NaN} are left out. The subtitle names the
+comparison and counts the features rejected.
 }
 \examples{
     x   <- ex_counts + 1
     grp <- c('oral', 'oral', 'other', 'other')
-    plot(da_ttest(x, grp))
-    plot(da_lm(x, groups = grp))
+    res <- da_ttest(x, grp)
+    plot(res)
+    plot(res, 'effect')
+    plot(res, 'forest', n_features = 10)
+    plot(da_lm(x, groups = grp), type = 'ma')
+}
+\references{
+Gloor, G. B., Macklaim, J. M., & Fernandes, A. D. (2016). Displaying
+variation in large datasets: plotting a visual summary of effect sizes.
+\emph{Journal of Computational and Graphical Statistics}, 25, 971-979.
+\doi{10.1080/10618600.2015.1131161}
 }

@@ -130,8 +130,8 @@ covariate), in the order of \code{counts}, of class
 statistic: the treatment's rank sum minus its smallest possible
 value); \code{auc}, \eqn{W / (n_1 n_2)}, the probability that a
 treatment sample's value is above a reference sample's (ties count
-half); and \code{median_diff}, the treatment's median minus the
-reference's.
+half); \code{median_diff}, the treatment's median minus the
+reference's; and \code{mean}, the mean of both groups' values.
 \item \code{da_ttest()}: \code{diff}, the treatment's mean minus the reference's;
 \code{ci_lower}, \code{ci_upper}, its confidence interval; \code{t}; \code{dof}, the
 degrees of freedom (Welch-Satterthwaite's, or \eqn{n_1 + n_2 - 2});

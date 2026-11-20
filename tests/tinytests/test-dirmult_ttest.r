@@ -270,7 +270,9 @@
 
   res <- dirmult_ttest(big, bg, contrast = c('w', 'u'), n_draws = 10L, cpus = 2L)
   expect_true(inherits(res, 'ecodive_dirmult_ttest') && is.data.frame(res))
-  expect_identical(names(res), c('feature', cols, 'reject'))
+  expect_identical(names(res), c(
+    'feature', 't', 'log2_fc', 'ci_lower', 'ci_upper', 'pooled_sd', 'mean',
+    'effect', 'p_value', 'p_adjusted', 'reject' ))
   expect_identical(res$feature, colnames(big))
   expect_identical(attr(res, 'contrast'), c(treatment = 'w', reference = 'u'))
   expect_identical(attr(res, 'n'), c(treatment = 12L, reference = 15L))
@@ -294,6 +296,9 @@
     expect_true(max(abs(rev$ci_lower + res$ci_upper)) < 1e-12, info = sd)
     expect_true(max(abs(rev$ci_upper + res$ci_lower)) < 1e-12, info = sd)
     expect_true(max(abs(rev$p_value - res$p_value)) < 1e-12, info = sd)
+    expect_true(max(abs(rev$effect + res$effect)) < 1e-12, info = sd)
+    expect_true(max(abs(rev$pooled_sd - res$pooled_sd)) < 1e-12, info = sd)
+    expect_true(max(abs(rev$mean - res$mean)) < 1e-12, info = sd)
     expect_identical(rev$reject, res$reject, info = sd)
   }
 

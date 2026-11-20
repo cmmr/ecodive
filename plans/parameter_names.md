@@ -43,7 +43,7 @@ same thing.
 | `basis` | **(new)** an ILR basis or a sequential binary partition | `ilr` |
 | `load` | **(new, 2026-11-19)** each sample's measured total microbial load: one finite value > 0 per sample (matched by name, else by position), or a column name of `data`, by the same `per_sample()` rule as `groups` | `qmp_scale`, `qmp_rarefy` |
 | `contrast` | **(new)** the samples compared, `c(treatment, reference)`; `reference = NA` pools all other samples | `dirmult_ttest`, `da_wilcoxon`, `da_ttest` |
-| `conf_level` | **(new, 2026-11-19)** the confidence level of an interval, strictly between 0 and 1 (as `t.test(conf.level)`, snake_case) | `dirmult_ttest`, `da_ttest`, `da_lm` |
+| `conf_level` | **(new, 2026-11-19)** the confidence level of an interval, strictly between 0 and 1 (as `t.test(conf.level)`, snake_case) | `dirmult_ttest`, `da_ttest`, `da_lm`; `plot.ecodive_ancombc` (its forest plot's Wald intervals) |
 | `pseudocounts`, `zeros`, `scale_sds`, `crossed` | **(new, 2026-11-20)** a sensitivity analysis's grids, plural so that they don't capture the method's own `pseudocount` and `scale_sd` (they follow `...`, so they match only exactly; no DA method may take these names): pseudocounts to try, zero replacements (`replace_zeros()` ids) to try, scale uncertainties to try (`TRUE` for each grid's default values), and `crossed` (`TRUE`: every combination, with pseudocounts and zero replacements as alternatives) | `da_sensitivity` |
 | `var_equal` | **(new, 2026-11-20)** `TRUE` for Student's t-test with a pooled variance, `FALSE` (the default) for Welch's (as `t.test(var.equal)`, snake_case) | `da_ttest` |
 | `part_weights`, `ilr_weights` | **(new)** PhILR's taxon and balance weights | planned `philr` |
