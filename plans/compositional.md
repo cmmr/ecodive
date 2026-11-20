@@ -52,7 +52,7 @@ typing), and recorded two findings about methods ecodive already has. See
 | Plan | Functions | Tier |
 |:-----|:----------|:-----|
 | [compositional_docs.md](compositional_docs.md) | help-page and article changes (Schloss on RPCA and depth, scale-model guidance, ML caveats, predicted loads) | docs |
-| [da_plots.md](da_plots.md) | `plot(type = 'effect' / 'ma' / 'forest')` for DA results; new dispersion and abundance columns in `dirmult_ttest()` | formula (CoDaSeq, MIT; ALDEx2 output-only) |
+| [da_plots.md](da_plots.md) | `plot(type = 'effect' / 'ma' / 'forest')` for DA results; new dispersion and abundance columns in `dirmult_ttest()` | port (ALDEx3 `aldex.effect()`, MIT; ALDEx2 output-only) |
 | [da_test.md](da_test.md) | `da_test()` wrapper (+ `list_da_tests()`, `match_da_test()`); `da_wilcoxon()`, `da_ttest()`, `da_lm()` | formula |
 | [rarefied_diversity.md](rarefied_diversity.md) | `beta_div_rarefied()`, `alpha_div_rarefied()` | derived (on `rarefy()`) |
 | [linda.md](linda.md) | `linda()` | clean room (LinDA GPL) |

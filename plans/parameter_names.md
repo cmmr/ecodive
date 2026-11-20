@@ -178,3 +178,23 @@ rows marked "(new)". Two choices worth recording:
   `n_<unit>` / `max_<unit>` rule, renaming scikit-bio's `draws` and
   gemelli's `max_iterations_rptm` / `n_test_samples`. `ctf()` takes
   `n_starts` for gemelli's `n_initializations` (as in `mds()` / `nmds()`).
+
+
+## 6. Second compositional batch (2026-11-20)
+
+The plans added on 2026-11-20 (listed in [compositional.md](compositional.md))
+reuse §1's names and add these:
+
+| Name | Meaning | Used by (planned) |
+|:-----|:--------|:------------------|
+| `scaling` | the biplot scaling (`'form'`, `'covariance'`, `'contribution'`); the use §1 reserved it for | `plot.ecodive_ord` |
+| `threshold` | the association cutoff that makes an edge | `assoc_network` and the association functions' sparsification |
+| `average`, `sd` | how repeated rarefactions are combined (`'mean'`, `'median'`, `'medoid'`), and whether to return their spread | `beta_div_rarefied`, `alpha_div_rarefied` (with `rarefy()`'s `times`) |
+| `pseudocounts`, `zeros`, `scale_sds` | the settings grids of a sensitivity analysis. Plural, and after `...`, so they can't capture the method's own `pseudocount` / `scale_sd` (arguments after `...` match only exactly) | `da_sensitivity` |
+| `load_sd` | the uncertainty of a measured load in a scale model | `dirmult_lm` (with `qmp_scale()`'s `load`) |
+| `n_draws` | also used by `dirmult_lm` and `sparcc` | |
+
+Open naming questions for the user are flagged "ask" in the plans: the
+`feature_assoc()` wrapper name ([assoc_network.md](assoc_network.md)),
+`bias_counts` ([secom.md](secom.md)), and the `da_test()` groups/formula
+convention ([da_test.md](da_test.md)).
