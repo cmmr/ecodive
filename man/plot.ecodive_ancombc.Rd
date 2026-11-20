@@ -8,7 +8,15 @@
 \alias{plot.ecodive_ancombc_trend}
 \title{Plot an ANCOM-BC result}
 \usage{
-\method{plot}{ecodive_ancombc}(x, covariate = NULL, labels = 10, ...)
+\method{plot}{ecodive_ancombc}(
+  x,
+  covariate = NULL,
+  type = c("volcano", "effect", "ma", "forest"),
+  labels = 10,
+  n_features = 30,
+  conf_level = 0.95,
+  ...
+)
 
 \method{plot}{ecodive_ancombc_pairwise}(x, n_features = 30, digits = 2L, ...)
 
@@ -27,20 +35,28 @@ fold changes to plot, as named in the result's \code{covariate} column
 (such as \code{"statusmoderate"} or \code{"age"}). Defaults to the first
 covariate that isn't the intercept.}
 
-\item{labels}{For \code{\link[=ancombc]{ancombc()}} and \code{\link[=ancombc2]{ancombc2()}}: how many of the
-differentially abundant features to name, those with the smallest
-adjusted p-values. Default \code{10}; \code{0} for none.}
+\item{type}{For \code{\link[=ancombc]{ancombc()}} and \code{\link[=ancombc2]{ancombc2()}}: the plot, \code{"volcano"}
+(the default), \code{"effect"}, \code{"ma"}, or \code{"forest"}.}
 
-\item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}} for the volcano plot,
-\code{\link[graphics:image]{graphics::image()}} for the heatmap (where \code{col} is the colour
+\item{labels}{For \code{\link[=ancombc]{ancombc()}} and \code{\link[=ancombc2]{ancombc2()}}: how many of the
+differentially abundant features to name (in the volcano, effect
+and MA plots), those with the smallest adjusted p-values. Default
+\code{10}; \code{0} for none.}
+
+\item{n_features}{How many features to show: for the forest plot, those
+with the smallest adjusted p-value (ties in the table's order);
+for the heatmap, those with the smallest adjusted p-value in any
+comparison; for the dot chart, those with the largest statistic.
+Default \code{30}; \code{Inf} for all.}
+
+\item{conf_level}{For the forest plot: the confidence level of the
+intervals. Default \code{0.95}.}
+
+\item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}} for the volcano,
+effect, MA and forest plots, \code{\link[graphics:image]{graphics::image()}} for the heatmap (where \code{col} is the colour
 scale, from most negative to most positive), and
 \code{\link[graphics:dotchart]{graphics::dotchart()}} for the dot chart (\code{col} as its \code{color}),
 such as \code{main}, \code{sub}, \code{xlab} or \code{cex}.}
-
-\item{n_features}{How many features to show: for the heatmap, those
-with the smallest adjusted p-value in any comparison; for the dot
-chart, those with the largest statistic. Default \code{30}; \code{Inf} for
-all.}
 
 \item{digits}{For the heatmap: the number of decimal places of the log
 fold changes written in its cells. Default \code{2}.}
@@ -54,8 +70,13 @@ tests, from what each holds:
 }
 \details{
 \itemize{
-\item \code{\link[=ancombc]{ancombc()}}, \code{\link[=ancombc2]{ancombc2()}}: a volcano plot of one covariate's
-bias-corrected log fold changes against their adjusted p-values.
+\item \code{\link[=ancombc]{ancombc()}}, \code{\link[=ancombc2]{ancombc2()}}: one covariate's bias-corrected log fold
+changes, as one of four plots (\code{type}): \code{"volcano"} (the default),
+against their adjusted p-values; \code{"effect"}, against each feature's
+residual standard deviation (Gloor et al. 2016; ALDEx2's \code{"MW"}
+plot), for a two-level comparison; \code{"ma"}, against each feature's mean
+clr abundance (ALDEx2's \code{"MA"} plot); or \code{"forest"}, with their
+confidence intervals, for the \code{n_features} most significant features.
 \item \code{\link[=ancombc_pairwise]{ancombc_pairwise()}}, \code{\link[=ancombc_dunnett]{ancombc_dunnett()}}: a heatmap of the log fold
 change of each feature (rows) in each comparison (columns), with the
 significant ones in bold.
@@ -71,10 +92,29 @@ and the others that are significant hollow (in italics).
 
 Log fold changes are natural logs, as ANCOM-BC estimates them; the axis
 label and the heatmap's subtitle say so from the result's \code{log_base}
-attribute. In the
-volcano plot, the y axis is \eqn{-\log_{10}} of \code{p_adjusted}, with a
-dashed line at \code{alpha}; coefficients that couldn't be estimated (\code{NaN})
-are left out. In the heatmap, red cells are increases and blue cells
+attribute. Coefficients that couldn't be estimated (\code{NaN}) are left out.
+\itemize{
+\item \strong{Volcano plot.} The y axis is \eqn{-\log_{10}} of \code{p_adjusted},
+with a dashed line at \code{alpha}.
+\item \strong{Effect plot.} The x axis is the feature's residual standard
+deviation (the \code{resid_sd} attribute, natural logs); the dashed lines
+are \eqn{y = \pm x}, so features beyond them differ by more than they
+vary within the groups. Only for a covariate whose design column is 0
+or 1 (a factor's level against its reference): for a model of that
+factor alone, \code{resid_sd} is the pooled within-group standard
+deviation; with other covariates, it is the spread left after them.
+\item \strong{MA plot.} The x axis is the feature's mean clr abundance (the \code{mean}
+attribute; the rclr with zeros as missing values).
+\item \strong{Forest plot.} Bars over Wald intervals, \eqn{\mathrm{log\_fc} \pm
+  q\,\mathrm{se}}, with \eqn{q} the \eqn{(1 + }\code{conf_level}\eqn{)/2}
+quantile of the standard normal (\code{ancombc()}) or of the t distribution
+with the feature's \code{dof} (\code{ancombc2()}), as the p-values; they aren't
+adjusted for testing many features, so a bar can miss 0 while the
+feature isn't rejected. The ANCOM-BC2 vignette's bar charts of log
+fold changes and standard errors show the same.
+}
+
+In the heatmap, red cells are increases and blue cells
 decreases, on a scale symmetric about 0, and the value of each cell is
 written in it, in bold when that comparison is significant for that
 feature. For \code{\link[=ancombc_trend]{ancombc_trend()}}, each feature's label gives the pattern
@@ -100,6 +140,12 @@ with the largest statistic.
     # Moderate against mild, then age.
     plot(fit)
     plot(fit, 'age')
+
+    # Each feature's difference against its spread, its abundance, and
+    # with its interval.
+    plot(fit, type = 'effect')
+    plot(fit, type = 'ma')
+    plot(fit, 'age', type = 'forest')
 
     # Every pair of groups.
     plot(ancombc_pairwise(fit))

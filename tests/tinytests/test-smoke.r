@@ -163,6 +163,9 @@
   expect_identical(unique(z$covariate), c('(Intercept)', 'grpb', 'x'))
   z <- da_test(counts, 'da_lm', 'grp', meta, cpus = cpus)
   expect_true(inherits(z, 'ecodive_da_lm') && nrow(z) == 24L)
+  z <- suppressWarnings(linda(cz, ~ grp + x, meta, cpus = cpus))
+  expect_true(inherits(z, 'ecodive_linda') && nrow(z) == 24L && !anyNA(z$reject))
+  expect_true(all(is.finite(z$log2_fc)) && all(z$p_value >= 0 & z$p_value <= 1))
   expect_true(is.data.frame(list_da_tests()) && 'da_ttest' %in% list_da_tests('id'))
   expect_identical(match_da_test('Mann-Whitney')$id, 'da_wilcoxon')
   z <- da_sensitivity(counts, 'da_ttest', 'grp', meta, pseudocounts = TRUE, cpus = cpus)
@@ -337,6 +340,7 @@
   expect_true(drawn(da_wilcoxon(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(da_ttest(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(da_lm(counts, ~ grp + x, meta, cpus = cpus)))
+  expect_true(drawn(linda(counts, ~ grp + x, meta, cpus = cpus)))
   for (nm in names(tests)) {
     expect_true(drawn(tests[[nm]]), info = nm)
     expect_true(drawn(tests[[nm]], type = 'null'), info = nm)

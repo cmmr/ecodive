@@ -26,7 +26,8 @@
     group's within-group distance or dispersion, and `procrustes_test()` its
     Procrustes fit (each with `type = "null"` for the distribution).
   * `simper()` gives a dot chart of the taxa that contribute most to each
-    pair's dissimilarity, `dirmult_ttest()` a volcano plot, `ancom()` a dot
+    pair's dissimilarity, `dirmult_ttest()` a volcano, effect, MA or forest
+    plot (see below), `ancom()` a dot
     chart of W, `varpart()` a Venn diagram of the fractions (two to four
     sets), `forward_select()` the adjusted R-squared at each step, and
     `bioenv()` the best correlation for each number of variables.
@@ -38,8 +39,8 @@
     objects, and every function for `dist` objects works on them as
     before. Code that checks `identical(class(d), "dist")` or
     `class(d) == "dist"` should use `inherits(d, "dist")` instead.
-  * `ancombc()` and `ancombc2()` give a volcano plot of one covariate's log
-    fold changes, `ancombc_pairwise()` and `ancombc_dunnett()` a heatmap of
+  * `ancombc()` and `ancombc2()` give a volcano, effect, MA or forest plot
+    of one covariate's log fold changes, `ancombc_pairwise()` and `ancombc_dunnett()` a heatmap of
     the log fold change of each feature in each comparison, and
     `ancombc_global()` and `ancombc_trend()` a dot chart of their
     statistics.
@@ -782,6 +783,19 @@
   run's `seed`, and is the same for any `cpus`; ANCOM-BC's pseudocount runs
   are the fits behind its `passed_ss`, reused when the base run made them.
 
+* New `linda()`: LinDA (Zhou et al. 2022), linear models of each feature's
+  centred log2 ratios with the compositional bias of every coefficient
+  removed (estimated as the coefficients' mode across features). Any
+  `formula`, as `da_lm()`; winsorization of outliers (`outlier_pct`); zeros
+  replaced by a pseudocount, by imputation proportional to sequencing depth,
+  or adaptively (`zero_handling`, `corr_cut`); numeric covariates
+  standardized (`standardize`). It matches MicrobiomeStat's `linda()` to
+  about 1e-12 (fold changes, standard errors, the bias, p-values), except
+  that its `'adaptive'` choice is applied (MicrobiomeStat 1.4 reports it but
+  adds the pseudocount regardless). Parallel C from a sparse table, the
+  same for any `cpus`; one of `da_test()`'s and `da_sensitivity()`'s
+  methods, with a volcano `plot()`.
+
 * New `sourcetracker()` estimates what share of each sink sample's community
   came from each of several source environments, and from an unknown
   source, with SourceTracker's Gibbs sampler (Knights et al. 2011), ported
@@ -831,6 +845,30 @@
   natural log), and `dirmult_ttest()` results one of `2` (`log2_fc`), as
   `da_wilcoxon()`, `da_ttest()` and `da_lm()` results have. Their plots
   label log fold changes from it.
+
+* The plots of differential-abundance results take `type`: besides the
+  volcano plot (the default), `"effect"`, each feature's difference against
+  its dispersion within the groups, with lines where the two are equal
+  (Gloor et al. 2016; ALDEx2's `"MW"` plot); `"ma"`, against its mean
+  abundance (ALDEx2's `"MA"`); and `"forest"`, the effects and intervals of
+  the `n_features` most significant features. For `dirmult_ttest()`,
+  `ancombc()`, `ancombc2()`, `da_ttest()` and `da_lm()` (all four types)
+  and `da_wilcoxon()` (volcano and MA). The effect plot of a model result
+  needs a two-level comparison (a covariate coded 0/1). Titles name the
+  plot and the method ("Effect plot of ANCOM-BC2"), and subtitles the
+  comparison. `type` is the second argument of the `dirmult_ttest()`,
+  `da_ttest()` and `da_wilcoxon()` methods, before `labels`, and the third
+  of the `ancombc()` and `da_lm()` ones, after `covariate`.
+
+* `dirmult_ttest()` results gain three columns, for these plots:
+  `pooled_sd`, the pooled within-group standard deviation, `mean`, the
+  mean clr abundance (both averaged over the draws, in log2 units), and
+  `effect`, each draw's difference over its pooled standard deviation,
+  averaged (Cohen's d). `pooled_sd` and `effect` are ALDEx3's
+  `aldex.effect()` statistics and match them for the same draws.
+  `ancombc()` and `ancombc2()` results gain `resid_sd` and `mean`
+  attributes (each feature's residual standard deviation and mean clr), and
+  `da_wilcoxon()` results a `mean` column, as `da_ttest()`'s.
 
 * `rarefy()` of a slam `simple_triplet_matrix` now draws exactly the same
   observations as the same table in any other class, for the same `seed`.

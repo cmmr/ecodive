@@ -279,6 +279,11 @@ static void *dt_worker (void *arg) {
 
     if (dt_test == 1) {
 
+      // The mean of both sides' values together (before the ranking
+      // reorders them).
+      memcpy(a + n1, b, (size_t) n2 * sizeof(double));
+      out[8 * (size_t) D] = (n1 + n2) ? r_mean(a, n1 + n2) : R_NaN;
+
       // Wilcoxon: ranks of the pooled values, ties averaged.
       int k = 0;
       for (int i = 0; i < n1; i++) { pr[k].v = a[i]; pr[k++].side = 1; }
@@ -324,6 +329,7 @@ static void *dt_worker (void *arg) {
       memcpy(a + n1, b, (size_t) n2 * sizeof(double));
       out[6 * (size_t) D] = (n1 + n2) ? r_mean(a, n1 + n2) : R_NaN;
       out[7 * (size_t) D] = R_NaN;
+      out[8 * (size_t) D] = out[6 * (size_t) D];
     }
   }
 
@@ -334,13 +340,14 @@ static void *dt_worker (void *arg) {
 
 //======================================================
 // R interface: da_wilcoxon() (test 1) and da_ttest()
-// (test 2). Returns a D x 8 matrix: n1, n2 (the values
+// (test 2). Returns a D x 9 matrix: n1, n2 (the values
 // on each side), then
 //   Wilcoxon: W, sum(t^3 - t) over ties, median1,
 //             median2, and with ties and both sides under
 //             50 the exact P(W <= w) and P(W >= w) (else
 //             NaN);
-//   t-test:   mean1, mean2, var1, var2, mean of both, NaN.
+//   t-test:   mean1, mean2, var1, var2, mean of both, NaN;
+// and last, the mean of both sides' values (both tests).
 //======================================================
 SEXP C_da_tests(
     SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_norm, SEXP sexp_pseudocount,
@@ -363,7 +370,7 @@ SEXP C_da_tests(
   // Threads only for enough work: about 20 ns per value.
   int nt = threads_for(n_thr, (double) D * (n + m) * 20, 1e6);
 
-  SEXP result = PROTECT(allocMatrix(REALSXP, D, 8));
+  SEXP result = PROTECT(allocMatrix(REALSXP, D, 9));
 
   dt_tab  = &tab;
   dt_test = asInteger(sexp_test);

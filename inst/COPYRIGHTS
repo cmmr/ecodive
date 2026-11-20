@@ -702,8 +702,12 @@ Comment: The scale model of dirmult_ttest() (scale_sd) follows clr.sm() from
  ALDEx3 1.4.0 (R/scale.R): one N(0, scale_sd^2) log2 shift per Monte Carlo
  draw for each coefficient of the design, here the treatment-versus-reference
  indicator of the contrast (the intercept's shift cancels from every
- difference). The rest of these files is under the scikit-bio license above
- or Copyright 2026 ecodive authors, under the MIT license above.
+ difference). Its pooled_sd and effect columns follow aldex.effect() and
+ .aldex_pooled_var() from ALDEx3 1.4.0 (R/aldex-summary.R): the mean over
+ the draws of the pooled within-group standard deviation, and of the
+ contrast's coefficient divided by it (cohens.d). The rest of these files is
+ under the scikit-bio license above or Copyright 2026 ecodive authors, under
+ the MIT license above.
 License:
    Copyright (c) 2026 ALDEx3 authors
 

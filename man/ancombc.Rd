@@ -170,6 +170,17 @@ of each factor).
 (\code{delta_em}, subtracted from the coefficients), its weighted least
 squares estimate (\code{delta_wls}) and that estimate's variance
 (\code{var_delta}); \code{n_iters}: the EM iterations run per covariate.
+\item Per feature (named by feature), for the effect and MA plots
+(\code{\link[=plot.ecodive_ancombc]{plot.ecodive_ancombc()}}): \code{resid_sd}, the residual standard
+deviation of the fit behind the variances, \eqn{\sqrt{\mathrm{RSS}
+    / (n_{obs} - \mathrm{rank})}} over the feature's observed samples
+(ANCOM-BC: the initial fit, about each sample's estimated sampling
+fraction; ANCOM-BC2: the final fit), in natural logs; \code{NaN} for a
+fit that failed or has no residual degrees of freedom. For a design
+of one two-level factor, it is the pooled within-group standard
+deviation. And \code{mean}, the feature's mean clr value (natural logs,
+with \code{pseudocount}), or with zeros as missing values (\code{ancombc2()},
+\code{pseudocount = 0}) its mean rclr value, over its observed samples.
 \item \code{sample_fractions} (\code{ancombc2()}): each sample's estimated log
 sampling fraction.
 \item With \code{sensitivity}: \code{sensitivity}, a list of \code{pseudocounts} and

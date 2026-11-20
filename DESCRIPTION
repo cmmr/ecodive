@@ -59,7 +59,7 @@ Authors@R: c(
     person(
       "ALDEx3 authors",
       role    = c("ctb", "cph"),
-      comment = "the scale model of dirmult_ttest(), following 'ALDEx3'"),
+      comment = "the scale model and effect sizes of dirmult_ttest(), following 'ALDEx3'"),
     person(
       "Biota Technology",
       role    = c("ctb", "cph"),

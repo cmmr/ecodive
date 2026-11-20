@@ -424,7 +424,7 @@
   expect_true(any(grepl('Welch t-test', utils::capture.output(print(r)))))
 
   r <- da_wilcoxon(x, 'grp', meta, pseudocount = pc, cpus = 1L)
-  expect_identical(names(r), c('feature', 'w', 'auc', 'median_diff', 'p_value', 'p_adjusted', 'reject'))
+  expect_identical(names(r), c('feature', 'w', 'auc', 'median_diff', 'mean', 'p_value', 'p_adjusted', 'reject'))
   expect_identical(class(r), c('ecodive_da_wilcoxon', 'data.frame'))
   expect_true(any(grepl('Wilcoxon Rank-Sum Test', utils::capture.output(print(r)))))
 
@@ -458,6 +458,8 @@
                    ancombc2(x, ~ grp + age, meta, cpus = 1L))
   expect_identical(da_test(xi, 'dirmult_ttest', 'grp', meta, n_draws = 8L, seed = 3L, cpus = 1L),
                    dirmult_ttest(xi, 'grp', meta, n_draws = 8L, seed = 3L, cpus = 1L))
+  expect_identical(da_test(x, 'linda', 'grp', meta, ~ grp + age, pseudocount = 1, cpus = 1L),
+                   linda(x, ~ grp + age, meta, groups = 'grp', pseudocount = 1, cpus = 1L))
   expect_identical(da_test(x, 'da_wilcoxon', 'grp', meta, pseudocount = 1, cpus = 1L),
                    da_wilcoxon(x, 'grp', meta, pseudocount = 1, cpus = 1L))
   expect_identical(da_test(x, 'da_ttest', meta$grp, norm = 'percent', seed = 9L, cpus = 1L),
@@ -496,7 +498,7 @@
   df <- list_da_tests()
   expect_identical(names(df), c('name', 'id', 'design', 'effect', 'base', 'zero_free_ok'))
   expect_identical(sort(df$id), sort(c('ancom', 'ancombc', 'ancombc2', 'dirmult_ttest',
-                                       'da_wilcoxon', 'da_ttest', 'da_lm')))
+                                       'da_wilcoxon', 'da_ttest', 'da_lm', 'linda')))
   expect_true(all(df$design %in% c('groups', 'formula')) && is.logical(df$zero_free_ok))
   expect_identical(rownames(list_da_tests(nm = 'id')), df$id)
   expect_identical(names(list_da_tests('func')), df$id)

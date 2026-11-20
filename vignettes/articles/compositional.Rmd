@@ -609,6 +609,20 @@ tapply(res_dm$log2_fc[changed], fold[changed], median)
 Every estimate is shifted down by about 0.7 log2 units, which is the
 subject of the next section.
 
+A volcano plot can mislead: with many samples, tiny differences reach
+small p-values (**[Gloor, Macklaim & Fernandes
+2016](https://doi.org/10.1080/10618600.2015.1131161)**). The effect plot (ALDEx2's "MW" plot)
+sets each taxon's difference between the groups against its spread within
+them; taxa beyond the dashed lines differ by more than they vary:
+
+```{r dirmult-effect, fig.alt = "Effect plot of the Dirichlet-multinomial t-test: each taxon's log2 fold change against its pooled within-group standard deviation, with dashed lines where the two are equal and the differentially abundant taxa highlighted."}
+plot(res_dm, 'effect')
+```
+
+`type = 'ma'` plots the differences against each taxon's mean abundance,
+and `type = 'forest'` the most significant taxa with their intervals; the
+same types work for `ancombc()`, `ancombc2()`, `da_ttest()` and `da_lm()`.
+
 ### Why the reference matters
 
 Every per-taxon method compares each taxon with some reference. With
@@ -950,6 +964,10 @@ noted where one exists.
   gene sequencing and selective growth experiments by compositional data
   analysis. *Microbiome*, 2, 15.
   [doi:10.1186/2049-2618-2-15](https://doi.org/10.1186/2049-2618-2-15)
+* Gloor, G. B., Macklaim, J. M., & Fernandes, A. D. (2016). Displaying
+  variation in large datasets: plotting a visual summary of effect sizes.
+  *Journal of Computational and Graphical Statistics*, 25, 971–979.
+  [doi:10.1080/10618600.2015.1131161](https://doi.org/10.1080/10618600.2015.1131161) †
 * Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J.
   (2017). Microbiome datasets are compositional: and this is not optional.
   *Frontiers in Microbiology*, 8, 2224.

@@ -225,3 +225,136 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - McGovern, K. C., & Silverman, J. D. (2026). Scale reliant mixed effects
   models enhance microbiome data analysis. *Microbiome*, 14, 117.
   doi:10.1186/s40168-026-02377-x (ALDEx3).
+
+
+## Decisions made while implementing (2026-11-20)
+
+Asked of the user at the start:
+
+- **Cohen's d: added, as `effect`** (the plan's name; the user chose it
+  over ALDEx3's `cohens_d`). It is each draw's shifted difference over
+  that draw's pooled sd, averaged (ALDEx3's `cohens.d`), not `log2_fc /
+  pooled_sd`. The docs say it plays the part of ALDEx2's `effect`, which is
+  a different estimator. It shares its name with `DA_TESTS`'s registry
+  column `effect` (which names each method's log-fold-change column, here
+  still `log2_fc`); the two never meet in code.
+- **`mean`, not `mean_clr`, everywhere:** `dirmult_ttest()`'s column (log2
+  units), `ancombc()` / `ancombc2()`'s attribute (natural logs; the rclr
+  with zeros as missing values), matching item 36's `da_ttest()` column
+  and `da_lm()` attribute, so that one MA-plot path reads them all.
+- **Item 36's plots were extended and restyled too:** `da_ttest()` (all
+  four types), `da_lm()` (as ANCOM-BC, `covariate` second, `type` third),
+  `da_wilcoxon()` (volcano and MA). `da_wilcoxon()` results gained a
+  `mean` column (after `median_diff`) so that its MA plot has an x axis:
+  the C worker copies both sides' values together before ranking and
+  takes R's `mean()` of them (`r_mean()`), so it is identical to
+  `da_ttest()`'s `mean` (tested), and `C_da_tests` now returns 9 columns.
+
+Made while implementing:
+
+- **Columns:** `feature, t, log2_fc, ci_lower, ci_upper, pooled_sd, mean,
+  effect, p_value, p_adjusted, reject`. In C, `welch_worker()` writes each
+  draw's pooled sd and mean beside the Welch statistics, and the main
+  thread adds them (and the effect) into running sums in draw order; the
+  averages are divided by `log 2` after the draws, as `log2_fc`.
+  `details = TRUE` adds `pooled_sd` and `mean` (natural logs) to `draws`.
+  With one sample a side, `pooled_sd` and `effect` are `NaN` (0/0); with
+  one sample on one side only, the other side's variance alone (n - 2 = 1
+  degree of freedom), as ALDEx3's formula gives.
+- **ANCOM-BC attributes:** `resid_sd` and `mean` follow `bias` / `n_iters`
+  among the attributes. `resid_sd` = sqrt(RSS / (n_obs − rank)): RSS from
+  `var_worker()`'s squared residuals (the same fit as the variances:
+  ANCOM-BC's θ-centred initial fit, ANCOM-BC2's final fit), `NaN` for
+  failed fits; the rank is the masked design's with missing values, else
+  the global design's (the SVD's non-zero singular values, numpy's
+  cutoff). `mean` is computed once in C from the logs before ANCOM-BC2's
+  centring. Tested: ANCOM-BC's `resid_sd` equals `sigma(lm())` of the
+  logs less θ (θ is orthogonal to the design, so these are the same
+  residuals), ANCOM-BC2's equals `sigma(lm())` of the centred logs less
+  `sample_fractions`, both to 1e-10; for one two-level factor it is the
+  pooled within-group sd; `mean` equals `colMeans(normalize(x, 'clr',
+  pseudocount = 1))` and, with zeros as missing, an R rclr.
+- **Titles:** "<Volcano / Effect / MA / Forest> plot of <`DA_TESTS`
+  name>" for every DA result (`da_plot_title(x, type)`), so the old
+  "Dirichlet-multinomial t-test" and "ANCOM-BC2" volcano titles changed to
+  "Volcano plot of Dirichlet-Multinomial t-test" and "Volcano plot of
+  ANCOM-BC2". The comparison moved from the x label to the subtitle:
+  "a (n = 6) vs all others (n = 12): 4 of 30 features differentially
+  abundant[, k robust to the pseudocount (filled)]" or "grpb: ...". The
+  count is over all features (the volcano used to count only the plotted
+  ones; rejected features are always plotted, so only the denominator can
+  differ, when coefficients are `NaN`).
+- **Axis labels:** dirmult and ANCOM-BC from `lfc_label()`; the `da_*()`
+  plots now say "Log fold change (difference in means, clr)" when
+  `log_base` is finite, else "Difference in means (percent)" (item 34
+  left them norm-based). Dispersion axes: "Pooled within-group standard
+  deviation (log2)" (dirmult), "Residual standard deviation (natural
+  log)" (ANCOM-BC), "(clr, natural log)" / "(percent)" for the `da_*()`
+  ones; MA axes "Mean clr abundance (log2)", "Mean abundance (clr|rclr,
+  natural log)", "Mean abundance (<norm units>)".
+- **Forest plot:** the interval's description goes in the x label ("Log2
+  fold change; bars: envelope of the draws' 95% intervals", "...; bars:
+  unadjusted 95% Wald intervals", "...; bars: 95% confidence intervals"),
+  because the subtitle was too long to fit. Bars whose ends are `NaN`
+  (one sample a side, `NaN` dof) are not drawn; the point is. Light
+  dotted row lines help read the names. Like the ANCOM-BC heatmap, it
+  widens the left margin to the names and restores it (tested).
+- **`plot.ecodive_ancombc(conf_level = 0.95)`** is validated like the
+  methods' own `conf_level`; ANCOM-BC2's Wald intervals use `qt()` with
+  each feature's `dof` (so `NaN` dof gives no bar).
+- **Effect plot of model results:** allowed when the covariate's design
+  column holds exactly the values 0 and 1 (`da_plot_binary()`), so a
+  numeric 0/1 covariate also qualifies; error "`type = "effect"` needs a
+  two-level comparison (a design column of 0s and 1s), and `age` isn't
+  one; use "ma" or "forest"."
+- **Results made before these columns** (saved objects): the plots that
+  need them stop with "This result has no `pooled_sd` column, which
+  `type = "effect"` plots: fit it again with this version of ecodive.";
+  the volcano and forest plots still work.
+- Shared helpers: `da_plot()` (dispatch, in `R/plot_da.r`, with
+  `da_plot_title()`, `da_plot_contrast()`, `da_norm_units()`,
+  `da_effect_label()`, `da_plot_need()`, `da_plot_binary()`), and in
+  `R/plot_tables.r` `plot_volcano()` (now given its subtitle),
+  `plot_da_scatter()`, `plot_forest()`, `da_plot_sub()`,
+  `da_plot_marks()`, `da_plot_labels()`, `plot_pct()`. `linda()`,
+  `dirmult_lm()` and later DA methods can call `da_plot()` with their
+  vectors.
+- **Licensing:** the `src/dirmult.c` header and `R/dirmult_ttest.r` name
+  ALDEx3's `aldex.effect()` and `.aldex_pooled_var()`; the existing
+  `inst/COPYRIGHTS` stanza for ALDEx3 says what follows them; the
+  `Authors@R` comment reads "the scale model and effect sizes of
+  dirmult_ttest()". `overlap` / `aitchison.mean()` were not ported, as the
+  plan says.
+- **References** (`data-raw/expected/da_plots.r`, fixture
+  `tests/tinytests/expected/da_plots.rds`, 120 KB):
+  - ALDEx3 1.4.0, on its own Dirichlet draws given to
+    `dirmult_ttest_details(gamma_draws = 2^logComp)` (32 draws, 12
+    samples × 20 features): `estimate`, `pooled.SD` and `cohens.d` match
+    `log2_fc`, `pooled_sd` and `effect` to 7.8e-16 (largest relative
+    difference) without a scale model and to 3.9e-15 with one (test
+    bound 1e-10). For the
+    scale case ALDEx3 was given the scale matrix `-colMeans(logComp) +
+    x * shift`, with ecodive's own shifts for those draws (clr.sm()'s form
+    with the treatment's shift fixed); `aldex()` takes a matrix `scale`,
+    and both calls start from the same R seed, so they draw the same
+    compositions (checked with `identical()`).
+  - ALDEx3 with its own 2,000 draws on a deep table (counts ~1e4) versus
+    ecodive's 256: `pooled_sd` within 0.21%, `effect` within 0.34% (test
+    bounds 1% and 2%), `log2_fc` within 0.0019.
+  - ALDEx2 1.34.0 (`aldex.clr(mc.samples = 1000, denom = 'all')`,
+    `aldex.effect()`), outputs only, on the deep table: Spearman 0.994
+    between `mean` and `rab.all` (mean − rab.all from −0.13 to 0.12);
+    Pearson 0.994 between `log2_fc` and `diff.btw` (largest difference
+    0.20); Spearman 0.94 between `pooled_sd` and `diff.win`, with
+    `diff.win` 1.22 to 1.54 times `pooled_sd` (median 1.41): larger than
+    the plan's 0.954σ argument suggested, since `diff.win` is the larger
+    of the two groups' values and a median over random pairs (the docs
+    now say so instead of calling them close); Pearson 0.998 between
+    `effect` and ALDEx2's `effect`, ALDEx2's being smaller (median ratio
+    0.74). Test bounds: 0.99, 0.99, 0.9, 0.99.
+  - CoDaSeq was not run (a cross-check only, and the ALDEx2 comparison
+    covers the same ground).
+- **Article:** `vignettes/articles/compositional.Rmd` gained an effect plot
+  of `res_dm` after the volcano plot, with a sentence on the other types,
+  citing Gloor, Macklaim & Fernandes (2016) († : closed access; no free
+  version found on arXiv).

@@ -203,45 +203,98 @@ simper_plot_rows <- function (pair, pairs, n) {
 
 #' Plot a Dirichlet-multinomial t-test
 #'
-#' A volcano plot of [dirmult_ttest()]'s results: each feature's log2 fold
-#' change against its adjusted p-value, with the features that differ (those
-#' with `reject = TRUE`) highlighted, and the most significant of them named.
+#' Four views of [dirmult_ttest()]'s results, each feature a point (or a
+#' row), with the features that differ (`reject = TRUE`) highlighted and
+#' the most significant of them named:
+#'
+#' * `"volcano"` (the default): the log2 fold change against the adjusted
+#'   p-value.
+#' * `"effect"`: the log2 fold change against the pooled within-group
+#'   standard deviation (Gloor et al. 2016; ALDEx2's `"MW"` plot).
+#' * `"ma"`: the log2 fold change against the mean clr abundance (ALDEx2's
+#'   `"MA"` plot).
+#' * `"forest"`: the log2 fold changes and their intervals of the
+#'   `n_features` most significant features, largest at the top.
 #'
 #' @param x  The result of [dirmult_ttest()].
 #'
-#' @param labels  How many of the differentially abundant features to name,
-#'        those with the smallest adjusted p-values. Default `10`; `0` for
-#'        none.
+#' @param type  The plot: `"volcano"` (the default), `"effect"`, `"ma"`, or
+#'        `"forest"`.
+#'
+#' @param labels  How many of the differentially abundant features to name
+#'        (in the volcano, effect and MA plots), those with the smallest
+#'        adjusted p-values. Default `10`; `0` for none.
+#'
+#' @param n_features  For `"forest"`: how many features to show, those with
+#'        the smallest adjusted p-values (ties in the table's order).
+#'        Default `30`; `Inf` for all.
 #'
 #' @param ...  Passed on to [graphics::plot.default()], such as `main`,
-#'        `xlab`, `xlim` or `cex`.
+#'        `sub`, `xlab`, `xlim` or `cex`.
 #'
 #' @details
-#' The y axis is \eqn{-\log_{10}} of `p_adjusted` (an adjusted p-value of 0
-#' is drawn at the smallest positive double). The dashed line marks `alpha`;
-#' a feature also needs its confidence interval for the log2 fold change to
-#' exclude 0 to count as differentially abundant, so some features above the
-#' line may not be highlighted.
+#' **Volcano plot.** The y axis is \eqn{-\log_{10}} of `p_adjusted` (an
+#' adjusted p-value of 0 is drawn at the smallest positive double). The
+#' dashed line marks `alpha`; a feature also needs its interval for the
+#' log2 fold change to exclude 0 to count as differentially abundant, so
+#' some features above the line may not be highlighted. Gloor et al.
+#' (2016) argue that volcano plots mislead: with many samples, tiny
+#' differences reach small p-values, so read them with the effect plot.
+#'
+#' **Effect plot.** Each feature's difference between the groups (y,
+#' `log2_fc`) against its dispersion within them (x, `pooled_sd`), both in
+#' log2 units. The dashed lines are \eqn{y = \pm x}: features beyond them
+#' differ between the groups by more than they vary within them (an
+#' average `effect` of about 1 or more). Features near the y axis vary
+#' little, so a small difference can be significant; features far to the
+#' right need a large difference. This is ALDEx2's `aldex.plot(type =
+#' "MW")`, with ALDEx3's pooled standard deviation in place of ALDEx2's
+#' `diff.win` (see [dirmult_ttest()]'s **Effect sizes**).
+#'
+#' **MA plot.** The log2 fold change against the feature's mean clr value
+#' (`mean`): how the differences depend on abundance. Rare features (on
+#' the left) vary most, from sampling alone.
+#'
+#' **Forest plot.** A point at each feature's `log2_fc` and a bar from
+#' `ci_lower` to `ci_upper`, which are the envelope of the draws'
+#' intervals (the lowest lower and highest upper bound), not an interval
+#' of one draw: wider than a single confidence interval.
+#'
+#' Features whose value is `NaN` are left out of each plot. The subtitle
+#' names the contrast and counts the features rejected.
 #'
 #' @return `x`, invisibly.
+#'
+#' @references
+#' Gloor, G. B., Macklaim, J. M., & Fernandes, A. D. (2016). Displaying
+#' variation in large datasets: plotting a visual summary of effect sizes.
+#' *Journal of Computational and Graphical Statistics*, 25, 971-979.
+#' \doi{10.1080/10618600.2015.1131161}
 #'
 #' @export
 #' @examples
 #'     res <- dirmult_ttest(round(iris[, 1:4] * 10), 'Species', iris)
 #'     plot(res)
-plot.ecodive_dirmult_ttest <- function (x, labels = 10, ...) {
+#'     plot(res, 'effect')
+#'     plot(res, 'ma')
+#'     plot(res, 'forest')
+plot.ecodive_dirmult_ttest <- function (
+    x, type = c('volcano', 'effect', 'ma', 'forest'), labels = 10,
+    n_features = 30, ... ) {
 
-  labels <- plot_count(labels, 'labels')
+  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest'))
+  da_plot_need(x, type, c(effect = 'pooled_sd', ma = 'mean'), column = TRUE)
 
-  ct  <- attr(x, 'contrast', exact = TRUE)
-  n   <- attr(x, 'n', exact = TRUE)
-  ref <- if (is.na(ct[[2]])) 'all others' else ct[[2]]
-
-  plot_volcano(
-    x$log2_fc, x$p_adjusted, x$reject, x$feature, attr(x, 'alpha', exact = TRUE),
-    labels, list(...),
-    main = 'Dirichlet-multinomial t-test',
-    xlab = sprintf('%s, %s (n = %d) / %s (n = %d)', lfc_label(x), ct[[1]], n[[1]], ref, n[[2]]) )
+  conf <- attr(x, 'conf_level', exact = TRUE)
+  da_plot(
+    x, type, labels, n_features, list(...),
+    est = x$log2_fc, p = x$p_adjusted, reject = x$reject, feature = x$feature,
+    sd = x$pooled_sd, mean = x$mean, lo = x$ci_lower, hi = x$ci_upper,
+    what     = da_plot_contrast(x),
+    est_lab  = lfc_label(x),
+    sd_lab   = 'Pooled within-group standard deviation (log2)',
+    mean_lab = 'Mean clr abundance (log2)',
+    interval = sprintf("envelope of the draws' %s intervals", plot_pct(conf)) )
 
   invisible(x)
 }
@@ -262,32 +315,67 @@ lfc_label <- function (x) {
 }
 
 
+# "95%", from a confidence level.
+plot_pct <- function (level) {
+  if (!is.numeric(level) || length(level) != 1L || is.na(level)) return ('')
+  paste0(format(100 * level, digits = 6), '%')
+}
+
+
+# The subtitle of a DA plot: the comparison `what` (or NULL), the number of
+# features rejected out of all of them, and with a sensitivity analysis
+# (`robust`) the number robust to the pseudocount (filled), then `extra`.
+da_plot_sub <- function (what, reject, robust = NULL, extra = NULL) {
+  s <- sprintf(
+    '%d of %d features differentially abundant', sum(reject %in% TRUE),
+    length(reject) )
+  if (!is.null(robust))
+    s <- sprintf('%s, %d robust to the pseudocount (filled)', s, sum(robust %in% TRUE))
+  s <- paste(c(if (length(what)) paste0(what, ':'), s), collapse = ' ')
+  paste(c(s, extra), collapse = '; ')
+}
+
+
+# The highlighting of DA plots: colours from `reject`; with a sensitivity
+# analysis (`robust`), the robust decisions filled and the others that are
+# significant hollow; and which features to name (robust ones only, then).
+# Returns list(col, pch, named).
+da_plot_marks <- function (reject, robust, pch = 16) {
+  rej <- reject %in% TRUE
+  col <- ifelse(rej, PLOT_HIGHLIGHT, PLOT_MUTED)
+  if (is.null(robust)) return (list(col = col, pch = pch, named = rej))
+  rob <- robust %in% TRUE
+  list(col = col, pch = ifelse(rej & !rob, 1, pch), named = rob)
+}
+
+
+# Names the `labels` features with the smallest `p` among `named`, at
+# (x, y).
+da_plot_labels <- function (x, y, p, feature, named, labels) {
+  if (labels > 0 && any(named)) {
+    i <- which(named)
+    i <- utils::head(i[order(p[i])], labels)
+    graphics::text(x[i], y[i], feature[i], pos = 3, cex = 0.75, xpd = NA)
+  }
+}
+
+
 # A volcano plot: log fold changes `lfc` against -log10 of the adjusted
 # p-values `p`, with the features that `reject` highlighted, the `labels`
 # most significant of them named, and dashed lines at `alpha` and 0. `args`
-# are the user's arguments for graphics::plot.default(). The subtitle counts
-# the features rejected.
+# are the user's arguments for graphics::plot.default(). `sub` is the
+# subtitle (da_plot_sub()).
 plot_volcano <- function (
-    lfc, p, reject, feature, alpha, labels, args, main, xlab, robust = NULL ) {
+    lfc, p, reject, feature, alpha, labels, args, main, xlab, sub,
+    robust = NULL ) {
 
-  y   <- -log10(pmax(p, .Machine$double.xmin))
-  rej <- reject %in% TRUE
-
-  # With a sensitivity analysis: the robust decisions filled, the others
-  # that are significant hollow, and only the robust ones named.
-  sub <- sprintf('%d of %d features differentially abundant', sum(rej), length(rej))
-  pch <- 16
-  if (!is.null(robust)) {
-    rob <- robust %in% TRUE
-    pch <- ifelse(rej & !rob, 1, 16)
-    sub <- sprintf('%s, %d robust to the pseudocount (filled)', sub, sum(rob))
-    rej <- rob
-  }
+  y  <- -log10(pmax(p, .Machine$double.xmin))
+  mk <- da_plot_marks(reject, robust)
 
   plot_do(
     graphics::plot.default, c(list(lfc, y), args),
     list(
-      col  = ifelse(reject %in% TRUE, PLOT_HIGHLIGHT, PLOT_MUTED), pch = pch, las = 1,
+      col  = mk$col, pch = mk$pch, las = 1,
       ylim = range(0, y, finite = TRUE), main = main, xlab = xlab, sub = sub,
       ylab = expression(-log[10] ~ (adjusted ~ italic(p))) ))
 
@@ -295,11 +383,86 @@ plot_volcano <- function (
   if (length(alpha) && is.finite(alpha) && alpha > 0)
     graphics::abline(h = -log10(alpha), lty = 2, col = 'grey40')
 
-  if (labels > 0 && any(rej)) {
-    i <- which(rej)
-    i <- utils::head(i[order(p[i])], labels)
-    graphics::text(lfc[i], y[i], feature[i], pos = 3, cex = 0.75, xpd = NA)
+  da_plot_labels(lfc, y, p, feature, mk$named, labels)
+
+  invisible()
+}
+
+
+# The effect and MA plots: log fold changes `y` against `x` (a dispersion,
+# from 0, with dashed lines at y = x and y = -x, for `guides = 'effect'`;
+# a mean abundance for 'ma'), with a dotted line at y = 0, highlighting
+# and names as plot_volcano().
+plot_da_scatter <- function (
+    x, y, p, reject, feature, labels, args, main, xlab, ylab, sub,
+    guides = c('effect', 'ma'), robust = NULL ) {
+
+  guides <- match.arg(guides)
+  mk     <- da_plot_marks(reject, robust)
+  xlim   <- if (guides == 'effect') range(0, x, finite = TRUE) else range(x, finite = TRUE)
+
+  plot_do(
+    graphics::plot.default, c(list(x, y), args),
+    list(
+      col = mk$col, pch = mk$pch, las = 1, xlim = xlim,
+      main = main, xlab = xlab, ylab = ylab, sub = sub ))
+
+  graphics::abline(h = 0, lty = 3, col = 'grey70')
+  if (guides == 'effect') {
+    graphics::abline(0,  1, lty = 2, col = 'grey40')
+    graphics::abline(0, -1, lty = 2, col = 'grey40')
   }
+
+  da_plot_labels(x, y, p, feature, mk$named, labels)
+
+  invisible()
+}
+
+
+# A forest plot: for the `n` features with the smallest `p` (ties in their
+# order), a point at `est` and a bar from `lo` to `hi`, one row each,
+# sorted by `est` (largest at the top) and labelled with `feature`, with
+# the features that `reject` highlighted (robust ones filled) and a dotted
+# line at 0. Features whose `est` is NaN are left out; a bar whose ends are
+# NaN isn't drawn. Like dotchart(), it widens the left margin to fit the
+# names, and restores it after.
+plot_forest <- function (
+    est, lo, hi, p, reject, feature, n, args, main, xlab, sub, robust = NULL ) {
+
+  n <- plot_count(n, 'n_features')
+  if (n < 1)
+    stop('`n_features` must be at least 1.', call. = FALSE)
+
+  ok  <- which(is.finite(est))
+  top <- utils::head(ok[order(p[ok])], n)
+  idx <- top[order(est[top])]         # bottom to top
+  k   <- length(idx)
+  mk  <- da_plot_marks(reject[idx], if (!is.null(robust)) robust[idx])
+  if (k < length(ok)) sub <- sprintf('%s; top %d shown', sub, k)
+
+  opar <- graphics::par('mai', 'mar')
+  on.exit(graphics::par(opar))
+  linch <- max(graphics::strwidth(feature[idx], 'inch', cex = 0.8), 0, na.rm = TRUE)
+  mai   <- graphics::par('mai')
+  mai[2L] <- max(mai[2L], linch + 0.3)
+  graphics::par(mai = mai)
+
+  xlim <- range(0, est[idx], lo[idx], hi[idx], finite = TRUE)
+  y    <- seq_len(k)
+
+  plot_do(
+    graphics::plot.default, c(list(est[idx], y), args),
+    list(
+      type = 'n', yaxt = 'n', xlim = xlim, ylim = c(0.5, max(k, 1) + 0.5),
+      main = main, xlab = xlab, ylab = '', sub = sub, las = 1 ))
+
+  graphics::abline(v = 0, lty = 3, col = 'grey70')
+  graphics::abline(h = y, lty = 3, col = 'grey90')
+  bar <- is.finite(lo[idx]) & is.finite(hi[idx])
+  if (any(bar))
+    graphics::segments(lo[idx][bar], y[bar], hi[idx][bar], y[bar], col = mk$col[bar], lwd = 1.5)
+  graphics::points(est[idx], y, pch = mk$pch, col = mk$col, bg = 'white')
+  if (k) graphics::axis(2, at = y, labels = feature[idx], tick = FALSE, las = 1, cex.axis = 0.8)
 
   invisible()
 }
