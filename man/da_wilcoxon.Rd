@@ -100,7 +100,8 @@ methods; \code{'BH'}, as the benchmarks below; \code{'hochberg'},
 p-values are left out of the family.}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 
 \item{var_equal}{\code{da_ttest()}: \code{FALSE} (the default) for Welch's t-test,
 \code{TRUE} for Student's, with a pooled variance (\code{t.test()}'s

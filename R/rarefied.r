@@ -253,9 +253,6 @@ alpha_div_rarefied <- function (
     seed    = 0L,
     cpus    = n_cpus() ) {
 
-  held <- hold_n_cpus()
-  on.exit(release_n_cpus(held), add = TRUE)
-  
   s <- rarefied_setup('alpha')
 
   validate_cutoff()
@@ -312,9 +309,6 @@ rarefied_beta_fit <- function (
     counts, metric, depth, times, average, sd, margin, norm, pseudocount,
     power, alpha, tree, pairs, clust, seed, cpus, budget = 256 * 2^20 ) {
 
-  held <- hold_n_cpus()
-  on.exit(release_n_cpus(held), add = TRUE)
-  
   validate_clust()
   s <- rarefied_setup('beta')
 

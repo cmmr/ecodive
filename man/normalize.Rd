@@ -44,7 +44,8 @@ class (e.g. \code{phyloseq}). Default: \code{1}}
 \strong{Pseudocount} section.}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 The normalized table, with the same orientation (samples in rows

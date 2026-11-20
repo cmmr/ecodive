@@ -57,7 +57,8 @@ correlations are clustered as the dissimilarities \eqn{1 - r}.}
 \code{seed} gives the same results, for any number of \code{cpus}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 A \code{dist} object \strong{over the features} (the packed lower

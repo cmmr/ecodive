@@ -383,6 +383,7 @@
   expect_error(dist_test(dm, 'no_such_test', 'grp', meta))
 
   expect_true(n_cpus() >= 1)
+  expect_true(n_cpus() <= max_cpus())
   bt <- blas_threads()
   expect_true(is.integer(bt) && length(bt) == 1)
 

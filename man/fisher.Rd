@@ -19,7 +19,8 @@ places. E.g. the default \code{digits=3} could return \code{6.392}.}
 class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \description{
 A parametric diversity index assuming species abundances follow a log-series distribution.

@@ -107,7 +107,8 @@ table gains \code{passed_ss} and \code{reject_robust}. It takes one more fit
 per pseudocount.}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 
 \item{var_quantile}{\code{ancombc2()} only: the quantile of each covariate's
 coefficient variances (over the features) added to every variance

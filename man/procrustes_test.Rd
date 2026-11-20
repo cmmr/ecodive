@@ -50,7 +50,8 @@ otherwise in the same order. Default: \code{NULL} (free permutation).}
 gives the same p-values. Default: \code{0}}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 A list of class \code{c('ecodive_procrustes_test', 'ecodive_test')},

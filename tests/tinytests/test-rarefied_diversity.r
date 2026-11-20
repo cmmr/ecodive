@@ -365,16 +365,5 @@
   expect_error(beta_div_rarefied(x, 'bray', clust = 'nope'), '`clust` must be')
   expect_error(beta_div_rarefied(x, 'bray', seed = 1.5), '`seed` must be')
 
-  # n_cpus() is held only while the functions run, errors or not.
-  expect_null(CACHE$n_cpus_held)
-  expect_identical(n_cpus(), parallel_n <- n_cpus())
-  CACHE$n_cpus_held <- 1L
-  expect_identical(n_cpus(), 1L)
-  h <- hold_n_cpus()
-  expect_identical(n_cpus(), 1L)
-  release_n_cpus(h)
-  expect_identical(CACHE$n_cpus_held, 1L)
-  CACHE$n_cpus_held <- NULL
-  expect_identical(n_cpus(), parallel_n)
 
 #})

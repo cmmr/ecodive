@@ -63,7 +63,8 @@ error control of mdFDR, for \code{ancombc_pairwise()} and
 \code{ancombc_dunnett()}. Default: the fit's.}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 
 \item{n_bootstraps}{The number of bootstrap draws of the null
 statistics, per feature. Default: \code{100}, as scikit-bio and

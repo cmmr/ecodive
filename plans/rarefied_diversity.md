@@ -291,6 +291,9 @@ Recorded 2026-11-20 (item 37).
   `release_n_cpus()` (R/utils.r) make `n_cpus()` return its value at the
   start of the call until the function exits (errors included; holds nest).
   The vegan fixture's 5000 rarefactions went from 22 s to 1.2 s.
+  *Superseded:* `n_cpus()` no longer uses parallelly and takes ~25 us
+  (R/cpus.r), so the holds were removed; each metric call checks its
+  explicit `cpus` against `max_cpus()`.
 - **Validation order:** metric first (a misspelt metric is the error
   reported), then counts, margin, integers, seed, cpus, non-negative counts,
   `times`, `depth`, `average`, `sd`; `clust` before the samples are

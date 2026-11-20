@@ -47,7 +47,8 @@ PCoA axes to compute from it, as in \code{\link[=pcoa]{pcoa()}}. Ignored otherwi
 Default: \code{3}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 The rotated \code{ord}: a numeric matrix of class \code{ecodive_ord}, with

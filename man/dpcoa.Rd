@@ -42,7 +42,8 @@ class (e.g. \code{phyloseq}). Default: \code{1}}
 \item{n_axes}{The number of axes to return. Default: \code{3}}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 A numeric matrix with one row per sample and one column per axis,

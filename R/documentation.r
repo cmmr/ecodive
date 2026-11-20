@@ -16,7 +16,8 @@
 #'        proportions are also accepted.
 #' 
 #' @param cpus   How many parallel processing threads should be used. The
-#'        default, `n_cpus()`, will use all logical CPU cores.
+#'        default, `n_cpus()`, is the CPU cores this R process may use,
+#'        within any limits set on it. Results are the same for any `cpus`.
 #' 
 #' @param cutoff   The maximum number of observations to consider "rare".
 #'        Default: `10`.

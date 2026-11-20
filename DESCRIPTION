@@ -94,7 +94,7 @@ Depends: R (>= 3.6.0)
 Roxygen: list(markdown = TRUE)
 Config/Needs/website: rmarkdown
 Config/testthat/edition: 3
-Imports: graphics, grDevices, parallel, stats, utils
-Suggests: knitr, Matrix, parallelly, rmarkdown, slam, tinytest
+Imports: graphics, grDevices, stats, utils
+Suggests: knitr, Matrix, parallel, rmarkdown, slam, tinytest
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.1

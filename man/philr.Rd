@@ -74,7 +74,8 @@ the smallest positive branch length of the tree, as in philr. They need
 \code{tree} to have branch lengths.}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 A dense numeric \code{matrix} of the \eqn{D - 1} coordinates, one per

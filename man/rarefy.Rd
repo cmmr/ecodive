@@ -42,7 +42,8 @@ original counts. Default: \code{TRUE}}
 class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 
 \item{warn}{Logical. If \code{TRUE}, emits a warning when samples are dropped
 or returned unrarefied due to insufficient depth.

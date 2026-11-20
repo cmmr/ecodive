@@ -69,7 +69,8 @@ every sample (the total of its tips' counts, not weighted by
 branch length) in attribute \code{node_counts}. Default: \code{FALSE}}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 A numeric matrix with one row per kept sample and one column per

@@ -89,7 +89,8 @@ or \code{'none'}).}
 the same results, for any number of \code{cpus}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
-default, \code{n_cpus()}, will use all logical CPU cores.}
+default, \code{n_cpus()}, is the CPU cores this R process may use,
+within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 A data frame of class \code{c('ecodive_dirmult_ttest', 'data.frame')},

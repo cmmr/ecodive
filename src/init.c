@@ -22,6 +22,7 @@ extern SEXP C_blas_settable(void);
 extern SEXP C_blas_threads(SEXP);
 extern SEXP C_capda_trace(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_cpu_info(SEXP);
 extern SEXP C_cord_cross(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dpcoa(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -96,6 +97,7 @@ extern SEXP C_unifrac(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_zero_counts(SEXP, SEXP);
 
 extern void init_blas_threads(void);
+extern void init_cpu_info(void);
 
 
 static const R_CallMethodDef CallEntries[] = {
@@ -114,6 +116,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_blas_threads",  (DL_FUNC) &C_blas_threads,  1},
   {"C_capda_trace", (DL_FUNC) &C_capda_trace, 6},
   {"C_cca",       (DL_FUNC) &C_cca,      10},
+  {"C_cpu_info",  (DL_FUNC) &C_cpu_info,  1},
   {"C_cord_cross", (DL_FUNC) &C_cord_cross, 8},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
   {"C_dpcoa",     (DL_FUNC) &C_dpcoa,     8},
@@ -195,5 +198,6 @@ void R_init_ecodive(DllInfo *dll) {
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
   init_blas_threads();
+  init_cpu_info();
 }
 // # nocov end

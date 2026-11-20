@@ -126,6 +126,12 @@ validate_counts <- function (env = parent.frame()) {
 
 
 validate_cpus <- function (env = parent.frame()) {
+
+  # The default, n_cpus(), is within the limits already.
+  dflt <- tryCatch(
+    eval(quote(missing(cpus)), env),
+    error = function (e) FALSE )
+
   tryCatch(
     with(env, {
       
@@ -144,8 +150,9 @@ validate_cpus <- function (env = parent.frame()) {
       stop(e$message, '\n`cpus` must be an integer greater than 0.')
   )
 
-  # No more threads than cores. Results are the same for any `cpus`.
-  if (env$cpus > 1L) env$cpus <- min(env$cpus, n_cpus())
+  # No more threads than the process may use. Results are the same for any
+  # `cpus`.
+  if (!isTRUE(dflt) && env$cpus > 1L) env$cpus <- min(env$cpus, max_cpus())
 }
 
 
