@@ -339,4 +339,76 @@ other random tables gave up to 4e-11 relative, again on a fold change near
 0.) Mode estimator: 42 vectors (ties, n = 2 to 500), shorth to 1e-13, mode
 to 1e-14.
 
-Not done (later): mixed models (`(1 | id)`), as planned.
+Not done in that commit: mixed models (`(1 | id)`); added next (below).
+
+
+## Decisions made while implementing: mixed models (2026-11-20)
+
+Asked for by the user after the fixed-effects commit (`f09370e`).
+
+Settled from outputs (MicrobiomeStat 1.4, lme4 1.1-35.1, lmerTest 3.1-3,
+all GPL, run only; their code was not opened):
+
+- MicrobiomeStat's mixed path is `lmerTest::lmer(y ~ fixed + (1|id))`
+  (REML) per feature on the same centred log2 values, `log2FoldChange` =
+  fixed effect − bias (the same meanshift mode), `lfcSE` and `df` exactly
+  lmerTest's `summary()` (Satterthwaite) — identical to direct `lmer()`
+  fits at 0 difference. Singular fits (θ = 0) give df = n − p.
+- Adaptive choice with a random term: the t-tests of `lmer(log(M) ~ fixed
+  + (1|id))` with lmerTest's p-values (M the winsorized totals), 150 of 150
+  random cases (the fixed-effects `lm()` test: 146). MicrobiomeStat again
+  adds the pseudocount whatever it reports.
+
+Written from Bates et al. (2015, JSS, the profiled REML criterion) and
+Kuznetsova et al. (2017, JSS, Satterthwaite from the variance parameters
+(θ, σ)), in `src/feature_lmm.c` (MIT, shareable with maaslin3 and
+dirmult_lm):
+
+- **One random intercept only**, `(1 | var)` with `var` a column of
+  `data`: random slopes, `||`, several random terms, nested or interaction
+  groupings are errors. At least two groups and fewer groups than samples
+  (lme4's own rules); a full-rank fixed design (error otherwise).
+- **Fit:** with c_j = n_j / (1 + n_j θ²), M = Xc'Xc + Σ c_j x̄_j x̄_j' and
+  r² = |yc − Xc b|² + Σ c_j (ȳ_j − x̄_j'b)² (within-group centred, so no
+  cancellation); θ minimises the profiled REML deviance, found by Brent's
+  method on [0, θ_hi] then by bracketing the root of the analytic
+  derivative (d'(θ) = θ h(θ), so θ = 0 is the optimum when h stays ≥ 0
+  below the first root). The deviance equals lme4's `REMLcrit()` at the
+  same θ to 3e-14.
+- **Satterthwaite:** the Hessian of the unprofiled REML deviance in
+  (θ, σ) and the gradient of Var(b_k) = σ² (M⁻¹)_kk, all analytic;
+  A = 2 Hess⁻¹, df = 2 V² / g'Ag. Parameterising by θ (not σ_u²) makes the
+  boundary behave as lmerTest's: at θ = 0 df = n − p exactly.
+- **Not lme4's optimizer:** lme4's BOBYQA stops when the (very flat)
+  criterion stops improving, a few 1e-7 to 1e-5 short in θ even with
+  tightened tolerances; ecodive's θ is the exact root, its deviance never
+  above lme4's (29 cases, lower by up to 5e-13), so results differ from LinDA's by
+  lme4's tolerance: coefficients ~1e-6 relative, df ~1e-6 to 4e-4 (largest
+  for a subject-level covariate with df ≈ 2), `reject` identical in every
+  fixture.
+- **R:** `linda_random()` splits `(1 | id)` from `formula` (formula or
+  string); `da_design()` now also returns the aligned `data` (for the
+  grouping column); `C_linda_fit` takes the group codes and returns per
+  feature×coefficient `df`, `theta` and the full `vcov`. Results add the
+  `random` attribute (the variable) and per-feature `random_sd` (θσ);
+  `resid_sd` is σ; the `formula` attribute keeps `(1 | id)`. The term of
+  interest (`groups`) must be a fixed effect. Threads, input types and
+  `da_test()` give identical results, as for fixed effects.
+- Rows' `dof` is per feature and covariate (Satterthwaite) instead of one
+  value; plots' forest intervals use it.
+
+Reference results:
+
+- `lmm.csv`: 29 single responses (3 to 14 groups, sizes 1 to 6,
+  balanced and unbalanced, subject-level covariates, 6 boundary fits):
+  at lme4's θ, coefficients to 3.0e-13, standard errors 9.3e-15,
+  Satterthwaite df 3.8e-9 (lmerTest's numerical derivatives), deviance
+  2.8e-14; ecodive's own optimum within 2.4e-7 of lme4's θ, with a
+  deviance never higher.
+- MicrobiomeStat, 6 mixed cases (counts with pseudocount and imputation,
+  two adaptive (one each way), unbalanced subjects with a subject-level
+  covariate, proportions): log2 fold changes to 6.2e-6 absolute, standard
+  errors 1.9e-5, p-values 6.5e-5 and df 4.2e-4 relative (all where lme4
+  stopped short), bias 2.5e-7, `reject` identical.
+- Speed, 200 samples (50 subjects) × 2000 features: MicrobiomeStat 117 s,
+  ecodive 0.37 s on one thread, 0.21 s on four.

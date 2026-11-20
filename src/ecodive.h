@@ -254,6 +254,23 @@ void   flm_fit(const flm_t *q, const double *y, double *qty, double *coef,
 void   flm_se(const flm_t *q, const double *y, const double *qty, double rss,
               int se_type, double *se, double *resid);
 
+/* --- feature_lmm.c: REML random-intercept models for many responses --- */
+typedef struct {
+  int           n, p, J;
+  const int    *grp;    // n: each sample's group, 0-based
+  const double *nj;     // J: group sizes
+  const double *xbar;   // J x p: group means of the design
+  const double *xc;     // n x p: the design, centred within groups
+  const double *wxx;    // p x p: xc' xc
+} lmm_design_t;
+
+void   lmm_design_init(lmm_design_t *d, const double *X, const int *grp,
+                       int n, int p, int J);
+size_t lmm_doubles(int n, int p, int J);
+double lmm_fit(const lmm_design_t *d, const double *y, double theta,
+               double *mem, double *coef, double *vcov, double *df,
+               double *sigma, double *dev);
+
 /* --- rpca.c: shared with rpca_phylo.c --- */
 void rpca_filter(int N0, int P0, const int *tpos, const int *tidx, const double *tval,
                  double msc, double mfc, double mff, int drop_single,

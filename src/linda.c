@@ -222,6 +222,10 @@ static double       *ld_mem;          // per thread: flm workspace
 static size_t        ld_mem_sz;
 static const double *ld_center;       // n: per-sample means
 static double       *ld_coef, *ld_se, *ld_rss, *ld_mean;
+static const lmm_design_t *ld_lmm;    // mixed models: the design, or NULL
+static double       *ld_lmem;         // per thread: lmm workspace
+static size_t        ld_lmem_sz;
+static double       *ld_df, *ld_theta, *ld_vcov;
 
 
 static void *ld_sum_worker (void *arg) {
@@ -273,6 +277,23 @@ static void *ld_fit_worker (void *arg) {
     for (int s = 0; s < n; s++) { y[s] = log2(y[s]) - ld_center[s]; m += y[s]; }
     ld_mean[f] = (double) (m / n);
 
+    if (ld_lmm) {
+      double *lm  = ld_lmem + (size_t) thread_i * ld_lmem_sz;
+      double *vc  = lm + lmm_doubles(n, P, ld_lmm->J);
+      double *df  = vc + (size_t) P * P;
+      double sigma, dev;
+      ld_theta[f] = lmm_fit(ld_lmm, y, -1, lm, coef, vc, df, &sigma, &dev);
+      for (int j = 0; j < P; j++) {
+        ld_coef[f + (size_t) D * j] = coef[j];
+        ld_se[f + (size_t) D * j]   = sqrt(vc[j + (size_t) P * j]);
+        ld_df[f + (size_t) D * j]   = df[j];
+        for (int l = 0; l < P; l++)
+          ld_vcov[f + (size_t) D * (j + (size_t) P * l)] = vc[j + (size_t) P * l];
+      }
+      ld_rss[f] = sigma;
+      continue;
+    }
+
     double rss;
     flm_fit(&q, y, qty, coef, &rss);
     flm_se(&q, y, qty, rss, 0, se, NULL);
@@ -289,11 +310,14 @@ static void *ld_fit_worker (void *arg) {
 
 
 // Returns list(coef, se (D x P), rss, mean (each feature's mean centred
-// log2 value), rank (of the design)).
+// log2 value), rank (of the design)). With `groups` (1-based group codes,
+// or NULL), each feature gets a random-intercept model (feature_lmm.c)
+// instead, and the list adds df (D x P, Satterthwaite's), theta and vcov
+// (D x P x P); rss is then the residual standard deviation.
 SEXP C_linda_fit(
     SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_is_count, SEXP sexp_outlier_pct,
     SEXP sexp_depth, SEXP sexp_depth_w, SEXP sexp_zero_mode, SEXP sexp_pc,
-    SEXP sexp_X, SEXP sexp_tol, SEXP sexp_n_threads ) {
+    SEXP sexp_X, SEXP sexp_tol, SEXP sexp_groups, SEXP sexp_n_threads ) {
 
   int    is_count = asLogical(sexp_is_count);
   double pct      = asReal(sexp_outlier_pct);
@@ -322,7 +346,8 @@ SEXP C_linda_fit(
   flm_init(&full, fmem, fimem, n, P, 0);
   flm_decompose(&full, REAL(sexp_X), n, NULL, n, P, tol);
 
-  const char *nms[] = { "coef", "se", "rss", "mean", "rank", "" };
+  int mixed = !isNull(sexp_groups);
+  const char *nms[] = { "coef", "se", "rss", "mean", "rank", "df", "theta", "vcov", "" };
   SEXP result = PROTECT(mkNamed(VECSXP, nms));
   SEXP s_coef = allocMatrix(REALSXP, D, P); SET_VECTOR_ELT(result, 0, s_coef);
   SEXP s_se   = allocMatrix(REALSXP, D, P); SET_VECTOR_ELT(result, 1, s_se);
@@ -330,9 +355,33 @@ SEXP C_linda_fit(
   SEXP s_mean = allocVector(REALSXP, D);    SET_VECTOR_ELT(result, 3, s_mean);
   SET_VECTOR_ELT(result, 4, ScalarInteger(full.rank));
 
+  lmm_design_t lmm;
+  ld_lmm = NULL;
+  if (mixed) {
+    int *grp = (int *) R_alloc((size_t) n + 1, sizeof(int));
+    int J = 0;
+    for (int i = 0; i < n; i++) { grp[i] = INTEGER(sexp_groups)[i] - 1; if (grp[i] + 1 > J) J = grp[i] + 1; }
+    lmm_design_init(&lmm, REAL(sexp_X), grp, n, P, J);
+    ld_lmm = &lmm;
+    SEXP s_df = allocMatrix(REALSXP, D, P); SET_VECTOR_ELT(result, 5, s_df);
+    SEXP s_th = allocVector(REALSXP, D);    SET_VECTOR_ELT(result, 6, s_th);
+    SEXP s_vc = PROTECT(allocVector(REALSXP, (R_xlen_t) D * P * P));
+    SEXP dim  = PROTECT(allocVector(INTSXP, 3));
+    INTEGER(dim)[0] = D; INTEGER(dim)[1] = P; INTEGER(dim)[2] = P;
+    setAttrib(s_vc, R_DimSymbol, dim);
+    SET_VECTOR_ELT(result, 7, s_vc);
+    UNPROTECT(2);
+    ld_df    = REAL(s_df);
+    ld_theta = REAL(s_th);
+    ld_vcov  = REAL(s_vc);
+  }
+
   int nb = (D + LD_BLOCK - 1) / LD_BLOCK;
-  int nt = threads_for(n_thr, (double) D * n * (P + 8), 1e6);
+  int nt  = threads_for(n_thr, (double) D * n * (P + 8), 1e6);
   int nt1 = nt > nb ? nb : nt;
+  // A mixed model's fit iterates: worth threads for smaller tables.
+  if (mixed) nt = threads_for(n_thr, (double) D * (n * P + ld_lmm->J * P * P) * 60, 1e6);
+  if (nt < nt1) nt = nt1;
 
   size_t per = 4 * (size_t) n + 2 * (size_t) P;
   ld_sp     = &sp;
@@ -359,6 +408,11 @@ SEXP C_linda_fit(
   ld_se     = REAL(s_se);
   ld_rss    = REAL(s_rss);
   ld_mean   = REAL(s_mean);
+
+  if (mixed) {
+    ld_lmem_sz = lmm_doubles(n, P, ld_lmm->J) + (size_t) P * P + P;
+    ld_lmem    = (double *) R_alloc((size_t) nt * ld_lmem_sz, sizeof(double));
+  }
 
   run_parallel(ld_fit_worker, nt, D < 100 ? 100 : D);
 

@@ -31,6 +31,13 @@
       tb$counts, r$formula, tb$meta, zero_handling = zh, pseudocount = 0.5,
       outlier_pct = if (r$winsor) 0.03 else 0, p_adjust = 'BH', cpus = 1L )
 
+    # Mixed models: lme4's optimizer stops short of the exact REML optimum
+    # (see the lme4 section below), so compare at its tolerance.
+    mixed <- grepl('|', r$formula, fixed = TRUE)
+    tl <- if (mixed) c(fc = 1e-3, se = 1e-4, p = 1e-3, dof = 2e-3, bias = 1e-5, cov = 1e-4) else
+                     c(fc = 1e-9, se = 1e-10, p = 1e-9, dof = 0, bias = 1e-12, cov = 1e-10)
+    fl <- if (mixed) 1e-3 else 1e-8
+
     o <- r$result
     key <- paste(e$feature, e$covariate)
     i <- match(paste(o$feature, o$covariate), key)
@@ -39,26 +46,51 @@
     e <- e[i, ]
 
     expect_identical(attr(e, 'zero_handling'), if (r$zero == 'proportion') 'half_min' else r$chosen, info = cs)
-    expect_true(maxrel(e$log2_fc, o$log2_fc) < 1e-9, info = cs)
-    expect_true(maxrel(e$se, o$se) < 1e-10, info = cs)
-    expect_true(maxrel(e$t, o$t) < 1e-9, info = cs)
-    expect_true(maxrel(e$p_value, o$p_value) < 1e-9, info = cs)
-    expect_true(maxrel(e$p_adjusted, o$p_adjusted) < 1e-9, info = cs)
+    expect_true(maxrel(e$log2_fc, o$log2_fc, fl) < tl[['fc']], info = cs)
+    expect_true(maxrel(e$se, o$se) < tl[['se']], info = cs)
+    expect_true(maxrel(e$t, o$t, fl) < tl[['fc']], info = cs)
+    expect_true(maxrel(e$p_value, o$p_value, fl) < tl[['p']], info = cs)
+    expect_true(maxrel(e$p_adjusted, o$p_adjusted, fl) < tl[['p']], info = cs)
     expect_identical(e$reject, o$reject, info = cs)
-    expect_identical(e$dof, o$dof, info = cs)
+    if (mixed) expect_true(maxrel(e$dof, o$dof) < tl[['dof']], info = cs)
+    else       expect_identical(e$dof, o$dof, info = cs)
 
     # Steps 1 to 4: the biased coefficients; step 5: the mode.
     bias <- attr(e, 'bias')
-    expect_true(maxrel(e$log2_fc + bias[e$covariate], o$biased) < 1e-10, info = cs)
-    expect_true(max(abs(bias - r$bias)) < 1e-12, info = cs)
+    expect_true(maxrel(e$log2_fc + bias[e$covariate], o$biased, fl) < tl[['fc']], info = cs)
+    expect_true(max(abs(bias - r$bias)) < tl[['bias']], info = cs)
 
     # Covariances, and each feature's residual standard deviation.
     feats <- unique(o$feature)
     if (length(r$cov12)) {
       v <- unique(o$covariate)
-      expect_true(maxrel(attr(e, 'vcov')[feats, v[[1]], v[[2]]], r$cov12) < 1e-10, info = cs)
+      expect_true(maxrel(attr(e, 'vcov')[feats, v[[1]], v[[2]]], r$cov12) < tl[['cov']], info = cs)
     }
-    expect_true(maxrel(attr(e, 'resid_sd')[feats], r$sig) < 1e-10, info = cs)
+    if (length(r$sig))
+      expect_true(maxrel(attr(e, 'resid_sd')[feats], r$sig) < 1e-10, info = cs)
+    if (mixed) expect_identical(attr(e, 'random'), 'subj', info = cs)
+  }
+
+
+  # -----------------------------------------------------------------------
+  # Random intercepts: lme4's lmer() and lmerTest's degrees of freedom
+  # -----------------------------------------------------------------------
+
+  for (k in seq_along(ref$lmm)) {
+    m  <- ref$lmm[[k]]
+    Y  <- matrix(m$y)
+    # At lme4's estimate of theta: the same REML fit.
+    at <- .Call(C_feature_lmm, m$X, Y, m$groups, m$theta)
+    expect_true(maxrel(at$coef, m$coef) < 1e-10, info = k)
+    expect_true(maxrel(at$se, m$se) < 1e-10, info = k)
+    expect_true(maxrel(at$df, m$df) < 1e-5, info = k)     # lmerTest: numerical derivatives
+    expect_true(abs(at$deviance - m$dev) < 1e-9 * abs(m$dev), info = k)
+    # The exact optimum: never worse than lme4's, and close to it.
+    op <- .Call(C_feature_lmm, m$X, Y, m$groups, NULL)
+    expect_true(op$deviance <= m$dev + 1e-10 * abs(m$dev), info = k)
+    expect_true(abs(op$theta - m$theta) < 1e-3 * (1 + m$theta), info = k)
+    expect_true(maxrel(op$coef, m$coef, 1e-3) < 1e-5, info = k)
+    expect_true(maxrel(op$df, m$df) < 1e-3, info = k)
   }
 
 
@@ -123,6 +155,43 @@
   expect_identical(match_da_test('linda')$id, 'linda')
   expect_identical(match_da_test('LinDA')$effect, 'log2_fc')
   expect_identical(match_da_test('linear')$id, 'da_lm')
+
+
+  # Mixed models: threads, input types, wrappers, formula forms.
+  tb   <- ref$tables$subj
+  xs   <- tb$counts
+  fm   <- ~ g + x + (1 | subj)
+  rm1  <- linda(xs, fm, tb$meta, groups = 'g', pseudocount = 0.5, cpus = 1L)
+  for (cpus in c(2L, 4L))
+    expect_identical(linda(xs, fm, tb$meta, groups = 'g', pseudocount = 0.5, cpus = cpus), rm1, info = cpus)
+  if (requireNamespace('Matrix', quietly = TRUE))
+    expect_identical(linda(Matrix::Matrix(t(xs), sparse = TRUE), fm, tb$meta, groups = 'g',
+                           pseudocount = 0.5, margin = 2L, cpus = 2L), rm1)
+  expect_identical(da_test(xs, 'linda', 'g', tb$meta, fm, pseudocount = 0.5, cpus = 1L), rm1)
+  rs <- linda(xs, 'g + x + (1|subj)', tb$meta, groups = 'g', pseudocount = 0.5, cpus = 1L)
+  expect_identical(format(attr(rs, 'formula')), '~g + x + (1 | subj)')
+  expect_identical(rs$log2_fc, rm1$log2_fc)
+  expect_identical(attr(rm1, 'random'), 'subj')
+  expect_identical(names(attr(rm1, 'random_sd')), colnames(xs))
+  expect_true(all(attr(rm1, 'random_sd') >= 0))
+  expect_identical(dim(attr(rm1, 'vcov')), c(ncol(xs), 3L, 3L))
+  expect_true(all(rm1$dof > 0 & rm1$dof <= nrow(xs) - 3 + 1e-8))
+  # The term of interest is a fixed effect.
+  expect_error(linda(xs, fm, tb$meta, groups = 'subj'), 'term in `formula`')
+  # Unsupported random effects, and bad groupings.
+  expect_error(linda(xs, ~ g + (x | subj), tb$meta), 'random intercept')
+  expect_error(linda(xs, ~ g + (1 | subj) + (1 | c2), tb$meta), 'random intercept')
+  expect_error(linda(xs, ~ g + (1 | subj:g), tb$meta), 'random intercept')
+  expect_error(linda(xs, ~ (1 | subj), tb$meta), 'fixed effect')
+  expect_error(linda(xs, ~ g + (1 | nope), tb$meta), 'nope')
+  mm <- tb$meta; mm$subj[2] <- NA
+  expect_error(linda(xs, fm, mm), 'NA')
+  mm <- tb$meta; mm$subj <- 'one'
+  expect_error(linda(xs, fm, mm), 'at least two')
+  mm <- tb$meta; mm$subj <- seq_len(nrow(mm))
+  expect_error(linda(xs, fm, mm), 'fewer values')
+  mm <- tb$meta; mm$x2 <- 2 * mm$x
+  expect_error(suppressWarnings(linda(xs, ~ g + x + x2 + (1 | subj), mm, standardize = FALSE)), 'full rank')
 
 
   # -----------------------------------------------------------------------

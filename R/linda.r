@@ -28,9 +28,12 @@
 #'        Anything [stats::model.matrix()] accepts may be used. Every factor
 #'        (and character or logical column) is coded with treatment
 #'        contrasts, its first level (in sorted order, or a factor's own
-#'        order) the reference. `NULL` (the default) is `~ groups`.
+#'        order) the reference. One random intercept may be added, as in
+#'        lme4: `~ status + age + (1 | subject)`, for samples grouped by a
+#'        column of `data` (see **Repeated measures**). `NULL` (the
+#'        default) is `~ groups`.
 #'
-#' @param groups  The term of interest: with `formula`, the name of one of
+#' @param groups  The term of interest (a fixed effect): with `formula`, the name of one of
 #'        its terms (the one [plot()] shows by default); alone, the name of a
 #'        column of `data` or a vector with one value per sample, and the
 #'        model is `~ groups`.
@@ -82,7 +85,8 @@
 #'   * `se`: its standard error.
 #'   * `t`: `log2_fc / se`.
 #'   * `dof`: the degrees of freedom, the number of samples minus the rank
-#'     of the design.
+#'     of the design; with a random intercept, Satterthwaite's, per feature
+#'     and covariate.
 #'   * `p_value`: \eqn{2 F_t(-|t|)}.
 #'   * `p_adjusted`: adjusted with `p_adjust`, per covariate.
 #'   * `reject`: `p_adjusted <= alpha` (`FALSE` where `NaN`).
@@ -99,7 +103,10 @@
 #'   feature's covariance matrix of the coefficients), and per feature
 #'   (named by feature): `mean` (the mean of its centred log2 values, its
 #'   mean clr abundance) and `resid_sd` (the residual standard deviation of
-#'   its fit). [plot()] draws volcano, effect, MA and forest plots of them
+#'   its fit). With a random intercept, also `random` (its grouping
+#'   variable) and per feature `random_sd` (the random intercepts' standard
+#'   deviation; `vcov` and `resid_sd` are then the mixed model's). [plot()]
+#'   draws volcano, effect, MA and forest plots of them
 #'   ([plot.ecodive_linda()]).
 #'
 #' @details
@@ -157,10 +164,31 @@
 #'   (LinDA's `feature.dat.type`).
 #' * `p_adjust` defaults to `'holm'` (LinDA: `'BH'`).
 #' * Factor levels are sorted in the C locale (LinDA: in the session's).
-#' * Mixed models (LinDA's `(1 | id)` terms) are not supported (yet).
+#' * Of LinDA's mixed models, one random intercept, `(1 | id)`; random
+#'   slopes, several random terms and nested terms are not supported.
+#' * Mixed models are fitted at the exact REML optimum, and their degrees
+#'   of freedom from exact derivatives (see **Repeated measures**); lme4's
+#'   optimizer stops a little short of the optimum, and lmerTest takes
+#'   derivatives numerically, so these differ from LinDA's by about
+#'   \eqn{10^{-6}} (\eqn{10^{-4}} in places where the likelihood is
+#'   very flat).
 #' * The result is one data frame (LinDA: a list per covariate), without
 #'   `baseMean` (the `mean` attribute gives each feature's mean clr
 #'   abundance instead).
+#'
+#' **Repeated measures.** With `(1 | id)` in `formula`, each feature's
+#' clr values get a linear mixed model, with a random intercept for each
+#' value of `id` (a subject, say), fitted by restricted maximum likelihood
+#' (REML) as lme4's `lmer()` does (Bates et al. 2015), and the same mode
+#' correction (Zhou et al. 2022, Remark 1). Coefficients are tested with
+#' Satterthwaite's degrees of freedom, as by lmerTest (Kuznetsova et al.
+#' 2017), from the variance parameters' REML covariance. The optimum is
+#' found exactly (the root of the REML criterion's derivative in the ratio
+#' of the two standard deviations, by Brent's method then bracketing), and
+#' every derivative is analytic. A random intercept whose variance is
+#' estimated as 0 (lme4's "boundary (singular) fit") gives the fixed-effects
+#' fit, with \eqn{n - p} degrees of freedom. With `zero_handling =
+#' 'adaptive'`, the samples' log totals get the same mixed model.
 #'
 #' **Computation.** The table is read by feature from its sparse form,
 #' winsorized and transformed per feature in parallel C, and every feature
@@ -181,6 +209,14 @@
 #' Yang, L., & Chen, J. (2023). Benchmarking differential abundance analysis
 #' methods for correlated microbiome sequencing data. *Briefings in
 #' Bioinformatics*, 24, bbac607. \doi{10.1093/bib/bbac607}
+#'
+#' Bates, D., Maechler, M., Bolker, B., & Walker, S. (2015). Fitting
+#' linear mixed-effects models using lme4. *Journal of Statistical
+#' Software*, 67(1), 1-48. \doi{10.18637/jss.v067.i01}
+#'
+#' Kuznetsova, A., Brockhoff, P. B., & Christensen, R. H. B. (2017).
+#' lmerTest package: tests in linear mixed effects models. *Journal of
+#' Statistical Software*, 82(13), 1-26. \doi{10.18637/jss.v082.i13}
 #'
 #' Fukunaga, K., & Hostetler, L. (1975). The estimation of the gradient of
 #' a density function, with applications in pattern recognition. *IEEE
@@ -207,6 +243,10 @@
 #'     # The same, as LinDA's defaults would give it.
 #'     linda(x, ~ grp + age, meta, zero_handling = 'pseudocount',
 #'           pseudocount = 0.5, p_adjust = 'BH')
+#'
+#'     # Two samples from each of 15 subjects: a random intercept per subject.
+#'     meta$subject <- rep(sprintf('s%02d', 1:15), 2)
+#'     linda(x, ~ grp + age + (1 | subject), meta, groups = 'grp')
 #'
 linda <- function (
     counts, formula = NULL, data = NULL, groups = NULL, margin = 1L,
@@ -262,8 +302,9 @@ linda_fit <- function (env) {
   #--------------------------------------------------------
   # The design.
   #--------------------------------------------------------
+  rnd <- linda_random(env$formula)
   des <- da_design(
-    env$formula, env$data, env$groups, info$samples, info$n, 'LinDA',
+    rnd$fixed, env$data, env$groups, info$samples, info$n, 'LinDA',
     standardize = standardize )
   X <- des$X
   P <- ncol(X)
@@ -274,6 +315,28 @@ linda_fit <- function (env) {
   dX <- X
   attributes(dX) <- list(dim = dim(X))
   storage.mode(dX) <- 'double'
+
+  # A random intercept: each sample's group.
+  mixed <- !is.null(rnd$random)
+  codes <- NULL
+  if (mixed) {
+    v <- rnd$random
+    if (!v %in% names(des$data))
+      stop('Not found in `data`: ', name_list(v), call. = FALSE)
+    idv <- des$data[[v]]
+    if (anyNA(idv))
+      stop('Missing values (NA) in `data` column ', name_list(v), call. = FALSE)
+    codes <- as.integer(factor(as.character(idv)))
+    J <- max(codes)
+    if (J < 2L)
+      stop('The random intercept\'s `', v, '` must have at least two values.', call. = FALSE)
+    if (J >= info$n)
+      stop(
+        'The random intercept\'s `', v, '` must have fewer values than there ',
+        'are samples (', J, ' values, ', info$n, ' samples).', call. = FALSE )
+    if (qr(dX)$rank < P)
+      stop('A mixed model needs a design of full rank.', call. = FALSE)
+  }
 
 
   #--------------------------------------------------------
@@ -294,9 +357,14 @@ linda_fit <- function (env) {
           'A sample has no counts left after winsorization, so the ',
           'adaptive zero handling can\'t test its total: give ',
           '`zero_handling`.', call. = FALSE )
-      Xk <- dX[, keep, drop = FALSE]
-      fit <- stats::lm.fit(cbind(1, Xk), log(prep$depth_w))
-      p   <- linda_lm_p(fit)
+      Xk <- cbind(1, dX[, keep, drop = FALSE])
+      if (mixed) {
+        fit <- .Call(C_feature_lmm, Xk, matrix(log(prep$depth_w)), codes, NULL)
+        p   <- (2 * stats::pt(-abs(fit$coef / fit$se), fit$df))[-1L]
+      }
+      else {
+        p <- linda_lm_p(stats::lm.fit(Xk, log(prep$depth_w)))
+      }
       zh  <- if (any(p <= corr_cut, na.rm = TRUE)) 'imputation' else 'pseudocount'
     }
 
@@ -340,10 +408,10 @@ linda_fit <- function (env) {
   #--------------------------------------------------------
   res <- .Call(
     C_linda_fit, counts, env$margin, is_count, outlier_pct, prep$depth,
-    prep$depth_w, zero_mode, as.double(pc_used), dX, 1e-7, env$cpus )
+    prep$depth_w, zero_mode, as.double(pc_used), dX, 1e-7, codes, env$cpus )
 
   D   <- info$D
-  dof <- info$n - res$rank
+  dof <- if (mixed) res$df[, keep, drop = FALSE] else info$n - res$rank
   B   <- res$coef[, keep, drop = FALSE]
 
   start <- h <- rep(NaN, length(keep))
@@ -360,7 +428,7 @@ linda_fit <- function (env) {
 
   est <- sweep(B, 2L, mode)
   se  <- res$se[, keep, drop = FALSE]
-  if (!(dof > 0)) se[] <- NaN
+  if (!mixed && !(dof > 0)) se[] <- NaN
   tstat <- est / se
   pval  <- 2 * stats::pt(-abs(tstat), dof)
 
@@ -382,7 +450,7 @@ linda_fit <- function (env) {
     log2_fc    = byrow(est),
     se         = byrow(se),
     t          = byrow(tstat),
-    dof        = if (dof > 0) as.double(dof) else NaN,
+    dof        = if (mixed) byrow(dof) else if (dof > 0) as.double(dof) else NaN,
     p_value    = byrow(pval),
     p_adjusted = byrow(padj),
     reject     = as.vector(t(reject)),
@@ -390,24 +458,31 @@ linda_fit <- function (env) {
 
 
   #--------------------------------------------------------
-  # Each feature's covariance matrix: s^2 (X'X)^-1.
+  # Each feature's covariance matrix: s^2 (X'X)^-1, or the
+  # mixed model's s^2 (X'H^-1 X)^-1.
   #--------------------------------------------------------
-  s2   <- if (dof > 0) res$rss / dof else rep(NaN, D)
-  qx   <- qr(dX, tol = 1e-7, LAPACK = FALSE)
-  r    <- qx$rank
-  xtxi <- matrix(NaN, P, P)
-  if (r > 0) {
-    piv <- qx$pivot[seq_len(r)]
-    xtxi[piv, piv] <- chol2inv(qx$qr[seq_len(r), seq_len(r), drop = FALSE])
+  if (mixed) {
+    vcov     <- res$vcov
+    dimnames(vcov) <- list(features, colnames(X), colnames(X))
+    resid_sd <- res$rss
   }
-  vcov <- array(rep(s2, times = P * P) * rep(as.vector(xtxi), each = D),
-                dim = c(D, P, P), dimnames = list(features, colnames(X), colnames(X)))
-
-  resid_sd <- sqrt(s2)
+  else {
+    s2   <- if (dof > 0) res$rss / dof else rep(NaN, D)
+    qx   <- qr(dX, tol = 1e-7, LAPACK = FALSE)
+    r    <- qx$rank
+    xtxi <- matrix(NaN, P, P)
+    if (r > 0) {
+      piv <- qx$pivot[seq_len(r)]
+      xtxi[piv, piv] <- chol2inv(qx$qr[seq_len(r), seq_len(r), drop = FALSE])
+    }
+    vcov <- array(rep(s2, times = P * P) * rep(as.vector(xtxi), each = D),
+                  dim = c(D, P, P), dimnames = list(features, colnames(X), colnames(X)))
+    resid_sd <- sqrt(s2)
+  }
   resid_sd[is.na(resid_sd)] <- NaN
 
   attr(out, 'method')        <- 'linda'
-  attr(out, 'formula')       <- des$formula
+  attr(out, 'formula')       <- if (mixed) linda_formula(des$formula, rnd$random) else des$formula
   attr(out, 'groups')        <- des$groups
   attr(out, 'design')        <- X
   attr(out, 'standardize')   <- standardize
@@ -421,6 +496,12 @@ linda_fit <- function (env) {
   attr(out, 'vcov')          <- vcov
   attr(out, 'mean')          <- stats::setNames(res$mean, features)
   attr(out, 'resid_sd')      <- stats::setNames(resid_sd, features)
+  if (mixed) {
+    random_sd <- res$theta * resid_sd
+    random_sd[is.na(random_sd)] <- NaN
+    attr(out, 'random')    <- rnd$random
+    attr(out, 'random_sd') <- stats::setNames(random_sd, features)
+  }
   class(out) <- c('ecodive_linda', 'data.frame')
 
   out
@@ -440,6 +521,54 @@ linda_shorth <- function (x) {
   i <- which(w == min(w))
   j <- floor(mean(i))
   mean(y[j:(j + k)])
+}
+
+
+# Splits a random intercept, `(1 | id)`, from `formula`: list(fixed (the
+# formula without it, or `formula` as given), random (the grouping
+# variable's name, or NULL)).
+linda_random <- function (formula) {
+
+  f <- formula
+  if (is.character(f) && length(f) == 1L && !is.na(f)) {
+    txt <- if (grepl('~', f, fixed = TRUE)) f else paste('~', f)
+    f   <- tryCatch(eval(str2lang(txt)), error = function (e) NULL)
+    if (inherits(f, 'formula')) environment(f) <- globalenv()
+  }
+  if (!inherits(f, 'formula')) return (list(fixed = formula, random = NULL))
+
+  rhs   <- f[[length(f)]]
+  split <- function (e)
+    if (is.call(e) && identical(e[[1L]], as.name('+')) && length(e) == 3L)
+      c(split(e[[2L]]), split(e[[3L]]))
+    else list(e)
+  parts <- split(rhs)
+  bar   <- vapply(parts, function (e) any(all.names(e) %in% c('|', '||')), logical(1))
+  if (!any(bar)) return (list(fixed = formula, random = NULL))
+
+  ok <- function (e) {
+    if (!is.call(e) || !identical(e[[1L]], as.name('('))) return (FALSE)
+    e <- e[[2L]]
+    is.call(e) && identical(e[[1L]], as.name('|')) && length(e) == 3L &&
+      identical(e[[2L]], 1) && is.name(e[[3L]])
+  }
+  if (!all(vapply(parts[bar], ok, logical(1))) || sum(bar) > 1L)
+    stop(
+      'Of random effects, `formula` may have one random intercept, such as ',
+      '`(1 | subject)`, of a column of `data`.', call. = FALSE )
+  if (all(bar))
+    stop('`formula` must have at least one fixed effect besides `(1 | ...)`.', call. = FALSE)
+
+  fixed <- Reduce(function (a, b) call('+', a, b), parts[!bar])
+  out   <- stats::as.formula(call('~', fixed), env = environment(f))
+  list(fixed = out, random = as.character(parts[bar][[1L]][[2L]][[3L]]))
+}
+
+
+# The fixed formula with the random intercept added back: ~ g + (1 | id).
+linda_formula <- function (fixed, random) {
+  rhs <- call('+', fixed[[length(fixed)]], call('(', call('|', 1, as.name(random))))
+  stats::as.formula(call('~', rhs), env = environment(fixed))
 }
 
 

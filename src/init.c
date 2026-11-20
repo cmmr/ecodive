@@ -28,13 +28,14 @@ extern SEXP C_dpcoa(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_tests(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_feature_lm(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_feature_lmm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dirmult_ttest(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_helmert_basis(SEXP);
 extern SEXP C_lda(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_linda_prep(SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP C_linda_fit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_linda_fit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_linda_mode(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lda_loo(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_log_ratio(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -119,12 +120,13 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_da_lm",         (DL_FUNC) &C_da_lm,         8},
   {"C_da_tests",      (DL_FUNC) &C_da_tests,      7},
   {"C_feature_lm",    (DL_FUNC) &C_feature_lm,    4},
+  {"C_feature_lmm",   (DL_FUNC) &C_feature_lmm,   4},
   {"C_dirmult_ttest", (DL_FUNC) &C_dirmult_ttest, 11},
   {"C_envfit",    (DL_FUNC) &C_envfit,   12},
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},
   {"C_lda",       (DL_FUNC) &C_lda,       5},
   {"C_linda_prep", (DL_FUNC) &C_linda_prep, 5},
-  {"C_linda_fit",  (DL_FUNC) &C_linda_fit, 11},
+  {"C_linda_fit",  (DL_FUNC) &C_linda_fit, 12},
   {"C_linda_mode", (DL_FUNC) &C_linda_mode, 5},
   {"C_helmert_basis", (DL_FUNC) &C_helmert_basis, 1},
   {"C_lda_loo",   (DL_FUNC) &C_lda_loo,   5},

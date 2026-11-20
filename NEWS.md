@@ -818,7 +818,11 @@
   `formula`, as `da_lm()`; winsorization of outliers (`outlier_pct`); zeros
   replaced by a pseudocount, by imputation proportional to sequencing depth,
   or adaptively (`zero_handling`, `corr_cut`); numeric covariates
-  standardized (`standardize`). It matches MicrobiomeStat's `linda()` to
+  standardized (`standardize`); repeated measures with a random intercept,
+  `~ group + (1 | subject)`, fitted by REML at the exact optimum, with
+  Satterthwaite degrees of freedom (as lme4 and lmerTest, without them,
+  and about 300 times faster than MicrobiomeStat's mixed models). It
+  matches MicrobiomeStat's `linda()` to
   about 1e-12 (fold changes, standard errors, the bias, p-values), except
   that its `'adaptive'` choice is applied (MicrobiomeStat 1.4 reports it but
   adds the pseudocount regardless). Parallel C from a sparse table, the

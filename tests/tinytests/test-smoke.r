@@ -183,6 +183,8 @@
   z <- suppressWarnings(linda(cz, ~ grp + x, meta, cpus = cpus))
   expect_true(inherits(z, 'ecodive_linda') && nrow(z) == 24L && !anyNA(z$reject))
   expect_true(all(is.finite(z$log2_fc)) && all(z$p_value >= 0 & z$p_value <= 1))
+  z <- linda(counts, ~ grp + x + (1 | subj), data.frame(meta, subj = rep(sprintf('s%d', 1:5), 4)), cpus = cpus)
+  expect_true(inherits(z, 'ecodive_linda') && nrow(z) == 24L && all(z$dof > 0) && !anyNA(z$reject))
   expect_true(is.data.frame(list_da_tests()) && 'da_ttest' %in% list_da_tests('id'))
   expect_identical(match_da_test('Mann-Whitney')$id, 'da_wilcoxon')
   z <- da_sensitivity(counts, 'da_ttest', 'grp', meta, pseudocounts = TRUE, cpus = cpus)

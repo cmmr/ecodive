@@ -29,6 +29,8 @@
 #   factors    One integer vector per factor with a main-effect term, for
 #              C_ancombc: c(standard, rebase, L, level_col, codes) (see
 #              src/ancombc.c).
+#   data       `data`, one row per sample (with `group` from `groups`
+#              values), its formula's variables as used.
 #------------------------------------------------------------------------------
 da_design <- function (formula, data, groups, labels, n, what, standardize = FALSE) {
 
@@ -236,5 +238,6 @@ da_design <- function (formula, data, groups, labels, n, what, standardize = FAL
     formula   = formula,
     groups    = groups,
     intercept = intercept,
-    factors   = factors )
+    factors   = factors,
+    data      = data )
 }

@@ -13,6 +13,11 @@
 # real number in those files is a hexadecimal float, read back exactly.
 # Then, with or without MicrobiomeStat, the files are folded into the .rds.
 #
+# The mixed-model cases (`(1|subj)`) are fitted by MicrobiomeStat with
+# lme4's lmer() and lmerTest's Satterthwaite degrees of freedom; lme4
+# 1.1-35.1 and lmerTest 3.1-3 (GPL) are also run directly on single
+# responses (lmm.csv), for the REML fit at lme4's own estimate.
+#
 # Each case runs linda() with adaptive = FALSE and an explicit
 # zero.handling (MicrobiomeStat 1.4's adaptive mode reports its choice but
 # adds the pseudocount whatever it chose), pseudo.cnt = 0.5, no filters,
@@ -59,6 +64,8 @@ if (requireNamespace('MicrobiomeStat', quietly = TRUE)) {
       c2  = sample(c('north', 'east', 'south'), n, TRUE),
       flg = sample(c(TRUE, FALSE), n, TRUE),
       row.names = colnames(Y), stringsAsFactors = FALSE )
+    # Subjects of four samples each (no random numbers drawn).
+    meta$subj <- sprintf('p%02d', rep(seq_len(ceiling(n / 4)), each = 4)[seq_len(n)])
     list(Y = Y, meta = meta)
   }
 
@@ -76,6 +83,22 @@ if (requireNamespace('MicrobiomeStat', quietly = TRUE)) {
   tabs$rare <- sim(6, 24, 50)
   tabs$rare$Y[31:50, ] <- 0
   for (f in 31:50) tabs$rare$Y[f, 1 + (f %% 3)] <- 1
+  # Repeated measures: each subject's samples share a depth and a
+  # per-feature offset (random intercepts).
+  tabs$subj <- sim(8, 48, 60)
+  set.seed(9)
+  sj <- as.integer(factor(tabs$subj$meta$subj))
+  off <- matrix(rnorm(60 * 12, 0, 0.6), 60, 12)
+  tabs$subj$Y <- round(tabs$subj$Y * exp(off[, sj]))
+  # Unbalanced subjects (1 to 7 samples), with a subject-level covariate.
+  tabs$unbal <- sim(10, 40, 50)
+  set.seed(11)
+  sz <- c(1, 7, 2, 5, 3, 1, 6, 4, 2, 5, 4)
+  tabs$unbal$meta$subj <- sprintf('u%02d', rep(seq_along(sz), sz))
+  su <- as.integer(factor(tabs$unbal$meta$subj))
+  tabs$unbal$meta$x <- round(rnorm(length(sz), 50, 10), 2)[su]
+  off <- matrix(rnorm(50 * length(sz), 0, 0.8), 50, length(sz))
+  tabs$unbal$Y <- round(tabs$unbal$Y * exp(off[, su]))
 
   for (nm in names(tabs)) {
     Y <- tabs[[nm]]$Y
@@ -111,6 +134,12 @@ if (requireNamespace('MicrobiomeStat', quietly = TRUE)) {
     prop_nowin    prop    ~g                proportion   FALSE
     rare          rare    ~g                pseudo-count TRUE
     small         small   ~g+x              pseudo-count TRUE
+    mixed_pc      subj    ~g+x+(1|subj)     pseudo-count TRUE
+    mixed_imp     subj    ~g+x+(1|subj)     imputation   TRUE
+    mixed_adapt   subj    ~g+(1|subj)       adaptive     TRUE
+    mixed_adapt2  depth   ~g+(1|subj)       adaptive     TRUE
+    mixed_unbal   unbal   ~g+x+(1|subj)     pseudo-count TRUE
+    mixed_prop    prop    ~g+(1|subj)       proportion   FALSE
   ')
 
   results <- NULL
@@ -144,14 +173,14 @@ if (requireNamespace('MicrobiomeStat', quietly = TRUE)) {
         log2_fc = hexs(o$log2FoldChange), se = hexs(o$lfcSE),
         t = hexs(o$stat), p_value = hexs(o$pvalue), p_adjusted = hexs(o$padj),
         reject = as.integer(o$reject), dof = o$df,
-        biased = hexs(r$wald$beta[v, rownames(o)]),
+        biased = hexs(r$wald$beta[v, ]),   # features in table order, as `o`
         stringsAsFactors = FALSE ))
     }
 
     # Covariances between coefficients (LinDA: only with two or more
     # variables), and each feature's residual standard deviation.
     cv <- ''
-    if (length(r$variables) > 1L) {
+    if (length(r$variables) > 1L && !is.null(r$covariance)) {
       v1 <- r$variables[[1]]; v2 <- r$variables[[2]]
       cv <- paste(hexs(r$covariance[[v1]][[v2]]), collapse = ' ')
     }
@@ -159,7 +188,7 @@ if (requireNamespace('MicrobiomeStat', quietly = TRUE)) {
       case    = cs$case, chosen = chosen,
       bias    = paste(hexs(r$bias), collapse = ' '),
       cov12   = cv,
-      sig     = paste(hexs(r$wald$sig), collapse = ' '),
+      sig     = if (is.null(r$wald$sig)) '' else paste(hexs(r$wald$sig), collapse = ' '),
       stringsAsFactors = FALSE ))
   }
 
@@ -195,6 +224,47 @@ if (requireNamespace('MicrobiomeStat', quietly = TRUE)) {
                 as.numeric(modeest::meanshift(v, bw = stats::bw.nrd0(v))))), ''),
     stringsAsFactors = FALSE )
   write.csv(modes, file.path(dir, 'modes.csv'), row.names = FALSE)
+
+
+  #--------------------------------------------------------
+  # lme4 1.1-35.1's lmer() (REML, default optimizer) and
+  # lmerTest 3.1-3's Satterthwaite degrees of freedom (both
+  # GPL: run for their outputs only) on random-intercept
+  # models: balanced and unbalanced groups, singletons,
+  # subject-level covariates, fits on the boundary.
+  #--------------------------------------------------------
+  suppressMessages(library(lmerTest))
+  stopifnot(packageVersion('lme4') == '1.1.35.1', packageVersion('lmerTest') == '3.1.3')
+  set.seed(21)
+  lmm <- NULL
+  for (k in 1:30) {
+    J  <- sample(3:14, 1)
+    nj <- if (k %% 3 == 0) rep(sample(2:5, 1), J) else sample(1:6, J, TRUE)
+    id <- rep(seq_len(J), nj)
+    n  <- length(id)
+    if (n < 8) next
+    X  <- cbind(1, rbinom(n, 1, 0.5), round(rnorm(n), 3))
+    if (k %% 2) X <- cbind(X, round(rep(rnorm(J), nj), 3))
+    sd_u <- c(0, 0.3, 1, 2)[1 + k %% 4]
+    y  <- drop(X %*% round(rnorm(ncol(X)), 2)) + rnorm(J, 0, sd_u)[id] + rnorm(n)
+    y  <- round(y, 4)
+    d  <- data.frame(y = y, X[, -1, drop = FALSE], id = factor(id))
+    fo <- stats::as.formula(paste('y ~', paste(names(d)[2:ncol(X)], collapse = ' + '), '+ (1 | id)'))
+    f  <- suppressWarnings(suppressMessages(lmerTest::lmer(fo, d)))
+    cf <- summary(f)$coefficients
+    lmm <- rbind(lmm, data.frame(
+      case  = k, n = n, p = ncol(X),
+      groups = paste(id, collapse = ' '),
+      X     = paste(hexs(X), collapse = ' '),
+      y     = paste(hexs(y), collapse = ' '),
+      theta = hexs(unname(lme4::getME(f, 'theta'))),
+      dev   = hexs(unname(lme4::REMLcrit(f))),
+      coef  = paste(hexs(cf[, 'Estimate']),   collapse = ' '),
+      se    = paste(hexs(cf[, 'Std. Error']), collapse = ' '),
+      df    = paste(hexs(cf[, 'df']),         collapse = ' '),
+      stringsAsFactors = FALSE ))
+  }
+  write.csv(lmm, file.path(dir, 'lmm.csv'), row.names = FALSE)
 }
 
 
@@ -250,12 +320,27 @@ ref <- lapply(setNames(nm = cases$case), function (cs) {
     sig   = words(e$sig) )
 })
 
+lmm <- csv('lmm.csv')
+lmm <- lapply(seq_len(nrow(lmm)), function (i) {
+  r <- lmm[i, ]
+  n <- as.integer(r$n); p <- as.integer(r$p)
+  list(
+    X      = matrix(words(r$X), n, p),
+    y      = words(r$y),
+    groups = as.integer(strsplit(r$groups, ' ', fixed = TRUE)[[1]]),
+    theta  = hex(r$theta),
+    dev    = hex(r$dev),
+    coef   = words(r$coef),
+    se     = words(r$se),
+    df     = words(r$df) )
+})
+
 modes <- lapply(seq_len(nrow(modes)), function (i) list(
   values = words(modes$values[[i]]),
   shorth = hex(modes$shorth[[i]]),
   mode   = hex(modes$mode[[i]]) ))
 
 saveRDS(
-  list(tables = tables, cases = ref, modes = modes),
+  list(tables = tables, cases = ref, modes = modes, lmm = lmm),
   file.path('tests', 'tinytests', 'expected', 'linda.rds'),
   version = 2 )

@@ -32,13 +32,16 @@ proportions of \code{\link[=replace_zeros]{replace_zeros()}}) is taken as propor
 Anything \code{\link[stats:model.matrix]{stats::model.matrix()}} accepts may be used. Every factor
 (and character or logical column) is coded with treatment
 contrasts, its first level (in sorted order, or a factor's own
-order) the reference. \code{NULL} (the default) is \code{~ groups}.}
+order) the reference. One random intercept may be added, as in
+lme4: \code{~ status + age + (1 | subject)}, for samples grouped by a
+column of \code{data} (see \strong{Repeated measures}). \code{NULL} (the
+default) is \code{~ groups}.}
 
 \item{data}{A data frame of sample metadata, with the variables of
 \code{groups} or \code{formula}. Its rows are matched to the samples of
 \code{counts} by name when both have names, else by position.}
 
-\item{groups}{The term of interest: with \code{formula}, the name of one of
+\item{groups}{The term of interest (a fixed effect): with \code{formula}, the name of one of
 its terms (the one \code{\link[=plot]{plot()}} shows by default); alone, the name of a
 column of \code{data} or a vector with one value per sample, and the
 model is \code{~ groups}.}
@@ -102,7 +105,8 @@ abundance (per standard deviation of a numeric covariate when
 \item \code{se}: its standard error.
 \item \code{t}: \code{log2_fc / se}.
 \item \code{dof}: the degrees of freedom, the number of samples minus the rank
-of the design.
+of the design; with a random intercept, Satterthwaite's, per feature
+and covariate.
 \item \code{p_value}: \eqn{2 F_t(-|t|)}.
 \item \code{p_adjusted}: adjusted with \code{p_adjust}, per covariate.
 \item \code{reject}: \code{p_adjusted <= alpha} (\code{FALSE} where \code{NaN}).
@@ -120,7 +124,10 @@ coefficients: their mode, which was subtracted), \code{vcov} (a feature
 feature's covariance matrix of the coefficients), and per feature
 (named by feature): \code{mean} (the mean of its centred log2 values, its
 mean clr abundance) and \code{resid_sd} (the residual standard deviation of
-its fit). \code{\link[=plot]{plot()}} draws volcano, effect, MA and forest plots of them
+its fit). With a random intercept, also \code{random} (its grouping
+variable) and per feature \code{random_sd} (the random intercepts' standard
+deviation; \code{vcov} and \code{resid_sd} are then the mixed model's). \code{\link[=plot]{plot()}}
+draws volcano, effect, MA and forest plots of them
 (\code{\link[=plot.ecodive_linda]{plot.ecodive_linda()}}).
 }
 \description{
@@ -185,11 +192,31 @@ example \code{counts[, colMeans(counts > 0) >= 0.1]} for a prevalence of
 (LinDA's \code{feature.dat.type}).
 \item \code{p_adjust} defaults to \code{'holm'} (LinDA: \code{'BH'}).
 \item Factor levels are sorted in the C locale (LinDA: in the session's).
-\item Mixed models (LinDA's \code{(1 | id)} terms) are not supported (yet).
+\item Of LinDA's mixed models, one random intercept, \code{(1 | id)}; random
+slopes, several random terms and nested terms are not supported.
+\item Mixed models are fitted at the exact REML optimum, and their degrees
+of freedom from exact derivatives (see \strong{Repeated measures}); lme4's
+optimizer stops a little short of the optimum, and lmerTest takes
+derivatives numerically, so these differ from LinDA's by about
+\eqn{10^{-6}} (\eqn{10^{-4}} in places where the likelihood is
+very flat).
 \item The result is one data frame (LinDA: a list per covariate), without
 \code{baseMean} (the \code{mean} attribute gives each feature's mean clr
 abundance instead).
 }
+
+\strong{Repeated measures.} With \code{(1 | id)} in \code{formula}, each feature's
+clr values get a linear mixed model, with a random intercept for each
+value of \code{id} (a subject, say), fitted by restricted maximum likelihood
+(REML) as lme4's \code{lmer()} does (Bates et al. 2015), and the same mode
+correction (Zhou et al. 2022, Remark 1). Coefficients are tested with
+Satterthwaite's degrees of freedom, as by lmerTest (Kuznetsova et al.
+2017), from the variance parameters' REML covariance. The optimum is
+found exactly (the root of the REML criterion's derivative in the ratio
+of the two standard deviations, by Brent's method then bracketing), and
+every derivative is analytic. A random intercept whose variance is
+estimated as 0 (lme4's "boundary (singular) fit") gives the fixed-effects
+fit, with \eqn{n - p} degrees of freedom. With \code{zero_handling = 'adaptive'}, the samples' log totals get the same mixed model.
 
 \strong{Computation.} The table is read by feature from its sparse form,
 winsorized and transformed per feature in parallel C, and every feature
@@ -237,6 +264,10 @@ For large datasets, standard matrix operations may be slow. See
     linda(x, ~ grp + age, meta, zero_handling = 'pseudocount',
           pseudocount = 0.5, p_adjust = 'BH')
 
+    # Two samples from each of 15 subjects: a random intercept per subject.
+    meta$subject <- rep(sprintf('s\%02d', 1:15), 2)
+    linda(x, ~ grp + age + (1 | subject), meta, groups = 'grp')
+
 }
 \references{
 Zhou, H., He, K., Chen, J., & Zhang, X. (2022). LinDA: linear models for
@@ -246,6 +277,14 @@ differential abundance analysis of microbiome compositional data.
 Yang, L., & Chen, J. (2023). Benchmarking differential abundance analysis
 methods for correlated microbiome sequencing data. \emph{Briefings in
 Bioinformatics}, 24, bbac607. \doi{10.1093/bib/bbac607}
+
+Bates, D., Maechler, M., Bolker, B., & Walker, S. (2015). Fitting
+linear mixed-effects models using lme4. \emph{Journal of Statistical
+Software}, 67(1), 1-48. \doi{10.18637/jss.v067.i01}
+
+Kuznetsova, A., Brockhoff, P. B., & Christensen, R. H. B. (2017).
+lmerTest package: tests in linear mixed effects models. \emph{Journal of
+Statistical Software}, 82(13), 1-26. \doi{10.18637/jss.v082.i13}
 
 Fukunaga, K., & Hostetler, L. (1975). The estimation of the gradient of
 a density function, with applications in pattern recognition. \emph{IEEE
