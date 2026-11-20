@@ -85,6 +85,10 @@ reference:
   - vlr
   - rho_p
   - phi_s
+- subtitle: Associations and networks
+  desc: Correlations between features' absolute abundances, estimated from relative abundances. A dist over the features.
+  contents:
+  - sparcc
 - subtitle: Differential abundance
   desc: Which features' abundances differ between groups. da_test() runs any method by name; the classical per-feature tests compare normalized values, the others log ratios or clr values, so that the samples' totals don't matter.
   contents:

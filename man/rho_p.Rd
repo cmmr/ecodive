@@ -95,6 +95,14 @@ where \eqn{\mathrm{var}(z_i - z_j)} is \code{\link[=vlr]{vlr()}}. It lies in \eq
 A pair of features that are both constant relative to the reference has
 no defined \eqn{\rho_p} (\code{NaN}).
 
+\strong{Not a correlation of abundances.} \eqn{\rho_p} asks whether two
+features keep a constant ratio: it is 1 only for a log ratio with slope 1,
+and pairs related by a power law with another exponent, or with unequal
+variances, score low. \code{\link[=sparcc]{sparcc()}} starts from the same variance of log
+ratios but divides by estimated variances of the log \emph{absolute}
+abundances instead, to estimate their Pearson correlation; that is
+possible only under its assumption that most pairs are uncorrelated.
+
 This is the coefficient that propr computes with \code{propr(counts, metric = "rho")} (see \strong{Zeros} for its zero handling). propr also estimates false discovery
 rates by permutation (\code{updateCutoffs()}), and offers \code{ivar = "iqlr"}, a
 clr over the features of mid-range variance; neither is offered here.
@@ -167,6 +175,6 @@ propr: an R-package for identifying proportionally abundant features
 using compositional data analysis. \emph{Scientific Reports}, 7, 16252.
 }
 \seealso{
-\code{\link[=vlr]{vlr()}}, \code{\link[=phi_s]{phi_s()}}, \code{\link[=alr]{alr()}}, \code{\link[=normalize]{normalize()}} (\code{'clr'}),
-\code{\link[=replace_zeros]{replace_zeros()}}.
+\code{\link[=vlr]{vlr()}}, \code{\link[=phi_s]{phi_s()}}, \code{\link[=sparcc]{sparcc()}}, \code{\link[=alr]{alr()}}, \code{\link[=normalize]{normalize()}}
+(\code{'clr'}), \code{\link[=replace_zeros]{replace_zeros()}}.
 }

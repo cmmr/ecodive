@@ -197,6 +197,7 @@ reuse §1's names and add these:
 | `pseudocounts`, `zeros`, `scale_sds` | the settings grids of a sensitivity analysis. Plural, and after `...`, so they can't capture the method's own `pseudocount` / `scale_sd` (arguments after `...` match only exactly) | `da_sensitivity` |
 | `load_sd` | the uncertainty of a measured load in a scale model | `dirmult_lm` (with `qmp_scale()`'s `load`) |
 | `n_draws` | also used by `dirmult_lm` and `sparcc` | |
+| `max_exclusions`, `exclusion_threshold` | **(added 2026-11-20, item 39)** SparCC's cap on exclusion iterations (`max_<unit>` rule; `0L` for none) and the \|r\| above which a pair is excluded from the variance estimate. Not `threshold`, which is `assoc_network()`'s edge cutoff | `sparcc` (exists) |
 
 Open naming questions for the user are flagged "ask" in the plans: the
 `feature_assoc()` wrapper name ([assoc_network.md](assoc_network.md)),

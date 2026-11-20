@@ -45,6 +45,9 @@ or just before it:
 
 - `feature_assoc(counts, method, ...)` with registry `FEATURE_ASSOCS` and
   `list_feature_assocs()` / `match_feature_assoc()`, shaped like `count_ord()`.
+  **`FEATURE_ASSOCS` itself landed with item 39** (`R/feature_assoc.r`, rows
+  for `vlr`, `rho_p`, `phi_s`, `sparcc`; the range as numeric `lower` and
+  `upper` columns); see sparcc.md's "What item 40 can rely on".
 - Registry columns: `id`, `name`, `alt_ids`, `fun`, plus `kind`
   (`'dissimilarity'` for vlr and phi_s; `'similarity'` for the rest), `range`
   (`'[-1,1]'`, `'[0,1]'`, `'[0,Inf)'`), `fisher_z` (TRUE only for
