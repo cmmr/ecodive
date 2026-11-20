@@ -336,9 +336,32 @@ Made while implementing:
   "essentially constant" rule, `dof <= 0` in `da_lm()`.
 - **Wilcoxon:** C returns W, the ties' \eqn{\sum t^3 - t}, and both medians
   (R's `median()` algorithm); the exact / normal branch, continuity
-  correction and `pwilcox()` run in R on the main thread, exactly as
-  `wilcox.test.default()` (R 4.3.3). `auc` = W / (n1 n2) with the
-  feature's own n (rclr).
+  correction and `pwilcox()` run in R on the main thread. `auc` = W / (n1
+  n2) with the feature's own n (rclr).
+- **Wilcoxon with ties follows R 4.6.0 (fixed after the first push, when
+  the suite failed on the user's R 4.6):** R 4.6.0's `wilcox.test()`
+  (NEWS: "can now perform exact (conditional) inference in case of ties",
+  Streitberg-Rohmel shift algorithm) gives an exact p-value whenever both
+  sides have under 50 values, ties or not; R 4.3.3 used the normal
+  approximation with ties. ecodive now gives R 4.6's answer on every R
+  version: `wilcox_exact_ties()` in `src/da_tests.c` counts every n1-subset
+  of the doubled average ranks by its sum (shifted and divided by their
+  gcd; the smaller side; in each worker thread, about 4 MB each), and the
+  two-sided p-value is `min(1, 2 * min(P(W <= w), P(W >= w)))`. That rule
+  was chosen by comparing three candidates with R 4.6.2's output (built
+  from source in the scratchpad; R's own code wasn't read, being GPL): it
+  agreed to 4e-15 on 399 random tied cases, the others didn't. All values
+  tied gives 1, as R 4.6. The tests compare with `wilcox.test()` directly
+  on R >= 4.6.0, and with an independent R count of the subsets
+  (`exact_ties_p()`) on older R; a brute-force `combn()` check covers the
+  distribution itself. Worst case (49 vs 49, many ties) is about 3 ms per
+  feature on one thread.
+- **R 4.6.2's `pwilcox()` is wrong when vectorised over different sizes**
+  (e.g. `pwilcox(c(30, 40, 25, 50), c(11, 10, 9, 12), c(10, 11, 11, 10))`
+  gives 0.0375 for the third, 0.0337 called alone; R 4.3.3 gives 0.0337
+  either way). rclr's missing values give features different sizes, so
+  `da_pwilcox()` calls it once per (m, n) pair, with scalar sizes (checked
+  identical to one-at-a-time calls on R 4.6.2). Worth reporting to R core.
 - **t-test:** C returns each side's n, mean and variance by R's own `mean()`
   / `var()` algorithms (long double sums with the refinement step), and the
   pooled mean; the rest is `t.test.default()`'s arithmetic in R.

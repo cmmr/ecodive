@@ -266,8 +266,7 @@
   # 6. Auto-detection: Sparse Matrix (slam::simple_triplet_matrix)
   # ----------------------------------------------------------------
   
-  exit_if_not(requireNamespace("slam", quietly=TRUE))
-  # skip_if_not_installed('slam')
+  if (requireNamespace("slam", quietly=TRUE)) {
   
   # Case: Implicit zeros (v has length < nrow*ncol)
   # Matrix: 10  0
@@ -286,12 +285,12 @@
   env$pseudocount <- NULL
   expect_warning(validate_pseudocount(env), "Zeros detected")
   expect_equal(env$pseudocount, 5)
+  }
   
   
   # 7. Auto-detection: Sparse Matrix (Matrix::dgCMatrix)
   # ----------------------------------------------------------------
-  exit_if_not(requireNamespace("Matrix", quietly=TRUE))
-  # skip_if_not_installed('Matrix')
+  if (requireNamespace("Matrix", quietly=TRUE)) {
   
   # Case: Implicit zeros
   dgc <- Matrix::Matrix(c(10, 0, 0, 20), 2, 2, sparse=TRUE)
@@ -308,49 +307,42 @@
   env$pseudocount <- NULL
   expect_silent(validate_pseudocount(env))
   expect_equal(env$pseudocount, 0)
+  }
 
 
 
 
-  # validate_counts() with rbiom, phyloseq and TSE objects. At home only, and
-  # this block ends the file early, so it must stay last. ====
-
-  exit_if_not(at_home())
-  exit_if_not(requireNamespace("rbiom",                    quietly=TRUE))
-  exit_if_not(requireNamespace("phyloseq",                 quietly=TRUE))
-  exit_if_not(requireNamespace("TreeSummarizedExperiment", quietly=TRUE))
-  # skip_on_cran()
-  # skip_if_not_installed('rbiom')
-  # skip_if_not_installed('phyloseq')
-  # skip_if_not_installed('TreeSummarizedExperiment')
-
-  hmp50               <- do.call(`::`, list('rbiom', 'hmp50'))
-  convert_to_phyloseq <- do.call(`::`, list('rbiom', 'convert_to_phyloseq'))
-  convert_to_TSE      <- do.call(`::`, list('rbiom', 'convert_to_TSE'))
-  convert_to_SE       <- do.call(`::`, list('rbiom', 'convert_to_SE'))
+  # validate_counts() with rbiom, phyloseq and (Tree)SummarizedExperiment
+  # objects, each only where its package is installed (at home only).
 
   env$tree   <- NULL
   env$counts <- 1:10
   expect_silent(validate_counts(env))
 
-  env$tree   <- NULL
-  env$counts <- Matrix::t(hmp50$counts)
-  expect_silent(validate_counts(env))
+  if (at_home() && requireNamespace('rbiom', quietly = TRUE)) {
 
-  env$tree   <- NULL
-  env$counts <- hmp50
-  expect_silent(validate_counts(env))
+    hmp50 <- do.call(`::`, list('rbiom', 'hmp50'))
 
-  env$tree   <- NULL
-  env$counts <- convert_to_phyloseq(hmp50)
-  expect_silent(validate_counts(env))
+    env$tree   <- NULL
+    env$counts <- Matrix::t(hmp50$counts)
+    expect_silent(validate_counts(env))
 
-  env$tree   <- NULL
-  env$counts <- convert_to_TSE(hmp50)
-  expect_silent(validate_counts(env))
+    env$tree   <- NULL
+    env$counts <- hmp50
+    expect_silent(validate_counts(env))
 
-  env$tree   <- NULL
-  env$counts <- convert_to_SE(hmp50)
-  expect_silent(validate_counts(env))
+    conversions <- list(
+      phyloseq                 = 'convert_to_phyloseq',
+      TreeSummarizedExperiment = 'convert_to_TSE',
+      SummarizedExperiment     = 'convert_to_SE' )
+
+    for (pkg in names(conversions)) {
+      if (!requireNamespace(pkg, quietly = TRUE)) next
+      convert    <- do.call(`::`, list('rbiom', conversions[[pkg]]))
+      env$tree   <- NULL
+      env$counts <- convert(hmp50)
+      expect_silent(validate_counts(env), info = pkg)
+    }
+  }
 
 #})

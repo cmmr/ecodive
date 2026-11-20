@@ -39,11 +39,32 @@
   # da_wilcoxon() = wilcox.test()
   # -----------------------------------------------------------------------
 
+  # With ties and both sides under 50, wilcox.test() gives the exact
+  # p-value given the ties from R 4.6.0 on, and the normal approximation
+  # before. On older R, the reference for those is this one: the
+  # distribution of the doubled rank sum of every n1-subset, counted by
+  # adding one rank at a time; twice the smaller tail.
+  exact_ties_p <- function (u, v) {
+    a  <- as.integer(round(2 * rank(c(u, v))))
+    n1 <- length(u)
+    S  <- sum(a)
+    cnt <- matrix(0, n1 + 1L, S + 1L)
+    cnt[1, 1] <- 1
+    for (ai in a) for (k in n1:1)
+      cnt[k + 1, (ai + 1):(S + 1)] <- cnt[k + 1, (ai + 1):(S + 1)] + cnt[k, 1:(S + 1 - ai)]
+    d <- cnt[n1 + 1, ]; s <- 0:S; obs <- sum(a[seq_len(n1)])
+    min(1, 2 * min(sum(d[s <= obs]), sum(d[s >= obs])) / sum(d))
+  }
+  new_wilcox <- getRversion() >= '4.6.0'
+
   ref_w <- function (y, a, b) t(vapply(seq_len(ncol(y)), function (f) {
     u <- y[a, f]; v <- y[b, f]; u <- u[!is.na(u)]; v <- v[!is.na(v)]
     if (!length(u) || !length(v)) return (c(NaN, NaN, NaN))
     w <- suppressWarnings(stats::wilcox.test(u, v))
-    c(w$statistic, w$p.value, stats::median(u) - stats::median(v))
+    p <- w$p.value
+    if (!new_wilcox && length(u) < 50 && length(v) < 50 && anyDuplicated(c(u, v)))
+      p <- exact_ties_p(u, v)
+    c(w$statistic, p, stats::median(u) - stats::median(v))
   }, numeric(3)))
 
   for (norm in c('clr', 'percent', 'rclr', 'log', 'none')) {
@@ -66,12 +87,28 @@
     expect_identical(r$w, e[, 1], info = paste(sz, collapse = ' '))
     expect_true(maxrel(r$p_value, e[, 2]) < 1e-12, info = paste(sz, collapse = ' '))
   }
-  xx <- matrix(sample(0:3, 22 * 5, TRUE), 22, 5)
-  g  <- rep(c('a', 'b'), c(10, 12))
-  r  <- da_wilcoxon(xx, g, norm = 'none', cpus = 1L)
-  e  <- ref_w(xx, g == 'a', g == 'b')
-  expect_identical(r$w, e[, 1])
-  expect_true(maxrel(r$p_value, e[, 2]) < 1e-12)
+  for (sz in list(c(10, 12), c(49, 49), c(49, 50), c(3, 40), c(1, 6))) {
+    xx <- matrix(sample(0:3, sum(sz) * 5, TRUE), sum(sz), 5)
+    g  <- rep(c('a', 'b'), sz)
+    r  <- da_wilcoxon(xx, g, norm = 'none', cpus = 1L)
+    e  <- ref_w(xx, g == 'a', g == 'b')
+    expect_identical(r$w, e[, 1], info = paste(sz, collapse = ' '))
+    expect_true(maxrel(r$p_value, e[, 2]) < 1e-12, info = paste(sz, collapse = ' '))
+  }
+
+  # The tie distribution itself, against every subset.
+  set.seed(5)
+  for (it in 1:20) {
+    sz <- sample(2:7, 2, TRUE)
+    xx <- matrix(sample(0:2, sum(sz), TRUE) + 0, ncol = 1)
+    xx[1] <- 3                                     # not all tied
+    g  <- rep(c('a', 'b'), sz)
+    rk <- rank(xx)
+    Ws <- utils::combn(sum(sz), sz[[1]], function (i) sum(rk[i]))
+    ob <- sum(rk[g == 'a'])
+    e  <- min(1, 2 * min(mean(Ws <= ob + 1e-9), mean(Ws >= ob - 1e-9)))
+    expect_true(abs(da_wilcoxon(xx, g, norm = 'none')$p_value - e) < 1e-12, info = it)
+  }
 
 
   # -----------------------------------------------------------------------
@@ -322,7 +359,7 @@
   expect_true(is.nan(r$t[[2]]) && is.nan(r$p_value[[2]]) && !r$reject[[2]])
   expect_identical(r$p_adjusted[-2], stats::p.adjust(r$p_value[-2], 'holm'))
   r <- da_wilcoxon(xc, 'grp', meta, norm = 'none', cpus = 1L)
-  expect_true(is.nan(r$p_value[[2]]) && !r$reject[[2]])
+  expect_true(r$p_value[[2]] == 1 && !r$reject[[2]])   # every rank sum the same
   r <- da_lm(xc, ~ grp, meta, norm = 'none', cpus = 1L)
   expect_true(all(abs(r$estimate[r$feature == 'F2'] - c(5, 0)) < 1e-12))
   expect_true(all(r$se[r$feature == 'F2'] < 1e-12))

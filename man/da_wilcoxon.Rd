@@ -174,13 +174,17 @@ table without a dense copy.
 \strong{The tests.} For each feature, the transformed values of the treatment
 and reference samples are compared:
 \itemize{
-\item \code{da_wilcoxon()}: \code{wilcox.test(trt, ref)}, two-sided, with its defaults:
-the exact p-value (\code{\link[stats:Wilcoxon]{stats::pwilcox()}}) when both sides have fewer than
-50 samples and there are no ties; otherwise the normal approximation,
-with the variance corrected for ties and a continuity correction.
+\item \code{da_wilcoxon()}: \code{wilcox.test(trt, ref)}, two-sided, with its defaults
+as of R 4.6.0: when both sides have fewer than 50 values, the exact
+p-value (\code{\link[stats:Wilcoxon]{stats::pwilcox()}} without ties; with ties, the exact
+distribution of the rank sum given the ties, as the Streitberg-Rohmel
+shift algorithm computes it, twice the smaller tail); otherwise the
+normal approximation, with the variance corrected for ties and a
+continuity correction. Before R 4.6.0, \code{wilcox.test()} used the normal
+approximation whenever there were ties, so its p-values differ there.
 Ties are equal values (with \code{norm = 'clr'}, all of a sample's zeros
 are one value, and zeros tie across samples only with \code{'percent'} or
-\code{'none'}).
+\code{'none'}). A feature whose values are all equal gets a p-value of 1.
 \item \code{da_ttest()}: \code{t.test(trt, ref, var.equal = var_equal, conf.level = conf_level)}.
 \item \code{da_lm()}: \code{lm(y ~ ...)} of the feature's values \code{y} on the design of
 \code{formula}, every coefficient tested against 0 with its t statistic
@@ -194,8 +198,8 @@ coefficients) are its own.
 Where base R stops with an error, these give \code{NaN} statistics and
 p-values (never rejected) for that feature: a side with no values (with
 \code{'rclr'}) or a single value (Welch's t-test, with a warning when a whole
-side of the contrast has one sample), or a feature whose values are
-constant ("data are essentially constant").
+side of the contrast has one sample), or, for the t-test, a feature
+whose values are constant ("data are essentially constant").
 
 \strong{Normalization.} The tests compare relative abundances, not absolute
 ones: with \code{'clr'}, relative to each sample's geometric mean, so that a
@@ -288,6 +292,10 @@ For large datasets, standard matrix operations may be slow. See
 
 }
 \references{
+Streitberg, B., & Rohmel, J. (1986). Exact distributions for
+permutation and rank tests: an introduction to some recently published
+algorithms. \emph{Statistical Software Newsletter}, 12, 10-17.
+
 Wirbel, J., Essex, M., Forslund, S. K., & Zeller, G. (2024). A realistic
 benchmark for differential abundance testing and confounder adjustment in
 human microbiome studies. \emph{Genome Biology}, 25, 247.

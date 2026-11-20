@@ -723,7 +723,10 @@
   `p_adjust` (default `'holm'`, as the other DA methods). They give the
   results of `wilcox.test()`, `t.test()` and `summary(lm())` / `confint()`
   feature by feature, to about 1e-12, from a sparse table without a dense
-  copy, in parallel C, identical for any `cpus`. `norm` chooses the values
+  copy, in parallel C, identical for any `cpus`. `da_wilcoxon()` follows
+  R 4.6.0's `wilcox.test()` on every R version: with ties and fewer than 50
+  values on each side, its p-value is exact given the ties (earlier R used
+  the normal approximation there). `norm` chooses the values
   compared (`'clr'` by default; `'log'`, `'percent'`, `'rclr'`, whose zeros
   are left out, ...). Their results print as tables and `plot()` as volcano
   plots.

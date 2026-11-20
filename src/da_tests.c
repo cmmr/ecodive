@@ -98,7 +98,15 @@ static const int    *dt_side;   // per sample: 1, 2, or 0 (left out)
 static double       *dt_buf;    // per thread: n + 2 * m doubles
 static dt_pair_t     *dt_pairs;  // per thread: m + 1 (value, side) pairs
 static int           dt_m;      // samples in the contrast
-static double       *dt_out;    // D x 7, column-major
+static double       *dt_out;    // D x 8, column-major
+static double       *dt_dp;     // per thread: DT_DP doubles, for exact tie p-values
+
+// The exact conditional distribution with ties is computed when both
+// sides have fewer than 50 values: then N < 99, so a subset of at most
+// 49 doubled ranks sums to at most 49 * 2 * 98.
+#define DT_MAX_SIDE 49
+#define DT_SMAX     (DT_MAX_SIDE * 2 * 98)
+#define DT_DP       ((size_t) (DT_MAX_SIDE + 1) * (DT_SMAX + 1) + DT_MAX_SIDE + 1)
 
 
 static int cmp_pair (const void *a, const void *b) {
@@ -136,6 +144,96 @@ static double r_var (const double *x, int n) {
   sum = 0;
   for (int i = 0; i < n; i++) sum += (x[i] - xm) * (x[i] - xm);
   return (double) (sum / (n - 1));
+}
+
+
+static int gcd_int (int a, int b) {
+  while (b) { int t = a % b; a = b; b = t; }
+  return a;
+}
+
+
+// The exact null distribution of Wilcoxon's rank sum given the ties: the
+// treatment's ranks are a random n1-subset of the N pooled (average) ranks,
+// every subset equally likely (the permutation distribution; Streitberg &
+// Rohmel 1986). `pr` holds the N sorted pairs (value, side). Counts the
+// subsets by their sum of doubled ranks, shifted by the smallest and
+// divided by their greatest common divisor, one rank at a time (the shift
+// algorithm), for the smaller side. Writes P(W <= w) and P(W >= w); R's
+// wilcox.test() (4.6.0 on) takes twice the smaller, at most 1, as the
+// two-sided p-value (checked against its output).
+static void wilcox_exact_ties (
+    const dt_pair_t *pr, int N, int n1, double *dp, double *out3 ) {
+
+  int n2 = N - n1;
+  int m  = n1 <= n2 ? n1 : n2;
+  int sm = n1 <= n2 ? 1 : 2;           // the side whose sum is counted
+
+  // Doubled average ranks, as integers.
+  int *c = (int *) (dp + (size_t) (DT_MAX_SIDE + 1) * (DT_SMAX + 1));
+  int  amin = 2, g = 0;
+  for (int i = 0; i < N; ) {
+    int j = i + 1;
+    while (j < N && pr[j].v == pr[i].v) j++;
+    for (int e = i; e < j; e++) c[e] = i + 1 + j;
+    i = j;
+  }
+  amin = c[0];
+  for (int i = 0; i < N; i++) { c[i] -= amin; g = gcd_int(g, c[i]); }
+
+  long obs = 0, total = 0;
+  for (int i = 0; i < N; i++) {
+    total += c[i];
+    if (pr[i].side == sm) obs += c[i];
+  }
+
+  if (g == 0) {                        // all tied: W is constant
+    out3[0] = out3[1] = 1;
+    return;
+  }
+  for (int i = 0; i < N; i++) c[i] /= g;
+  total /= g;
+  obs   /= g;
+
+  // The largest sum of m values (c is sorted).
+  int smax = 0;
+  for (int i = N - m; i < N; i++) smax += c[i];
+  int w = smax + 1;
+
+  int maxs[DT_MAX_SIDE + 1];
+  for (int k = 0; k <= m; k++) {
+    maxs[k] = -1;
+    memset(dp + (size_t) k * w, 0, (size_t) w * sizeof(double));
+  }
+  dp[0]   = 1;
+  maxs[0] = 0;
+
+  for (int i = 0; i < N; i++) {
+    int ci = c[i];
+    for (int k = (i + 1 < m ? i + 1 : m); k >= 1; k--) {
+      if (maxs[k - 1] < 0) continue;
+      const double *src = dp + (size_t) (k - 1) * w;
+      double       *dst = dp + (size_t) k * w + ci;
+      for (int s = 0; s <= maxs[k - 1]; s++) dst[s] += src[s];
+      if (maxs[k - 1] + ci > maxs[k]) maxs[k] = maxs[k - 1] + ci;
+    }
+  }
+
+  // Counts of the treatment's sums: x = sum (sm == 1) or total - sum.
+  const double *cnt = dp + (size_t) m * w;
+  long   x_obs = (sm == 1) ? obs : total - obs;
+
+  long double all = 0, lo = 0, hi = 0;
+  for (int s = 0; s <= maxs[m]; s++) {
+    double v = cnt[s];
+    if (v == 0) continue;
+    long   x = (sm == 1) ? s : total - s;
+    all += v;
+    if (x <= x_obs) lo += v;
+    if (x >= x_obs) hi += v;
+  }
+  out3[0] = (double) (lo / all);
+  out3[1] = (double) (hi / all);
 }
 
 
@@ -202,11 +300,18 @@ static void *dt_worker (void *arg) {
         i = j;
       }
 
+      // With ties and both sides under 50: the exact conditional
+      // p-values (R >= 4.6.0's wilcox.test()).
+      double ex[2] = { R_NaN, R_NaN };
+      if (ties > 0 && n1 > 0 && n2 > 0 && n1 <= DT_MAX_SIDE && n2 <= DT_MAX_SIDE)
+        wilcox_exact_ties(pr, k, n1, dt_dp + (size_t) thread_i * DT_DP, ex);
+
       out[2 * (size_t) D] = r1 - (double) n1 * (n1 + 1) / 2;
       out[3 * (size_t) D] = ties;
       out[4 * (size_t) D] = sorted_median(a, n1);
       out[5 * (size_t) D] = sorted_median(b, n2);
-      out[6 * (size_t) D] = R_NaN;
+      out[6 * (size_t) D] = ex[0];
+      out[7 * (size_t) D] = ex[1];
     }
     else {
 
@@ -218,6 +323,7 @@ static void *dt_worker (void *arg) {
       // The mean of both sides' values together.
       memcpy(a + n1, b, (size_t) n2 * sizeof(double));
       out[6 * (size_t) D] = (n1 + n2) ? r_mean(a, n1 + n2) : R_NaN;
+      out[7 * (size_t) D] = R_NaN;
     }
   }
 
@@ -228,11 +334,13 @@ static void *dt_worker (void *arg) {
 
 //======================================================
 // R interface: da_wilcoxon() (test 1) and da_ttest()
-// (test 2). Returns a D x 7 matrix: n1, n2 (the values
+// (test 2). Returns a D x 8 matrix: n1, n2 (the values
 // on each side), then
 //   Wilcoxon: W, sum(t^3 - t) over ties, median1,
-//             median2, NaN;
-//   t-test:   mean1, mean2, var1, var2, mean of both.
+//             median2, and with ties and both sides under
+//             50 the exact P(W <= w) and P(W >= w) (else
+//             NaN);
+//   t-test:   mean1, mean2, var1, var2, mean of both, NaN.
 //======================================================
 SEXP C_da_tests(
     SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_norm, SEXP sexp_pseudocount,
@@ -255,7 +363,7 @@ SEXP C_da_tests(
   // Threads only for enough work: about 20 ns per value.
   int nt = threads_for(n_thr, (double) D * (n + m) * 20, 1e6);
 
-  SEXP result = PROTECT(allocMatrix(REALSXP, D, 7));
+  SEXP result = PROTECT(allocMatrix(REALSXP, D, 8));
 
   dt_tab  = &tab;
   dt_test = asInteger(sexp_test);
@@ -264,6 +372,10 @@ SEXP C_da_tests(
   dt_out  = REAL(result);
   dt_buf  = (double *) R_alloc((size_t) nt * ((size_t) n + 3 * (size_t) m + 2), sizeof(double));
   dt_pairs = (dt_pair_t *) R_alloc((size_t) nt * ((size_t) m + 1), sizeof(dt_pair_t));
+
+  // Room for the exact tie distribution (about 4 MB a thread): with rclr,
+  // any feature's sides may be small enough to need it.
+  dt_dp = (dt_test == 1) ? (double *) R_alloc((size_t) nt * DT_DP, sizeof(double)) : NULL;
 
   run_parallel(dt_worker, nt, D < 100 ? 100 : D);
 
