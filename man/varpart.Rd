@@ -45,12 +45,12 @@ with one row per sample, matched to the samples of \code{x} by row
 name (or, without row names, in the same order). Default: \code{NULL}.}
 
 \item{norm}{Normalize the count table first, as in \code{\link[=rda]{rda()}}: \code{'none'},
-\code{'percent'}, \code{'chord'}, \code{'hellinger'}, \code{'binary'}, \code{'clr'}, or
-\code{'rclr'}. \code{vegan::varpart(transfo = 'hel')} is \code{norm = 'hellinger'}. Not used for distances, and only \code{'none'} with
+\code{'percent'}, \code{'chord'}, \code{'hellinger'}, \code{'binary'}, \code{'clr'},
+\code{'rclr'}, or \code{'log'}. \code{vegan::varpart(transfo = 'hel')} is \code{norm = 'hellinger'}. Not used for distances, and only \code{'none'} with
 \code{chisquare = TRUE}. Default: \code{'none'}.}
 
 \item{pseudocount}{Value added to counts to handle zeros when
-\code{norm = 'clr'}. Ignored for other normalization methods. See
+\code{norm = 'clr'} or \code{'log'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
@@ -198,10 +198,12 @@ For large datasets, standard matrix operations may be slow. See
 
 \section{Pseudocount}{
 
-The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}.
+The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}
+or \code{norm = 'log'}.
 
-Zeros are undefined in the centered log-ratio (CLR) transformation. If
-\code{norm = 'clr'}, \code{pseudocount} is \code{NULL} (the default), and
+Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If \code{norm} is \code{'clr'} or
+\code{'log'}, \code{pseudocount} is \code{NULL} (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (\code{min(x[x>0]) / 2}) and issues a warning.
 

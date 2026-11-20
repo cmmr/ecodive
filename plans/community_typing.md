@@ -367,3 +367,144 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - Liu, D. C., & Nocedal, J. (1989). On the limited memory BFGS method for
   large scale optimization. *Math Program*, 45, 503–528.
   doi:10.1007/BF01589116
+
+
+## Decisions made while implementing (enterotype)
+
+Item 45, 2026-11-20. `enterotype()` is in `R/enterotype.r` and `src/pam.c`;
+the shared `ecodive_types` output (constructor, registry, `print()` and
+`plot()`) is in `R/community_types.r`.
+
+**Asked of the user up front:**
+- **CH index: both, via an argument.** `ch = c('medoids', 'centroids')`,
+  default `'medoids'` (parity with Arumugam et al.'s script, which calls
+  `clusterSim::index.G1(t(data), cl, d = dist, centrotypes = "medoids")`);
+  `'centroids'` is the distances' pseudo-F (PERMANOVA's F).
+- **A `dist` input takes an optional `counts`**, used only for `profiles`
+  and `top_feature` (and the medoid-form CH; below). Matched to the
+  distances' labels by name, else by position. Without it, `profiles` is
+  `NULL`, `top_feature` is `NA`, and `plot(type = 'profiles')` errors with
+  a hint. Giving `counts` when `x` is already a count table is an error.
+- Signature: `enterotype(x, n_types = 2:10, ch = c('medoids', 'centroids'),
+  counts = NULL, margin = 1L, cpus = n_cpus())`.
+
+**Settled from the references' outputs** (cluster 2.1.6, clusterSim
+0.51.6, R 4.3.3; their source was never read):
+- **BUILD's gain includes the candidate itself:** each later medoid
+  maximises \eqn{\sum_j \max(D_j - d_{ij}, 0)} over every non-medoid
+  \eqn{j}, *including* \eqn{j = i} (which gains \eqn{D_i}). Kaufman &
+  Rousseeuw's wording ("another nonselected object j") reads as excluding
+  it, but that version's BUILD objectives disagree with `pam()`'s (e.g.
+  0.4018 vs 0.2824 on `ex_counts`, k = 2), and on varespec it then ends at
+  different local optima. Including \eqn{i} matches every BUILD objective.
+- **Ties** (pinned on 300 random tie-heavy integer grids, n = 10–30,
+  k = 2–8, 2,100 fits):
+  - BUILD: the **highest** index wins (first medoid and later ones). The
+    plan's "lowest index" was a guess to check; the outputs say highest.
+  - SWAP: the best \eqn{\Delta T}, the first in (lowest h, then lowest
+    medoid) order; `h`-major and `i`-major orders were indistinguishable.
+  - Assignment: a sample equally near two medoids joins the lower-indexed
+    medoid (3,487/3,487 tied samples); **a medoid always keeps its own
+    cluster**, even when another medoid is its duplicate (distance 0). The
+    first version assigned it to the lower duplicate, leaving a cluster
+    empty; 142 of the 2,100 fits caught that.
+  - Result: medoids identical in 2,099/2,100 fits, partitions in
+    2,100/2,100, objectives at 1e-12 in 2,099. The one miss (seed 235,
+    k = 2): six samples tie for the first BUILD medoid, and `pam()` takes
+    neither the highest nor the lowest; probably rounding in its own
+    arithmetic. The plan only requires exact agreement without ties, so
+    this is documented ("Differences from cluster and clusterSim") and
+    not chased.
+- **SWAP acceptance:** a swap is made when \eqn{\Delta T < -16
+  \epsilon T} (relative), so rounding can't make it cycle; a cap of
+  100 n swaps is a never-reached guard.
+- **The medoid-form CH (`clusterSim`) is a mixed index.** With
+  `centrotypes = "medoids"`, `index.G1(x, cl, d)` takes the medoids from
+  `d` (each cluster's member with the smallest total within-cluster
+  distance; \eqn{M} the same over all samples), but measures spread in
+  `x`'s space: \eqn{T = \sum_i \lVert x_i - x_M\rVert^2},
+  \eqn{W = \sum_i \lVert x_i - x_{m(i)}\rVert^2},
+  \eqn{CH = ((T-W)/(k-1))/(W/(n-k))}. Found by fitting candidate formulas
+  to its outputs: it returned NaN for `x` = zeros, changed with random `x`,
+  and was unchanged when `x` was scaled. ecodive therefore uses the
+  samples' **proportions** as `x` (what Arumugam et al. pass), from the
+  count table or from `counts`; for a `dist` without `counts`, it uses the
+  distances themselves for \eqn{e}, which equals `index.G1()` whenever the
+  distances are Euclidean distances of its `x`. Matches to ≤ 1.1e-15
+  relative.
+- **The centroid form** is exactly `index.G1(x, cl)` for `d = dist(x)`
+  (≤ 3.4e-15 on iris, k = 2–5), and equals `permanova()`'s F (tested). It
+  is computed by a dedicated O(n²) loop in `src/pam.c` rather than through
+  `C_permanova` (whose interface is built around permutations).
+- **Numbering:** `cluster::pam()` numbers clusters by first appearance
+  (1,000/1,000 random fits); ecodive numbers types by their medoids'
+  positions, as the plan says. Documented.
+
+**Other decisions:**
+- **Type labels** are `"1"`, `"2"`, ... (factor levels in type order).
+  `dmm()` can do the same; `valencia()`'s types are its sub-CST names.
+- **Only a `dist` is read as distances;** a matrix is always a count
+  table (a symmetric count table would otherwise be ambiguous).
+- **`n_types`:** when omitted, `2:10` is cut to `2:min(10, n - 1)`; an
+  explicit value outside 2..n−1 is an error. Fewer than 3 samples is an
+  error. Values are sorted and de-duplicated.
+- **Counts:** NA, negative values and a sample with total 0 are errors
+  (the plan: error for an all-zero sample). No pseudocount.
+- **Beyond the plan's columns:** `types$silhouette` (each type's mean
+  silhouette, as `cluster`'s `clus.avg.widths`); `selection$objective`
+  (PAM's mean distance to the nearest medoid, per k); attributes
+  `objective = c(build =, swap =)` for the chosen k (the plan's "report
+  the BUILD and SWAP objectives") and `ch` (which form made the `ch`
+  column, a setting that qualifies a result, README rule 1). The C code
+  also returns each sample's neighbouring cluster, not exposed.
+- **Registry:** `COMMUNITY_TYPES` (id, display name, the `selection`
+  criterion column, its label, and whether `max` or `min` wins) keyed by
+  `method`, per README's "facts live in a registry". `print()` and the
+  selection plot read it.
+- **print():** a custom `print.ecodive_types()` (the plan's "counts per
+  type and the selection"): the title; "n samples in k types, chosen by
+  the <criterion> from <range>"; the `types` table; the `selection` table
+  (when more than one k was tried); then the tibble-style preview of the
+  samples, with the usual footer, all through `print_table_lines()`.
+  Documented under `?print_ecodive`.
+- **plot():** `type = c('profiles', 'selection')`. `'profiles'` draws
+  stacked bars of the `n_features` (default 10) features with the
+  largest mean proportion in any type, the rest pooled as "Other" (grey),
+  bars labelled "type (n = …)", legend in a widened right margin, colours
+  `plot_palette()`. `'selection'` plots the registry's criterion against
+  `n_types`, circling the choice. `'scores'` is not added yet: valencia
+  adds it to the `match.arg()` choices.
+- **Threads:** BUILD (over candidates), SWAP (over non-medoids h, each
+  computing every \eqn{T_{ih}} as an in-order sum over j) and silhouettes
+  (over samples) use `run_parallel()`; the best candidate is chosen
+  afterwards in index order. CH is a serial O(n²) loop. Results are
+  `identical()` for cpus 1, 2, 4 (tests, n = 210; and all fixtures).
+  Different `n_types` run one after another, each threaded.
+- **Speed:** n = 2,000, 60 features, k = 2–6, from a `dist`: 1.07 s on one
+  thread, 0.62 s on four, against 3.55 s for `cluster::pam()` +
+  `silhouette()` + `index.G1()`.
+- **Fixtures** (`data-raw/expected/enterotype.r`): `ex_counts` has only 4
+  samples, so it is used for k = 2–3 only; vegan's `varespec` (24 samples)
+  was added, with the simulated three-type Dirichlet table (60 × 30), a
+  tie-heavy Manhattan grid with duplicated points, and iris (Euclidean,
+  for the centroid form). Inputs are stored (8.9 KB); the tests recompute
+  the distances.
+- **Examples** use `iris[, 1:4]` (150 samples; types recover setosa vs the
+  rest) because `ex_counts` is too small for `n_types = 2:10`.
+- **Clean room:** no GPL source was read. The only GPL text seen was
+  `cluster::pam()`'s R-level error message "Number of clusters 'k' must be
+  in {1,2, .., n-1}; hence n >= 2", printed when a fixture script first
+  asked for k = 4 of 4 samples; it was not used (ecodive's messages are
+  its own).
+
+**For `valencia()` and `dmm()`:** reuse `new_ecodive_types()`,
+`types_profiles()`, `types_top_feature()`, `types_proportions()` and
+`validate_n_types()` (its default-cutting rule), add a row to
+`COMMUNITY_TYPES` (dmm: `criterion = 'laplace'`, `best = 'min'`;
+valencia: no criterion, so `selection = NULL`, which `print()` and the
+selection plot already handle), register `print`/`plot` through the
+shared `ecodive_types` methods (no per-method S3 methods needed), and add
+`'scores'` to `plot.ecodive_types()`. `print()` and `plot()` mark the
+choice from `selection$selected`, never by recomputing a max or min, so
+`dmm()`'s minimum-Laplace choice needs no change there (the `best` column
+documents it).

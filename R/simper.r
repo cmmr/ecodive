@@ -214,7 +214,7 @@ simper <- function (
 
   if (missing(groups)) groups <- NULL
 
-  if (is.character(norm) && length(norm) == 1 && tolower(norm) %in% c('clr', 'rclr'))
+  if (is.character(norm) && length(norm) == 1 && tolower(norm) %in% c('clr', 'rclr', 'log'))
     stop(
       "`norm = '", norm, "'` gives negative values, which Bray-Curtis ",
       "can't use. Use 'none', 'percent', 'chord', 'hellinger', or 'binary'.",

@@ -8,10 +8,12 @@ documentation
 }
 \section{Pseudocount}{
 
-The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}.
+The \code{pseudocount} parameter is only relevant when \code{norm = 'clr'}
+or \code{norm = 'log'}.
 
-Zeros are undefined in the centered log-ratio (CLR) transformation. If
-\code{norm = 'clr'}, \code{pseudocount} is \code{NULL} (the default), and
+Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If \code{norm} is \code{'clr'} or
+\code{'log'}, \code{pseudocount} is \code{NULL} (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (\code{min(x[x>0]) / 2}) and issues a warning.
 

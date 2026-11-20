@@ -262,3 +262,125 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - van Elteren, P. H. (1960). On the combination of independent two-sample
   tests of Wilcoxon. *Bulletin of the International Statistical
   Institute*, 37, 351–361.
+
+
+## Decisions made while implementing (2026-11-20)
+
+Asked of the user at the start:
+
+- **`groups` / `formula` convention: adopted**, including for `ancombc()` /
+  `ancombc2()`. `formula` and `data` default to `NULL`; `groups` alone is
+  `formula = ~ groups` (a column name of `data`, or one value per sample,
+  which becomes the variable `group`); with `formula`, `groups` must name
+  one of its terms (a column of `data`). The checks that it is categorical
+  with at least three levels moved to the post-hoc tests
+  (`posthoc_setup()` already made them). `attr(fit, 'groups')` stays what
+  was given (`NULL` without it), so `ancombc_global(fit)` without a
+  `groups` still asks for one; the "first non-intercept term" default is
+  applied where a term is needed (`plot.ecodive_da_lm()`, and
+  `da_sensitivity()` should do the same), not stored.
+- **`norm`: `'clr'` default, and a new `'log'` norm** in `normalize()` and
+  everywhere `norm` is offered: \eqn{\log((x + pc) / \sum (x + pc))}, the
+  closure *after* the pseudocount (so it is the clr shifted by one constant
+  per sample; the zeros' value goes in `clr_vec` like the clr's, so every
+  C consumer of `norm` handles it unchanged). Same pseudocount rule as the
+  clr (`log_pseudocount()`, "cannot perform log normalization"). `simper()`
+  refuses it as it refuses clr/rclr (negative values).
+- **`p_adjust` default `'holm'`**, as the other DA methods (not the
+  benchmarks' `'BH'`); the docs point to `'BH'`.
+- **`aldex` / `aldex2` aliases for `dirmult_ttest`: added.** The docs say
+  it is an ALDEx2-style method, not ALDEx2.
+
+Made while implementing:
+
+- **Registry** `DA_TESTS` in `R/da_test.r` with columns `name, id, design,
+  effect, base, zero_free_ok, alt_ids` (`base` is a string: `'e'`, `'2'`,
+  `'norm'`, or `NA` for ancom). Aliases: ancom `analysisofcompositionsofmicrobiomes`;
+  ancombc `ancombiascorrected`, the long name; dirmult_ttest
+  `dirichletmultinomialwelchttest aldex aldex2`; da_wilcoxon `wilcoxon wilcox
+  wilcoxontest mannwhitney mannwhitneyu ranksum`; da_ttest `ttest welch
+  studentttest`; da_lm `lm linearregression ols`. None is a name or alias in
+  any other registry (tested).
+- **ANCOM-BC2 vs ANCOM-BC:** letters-only matching makes both `ancombc`, so
+  `match_da_test()` first tries an exact match keeping digits (`'ANCOM-BC2'`
+  is ancombc2, `'ANCOM-BC'` ancombc); `exact_names('DA_TESTS')` therefore
+  has `ancombc` twice (both ids), which the redirect checks don't mind.
+- **Redirects both ways:** `match_da_test()` sends distance tests to
+  `dist_test()` and ordinations to `count_ord()` / `dist_ord()`;
+  `match_count_ord()`, `match_dist_ord()` and `match_dist_test()` send DA
+  names to `da_test()` (so `match_dist_test('t-test')` now says "use
+  da_test()"; its test was updated).
+- **`da_test()` signature** `(counts, method, groups = NULL, data = NULL,
+  formula = NULL, ...)`; `seed` is dropped for methods without one (as
+  `count_ord()`); a group method given `formula` takes its single variable
+  (LHS variables count as terms; `~ log(age)` is an error), and given both
+  `groups` and `formula` is an error.
+- **`method` attribute** added to `ancom()` and `dirmult_ttest()` results
+  (their docs say so); `da_method_name()` reads the registry.
+- **`da_design()`** in `R/da_design.r` (renamed `ancombc_design()`, takes
+  `what` for its "needs more samples than design columns" message). The
+  formula built from `groups` is `as.formula(call('~', as.name(groups)))`,
+  so it prints `~status`.
+- **Inputs:** any input type; finite; non-negative except with `norm =
+  'none'` (an already transformed table). At least one feature.
+- **Results:** columns as the plan, with `mean` (not `mean_clr`) for
+  `da_ttest()`'s column and `da_lm()`'s attribute, since `norm` needn't be
+  clr. Attributes: `method`, `contrast`, `n` (two-sample), `norm` (its
+  name), `pseudocount`, `var_equal` + `conf_level` (t-test), `alpha`,
+  `p_adjust`, `log_base` (`exp(1)` for clr/rclr/log, `NA` otherwise);
+  `da_lm()` also `formula`, `groups`, `design`, and per feature `dof`,
+  `mean`, `resid_sd`. Missing values are `NaN` throughout.
+- **Base R's errors become `NaN`, never rejected:** a side with no values
+  (rclr), Welch with one value on a side (with the warning `dirmult_ttest()`
+  gives, when a whole side of the contrast has one sample), t.test()'s
+  "essentially constant" rule, `dof <= 0` in `da_lm()`.
+- **Wilcoxon:** C returns W, the ties' \eqn{\sum t^3 - t}, and both medians
+  (R's `median()` algorithm); the exact / normal branch, continuity
+  correction and `pwilcox()` run in R on the main thread, exactly as
+  `wilcox.test.default()` (R 4.3.3). `auc` = W / (n1 n2) with the
+  feature's own n (rclr).
+- **t-test:** C returns each side's n, mean and variance by R's own `mean()`
+  / `var()` algorithms (long double sums with the refinement step), and the
+  pooled mean; the rest is `t.test.default()`'s arithmetic in R.
+- **`src/feature_lm.c`:** a Householder QR with dqrdc2's limited pivoting
+  (tol 1e-7, columns whose remaining norm falls below tol × their own move
+  to the end and are aliased), written from the algorithm's description;
+  no BLAS, so worker threads can call it. API: `flm_init()`,
+  `flm_decompose()` (rows subset = the masked design), `flm_fit()` (Q'y,
+  coefficients in design order with `NaN` where aliased, RSS as the sum of
+  the last n − rank squares of Q'y), `flm_se()` (classical, HC0, HC3; the
+  HC ones need `q1`). `C_feature_lm` exposes it to the tests, which check it
+  against `lm()` and the sandwich formulas. The complete design is
+  decomposed once; features with missing values (rclr) get their own QR.
+- **`da_lm()` per factor level:** one t-test per design column, as the
+  plan; `(Intercept)` rows included.
+- **Plots:** volcano only (item 35 adds the other types):
+  `plot.ecodive_da_wilcoxon()` / `_da_ttest()` (x: difference in medians or
+  means, with the norm in the label) and `plot.ecodive_da_lm(x, covariate =
+  NULL)` (default: the first column of `groups`'s term, else the first
+  non-intercept column), all titled "Volcano plot of <registry name>"
+  (`da_plot_title()`), in `R/plot_da.r`. Printing: `print_table_result`,
+  header from `da_method_name()`.
+- **Not done (later steps):** the stratified (van Elteren) Wilcoxon; the
+  effect / MA / forest plots (item 35); `log_base` on the *existing* DA
+  results (item 34; the new ones have it).
+
+What later items can rely on:
+
+- **Item 41 (`da_sensitivity()`):** `list_da_tests()` gives `design`,
+  `effect` (column name), `base` and `zero_free_ok` per method;
+  `da_test(counts, id, groups, data, formula, ...)` runs any of them with
+  one call shape; every result has `method`, `alpha`, `reject` (and
+  `reject_robust` / `passed_ss` for ancombc's sensitivity analysis); model
+  methods' term of interest is `attr(res, 'groups')`, else the first
+  non-intercept term. Effects: `log_fc` (ancombc*), `log2_fc`
+  (dirmult_ttest), `median_diff` / `diff` / `estimate` (da_*, in `norm`
+  units, `log_base` attribute). ancom has no effect column.
+- **Item 34 (`log_base`):** `da_wilcoxon()`, `da_ttest()`, `da_lm()` already
+  set it; `ancombc()`, `ancombc2()` and `dirmult_ttest()` still need it.
+- **Item 35 (DA plots):** `da_ttest()` has `pooled_sd` and `mean` columns;
+  `da_lm()` has `resid_sd`, `mean` and `dof` attributes and `ci_lower` /
+  `ci_upper` columns; `da_plot_title()` / `da_method_name()` give titles.
+- **linda / fastancom / dirmult_lm:** `da_design()`, `da_table_init()` /
+  `da_table_column()` (normalized table by feature, any norm, rclr zeros as
+  `NaN`) and the `flm_*` kernel (with HC0 / HC3).

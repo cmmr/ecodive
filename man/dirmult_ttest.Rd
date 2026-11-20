@@ -112,7 +112,7 @@ bound of the draws' intervals for that difference, in log2 units
 (\code{ci_lower}, \code{ci_upper}) excludes 0 (\code{Signif}).
 }
 
-Attributes: \code{contrast} (the treatment and reference groups; the
+Attributes: \code{method} (\code{"dirmult_ttest"}), \code{contrast} (the treatment and reference groups; the
 reference is \code{NA} when all other samples were pooled), \code{n} (the number
 of samples on each side), \code{n_draws}, \code{pseudocount}, \code{scale_sd},
 \code{alpha}, \code{conf_level}, \code{p_adjust} and \code{seed}.

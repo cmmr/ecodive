@@ -280,10 +280,11 @@ plots read.
   | `count_ord()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
   | `dist_test()` | `dm`, `test`, `groups`, `data` | an argument named `test`, or any prefix of `test`, `groups` or `data` (`t`, `g`, `gr`, `d`, `da`, ...) |
   | `replace_zeros()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
-  | `da_test()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
+  | `da_test()` | `counts`, `method`, `groups`, `data`, `formula` | an argument named `method`, or any prefix of `method`, `counts`, `groups`, `data` or `formula` other than the pass-through `groups`, `data`, `formula` themselves (`m`, `c`, `co`, `g`, `gr`, `d`, `da`, `f`, `fo`, ...) |
 
   `groups` and `data` themselves are fine in `dist_test()`: it passes
-  them through on purpose. Tests may take a `method` argument (as
+  them through on purpose, as `da_test()` passes `groups`, `data` and
+  `formula`. Tests may take a `method` argument (as
   `mantel()` does, for the correlation), because `dist_test()` names its
   selector `test`. Plain functions with no wrapper are free of this
   constraint. `tests/tinytests/test-wrapper_args.r` enforces the rule for
@@ -332,7 +333,7 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, `da_test` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, ✓ `da_test` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
 | Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, ✓ `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
@@ -349,12 +350,12 @@ can't be mistaken for one another:
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance`, `log_ratio_features` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
-| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, `da_wilcoxon`, `da_ttest`, `da_lm`, `linda`, `maaslin3`, `fastancom`, `rademu`, `da_sensitivity` |
+| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, `linda`, `maaslin3`, `fastancom`, `rademu`, `da_sensitivity` |
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
-| Rarefied diversity | `beta_div_rarefied`, `alpha_div_rarefied` |
+| Rarefied diversity | ✓ `beta_div_rarefied`, ✓ `alpha_div_rarefied` |
 | Normalization | ✓ `normalize`, `size_factors` (new `norm` choices: see [normalization_factors.md](normalization_factors.md)) |
 | Associations and networks (`feature_assoc`, proposed) | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s`, `sparcc`, `spiec_easi_mb`, `spiec_easi_glasso`, `secom_pearson`, `secom_distance`, `assoc_network`, `assoc_network_compare`, `assoc_network_diff` |
-| Community types | `enterotype`, `valencia`, `dmm` |
+| Community types | ✓ `enterotype`, `valencia`, `dmm` |
 | Compositional plots | `ternary_plot`, `variation_array`, `zero_pattern`, `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
 | Spatial | `moran_i`, `dbmem` |
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |

@@ -23,7 +23,7 @@ proportions are also accepted.}
 class (e.g. \code{phyloseq}). Default: \code{1}}
 
 \item{pseudocount}{Value added to counts to handle zeros when
-\code{norm = 'clr'}. Ignored for other normalization methods. See
+\code{norm = 'clr'} or \code{'log'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
 \item{pairs}{Which combinations of samples should distances be

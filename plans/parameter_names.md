@@ -21,12 +21,12 @@ same thing.
 | `counts` | a count table (first argument) | metrics, `pca`, `rpca`, `normalize`, `rarefy`, `count_ord`, and all planned count-table methods |
 | `dm` | beta diversity distances (first argument) | `pcoa`, ..., all tests, `dist_ord`, `dist_test` |
 | `ord` | an ordination result (first argument) | `envfit`, `pcoa_biplot`; planned `procrustes` |
-| `x`, `y` | two inputs of equal standing, or a first argument that can be either `dm` or `counts` | planned `coinertia(x, y)`, `varpart(x, ...)`, `forward_select(x, ...)`; `mantel(dm, y)` |
+| `x`, `y` | two inputs of equal standing, or a first argument that can be either `dm` or `counts` | planned `coinertia(x, y)`, `varpart(x, ...)`, `forward_select(x, ...)`; `enterotype(x, ...)` (with `counts` as a later, optional argument when `x` is a dist); `mantel(dm, y)` |
 | `n_axes` | **the number of axes returned** (proposed rename of `k`; see §2.0) | every ordination |
 | `axes` | **which** axes of an input ordination to use (indices) | `envfit`; planned `procrustes` |
-| `groups`, `data`, `formula` | the grouping variable or model, and the sample metadata it comes from | tests, `dbrda`, `capscale`, and planned constrained and discriminant methods |
+| `groups`, `data`, `formula` | the grouping variable or model, and the sample metadata it comes from. DA model methods (2026-11-20, `da_test()`): `formula` is the model and `groups` its term of interest; `groups` alone is `formula = ~ groups` | tests, `dbrda`, `capscale`, DA methods, and planned constrained and discriminant methods |
 | `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv` |
-| `margin`, `norm`, `pseudocount` | the count table's orientation and transformation | everything that takes `counts` |
+| `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20) | everything that takes `counts` |
 | `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
 | `scaling` | **reserved** for score scaling (vegan's scaling 1/2), if ever needed | — |
 | `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
@@ -42,8 +42,9 @@ same thing.
 | `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only), `log_ratio`, `balance`, `rho_p`, `phi_s` (`denominator` only: one feature for an alr, or a set) |
 | `basis` | **(new)** an ILR basis or a sequential binary partition | `ilr` |
 | `load` | **(new, 2026-11-19)** each sample's measured total microbial load: one finite value > 0 per sample (matched by name, else by position), or a column name of `data`, by the same `per_sample()` rule as `groups` | `qmp_scale`, `qmp_rarefy` |
-| `contrast` | **(new)** the samples compared, `c(treatment, reference)`; `reference = NA` pools all other samples | `dirmult_ttest` |
-| `conf_level` | **(new, 2026-11-19)** the confidence level of an interval, strictly between 0 and 1 (as `t.test(conf.level)`, snake_case) | `dirmult_ttest` |
+| `contrast` | **(new)** the samples compared, `c(treatment, reference)`; `reference = NA` pools all other samples | `dirmult_ttest`, `da_wilcoxon`, `da_ttest` |
+| `conf_level` | **(new, 2026-11-19)** the confidence level of an interval, strictly between 0 and 1 (as `t.test(conf.level)`, snake_case) | `dirmult_ttest`, `da_ttest`, `da_lm` |
+| `var_equal` | **(new, 2026-11-20)** `TRUE` for Student's t-test with a pooled variance, `FALSE` (the default) for Welch's (as `t.test(var.equal)`, snake_case) | `da_ttest` |
 | `part_weights`, `ilr_weights` | **(new)** PhILR's taxon and balance weights | planned `philr` |
 | `subjects`, `states` | **(new)** per-sample subject ids and time points / conditions | planned `ctf` |
 | `fit` | **(new)** a fitted result given to a post-hoc test | planned `ancombc_*` |
@@ -51,6 +52,9 @@ same thing.
 | `n_folds`, `folds`, `select` | **(new)** cross-validation: a fold count or a per-sample fold vector (overrides `seed`), and which λ to report (`'min'`, `'1se'`) | planned `coda_lasso`, `coda_lasso_pairwise` |
 | `sources`, `sink_depth` | **(new)** per-sample source-environment labels (`NA` marks a sink), and the sinks' rarefaction depth (`depth` is the sources', as in `rarefy`) | planned `sourcetracker`; `sources` also `feast` |
 | `n_restarts`, `burnin`, `delay`, `loo`, `features` | **(new)** the Gibbs schedule, leave-one-out over environments, and per-feature output | planned `sourcetracker` |
+| `n_types` | **(new, 2026-11-20)** the candidate numbers of community types (a single value fixes it) | `enterotype`; planned `dmm` |
+| `ch` | **(new, 2026-11-20)** the form of the Calinski-Harabasz index: `'medoids'` (clusterSim's, as in Arumugam et al.'s script) or `'centroids'` (the distances' pseudo-F) | `enterotype` |
+| `centroids` | **(new)** reference type profiles to classify against | planned `valencia` |
 | `cpus` | threads (always last) | everything threaded |
 
 

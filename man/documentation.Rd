@@ -30,6 +30,8 @@ transformation).
 \item \code{'binary'}: Unweighted presence/absence (each count is either 0 or 1).
 \item \code{'clr'}: Centered log ratio.
 \item \code{'rclr'}: Robust centered log ratio.
+\item \code{'log'}: Log relative abundance (log-TSS), with \code{pseudocount} added
+to every value first.
 }
 
 Default: \code{'none'}.}
@@ -77,7 +79,7 @@ Default: \code{'holm'}.}
 communities (\eqn{p}). Default: \code{1.5}}
 
 \item{pseudocount}{Value added to counts to handle zeros when
-\code{norm = 'clr'}. Ignored for other normalization methods. See
+\code{norm = 'clr'} or \code{'log'}. Ignored for other normalization methods. See
 \strong{Pseudocount} section.}
 
 \item{strata}{Permute samples only within these groups (blocks), for
