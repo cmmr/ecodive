@@ -1147,6 +1147,27 @@
   are the fits behind its `passed_ss`, reused when the base run made
   them.
 
+- New [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md):
+  LinDA (Zhou et al. 2022), linear models of each feature’s centred log2
+  ratios with the compositional bias of every coefficient removed
+  (estimated as the coefficients’ mode across features). Any `formula`,
+  as
+  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md);
+  winsorization of outliers (`outlier_pct`); zeros replaced by a
+  pseudocount, by imputation proportional to sequencing depth, or
+  adaptively (`zero_handling`, `corr_cut`); numeric covariates
+  standardized (`standardize`). It matches MicrobiomeStat’s
+  [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md) to
+  about 1e-12 (fold changes, standard errors, the bias, p-values),
+  except that its `'adaptive'` choice is applied (MicrobiomeStat 1.4
+  reports it but adds the pseudocount regardless). Parallel C from a
+  sparse table, the same for any `cpus`; one of
+  [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md)’s
+  and
+  [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md)’s
+  methods, with a volcano
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
+
 - New `norm = 'log'`, wherever `norm` is offered (beta diversity
   metrics, [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),

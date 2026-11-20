@@ -84,8 +84,8 @@ Types</strong>.</p></dd>
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>The name of a DA method, as for <code><a href="da_test.html">da_test()</a></code>: <code>"ancom"</code>,
 <code>"ancombc"</code>, <code>"ancombc2"</code>, <code>"da_lm"</code>, <code>"da_ttest"</code>,
-<code>"da_wilcoxon"</code>, or <code>"dirmult_ttest"</code>. Flexible matching is
-supported.</p></dd>
+<code>"da_wilcoxon"</code>, <code>"dirmult_ttest"</code>, or <code>"linda"</code>. Flexible
+matching is supported.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -195,7 +195,10 @@ only with <code>norm = 'clr'</code> or <code>'log'</code>, the norms that take l
 <code><a href="ancombc.html">ancombc()</a></code>
 and <code><a href="ancombc.html">ancombc2()</a></code> it is added to every value, as in ANCOMBC's own
 sensitivity analysis. For <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code> it is the Dirichlet
-prior, added to the counts before the posterior draws.</p></li>
+prior, added to the counts before the posterior draws. For <code><a href="linda.html">linda()</a></code>
+it is added to every count when the zeros get a pseudocount
+(<code>zero_handling = 'pseudocount'</code>, or <code>'adaptive'</code> choosing it); when
+they are imputed, every run is the same.</p></li>
 <li><p><code>zeros</code>: replaces the zeros with <code><a href="replace_zeros.html">replace_zeros()</a></code> instead of a
 pseudocount, for the methods that take any table of positive values.</p></li>
 <li><p><code>scale_sds</code>: <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>'s scale model, the standard deviation of

@@ -21,8 +21,9 @@ da_test(counts, method, groups = NULL, data = NULL, formula = NULL, ...)
 - method:
 
   The name of a DA method: `"ancom"`, `"ancombc"`, `"ancombc2"`,
-  `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`, or `"dirmult_ttest"`.
-  Flexible matching is supported (see below). Programmatic access via
+  `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`, `"dirmult_ttest"`, or
+  `"linda"`. Flexible matching is supported (see below). Programmatic
+  access via
   [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md).
 
 - groups:
@@ -59,8 +60,8 @@ da_test(counts, method, groups = NULL, data = NULL, formula = NULL, ...)
   [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
   [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
   [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
-  and
-  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md).
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+  and [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md).
   `seed` is ignored by the methods that have no random parts (all but
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)).
 
@@ -85,6 +86,7 @@ methods) and a `method` attribute, the method's id.
 | `da_ttest` | Welch t-test per feature | groups |
 | `da_wilcoxon` | Wilcoxon rank-sum test per feature | groups |
 | `dirmult_ttest` | Dirichlet-multinomial t-test (ALDEx2-style) | groups |
+| `linda` | Linear models for differential abundance (LinDA) | formula |
 
 **Groups and models.** *Group methods* compare the samples of one
 categorical variable: `groups`, a column name of `data` or one value per
@@ -168,6 +170,7 @@ abundance analysis. *Briefings in Bioinformatics*, 26, bbaf130.
 [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
 [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
 [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+[`linda()`](https://cmmr.github.io/ecodive/reference/linda.md),
 [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md);
 [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)
 for the zeros;

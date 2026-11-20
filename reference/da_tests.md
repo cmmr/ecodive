@@ -100,6 +100,7 @@ will be applied to the
 #> 5                 Wilcoxon Rank-Sum Test   da_wilcoxon  groups median_diff norm
 #> 6                           Welch t-test      da_ttest  groups        diff norm
 #> 7                           Linear Model         da_lm formula    estimate norm
+#> 8                                  LinDA         linda formula     log2_fc    2
 #>   zero_free_ok
 #> 1         TRUE
 #> 2         TRUE
@@ -108,6 +109,7 @@ will be applied to the
 #> 5         TRUE
 #> 6         TRUE
 #> 7         TRUE
+#> 8         TRUE
 
     # Find the method for 'Mann-Whitney'.
     m <- match_da_test('Mann-Whitney')

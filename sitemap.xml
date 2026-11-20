@@ -87,6 +87,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/jensen.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/jsd.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/lda.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/linda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/log_ratio.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/log_ratio_pseudocount_section.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/lorentzian.html</loc></url>
@@ -130,6 +131,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_simper.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_test.html</loc></url>

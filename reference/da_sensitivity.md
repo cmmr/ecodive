@@ -32,7 +32,8 @@ da_sensitivity(
   The name of a DA method, as for
   [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md):
   `"ancom"`, `"ancombc"`, `"ancombc2"`, `"da_lm"`, `"da_ttest"`,
-  `"da_wilcoxon"`, or `"dirmult_ttest"`. Flexible matching is supported.
+  `"da_wilcoxon"`, `"dirmult_ttest"`, or `"linda"`. Flexible matching is
+  supported.
 
 - ...:
 
@@ -185,7 +186,11 @@ each, and not when the base run already gave them.
   is added to every value, as in ANCOMBC's own sensitivity analysis. For
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
   it is the Dirichlet prior, added to the counts before the posterior
-  draws.
+  draws. For
+  [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md) it is
+  added to every count when the zeros get a pseudocount
+  (`zero_handling = 'pseudocount'`, or `'adaptive'` choosing it); when
+  they are imputed, every run is the same.
 
 - `zeros`: replaces the zeros with
   [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)

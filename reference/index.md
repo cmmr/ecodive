@@ -250,6 +250,8 @@ don’t matter.
   [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
   [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md) :
   Per-feature Wilcoxon, t and Linear Model Tests
+- [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md) :
+  Linear Models for Differential Abundance (LinDA)
 
 ### Absolute abundance
 
@@ -411,6 +413,8 @@ than every value.
   [`plot(`*`<ecodive_da_wilcoxon>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
   [`plot(`*`<ecodive_da_lm>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
   : Plot a Per-feature Test Result
+- [`plot(`*`<ecodive_linda>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.md)
+  : Plot a LinDA Result
 - [`plot(`*`<ecodive_da_sensitivity>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.md)
   : Plot a Differential Abundance Sensitivity Analysis
 - [`plot(`*`<ecodive_varpart>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.md)
