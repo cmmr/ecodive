@@ -74,12 +74,10 @@
 #'
 #'   The correlations are a **similarity** in a `dist` container:
 #'   `as.matrix()` puts 0 on the diagonal, where they are 1, and they must
-#'   not be given as `dm` to an ordination or test. To find strongly
-#'   associated pairs, threshold them: `which(abs(r) > 0.3)` gives their
-#'   positions in the triangle, and `abs(as.matrix(r)) > 0.3` an adjacency
-#'   matrix. For a dissimilarity, use `1 - r`. With p-values,
-#'   `p <- p.adjust(attr(r, "p_value"), "BH")` adjusts them for testing
-#'   every pair, and `r[p <= 0.05]` keeps the significant pairs.
+#'   not be given as `dm` to an ordination or test. [assoc_pairs()] lists
+#'   the strongly associated pairs, as a data frame, optionally only the
+#'   significant ones; `abs(as.matrix(r)) > 0.3` gives an adjacency matrix.
+#'   For a dissimilarity, use `1 - r`.
 #'
 #' @details
 #' **What is estimated.** Let \eqn{y_i} be the log of feature \eqn{i}'s
@@ -208,8 +206,9 @@
 #' rapid and scalable correlation estimation for compositional data.
 #' *Bioinformatics*, 35, 1064–1066. \doi{10.1093/bioinformatics/bty734}
 #'
-#' @seealso [rho_p()], proportionality of features; [vlr()], the variation
-#'   matrix; [plot.ecodive_dist()].
+#' @seealso [assoc_pairs()], the pairs above a cutoff; [rho_p()],
+#'   proportionality of features; [vlr()], the variation matrix;
+#'   [plot.ecodive_dist()].
 #'
 #' @export
 #' @examples
@@ -228,12 +227,12 @@
 #'     attr(r, 'variances')
 #'
 #'     # Pairs above a cutoff
-#'     m <- as.matrix(r)
-#'     which(abs(m) > 0.5 & upper.tri(m), arr.ind = TRUE)
+#'     assoc_pairs(r, threshold = 0.5)
 #'
-#'     # With p-values from 99 null datasets
+#'     # With p-values from 99 null datasets (see assoc_pairs() for how
+#'     # many are needed for significance after adjustment)
 #'     r <- sparcc(counts, n_draws = 10, permutations = 99)
-#'     head(attr(r, 'p_value'))
+#'     assoc_pairs(r)
 #'
 #'     plot(r)
 #'

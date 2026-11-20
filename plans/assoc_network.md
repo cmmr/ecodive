@@ -91,7 +91,15 @@ assoc_network(x, threshold = NULL, alpha = NULL, p_adjust = 'BH',
               weighted_degree = FALSE)
 ```
 
-1. **Edges.** \eqn{r^*_{ij} = r_{ij}} if it passes every filter given, else 0:
+1. **Edges.** \eqn{r^*_{ij} = r_{ij}} if it passes every filter given, else 0.
+   **`assoc_pairs()` (landed 2026-11-20, `R/assoc_pairs.r`) already does
+   this step**, with the same `threshold` (inclusive), `alpha` and
+   `p_adjust` (adjusted over all pairs, then filtered), for `sparcc()`,
+   `rho_p()` and correlation matrices; build `edges` from its `from`, `to`,
+   `association`, `p_value` and `p_adjusted` rather than filtering again.
+   It returns the pairs strongest first; sort them as `edges` needs. Its
+   only gap is `threshold = NULL` (a result's own sparsity, for
+   SPIEC-EASI and SECOM), which this item adds:
    - `threshold`: \eqn{|r_{ij}| \ge} threshold (NetCoMi docs: "greater than
      or equal"). `NULL` = the result's own sparsity, where it has one
      (SPIEC-EASI's selected graph: non-zero entries; SECOM: its

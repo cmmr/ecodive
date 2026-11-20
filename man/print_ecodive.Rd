@@ -18,10 +18,10 @@
 (a distance matrix), or one of ecodive's data frames: from
 \code{\link[=ancom]{ancom()}}, \code{\link[=ancombc]{ancombc()}}, \code{\link[=ancombc2]{ancombc2()}}, \code{\link[=ancombc_global]{ancombc_global()}},
 \code{\link[=ancombc_pairwise]{ancombc_pairwise()}}, \code{\link[=ancombc_dunnett]{ancombc_dunnett()}}, \code{\link[=ancombc_trend]{ancombc_trend()}},
-\code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=simper]{simper()}}, \code{\link[=bioenv]{bioenv()}}, \code{\link[=envfit]{envfit()}} or
-\code{\link[=enterotype]{enterotype()}}. A community-types result (see \link{ecodive_types})
-prints its types and how their number was chosen before its
-first samples.}
+\code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=simper]{simper()}}, \code{\link[=bioenv]{bioenv()}}, \code{\link[=envfit]{envfit()}},
+\code{\link[=assoc_pairs]{assoc_pairs()}} or \code{\link[=enterotype]{enterotype()}}. A community-types result (see
+\link{ecodive_types}) prints its types and how their number was chosen
+before its first samples.}
 
 \item{n}{The number of rows to print (samples, for a distance matrix).
 \code{NULL}, the default, prints every row of up to 20, and the first

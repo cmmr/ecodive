@@ -72,10 +72,11 @@ A \code{dist} object over the features, as \code{\link[=vlr]{vlr()}} returns, wi
 
 \eqn{\rho_p} is a \strong{similarity} in a \code{dist} container: \code{as.matrix()}
 puts 0 on the diagonal, where \eqn{\rho_p} is 1, and it must not be
-given as \code{dm} to an ordination or test. Threshold it to find
-proportional pairs (\code{which(rho > 0.7)}, or \code{as.matrix(rho) > 0.7} for
-an adjacency matrix), or use \code{1 - rho_p(x)} (which is \eqn{\mathrm{vlr}_{ij}
-  / (\mathrm{var}(z_i) + \mathrm{var}(z_j))}) for a dissimilarity.
+given as \code{dm} to an ordination or test. \code{\link[=assoc_pairs]{assoc_pairs()}} lists the
+most proportional pairs, such as \code{assoc_pairs(rho, threshold = 0.7)},
+and \code{as.matrix(rho) > 0.7} gives an adjacency matrix. For a
+dissimilarity, use \code{1 - rho_p(x)}, which is \eqn{\mathrm{vlr}_{ij} /
+  (\mathrm{var}(z_i) + \mathrm{var}(z_j))}.
 }
 \description{
 The proportionality coefficient \eqn{\rho_p} of Erb & Notredame (2016),
@@ -155,8 +156,7 @@ For large datasets, standard matrix operations may be slow. See
     rho
 
     # Pairs above a cutoff
-    m <- as.matrix(rho)
-    which(m > 0.5 & upper.tri(m), arr.ind = TRUE)
+    assoc_pairs(rho, threshold = 0.5)
 
     # Relative to one feature (alr): that feature is left out
     rho_p(x, denominator = 'Streptococcus')

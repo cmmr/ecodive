@@ -82,12 +82,10 @@ every pair: see \code{\link[stats:p.adjust]{stats::p.adjust()}}.
 
 The correlations are a \strong{similarity} in a \code{dist} container:
 \code{as.matrix()} puts 0 on the diagonal, where they are 1, and they must
-not be given as \code{dm} to an ordination or test. To find strongly
-associated pairs, threshold them: \code{which(abs(r) > 0.3)} gives their
-positions in the triangle, and \code{abs(as.matrix(r)) > 0.3} an adjacency
-matrix. For a dissimilarity, use \code{1 - r}. With p-values,
-\code{p <- p.adjust(attr(r, "p_value"), "BH")} adjusts them for testing
-every pair, and \code{r[p <= 0.05]} keeps the significant pairs.
+not be given as \code{dm} to an ordination or test. \code{\link[=assoc_pairs]{assoc_pairs()}} lists
+the strongly associated pairs, as a data frame, optionally only the
+significant ones; \code{abs(as.matrix(r)) > 0.3} gives an adjacency matrix.
+For a dissimilarity, use \code{1 - r}.
 }
 \description{
 Estimates the correlations between the log \strong{absolute} abundances of
@@ -250,12 +248,12 @@ For large datasets, standard matrix operations may be slow. See
     attr(r, 'variances')
 
     # Pairs above a cutoff
-    m <- as.matrix(r)
-    which(abs(m) > 0.5 & upper.tri(m), arr.ind = TRUE)
+    assoc_pairs(r, threshold = 0.5)
 
-    # With p-values from 99 null datasets
+    # With p-values from 99 null datasets (see assoc_pairs() for how
+    # many are needed for significance after adjustment)
     r <- sparcc(counts, n_draws = 10, permutations = 99)
-    head(attr(r, 'p_value'))
+    assoc_pairs(r)
 
     plot(r)
 
@@ -275,6 +273,7 @@ rapid and scalable correlation estimation for compositional data.
 \emph{Bioinformatics}, 35, 1064–1066. \doi{10.1093/bioinformatics/bty734}
 }
 \seealso{
-\code{\link[=rho_p]{rho_p()}}, proportionality of features; \code{\link[=vlr]{vlr()}}, the variation
-matrix; \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}.
+\code{\link[=assoc_pairs]{assoc_pairs()}}, the pairs above a cutoff; \code{\link[=rho_p]{rho_p()}},
+proportionality of features; \code{\link[=vlr]{vlr()}}, the variation matrix;
+\code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}.
 }

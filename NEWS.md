@@ -615,6 +615,13 @@
   samples, 100 draws, take about 1.5 seconds on 4 cores. Its docs explain
   how it differs from `rho_p()`.
 
+* New `assoc_pairs()` lists the pairs of features whose correlation, from
+  `sparcc()` or `rho_p()` (or a correlation matrix), is at least a cutoff
+  in absolute value, strongest first, as a data frame of `from`, `to` and
+  `association`. With `sparcc()`'s p-values it adds `p_value` and
+  `p_adjusted` (adjusted over all pairs by `p_adjust`, Benjamini-Hochberg
+  by default), and `alpha` keeps only the significant pairs.
+
 * New `qmp_scale()` and `qmp_rarefy()` turn relative abundances into
   absolute abundances when each sample's total microbial `load` was measured
   (flow cytometry, qPCR, a spike-in). `qmp_scale()` multiplies each sample's
