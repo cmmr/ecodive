@@ -623,7 +623,7 @@
       </dl></div><div class="section level2">
 
       <h3 id="associations-and-networks">Associations and networks<a class="anchor" aria-label="anchor" href="#associations-and-networks"></a></h3>
-      <div class="section-desc"><p>Correlations between features’ absolute abundances, estimated from relative abundances (a dist over the features), and the pairs above a cutoff.</p></div>
+      <div class="section-desc"><p>Correlations between features’ absolute abundances, estimated from relative abundances (a dist over the features), the pairs above a cutoff, and the networks they make. feature_assoc() runs any association measure by name.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -639,10 +639,45 @@
 
         <dt>
 
+          <code><a href="feature_assoc.html">feature_assoc()</a></code>
+
+        </dt>
+        <dd>Associations Between Features</dd>
+
+        <dt>
+
+          <code><a href="feature_assocs.html">list_feature_assocs()</a></code> <code><a href="feature_assocs.html">match_feature_assoc()</a></code>
+
+        </dt>
+        <dd>Find and Browse Association Measures</dd>
+
+        <dt>
+
           <code><a href="assoc_pairs.html">assoc_pairs()</a></code>
 
         </dt>
         <dd>Strongly Associated Pairs of Features</dd>
+
+        <dt>
+
+          <code><a href="assoc_network.html">assoc_network()</a></code>
+
+        </dt>
+        <dd>Association Network</dd>
+
+        <dt>
+
+          <code><a href="assoc_network_compare.html">assoc_network_compare()</a></code>
+
+        </dt>
+        <dd>Compare Two Association Networks</dd>
+
+        <dt>
+
+          <code><a href="assoc_network_diff.html">assoc_network_diff()</a></code>
+
+        </dt>
+        <dd>Differential Associations</dd>
       </dl></div><div class="section level2">
 
       <h3 id="differential-abundance">Differential abundance<a class="anchor" aria-label="anchor" href="#differential-abundance"></a></h3>
@@ -761,6 +796,22 @@
 
         </dt>
         <dd>Community types</dd>
+      </dl></div><div class="section level2">
+      <h2 id="source-tracking">Source Tracking<a class="anchor" aria-label="anchor" href="#source-tracking"></a></h2>
+
+      <div class="section-desc"><p>What share of each sink sample’s community came from each of several source environments, and from an unknown source.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="sourcetracker.html">sourcetracker()</a></code>
+
+        </dt>
+        <dd>Microbial source tracking (SourceTracker)</dd>
       </dl></div><div class="section level2">
       <h2 id="ordination">Ordination<a class="anchor" aria-label="anchor" href="#ordination"></a></h2>
 
@@ -1096,6 +1147,13 @@
 
         <dt>
 
+          <code><a href="plot.ecodive_network.html">plot(<i>&lt;ecodive_network&gt;</i>)</a></code> <code><a href="plot.ecodive_network.html">plot(<i>&lt;ecodive_network_compare&gt;</i>)</a></code> <code><a href="plot.ecodive_network.html">plot(<i>&lt;ecodive_network_diff&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot an association network</dd>
+
+        <dt>
+
           <code><a href="plot.ecodive_envfit.html">plot(<i>&lt;ecodive_envfit&gt;</i>)</a></code>
 
         </dt>
@@ -1187,6 +1245,13 @@
 
         <dt>
 
+          <code><a href="plot.ecodive_source.html">plot(<i>&lt;ecodive_source&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot source contributions</dd>
+
+        <dt>
+
           <code><a href="ecodive_display.html">ecodive_display</a></code>
 
         </dt>
@@ -1194,7 +1259,7 @@
 
         <dt>
 
-          <code><a href="print_ecodive.html">print(<i>&lt;ecodive_types&gt;</i>)</a></code> <code><a href="print_ecodive.html">print(<i>&lt;ecodive_ord&gt;</i>)</a></code> <code><a href="print_ecodive.html">print(<i>&lt;ecodive_dist&gt;</i>)</a></code>
+          <code><a href="print_ecodive.html">print(<i>&lt;ecodive_types&gt;</i>)</a></code> <code><a href="print_ecodive.html">print(<i>&lt;ecodive_ord&gt;</i>)</a></code> <code><a href="print_ecodive.html">print(<i>&lt;ecodive_dist&gt;</i>)</a></code> <code><a href="print_ecodive.html">print(<i>&lt;ecodive_source&gt;</i>)</a></code>
 
         </dt>
         <dd>Print ecodive's results</dd>

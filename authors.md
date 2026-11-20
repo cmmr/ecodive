@@ -50,6 +50,9 @@
   the scale model and effect sizes of dirmult_ttest(), following
   'ALDEx3'
 
+- **Biota Technology**. Contributor, copyright holder.  
+  the Gibbs sampler of sourcetracker(), from 'SourceTracker2'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

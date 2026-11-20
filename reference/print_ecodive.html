@@ -55,7 +55,7 @@ as.matrix(x) or unclass(x) print it in full."><meta property="og:image" content=
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Print ecodive's results</h1>
-      <small class="dont-index">Source: <a href="https://github.com/cmmr/ecodive/blob/main/R/community_types.r" class="external-link"><code>R/community_types.r</code></a>, <a href="https://github.com/cmmr/ecodive/blob/main/R/ord_utils.r" class="external-link"><code>R/ord_utils.r</code></a>, <a href="https://github.com/cmmr/ecodive/blob/main/R/print.r" class="external-link"><code>R/print.r</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/cmmr/ecodive/blob/main/R/community_types.r" class="external-link"><code>R/community_types.r</code></a>, <a href="https://github.com/cmmr/ecodive/blob/main/R/ord_utils.r" class="external-link"><code>R/ord_utils.r</code></a>, <a href="https://github.com/cmmr/ecodive/blob/main/R/print.r" class="external-link"><code>R/print.r</code></a>, and 1 more</small>
       <div class="d-none name"><code>print_ecodive.Rd</code></div>
     </div>
 
@@ -79,6 +79,9 @@ other attributes. The object itself is unchanged: <code>as.data.frame(x)</code>,
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, digits <span class="op">=</span> <span class="fl">3L</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'ecodive_dist'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, digits <span class="op">=</span> <span class="fl">3L</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'ecodive_source'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, digits <span class="op">=</span> <span class="fl">3L</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,7 +95,8 @@ other attributes. The object itself is unchanged: <code>as.data.frame(x)</code>,
 <code><a href="ancom.html">ancom()</a></code>, <code><a href="ancombc.html">ancombc()</a></code>, <code><a href="ancombc.html">ancombc2()</a></code>, <code><a href="ancombc_global.html">ancombc_global()</a></code>,
 <code><a href="ancombc_global.html">ancombc_pairwise()</a></code>, <code><a href="ancombc_global.html">ancombc_dunnett()</a></code>, <code><a href="ancombc_global.html">ancombc_trend()</a></code>,
 <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>, <code><a href="da_sensitivity.html">da_sensitivity()</a></code>, <code><a href="simper.html">simper()</a></code>, <code><a href="bioenv.html">bioenv()</a></code>,
-<code><a href="envfit.html">envfit()</a></code>, <code><a href="assoc_pairs.html">assoc_pairs()</a></code> or <code><a href="enterotype.html">enterotype()</a></code>. A community-types result (see
+<code><a href="envfit.html">envfit()</a></code>, <code><a href="assoc_pairs.html">assoc_pairs()</a></code>, <code><a href="assoc_network_diff.html">assoc_network_diff()</a></code> or <code><a href="enterotype.html">enterotype()</a></code>, or a source-tracking
+matrix of class <code>ecodive_source</code> (from <code><a href="sourcetracker.html">sourcetracker()</a></code>). A community-types result (see
 <a href="ecodive_types.html">ecodive_types</a>) prints its types and how their number was chosen
 before its first samples.</p></dd>
 

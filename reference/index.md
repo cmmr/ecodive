@@ -209,13 +209,25 @@ valid alternative to correlation. A dist over the features.
 ### Associations and networks
 
 Correlations between features’ absolute abundances, estimated from
-relative abundances (a dist over the features), and the pairs above a
-cutoff.
+relative abundances (a dist over the features), the pairs above a
+cutoff, and the networks they make. feature_assoc() runs any association
+measure by name.
 
 - [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md) :
   SparCC Correlation
+- [`feature_assoc()`](https://cmmr.github.io/ecodive/reference/feature_assoc.md)
+  : Associations Between Features
+- [`list_feature_assocs()`](https://cmmr.github.io/ecodive/reference/feature_assocs.md)
+  [`match_feature_assoc()`](https://cmmr.github.io/ecodive/reference/feature_assocs.md)
+  : Find and Browse Association Measures
 - [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md)
   : Strongly Associated Pairs of Features
+- [`assoc_network()`](https://cmmr.github.io/ecodive/reference/assoc_network.md)
+  : Association Network
+- [`assoc_network_compare()`](https://cmmr.github.io/ecodive/reference/assoc_network_compare.md)
+  : Compare Two Association Networks
+- [`assoc_network_diff()`](https://cmmr.github.io/ecodive/reference/assoc_network_diff.md)
+  : Differential Associations
 
 ### Differential abundance
 
@@ -273,6 +285,14 @@ or ordination plot.
   : Enterotypes
 - [`ecodive_types`](https://cmmr.github.io/ecodive/reference/ecodive_types.md)
   : Community types
+
+## Source Tracking
+
+What share of each sink sample’s community came from each of several
+source environments, and from an unknown source.
+
+- [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)
+  : Microbial source tracking (SourceTracker)
 
 ## Ordination
 
@@ -390,6 +410,10 @@ than every value.
   : Plot an ordination
 - [`plot(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   : Plot a distance matrix
+- [`plot(`*`<ecodive_network>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_network.md)
+  [`plot(`*`<ecodive_network_compare>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_network.md)
+  [`plot(`*`<ecodive_network_diff>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_network.md)
+  : Plot an association network
 - [`plot(`*`<ecodive_envfit>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.md)
   : Plot fitted variables
 - [`plot(`*`<ecodive_test>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_test.md)
@@ -425,11 +449,14 @@ than every value.
   : Plot a BIO-ENV result
 - [`plot(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_types.md)
   : Plot community types
+- [`plot(`*`<ecodive_source>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_source.md)
+  : Plot source contributions
 - [`ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)
   : Titles of results
 - [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+  [`print(`*`<ecodive_source>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   : Print ecodive's results
 
 ## Utilities & Helpers

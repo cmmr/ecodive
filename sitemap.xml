@@ -28,6 +28,9 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/ancombc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ancombc_global.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/anosim.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/assoc_network.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/assoc_network_compare.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/assoc_network_diff.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/assoc_pairs.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/balance.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_assert_integer.html</loc></url>
@@ -72,6 +75,8 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/ex_counts.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ex_tree.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/faith.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/feature_assoc.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/feature_assocs.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/fisher.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/forward_select.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/generalized_unifrac.html</loc></url>
@@ -132,8 +137,10 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_network.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_simper.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_source.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_test.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_types.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.html</loc></url>
@@ -159,6 +166,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/simpson.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/soergel.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/sorensen.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/sourcetracker.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/sparcc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/squared_chisq.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/squared_chord.html</loc></url>

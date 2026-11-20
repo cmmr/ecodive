@@ -43,7 +43,10 @@ linda(
   [`stats::model.matrix()`](https://rdrr.io/r/stats/model.matrix.html)
   accepts may be used. Every factor (and character or logical column) is
   coded with treatment contrasts, its first level (in sorted order, or a
-  factor's own order) the reference. `NULL` (the default) is `~ groups`.
+  factor's own order) the reference. One random intercept may be added,
+  as in lme4: `~ status + age + (1 | subject)`, for samples grouped by a
+  column of `data` (see **Repeated measures**). `NULL` (the default) is
+  `~ groups`.
 
 - data:
 
@@ -53,10 +56,11 @@ linda(
 
 - groups:
 
-  The term of interest: with `formula`, the name of one of its terms
-  (the one [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
-  shows by default); alone, the name of a column of `data` or a vector
-  with one value per sample, and the model is `~ groups`.
+  The term of interest (a fixed effect): with `formula`, the name of one
+  of its terms (the one
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) shows by
+  default); alone, the name of a column of `data` or a vector with one
+  value per sample, and the model is `~ groups`.
 
 - margin:
 
@@ -141,7 +145,8 @@ order of `counts`:
 - `t`: `log2_fc / se`.
 
 - `dof`: the degrees of freedom, the number of samples minus the rank of
-  the design.
+  the design; with a random intercept, Satterthwaite's, per feature and
+  covariate.
 
 - `p_value`: \\2 F_t(-\|t\|)\\.
 
@@ -161,6 +166,9 @@ coefficients: their mode, which was subtracted), `vcov` (a feature
 covariance matrix of the coefficients), and per feature (named by
 feature): `mean` (the mean of its centred log2 values, its mean clr
 abundance) and `resid_sd` (the residual standard deviation of its fit).
+With a random intercept, also `random` (its grouping variable) and per
+feature `random_sd` (the random intercepts' standard deviation; `vcov`
+and `resid_sd` are then the mixed model's).
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws volcano,
 effect, MA and forest plots of them
 ([`plot.ecodive_linda()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.md)).
@@ -228,11 +236,33 @@ non-zero value is an error).
 
 - Factor levels are sorted in the C locale (LinDA: in the session's).
 
-- Mixed models (LinDA's `(1 | id)` terms) are not supported (yet).
+- Of LinDA's mixed models, one random intercept, `(1 | id)`; random
+  slopes, several random terms and nested terms are not supported.
+
+- Mixed models are fitted at the exact REML optimum, and their degrees
+  of freedom from exact derivatives (see **Repeated measures**); lme4's
+  optimizer stops a little short of the optimum, and lmerTest takes
+  derivatives numerically, so these differ from LinDA's by about
+  \\10^{-6}\\ (\\10^{-4}\\ in places where the likelihood is very flat).
 
 - The result is one data frame (LinDA: a list per covariate), without
   `baseMean` (the `mean` attribute gives each feature's mean clr
   abundance instead).
+
+**Repeated measures.** With `(1 | id)` in `formula`, each feature's clr
+values get a linear mixed model, with a random intercept for each value
+of `id` (a subject, say), fitted by restricted maximum likelihood (REML)
+as lme4's `lmer()` does (Bates et al. 2015), and the same mode
+correction (Zhou et al. 2022, Remark 1). Coefficients are tested with
+Satterthwaite's degrees of freedom, as by lmerTest (Kuznetsova et al.
+2017), from the variance parameters' REML covariance. The optimum is
+found exactly (the root of the REML criterion's derivative in the ratio
+of the two standard deviations, by Brent's method then bracketing), and
+every derivative is analytic. A random intercept whose variance is
+estimated as 0 (lme4's "boundary (singular) fit") gives the
+fixed-effects fit, with \\n - p\\ degrees of freedom. With
+`zero_handling = 'adaptive'`, the samples' log totals get the same mixed
+model.
 
 **Computation.** The table is read by feature from its sparse form,
 winsorized and transformed per feature in parallel C, and every feature
@@ -274,6 +304,16 @@ Yang, L., & Chen, J. (2023). Benchmarking differential abundance
 analysis methods for correlated microbiome sequencing data. *Briefings
 in Bioinformatics*, 24, bbac607.
 [doi:10.1093/bib/bbac607](https://doi.org/10.1093/bib/bbac607)
+
+Bates, D., Maechler, M., Bolker, B., & Walker, S. (2015). Fitting linear
+mixed-effects models using lme4. *Journal of Statistical Software*,
+67(1), 1-48.
+[doi:10.18637/jss.v067.i01](https://doi.org/10.18637/jss.v067.i01)
+
+Kuznetsova, A., Brockhoff, P. B., & Christensen, R. H. B. (2017).
+lmerTest package: tests in linear mixed effects models. *Journal of
+Statistical Software*, 82(13), 1-26.
+[doi:10.18637/jss.v082.i13](https://doi.org/10.18637/jss.v082.i13)
 
 Fukunaga, K., & Hostetler, L. (1975). The estimation of the gradient of
 a density function, with applications in pattern recognition. *IEEE
@@ -345,4 +385,27 @@ Transactions on Information Theory*, 21, 32-40.
 #> # Attributes: method, formula, design, standardize, zero_handling,
 #> #   pseudocount, outlier_pct, alpha, p_adjust, log_base, bias, vcov, mean,
 #> #   resid_sd
+
+    # Two samples from each of 15 subjects: a random intercept per subject.
+    meta$subject <- rep(sprintf('s%02d', 1:15), 2)
+    linda(x, ~ grp + age + (1 | subject), meta, groups = 'grp')
+#> # A data.frame: 80 × 9
+#> # LinDA
+#>    feature covariate  log2_fc     se      t   dof  p_value p_adjusted reject
+#>    <chr>   <chr>        <dbl>  <dbl>  <dbl> <dbl>    <dbl>      <dbl>  <lgl>
+#>  1 f1      grpb       1.94    0.0656 29.6    27   4.23e-22   1.65e-20   TRUE
+#>  2 f1      age        0.0133  0.0334  0.399  27      0.693          1  FALSE
+#>  3 f2      grpb       1.99    0.0517 38.5    13.5 3.44e-15   1.31e-13   TRUE
+#>  4 f2      age        0.0202  0.0348  0.58   26.3    0.567          1  FALSE
+#>  5 f3      grpb       1.98    0.0632 31.3    27   9.08e-23   3.63e-21   TRUE
+#>  6 f3      age       -0.00424 0.0321 -0.132  27      0.896          1  FALSE
+#>  7 f4      grpb       1.88    0.0546 34.4    14   5.79e-15   2.14e-13   TRUE
+#>  8 f4      age        0.0385  0.0326  1.18   26.7    0.248          1  FALSE
+#>  9 f5      grpb      -0.0872  0.0811 -1.07   27      0.292          1  FALSE
+#> 10 f5      age        0.00844 0.0413  0.205  27      0.839          1  FALSE
+#> # … 70 more rows
+#> # Use print(x, n = ...) to see more rows
+#> # Attributes: method, formula, groups, design, standardize, zero_handling,
+#> #   pseudocount, outlier_pct, alpha, p_adjust, log_base, bias, vcov, mean,
+#> #   resid_sd, random, random_sd
 ```

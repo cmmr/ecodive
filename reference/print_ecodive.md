@@ -22,6 +22,9 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
 
 # S3 method for class 'ecodive_dist'
 print(x, n = NULL, width = NULL, digits = 3L, ...)
+
+# S3 method for class 'ecodive_source'
+print(x, n = NULL, width = NULL, digits = 3L, ...)
 ```
 
 ## Arguments
@@ -42,9 +45,12 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
   [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md),
   [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md),
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),
-  [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md)
+  [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md),
+  [`assoc_network_diff()`](https://cmmr.github.io/ecodive/reference/assoc_network_diff.md)
   or
-  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md).
+  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md),
+  or a source-tracking matrix of class `ecodive_source` (from
+  [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)).
   A community-types result (see
   [ecodive_types](https://cmmr.github.io/ecodive/reference/ecodive_types.md))
   prints its types and how their number was chosen before its first

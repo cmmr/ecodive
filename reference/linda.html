@@ -98,7 +98,10 @@ proportions of <code><a href="replace_zeros.html">replace_zeros()</a></code>) is
 Anything <code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">stats::model.matrix()</a></code> accepts may be used. Every factor
 (and character or logical column) is coded with treatment
 contrasts, its first level (in sorted order, or a factor's own
-order) the reference. <code>NULL</code> (the default) is <code>~ groups</code>.</p></dd>
+order) the reference. One random intercept may be added, as in
+lme4: <code>~ status + age + (1 | subject)</code>, for samples grouped by a
+column of <code>data</code> (see <strong>Repeated measures</strong>). <code>NULL</code> (the
+default) is <code>~ groups</code>.</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
@@ -108,7 +111,7 @@ order) the reference. <code>NULL</code> (the default) is <code>~ groups</code>.<
 
 
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p>The term of interest: with <code>formula</code>, the name of one of
+<dd><p>The term of interest (a fixed effect): with <code>formula</code>, the name of one of
 its terms (the one <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> shows by default); alone, the name of a
 column of <code>data</code> or a vector with one value per sample, and the
 model is <code>~ groups</code>.</p></dd>
@@ -190,7 +193,8 @@ abundance (per standard deviation of a numeric covariate when
 <li><p><code>se</code>: its standard error.</p></li>
 <li><p><code>t</code>: <code>log2_fc / se</code>.</p></li>
 <li><p><code>dof</code>: the degrees of freedom, the number of samples minus the rank
-of the design.</p></li>
+of the design; with a random intercept, Satterthwaite's, per feature
+and covariate.</p></li>
 <li><p><code>p_value</code>: \(2 F_t(-|t|)\).</p></li>
 <li><p><code>p_adjusted</code>: adjusted with <code>p_adjust</code>, per covariate.</p></li>
 <li><p><code>reject</code>: <code>p_adjusted &lt;= alpha</code> (<code>FALSE</code> where <code>NaN</code>).</p></li>
@@ -206,7 +210,10 @@ coefficients: their mode, which was subtracted), <code>vcov</code> (a feature
 feature's covariance matrix of the coefficients), and per feature
 (named by feature): <code>mean</code> (the mean of its centred log2 values, its
 mean clr abundance) and <code>resid_sd</code> (the residual standard deviation of
-its fit). <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws volcano, effect, MA and forest plots of them
+its fit). With a random intercept, also <code>random</code> (its grouping
+variable) and per feature <code>random_sd</code> (the random intercepts' standard
+deviation; <code>vcov</code> and <code>resid_sd</code> are then the mixed model's). <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>
+draws volcano, effect, MA and forest plots of them
 (<code><a href="plot.ecodive_linda.html">plot.ecodive_linda()</a></code>).</p>
     </div>
     <div class="section level2">
@@ -260,11 +267,30 @@ example <code>counts[, colMeans(counts &gt; 0) &gt;= 0.1]</code> for a prevalenc
 (LinDA's <code>feature.dat.type</code>).</p></li>
 <li><p><code>p_adjust</code> defaults to <code>'holm'</code> (LinDA: <code>'BH'</code>).</p></li>
 <li><p>Factor levels are sorted in the C locale (LinDA: in the session's).</p></li>
-<li><p>Mixed models (LinDA's <code>(1 | id)</code> terms) are not supported (yet).</p></li>
+<li><p>Of LinDA's mixed models, one random intercept, <code>(1 | id)</code>; random
+slopes, several random terms and nested terms are not supported.</p></li>
+<li><p>Mixed models are fitted at the exact REML optimum, and their degrees
+of freedom from exact derivatives (see <strong>Repeated measures</strong>); lme4's
+optimizer stops a little short of the optimum, and lmerTest takes
+derivatives numerically, so these differ from LinDA's by about
+\(10^{-6}\) (\(10^{-4}\) in places where the likelihood is
+very flat).</p></li>
 <li><p>The result is one data frame (LinDA: a list per covariate), without
 <code>baseMean</code> (the <code>mean</code> attribute gives each feature's mean clr
 abundance instead).</p></li>
-</ul><p><strong>Computation.</strong> The table is read by feature from its sparse form,
+</ul><p><strong>Repeated measures.</strong> With <code>(1 | id)</code> in <code>formula</code>, each feature's
+clr values get a linear mixed model, with a random intercept for each
+value of <code>id</code> (a subject, say), fitted by restricted maximum likelihood
+(REML) as lme4's <code>lmer()</code> does (Bates et al. 2015), and the same mode
+correction (Zhou et al. 2022, Remark 1). Coefficients are tested with
+Satterthwaite's degrees of freedom, as by lmerTest (Kuznetsova et al.
+2017), from the variance parameters' REML covariance. The optimum is
+found exactly (the root of the REML criterion's derivative in the ratio
+of the two standard deviations, by Brent's method then bracketing), and
+every derivative is analytic. A random intercept whose variance is
+estimated as 0 (lme4's "boundary (singular) fit") gives the fixed-effects
+fit, with \(n - p\) degrees of freedom. With <code>zero_handling = 'adaptive'</code>, the samples' log totals get the same mixed model.</p>
+<p><strong>Computation.</strong> The table is read by feature from its sparse form,
 winsorized and transformed per feature in parallel C, and every feature
 is fitted to one QR decomposition of the design; the per-sample means of
 the clr are summed in a fixed order, so results are identical for any
@@ -298,6 +324,12 @@ differential abundance analysis of microbiome compositional data.
 <p>Yang, L., &amp; Chen, J. (2023). Benchmarking differential abundance analysis
 methods for correlated microbiome sequencing data. <em>Briefings in
 Bioinformatics</em>, 24, bbac607. <a href="https://doi.org/10.1093/bib/bbac607" class="external-link">doi:10.1093/bib/bbac607</a></p>
+<p>Bates, D., Maechler, M., Bolker, B., &amp; Walker, S. (2015). Fitting
+linear mixed-effects models using lme4. <em>Journal of Statistical
+Software</em>, 67(1), 1-48. <a href="https://doi.org/10.18637/jss.v067.i01" class="external-link">doi:10.18637/jss.v067.i01</a></p>
+<p>Kuznetsova, A., Brockhoff, P. B., &amp; Christensen, R. H. B. (2017).
+lmerTest package: tests in linear mixed effects models. <em>Journal of
+Statistical Software</em>, 82(13), 1-26. <a href="https://doi.org/10.18637/jss.v082.i13" class="external-link">doi:10.18637/jss.v082.i13</a></p>
 <p>Fukunaga, K., &amp; Hostetler, L. (1975). The estimation of the gradient of
 a density function, with applications in pattern recognition. <em>IEEE
 Transactions on Information Theory</em>, 21, 32-40.
@@ -365,6 +397,29 @@ Transactions on Information Theory</em>, 21, 32-40.
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, design, standardize, zero_handling,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   pseudocount, outlier_pct, alpha, p_adjust, log_base, bias, vcov, mean,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   resid_sd</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Two samples from each of 15 subjects: a random intercept per subject.</span></span></span>
+<span class="r-in"><span>    <span class="va">meta</span><span class="op">$</span><span class="va">subject</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'s%02d'</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu">linda</span><span class="op">(</span><span class="va">x</span>, <span class="op">~</span> <span class="va">grp</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">subject</span><span class="op">)</span>, <span class="va">meta</span>, groups <span class="op">=</span> <span class="st">'grp'</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 80 × 9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # LinDA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    feature covariate  log2_fc     se      t   dof  p_value p_adjusted reject</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 f1      grpb       1.94    0.0656 29.6    27   4.23e-22   1.65e-20   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2 f1      age        0.0133  0.0334  0.399  27      0.693          1  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3 f2      grpb       1.99    0.0517 38.5    13.5 3.44e-15   1.31e-13   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4 f2      age        0.0202  0.0348  0.58   26.3    0.567          1  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5 f3      grpb       1.98    0.0632 31.3    27   9.08e-23   3.63e-21   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6 f3      age       -0.00424 0.0321 -0.132  27      0.896          1  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7 f4      grpb       1.88    0.0546 34.4    14   5.79e-15   2.14e-13   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8 f4      age        0.0385  0.0326  1.18   26.7    0.248          1  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9 f5      grpb      -0.0872  0.0811 -1.07   27      0.292          1  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 f5      age        0.00844 0.0413  0.205  27      0.839          1  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 70 more rows</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more rows</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, groups, design, standardize, zero_handling,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   pseudocount, outlier_pct, alpha, p_adjust, log_base, bias, vcov, mean,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   resid_sd, random, random_sd</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

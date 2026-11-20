@@ -909,6 +909,52 @@
   by `p_adjust`, Benjamini-Hochberg by default), and `alpha` keeps only
   the significant pairs.
 
+- New
+  [`assoc_network()`](https://cmmr.github.io/ecodive/reference/assoc_network.md)
+  turns associations between features
+  ([`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md),
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), or a
+  correlation matrix) into a network and analyses it as NetCoMi’s
+  `netConstruct()` and `netAnalyze()` do: edges at a cutoff (and
+  optionally significant), signed or unsigned edge lengths, degree,
+  betweenness, closeness and eigenvector centralities of the largest
+  connected component, hubs, fast greedy modularity clusters, and global
+  properties (density, components, average path length, Barrat’s
+  clustering coefficient, modularity, …). Written from the papers and
+  NetCoMi’s documentation, it agrees with NetCoMi 1.2.0 to about 1e-13
+  on 160 test networks. Shortest paths run in parallel in C, with
+  results identical for any `cpus`: 3,000 features with 168,000 edges
+  take about 4 seconds on 4 cores.
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws it on a
+  circular layout.
+
+- New
+  [`assoc_network_compare()`](https://cmmr.github.io/ecodive/reference/assoc_network_compare.md)
+  compares two groups’ networks as NetCoMi’s `netCompare()` does:
+  differences in centralities and global properties, Jaccard indices of
+  the most central features and of the hubs (with NetCoMi’s
+  probabilities), and the adjusted Rand index of the clusterings with a
+  permutation test. Given the count table and the groups, it tests every
+  difference by permuting the samples’ groups and re-estimating both
+  networks.
+
+- New
+  [`assoc_network_diff()`](https://cmmr.github.io/ecodive/reference/assoc_network_diff.md)
+  tests every pair’s correlation for a difference between two groups
+  with Fisher’s z, as NetCoMi’s `diffnet(diffMethod = "fisherTest")`.
+
+- New
+  [`feature_assoc()`](https://cmmr.github.io/ecodive/reference/feature_assoc.md)
+  runs any association measure
+  ([`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md),
+  [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md),
+  [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md)) by
+  name, with
+  [`list_feature_assocs()`](https://cmmr.github.io/ecodive/reference/feature_assocs.md)
+  and
+  [`match_feature_assoc()`](https://cmmr.github.io/ecodive/reference/feature_assocs.md).
+
 - New [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md)
   and [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md)
   turn relative abundances into absolute abundances when each sample’s
@@ -1156,7 +1202,11 @@
   winsorization of outliers (`outlier_pct`); zeros replaced by a
   pseudocount, by imputation proportional to sequencing depth, or
   adaptively (`zero_handling`, `corr_cut`); numeric covariates
-  standardized (`standardize`). It matches MicrobiomeStat’s
+  standardized (`standardize`); repeated measures with a random
+  intercept, `~ group + (1 | subject)`, fitted by REML at the exact
+  optimum, with Satterthwaite degrees of freedom (as lme4 and lmerTest,
+  without them, and about 300 times faster than MicrobiomeStat’s mixed
+  models). It matches MicrobiomeStat’s
   [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md) to
   about 1e-12 (fold changes, standard errors, the bias, p-values),
   except that its `'adaptive'` choice is applied (MicrobiomeStat 1.4
@@ -1167,6 +1217,22 @@
   [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md)’s
   methods, with a volcano
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
+
+- New
+  [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)
+  estimates what share of each sink sample’s community came from each of
+  several source environments, and from an unknown source, with
+  SourceTracker’s Gibbs sampler (Knights et al. 2011), ported from
+  SourceTracker2. One `sources` vector gives each sample’s environment,
+  with `NA` for the sinks; `loo = TRUE` tracks each environment against
+  the others, and `features = TRUE` also returns each sink’s reads by
+  source and feature. The sampler runs in threaded C, with one random
+  stream per sink and restart, so results are reproducible and the same
+  for any `cpus` (SourceTracker2’s parallel runs are neither). It
+  returns a sinks x sources matrix of proportions (class
+  `ecodive_source`) with their standard deviations, and
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+  usual stacked bar chart.
 
 - New `norm = 'log'`, wherever `norm` is offered (beta diversity
   metrics, [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
