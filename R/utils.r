@@ -80,6 +80,9 @@ n_cpus <- function () {
   # variables that can change during a session, such as `mc.cores`, which
   # the future package sets to 1 inside its workers.
   
+  # Held by hold_n_cpus() while a function calls many threaded ones.
+  if (!is.null(CACHE$n_cpus_held)) return (CACHE$n_cpus_held)
+  
   cpus <- 1L
   
   if (pthreads()) {
@@ -104,6 +107,22 @@ n_cpus <- function () {
   }
   
   return (cpus)
+}
+
+
+# Makes n_cpus() return its current value, without asking parallelly
+# again (several milliseconds), until release_n_cpus(): for a function that
+# calls threaded functions many times, such as beta_div_rarefied(), each of
+# which checks its `cpus` against n_cpus(). Returns what to give
+# release_n_cpus(), from on.exit(), so that holds can nest.
+hold_n_cpus <- function () {
+  old <- CACHE$n_cpus_held
+  CACHE$n_cpus_held <- n_cpus()
+  list(old)
+}
+
+release_n_cpus <- function (held) {
+  CACHE$n_cpus_held <- held[[1]]
 }
 
 

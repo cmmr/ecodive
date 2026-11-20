@@ -41,6 +41,12 @@
   r <- rarefy(counts, depth = 31:50, cpus = cpus)
   expect_equal(unname(rowSums(r)), 31:50)
 
+  # Diversity over repeated rarefactions.
+  z <- beta_div_rarefied(counts, 'bray', depth = 40, times = 3, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 20L && all(is.finite(z)))
+  z <- alpha_div_rarefied(counts, 'shannon', depth = 40, times = 3, cpus = cpus)
+  expect_true(is.numeric(z) && length(z) == 20L && all(is.finite(z)))
+
   # Absolute abundance.
   load <- seq(1, 2, length.out = 20) * 1e9
   z <- qmp_scale(counts, load, cpus = cpus)

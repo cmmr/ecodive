@@ -122,8 +122,7 @@
   expect_identical(qmp_rarefy(x, L, seed = 5), q)
   expect_false(identical(unclass(qmp_rarefy(x, L, seed = 6))[, ], unclass(q)[, ]))
 
-  # Every class and margin (slam's draws are seeded by 1-based sample number,
-  # as in rarefy(), so they differ from the others').
+  # Every class and margin.
   for (cl in names(classes)) {
     for (margin in 1:2) {
       m  <- if (margin == 1L) x else t(x)
@@ -137,14 +136,7 @@
       qm <- strip(as.matrix(qc))
       if (margin == 2L) qm <- t(qm)
       expect_equal(rowSums(qm), L, tolerance = 1e-14, info = cl)
-      if (cl != 'slam')
-        expect_identical(qm, strip(q), info = paste(cl, margin))
-      else {
-        rs <- as.matrix(rarefy(
-          classes$slam(m), depth = tgt, seed = 5, margin = margin, drop = FALSE, warn = FALSE ))
-        if (margin == 2L) rs <- t(rs)
-        expect_true(rel_diff(qm, rs / tgt * L) < 1e-15)
-      }
+      expect_identical(qm, strip(q), info = paste(cl, margin))
     }
   }
   qs <- qmp_rarefy(classes$dgC(x), L, seed = 5)

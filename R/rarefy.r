@@ -43,8 +43,11 @@
 #'         matches the input class.
 #' 
 #' @section Auto-Depth Selection:
-#'   If `depth` is `NULL`, the function defaults to the highest depth that retains 
-#'   at least 10% of the total observations in the dataset.
+#'   If `depth` is `NULL`, the depth is the smallest library size at which
+#'   the observations kept (that depth times the number of samples with at
+#'   least that many) make up at least 10% of all the observations in the
+#'   table. [beta_div_rarefied()] and [alpha_div_rarefied()] choose their
+#'   default depth the same way.
 #' 
 #' @section One Depth per Sample:
 #'   With one `depth` per sample, each sample is rarefied to its own depth,
@@ -135,47 +138,9 @@ rarefy <- function (
   # auto-selection AND the warning check.
   if (is.null(depth) || isTRUE(warn)) {
     
-    if (is.matrix(counts)) {
-      if (margin == 1L) sums <- rowSums(counts)
-      else              sums <- colSums(counts)
-    }
-    else if (inherits(counts, "simple_triplet_matrix")) {
-      if (margin == 1L) sums <- slam::row_sums(counts)
-      else              sums <- slam::col_sums(counts)
-    }
-    else {
-      # Matrix package objects
-      if (margin == 1L) sums <- Matrix::rowSums(counts)
-      else              sums <- Matrix::colSums(counts)
-    }
+    sums <- sample_sums(counts, margin)
     
-    
-    if (is.null(depth)) {
-      
-      # Auto-select depth:
-      # Select the lowest depth that still retains at least 10% 
-      # of the total observations in the dataset.
-      sums_sorted <- sort(sums)
-      n_sams      <- length(sums_sorted)
-      total_reads <- sum(sums_sorted)
-      threshold   <- 0.1 * total_reads
-      
-      # Vectorized calculation:
-      yields <- sums_sorted * seq.int(n_sams, 1L)
-      
-      # Find the first index (lowest depth) that meets the threshold
-      idx <- which(yields >= threshold)[1L]
-      
-      if (!is.na(idx)) {
-        depth <- as.integer(sums_sorted[idx])
-      } else {
-        # Fallback: Use the max depth (retains 1 sample, but 100% of its reads).
-        # To reach the line, we need a distribution where NO depth meets the 10% 
-        # retention threshold, such as a Zipfian distribution (1/rank) 
-        # with N > 23,000 samples.
-        depth <- as.integer(max(sums_sorted)) # nocov
-      }
-    }
+    if (is.null(depth)) depth <- auto_depth(sums)
     
     
     # Warning logic:
@@ -242,4 +207,49 @@ rarefy <- function (
   }
   
   return (result)
+}
+
+
+
+# Each sample's total count (library size): rows with margin = 1, columns
+# with margin = 2, for any table class rarefy() takes.
+sample_sums <- function (counts, margin) {
+  if (is.matrix(counts)) {
+    if (margin == 1L) rowSums(counts) else colSums(counts)
+  }
+  else if (inherits(counts, "simple_triplet_matrix")) {
+    if (margin == 1L) slam::row_sums(counts) else slam::col_sums(counts)
+  }
+  else {
+    # Matrix package objects
+    if (margin == 1L) Matrix::rowSums(counts) else Matrix::colSums(counts)
+  }
+}
+
+
+# The automatic rarefaction depth for library sizes `sums`: the smallest
+# library size whose yield (that depth times the number of samples with at
+# least that many observations) is at least 10% of all the observations.
+auto_depth <- function (sums) {
+  
+  sums_sorted <- sort(sums)
+  n_sams      <- length(sums_sorted)
+  total_reads <- sum(sums_sorted)
+  threshold   <- 0.1 * total_reads
+  
+  # Vectorized calculation:
+  yields <- sums_sorted * seq.int(n_sams, 1L)
+  
+  # Find the first index (lowest depth) that meets the threshold
+  idx <- which(yields >= threshold)[1L]
+  
+  if (!is.na(idx)) {
+    as.integer(sums_sorted[idx])
+  } else {
+    # Fallback: Use the max depth (retains 1 sample, but 100% of its reads).
+    # To reach the line, we need a distribution where NO depth meets the 10% 
+    # retention threshold, such as a Zipfian distribution (1/rank) 
+    # with N > 23,000 samples.
+    as.integer(max(sums_sorted)) # nocov
+  }
 }

@@ -705,6 +705,25 @@
   with its own depth. A single depth gives exactly the same results as
   before.
 
+* New `beta_div_rarefied()` and `alpha_div_rarefied()` rarefy a table many
+  times (`times = 100` by default), compute any beta or alpha diversity
+  metric from each rarefied table, and average the results: the mean (as
+  `vegan::avgdist()` and mothur), the median, or for beta diversity the
+  medoid (the matrix of the rarefaction closest to all the others, as in
+  q2-boots). `sd = TRUE` adds each value's standard deviation over the
+  rarefactions. Iteration t is exactly `rarefy(counts, depth, seed = seed +
+  t - 1)`, so results are reproducible and the same for any `cpus`; the
+  mean needs memory for only a few distance matrices, and the median and
+  medoid work through the pairs of samples in blocks. Titles say so: an
+  ordination of the result is a "Principal Coordinates Analysis of
+  Bray-Curtis Dissimilarity (rarefied 100×)".
+
+* `rarefy()` of a slam `simple_triplet_matrix` now draws exactly the same
+  observations as the same table in any other class, for the same `seed`.
+  Before, slam's samples were seeded by their 1-based positions, so its
+  draws differed from those of a `matrix` or `dgCMatrix`. Rarefying slam
+  input therefore gives different (equally random) results than before.
+
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument
   (`'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`),

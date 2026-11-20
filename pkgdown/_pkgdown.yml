@@ -177,6 +177,8 @@ reference:
   - list_metrics
   - read_tree
   - rarefy
+  - beta_div_rarefied
+  - alpha_div_rarefied
   - normalize
   - n_cpus
   - blas_threads

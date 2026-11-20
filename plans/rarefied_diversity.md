@@ -254,3 +254,108 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA and other compositional data analysis methods at controlling for uneven sequencing effort. *mSystems*, 11, e00930-26. doi:10.1128/msystems.00930-26
 - McMurdie, P. J., & Holmes, S. (2014). Waste not, want not: why rarefying microbiome data is inadmissible. *PLoS Computational Biology*, 10, e1003531. doi:10.1371/journal.pcbi.1003531
 - Hurlbert, S. H. (1971). The nonconcept of species diversity: a critique and alternative parameters. *Ecology*, 52, 577–586. doi:10.2307/1934145 (the expected-richness formula used in the tests)
+
+
+## Decisions made while implementing
+
+Recorded 2026-11-20 (item 37).
+
+**Asked the user, at the start:**
+
+- **slam seeding in `rarefy()`:** fixed. `src/rarefy.c` seeded each slam
+  sample's PCG stream from its 1-based index, so slam input drew different
+  observations from every other class with the same `seed`. Each stream is
+  now the sample's 0-based position, for slam as for the rest, so
+  `rarefy()`, `qmp_rarefy()` and the new functions give identical results
+  for every table class. This changes `rarefy()`'s draws for slam input
+  only (NEWS says so); test-rarefy.r now compares slam with the base-matrix
+  fixtures, and test-qmp.r expects slam to equal the others. (The question
+  as asked also named a per-sample-depth bug in the slam path; on a closer
+  read there was none: `C_rarefy` already shifts the per-sample targets by
+  one for slam. Only the seeding needed fixing.)
+- **Warnings inside the iterations** (e.g. Aitchison's pseudocount
+  warning, once per rarefaction): collected, and each distinct message is
+  given once after the loop (`rarefied_quietly()` / `rarefied_rewarn()`).
+  Errors pass through at once.
+
+**Decided while implementing:**
+
+- **Iterations call C_rarefy directly** (`rarefied_draw()`), on counts
+  converted to doubles once, then drop the samples below `depth` with the
+  same logical subset `rarefy()` uses. This is exactly `rarefy(counts,
+  depth, seed = s_t, margin, cpus, warn = FALSE)` (the tests check it for
+  every class) without revalidating the table `times` times.
+- **`n_cpus()` is held during the loop.** Each metric function checks
+  `cpus` against `n_cpus()`, which with parallelly installed costs ~4 ms
+  per call; 5000 iterations spent 20 s there. `hold_n_cpus()` /
+  `release_n_cpus()` (R/utils.r) make `n_cpus()` return its value at the
+  start of the call until the function exits (errors included; holds nest).
+  The vegan fixture's 5000 rarefactions went from 22 s to 1.2 s.
+- **Validation order:** metric first (a misspelt metric is the error
+  reported), then counts, margin, integers, seed, cpus, non-negative counts,
+  `times`, `depth`, `average`, `sd`; `clust` before the samples are
+  dropped, so an invalid `clust` gives no drop warning first. Messages:
+  "`depth` must be NULL or a single whole number of at least 1." (a
+  vector: "... To rarefy each sample to a depth of its own, use
+  rarefy()."), "`times` must be a whole number of at least 1.", "`average
+  = "me"` must be one of ... (it matches several).", "`average = "medoid"`
+  is only for beta diversity; ...", "Only k of the n samples have at least
+  d observations; at least two are needed."
+- **`average` matching:** exact choice, else unique prefix,
+  case-insensitive. `"med"` is ambiguous for beta (median, medoid) and
+  means `"median"` for alpha. For alpha, a prefix of `"medoid"` of at least
+  4 letters gets the "only for beta" message.
+- **`dropped`** is always set: the names of the dropped samples, or their
+  positions (integers) when samples are unnamed; empty (`character(0)` /
+  `integer(0)`) when none. The drop warning reads "k of the n samples
+  have fewer than d observations and were dropped."
+- **`sd`** with `times = 1` is `NA` (as `stats::sd()` of one value). The
+  `sd` dist has no `method` (it isn't the metric's distance), the title
+  `title_of("SD", <title>)`, and with `clust`, the result's `order` and
+  `display$clust`, reordered with it by `dist_reorder()` (no shared list
+  of triangle-parallel attributes exists yet; README mentions one).
+- **Title:** "<METRICS display name> (rarefied <times>×)" with
+  U+00D7, written `×` in R code.
+- **Median and medoid blocks:** pairs to compute are `sort(unique(pairs))`
+  (all pairs when `NULL`); block size `floor(budget / (8 * times))`,
+  budget 256 MB (`rarefied_beta_fit(budget =)`, internal). With
+  `pairs = integer(0)` one empty block runs, so attributes still come from
+  a real iteration (medoid then picks iteration 1).
+- **Medoid sums don't depend on blocks:** `C_medoid_accum` continues each
+  cell's running sum of squared differences row by row from the previous
+  block's value, so one block and many give bit-identical sums (the tests
+  check `identical()` at budgets of 3 pairs and 1 pair). Rows with NA or
+  NaN in either iteration are skipped. The medoid is
+  `which.min(rowSums(sqrt(ssq)))` (first minimum). Two identical
+  iterations get exactly equal sums however they are added, so ties go to
+  the first, as `np.argmin`.
+- **`C_row_medians`:** quickselect per row (Hoare partition, median-of-
+  three pivot), `(a + b) / 2` for an even count, which equals R's
+  `mean()` of the two (halving a rounded sum is exact); `NA` for a row
+  with NA or NaN, as `median()`. Equal to `apply(M, 1, median)` exactly in
+  the tests. Used for the alpha median too.
+- **sd in blocks:** two-pass per block (`rowMeans()`, then the sum of
+  squared deviations accumulated over the `times` columns, so no extra
+  `B × times` temporaries); matches `apply(stack, 1, sd)` to 1e-12.
+- **Alpha** keeps the `n × times` matrix; mean is the sequential sum over
+  iterations divided by `times`; `sd` is `apply(M, 1, stats::sd)`, named.
+- **`auto_depth()` and `sample_sums()`** (R/rarefy.r) are shared by
+  `rarefy()` and the new functions; `rarefy()`'s "Auto-Depth Selection"
+  section now describes the rule as coded (the smallest library size whose
+  yield is at least 10% of all observations).
+- **Docs follow-ups:** `rpca()` has no "Sequencing depth" section yet
+  (item 34, not done), so that replacement is left for item 34, which
+  should use `beta_div_rarefied(counts, 'robust_aitchison')` there. The
+  compositional article gains "Rarefied or compositional?" after the PhILR
+  chunk: `beta_div_rarefied(counts, 'bray', times = 20)`, a
+  `procrustes_test()` against the article's `rpca()` ordination, and
+  `envfit()` of `log(rowSums(counts))` on both (on the simulated data,
+  r² 0.08 for rarefied Bray-Curtis, 0.50 for RPCA).
+- **No compact-output flag** for `C_beta_div` with `pairs`: each block's
+  call still allocates a full-length triangle (400 MB at 10,000 samples).
+  Fine below a few thousand samples; a follow-up if large median/medoid
+  runs need it.
+- **vegan fixture:** 8 samples × 20 features, depth = the smallest library
+  (209), `avgdist(iterations = 5000)` run twice from `set.seed(1)` with
+  `meanfun = mean` and `meanfun = sd` (the same draws), so the test's
+  combined SE uses vegan's own spread. vegan 2.7-8.
