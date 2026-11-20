@@ -337,7 +337,7 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, ✓ `da_test`, `feature_assoc` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, ✓ `da_test`, ✓ `feature_assoc` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
 | Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, ✓ `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
@@ -358,7 +358,7 @@ can't be mistaken for one another:
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
 | Rarefied diversity | ✓ `beta_div_rarefied`, ✓ `alpha_div_rarefied` |
 | Normalization | ✓ `normalize`, `size_factors` (new `norm` choices: see [normalization_factors.md](normalization_factors.md)) |
-| Associations and networks (`feature_assoc`, proposed) | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s`, ✓ `sparcc`, ✓ `assoc_pairs`, `spiec_easi_mb`, `spiec_easi_glasso`, `secom_pearson`, `secom_distance`, `assoc_network`, `assoc_network_compare`, `assoc_network_diff` |
+| Associations and networks (`feature_assoc`) | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s`, ✓ `sparcc`, ✓ `assoc_pairs`, `spiec_easi_mb`, `spiec_easi_glasso`, `secom_pearson`, `secom_distance`, ✓ `assoc_network`, ✓ `assoc_network_compare`, ✓ `assoc_network_diff` |
 | Community types | ✓ `enterotype`, `valencia`, `dmm` |
 | Compositional plots | `ternary_plot`, `variation_array`, `zero_pattern`, `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
 | Spatial | `moran_i`, `dbmem` |
