@@ -111,19 +111,19 @@ before returning the distance matrix: <code>NULL</code> (the default) or
 (WPGMA), <code>"median"</code> or <code>"centroid"</code>, or <code>"pcoa"</code> to order them
 along the first axis of <code><a href="pcoa.html">pcoa()</a></code>. Clustering <strong>reorders the
 samples</strong> of the result, with their labels (samples without names
-are labelled with their positions in the input): its <code>dist</code> record
-(see <a href="ecodive_steps.html">ecodive_steps</a>) gives each one's position in the input as
-<code>order</code>, so that <code>meta[attr(d, "dist")$order, ]</code> lines metadata up
-with them. ecodive's ordinations and tests put the samples back in
-their input order before analysing them, so give them metadata in
-its usual order. Other packages see the reordered matrix: give
-them metadata reordered by <code>order</code>, or matched by name. The
-record's <code>clust</code> records <code>clust</code>
-(<code>FALSE</code> as <code>"none"</code>), which <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
+are labelled with their positions in the input): its <code>order</code>
+attribute gives each one's position in the input, so that
+<code>meta[attr(d, "order"), ]</code> lines metadata up with them. ecodive's
+ordinations and tests put the samples back in their input order
+before analysing them, so give them metadata in its usual order.
+Other packages see the reordered matrix: give them metadata
+reordered by <code>order</code>, or matched by name. The matrix's <code>display</code>
+list keeps <code>clust</code> (<code>FALSE</code> as <code>"none"</code>; see <a href="ecodive_display.html">ecodive_display</a>),
+which <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> follows: with <code>NULL</code> it clusters the samples
 for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
 order. <code>clust</code> needs every distance, so it cannot be used with
 <code>pairs</code>. <code><a href="rho_p.html">rho_p()</a></code>'s similarities are clustered as \(1 -
-       \rho_p\).</p></dd>
+\rho_p\).</p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
@@ -215,10 +215,13 @@ Costea et al. (2014) for the impact on community clustering.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="fu">soergel</span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          Saliva      Gums      Nose</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gums  0.7425945                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Nose  0.9796840 0.9850187          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Stool 0.9958159 0.9953146 0.9962963</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A dist: 4 samples (lower triangle)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Soergel Distance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Saliva  Gums  Nose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums   0.743</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose   0.98  0.985</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool  0.996 0.995 0.996</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

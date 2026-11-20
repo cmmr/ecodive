@@ -206,6 +206,24 @@ approach over the Mantel test. *Oecologia*, 129(2), 169-178.
     jc <- pcoa(jaccard(counts), n_axes = 2)
 
     fit <- procrustes(jc, bc)
+    fit
+#> # A matrix: 30 samples × 2 axes
+#> # Procrustes Rotation
+#>        PCoA1    PCoA2
+#> S1  -0.444    0.029
+#> S2  -0.308    0.0144
+#> S3  -0.677    0.049
+#> S4  -0.308    0.0144
+#> S5  -0.261   -0.0104
+#> S6  -0.0875  -0.00756
+#> S7  -0.299    0.00662
+#> S8  -0.299    0.00662
+#> S9  -0.0104  -0.0404
+#> S10 -0.00658 -0.0141
+#> # … 20 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, ss, rotation, translation, dilation,
+#> #   residuals, symmetric, target
     attr(fit, 'ss')
 #> [1] 2.520756
     attr(fit, 'residuals')

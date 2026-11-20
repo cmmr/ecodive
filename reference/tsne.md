@@ -345,12 +345,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -402,14 +404,24 @@ Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python.
     ord <- tsne(dm)
     plot(ord, 'Species', iris)
 
-    head(ord)
-#>         TSNE1     TSNE2
-#> [1,] 25.08105 -6.857942
-#> [2,] 24.92025 -4.253650
-#> [3,] 25.85836 -4.578273
-#> [4,] 25.52385 -4.178758
-#> [5,] 25.34108 -6.647509
-#> [6,] 24.19891 -8.867062
+    ord
+#> # A matrix: 150 samples × 2 axes
+#> # t-distributed Stochastic Neighbor Embedding of Bray-Curtis Dissimilarity
+#>    TSNE1 TSNE2
+#>  1  25.1 -6.86
+#>  2  24.9 -4.25
+#>  3  25.9 -4.58
+#>  4  25.5 -4.18
+#>  5  25.3 -6.65
+#>  6  24.2 -8.87
+#>  7  26.2 -5.14
+#>  8  24.7 -6.19
+#>  9  25.9 -3.44
+#> 10  24.6 -4.56
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, kl_divergence, perplexity, init, n_iters,
+#> #   learning_rate, gradient
     str(ord)
 #>  'ecodive_ord' num [1:150, 1:2] 25.1 24.9 25.9 25.5 25.3 ...
 #>  - attr(*, "dimnames")=List of 2
@@ -424,6 +436,6 @@ Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python.
 #>  - attr(*, "n_iters")= int 1000
 #>  - attr(*, "learning_rate")= num 50
 #>  - attr(*, "gradient")= chr "exact"
-#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
-#>  - attr(*, "ord")= t-distributed Stochastic Neighbor Embedding (method = tsne, n_axes = 2, perplexity = 30, theta = 0.5, gradient = auto, init = pcoa, max_iters = 1000, early_exaggeration = 12, learning_rate = 50, seed = 0)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "t-distributed Stochastic Neighbor Embedding of Bray-Curtis Dissimilarity"
 ```

@@ -329,12 +329,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -463,11 +465,12 @@ Elsevier.
 #>   ..- attr(*, "dimnames")=List of 2
 #>   .. ..$ : chr [1:4] "Sepal.Length" "Sepal.Width" "Petal.Length" "Petal.Width"
 #>   .. ..$ : chr [1:2] "RDA1" "RDA2"
-#>  - attr(*, "ord")= Redundancy Analysis (method = rda, formula = ~Species, margin = 1, norm = chord, pseudocount = 0, scale = FALSE, n_axes = 2)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Redundancy Analysis"
 
     # Its permutation test: PERMANOVA of the Hellinger distances.
     permanova(euclidean(counts, norm = 'hellinger'), 'Species', iris, permutations = 99)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Euclidean Distance
 #> 
 #> F =  1342, p = 0.01, z =  1215
 #> Permutations: 99 (free)
@@ -482,12 +485,23 @@ Elsevier.
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
     # Without constraints, a PCA.
-    head(rda(counts))
-#>            PC1        PC2         PC3
-#> [1,] -1.727729  0.8581736 -0.13211676
-#> [2,] -1.747050 -0.4755764 -0.99609633
-#> [3,] -1.859597 -0.3894579  0.08471927
-#> [4,] -1.767134 -0.8552227  0.14936586
-#> [5,] -1.756432  0.8779415  0.42633175
-#> [6,] -1.468153  1.9918464  0.79832646
+    rda(counts)
+#> # A matrix: 150 samples × 3 axes
+#> # Redundancy Analysis
+#> # % of variance: 92.5, 5.3, 1.7
+#>      PC1    PC2     PC3
+#>  1 -1.73  0.858 -0.132
+#>  2 -1.75 -0.476 -0.996
+#>  3 -1.86 -0.389  0.0847
+#>  4 -1.77 -0.855  0.149
+#>  5 -1.76  0.878  0.426
+#>  6 -1.47  1.99   0.798
+#>  7 -1.82 -0.24   1.22
+#>  8 -1.69  0.439 -0.104
+#>  9 -1.86 -1.55   0.0983
+#> 10 -1.72 -0.306 -0.935
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared,
+#> #   adj_r_squared, biplot, loadings
 ```

@@ -275,12 +275,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -344,6 +346,16 @@ is;
 
 ``` r
     ord <- rpca_phylo(ex_counts, ex_tree, n_axes = 2)
+    ord
+#> # A matrix: 4 samples × 2 axes
+#> # Phylogenetic Robust Aitchison PCA
+#> # % of variance: 54.1, 45.9
+#>        RPCA1 RPCA2
+#> Saliva -1.45 -3.36
+#> Gums   -1.4  -5.1
+#> Nose    7.99  2.39
+#> Stool  -5.13  6.07
+#> # Attributes: method, eig, prop, trace, loadings, cost, n_iters, tree
     plot(ord)
 
     str(ord)
@@ -369,7 +381,8 @@ is;
 #>   ..$ node.label : chr [1:5] "n10" "n8" "n9" "n6" ...
 #>   ..- attr(*, "class")= chr "phylo"
 #>   ..- attr(*, "order")= chr "cladewise"
-#>  - attr(*, "ord")= Phylogenetic Robust Aitchison PCA (method = rpca_phylo, margin = 1, n_axes = 2, max_iters = 5, tol = 1e-05, min_sample_count = 0, min_feature_count = 0, min_feature_frequency = 0, min_depth = 0, distances = FALSE, node_counts = FALSE)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Phylogenetic Robust Aitchison PCA"
 
     # Loadings for clades as well as tips.
     head(attr(ord, 'loadings'))

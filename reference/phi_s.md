@@ -66,15 +66,15 @@ phi_s(
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (samples without names are labelled with their positions in the
-  input): its `dist` record (see
-  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
-  gives each one's position in the input as `order`, so that
-  `meta[attr(d, "dist")$order, ]` lines metadata up with them. ecodive's
-  ordinations and tests put the samples back in their input order before
-  analysing them, so give them metadata in its usual order. Other
-  packages see the reordered matrix: give them metadata reordered by
-  `order`, or matched by name. The record's `clust` records `clust`
-  (`FALSE` as `"none"`), which
+  input): its `order` attribute gives each one's position in the input,
+  so that `meta[attr(d, "order"), ]` lines metadata up with them.
+  ecodive's ordinations and tests put the samples back in their input
+  order before analysing them, so give them metadata in its usual order.
+  Other packages see the reordered matrix: give them metadata reordered
+  by `order`, or matched by name. The matrix's `display` list keeps
+  `clust` (`FALSE` as `"none"`; see
+  [ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
+  which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -92,9 +92,8 @@ phi_s(
 
 A `dist` object over the features, as
 [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) returns,
-whose `dist` record has `metric` `"phi_s"`. It is a dissimilarity, so it
-can be given as `dm` to
-[`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
+with `method` `"phi_s"`. It is a dissimilarity, so it can be given as
+`dm` to [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
 [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) or
 [`stats::hclust()`](https://rdrr.io/r/stats/hclust.html).
 
@@ -188,18 +187,16 @@ using compositional data analysis. *Scientific Reports*, 7, 16252.
 ``` r
     x <- replace_zeros(ex_counts, 'mult')
     phi_s(x)
-#>                   Streptococcus  Bacteroides Corynebacterium  Haemophilus
-#> Bacteroides          3.03059414                                          
-#> Corynebacterium      0.84332117   4.65087656                             
-#> Haemophilus          0.07245552   1.54794798      1.93602839             
-#> Propionibacterium   29.69577708   0.53014503      0.66220067 118.51898728
-#> Staphylococcus       2.61515860   2.40122280      0.21092244   3.30740984
-#>                   Propionibacterium
-#> Bacteroides                        
-#> Corynebacterium                    
-#> Haemophilus                        
-#> Propionibacterium                  
-#> Staphylococcus           0.30095796
+#> # A dist: 6 features (lower triangle)
+#> # Proportionality (phi_s)
+#>                   Streptococcus Bacteroides Corynebacterium Haemophilus
+#> Bacteroides              3.03
+#> Corynebacterium          0.843         4.65
+#> Haemophilus              0.0725        1.55           1.94
+#> Propionibacterium       29.7           0.53           0.662      119
+#> Staphylococcus           2.62          2.4            0.211        3.31
+#> # … 1 more column: Propionibacterium
+#> # Attributes: method
 
     # The same as (1 - rho_p) / (1 + rho_p)
     rho <- rho_p(x)

@@ -272,7 +272,7 @@ in Ecology and Evolution*, 3(1), 89-101.
     # Are samples more alike within treatment groups than between them?
     res <- anosim(dm, 'treatment', meta)
     res
-#> Analysis of similarities (ANOSIM)
+#> Analysis of similarities (ANOSIM) of Bray-Curtis Dissimilarity
 #> 
 #> R = 0.3217, p = 0.001, z = 6.742
 #> Permutations: 999 (free)
@@ -288,7 +288,7 @@ in Ecology and Evolution*, 3(1), 89-101.
 
     # The same, with the groups as a vector.
     anosim(dm, meta$treatment)
-#> Analysis of similarities (ANOSIM)
+#> Analysis of similarities (ANOSIM) of Bray-Curtis Dissimilarity
 #> 
 #> R = 0.3217, p = 0.001, z = 6.742
 #> Permutations: 999 (free)
@@ -302,7 +302,7 @@ in Ecology and Evolution*, 3(1), 89-101.
 
     # Permuting treatment labels only within each site.
     anosim(dm, 'treatment', meta, strata = 'site')
-#> Analysis of similarities (ANOSIM)
+#> Analysis of similarities (ANOSIM) of Bray-Curtis Dissimilarity
 #> 
 #> R = 0.3217, p = 0.001, z = 6.714
 #> Permutations: 999 (within strata)

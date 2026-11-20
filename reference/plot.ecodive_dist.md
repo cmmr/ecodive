@@ -11,7 +11,7 @@ or of the proportionality of features from
 [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md): one row
 and one column per sample (or feature), each cell coloured by the
 distance between its row's and its column's, with the samples ordered as
-the matrix's `clust` attribute says.
+the `clust` it was made with says.
 
 ## Usage
 
@@ -70,9 +70,9 @@ plot(x, groups = NULL, data = NULL, col = NULL, key = TRUE, ...)
 ## Details
 
 **Order.** The samples are ordered by the `clust` argument of the
-function that made `x`, recorded in its `dist` record
-(`attr(x, "dist")$clust`; see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
+function that made `x`, kept in its `display` list
+(`attr(x, "display")$clust`; see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)):
 
 - Not set (`clust = NULL`, the default): the plot clusters them itself,
   by average linkage (UPGMA,
@@ -85,12 +85,13 @@ function that made `x`, recorded in its `dist` record
 
 To plot a matrix in its own order, make it with `clust = FALSE`.
 
-**Title.** The metric's display name, from the `dist` record (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)),
-such as `"Bray-Curtis Dissimilarity"`; or else the `method` attribute
-that [`stats::dist()`](https://rdrr.io/r/stats/dist.html) sets;
-`"Distances"` without either. With `groups`, the samples are sorted by
-group, keeping that order within each group.
+**Title.** The matrix's title (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
+the metric's display name, such as `"Bray-Curtis Dissimilarity"`; or
+else the `method` attribute that
+[`stats::dist()`](https://rdrr.io/r/stats/dist.html) sets; `"Distances"`
+without either, as after arithmetic on `x`. With `groups`, the samples
+are sorted by group, keeping that order within each group.
 
 The rows run from the first sample at the top to the last at the bottom,
 and the columns from left to right in the same order, so the matrix is
@@ -123,7 +124,7 @@ before.
 
     # Clustered by Ward's method when computed: the result is reordered.
     dm <- bray(iris[, 1:4], clust = 'ward.D2')
-    head(attr(dm, 'dist')$order)
+    head(attr(dm, 'order'))
 #> [1] 13  2 46 30 31 26
     plot(dm, 'Species', iris)
 

@@ -445,14 +445,15 @@ methods for human gut 16S rRNA microbiome data (2026). <em>bioRxiv</em>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">ancombc</span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span>, <span class="op">~</span> <span class="va">status</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">res</span><span class="op">[</span><span class="va">res</span><span class="op">$</span><span class="va">reject</span> <span class="op">&amp;</span> <span class="va">res</span><span class="op">$</span><span class="va">covariate</span> <span class="op">!=</span> <span class="st">'(Intercept)'</span>, <span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    feature      covariate     log_fc        se        w      p_value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       F2 statusmoderate 1.90555337 0.2585194 7.371028 1.693178e-13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7       F2   statussevere 2.93516110 0.3041880 9.649167 4.955686e-22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12      F3            age 0.06264515 0.0218213 2.870825 4.094016e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      p_adjusted reject</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.354542e-12   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  3.964549e-21   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 3.275213e-02   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 3 × 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # ANCOM-BC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    feature covariate      log_fc     se     w  p_value p_adjusted reject</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;chr&gt;   &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  F2      statusmoderate 1.91   0.259   7.37 1.69e-13   1.35e-12   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  F2      statussevere   2.94   0.304   9.65 4.96e-22   3.96e-21   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 F3      age            0.0626 0.0218  2.87  0.00409     0.0328   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, alpha, p_adjust, max_iters, tol, pseudocount,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   coef, var, vcov, design, bias, n_iters</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A volcano plot of one covariate, here the first: moderate vs mild.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
@@ -465,9 +466,14 @@ methods for human gut 16S rRNA microbiome data (2026). <em>bioRxiv</em>
 <span class="r-in"><span>    <span class="co"># 0.5 and 1 too are kept in `reject_robust`.</span></span></span>
 <span class="r-in"><span>    <span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">x</span>, <span class="op">~</span> <span class="va">status</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta</span>, groups <span class="op">=</span> <span class="st">'status'</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">res2</span><span class="op">[</span><span class="va">res2</span><span class="op">$</span><span class="va">reject</span>, <span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] feature       covariate     log_fc        se            w            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] p_value       p_adjusted    reject        passed_ss     reject_robust</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;0 rows&gt; (or 0-length row.names)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 0 × 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # ANCOM-BC2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  feature covariate log_fc    se     w p_value p_adjusted reject passed_ss</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;     &lt;lgl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 1 more column: reject_robust &lt;lgl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, groups, alpha, p_adjust, max_iters, tol,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   var_quantile, pseudocount, coef, var, vcov, dof, design, bias, n_iters,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   sample_fractions, sensitivity</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># ANCOMBC's preprocessing, done first: keep features present in at</span></span></span>
 <span class="r-in"><span>    <span class="co"># least 10% of samples (prv_cut = 0.1), and samples with at least 10</span></span></span>

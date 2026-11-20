@@ -143,19 +143,25 @@ zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
 
     # No zeros left, so no pseudocount is needed.
     aitchison(x)
-#>          Saliva      Gums      Nose
-#> Gums   3.119740                    
-#> Nose   8.584062  9.538761          
-#> Stool  9.893138 10.072882  9.626133
+#> # A dist: 4 samples (lower triangle)
+#> # Aitchison Distance
+#>       Saliva  Gums Nose
+#> Gums    3.12
+#> Nose    8.58  9.54
+#> Stool   9.89 10.1  9.63
+#> # Attributes: method
 
     # The same analysis with every method.
     lapply(list_zero_replacements('id'), function (m) {
       aitchison(replace_zeros(ex_counts, m))
     })
 #> [[1]]
-#>          Saliva      Gums      Nose
-#> Gums   3.119740                    
-#> Nose   8.584062  9.538761          
-#> Stool  9.893138 10.072882  9.626133
+#> # A dist: 4 samples (lower triangle)
+#> # Aitchison Distance
+#>       Saliva  Gums Nose
+#> Gums    3.12
+#> Nose    8.58  9.54
+#> Stool   9.89 10.1  9.63
+#> # Attributes: method
 #> 
 ```

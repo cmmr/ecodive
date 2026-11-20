@@ -245,22 +245,18 @@ Oksanen, J., et al. vegan: Community Ecology Package. `envfit()`.
     # An arrow for each measurement, a centroid for each species.
     fit <- envfit(ord, iris)
     fit
-#>                       variable      level       PCoA1       PCoA2        r2
-#> Sepal.Length      Sepal.Length       <NA> -0.62240779 -0.78269313 0.8942973
-#> Sepal.Width        Sepal.Width       <NA>  0.17280029 -0.98495688 0.9213948
-#> Petal.Length      Petal.Length       <NA> -0.99139935 -0.13087144 0.9849779
-#> Petal.Width        Petal.Width       <NA> -0.96090689 -0.27687170 0.9289167
-#> Speciessetosa          Species     setosa  0.16700378 -0.01395054 0.8875721
-#> Speciesversicolor      Species versicolor -0.04635194  0.03090254 0.8875721
-#> Speciesvirginica       Species  virginica -0.12065184 -0.01695200 0.8875721
-#>                   p_value        z
-#> Sepal.Length        0.001 71.49808
-#> Sepal.Width         0.001 67.92426
-#> Petal.Length        0.001 74.01866
-#> Petal.Width         0.001 70.39502
-#> Speciessetosa       0.001 70.18593
-#> Speciesversicolor   0.001 70.18593
-#> Speciesvirginica    0.001 70.18593
+#> # A data.frame: 7 × 7
+#> # Fitted variables on Principal Coordinates Analysis of Bray-Curtis Dissimilarity
+#>                   variable     level        PCoA1   PCoA2    r2 p_value     z
+#>                   <chr>        <chr>        <dbl>   <dbl> <dbl>   <dbl> <dbl>
+#> Sepal.Length      Sepal.Length NA         -0.622  -0.783  0.894   0.001  71.5
+#> Sepal.Width       Sepal.Width  NA          0.173  -0.985  0.921   0.001  67.9
+#> Petal.Length      Petal.Length NA         -0.991  -0.131  0.985   0.001  74
+#> Petal.Width       Petal.Width  NA         -0.961  -0.277  0.929   0.001  70.4
+#> Speciessetosa     Species      setosa      0.167  -0.014  0.888   0.001  70.2
+#> Speciesversicolor Species      versicolor -0.0464  0.0309 0.888   0.001  70.2
+#> Speciesvirginica  Species      virginica  -0.121  -0.017  0.888   0.001  70.2
+#> # Attributes: r2_perm, n_perm
 
     # A biplot: the fit drawn on the ordination.
     plot(ord, 'Species', iris)

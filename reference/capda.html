@@ -292,10 +292,11 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them, and last, the records
-of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
-matrix's, for the methods that take distances, and <code>ord</code>, the
-ordination's own (its method, display name and settings). The matrix has class
+</ul><p>Attributes particular to the method follow them, and last <code>display</code>,
+with the ordination's title for <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see <a href="ecodive_display.html">ecodive_display</a>). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -322,6 +323,25 @@ PRIMER: Guide to Software and Statistical Methods</em>. PRIMER-E, Plymouth.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="co"># CAP of iris, from Bray-Curtis distances.</span></span></span>
 <span class="r-in"><span>    <span class="va">dm</span>  <span class="op">&lt;-</span> <span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">capda</span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, permutations <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">ord</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 150 samples × 2 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Discriminant Canonical Analysis of Principal Coordinates of Bray-Curtis Dissimilarity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # % of variance: 56.8, 43.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    CAP1   CAP2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 9.18 -0.559</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2 8.34 -0.369</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3 9.77 -0.927</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4 9.23 -0.406</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5 9.48 -0.905</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6 8.06  0.705</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7 9.54 -1.15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8 8.59 -0.53</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9 9.05  0.704</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 8.66 -0.164</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 140 more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, n_pcoa_axes, success, loo_table, loo_class,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   trace_stat, p_value, n_perm, trace_perm, scaling, groups</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="capda-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

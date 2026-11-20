@@ -334,10 +334,11 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them, and last, the records
-of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
-matrix's, for the methods that take distances, and <code>ord</code>, the
-ordination's own (its method, display name and settings). The matrix has class
+</ul><p>Attributes particular to the method follow them, and last <code>display</code>,
+with the ordination's title for <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see <a href="ecodive_display.html">ecodive_display</a>). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -376,14 +377,24 @@ and <code>sklearn.isotonic</code>, under scikit-learn's BSD-3-Clause license
 <span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">nmds</span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="nmds-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          NMDS1       NMDS2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.1703377 -0.02307947</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.1727886  0.01624136</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.1910232  0.00691959</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.1843325  0.01709551</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.1772749 -0.02496549</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.1364458 -0.05359534</span>
+<span class="r-in"><span>    <span class="va">ord</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 150 samples × 2 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Non-metric Multidimensional Scaling of Bray-Curtis Dissimilarity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    NMDS1    NMDS2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 0.17  -0.0231</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2 0.173  0.0162</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3 0.191  0.00692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4 0.184  0.0171</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5 0.177 -0.025</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6 0.136 -0.0536</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7 0.19  -0.00604</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8 0.168 -0.0129</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9 0.199  0.0372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 0.173  0.011</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 140 more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, stress, converged, n_iters, n_starts,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   best_start, n_best, ties</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  'ecodive_ord' num [1:150, 1:2] 0.17 0.173 0.191 0.184 0.177 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dimnames")=List of 2</span>
@@ -399,8 +410,8 @@ and <code>sklearn.isotonic</code>, under scikit-learn's BSD-3-Clause license
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "best_start")= int 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "n_best")= int 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ties")= chr "primary"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ord")= Non-metric Multidimensional Scaling (method = nmds, n_axes = 2, n_starts = 4, max_iters = 1000, tol = 1e-07, ties = primary, seed = 0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "display")=List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ title: chr "Non-metric Multidimensional Scaling of Bray-Curtis Dissimilarity"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

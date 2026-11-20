@@ -47,7 +47,7 @@ name of `data`, or as a vector.
 
 res <- permanova(dm, 'Species', iris)
 res
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 532.7, p = 0.001, z = 577.6
 #> Permutations: 999 (free)
@@ -84,7 +84,7 @@ within blocks (such as subjects in a repeated-measures design).
 ``` r
 
 permanova(dm, data = iris, formula = ~ Species + Sepal.Width, by = 'terms')
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F =   825, p = 0.001, z =  1105
 #> Permutations: 999 (free)
@@ -114,7 +114,7 @@ res <- permdisp(dm, 'Species', iris)
 #> Warning: Some squared distances to group centres are negative, and were set to
 #> 0.
 res
-#> Homogeneity of multivariate dispersions (PERMDISP)
+#> Homogeneity of multivariate dispersions (PERMDISP) of Bray-Curtis Dissimilarity
 #> 
 #> F = 0.5676, p = 0.573, z = -0.4401
 #> Permutations: 999 (free)
@@ -149,7 +149,7 @@ the average distance within groups with what random groups would give.
 ``` r
 
 anosim(dm, 'Species', iris)
-#> Analysis of similarities (ANOSIM)
+#> Analysis of similarities (ANOSIM) of Bray-Curtis Dissimilarity
 #> 
 #> R = 0.8576, p = 0.001, z =  79.4
 #> Permutations: 999 (free)
@@ -163,7 +163,7 @@ anosim(dm, 'Species', iris)
 
 res <- mrpp(dm, 'Species', iris)
 res
-#> Multi-response permutation procedure (MRPP)
+#> Multi-response permutation procedure (MRPP) of Bray-Curtis Dissimilarity
 #> 
 #> delta = 0.05795, p = 0.001, z = -78.9
 #> Permutations: 999 (free)
@@ -249,7 +249,7 @@ petals <- bray(iris[, 3:4])
 
 res <- mantel(sepals, petals, method = 'spearman')
 res
-#> Mantel test (Spearman)
+#> Mantel test (Spearman) of Bray-Curtis Dissimilarity and Bray-Curtis Dissimilarity
 #> 
 #> r =  0.69, p = 0.001, z = 35.65
 #> Permutations: 999 (free)
@@ -269,7 +269,7 @@ sepals and petals still match after accounting for petal width alone.
 ``` r
 
 mantel_partial(sepals, petals, given = 'Petal.Width', data = iris, method = 'spearman')
-#> Partial Mantel test (Spearman)
+#> Partial Mantel test (Spearman) of Bray-Curtis Dissimilarity and Bray-Curtis Dissimilarity
 #> 
 #> r = 0.3918, p = 0.001, z =  12.4
 #> Permutations: 999 (free)
@@ -291,7 +291,7 @@ finds `permanova` and `'betadisper'` finds `permdisp`.
 ``` r
 
 dist_test(dm, 'adonis2', 'Species', iris)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 532.7, p = 0.001, z = 577.6
 #> Permutations: 999 (free)

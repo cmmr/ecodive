@@ -297,12 +297,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -404,15 +406,27 @@ Chapman & Hall/CRC.
 #>   ..- attr(*, "dimnames")=List of 2
 #>   .. ..$ : chr [1:4] "Sepal.Length" "Sepal.Width" "Petal.Length" "Petal.Width"
 #>   .. ..$ : chr [1:2] "CCA1" "CA1"
-#>  - attr(*, "ord")= Canonical Correspondence Analysis (method = cca, formula = ~Petal.Width, margin = 1, n_axes = 2, permutations = 1000, seed = 0)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Canonical Correspondence Analysis"
 
     # Without constraints, a correspondence analysis.
-    head(cca(counts))
-#>           CA1         CA2        CA3
-#> [1,] 1.808718 -0.02363406  0.0946769
-#> [2,] 1.642803  0.87122963  1.3117351
-#> [3,] 1.778758 -0.03248420  0.2454927
-#> [4,] 1.613485  0.32810647 -0.6368010
-#> [5,] 1.841613 -0.38244840 -0.6112067
-#> [6,] 1.598380 -0.99156726 -0.4130386
+    cca(counts)
+#> # A matrix: 150 samples × 3 axes
+#> # Canonical Correspondence Analysis
+#> # % of variance: 95.6, 3.4, 1.0
+#>     CA1     CA2     CA3
+#>  1 1.81 -0.0236  0.0947
+#>  2 1.64  0.871   1.31
+#>  3 1.78 -0.0325  0.245
+#>  4 1.61  0.328  -0.637
+#>  5 1.84 -0.382  -0.611
+#>  6 1.6  -0.992  -0.413
+#>  7 1.69 -1.03   -0.738
+#>  8 1.72  0.187  -0.305
+#>  9 1.6   0.399  -0.151
+#> 10 1.71  1.28   -0.121
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared,
+#> #   adj_r_squared, biplot, loadings
 ```

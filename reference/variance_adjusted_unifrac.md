@@ -55,15 +55,15 @@ variance_adjusted_unifrac(
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (samples without names are labelled with their positions in the
-  input): its `dist` record (see
-  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
-  gives each one's position in the input as `order`, so that
-  `meta[attr(d, "dist")$order, ]` lines metadata up with them. ecodive's
-  ordinations and tests put the samples back in their input order before
-  analysing them, so give them metadata in its usual order. Other
-  packages see the reordered matrix: give them metadata reordered by
-  `order`, or matched by name. The record's `clust` records `clust`
-  (`FALSE` as `"none"`), which
+  input): its `order` attribute gives each one's position in the input,
+  so that `meta[attr(d, "order"), ]` lines metadata up with them.
+  ecodive's ordinations and tests put the samples back in their input
+  order before analysing them, so give them metadata in its usual order.
+  Other packages see the reordered matrix: give them metadata reordered
+  by `order`, or matched by name. The matrix's `display` list keeps
+  `clust` (`FALSE` as `"none"`; see
+  [ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
+  which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -137,8 +137,11 @@ Other Phylogenetic metrics:
 
 ``` r
     variance_adjusted_unifrac(ex_counts, tree = ex_tree)
-#>          Saliva      Gums      Nose
-#> Gums  0.4242631                    
-#> Nose  0.7753369 0.5565010          
-#> Stool 0.9655749 0.9807634 0.9785147
+#> # A dist: 4 samples (lower triangle)
+#> # Variance-Adjusted Weighted UniFrac
+#>       Saliva  Gums  Nose
+#> Gums   0.424
+#> Nose   0.775 0.557
+#> Stool  0.966 0.981 0.979
+#> # Attributes: method
 ```

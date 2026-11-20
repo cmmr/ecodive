@@ -340,7 +340,7 @@ dm_rait <- robust_aitchison(counts)
 
 # Do the groups differ in composition, and in dispersion?
 permanova(dm_rait, groups, seed = 1)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Robust Aitchison Distance
 #> 
 #> F = 6.625, p = 0.001, z = 23.86
 #> Permutations: 999 (free)
@@ -354,7 +354,7 @@ permanova(dm_rait, groups, seed = 1)
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 permdisp(dm_rait, groups, seed = 1)
-#> Homogeneity of multivariate dispersions (PERMDISP)
+#> Homogeneity of multivariate dispersions (PERMDISP) of Robust Aitchison Distance
 #> 
 #> F =  24.4, p = 0.001, z = 15.19
 #> Permutations: 999 (free)
@@ -602,19 +602,24 @@ differentially abundant:
 
 res_ancom <- ancom(counts, groups, pseudocount = 1)
 head(res_ancom[order(-res_ancom$W), ], 12)
-#>    feature   W reject
-#> 8   ASV008 131   TRUE
-#> 7   ASV007 120   TRUE
-#> 9   ASV009 111  FALSE
-#> 6   ASV006 110  FALSE
-#> 10  ASV010 110  FALSE
-#> 4   ASV004  85  FALSE
-#> 2   ASV002  79  FALSE
-#> 3   ASV003  58  FALSE
-#> 1   ASV001  54  FALSE
-#> 5   ASV005  51  FALSE
-#> 12  ASV012  40  FALSE
-#> 14  ASV014  38  FALSE
+#> # A data.frame: 12 × 3
+#> # ANCOM: control vs treated
+#>    feature     W reject
+#>    <chr>   <int>  <lgl>
+#> 8  ASV008    131   TRUE
+#> 7  ASV007    120   TRUE
+#> 9  ASV009    111  FALSE
+#> 6  ASV006    110  FALSE
+#> 10 ASV010    110  FALSE
+#> 4  ASV004     85  FALSE
+#> 2  ASV002     79  FALSE
+#> 3  ASV003     58  FALSE
+#> 1  ASV001     54  FALSE
+#> 5  ASV005     51  FALSE
+#> 12 ASV012     40  FALSE
+#> 14 ASV014     38  FALSE
+#> # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
+#> #   pseudocount
 table(changed = changed, rejected = res_ancom$reject)
 #>        rejected
 #> changed FALSE TRUE
@@ -643,19 +648,22 @@ is scikit-bio’s version, with Welch’s t-test; `contrast` is
 res_dm <- dirmult_ttest(counts, groups, contrast = c('treated', 'control'))
 cols <- c('feature', 'log2_fc', 'ci_lower', 'ci_upper', 'p_adjusted', 'reject')
 head(res_dm[order(res_dm$p_adjusted), cols], 12)
-#>    feature    log2_fc  ci_lower   ci_upper   p_adjusted reject
-#> 4   ASV004  2.5202899  1.961037  3.0618609 5.264583e-12   TRUE
-#> 2   ASV002  2.4474258  1.808636  3.0412890 3.443408e-10   TRUE
-#> 8   ASV008 -3.1138914 -4.010513 -2.3116801 1.656216e-09   TRUE
-#> 3   ASV003  2.2775399  1.660345  2.8540378 4.957579e-09   TRUE
-#> 1   ASV001  2.2245643  1.554660  2.8607141 2.798873e-08   TRUE
-#> 10  ASV010 -2.5056683 -3.321620 -1.7311392 8.303254e-08   TRUE
-#> 9   ASV009 -2.5722890 -3.486387 -1.7212250 8.555397e-08   TRUE
-#> 5   ASV005  2.2081455  1.494890  2.8810657 3.011255e-07   TRUE
-#> 7   ASV007 -2.9353056 -4.017622 -2.0322304 3.991538e-07   TRUE
-#> 6   ASV006 -2.6726712 -3.747770 -1.8288617 1.007440e-06   TRUE
-#> 12  ASV012 -1.1412728 -1.956878 -0.3571674 6.200273e-02  FALSE
-#> 14  ASV014 -0.8150652 -1.509735 -0.1587740 2.216853e-01  FALSE
+#> # A data.frame: 12 × 6
+#> # Dirichlet-multinomial t-test
+#>    feature log2_fc ci_lower ci_upper p_adjusted reject
+#>    <chr>     <dbl>    <dbl>    <dbl>      <dbl>  <lgl>
+#> 4  ASV004    2.52      1.96    3.06    5.26e-12   TRUE
+#> 2  ASV002    2.45      1.81    3.04    3.44e-10   TRUE
+#> 8  ASV008   -3.11     -4.01   -2.31    1.66e-09   TRUE
+#> 3  ASV003    2.28      1.66    2.85    4.96e-09   TRUE
+#> 1  ASV001    2.22      1.55    2.86     2.8e-08   TRUE
+#> 10 ASV010   -2.51     -3.32   -1.73     8.3e-08   TRUE
+#> 9  ASV009   -2.57     -3.49   -1.72    8.56e-08   TRUE
+#> 5  ASV005    2.21      1.49    2.88    3.01e-07   TRUE
+#> 7  ASV007   -2.94     -4.02   -2.03    3.99e-07   TRUE
+#> 6  ASV006   -2.67     -3.75   -1.83    1.01e-06   TRUE
+#> 12 ASV012   -1.14     -1.96   -0.357      0.062  FALSE
+#> 14 ASV014   -0.815    -1.51   -0.159      0.222  FALSE
 table(changed = changed, rejected = res_dm$reject)
 #>        rejected
 #> changed FALSE TRUE
@@ -782,32 +790,26 @@ meta <- data.frame(group = groups, row.names = samples)
 fit <- ancombc2(counts[, keep], ~ group, meta)
 res_bc <- fit[fit$covariate == 'grouptreated', ]
 head(res_bc[order(res_bc$p_adjusted), ], 12)
-#>     feature    covariate     log_fc        se         w      p_value
-#> 8    ASV004 grouptreated  2.2269477 0.2161342 10.303540 1.477387e-12
-#> 6    ASV003 grouptreated  2.0585156 0.2169332  9.489169 1.436190e-11
-#> 4    ASV002 grouptreated  2.1765173 0.2309273  9.425117 1.723747e-11
-#> 10   ASV005 grouptreated  2.0108898 0.2299505  8.744881 1.236170e-10
-#> 2    ASV001 grouptreated  2.0220426 0.2386440  8.473049 2.759710e-10
-#> 16   ASV008 grouptreated -1.6849103 0.2587505 -6.511718 1.134068e-07
-#> 14   ASV007 grouptreated -1.5590213 0.2560695 -6.088273 4.307705e-07
-#> 18   ASV009 grouptreated -1.3000957 0.2420488 -5.371214 4.142970e-06
-#> 12   ASV006 grouptreated -1.3679346 0.2570957 -5.320722 4.856494e-06
-#> 20   ASV010 grouptreated -1.2558726 0.2497938 -5.027638 1.217797e-05
-#> 116  ASV116 grouptreated  0.9178394 0.2488831  3.687833 1.049483e-03
-#> 48   ASV027 grouptreated  0.6429064 0.2184252  2.943370 6.749844e-03
-#>       p_adjusted reject passed_ss reject_robust
-#> 8   8.568846e-11   TRUE      TRUE          TRUE
-#> 6   8.186282e-10   TRUE      TRUE          TRUE
-#> 4   9.652985e-10   TRUE      TRUE          TRUE
-#> 10  6.798933e-09   TRUE      TRUE          TRUE
-#> 2   1.490243e-08   TRUE      TRUE          TRUE
-#> 16  6.010560e-06   TRUE      TRUE          TRUE
-#> 14  2.240007e-05   TRUE      TRUE          TRUE
-#> 18  2.112915e-04   TRUE      TRUE          TRUE
-#> 12  2.428247e-04   TRUE      TRUE          TRUE
-#> 20  5.967208e-04   TRUE      TRUE          TRUE
-#> 116 5.037521e-02  FALSE      TRUE         FALSE
-#> 48  3.172427e-01  FALSE      TRUE         FALSE
+#> # A data.frame: 12 × 10
+#> # ANCOM-BC2
+#>     feature covariate    log_fc    se     w  p_value p_adjusted reject passed_ss
+#>     <chr>   <chr>         <dbl> <dbl> <dbl>    <dbl>      <dbl>  <lgl>     <lgl>
+#> 8   ASV004  grouptreated  2.23  0.216 10.3  1.48e-12   8.57e-11   TRUE      TRUE
+#> 6   ASV003  grouptreated  2.06  0.217  9.49 1.44e-11   8.19e-10   TRUE      TRUE
+#> 4   ASV002  grouptreated  2.18  0.231  9.43 1.72e-11   9.65e-10   TRUE      TRUE
+#> 10  ASV005  grouptreated  2.01  0.23   8.74 1.24e-10    6.8e-09   TRUE      TRUE
+#> 2   ASV001  grouptreated  2.02  0.239  8.47 2.76e-10   1.49e-08   TRUE      TRUE
+#> 16  ASV008  grouptreated -1.68  0.259 -6.51 1.13e-07   6.01e-06   TRUE      TRUE
+#> 14  ASV007  grouptreated -1.56  0.256 -6.09 4.31e-07   2.24e-05   TRUE      TRUE
+#> 18  ASV009  grouptreated -1.3   0.242 -5.37 4.14e-06   0.000211   TRUE      TRUE
+#> 12  ASV006  grouptreated -1.37  0.257 -5.32 4.86e-06   0.000243   TRUE      TRUE
+#> 20  ASV010  grouptreated -1.26  0.25  -5.03 1.22e-05   0.000597   TRUE      TRUE
+#> 116 ASV116  grouptreated  0.918 0.249  3.69  0.00105     0.0504  FALSE      TRUE
+#> 48  ASV027  grouptreated  0.643 0.218  2.94  0.00675      0.317  FALSE      TRUE
+#> # … 1 more column: reject_robust <lgl>
+#> # Attributes: method, formula, alpha, p_adjust, max_iters, tol, var_quantile,
+#> #   pseudocount, coef, var, vcov, dof, design, bias, n_iters,
+#> #   sample_fractions, sensitivity
 table(changed = changed[keep], rejected = res_bc$reject)
 #>        rejected
 #> changed FALSE TRUE

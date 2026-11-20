@@ -229,6 +229,24 @@ the Mantel test. <em>Oecologia</em>, 129(2), 169-178.
 <span class="r-in"><span>    <span class="va">jc</span> <span class="op">&lt;-</span> <span class="fu"><a href="pcoa.html">pcoa</a></span><span class="op">(</span><span class="fu"><a href="jaccard.html">jaccard</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">procrustes</span><span class="op">(</span><span class="va">jc</span>, <span class="va">bc</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">fit</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 30 samples × 2 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Procrustes Rotation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        PCoA1    PCoA2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S1  -0.444    0.029</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S2  -0.308    0.0144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S3  -0.677    0.049</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S4  -0.308    0.0144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S5  -0.261   -0.0104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S6  -0.0875  -0.00756</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S7  -0.299    0.00662</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S8  -0.299    0.00662</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S9  -0.0104  -0.0404</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S10 -0.00658 -0.0141</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 20 more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, ss, rotation, translation, dilation,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   residuals, symmetric, target</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">'ss'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.520756</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">'residuals'</span><span class="op">)</span></span></span>

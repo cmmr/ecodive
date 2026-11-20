@@ -240,10 +240,11 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them, and last, the records
-of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
-matrix's, for the methods that take distances, and <code>ord</code>, the
-ordination's own (its method, display name and settings). The matrix has class
+</ul><p>Attributes particular to the method follow them, and last <code>display</code>,
+with the ordination's title for <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see <a href="ecodive_display.html">ecodive_display</a>). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -276,14 +277,25 @@ ed.). Elsevier.</p>
 <span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">capscale</span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="capscale-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           CAP1        CAP2        MDS1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.5066572 -0.26288381 -0.07396932</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.5050815  0.26531512  0.31060632</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.5565336 -0.08822428  0.21441482</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.5347107  0.09086444  0.28072084</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.5279706 -0.33653429 -0.05903183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.4111538 -0.26696879 -0.40145462</span>
+<span class="r-in"><span>    <span class="va">ord</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 150 samples × 3 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Constrained Analysis of Principal Coordinates of Bray-Curtis Dissimilarity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # % of variance: 76.7, 3.0, 8.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CAP1    CAP2     MDS1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 0.507 -0.263  -0.074</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2 0.505  0.265   0.311</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3 0.557 -0.0882  0.214</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4 0.535  0.0909  0.281</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5 0.528 -0.337  -0.059</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6 0.411 -0.267  -0.401</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7 0.555 -0.275   0.101</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8 0.499 -0.166  -0.00641</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9 0.572  0.411   0.57</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 0.507  0.137   0.218</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 140 more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   adj_r_squared, biplot, centroids</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  'ecodive_ord' num [1:150, 1:3] 0.507 0.505 0.557 0.535 0.528 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dimnames")=List of 2</span>
@@ -306,8 +318,8 @@ ed.). Elsevier.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:3] "Speciessetosa" "Speciesversicolor" "Speciesvirginica"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:3] "CAP1" "CAP2" "MDS1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ord")= Constrained Analysis of Principal Coordinates (method = capscale, groups = Species, n_axes = 3)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "display")=List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ title: chr "Constrained Analysis of Principal Coordinates of Bray-Curtis Dissimilarity"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

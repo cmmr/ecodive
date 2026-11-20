@@ -227,7 +227,7 @@ and correlation extensions of the Mantel test of matrix correspondence.
     # Are samples that differ more in pH also more different in
     # community composition, beyond the effect of geographic distance?
     mantel_partial(dm, 'ph', given = geo, data = meta)
-#> Partial Mantel test (Pearson)
+#> Partial Mantel test (Pearson) of Bray-Curtis Dissimilarity
 #> 
 #> r = 0.5931, p = 0.001, z = 9.759
 #> Permutations: 999 (free)
@@ -238,7 +238,7 @@ and correlation extensions of the Mantel test of matrix correspondence.
 
     # With rank correlation.
     mantel_partial(dm, 'ph', given = geo, data = meta, method = 'spearman')
-#> Partial Mantel test (Spearman)
+#> Partial Mantel test (Spearman) of Bray-Curtis Dissimilarity
 #> 
 #> r = 0.5528, p = 0.001, z = 9.969
 #> Permutations: 999 (free)
@@ -249,7 +249,7 @@ and correlation extensions of the Mantel test of matrix correspondence.
 
     # The same, through dist_test().
     dist_test(dm, 'mantel_partial', 'ph', meta, given = geo, method = 'spearman')
-#> Partial Mantel test (Spearman)
+#> Partial Mantel test (Spearman) of Bray-Curtis Dissimilarity
 #> 
 #> r = 0.5528, p = 0.001, z = 9.969
 #> Permutations: 999 (free)

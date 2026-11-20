@@ -74,15 +74,15 @@ clark(
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (samples without names are labelled with their positions in the
-  input): its `dist` record (see
-  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
-  gives each one's position in the input as `order`, so that
-  `meta[attr(d, "dist")$order, ]` lines metadata up with them. ecodive's
-  ordinations and tests put the samples back in their input order before
-  analysing them, so give them metadata in its usual order. Other
-  packages see the reordered matrix: give them metadata reordered by
-  `order`, or matched by name. The record's `clust` records `clust`
-  (`FALSE` as `"none"`), which
+  input): its `order` attribute gives each one's position in the input,
+  so that `meta[attr(d, "order"), ]` lines metadata up with them.
+  ecodive's ordinations and tests put the samples back in their input
+  order before analysing them, so give them metadata in its usual order.
+  Other packages see the reordered matrix: give them metadata reordered
+  by `order`, or matched by name. The matrix's `display` list keeps
+  `clust` (`FALSE` as `"none"`; see
+  [ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
+  which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -201,8 +201,11 @@ Other Abundance metrics:
 
 ``` r
     clark(ex_counts)
-#>         Saliva     Gums     Nose
-#> Gums  1.291899                  
-#> Nose  2.125944 2.210332         
-#> Stool 2.437340 2.219050 2.215163
+#> # A dist: 4 samples (lower triangle)
+#> # Clark's Divergence Distance
+#>       Saliva Gums Nose
+#> Gums    1.29
+#> Nose    2.13 2.21
+#> Stool   2.44 2.22 2.22
+#> # Attributes: method
 ```

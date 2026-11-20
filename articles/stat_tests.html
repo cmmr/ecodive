@@ -169,7 +169,7 @@ vector.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="va">res</span></span>
-<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F = 532.7, p = 0.001, z = 577.6</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -198,7 +198,7 @@ does, and <code>strata</code> restricts permutations to within blocks
 (such as subjects in a repeated-measures design).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, data <span class="op">=</span> <span class="va">iris</span>, formula <span class="op">=</span> <span class="op">~</span> <span class="va">Species</span> <span class="op">+</span> <span class="va">Sepal.Width</span>, by <span class="op">=</span> <span class="st">'terms'</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F =   825, p = 0.001, z =  1105</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -225,7 +225,7 @@ partly or wholly from dispersion.</p>
 <span><span class="co">#&gt; Warning: Some squared distances to group centres are negative, and were set to</span></span>
 <span><span class="co">#&gt; 0.</span></span>
 <span><span class="va">res</span></span>
-<span><span class="co">#&gt; Homogeneity of multivariate dispersions (PERMDISP)</span></span>
+<span><span class="co">#&gt; Homogeneity of multivariate dispersions (PERMDISP) of Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F = 0.5676, p = 0.573, z = -0.4401</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -254,7 +254,7 @@ near 0 means no difference. <code><a href="../reference/mrpp.html">mrpp()</a></c
 distance within groups with what random groups would give.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/anosim.html">anosim</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Analysis of similarities (ANOSIM)</span></span>
+<span><span class="co">#&gt; Analysis of similarities (ANOSIM) of Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; R = 0.8576, p = 0.001, z =  79.4</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -268,7 +268,7 @@ distance within groups with what random groups would give.</p>
 <span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mrpp.html">mrpp</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="va">res</span></span>
-<span><span class="co">#&gt; Multi-response permutation procedure (MRPP)</span></span>
+<span><span class="co">#&gt; Multi-response permutation procedure (MRPP) of Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; delta = 0.05795, p = 0.001, z = -78.9</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -340,7 +340,7 @@ similar petals also have similar sepals. <code>method</code> can be
 <span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mantel.html">mantel</a></span><span class="op">(</span><span class="va">sepals</span>, <span class="va">petals</span>, method <span class="op">=</span> <span class="st">'spearman'</span><span class="op">)</span></span>
 <span><span class="va">res</span></span>
-<span><span class="co">#&gt; Mantel test (Spearman)</span></span>
+<span><span class="co">#&gt; Mantel test (Spearman) of Bray-Curtis Dissimilarity and Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; r =  0.69, p = 0.001, z = 35.65</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -355,7 +355,7 @@ distances, <code>given</code>: here, whether sepals and petals still
 match after accounting for petal width alone.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/mantel_partial.html">mantel_partial</a></span><span class="op">(</span><span class="va">sepals</span>, <span class="va">petals</span>, given <span class="op">=</span> <span class="st">'Petal.Width'</span>, data <span class="op">=</span> <span class="va">iris</span>, method <span class="op">=</span> <span class="st">'spearman'</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Partial Mantel test (Spearman)</span></span>
+<span><span class="co">#&gt; Partial Mantel test (Spearman) of Bray-Curtis Dissimilarity and Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; r = 0.3918, p = 0.001, z =  12.4</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -374,7 +374,7 @@ forgivingly: <code>'adonis2'</code> finds <code>permanova</code> and
 <code>'betadisper'</code> finds <code>permdisp</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_test.html">dist_test</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'adonis2'</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F = 532.7, p = 0.001, z = 577.6</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>

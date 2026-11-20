@@ -502,7 +502,7 @@ ecodive ordination and test.</p>
 <span></span>
 <span><span class="co"># Do the groups differ in composition, and in dispersion?</span></span>
 <span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm_rait</span>, <span class="va">groups</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA) of Robust Aitchison Distance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F = 6.625, p = 0.001, z = 23.86</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -516,7 +516,7 @@ ecodive ordination and test.</p>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="fu"><a href="../reference/permdisp.html">permdisp</a></span><span class="op">(</span><span class="va">dm_rait</span>, <span class="va">groups</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Homogeneity of multivariate dispersions (PERMDISP)</span></span>
+<span><span class="co">#&gt; Homogeneity of multivariate dispersions (PERMDISP) of Robust Aitchison Distance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F =  24.4, p = 0.001, z = 15.19</span></span>
 <span><span class="co">#&gt; Permutations: 999 (free)</span></span>
@@ -738,19 +738,24 @@ largest W differentially abundant:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_ancom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancom.html">ancom</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_ancom</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">res_ancom</span><span class="op">$</span><span class="va">W</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    feature   W reject</span></span>
-<span><span class="co">#&gt; 8   ASV008 131   TRUE</span></span>
-<span><span class="co">#&gt; 7   ASV007 120   TRUE</span></span>
-<span><span class="co">#&gt; 9   ASV009 111  FALSE</span></span>
-<span><span class="co">#&gt; 6   ASV006 110  FALSE</span></span>
-<span><span class="co">#&gt; 10  ASV010 110  FALSE</span></span>
-<span><span class="co">#&gt; 4   ASV004  85  FALSE</span></span>
-<span><span class="co">#&gt; 2   ASV002  79  FALSE</span></span>
-<span><span class="co">#&gt; 3   ASV003  58  FALSE</span></span>
-<span><span class="co">#&gt; 1   ASV001  54  FALSE</span></span>
-<span><span class="co">#&gt; 5   ASV005  51  FALSE</span></span>
-<span><span class="co">#&gt; 12  ASV012  40  FALSE</span></span>
-<span><span class="co">#&gt; 14  ASV014  38  FALSE</span></span>
+<span><span class="co">#&gt; # A data.frame: 12 × 3</span></span>
+<span><span class="co">#&gt; # ANCOM: control vs treated</span></span>
+<span><span class="co">#&gt;    feature     W reject</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;   &lt;int&gt;  &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; 8  ASV008    131   TRUE</span></span>
+<span><span class="co">#&gt; 7  ASV007    120   TRUE</span></span>
+<span><span class="co">#&gt; 9  ASV009    111  FALSE</span></span>
+<span><span class="co">#&gt; 6  ASV006    110  FALSE</span></span>
+<span><span class="co">#&gt; 10 ASV010    110  FALSE</span></span>
+<span><span class="co">#&gt; 4  ASV004     85  FALSE</span></span>
+<span><span class="co">#&gt; 2  ASV002     79  FALSE</span></span>
+<span><span class="co">#&gt; 3  ASV003     58  FALSE</span></span>
+<span><span class="co">#&gt; 1  ASV001     54  FALSE</span></span>
+<span><span class="co">#&gt; 5  ASV005     51  FALSE</span></span>
+<span><span class="co">#&gt; 12 ASV012     40  FALSE</span></span>
+<span><span class="co">#&gt; 14 ASV014     38  FALSE</span></span>
+<span><span class="co">#&gt; # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,</span></span>
+<span><span class="co">#&gt; #   pseudocount</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span>, rejected <span class="op">=</span> <span class="va">res_ancom</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>
@@ -770,19 +775,22 @@ version, with Welch’s t-test; <code>contrast</code> is
 <code class="sourceCode R"><span><span class="va">res_dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'feature'</span>, <span class="st">'log2_fc'</span>, <span class="st">'ci_lower'</span>, <span class="st">'ci_upper'</span>, <span class="st">'p_adjusted'</span>, <span class="st">'reject'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="va">cols</span><span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    feature    log2_fc  ci_lower   ci_upper   p_adjusted reject</span></span>
-<span><span class="co">#&gt; 4   ASV004  2.5202899  1.961037  3.0618609 5.264583e-12   TRUE</span></span>
-<span><span class="co">#&gt; 2   ASV002  2.4474258  1.808636  3.0412890 3.443408e-10   TRUE</span></span>
-<span><span class="co">#&gt; 8   ASV008 -3.1138914 -4.010513 -2.3116801 1.656216e-09   TRUE</span></span>
-<span><span class="co">#&gt; 3   ASV003  2.2775399  1.660345  2.8540378 4.957579e-09   TRUE</span></span>
-<span><span class="co">#&gt; 1   ASV001  2.2245643  1.554660  2.8607141 2.798873e-08   TRUE</span></span>
-<span><span class="co">#&gt; 10  ASV010 -2.5056683 -3.321620 -1.7311392 8.303254e-08   TRUE</span></span>
-<span><span class="co">#&gt; 9   ASV009 -2.5722890 -3.486387 -1.7212250 8.555397e-08   TRUE</span></span>
-<span><span class="co">#&gt; 5   ASV005  2.2081455  1.494890  2.8810657 3.011255e-07   TRUE</span></span>
-<span><span class="co">#&gt; 7   ASV007 -2.9353056 -4.017622 -2.0322304 3.991538e-07   TRUE</span></span>
-<span><span class="co">#&gt; 6   ASV006 -2.6726712 -3.747770 -1.8288617 1.007440e-06   TRUE</span></span>
-<span><span class="co">#&gt; 12  ASV012 -1.1412728 -1.956878 -0.3571674 6.200273e-02  FALSE</span></span>
-<span><span class="co">#&gt; 14  ASV014 -0.8150652 -1.509735 -0.1587740 2.216853e-01  FALSE</span></span>
+<span><span class="co">#&gt; # A data.frame: 12 × 6</span></span>
+<span><span class="co">#&gt; # Dirichlet-multinomial t-test</span></span>
+<span><span class="co">#&gt;    feature log2_fc ci_lower ci_upper p_adjusted reject</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; 4  ASV004    2.52      1.96    3.06    5.26e-12   TRUE</span></span>
+<span><span class="co">#&gt; 2  ASV002    2.45      1.81    3.04    3.44e-10   TRUE</span></span>
+<span><span class="co">#&gt; 8  ASV008   -3.11     -4.01   -2.31    1.66e-09   TRUE</span></span>
+<span><span class="co">#&gt; 3  ASV003    2.28      1.66    2.85    4.96e-09   TRUE</span></span>
+<span><span class="co">#&gt; 1  ASV001    2.22      1.55    2.86     2.8e-08   TRUE</span></span>
+<span><span class="co">#&gt; 10 ASV010   -2.51     -3.32   -1.73     8.3e-08   TRUE</span></span>
+<span><span class="co">#&gt; 9  ASV009   -2.57     -3.49   -1.72    8.56e-08   TRUE</span></span>
+<span><span class="co">#&gt; 5  ASV005    2.21      1.49    2.88    3.01e-07   TRUE</span></span>
+<span><span class="co">#&gt; 7  ASV007   -2.94     -4.02   -2.03    3.99e-07   TRUE</span></span>
+<span><span class="co">#&gt; 6  ASV006   -2.67     -3.75   -1.83    1.01e-06   TRUE</span></span>
+<span><span class="co">#&gt; 12 ASV012   -1.14     -1.96   -0.357      0.062  FALSE</span></span>
+<span><span class="co">#&gt; 14 ASV014   -0.815    -1.51   -0.159      0.222  FALSE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span>, rejected <span class="op">=</span> <span class="va">res_dm</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>
@@ -885,32 +893,26 @@ them).</p>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc2</a></span><span class="op">(</span><span class="va">counts</span><span class="op">[</span>, <span class="va">keep</span><span class="op">]</span>, <span class="op">~</span> <span class="va">group</span>, <span class="va">meta</span><span class="op">)</span></span>
 <span><span class="va">res_bc</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">[</span><span class="va">fit</span><span class="op">$</span><span class="va">covariate</span> <span class="op">==</span> <span class="st">'grouptreated'</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_bc</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_bc</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     feature    covariate     log_fc        se         w      p_value</span></span>
-<span><span class="co">#&gt; 8    ASV004 grouptreated  2.2269477 0.2161342 10.303540 1.477387e-12</span></span>
-<span><span class="co">#&gt; 6    ASV003 grouptreated  2.0585156 0.2169332  9.489169 1.436190e-11</span></span>
-<span><span class="co">#&gt; 4    ASV002 grouptreated  2.1765173 0.2309273  9.425117 1.723747e-11</span></span>
-<span><span class="co">#&gt; 10   ASV005 grouptreated  2.0108898 0.2299505  8.744881 1.236170e-10</span></span>
-<span><span class="co">#&gt; 2    ASV001 grouptreated  2.0220426 0.2386440  8.473049 2.759710e-10</span></span>
-<span><span class="co">#&gt; 16   ASV008 grouptreated -1.6849103 0.2587505 -6.511718 1.134068e-07</span></span>
-<span><span class="co">#&gt; 14   ASV007 grouptreated -1.5590213 0.2560695 -6.088273 4.307705e-07</span></span>
-<span><span class="co">#&gt; 18   ASV009 grouptreated -1.3000957 0.2420488 -5.371214 4.142970e-06</span></span>
-<span><span class="co">#&gt; 12   ASV006 grouptreated -1.3679346 0.2570957 -5.320722 4.856494e-06</span></span>
-<span><span class="co">#&gt; 20   ASV010 grouptreated -1.2558726 0.2497938 -5.027638 1.217797e-05</span></span>
-<span><span class="co">#&gt; 116  ASV116 grouptreated  0.9178394 0.2488831  3.687833 1.049483e-03</span></span>
-<span><span class="co">#&gt; 48   ASV027 grouptreated  0.6429064 0.2184252  2.943370 6.749844e-03</span></span>
-<span><span class="co">#&gt;       p_adjusted reject passed_ss reject_robust</span></span>
-<span><span class="co">#&gt; 8   8.568846e-11   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 6   8.186282e-10   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 4   9.652985e-10   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 10  6.798933e-09   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 2   1.490243e-08   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 16  6.010560e-06   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 14  2.240007e-05   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 18  2.112915e-04   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 12  2.428247e-04   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 20  5.967208e-04   TRUE      TRUE          TRUE</span></span>
-<span><span class="co">#&gt; 116 5.037521e-02  FALSE      TRUE         FALSE</span></span>
-<span><span class="co">#&gt; 48  3.172427e-01  FALSE      TRUE         FALSE</span></span>
+<span><span class="co">#&gt; # A data.frame: 12 × 10</span></span>
+<span><span class="co">#&gt; # ANCOM-BC2</span></span>
+<span><span class="co">#&gt;     feature covariate    log_fc    se     w  p_value p_adjusted reject passed_ss</span></span>
+<span><span class="co">#&gt;     &lt;chr&gt;   &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;     &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; 8   ASV004  grouptreated  2.23  0.216 10.3  1.48e-12   8.57e-11   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 6   ASV003  grouptreated  2.06  0.217  9.49 1.44e-11   8.19e-10   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 4   ASV002  grouptreated  2.18  0.231  9.43 1.72e-11   9.65e-10   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 10  ASV005  grouptreated  2.01  0.23   8.74 1.24e-10    6.8e-09   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 2   ASV001  grouptreated  2.02  0.239  8.47 2.76e-10   1.49e-08   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 16  ASV008  grouptreated -1.68  0.259 -6.51 1.13e-07   6.01e-06   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 14  ASV007  grouptreated -1.56  0.256 -6.09 4.31e-07   2.24e-05   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 18  ASV009  grouptreated -1.3   0.242 -5.37 4.14e-06   0.000211   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 12  ASV006  grouptreated -1.37  0.257 -5.32 4.86e-06   0.000243   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 20  ASV010  grouptreated -1.26  0.25  -5.03 1.22e-05   0.000597   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 116 ASV116  grouptreated  0.918 0.249  3.69  0.00105     0.0504  FALSE      TRUE</span></span>
+<span><span class="co">#&gt; 48  ASV027  grouptreated  0.643 0.218  2.94  0.00675      0.317  FALSE      TRUE</span></span>
+<span><span class="co">#&gt; # … 1 more column: reject_robust &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; # Attributes: method, formula, alpha, p_adjust, max_iters, tol, var_quantile,</span></span>
+<span><span class="co">#&gt; #   pseudocount, coef, var, vcov, dof, design, bias, n_iters,</span></span>
+<span><span class="co">#&gt; #   sample_fractions, sensitivity</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, rejected <span class="op">=</span> <span class="va">res_bc</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>

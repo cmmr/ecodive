@@ -41,15 +41,15 @@ topsoe(counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus())
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (samples without names are labelled with their positions in the
-  input): its `dist` record (see
-  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
-  gives each one's position in the input as `order`, so that
-  `meta[attr(d, "dist")$order, ]` lines metadata up with them. ecodive's
-  ordinations and tests put the samples back in their input order before
-  analysing them, so give them metadata in its usual order. Other
-  packages see the reordered matrix: give them metadata reordered by
-  `order`, or matched by name. The record's `clust` records `clust`
-  (`FALSE` as `"none"`), which
+  input): its `order` attribute gives each one's position in the input,
+  so that `meta[attr(d, "order"), ]` lines metadata up with them.
+  ecodive's ordinations and tests put the samples back in their input
+  order before analysing them, so give them metadata in its usual order.
+  Other packages see the reordered matrix: give them metadata reordered
+  by `order`, or matched by name. The matrix's `display` list keeps
+  `clust` (`FALSE` as `"none"`; see
+  [ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
+  which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -146,8 +146,11 @@ Other Abundance metrics:
 
 ``` r
     topsoe(ex_counts)
-#>          Saliva      Gums      Nose
-#> Gums  0.2275073                    
-#> Nose  1.2639597 1.2553101          
-#> Stool 1.3288072 1.3353573 1.3430006
+#> # A dist: 4 samples (lower triangle)
+#> # Topsoe Distance
+#>       Saliva Gums Nose
+#> Gums   0.228
+#> Nose   1.26  1.26
+#> Stool  1.33  1.34 1.34
+#> # Attributes: method
 ```

@@ -269,12 +269,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -376,19 +378,19 @@ Pedregosa, F., et al. (2011). Scikit-learn: machine learning in Python.
     grp <- rep(c('a', 'b'), length.out = nrow(ex_counts))
     pc  <- pcoa(bray(ex_counts), n_axes = 2)
     lda(pc, grp)
-#>                LD1
-#> Saliva  0.01780549
-#> Gums   -0.03303610
-#> Nose    1.44716764
-#> Stool  -1.43193704
-#> 
-#> lda: 4 samples, 1 axis; % of variance: 100.0
-#> Attributes: method, eig, prop, scaling, means, prior, groups
-#> ord:  Linear Discriminant Analysis (method = lda, margin = 1, norm = none, pseudocount = 0)
+#> # A matrix: 4 samples × 1 axis
+#> # Linear Discriminant Analysis
+#> # % of variance: 100.0
+#>            LD1
+#> Saliva  0.0178
+#> Gums   -0.033
+#> Nose    1.45
+#> Stool  -1.43
+#> # Attributes: method, eig, prop, scaling, means, prior, groups
 
     # Supervised: always validate the separation, e.g. with PERMANOVA.
     permanova(bray(ex_counts), grp, permutations = 99)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 0.7124, p = 0.68, z = -0.6451
 #> Permutations: 99 (free)

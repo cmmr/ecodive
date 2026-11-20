@@ -441,14 +441,15 @@ methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
 
     res <- ancombc(x + 1, ~ status + age, meta)
     res[res$reject & res$covariate != '(Intercept)', ]
-#>    feature      covariate     log_fc        se        w      p_value
-#> 6       F2 statusmoderate 1.90555337 0.2585194 7.371028 1.693178e-13
-#> 7       F2   statussevere 2.93516110 0.3041880 9.649167 4.955686e-22
-#> 12      F3            age 0.06264515 0.0218213 2.870825 4.094016e-03
-#>      p_adjusted reject
-#> 6  1.354542e-12   TRUE
-#> 7  3.964549e-21   TRUE
-#> 12 3.275213e-02   TRUE
+#> # A data.frame: 3 × 8
+#> # ANCOM-BC
+#>    feature covariate      log_fc     se     w  p_value p_adjusted reject
+#>    <chr>   <chr>           <dbl>  <dbl> <dbl>    <dbl>      <dbl>  <lgl>
+#> 6  F2      statusmoderate 1.91   0.259   7.37 1.69e-13   1.35e-12   TRUE
+#> 7  F2      statussevere   2.94   0.304   9.65 4.96e-22   3.96e-21   TRUE
+#> 12 F3      age            0.0626 0.0218  2.87  0.00409     0.0328   TRUE
+#> # Attributes: method, formula, alpha, p_adjust, max_iters, tol, pseudocount,
+#> #   coef, var, vcov, design, bias, n_iters
 
     # A volcano plot of one covariate, here the first: moderate vs mild.
     plot(res)
@@ -461,9 +462,14 @@ methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
     # 0.5 and 1 too are kept in `reject_robust`.
     res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
     res2[res2$reject, ]
-#>  [1] feature       covariate     log_fc        se            w            
-#>  [6] p_value       p_adjusted    reject        passed_ss     reject_robust
-#> <0 rows> (or 0-length row.names)
+#> # A data.frame: 0 × 10
+#> # ANCOM-BC2
+#>  feature covariate log_fc    se     w p_value p_adjusted reject passed_ss
+#>  <chr>   <chr>      <dbl> <dbl> <dbl>   <dbl>      <dbl>  <lgl>     <lgl>
+#> # … 1 more column: reject_robust <lgl>
+#> # Attributes: method, formula, groups, alpha, p_adjust, max_iters, tol,
+#> #   var_quantile, pseudocount, coef, var, vcov, dof, design, bias, n_iters,
+#> #   sample_fractions, sensitivity
 
     # ANCOMBC's preprocessing, done first: keep features present in at
     # least 10% of samples (prv_cut = 0.1), and samples with at least 10

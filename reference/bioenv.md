@@ -213,26 +213,38 @@ Series*, 92, 205-219.
     # The best subset of each size.
     res <- bioenv(dm, env)
     res
-#>   size          variables correlation
-#> 1    1                 ph   0.3950963
-#> 2    2              ph, n   0.5748103
-#> 3    3           ph, n, k   0.5094742
-#> 4    4    ph, n, k, depth   0.4120055
-#> 5    5 ph, n, p, k, depth   0.2998922
+#> # A data.frame: 5 × 3
+#> # BIO-ENV
+#>    size variables          correlation
+#>   <int> <chr>                    <dbl>
+#> 1     1 ph                       0.395
+#> 2     2 ph, n                    0.575
+#> 3     3 ph, n, k                 0.509
+#> 4     4 ph, n, k, depth          0.412
+#> 5     5 ph, n, p, k, depth       0.3
+#> # Attributes: best, method, metric, partial, n_subsets
     plot(res)
 
 
     # Only some variables, transformed, with subsets of up to two.
     bioenv(dm, env, ~ ph + log(n) + p, max_vars = 2)
-#>   size  variables correlation
-#> 1    1     log(n)   0.4565752
-#> 2    2 ph, log(n)   0.6646602
+#> # A data.frame: 2 × 3
+#> # BIO-ENV
+#>    size variables  correlation
+#>   <int> <chr>            <dbl>
+#> 1     1 log(n)           0.457
+#> 2     2 ph, log(n)       0.665
+#> # Attributes: best, method, metric, partial, n_subsets
 
     # Removing the effect of depth.
     bioenv(dm, env, ~ ph + n + p + k, given = 'depth')
-#>   size   variables correlation
-#> 1    1          ph   0.3958804
-#> 2    2       ph, n   0.5765360
-#> 3    3    ph, n, k   0.5101373
-#> 4    4 ph, n, p, k   0.3723358
+#> # A data.frame: 4 × 3
+#> # BIO-ENV (partial)
+#>    size variables   correlation
+#>   <int> <chr>             <dbl>
+#> 1     1 ph                0.396
+#> 2     2 ph, n             0.577
+#> 3     3 ph, n, k          0.51
+#> 4     4 ph, n, p, k       0.372
+#> # Attributes: best, method, metric, partial, n_subsets
 ```

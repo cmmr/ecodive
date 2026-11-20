@@ -253,12 +253,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -300,14 +302,25 @@ ed.). Elsevier.
     ord <- capscale(dm, 'Species', iris)
     plot(ord, 'Species', iris)
 
-    head(ord)
-#>           CAP1        CAP2        MDS1
-#> [1,] 0.5066572 -0.26288381 -0.07396932
-#> [2,] 0.5050815  0.26531512  0.31060632
-#> [3,] 0.5565336 -0.08822428  0.21441482
-#> [4,] 0.5347107  0.09086444  0.28072084
-#> [5,] 0.5279706 -0.33653429 -0.05903183
-#> [6,] 0.4111538 -0.26696879 -0.40145462
+    ord
+#> # A matrix: 150 samples × 3 axes
+#> # Constrained Analysis of Principal Coordinates of Bray-Curtis Dissimilarity
+#> # % of variance: 76.7, 3.0, 8.4
+#>     CAP1    CAP2     MDS1
+#>  1 0.507 -0.263  -0.074
+#>  2 0.505  0.265   0.311
+#>  3 0.557 -0.0882  0.214
+#>  4 0.535  0.0909  0.281
+#>  5 0.528 -0.337  -0.059
+#>  6 0.411 -0.267  -0.401
+#>  7 0.555 -0.275   0.101
+#>  8 0.499 -0.166  -0.00641
+#>  9 0.572  0.411   0.57
+#> 10 0.507  0.137   0.218
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared,
+#> #   adj_r_squared, biplot, centroids
     str(ord)
 #>  'ecodive_ord' num [1:150, 1:3] 0.507 0.505 0.557 0.535 0.528 ...
 #>  - attr(*, "dimnames")=List of 2
@@ -330,6 +343,6 @@ ed.). Elsevier.
 #>   ..- attr(*, "dimnames")=List of 2
 #>   .. ..$ : chr [1:3] "Speciessetosa" "Speciesversicolor" "Speciesvirginica"
 #>   .. ..$ : chr [1:3] "CAP1" "CAP2" "MDS1"
-#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
-#>  - attr(*, "ord")= Constrained Analysis of Principal Coordinates (method = capscale, groups = Species, n_axes = 3)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Constrained Analysis of Principal Coordinates of Bray-Curtis Dissimilarity"
 ```

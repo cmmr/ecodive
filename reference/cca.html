@@ -295,10 +295,11 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them, and last, the records
-of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
-matrix's, for the methods that take distances, and <code>ord</code>, the
-ordination's own (its method, display name and settings). The matrix has class
+</ul><p>Attributes particular to the method follow them, and last <code>display</code>,
+with the ordination's title for <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see <a href="ecodive_display.html">ecodive_display</a>). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -382,17 +383,29 @@ Chapman &amp; Hall/CRC.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "Sepal.Length" "Sepal.Width" "Petal.Length" "Petal.Width"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:2] "CCA1" "CA1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ord")= Canonical Correspondence Analysis (method = cca, formula = ~Petal.Width, margin = 1, n_axes = 2, permutations = 1000, seed = 0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "display")=List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ title: chr "Canonical Correspondence Analysis"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Without constraints, a correspondence analysis.</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">cca</span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           CA1         CA2        CA3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 1.808718 -0.02363406  0.0946769</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 1.642803  0.87122963  1.3117351</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 1.778758 -0.03248420  0.2454927</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 1.613485  0.32810647 -0.6368010</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 1.841613 -0.38244840 -0.6112067</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 1.598380 -0.99156726 -0.4130386</span>
+<span class="r-in"><span>    <span class="fu">cca</span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 150 samples × 3 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Canonical Correspondence Analysis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # % of variance: 95.6, 3.4, 1.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CA1     CA2     CA3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 1.81 -0.0236  0.0947</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2 1.64  0.871   1.31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3 1.78 -0.0325  0.245</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4 1.61  0.328  -0.637</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5 1.84 -0.382  -0.611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6 1.6  -0.992  -0.413</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7 1.69 -1.03   -0.738</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8 1.72  0.187  -0.305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9 1.6   0.399  -0.151</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 1.71  1.28   -0.121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 140 more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   adj_r_squared, biplot, loadings</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

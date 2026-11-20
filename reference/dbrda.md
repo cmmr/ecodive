@@ -250,12 +250,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -301,14 +303,25 @@ comparison of fractions. *Ecology*, 87(10), 2614-2625.
     ord <- dbrda(dm, 'Species', iris)
     plot(ord, 'Species', iris)
 
-    head(ord)
-#>         dbRDA1      dbRDA2        MDS1
-#> [1,] 0.5063136 -0.24878132 -0.07219804
-#> [2,] 0.5054159  0.23586757  0.31152982
-#> [3,] 0.5562949 -0.08101404  0.21660752
-#> [4,] 0.5346932  0.08738929  0.28235426
-#> [5,] 0.5275513 -0.32964567 -0.05581075
-#> [6,] 0.4111321 -0.25311068 -0.40408427
+    ord
+#> # A matrix: 150 samples × 3 axes
+#> # Distance-based Redundancy Analysis of Bray-Curtis Dissimilarity
+#> # % of variance: 84.7, 3.2, 9.3
+#>    dbRDA1  dbRDA2     MDS1
+#>  1  0.506 -0.249  -0.0722
+#>  2  0.505  0.236   0.312
+#>  3  0.556 -0.081   0.217
+#>  4  0.535  0.0874  0.282
+#>  5  0.528 -0.33   -0.0558
+#>  6  0.411 -0.253  -0.404
+#>  7  0.554 -0.253   0.103
+#>  8  0.499 -0.159  -0.00276
+#>  9  0.573  0.373   0.564
+#> 10  0.507  0.119   0.221
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, inertia, constrained_eig, r_squared,
+#> #   adj_r_squared, biplot, centroids
     str(ord)
 #>  'ecodive_ord' num [1:150, 1:3] 0.506 0.505 0.556 0.535 0.528 ...
 #>  - attr(*, "dimnames")=List of 2
@@ -331,6 +344,6 @@ comparison of fractions. *Ecology*, 87(10), 2614-2625.
 #>   ..- attr(*, "dimnames")=List of 2
 #>   .. ..$ : chr [1:3] "Speciessetosa" "Speciesversicolor" "Speciesvirginica"
 #>   .. ..$ : chr [1:3] "dbRDA1" "dbRDA2" "MDS1"
-#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
-#>  - attr(*, "ord")= Distance-based Redundancy Analysis (method = dbrda, groups = Species, n_axes = 3)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Distance-based Redundancy Analysis of Bray-Curtis Dissimilarity"
 ```

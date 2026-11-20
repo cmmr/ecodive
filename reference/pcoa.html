@@ -233,10 +233,11 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them, and last, the records
-of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
-matrix's, for the methods that take distances, and <code>ord</code>, the
-ordination's own (its method, display name and settings). The matrix has class
+</ul><p>Attributes particular to the method follow them, and last <code>display</code>,
+with the ordination's title for <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see <a href="ecodive_display.html">ecodive_display</a>). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -276,14 +277,24 @@ Applications</em>, 22(2), 602-616. <a href="https://doi.org/10.1137/S08954798983
 <span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">pcoa</span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="pcoa-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          PCoA1       PCoA2        PCoA3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.1692812 -0.02591990 -0.005053611</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.1706354  0.02346821  0.030848760</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.1870090 -0.00320247  0.032221661</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.1801593  0.01132449  0.037211653</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.1763516 -0.02998591 -0.006128668</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.1363264 -0.03979963 -0.043074846</span>
+<span class="r-in"><span>    <span class="va">ord</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 150 samples × 3 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Principal Coordinates Analysis of Bray-Curtis Dissimilarity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # % of variance: 89.0, 9.3, 2.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    PCoA1   PCoA2    PCoA3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 0.169 -0.0259 -0.00505</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2 0.171  0.0235  0.0308</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3 0.187 -0.0032  0.0322</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4 0.18   0.0113  0.0372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5 0.176 -0.03   -0.00613</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6 0.136 -0.0398 -0.0431</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7 0.186 -0.0182  0.0156</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8 0.167 -0.0165  0.00287</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9 0.194  0.0406  0.0413</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 0.171  0.011   0.0286</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 140 more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, trace, correction, constant</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  'ecodive_ord' num [1:150, 1:3] 0.169 0.171 0.187 0.18 0.176 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dimnames")=List of 2</span>
@@ -295,8 +306,8 @@ Applications</em>, 22(2), 602-616. <a href="https://doi.org/10.1137/S08954798983
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "trace")= num 2.64</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "correction")= chr "none"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "constant")= num 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ord")= Principal Coordinates Analysis (method = pcoa, n_axes = 3, correction = none)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "display")=List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ title: chr "Principal Coordinates Analysis of Bray-Curtis Dissimilarity"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

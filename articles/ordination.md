@@ -120,8 +120,8 @@ str(ord)
 #>  - attr(*, "trace")= num 2.64
 #>  - attr(*, "correction")= chr "none"
 #>  - attr(*, "constant")= num 0
-#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
-#>  - attr(*, "ord")= Principal Coordinates Analysis (method = pcoa, n_axes = 3, correction = none)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Principal Coordinates Analysis of Bray-Curtis Dissimilarity"
 ```
 
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the first
@@ -297,7 +297,7 @@ c(rda = attr(ord, 'r_squared'), dbrda = attr(dbrda(hd, 'Species', iris), 'r_squa
 #>       rda     dbrda 
 #> 0.9480809 0.9480809
 permanova(hd, 'Species', iris, permutations = 99)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Euclidean Distance
 #> 
 #> F =  1342, p = 0.01, z =  1215
 #> Permutations: 99 (free)
@@ -364,7 +364,7 @@ size given species:
 permanova(
   euclidean(iris[, 3:4], norm = 'hellinger'), data = iris,
   formula = ~ Sepal.Length + Sepal.Width + Condition(Species), permutations = 99 )
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Euclidean Distance
 #> 
 #> F = 5.514, p = 0.01, z = 5.142
 #> Permutations: 99 (free)
@@ -682,22 +682,19 @@ each one a permutation p-value, as `vegan::envfit()` gives.
 
 fit <- envfit(ord, iris)
 fit
-#>                       variable      level       PCoA1       PCoA2        PCoA3
-#> Sepal.Length      Sepal.Length       <NA> -0.61857745 -0.77787638 -0.110771313
-#> Sepal.Width        Sepal.Width       <NA>  0.16693381 -0.95151811 -0.258353229
-#> Petal.Length      Petal.Length       <NA> -0.94193586 -0.12434192  0.311922927
-#> Petal.Width        Petal.Width       <NA> -0.88333780 -0.25452127  0.393615619
-#> Speciessetosa          Species     setosa  0.16700378 -0.01395054  0.001691427
-#> Speciesversicolor      Species versicolor -0.04635194  0.03090254 -0.009450001
-#> Speciesvirginica       Species  virginica -0.12065184 -0.01695200  0.007758574
-#>                          r2 p_value        z
-#> Sepal.Length      0.8951005   0.001 57.50362
-#> Sepal.Width       0.9377558   0.001 57.03726
-#> Petal.Length      0.9884977   0.001 59.52106
-#> Petal.Width       0.9348862   0.001 55.99111
-#> Speciessetosa     0.8649502   0.001 70.45196
-#> Speciesversicolor 0.8649502   0.001 70.45196
-#> Speciesvirginica  0.8649502   0.001 70.45196
+#> # A data.frame: 7 × 8
+#> # Fitted variables on Principal Coordinates Analysis of Bray-Curtis Dissimilarity
+#>                   variable     level        PCoA1   PCoA2    PCoA3    r2 p_value
+#>                   <chr>        <chr>        <dbl>   <dbl>    <dbl> <dbl>   <dbl>
+#> Sepal.Length      Sepal.Length NA         -0.619  -0.778  -0.111   0.895   0.001
+#> Sepal.Width       Sepal.Width  NA          0.167  -0.952  -0.258   0.938   0.001
+#> Petal.Length      Petal.Length NA         -0.942  -0.124   0.312   0.988   0.001
+#> Petal.Width       Petal.Width  NA         -0.883  -0.255   0.394   0.935   0.001
+#> Speciessetosa     Species      setosa      0.167  -0.014   0.00169 0.865   0.001
+#> Speciesversicolor Species      versicolor -0.0464  0.0309 -0.00945 0.865   0.001
+#> Speciesvirginica  Species      virginica  -0.121  -0.017   0.00776 0.865   0.001
+#> # … 1 more column: z <dbl>
+#> # Attributes: r2_perm, n_perm
 
 # An arrow for each measurement, longer for a better fit, and a label for
 # each species' centroid.

@@ -354,12 +354,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -423,14 +425,24 @@ the same over the nodes of a phylogenetic tree;
     ord <- rpca(iris[, 1:4])
     plot(ord, 'Species', iris)
 
-    head(ord)
-#>       RPCA1        RPCA2        RPCA3
-#> 1 1.2379290  0.005488659  0.008320257
-#> 2 1.1353545 -0.050106259  0.056553065
-#> 3 1.1739161  0.036919287  0.015602530
-#> 4 1.1172469 -0.082817128 -0.033203894
-#> 5 1.2472104  0.018834118 -0.021746165
-#> 6 0.7874903  0.234444962 -0.019601198
+    ord
+#> # A matrix: 150 samples × 3 axes
+#> # Robust Aitchison PCA
+#> # % of variance: 96.8, 2.7, 0.5
+#>    RPCA1    RPCA2    RPCA3
+#> 1  1.24   0.00549  0.00832
+#> 2  1.14  -0.0501   0.0566
+#> 3  1.17   0.0369   0.0156
+#> 4  1.12  -0.0828  -0.0332
+#> 5  1.25   0.0188  -0.0217
+#> 6  0.787  0.234   -0.0196
+#> 7  0.898  0.207   -0.0291
+#> 8  1.2   -0.0565  -0.0155
+#> 9  1.08  -0.0507  -0.0103
+#> 10 1.63  -0.433   -0.0324
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, loadings, cost, n_iters
     str(ord)
 #>  'ecodive_ord' num [1:150, 1:3] 1.24 1.14 1.17 1.12 1.25 ...
 #>  - attr(*, "dimnames")=List of 2
@@ -446,5 +458,6 @@ the same over the nodes of a phylogenetic tree;
 #>   .. ..$ : chr [1:3] "RPCA1" "RPCA2" "RPCA3"
 #>  - attr(*, "cost")= num [1:2] 2.67e-15 2.62e-15
 #>  - attr(*, "n_iters")= int 1
-#>  - attr(*, "ord")= Robust Aitchison PCA (method = rpca, margin = 1, n_axes = 3, max_iters = 5, tol = 1e-05, min_sample_count = 0, min_feature_count = 0, min_feature_frequency = 0, distances = FALSE)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Robust Aitchison PCA"
 ```

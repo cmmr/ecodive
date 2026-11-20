@@ -279,12 +279,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -329,14 +331,25 @@ methods used in multivariate analysis. *Biometrika*, 53(3-4), 325-338.
     ord <- isomap(dm, n_neighbors = 50)
     plot(ord, 'Species', iris)
 
-    head(ord)
-#>        Isomap1      Isomap2      Isomap3
-#> [1,] 0.1815951 -0.039742273 -0.027484748
-#> [2,] 0.1976638  0.024659828 -0.004686106
-#> [3,] 0.2105455 -0.008544025 -0.035748665
-#> [4,] 0.2123135  0.026838706 -0.005276499
-#> [5,] 0.1909184 -0.040604972 -0.023909921
-#> [6,] 0.1734805 -0.026899418  0.055991780
+    ord
+#> # A matrix: 150 samples × 3 axes
+#> # Isometric Feature Mapping of Bray-Curtis Dissimilarity
+#> # % of variance: 94.5, 4.2, 1.9
+#>    Isomap1  Isomap2  Isomap3
+#>  1   0.182 -0.0397  -0.0275
+#>  2   0.198  0.0247  -0.00469
+#>  3   0.211 -0.00854 -0.0357
+#>  4   0.212  0.0268  -0.00528
+#>  5   0.191 -0.0406  -0.0239
+#>  6   0.173 -0.0269   0.056
+#>  7   0.214 -0.00391 -0.0228
+#>  8   0.195 -0.00754 -0.0121
+#>  9   0.219  0.0365  -0.0205
+#> 10   0.202  0.0229   0.00114
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, n_neighbors, radius, components,
+#> #   membership
     str(ord)
 #>  'ecodive_ord' num [1:150, 1:3] 0.182 0.198 0.211 0.212 0.191 ...
 #>  - attr(*, "dimnames")=List of 2
@@ -350,6 +363,6 @@ methods used in multivariate analysis. *Biometrika*, 53(3-4), 325-338.
 #>  - attr(*, "radius")= num NA
 #>  - attr(*, "components")= int 1
 #>  - attr(*, "membership")= int [1:150] 1 1 1 1 1 1 1 1 1 1 ...
-#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
-#>  - attr(*, "ord")= Isometric Feature Mapping (method = isomap, n_axes = 3, n_neighbors = 50, radius = NA)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Isometric Feature Mapping of Bray-Curtis Dissimilarity"
 ```

@@ -98,39 +98,58 @@
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (unnamed samples are labelled with their input positions); the
-  matrix’s `dist` record gives each one’s position in the input as
-  `order`, and the method as `clust`. ecodive’s ordinations and tests
-  put the samples back in their input order before analysing them, so
-  metadata lines up whether matched by name or by position; for other
-  packages, reorder metadata with `attr(d, "dist")$order`.
-  `clust = NULL`, the default, leaves the matrix as it was, and
-  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) then clusters
-  it by average linkage for the heatmap; `clust = FALSE` (recorded as
-  `"none"`) keeps the input order in the plot too.
+  matrix’s `order` attribute gives each one’s position in the input.
+  ecodive’s ordinations and tests put the samples back in their input
+  order before analysing them, so metadata lines up whether matched by
+  name or by position; for other packages, reorder metadata with
+  `attr(d, "order")`. `clust = NULL`, the default, leaves the matrix as
+  it was, and [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  then clusters it by average linkage for the heatmap; `clust = FALSE`
+  (kept as `"none"`) keeps the input order in the plot too.
 
-- Results record how they were made, one attribute per step, and the
-  records travel with them through later steps
-  ([`?ecodive_steps`](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)).
-  A distance matrix has a `dist` record: the metric’s display name (such
-  as `"Bray-Curtis Dissimilarity"`, so that other packages can label it
-  without ecodive’s table of metrics), its ID, and the `norm`,
-  `pseudocount`, `power`, `alpha` and `clust` it was made with. An
-  ordination adds an `ord` record (its method, display name and
-  settings, such as `n_axes` or `seed`) and keeps its distance matrix’s
-  `dist`; the permutation tests keep their distance matrix’s `dist`, and
-  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) its
-  ordination’s `dist` and `ord`. Each record is a small list that
-  [`str()`](https://rdrr.io/r/utils/str.html) and
-  [`print()`](https://rdrr.io/r/base/print.html) show on one line, read
-  as `attr(x, "dist")$metric`.
-  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) titles with
-  them, such as “Principal Coordinates Analysis of Bray-Curtis
-  Dissimilarity”.
+- Distance matrices, ordinations, permutation tests and
+  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) have
+  a title, which
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) uses unless
+  given `main`
+  ([`?ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)):
+  the method’s name, then the title of the result it was computed from,
+  such as “Principal Coordinates Analysis of Bray-Curtis Dissimilarity”.
+  It is kept in one attribute, `display`, a list for ecodive’s own
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+  [`print()`](https://rdrr.io/r/base/print.html), beside a distance
+  matrix’s `clust`; set `attr(x, "display")$title` to retitle a result.
+  A distance matrix’s `method` attribute is its metric’s ID (such as
+  `"bray"`), as [`stats::dist()`](https://rdrr.io/r/stats/dist.html)
+  sets it. Results don’t record the arguments or earlier steps they were
+  made with. Arithmetic on a distance matrix (such as `sqrt(d)`) drops
+  its title and `method`, since they no longer describe its values.
   [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
   [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
-  [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) move
-  their `method`, `denominator` and `pseudocount` attributes into their
-  `dist` record (`method` as `metric`).
+  [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) no
+  longer return their `denominator` and `pseudocount` as attributes.
+
+- Ordinations, distance matrices and ecodive’s data frames (from
+  [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md),
+  [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
+  and their post-hoc tests,
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+  [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md),
+  [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) and
+  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md))
+  print a preview, in the manner of the tibble package, rather than
+  every value
+  ([`?print_ecodive`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)):
+  a header with the object’s kind, size and title; the first 10 rows
+  (all of up to 20), with each column’s type; the columns that fit the
+  console; and a footer counting what was left out and naming the other
+  attributes. A distance matrix shows the top-left corner of its lower
+  triangle. `print(x, n = Inf)` shows every row, and
+  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html),
+  [`as.matrix()`](https://rdrr.io/r/base/matrix.html) or
+  [`unclass()`](https://rdrr.io/r/base/class.html) give the plain
+  object. Every function’s examples print its result.
 
 - New [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) runs
   a principal coordinates analysis (classical multidimensional scaling)

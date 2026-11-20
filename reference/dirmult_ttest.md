@@ -320,44 +320,38 @@ scale uncertainty into differential expression analyses using ALDEx2.
 
     res <- dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
     res
-#>   feature          t   log2_fc   ci_lower  ci_upper     p_value  p_adjusted
-#> 1      b1 -15.441403 -4.999191 -7.8190476 -2.300428 0.003106233 0.018637397
-#> 2      b2 -16.971123 -2.521372 -3.7194332 -1.332911 0.001024445 0.007171115
-#> 3      b3   6.898244  1.612080 -1.2376907  4.970007 0.023569582 0.065085828
-#> 4      b4   6.750031  1.702924 -0.3890346  4.042421 0.012030889 0.060154443
-#> 5      b5   6.259134  1.522668 -1.2955554  4.554140 0.019331574 0.065085828
-#> 6      b6   3.568824  1.150426 -1.2527189  3.292559 0.048711747 0.065085828
-#> 7      b7   8.320119  1.532466 -1.1109103  3.814229 0.016271457 0.065085828
-#>   reject
-#> 1   TRUE
-#> 2   TRUE
-#> 3  FALSE
-#> 4  FALSE
-#> 5  FALSE
-#> 6  FALSE
-#> 7  FALSE
+#> # A data.frame: 7 × 8
+#> # Dirichlet-multinomial t-test
+#>   feature      t log2_fc ci_lower ci_upper p_value p_adjusted reject
+#>   <chr>    <dbl>   <dbl>    <dbl>    <dbl>   <dbl>      <dbl>  <lgl>
+#> 1 b1      -15.4    -5      -7.82     -2.3  0.00311    0.0186    TRUE
+#> 2 b2      -17      -2.52   -3.72     -1.33 0.00102    0.00717   TRUE
+#> 3 b3        6.9     1.61   -1.24      4.97 0.0236     0.0651   FALSE
+#> 4 b4        6.75    1.7    -0.389     4.04 0.012      0.0602   FALSE
+#> 5 b5        6.26    1.52   -1.3       4.55 0.0193     0.0651   FALSE
+#> 6 b6        3.57    1.15   -1.25      3.29 0.0487     0.0651   FALSE
+#> 7 b7        8.32    1.53   -1.11      3.81 0.0163     0.0651   FALSE
+#> # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,
+#> #   p_adjust, seed
     plot(res)
 
 
     # With a scale model, the intervals widen and fewer features are
     # rejected.
     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0.5)
-#>   feature          t   log2_fc   ci_lower   ci_upper     p_value p_adjusted
-#> 1      b1 -15.360651 -4.970128 -8.0452745 -1.8335001 0.003310788 0.01986473
-#> 2      b2 -16.843497 -2.492309 -4.5153161 -0.3869114 0.001542506 0.01079754
-#> 3      b3   7.076442  1.641144 -1.6546879  4.9946721 0.040226050 0.13875915
-#> 4      b4   6.864439  1.731988 -1.1794280  4.3070830 0.027751830 0.13875915
-#> 5      b5   6.435113  1.551732 -2.4053156  4.8504523 0.039672811 0.13875915
-#> 6      b6   3.677914  1.179490 -1.8103652  3.6006556 0.102469710 0.13875915
-#> 7      b7   8.371599  1.561530 -0.7739019  4.5681716 0.027913829 0.13875915
-#>   reject
-#> 1   TRUE
-#> 2   TRUE
-#> 3  FALSE
-#> 4  FALSE
-#> 5  FALSE
-#> 6  FALSE
-#> 7  FALSE
+#> # A data.frame: 7 × 8
+#> # Dirichlet-multinomial t-test
+#>   feature      t log2_fc ci_lower ci_upper p_value p_adjusted reject
+#>   <chr>    <dbl>   <dbl>    <dbl>    <dbl>   <dbl>      <dbl>  <lgl>
+#> 1 b1      -15.4    -4.97   -8.05    -1.83  0.00331     0.0199   TRUE
+#> 2 b2      -16.8    -2.49   -4.52    -0.387 0.00154     0.0108   TRUE
+#> 3 b3        7.08    1.64   -1.65     4.99  0.0402      0.139   FALSE
+#> 4 b4        6.86    1.73   -1.18     4.31  0.0278      0.139   FALSE
+#> 5 b5        6.44    1.55   -2.41     4.85  0.0397      0.139   FALSE
+#> 6 b6        3.68    1.18   -1.81     3.6   0.102       0.139   FALSE
+#> 7 b7        8.37    1.56   -0.774    4.57  0.0279      0.139   FALSE
+#> # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,
+#> #   p_adjust, seed
 
     # The default contrast: the first group ('placebo', in sorted order)
     # against the rest.

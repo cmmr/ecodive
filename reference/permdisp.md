@@ -318,7 +318,7 @@ Sciences*, 97(4), 1423-1426.
     # Do the treatment groups differ in dispersion?
     res <- permdisp(dm, 'treatment', meta)
     res
-#> Homogeneity of multivariate dispersions (PERMDISP)
+#> Homogeneity of multivariate dispersions (PERMDISP) of Bray-Curtis Dissimilarity
 #> 
 #> F =  94.2, p = 0.001, z =  88.9
 #> Permutations: 999 (free)

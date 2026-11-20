@@ -67,15 +67,15 @@ rho_p(
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (samples without names are labelled with their positions in the
-  input): its `dist` record (see
-  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
-  gives each one's position in the input as `order`, so that
-  `meta[attr(d, "dist")$order, ]` lines metadata up with them. ecodive's
-  ordinations and tests put the samples back in their input order before
-  analysing them, so give them metadata in its usual order. Other
-  packages see the reordered matrix: give them metadata reordered by
-  `order`, or matched by name. The record's `clust` records `clust`
-  (`FALSE` as `"none"`), which
+  input): its `order` attribute gives each one's position in the input,
+  so that `meta[attr(d, "order"), ]` lines metadata up with them.
+  ecodive's ordinations and tests put the samples back in their input
+  order before analysing them, so give them metadata in its usual order.
+  Other packages see the reordered matrix: give them metadata reordered
+  by `order`, or matched by name. The matrix's `display` list keeps
+  `clust` (`FALSE` as `"none"`; see
+  [ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
+  which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -91,12 +91,8 @@ rho_p(
 ## Value
 
 A `dist` object over the features, as
-[`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md) returns,
-whose `dist` record (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
-has `metric` `"rho_p"`, the `denominator` (absent for the clr; otherwise
-the reference features' names, or their indices when the features have
-no names) and the `pseudocount`.
+[`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md) returns, with
+`method` `"rho_p"`.
 
 \\\rho_p\\ is a **similarity** in a `dist` container:
 [`as.matrix()`](https://rdrr.io/r/base/matrix.html) puts 0 on the
@@ -198,18 +194,16 @@ using compositional data analysis. *Scientific Reports*, 7, 16252.
     x   <- replace_zeros(ex_counts, 'mult')
     rho <- rho_p(x)
     rho
+#> # A dist: 6 features (lower triangle)
+#> # Proportionality (rho_p)
 #>                   Streptococcus Bacteroides Corynebacterium Haemophilus
-#> Bacteroides         -0.50379524                                        
-#> Corynebacterium      0.08499811 -0.64607261                            
-#> Haemophilus          0.86487921 -0.21505462     -0.31880768            
-#> Propionibacterium   -0.93484446  0.30706565      0.20322416 -0.98326626
-#> Staphylococcus      -0.44677393 -0.41197619      0.65163345 -0.53568384
-#>                   Propionibacterium
-#> Bacteroides                        
-#> Corynebacterium                    
-#> Haemophilus                        
-#> Propionibacterium                  
-#> Staphylococcus           0.53732869
+#> Bacteroides              -0.504
+#> Corynebacterium           0.085      -0.646
+#> Haemophilus               0.865      -0.215          -0.319
+#> Propionibacterium        -0.935       0.307           0.203      -0.983
+#> Staphylococcus           -0.447      -0.412           0.652      -0.536
+#> # … 1 more column: Propionibacterium
+#> # Attributes: method
 
     # Pairs above a cutoff
     m <- as.matrix(rho)
@@ -221,9 +215,12 @@ using compositional data analysis. *Scientific Reports*, 7, 16252.
 
     # Relative to one feature (alr): that feature is left out
     rho_p(x, denominator = 'Streptococcus')
+#> # A dist: 5 features (lower triangle)
+#> # Proportionality (rho_p)
 #>                   Bacteroides Corynebacterium Haemophilus Propionibacterium
-#> Corynebacterium    0.32781782                                              
-#> Haemophilus        0.23103228     -0.22460049                              
-#> Propionibacterium  0.76178794      0.78558889  0.02771891                  
-#> Staphylococcus     0.48317500      0.90250450  0.03178041        0.88708073
+#> Corynebacterium         0.328
+#> Haemophilus             0.231          -0.225
+#> Propionibacterium       0.762           0.786      0.0277
+#> Staphylococcus          0.483           0.903      0.0318             0.887
+#> # Attributes: method
 ```

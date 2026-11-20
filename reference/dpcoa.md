@@ -226,12 +226,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -292,6 +294,16 @@ for another phylogeny-aware ordination;
 
 ``` r
     ord <- dpcoa(ex_counts, ex_tree, n_axes = 2)
+    ord
+#> # A matrix: 4 samples × 2 axes
+#> # Double Principal Coordinate Analysis
+#> # % of variance: 67.6, 26.7
+#>        DPCoA1 DPCoA2
+#> Saliva  -1.39 -1.91
+#> Gums    -2.43 -2.6
+#> Nose    -1.84  3.05
+#> Stool    7.31 -0.191
+#> # Attributes: method, eig, prop, taxa, rao, trace
     plot(ord)
 
     str(ord)
@@ -309,7 +321,8 @@ for another phylogeny-aware ordination;
 #>  - attr(*, "rao")= Named num [1:4] 22.156 8.248 15.633 0.718
 #>   ..- attr(*, "names")= chr [1:4] "Saliva" "Gums" "Nose" "Stool"
 #>  - attr(*, "trace")= num 21.8
-#>  - attr(*, "ord")= Double Principal Coordinate Analysis (method = dpcoa, margin = 1, n_axes = 2)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Double Principal Coordinate Analysis"
 
     # Taxa on the same axes, and each sample's Rao entropy.
     head(attr(ord, 'taxa'))

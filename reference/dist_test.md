@@ -140,7 +140,7 @@ sure.
     dm <- bray(counts)
 
     dist_test(dm, 'permanova', 'treatment', meta)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 3.442, p = 0.001, z = 8.275
 #> Permutations: 999 (free)
@@ -166,7 +166,7 @@ sure.
 
     # A numeric variable.
     dist_test(dm, 'adonis2', 'ph', meta)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 0.3849, p = 0.972, z = -1.488
 #> Permutations: 999 (free)
@@ -178,7 +178,7 @@ sure.
 #> Residual 28   0.8803 0.9864             
 #> Total    29   0.8924 1.0000             
     dist_test(dm, 'mantel', 'ph', meta, method = 'spearman')
-#> Mantel test (Spearman)
+#> Mantel test (Spearman) of Bray-Curtis Dissimilarity
 #> 
 #> r = -0.0818, p = 0.863, z = -1.089
 #> Permutations: 999 (free)

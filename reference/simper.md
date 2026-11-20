@@ -273,20 +273,18 @@ in Ecology and Evolution*, 3, 89-101.
     # Four samples are far too few for permutation p-values.
     res <- simper(ex_counts, grp, permutations = 0, cpus = 1)
     res
-#>         pair             taxon    average         sd     ratio mean_a mean_b
-#> 1 oral-other     Streptococcus 0.30125815 0.19946484 1.5103321  477.5   11.5
-#> 2 oral-other       Bacteroides 0.25995659 0.31393206 0.8280664    3.0  306.5
-#> 3 oral-other   Corynebacterium 0.15787107 0.18628159 0.8474862    0.0  249.5
-#> 4 oral-other       Haemophilus 0.10495737 0.06639368 1.5808337  133.5    1.5
-#> 5 oral-other Propionibacterium 0.07946518 0.09327600 0.8519359    1.0  125.5
-#> 6 oral-other    Staphylococcus 0.07474069 0.08811542 0.8482136    0.5  118.5
-#>      cumsum p_value p_adjusted
-#> 1 0.3079565      NA         NA
-#> 2 0.5736931      NA         NA
-#> 3 0.7350744      NA         NA
-#> 4 0.8423654      NA         NA
-#> 5 0.9235975      NA         NA
-#> 6 1.0000000      NA         NA
+#> # A data.frame: 6 × 10
+#> # SIMPER
+#>   pair       taxon             average     sd ratio mean_a mean_b cumsum p_value
+#>   <chr>      <chr>               <dbl>  <dbl> <dbl>  <dbl>  <dbl>  <dbl>   <dbl>
+#> 1 oral-other Streptococcus      0.301  0.199  1.51   478     11.5  0.308      NA
+#> 2 oral-other Bacteroides        0.26   0.314  0.828    3    306    0.574      NA
+#> 3 oral-other Corynebacterium    0.158  0.186  0.847    0    250    0.735      NA
+#> 4 oral-other Haemophilus        0.105  0.0664 1.58   134      1.5  0.842      NA
+#> 5 oral-other Propionibacterium  0.0795 0.0933 0.852    1    126    0.924      NA
+#> 6 oral-other Staphylococcus     0.0747 0.0881 0.848    0.5  118    1          NA
+#> # … 1 more column: p_adjusted <dbl>
+#> # Attributes: overall, n_perm, p_adjust, permutation
     plot(res)
 
 

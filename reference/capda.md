@@ -295,12 +295,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -336,6 +338,25 @@ PRIMER: Guide to Software and Statistical Methods*. PRIMER-E, Plymouth.
     # CAP of iris, from Bray-Curtis distances.
     dm  <- bray(iris[, 1:4])
     ord <- capda(dm, 'Species', iris, permutations = 99)
+    ord
+#> # A matrix: 150 samples × 2 axes
+#> # Discriminant Canonical Analysis of Principal Coordinates of Bray-Curtis Dissimilarity
+#> # % of variance: 56.8, 43.2
+#>    CAP1   CAP2
+#>  1 9.18 -0.559
+#>  2 8.34 -0.369
+#>  3 9.77 -0.927
+#>  4 9.23 -0.406
+#>  5 9.48 -0.905
+#>  6 8.06  0.705
+#>  7 9.54 -1.15
+#>  8 8.59 -0.53
+#>  9 9.05  0.704
+#> 10 8.66 -0.164
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, n_pcoa_axes, success, loo_table, loo_class,
+#> #   trace_stat, p_value, n_perm, trace_perm, scaling, groups
     plot(ord, 'Species', iris)
 
 

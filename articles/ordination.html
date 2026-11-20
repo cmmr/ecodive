@@ -308,8 +308,8 @@ axis), followed by the method’s own.</p>
 <span><span class="co">#&gt;  - attr(*, "trace")= num 2.64</span></span>
 <span><span class="co">#&gt;  - attr(*, "correction")= chr "none"</span></span>
 <span><span class="co">#&gt;  - attr(*, "constant")= num 0</span></span>
-<span><span class="co">#&gt;  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)</span></span>
-<span><span class="co">#&gt;  - attr(*, "ord")= Principal Coordinates Analysis (method = pcoa, n_axes = 3, correction = none)</span></span></code></pre></div>
+<span><span class="co">#&gt;  - attr(*, "display")=List of 1</span></span>
+<span><span class="co">#&gt;   ..$ title: chr "Principal Coordinates Analysis of Bray-Curtis Dissimilarity"</span></span></code></pre></div>
 <p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the first two axes, and takes its labels
 from the attributes: the title from <code>method</code>, and each axis’s
 share of the variance from <code>prop</code>. Give <code>groups</code>
@@ -445,7 +445,7 @@ Its permutation test is <code><a href="../reference/permanova.html">permanova()<
 <span><span class="co">#&gt;       rda     dbrda </span></span>
 <span><span class="co">#&gt; 0.9480809 0.9480809</span></span>
 <span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">hd</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, permutations <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA) of Euclidean Distance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F =  1342, p = 0.01, z =  1215</span></span>
 <span><span class="co">#&gt; Permutations: 99 (free)</span></span>
@@ -506,7 +506,7 @@ species:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/euclidean.html">euclidean</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, norm <span class="op">=</span> <span class="st">'hellinger'</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">iris</span>,</span>
 <span>  formula <span class="op">=</span> <span class="op">~</span> <span class="va">Sepal.Length</span> <span class="op">+</span> <span class="va">Sepal.Width</span> <span class="op">+</span> <span class="fu">Condition</span><span class="op">(</span><span class="va">Species</span><span class="op">)</span>, permutations <span class="op">=</span> <span class="fl">99</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA) of Euclidean Distance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; F = 5.514, p = 0.01, z = 5.142</span></span>
 <span><span class="co">#&gt; Permutations: 99 (free)</span></span>
@@ -749,22 +749,19 @@ centroid per level, and each one a permutation p-value, as
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/envfit.html">envfit</a></span><span class="op">(</span><span class="va">ord</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
-<span><span class="co">#&gt;                       variable      level       PCoA1       PCoA2        PCoA3</span></span>
-<span><span class="co">#&gt; Sepal.Length      Sepal.Length       &lt;NA&gt; -0.61857745 -0.77787638 -0.110771313</span></span>
-<span><span class="co">#&gt; Sepal.Width        Sepal.Width       &lt;NA&gt;  0.16693381 -0.95151811 -0.258353229</span></span>
-<span><span class="co">#&gt; Petal.Length      Petal.Length       &lt;NA&gt; -0.94193586 -0.12434192  0.311922927</span></span>
-<span><span class="co">#&gt; Petal.Width        Petal.Width       &lt;NA&gt; -0.88333780 -0.25452127  0.393615619</span></span>
-<span><span class="co">#&gt; Speciessetosa          Species     setosa  0.16700378 -0.01395054  0.001691427</span></span>
-<span><span class="co">#&gt; Speciesversicolor      Species versicolor -0.04635194  0.03090254 -0.009450001</span></span>
-<span><span class="co">#&gt; Speciesvirginica       Species  virginica -0.12065184 -0.01695200  0.007758574</span></span>
-<span><span class="co">#&gt;                          r2 p_value        z</span></span>
-<span><span class="co">#&gt; Sepal.Length      0.8951005   0.001 57.50362</span></span>
-<span><span class="co">#&gt; Sepal.Width       0.9377558   0.001 57.03726</span></span>
-<span><span class="co">#&gt; Petal.Length      0.9884977   0.001 59.52106</span></span>
-<span><span class="co">#&gt; Petal.Width       0.9348862   0.001 55.99111</span></span>
-<span><span class="co">#&gt; Speciessetosa     0.8649502   0.001 70.45196</span></span>
-<span><span class="co">#&gt; Speciesversicolor 0.8649502   0.001 70.45196</span></span>
-<span><span class="co">#&gt; Speciesvirginica  0.8649502   0.001 70.45196</span></span>
+<span><span class="co">#&gt; # A data.frame: 7 × 8</span></span>
+<span><span class="co">#&gt; # Fitted variables on Principal Coordinates Analysis of Bray-Curtis Dissimilarity</span></span>
+<span><span class="co">#&gt;                   variable     level        PCoA1   PCoA2    PCoA3    r2 p_value</span></span>
+<span><span class="co">#&gt;                   &lt;chr&gt;        &lt;chr&gt;        &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; Sepal.Length      Sepal.Length NA         -0.619  -0.778  -0.111   0.895   0.001</span></span>
+<span><span class="co">#&gt; Sepal.Width       Sepal.Width  NA          0.167  -0.952  -0.258   0.938   0.001</span></span>
+<span><span class="co">#&gt; Petal.Length      Petal.Length NA         -0.942  -0.124   0.312   0.988   0.001</span></span>
+<span><span class="co">#&gt; Petal.Width       Petal.Width  NA         -0.883  -0.255   0.394   0.935   0.001</span></span>
+<span><span class="co">#&gt; Speciessetosa     Species      setosa      0.167  -0.014   0.00169 0.865   0.001</span></span>
+<span><span class="co">#&gt; Speciesversicolor Species      versicolor -0.0464  0.0309 -0.00945 0.865   0.001</span></span>
+<span><span class="co">#&gt; Speciesvirginica  Species      virginica  -0.121  -0.017   0.00776 0.865   0.001</span></span>
+<span><span class="co">#&gt; # … 1 more column: z &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; # Attributes: r2_perm, n_perm</span></span>
 <span></span>
 <span><span class="co"># An arrow for each measurement, longer for a better fit, and a label for</span></span>
 <span><span class="co"># each species' centroid.</span></span>

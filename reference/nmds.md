@@ -362,12 +362,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -416,14 +418,24 @@ and `sklearn.isotonic`, under scikit-learn's BSD-3-Clause license
     ord <- nmds(dm)
     plot(ord, 'Species', iris)
 
-    head(ord)
-#>          NMDS1       NMDS2
-#> [1,] 0.1703377 -0.02307947
-#> [2,] 0.1727886  0.01624136
-#> [3,] 0.1910232  0.00691959
-#> [4,] 0.1843325  0.01709551
-#> [5,] 0.1772749 -0.02496549
-#> [6,] 0.1364458 -0.05359534
+    ord
+#> # A matrix: 150 samples × 2 axes
+#> # Non-metric Multidimensional Scaling of Bray-Curtis Dissimilarity
+#>    NMDS1    NMDS2
+#>  1 0.17  -0.0231
+#>  2 0.173  0.0162
+#>  3 0.191  0.00692
+#>  4 0.184  0.0171
+#>  5 0.177 -0.025
+#>  6 0.136 -0.0536
+#>  7 0.19  -0.00604
+#>  8 0.168 -0.0129
+#>  9 0.199  0.0372
+#> 10 0.173  0.011
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, stress, converged, n_iters, n_starts,
+#> #   best_start, n_best, ties
     str(ord)
 #>  'ecodive_ord' num [1:150, 1:2] 0.17 0.173 0.191 0.184 0.177 ...
 #>  - attr(*, "dimnames")=List of 2
@@ -439,6 +451,6 @@ and `sklearn.isotonic`, under scikit-learn's BSD-3-Clause license
 #>  - attr(*, "best_start")= int 0
 #>  - attr(*, "n_best")= int 1
 #>  - attr(*, "ties")= chr "primary"
-#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
-#>  - attr(*, "ord")= Non-metric Multidimensional Scaling (method = nmds, n_axes = 2, n_starts = 4, max_iters = 1000, tol = 1e-07, ties = primary, seed = 0)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Non-metric Multidimensional Scaling of Bray-Curtis Dissimilarity"
 ```

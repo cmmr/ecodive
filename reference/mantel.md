@@ -209,7 +209,7 @@ regression approach. *Cancer Research*, 27(2), 209-220.
     # community composition?
     res <- mantel(dm, ph)
     res
-#> Mantel test (Pearson)
+#> Mantel test (Pearson) of Bray-Curtis Dissimilarity
 #> 
 #> r = 0.593, p = 0.001, z = 9.786
 #> Permutations: 999 (free)
@@ -222,7 +222,7 @@ regression approach. *Cancer Research*, 27(2), 209-220.
 
     # With rank correlation.
     mantel(dm, ph, method = 'spearman')
-#> Mantel test (Spearman)
+#> Mantel test (Spearman) of Bray-Curtis Dissimilarity
 #> 
 #> r = 0.5528, p = 0.001, z =    10
 #> Permutations: 999 (free)
@@ -234,7 +234,7 @@ regression approach. *Cancer Research*, 27(2), 209-220.
     # The same as a column of sample metadata.
     meta <- data.frame(row.names = rownames(counts), ph = ph)
     mantel(dm, 'ph', data = meta, method = 'spearman')
-#> Mantel test (Spearman)
+#> Mantel test (Spearman) of Bray-Curtis Dissimilarity
 #> 
 #> r = 0.5528, p = 0.001, z =    10
 #> Permutations: 999 (free)
@@ -245,7 +245,7 @@ regression approach. *Cancer Research*, 27(2), 209-220.
 
     # Two distance matrices.
     mantel(dm, dist(counts[, 6:20]))
-#> Mantel test (Pearson)
+#> Mantel test (Pearson) of Bray-Curtis Dissimilarity
 #> 
 #> r = 0.4893, p = 0.001, z = 6.502
 #> Permutations: 999 (free)

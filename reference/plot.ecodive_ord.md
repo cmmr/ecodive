@@ -170,13 +170,13 @@ plot(
 
 The plot is made of what `x` holds:
 
-- **Title**: the method's name, as
+- **Title**: the ordination's title (see
+  [ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)):
+  the method's name, as
   [`list_dist_ords()`](https://cmmr.github.io/ecodive/reference/dist_ords.md)
   and
   [`list_count_ords()`](https://cmmr.github.io/ecodive/reference/count_ords.md)
   give it, and for an ordination of distances, the distances' metric,
-  from the records of how `x` was made (see
-  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
   such as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity".
 
 - **Axis labels**: the axes' names, with the percentage of the variance

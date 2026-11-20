@@ -342,11 +342,12 @@ Which taxa drive the differences between groups.
 - [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md) :
   Similarity Percentages (SIMPER)
 
-## Plotting
+## Plotting and Printing
 
-plot() methods for ecodive’s results. They draw what a result already
-holds, with titles, labels and legends taken from its attributes, in
-base graphics.
+plot() and print() methods for ecodive’s results. They show what a
+result already holds, with titles, labels and legends taken from its
+attributes; plots use base graphics, and printing shows a preview rather
+than every value.
 
 - [`plot(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)
   : Plot an ordination
@@ -377,8 +378,11 @@ base graphics.
   : Plot a forward selection
 - [`plot(`*`<ecodive_bioenv>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.md)
   : Plot a BIO-ENV result
-- [`ecodive_steps`](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)
-  : How a result was made
+- [`ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)
+  : Titles of results
+- [`print(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+  [`print(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+  : Print ecodive's results
 
 ## Utilities & Helpers
 

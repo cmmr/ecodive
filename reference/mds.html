@@ -258,10 +258,11 @@ distance is 4 or more. <code>NA</code> for <code>mds()</code>, <code><a href="nm
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them, and last, the records
-of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
-matrix's, for the methods that take distances, and <code>ord</code>, the
-ordination's own (its method, display name and settings). The matrix has class
+</ul><p>Attributes particular to the method follow them, and last <code>display</code>,
+with the ordination's title for <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see <a href="ecodive_display.html">ecodive_display</a>). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -298,14 +299,24 @@ scikit-learn developers).</p>
 <span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">mds</span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="mds-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           MDS1         MDS2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.1690167 -0.025108951</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.1711458  0.019271351</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.1902816  0.007971196</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.1831555  0.019815690</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.1762013 -0.027267075</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.1334516 -0.058522704</span>
+<span class="r-in"><span>    <span class="va">ord</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 150 samples × 2 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Metric Multidimensional Scaling of Bray-Curtis Dissimilarity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     MDS1     MDS2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 0.169 -0.0251</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2 0.171  0.0193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3 0.19   0.00797</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4 0.183  0.0198</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5 0.176 -0.0273</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6 0.133 -0.0585</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7 0.19  -0.00634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8 0.167 -0.0139</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9 0.197  0.0416</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 0.172  0.0133</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 140 more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, stress, converged, n_iters, n_starts,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   best_start, n_best</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  'ecodive_ord' num [1:150, 1:2] 0.169 0.171 0.19 0.183 0.176 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dimnames")=List of 2</span>
@@ -320,8 +331,8 @@ scikit-learn developers).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "n_starts")= int 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "best_start")= int 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "n_best")= int 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ord")= Metric Multidimensional Scaling (method = mds, n_axes = 2, n_starts = 4, max_iters = 1000, tol = 1e-07, seed = 0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "display")=List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ title: chr "Metric Multidimensional Scaling of Bray-Curtis Dissimilarity"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

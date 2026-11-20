@@ -303,7 +303,7 @@ Function Approach*. Springer, New York.
     # Are samples more alike within treatment groups?
     res <- mrpp(dm, 'treatment', meta)
     res
-#> Multi-response permutation procedure (MRPP)
+#> Multi-response permutation procedure (MRPP) of Bray-Curtis Dissimilarity
 #> 
 #> delta = 0.2244, p = 0.001, z = -7.322
 #> Permutations: 999 (free)
@@ -330,7 +330,7 @@ Function Approach*. Springer, New York.
 
     # Permuting only within sites.
     mrpp(dm, 'treatment', meta, strata = 'site')
-#> Multi-response permutation procedure (MRPP)
+#> Multi-response permutation procedure (MRPP) of Bray-Curtis Dissimilarity
 #> 
 #> delta = 0.2244, p = 0.001, z = -7.342
 #> Permutations: 999 (within strata)

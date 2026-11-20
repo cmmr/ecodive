@@ -268,25 +268,35 @@ Microbiology*, 8, 2114.
     grp <- rep(c('treatment', 'placebo'), each = 3)
     res <- ancom(x, grp)
     res
-#>   feature W reject
-#> 1      b1 0  FALSE
-#> 2      b2 4   TRUE
-#> 3      b3 0  FALSE
-#> 4      b4 1  FALSE
-#> 5      b5 1  FALSE
-#> 6      b6 0  FALSE
-#> 7      b7 1  FALSE
+#> # A data.frame: 7 × 3
+#> # ANCOM: placebo vs treatment
+#>   feature     W reject
+#>   <chr>   <int>  <lgl>
+#> 1 b1          0  FALSE
+#> 2 b2          4   TRUE
+#> 3 b3          0  FALSE
+#> 4 b4          1  FALSE
+#> 5 b5          1  FALSE
+#> 6 b6          0  FALSE
+#> 7 b7          1  FALSE
+#> # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
+#> #   pseudocount
     plot(res)
 
 
     # A table with zeros: replace them first.
     grp <- c('oral', 'oral', 'other', 'other')
     ancom(replace_zeros(ex_counts, 'mult'), grp, sig_test = 'kruskal')
-#>             feature W reject
-#> 1     Streptococcus 0  FALSE
-#> 2       Bacteroides 0  FALSE
-#> 3   Corynebacterium 0  FALSE
-#> 4       Haemophilus 0  FALSE
-#> 5 Propionibacterium 0  FALSE
-#> 6    Staphylococcus 0  FALSE
+#> # A data.frame: 6 × 3
+#> # ANCOM: oral vs other
+#>   feature               W reject
+#>   <chr>             <int>  <lgl>
+#> 1 Streptococcus         0  FALSE
+#> 2 Bacteroides           0  FALSE
+#> 3 Corynebacterium       0  FALSE
+#> 4 Haemophilus           0  FALSE
+#> 5 Propionibacterium     0  FALSE
+#> 6 Staphylococcus        0  FALSE
+#> # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
+#> #   pseudocount
 ```

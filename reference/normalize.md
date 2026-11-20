@@ -154,6 +154,5 @@ for references.
     a <- pca(ex_counts, norm = 'clr', pseudocount = 1, n_axes = 2)
     b <- pca(clr, n_axes = 2)
     all.equal(a, b)
-#> [1] "Attributes: < Component “ord”: Component “norm”: 1 string mismatch >"                 
-#> [2] "Attributes: < Component “ord”: Component “pseudocount”: Mean relative difference: 1 >"
+#> [1] TRUE
 ```

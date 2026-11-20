@@ -360,7 +360,7 @@ comparison of fractions. *Ecology*, 87, 2614-2625.
     permanova(
       euclidean(counts, norm = 'hellinger'),
       data = meta, formula = ~ ph + temp + Condition(x + y) )
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Euclidean Distance
 #> 
 #> F = 1.485, p = 0.06, z = 1.628
 #> Permutations: 999 (free)

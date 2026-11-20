@@ -4,12 +4,12 @@ functions (such as bray() or unweighted_unifrac()), or of the
 proportionality of features from vlr(), rho_p() or phi_s(): one row
 and one column per sample (or feature), each cell coloured by the
 distance between its row's and its column's, with the samples ordered as
-the matrix's clust attribute says."><meta property="og:description" content="A heatmap of a distance matrix from beta_div() or any of its metric
+the clust it was made with says."><meta property="og:description" content="A heatmap of a distance matrix from beta_div() or any of its metric
 functions (such as bray() or unweighted_unifrac()), or of the
 proportionality of features from vlr(), rho_p() or phi_s(): one row
 and one column per sample (or feature), each cell coloured by the
 distance between its row's and its column's, with the samples ordered as
-the matrix's clust attribute says."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.png"></head><body>
+the clust it was made with says."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -61,7 +61,7 @@ functions (such as <code><a href="bray.html">bray()</a></code> or <code><a href=
 proportionality of features from <code><a href="vlr.html">vlr()</a></code>, <code><a href="rho_p.html">rho_p()</a></code> or <code><a href="phi_s.html">phi_s()</a></code>: one row
 and one column per sample (or feature), each cell coloured by the
 distance between its row's and its column's, with the samples ordered as
-the matrix's <code>clust</code> attribute says.</p>
+the <code>clust</code> it was made with says.</p>
     </div>
 
     <div class="section level2">
@@ -118,17 +118,17 @@ from <code><a href="rho_p.html">rho_p()</a></code>), its <code>"Blue-Red 3"</cod
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>Order.</strong> The samples are ordered by the <code>clust</code> argument of the
-function that made <code>x</code>, recorded in its <code>dist</code> record
-(<code>attr(x, "dist")$clust</code>; see <a href="ecodive_steps.html">ecodive_steps</a>):</p><ul><li><p>Not set (<code>clust = NULL</code>, the default): the plot clusters them itself,
+function that made <code>x</code>, kept in its <code>display</code> list
+(<code>attr(x, "display")$clust</code>; see <a href="ecodive_display.html">ecodive_display</a>):</p><ul><li><p>Not set (<code>clust = NULL</code>, the default): the plot clusters them itself,
 by average linkage (UPGMA, <code><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">stats::hclust()</a></code>), so that similar samples
 sit together. <code>x</code> is not changed.</p></li>
 <li><p><code>"none"</code> (<code>clust = FALSE</code>): their order in <code>x</code>, which is the input's.</p></li>
 <li><p>A clustering method: <code>x</code> is already in that order, which is kept.</p></li>
 </ul><p>To plot a matrix in its own order, make it with <code>clust = FALSE</code>.</p>
-<p><strong>Title.</strong> The metric's display name, from the <code>dist</code> record (see
-<a href="ecodive_steps.html">ecodive_steps</a>), such as <code>"Bray-Curtis Dissimilarity"</code>; or else the
+<p><strong>Title.</strong> The matrix's title (see <a href="ecodive_display.html">ecodive_display</a>), the metric's
+display name, such as <code>"Bray-Curtis Dissimilarity"</code>; or else the
 <code>method</code> attribute that <code><a href="https://rdrr.io/r/stats/dist.html" class="external-link">stats::dist()</a></code> sets; <code>"Distances"</code> without
-either.
+either, as after arithmetic on <code>x</code>.
 With <code>groups</code>, the samples are sorted by group, keeping that order within
 each group.</p>
 <p>The rows run from the first sample at the top to the last at the bottom,
@@ -160,7 +160,7 @@ as before.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Clustered by Ward's method when computed: the result is reordered.</span></span></span>
 <span class="r-in"><span>    <span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, clust <span class="op">=</span> <span class="st">'ward.D2'</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'dist'</span><span class="op">)</span><span class="op">$</span><span class="va">order</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'order'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 13  2 46 30 31 26</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.ecodive_dist-4.png" alt="" width="700" height="433"></span>

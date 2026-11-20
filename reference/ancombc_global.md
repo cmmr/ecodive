@@ -238,85 +238,73 @@ to gene expression data on ordered categories. *Biometrics*, 66,
 
     res <- ancombc_global(fit)
     res
-#>   feature           w      p_value   p_adjusted reject passed_ss reject_robust
-#> 1      F1  1.78597500 4.568396e-01 1.000000e+00  FALSE      TRUE         FALSE
-#> 2      F2 60.28742380 2.361777e-06 1.889422e-05   TRUE      TRUE          TRUE
-#> 3      F3  0.03998274 7.811002e-02 4.686601e-01  FALSE      TRUE         FALSE
-#> 4      F4  4.78034917 2.334486e-01 1.000000e+00  FALSE      TRUE         FALSE
-#> 5      F5  1.38517980 6.225672e-01 1.000000e+00  FALSE      TRUE         FALSE
-#> 6      F6 25.90625478 2.216400e-04 1.551480e-03   TRUE     FALSE         FALSE
-#> 7      F7  0.86510213 9.745627e-01 1.000000e+00  FALSE      TRUE         FALSE
-#> 8      F8  1.58903521 5.128828e-01 1.000000e+00  FALSE      TRUE         FALSE
+#> # A data.frame: 8 × 7
+#> # ANCOM-BC2 global test
+#>   feature      w  p_value p_adjusted reject passed_ss reject_robust
+#>   <chr>    <dbl>    <dbl>      <dbl>  <lgl>     <lgl>         <lgl>
+#> 1 F1       1.79     0.457          1  FALSE      TRUE         FALSE
+#> 2 F2      60.3   2.36e-06   1.89e-05   TRUE      TRUE          TRUE
+#> 3 F3       0.04    0.0781      0.469  FALSE      TRUE         FALSE
+#> 4 F4       4.78     0.233          1  FALSE      TRUE         FALSE
+#> 5 F5       1.39     0.623          1  FALSE      TRUE         FALSE
+#> 6 F6      25.9   0.000222    0.00155   TRUE     FALSE         FALSE
+#> 7 F7       0.865    0.975          1  FALSE      TRUE         FALSE
+#> 8 F8       1.59     0.513          1  FALSE      TRUE         FALSE
+#> # Attributes: method, groups, alpha, p_adjust, sensitivity
     plot(res)
 
 
     res <- ancombc_pairwise(fit)
     res[res$reject, ]
-#>    feature        comparison    log_fc        se         w      p_value
-#> 4       F2   moderate - mild  1.578050 0.2867837  5.502581 1.855143e-04
-#> 5       F2     severe - mild  1.880123 0.2997796  6.271683 6.073015e-05
-#> 17      F6     severe - mild -1.728554 0.3428363 -5.041923 5.051992e-04
-#> 18      F6 severe - moderate -1.653628 0.4016451 -4.117137 2.086614e-03
-#>      p_adjusted reject passed_ss reject_robust
-#> 4  0.0020406570   TRUE     FALSE         FALSE
-#> 5  0.0007287618   TRUE     FALSE         FALSE
-#> 17 0.0060623903   TRUE     FALSE         FALSE
-#> 18 0.0229527490   TRUE     FALSE         FALSE
+#> # A data.frame: 4 × 10
+#> # ANCOM-BC2 pairwise tests
+#>    feature comparison        log_fc    se     w  p_value p_adjusted reject
+#>    <chr>   <chr>              <dbl> <dbl> <dbl>    <dbl>      <dbl>  <lgl>
+#> 4  F2      moderate - mild     1.58 0.287  5.5  0.000186   0.00204    TRUE
+#> 5  F2      severe - mild       1.88 0.3    6.27 6.07e-05   0.000729   TRUE
+#> 17 F6      severe - mild      -1.73 0.343 -5.04 0.000505   0.00606    TRUE
+#> 18 F6      severe - moderate  -1.65 0.402 -4.12  0.00209   0.023      TRUE
+#> # … 2 more columns: passed_ss <lgl>, reject_robust <lgl>
+#> # Attributes: method, groups, alpha, p_adjust, sensitivity
     plot(res)
 
 
     ancombc_dunnett(fit)
-#>    feature      comparison       log_fc        se           w      p_value
-#> 1       F1 moderate - mild -0.130278285 0.4277787 -0.30454595 1.000000e+00
-#> 2       F1   severe - mild  0.449835345 0.4455405  1.00963962 1.000000e+00
-#> 3       F2 moderate - mild  1.578050339 0.2867837  5.50258086 1.855143e-04
-#> 4       F2   severe - mild  1.880122789 0.2997796  6.27168297 6.073015e-05
-#> 5       F3 moderate - mild -0.054194121 0.2713215 -0.19974133 1.000000e+00
-#> 6       F3   severe - mild -0.004017009 0.2968972 -0.01352997 1.000000e+00
-#> 7       F4 moderate - mild  0.932813583 0.4266513  2.18636071 1.000000e+00
-#> 8       F4   severe - mild  0.600334750 0.5156519  1.16422490 1.000000e+00
-#> 9       F5 moderate - mild  0.069268610 0.3884956  0.17829960 1.000000e+00
-#> 10      F5   severe - mild -0.448051616 0.4668154 -0.95980468 1.000000e+00
-#> 11      F6 moderate - mild -0.074926233 0.2834519 -0.26433494 7.968898e-01
-#> 12      F6   severe - mild -1.728554271 0.3428363 -5.04192317 5.051992e-04
-#> 13      F7 moderate - mild  0.347893536 0.4396022  0.79138265 1.000000e+00
-#> 14      F7   severe - mild  0.000000000 0.5163252  0.00000000 1.000000e+00
-#> 15      F8 moderate - mild  0.028229795 0.4110188  0.06868249 1.000000e+00
-#> 16      F8   severe - mild -0.530294725 0.4443275 -1.19347709 1.000000e+00
-#>      p_adjusted reject passed_ss reject_robust
-#> 1  1.0000000000  FALSE      TRUE         FALSE
-#> 2  1.0000000000  FALSE      TRUE         FALSE
-#> 3  0.0012985999   TRUE     FALSE         FALSE
-#> 4  0.0004858412   TRUE     FALSE         FALSE
-#> 5  1.0000000000  FALSE      TRUE         FALSE
-#> 6  1.0000000000  FALSE      TRUE         FALSE
-#> 7  1.0000000000  FALSE      TRUE         FALSE
-#> 8  1.0000000000  FALSE      TRUE         FALSE
-#> 9  1.0000000000  FALSE      TRUE         FALSE
-#> 10 1.0000000000  FALSE      TRUE         FALSE
-#> 11 1.0000000000  FALSE      TRUE         FALSE
-#> 12 0.0040415935   TRUE     FALSE         FALSE
-#> 13 1.0000000000  FALSE      TRUE         FALSE
-#> 14 1.0000000000  FALSE      TRUE         FALSE
-#> 15 1.0000000000  FALSE      TRUE         FALSE
-#> 16 1.0000000000  FALSE      TRUE         FALSE
+#> # A data.frame: 16 × 10
+#> # ANCOM-BC2 Dunnett's tests
+#>    feature comparison        log_fc    se       w  p_value p_adjusted reject
+#>    <chr>   <chr>              <dbl> <dbl>   <dbl>    <dbl>      <dbl>  <lgl>
+#>  1 F1      moderate - mild -0.13    0.428 -0.305         1   1         FALSE
+#>  2 F1      severe - mild    0.45    0.446  1.01          1   1         FALSE
+#>  3 F2      moderate - mild  1.58    0.287  5.5    0.000186   0.0013     TRUE
+#>  4 F2      severe - mild    1.88    0.3    6.27   6.07e-05   0.000486   TRUE
+#>  5 F3      moderate - mild -0.0542  0.271 -0.2           1   1         FALSE
+#>  6 F3      severe - mild   -0.00402 0.297 -0.0135        1   1         FALSE
+#>  7 F4      moderate - mild  0.933   0.427  2.19          1   1         FALSE
+#>  8 F4      severe - mild    0.6     0.516  1.16          1   1         FALSE
+#>  9 F5      moderate - mild  0.0693  0.388  0.178         1   1         FALSE
+#> 10 F5      severe - mild   -0.448   0.467 -0.96          1   1         FALSE
+#> 11 F6      moderate - mild -0.0749  0.283 -0.264     0.797   1         FALSE
+#> 12 F6      severe - mild   -1.73    0.343 -5.04   0.000505   0.00404    TRUE
+#> 13 F7      moderate - mild  0.348   0.44   0.791         1   1         FALSE
+#> 14 F7      severe - mild    0       0.516  0             1   1         FALSE
+#> 15 F8      moderate - mild  0.0282  0.411  0.0687        1   1         FALSE
+#> 16 F8      severe - mild   -0.53    0.444 -1.19          1   1         FALSE
+#> # … 2 more columns: passed_ss <lgl>, reject_robust <lgl>
+#> # Attributes: method, groups, alpha, p_adjust, n_bootstraps, seed, sensitivity
     ancombc_trend(fit, n_bootstraps = 1000)
-#>   feature    pattern          w p_value p_adjusted reject passed_ss
-#> 1      F1 increasing 0.51303279   0.278      1.000  FALSE      TRUE
-#> 2      F2 increasing 1.88012279   0.000      0.000   TRUE      TRUE
-#> 3      F3 decreasing 0.03140829   0.988      1.000  FALSE      TRUE
-#> 4      F4 increasing 0.83253144   0.119      0.714  FALSE      TRUE
-#> 5      F5 decreasing 0.48538297   0.355      1.000  FALSE      TRUE
-#> 6      F6 decreasing 1.72855427   0.000      0.000   TRUE     FALSE
-#> 7      F7 increasing 0.23158725   0.789      1.000  FALSE      TRUE
-#> 8      F8 decreasing 0.53852924   0.228      1.000  FALSE      TRUE
-#>   reject_robust
-#> 1         FALSE
-#> 2          TRUE
-#> 3         FALSE
-#> 4         FALSE
-#> 5         FALSE
-#> 6         FALSE
-#> 7         FALSE
-#> 8         FALSE
+#> # A data.frame: 8 × 8
+#> # ANCOM-BC2 trend test
+#>   feature pattern         w p_value p_adjusted reject passed_ss reject_robust
+#>   <chr>   <chr>       <dbl>   <dbl>      <dbl>  <lgl>     <lgl>         <lgl>
+#> 1 F1      increasing 0.513    0.278      1      FALSE      TRUE         FALSE
+#> 2 F2      increasing 1.88     0          0       TRUE      TRUE          TRUE
+#> 3 F3      decreasing 0.0314   0.988      1      FALSE      TRUE         FALSE
+#> 4 F4      increasing 0.833    0.119      0.714  FALSE      TRUE         FALSE
+#> 5 F5      decreasing 0.485    0.355      1      FALSE      TRUE         FALSE
+#> 6 F6      decreasing 1.73     0          0       TRUE     FALSE         FALSE
+#> 7 F7      increasing 0.232    0.789      1      FALSE      TRUE         FALSE
+#> 8 F8      decreasing 0.539    0.228      1      FALSE      TRUE         FALSE
+#> # Attributes: method, groups, alpha, p_adjust, n_bootstraps, seed,
+#> #   sensitivity, patterns, nodes, coef
 ```

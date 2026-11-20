@@ -273,22 +273,18 @@ southeastern Spain. <em>Vegetatio</em>, 55, 37-55. <a href="https://doi.org/10.1
 <span class="r-in"><span>    <span class="co"># An arrow for each measurement, a centroid for each species.</span></span></span>
 <span class="r-in"><span>    <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">envfit</span><span class="op">(</span><span class="va">ord</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">fit</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       variable      level       PCoA1       PCoA2        r2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length      Sepal.Length       &lt;NA&gt; -0.62240779 -0.78269313 0.8942973</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Width        Sepal.Width       &lt;NA&gt;  0.17280029 -0.98495688 0.9213948</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length      Petal.Length       &lt;NA&gt; -0.99139935 -0.13087144 0.9849779</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width        Petal.Width       &lt;NA&gt; -0.96090689 -0.27687170 0.9289167</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Speciessetosa          Species     setosa  0.16700378 -0.01395054 0.8875721</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor      Species versicolor -0.04635194  0.03090254 0.8875721</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica       Species  virginica -0.12065184 -0.01695200 0.8875721</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   p_value        z</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length        0.001 71.49808</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Width         0.001 67.92426</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length        0.001 74.01866</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width         0.001 70.39502</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Speciessetosa       0.001 70.18593</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor   0.001 70.18593</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica    0.001 70.18593</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 7 × 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Fitted variables on Principal Coordinates Analysis of Bray-Curtis Dissimilarity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   variable     level        PCoA1   PCoA2    r2 p_value     z</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   &lt;chr&gt;        &lt;chr&gt;        &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Length      Sepal.Length NA         -0.622  -0.783  0.894   0.001  71.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sepal.Width       Sepal.Width  NA          0.173  -0.985  0.921   0.001  67.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Length      Petal.Length NA         -0.991  -0.131  0.985   0.001  74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Petal.Width       Petal.Width  NA         -0.961  -0.277  0.929   0.001  70.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciessetosa     Species      setosa      0.167  -0.014  0.888   0.001  70.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesversicolor Species      versicolor -0.0464  0.0309 0.888   0.001  70.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Speciesvirginica  Species      virginica  -0.121  -0.017  0.888   0.001  70.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: r2_perm, n_perm</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A biplot: the fit drawn on the ordination.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>

@@ -47,15 +47,15 @@ vlr(counts, margin = 1L, pseudocount = NULL, clust = NULL, cpus = n_cpus())
   [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
   Clustering **reorders the samples** of the result, with their labels
   (samples without names are labelled with their positions in the
-  input): its `dist` record (see
-  [ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md))
-  gives each one's position in the input as `order`, so that
-  `meta[attr(d, "dist")$order, ]` lines metadata up with them. ecodive's
-  ordinations and tests put the samples back in their input order before
-  analysing them, so give them metadata in its usual order. Other
-  packages see the reordered matrix: give them metadata reordered by
-  `order`, or matched by name. The record's `clust` records `clust`
-  (`FALSE` as `"none"`), which
+  input): its `order` attribute gives each one's position in the input,
+  so that `meta[attr(d, "order"), ]` lines metadata up with them.
+  ecodive's ordinations and tests put the samples back in their input
+  order before analysing them, so give them metadata in its usual order.
+  Other packages see the reordered matrix: give them metadata reordered
+  by `order`, or matched by name. The matrix's `display` list keeps
+  `clust` (`FALSE` as `"none"`; see
+  [ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
+  which
   [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)
   follows: with `NULL` it clusters the samples for the heatmap
   (`"average"`), and with `"none"` it keeps their order. `clust` needs
@@ -78,13 +78,13 @@ returns over samples), labelled with the feature names, of class
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws it as a
 heatmap (see
 [`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md)).
-Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, it has attribute
-`dist`, the record of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)),
+Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, it has attributes
+`method` (`"vlr"`) and `display`, with its title
+(`"Variance of Log Ratios"`; see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
 as
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)'s
-results do: its display name (`"Variance of Log Ratios"`), `metric`
-(`"vlr"`), and the `pseudocount` used (`0` for none).
+results do, and with `clust`, `order`.
 
 It is a dissimilarity, so it can be given as `dm` to
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md),
@@ -199,18 +199,16 @@ for one log ratio per sample;
     # Zeros replaced first
     x <- replace_zeros(ex_counts, 'mult')
     vlr(x)
+#> # A dist: 6 features (lower triangle)
+#> # Variance of Log Ratios
 #>                   Streptococcus Bacteroides Corynebacterium Haemophilus
-#> Bacteroides           28.721860                                        
-#> Corynebacterium        8.958619   25.328147                            
-#> Haemophilus            1.858905   23.515621       13.247144            
-#> Propionibacterium     24.716800   12.729733        7.220384   25.839055
-#> Staphylococcus        15.121173   22.659176        2.347671   16.440444
-#>                   Propionibacterium
-#> Bacteroides                        
-#> Corynebacterium                    
-#> Haemophilus                        
-#> Propionibacterium                  
-#> Staphylococcus             4.498475
+#> Bacteroides               28.7
+#> Corynebacterium            8.96        25.3
+#> Haemophilus                1.86        23.5           13.2
+#> Propionibacterium         24.7         12.7            7.22        25.8
+#> Staphylococcus            15.1         22.7            2.35        16.4
+#> # … 1 more column: Propionibacterium
+#> # Attributes: method
 
     # The same as the variance of each log ratio
     var(log(x[, 'Streptococcus'] / x[, 'Bacteroides']))

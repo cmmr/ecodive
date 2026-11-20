@@ -186,10 +186,11 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them, and last, the records
-of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
-matrix's, for the methods that take distances, and <code>ord</code>, the
-ordination's own (its method, display name and settings). The matrix has class
+</ul><p>Attributes particular to the method follow them, and last <code>display</code>,
+with the ordination's title for <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see <a href="ecodive_display.html">ecodive_display</a>). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -230,6 +231,16 @@ Chapman &amp; Hall/CRC.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">ca</span><span class="op">(</span><span class="va">ex_counts</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">ord</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 4 samples × 3 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Correspondence Analysis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # % of variance: 45.7, 44.4, 9.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           CA1    CA2      CA3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Saliva -0.42  -1.08   2.44</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums   -0.429 -1.06  -0.954</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose   -0.637  1.19   0.00649</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   1.9    0.178 -0.00426</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, trace, loadings</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ca-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span></span></span>

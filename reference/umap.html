@@ -292,10 +292,11 @@ distance is 4 or more. <code>NA</code> for <code><a href="mds.html">mds()</a></c
 <li><p><code>prop</code>: The proportion of the total variance (or inertia) that each
 axis explains. Unlike <code>eig</code>, it is comparable between methods, so use
 it to label axes. <code>NA</code> where it isn't defined.</p></li>
-</ul><p>Attributes particular to the method follow them, and last, the records
-of how it was made (see <a href="ecodive_steps.html">ecodive_steps</a>): <code>dist</code>, the distance
-matrix's, for the methods that take distances, and <code>ord</code>, the
-ordination's own (its method, display name and settings). The matrix has class
+</ul><p>Attributes particular to the method follow them, and last <code>display</code>,
+with the ordination's title for <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see <a href="ecodive_display.html">ecodive_display</a>). The matrix has class
 <code>"ecodive_ord"</code> (as well as <code>"matrix"</code>), so that <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the
 other attributes by name rather than in full, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the
 samples on the first two axes, labelled from the attributes, with any
@@ -328,14 +329,23 @@ Applications</em>, 22(2), 602-616. <a href="https://doi.org/10.1137/S08954798983
 <span class="r-in"><span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu">umap</span><span class="op">(</span><span class="va">dm</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="umap-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         UMAP1       UMAP2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 5.254048 -1.77263912</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 4.404295 -0.18979135</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 5.162174  0.11891402</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 4.950985 -0.01741511</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 5.250620 -1.60047599</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 4.974723 -2.73126598</span>
+<span class="r-in"><span>    <span class="va">ord</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A matrix: 150 samples × 2 axes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Uniform Manifold Approximation and Projection of Bray-Curtis Dissimilarity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    UMAP1   UMAP2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1  5.25 -1.77</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2  4.4  -0.19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3  5.16  0.119</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4  4.95 -0.0174</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5  5.25 -1.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6  4.97 -2.73</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7  5.25 -0.189</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8  4.86 -1.27</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9  4.79  0.405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  4.34 -0.339</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 140 more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, a, b, init, n_epochs, n_neighbors</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  'ecodive_ord' num [1:150, 1:2] 5.25 4.4 5.16 4.95 5.25 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dimnames")=List of 2</span>
@@ -349,8 +359,8 @@ Applications</em>, 22(2), 602-616. <a href="https://doi.org/10.1137/S08954798983
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "init")= chr "pcoa"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "n_epochs")= int 500</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "n_neighbors")= int 15</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "ord")= Uniform Manifold Approximation and Projection (method = umap, n_axes = 2, n_neighbors = 15, min_dist = 0.1, spread = 1, n_epochs = 500, learning_rate = 1, negative_sample_rate = 5, repulsion_strength = 1, set_op_mix_ratio = 1, local_connectivity = 1, bandwidth = 1, init = pcoa, seed = 0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "display")=List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ title: chr "Uniform Manifold Approximation and Projection of Bray-Curtis Dissimilarity"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

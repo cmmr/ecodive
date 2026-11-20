@@ -173,12 +173,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -232,6 +234,16 @@ Chapman & Hall/CRC.
 
 ``` r
     ord <- ca(ex_counts)
+    ord
+#> # A matrix: 4 samples × 3 axes
+#> # Correspondence Analysis
+#> # % of variance: 45.7, 44.4, 9.9
+#>           CA1    CA2      CA3
+#> Saliva -0.42  -1.08   2.44
+#> Gums   -0.429 -1.06  -0.954
+#> Nose   -0.637  1.19   0.00649
+#> Stool   1.9    0.178 -0.00426
+#> # Attributes: method, eig, prop, trace, loadings
     plot(ord)
 
     attr(ord, 'prop')

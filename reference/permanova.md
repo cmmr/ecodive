@@ -337,7 +337,7 @@ community data: a comment on distance-based redundancy analysis.
     # Does treatment explain differences in community composition?
     res <- permanova(dm, 'treatment', meta)
     res
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 3.442, p = 0.001, z = 8.275
 #> Permutations: 999 (free)
@@ -357,7 +357,7 @@ community data: a comment on distance-based redundancy analysis.
 
     # The same, with the groups as a vector.
     permanova(dm, meta$treatment)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 3.442, p = 0.001, z = 8.275
 #> Permutations: 999 (free)
@@ -391,7 +391,7 @@ community data: a comment on distance-based redundancy analysis.
     # Several variables: a formula. Each term in turn, after the ones
     # before it.
     permanova(dm, data = meta, formula = ~ treatment + ph, by = 'terms')
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 2.415, p = 0.001, z = 5.633
 #> Permutations: 999 (free)
@@ -408,7 +408,7 @@ community data: a comment on distance-based redundancy analysis.
 
     # The same, in adonis2()'s style.
     permanova(dm ~ treatment + ph, meta, by = 'terms')
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 2.415, p = 0.001, z = 5.633
 #> Permutations: 999 (free)
@@ -425,7 +425,7 @@ community data: a comment on distance-based redundancy analysis.
 
     # pH, after removing the effect of treatment.
     permanova(dm, data = meta, formula = ~ ph + Condition(treatment))
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 0.4895, p = 0.944, z = -1.371
 #> Permutations: 999 (free)

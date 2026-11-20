@@ -238,12 +238,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -298,14 +300,24 @@ Applications*, 22(2), 602-616.
     ord <- pcoa(dm)
     plot(ord, 'Species', iris)
 
-    head(ord)
-#>          PCoA1       PCoA2        PCoA3
-#> [1,] 0.1692812 -0.02591990 -0.005053611
-#> [2,] 0.1706354  0.02346821  0.030848760
-#> [3,] 0.1870090 -0.00320247  0.032221661
-#> [4,] 0.1801593  0.01132449  0.037211653
-#> [5,] 0.1763516 -0.02998591 -0.006128668
-#> [6,] 0.1363264 -0.03979963 -0.043074846
+    ord
+#> # A matrix: 150 samples × 3 axes
+#> # Principal Coordinates Analysis of Bray-Curtis Dissimilarity
+#> # % of variance: 89.0, 9.3, 2.9
+#>    PCoA1   PCoA2    PCoA3
+#>  1 0.169 -0.0259 -0.00505
+#>  2 0.171  0.0235  0.0308
+#>  3 0.187 -0.0032  0.0322
+#>  4 0.18   0.0113  0.0372
+#>  5 0.176 -0.03   -0.00613
+#>  6 0.136 -0.0398 -0.0431
+#>  7 0.186 -0.0182  0.0156
+#>  8 0.167 -0.0165  0.00287
+#>  9 0.194  0.0406  0.0413
+#> 10 0.171  0.011   0.0286
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, correction, constant
     str(ord)
 #>  'ecodive_ord' num [1:150, 1:3] 0.169 0.171 0.187 0.18 0.176 ...
 #>  - attr(*, "dimnames")=List of 2
@@ -317,6 +329,6 @@ Applications*, 22(2), 602-616.
 #>  - attr(*, "trace")= num 2.64
 #>  - attr(*, "correction")= chr "none"
 #>  - attr(*, "constant")= num 0
-#>  - attr(*, "dist")= Bray-Curtis Dissimilarity (metric = bray, norm = none, pseudocount = 0)
-#>  - attr(*, "ord")= Principal Coordinates Analysis (method = pcoa, n_axes = 3, correction = none)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Principal Coordinates Analysis of Bray-Curtis Dissimilarity"
 ```

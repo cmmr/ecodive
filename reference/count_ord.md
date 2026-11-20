@@ -186,12 +186,14 @@ one value per column:
   axis explains. Unlike `eig`, it is comparable between methods, so use
   it to label axes. `NA` where it isn't defined.
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see
-[ecodive_steps](https://cmmr.github.io/ecodive/reference/ecodive_steps.md)):
-`dist`, the distance matrix's, for the methods that take distances, and
-`ord`, the ordination's own (its method, display name and settings). The
-matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
+Attributes particular to the method follow them, and last `display`,
+with the ordination's title for
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`print()`](https://rdrr.io/r/base/print.html): the method's name, and
+for the methods that take distances, the distance matrix's title, such
+as "Principal Coordinates Analysis of Bray-Curtis Dissimilarity" (see
+[ecodive_display](https://cmmr.github.io/ecodive/reference/ecodive_display.md)).
+The matrix has class `"ecodive_ord"` (as well as `"matrix"`), so that
 [`print()`](https://rdrr.io/r/base/print.html) lists the other
 attributes by name rather than in full, and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
@@ -242,7 +244,8 @@ the methods that take distances.
 #>   ..- attr(*, "dimnames")=List of 2
 #>   .. ..$ : chr [1:6] "Streptococcus" "Bacteroides" "Corynebacterium" "Haemophilus" ...
 #>   .. ..$ : chr [1:3] "PC1" "PC2" "PC3"
-#>  - attr(*, "ord")= Principal Component Analysis (method = pca, margin = 1, norm = clr, pseudocount = 1, n_axes = 3, scale = FALSE)
+#>  - attr(*, "display")=List of 1
+#>   ..$ title: chr "Principal Component Analysis"
 
     # The same arguments for every method (but lda, plsda and oplsda,
     # which need groups, and rpca_phylo and dpcoa, which need a tree).
@@ -268,13 +271,14 @@ the methods that take distances.
     ord <- count_ord(ex_counts, 'dpcoa', tree = ex_tree, n_axes = 2)
 
     count_ord(ex_counts, 'plsda', c('a', 'a', 'b', 'b'), n_axes = 1)
-#>            PLSDA1
-#> Saliva -1.3383967
-#> Gums   -1.4836105
-#> Nose    2.1044086
-#> Stool   0.7175985
-#> 
-#> plsda: 4 samples, 1 axis; % of variance: 53.9
-#> Attributes: method, eig, prop, trace, loadings, weights, y_loadings, vip, groups, centroids
-#> ord:  Partial Least Squares Discriminant Analysis (method = plsda, margin = 1, norm = none, pseudocount = 0, scale = TRUE, n_axes = 1)
+#> # A matrix: 4 samples × 1 axis
+#> # Partial Least Squares Discriminant Analysis
+#> # % of variance: 53.9
+#>        PLSDA1
+#> Saliva -1.34
+#> Gums   -1.48
+#> Nose    2.1
+#> Stool   0.718
+#> # Attributes: method, eig, prop, trace, loadings, weights, y_loadings, vip,
+#> #   groups, centroids
 ```
