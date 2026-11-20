@@ -360,7 +360,7 @@ can't be mistaken for one another:
 | Compositional plots | `ternary_plot`, `variation_array`, `zero_pattern`, `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
 | Spatial | `moran_i`, `dbmem` |
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
-| Source tracking | `sourcetracker`, `feast` |
+| Source tracking | ✓ `sourcetracker`, `feast` |
 
 Names still worth a word of warning in the docs:
 - `lda` also means latent Dirichlet allocation (topic models) and LEfSe's
