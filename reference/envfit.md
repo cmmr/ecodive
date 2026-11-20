@@ -5,10 +5,10 @@ Finds the direction in an ordination along which each numeric variable
 ordination (\\r^2\\); and, for each factor, the centroid of each of its
 levels and how well the factor separates the samples. Permutation tests
 give p-values. Gives the same arrows, centroids, and \\r^2\\ as
-[`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html),
-and the same p-values for the same permutations, but runs in parallel C,
-so that fitting thousands of taxa with 999 permutations each takes
-seconds. Use it for the arrows and labels of a biplot.
+`vegan::envfit()`, and the same p-values for the same permutations, but
+runs in parallel C, so that fitting thousands of taxa with 999
+permutations each takes seconds. Use it for the arrows and labels of a
+biplot.
 
 ## Usage
 
@@ -86,25 +86,21 @@ envfit(
 - axes:
 
   Which columns of `ord` to fit onto: indices or column names. The
-  default, `NULL`, uses every column.
-  [`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html)
-  uses the first two by default (its `choices = c(1, 2)`), so give
-  `axes = 1:2` to compare with it.
+  default, `NULL`, uses every column. `vegan::envfit()` uses the first
+  two by default (its `choices = c(1, 2)`), so give `axes = 1:2` to
+  compare with it.
 
 - na.rm:
 
   Leave out samples with missing values (`NA`) in `ord` or in any column
-  of `data`, as
-  [`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html)
-  does. `counts` must not have any. Default: `FALSE`, which stops with
-  an error if there are any.
+  of `data`, as `vegan::envfit()` does. `counts` must not have any.
+  Default: `FALSE`, which stops with an error if there are any.
 
 - permutations:
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones.
+  `permute::shuffleSet()`, to use instead of random ones.
 
 - strata:
 
@@ -153,9 +149,8 @@ feature of `counts`. Its columns are:
   `r2_perm`.
 
 Row names are the variables' names, and for factor levels, the
-variable's name pasted to the level's, as in
-[`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html).
-The data frame has class `"ecodive_envfit"`, only to mark what made it.
+variable's name pasted to the level's, as in `vegan::envfit()`. The data
+frame has class `"ecodive_envfit"`, only to mark what made it.
 
 Attributes: `r2_perm`, a matrix of the \\r^2\\ of each permutation
 (rows) for each variable (columns); and `n_perm`, the number of
@@ -177,9 +172,8 @@ MANOVA.
 The p-value is the proportion of permutations of the samples, counting
 the observed data, with an \\r^2\\ at least as large: \\(1 +
 \\\\r^2\_{perm} \ge r^2\\) / (1 + permutations)\\. As in
-[`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html),
-permuted values within `sqrt(.Machine$double.eps)` of the observed one
-count as ties.
+`vegan::envfit()`, permuted values within `sqrt(.Machine$double.eps)` of
+the observed one count as ties.
 
 **Speed and memory**
 
@@ -219,8 +213,7 @@ unless the same `permutations` matrix is given to both.
   uses them only for its CA and CCA results.
 
 - `strata` permutes freely within strata. For other restricted designs,
-  pass a `permutations` matrix from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html).
+  pass a `permutations` matrix from `permute::shuffleSet()`.
 
 - When there are fewer possible permutations than requested, `vegan`
   (via `permute`) runs each of them once instead. `envfit()` always

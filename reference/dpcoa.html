@@ -199,11 +199,11 @@ between samples (<code>RaoDis</code>) and its diversity table (<code>RaoDecodiv<
 not returned; <code>trace</code> is the table's between-samples diversity, and
 the within-samples diversity is <code>weighted.mean(rao, w)</code>.</p></li>
 <li><p>phyloseq's DPCoA applies a Cailliez correction to the distances when
-<code><a href="https://adeverse.github.io/ade4/reference/is.euclid.html" class="external-link">ade4::is.euclid()</a></code> finds them non-Euclidean. The square roots of
+<code>ade4::is.euclid()</code> finds them non-Euclidean. The square roots of
 patristic distances are always Euclidean, so that only happens through
 rounding error; <code>dpcoa()</code> never corrects them.</p></li>
 </ul><p><strong>Same names in other packages</strong></p>
-<p><code><a href="https://adeverse.github.io/ade4/reference/dpcoa.html" class="external-link">ade4::dpcoa()</a></code> shares its name with <code>dpcoa()</code>; whichever package was
+<p><code>ade4::dpcoa()</code> shares its name with <code>dpcoa()</code>; whichever package was
 attached last masks the other's. Write <code>ecodive::dpcoa()</code>, or use
 <code><a href="count_ord.html">count_ord()</a></code>, to be sure.</p>
     </div>

@@ -127,7 +127,7 @@ are dropped (with a warning), and are listed in the result's
 
 <dt id="arg-times">times<a class="anchor" aria-label="anchor" href="#arg-times"></a></dt>
 <dd><p>The number of rarefactions to average, a whole number of
-at least 1. Default: <code>100</code>, as <code><a href="https://vegandevs.github.io/vegan/reference/avgdist.html" class="external-link">vegan::avgdist()</a></code>.</p></dd>
+at least 1. Default: <code>100</code>, as <code>vegan::avgdist()</code>.</p></dd>
 
 
 <dt id="arg-average">average<a class="anchor" aria-label="anchor" href="#arg-average"></a></dt>
@@ -156,12 +156,14 @@ transformation).</p></li>
 <li><p><code>'binary'</code>: Unweighted presence/absence (each count is either 0 or 1).</p></li>
 <li><p><code>'clr'</code>: Centered log ratio.</p></li>
 <li><p><code>'rclr'</code>: Robust centered log ratio.</p></li>
+<li><p><code>'log'</code>: Log relative abundance (log-TSS), with <code>pseudocount</code> added
+to every value first.</p></li>
 </ul><p>Default: <code>'none'</code>.</p></dd>
 
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
 <dd><p>Value added to counts to handle zeros when
-<code>norm = 'clr'</code>. Ignored for other normalization methods. See
+<code>norm = 'clr'</code> or <code>'log'</code>. Ignored for other normalization methods. See
 <strong>Pseudocount</strong> section.</p></dd>
 
 
@@ -212,7 +214,7 @@ which <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> foll
 for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
 order. <code>clust</code> needs every distance, so it cannot be used with
 <code>pairs</code>. <code><a href="rho_p.html">rho_p()</a></code>'s similarities are clustered as \(1 -
-\rho_p\).</p></dd>
+       \rho_p\).</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -296,7 +298,7 @@ dropped matter.</p>
     <h2 id="choosing-how-to-average">Choosing how to average<a class="anchor" aria-label="anchor" href="#choosing-how-to-average"></a></h2>
 
 
-<ul><li><p><code>"mean"</code> (the default, as in <code><a href="https://vegandevs.github.io/vegan/reference/avgdist.html" class="external-link">vegan::avgdist()</a></code> and mothur): the
+<ul><li><p><code>"mean"</code> (the default, as in <code>vegan::avgdist()</code> and mothur): the
 average of each value over the rarefactions. It needs one pass over
 them, and memory for a few distance matrices.</p></li>
 <li><p><code>"median"</code>: the median of each value; less affected by an unusual
@@ -341,7 +343,7 @@ of them raised it.</p>
     <h2 id="same-names-in-other-packages">Same names in other packages<a class="anchor" aria-label="anchor" href="#same-names-in-other-packages"></a></h2>
 
 
-<p>None, but <code><a href="https://vegandevs.github.io/vegan/reference/avgdist.html" class="external-link">vegan::avgdist()</a></code> computes the same as <code>beta_div_rarefied()</code>
+<p>None, but <code>vegan::avgdist()</code> computes the same as <code>beta_div_rarefied()</code>
 with <code>average = "mean"</code> (or <code>"median"</code>), from R's random number
 generator, so their results agree only up to Monte Carlo error.</p>
     </div>

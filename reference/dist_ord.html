@@ -126,8 +126,8 @@ selects <code>capscale</code> (but <code>'CA'</code> names <code><a href="ca.htm
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.</p>
 <p><strong>Same names in other packages</strong></p>
-<p><code><a href="https://rdrr.io/pkg/ape/man/pcoa.html" class="external-link">ape::pcoa()</a></code>, <code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::pca()</a></code>, <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>, <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code>,
-<code><a href="https://vegandevs.github.io/vegan/reference/isomap.html" class="external-link">vegan::isomap()</a></code> (whose <code>k</code> is the number of neighbours, not axes), and
+<p><code>ape::pcoa()</code>, <code>vegan::pca()</code>, <code>vegan::dbrda()</code>, <code>vegan::capscale()</code>,
+<code>vegan::isomap()</code> (whose <code>k</code> is the number of neighbours, not axes), and
 <code>uwot::umap()</code> share names with ecodive's functions, and whichever package was attached last
 masks the other's. Write <code><a href="pcoa.html">ecodive::pcoa()</a></code> and so on, or use
 <code>dist_ord()</code>, which always runs ecodive's, to be sure.</p>

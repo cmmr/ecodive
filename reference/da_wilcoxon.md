@@ -207,14 +207,19 @@ values) and `resid_sd` (the residual standard deviation,
 **The tests.** For each feature, the transformed values of the treatment
 and reference samples are compared:
 
-- `da_wilcoxon()`: `wilcox.test(trt, ref)`, two-sided, with its
-  defaults: the exact p-value
-  ([`stats::pwilcox()`](https://rdrr.io/r/stats/Wilcoxon.html)) when
-  both sides have fewer than 50 samples and there are no ties; otherwise
-  the normal approximation, with the variance corrected for ties and a
-  continuity correction. Ties are equal values (with `norm = 'clr'`, all
+- `da_wilcoxon()`: `wilcox.test(trt, ref)`, two-sided, with its defaults
+  as of R 4.6.0: when both sides have fewer than 50 values, the exact
+  p-value ([`stats::pwilcox()`](https://rdrr.io/r/stats/Wilcoxon.html)
+  without ties; with ties, the exact distribution of the rank sum given
+  the ties, as the Streitberg-Rohmel shift algorithm computes it, twice
+  the smaller tail); otherwise the normal approximation, with the
+  variance corrected for ties and a continuity correction. Before R
+  4.6.0, [`wilcox.test()`](https://rdrr.io/r/stats/wilcox.test.html)
+  used the normal approximation whenever there were ties, so its
+  p-values differ there. Ties are equal values (with `norm = 'clr'`, all
   of a sample's zeros are one value, and zeros tie across samples only
-  with `'percent'` or `'none'`).
+  with `'percent'` or `'none'`). A feature whose values are all equal
+  gets a p-value of 1.
 
 - `da_ttest()`:
   `t.test(trt, ref, var.equal = var_equal, conf.level = conf_level)`.
@@ -233,8 +238,8 @@ and reference samples are compared:
 Where base R stops with an error, these give `NaN` statistics and
 p-values (never rejected) for that feature: a side with no values (with
 `'rclr'`) or a single value (Welch's t-test, with a warning when a whole
-side of the contrast has one sample), or a feature whose values are
-constant ("data are essentially constant").
+side of the contrast has one sample), or, for the t-test, a feature
+whose values are constant ("data are essentially constant").
 
 **Normalization.** The tests compare relative abundances, not absolute
 ones: with `'clr'`, relative to each sample's geometric mean, so that a
@@ -311,6 +316,10 @@ for details on using optimized formats (e.g. sparse matrices) and
 parallel processing.
 
 ## References
+
+Streitberg, B., & Rohmel, J. (1986). Exact distributions for permutation
+and rank tests: an introduction to some recently published algorithms.
+*Statistical Software Newsletter*, 12, 10-17.
 
 Wirbel, J., Essex, M., Forslund, S. K., & Zeller, G. (2024). A realistic
 benchmark for differential abundance testing and confounder adjustment

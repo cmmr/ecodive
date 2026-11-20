@@ -4,10 +4,9 @@ Constrained ordination of samples from their feature abundances in the
 chi-square metric: the axes of correspondence analysis that sample
 metadata explain, followed by correspondence analysis axes of what they
 leave unexplained (ter Braak 1986). Gives the same results as
-[`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html),
-computed straight from sparse input without forming any \\n \times n\\
-or dense table, so it takes far less time and memory for large datasets.
-With `Condition()` terms, partial CCA.
+`vegan::cca()`, computed straight from sparse input without forming any
+\\n \times n\\ or dense table, so it takes far less time and memory for
+large datasets. With `Condition()` terms, partial CCA.
 
 ## Usage
 
@@ -32,12 +31,10 @@ cca(
   A numeric matrix of non-negative feature abundances (samples
   \\\times\\ features), or any of the table types listed under "Input
   Types". Every sample must have at least one non-zero abundance.
-  Alternatively, as in
-  [`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html),
-  a formula with the table on its left-hand side and the constraints on
-  its right, such as `counts ~ treatment`, in place of `counts` and
-  `formula`; the metadata may then be given second, as in
-  `cca(counts ~ treatment, meta)`.
+  Alternatively, as in `vegan::cca()`, a formula with the table on its
+  left-hand side and the constraints on its right, such as
+  `counts ~ treatment`, in place of `counts` and `formula`; the metadata
+  may then be given second, as in `cca(counts ~ treatment, meta)`.
 
 - groups:
 
@@ -63,8 +60,7 @@ cca(
   formula naming the variables in `data` that constrain the ordination,
   such as `~ treatment + ph`. Factors, numeric covariates, and
   interactions are all allowed. Wrap variables in `Condition()` to
-  remove their effect first (partial CCA), as in
-  [`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html):
+  remove their effect first (partial CCA), as in `vegan::cca()`:
   `~ treatment + Condition(site)`. With only `Condition()` terms, the
   result is the correspondence analysis of the table after removing
   their effect. A left-hand side, if given, is ignored. Default: `NULL`.
@@ -84,11 +80,10 @@ cca(
 - permutations:
 
   The number of permutations for `adj_r_squared`. Default: `1000`, as
-  [`vegan::RsquareAdj()`](https://vegandevs.github.io/vegan/reference/RsquareAdj.html).
-  Alternatively, a matrix with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones. `0` gives an `adj_r_squared` of `NA`.
-  Unused without constraints.
+  `vegan::RsquareAdj()`. Alternatively, a matrix with one permutation of
+  `1:n` per row, as from `permute::shuffleSet()`, to use instead of
+  random ones. `0` gives an `adj_r_squared` of `NA`. Unused without
+  constraints.
 
 - seed:
 
@@ -109,8 +104,7 @@ named `"CCA1"`, `"CCA2"`, etc. If the constraints give fewer than
 `n_axes` of them, unconstrained axes follow, named `"CA1"`, `"CA2"`,
 etc. The values are `vegan`'s site scores ("wa" scores, scaling 2): what
 `vegan::scores(x, display = "sites")` returns and what
-[`phyloseq::plot_ordination()`](https://rdrr.io/pkg/phyloseq/man/plot_ordination.html)
-plots. Its attributes are those of
+`phyloseq::plot_ordination()` plots. Its attributes are those of
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), with the
 same meanings, but for inertia in place of variance:
 
@@ -205,8 +199,7 @@ weight, so CCA can be sensitive to them.
 
 Ezekiel's adjustment, which
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) uses, is
-biased for CCA (Peres-Neto et al. 2006). So, as
-[`vegan::RsquareAdj()`](https://vegandevs.github.io/vegan/reference/RsquareAdj.html)
+biased for CCA (Peres-Neto et al. 2006). So, as `vegan::RsquareAdj()`
 does, `cca()` estimates it by permutation: \\R^2\_{adj} = 1 - (1 - R^2)
 / (1 - \bar{R}^2\_{perm})\\, where \\\bar{R}^2\_{perm}\\ is the mean
 \\R^2\\ over `permutations` random permutations of the samples (their
@@ -218,19 +211,16 @@ For partial CCA, as in `vegan`, it is the adjusted \\R^2\\ of the
 constraints and conditions together less that of the conditions alone
 (Peres-Neto et al. 2006). Each is estimated as above, but permuting the
 rows of the chi-square matrix \\\bar{Q}\\ against the fixed (weighted)
-design, as
-[`vegan::RsquareAdj()`](https://vegandevs.github.io/vegan/reference/RsquareAdj.html)
-does for partial models.
+design, as `vegan::RsquareAdj()` does for partial models.
 
 **Matching vegan**
 
 `cca()` gives the same scores, eigenvalues, inertia, \\R^2\\, biplot
-scores, centroids and species scores as
-[`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html),
-up to the signs of the axes. Columns of the model matrix that are linear
-combinations of earlier ones are dropped, with a message, as in `vegan`.
-Samples with no observations are an error, as in `vegan`; features with
-no observations have no weight, and get species scores of 0.
+scores, centroids and species scores as `vegan::cca()`, up to the signs
+of the axes. Columns of the model matrix that are linear combinations of
+earlier ones are dropped, with a message, as in `vegan`. Samples with no
+observations are an error, as in `vegan`; features with no observations
+have no weight, and get species scores of 0.
 
 With no constraints, `cca(counts)` is a correspondence analysis, as
 `vegan::cca(counts)`, and the same as
@@ -238,16 +228,14 @@ With no constraints, `cca(counts)` is a correspondence analysis, as
 
 **Permutation tests**
 
-`cca()` has no permutation test of its own;
-[`vegan::anova.cca()`](https://vegandevs.github.io/vegan/reference/anova.cca.html)
-gives one. (Unlike RDA's, CCA's test is not a PERMANOVA of any
-distance.)
+`cca()` has no permutation test of its own; `vegan::anova.cca()` gives
+one. (Unlike RDA's, CCA's test is not a PERMANOVA of any distance.)
 
 **Same names in other packages**
 
-[`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html)
-shares its name with ecodive's `cca()`, and whichever package was
-attached last masks the other's. Write `ecodive::cca()`, or use
+`vegan::cca()` shares its name with ecodive's `cca()`, and whichever
+package was attached last masks the other's. Write `ecodive::cca()`, or
+use
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md),
 which always runs ecodive's, to be sure.
 

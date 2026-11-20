@@ -3,12 +3,11 @@
 Constrained ordination of samples from their feature abundances: the
 axes of a (normalized) count table that sample metadata explain,
 followed by principal components of what they leave unexplained. Gives
-the same results as
-[`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html),
-computed straight from sparse input without forming any \\n \times n\\
-or dense table, so it takes far less time and memory for large datasets.
-With `norm = 'hellinger'` or `norm = 'chord'` it is transformation-based
-RDA (tb-RDA); with `Condition()` terms, partial RDA.
+the same results as `vegan::rda()`, computed straight from sparse input
+without forming any \\n \times n\\ or dense table, so it takes far less
+time and memory for large datasets. With `norm = 'hellinger'` or
+`norm = 'chord'` it is transformation-based RDA (tb-RDA); with
+`Condition()` terms, partial RDA.
 
 ## Usage
 
@@ -33,12 +32,10 @@ rda(
 
   A numeric matrix of feature abundances (samples \\\times\\ features),
   or any of the table types listed under "Input Types". Alternatively,
-  as in
-  [`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html),
-  a formula with the table on its left-hand side and the constraints on
-  its right, such as `counts ~ treatment`, in place of `counts` and
-  `formula`; the metadata may then be given second, as in
-  `rda(counts ~ treatment, meta)`.
+  as in `vegan::rda()`, a formula with the table on its left-hand side
+  and the constraints on its right, such as `counts ~ treatment`, in
+  place of `counts` and `formula`; the metadata may then be given
+  second, as in `rda(counts ~ treatment, meta)`.
 
 - groups:
 
@@ -64,8 +61,7 @@ rda(
   formula naming the variables in `data` that constrain the ordination,
   such as `~ treatment + ph`. Factors, numeric covariates, and
   interactions are all allowed. Wrap variables in `Condition()` to
-  remove their effect first (partial RDA), as in
-  [`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html):
+  remove their effect first (partial RDA), as in `vegan::rda()`:
   `~ treatment + Condition(site)`. With only `Condition()` terms, the
   result is the PCA of the table after removing their effect. A
   left-hand side, if given, is ignored. Default: `NULL`.
@@ -133,8 +129,7 @@ named `"RDA1"`, `"RDA2"`, etc. If the constraints give fewer than
 `n_axes` of them, unconstrained axes follow, named `"PC1"`, `"PC2"`,
 etc. The values are `vegan`'s site scores ("wa" scores, scaling 2): what
 `vegan::scores(x, display = "sites")` returns and what
-[`phyloseq::plot_ordination()`](https://rdrr.io/pkg/phyloseq/man/plot_ordination.html)
-plots. Its attributes are those of
+`phyloseq::plot_ordination()` plots. Its attributes are those of
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md), with the
 same meanings, plus `loadings`:
 
@@ -251,10 +246,8 @@ distances.
   by \\\sqrt{(n - 1) \cdot eig}\\ and multiplied by \\\sqrt\[4\]{(n - 1)
   \cdot trace}\\.
 
-- The permutation test of an RDA
-  ([`vegan::anova.cca()`](https://vegandevs.github.io/vegan/reference/anova.cca.html))
-  is PERMANOVA of the Euclidean distances between the normalized
-  samples: e.g.
+- The permutation test of an RDA (`vegan::anova.cca()`) is PERMANOVA of
+  the Euclidean distances between the normalized samples: e.g.
   `permanova(euclidean(counts, norm = 'hellinger'), 'treatment', meta)`.
   Its \\R^2\\ is `rda()`'s `r_squared`, and its pseudo-F and p-value
   those of `anova(vegan::rda(...))` for the same permutations.
@@ -267,19 +260,17 @@ build on `rda()`.
 **Matching vegan**
 
 `rda()` gives the same scores, eigenvalues, inertia, \\R^2\\, biplot
-scores, centroids and species scores as
-[`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html)
-on the normalized table, up to the signs of the axes. Columns of the
-model matrix that are linear combinations of earlier ones are dropped,
-with a message, as in `vegan`. With `scale = TRUE`, features with
-constant values are left out (their loadings are 0), where `vegan` would
-stop with an error.
+scores, centroids and species scores as `vegan::rda()` on the normalized
+table, up to the signs of the axes. Columns of the model matrix that are
+linear combinations of earlier ones are dropped, with a message, as in
+`vegan`. With `scale = TRUE`, features with constant values are left out
+(their loadings are 0), where `vegan` would stop with an error.
 
 **Same names in other packages**
 
-[`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html)
-shares its name with ecodive's `rda()`, and whichever package was
-attached last masks the other's. Write `ecodive::rda()`, or use
+`vegan::rda()` shares its name with ecodive's `rda()`, and whichever
+package was attached last masks the other's. Write `ecodive::rda()`, or
+use
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md),
 which always runs ecodive's, to be sure.
 

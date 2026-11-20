@@ -8,9 +8,8 @@ their first \\m\\ principal coordinates
 test of the separation of the groups (Anderson & Willis 2003; "CAP" in
 PRIMER-PERMANOVA+). Gives the same number of axes, squared canonical
 correlations and classification success as
-`BiodiversityR::CAPdiscrim()`. It is not
-[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
-which is distance-based redundancy analysis.
+`BiodiversityR::CAPdiscrim()`. It is not `vegan::capscale()`, which is
+distance-based redundancy analysis.
 
 ## Usage
 
@@ -83,9 +82,8 @@ capda(
 
   The number of permutations for the test of the trace statistic.
   Default: `999`. Alternatively, a matrix with one permutation of `1:n`
-  per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones. `0` skips the test.
+  per row, as from `permute::shuffleSet()`, to use instead of random
+  ones. `0` skips the test.
 
 - strata:
 
@@ -230,9 +228,8 @@ does not use prior probabilities.
 
 **Same names in other packages**
 
-[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
-("constrained analysis of principal coordinates") is distance-based
-redundancy analysis, ecodive's
+`vegan::capscale()` ("constrained analysis of principal coordinates") is
+distance-based redundancy analysis, ecodive's
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) and
 [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md), not this
 method. In

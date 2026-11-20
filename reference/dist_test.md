@@ -105,12 +105,9 @@ ambiguity with future additions to the list of methods.
 
 **Same names in other packages**
 
-[`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html),
-[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html),
-and
-[`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)
-share names with ecodive's functions, and whichever package was attached
-last masks the other's. Write
+`vegan::anosim()`, `vegan::mantel()`, and `vegan::mrpp()` share names
+with ecodive's functions, and whichever package was attached last masks
+the other's. Write
 [`ecodive::anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md)
 and so on, or use `dist_test()`, which always runs ecodive's, to be
 sure.

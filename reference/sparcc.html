@@ -158,12 +158,17 @@ feature and in the order of the result's labels.</p></li>
 p-value per pair, <strong>parallel to the triangle</strong> (same length and
 order: <code>p_value[k]</code> belongs to <code>x[k]</code>). Not adjusted for testing
 every pair: see <code><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">stats::p.adjust()</a></code>.</p></li>
-<li><p><code>display</code>: its title, <code>"SparCC Correlation"</code> (see
-<a href="ecodive_display.html">ecodive_display</a>), and <code>clust</code>; and <code>order</code> when clustered.</p></li>
+<li><p><code>display</code>: the title for plots and printing, <code>"SparCC Correlation"</code>, and the <code>clust</code> it was made with (see
+<a href="ecodive_display.html">ecodive_display</a>).</p></li>
+<li><p><code>order</code>: with <code>clust</code>, each feature's position in the input.</p></li>
 </ul><p>The correlations are a <strong>similarity</strong> in a <code>dist</code> container:
 <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> puts 0 on the diagonal, where they are 1, and they must
-not be given as <code>dm</code> to an ordination or test. Threshold them to find
-strongly associated pairs (<code>which(abs(r) &gt; 0.3)</code>, or `abs(as.matrix(r))0.3for an adjacency matrix), or use1 - rfor a dissimilarity.   With p-values,rp.adjust(attr(r, "p_value"), "BH") &lt;= 0.05` keepsthe significant pairs.</p>
+not be given as <code>dm</code> to an ordination or test. To find strongly
+associated pairs, threshold them: <code>which(abs(r) &gt; 0.3)</code> gives their
+positions in the triangle, and <code>abs(as.matrix(r)) &gt; 0.3</code> an adjacency
+matrix. For a dissimilarity, use <code>1 - r</code>. With p-values,
+<code>p &lt;- p.adjust(attr(r, "p_value"), "BH")</code> adjusts them for testing
+every pair, and <code>r[p &lt;= 0.05]</code> keeps the significant pairs.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

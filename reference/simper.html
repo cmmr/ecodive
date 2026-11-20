@@ -64,7 +64,7 @@ are too small for small groups (see Permutations)."><meta property="og:image" co
 groups into the contribution of each taxon, to rank the taxa that
 differ most between the groups (Clarke 1993). Permutation tests give
 each taxon's contribution a p-value. Gives the same results as
-<code><a href="https://vegandevs.github.io/vegan/reference/simper.html" class="external-link">vegan::simper()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of it, but runs in parallel C on
+<code>vegan::simper()</code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of it, but runs in parallel C on
 sparse tables. Its p-values count ties with the observed contribution,
 as Clarke (1993) does, so they are never smaller than vegan's, which
 are too small for small groups (see <strong>Permutations</strong>).</p>
@@ -123,7 +123,7 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
-<dd><p>Normalize <code>counts</code> first: <code>'none'</code> (as <code><a href="https://vegandevs.github.io/vegan/reference/simper.html" class="external-link">vegan::simper()</a></code>,
+<dd><p>Normalize <code>counts</code> first: <code>'none'</code> (as <code>vegan::simper()</code>,
 which uses the values as given), <code>'percent'</code>, <code>'chord'</code>,
 <code>'hellinger'</code>, or <code>'binary'</code>, as in <code><a href="beta_div.html">beta_div()</a></code>. <code>'clr'</code> and
 <code>'rclr'</code> are not allowed: they give negative values, which
@@ -143,7 +143,7 @@ Default: <code>'holm'</code>.</p></dd>
 <dd><p>The number of permutations. <code>0</code> skips the tests,
 and gives <code>NA</code> p-values. Default: <code>999</code>. Alternatively, a matrix
 with one permutation of <code>1:n</code> per row, as from
-<code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones: it is cut
+<code>permute::shuffleSet()</code>, to use instead of random ones: it is cut
 down to each pair's samples (see <strong>Permutations</strong>).</p></dd>
 
 
@@ -216,7 +216,7 @@ average\}) / (1 + permutations)\), Clarke's (1993) "at least as large"
 rule, with permuted averages within a relative \(10^{-7}\) of the
 observed one counted as ties (for rounding). Permutations that only swap
 samples within groups reproduce the observed <code>average</code> exactly, so they
-count. <code><a href="https://vegandevs.github.io/vegan/reference/simper.html" class="external-link">vegan::simper()</a></code> counts only permuted averages that are strictly
+count. <code>vegan::simper()</code> counts only permuted averages that are strictly
 larger, which makes its p-values too small when groups are small: with
 two samples per group, a third of all permutations reproduce the
 observed <code>average</code>, and a taxon whose observed <code>average</code> is the largest
@@ -230,9 +230,9 @@ are identical for any number of <code>cpus</code>, but differ by sampling error
 from <code>simper()</code> run by hand on the pair's samples with the same <code>seed</code>.
 A supplied <code>permutations</code> matrix is cut down to each pair's samples by
 following each permutation's cycles, as in the pairwise tests (see
-<code><a href="permanova.html">permanova()</a></code>'s <strong>Pairwise comparisons</strong>). Give <code><a href="https://vegandevs.github.io/vegan/reference/simper.html" class="external-link">vegan::simper()</a></code> those
+<code><a href="permanova.html">permanova()</a></code>'s <strong>Pairwise comparisons</strong>). Give <code>vegan::simper()</code> those
 permutations, on the pair's samples, for the same permutations.</p>
-<p>The adjusted p-values (<code>p_adjusted</code>) are an addition: <code><a href="https://vegandevs.github.io/vegan/reference/simper.html" class="external-link">vegan::simper()</a></code>
+<p>The adjusted p-values (<code>p_adjusted</code>) are an addition: <code>vegan::simper()</code>
 doesn't adjust. A study of a few groups and hundreds of taxa tests many
 hypotheses, so look at <code>p_adjusted</code>, not <code>p_value</code>.</p>
 <p><strong>Interpretation: location and dispersion</strong></p>
@@ -270,8 +270,8 @@ Clarke (1993) does; vegan counts only larger ones (see
     <h2 id="same-names-in-other-packages">Same names in other packages<a class="anchor" aria-label="anchor" href="#same-names-in-other-packages"></a></h2>
 
 
-<p><code><a href="https://vegandevs.github.io/vegan/reference/simper.html" class="external-link">vegan::simper()</a></code> has the same name: whichever package was attached
-last masks the other. Call <code>ecodive::simper()</code> or <code><a href="https://vegandevs.github.io/vegan/reference/simper.html" class="external-link">vegan::simper()</a></code> to
+<p><code>vegan::simper()</code> has the same name: whichever package was attached
+last masks the other. Call <code>ecodive::simper()</code> or <code>vegan::simper()</code> to
 be sure.</p>
     </div>
     <div class="section level2">

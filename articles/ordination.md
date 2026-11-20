@@ -67,7 +67,7 @@ plot(dm, 'Species', iris)
 | [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md) | t-distributed Stochastic Neighbor Embedding | `dm` | Separating clusters; distances between clusters mean little. |
 | [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md) | Uniform Manifold Approximation and Projection | `dm` | Clusters, with more of the global layout kept than t-SNE. |
 | [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) | Distance-based Redundancy Analysis (db-RDA) | `dm` | Axes that sample metadata explain (a constrained ordination). |
-| [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) | Constrained Analysis of Principal Coordinates | `dm` | The same, as [`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html) computes it. |
+| [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) | Constrained Analysis of Principal Coordinates | `dm` | The same, as `vegan::capscale()` computes it. |
 | [`capda()`](https://cmmr.github.io/ecodive/reference/capda.md) | Discriminant CAP (Anderson & Willis) | `dm` | Axes that best separate known groups, from any distances (supervised). |
 | [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) | Redundancy Analysis (RDA) | counts | Axes of (transformed) counts that sample metadata explain. |
 | [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) | Canonical Correspondence Analysis (CCA) | counts | The same in the chi-square metric, for species with unimodal responses. |
@@ -206,8 +206,7 @@ list_dist_ords()
 Many ecological distances, such as Bray-Curtis and unweighted UniFrac,
 are not Euclidean: PCoA then finds negative eigenvalues, which cannot be
 drawn. `correction = 'lingoes'` or `'cailliez'` adds the smallest
-constant that removes them, as
-[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html) does.
+constant that removes them, as `ape::pcoa()` does.
 
 ``` r
 
@@ -332,11 +331,10 @@ permanova(hd, 'Species', iris, permutations = 99)
 splits the variation that two to four sets of variables explain (say,
 environment and space) into the part each explains on its own, the parts
 they share, and what none of them explains (Borcard et al. 1992), as
-[`vegan::varpart()`](https://vegandevs.github.io/vegan/reference/varpart.html)
-does. Each fraction is an adjusted R^2 from a series of (partial) RDAs
-of a count table (with `norm`), db-RDAs of distances, or, with
-`chisquare = TRUE`, CCAs. Here the petal measurements are partitioned
-between species and sepal size:
+`vegan::varpart()` does. Each fraction is an adjusted R^2 from a series
+of (partial) RDAs of a count table (with `norm`), db-RDAs of distances,
+or, with `chisquare = TRUE`, CCAs. Here the petal measurements are
+partitioned between species and sepal size:
 
 ``` r
 
@@ -398,12 +396,12 @@ permanova(
 Before partitioning,
 [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
 can choose which variables of a set to keep (Blanchet et al. 2008), as
-[`vegan::ordiR2step()`](https://vegandevs.github.io/vegan/reference/ordistep.html)
-does: at each step it adds the variable that raises the adjusted R^2
-most, if a permutation test of it, given those already chosen, is
-significant, and stops before the adjusted R^2 would exceed that of all
-the candidates together. By default it first tests the global model, all
-candidates together, and selects nothing if that is not significant:
+`vegan::ordiR2step()` does: at each step it adds the variable that
+raises the adjusted R^2 most, if a permutation test of it, given those
+already chosen, is significant, and stops before the adjusted R^2 would
+exceed that of all the candidates together. By default it first tests
+the global model, all candidates together, and selects nothing if that
+is not significant:
 
 ``` r
 
@@ -445,9 +443,7 @@ long gradients, where many species are absent from much of the range.
 Over short gradients, tb-RDA is often preferred, and CCA, which gives
 rare species a large weight, can be sensitive to them. It takes the same
 `groups`, `formula` and `Condition()`, and its `adj_r_squared` is
-estimated by permutation, as
-[`vegan::RsquareAdj()`](https://vegandevs.github.io/vegan/reference/RsquareAdj.html)
-does.
+estimated by permutation, as `vegan::RsquareAdj()` does.
 
 ``` r
 
@@ -709,9 +705,7 @@ scores
 [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) fits
 sample metadata, or a feature table, onto any ordination. Numeric
 variables get an arrow and r-squared, factors a centroid per level, and
-each one a permutation p-value, as
-[`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html)
-gives.
+each one a permutation p-value, as `vegan::envfit()` gives.
 
 ``` r
 
@@ -747,10 +741,9 @@ samples, and reports how far apart they still are: the Procrustes sum of
 squares, m^2.
 [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
 asks whether they agree better than chance (PROTEST), as
-[`vegan::protest()`](https://vegandevs.github.io/vegan/reference/procrustes.html)
-does. Here, Bray-Curtis and unweighted UniFrac PCoAs of 30 simulated
-samples of the six taxa in ecodive’s example tree, along a gradient that
-favours some taxa at one end and others at the other:
+`vegan::protest()` does. Here, Bray-Curtis and unweighted UniFrac PCoAs
+of 30 simulated samples of the six taxa in ecodive’s example tree, along
+a gradient that favours some taxa at one end and others at the other:
 
 ``` r
 
