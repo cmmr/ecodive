@@ -176,8 +176,10 @@ is repeated on the fit at every pseudocount, and the table gains
 the global test's decision, as in ANCOMBC) and <code>reject_robust</code>
 (<code>reject &amp; passed_ss</code>), the decisions to use.</p>
 <p>Attributes: <code>method</code> (the fit's), <code>groups</code>, <code>alpha</code>, <code>p_adjust</code>, for
-the bootstrapped tests <code>n_bootstraps</code> and <code>seed</code>, and with the
-sensitivity analysis <code>sensitivity</code> (its pseudocounts).</p>
+<code>ancombc_pairwise()</code> and <code>ancombc_dunnett()</code> <code>log_base</code> (<code>exp(1)</code>:
+<code>log_fc</code> is a natural log), for the bootstrapped tests <code>n_bootstraps</code>
+and <code>seed</code>, and with the sensitivity analysis <code>sensitivity</code> (its
+pseudocounts).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -296,7 +298,7 @@ to gene expression data on ordered categories. <em>Biometrics</em>, 66, 485–49
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17 F6      severe - mild      -1.73 0.343 -5.04 0.000505   0.00606    TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18 F6      severe - moderate  -1.65 0.402 -4.12  0.00209   0.023      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # … 2 more columns: passed_ss &lt;lgl&gt;, reject_robust &lt;lgl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, groups, alpha, p_adjust, sensitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, groups, alpha, p_adjust, log_base, sensitivity</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ancombc_global-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -322,7 +324,8 @@ to gene expression data on ordered categories. <em>Biometrics</em>, 66, 485–49
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15 F8      moderate - mild  0.0282  0.411  0.0687        1   1         FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16 F8      severe - mild   -0.53    0.444 -1.19          1   1         FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # … 2 more columns: passed_ss &lt;lgl&gt;, reject_robust &lt;lgl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, groups, alpha, p_adjust, n_bootstraps, seed, sensitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, groups, alpha, p_adjust, log_base, n_bootstraps, seed,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   sensitivity</span>
 <span class="r-in"><span>    <span class="fu">ancombc_trend</span><span class="op">(</span><span class="va">fit</span>, n_bootstraps <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 8 × 8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # ANCOM-BC2 trend test</span>

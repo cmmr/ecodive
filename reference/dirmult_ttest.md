@@ -90,7 +90,8 @@ dirmult_ttest(
   scikit-bio's `dirmult_ttest()` and ALDEx2's default do. Nixon et
   al. (2025) and ALDEx3 suggest `0.5`; use it with more draws
   (`n_draws = 1000` or more) and judge by `p_adjusted` (see
-  **Details**).
+  **Details**). Check how your calls depend on it (see **Choosing
+  `scale_sd`** in **Details**).
 
 - n_draws:
 
@@ -158,7 +159,9 @@ row per feature, in the order of `counts`, with columns:
 Attributes: `method` (`"dirmult_ttest"`), `contrast` (the treatment and
 reference groups; the reference is `NA` when all other samples were
 pooled), `n` (the number of samples on each side), `n_draws`,
-`pseudocount`, `scale_sd`, `alpha`, `conf_level`, `p_adjust` and `seed`.
+`pseudocount`, `scale_sd`, `alpha`, `conf_level`, `p_adjust`, `seed`,
+and `log_base` (`2`: the base of the logs in `log2_fc`, `ci_lower` and
+`ci_upper`).
 
 ## Details
 
@@ -220,6 +223,19 @@ level order) against the other, so reversing a `contrast` of two groups
 gives exactly the mirror image, with or without a scale model.
 [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) tests log
 ratios without the assumption, but gives no effect sizes.
+
+**Choosing `scale_sd`.** Report how the results depend on it: rerun with
+`scale_sd = 0`, `0.5` and `1` (`n_draws = 1000` or more) and say which
+features stay rejected. Wrong scale assumptions are costly: in
+differential set analysis, McGovern et al. (2023) found positive
+predictive values as low as 9% under small errors in the assumed scale;
+over 11 RNA-seq and other sequencing datasets, Dos Santos et al. (2026)
+found that misspecified scale broke false-discovery control in several
+common tools, and that a scale model (ALDEx2, ALDEx3) reduced the
+unacceptably high FDRs at a cost in sensitivity: no tool offered both.
+Larger `scale_sd` raises the smallest change that can be called. The
+package website's article "Compositional Analysis of Microbiome Data"
+runs such a comparison.
 
 A side with a single sample has no variance: its features' `t`,
 `p_value`, intervals and `p_adjusted` are `NaN`, with a warning, and
@@ -295,9 +311,20 @@ gamma variables. *ACM Transactions on Mathematical Software*, 26,
 363-372.
 
 Nixon, M. P., Gloor, G. B., & Silverman, J. D. (2025). Incorporating
-scale uncertainty into differential expression analyses using ALDEx2.
-*Genome Biology*, 26, 139.
+scale uncertainty in microbiome and gene expression analysis as an
+extension of normalization. *Genome Biology*, 26, 139.
 [doi:10.1186/s13059-025-03609-3](https://doi.org/10.1186/s13059-025-03609-3)
+
+McGovern, K. C., Nixon, M. P., & Silverman, J. D. (2023). Addressing
+erroneous scale assumptions in microbe and gene set enrichment analysis.
+*PLOS Computational Biology*, 19, e1011659.
+[doi:10.1371/journal.pcbi.1011659](https://doi.org/10.1371/journal.pcbi.1011659)
+
+Dos Santos, S. J., Murariu, A. C., Silverman, J. D., & Gloor, G. B.
+(2026). Not every gene is special: modelling scale controls the false
+discovery rate when analysing high-throughput sequencing data. *PLOS
+Computational Biology*, 22, e1014728.
+[doi:10.1371/journal.pcbi.1014728](https://doi.org/10.1371/journal.pcbi.1014728)
 
 ## See also
 
@@ -332,7 +359,7 @@ scale uncertainty into differential expression analyses using ALDEx2.
 #> 6 b6        3.57    1.15   -1.25      3.29 0.0487     0.0651   FALSE
 #> 7 b7        8.32    1.53   -1.11      3.81 0.0163     0.0651   FALSE
 #> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
-#> #   conf_level, p_adjust, seed
+#> #   conf_level, p_adjust, seed, log_base
     plot(res)
 
 
@@ -351,7 +378,7 @@ scale uncertainty into differential expression analyses using ALDEx2.
 #> 6 b6        3.68    1.18   -1.81     3.6   0.102       0.139   FALSE
 #> 7 b7        8.37    1.56   -0.774    4.57  0.0279      0.139   FALSE
 #> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
-#> #   conf_level, p_adjust, seed
+#> #   conf_level, p_adjust, seed, log_base
 
     # The default contrast: the first group ('placebo', in sorted order)
     # against the rest.

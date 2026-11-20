@@ -308,6 +308,17 @@ fall in the treated group whether or not the taxa changed (by log 8 ≈
 pseudocount damp it). An alr reference should be a taxon that is common
 and stable, which is hard to know in advance.
 
+**For prediction**, these transforms serve interpretation and
+compositional geometry; don’t expect them to make a machine-learning
+model more accurate. With random forests predicting 65 metadata
+variables in four datasets, Yerke et al.
+(**[2024](https://doi.org/10.1186/s40168-023-01747-z)**) found that alr,
+clr and ilr (PhILR) “performed generally slightly worse or only as well
+as compositionally naïve transformations”; relative abundances did best,
+by a small margin. Compare with relative abundances
+(`normalize(counts, 'percent')`) before choosing a log-ratio predictor
+table.
+
 PhILR needs a phylogeny. The simulated taxa get one that puts the five
 blooming taxa in one clade and the five declining taxa in another, and
 joins the other 140 at random:
@@ -530,8 +541,13 @@ permanova(dm_philr, groups, seed = 1)
 is the other answer to uneven sequencing depth, and Schloss
 (**[2024](https://doi.org/10.1128/msphere.00354-23)**,
 **[2026](https://doi.org/10.1128/msystems.00930-26)**) argues that it
-controls for depth better than robust Aitchison PCA does. Averaging many
-rarefactions
+controls for depth better than robust Aitchison PCA does: correcting
+“numerous problems” in the benchmark that had supported robust Aitchison
+PCA, he found that it “was not insensitive to uneven sequencing effort
+and did not perform as well as rarefaction”. So
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) is not a
+correction for depth (its help explains why, under “Sequencing depth”).
+Averaging many rarefactions
 ([`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md))
 removes most of the noise that a single one adds. A Procrustes test
 shows how far the two views agree on these samples, and
@@ -588,6 +604,57 @@ envfit(ord, log_depth, seed = 1)
 The larger an ordination’s r² for `log_depth`, the more it still
 reflects how deeply each sample happened to be sequenced rather than
 what is in it.
+
+**Is it depth?** The comparison above changes two things at once, the
+metric and the rarefying. Two more checks separate them: the correlation
+of each RPCA axis with log library size, and PCoAs of the robust
+Aitchison distance (the same rclr, without RPCA’s completion of the
+zeros), as it is and averaged over rarefactions:
+
+``` r
+
+# Correlation of each RPCA axis with log library size:
+cor(ord, log_depth[rownames(ord), , drop = FALSE])
+#>        log_depth
+#> RPCA1 -0.3721507
+#> RPCA2 -0.6002383
+
+ord_rait  <- pcoa(dm_rait, n_axes = 2)
+ord_rrare <- pcoa(beta_div_rarefied(counts, 'robust_aitchison', times = 20), n_axes = 2)
+envfit(ord_rait, log_depth, seed = 1)
+#> # A data.frame: 1 × 7
+#> # Fitted variables on Principal Coordinates Analysis of Robust Aitchison Distance
+#>           variable  level  PCoA1  PCoA2    r2 p_value     z
+#>           <chr>     <chr>  <dbl>  <dbl> <dbl>   <dbl> <dbl>
+#> log_depth log_depth NA    -0.874 -0.486 0.167   0.038  2.35
+#> # Attributes: r2_perm, n_perm
+envfit(ord_rrare, log_depth, seed = 1)
+#> # A data.frame: 1 × 7
+#> # Fitted variables on Principal Coordinates Analysis of Robust Aitchison Distance (rarefied 20×)
+#>           variable  level  PCoA1  PCoA2     r2 p_value     z
+#>           <chr>     <chr>  <dbl>  <dbl>  <dbl>   <dbl> <dbl>
+#> log_depth log_depth NA    -0.118 -0.993 0.0934   0.142 0.963
+#> # Attributes: r2_perm, n_perm
+procrustes_test(ord_rrare, ord, seed = 1)
+#> Procrustes randomization test (PROTEST)
+#> 
+#> r = 0.8299, p = 0.001, z = 8.734
+#> Permutations: 999 (free)
+#> 
+#> Symmetric Procrustes sum of squares (m^2): 0.3113
+#> Samples: 40, axes: 2
+```
+
+The RPCA follows depth most: its second axis correlates −0.60 with log
+library size, and
+[`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) gave it
+r² = 0.50 (p = 0.001). The robust Aitchison PCoA follows it less (r² =
+0.17, p = 0.038), and the rarefied one least (r² = 0.09, p = 0.14, close
+to the rarefied Bray-Curtis PCoA’s 0.08), while still agreeing well with
+the RPCA (Procrustes r = 0.83, against 0.74 for Bray-Curtis). On these
+simulated samples, then, most of RPCA’s depth signal comes with the
+completion of the zeros, and rarefying lowers what is left. That is one
+simulation, not a benchmark: run the same checks on your own data.
 
 **Used in practice.**
 
@@ -773,7 +840,7 @@ res_dm[order(res_dm$p_adjusted), ]
 #> # … 140 more rows
 #> # Use print(x, n = ...) to see more rows
 #> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
-#> #   conf_level, p_adjust, seed
+#> #   conf_level, p_adjust, seed, log_base
 table(changed = changed, rejected = res_dm$reject)
 #>        rejected
 #> changed FALSE TRUE
@@ -873,7 +940,20 @@ The intervals widen as `scale_sd` grows, so a taxon is only declared
 changed when its change is clear of plausible shifts in the reference.
 At 0.5 all ten true changes survive; at 1, a shift of 2 log2 units is
 plausible, and none does. Choose `scale_sd` from what you know about how
-much total load could differ between your groups.
+much total load could differ between your groups, and report how the
+rejections change over a range of values, as above.
+
+Wrong scale assumptions are costly. Over 11 RNA-seq and other sequencing
+datasets, Dos Santos et al.
+(**[2026](https://doi.org/10.1371/journal.pcbi.1014728)**) found that
+misspecified scale broke false-discovery control in several common
+tools, and that a scale model reduced the unacceptably high false
+discovery rates at a cost in sensitivity: no tool offered both. In
+differential set analysis (enrichment of groups of taxa or genes),
+McGovern et al.
+(**[2023](https://doi.org/10.1371/journal.pcbi.1011659)**) found
+positive predictive values as low as 9% under small errors in the
+assumed scale.
 
 ### Removing the shift: ANCOM-BC
 
@@ -917,8 +997,8 @@ res_bc[order(res_bc$p_adjusted), ]
 #> # … 48 more rows
 #> # … 1 more column: reject_robust <lgl>
 #> # Use print(x, n = ...) to see more rows
-#> # Attributes: method, formula, alpha, p_adjust, max_iters, tol, var_quantile,
-#> #   pseudocount, coef, var, vcov, dof, design, bias, n_iters,
+#> # Attributes: method, formula, alpha, p_adjust, log_base, max_iters, tol,
+#> #   var_quantile, pseudocount, coef, var, vcov, dof, design, bias, n_iters,
 #> #   sample_fractions, sensitivity
 table(changed = changed[keep], rejected = res_bc$reject)
 #>        rejected
@@ -1075,7 +1155,13 @@ microbiome profiling** (QMP; **[Vandeputte et al.
 multiplies relative abundances by the load (**[Jian et al.
 2020](https://doi.org/10.1371/journal.pone.0227285)**); Vandeputte’s
 original first rarefies every sample to the same number of reads per
-cell.
+cell. Loads predicted from the relative profile itself (**[Nishijima et
+al. 2025](https://doi.org/10.1016/j.cell.2024.10.022)**) can be passed
+to [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md) too,
+but a prediction is not a measurement: it is computed from the same
+relative profile, so (we infer) it can’t confirm a compositional result
+(see [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md)’s
+help, “Predicted loads”).
 
 Here the load is measured with 20% error, as a real measurement would
 be:
@@ -1175,9 +1261,14 @@ metagenomic and metabolomic features in marmosets after a diet change.
     report log ratios or balances, and say which taxa form the
     reference.
 4.  **Run more than one differential-abundance method** and report what
-    they agree on.
+    they agree on, and, for
+    [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+    more than one `scale_sd`.
 5.  **Measure total load when you can**, and analyse absolute abundances
     with QMP.
+6.  **Check depth sensitivity** of any ordination that doesn’t rarefy:
+    correlate its axes with log library size and compare with a rarefied
+    analysis.
 
 ## References
 
@@ -1203,6 +1294,11 @@ noted where one exists.
   multi-omics integration for systems microbiology. *Molecular Systems
   Biology*, 22, 1789–1808.
   [doi:10.1038/s44320-026-00236-3](https://doi.org/10.1038/s44320-026-00236-3)
+- Dos Santos, S. J., Murariu, A. C., Silverman, J. D., & Gloor, G. B.
+  (2026). Not every gene is special: modelling scale controls the false
+  discovery rate when analysing high-throughput sequencing data. *PLOS
+  Computational Biology*, 22, e1014728.
+  [doi:10.1371/journal.pcbi.1014728](https://doi.org/10.1371/journal.pcbi.1014728)
 - Erb, I., & Notredame, C. (2016). How should we measure proportionality
   on relative gene expression data? *Theory in Biosciences*, 135, 21–36.
   [doi:10.1007/s12064-015-0220-8](https://doi.org/10.1007/s12064-015-0220-8)
@@ -1259,6 +1355,10 @@ noted where one exists.
   beta-diversity measures better resolve microbiomes associated with
   phenotype. *mSystems*, 7, e00050-22.
   [doi:10.1128/msystems.00050-22](https://doi.org/10.1128/msystems.00050-22)
+- McGovern, K. C., Nixon, M. P., & Silverman, J. D. (2023). Addressing
+  erroneous scale assumptions in microbe and gene set enrichment
+  analysis. *PLOS Computational Biology*, 19, e1011659.
+  [doi:10.1371/journal.pcbi.1011659](https://doi.org/10.1371/journal.pcbi.1011659)
 - Morton, J. T., et al. (2019). Establishing microbial composition
   measurement standards with reference frames. *Nature Communications*,
   10, 2719.
@@ -1267,6 +1367,10 @@ noted where one exists.
   methods produce different results across 38 datasets. *Nature
   Communications*, 13, 342.
   [doi:10.1038/s41467-022-28034-z](https://doi.org/10.1038/s41467-022-28034-z)
+- Nishijima, S., et al. (2025). Fecal microbial load is a major
+  determinant of gut microbiome variation and a confounder for disease
+  associations. *Cell*, 188, 222–236.
+  [doi:10.1016/j.cell.2024.10.022](https://doi.org/10.1016/j.cell.2024.10.022)
 - Nixon, M. P., Gloor, G. B., & Silverman, J. D. (2025). Incorporating
   scale uncertainty in microbiome and gene expression analysis as an
   extension of normalization. *Genome Biology*, 26, 139.
@@ -1287,6 +1391,14 @@ noted where one exists.
 - Rivera-Pinto, J., et al. (2018). Balances: a new perspective for
   microbiome analysis. *mSystems*, 3, e00053-18.
   [doi:10.1128/mSystems.00053-18](https://doi.org/10.1128/mSystems.00053-18)
+- Schloss, P. D. (2024). Rarefaction is currently the best approach to
+  control for uneven sequencing effort in amplicon sequence analyses.
+  *mSphere*, 9, e00354-23.
+  [doi:10.1128/msphere.00354-23](https://doi.org/10.1128/msphere.00354-23)
+- Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA
+  and other compositional data analysis methods at controlling for
+  uneven sequencing effort. *mSystems*, 11, e00930-26.
+  [doi:10.1128/msystems.00930-26](https://doi.org/10.1128/msystems.00930-26)
 - Silverman, J. D., et al. (2017). A phylogenetic transform enhances
   analysis of compositional microbiota data. *eLife*, 6, e21887.
   [doi:10.7554/eLife.21887](https://doi.org/10.7554/eLife.21887)
@@ -1295,6 +1407,10 @@ noted where one exists.
   [doi:10.1038/nature24460](https://doi.org/10.1038/nature24460) †
   (submitted version free at
   [hdl:2078.1/305305](http://hdl.handle.net/2078.1/305305))
+- Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+  normalizations outperform compositional data transformations in
+  machine learning applications. *Microbiome*, 12, 45.
+  [doi:10.1186/s40168-023-01747-z](https://doi.org/10.1186/s40168-023-01747-z)
 
 ### Applied studies
 

@@ -105,13 +105,14 @@ robust decisions (`reject_robust`) are drawn filled (in bold in the
 heatmap) and named, and the others that are significant hollow (in
 italics).
 
-Log fold changes are natural logs, as ANCOM-BC estimates them. In the
-volcano plot, the y axis is \\-\log\_{10}\\ of `p_adjusted`, with a
-dashed line at `alpha`; coefficients that couldn't be estimated (`NaN`)
-are left out. In the heatmap, red cells are increases and blue cells
-decreases, on a scale symmetric about 0, and the value of each cell is
-written in it, in bold when that comparison is significant for that
-feature. For
+Log fold changes are natural logs, as ANCOM-BC estimates them; the axis
+label and the heatmap's subtitle say so from the result's `log_base`
+attribute. In the volcano plot, the y axis is \\-\log\_{10}\\ of
+`p_adjusted`, with a dashed line at `alpha`; coefficients that couldn't
+be estimated (`NaN`) are left out. In the heatmap, red cells are
+increases and blue cells decreases, on a scale symmetric about 0, and
+the value of each cell is written in it, in bold when that comparison is
+significant for that feature. For
 [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
 each feature's label gives the pattern with the largest statistic.
 

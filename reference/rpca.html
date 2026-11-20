@@ -302,6 +302,34 @@ than by re-summing, which differs only by rounding; in a borderline
 case that can change which step length is accepted.</p></li>
 </ul></div>
     <div class="section level2">
+    <h2 id="sequencing-depth">Sequencing depth<a class="anchor" aria-label="anchor" href="#sequencing-depth"></a></h2>
+
+
+<p><code>rpca()</code> is not a correction for uneven sequencing depth. The robust clr
+divides each sample by the geometric mean of its own non-zero counts, so
+scaling a sample's counts changes nothing; but a deeper sample has more
+non-zero features, so which values are missing (the zeros that OptSpace
+completes) depends on depth, and depth can reach the result that way
+(an inference from the method, not a measured effect). Schloss (2026)
+corrected "numerous problems" in the benchmark that had supported robust
+Aitchison PCA and found that it "was not insensitive to uneven
+sequencing effort and did not perform as well as rarefaction" (see also
+Schloss 2024).</p>
+<p>To check a result, correlate its axes with log library size, fit library
+size onto it with <code><a href="envfit.html">envfit()</a></code> (\(r^2\) and a permutation p-value), and
+compare it with an ordination of rarefied data from
+<code><a href="rarefied_diversity.html">beta_div_rarefied()</a></code>, here rarefied to the smallest library so that no
+sample is dropped:</p>
+<p></p><div class="sourceCode r"><pre><code><span><span class="va">depth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="va">ord</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca.html">rpca</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">ord</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">depth</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>              <span class="co"># per axis</span></span>
+<span><span class="fu"><a href="../reference/envfit.html">envfit</a></span><span class="op">(</span><span class="va">ord</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>log_depth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">depth</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dm_rar</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rarefied_diversity.html">beta_div_rarefied</a></span><span class="op">(</span><span class="va">counts</span>, <span class="st">'robust_aitchison'</span>, depth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">depth</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ord_rar</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm_rar</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/procrustes_test.html">procrustes_test</a></span><span class="op">(</span><span class="va">ord_rar</span>, <span class="va">ord</span><span class="op">)</span></span></code></pre><p></p></div>
+    </div>
+    <div class="section level2">
     <h2 id="ordination-result">Ordination result<a class="anchor" aria-label="anchor" href="#ordination-result"></a></h2>
 
 
@@ -359,6 +387,13 @@ seamlessly supports objects from the following biological data packages:</p><ul>
 Knight, R., &amp; Zengler, K. (2019). A novel sparse compositional technique
 reveals microbial perturbations. <em>mSystems</em>, 4(1), e00016-19.
 <a href="https://doi.org/10.1128/mSystems.00016-19" class="external-link">doi:10.1128/mSystems.00016-19</a></p>
+<p>Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA and
+other compositional data analysis methods at controlling for uneven
+sequencing effort. <em>mSystems</em>, 11, e00930-26.
+<a href="https://doi.org/10.1128/msystems.00930-26" class="external-link">doi:10.1128/msystems.00930-26</a></p>
+<p>Schloss, P. D. (2024). Rarefaction is currently the best approach to
+control for uneven sequencing effort in amplicon sequence analyses.
+<em>mSphere</em>, 9, e00354-23. <a href="https://doi.org/10.1128/msphere.00354-23" class="external-link">doi:10.1128/msphere.00354-23</a></p>
 <p>Keshavan, R. H., Montanari, A., &amp; Oh, S. (2010). Matrix completion from a
 few entries. <em>IEEE Transactions on Information Theory</em>, 56(6), 2980-2998.
 <a href="https://doi.org/10.1109/TIT.2010.2046205" class="external-link">doi:10.1109/TIT.2010.2046205</a></p>
@@ -371,7 +406,8 @@ Chapman &amp; Hall, London.</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="pca.html">pca()</a></code>, which with <code>norm = 'rclr'</code> keeps zeros as 0 rather than
 completing them; <code><a href="rpca_phylo.html">rpca_phylo()</a></code>, the same over the nodes of a
-phylogenetic tree; <code><a href="pcoa.html">pcoa()</a></code>; <code><a href="robust_aitchison.html">robust_aitchison()</a></code>.</p></div>
+phylogenetic tree; <code><a href="pcoa.html">pcoa()</a></code>; <code><a href="robust_aitchison.html">robust_aitchison()</a></code>;
+<code><a href="rarefied_diversity.html">beta_div_rarefied()</a></code>, for a rarefied comparison.</p></div>
     </div>
 
     <div class="section level2">

@@ -178,6 +178,19 @@ replace the zeros first with <code><a href="replace_zeros.html">replace_zeros()<
 especially for sparse tables. See <code><a href="aitchison.html">aitchison()</a></code> for references.</p>
     </div>
     <div class="section level2">
+    <h2 id="machine-learning">Machine learning<a class="anchor" aria-label="anchor" href="#machine-learning"></a></h2>
+
+
+<p>Log-ratio transforms (clr, rclr, alr, ilr, PhILR) serve interpretation
+and compositional geometry; don't expect them to improve prediction.
+With random forests predicting 65 metadata variables in four datasets,
+Yerke et al. (2024) found that alr, clr and ilr (PhILR) "performed
+generally slightly worse or only as well as compositionally naïve
+transformations", and relative abundances did best, by a small margin.
+Compare with <code>norm = 'percent'</code> (see <code><a href="normalize.html">normalize()</a></code>) before choosing a
+log-ratio predictor table.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., &amp; Barceló-Vidal,
 C. (2003). Isometric logratio transformations for compositional data
@@ -185,6 +198,10 @@ analysis. <em>Mathematical Geology</em>, 35, 279–300.</p>
 <p>Egozcue, J. J., &amp; Pawlowsky-Glahn, V. (2005). Groups of parts and their
 balances in compositional data analysis. <em>Mathematical Geology</em>, 37,
 795–828.</p>
+<p>Yerke, A., Fry Brumit, D., &amp; Fodor, A. A. (2024). Proportion-based
+normalizations outperform compositional data transformations in machine
+learning applications. <em>Microbiome</em>, 12, 45.
+<a href="https://doi.org/10.1186/s40168-023-01747-z" class="external-link">doi:10.1186/s40168-023-01747-z</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -242,6 +242,8 @@ as in scikit-bio and ANCOMBC.</p>
 <p>Attributes:</p><ul><li><p><code>method</code>: <code>'ancombc'</code> or <code>'ancombc2'</code>.</p></li>
 <li><p><code>formula</code>, <code>groups</code>, <code>alpha</code>, <code>p_adjust</code>, <code>max_iters</code>, <code>tol</code>,
 <code>pseudocount</code> (the value used), and for <code>ancombc2()</code> <code>var_quantile</code>.</p></li>
+<li><p><code>log_base</code>: <code>exp(1)</code>, the base of the logs in <code>log_fc</code> (natural
+logs).</p></li>
 <li><p>The fit, for the post-hoc tests: <code>coef</code> (features \(\times\)
 covariates: the bias-corrected coefficients, including those that
 can't be estimated), <code>var</code> (their variances; for <code>ancombc2()</code>
@@ -458,8 +460,8 @@ methods for human gut 16S rRNA microbiome data (2026). <em>bioRxiv</em>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6  F2      statusmoderate 1.91   0.259   7.37 1.69e-13   1.35e-12   TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7  F2      statussevere   2.94   0.304   9.65 4.96e-22   3.96e-21   TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12 F3      age            0.0626 0.0218  2.87  0.00409     0.0328   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, alpha, p_adjust, max_iters, tol, pseudocount,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   coef, var, vcov, design, bias, n_iters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, alpha, p_adjust, log_base, max_iters, tol,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   pseudocount, coef, var, vcov, design, bias, n_iters</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A volcano plot of one covariate, here the first: moderate vs mild.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
@@ -477,9 +479,9 @@ methods for human gut 16S rRNA microbiome data (2026). <em>bioRxiv</em>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  feature covariate log_fc    se     w p_value p_adjusted reject passed_ss</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;     &lt;lgl&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # … 1 more column: reject_robust &lt;lgl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, groups, alpha, p_adjust, max_iters, tol,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   var_quantile, pseudocount, coef, var, vcov, dof, design, bias, n_iters,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   sample_fractions, sensitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, groups, alpha, p_adjust, log_base, max_iters,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   tol, var_quantile, pseudocount, coef, var, vcov, dof, design, bias,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   n_iters, sample_fractions, sensitivity</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># ANCOMBC's preprocessing, done first: keep features present in at</span></span></span>
 <span class="r-in"><span>    <span class="co"># least 10% of samples (prv_cut = 0.1), and samples with at least 10</span></span></span>

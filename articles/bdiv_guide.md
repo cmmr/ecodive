@@ -74,6 +74,14 @@ systematically narrow the field of metrics to a small, relevant subset.
     positives” common in standard ecological metrics, and the robust
     adaptation makes it ideal for highly sparse sequencing datasets.
 
+  - **[Schloss (2026)](https://doi.org/10.1128/msystems.00930-26)**
+    disputes this for uneven sequencing depth: in a corrected re-run of
+    the original benchmark, rarefaction did better than robust Aitchison
+    PCA. Check whether your ordination’s axes follow library size (see
+    [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)’s help,
+    “Sequencing depth”), and consider a rarefied analysis alongside
+    ([`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)).
+
   - If you choose to use a non-compositional metric, select one that is
     robust to sparsity. -\> Good secondary choices include *Hellinger*
     or *Jensen-Shannon Divergence (JSD)*. In a rigorous benchmarking of

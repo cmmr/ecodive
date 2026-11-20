@@ -154,7 +154,8 @@ default) assumes the clr's reference (the geometric mean) is the
 same on both sides, as scikit-bio's <code>dirmult_ttest()</code> and ALDEx2's
 default do. Nixon et al. (2025) and ALDEx3 suggest <code>0.5</code>; use it
 with more draws (<code>n_draws = 1000</code> or more) and judge by
-<code>p_adjusted</code> (see <strong>Details</strong>).</p></dd>
+<code>p_adjusted</code> (see <strong>Details</strong>). Check how your calls depend on it
+(see <strong>Choosing <code>scale_sd</code></strong> in <strong>Details</strong>).</p></dd>
 
 
 <dt id="arg-n-draws">n_draws<a class="anchor" aria-label="anchor" href="#arg-n-draws"></a></dt>
@@ -213,7 +214,8 @@ bound of the draws' intervals for that difference, in log2 units
 </ul><p>Attributes: <code>method</code> (<code>"dirmult_ttest"</code>), <code>contrast</code> (the treatment and reference groups; the
 reference is <code>NA</code> when all other samples were pooled), <code>n</code> (the number
 of samples on each side), <code>n_draws</code>, <code>pseudocount</code>, <code>scale_sd</code>,
-<code>alpha</code>, <code>conf_level</code>, <code>p_adjust</code> and <code>seed</code>.</p>
+<code>alpha</code>, <code>conf_level</code>, <code>p_adjust</code>, <code>seed</code>, and <code>log_base</code> (<code>2</code>: the
+base of the logs in <code>log2_fc</code>, <code>ci_lower</code> and <code>ci_upper</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -268,6 +270,18 @@ group that comes first (in sorted order, or a factor's level order)
 against the other, so reversing a <code>contrast</code> of two groups gives exactly
 the mirror image, with or without a scale model. <code><a href="ancom.html">ancom()</a></code> tests log ratios
 without the assumption, but gives no effect sizes.</p>
+<p><strong>Choosing <code>scale_sd</code>.</strong> Report how the results depend on it: rerun with
+<code>scale_sd = 0</code>, <code>0.5</code> and <code>1</code> (<code>n_draws = 1000</code> or more) and say which
+features stay rejected. Wrong scale assumptions are costly: in
+differential set analysis, McGovern et al. (2023) found positive
+predictive values as low as 9% under small errors in the assumed scale;
+over 11 RNA-seq and other sequencing datasets, Dos Santos et al. (2026)
+found that misspecified scale broke false-discovery control in several
+common tools, and that a scale model (ALDEx2, ALDEx3) reduced the
+unacceptably high FDRs at a cost in sensitivity: no tool offered both.
+Larger <code>scale_sd</code> raises the smallest change that can be called. The
+package website's article "Compositional Analysis of Microbiome Data"
+runs such a comparison.</p>
 <p>A side with a single sample has no variance: its features' <code>t</code>,
 <code>p_value</code>, intervals and <code>p_adjusted</code> are <code>NaN</code>, with a warning, and none
 are rejected (as scikit-bio's, which gives them silently).</p>
@@ -331,8 +345,18 @@ analysis. <em>Microbiome</em>, 2, 15.</p>
 gamma variables. <em>ACM Transactions on Mathematical Software</em>, 26,
 363-372.</p>
 <p>Nixon, M. P., Gloor, G. B., &amp; Silverman, J. D. (2025). Incorporating
-scale uncertainty into differential expression analyses using ALDEx2.
-<em>Genome Biology</em>, 26, 139. <a href="https://doi.org/10.1186/s13059-025-03609-3" class="external-link">doi:10.1186/s13059-025-03609-3</a></p>
+scale uncertainty in microbiome and gene expression analysis as an
+extension of normalization. <em>Genome Biology</em>, 26, 139.
+<a href="https://doi.org/10.1186/s13059-025-03609-3" class="external-link">doi:10.1186/s13059-025-03609-3</a></p>
+<p>McGovern, K. C., Nixon, M. P., &amp; Silverman, J. D. (2023). Addressing
+erroneous scale assumptions in microbe and gene set enrichment analysis.
+<em>PLOS Computational Biology</em>, 19, e1011659.
+<a href="https://doi.org/10.1371/journal.pcbi.1011659" class="external-link">doi:10.1371/journal.pcbi.1011659</a></p>
+<p>Dos Santos, S. J., Murariu, A. C., Silverman, J. D., &amp; Gloor, G. B.
+(2026). Not every gene is special: modelling scale controls the false
+discovery rate when analysing high-throughput sequencing data. <em>PLOS
+Computational Biology</em>, 22, e1014728.
+<a href="https://doi.org/10.1371/journal.pcbi.1014728" class="external-link">doi:10.1371/journal.pcbi.1014728</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -366,7 +390,7 @@ scale uncertainty into differential expression analyses using ALDEx2.
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 b6        3.57    1.15   -1.25      3.29 0.0487     0.0651   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7 b7        8.32    1.53   -1.11      3.81 0.0163     0.0651   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   conf_level, p_adjust, seed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   conf_level, p_adjust, seed, log_base</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="dirmult_ttest-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -385,7 +409,7 @@ scale uncertainty into differential expression analyses using ALDEx2.
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 b6        3.68    1.18   -1.81     3.6   0.102       0.139   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7 b7        8.37    1.56   -0.774    4.57  0.0279      0.139   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   conf_level, p_adjust, seed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   conf_level, p_adjust, seed, log_base</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># The default contrast: the first group ('placebo', in sorted order)</span></span></span>
 <span class="r-in"><span>    <span class="co"># against the rest.</span></span></span>

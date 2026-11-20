@@ -133,6 +133,24 @@ Costea et al. (2014) for the impact on community clustering.
 See [`aitchison`](https://cmmr.github.io/ecodive/reference/aitchison.md)
 for references.
 
+## Machine learning
+
+Log-ratio transforms (clr, rclr, alr, ilr, PhILR) serve interpretation
+and compositional geometry; don't expect them to improve prediction.
+With random forests predicting 65 metadata variables in four datasets,
+Yerke et al. (2024) found that alr, clr and ilr (PhILR) "performed
+generally slightly worse or only as well as compositionally naïve
+transformations", and relative abundances did best, by a small margin.
+Compare with `norm = 'percent'` (see `normalize()`) before choosing a
+log-ratio predictor table.
+
+## References
+
+Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+normalizations outperform compositional data transformations in machine
+learning applications. *Microbiome*, 12, 45.
+[doi:10.1186/s40168-023-01747-z](https://doi.org/10.1186/s40168-023-01747-z)
+
 ## See also
 
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),

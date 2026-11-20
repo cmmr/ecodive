@@ -131,7 +131,9 @@ highlighted in all of them. When the fit was made with a sensitivity
 analysis (<code>sensitivity</code>, see <code><a href="ancombc.html">ancombc()</a></code>), the robust decisions
 (<code>reject_robust</code>) are drawn filled (in bold in the heatmap) and named,
 and the others that are significant hollow (in italics).</p>
-<p>Log fold changes are natural logs, as ANCOM-BC estimates them. In the
+<p>Log fold changes are natural logs, as ANCOM-BC estimates them; the axis
+label and the heatmap's subtitle say so from the result's <code>log_base</code>
+attribute. In the
 volcano plot, the y axis is \(-\log_{10}\) of <code>p_adjusted</code>, with a
 dashed line at <code>alpha</code>; coefficients that couldn't be estimated (<code>NaN</code>)
 are left out. In the heatmap, red cells are increases and blue cells

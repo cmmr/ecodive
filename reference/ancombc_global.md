@@ -131,9 +131,11 @@ gains `passed_ss` (the decision is the same in every fit; for the trend
 test, the global test's decision, as in ANCOMBC) and `reject_robust`
 (`reject & passed_ss`), the decisions to use.
 
-Attributes: `method` (the fit's), `groups`, `alpha`, `p_adjust`, for the
-bootstrapped tests `n_bootstraps` and `seed`, and with the sensitivity
-analysis `sensitivity` (its pseudocounts).
+Attributes: `method` (the fit's), `groups`, `alpha`, `p_adjust`, for
+`ancombc_pairwise()` and `ancombc_dunnett()` `log_base` (`exp(1)`:
+`log_fc` is a natural log), for the bootstrapped tests `n_bootstraps`
+and `seed`, and with the sensitivity analysis `sensitivity` (its
+pseudocounts).
 
 ## Details
 
@@ -265,7 +267,7 @@ to gene expression data on ordered categories. *Biometrics*, 66,
 #> 17 F6      severe - mild      -1.73 0.343 -5.04 0.000505   0.00606    TRUE
 #> 18 F6      severe - moderate  -1.65 0.402 -4.12  0.00209   0.023      TRUE
 #> # … 2 more columns: passed_ss <lgl>, reject_robust <lgl>
-#> # Attributes: method, groups, alpha, p_adjust, sensitivity
+#> # Attributes: method, groups, alpha, p_adjust, log_base, sensitivity
     plot(res)
 
 
@@ -291,7 +293,8 @@ to gene expression data on ordered categories. *Biometrics*, 66,
 #> 15 F8      moderate - mild  0.0282  0.411  0.0687        1   1         FALSE
 #> 16 F8      severe - mild   -0.53    0.444 -1.19          1   1         FALSE
 #> # … 2 more columns: passed_ss <lgl>, reject_robust <lgl>
-#> # Attributes: method, groups, alpha, p_adjust, n_bootstraps, seed, sensitivity
+#> # Attributes: method, groups, alpha, p_adjust, log_base, n_bootstraps, seed,
+#> #   sensitivity
     ancombc_trend(fit, n_bootstraps = 1000)
 #> # A data.frame: 8 × 8
 #> # ANCOM-BC2 trend test

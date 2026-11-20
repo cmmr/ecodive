@@ -235,6 +235,18 @@ especially for sparse tables. See
 [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md)
 for references.
 
+## Machine learning
+
+Log-ratio transforms (clr, rclr, alr, ilr, PhILR) serve interpretation
+and compositional geometry; don't expect them to improve prediction.
+With random forests predicting 65 metadata variables in four datasets,
+Yerke et al. (2024) found that alr, clr and ilr (PhILR) "performed
+generally slightly worse or only as well as compositionally naïve
+transformations", and relative abundances did best, by a small margin.
+Compare with `norm = 'percent'` (see
+[`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md))
+before choosing a log-ratio predictor table.
+
 ## References
 
 Silverman, J. D., Washburne, A. D., Mukherjee, S., & David, L. A.
@@ -246,6 +258,11 @@ Egozcue, J. J., & Pawlowsky-Glahn, V. (2016). Changing the reference
 measure in the simplex and its weighting effects. *Austrian Journal of
 Statistics*, 45(4), 25–44.
 [doi:10.17713/ajs.v45i4.126](https://doi.org/10.17713/ajs.v45i4.126)
+
+Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+normalizations outperform compositional data transformations in machine
+learning applications. *Microbiome*, 12, 45.
+[doi:10.1186/s40168-023-01747-z](https://doi.org/10.1186/s40168-023-01747-z)
 
 ## See also
 

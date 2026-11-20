@@ -158,6 +158,13 @@ al. (2017)</a></strong> argue this compositional approach is essential
 to avoid the “false positives” common in standard ecological metrics,
 and the robust adaptation makes it ideal for highly sparse sequencing
 datasets.</p></li>
+<li><p><strong><a href="https://doi.org/10.1128/msystems.00930-26" class="external-link">Schloss
+(2026)</a></strong> disputes this for uneven sequencing depth: in a
+corrected re-run of the original benchmark, rarefaction did better than
+robust Aitchison PCA. Check whether your ordination’s axes follow
+library size (see <code><a href="../reference/rpca.html">rpca()</a></code>’s help, “Sequencing depth”), and
+consider a rarefied analysis alongside
+(<code><a href="../reference/rarefied_diversity.html">beta_div_rarefied()</a></code>).</p></li>
 <li><p>If you choose to use a non-compositional metric, select one that
 is robust to sparsity. -&gt; Good secondary choices include
 <u>Hellinger</u> or <u>Jensen-Shannon Divergence (JSD)</u>. In a

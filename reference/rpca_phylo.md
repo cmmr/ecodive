@@ -225,6 +225,37 @@ and these:
 - Internal node labels in `tree` are replaced by the `n<id>` names, as
   gemelli does; gemelli's optional taxonomy output is not provided.
 
+## Sequencing depth
+
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) is not a
+correction for uneven sequencing depth. The robust clr divides each
+sample by the geometric mean of its own non-zero counts, so scaling a
+sample's counts changes nothing; but a deeper sample has more non-zero
+features, so which values are missing (the zeros that OptSpace
+completes) depends on depth, and depth can reach the result that way (an
+inference from the method, not a measured effect). Schloss (2026)
+corrected "numerous problems" in the benchmark that had supported robust
+Aitchison PCA and found that it "was not insensitive to uneven
+sequencing effort and did not perform as well as rarefaction" (see also
+Schloss 2024).
+
+To check a result, correlate its axes with log library size, fit library
+size onto it with
+[`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md)
+(\\r^2\\ and a permutation p-value), and compare it with an ordination
+of rarefied data from
+[`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md),
+here rarefied to the smallest library so that no sample is dropped:
+
+    depth <- rowSums(counts)
+    ord   <- rpca(counts)
+    cor(ord, log(depth[rownames(ord)]))              # per axis
+    envfit(ord, data.frame(log_depth = log(depth)))
+
+    dm_rar  <- beta_div_rarefied(counts, 'robust_aitchison', depth = min(depth))
+    ord_rar <- pcoa(dm_rar, n_axes = 2)
+    procrustes_test(ord_rar, ord)
+
 ## Ordination result
 
 Every ordination function
@@ -329,6 +360,16 @@ technique reveals microbial perturbations. *mSystems*, 4(1), e00016-19.
 
 Martino, C. (2019). *gemelli* (Python package, version 0.0.13). BSD
 3-Clause License. <https://pypi.org/project/gemelli/>
+
+Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA
+and other compositional data analysis methods at controlling for uneven
+sequencing effort. *mSystems*, 11, e00930-26.
+[doi:10.1128/msystems.00930-26](https://doi.org/10.1128/msystems.00930-26)
+
+Schloss, P. D. (2024). Rarefaction is currently the best approach to
+control for uneven sequencing effort in amplicon sequence analyses.
+*mSphere*, 9, e00354-23.
+[doi:10.1128/msphere.00354-23](https://doi.org/10.1128/msphere.00354-23)
 
 ## See also
 

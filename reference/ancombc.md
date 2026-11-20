@@ -203,6 +203,8 @@ Attributes:
 - `formula`, `groups`, `alpha`, `p_adjust`, `max_iters`, `tol`,
   `pseudocount` (the value used), and for `ancombc2()` `var_quantile`.
 
+- `log_base`: `exp(1)`, the base of the logs in `log_fc` (natural logs).
+
 - The fit, for the post-hoc tests: `coef` (features \\\times\\
   covariates: the bias-corrected coefficients, including those that
   can't be estimated), `var` (their variances; for `ancombc2()` adjusted
@@ -455,8 +457,8 @@ methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
 #> 6  F2      statusmoderate 1.91   0.259   7.37 1.69e-13   1.35e-12   TRUE
 #> 7  F2      statussevere   2.94   0.304   9.65 4.96e-22   3.96e-21   TRUE
 #> 12 F3      age            0.0626 0.0218  2.87  0.00409     0.0328   TRUE
-#> # Attributes: method, formula, alpha, p_adjust, max_iters, tol, pseudocount,
-#> #   coef, var, vcov, design, bias, n_iters
+#> # Attributes: method, formula, alpha, p_adjust, log_base, max_iters, tol,
+#> #   pseudocount, coef, var, vcov, design, bias, n_iters
 
     # A volcano plot of one covariate, here the first: moderate vs mild.
     plot(res)
@@ -474,9 +476,9 @@ methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
 #>  feature covariate log_fc    se     w p_value p_adjusted reject passed_ss
 #>  <chr>   <chr>      <dbl> <dbl> <dbl>   <dbl>      <dbl>  <lgl>     <lgl>
 #> # … 1 more column: reject_robust <lgl>
-#> # Attributes: method, formula, groups, alpha, p_adjust, max_iters, tol,
-#> #   var_quantile, pseudocount, coef, var, vcov, dof, design, bias, n_iters,
-#> #   sample_fractions, sensitivity
+#> # Attributes: method, formula, groups, alpha, p_adjust, log_base, max_iters,
+#> #   tol, var_quantile, pseudocount, coef, var, vcov, dof, design, bias,
+#> #   n_iters, sample_fractions, sensitivity
 
     # ANCOMBC's preprocessing, done first: keep features present in at
     # least 10% of samples (prv_cut = 0.1), and samples with at least 10

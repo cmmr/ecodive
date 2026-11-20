@@ -98,6 +98,16 @@ Base R Equivalent:
     y <- ifelse(y > 0, log(y) - mean(log(y[y > 0])), 0)
     sqrt(sum((x-y)^2)) # Euclidean distance
 
+**Sequencing depth.** It uses the same robust clr as
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), so the
+caveat about sequencing depth there applies too: an inference, since
+Schloss (2026) benchmarked robust Aitchison PCA, not this distance
+alone. See "Sequencing depth" in
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) for a
+check, and
+[`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
+for a rarefied alternative.
+
 ## Input Types
 
 The `counts` parameter is designed to accept a simple numeric matrix,
@@ -123,6 +133,11 @@ Martino, C., Morton, J. T., Marotz, C. A., Thompson, L. R., Tripathi,
 A., Knight, R., and Zengler, K. (2019). A novel sparse compositional
 technique reveals microbial perturbations. *mSystems*, 4(1), e00016-19.
 [doi:10.1128/mSystems.00016-19](https://doi.org/10.1128/mSystems.00016-19)
+
+Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA
+and other compositional data analysis methods at controlling for uneven
+sequencing effort. *mSystems*, 11, e00930-26.
+[doi:10.1128/msystems.00930-26](https://doi.org/10.1128/msystems.00930-26)
 
 ## See also
 

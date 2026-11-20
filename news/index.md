@@ -1156,6 +1156,39 @@
   result is a “Principal Coordinates Analysis of Bray-Curtis
   Dissimilarity (rarefied 100×)”.
 
+- Documentation:
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
+  [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md)
+  and
+  [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md)
+  discuss sequencing depth (Schloss 2026) and show how to check an
+  ordination against library size and a rarefied analysis;
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+  recommends a `scale_sd` sensitivity check;
+  [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md),
+  [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md),
+  [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) and
+  [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md) note
+  that log-ratio transforms don’t improve machine learning;
+  [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md)
+  explains predicted loads. The reference to Nixon et al. (2025) now has
+  the published title.
+
+- [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  [`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+  and
+  [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
+  results gain a `log_base` attribute (`exp(1)`: their `log_fc` is a
+  natural log), and
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+  results one of `2` (`log2_fc`), as
+  [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
+  [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  and
+  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  results have. Their plots label log fold changes from it.
+
 - [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md) of a
   slam `simple_triplet_matrix` now draws exactly the same observations
   as the same table in any other class, for the same `seed`. Before,
