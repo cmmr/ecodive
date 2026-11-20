@@ -363,7 +363,7 @@ of explanatory variables. *Ecology*, 89, 2623-2632.
     fs <- forward_select(bray(counts), ~ ph + temp + depth + site, meta)
     attr(fs, 'selected')
 #> ~ph + temp
-#> <environment: 0x6074e2d356d8>
+#> <environment: 0x5b5cc91b3778>
     varpart(bray(counts), env = attr(fs, 'selected'), site = ~ site, data = meta)
 #> Variation partitioning by db-RDA: 40 samples, 2 sets
 #> Total inertia: 1.5469

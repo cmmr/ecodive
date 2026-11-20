@@ -66,7 +66,7 @@ sorensen(counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cpus())
 
 ## Details
 
-The Dice-Sorensen dissimilarity is defined as: \$\$\frac{2J}{(A +
+The Dice-Sorensen dissimilarity is defined as: \$\$1 - \frac{2J}{(A +
 B)}\$\$
 
 Where:
@@ -79,7 +79,7 @@ Base R Equivalent:
 
     x <- ex_counts[1,]
     y <- ex_counts[2,]
-    2 * sum(x & y) / sum(x>0, y>0)
+    1 - 2 * sum(x & y) / sum(x>0, y>0)
 
 ## Input Types
 
