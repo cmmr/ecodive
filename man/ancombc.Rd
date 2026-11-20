@@ -151,6 +151,8 @@ Attributes:
 \item \code{method}: \code{'ancombc'} or \code{'ancombc2'}.
 \item \code{formula}, \code{groups}, \code{alpha}, \code{p_adjust}, \code{max_iters}, \code{tol},
 \code{pseudocount} (the value used), and for \code{ancombc2()} \code{var_quantile}.
+\item \code{log_base}: \code{exp(1)}, the base of the logs in \code{log_fc} (natural
+logs).
 \item The fit, for the post-hoc tests: \code{coef} (features \eqn{\times}
 covariates: the bias-corrected coefficients, including those that
 can't be estimated), \code{var} (their variances; for \code{ancombc2()}

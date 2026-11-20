@@ -48,7 +48,9 @@
 #'        such as `main`, `sub`, `xlab` or `cex`.
 #'
 #' @details
-#' Log fold changes are natural logs, as ANCOM-BC estimates them. In the
+#' Log fold changes are natural logs, as ANCOM-BC estimates them; the axis
+#' label and the heatmap's subtitle say so from the result's `log_base`
+#' attribute. In the
 #' volcano plot, the y axis is \eqn{-\log_{10}} of `p_adjusted`, with a
 #' dashed line at `alpha`; coefficients that couldn't be estimated (`NaN`)
 #' are left out. In the heatmap, red cells are increases and blue cells
@@ -104,7 +106,7 @@ plot.ecodive_ancombc <- function (x, covariate = NULL, labels = 10, ...) {
     r$log_fc, r$p_adjusted, r$reject, r$feature, attr(x, 'alpha', exact = TRUE),
     labels, list(...), robust = r$reject_robust,
     main = ancombc_plot_name(x),
-    xlab = sprintf('Log fold change, %s', covariate) )
+    xlab = sprintf('%s, %s', lfc_label(x), covariate) )
 
   invisible(x)
 }
@@ -220,8 +222,8 @@ ancombc_plot_heatmap <- function (x, n, digits, args, what) {
 
   n_rej <- length(unique(x$feature[x$reject %in% TRUE]))
   sub   <- sprintf(
-    'Log fold changes; bold: differentially abundant (%d of %d features)%s%s',
-    n_rej, length(feats),
+    '%ss; bold: differentially abundant (%d of %d features)%s%s',
+    lfc_label(x), n_rej, length(feats),
     if (sens) '; italic: not robust to the pseudocount' else '',
     if (length(keep) < length(feats)) sprintf('; top %d shown', length(keep)) else '' )
 

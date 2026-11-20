@@ -77,6 +77,12 @@ Base R Equivalent:
 y <- ifelse(y > 0, log(y) - mean(log(y[y > 0])), 0)
 sqrt(sum((x-y)^2)) # Euclidean distance
 }\if{html}{\out{</div>}}
+
+\strong{Sequencing depth.} It uses the same robust clr as \code{\link[=rpca]{rpca()}}, so the
+caveat about sequencing depth there applies too: an inference, since
+Schloss (2026) benchmarked robust Aitchison PCA, not this distance alone.
+See "Sequencing depth" in \code{\link[=rpca]{rpca()}} for a check, and
+\code{\link[=beta_div_rarefied]{beta_div_rarefied()}} for a rarefied alternative.
 }
 \section{Input Types}{
 
@@ -100,6 +106,8 @@ For large datasets, standard matrix operations may be slow. See
 }
 \references{
 Martino, C., Morton, J. T., Marotz, C. A., Thompson, L. R., Tripathi, A., Knight, R., and Zengler, K. (2019). A novel sparse compositional technique reveals microbial perturbations. \emph{mSystems}, 4(1), e00016-19. \doi{10.1128/mSystems.00016-19}
+
+Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA and other compositional data analysis methods at controlling for uneven sequencing effort. \emph{mSystems}, 11, e00930-26. \doi{10.1128/msystems.00930-26}
 }
 \seealso{
 \code{beta_div()}, \code{aitchison()}

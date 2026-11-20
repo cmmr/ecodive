@@ -107,8 +107,10 @@ the global test's decision, as in ANCOMBC) and \code{reject_robust}
 (\code{reject & passed_ss}), the decisions to use.
 
 Attributes: \code{method} (the fit's), \code{groups}, \code{alpha}, \code{p_adjust}, for
-the bootstrapped tests \code{n_bootstraps} and \code{seed}, and with the
-sensitivity analysis \code{sensitivity} (its pseudocounts).
+\code{ancombc_pairwise()} and \code{ancombc_dunnett()} \code{log_base} (\code{exp(1)}:
+\code{log_fc} is a natural log), for the bootstrapped tests \code{n_bootstraps}
+and \code{seed}, and with the sensitivity analysis \code{sensitivity} (its
+pseudocounts).
 }
 \description{
 Multigroup tests on a fit from \code{\link[=ancombc]{ancombc()}} or \code{\link[=ancombc2]{ancombc2()}}, for a

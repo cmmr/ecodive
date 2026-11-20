@@ -54,6 +54,7 @@
 #'   \eqn{10^8} values (800 MB).
 #'
 #' @inheritSection pseudocount_section Pseudocount
+#' @inheritSection ml_section Machine learning
 #'
 #' @details
 #' Samples whose counts are already proportions (summing to 1, within
@@ -65,6 +66,12 @@
 #' \pkg{phyloseq} or \pkg{SummarizedExperiment}, also has a `normalize()`.
 #' Whichever package was attached last masks the other's, so call
 #' `ecodive::normalize()` to be sure of getting this one.
+#'
+#' @references
+#' Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+#' normalizations outperform compositional data transformations in machine
+#' learning applications. *Microbiome*, 12, 45.
+#' \doi{10.1186/s40168-023-01747-z}
 #'
 #' @seealso [beta_div()], [pca()], [envfit()], [rarefy()], [qmp_scale()]
 #'

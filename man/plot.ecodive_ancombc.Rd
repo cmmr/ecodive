@@ -69,7 +69,9 @@ analysis (\code{sensitivity}, see \code{\link[=ancombc]{ancombc()}}), the robust
 (\code{reject_robust}) are drawn filled (in bold in the heatmap) and named,
 and the others that are significant hollow (in italics).
 
-Log fold changes are natural logs, as ANCOM-BC estimates them. In the
+Log fold changes are natural logs, as ANCOM-BC estimates them; the axis
+label and the heatmap's subtitle say so from the result's \code{log_base}
+attribute. In the
 volcano plot, the y axis is \eqn{-\log_{10}} of \code{p_adjusted}, with a
 dashed line at \code{alpha}; coefficients that couldn't be estimated (\code{NaN})
 are left out. In the heatmap, red cells are increases and blue cells

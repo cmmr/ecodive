@@ -249,6 +249,36 @@ than by re-summing, which differs only by rounding; in a borderline
 case that can change which step length is accepted.
 }
 }
+\section{Sequencing depth}{
+
+\code{rpca()} is not a correction for uneven sequencing depth. The robust clr
+divides each sample by the geometric mean of its own non-zero counts, so
+scaling a sample's counts changes nothing; but a deeper sample has more
+non-zero features, so which values are missing (the zeros that OptSpace
+completes) depends on depth, and depth can reach the result that way
+(an inference from the method, not a measured effect). Schloss (2026)
+corrected "numerous problems" in the benchmark that had supported robust
+Aitchison PCA and found that it "was not insensitive to uneven
+sequencing effort and did not perform as well as rarefaction" (see also
+Schloss 2024).
+
+To check a result, correlate its axes with log library size, fit library
+size onto it with \code{\link[=envfit]{envfit()}} (\eqn{r^2} and a permutation p-value), and
+compare it with an ordination of rarefied data from
+\code{\link[=beta_div_rarefied]{beta_div_rarefied()}}, here rarefied to the smallest library so that no
+sample is dropped:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{depth <- rowSums(counts)
+ord   <- rpca(counts)
+cor(ord, log(depth[rownames(ord)]))              # per axis
+envfit(ord, data.frame(log_depth = log(depth)))
+
+dm_rar  <- beta_div_rarefied(counts, 'robust_aitchison', depth = min(depth))
+ord_rar <- pcoa(dm_rar, n_axes = 2)
+procrustes_test(ord_rar, ord)
+}\if{html}{\out{</div>}}
+}
+
 \section{Ordination result}{
 
 Every ordination function (\code{\link[=pcoa]{pcoa()}}, \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}}, \code{\link[=dbrda]{dbrda()}}, \code{\link[=capda]{capda()}},
@@ -321,6 +351,15 @@ Knight, R., & Zengler, K. (2019). A novel sparse compositional technique
 reveals microbial perturbations. \emph{mSystems}, 4(1), e00016-19.
 \doi{10.1128/mSystems.00016-19}
 
+Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA and
+other compositional data analysis methods at controlling for uneven
+sequencing effort. \emph{mSystems}, 11, e00930-26.
+\doi{10.1128/msystems.00930-26}
+
+Schloss, P. D. (2024). Rarefaction is currently the best approach to
+control for uneven sequencing effort in amplicon sequence analyses.
+\emph{mSphere}, 9, e00354-23. \doi{10.1128/msphere.00354-23}
+
 Keshavan, R. H., Montanari, A., & Oh, S. (2010). Matrix completion from a
 few entries. \emph{IEEE Transactions on Information Theory}, 56(6), 2980-2998.
 \doi{10.1109/TIT.2010.2046205}
@@ -334,5 +373,6 @@ Martino, C. (2019). \emph{gemelli} (Python package, version 0.0.13). BSD
 \seealso{
 \code{\link[=pca]{pca()}}, which with \code{norm = 'rclr'} keeps zeros as 0 rather than
 completing them; \code{\link[=rpca_phylo]{rpca_phylo()}}, the same over the nodes of a
-phylogenetic tree; \code{\link[=pcoa]{pcoa()}}; \code{\link[=robust_aitchison]{robust_aitchison()}}.
+phylogenetic tree; \code{\link[=pcoa]{pcoa()}}; \code{\link[=robust_aitchison]{robust_aitchison()}};
+\code{\link[=beta_div_rarefied]{beta_div_rarefied()}}, for a rarefied comparison.
 }

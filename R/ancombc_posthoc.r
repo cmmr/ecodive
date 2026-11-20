@@ -97,8 +97,10 @@
 #'   (`reject & passed_ss`), the decisions to use.
 #'
 #'   Attributes: `method` (the fit's), `groups`, `alpha`, `p_adjust`, for
-#'   the bootstrapped tests `n_bootstraps` and `seed`, and with the
-#'   sensitivity analysis `sensitivity` (its pseudocounts).
+#'   `ancombc_pairwise()` and `ancombc_dunnett()` `log_base` (`exp(1)`:
+#'   `log_fc` is a natural log), for the bootstrapped tests `n_bootstraps`
+#'   and `seed`, and with the sensitivity analysis `sensitivity` (its
+#'   pseudocounts).
 #'
 #' @details
 #' With \eqn{\hat\beta_f} the feature's \eqn{k} coefficients of `groups`
@@ -601,6 +603,7 @@ posthoc_result <- function (out, ph, test) {
   attr(out, 'groups')   <- ph$groups
   attr(out, 'alpha')    <- ph$alpha
   attr(out, 'p_adjust') <- ph$p_adjust
+  if ('log_fc' %in% names(out)) attr(out, 'log_base') <- exp(1)
   if (!is.null(ph$n_bootstraps)) {
     attr(out, 'n_bootstraps') <- ph$n_bootstraps
     attr(out, 'seed')         <- ph$seed

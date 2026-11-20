@@ -287,6 +287,15 @@
   expect_true(invisibly(dt, labels = 0, main = 'x'))
   expect_true(invisibly(dirmult_ttest(cnt, 'Species', iris, contrast = c('setosa', 'virginica'), cpus = cpus)))
 
+  # Log fold changes are labelled from the result's `log_base`.
+  expect_identical(attr(dt, 'log_base'), 2)
+  expect_identical(lfc_label(dt), 'Log2 fold change')
+  expect_identical(lfc_label(structure(1, log_base = exp(1))), 'Log fold change')
+  expect_identical(lfc_label(structure(1, log_base = 10)), 'Log10 fold change')
+  expect_identical(lfc_label(structure(1, log_base = 3)), 'Log fold change (base 3)')
+  expect_identical(lfc_label(structure(1, log_base = NA_real_)), 'Log fold change')
+  expect_identical(lfc_label(1), 'Log fold change')
+
   set.seed(1)
   x <- matrix(rpois(200, 20), 10, dimnames = list(NULL, paste0('F', 1:20)))
   x[1:5, 1:3] <- x[1:5, 1:3] * 8
@@ -375,6 +384,9 @@
   expect_identical(ancombc_plot_name(fit1), 'ANCOM-BC')
   expect_identical(ancombc_plot_groups(fit), 'status')
   expect_identical(ancombc_plot_groups(fit1), 'the groups')
+  expect_identical(attr(fit, 'log_base'), exp(1))
+  expect_identical(attr(fit1, 'log_base'), exp(1))
+  expect_identical(lfc_label(fit), 'Log fold change')
   expect_error(plot(fit, 'nope'), '`covariate` must be one of')
   expect_error(plot(fit, c('age', 'statussevere')), '`covariate` must be one of')
 
@@ -383,6 +395,10 @@
   ad <- ancombc_dunnett(fit, n_bootstraps = 20L, cpus = cpus)
   ag <- ancombc_global(fit, cpus = cpus)
   at <- ancombc_trend(fit, n_bootstraps = 20L, cpus = cpus)
+  expect_identical(attr(ap, 'log_base'), exp(1))
+  expect_identical(attr(ad, 'log_base'), exp(1))
+  expect_null(attr(ag, 'log_base'))   # no log fold changes
+  expect_null(attr(at, 'log_base'))
   for (r in list(ap, ad, ag, at)) {
     expect_true(invisibly(r), info = class(r)[[1]])
     expect_true(invisibly(r, n_features = 3, main = 'x', sub = 'y'), info = class(r)[[1]])

@@ -53,7 +53,8 @@
 #'        same on both sides, as scikit-bio's `dirmult_ttest()` and ALDEx2's
 #'        default do. Nixon et al. (2025) and ALDEx3 suggest `0.5`; use it
 #'        with more draws (`n_draws = 1000` or more) and judge by
-#'        `p_adjusted` (see **Details**).
+#'        `p_adjusted` (see **Details**). Check how your calls depend on it
+#'        (see **Choosing `scale_sd`** in **Details**).
 #'
 #' @param n_draws  The number of Monte Carlo draws from the Dirichlet
 #'        posterior (scikit-bio's `draws`). Default: `128`.
@@ -97,7 +98,8 @@
 #'   Attributes: `method` (`"dirmult_ttest"`), `contrast` (the treatment and reference groups; the
 #'   reference is `NA` when all other samples were pooled), `n` (the number
 #'   of samples on each side), `n_draws`, `pseudocount`, `scale_sd`,
-#'   `alpha`, `conf_level`, `p_adjust` and `seed`.
+#'   `alpha`, `conf_level`, `p_adjust`, `seed`, and `log_base` (`2`: the
+#'   base of the logs in `log2_fc`, `ci_lower` and `ci_upper`).
 #'
 #' @details
 #' With \eqn{x_{sf}} the abundance of feature \eqn{f} in sample \eqn{s} and
@@ -156,6 +158,19 @@
 #' the mirror image, with or without a scale model. [ancom()] tests log ratios
 #' without the assumption, but gives no effect sizes.
 #'
+#' **Choosing `scale_sd`.** Report how the results depend on it: rerun with
+#' `scale_sd = 0`, `0.5` and `1` (`n_draws = 1000` or more) and say which
+#' features stay rejected. Wrong scale assumptions are costly: in
+#' differential set analysis, McGovern et al. (2023) found positive
+#' predictive values as low as 9% under small errors in the assumed scale;
+#' over 11 RNA-seq and other sequencing datasets, Dos Santos et al. (2026)
+#' found that misspecified scale broke false-discovery control in several
+#' common tools, and that a scale model (ALDEx2, ALDEx3) reduced the
+#' unacceptably high FDRs at a cost in sensitivity: no tool offered both.
+#' Larger `scale_sd` raises the smallest change that can be called. The
+#' package website's article "Compositional Analysis of Microbiome Data"
+#' runs such a comparison.
+#'
 #' A side with a single sample has no variance: its features' `t`,
 #' `p_value`, intervals and `p_adjusted` are `NaN`, with a warning, and none
 #' are rejected (as scikit-bio's, which gives them silently).
@@ -209,8 +224,20 @@
 #' 363-372.
 #'
 #' Nixon, M. P., Gloor, G. B., & Silverman, J. D. (2025). Incorporating
-#' scale uncertainty into differential expression analyses using ALDEx2.
-#' *Genome Biology*, 26, 139. \doi{10.1186/s13059-025-03609-3}
+#' scale uncertainty in microbiome and gene expression analysis as an
+#' extension of normalization. *Genome Biology*, 26, 139.
+#' \doi{10.1186/s13059-025-03609-3}
+#'
+#' McGovern, K. C., Nixon, M. P., & Silverman, J. D. (2023). Addressing
+#' erroneous scale assumptions in microbe and gene set enrichment analysis.
+#' *PLOS Computational Biology*, 19, e1011659.
+#' \doi{10.1371/journal.pcbi.1011659}
+#'
+#' Dos Santos, S. J., Murariu, A. C., Silverman, J. D., & Gloor, G. B.
+#' (2026). Not every gene is special: modelling scale controls the false
+#' discovery rate when analysing high-throughput sequencing data. *PLOS
+#' Computational Biology*, 22, e1014728.
+#' \doi{10.1371/journal.pcbi.1014728}
 #'
 #' @seealso [ancom()], [replace_zeros()].
 #'
@@ -365,6 +392,7 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
   attr(out, 'conf_level')  <- conf_level
   attr(out, 'p_adjust')    <- p_adjust
   attr(out, 'seed')        <- seed
+  attr(out, 'log_base')    <- 2
   class(out) <- c('ecodive_dirmult_ttest', 'data.frame')
 
   if (!details) return (out)

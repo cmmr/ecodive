@@ -1088,8 +1088,16 @@ psym_chisq <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = 
 #' sqrt(sum((x-y)^2)) # Euclidean distance
 #' ```
 #' 
+#' **Sequencing depth.** It uses the same robust clr as [rpca()], so the
+#' caveat about sequencing depth there applies too: an inference, since
+#' Schloss (2026) benchmarked robust Aitchison PCA, not this distance alone.
+#' See "Sequencing depth" in [rpca()] for a check, and
+#' [beta_div_rarefied()] for a rarefied alternative.
+#' 
 #' @references
 #' Martino, C., Morton, J. T., Marotz, C. A., Thompson, L. R., Tripathi, A., Knight, R., and Zengler, K. (2019). A novel sparse compositional technique reveals microbial perturbations. *mSystems*, 4(1), e00016-19. \doi{10.1128/mSystems.00016-19}
+#' 
+#' Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA and other compositional data analysis methods at controlling for uneven sequencing effort. *mSystems*, 11, e00930-26. \doi{10.1128/msystems.00930-26}
 #' 
 #' @export
 #' @examples
