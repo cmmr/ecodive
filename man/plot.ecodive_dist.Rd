@@ -23,7 +23,7 @@ sort the samples from smallest to largest.}
 \code{groups} names one of its columns.}
 
 \item{col}{The colour scale, from the smallest value to the largest.
-Defaults to \code{\link[grDevices:palettes]{grDevices::hcl.colors()}}'s \code{"YlOrRd"} palette, light
+Defaults to \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}}'s \code{"YlOrRd"} palette, light
 for near and dark for far; or, when some values are negative (as
 from \code{\link[=rho_p]{rho_p()}}), its \code{"Blue-Red 3"} palette, symmetric about 0.}
 
@@ -41,12 +41,12 @@ functions (such as \code{\link[=bray]{bray()}} or \code{\link[=unweighted_unifra
 proportionality of features from \code{\link[=vlr]{vlr()}}, \code{\link[=rho_p]{rho_p()}} or \code{\link[=phi_s]{phi_s()}}: one row
 and one column per sample (or feature), each cell coloured by the
 distance between its row's and its column's, with the samples ordered as
-the matrix's \code{clust} attribute says.
+the \code{clust} it was made with says.
 }
 \details{
 \strong{Order.} The samples are ordered by the \code{clust} argument of the
-function that made \code{x}, recorded in its \code{dist} record
-(\code{attr(x, "dist")$clust}; see \link{ecodive_steps}):
+function that made \code{x}, kept in its \code{display} list
+(\code{attr(x, "display")$clust}; see \link{ecodive_display}):
 \itemize{
 \item Not set (\code{clust = NULL}, the default): the plot clusters them itself,
 by average linkage (UPGMA, \code{\link[stats:hclust]{stats::hclust()}}), so that similar samples
@@ -57,10 +57,10 @@ sit together. \code{x} is not changed.
 
 To plot a matrix in its own order, make it with \code{clust = FALSE}.
 
-\strong{Title.} The metric's display name, from the \code{dist} record (see
-\link{ecodive_steps}), such as \code{"Bray-Curtis Dissimilarity"}; or else the
+\strong{Title.} The matrix's title (see \link{ecodive_display}), the metric's
+display name, such as \code{"Bray-Curtis Dissimilarity"}; or else the
 \code{method} attribute that \code{\link[stats:dist]{stats::dist()}} sets; \code{"Distances"} without
-either.
+either, as after arithmetic on \code{x}.
 With \code{groups}, the samples are sorted by group, keeping that order within
 each group.
 
@@ -90,7 +90,7 @@ as before.
 
     # Clustered by Ward's method when computed: the result is reordered.
     dm <- bray(iris[, 1:4], clust = 'ward.D2')
-    head(attr(dm, 'dist')$order)
+    head(attr(dm, 'order'))
     plot(dm, 'Species', iris)
 
     # Proportionality, with negative values.

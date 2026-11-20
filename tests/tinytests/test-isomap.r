@@ -97,7 +97,7 @@
   expect_identical(class(x), c('ecodive_ord', 'matrix', 'array'))
   expect_true(is.double(x))
   expect_identical(
-    names(attributes(no_steps(x))),
+    names(attributes(no_display(x))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace',
       'n_neighbors', 'radius', 'components', 'membership', 'class') )
   expect_identical(dimnames(x), list(attr(d, 'Labels'), c('Isomap1', 'Isomap2', 'Isomap3')))
@@ -114,7 +114,7 @@
   expect_identical(dist_ord(d, 'isometric mapping', n_neighbors = 10, seed = 1, cpus = 1), x)
 
   # A symmetric matrix gives the same result as a dist.
-  expect_identical(no_steps(isomap(as.matrix(d), n_neighbors = 10, cpus = 1)), no_steps(x))
+  expect_identical(no_display(isomap(as.matrix(d), n_neighbors = 10, cpus = 1)), no_display(x))
 
   # Radius neighbors.
   r <- isomap(d, radius = 0.6, cpus = 1)
@@ -314,8 +314,8 @@
 
   # k larger than n - 1.
   expect_identical(
-    no_steps(suppressWarnings(isomap(d, n_axes = 1e10, n_neighbors = 9))),
-    no_steps(suppressWarnings(isomap(d, n_axes = 9,    n_neighbors = 9))) )
+    no_display(suppressWarnings(isomap(d, n_axes = 1e10, n_neighbors = 9))),
+    no_display(suppressWarnings(isomap(d, n_axes = 9,    n_neighbors = 9))) )
 
   # All distances zero: no axes.
   expect_warning(ord <- isomap(as.dist(matrix(0, 5, 5))), 'only 0 of the first 3')
@@ -401,7 +401,7 @@
   }
   w <- warnings_of(ord <- isomap(d, n_axes = 1e300, n_neighbors = 9))
   expect_identical(w, warnings_of(isomap(d, n_axes = 9, n_neighbors = 9)))
-  expect_identical(no_steps(ord), no_steps(suppressWarnings(isomap(d, n_axes = 9, n_neighbors = 9))))
+  expect_identical(no_display(ord), no_display(suppressWarnings(isomap(d, n_axes = 9, n_neighbors = 9))))
   w <- warnings_of(ord <- isomap(d, n_neighbors = 1e300))
   expect_identical(length(w), 1L)
   expect_true(grepl('more than the 9 other samples', w[1]))

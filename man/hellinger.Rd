@@ -28,19 +28,19 @@ before returning the distance matrix: \code{NULL} (the default) or
 (WPGMA), \code{"median"} or \code{"centroid"}, or \code{"pcoa"} to order them
 along the first axis of \code{\link[=pcoa]{pcoa()}}. Clustering \strong{reorders the
 samples} of the result, with their labels (samples without names
-are labelled with their positions in the input): its \code{dist} record
-(see \link{ecodive_steps}) gives each one's position in the input as
-\code{order}, so that \code{meta[attr(d, "dist")$order, ]} lines metadata up
-with them. ecodive's ordinations and tests put the samples back in
-their input order before analysing them, so give them metadata in
-its usual order. Other packages see the reordered matrix: give
-them metadata reordered by \code{order}, or matched by name. The
-record's \code{clust} records \code{clust}
-(\code{FALSE} as \code{"none"}), which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
+are labelled with their positions in the input): its \code{order}
+attribute gives each one's position in the input, so that
+\code{meta[attr(d, "order"), ]} lines metadata up with them. ecodive's
+ordinations and tests put the samples back in their input order
+before analysing them, so give them metadata in its usual order.
+Other packages see the reordered matrix: give them metadata
+reordered by \code{order}, or matched by name. The matrix's \code{display}
+list keeps \code{clust} (\code{FALSE} as \code{"none"}; see \link{ecodive_display}),
+which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-       \rho_p}.}
+\rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -93,33 +93,33 @@ Hellinger, E. (1909). Neue Begründung der Theorie quadratischer Formen von unen
 \seealso{
 \code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
-Other Abundance metrics: 
-\code{\link{aitchison}()},
-\code{\link{bhattacharyya}()},
-\code{\link{bray}()},
-\code{\link{canberra}()},
-\code{\link{chebyshev}()},
-\code{\link{chord}()},
-\code{\link{clark}()},
-\code{\link{divergence}()},
-\code{\link{euclidean}()},
-\code{\link{gower}()},
-\code{\link{horn}()},
-\code{\link{jensen}()},
-\code{\link{jsd}()},
-\code{\link{lorentzian}()},
-\code{\link{manhattan}()},
-\code{\link{matusita}()},
-\code{\link{minkowski}()},
-\code{\link{morisita}()},
-\code{\link{motyka}()},
-\code{\link{psym_chisq}()},
-\code{\link{robust_aitchison}()},
-\code{\link{soergel}()},
-\code{\link{squared_chisq}()},
-\code{\link{squared_chord}()},
-\code{\link{squared_euclidean}()},
-\code{\link{topsoe}()},
-\code{\link{wave_hedges}()}
+Other Abundance metrics:
+\code{\link[=aitchison]{aitchison()}},
+\code{\link[=bhattacharyya]{bhattacharyya()}},
+\code{\link[=bray]{bray()}},
+\code{\link[=canberra]{canberra()}},
+\code{\link[=chebyshev]{chebyshev()}},
+\code{\link[=chord]{chord()}},
+\code{\link[=clark]{clark()}},
+\code{\link[=divergence]{divergence()}},
+\code{\link[=euclidean]{euclidean()}},
+\code{\link[=gower]{gower()}},
+\code{\link[=horn]{horn()}},
+\code{\link[=jensen]{jensen()}},
+\code{\link[=jsd]{jsd()}},
+\code{\link[=lorentzian]{lorentzian()}},
+\code{\link[=manhattan]{manhattan()}},
+\code{\link[=matusita]{matusita()}},
+\code{\link[=minkowski]{minkowski()}},
+\code{\link[=morisita]{morisita()}},
+\code{\link[=motyka]{motyka()}},
+\code{\link[=psym_chisq]{psym_chisq()}},
+\code{\link[=robust_aitchison]{robust_aitchison()}},
+\code{\link[=soergel]{soergel()}},
+\code{\link[=squared_chisq]{squared_chisq()}},
+\code{\link[=squared_chord]{squared_chord()}},
+\code{\link[=squared_euclidean]{squared_euclidean()}},
+\code{\link[=topsoe]{topsoe()}},
+\code{\link[=wave_hedges]{wave_hedges()}}
 }
 \concept{Abundance metrics}

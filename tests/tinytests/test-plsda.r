@@ -107,7 +107,7 @@
     }
     if (requireNamespace('slam', quietly = TRUE))
       expect_equal(fit_case(cs, counts = slam::as.simple_triplet_matrix(cs$counts)), ord, tolerance = 1e-12)
-    expect_equal(no_steps(fit_case(cs, counts = t(cs$counts), margin = 2L)), no_steps(ord), tolerance = 1e-12)
+    expect_equal(no_display(fit_case(cs, counts = t(cs$counts), margin = 2L)), no_display(ord), tolerance = 1e-12)
   }
 
 
@@ -131,7 +131,7 @@
 
   expect_identical(class(ord), c('ecodive_ord', 'matrix', 'array'))
   expect_identical(
-    names(attributes(no_steps(ord))),
+    names(attributes(no_display(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings', 'weights',
       'y_loadings', 'vip', 'groups', 'centroids', 'class') )
   expect_identical(attr(ord, 'method'), 'plsda')
@@ -166,9 +166,9 @@
   # Groups given as a column of `data`, a factor, characters, numbers, or
   # through count_ord(): all the same.
   meta <- data.frame(row.names = rownames(cs$counts), mgmt = cs$groups, num = as.integer(cs$groups))
-  expect_identical(no_steps(plsda(cs$counts, 'mgmt', meta, n_axes = 3, cpus = 1)), no_steps(ord))
+  expect_identical(no_display(plsda(cs$counts, 'mgmt', meta, n_axes = 3, cpus = 1)), no_display(ord))
   expect_identical(plsda(cs$counts, meta$mgmt, n_axes = 3, cpus = 1), ord)
-  expect_identical(no_steps(count_ord(cs$counts, 'plsda', 'mgmt', meta, n_axes = 3, cpus = 1)), no_steps(ord))
+  expect_identical(no_display(count_ord(cs$counts, 'plsda', 'mgmt', meta, n_axes = 3, cpus = 1)), no_display(ord))
   by_chr <- plsda(cs$counts, as.character(cs$groups), n_axes = 3, cpus = 1)
   expect_equal(unclass(by_chr)[, ], unclass(ord)[, ])
   by_num <- plsda(cs$counts, 'num', meta, n_axes = 3, cpus = 1)
@@ -177,7 +177,7 @@
 
   # Metadata rows are matched by name.
   shuffled <- meta[rev(seq_len(nrow(meta))), , drop = FALSE]
-  expect_identical(no_steps(plsda(cs$counts, 'mgmt', shuffled, n_axes = 3, cpus = 1)), no_steps(ord))
+  expect_identical(no_display(plsda(cs$counts, 'mgmt', shuffled, n_axes = 3, cpus = 1)), no_display(ord))
 
   # Unused factor levels are dropped.
   extra <- factor(cs$groups, levels = c(lev, 'unused'))

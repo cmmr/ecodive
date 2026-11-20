@@ -133,7 +133,7 @@
   f <- attr(res, 'f_perm')
   expect_true(is.double(f) && is.null(dim(f)) && length(f) == 99)
   expect_equal(res$z, (res$statistic[['F']] - mean(f)) / stats::sd(f), tolerance = 1e-14)
-  expect_identical(attr(res, 'title'), 'Homogeneity of multivariate dispersions (PERMDISP)')
+  expect_identical(attr(res, 'display')$title, 'Homogeneity of multivariate dispersions (PERMDISP) of Bray-Curtis Dissimilarity')
 
   tbl <- res$table
   expect_inherits(tbl, 'anova')
@@ -290,10 +290,10 @@
   }
 
   # A symmetric matrix works like a dist.
-  expect_identical(no_steps(permdisp(as.matrix(d), g, permutations = 19, cpus = 1)), no_steps(ref))
+  expect_identical(no_display(permdisp(as.matrix(d), g, permutations = 19, cpus = 1)), no_display(ref))
   expect_identical(
-    no_steps(permdisp(as.matrix(d), g, type = 'median', permutations = 19, cpus = 1)),
-    no_steps(permdisp(d, 'trt', meta[36:1, ], type = 'median', permutations = 19, cpus = 1)) )
+    no_display(permdisp(as.matrix(d), g, type = 'median', permutations = 19, cpus = 1)),
+    no_display(permdisp(d, 'trt', meta[36:1, ], type = 'median', permutations = 19, cpus = 1)) )
 
   # Rows for other samples are ignored, with their levels.
   extra <- rbind(meta, meta[1, ])

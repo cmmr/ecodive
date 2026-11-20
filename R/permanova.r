@@ -536,7 +536,7 @@ permanova <- function (
 
   new_ecodive_test(
     class       = 'ecodive_permanova',
-    dist        = dv$step,
+    from        = dv$title,
     title       = 'Permutational multivariate analysis of variance (PERMANOVA)',
     statistic   = c(F = f0),
     p_value     = p_model,

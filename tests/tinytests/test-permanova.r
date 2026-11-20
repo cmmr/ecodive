@@ -120,7 +120,7 @@
   expect_identical(df$statistic, obj$statistic[['F']])
 
   out <- capture.output(print(obj))
-  expect_identical(out[[1]], 'Permutational multivariate analysis of variance (PERMANOVA)')
+  expect_identical(out[[1]], 'Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity')
   expect_true(any(grepl('^F = .*, p = .*, z = ', out)))
   expect_true(any(grepl('Terms added sequentially', out)))
   expect_true(any(grepl('^Residual', out)))
@@ -314,7 +314,7 @@
   expect_identical(permanova(d, data = unnamed, formula = ~ trt + ph, permutations = 19, cpus = 1), ref)
 
   # A symmetric matrix works like a dist.
-  expect_identical(no_steps(permanova(as.matrix(d), data = meta, formula = ~ trt + ph, permutations = 19, cpus = 1)), no_steps(ref))
+  expect_identical(no_display(permanova(as.matrix(d), data = meta, formula = ~ trt + ph, permutations = 19, cpus = 1)), no_display(ref))
 
   # A left-hand side is ignored; character columns are factors.
   expect_identical(permanova(d, data = meta, formula = dm ~ trt + ph, permutations = 19, cpus = 1), ref)

@@ -111,7 +111,7 @@
   expect_identical(res$n_perm, 99L)
   expect_identical(res$permutation, 'free')
   expect_identical(length(attr(res, 'r_perm')), 99L)
-  expect_identical(attr(res, 'title'), 'Analysis of similarities (ANOSIM)')
+  expect_identical(attr(res, 'display')$title, 'Analysis of similarities (ANOSIM) of Bray-Curtis Dissimilarity')
   expect_identical(names(res$ranks), c('pairs', 'mean_rank'))
   expect_true(res$p_value >= 1 / 100)
   expect_equal(res$z, (res$statistic[['R']] - mean(attr(res, 'r_perm'))) / stats::sd(attr(res, 'r_perm')))
@@ -214,7 +214,7 @@
     anosim(d, meta$site, permutations = 19, cpus = 1)$statistic[['R']] )
 
   # A symmetric matrix works like a dist; a data matrix like a data frame.
-  expect_identical(no_steps(anosim(as.matrix(d), meta$trt, permutations = 19, cpus = 1)), no_steps(ref))
+  expect_identical(no_display(anosim(as.matrix(d), meta$trt, permutations = 19, cpus = 1)), no_display(ref))
   mm <- as.matrix(meta[c('trt', 'site')])
   expect_identical(anosim(d, 'site', mm, permutations = 19, cpus = 1)$statistic[['R']], anosim(d, meta$site, permutations = 0)$statistic[['R']])
 

@@ -53,8 +53,8 @@
 
   # A symmetric matrix, as for the methods.
   expect_identical(
-    no_steps(dist_test(as.matrix(d), 'anosim', 'trt', meta, permutations = 9, cpus = 1)),
-    no_steps(anosim(d, 'trt', meta, permutations = 9, cpus = 1)) )
+    no_display(dist_test(as.matrix(d), 'anosim', 'trt', meta, permutations = 9, cpus = 1)),
+    no_display(anosim(d, 'trt', meta, permutations = 9, cpus = 1)) )
 
   # Results bind into one table.
   tbl <- do.call(rbind, lapply(list_dist_tests(val = 'id', groups = 'categorical'), function (m)

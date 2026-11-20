@@ -354,7 +354,7 @@ tsne <- function (
 
   result <- function (x, kl_divergence, n_iter) {
     ord_result(
-      ord_flip(x), 'tsne', labels, prefix = 'TSNE', dist = dv$step,
+      ord_flip(x), 'tsne', labels, prefix = 'TSNE', from = dv$title,
       kl_divergence = kl_divergence,
       perplexity    = perplexity,
       init          = init,

@@ -40,19 +40,19 @@ before returning the distance matrix: \code{NULL} (the default) or
 (WPGMA), \code{"median"} or \code{"centroid"}, or \code{"pcoa"} to order them
 along the first axis of \code{\link[=pcoa]{pcoa()}}. Clustering \strong{reorders the
 samples} of the result, with their labels (samples without names
-are labelled with their positions in the input): its \code{dist} record
-(see \link{ecodive_steps}) gives each one's position in the input as
-\code{order}, so that \code{meta[attr(d, "dist")$order, ]} lines metadata up
-with them. ecodive's ordinations and tests put the samples back in
-their input order before analysing them, so give them metadata in
-its usual order. Other packages see the reordered matrix: give
-them metadata reordered by \code{order}, or matched by name. The
-record's \code{clust} records \code{clust}
-(\code{FALSE} as \code{"none"}), which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
+are labelled with their positions in the input): its \code{order}
+attribute gives each one's position in the input, so that
+\code{meta[attr(d, "order"), ]} lines metadata up with them. ecodive's
+ordinations and tests put the samples back in their input order
+before analysing them, so give them metadata in its usual order.
+Other packages see the reordered matrix: give them metadata
+reordered by \code{order}, or matched by name. The matrix's \code{display}
+list keeps \code{clust} (\code{FALSE} as \code{"none"}; see \link{ecodive_display}),
+which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-       \rho_p}.}
+\rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -97,12 +97,12 @@ Lozupone, C., & Knight, R. (2005). UniFrac: a new phylogenetic method for compar
 \seealso{
 \code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
-Other Phylogenetic metrics: 
-\code{\link{faith}()},
-\code{\link{generalized_unifrac}()},
-\code{\link{normalized_unifrac}()},
-\code{\link{philr_distance}()},
-\code{\link{variance_adjusted_unifrac}()},
-\code{\link{weighted_unifrac}()}
+Other Phylogenetic metrics:
+\code{\link[=faith]{faith()}},
+\code{\link[=generalized_unifrac]{generalized_unifrac()}},
+\code{\link[=normalized_unifrac]{normalized_unifrac()}},
+\code{\link[=philr_distance]{philr_distance()}},
+\code{\link[=variance_adjusted_unifrac]{variance_adjusted_unifrac()}},
+\code{\link[=weighted_unifrac]{weighted_unifrac()}}
 }
 \concept{Phylogenetic metrics}

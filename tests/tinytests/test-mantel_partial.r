@@ -42,7 +42,7 @@
   expect_identical(res$n, n)
   expect_identical(res$n_perm, 99L)
   expect_identical(res$permutation, 'free')
-  expect_identical(attr(res, 'title'), 'Partial Mantel test (Pearson)')
+  expect_identical(attr(res, 'display')$title, 'Partial Mantel test (Pearson)')
   expect_identical(length(attr(res, 'r_perm')), 99L)
   expect_true(res$p_value >= 1 / 100 && res$p_value <= 1)
 
@@ -60,7 +60,7 @@
   expect_true(res$partial)
   expect_identical(res$permutation, 'within strata')
   expect_identical(res$alternative, 'less')
-  expect_identical(attr(res, 'title'), 'Partial Mantel test (Kendall)')
+  expect_identical(attr(res, 'display')$title, 'Partial Mantel test (Kendall)')
   expect_identical(
     mantel_partial(x, ex$y, ex$z, permutations = ex$perms[1:3, ])$permutation,
     'supplied matrix' )

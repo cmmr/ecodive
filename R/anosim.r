@@ -258,7 +258,7 @@ anosim <- function (
 
   new_ecodive_test(
     class       = 'ecodive_anosim',
-    dist        = dv$step,
+    from        = dv$title,
     title       = 'Analysis of similarities (ANOSIM)',
     statistic   = c(R = r_obs),
     p_value     = p,

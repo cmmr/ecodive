@@ -82,11 +82,10 @@
 #' @details
 #' The plot is made of what `x` holds:
 #'
-#' * **Title**: the method's name, as [list_dist_ords()] and
-#'   [list_count_ords()] give it, and for an ordination of distances, the
-#'   distances' metric, from the records of how `x` was made (see
-#'   [ecodive_steps]): such as "Principal Coordinates Analysis of
-#'   Bray-Curtis Dissimilarity".
+#' * **Title**: the ordination's title (see [ecodive_display]): the
+#'   method's name, as [list_dist_ords()] and [list_count_ords()] give it,
+#'   and for an ordination of distances, the distances' metric, such as
+#'   "Principal Coordinates Analysis of Bray-Curtis Dissimilarity".
 #' * **Axis labels**: the axes' names, with the percentage of the variance
 #'   each explains (the `prop` attribute), for methods that have one.
 #' * **Subtitle**: how well the method fit, for methods that measure it: the
@@ -158,7 +157,7 @@ plot.ecodive_ord <- function (
   g    <- ord_plot_groups(x, groups, data)
   look <- ord_plot_look(g, col, pch)
 
-  main <- step_title(ord_method_name(att$method), att$dist)
+  main <- plot_title(x, ord_method_name(att$method))
   sub  <- ord_subtitle(x)
   labs <- ord_axis_labels(x)
 

@@ -211,12 +211,12 @@
 
   expect_true(inherits(ord, 'ecodive_ord') && is.matrix(ord) && is.double(ord))
   expect_identical(
-    names(attributes(no_steps(ord))),
+    names(attributes(no_display(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings',
       'cost', 'n_iters', 'dm', 'tree', 'node_counts', 'class') )
   expect_identical(dimnames(ord), list(rownames(m), c('RPCA1', 'RPCA2')))
   expect_identical(attr(ord, 'method'), 'rpca_phylo')
-  expect_identical(attr(attr(ord, 'dm'), 'dist')$metric, 'rpca_phylo')
+  expect_identical(attr(attr(ord, 'dm'), 'method'), 'rpca_phylo')
   expect_identical(attr(ord, 'n_iters'), 5L)
   expect_equal(attr(ord, 'prop'), attr(ord, 'eig') / attr(ord, 'trace'), tolerance = 1e-14)
 
@@ -250,7 +250,7 @@
   # Without node_counts and distances.
   o2 <- rpca_phylo(m, tree, n_axes = 2, cpus = 1)
   expect_identical(
-    names(attributes(no_steps(o2))),
+    names(attributes(no_display(o2))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings',
       'cost', 'n_iters', 'tree', 'class') )
   expect_identical(c(o2), c(ord))
@@ -275,7 +275,7 @@
   # validate_tree() pads tips missing from a table with samples as columns
   # (it gave the padding the wrong dimnames before rpca_phylo()).
   expect_identical(faith(t(m), tree, margin = 2, cpus = 1), faith(m, tree, cpus = 1))
-  expect_identical(no_steps(rpca_phylo(t(big), btr, margin = 2, min_depth = 2, distances = TRUE, node_counts = TRUE, cpus = 1)), no_steps(ref))
+  expect_identical(no_display(rpca_phylo(t(big), btr, margin = 2, min_depth = 2, distances = TRUE, node_counts = TRUE, cpus = 1)), no_display(ref))
   if (requireNamespace('Matrix', quietly = TRUE))
     expect_identical(
       rpca_phylo(Matrix::Matrix(big, sparse = TRUE), btr, min_depth = 2,

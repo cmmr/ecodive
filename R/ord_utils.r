@@ -18,8 +18,8 @@
 # The packed lower triangle of a dist object or symmetric matrix, as a
 # double vector `dm`, with the number of samples `n`, their `labels`, the
 # dist object's `maxdist` attribute (from vegan::vegdist()), if any, and its
-# `dist` record (`step`; see ?ecodive_steps), if any. A matrix that `clust`
-# reordered is put back in its samples' input order first.
+# `title` (see ?ecodive_display), if any. A matrix that `clust` reordered
+# (by its `order` attribute) is put back in its samples' input order first.
 #
 # Every method rejects NA, NaN, infinite, and negative distances. Negative
 # values within rounding error of 0 (down to -1e-12 times the largest
@@ -28,14 +28,13 @@
 dist_vector <- function (dm) {
 
   maxdist <- NULL
-  step    <- attr(dm, 'dist', exact = TRUE)  # how it was made (?ecodive_steps)
-  if (!inherits(step, 'ecodive_step')) step <- NULL
+  title   <- display_title(dm)
 
   # A matrix that `clust` reordered goes back to its samples' input order, so
   # that metadata lines up with them whether matched by name or by position.
   # Labels that clustering gave unnamed samples (their positions) go too.
-  if (inherits(dm, 'dist') && !is.null(step$order)) {
-    o <- step$order
+  o <- attr(dm, 'order', exact = TRUE)
+  if (inherits(dm, 'dist') && is.numeric(o)) {
     if (length(o) == attr(dm, 'Size', exact = TRUE) && !anyDuplicated(o) && all(o %in% seq_along(o))) {
       lab <- attr(dm, 'Labels', exact = TRUE)
       dm  <- dist_reorder(dm, order(o))
@@ -92,7 +91,7 @@ dist_vector <- function (dm) {
     }
   }
 
-  list(dm = dm, n = n, labels = labels, maxdist = maxdist, step = step)
+  list(dm = dm, n = n, labels = labels, maxdist = maxdist, title = title)
 }
 
 
@@ -225,12 +224,13 @@ ord_flip <- function (x) {
 # row per sample (named `labels`) and one column per axis, named `prefix`
 # followed by 1, 2, ..., or else `cols`. Of class "ecodive_ord". Attributes
 # `method`, `eig` and `prop` come first (NA_real_ for each axis by default),
-# then those in `...`, then the records of how it was made (?ecodive_steps):
-# `dist`, the distance matrix's (dist_vector()'s `step`), if any, and `ord`,
-# this ordination's (from ord_step(), or `ord`).
+# then those in `...`, and last `display`, with the title (see
+# ?ecodive_display): the method's display name, then " of " and `from`, the
+# title of the distance matrix it was computed from (dist_vector()'s
+# `title`), if any.
 ord_result <- function (
     points, method, labels, prefix = NULL, cols = NULL,
-    eig = NULL, prop = NULL, ..., dist = NULL, ord = NULL ) {
+    eig = NULL, prop = NULL, ..., from = NULL ) {
 
   points <- matrix(as.double(points), nrow = NROW(points), ncol = NCOL(points))
   k      <- ncol(points)
@@ -251,19 +251,17 @@ ord_result <- function (
     ...,
     class  = c('ecodive_ord', 'matrix', 'array') )
 
-  if (inherits(dist, 'ecodive_step')) attr(res, 'dist') <- dist
-  attr(res, 'ord') <- if (inherits(ord, 'ecodive_step')) ord else ord_step(method)
-  res
+  set_display(res, title = title_of(ord_method_name(method), from))
 }
 
 
 
 #' Print an ordination result
 #'
-#' Prints the coordinates, then one line on the axes and the names of the
-#' other attributes, rather than every attribute in full (such as `pca()`'s
-#' loadings), and last, the records of how it was made (see
-#' [ecodive_steps]), one line each.
+#' Prints the coordinates, then the ordination's title (see
+#' [ecodive_display]), one line on the axes, and the names of the other
+#' attributes, rather than every attribute in full (such as `pca()`'s
+#' loadings).
 #'
 #' @param x  An ordination result, from [dist_ord()], [count_ord()],
 #'        [pcoa()], [pca()], [rpca()], [rpca_phylo()], [dpcoa()], [rda()], [cca()], [ca()], [lda()], [plsda()], [oplsda()], [dbrda()], [capscale()],
@@ -282,6 +280,9 @@ print.ecodive_ord <- function (x, ...) {
   attributes(m) <- att[c('dim', 'dimnames')]
   print(m, ...)
 
+  title <- display_title(x)
+  if (!is.null(title)) cat('\n', title, sep = '')
+
   k    <- ncol(x)
   prop <- att$prop
   line <- sprintf('\n%s: %d sample%s, %d ax%s', att$method,
@@ -291,13 +292,8 @@ print.ecodive_ord <- function (x, ...) {
       paste(format(round(100 * prop, 1), nsmall = 1, trim = TRUE), collapse = ', ')))
   cat(line, '\n', sep = '')
 
-  more <- setdiff(names(att), c('dim', 'dimnames', 'class', 'dist', 'ord'))
+  more <- setdiff(names(att), c('dim', 'dimnames', 'class', 'display'))
   cat('Attributes: ', paste(more, collapse = ', '), '\n', sep = '')
-
-  # How it was made (?ecodive_steps).
-  for (a in c('dist', 'ord'))
-    if (inherits(att[[a]], 'ecodive_step'))
-      cat(sprintf('%-6s%s\n', paste0(a, ':'), format(att[[a]])))
 
   invisible(x)
 }

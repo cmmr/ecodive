@@ -357,7 +357,7 @@ dbrda_core <- function (
     prefix   = if (positive) 'CAP' else 'dbRDA',
     prefix_u = 'MDS',
     positive = positive,
-    dist     = dv$step )
+    from     = dv$title )
 }
 
 

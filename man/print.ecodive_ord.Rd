@@ -17,9 +17,9 @@
 \code{x}, invisibly.
 }
 \description{
-Prints the coordinates, then one line on the axes and the names of the
-other attributes, rather than every attribute in full (such as \code{pca()}'s
-loadings), and last, the records of how it was made (see
-\link{ecodive_steps}), one line each.
+Prints the coordinates, then the ordination's title (see
+\link{ecodive_display}), one line on the axes, and the names of the other
+attributes, rather than every attribute in full (such as \code{pca()}'s
+loadings).
 }
 \keyword{internal}

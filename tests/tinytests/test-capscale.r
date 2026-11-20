@@ -90,7 +90,7 @@
   expect_true(is.matrix(ord) && is.double(ord))
   expect_identical(class(ord), c('ecodive_ord', 'matrix', 'array'))
   expect_identical(
-    names(attributes(no_steps(ord))),
+    names(attributes(no_display(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'inertia',
       'constrained_eig', 'r_squared', 'adj_r_squared', 'biplot', 'centroids', 'class') )
   expect_identical(attr(ord, 'method'), 'capscale')
@@ -198,15 +198,15 @@
   one  <- capscale(d, data = meta, formula = ~ Management, cpus = 1)
 
   dmx <- d
-  expect_identical(no_steps(capscale(d, 'Management', meta, cpus = 1)), no_steps(one))
-  expect_identical(no_steps(capscale(dmx ~ Management, meta, cpus = 1)), no_steps(one))
-  expect_identical(no_steps(capscale(as.matrix(d), 'Management', meta, cpus = 1)), no_steps(one))
-  expect_identical(no_steps(capscale(d, 'Management', meta[rev(seq_len(nrow(meta))), ], cpus = 1)), no_steps(one))
+  expect_identical(no_display(capscale(d, 'Management', meta, cpus = 1)), no_display(one))
+  expect_identical(no_display(capscale(dmx ~ Management, meta, cpus = 1)), no_display(one))
+  expect_identical(no_display(capscale(as.matrix(d), 'Management', meta, cpus = 1)), no_display(one))
+  expect_identical(no_display(capscale(d, 'Management', meta[rev(seq_len(nrow(meta))), ], cpus = 1)), no_display(one))
   expect_equal(unclass(capscale(d, meta$Management, cpus = 1))[, ], unclass(one)[, ])
 
   # dist_ord() runs it, by its name or another.
-  expect_identical(no_steps(dist_ord(d, 'capscale', 'Management', meta, cpus = 1)), no_steps(one))
-  expect_identical(no_steps(dist_ord(d, 'capscale', 'Management', meta, seed = 3, cpus = 1)), no_steps(one))
+  expect_identical(no_display(dist_ord(d, 'capscale', 'Management', meta, cpus = 1)), no_display(one))
+  expect_identical(no_display(dist_ord(d, 'capscale', 'Management', meta, seed = 3, cpus = 1)), no_display(one))
   expect_identical(match_dist_ord('CAP')$id, 'capscale')
   expect_identical(match_dist_ord('constrained analysis of principal coordinates')$id, 'capscale')
 

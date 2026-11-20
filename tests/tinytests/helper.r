@@ -21,12 +21,12 @@ tree     <- read_tree(tree_str)
 
 
 
-# A result without the records of how it was made (?ecodive_steps): to
-# compare results made in different ways, whose records differ.
-no_steps <- function (x) {
-  attr(x, 'dist') <- NULL
-  attr(x, 'ord')  <- NULL
+# A result without its `display` list (?ecodive_display): to compare
+# results made in different ways, whose titles differ (such as an
+# ordination of a distance matrix and of the same matrix as a plain matrix).
+no_display <- function (x) {
+  attr(x, 'display') <- NULL
   if (inherits(x, 'ecodive_test') && inherits(x$procrustes, 'ecodive_ord'))
-    x$procrustes <- no_steps(x$procrustes)
+    x$procrustes <- no_display(x$procrustes)
   x
 }

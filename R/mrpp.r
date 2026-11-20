@@ -287,7 +287,7 @@ mrpp <- function (
 
   new_ecodive_test(
     class          = 'ecodive_mrpp',
-    dist           = dv$step,
+    from           = dv$title,
     title          = 'Multi-response permutation procedure (MRPP)',
     statistic      = c(delta = delta),
     p_value        = p,

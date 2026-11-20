@@ -118,7 +118,7 @@
 
     expect_identical(attr(ord, 'correction'), corr)
     expect_identical(
-      names(attributes(no_steps(ord))),
+      names(attributes(no_display(ord))),
       c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'correction', 'constant', 'class') )
   }
 
@@ -205,7 +205,7 @@
       o <- suppressWarnings(pcoa(d, correction = corr, cpus = 1))
       expect_identical(attr(o, 'constant'), 0)
       expect_identical(attr(o, 'correction'), corr)
-      expect_identical(no_steps(strip(o)), no_steps(strip(o0)))
+      expect_identical(no_display(strip(o)), no_display(strip(o0)))
     }
   }
 

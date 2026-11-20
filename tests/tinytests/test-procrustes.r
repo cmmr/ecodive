@@ -87,7 +87,7 @@
   expect_identical(rownames(res), rownames(X))
   expect_identical(colnames(res), c('Dim1', 'Dim2'))
   expect_identical(attr(res, 'method'), 'procrustes')
-  expect_identical(names(attributes(no_steps(res))), c(
+  expect_identical(names(attributes(no_display(res))), c(
     'dim', 'dimnames', 'method', 'eig', 'prop', 'ss', 'rotation', 'translation',
     'dilation', 'residuals', 'symmetric', 'target', 'class' ))
   expect_identical(attr(res, 'eig'), c(NA_real_, NA_real_))
@@ -157,12 +157,12 @@
 
   d1 <- dist(X)
   d2 <- dist(cf$N)
-  expect_equal(no_steps(procrustes(d1, d1)), no_steps(procrustes(pcoa(d1), pcoa(d1))))
-  expect_equal(no_steps(procrustes(d1, d2, n_axes = 2)), no_steps(procrustes(pcoa(d1, n_axes = 2), pcoa(d2, n_axes = 2))))
-  expect_equal(no_steps(procrustes(d1, X)), no_steps(procrustes(pcoa(d1), X)))
+  expect_equal(no_display(procrustes(d1, d1)), no_display(procrustes(pcoa(d1), pcoa(d1))))
+  expect_equal(no_display(procrustes(d1, d2, n_axes = 2)), no_display(procrustes(pcoa(d1, n_axes = 2), pcoa(d2, n_axes = 2))))
+  expect_equal(no_display(procrustes(d1, X)), no_display(procrustes(pcoa(d1), X)))
   expect_equal(
-    no_steps(procrustes_test(d1, d2, n_axes = 2, permutations = 19)),
-    no_steps(procrustes_test(pcoa(d1, n_axes = 2), pcoa(d2, n_axes = 2), permutations = 19)) )
+    no_display(procrustes_test(d1, d2, n_axes = 2, permutations = 19)),
+    no_display(procrustes_test(pcoa(d1, n_axes = 2), pcoa(d2, n_axes = 2), permutations = 19)) )
 
 
 
@@ -180,7 +180,7 @@
   expect_identical(pt$permutation, 'free')
   expect_identical(length(attr(pt, 'r_perm')), 99L)
   expect_equal(pt$statistic[['r']], sqrt(1 - pt$ss))
-  expect_identical(no_steps(pt$procrustes), no_steps(procrustes(Y, X, symmetric = TRUE)))
+  expect_identical(no_display(pt$procrustes), no_display(procrustes(Y, X, symmetric = TRUE)))
   expect_equal(pt$z, (pt$statistic[['r']] - mean(attr(pt, 'r_perm'))) / sd(attr(pt, 'r_perm')))
   expect_identical(pt$p_value, 0.01)
   expect_stdout(print(pt), 'PROTEST')

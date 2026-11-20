@@ -351,7 +351,7 @@ isomap <- function (dm, n_axes = 3L, n_neighbors = 5L, radius = NULL, cpus = n_c
   names(membership) <- labels
 
   ord_result(
-    points, 'isomap', labels, prefix = 'Isomap', dist = dv$step,
+    points, 'isomap', labels, prefix = 'Isomap', from = dv$title,
     eig         = eig,
     prop        = if (trace > 0) eig / trace else eig,
     trace       = trace,

@@ -74,19 +74,19 @@ before returning the distance matrix: \code{NULL} (the default) or
 (WPGMA), \code{"median"} or \code{"centroid"}, or \code{"pcoa"} to order them
 along the first axis of \code{\link[=pcoa]{pcoa()}}. Clustering \strong{reorders the
 samples} of the result, with their labels (samples without names
-are labelled with their positions in the input): its \code{dist} record
-(see \link{ecodive_steps}) gives each one's position in the input as
-\code{order}, so that \code{meta[attr(d, "dist")$order, ]} lines metadata up
-with them. ecodive's ordinations and tests put the samples back in
-their input order before analysing them, so give them metadata in
-its usual order. Other packages see the reordered matrix: give
-them metadata reordered by \code{order}, or matched by name. The
-record's \code{clust} records \code{clust}
-(\code{FALSE} as \code{"none"}), which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
+are labelled with their positions in the input): its \code{order}
+attribute gives each one's position in the input, so that
+\code{meta[attr(d, "order"), ]} lines metadata up with them. ecodive's
+ordinations and tests put the samples back in their input order
+before analysing them, so give them metadata in its usual order.
+Other packages see the reordered matrix: give them metadata
+reordered by \code{order}, or matched by name. The matrix's \code{display}
+list keeps \code{clust} (\code{FALSE} as \code{"none"}; see \link{ecodive_display}),
+which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{NULL} it clusters the samples
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-       \rho_p}.}
+\rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -99,11 +99,13 @@ that \code{plot()} draws it as a heatmap (see \code{\link[=plot.ecodive_dist]{pl
 function for \code{dist} objects, such as \code{as.matrix()}, works on it as
 before. Each metric's own function, such as \code{\link[=bray]{bray()}}, returns the same.
 
-Besides \code{dist}'s \code{Size}, \code{Labels}, \code{Diag} and \code{Upper}, it has attribute
-\code{dist}, the record of how it was made (see \link{ecodive_steps}): the
-metric's display name (\code{attr(d, "dist")$name}, such as \code{"Bray-Curtis Dissimilarity"}) and ID (\verb{$metric}), the \code{norm} applied, the
-\code{pseudocount}, \code{power} or \code{alpha} used, and with \code{clust}, \verb{$clust} and
-\verb{$order}. Ordinations and tests of the matrix keep the record.
+Besides \code{dist}'s \code{Size}, \code{Labels}, \code{Diag} and \code{Upper}, it has
+attributes \code{method}, the metric's ID (such as \code{"bray"}), as
+\code{\link[stats:dist]{stats::dist()}} sets it; with \code{clust}, \code{order} (see \code{clust}); and
+\code{display}, for \code{plot()} and \code{print()}: its title, the metric's display
+name (such as \code{"Bray-Curtis Dissimilarity"}), which ordinations and
+tests of the matrix name in theirs, and with \code{clust}, the clustering
+method (see \link{ecodive_display}).
 }
 \description{
 Beta Diversity Wrapper Function

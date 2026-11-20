@@ -77,12 +77,13 @@ V_UNIFRAC <- 5L
 #'   function for `dist` objects, such as `as.matrix()`, works on it as
 #'   before. Each metric's own function, such as [bray()], returns the same.
 #'
-#'   Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, it has attribute
-#'   `dist`, the record of how it was made (see [ecodive_steps]): the
-#'   metric's display name (`attr(d, "dist")$name`, such as `"Bray-Curtis
-#'   Dissimilarity"`) and ID (`$metric`), the `norm` applied, the
-#'   `pseudocount`, `power` or `alpha` used, and with `clust`, `$clust` and
-#'   `$order`. Ordinations and tests of the matrix keep the record.
+#'   Besides `dist`'s `Size`, `Labels`, `Diag` and `Upper`, it has
+#'   attributes `method`, the metric's ID (such as `"bray"`), as
+#'   [stats::dist()] sets it; with `clust`, `order` (see `clust`); and
+#'   `display`, for `plot()` and `print()`: its title, the metric's display
+#'   name (such as `"Bray-Curtis Dissimilarity"`), which ordinations and
+#'   tests of the matrix name in theirs, and with `clust`, the clustering
+#'   method (see [ecodive_display]).
 #' 
 #' 
 #' @details

@@ -80,9 +80,6 @@ plot.ecodive_envfit <- function (
     if (anyDuplicated(x$level[!is.na(x$level)])) rownames(df)[!is_vec] else lev, cols ))
 
   if (!add) {
-    # The ordination fitted to, from its records (?ecodive_steps).
-    on_ <- step_title(step_name(attr(x, 'ord', exact = TRUE)), attr(x, 'dist', exact = TRUE))
-
     # Arrows to 80% of the furthest centroid, or their own lengths.
     ext <- rep(if (nrow(cen)) max(abs(cen)) else 1.25, 2)
     mul <- if (nrow(arr) && nrow(cen)) plot_arrow_mul(arr, ext) else 1
@@ -92,7 +89,7 @@ plot.ecodive_envfit <- function (
       list(
         type = 'n', asp = 1, xlim = lim, ylim = lim,
         xlab = cols[[1]], ylab = cols[[2]],
-        main = if (is.null(on_)) 'Fitted variables' else paste('Fitted variables on', on_),
+        main = plot_title(x, 'Fitted variables'),
         sub = sprintf('%d permutations', attr(x, 'n_perm', exact = TRUE)) ))
     graphics::abline(h = 0, v = 0, lty = 3, col = 'grey70')
   }

@@ -9,7 +9,7 @@
 #' proportionality of features from [vlr()], [rho_p()] or [phi_s()]: one row
 #' and one column per sample (or feature), each cell coloured by the
 #' distance between its row's and its column's, with the samples ordered as
-#' the matrix's `clust` attribute says.
+#' the `clust` it was made with says.
 #'
 #' @param x  A distance matrix of class `ecodive_dist`, as ecodive's
 #'        distance functions return. (`plot(as.dist(m))` of another matrix
@@ -38,8 +38,8 @@
 #'
 #' @details
 #' **Order.** The samples are ordered by the `clust` argument of the
-#' function that made `x`, recorded in its `dist` record
-#' (`attr(x, "dist")$clust`; see [ecodive_steps]):
+#' function that made `x`, kept in its `display` list
+#' (`attr(x, "display")$clust`; see [ecodive_display]):
 #'
 #' * Not set (`clust = NULL`, the default): the plot clusters them itself,
 #'   by average linkage (UPGMA, [stats::hclust()]), so that similar samples
@@ -49,10 +49,10 @@
 #'
 #' To plot a matrix in its own order, make it with `clust = FALSE`.
 #'
-#' **Title.** The metric's display name, from the `dist` record (see
-#' [ecodive_steps]), such as `"Bray-Curtis Dissimilarity"`; or else the
+#' **Title.** The matrix's title (see [ecodive_display]), the metric's
+#' display name, such as `"Bray-Curtis Dissimilarity"`; or else the
 #' `method` attribute that [stats::dist()] sets; `"Distances"` without
-#' either.
+#' either, as after arithmetic on `x`.
 #' With `groups`, the samples are sorted by group, keeping that order within
 #' each group.
 #'
@@ -85,7 +85,7 @@
 #'
 #'     # Clustered by Ward's method when computed: the result is reordered.
 #'     dm <- bray(iris[, 1:4], clust = 'ward.D2')
-#'     head(attr(dm, 'dist')$order)
+#'     head(attr(dm, 'order'))
 #'     plot(dm, 'Species', iris)
 #'
 #'     # Proportionality, with negative values.
@@ -200,8 +200,8 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
 # so the groups are found for the samples in that order (by their labels, or
 # by position for samples that had none) and then put in `x`'s.
 dist_plot_groups <- function (x, n, labels, groups, data) {
-  o <- attr(x, 'dist', exact = TRUE)$order
-  if (is.null(o) || length(o) != n || anyDuplicated(o) || !all(o %in% seq_len(n)))
+  o <- attr(x, 'order', exact = TRUE)
+  if (!is.numeric(o) || length(o) != n || anyDuplicated(o) || !all(o %in% seq_len(n)))
     return (plot_groups(n, labels, groups, data))
   input <- if (is.null(labels) || identical(as.character(labels), as.character(o))) NULL
            else labels[order(o)]
@@ -222,13 +222,12 @@ dist_plot_order_name <- function (clust) {
 
 
 # The title, the unit (samples or features) and the colour key's title of a
-# distance matrix: the title from its `dist` record's name (the metric's
-# display name), the rest from its metric (or the `method` attribute that
-# stats::dist() sets). Without either, "Distances".
+# distance matrix: its title (the metric's display name), the rest from its
+# `method` attribute (the metric's ID, as stats::dist() also sets it).
+# Without either, "Distances".
 dist_plot_name <- function (x) {
   m     <- dist_metric_of(x)
-  title <- step_name(attr(x, 'dist', exact = TRUE))
-  if (is.null(title)) title <- if (nzchar(m)) m else 'Distances'
+  title <- plot_title(x, if (nzchar(m)) m else 'Distances')
   features <- m %in% c('vlr', 'rho_p', 'phi_s')
   list(
     title = title,

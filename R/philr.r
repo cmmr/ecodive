@@ -264,10 +264,8 @@ philr_distance <- function (
 
   x <- philr_run('enorm.x.gm.counts', 'blw.sqrt')
 
-  # The coordinates replace the counts; the pseudocount used stays in this
-  # frame for the `dist` record.
-  pseudocount <- attr(x, 'pseudocount', exact = TRUE)
-  counts      <- x
+  # The coordinates replace the counts.
+  counts <- x
   validate_pairs()
   validate_clust()
 

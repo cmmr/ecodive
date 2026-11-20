@@ -92,7 +92,7 @@
       'class_delta', 'class_n', 'weights', 'pairwise', 'p_adjust', 'permutation') )
   expect_identical(class(res), c('ecodive_mrpp', 'ecodive_test'))
   expect_identical(names(res$statistic), 'delta')
-  expect_identical(attr(res, 'title'), 'Multi-response permutation procedure (MRPP)')
+  expect_identical(attr(res, 'display')$title, 'Multi-response permutation procedure (MRPP) of Bray-Curtis Dissimilarity')
 
   # One row of the shared core fields.
   df <- as.data.frame(res)
@@ -110,7 +110,7 @@
   expect_true(res$p_value >= 1 / 100 && res$p_value <= 1)
   expect_true(res$z < 0)  # A real treatment effect.
   out <- capture.output(print(res))
-  expect_identical(out[[1]], 'Multi-response permutation procedure (MRPP)')
+  expect_identical(out[[1]], 'Multi-response permutation procedure (MRPP) of Bray-Curtis Dissimilarity')
   expect_true(any(grepl('^delta = .*, p = .*, z = -', out)))
   expect_true(any(grepl('Permutations: 99 (free)', out, fixed = TRUE)))
   expect_true(any(grepl('agreement A', out)))
@@ -206,7 +206,7 @@
   expect_identical(sort(chr$class_delta), sort(ref$class_delta))
 
   # A symmetric matrix works like a dist.
-  expect_identical(no_steps(mrpp(as.matrix(d), 'trt', meta, permutations = 19, cpus = 1)), no_steps(ref))
+  expect_identical(no_display(mrpp(as.matrix(d), 'trt', meta, permutations = 19, cpus = 1)), no_display(ref))
 
   # Rows for other samples are ignored, even with NAs, and so are their
   # factor levels.

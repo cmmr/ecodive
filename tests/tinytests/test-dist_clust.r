@@ -19,15 +19,15 @@
   }
 
   # NULL, the default, changes nothing.
-  expect_null(attr(d0, 'dist')$clust)
-  expect_null(attr(d0, 'dist')$order)
+  expect_null(attr(d0, 'display')$clust)
+  expect_null(attr(d0, 'order'))
   expect_identical(bray(x, clust = NULL, cpus = cpus), d0)
 
   # FALSE and 'none' keep the order, and record 'none'.
   for (cl in list(FALSE, 'none')) {
     d <- bray(x, clust = cl, cpus = cpus)
-    expect_identical(attr(d, 'dist')$clust, 'none')
-    expect_null(attr(d, 'dist')$order)
+    expect_identical(attr(d, 'display')$clust, 'none')
+    expect_null(attr(d, 'order'))
     expect_identical(as.vector(d), as.vector(d0))
     expect_identical(labels(d), labels(d0))
   }
@@ -35,9 +35,9 @@
   # Each linkage: the samples in hclust()'s leaf order, with their labels.
   for (cl in c('average', 'complete', 'single', 'ward.D', 'ward.D2', 'mcquitty', 'median', 'centroid')) {
     d <- bray(x, clust = cl, cpus = cpus)
-    o <- attr(d, 'dist')$order
+    o <- attr(d, 'order')
     expect_identical(o, stats::hclust(stats::as.dist(m0), method = cl)$order, info = cl)
-    expect_identical(attr(d, 'dist')$clust, cl, info = cl)
+    expect_identical(attr(d, 'display')$clust, cl, info = cl)
     expect_identical(class(d), c('ecodive_dist', 'dist'), info = cl)
     expect_identical(labels(d), labels(d0)[o], info = cl)
     expect_equal(unname(as.matrix(d)), unname(m0[o, o]), info = cl)
@@ -46,15 +46,15 @@
 
   # 'pcoa': along the first axis of pcoa().
   d <- bray(x, clust = 'pcoa', cpus = cpus)
-  expect_identical(attr(d, 'dist')$order, order(pcoa(d0, n_axes = 1, cpus = cpus)[, 1]))
-  expect_equal(unname(as.matrix(d)), unname(m0[attr(d, 'dist')$order, attr(d, 'dist')$order]))
+  expect_identical(attr(d, 'order'), order(pcoa(d0, n_axes = 1, cpus = cpus)[, 1]))
+  expect_equal(unname(as.matrix(d)), unname(m0[attr(d, 'order'), attr(d, 'order')]))
 
   # The same for any number of threads.
   expect_identical(bray(x, clust = 'pcoa', cpus = 1L), bray(x, clust = 'pcoa', cpus = 2L))
 
   # The order can be undone, and lines metadata up.
   d  <- bray(x, clust = 'average', cpus = cpus)
-  o  <- attr(d, 'dist')$order
+  o  <- attr(d, 'order')
   dr <- dist_reorder(d, order(o))
   expect_identical(as.vector(dr), as.vector(d0))
   expect_identical(labels(dr), labels(d0))
@@ -73,40 +73,40 @@
   for (cs in cases) {
     dd  <- cs$dd
     ref <- cs$ref
-    expect_equal(unclass(no_steps(pcoa(dd, cpus = cpus)))[, ], unclass(no_steps(pcoa(ref, cpus = cpus)))[, ])
+    expect_equal(unclass(no_display(pcoa(dd, cpus = cpus)))[, ], unclass(no_display(pcoa(ref, cpus = cpus)))[, ])
     expect_identical(rownames(pcoa(dd, cpus = cpus)), labels(ref))
     expect_identical(
       permanova(dd, iris$Species, permutations = 0, cpus = cpus)$statistic,
       permanova(ref, iris$Species, permutations = 0, cpus = cpus)$statistic )
   }
-  expect_identical(attr(pcoa(d, cpus = cpus), 'dist')$clust, 'average')
+  expect_identical(attr(pcoa(d, cpus = cpus), 'display')$title, 'Principal Coordinates Analysis of Bray-Curtis Dissimilarity')
 
   # The heatmap finds the groups of a clustered matrix's samples by their
   # input positions.
   dc <- bray(iris[, 1:4], clust = 'average', cpus = cpus)
   g  <- dist_plot_groups(dc, 150L, labels(dc), 'Species', iris)
-  expect_identical(g$f, iris$Species[attr(dc, 'dist')$order])
+  expect_identical(g$f, iris$Species[attr(dc, 'order')])
   g  <- dist_plot_groups(d, 150L, labels(d), iris$Species, NULL)
-  expect_identical(g$f, iris$Species[attr(d, 'dist')$order])
+  expect_identical(g$f, iris$Species[attr(d, 'order')])
 
   # Samples without names are labelled with their input positions.
   d <- bray(iris[, 1:4], clust = 'average', cpus = cpus)
-  expect_identical(labels(d), as.character(attr(d, 'dist')$order))
+  expect_identical(labels(d), as.character(attr(d, 'order')))
   expect_null(labels(bray(iris[, 1:4], cpus = cpus)))
 
   # The wrapper and the other functions pass it on.
   d <- beta_div(x, 'jaccard', clust = 'complete', cpus = cpus)
-  expect_identical(attr(d, 'dist')$clust, 'complete')
-  expect_identical(attr(d, 'dist')$order, stats::hclust(stats::as.dist(as.matrix(jaccard(x, cpus = cpus))), 'complete')$order)
+  expect_identical(attr(d, 'display')$clust, 'complete')
+  expect_identical(attr(d, 'order'), stats::hclust(stats::as.dist(as.matrix(jaccard(x, cpus = cpus))), 'complete')$order)
   ex <- ecodive::ex_counts
   for (f in list(unweighted_unifrac, weighted_unifrac, normalized_unifrac, generalized_unifrac, variance_adjusted_unifrac)) {
     d <- f(ex, tree = ecodive::ex_tree, clust = 'average', cpus = cpus)
-    expect_identical(attr(d, 'dist')$clust, 'average')
-    expect_identical(sort(attr(d, 'dist')$order), 1:4)
+    expect_identical(attr(d, 'display')$clust, 'average')
+    expect_identical(sort(attr(d, 'order')), 1:4)
   }
   for (f in list(hellinger, jensen, matusita, psym_chisq, squared_euclidean, topsoe)) {
     d <- f(x, clust = 'single', cpus = cpus)
-    expect_identical(attr(d, 'dist')$clust, 'single')
+    expect_identical(attr(d, 'display')$clust, 'single')
     expect_identical(class(d), c('ecodive_dist', 'dist'))
   }
 
@@ -114,18 +114,18 @@
   for (f in list(vlr, phi_s)) {
     d0f <- f(ex + 1, cpus = cpus)
     d   <- f(ex + 1, clust = 'average', cpus = cpus)
-    expect_identical(attr(d, 'dist')$order, stats::hclust(stats::as.dist(as.matrix(d0f)), 'average')$order)
-    expect_identical(labels(d), labels(d0f)[attr(d, 'dist')$order])
-    expect_identical(attr(d, 'dist')$metric, attr(d0f, 'dist')$metric)
+    expect_identical(attr(d, 'order'), stats::hclust(stats::as.dist(as.matrix(d0f)), 'average')$order)
+    expect_identical(labels(d), labels(d0f)[attr(d, 'order')])
+    expect_identical(attr(d, 'method'), attr(d0f, 'method'))
   }
   r0 <- rho_p(ex + 1, cpus = cpus)
   r  <- rho_p(ex + 1, clust = 'average', cpus = cpus)
-  expect_identical(attr(r, 'dist')$order, stats::hclust(stats::as.dist(1 - as.matrix(r0)), 'average')$order)
-  expect_equal(unname(as.matrix(r)), unname(as.matrix(r0)[attr(r, 'dist')$order, attr(r, 'dist')$order]))
+  expect_identical(attr(r, 'order'), stats::hclust(stats::as.dist(1 - as.matrix(r0)), 'average')$order)
+  expect_equal(unname(as.matrix(r)), unname(as.matrix(r0)[attr(r, 'order'), attr(r, 'order')]))
 
   # Two samples: nothing to cluster.
   d <- bray(x[1:2, ], clust = 'average', cpus = cpus)
-  expect_identical(attr(d, 'dist')$order, 1:2)
+  expect_identical(attr(d, 'order'), 1:2)
 
   # Errors.
   expect_error(bray(x, clust = 'ward'), '`clust` must be NULL, FALSE, or one of')
@@ -137,37 +137,30 @@
 
 
 
-  # How each matrix was made: the metric's ID and display name, and its
-  # settings. ====
+  # Each matrix's metric: its ID as `method`, and its display name as its
+  # title (?ecodive_display). ====
 
   for (f in list_metrics('beta', 'func')) {
     id <- names(which(vapply(list_metrics('beta', 'func'), identical, TRUE, f)))
     d  <- if (id %in% list_metrics('beta', 'id', phylo = TRUE))
       f(ex + 1, tree = ecodive::ex_tree, cpus = cpus) else f(ex + 1, cpus = cpus)
-    expect_identical(attr(d, 'dist')$metric, id, info = id)
-    expect_identical(attr(d, 'dist')$name, match_metric(id)$name, info = id)
-    if ('norm' %in% names(formals(f)) || exists('norm', envir = environment(f), inherits = FALSE))
-      expect_true(is.null(attr(d, 'dist')$norm) || is.character(attr(d, 'dist')$norm), info = id)
+    expect_identical(attr(d, 'method'), id, info = id)
+    expect_identical(attr(d, 'display')$title, match_metric(id)$name, info = id)
   }
   d <- bray(x, norm = 'percent', cpus = cpus)
-  expect_identical(attr(d, 'dist')$norm, 'percent')
-  expect_identical(attr(d, 'dist')$pseudocount, 0)
-  expect_identical(attr(hellinger(x, cpus = cpus), 'dist')$norm, 'percent')
-  expect_identical(attr(aitchison(ex, pseudocount = 1, cpus = cpus), 'dist')$pseudocount, 1)
-  expect_identical(attr(minkowski(x, power = 3, cpus = cpus), 'dist')$power, 3)
-  expect_identical(attr(generalized_unifrac(ex, tree = ecodive::ex_tree, alpha = 0.3, cpus = cpus), 'dist')$alpha, 0.3)
-  expect_identical(attr(beta_div(x, 'Bray-Curtis', cpus = cpus), 'dist')$metric, 'bray')
+  expect_identical(names(attributes(d)), c('class', 'Size', 'Diag', 'Upper', 'Labels', 'method', 'display'))
+  expect_identical(attr(beta_div(x, 'Bray-Curtis', cpus = cpus), 'method'), 'bray')
   # Clustering keeps them.
   d <- bray(x, clust = 'average', cpus = cpus)
-  expect_identical(attr(d, 'dist')$name, 'Bray-Curtis Dissimilarity')
+  expect_identical(attr(d, 'display')$title, 'Bray-Curtis Dissimilarity')
   for (f in c('vlr', 'rho_p', 'phi_s')) {
     d <- get(f)(ex + 1, cpus = cpus)
-    expect_identical(attr(d, 'dist')$metric, f)
-    expect_true(is.character(attr(d, 'dist')$name) && nzchar(attr(d, 'dist')$name))
+    expect_identical(attr(d, 'method'), f)
+    expect_true(is.character(attr(d, 'display')$title) && nzchar(attr(d, 'display')$title))
   }
   d <- attr(rpca(cnt <- round(x * 10), distances = TRUE, cpus = cpus), 'dm')
-  expect_identical(attr(d, 'dist')$metric, 'rpca')
-  expect_identical(attr(d, 'dist')$name, 'Robust Aitchison Distance (RPCA)')
+  expect_identical(attr(d, 'method'), 'rpca')
+  expect_identical(attr(d, 'display')$title, 'Robust Aitchison Distance (RPCA)')
 
 
 

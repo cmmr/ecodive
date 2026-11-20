@@ -226,10 +226,11 @@ axis explains. Unlike \code{eig}, it is comparable between methods, so use
 it to label axes. \code{NA} where it isn't defined.
 }
 
-Attributes particular to the method follow them, and last, the records
-of how it was made (see \link{ecodive_steps}): \code{dist}, the distance
-matrix's, for the methods that take distances, and \code{ord}, the
-ordination's own (its method, display name and settings). The matrix has class
+Attributes particular to the method follow them, and last \code{display},
+with the ordination's title for \code{plot()} and \code{print()}: the method's
+name, and for the methods that take distances, the distance matrix's
+title, such as "Principal Coordinates Analysis of Bray-Curtis
+Dissimilarity" (see \link{ecodive_display}). The matrix has class
 \code{"ecodive_ord"} (as well as \code{"matrix"}), so that \code{print()} lists the
 other attributes by name rather than in full, and \code{plot()} draws the
 samples on the first two axes, labelled from the attributes, with any

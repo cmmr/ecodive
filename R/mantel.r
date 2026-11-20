@@ -379,19 +379,24 @@ mantel_core <- function (
     given  <- mantel_column(given, 'given', des$data)
   }
 
-  y <- mantel_align(mantel_dist(y, 'y'), 'y', x$labels, n)
+  y <- mantel_dist(y, 'y')
   g <- if (is.null(given)) NULL else mantel_align(mantel_dist(given, 'given'), 'given', x$labels, n)
+
+  # The title names both matrices when both have titles, else `dm`'s
+  # (?ecodive_display).
+  from <- if (!is.null(x$title) && !is.null(y$title)) paste(x$title, 'and', y$title) else x$title
+
+  y <- mantel_align(y, 'y', x$labels, n)
 
   pm <- perm_matrix(permutations, n)
 
   if (!is.null(pm$perms) && !is.null(strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
 
-  step <- x$step
-  x    <- x$dm
+  x <- x$dm
 
   result <- function (r_all) mantel_result(
-    r_all, method, alternative, partial = !is.null(g), n = n, dist = step,
+    r_all, method, alternative, partial = !is.null(g), n = n, from = from,
     permutation = if (!is.null(pm$perms)) 'supplied matrix'
                   else if (!is.null(strata)) 'within strata'
                   else 'free' )
@@ -648,7 +653,7 @@ mantel_tied  <- function (codes) {
 # The result, from the observed and permuted statistics (r_all[1] and
 # r_all[-1]).
 #------------------------------------------------------------------------------
-mantel_result <- function (r_all, method, alternative, partial, n, permutation, dist = NULL) {
+mantel_result <- function (r_all, method, alternative, partial, n, permutation, from = NULL) {
 
   r      <- r_all[[1]]
   r_perm <- r_all[-1]
@@ -657,7 +662,7 @@ mantel_result <- function (r_all, method, alternative, partial, n, permutation, 
 
   new_ecodive_test(
     class       = 'ecodive_mantel',
-    dist        = dist,
+    from        = from,
     title       = paste0(
       if (partial) 'Partial Mantel test (' else 'Mantel test (',
       switch(method, pearson = 'Pearson', spearman = 'Spearman', kendall = 'Kendall'), ')' ),

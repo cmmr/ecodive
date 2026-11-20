@@ -80,7 +80,7 @@
   ord <- ca(x, cpus = 1)
   expect_true(is.matrix(ord) && is.double(ord))
   expect_identical(
-    names(attributes(no_steps(ord))),
+    names(attributes(no_display(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings', 'class') )
   expect_identical(attr(ord, 'method'), 'ca')
   expect_identical(colnames(ord), c('CA1', 'CA2', 'CA3'))
@@ -175,11 +175,11 @@
 
   d1 <- ca(counts, n_axes = 5, cpus = 1)
   tc <- t(counts)
-  expect_identical(no_steps(ca(tc, margin = 2, n_axes = 5, cpus = 1)), no_steps(d1))
+  expect_identical(no_display(ca(tc, margin = 2, n_axes = 5, cpus = 1)), no_display(d1))
   if (requireNamespace('Matrix', quietly = TRUE)) {
     sp <- Matrix::Matrix(tc, sparse = TRUE)
     expect_true(inherits(sp, 'dgCMatrix'))
-    expect_equal(no_steps(ca(sp, margin = 2, n_axes = 5, cpus = 1)), no_steps(d1), tolerance = 1e-12)
+    expect_equal(no_display(ca(sp, margin = 2, n_axes = 5, cpus = 1)), no_display(d1), tolerance = 1e-12)
     expect_equal(ca(Matrix::t(sp), n_axes = 5, cpus = 1), d1, tolerance = 1e-12)
   }
   if (requireNamespace('slam', quietly = TRUE)) {

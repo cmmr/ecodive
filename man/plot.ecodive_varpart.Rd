@@ -13,7 +13,7 @@
 \code{2}.}
 
 \item{col}{The sets' colours, one per set. Defaults to
-\code{\link[grDevices:palettes]{grDevices::hcl.colors()}}'s \code{"Dark 3"} palette.}
+\code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}}'s \code{"Dark 3"} palette.}
 
 \item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}}, such as \code{main},
 \code{sub} or \code{cex}.}

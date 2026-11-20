@@ -168,7 +168,7 @@
     expect_true(relv(attr(d1, 'rao'), attr(o1, 'rao')) < 1e-12)
   }
 
-  expect_identical(no_steps(dpcoa(t(big), tr, margin = 2, n_axes = 5, cpus = 1)), no_steps(o1))
+  expect_identical(no_display(dpcoa(t(big), tr, margin = 2, n_axes = 5, cpus = 1)), no_display(o1))
 
   sp <- slam::as.simple_triplet_matrix(big)
   expect_true(rel(dpcoa(sp, tr, n_axes = 5, cpus = 1), o1) < 1e-12)
@@ -189,11 +189,9 @@
 
   o <- dpcoa(m, et, n_axes = 2, cpus = 1)
   expect_identical(names(attributes(o)),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'taxa', 'rao', 'trace', 'class', 'ord'))
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'taxa', 'rao', 'trace', 'class', 'display'))
   expect_identical(attr(o, 'method'), 'dpcoa')
-  expect_identical(attr(o, 'ord')$name, 'Double Principal Coordinate Analysis')
-  expect_identical(attr(o, 'ord')$n_axes, 2L)
-  expect_null(attr(o, 'ord')$tree)
+  expect_identical(attr(o, 'display'), list(title = 'Double Principal Coordinate Analysis'))
   expect_identical(dim(attr(o, 'taxa')), c(ncol(m), 2L))
   expect_identical(colnames(attr(o, 'taxa')), c('DPCoA1', 'DPCoA2'))
   expect_true(all(diff(attr(o, 'eig')) <= 0))

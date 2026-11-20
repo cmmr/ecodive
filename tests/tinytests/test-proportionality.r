@@ -35,7 +35,6 @@
 
     if (r$pc > 0) expect_warning(vlr(x, cpus = 1L), 'Zeros detected', info = nm)
     v <- vlr(x, pseudocount = pc, cpus = 1L)
-    expect_identical(attr(v, 'dist')$pseudocount, r$pc, info = nm)
     expect_true(maxabs(plain(v), r$pairwise) < 1e-14, info = nm)
     expect_true(maxabs(plain(v), r$vlr)      < 1e-14, info = nm)
     if (nm != 'nearprop') {   # scikit-bio's covariance route cancels there
@@ -172,7 +171,6 @@
   # replace_zeros() output goes straight in, with no pseudocount.
   z <- replace_zeros(x, 'mult')
   expect_silent(r <- rho_p(z))
-  expect_identical(attr(r, 'dist')$pseudocount, 0)
   expect_identical(r, rho_p(z, pseudocount = 0))
   expect_equal(plain(r), base_rho(log(z) - rowMeans(log(z))), tolerance = 1e-12)
   expect_equal(plain(vlr(z)), base_vlr(log(z)), tolerance = 1e-12)
@@ -192,23 +190,20 @@
   r <- rho_p(x, denominator = 'F3')
   expect_identical(attr(r, 'Labels'), paste0('F', c(1:2, 4:6)))
   expect_identical(attr(r, 'Size'), 5L)
-  expect_identical(attr(r, 'dist')$metric, 'rho_p')
-  expect_identical(attr(r, 'dist')$denominator, 'F3')
-  expect_identical(attr(r, 'dist')$pseudocount, 0)
+  expect_identical(attr(r, 'method'), 'rho_p')
   expect_inherits(r, 'dist')
-  expect_identical(attr(rho_p(x, denominator = c(TRUE, FALSE, TRUE, FALSE, FALSE, FALSE)), 'dist')$denominator, c('F1', 'F3'))
-  expect_identical(attr(phi_s(x, denominator = c('F4', 'F2')), 'dist')$denominator, c('F2', 'F4'))
-  expect_null(attr(rho_p(x), 'dist')$denominator)
-  expect_identical(attr(vlr(x), 'dist')$metric, 'vlr')
-  expect_identical(attr(phi_s(x), 'dist')$metric, 'phi_s')
+  expect_identical(rho_p(x, denominator = c(TRUE, FALSE, TRUE, FALSE, FALSE, FALSE)), rho_p(x, denominator = c('F1', 'F3')))
+  expect_identical(phi_s(x, denominator = c('F4', 'F2')), phi_s(x, denominator = c(2, 4)))
+  expect_identical(attr(vlr(x), 'method'), 'vlr')
+  expect_identical(attr(phi_s(x), 'method'), 'phi_s')
   expect_identical(attr(vlr(x), 'Labels'), colnames(x))
 
   # Unnamed features: no labels, except for the positions kept by an alr.
   x <- unname(ref$small$counts)
   expect_null(attr(vlr(x), 'Labels'))
   expect_identical(attr(rho_p(x, denominator = 2), 'Labels'), as.character(c(1, 3:6)))
-  expect_identical(attr(rho_p(x, denominator = 2), 'dist')$denominator, 2L)
-  expect_identical(attr(rho_p(x, denominator = c(5, 1)), 'dist')$denominator, c(1L, 5L))
+  expect_identical(rho_p(x, denominator = 2), rho_p(x, denominator = c(FALSE, TRUE, FALSE, FALSE, FALSE, FALSE)))
+  expect_identical(rho_p(x, denominator = c(5, 1)), rho_p(x, denominator = c(1, 5)))
 
   # Usable as a dissimilarity.
   x <- ref$wide$counts

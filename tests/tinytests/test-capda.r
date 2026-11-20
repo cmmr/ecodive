@@ -135,7 +135,7 @@
   ord <- capda(dm, 'trt', meta, permutations = 99)
   m   <- attr(ord, 'n_pcoa_axes')
   suc <- attr(ord, 'success')
-  expect_identical(names(attributes(no_steps(ord))), attrs)
+  expect_identical(names(attributes(no_display(ord))), attrs)
   expect_identical(attr(ord, 'method'), 'capda')
   expect_identical(colnames(ord), c('CAP1', 'CAP2'))
   expect_identical(rownames(ord), rownames(cts))
@@ -158,7 +158,7 @@
   expect_identical(unname(apply(unclass(ord)[, ], 2, function (v) sign(v[which.max(abs(v))]))), c(1, 1))
 
   # The same from a symmetric matrix, and through dist_ord().
-  expect_identical(no_steps(capda(as.matrix(dm), 'trt', meta, permutations = 99)), no_steps(ord))
+  expect_identical(no_display(capda(as.matrix(dm), 'trt', meta, permutations = 99)), no_display(ord))
   expect_identical(dist_ord(dm, 'capda', 'trt', meta, permutations = 99), ord)
   expect_identical(dist_ord(dm, 'capda', grp, n_pcoa_axes = 3, permutations = 0),
                    capda(dm, grp, n_pcoa_axes = 3, permutations = 0))
@@ -199,8 +199,8 @@
   o <- capda(dm, grp, n_pcoa_axes = 3, strata = grp, permutations = 19)
   expect_identical(attr(o, 'p_value'), 1)
   expect_equal(attr(o, 'trace_perm'), rep(attr(o, 'trace_stat'), 19), tolerance = 1e-12)
-  expect_identical(no_steps(capda(dm, 'trt', meta, n_pcoa_axes = 3, strata = 'blk', permutations = 19)),
-                   no_steps(capda(dm, grp, n_pcoa_axes = 3, strata = rev(meta$blk), permutations = 19)))
+  expect_identical(no_display(capda(dm, 'trt', meta, n_pcoa_axes = 3, strata = 'blk', permutations = 19)),
+                   no_display(capda(dm, grp, n_pcoa_axes = 3, strata = rev(meta$blk), permutations = 19)))
 
   a <- capda(dm, grp, n_pcoa_axes = 3, permutations = 99, seed = 1)
   b <- capda(dm, grp, n_pcoa_axes = 3, permutations = 99, seed = 2)

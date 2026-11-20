@@ -6,7 +6,7 @@
 # beta_div(), its metric functions, vlr(), rho_p() and phi_s(), and the
 # default order of plot.ecodive_dist().
 #
-#   dist_result()        records how a distance matrix was made, then
+#   dist_result()        labels a distance matrix with its metric, then
 #                        applies `clust`: the end of every metric function.
 #   validate_clust()     checks `clust` (validate_args() calls it).
 #   dist_clust()         reorders a distance matrix by `clust`.
@@ -15,32 +15,14 @@
 
 
 # The distance matrix `d` from metric `metric` (its ID, such as 'bray'),
-# with its `dist` record (see ?ecodive_steps): the metric's display name and
-# ID, and those of `norm` (the normalization applied, whether chosen or fixed
-# by the metric, by name), `pseudocount` (0 for none), `power` and `alpha`
-# that the metric function has (in its frame `env`) and that aren't NULL.
-# Then clustered by `clust`.
+# with the ID as its `method` attribute, as stats::dist() and
+# vegan::vegdist() set it, and the metric's display name as its title (see
+# ?ecodive_display). Then clustered by `clust`, from the metric function's
+# frame `env`.
 dist_result <- function (d, metric, env = parent.frame()) {
-  settings <- list()
-  for (nm in c('norm', 'pseudocount', 'power', 'alpha')) {
-    if (exists(nm, envir = env, inherits = FALSE)) {
-      v <- get(nm, envir = env, inherits = FALSE)
-      if (nm == 'norm' && is.numeric(v)) v <- norm_name(v)  # validate_norm() made it a code
-      settings[[nm]] <- v
-    }
-  }
-  attr(d, 'dist') <- ecodive_step(
-    METRICS$name[match(metric, METRICS$id)], metric = metric, settings = settings )
+  attr(d, 'method') <- metric
+  d <- set_display(d, title = METRICS$name[match(metric, METRICS$id)])
   dist_clust(d, get('clust', envir = env), get('cpus', envir = env))
-}
-
-
-# The name of a normalization from its code (NORM_PERCENT -> 'percent').
-norm_name <- function (code) {
-  codes <- c(
-    none = NORM_NONE, percent = NORM_PERCENT, clr = NORM_CLR, chord = NORM_CHORD,
-    binary = NORM_BINARY, rclr = NORM_RCLR, hellinger = NORM_HELLINGER )
-  names(codes)[match(code, codes)]
 }
 
 
@@ -70,17 +52,13 @@ validate_clust <- function (env = parent.frame()) {
 
 
 # `d`, with its samples reordered by the clustering `clust` (checked by
-# validate_clust()), recorded in its `dist` record as `clust` (the method)
-# and `order` (the original position of each sample, now in order). NULL
-# leaves `d` unchanged, recording neither; 'none' keeps the order and
-# records `clust`, so that plot() keeps it too.
+# validate_clust()): attribute `order` gives the input position of each
+# sample, now in order, and `clust` in its `display` list names the method,
+# for plot(). NULL leaves `d` unchanged; 'none' keeps the order and sets
+# `clust`, so that plot() keeps it too.
 dist_clust <- function (d, clust, cpus = 1L) {
 
   if (is.null(clust)) return (d)
-
-  step <- attr(d, 'dist', exact = TRUE)
-  if (is.null(step)) step <- ecodive_step('Distances')
-  step$clust <- clust
 
   if (!identical(clust, 'none')) {
     if (anyNA(d))
@@ -89,26 +67,24 @@ dist_clust <- function (d, clust, cpus = 1L) {
         '(or distances that are NA).', call. = FALSE )
     ord <- dist_clust_order(d, clust, cpus)
     d   <- dist_reorder(d, ord)
-    step$order <- ord
+    attr(d, 'order') <- ord
   }
 
-  attr(d, 'dist') <- step
-  d
+  set_display(d, clust = clust)
 }
 
 
-# The `clust` that `d` was made with (from its `dist` record), or NULL.
+# The `clust` that `d` was made with (from its `display` list), or NULL.
 dist_clust_of <- function (d) {
-  step <- attr(d, 'dist', exact = TRUE)
-  if (inherits(step, 'ecodive_step')) step$clust
+  cl <- get_display(d, 'clust')
+  if (is.character(cl) && length(cl) == 1 && !is.na(cl)) cl
 }
 
 
-# The ID of the metric that made `d`: its `dist` record's `metric`, or else
-# its `method` attribute (as stats::dist() sets it), or ''.
+# The ID of the metric that made `d`: its `method` attribute, as ecodive's
+# distance functions and stats::dist() set it, or ''.
 dist_metric_of <- function (d) {
-  step <- attr(d, 'dist', exact = TRUE)
-  m <- if (inherits(step, 'ecodive_step')) step$metric else attr(d, 'method', exact = TRUE)
+  m <- attr(d, 'method', exact = TRUE)
   if (is.character(m) && length(m) == 1 && !is.na(m)) m else ''
 }
 

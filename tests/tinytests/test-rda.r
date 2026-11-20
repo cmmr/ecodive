@@ -132,7 +132,7 @@
   ord <- fit_case(cs)
   expect_true(is.matrix(ord) && is.double(ord))
   expect_identical(
-    names(attributes(no_steps(ord))),
+    names(attributes(no_display(ord))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'inertia',
       'constrained_eig', 'r_squared', 'adj_r_squared', 'biplot', 'centroids',
       'loadings', 'class') )
@@ -160,7 +160,7 @@
   meta   <- cs$data
   one    <- rda(counts, data = meta, formula = ~ Management, norm = 'hellinger', cpus = 1)
 
-  expect_identical(no_steps(rda(counts, 'Management', meta, norm = 'hellinger', cpus = 1)), no_steps(one))
+  expect_identical(no_display(rda(counts, 'Management', meta, norm = 'hellinger', cpus = 1)), no_display(one))
   expect_equal(unclass(rda(counts, meta$Management, norm = 'hellinger', cpus = 1))[, ], unclass(one)[, ])
 
   # vegan's style: the table on the formula's left-hand side.
@@ -171,12 +171,12 @@
   expect_error(rda(counts ~ A1, data = meta, formula = ~ A1), 'not both')
 
   # count_ord() passes the same arguments on, and drops `seed`.
-  expect_identical(no_steps(count_ord(counts, 'rda', 'Management', meta, norm = 'hellinger', cpus = 1)), no_steps(one))
+  expect_identical(no_display(count_ord(counts, 'rda', 'Management', meta, norm = 'hellinger', cpus = 1)), no_display(one))
   expect_identical(count_ord(counts, 'tbrda', data = meta, formula = ~ Management, norm = 'hellinger', seed = 1, cpus = 1), one)
   expect_error(dist_ord(bray(counts), 'rda'), 'count_ord')
 
   # Rows of `data` are matched to the samples by name.
-  expect_identical(no_steps(rda(counts, 'Management', meta[rev(seq_len(nrow(meta))), ], norm = 'hellinger', cpus = 1)), no_steps(one))
+  expect_identical(no_display(rda(counts, 'Management', meta[rev(seq_len(nrow(meta))), ], norm = 'hellinger', cpus = 1)), no_display(one))
 
   # Errors in the model.
   expect_error(rda(counts, meta$Managment, meta),         '`groups` is NULL')
@@ -269,13 +269,13 @@
     d1  <- rda(counts, data = meta, formula = ~ Management + Condition(A1), norm = nm,
                pseudocount = pc, n_axes = 5, cpus = 1)
     tc  <- t(counts)
-    expect_identical(no_steps(rda(tc, data = meta, formula = ~ Management + Condition(A1), margin = 2,
-                         norm = nm, pseudocount = pc, n_axes = 5, cpus = 1)), no_steps(d1), info = nm)
+    expect_identical(no_display(rda(tc, data = meta, formula = ~ Management + Condition(A1), margin = 2,
+                         norm = nm, pseudocount = pc, n_axes = 5, cpus = 1)), no_display(d1), info = nm)
     if (requireNamespace('Matrix', quietly = TRUE)) {
       sp <- Matrix::Matrix(tc, sparse = TRUE)
       expect_true(inherits(sp, 'dgCMatrix'))
-      expect_equal(no_steps(rda(sp, data = meta, formula = ~ Management + Condition(A1), margin = 2,
-                       norm = nm, pseudocount = pc, n_axes = 5, cpus = 1)), no_steps(d1), tolerance = 1e-12, info = nm)
+      expect_equal(no_display(rda(sp, data = meta, formula = ~ Management + Condition(A1), margin = 2,
+                       norm = nm, pseudocount = pc, n_axes = 5, cpus = 1)), no_display(d1), tolerance = 1e-12, info = nm)
     }
     if (requireNamespace('slam', quietly = TRUE)) {
       st <- slam::as.simple_triplet_matrix(counts)

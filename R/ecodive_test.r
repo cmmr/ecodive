@@ -35,19 +35,20 @@
 # Builds a test result.
 #
 #   class        The method's class, e.g. 'ecodive_mrpp'.
-#   title        The test's name, printed as the heading.
+#   title        The test's name. With `from`, the title of the distances
+#                tested (dist_vector()'s `title`), it makes the result's
+#                title, "<title> of <from>" (?ecodive_display), which
+#                print() shows as the heading.
 #   statistic    Named numeric scalar, e.g. c(delta = 0.412).
 #   p_value, z, n_perm   The core fields.
 #   ...          The method's own fields, named, in order.
 #   perm         The permuted statistics (numeric vector, length n_perm).
 #                Stored as attribute <tolower(names(statistic))>_perm.
 #   permutation  'free', 'within strata', or 'supplied matrix'.
-#   dist         The distance matrix's `dist` record (dist_vector()'s
-#                `step`), kept as attribute `dist` (?ecodive_steps).
 #------------------------------------------------------------------------------
 new_ecodive_test <- function (
     class, title, statistic, p_value, z, n_perm, ..., perm,
-    permutation = 'free', dist = NULL ) {
+    permutation = 'free', from = NULL ) {
 
   stopifnot(
     is.character(class), length(class) >= 1,
@@ -62,11 +63,9 @@ new_ecodive_test <- function (
     permutation = permutation )
 
   attr(res, paste0(tolower(names(statistic)), '_perm')) <- as.double(perm)
-  attr(res, 'title') <- title
-  if (inherits(dist, 'ecodive_step')) attr(res, 'dist') <- dist
   class(res) <- c(class, 'ecodive_test')
 
-  res
+  set_display(res, title = title_of(title, from))
 }
 
 
@@ -236,7 +235,7 @@ print.ecodive_test <- function (x, digits = max(3L, getOption('digits') - 3L), .
 
   fmt <- function (v) if (is.na(v)) 'NA' else formatC(v, digits = digits, format = 'g')
 
-  title <- attr(x, 'title', exact = TRUE)
+  title <- display_title(x)
   if (is.null(title)) title <- class(x)[[1]]
   cat(title, '\n\n', sep = '')
 

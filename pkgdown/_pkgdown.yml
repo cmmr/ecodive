@@ -167,7 +167,7 @@ reference:
   - plot.ecodive_varpart
   - plot.ecodive_forward_select
   - plot.ecodive_bioenv
-  - ecodive_steps
+  - ecodive_display
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.

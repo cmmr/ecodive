@@ -29,8 +29,8 @@
 #'        `col` or `breaks`; they replace the defaults made from `x`.
 #'
 #' @details
-#' The title is the test's name, with the metric of the distances it tested
-#' (from their `dist` record; see [ecodive_steps]), and the subtitle its
+#' The title is the test's title (see [ecodive_display]): its name, and the
+#' metric of the distances it tested, as printed. The subtitle is its
 #' statistic, p-value and standardized effect size \eqn{z}, as printed.
 #'
 #' * `"null"`: a histogram of the statistic in each permutation (the
@@ -150,10 +150,10 @@ test_plot_type <- function (type, choices) {
 }
 
 
-# The test's title, and the distances it tested, from their `dist` record
-# (?ecodive_steps): "... (PERMANOVA) of Bray-Curtis Dissimilarity".
+# The test's title (?ecodive_display): "... (PERMANOVA) of Bray-Curtis
+# Dissimilarity".
 test_title <- function (x) {
-  step_title(attr(x, 'title', exact = TRUE), attr(x, 'dist', exact = TRUE))
+  plot_title(x, class(x)[[1]])
 }
 
 

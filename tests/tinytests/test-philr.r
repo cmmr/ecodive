@@ -126,9 +126,8 @@
   x <- philr(cs$counts, cs$tree, pseudocount = 0.5, part_weights = 'enorm.x.gm.counts', ilr_weights = 'blw.sqrt')
   d <- philr_distance(cs$counts, cs$tree, pseudocount = 0.5)
   expect_identical(as.vector(d), as.vector(euclidean(x)))
-  expect_identical(attr(d, 'dist')$metric, 'philr_distance')
-  expect_identical(attr(d, 'dist')$name, 'PhILR Distance')
-  expect_identical(attr(d, 'dist')$pseudocount, 0.5)
+  expect_identical(attr(d, 'method'), 'philr_distance')
+  expect_identical(attr(d, 'display')$title, 'PhILR Distance')
   expect_true('philr_distance' %in% list_metrics('beta', 'id', phylo = TRUE))
   expect_identical(match_metric('philr')$id, 'philr_distance')
   expect_identical(match_metric('Phylogenetic ILR')$id, 'philr_distance')
@@ -253,7 +252,7 @@
   expect_true(all(is.na(as.vector(d)[-c(1, 5, 9)])))
   expect_error(philr_distance(cs$counts, cs$tree, pseudocount = pc, pairs = 1:3, clust = 'average'), 'pairs')
   dc <- philr_distance(cs$counts, cs$tree, pseudocount = pc, clust = 'average')
-  expect_identical(attr(dc, 'dist')$clust, 'average')
+  expect_identical(attr(dc, 'display')$clust, 'average')
 
   # Zeros: the shared rule.
   expect_warning(x <- philr(cs$counts, cs$tree), 'Zeros detected')
