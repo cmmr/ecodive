@@ -235,7 +235,10 @@ common tools, and that a scale model (ALDEx2, ALDEx3) reduced the
 unacceptably high FDRs at a cost in sensitivity: no tool offered both.
 Larger `scale_sd` raises the smallest change that can be called. The
 package website's article "Compositional Analysis of Microbiome Data"
-runs such a comparison.
+runs such a comparison, and
+[`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md)
+(`scale_sds = TRUE`) runs it in one call and plots each feature's effect
+against `scale_sd`.
 
 A side with a single sample has no variance: its features' `t`,
 `p_value`, intervals and `p_adjusted` are `NaN`, with a warning, and
@@ -329,7 +332,8 @@ Computational Biology*, 22, e1014728.
 ## See also
 
 [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md),
-[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md).
+[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md),
+[`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md).
 
 ## Examples
 
@@ -384,4 +388,10 @@ Computational Biology*, 22, e1014728.
     # against the rest.
     dirmult_ttest(x, grp, n_draws = 32)$log2_fc
 #> [1]  4.986264  2.544825 -1.607468 -1.736224 -1.538447 -1.163018 -1.485933
+
+    # Which decisions hold over a range of scale uncertainties (ALDEx2's
+    # gamma): see da_sensitivity().
+    res <- da_sensitivity(x, 'dirmult_ttest', grp, scale_sds = TRUE, n_draws = 32)
+    plot(res, 'traces')
+
 ```

@@ -170,7 +170,10 @@ abundance analysis. *Briefings in Bioinformatics*, 26, bbaf130.
 [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
 [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md);
 [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)
-for the zeros.
+for the zeros;
+[`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md)
+to rerun a method over pseudocounts, zero replacements and scale
+uncertainties.
 
 ## Examples
 

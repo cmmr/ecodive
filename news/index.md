@@ -1126,6 +1126,26 @@
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as volcano
   plots.
 
+- New
+  [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md)
+  reruns any
+  [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md)
+  method over the settings that have no right value, `pseudocounts`,
+  zero replacements (`zeros`, through
+  [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md))
+  and
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)’s
+  scale uncertainty (`scale_sds`), one at a time or `crossed`, and
+  reports each feature’s decision in every run: one tidy table, a
+  per-feature `summary` (`passed` when every run agrees, ANCOMBC’s
+  `passed_ss` generalised, and `robust`), and two plots, tiles of the
+  decisions and traces of the effects against a setting (for
+  `scale_sds`, the display of ALDEx2’s `plotGamma()`). Every run is
+  identical to the direct call with its setting, keeps the base run’s
+  `seed`, and is the same for any `cpus`; ANCOM-BC’s pseudocount runs
+  are the fits behind its `passed_ss`, reused when the base run made
+  them.
+
 - New `norm = 'log'`, wherever `norm` is offered (beta diversity
   metrics, [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),

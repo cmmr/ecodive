@@ -229,6 +229,8 @@ don’t matter.
 - [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md)
   [`match_da_test()`](https://cmmr.github.io/ecodive/reference/da_tests.md)
   : Find and Browse Differential Abundance Methods
+- [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md)
+  : Sensitivity of a Differential Abundance Analysis
 - [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) :
   Analysis of Composition of Microbiomes (ANCOM)
 - [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
@@ -409,6 +411,8 @@ than every value.
   [`plot(`*`<ecodive_da_wilcoxon>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
   [`plot(`*`<ecodive_da_lm>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
   : Plot a Per-feature Test Result
+- [`plot(`*`<ecodive_da_sensitivity>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.md)
+  : Plot a Differential Abundance Sensitivity Analysis
 - [`plot(`*`<ecodive_varpart>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.md)
   : Plot a variation partitioning
 - [`plot(`*`<ecodive_forward_select>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.md)

@@ -38,6 +38,7 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
   [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
   [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+  [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md),
   [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md),
   [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md),
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),
