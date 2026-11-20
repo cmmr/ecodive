@@ -783,6 +783,19 @@
   run's `seed`, and is the same for any `cpus`; ANCOM-BC's pseudocount runs
   are the fits behind its `passed_ss`, reused when the base run made them.
 
+* New `linda()`: LinDA (Zhou et al. 2022), linear models of each feature's
+  centred log2 ratios with the compositional bias of every coefficient
+  removed (estimated as the coefficients' mode across features). Any
+  `formula`, as `da_lm()`; winsorization of outliers (`outlier_pct`); zeros
+  replaced by a pseudocount, by imputation proportional to sequencing depth,
+  or adaptively (`zero_handling`, `corr_cut`); numeric covariates
+  standardized (`standardize`). It matches MicrobiomeStat's `linda()` to
+  about 1e-12 (fold changes, standard errors, the bias, p-values), except
+  that its `'adaptive'` choice is applied (MicrobiomeStat 1.4 reports it but
+  adds the pseudocount regardless). Parallel C from a sparse table, the
+  same for any `cpus`; one of `da_test()`'s and `da_sensitivity()`'s
+  methods, with a volcano `plot()`.
+
 * New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
   `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's
   proportions after adding `pseudocount` (log-TSS), with the same

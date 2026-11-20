@@ -21,8 +21,8 @@ Types}.}
 
 \item{method}{The name of a DA method, as for \code{\link[=da_test]{da_test()}}: \code{"ancom"},
 \code{"ancombc"}, \code{"ancombc2"}, \code{"da_lm"}, \code{"da_ttest"},
-\code{"da_wilcoxon"}, or \code{"dirmult_ttest"}. Flexible matching is
-supported.}
+\code{"da_wilcoxon"}, \code{"dirmult_ttest"}, or \code{"linda"}. Flexible
+matching is supported.}
 
 \item{...}{The base run: everything \code{\link[=da_test]{da_test()}} takes after \code{method}
 (\code{groups}, \code{data}, \code{formula}) and the method's own arguments
@@ -136,7 +136,10 @@ only with \code{norm = 'clr'} or \code{'log'}, the norms that take logs). For
 \code{\link[=ancombc]{ancombc()}}
 and \code{\link[=ancombc2]{ancombc2()}} it is added to every value, as in ANCOMBC's own
 sensitivity analysis. For \code{\link[=dirmult_ttest]{dirmult_ttest()}} it is the Dirichlet
-prior, added to the counts before the posterior draws.
+prior, added to the counts before the posterior draws. For \code{\link[=linda]{linda()}}
+it is added to every count when the zeros get a pseudocount
+(\code{zero_handling = 'pseudocount'}, or \code{'adaptive'} choosing it); when
+they are imputed, every run is the same.
 \item \code{zeros}: replaces the zeros with \code{\link[=replace_zeros]{replace_zeros()}} instead of a
 pseudocount, for the methods that take any table of positive values.
 \item \code{scale_sds}: \code{\link[=dirmult_ttest]{dirmult_ttest()}}'s scale model, the standard deviation of

@@ -110,6 +110,20 @@
     for (k in 0:3) expect_true(same_rows(res, k, fits[[k + 1]], eff), info = paste(m, k))
   }
 
+  # linda (pseudocounts with zero_handling = 'pseudocount'; the zeros run
+  # gives it proportions without zeros).
+  res <- da_sensitivity(x, 'linda', 'grp', meta, ~ grp + age, zero_handling = 'pseudocount', pseudocount = 0.5,
+                        pseudocounts = c(1, 2), zeros = 'mult', cpus = 1)
+  fits <- attr(res, 'fits')
+  expect_identical(fits[[1]], linda(x, ~ grp + age, meta, 'grp', zero_handling = 'pseudocount', pseudocount = 0.5, cpus = 1))
+  expect_identical(fits[[2]], linda(x, ~ grp + age, meta, 'grp', zero_handling = 'pseudocount', pseudocount = 1, cpus = 1))
+  expect_identical(fits[[3]], linda(x, ~ grp + age, meta, 'grp', zero_handling = 'pseudocount', pseudocount = 2, cpus = 1))
+  expect_identical(fits[[4]], linda(xz, ~ grp + age, meta, 'grp', zero_handling = 'pseudocount', cpus = 1))
+  for (k in 0:3) expect_true(same_rows(res, k, fits[[k + 1]], 'log2_fc'), info = k)
+  expect_identical(attr(res, 'log_base'), 2)
+  expect_identical(attr(res, 'covariate'), 'grpb')
+  expect_error(da_sensitivity(x, 'linda', 'grp', meta, zero_handling = 'imputation', pseudocounts = TRUE), 'imputation')
+
   # A partial argument name is completed, so the run's setting replaces it.
   res <- da_sensitivity(x, 'da_ttest', 'grp', meta, pseudo = 1, pseudocounts = 2, cpus = 1)
   expect_identical(attr(res, 'fits')[[1]], da_ttest(x, 'grp', meta, pseudocount = 1, cpus = 1))

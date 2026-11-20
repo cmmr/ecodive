@@ -286,7 +286,8 @@ print_df_label <- function (x) {
     ecodive_dirmult_ttest = 'Dirichlet-multinomial t-test',
     ecodive_da_wilcoxon   = ,
     ecodive_da_ttest      = ,
-    ecodive_da_lm         = {
+    ecodive_da_lm         = ,
+    ecodive_linda         = {
       # Subsetting rows with `[` drops the `method` attribute.
       m <- attr(x, 'method', exact = TRUE)
       if (is.null(m)) NULL else da_method_name(m)
@@ -340,6 +341,8 @@ print.ecodive_da_wilcoxon      <- print_table_result
 print.ecodive_da_ttest         <- print_table_result
 #' @export
 print.ecodive_da_lm            <- print_table_result
+#' @export
+print.ecodive_linda            <- print_table_result
 #' @export
 print.ecodive_da_sensitivity   <- print_table_result
 #' @export

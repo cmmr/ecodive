@@ -211,3 +211,132 @@ exactly). NEWS. New glossary entries: `zero_handling`, `corr_cut`,
   doi:10.1186/s13059-024-03390-9.
 - Pelto, J., et al. (2025). *Briefings in Bioinformatics*, 26(2),
   bbaf130. doi:10.1093/bib/bbaf130.
+
+
+## Decisions made while implementing (item 38, 2026-11-20)
+
+Asked of the user at the start:
+
+- **`pseudocount` default: the shared rule (`NULL`)**, not LinDA's 0.5:
+  nothing added to a table without zeros, else half the smallest non-zero
+  (winsorized) value with the shared warning, which is 0.5 for counts with
+  ones. An explicit `pseudocount = 0` is allowed without zeros and an error
+  with them (as `ancombc()`). Fixtures pass `pseudocount = 0.5`.
+- **Counts or proportions: detected** (all stored values whole numbers →
+  counts), no argument.
+- **`standardize = TRUE` default** (LinDA scales numeric covariates; see
+  below), `FALSE` for per-unit coefficients.
+- **The mode: LinDA's exact estimator**, matched to ~1e-15 (below).
+
+Settled from outputs (MicrobiomeStat 1.4 and modeest 2.5.0, both GPL-3,
+run only; neither's code was opened). No GPL source text reached this
+session (MicrobiomeStat's own error messages, e.g. "the condition has
+length > 1", quote no code).
+
+- **The mode (step 5):** `wald$bias` equals `modeest::meanshift(b)` with
+  its defaults to 1e-16 (found by testing candidates: `density()` grid
+  maxima, exact Gaussian-KDE maxima by `optimize()` / `optim()` / `nlm()`,
+  modeest's `parzen()`, `tsybakov()`; only `meanshift()` matched, and its
+  default bandwidth is `bw.nrd0()`). From modeest's documentation
+  (Rd: Gaussian kernel, start `par = shorth(x)`, `iter = 1000`,
+  `tolerance = sqrt(eps)`) and outputs:
+  - the iteration is \eqn{x \leftarrow \sum w b / \sum w}, \eqn{w =
+    \phi((x - b)/h)}; it stops when \eqn{|x_{new} - x| < \sqrt\epsilon
+    |x|} and returns **the previous** \eqn{x} (the returned value equals
+    the iterate before the last step, in all 2,000 random cases, with the
+    same iteration count as its `iterations` attribute); at the cap it
+    returns the last iterate;
+  - `shorth()`: the mean of the shortest window of `ceiling(n/2)` sorted
+    values; among equally short windows, the one starting at
+    `floor(mean(starts))` (matched modeest on 1,078 tied cases and 2,000
+    untied ones; other tie rules failed).
+  `linda_shorth()` in R, `bw.nrd0()` from stats, the iteration in C
+  (`C_linda_mode`, long double sums). Agreement with modeest: 1e-14
+  relative.
+- **Winsorization (step 1):** for counts, proportions `y / N` (N: the
+  original sample totals), capped per feature at the type-7 quantile
+  `1 - outlier_pct`, multiplied back by N and **rounded** (`round()`, ties
+  to even; `nearbyint()` in C). For proportions, the values as given are
+  capped, not rounded. Only high values. Matched exactly (counts direct,
+  other quantile types, no rounding all failed).
+- **Zeros (step 2):** pseudocount added to every value; imputation as the
+  paper, \eqn{M_s / \max_{k: Y_{ik} = 0} M_k} with **M the winsorized
+  totals** (the original totals failed); proportions: half the feature's
+  smallest non-zero (winsorized) value; a proportion feature with none is
+  an error here (MicrobiomeStat gives `Inf` warnings, then fails).
+- **Adaptive choice:** `summary(lm(log(M) ~ X))` t-tests of every design
+  column but the intercept (M the winsorized totals); imputation if any
+  p ≤ `corr_cut`. Matched MicrobiomeStat's reported choice in 300 of 300
+  random cases (factor + numeric designs); per-column correlation tests,
+  the F-test, Spearman and the unwinsorized totals did not. **MicrobiomeStat
+  1.4 then adds the pseudocount whatever it chose** (its
+  `feature.dat.use` and coefficients are those of the pseudocount even when
+  it prints "Imputation approach is used."); `linda()` applies the choice,
+  as documented and as the paper intends, and says so in "Differences from
+  LinDA". The fixtures record MicrobiomeStat's reported choice and compare
+  with its explicit run for that choice. `adaptive = FALSE` without an
+  explicit `zero.handling` errors in MicrobiomeStat 1.4.
+- **Standardization:** numeric (including integer) variables of `formula`
+  are `scale()`d before `model.matrix()` (so `x:z` is the product of the
+  scaled variables); logical and character ones are not. Added as
+  `da_design(standardize = TRUE)`; a constant numeric variable is an error,
+  and a non-finite design (e.g. `log(x)` of a standardized variable) is an
+  error naming `standardize = FALSE` (LinDA can't take function terms at
+  all: it reads parentheses as random effects).
+- **clr and fit (steps 3–4):** log2, centred over all features per
+  sample; OLS on the shared `flm_*` kernel (one QR of the design); `df` =
+  n − rank (LinDA: n − P, the same for a full-rank design); p-values
+  `2 pt(-|t|, df)`; `p_adjust` per covariate over non-NaN p-values
+  (`da_adjust()`).
+
+Made while implementing:
+
+- **C (`src/linda.c`):** `C_linda_prep` (winsorized totals, each feature's
+  smallest non-zero value and zero count), `C_linda_fit` (pass 1: per-sample
+  sums of log2 values in blocks of 64 features, added in block order;
+  pass 2: each feature's fit), `C_linda_mode`. The table is read by feature
+  with `da_table_init(norm = none)`; nothing dense is kept. Results are
+  identical for `cpus` 1, 2, 3, 4, 8 and for dense, `Matrix`, `slam`,
+  `margin = 2` and integer input. 300 × 5000 counts: 0.47 s on one thread,
+  0.28 s on four, against MicrobiomeStat's 12.7 s.
+- **Result:** columns `feature, covariate, log2_fc, se, t, dof, p_value,
+  p_adjusted, reject`, every design column but the intercept. Attributes
+  `method`, `formula`, `groups`, `design` (standardized), `standardize`,
+  `zero_handling` (what was done: `pseudocount`, `imputation`, or
+  `half_min` for proportions), `pseudocount` (0 when none was added),
+  `outlier_pct`, `alpha`, `p_adjust`, `log_base = 2`, `bias` (per reported
+  covariate), `vcov` (D × P × P, intercept included, \eqn{s^2 (X'X)^{-1}}),
+  and per feature `mean` (mean centred log2 value; named `mean`, not the
+  plan's `mean_clr`, as `da_lm()` and `ancombc()` name it for item 35's
+  MA plots) and `resid_sd`. `baseMean` left out, as planned.
+- **Registry:** `LinDA, linda, formula, log2_fc, 2, TRUE`, no aliases (an
+  alias starting `linear` would break `match_da_test('linear')` → `da_lm`).
+- **Plots (after item 35 landed mid-task, at the user's request):**
+  `plot.ecodive_linda()` calls `da_plot()` with linda's columns: volcano
+  (default), effect (`resid_sd`, two-level covariates), MA (`mean`), and
+  forest with t intervals `log2_fc ± qt((1 + conf_level)/2, dof) se`
+  (`conf_level = 0.95`, as `plot.ecodive_ancombc()`'s Wald intervals).
+  Default covariate from `da_term_covariate()`.
+- **`da_sensitivity()`:** `pseudocounts` with `zero_handling =
+  'imputation'` is an error (every run would be the same); with
+  `'adaptive'` choosing imputation the runs are the same, as documented.
+  The zeros runs give linda proportions without zeros (`half_min`, nothing
+  to replace).
+- **Edge cases:** at least two features; every sample with a positive
+  total (counts); `~ 1` is an error; a rank-deficient design warns and its
+  aliased columns are `NaN` (bias `NaN`); all-equal coefficients give
+  themselves as the mode.
+
+Reference results (`data-raw/expected/linda.r`, 20 cases on 7 tables:
+two groups, a numeric covariate, a factor with confounders, an
+interaction, a logical covariate, depth differing between groups, sparse
+data, proportions, rare features whose coefficients tie, D = 2; five
+adaptive cases, three choosing imputation and two the pseudocount):
+log2 fold changes to 2.9e-15 absolute (2.8e-12 relative, on one near 0),
+standard errors 8.4e-16, p-values 1.5e-14 and adjusted ones 1.3e-14
+relative, bias 1.3e-15; `reject` and `dof` identical. (A first check on
+other random tables gave up to 4e-11 relative, again on a fold change near
+0.) Mode estimator: 42 vectors (ties, n = 2 to 500), shorth to 1e-13, mode
+to 1e-14.
+
+Not done (later): mixed models (`(1 | id)`), as planned.

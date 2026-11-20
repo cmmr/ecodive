@@ -17,6 +17,9 @@
 #   formula, data, groups  As the methods' arguments.
 #   labels, n              The samples' names (or NULL) and number.
 #   what                   The method's name, for messages.
+#   standardize            TRUE: centre and scale every numeric variable of
+#                          `formula` (scale()) before the model matrix is
+#                          made, as LinDA does (linda()).
 #
 # Returns a list:
 #   X          n x P model matrix (assign and contrasts attributes kept).
@@ -27,7 +30,7 @@
 #              C_ancombc: c(standard, rebase, L, level_col, codes) (see
 #              src/ancombc.c).
 #------------------------------------------------------------------------------
-da_design <- function (formula, data, groups, labels, n, what) {
+da_design <- function (formula, data, groups, labels, n, what, standardize = FALSE) {
 
   if (is.null(formula) && is.null(groups))
     stop(
@@ -135,6 +138,16 @@ da_design <- function (formula, data, groups, labels, n, what) {
          name_list(inf), call. = FALSE)
 
 
+  if (standardize) {
+    const <- vars[vapply(data[vars], function (v) is.numeric(v) && !isTRUE(stats::sd(v) > 0), logical(1))]
+    if (length(const))
+      stop(
+        'A numeric variable in `formula` has a single value, so it can\'t be ',
+        'standardized: ', name_list(const), call. = FALSE )
+    for (v in vars) if (is.numeric(data[[v]])) data[[v]] <- as.vector(scale(data[[v]]))
+  }
+
+
   #--------------------------------------------------------
   # Categorical variables: factors with treatment contrasts,
   # levels in their own order (factors) or sorted.
@@ -147,7 +160,8 @@ da_design <- function (formula, data, groups, labels, n, what) {
   }
   for (v in vars) data[[v]] <- as_levels(data[[v]])
 
-  mf <- stats::model.frame(tt, data, na.action = stats::na.pass)
+  mf <- if (standardize) suppressWarnings(stats::model.frame(tt, data, na.action = stats::na.pass))
+        else stats::model.frame(tt, data, na.action = stats::na.pass)
   for (i in seq_along(mf)) mf[[i]] <- as_levels(mf[[i]])
 
   is_fac <- vapply(mf, is.factor, logical(1))
@@ -159,6 +173,11 @@ da_design <- function (formula, data, groups, labels, n, what) {
   X   <- tryCatch(
     stats::model.matrix(tt, mf, contrasts.arg = if (length(ctr)) ctr),
     error = function (e) stop('Invalid `formula`: ', conditionMessage(e), call. = FALSE) )
+  if (standardize && !all(is.finite(X)))
+    stop(
+      'The design has non-finite values. With `standardize = TRUE`, ',
+      'functions in `formula` (such as log(x)) apply to the standardized ',
+      'variables: use `standardize = FALSE`.', call. = FALSE )
 
   P <- ncol(X)
   if (P == 0L)

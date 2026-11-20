@@ -35,6 +35,7 @@ DA_TESTS <- local({
       Wilcoxon Rank-Sum Test,                  da_wilcoxon,   groups,  median_diff, norm, TRUE,         wilcoxon wilcox wilcoxontest mannwhitney mannwhitneyu ranksum
       Welch t-test,                            da_ttest,      groups,  diff,        norm, TRUE,         ttest welch studentttest
       Linear Model,                            da_lm,         formula, estimate,    norm, TRUE,         lm linearregression ols
+      LinDA,                                   linda,         formula, log2_fc,     2,    TRUE,
   " )
 
   df$zero_free_ok <- as.logical(df$zero_free_ok)
@@ -55,9 +56,9 @@ DA_TESTS <- local({
 #'        Types**.
 #'
 #' @param method   The name of a DA method: `"ancom"`, `"ancombc"`,
-#'        `"ancombc2"`, `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`, or
-#'        `"dirmult_ttest"`. Flexible matching is supported (see below).
-#'        Programmatic access via `list_da_tests()`.
+#'        `"ancombc2"`, `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`,
+#'        `"dirmult_ttest"`, or `"linda"`. Flexible matching is supported
+#'        (see below). Programmatic access via `list_da_tests()`.
 #'
 #' @param groups  The grouping to compare: the name of a column of `data`,
 #'        or a vector with one value per sample. For a model method, the
@@ -77,9 +78,9 @@ DA_TESTS <- local({
 #'        `margin`, `alpha`, `p_adjust`, `cpus`, `contrast` ([da_ttest()],
 #'        [da_wilcoxon()], [dirmult_ttest()]), `norm` and `pseudocount`. Each
 #'        method keeps its own defaults; see [ancom()], [ancombc()],
-#'        [ancombc2()], [da_lm()], [da_ttest()], [da_wilcoxon()], and
-#'        [dirmult_ttest()]. `seed` is ignored by the methods that have no
-#'        random parts (all but [dirmult_ttest()]).
+#'        [ancombc2()], [da_lm()], [da_ttest()], [da_wilcoxon()],
+#'        [dirmult_ttest()], and [linda()]. `seed` is ignored by the methods
+#'        that have no random parts (all but [dirmult_ttest()]).
 #'
 #' @return The method's result, unchanged: `da_test(counts, 'ancombc2',
 #'   ...)` is identical to `ancombc2(counts, ...)`, attributes included.
@@ -99,6 +100,7 @@ DA_TESTS <- local({
 #' | `da_ttest`             | Welch t-test per feature               | groups  |
 #' | `da_wilcoxon`          | Wilcoxon rank-sum test per feature     | groups  |
 #' | `dirmult_ttest`        | Dirichlet-multinomial t-test (ALDEx2-style) | groups |
+#' | `linda`                | Linear models for differential abundance (LinDA) | formula |
 #'
 #' **Groups and models.** *Group methods* compare the samples of one
 #' categorical variable: `groups`, a column name of `data` or one value per
@@ -156,7 +158,7 @@ DA_TESTS <- local({
 #' \doi{10.1093/bib/bbaf130}
 #'
 #' @seealso [ancom()], [ancombc()], [da_lm()], [da_ttest()],
-#'   [da_wilcoxon()], [dirmult_ttest()], [list_da_tests()];
+#'   [da_wilcoxon()], [dirmult_ttest()], [linda()], [list_da_tests()];
 #'   [replace_zeros()] for the zeros; [da_sensitivity()] to rerun a method
 #'   over pseudocounts, zero replacements and scale uncertainties.
 #'
