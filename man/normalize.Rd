@@ -106,6 +106,18 @@ Costea et al. (2014) for the impact on community clustering.
 See \code{\link{aitchison}} for references.
 }
 
+\section{Machine learning}{
+
+Log-ratio transforms (clr, rclr, alr, ilr, PhILR) serve interpretation
+and compositional geometry; don't expect them to improve prediction.
+With random forests predicting 65 metadata variables in four datasets,
+Yerke et al. (2024) found that alr, clr and ilr (PhILR) "performed
+generally slightly worse or only as well as compositionally naïve
+transformations", and relative abundances did best, by a small margin.
+Compare with \code{norm = 'percent'} (see \code{\link[=normalize]{normalize()}}) before choosing a
+log-ratio predictor table.
+}
+
 \examples{
     # Relative abundances
     normalize(ex_counts, 'percent')[, 1:4]
@@ -119,6 +131,12 @@ See \code{\link{aitchison}} for references.
     b <- pca(clr, n_axes = 2)
     all.equal(a, b)
 
+}
+\references{
+Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+normalizations outperform compositional data transformations in machine
+learning applications. \emph{Microbiome}, 12, 45.
+\doi{10.1186/s40168-023-01747-z}
 }
 \seealso{
 \code{\link[=beta_div]{beta_div()}}, \code{\link[=pca]{pca()}}, \code{\link[=envfit]{envfit()}}, \code{\link[=rarefy]{rarefy()}}, \code{\link[=qmp_scale]{qmp_scale()}}

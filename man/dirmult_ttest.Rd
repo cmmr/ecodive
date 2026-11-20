@@ -66,7 +66,8 @@ default) assumes the clr's reference (the geometric mean) is the
 same on both sides, as scikit-bio's \code{dirmult_ttest()} and ALDEx2's
 default do. Nixon et al. (2025) and ALDEx3 suggest \code{0.5}; use it
 with more draws (\code{n_draws = 1000} or more) and judge by
-\code{p_adjusted} (see \strong{Details}).}
+\code{p_adjusted} (see \strong{Details}). Check how your calls depend on it
+(see \strong{Choosing \code{scale_sd}} in \strong{Details}).}
 
 \item{n_draws}{The number of Monte Carlo draws from the Dirichlet
 posterior (scikit-bio's \code{draws}). Default: \code{128}.}
@@ -115,7 +116,8 @@ bound of the draws' intervals for that difference, in log2 units
 Attributes: \code{method} (\code{"dirmult_ttest"}), \code{contrast} (the treatment and reference groups; the
 reference is \code{NA} when all other samples were pooled), \code{n} (the number
 of samples on each side), \code{n_draws}, \code{pseudocount}, \code{scale_sd},
-\code{alpha}, \code{conf_level}, \code{p_adjust} and \code{seed}.
+\code{alpha}, \code{conf_level}, \code{p_adjust}, \code{seed}, and \code{log_base} (\code{2}: the
+base of the logs in \code{log2_fc}, \code{ci_lower} and \code{ci_upper}).
 }
 \description{
 Finds features whose abundance differs between two sets of samples,
@@ -185,6 +187,20 @@ group that comes first (in sorted order, or a factor's level order)
 against the other, so reversing a \code{contrast} of two groups gives exactly
 the mirror image, with or without a scale model. \code{\link[=ancom]{ancom()}} tests log ratios
 without the assumption, but gives no effect sizes.
+
+\strong{Choosing \code{scale_sd}.} Report how the results depend on it: rerun with
+\code{scale_sd = 0}, \code{0.5} and \code{1} (\code{n_draws = 1000} or more) and say which
+features stay rejected. Wrong scale assumptions are costly: in
+differential set analysis, McGovern et al. (2023) found positive
+predictive values as low as 9\% under small errors in the assumed scale;
+over 11 RNA-seq and other sequencing datasets, Dos Santos et al. (2026)
+found that misspecified scale broke false-discovery control in several
+common tools, and that a scale model (ALDEx2, ALDEx3) reduced the
+unacceptably high FDRs at a cost in sensitivity: no tool offered both.
+Larger \code{scale_sd} raises the smallest change that can be called. The
+package website's article "Compositional Analysis of Microbiome Data"
+runs such a comparison, and \code{\link[=da_sensitivity]{da_sensitivity()}} (\code{scale_sds = TRUE}) runs
+it in one call and plots each feature's effect against \code{scale_sd}.
 
 A side with a single sample has no variance: its features' \code{t},
 \code{p_value}, intervals and \code{p_adjusted} are \code{NaN}, with a warning, and none
@@ -286,8 +302,20 @@ gamma variables. \emph{ACM Transactions on Mathematical Software}, 26,
 363-372.
 
 Nixon, M. P., Gloor, G. B., & Silverman, J. D. (2025). Incorporating
-scale uncertainty into differential expression analyses using ALDEx2.
-\emph{Genome Biology}, 26, 139. \doi{10.1186/s13059-025-03609-3}
+scale uncertainty in microbiome and gene expression analysis as an
+extension of normalization. \emph{Genome Biology}, 26, 139.
+\doi{10.1186/s13059-025-03609-3}
+
+McGovern, K. C., Nixon, M. P., & Silverman, J. D. (2023). Addressing
+erroneous scale assumptions in microbe and gene set enrichment analysis.
+\emph{PLOS Computational Biology}, 19, e1011659.
+\doi{10.1371/journal.pcbi.1011659}
+
+Dos Santos, S. J., Murariu, A. C., Silverman, J. D., & Gloor, G. B.
+(2026). Not every gene is special: modelling scale controls the false
+discovery rate when analysing high-throughput sequencing data. \emph{PLOS
+Computational Biology}, 22, e1014728.
+\doi{10.1371/journal.pcbi.1014728}
 }
 \seealso{
 \code{\link[=ancom]{ancom()}}, \code{\link[=replace_zeros]{replace_zeros()}}, \code{\link[=da_sensitivity]{da_sensitivity()}}.

@@ -126,6 +126,18 @@ The choice of pseudocount is not neutral: it can distort the results,
 especially for sparse tables. See \code{\link[=aitchison]{aitchison()}} for references.
 }
 
+\section{Machine learning}{
+
+Log-ratio transforms (clr, rclr, alr, ilr, PhILR) serve interpretation
+and compositional geometry; don't expect them to improve prediction.
+With random forests predicting 65 metadata variables in four datasets,
+Yerke et al. (2024) found that alr, clr and ilr (PhILR) "performed
+generally slightly worse or only as well as compositionally naïve
+transformations", and relative abundances did best, by a small margin.
+Compare with \code{norm = 'percent'} (see \code{\link[=normalize]{normalize()}}) before choosing a
+log-ratio predictor table.
+}
+
 \examples{
     x <- ilr(ex_counts, pseudocount = 1)
     dim(x)
@@ -151,6 +163,11 @@ analysis. \emph{Mathematical Geology}, 35, 279–300.
 Egozcue, J. J., & Pawlowsky-Glahn, V. (2005). Groups of parts and their
 balances in compositional data analysis. \emph{Mathematical Geology}, 37,
 795–828.
+
+Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+normalizations outperform compositional data transformations in machine
+learning applications. \emph{Microbiome}, 12, 45.
+\doi{10.1186/s40168-023-01747-z}
 }
 \seealso{
 \code{\link[=alr]{alr()}}, \code{\link[=normalize]{normalize()}} (\code{'clr'} and \code{'rclr'}), \code{\link[=aitchison]{aitchison()}}

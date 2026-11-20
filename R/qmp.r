@@ -122,6 +122,28 @@
 #'   again. Bray-Curtis on QMP data is the usual next step: [bray()] or
 #'   [beta_div()] with `norm = 'none'`.
 #'
+#' @section Predicted loads:
+#'
+#' Without a measured load, one can be predicted from a fecal profile with
+#' the MLP tool of Nishijima et al. (2025;
+#' \url{https://microbiome-tools.embl.de/mlp/}; an R package not on CRAN):
+#' `pred <- MLP(profile, profiler, training_data, "load")` gives cells per
+#' gram, to pass as `load`: `qmp_scale(counts, pred$load)`, with `counts`'
+#' samples in the same order as `profile`'s. MLP's own `"qmp"` output is
+#' the same calculation as `qmp_scale()`. But:
+#'
+#' * **A prediction is not a measurement.** It is computed from the same
+#'   relative profile, so it adds no independent information, its errors
+#'   are tied to composition, and it can't confirm a compositional result
+#'   (ecodive's reasoning). Predicted and measured loads correlated at
+#'   \eqn{r \approx} 0.67–0.68 within, and 0.56 across, the training
+#'   cohorts.
+#' * **Human stool only**, profiled with the supported tools (mOTUs,
+#'   MetaPhlAn, DADA2 + RDP), and trained on European cohorts.
+#' * That load is "the major determinant of gut microbiome variation" is a
+#'   reason to measure or adjust for load, not a validation of any one
+#'   prediction.
+#'
 #' @section Differences from QMP.R:
 #'
 #' `qmp_rarefy()` follows `rarefy_even_sampling_depth()` in the authors'
@@ -152,6 +174,11 @@
 #' (2020). Quantitative PCR provides a simple and accessible method for
 #' quantitative microbiota profiling. *PLoS ONE*, 15, e0227285.
 #' \doi{10.1371/journal.pone.0227285}
+#'
+#' Nishijima, S., Stankevic, E., Aasmets, O., et al. (2025). Fecal microbial
+#' load is a major determinant of gut microbiome variation and a confounder
+#' for disease associations. *Cell*, 188, 222–236.
+#' \doi{10.1016/j.cell.2024.10.022}
 #'
 #' Props, R., Kerckhof, F.-M., Rubbens, P., et al. (2017). Absolute
 #' quantification of microbial taxon abundances. *The ISME Journal*, 11,

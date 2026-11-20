@@ -137,6 +137,8 @@
 #'   * `method`: `'ancombc'` or `'ancombc2'`.
 #'   * `formula`, `groups`, `alpha`, `p_adjust`, `max_iters`, `tol`,
 #'     `pseudocount` (the value used), and for `ancombc2()` `var_quantile`.
+#'   * `log_base`: `exp(1)`, the base of the logs in `log_fc` (natural
+#'     logs).
 #'   * The fit, for the post-hoc tests: `coef` (features \eqn{\times}
 #'     covariates: the bias-corrected coefficients, including those that
 #'     can't be estimated), `var` (their variances; for `ancombc2()`
@@ -550,6 +552,7 @@ ancombc_fit <- function (env, v2) {
   attr(out, 'groups')      <- des$groups
   attr(out, 'alpha')       <- alpha
   attr(out, 'p_adjust')    <- p_adjust
+  attr(out, 'log_base')    <- exp(1)
   attr(out, 'max_iters')   <- max_iters
   attr(out, 'tol')         <- tol
   if (v2) attr(out, 'var_quantile') <- var_quantile

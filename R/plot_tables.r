@@ -241,11 +241,25 @@ plot.ecodive_dirmult_ttest <- function (x, labels = 10, ...) {
     x$log2_fc, x$p_adjusted, x$reject, x$feature, attr(x, 'alpha', exact = TRUE),
     labels, list(...),
     main = 'Dirichlet-multinomial t-test',
-    xlab = sprintf('log2 fold change, %s (n = %d) / %s (n = %d)', ct[[1]], n[[1]], ref, n[[2]]) )
+    xlab = sprintf('%s, %s (n = %d) / %s (n = %d)', lfc_label(x), ct[[1]], n[[1]], ref, n[[2]]) )
 
   invisible(x)
 }
 
+
+
+# "Log2 fold change", "Log fold change" (natural logs) or "Log10 fold
+# change", from a DA result's `log_base` attribute, for axis labels.
+# Without one (or for another base), "Log fold change", with the base when
+# it is known.
+lfc_label <- function (x) {
+  b <- attr(x, 'log_base', exact = TRUE)
+  if (!is.numeric(b) || length(b) != 1L || !is.finite(b) || b <= 0 || b == 1)
+    return('Log fold change')
+  if (abs(b - exp(1)) < 1e-12) return('Log fold change')
+  if (b %in% c(2, 10))         return(sprintf('Log%g fold change', b))
+  sprintf('Log fold change (base %g)', b)
+}
 
 
 # A volcano plot: log fold changes `lfc` against -log10 of the adjusted

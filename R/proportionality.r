@@ -155,10 +155,11 @@ vlr <- function (
 #'
 #'   \eqn{\rho_p} is a **similarity** in a `dist` container: `as.matrix()`
 #'   puts 0 on the diagonal, where \eqn{\rho_p} is 1, and it must not be
-#'   given as `dm` to an ordination or test. Threshold it to find
-#'   proportional pairs (`which(rho > 0.7)`, or `as.matrix(rho) > 0.7` for
-#'   an adjacency matrix), or use `1 - rho_p(x)` (which is \eqn{\mathrm{vlr}_{ij}
-#'   / (\mathrm{var}(z_i) + \mathrm{var}(z_j))}) for a dissimilarity.
+#'   given as `dm` to an ordination or test. [assoc_pairs()] lists the
+#'   most proportional pairs, such as `assoc_pairs(rho, threshold = 0.7)`,
+#'   and `as.matrix(rho) > 0.7` gives an adjacency matrix. For a
+#'   dissimilarity, use `1 - rho_p(x)`, which is \eqn{\mathrm{vlr}_{ij} /
+#'   (\mathrm{var}(z_i) + \mathrm{var}(z_j))}.
 #'
 #' @details
 #' With \eqn{z} the log-ratio-transformed abundances (clr or alr),
@@ -212,8 +213,7 @@ vlr <- function (
 #'     rho
 #'
 #'     # Pairs above a cutoff
-#'     m <- as.matrix(rho)
-#'     which(m > 0.5 & upper.tri(m), arr.ind = TRUE)
+#'     assoc_pairs(rho, threshold = 0.5)
 #'
 #'     # Relative to one feature (alr): that feature is left out
 #'     rho_p(x, denominator = 'Streptococcus')

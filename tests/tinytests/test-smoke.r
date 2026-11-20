@@ -106,6 +106,10 @@
   expect_identical(attr(z, 'Labels'), colnames(counts)[1:10])
   expect_identical(names(attr(z, 'variances')), colnames(counts)[1:10])
   expect_true(length(attr(z, 'p_value')) == 45L && all(attr(z, 'p_value') > 0 & attr(z, 'p_value') <= 1))
+  a <- assoc_pairs(z, threshold = 0, alpha = 1)
+  expect_true(inherits(a, 'ecodive_assoc_pairs') && nrow(a) == 45L)
+  expect_identical(names(a), c('from', 'to', 'association', 'p_value', 'p_adjusted'))
+  expect_true(all(a$from %in% colnames(counts)) && all(is.finite(a$association)))
 
   # Differential abundance.
   z <- ancom(counts, 'grp', meta, cpus = cpus)

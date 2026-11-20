@@ -17,10 +17,10 @@
 #'        (a distance matrix), or one of ecodive's data frames: from
 #'        [ancom()], [ancombc()], [ancombc2()], [ancombc_global()],
 #'        [ancombc_pairwise()], [ancombc_dunnett()], [ancombc_trend()],
-#'        [dirmult_ttest()], [simper()], [bioenv()], [envfit()] or
-#'        [enterotype()]. A community-types result (see [ecodive_types])
-#'        prints its types and how their number was chosen before its
-#'        first samples.
+#'        [dirmult_ttest()], [da_sensitivity()], [simper()], [bioenv()],
+#'        [envfit()], [assoc_pairs()] or [enterotype()]. A community-types result (see
+#'        [ecodive_types]) prints its types and how their number was chosen
+#'        before its first samples.
 #'
 #' @param n  The number of rows to print (samples, for a distance matrix).
 #'        `NULL`, the default, prints every row of up to 20, and the first
@@ -295,6 +295,7 @@ print_df_label <- function (x) {
       m <- attr(x, 'method', exact = TRUE)
       if (is.null(m)) NULL else paste('Sensitivity of', da_method_name(m))
     },
+    ecodive_assoc_pairs   = assoc_pairs_label(x),
     ecodive_simper        = 'SIMPER',
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
     NULL )
@@ -319,6 +320,8 @@ print_table_result <- function (x, n = NULL, width = NULL, digits = 3L, ...) {
 
 #' @export
 print.ecodive_ancom            <- print_table_result
+#' @export
+print.ecodive_assoc_pairs      <- print_table_result
 #' @export
 print.ecodive_ancombc          <- print_table_result
 #' @export

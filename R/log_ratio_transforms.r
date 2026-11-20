@@ -73,10 +73,16 @@
 #'
 #' @inheritSection documentation Input Types
 #' @inheritSection log_ratio_pseudocount_section Pseudocount
+#' @inheritSection ml_section Machine learning
 #'
 #' @references
 #' Aitchison, J. (1986). *The Statistical Analysis of Compositional Data*.
 #' Chapman & Hall.
+#'
+#' Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+#' normalizations outperform compositional data transformations in machine
+#' learning applications. *Microbiome*, 12, 45.
+#' \doi{10.1186/s40168-023-01747-z}
 #'
 #' @seealso [ilr()], [normalize()] (`'clr'` and `'rclr'`), [aitchison()]
 #'
@@ -195,6 +201,7 @@ alr <- function (
 #'
 #' @inheritSection documentation Input Types
 #' @inheritSection log_ratio_pseudocount_section Pseudocount
+#' @inheritSection ml_section Machine learning
 #'
 #' @references
 #' Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., & Barceló-Vidal,
@@ -204,6 +211,11 @@ alr <- function (
 #' Egozcue, J. J., & Pawlowsky-Glahn, V. (2005). Groups of parts and their
 #' balances in compositional data analysis. *Mathematical Geology*, 37,
 #' 795–828.
+#'
+#' Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+#' normalizations outperform compositional data transformations in machine
+#' learning applications. *Microbiome*, 12, 45.
+#' \doi{10.1186/s40168-023-01747-z}
 #'
 #' @seealso [alr()], [normalize()] (`'clr'` and `'rclr'`), [aitchison()]
 #'

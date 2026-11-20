@@ -201,6 +201,16 @@
 #' Martino, C. (2019). *gemelli* (Python package, version 0.0.13). BSD
 #' 3-Clause License. \url{https://pypi.org/project/gemelli/}
 #'
+#' Schloss, P. D. (2026). Rarefaction is better than robust Aitchison PCA and
+#' other compositional data analysis methods at controlling for uneven
+#' sequencing effort. *mSystems*, 11, e00930-26.
+#' \doi{10.1128/msystems.00930-26}
+#'
+#' Schloss, P. D. (2024). Rarefaction is currently the best approach to
+#' control for uneven sequencing effort in amplicon sequence analyses.
+#' *mSphere*, 9, e00354-23. \doi{10.1128/msphere.00354-23}
+#'
+#' @inheritSection rpca Sequencing depth
 #' @inheritSection ordination_section Ordination result
 #' @inheritSection documentation Input Types
 #'

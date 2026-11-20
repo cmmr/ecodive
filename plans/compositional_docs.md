@@ -219,3 +219,94 @@ changes. Keep new examples fast (`ex_counts`, or `iris` as `rpca()`'s do).
 - Dos Santos, S. J., Murariu, A. C., Silverman, J. D., & Gloor, G. B. (2026). Not every gene is special: modelling scale controls the false discovery rate when analysing high-throughput sequencing data. *PLOS Computational Biology*, 22, e1014728. doi:10.1371/journal.pcbi.1014728
 - Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based normalizations outperform compositional data transformations in machine learning applications. *Microbiome*, 12, 45. doi:10.1186/s40168-023-01747-z
 - Nishijima, S., et al. (2025). Fecal microbial load is a major determinant of gut microbiome variation and a confounder for disease associations. *Cell*, 188, 222–236. doi:10.1016/j.cell.2024.10.022
+
+
+## Decisions made while implementing (2026-11-20)
+
+Asked of the user at the start:
+
+- **`log_base` on the post-hoc results too:** `ancombc_pairwise()` and
+  `ancombc_dunnett()` results get `log_base = exp(1)` (their `log_fc` is a
+  natural log), set in `posthoc_result()` whenever the table has a `log_fc`
+  column; `ancombc_global()` and `ancombc_trend()` results (statistics
+  only) get none. With `ancombc()`, `ancombc2()` (`exp(1)`) and
+  `dirmult_ttest()` (`2`), every DA result with a log fold change now
+  carries it, as `da_wilcoxon()`, `da_ttest()` and `da_lm()` already did
+  (item 36).
+- **Which plots label from `log_base`:** the ANCOM-BC volcano plot's x axis
+  and the pairwise / Dunnett heatmap's subtitle, and `dirmult_ttest()`'s
+  volcano plot. The item-36 plots (`da_wilcoxon()`, `da_ttest()`,
+  `da_lm()`) keep their norm-based labels ("Difference in medians (clr)");
+  item 35 restyles every DA plot.
+- **Article:** the depth check extends the "Rarefied or compositional?"
+  paragraph that item 37 added, instead of a separate "Is it depth?" block
+  after the `rpca` chunk that would repeat it.
+
+Made while implementing:
+
+- **`lfc_label(x)`** (`R/plot_tables.r`) turns `log_base` into "Log2 fold
+  change", "Log10 fold change", "Log fold change" (natural logs, and the
+  fallback when the attribute is missing or invalid) or "Log fold change
+  (base b)". `dirmult_ttest()`'s axis label is therefore capitalised
+  ("Log2 fold change, ..."). `test-plot.r` checks `log_base` on each result
+  and `lfc_label()` for each base (14 new results).
+- **Attribute order:** `log_base` follows `p_adjust` in the ANCOM-BC
+  results and comes last in `dirmult_ttest()`'s; the values are the
+  doubles `exp(1)` and `2`, as item 36's. The sensitivity fits inside
+  `attr(fit, 'sensitivity')` get it too, being results of the same call.
+- **`rpca()`'s "Sequencing depth"** is a `@section` (Rd prints sections
+  after Details, so it follows **Distances** as asked). The plan's wording
+  is kept, with the mechanism ("depth can reach the result" through which
+  values are missing) labelled as an inference from the method. The check
+  uses `beta_div_rarefied(counts, 'robust_aitchison', depth =
+  min(depth))` (item 37's request) instead of `robust_aitchison(rarefy())`;
+  rarefying to the smallest library drops no sample, which
+  `procrustes_test()` needs (it requires the same samples). `[beta_div_rarefied()]`
+  joined `rpca()`'s `@seealso`.
+- **`robust_aitchison()`:** Schloss (2026)'s full text (Europe PMC,
+  PMC13712867, read 2026-11-20) benchmarks RPCA (DEICODE / gemelli, 2, 3,
+  5 and 9 axes) against CLR variants (Nudge, One and Zero CLR), DESeq2,
+  relative abundance, CSS, SRS, subsampling and rarefaction, but not the
+  plain robust Aitchison distance. So the page's sentence says it is an
+  inference ("since Schloss (2026) benchmarked robust Aitchison PCA, not
+  this distance alone"), in a bold **Sequencing depth** paragraph of
+  Details, pointing to `rpca()`'s check and `beta_div_rarefied()`.
+- **`dirmult_ttest()`:** the Dos Santos sentence ends with the abstract's
+  "no tool offered both" (in the claims table).
+- **Machine learning:** the shared section names Yerke et al.'s scope
+  ("random forests predicting 65 metadata variables in four datasets", from
+  the table). `normalize()` gained a `@references` section for it. The
+  article cites Yerke in a short "For prediction" paragraph in
+  "Log-ratio transforms", so that the reference it lists is cited.
+- **Predicted loads:** running the downloaded MLP package to see whether
+  `MLP()` returns sample IDs as row names was refused by this session's
+  permission policy, so that stays unverified; the page shows
+  `qmp_scale(counts, pred$load)` with the samples in `profile`'s order, and
+  not the `data = pred` form. "Adds no independent information ... can't
+  confirm a compositional result" is labelled as ecodive's reasoning. MLP's
+  website (fetched 2026-11-20) also lists a 16S model trained on Vandeputte
+  et al. (2021) and more MetaPhlAn 4 databases than the README; the page
+  names only the tool families, which stays true.
+- **Article, depth:** the new chunk adds the per-axis correlation of RPCA
+  with log library size and PCoAs of the robust Aitchison distance, plain
+  and averaged over 20 rarefactions, so that the completion and the
+  rarefying are separated (the existing comparison changes the metric and
+  the rarefying at once). Knitted: RPCA r² = 0.50 for log depth (axis 2
+  r = -0.60), robust Aitchison PCoA 0.17, rarefied 0.09 (rarefied
+  Bray-Curtis 0.08), Procrustes r = 0.83 between the rarefied robust
+  Aitchison PCoA and the RPCA. The text says this is one simulation, not
+  a benchmark.
+- **Article, other:** Schloss's two quotes join the existing paragraph;
+  the Dos Santos / McGovern paragraph follows the `scale_sd` comparison,
+  which now also asks to report how the rejections change; the predicted
+  loads sentence labels "can't confirm a compositional result" as an
+  inference. **Nishijima et al. (2025) is open access** (Crossref: version
+  of record under CC BY 4.0), so it has no †.
+- **`bdiv_guide.Rmd`:** the Schloss bullet is a sub-bullet after the
+  "primary choice" one, and also names `beta_div_rarefied()`.
+- **NEWS:** two bullets (the documentation, and `log_base`), placed after
+  the `beta_div_rarefied()` bullet rather than at the end of 2.4.0.
+- The ground rule that `beta_div_rarefied()` "comes later" was out of date
+  (item 37, 963647f): it is named on `rpca()`, `robust_aitchison()`, the
+  article and `bdiv_guide.Rmd`. `da_sensitivity()` (item 41, written in
+  parallel) is not named.

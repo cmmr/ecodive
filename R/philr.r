@@ -154,6 +154,7 @@ PHILR_ILR_WEIGHTS <- c('uniform', 'blw', 'blw.sqrt', 'mean.descendants')
 #'
 #' @inheritSection documentation Input Types
 #' @inheritSection log_ratio_pseudocount_section Pseudocount
+#' @inheritSection ml_section Machine learning
 #'
 #' @references
 #' Silverman, J. D., Washburne, A. D., Mukherjee, S., & David, L. A.
@@ -163,6 +164,11 @@ PHILR_ILR_WEIGHTS <- c('uniform', 'blw', 'blw.sqrt', 'mean.descendants')
 #' Egozcue, J. J., & Pawlowsky-Glahn, V. (2016). Changing the reference
 #' measure in the simplex and its weighting effects. *Austrian Journal of
 #' Statistics*, 45(4), 25–44. \doi{10.17713/ajs.v45i4.126}
+#'
+#' Yerke, A., Fry Brumit, D., & Fodor, A. A. (2024). Proportion-based
+#' normalizations outperform compositional data transformations in machine
+#' learning applications. *Microbiome*, 12, 45.
+#' \doi{10.1186/s40168-023-01747-z}
 #'
 #' @seealso [philr_distance()], [ilr()], [aitchison()]
 #'

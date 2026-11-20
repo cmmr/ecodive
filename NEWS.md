@@ -615,6 +615,13 @@
   samples, 100 draws, take about 1.5 seconds on 4 cores. Its docs explain
   how it differs from `rho_p()`.
 
+* New `assoc_pairs()` lists the pairs of features whose correlation, from
+  `sparcc()` or `rho_p()` (or a correlation matrix), is at least a cutoff
+  in absolute value, strongest first, as a data frame of `from`, `to` and
+  `association`. With `sparcc()`'s p-values it adds `p_value` and
+  `p_adjusted` (adjusted over all pairs by `p_adjust`, Benjamini-Hochberg
+  by default), and `alpha` keeps only the significant pairs.
+
 * New `qmp_scale()` and `qmp_rarefy()` turn relative abundances into
   absolute abundances when each sample's total microbial `load` was measured
   (flow cytometry, qPCR, a spike-in). `qmp_scale()` multiplies each sample's
@@ -798,6 +805,20 @@
   medoid work through the pairs of samples in blocks. Titles say so: an
   ordination of the result is a "Principal Coordinates Analysis of
   Bray-Curtis Dissimilarity (rarefied 100×)".
+
+* Documentation: `rpca()`, `rpca_phylo()` and `robust_aitchison()` discuss
+  sequencing depth (Schloss 2026) and show how to check an ordination
+  against library size and a rarefied analysis; `dirmult_ttest()`
+  recommends a `scale_sd` sensitivity check; `normalize()`, `alr()`,
+  `ilr()` and `philr()` note that log-ratio transforms don't improve
+  machine learning; `qmp_scale()` explains predicted loads. The reference
+  to Nixon et al. (2025) now has the published title.
+
+* `ancombc()`, `ancombc2()`, `ancombc_pairwise()` and `ancombc_dunnett()`
+  results gain a `log_base` attribute (`exp(1)`: their `log_fc` is a
+  natural log), and `dirmult_ttest()` results one of `2` (`log2_fc`), as
+  `da_wilcoxon()`, `da_ttest()` and `da_lm()` results have. Their plots
+  label log fold changes from it.
 
 * `rarefy()` of a slam `simple_triplet_matrix` now draws exactly the same
   observations as the same table in any other class, for the same `seed`.

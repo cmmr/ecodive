@@ -540,3 +540,41 @@ Made while implementing:
   `assoc_network_compare()`): `sparcc()` needs only `counts` and its
   arguments; its `seed` streams are by (dataset, draw, sample), so a
   caller wanting independent runs should vary `seed`.
+
+### Follow-up: `assoc_pairs()` (2026-11-20)
+
+The user asked for a helper for "pairs above a cutoff", the clunky
+`which(abs(m) > 0.5 & upper.tri(m), arr.ind = TRUE)` of the examples. Asked
+of the user: the name (**`assoc_pairs()`**, in the planned `assoc_network()`
+family) and the scope (**correlations only**: `sparcc()`, `rho_p()` and a
+correlation matrix; `vlr()` and `phi_s()` give an error pointing to
+`rho_p()`). Made while implementing:
+
+- `assoc_pairs(x, threshold = 0.3, alpha = NULL, p_adjust = 'BH')`: the
+  arguments and meanings of assoc_network.md's edge step (|r| ≥ threshold,
+  inclusive; p-values adjusted over **all** pairs, then filtered by
+  `alpha`), so that `assoc_network()` can build its `edges` on it.
+- Result: a data frame of class `ecodive_assoc_pairs`, columns `from`,
+  `to`, `association`, plus `p_value` and `p_adjusted` when `x` has
+  p-values; strongest first, ties in packed order. `from` is the feature
+  first in the input table (through `order` when `x` was clustered, so a
+  clustered result gives the identical table); unnamed features are their
+  input positions. Attributes `method` (the input's; absent for a matrix),
+  `threshold`, and `alpha` and `p_adjust` when used. Printed with
+  `print_table_result`, headed e.g. "SparCC Correlation: pairs with |r| >=
+  0.3 and BH-adjusted p <= 0.05".
+- A plain matrix must be square, symmetric (`all.equal`) with 1 on the
+  diagonal (within 1e-8). `alpha` without p-values is an error that says
+  to run `sparcc()` with `permutations`.
+- The docs explain why too few permutations can never pass `alpha` (for
+  BH, k pairs at the smallest p pass only when m / (k (B + 1)) ≤ alpha:
+  20 features and one strong pair need about 3,800). The example plants
+  five correlated pairs among 20 taxa, so 999 null datasets suffice
+  (adjusted p 0.038, under a second). `sparcc()`'s and `rho_p()`'s
+  examples and Value text now use `assoc_pairs()`.
+- Found while choosing the example: with 10 features, a few resampled
+  null datasets give |r| > 1 (SparCC's variance approximation fails with
+  so few features), so a pair with r = 0.89 got p = 0.002, not 0.001; with
+  20 features the nulls' largest |r| was 0.55. The method's behaviour, not
+  a bug; the docs already warn about few features.
+- Tests: `tests/tinytests/test-assoc_pairs.r` (63) and two smoke lines.
