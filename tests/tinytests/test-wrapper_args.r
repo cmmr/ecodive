@@ -1,6 +1,7 @@
 #test_that("wrapper arguments don't shadow the methods' arguments", {
 
-  # dist_ord(), count_ord(), dist_test(), replace_zeros() and da_test() pass `...` on to
+  # dist_ord(), count_ord(), dist_test(), replace_zeros(), da_test() and
+  # feature_assoc() pass `...` on to
   # the function of
   # the method they run. R matches named arguments to the wrapper's own
   # arguments before `...`, exactly or by prefix, so a method argument that
@@ -27,6 +28,7 @@
   expect_identical(shadowed(dist_test, list_dist_tests('func'), passed = c('groups', 'data')), character(0))
   expect_identical(shadowed(replace_zeros, list_zero_replacements('func')), character(0))
   expect_identical(shadowed(da_test, list_da_tests('func'), passed = c('groups', 'data', 'formula')), character(0))
+  expect_identical(shadowed(feature_assoc, list_feature_assocs('func')), character(0))
 
   # da_sensitivity() passes `...` to da_test() and takes its grids after
   # `...`, where they match only by exact name: no method may take an
@@ -45,6 +47,7 @@
   expect_identical(names(formals(dist_test)), c('dm', 'test', 'groups', 'data', '...'))
   expect_identical(names(formals(replace_zeros)), c('counts', 'method', '...'))
   expect_identical(names(formals(da_test)), c('counts', 'method', 'groups', 'data', 'formula', '...'))
+  expect_identical(names(formals(feature_assoc)), c('counts', 'method', '...'))
 
   # The check itself catches exact names and prefixes, and allows the
   # pass-through ones.

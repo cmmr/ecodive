@@ -114,11 +114,34 @@ assoc_pairs <- function (x, threshold = 0.3, alpha = NULL, p_adjust = 'BH') {
       'Run sparcc() with `permutations` to get them.', call. = FALSE )
 
 
-  #--------------------------------------------------------
-  # The pairs kept, strongest first (ties in packed order).
-  #--------------------------------------------------------
+  sel <- assoc_select(a, threshold, alpha, p_adjust)
+  res <- sel$pairs
+  res$pos_from <- res$pos_to <- NULL
+
+  class(res) <- c('ecodive_assoc_pairs', 'data.frame')
+  if (!is.null(a$method))   attr(res, 'method')    <- a$method
+  attr(res, 'threshold') <- threshold
+  if (!is.null(alpha))      attr(res, 'alpha')     <- as.double(alpha)
+  if (!is.null(a$p_value))  attr(res, 'p_adjust')  <- p_adjust
+  res
+}
+
+
+
+# The pairs of `a` (from assoc_pairs_input()) that pass the filters:
+# |r| >= threshold (|r| > threshold when `strict`), and, when `alpha` is
+# given, a p-value adjusted by `p_adjust` over all pairs of at most alpha.
+# Returns list(pairs, p_adjusted): `pairs` is a data frame with `from`, `to`
+# (labels; `from` is the one first in the input table), `association`,
+# `p_value` and `p_adjusted` (when `a` has p-values), and `pos_from`,
+# `pos_to` (the two features' input positions), strongest first, ties in
+# packed order; `p_adjusted` holds every pair's adjusted p-value (packed
+# order), or NULL. Shared by assoc_pairs() and assoc_network().
+assoc_select <- function (a, threshold, alpha = NULL, p_adjust = 'BH', strict = FALSE) {
+
   v    <- a$values
-  keep <- !is.na(v) & abs(v) >= threshold
+  keep <- !is.na(v) & (if (strict) abs(v) > threshold else abs(v) >= threshold)
+  p_adj <- NULL
   if (!is.null(a$p_value)) {
     p_adj <- stats::p.adjust(a$p_value, p_adjust)
     if (!is.null(alpha)) keep <- keep & !is.na(p_adj) & p_adj <= alpha
@@ -133,29 +156,24 @@ assoc_pairs <- function (x, threshold = 0.3, alpha = NULL, p_adjust = 'BH') {
   j      <- k - starts[i] + i
 
   # `from` is the one that comes first in the input table.
-  pi <- a$position[i]
-  pj <- a$position[j]
+  pi    <- a$position[i]
+  pj    <- a$position[j]
   first <- pi < pj
-  from  <- ifelse(first, a$labels[i], a$labels[j])
-  to    <- ifelse(first, a$labels[j], a$labels[i])
 
   res <- data.frame(
-    from        = as.character(from),
-    to          = as.character(to),
+    from        = as.character(ifelse(first, a$labels[i], a$labels[j])),
+    to          = as.character(ifelse(first, a$labels[j], a$labels[i])),
     association = v[k],
     stringsAsFactors = FALSE )
   if (!is.null(a$p_value)) {
     res$p_value    <- a$p_value[k]
     res$p_adjusted <- p_adj[k]
   }
+  res$pos_from <- as.integer(pmin(pi, pj))
+  res$pos_to   <- as.integer(pmax(pi, pj))
   rownames(res) <- NULL
 
-  class(res) <- c('ecodive_assoc_pairs', 'data.frame')
-  if (!is.null(a$method))   attr(res, 'method')    <- a$method
-  attr(res, 'threshold') <- threshold
-  if (!is.null(alpha))      attr(res, 'alpha')     <- as.double(alpha)
-  if (!is.null(a$p_value))  attr(res, 'p_adjust')  <- p_adjust
-  res
+  list(pairs = res, p_adjusted = p_adj)
 }
 
 

@@ -193,14 +193,17 @@ reuse §1's names and add these:
 | Name | Meaning | Used by (planned) |
 |:-----|:--------|:------------------|
 | `scaling` | the biplot scaling (`'form'`, `'covariance'`, `'contribution'`); the use §1 reserved it for | `plot.ecodive_ord` |
-| `threshold` | the association cutoff that makes an edge | `assoc_network` and the association functions' sparsification |
+| `threshold` | the association cutoff that makes an edge | `assoc_network`, `assoc_pairs` (exist) and the association functions' sparsification |
 | `average`, `sd` | how repeated rarefactions are combined (`'mean'`, `'median'`, `'medoid'`), and whether to return their spread | `beta_div_rarefied`, `alpha_div_rarefied` (with `rarefy()`'s `times`) |
 | `pseudocounts`, `zeros`, `scale_sds` | the settings grids of a sensitivity analysis. Plural, and after `...`, so they can't capture the method's own `pseudocount` / `scale_sd` (arguments after `...` match only exactly) | `da_sensitivity` |
 | `load_sd` | the uncertainty of a measured load in a scale model | `dirmult_lm` (with `qmp_scale()`'s `load`) |
 | `n_draws` | also used by `dirmult_lm` and `sparcc` | |
 | `max_exclusions`, `exclusion_threshold` | **(added 2026-11-20, item 39)** SparCC's cap on exclusion iterations (`max_<unit>` rule; `0L` for none) and the \|r\| above which a pair is excluded from the variance estimate. Not `threshold`, which is `assoc_network()`'s edge cutoff | `sparcc` (exists) |
+| `sign`, `clusters`, `hubs`, `hub_quantile`, `weighted_degree` | **(added 2026-11-20, item 40)** how an association becomes an edge length and weight (`'signed'`, `'unsigned'`, `'positive'`: NetCoMi's `dissFunc`), the clustering method (`'greedy'`, `'none'`), which centralities define a hub and the quantile it must be above (NetCoMi's `hubPar`, `hubQuant`), and whether degree sums the edge weights (`weightDeg`) | `assoc_network` (exists) |
+| `quantile` | **(item 40)** the quantile a "most central" feature is above (NetCoMi's `jaccQuant`) | `assoc_network_compare` (exists) |
+| `assoc_args`, `network_args` | **(item 40)** lists of the arguments that made two networks' associations and networks, passed again when the group-permutation test re-estimates them (`<step>_args`) | `assoc_network_compare` (exists) |
+| `n_samples` | **(item 40)** the numbers of samples behind two correlation matrices, as the `n_samples` attribute of an association result | `assoc_network_diff` (exists) |
 
-Open naming questions for the user are flagged "ask" in the plans: the
-`feature_assoc()` wrapper name ([assoc_network.md](assoc_network.md)),
+Open naming questions for the user are flagged "ask" in the plans:
 `bias_counts` ([secom.md](secom.md)), and the `da_test()` groups/formula
 convention ([da_test.md](da_test.md)).

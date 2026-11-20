@@ -123,3 +123,33 @@ SEXP C_pair_seed(SEXP sexp_seed, SEXP sexp_pair) {
 
   return ScalarInteger((int) (pcg32_random_r(&rng) >> 1));
 }
+
+
+//======================================================
+// Permutations 1 .. n_perm of n samples, as an n x n_perm
+// integer matrix (1-based, so R can index with them):
+// column k is perm_source_get()'s permutation k, the same
+// one the C tests use for (seed, k), with `strata`
+// (0-based codes, or NULL). For tests whose statistic is
+// computed in R.
+//======================================================
+SEXP C_perm_indices(SEXP sexp_n, SEXP sexp_n_perm, SEXP sexp_strata, SEXP sexp_seed) {
+
+  int n      = asInteger(sexp_n);
+  int n_perm = asInteger(sexp_n_perm);
+  if (n < 1 || n_perm < 0) error("Invalid arguments to C_perm_indices()."); // # nocov
+
+  perm_source_t ps;
+  perm_source_init(&ps, n, R_NilValue, sexp_strata, asInteger(sexp_seed));
+
+  SEXP res = PROTECT(allocMatrix(INTSXP, n, n_perm));
+  int *p   = INTEGER(res);
+  for (int k = 1; k <= n_perm; k++) {
+    int *col = p + (size_t) (k - 1) * n;
+    perm_source_get(&ps, k, col);
+    for (int a = 0; a < n; a++) col[a]++;
+  }
+
+  UNPROTECT(1);
+  return res;
+}

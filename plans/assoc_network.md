@@ -362,3 +362,180 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - van Dongen, S., & Enright, A. J. (2012). Metric distances derived from
   cosine similarity and Pearson and Spearman correlations. arXiv:1208.3145
   (cited by NetCoMi for the signed/unsigned distances; not checked here).
+
+
+## Decisions made while implementing (item 40, 2026-11-20)
+
+Asked of the user at the start:
+
+1. **`feature_assoc(counts, method, ...)`** is added now, with
+   `list_feature_assocs()` / `match_feature_assoc()`, shaped like
+   `count_ord()` (`R/feature_assoc.r`). No `fun` column: each `id` is its
+   function's name. Aliases: `logratiovariance` (vlr), `rho rhop propr`
+   (rho_p), `phi phis phs` (phi_s), `fastspar` (sparcc); `'proportionality'`
+   matches both rho_p and phi_s and so is an error. Checked: no other
+   registry has these as exact names, nor any name starting `assoc` or
+   `net` (tested). Its row is in README.md's shadowing table, and
+   `test-wrapper_args.r` checks it.
+2. **Clustering coefficient: NetCoMi's** (the mean of Barrat's weighted
+   local coefficient over nodes with two or more neighbours), not the
+   plan's unweighted transitivity.
+3. **Jaccard p-values: NetCoMi's model** (see 9), not the plan's
+   conditional hypergeometric.
+4. **One `permutations`** (default 1000) for the ARI test and the
+   group-permutation test; the docs give the cost.
+
+Made while implementing. Every NetCoMi convention below was read from its
+**outputs** (and its Rd); no NetCoMi or igraph source was opened:
+
+5. **Reference: NetCoMi 1.2.0**, from the jsDelivr mirror of
+   `stefpeschel/NetCoMi@1.2.0`. 1.3.0 needs R ≥ 4.6 (this container has
+   4.3.3) and mia; its NEWS lists no change to these computations. Its
+   imports that the correlation-input path never calls (mia, mixedCCA,
+   phyloseq, SPRING, SpiecEasi, SummarizedExperiment, Biobase, qgraph)
+   were replaced by stand-in packages (one erroring function per imported
+   name, `data-raw/expected/assoc_network.r` says how); igraph 1.6.0,
+   WGCNA, fdrtool, orca, pulsar and the rest were real (Ubuntu and CRAN).
+   **Exposure record:** read NetCoMi's `DESCRIPTION`, `NEWS.md`, the
+   import lines of `NAMESPACE`, and the Rd of `netConstruct`,
+   `netAnalyze`, `netCompare` and `diffnet`; listed (not printed) the
+   names of its namespace and called two internal functions,
+   `.calcJaccard()` and `.sigTestRand()`, for their outputs only. No R
+   source was opened or printed; no error message showed code.
+6. **Agreement.** Fixtures: `data-raw/expected/assoc_network.r` →
+   `tests/tinytests/expected/assoc_network.rds` (75 KB): 12 pairs of
+   correlation matrices (8–30 features) over all three signs, both degree
+   kinds, five hub settings and thresholds 0.2–0.4; edge cases; the
+   Jaccard grid; `diffnet()`; igraph on five hand-built graphs. Plus a
+   sweep (not stored) of 160 networks (2 seeds × 40 settings × 2 groups,
+   8–40 features). Largest differences, all networks:
+   degree 8.9e-16, betweenness 0, closeness 7.8e-16, eigenvector 3.2e-14,
+   global properties 8.9e-16; hubs identical and clusterings identical
+   (same partition, same 0s) in all 160. Jaccard indices and both
+   probabilities: 2e-16. ARI value: identical. Fisher's z p-values:
+   2e-6 relative at p ≈ 1e-11, because NetCoMi computes `1 - pnorm()`
+   (tested absolutely at 1e-14). igraph: betweenness, harmonic sums,
+   eigenvector, Barrat and fast greedy modularity at 1e-10 or better;
+   partitions identical except the star, whose two partitions differ in
+   modularity only by rounding (0 vs −7e-17). Base-R implementations
+   (Floyd–Warshall, path counting, `eigen()`, Barrat's and Newman's
+   formulas): 1e-12.
+7. **NetCoMi's definitions, as its outputs show them** (all now in the
+   Rd):
+   - degree ÷ (N − 1), N all features (igraph's normalised degree of the
+     whole network); **weighted degree is the raw strength**;
+   - betweenness ÷ (k − 1)(k − 2)/2, k the LCC size;
+   - **closeness = avDiss_LCC · Σ 1/dist ÷ (k − 1)**: shortest paths are
+     divided by the LCC's *average dissimilarity*, the mean of d over all
+     the LCC's pairs counting **1 for non-edges** (its `avDiss` with
+     `avDissIgnoreInf = FALSE`);
+   - **average path length** = mean finite shortest path over connected
+     pairs ÷ the whole network's average dissimilarity (1 without edges);
+     `average_dissimilarity` was added to `global` for it;
+   - **modularity is unweighted** (Newman) on the weighted fast greedy
+     clusters, with cluster 0 as one group;
+   - **hubs: the type-7 quantile over all N features** (zeros outside the
+     LCC included), strictly above it; the same for the "most central" sets
+     of `_compare()` (so `quantile` isn't over the LCC, as the plan had it);
+   - **clusters: a one-node cluster is 0** (not only isolated features),
+     and **igraph never returns one cluster of all nodes**: when the best
+     modularity is at the final merge of a connected network it returns the
+     partition one merge earlier (shown with K3, K4, K6, a star, and
+     disconnected unions in igraph 1.6.0). `C_network_greedy()` does the
+     same. Ties in the merge gain go to the first pair (i, j); no fixture
+     differed from igraph through a tie;
+   - `positive_fraction` with `sign = 'positive'` counts the dropped
+     negative edges in its denominator (NetCoMi's `pep` with "signedPos");
+   - an edge with **d = 0 (r = 1) is not used by shortest paths** (NetCoMi's
+     graph of dissimilarities reads 0 as "no edge"), and one with **s = 0
+     (r = −1, signed) is no edge at all**; the plan's 1e-12 length was
+     dropped;
+   - clustering coefficient 0 when no node has two neighbours.
+8. **Kept different from NetCoMi** (documented): no switch to weighted
+   degree for a complete network (NetCoMi switches silently; the fixture
+   checks ecodive's `weighted_degree = TRUE` against it); an empty network
+   gives zeros (NetCoMi errors); hub and most-central comparisons ignore
+   differences within a relative 1e-12 of the quantile (NetCoMi's hub for
+   two exactly tied eigenvector values of 1 depends on igraph's rounding;
+   the fixture `edge_r1` happens to agree); only these global properties
+   (no natural/vertex/edge connectivity, graphlets, or LCC-only copies);
+   p-values adjusted with `p.adjust()` only.
+9. **Jaccard probabilities** (`.calcJaccard()` outputs for every set size
+   up to 6): the shared count is **Binomial(|A ∪ B|, 1/3)**: each feature
+   in either set is in both with probability 1/3 (Real & Vargas's
+   equiprobable model); they don't depend on N. `p_less = P(K ≤ k)`,
+   `p_greater = P(K ≥ k)`; two empty sets give J = 0 and probabilities 1.
+   Matched at 2e-16.
+10. **ARI** uses the `cluster` columns as they are (cluster 0 is one
+    cluster; matched NetCoMi's `randInd` exactly). **Its test is two-sided**
+    in NetCoMi's outputs (|ARI_b| ≥ |ARI|; compared over 20,000
+    permutations on three cases: 0.2940 vs 0.2944, 0.6564 vs 0.6624, 1 vs
+    1, where the one-sided values would be 0.19, 0.75, 0.48), though its
+    Rd describes a one-sided test. ecodive is two-sided, permutes y's labels
+    over the features with `perm_source` streams (new `C_perm_indices()`
+    in `src/permute.c`), and adds 1 to both counts (NetCoMi doesn't, and
+    gives p = 0).
+11. **Group-permutation test**: as NetCoMi's Rd describes (relabel samples
+    keeping group sizes, re-estimate, |difference| ≥ observed, pseudo-count),
+    through `feature_assoc()` and `assoc_network()` with `assoc_args` /
+    `network_args`. Permutation b's association runs get the seed
+    `pair_seed(seed, b)` (`C_pair_seed()`), replacing any `seed` in
+    `assoc_args`. It is **not compared with NetCoMi** (NetCoMi re-estimates
+    with its own measures; ecodive has no Pearson association, and NetCoMi's
+    SparCC is SpiecEasi's), so it is tested exactly against networks rebuilt
+    by hand for the same permutations (the internal hook `group_perms` of
+    `network_compare_core()`; `ari_perms` likewise). Identical for `cpus`
+    1, 3, 4. Results: `nodes` is long (feature × centrality), which keeps
+    `p_value`/`p_adjusted` one column each; a `clusters` table (each
+    network's clusters and hubs) was added for the compare plot.
+12. **C** (`src/assoc_network.c`): CSR adjacency; Dijkstra with a lazy
+    binary heap and Brandes' accumulation, equal paths at a relative 1e-12;
+    sources in fixed blocks of 32, each block's betweenness in its own row,
+    rows summed in block order (identical for `cpus` 1, 2, 3, 4, 8,
+    tested); paths run on the whole network once (LCC values are the same,
+    and the average path length needs every component). Fast greedy with
+    sorted link lists, ΔQ recomputed from e and a. Eigenvector by
+    `lanczos()` (k = 1), sign fixed and scaled to max 1. Timing (4 cores):
+    3,000 features, 168,000 edges: 3.8 s (1 thread 8.6 s); paths 1.8 s,
+    `assoc_select()` 0.8 s, greedy 0.8 s.
+13. **`assoc_pairs()` refactored**: its selection is now `assoc_select()`
+    (shared with `assoc_network()`, with a `strict` option for methods
+    whose cutoff is `>`); its results are unchanged (its 63 tests pass).
+    `threshold = NULL` takes the method's own sparsity (`sparse` registry
+    column: non-zero entries) or a numeric `threshold` attribute (with
+    `strict`), else 0.3; tested by flipping `sparse` for sparcc.
+14. **Inputs**: `vlr()`/`phi_s()` refused with the plan's message; a matrix
+    must be within [−1, 1]; values beyond ±1 (SparCC) are clamped for d and
+    s but `association` keeps the raw value. `_diff()` takes `n_samples`
+    (one or two numbers) for matrices, uses a parallel `n_pairs` when a
+    result has one (SECOM), and refuses methods with `fisher_z = FALSE`.
+15. **Plots**: circular layout as planned; labels placed radially outside
+    the nodes; edge colours from positions 2 and 10 of
+    `hcl.colors(11, "Blue-Red 3")` (the very ends read as black at thin
+    widths); the compare plot titles its panels by group under one outer
+    title; ASCII `>=`/`<=` in subtitles (the Unicode signs failed on
+    `png()` in a C locale). `hubs` and `hub_quantile` are stored as
+    attributes (they qualify the `hub` column, rule 1), and the node size
+    reads the first of `hubs`.
+16. **Names in results**: `global` gained `average_dissimilarity`; the
+    compare result is `nodes`, `global`, `jaccard`, `ari` (named vector
+    `value`, `p_value`), `clusters`, `edges_x`, `edges_y`.
+
+### What `spiec_easi_*` (item 56) and `secom_*` (item 57) need to add
+
+- A `FEATURE_ASSOCS` row each (the function name as `id`): spiec_easi_*
+  with `kind = similarity`, `lower = -1`, `upper = 1`, `fisher_z = FALSE`,
+  **`sparse = TRUE`** (then `assoc_network(threshold = NULL)` makes edges of
+  the non-zero entries); secom_pearson with `fisher_z = TRUE`, **`strict =
+  TRUE`**, and its chosen cutoff as a numeric top-level **`threshold`**
+  attribute (then `threshold = NULL` uses it, with `>`), plus a parallel
+  **`n_pairs`** attribute (pairwise-complete sample counts), which
+  `assoc_network_diff()` already uses and `dist_reorder()` already keeps
+  aligned; secom_distance's kind and range as its plan decides.
+- Their functions must take `counts` first and no argument named
+  `method` or a prefix of `method`/`counts` (`test-wrapper_args.r`
+  checks); `assoc_network_compare()` re-runs them through
+  `feature_assoc()`, passing `seed` only if they take one.
+- Test that `assoc_network()` of their results gives the expected edges,
+  and add their aliases to the cross-registry check in
+  `test-assoc_network.r`.

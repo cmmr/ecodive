@@ -111,6 +111,23 @@
   expect_identical(names(a), c('from', 'to', 'association', 'p_value', 'p_adjusted'))
   expect_true(all(a$from %in% colnames(counts)) && all(is.finite(a$association)))
 
+  # Associations by name, and networks.
+  expect_identical(feature_assoc(counts, 'rho_p', cpus = cpus), rho_p(counts, cpus = cpus))
+  expect_identical(list_feature_assocs('id'), c('vlr', 'rho_p', 'phi_s', 'sparcc'))
+  expect_identical(match_feature_assoc('FastSpar')$id, 'sparcc')
+  an <- assoc_network(z, threshold = 0.2, cpus = cpus)
+  expect_true(inherits(an, 'ecodive_network') && nrow(an$nodes) == 10L)
+  expect_identical(an$nodes$feature, colnames(counts)[1:10])
+  expect_true(all(is.finite(an$global[c('n_nodes', 'n_edges', 'density', 'modularity')])))
+  expect_true(all(is.finite(as.matrix(an$nodes[2:5]))) && is.logical(an$nodes$hub))
+  z2 <- sparcc(counts[, 1:10], n_draws = 5L, seed = 1L, cpus = cpus)
+  ac <- assoc_network_compare(an, assoc_network(z2, threshold = 0.2), permutations = 9L, cpus = cpus)
+  expect_true(inherits(ac, 'ecodive_network_compare') && nrow(ac$jaccard) == 5L)
+  expect_true(nrow(ac$nodes) == 40L && all(ac$jaccard$p_less >= 0 & ac$jaccard$p_less <= 1))
+  ad <- assoc_network_diff(z, z2)
+  expect_true(inherits(ad, 'ecodive_network_diff') && nrow(ad) == 45L)
+  expect_true(is.logical(ad$reject) && all(ad$p_value[!is.na(ad$p_value)] <= 1))
+
   # Differential abundance.
   z <- ancom(counts, 'grp', meta, cpus = cpus)
   expect_true(inherits(z, 'ecodive_ancom') && nrow(z) == 12L)
@@ -318,6 +335,9 @@
   expect_true(drawn(ef, add = TRUE))
   expect_true(drawn(sp))
   expect_true(drawn(be))
+  expect_true(drawn(an))
+  expect_true(drawn(ac))
+  expect_true(drawn(ad))
   expect_true(drawn(vp))
   expect_true(drawn(fs))
   expect_true(drawn(ancom(counts, 'grp', meta, cpus = cpus)))

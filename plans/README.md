@@ -245,7 +245,9 @@ plots read.
   `ZERO_REPLACEMENTS` (see [zero_replacement.md](zero_replacement.md)).
   **Differential-abundance methods** join `da_test()`: add a row to
   `DA_TESTS` (see [da_test.md](da_test.md)).
-  **Ordinations of distances** join `dist_ord()`: add a row to `ORDINATIONS`
+  **Associations between features** join `feature_assoc()`: add a row to
+  `FEATURE_ASSOCS` in `R/feature_assoc.r` (its columns say what the
+  network functions need to know). **Ordinations of distances** join `dist_ord()`: add a row to `ORDINATIONS`
   in `R/dist_ord.r`. **Ordinations of a count table** join `count_ord()`:
   add a row to `COUNT_ORDS` in `R/count_ord.r`. **Tests of `dm` against
   one variable** join `dist_test()`: add a row to `DIST_TESTS` in
@@ -282,6 +284,7 @@ plots read.
   | `replace_zeros()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
   | `da_test()` | `counts`, `method`, `groups`, `data`, `formula` | an argument named `method`, or any prefix of `method`, `counts`, `groups`, `data` or `formula` other than the pass-through `groups`, `data`, `formula` themselves (`m`, `c`, `co`, `g`, `gr`, `d`, `da`, `f`, `fo`, ...) |
   | `da_sensitivity()` | `counts`, `method`, then (after `...`, so matched only exactly) `pseudocounts`, `zeros`, `scale_sds`, `crossed` | what `da_test()` forbids, and an argument named exactly `pseudocounts`, `zeros`, `scale_sds` or `crossed` |
+  | `feature_assoc()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
 
   `groups` and `data` themselves are fine in `dist_test()`: it passes
   them through on purpose, as `da_test()` passes `groups`, `data` and
@@ -334,7 +337,7 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, ✓ `da_test` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, ✓ `da_test`, `feature_assoc` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
 | Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, ✓ `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |

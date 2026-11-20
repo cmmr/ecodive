@@ -68,6 +68,11 @@ extern SEXP C_rpca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, S
 extern SEXP C_rpca_phylo(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_simper(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_sparcc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_network_paths(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_network_greedy(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_network_barrat(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_network_eigen(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_perm_indices(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_medoid_accum(SEXP, SEXP, SEXP);
 extern SEXP C_row_medians(SEXP, SEXP);
@@ -153,6 +158,11 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_rpca_phylo", (DL_FUNC) &C_rpca_phylo, 18},
   {"C_simper",    (DL_FUNC) &C_simper,    7},
   {"C_sparcc",    (DL_FUNC) &C_sparcc,   11},
+  {"C_network_paths",  (DL_FUNC) &C_network_paths,  5},
+  {"C_network_greedy", (DL_FUNC) &C_network_greedy, 4},
+  {"C_network_barrat", (DL_FUNC) &C_network_barrat, 4},
+  {"C_network_eigen",  (DL_FUNC) &C_network_eigen,  5},
+  {"C_perm_indices",   (DL_FUNC) &C_perm_indices,   4},
   {"C_tsne_p",    (DL_FUNC) &C_tsne_p,    7},
   {"C_tsne_run",  (DL_FUNC) &C_tsne_run,  4},
   {"C_umap_ab",       (DL_FUNC) &C_umap_ab,       2},

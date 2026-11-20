@@ -622,6 +622,35 @@
   `p_adjusted` (adjusted over all pairs by `p_adjust`, Benjamini-Hochberg
   by default), and `alpha` keeps only the significant pairs.
 
+* New `assoc_network()` turns associations between features (`sparcc()`,
+  `rho_p()`, or a correlation matrix) into a network and analyses it as
+  NetCoMi's `netConstruct()` and `netAnalyze()` do: edges at a cutoff (and
+  optionally significant), signed or unsigned edge lengths, degree,
+  betweenness, closeness and eigenvector centralities of the largest
+  connected component, hubs, fast greedy modularity clusters, and global
+  properties (density, components, average path length, Barrat's
+  clustering coefficient, modularity, ...). Written from the papers and
+  NetCoMi's documentation, it agrees with NetCoMi 1.2.0 to about 1e-13 on
+  160 test networks. Shortest paths run in parallel in C, with results
+  identical for any `cpus`: 3,000 features with 168,000 edges take about 4
+  seconds on 4 cores. `plot()` draws it on a circular layout.
+
+* New `assoc_network_compare()` compares two groups' networks as NetCoMi's
+  `netCompare()` does: differences in centralities and global properties,
+  Jaccard indices of the most central features and of the hubs (with
+  NetCoMi's probabilities), and the adjusted Rand index of the clusterings
+  with a permutation test. Given the count table and the groups, it tests
+  every difference by permuting the samples' groups and re-estimating both
+  networks.
+
+* New `assoc_network_diff()` tests every pair's correlation for a
+  difference between two groups with Fisher's z, as NetCoMi's
+  `diffnet(diffMethod = "fisherTest")`.
+
+* New `feature_assoc()` runs any association measure (`vlr()`, `rho_p()`,
+  `phi_s()`, `sparcc()`) by name, with `list_feature_assocs()` and
+  `match_feature_assoc()`.
+
 * New `qmp_scale()` and `qmp_rarefy()` turn relative abundances into
   absolute abundances when each sample's total microbial `load` was measured
   (flow cytometry, qPCR, a spike-in). `qmp_scale()` multiplies each sample's
