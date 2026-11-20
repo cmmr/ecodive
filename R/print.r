@@ -193,7 +193,8 @@ print_table_lines <- function (
     used <- used + 1L + w
   }
 
-  out <- paste('#', head)
+  head <- head[!is.na(head) & nzchar(head)]
+  out  <- paste('#', head)
   if (length(cols)) {
     row_line <- function (lab, cells) paste0(
       print_pad(lab, rw, !named), ' ',
@@ -257,6 +258,8 @@ print_df_label <- function (x) {
 
   cls <- class(x)[[1]]
   if (startsWith(cls, 'ecodive_ancombc')) {
+    # Subsetting rows with `[` drops the `method` attribute.
+    if (is.null(attr(x, 'method', exact = TRUE))) return (NULL)
     nm   <- ancombc_plot_name(x)
     test <- sub('^ecodive_ancombc_?', '', cls)
     return (switch(

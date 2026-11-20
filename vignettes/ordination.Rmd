@@ -94,11 +94,12 @@ names each one answers to.
 
 Every method returns the same kind of object: a matrix with one row per
 sample and one column per axis, so it goes straight into `plot()` or a data
-frame.
+frame. Printed, it shows its title, each axis's share of the variance, and
+its first rows.
 
 ```{r}
 ord <- pcoa(dm)
-head(ord)
+ord
 ```
 
 Its attributes say how the ordination was made and how good it is. They
@@ -110,9 +111,9 @@ str(ord)
 ```
 
 `plot()` draws the first two axes, and takes its labels from the
-attributes: the title from `method`, and each axis's share of the variance
-from `prop`. Give `groups` (and `data`) as for the tests to colour the
-samples, with a legend. The axes share one scale (`asp = 1`), to keep
+attributes: the title from `display` (see `?ecodive_display`), and each
+axis's share of the variance from `prop`. Give `groups` (and `data`) as for
+the tests to colour the samples, with a legend. The axes share one scale (`asp = 1`), to keep
 distances true.
 
 ```{r}
@@ -418,7 +419,7 @@ pseudocount, which suits sparse microbiome counts.
 
 ```{r}
 ord <- rpca(iris[, 1:4])
-round(100 * attr(ord, 'prop'), 1)
+ord
 ```
 
 `dpcoa()`, double principal coordinate analysis (as in `ade4` and

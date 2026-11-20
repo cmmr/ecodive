@@ -328,7 +328,7 @@ gemelli plugin (**[Martino et al.
 
 ```{r rpca, fig.alt = "RPCA biplot of the simulated samples, coloured by group, with arrows for the taxa with the longest loadings."}
 ord <- rpca(counts, n_axes = 2)
-round(attr(ord, 'prop'), 3)   # proportion of variance per axis
+ord   # its title, % of variance per axis, and first samples
 
 # A biplot: the samples by group, and the ten longest taxon loadings.
 grp <- groups[match(rownames(ord), rownames(counts))]
@@ -370,7 +370,7 @@ from noise alone, so leave out tips present in half the samples or fewer
 
 ```{r rpca-phylo}
 ord_phy <- rpca_phylo(counts, tree, n_axes = 2, min_feature_frequency = 50)
-round(attr(ord_phy, 'prop'), 3)
+ord_phy
 
 # The nodes with the largest loadings on the first axis:
 load_phy <- attr(ord_phy, 'loadings')[, 1]
@@ -511,7 +511,7 @@ differentially abundant:
 
 ```{r ancom, fig.alt = "Dot chart of ANCOM's W for each taxon, largest first, with the rejected taxa highlighted and a dashed line at the cutoff."}
 res_ancom <- ancom(counts, groups, pseudocount = 1)
-head(res_ancom[order(-res_ancom$W), ], 12)
+res_ancom[order(-res_ancom$W), ]
 table(changed = changed, rejected = res_ancom$reject)
 plot(res_ancom)
 ```
@@ -527,8 +527,7 @@ taxon. `dirmult_ttest()` is scikit-bio's version, with Welch's t-test;
 
 ```{r dirmult, fig.alt = "Volcano plot of the Dirichlet-multinomial t-test: each taxon's log2 fold change against its adjusted p-value, with the differentially abundant taxa highlighted and named."}
 res_dm <- dirmult_ttest(counts, groups, contrast = c('treated', 'control'))
-cols <- c('feature', 'log2_fc', 'ci_lower', 'ci_upper', 'p_adjusted', 'reject')
-head(res_dm[order(res_dm$p_adjusted), cols], 12)
+res_dm[order(res_dm$p_adjusted), ]
 table(changed = changed, rejected = res_dm$reject)
 plot(res_dm)
 ```
@@ -627,7 +626,7 @@ meta <- data.frame(group = groups, row.names = samples)
 
 fit <- ancombc2(counts[, keep], ~ group, meta)
 res_bc <- fit[fit$covariate == 'grouptreated', ]
-head(res_bc[order(res_bc$p_adjusted), ], 12)
+res_bc[order(res_bc$p_adjusted), ]
 table(changed = changed[keep], rejected = res_bc$reject)
 
 # Estimated log fold changes of the changed taxa, against the truth

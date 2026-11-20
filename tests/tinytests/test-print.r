@@ -77,6 +77,12 @@
   expect_identical(print_df_label(structure(list(), groups = c('a', 'b'), class = c('ecodive_ancom', 'data.frame'))), 'ANCOM: a vs b')
   expect_identical(print_df_label(structure(list(), method = 'ancombc2', class = c('ecodive_ancombc_pairwise', 'data.frame'))), 'ANCOM-BC2 pairwise tests')
   expect_identical(print_df_label(structure(list(), method = 'ancombc', class = c('ecodive_ancombc', 'data.frame'))), 'ANCOM-BC')
+  # Rows taken with `[` keep the class but not the attributes: no label line.
+  sub_ <- structure(data.frame(a = 1:3), class = c('ecodive_ancombc', 'data.frame'))[2:3, , drop = FALSE]
+  expect_null(print_df_label(sub_))
+  out <- capture.output(print(sub_))
+  expect_true(startsWith(out[[1]], '# A data.frame: 2 '))
+  expect_false(any(out == '#'))
   expect_identical(print_df_label(structure(list(), partial = TRUE, class = c('ecodive_bioenv', 'data.frame'))), 'BIO-ENV (partial)')
   meta <- data.frame(Species = iris$Species)
   fit  <- envfit(pcoa(bray(iris[, 1:4], cpus = cpus), cpus = cpus), meta, permutations = 9, cpus = cpus)
