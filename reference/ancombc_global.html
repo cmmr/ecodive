@@ -269,15 +269,15 @@ to gene expression data on ordered categories. <em>Biometrics</em>, 66, 485–49
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">ancombc_global</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">res</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   feature           w      p_value   p_adjusted reject</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      F1  1.78597500 4.568396e-01 1.000000e+00  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      F2 60.28742380 2.361777e-06 1.889422e-05   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      F3  0.03998274 7.811002e-02 4.686601e-01  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      F4  4.78034917 2.334486e-01 1.000000e+00  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      F5  1.38517980 6.225672e-01 1.000000e+00  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      F6 25.90625478 2.216400e-04 1.551480e-03   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7      F7  0.86510213 9.745627e-01 1.000000e+00  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8      F8  1.58903521 5.128828e-01 1.000000e+00  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   feature           w      p_value   p_adjusted reject passed_ss reject_robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      F1  1.78597500 4.568396e-01 1.000000e+00  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      F2 60.28742380 2.361777e-06 1.889422e-05   TRUE      TRUE          TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      F3  0.03998274 7.811002e-02 4.686601e-01  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      F4  4.78034917 2.334486e-01 1.000000e+00  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      F5  1.38517980 6.225672e-01 1.000000e+00  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6      F6 25.90625478 2.216400e-04 1.551480e-03   TRUE     FALSE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7      F7  0.86510213 9.745627e-01 1.000000e+00  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8      F8  1.58903521 5.128828e-01 1.000000e+00  FALSE      TRUE         FALSE</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ancombc_global-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -288,11 +288,11 @@ to gene expression data on ordered categories. <em>Biometrics</em>, 66, 485–49
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5       F2     severe - mild  1.880123 0.2997796  6.271683 6.073015e-05</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17      F6     severe - mild -1.728554 0.3428363 -5.041923 5.051992e-04</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18      F6 severe - moderate -1.653628 0.4016451 -4.117137 2.086614e-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      p_adjusted reject</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.0020406570   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.0007287618   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17 0.0060623903   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18 0.0229527490   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      p_adjusted reject passed_ss reject_robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.0020406570   TRUE     FALSE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.0007287618   TRUE     FALSE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17 0.0060623903   TRUE     FALSE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18 0.0229527490   TRUE     FALSE         FALSE</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ancombc_global-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -314,33 +314,42 @@ to gene expression data on ordered categories. <em>Biometrics</em>, 66, 485–49
 <span class="r-out co"><span class="r-pr">#&gt;</span> 14      F7   severe - mild  0.000000000 0.5163252  0.00000000 1.000000e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15      F8 moderate - mild  0.028229795 0.4110188  0.06868249 1.000000e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16      F8   severe - mild -0.530294725 0.4443275 -1.19347709 1.000000e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      p_adjusted reject</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.0012985999   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.0004858412   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 0.0040415935   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13 1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14 1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15 1.0000000000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 1.0000000000  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      p_adjusted reject passed_ss reject_robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.0012985999   TRUE     FALSE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.0004858412   TRUE     FALSE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 0.0040415935   TRUE     FALSE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13 1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14 1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 1.0000000000  FALSE      TRUE         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16 1.0000000000  FALSE      TRUE         FALSE</span>
 <span class="r-in"><span>    <span class="fu">ancombc_trend</span><span class="op">(</span><span class="va">fit</span>, n_bootstraps <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   feature    pattern          w p_value p_adjusted reject</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      F1 increasing 0.51303279   0.278      1.000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      F2 increasing 1.88012279   0.000      0.000   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      F3 decreasing 0.03140829   0.988      1.000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      F4 increasing 0.83253144   0.119      0.714  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      F5 decreasing 0.48538297   0.355      1.000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      F6 decreasing 1.72855427   0.000      0.000   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7      F7 increasing 0.23158725   0.789      1.000  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8      F8 decreasing 0.53852924   0.228      1.000  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   feature    pattern          w p_value p_adjusted reject passed_ss</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      F1 increasing 0.51303279   0.278      1.000  FALSE      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      F2 increasing 1.88012279   0.000      0.000   TRUE      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      F3 decreasing 0.03140829   0.988      1.000  FALSE      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      F4 increasing 0.83253144   0.119      0.714  FALSE      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      F5 decreasing 0.48538297   0.355      1.000  FALSE      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6      F6 decreasing 1.72855427   0.000      0.000   TRUE     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7      F7 increasing 0.23158725   0.789      1.000  FALSE      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8      F8 decreasing 0.53852924   0.228      1.000  FALSE      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   reject_robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7         FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8         FALSE</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

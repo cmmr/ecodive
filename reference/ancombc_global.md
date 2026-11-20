@@ -238,15 +238,15 @@ to gene expression data on ordered categories. *Biometrics*, 66,
 
     res <- ancombc_global(fit)
     res
-#>   feature           w      p_value   p_adjusted reject
-#> 1      F1  1.78597500 4.568396e-01 1.000000e+00  FALSE
-#> 2      F2 60.28742380 2.361777e-06 1.889422e-05   TRUE
-#> 3      F3  0.03998274 7.811002e-02 4.686601e-01  FALSE
-#> 4      F4  4.78034917 2.334486e-01 1.000000e+00  FALSE
-#> 5      F5  1.38517980 6.225672e-01 1.000000e+00  FALSE
-#> 6      F6 25.90625478 2.216400e-04 1.551480e-03   TRUE
-#> 7      F7  0.86510213 9.745627e-01 1.000000e+00  FALSE
-#> 8      F8  1.58903521 5.128828e-01 1.000000e+00  FALSE
+#>   feature           w      p_value   p_adjusted reject passed_ss reject_robust
+#> 1      F1  1.78597500 4.568396e-01 1.000000e+00  FALSE      TRUE         FALSE
+#> 2      F2 60.28742380 2.361777e-06 1.889422e-05   TRUE      TRUE          TRUE
+#> 3      F3  0.03998274 7.811002e-02 4.686601e-01  FALSE      TRUE         FALSE
+#> 4      F4  4.78034917 2.334486e-01 1.000000e+00  FALSE      TRUE         FALSE
+#> 5      F5  1.38517980 6.225672e-01 1.000000e+00  FALSE      TRUE         FALSE
+#> 6      F6 25.90625478 2.216400e-04 1.551480e-03   TRUE     FALSE         FALSE
+#> 7      F7  0.86510213 9.745627e-01 1.000000e+00  FALSE      TRUE         FALSE
+#> 8      F8  1.58903521 5.128828e-01 1.000000e+00  FALSE      TRUE         FALSE
     plot(res)
 
 
@@ -257,11 +257,11 @@ to gene expression data on ordered categories. *Biometrics*, 66,
 #> 5       F2     severe - mild  1.880123 0.2997796  6.271683 6.073015e-05
 #> 17      F6     severe - mild -1.728554 0.3428363 -5.041923 5.051992e-04
 #> 18      F6 severe - moderate -1.653628 0.4016451 -4.117137 2.086614e-03
-#>      p_adjusted reject
-#> 4  0.0020406570   TRUE
-#> 5  0.0007287618   TRUE
-#> 17 0.0060623903   TRUE
-#> 18 0.0229527490   TRUE
+#>      p_adjusted reject passed_ss reject_robust
+#> 4  0.0020406570   TRUE     FALSE         FALSE
+#> 5  0.0007287618   TRUE     FALSE         FALSE
+#> 17 0.0060623903   TRUE     FALSE         FALSE
+#> 18 0.0229527490   TRUE     FALSE         FALSE
     plot(res)
 
 
@@ -283,31 +283,40 @@ to gene expression data on ordered categories. *Biometrics*, 66,
 #> 14      F7   severe - mild  0.000000000 0.5163252  0.00000000 1.000000e+00
 #> 15      F8 moderate - mild  0.028229795 0.4110188  0.06868249 1.000000e+00
 #> 16      F8   severe - mild -0.530294725 0.4443275 -1.19347709 1.000000e+00
-#>      p_adjusted reject
-#> 1  1.0000000000  FALSE
-#> 2  1.0000000000  FALSE
-#> 3  0.0012985999   TRUE
-#> 4  0.0004858412   TRUE
-#> 5  1.0000000000  FALSE
-#> 6  1.0000000000  FALSE
-#> 7  1.0000000000  FALSE
-#> 8  1.0000000000  FALSE
-#> 9  1.0000000000  FALSE
-#> 10 1.0000000000  FALSE
-#> 11 1.0000000000  FALSE
-#> 12 0.0040415935   TRUE
-#> 13 1.0000000000  FALSE
-#> 14 1.0000000000  FALSE
-#> 15 1.0000000000  FALSE
-#> 16 1.0000000000  FALSE
+#>      p_adjusted reject passed_ss reject_robust
+#> 1  1.0000000000  FALSE      TRUE         FALSE
+#> 2  1.0000000000  FALSE      TRUE         FALSE
+#> 3  0.0012985999   TRUE     FALSE         FALSE
+#> 4  0.0004858412   TRUE     FALSE         FALSE
+#> 5  1.0000000000  FALSE      TRUE         FALSE
+#> 6  1.0000000000  FALSE      TRUE         FALSE
+#> 7  1.0000000000  FALSE      TRUE         FALSE
+#> 8  1.0000000000  FALSE      TRUE         FALSE
+#> 9  1.0000000000  FALSE      TRUE         FALSE
+#> 10 1.0000000000  FALSE      TRUE         FALSE
+#> 11 1.0000000000  FALSE      TRUE         FALSE
+#> 12 0.0040415935   TRUE     FALSE         FALSE
+#> 13 1.0000000000  FALSE      TRUE         FALSE
+#> 14 1.0000000000  FALSE      TRUE         FALSE
+#> 15 1.0000000000  FALSE      TRUE         FALSE
+#> 16 1.0000000000  FALSE      TRUE         FALSE
     ancombc_trend(fit, n_bootstraps = 1000)
-#>   feature    pattern          w p_value p_adjusted reject
-#> 1      F1 increasing 0.51303279   0.278      1.000  FALSE
-#> 2      F2 increasing 1.88012279   0.000      0.000   TRUE
-#> 3      F3 decreasing 0.03140829   0.988      1.000  FALSE
-#> 4      F4 increasing 0.83253144   0.119      0.714  FALSE
-#> 5      F5 decreasing 0.48538297   0.355      1.000  FALSE
-#> 6      F6 decreasing 1.72855427   0.000      0.000   TRUE
-#> 7      F7 increasing 0.23158725   0.789      1.000  FALSE
-#> 8      F8 decreasing 0.53852924   0.228      1.000  FALSE
+#>   feature    pattern          w p_value p_adjusted reject passed_ss
+#> 1      F1 increasing 0.51303279   0.278      1.000  FALSE      TRUE
+#> 2      F2 increasing 1.88012279   0.000      0.000   TRUE      TRUE
+#> 3      F3 decreasing 0.03140829   0.988      1.000  FALSE      TRUE
+#> 4      F4 increasing 0.83253144   0.119      0.714  FALSE      TRUE
+#> 5      F5 decreasing 0.48538297   0.355      1.000  FALSE      TRUE
+#> 6      F6 decreasing 1.72855427   0.000      0.000   TRUE     FALSE
+#> 7      F7 increasing 0.23158725   0.789      1.000  FALSE      TRUE
+#> 8      F8 decreasing 0.53852924   0.228      1.000  FALSE      TRUE
+#>   reject_robust
+#> 1         FALSE
+#> 2          TRUE
+#> 3         FALSE
+#> 4         FALSE
+#> 5         FALSE
+#> 6         FALSE
+#> 7         FALSE
+#> 8         FALSE
 ```

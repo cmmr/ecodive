@@ -795,19 +795,19 @@ head(res_bc[order(res_bc$p_adjusted), ], 12)
 #> 20   ASV010 grouptreated -1.2558726 0.2497938 -5.027638 1.217797e-05
 #> 116  ASV116 grouptreated  0.9178394 0.2488831  3.687833 1.049483e-03
 #> 48   ASV027 grouptreated  0.6429064 0.2184252  2.943370 6.749844e-03
-#>       p_adjusted reject
-#> 8   8.568846e-11   TRUE
-#> 6   8.186282e-10   TRUE
-#> 4   9.652985e-10   TRUE
-#> 10  6.798933e-09   TRUE
-#> 2   1.490243e-08   TRUE
-#> 16  6.010560e-06   TRUE
-#> 14  2.240007e-05   TRUE
-#> 18  2.112915e-04   TRUE
-#> 12  2.428247e-04   TRUE
-#> 20  5.967208e-04   TRUE
-#> 116 5.037521e-02  FALSE
-#> 48  3.172427e-01  FALSE
+#>       p_adjusted reject passed_ss reject_robust
+#> 8   8.568846e-11   TRUE      TRUE          TRUE
+#> 6   8.186282e-10   TRUE      TRUE          TRUE
+#> 4   9.652985e-10   TRUE      TRUE          TRUE
+#> 10  6.798933e-09   TRUE      TRUE          TRUE
+#> 2   1.490243e-08   TRUE      TRUE          TRUE
+#> 16  6.010560e-06   TRUE      TRUE          TRUE
+#> 14  2.240007e-05   TRUE      TRUE          TRUE
+#> 18  2.112915e-04   TRUE      TRUE          TRUE
+#> 12  2.428247e-04   TRUE      TRUE          TRUE
+#> 20  5.967208e-04   TRUE      TRUE          TRUE
+#> 116 5.037521e-02  FALSE      TRUE         FALSE
+#> 48  3.172427e-01  FALSE      TRUE         FALSE
 table(changed = changed[keep], rejected = res_bc$reject)
 #>        rejected
 #> changed FALSE TRUE
@@ -828,7 +828,11 @@ their adjusted p-values, with the differentially abundant taxa
 highlighted and named.](compositional_files/figure-html/ancombc2-1.png)
 
 The bias correction recovers the true fold changes almost exactly, where
-the clr-based estimates above were off by the shift. ANCOM-BC
+the clr-based estimates above were off by the shift.
+[`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) also
+runs the R package’s sensitivity analysis by default: it refits with
+pseudocounts 0.1, 0.5 and 1, and `reject_robust` keeps only the
+decisions that hold in every fit, which are the ones to report. ANCOM-BC
 ([`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md))
 does a little less well on this table, with two false positives and
 estimates further from the truth. It needs a pseudocount for the zeros,

@@ -39,7 +39,7 @@ ancombc2(
   tol = 1e-05,
   alpha = 0.05,
   p_adjust = "holm",
-  sensitivity = FALSE,
+  sensitivity = TRUE,
   cpus = n_cpus()
 )
 ```
@@ -125,12 +125,14 @@ ancombc2(
 - sensitivity:
 
   The pseudocount sensitivity analysis (see **False discoveries**):
-  `FALSE` (the default) for none; `TRUE` to refit with pseudocounts
-  `0.1`, `0.5` and `1` added to every value, as ANCOMBC does; or a
-  vector of positive pseudocounts to use instead (on the scale of
-  `counts`, so give your own for proportions). With it, the table gains
-  `passed_ss` and `reject_robust`. **Recommended**: it takes one more
-  fit per pseudocount.
+  `TRUE` to refit with pseudocounts `0.1`, `0.5` and `1` added to every
+  value, as ANCOMBC does (the default for `ancombc2()`, as in ANCOMBC);
+  `FALSE` for none (the default for `ancombc()`, for which neither
+  ANCOMBC nor scikit-bio offers it); or a vector of positive
+  pseudocounts to use instead. The default pseudocounts are on the scale
+  of counts: for proportions or other scaled values, give your own (a
+  warning says so). With it, the table gains `passed_ss` and
+  `reject_robust`. It takes one more fit per pseudocount.
 
 - cpus:
 
@@ -284,11 +286,12 @@ settings (Pelto et al. 2025), ANCOM-BC2's findings replicated least
 often of 14 methods: treat them with caution, and compare them with
 another method's.
 
-It is off by default here only because scikit-bio, whose results these
-are, leaves it to the user; set `sensitivity = TRUE`. It follows ANCOMBC
-2.10.1 and later (and scikit-bio's example): each pseudocount is added
-to every value before the whole analysis, which is repeated, and the
-post-hoc tests
+`ancombc2()` runs it by default, as ANCOMBC does; scikit-bio leaves it
+to the user (its results are the main columns, which it doesn't change).
+For `ancombc()` it is off by default, as neither reference offers it
+there; set `sensitivity = TRUE`. It follows ANCOMBC 2.10.1 and later
+(and scikit-bio's example): each pseudocount is added to every value
+before the whole analysis, which is repeated, and the post-hoc tests
 ([`ancombc_global()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
 ...) repeat themselves on each fit.
 
@@ -350,8 +353,9 @@ And unlike both:
   detection (see
   [`structural_zeros()`](https://cmmr.github.io/ecodive/reference/structural_zeros.md)).
 
-- The sensitivity analysis is off by default (ANCOMBC: on), and is
-  available for `ancombc()` too (ANCOMBC: `ancombc2()` only).
+- The sensitivity analysis is on by default for `ancombc2()`, as in
+  ANCOMBC (scikit-bio: not built in), and available for `ancombc()` too
+  (ANCOMBC: `ancombc2()` only).
 
 - A design with as many columns as samples, or more, is an error (the
   residuals would all be zero); a rank-deficient design gives a warning.
@@ -452,10 +456,10 @@ methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
     plot(res, 'age')
 
 
-    # ANCOM-BC2, with zeros as missing values, and the sensitivity
-    # analysis (recommended): only decisions that hold at pseudocounts
-    # 0.1, 0.5 and 1 too are kept in `reject_robust`.
-    res2 <- ancombc2(x, ~ status + age, meta, groups = 'status', sensitivity = TRUE)
+    # ANCOM-BC2, with zeros as missing values, and (by default) the
+    # sensitivity analysis: only decisions that hold at pseudocounts 0.1,
+    # 0.5 and 1 too are kept in `reject_robust`.
+    res2 <- ancombc2(x, ~ status + age, meta, groups = 'status')
     res2[res2$reject, ]
 #>  [1] feature       covariate     log_fc        se            w            
 #>  [6] p_value       p_adjusted    reject        passed_ss     reject_robust

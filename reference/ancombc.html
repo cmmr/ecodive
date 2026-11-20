@@ -99,7 +99,7 @@ follow scikit-bio's <code>ancombc()</code> and <code>ancombc2()</code>.</p>
 <span>  tol <span class="op">=</span> <span class="fl">1e-05</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  p_adjust <span class="op">=</span> <span class="st">"holm"</span>,</span>
-<span>  sensitivity <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  sensitivity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -182,12 +182,15 @@ the features, separately for each covariate: any method of
 
 <dt id="arg-sensitivity">sensitivity<a class="anchor" aria-label="anchor" href="#arg-sensitivity"></a></dt>
 <dd><p>The pseudocount sensitivity analysis (see <strong>False
-discoveries</strong>): <code>FALSE</code> (the default) for none; <code>TRUE</code> to refit with
-pseudocounts <code>0.1</code>, <code>0.5</code> and <code>1</code> added to every value, as ANCOMBC
-does; or a vector of positive pseudocounts to use instead (on the
-scale of <code>counts</code>, so give your own for proportions). With it, the
-table gains <code>passed_ss</code> and <code>reject_robust</code>. <strong>Recommended</strong>: it
-takes one more fit per pseudocount.</p></dd>
+discoveries</strong>): <code>TRUE</code> to refit with pseudocounts <code>0.1</code>, <code>0.5</code> and
+<code>1</code> added to every value, as ANCOMBC does (the default for
+<code>ancombc2()</code>, as in ANCOMBC); <code>FALSE</code> for none (the default for
+<code>ancombc()</code>, for which neither ANCOMBC nor scikit-bio offers it);
+or a vector of positive pseudocounts to use instead. The default
+pseudocounts are on the scale of counts: for proportions or other
+scaled values, give your own (a warning says so). With it, the
+table gains <code>passed_ss</code> and <code>reject_robust</code>. It takes one more fit
+per pseudocount.</p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
@@ -312,10 +315,12 @@ with it and greatly inflated without it. Even so, in a comparison over
 69 gut microbiome datasets with ANCOMBC's default settings (Pelto et al.
 2025), ANCOM-BC2's findings replicated least often of 14 methods: treat
 them with caution, and compare them with another method's.</p>
-<p>It is off by default here only because scikit-bio, whose results these
-are, leaves it to the user; set <code>sensitivity = TRUE</code>. It follows ANCOMBC
-2.10.1 and later (and scikit-bio's example): each pseudocount is added
-to every value before the whole analysis, which is repeated, and the
+<p><code>ancombc2()</code> runs it by default, as ANCOMBC does; scikit-bio leaves it
+to the user (its results are the main columns, which it doesn't
+change). For <code>ancombc()</code> it is off by default, as neither reference
+offers it there; set <code>sensitivity = TRUE</code>. It follows ANCOMBC 2.10.1
+and later (and scikit-bio's example): each pseudocount is added to
+every value before the whole analysis, which is repeated, and the
 post-hoc tests (<code><a href="ancombc_global.html">ancombc_global()</a></code>, ...) repeat themselves on each fit.</p>
     </div>
     <div class="section level2">
@@ -363,8 +368,9 @@ shared pseudocount rule (see <code>pseudocount</code>).</p></li>
 scikit-bio's <code>aggregator</code>, ANCOMBC's data preprocessing (<code>prv_cut</code>,
 <code>lib_cut</code>, <code>tax_level</code>; see the examples) and its structural-zero
 detection (see <code><a href="structural_zeros.html">structural_zeros()</a></code>).</p></li>
-<li><p>The sensitivity analysis is off by default (ANCOMBC: on), and is
-available for <code>ancombc()</code> too (ANCOMBC: <code>ancombc2()</code> only).</p></li>
+<li><p>The sensitivity analysis is on by default for <code>ancombc2()</code>, as in
+ANCOMBC (scikit-bio: not built in), and available for <code>ancombc()</code>
+too (ANCOMBC: <code>ancombc2()</code> only).</p></li>
 <li><p>A design with as many columns as samples, or more, is an error (the
 residuals would all be zero); a rank-deficient design gives a
 warning.</p></li>
@@ -454,10 +460,10 @@ methods for human gut 16S rRNA microbiome data (2026). <em>bioRxiv</em>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">'age'</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ancombc-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># ANCOM-BC2, with zeros as missing values, and the sensitivity</span></span></span>
-<span class="r-in"><span>    <span class="co"># analysis (recommended): only decisions that hold at pseudocounts</span></span></span>
-<span class="r-in"><span>    <span class="co"># 0.1, 0.5 and 1 too are kept in `reject_robust`.</span></span></span>
-<span class="r-in"><span>    <span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">x</span>, <span class="op">~</span> <span class="va">status</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta</span>, groups <span class="op">=</span> <span class="st">'status'</span>, sensitivity <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="co"># ANCOM-BC2, with zeros as missing values, and (by default) the</span></span></span>
+<span class="r-in"><span>    <span class="co"># sensitivity analysis: only decisions that hold at pseudocounts 0.1,</span></span></span>
+<span class="r-in"><span>    <span class="co"># 0.5 and 1 too are kept in `reject_robust`.</span></span></span>
+<span class="r-in"><span>    <span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">ancombc2</span><span class="op">(</span><span class="va">x</span>, <span class="op">~</span> <span class="va">status</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta</span>, groups <span class="op">=</span> <span class="st">'status'</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">res2</span><span class="op">[</span><span class="va">res2</span><span class="op">$</span><span class="va">reject</span>, <span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] feature       covariate     log_fc        se            w            </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [6] p_value       p_adjusted    reject        passed_ss     reject_robust</span>

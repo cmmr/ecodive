@@ -958,8 +958,13 @@
   in every fit) and `reject_robust` (the decisions to use), as ANCOMBC’s
   `passed_ss` and `diff_robust`. The post-hoc tests repeat themselves on
   each fit and add the same columns, and the plots draw the robust
-  decisions filled and the others hollow. It is off by default, as in
-  scikit-bio, but recommended: the help page now says plainly that
+  decisions filled and the others hollow. It is on by default for
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  as in ANCOMBC (the main columns are still scikit-bio’s), with a
+  warning when the table isn’t whole numbers (the default pseudocounts
+  are on the scale of counts), and off by default for
+  [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  for which neither reference offers it. The help page says plainly that
   without it the decisions can include many false discoveries.
 
 - New post-hoc tests on an

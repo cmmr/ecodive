@@ -898,19 +898,19 @@ them).</p>
 <span><span class="co">#&gt; 20   ASV010 grouptreated -1.2558726 0.2497938 -5.027638 1.217797e-05</span></span>
 <span><span class="co">#&gt; 116  ASV116 grouptreated  0.9178394 0.2488831  3.687833 1.049483e-03</span></span>
 <span><span class="co">#&gt; 48   ASV027 grouptreated  0.6429064 0.2184252  2.943370 6.749844e-03</span></span>
-<span><span class="co">#&gt;       p_adjusted reject</span></span>
-<span><span class="co">#&gt; 8   8.568846e-11   TRUE</span></span>
-<span><span class="co">#&gt; 6   8.186282e-10   TRUE</span></span>
-<span><span class="co">#&gt; 4   9.652985e-10   TRUE</span></span>
-<span><span class="co">#&gt; 10  6.798933e-09   TRUE</span></span>
-<span><span class="co">#&gt; 2   1.490243e-08   TRUE</span></span>
-<span><span class="co">#&gt; 16  6.010560e-06   TRUE</span></span>
-<span><span class="co">#&gt; 14  2.240007e-05   TRUE</span></span>
-<span><span class="co">#&gt; 18  2.112915e-04   TRUE</span></span>
-<span><span class="co">#&gt; 12  2.428247e-04   TRUE</span></span>
-<span><span class="co">#&gt; 20  5.967208e-04   TRUE</span></span>
-<span><span class="co">#&gt; 116 5.037521e-02  FALSE</span></span>
-<span><span class="co">#&gt; 48  3.172427e-01  FALSE</span></span>
+<span><span class="co">#&gt;       p_adjusted reject passed_ss reject_robust</span></span>
+<span><span class="co">#&gt; 8   8.568846e-11   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 6   8.186282e-10   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 4   9.652985e-10   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 10  6.798933e-09   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 2   1.490243e-08   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 16  6.010560e-06   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 14  2.240007e-05   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 18  2.112915e-04   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 12  2.428247e-04   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 20  5.967208e-04   TRUE      TRUE          TRUE</span></span>
+<span><span class="co">#&gt; 116 5.037521e-02  FALSE      TRUE         FALSE</span></span>
+<span><span class="co">#&gt; 48  3.172427e-01  FALSE      TRUE         FALSE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, rejected <span class="op">=</span> <span class="va">res_bc</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>
@@ -926,12 +926,15 @@ them).</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="compositional_files/figure-html/ancombc2-1.png" class="r-plt" alt="Volcano plot of ANCOM-BC2's bias-corrected log fold changes against their adjusted p-values, with the differentially abundant taxa highlighted and named." width="576"></p>
 <p>The bias correction recovers the true fold changes almost exactly,
-where the clr-based estimates above were off by the shift. ANCOM-BC
-(<code><a href="../reference/ancombc.html">ancombc()</a></code>) does a little less well on this table, with two
-false positives and estimates further from the truth. It needs a
-pseudocount for the zeros, and the bias a pseudocount introduces differs
-between rare and abundant taxa, so a single shift can’t remove it
-all:</p>
+where the clr-based estimates above were off by the shift.
+<code><a href="../reference/ancombc.html">ancombc2()</a></code> also runs the R package’s sensitivity analysis
+by default: it refits with pseudocounts 0.1, 0.5 and 1, and
+<code>reject_robust</code> keeps only the decisions that hold in every
+fit, which are the ones to report. ANCOM-BC (<code><a href="../reference/ancombc.html">ancombc()</a></code>)
+does a little less well on this table, with two false positives and
+estimates further from the truth. It needs a pseudocount for the zeros,
+and the bias a pseudocount introduces differs between rare and abundant
+taxa, so a single shift can’t remove it all:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc</a></span><span class="op">(</span><span class="va">counts</span><span class="op">[</span>, <span class="va">keep</span><span class="op">]</span>, <span class="op">~</span> <span class="va">group</span>, <span class="va">meta</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="va">fit1</span><span class="op">[</span><span class="va">fit1</span><span class="op">$</span><span class="va">covariate</span> <span class="op">==</span> <span class="st">'grouptreated'</span>, <span class="op">]</span></span>
