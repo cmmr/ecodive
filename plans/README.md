@@ -218,6 +218,17 @@ Rules:
   when the result is made. `plot()` never recomputes from the data.
 - **Tests** check `display$title` for one call of each new function, and
   that `plot()` uses it. Don't test echoed settings.
+- **Printing (set 2026-11-20):** results never print every value.
+  Ordinations and distance matrices get `print.ecodive_ord()` and
+  `print.ecodive_dist()` for free; a new class built on a data frame
+  registers `print.ecodive_<name> <- print_table_result` (R/print.r,
+  `?print_ecodive`: a tibble-style preview with a header, the first rows,
+  the columns that fit, and a footer) and adds a header label to
+  `print_df_label()`. A list result writes its own short `print()`, as
+  `print.ecodive_test()` does.
+- **Examples** print the function's result by leaving it bare on a line
+  (`ord`, or the call itself), never with `print()` and never through
+  `head()`, which drops the class.
 
 Each plan's "Plotting" section names its title and the attributes its
 plots read.
