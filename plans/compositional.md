@@ -248,9 +248,15 @@ proportions lose nothing.
     (`denominator`, `basis`, `tree`).
   - `log_ratio()`, `balance()`: two functions; numerator/denominator are
     their whole interface.
-  - `vlr()`, `rho_p()`, `phi_s()`, and later `sparcc()`, the SPIEC-EASI
-    and SECOM functions: see [assoc_network.md](assoc_network.md) for
-    whether an association wrapper is now justified.
+- **Proposed (2026-11-20; needs the user's approval of the name):
+  `feature_assoc(counts, method, ...)`** over `vlr()`, `rho_p()`,
+  `phi_s()`, `sparcc()`, `spiec_easi_mb()`, `spiec_easi_glasso()`,
+  `secom_pearson()` and `secom_distance()`: eight methods with one input and
+  one output, and `assoc_network_compare()` must re-run whichever method
+  made the networks on permuted samples. Not `assoc()`, which would mask
+  `vcd::assoc()`. See [assoc_network.md](assoc_network.md). The shared
+  output gains `similarity` and `features` flags in its record (set in
+  [sparcc.md](sparcc.md)), replacing today's hard-coded `rho_p` checks.
 - **New (2026-11-20): `da_test(counts, method, ...)`** with registry
   `DA_TESTS` and `list_da_tests()` / `match_da_test()`. The condition set
   here on 2026-11-19 ("if a third method joins") is met: `ancom()`,
