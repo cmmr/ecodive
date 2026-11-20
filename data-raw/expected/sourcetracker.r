@@ -7,6 +7,8 @@
 #     python -I data-raw/expected/sourcetracker.py <sourcetracker2 dir>
 #     SOURCETRACKER_V1=<SourceTracker.r> Rscript data-raw/expected/sourcetracker.r
 #
+# (The v1 part takes about 3 minutes on 4 cores.)
+#
 # SourceTracker2 2.0.1-dev (BSD-3): collapse_source_data(),
 # ConditionalProbability and gibbs_sampler()'s draw schedule on fixed
 # inputs, and gibbs() on simulated mixtures with 40 seeds per setting (see
@@ -118,7 +120,9 @@ v1_path <- Sys.getenv('SOURCETRACKER_V1')
 if (nzchar(v1_path)) {
   st1 <- new.env()
   sys.source(v1_path, envir = st1)
-  props <- lapply(1:20, function (seed) {
+  # Each seed seeds R's generator itself, so forked workers give the same
+  # results as a serial run.
+  props <- parallel::mclapply(1:20, mc.cores = 4L, function (seed) {
     set.seed(seed)
     fit <- st1$sourcetracker(srcs, envs, rarefaction_depth = 2000)
     res <- st1$predict.sourcetracker(

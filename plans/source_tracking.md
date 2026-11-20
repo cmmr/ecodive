@@ -462,6 +462,13 @@ Made while implementing:
     (`gibbs_sampler()` on `sources.drop(index=source)`, then
     `collate_gibbs_results(loo = TRUE)`). The docs' "Differences from
     SourceTracker2" say ecodive's `loo` works.
-    SourceTracker 1 (GPL) was **not** run: executing its downloaded script
-    was refused by the session's permission checks. The generator runs it
-    when `SOURCETRACKER_V1` is set, and the test checks it when present.
+    **SourceTracker 1.0** (GPL, github.com/danknights/sourcetracker,
+    `src/SourceTracker.r`) was run for its outputs only, by
+    `data-raw/expected/sourcetracker.r` with `SOURCETRACKER_V1` set: 20 seeds
+    of R's generator on the same simulated tables, `delay = 1`, other
+    settings as SourceTracker2's defaults. Only its README, `example.r`'s
+    calls and the two functions' argument lists were read. Its means are
+    within 0.0038 of ecodive's (max z 2.1) and 0.0045 of SourceTracker2's;
+    the test checks both within 0.02. (A first attempt to run it was refused
+    by the session's permission checks; the user then asked for it, and it
+    ran.)

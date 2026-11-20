@@ -70,6 +70,7 @@
       loo = r$loo, features = TRUE, seed = seed ))
     P  <- simplify2array(lapply(fits, unclass))          # sinks x V x seeds
     m  <- apply(P, 1:2, mean)
+    if (run == 'default') m_default <- m
     s  <- apply(P, 1:2, stats::sd)
     se <- sqrt(r$sd^2 / r$n_seeds + s^2 / length(seeds))
     expect_identical(dimnames(m), dimnames(r$mean), info = run)
@@ -114,10 +115,14 @@
   expect_true(max(abs(st - sim$truth)) < max(abs(r$mean - sim$truth)) + 0.02)
   expect_true(st['sink4', 'soil'] > 0.9 && st['sink5', 'Unknown'] > 0.85)
 
-  # SourceTracker 1 (GPL, outputs only), when its run is in the fixture:
-  # loosely.
-  if (!is.null(sim$v1))
-    expect_true(max(abs(r$mean - sim$v1$mean)) < 0.05)
+  # SourceTracker 1.0 (GPL, outputs only; 20 seeds of R's generator, with
+  # delay 1), when its run is in the fixture: ecodive's and SourceTracker2's
+  # means are within 0.02 of it (0.004 and 0.0045 when the fixture was made).
+  if (!is.null(sim$v1)) {
+    expect_identical(dimnames(sim$v1$mean), dimnames(m_default))
+    expect_true(max(abs(m_default - sim$v1$mean)) < 0.02)
+    expect_true(max(abs(r$mean - sim$v1$mean)) < 0.02)
+  }
 
 
   # -----------------------------------------------------------------------
