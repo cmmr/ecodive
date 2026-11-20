@@ -90,20 +90,23 @@ count data and phylogenetic tree.
 
 library(ecodive)
 data(esophagus, package = 'phyloseq')
-data(hmp50,     package = 'rbiom')
+hmp50 <- rbiom::hmp50
 
 # Calculate weighted UniFrac distance
 w_unifrac <- weighted_unifrac(esophagus)
-print(w_unifrac)
-#>           B         C
-#> C 0.1050480          
-#> D 0.1401124 0.1422409
+w_unifrac
+#> # A dist: 3 samples (lower triangle)
+#> # Weighted UniFrac
+#>       B     C
+#> C 0.105
+#> D 0.14  0.142
+#> # Attributes: method
 
 # Calculate Faith's Phylogenetic Diversity
 faith_pd <- faith(hmp50)
-print(faith_pd[1:4])
+faith_pd[1:4]
 #>   HMP01   HMP02   HMP03   HMP04 
-#> 6.22296 8.59432 8.93375 9.86597 
+#> 6.22296 8.59432 8.93375 9.86597
 ```
 
 ### With basic R objects
@@ -128,25 +131,31 @@ counts[,1:4]
 ## Alpha Diversity -------------------
 shannon(counts)
 #>     Saliva       Gums       Nose      Stool 
-#> 0.74119910 0.35692121 1.10615349 0.07927797 
+#> 0.74119910 0.35692121 1.10615349 0.07927797
 
 faith(counts, tree = ex_tree)
 #> Saliva   Gums   Nose  Stool 
-#>    180    155    101    202 
+#>    180    155    101    202
 
 
 ## Beta Diversity --------------------
 bray(counts)
-#>          Saliva      Gums      Nose
-#> Gums  0.4260870                    
-#> Nose  0.9797101 0.9826087          
-#> Stool 0.9884058 0.9884058 0.9913043
+#> # A dist: 4 samples (lower triangle)
+#> # Bray-Curtis Dissimilarity
+#>       Saliva  Gums  Nose
+#> Gums   0.426
+#> Nose   0.98  0.983
+#> Stool  0.988 0.988 0.991
+#> # Attributes: method
 
 weighted_unifrac(counts, tree = ex_tree)
-#>          Saliva      Gums      Nose
-#> Gums   36.97681                    
-#> Nose   67.23768  55.97101          
-#> Stool 109.77971 109.44058 110.00870
+#> # A dist: 4 samples (lower triangle)
+#> # Weighted UniFrac
+#>       Saliva Gums Nose
+#> Gums    37
+#> Nose    67.2   56
+#> Stool  110    109  110
+#> # Attributes: method
 ```
 
 ### Ordination
@@ -170,15 +179,24 @@ from three species.
 dm <- bray(iris[, 1:4])
 
 ord <- pcoa(dm)
-head(ord, 3)
-#>          PCoA1       PCoA2        PCoA3
-#> [1,] 0.1692812 -0.02591990 -0.005053611
-#> [2,] 0.1706354  0.02346821  0.030848760
-#> [3,] 0.1870090 -0.00320247  0.032221661
-
-# Percent of variance on each axis.
-round(100 * attr(ord, 'prop'), 1)
-#> [1] 89.0  9.3  2.9
+ord
+#> # A matrix: 150 samples × 3 axes
+#> # Principal Coordinates Analysis of Bray-Curtis Dissimilarity
+#> # % of variance: 89.0, 9.3, 2.9
+#>    PCoA1   PCoA2    PCoA3
+#>  1 0.169 -0.0259 -0.00505
+#>  2 0.171  0.0235  0.0308
+#>  3 0.187 -0.0032  0.0322
+#>  4 0.18   0.0113  0.0372
+#>  5 0.176 -0.03   -0.00613
+#>  6 0.136 -0.0398 -0.0431
+#>  7 0.186 -0.0182  0.0156
+#>  8 0.167 -0.0165  0.00287
+#>  9 0.194  0.0406  0.0413
+#> 10 0.171  0.011   0.0286
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, correction, constant
 
 # Any method by name, coloured by a column of metadata.
 plot(dist_ord(dm, 'pcoa'), 'Species', iris)
@@ -197,7 +215,7 @@ explains the distances between samples.
 ``` r
 
 permanova(dm, 'Species', iris)
-#> Permutational multivariate analysis of variance (PERMANOVA)
+#> Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity
 #> 
 #> F = 532.7, p = 0.001, z = 577.6
 #> Permutations: 999 (free)
@@ -213,7 +231,7 @@ permanova(dm, 'Species', iris)
 
 # Any test by name.
 dist_test(dm, 'anosim', 'Species', iris)
-#> Analysis of similarities (ANOSIM)
+#> Analysis of similarities (ANOSIM) of Bray-Curtis Dissimilarity
 #> 
 #> R = 0.8576, p = 0.001, z =  79.4
 #> Permutations: 999 (free)
@@ -242,33 +260,39 @@ for statistical tests.
 list_metrics('alpha', 'id')
 #>  [1] "ace"         "berger"      "brillouin"   "chao1"       "faith"      
 #>  [6] "fisher"      "simpson"     "inv_simpson" "margalef"    "mcintosh"   
-#> [11] "menhinick"   "observed"    "shannon"     "squares"    
+#> [11] "menhinick"   "observed"    "shannon"     "squares"
 
 # Beta Diversity
 list_metrics('beta', 'id')
-#>  [1] "aitchison"                 "bhattacharyya"             "bray"                     
-#>  [4] "canberra"                  "chebyshev"                 "chord"                    
-#>  [7] "clark"                     "sorensen"                  "divergence"               
-#> [10] "euclidean"                 "generalized_unifrac"       "gower"                    
-#> [13] "hamming"                   "hellinger"                 "horn"                     
-#> [16] "jaccard"                   "jensen"                    "jsd"                      
-#> [19] "lorentzian"                "manhattan"                 "matusita"                 
-#> [22] "minkowski"                 "morisita"                  "motyka"                   
-#> [25] "normalized_unifrac"        "ochiai"                    "philr_distance"           
-#> [28] "psym_chisq"                "robust_aitchison"          "soergel"                  
-#> [31] "squared_chisq"             "squared_chord"             "squared_euclidean"        
-#> [34] "topsoe"                    "unweighted_unifrac"        "variance_adjusted_unifrac"
-#> [37] "wave_hedges"               "weighted_unifrac"         
+#>  [1] "aitchison"                 "bhattacharyya"            
+#>  [3] "bray"                      "canberra"                 
+#>  [5] "chebyshev"                 "chord"                    
+#>  [7] "clark"                     "sorensen"                 
+#>  [9] "divergence"                "euclidean"                
+#> [11] "generalized_unifrac"       "gower"                    
+#> [13] "hamming"                   "hellinger"                
+#> [15] "horn"                      "jaccard"                  
+#> [17] "jensen"                    "jsd"                      
+#> [19] "lorentzian"                "manhattan"                
+#> [21] "matusita"                  "minkowski"                
+#> [23] "morisita"                  "motyka"                   
+#> [25] "normalized_unifrac"        "ochiai"                   
+#> [27] "philr_distance"            "psym_chisq"               
+#> [29] "robust_aitchison"          "soergel"                  
+#> [31] "squared_chisq"             "squared_chord"            
+#> [33] "squared_euclidean"         "topsoe"                   
+#> [35] "unweighted_unifrac"        "variance_adjusted_unifrac"
+#> [37] "wave_hedges"               "weighted_unifrac"
 
 # Ordination methods that take distances
 list_dist_ords('id')
-#> [1] "capscale" "dbrda"    "isomap"   "mds"      "nmds"     "pcoa"     "tsne"    
-#> [8] "umap"    
+#> [1] "capda"    "capscale" "dbrda"    "isomap"   "mds"      "nmds"     "pcoa"    
+#> [8] "tsne"     "umap"
 
 # Statistical tests
 list_dist_tests('id')
 #> [1] "anosim"         "mantel"         "mantel_partial" "mrpp"          
-#> [5] "permanova"      "permdisp"      
+#> [5] "permanova"      "permdisp"
 ```
 
 ## Documentation

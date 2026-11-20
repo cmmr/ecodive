@@ -38,8 +38,8 @@ planned function the article shows the call it will have, marked
 | Step | Question | In ecodive now | Planned |
 |:---|:---|:---|:---|
 | [Zeros](#zeros) | How do I take logs of zeros? | `pseudocount`, `norm = 'rclr'`, [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md) (`'mult'`) | Bayesian-multiplicative methods (`'gbm'`, …) |
-| [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`, [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) | [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md) |
-| [Beta diversity](#beta-diversity) | Do communities differ? | [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md) | [`philr_distance()`](https://cmmr.github.io/ecodive/reference/philr_distance.md) |
+| [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`, [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md), [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md) |  |
+| [Beta diversity](#beta-diversity) | Do communities differ? | [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md), [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md), [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md), [`philr_distance()`](https://cmmr.github.io/ecodive/reference/philr_distance.md) |  |
 | [Log ratios](#log-ratios) | Which taxa shift relative to which? | [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) loadings, [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) |  |
 | [Differential abundance](#differential-abundance) | Which taxa differ? | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md), [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md), [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md), [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) and their post-hoc tests, [`structural_zeros()`](https://cmmr.github.io/ecodive/reference/structural_zeros.md) |  |
 | [Co-occurrence](#proportionality) | Which taxa move together? | [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) |  |
@@ -280,7 +280,7 @@ where ordinary statistics apply.
 | robust clr (rclr) | `normalize(norm = 'rclr')` | non-zero taxa only | zeros are missing, not imputed |
 | additive log ratio (alr) | [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md) | each taxon relative to one reference taxon | easy to interpret; not isometric |
 | isometric log ratio (ilr) | [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md) | D − 1 orthonormal balances | Euclidean distance on ilr = Aitchison distance |
-| phylogenetic ilr (PhILR) | [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md) (*planned*) | one balance per internal node of a phylogeny | **[Silverman et al. 2017](https://doi.org/10.7554/eLife.21887)** |
+| phylogenetic ilr (PhILR) | [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md) | one balance per internal node of a phylogeny | **[Silverman et al. 2017](https://doi.org/10.7554/eLife.21887)** |
 
 ``` r
 
@@ -308,15 +308,37 @@ fall in the treated group whether or not the taxa changed (by log 8 ≈
 pseudocount damp it). An alr reference should be a taxon that is common
 and stable, which is hard to know in advance.
 
+PhILR needs a phylogeny. The simulated taxa get one that puts the five
+blooming taxa in one clade and the five declining taxa in another, and
+joins the other 140 at random:
+
 ``` r
 
-# Planned in ecodive:
+set.seed(7)
+random_clade <- function (tips) {
+  len <- runif(1, 0.05, 0.3)
+  if (length(tips) == 1) return (sprintf('%s:%.3f', tips, len))
+  k <- sample(length(tips) - 1, 1)
+  sprintf('(%s,%s):%.3f', random_clade(tips[1:k]), random_clade(tips[-(1:k)]), len)
+}
+tree <- read_tree(sprintf('(%s,(%s,%s):0.2);',
+  random_clade(taxa[1:5]), random_clade(taxa[6:10]),
+  random_clade(sample(taxa[-(1:10)])) ))
+c(tips = length(tree$tip.label), internal_nodes = tree$Nnode)
+#>           tips internal_nodes 
+#>            150            149
+```
+
+[`philr()`](https://cmmr.github.io/ecodive/reference/philr.md) gives one
+balance per internal node of the tree. These weights are those of
+Silverman et al. (2017), as in the philr package (Bioconductor):
+
+``` r
+
 p <- philr(counts, tree, pseudocount = 1,
            part_weights = 'enorm.x.gm.counts', ilr_weights = 'blw.sqrt')
-
-# Available now, in philr (Bioconductor):
-p <- philr::philr(counts, tree, pseudocount = 1,
-                  part.weights = 'enorm.x.gm.counts', ilr.weights = 'blw.sqrt')
+dim(p)   # one coordinate per internal node of the 150-tip tree
+#> [1]  40 149
 ```
 
 **Used in practice.** [Ruuskanen et
@@ -387,8 +409,24 @@ method of DEICODE and of QIIME 2’s gemelli plugin (**[Martino et al.
 ``` r
 
 ord <- rpca(counts, n_axes = 2)
-round(attr(ord, 'prop'), 3)   # proportion of variance per axis
-#> [1] 0.931 0.069
+ord   # its title, % of variance per axis, and first samples
+#> # A matrix: 40 samples × 2 axes
+#> # Robust Aitchison PCA
+#> # % of variance: 93.1, 6.9
+#>     RPCA1   RPCA2
+#> S01 -4.47  0.513
+#> S02 -4.67  0.21
+#> S03 -5.12  0.788
+#> S04 -2.55 -0.31
+#> S05 -6.01  0.889
+#> S06 -4.19  0.0524
+#> S07 -4.84  0.369
+#> S08 -4.89  0.302
+#> S09 -3.71  0.245
+#> S10 -5.01  1.15
+#> # … 30 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, loadings, cost, n_iters
 
 # A biplot: the samples by group, and the ten longest taxon loadings.
 grp <- groups[match(rownames(ord), rownames(counts))]
@@ -411,37 +449,33 @@ branch length, so clades that shift together show up as single features.
 It’s the compositional counterpart of a UniFrac PCoA, and gives loadings
 for every clade as well as every tip.
 
-The simulated taxa need a tree. This one puts the five blooming taxa in
-one clade and the five declining taxa in another, and joins the other
-140 at random:
-
-``` r
-
-set.seed(7)
-random_clade <- function (tips) {
-  len <- runif(1, 0.05, 0.3)
-  if (length(tips) == 1) return (sprintf('%s:%.3f', tips, len))
-  k <- sample(length(tips) - 1, 1)
-  sprintf('(%s,%s):%.3f', random_clade(tips[1:k]), random_clade(tips[-(1:k)]), len)
-}
-tree <- read_tree(sprintf('(%s,(%s,%s):0.2);',
-  random_clade(taxa[1:5]), random_clade(taxa[6:10]),
-  random_clade(sample(taxa[-(1:10)])) ))
-c(tips = length(tree$tip.label), internal_nodes = tree$Nnode)
-#>           tips internal_nodes 
-#>            150            149
-```
-
-As in the [log ratios](#log-ratios) below, rare tips get large loadings
-from noise alone, so leave out tips present in half the samples or fewer
+It uses the tree built for [PhILR](#transforms) above. As in the [log
+ratios](#log-ratios) below, rare tips get large loadings from noise
+alone, so leave out tips present in half the samples or fewer
 (`min_feature_frequency`, a percentage, as in
 [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)):
 
 ``` r
 
 ord_phy <- rpca_phylo(counts, tree, n_axes = 2, min_feature_frequency = 50)
-round(attr(ord_phy, 'prop'), 3)
-#> [1] 0.947 0.053
+ord_phy
+#> # A matrix: 40 samples × 2 axes
+#> # Phylogenetic Robust Aitchison PCA
+#> # % of variance: 94.7, 5.3
+#>     RPCA1   RPCA2
+#> S01 -5.17  0.273
+#> S02 -4.52  0.719
+#> S03 -5.8  -0.254
+#> S04 -3.58 -0.482
+#> S05 -5.01  0.954
+#> S06 -2.96  0.853
+#> S07 -4.92  0.0509
+#> S08 -4.33  0.295
+#> S09 -2.49  1.29
+#> S10 -4.77  0.0854
+#> # … 30 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, loadings, cost, n_iters, tree
 
 # The nodes with the largest loadings on the first axis:
 load_phy <- attr(ord_phy, 'loadings')[, 1]
@@ -469,15 +503,27 @@ The top node is the clade of the five blooming taxa.
 `attr(ord_phy, 'tree')` is the tree as it was used (pruned to the kept
 tips), with its internal nodes named as in the loadings.
 
-The **PhILR distance** (Euclidean distance on PhILR coordinates, with
-the weights of Silverman et al. 2017) is planned:
+The **PhILR distance** is the Euclidean distance between PhILR
+coordinates, with the weights of Silverman et al. (2017):
 
 ``` r
 
-# Planned in ecodive:
-dm_philr <- philr_distance(counts, tree)   # also beta_div(counts, 'philr', tree = tree)
-
-# Available now: philr (Bioconductor), then dist() on its coordinates.
+# The same as beta_div(counts, 'philr', tree = tree, pseudocount = 1):
+dm_philr <- philr_distance(counts, tree, pseudocount = 1)
+permanova(dm_philr, groups, seed = 1)
+#> Permutational multivariate analysis of variance (PERMANOVA) of PhILR Distance
+#> 
+#> F = 32.33, p = 0.001, z = 43.02
+#> Permutations: 999 (free)
+#> 
+#> Model R2 = 0.4597. Model tested as a whole:
+#> 
+#>          Df SumOfSqs     R2     F Pr(>F)    
+#> Model     1    14210 0.4597 32.33  0.001 ***
+#> Residual 38    16702 0.5403                 
+#> Total    39    30912 1.0000                 
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 **Used in practice.**
@@ -601,8 +647,8 @@ differentially abundant:
 ``` r
 
 res_ancom <- ancom(counts, groups, pseudocount = 1)
-head(res_ancom[order(-res_ancom$W), ], 12)
-#> # A data.frame: 12 × 3
+res_ancom[order(-res_ancom$W), ]
+#> # A data.frame: 150 × 3
 #> # ANCOM: control vs treated
 #>    feature     W reject
 #>    <chr>   <int>  <lgl>
@@ -616,8 +662,8 @@ head(res_ancom[order(-res_ancom$W), ], 12)
 #> 3  ASV003     58  FALSE
 #> 1  ASV001     54  FALSE
 #> 5  ASV005     51  FALSE
-#> 12 ASV012     40  FALSE
-#> 14 ASV014     38  FALSE
+#> # … 140 more rows
+#> # Use print(x, n = ...) to see more rows
 #> # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
 #> #   pseudocount
 table(changed = changed, rejected = res_ancom$reject)
@@ -646,24 +692,25 @@ is scikit-bio’s version, with Welch’s t-test; `contrast` is
 ``` r
 
 res_dm <- dirmult_ttest(counts, groups, contrast = c('treated', 'control'))
-cols <- c('feature', 'log2_fc', 'ci_lower', 'ci_upper', 'p_adjusted', 'reject')
-head(res_dm[order(res_dm$p_adjusted), cols], 12)
-#> # A data.frame: 12 × 6
+res_dm[order(res_dm$p_adjusted), ]
+#> # A data.frame: 150 × 8
 #> # Dirichlet-multinomial t-test
-#>    feature log2_fc ci_lower ci_upper p_adjusted reject
-#>    <chr>     <dbl>    <dbl>    <dbl>      <dbl>  <lgl>
-#> 4  ASV004    2.52      1.96    3.06    5.26e-12   TRUE
-#> 2  ASV002    2.45      1.81    3.04    3.44e-10   TRUE
-#> 8  ASV008   -3.11     -4.01   -2.31    1.66e-09   TRUE
-#> 3  ASV003    2.28      1.66    2.85    4.96e-09   TRUE
-#> 1  ASV001    2.22      1.55    2.86     2.8e-08   TRUE
-#> 10 ASV010   -2.51     -3.32   -1.73     8.3e-08   TRUE
-#> 9  ASV009   -2.57     -3.49   -1.72    8.56e-08   TRUE
-#> 5  ASV005    2.21      1.49    2.88    3.01e-07   TRUE
-#> 7  ASV007   -2.94     -4.02   -2.03    3.99e-07   TRUE
-#> 6  ASV006   -2.67     -3.75   -1.83    1.01e-06   TRUE
-#> 12 ASV012   -1.14     -1.96   -0.357      0.062  FALSE
-#> 14 ASV014   -0.815    -1.51   -0.159      0.222  FALSE
+#>    feature      t log2_fc ci_lower ci_upper  p_value p_adjusted reject
+#>    <chr>    <dbl>   <dbl>    <dbl>    <dbl>    <dbl>      <dbl>  <lgl>
+#> 4  ASV004   12.1     2.52     1.96     3.06 3.51e-14   5.26e-12   TRUE
+#> 2  ASV002   10.6     2.45     1.81     3.04 2.31e-12   3.44e-10   TRUE
+#> 8  ASV008  -11.2    -3.11    -4.01    -2.31 1.12e-11   1.66e-09   TRUE
+#> 3  ASV003    9.9     2.28     1.66     2.85 3.37e-11   4.96e-09   TRUE
+#> 1  ASV001    8.79    2.22     1.55     2.86 1.92e-10    2.8e-08   TRUE
+#> 10 ASV010   -9.25   -2.51    -3.32    -1.73 5.73e-10    8.3e-08   TRUE
+#> 9  ASV009   -8.56   -2.57    -3.49    -1.72 5.94e-10   8.56e-08   TRUE
+#> 5  ASV005    8.29    2.21     1.49     2.88 2.11e-09   3.01e-07   TRUE
+#> 7  ASV007   -9      -2.94    -4.02    -2.03 2.81e-09   3.99e-07   TRUE
+#> 6  ASV006   -8.44   -2.67    -3.75    -1.83 7.14e-09   1.01e-06   TRUE
+#> # … 140 more rows
+#> # Use print(x, n = ...) to see more rows
+#> # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,
+#> #   p_adjust, seed
 table(changed = changed, rejected = res_dm$reject)
 #>        rejected
 #> changed FALSE TRUE
@@ -789,24 +836,24 @@ meta <- data.frame(group = groups, row.names = samples)
 
 fit <- ancombc2(counts[, keep], ~ group, meta)
 res_bc <- fit[fit$covariate == 'grouptreated', ]
-head(res_bc[order(res_bc$p_adjusted), ], 12)
-#> # A data.frame: 12 × 10
+res_bc[order(res_bc$p_adjusted), ]
+#> # A data.frame: 58 × 10
 #> # ANCOM-BC2
-#>     feature covariate    log_fc    se     w  p_value p_adjusted reject passed_ss
-#>     <chr>   <chr>         <dbl> <dbl> <dbl>    <dbl>      <dbl>  <lgl>     <lgl>
-#> 8   ASV004  grouptreated  2.23  0.216 10.3  1.48e-12   8.57e-11   TRUE      TRUE
-#> 6   ASV003  grouptreated  2.06  0.217  9.49 1.44e-11   8.19e-10   TRUE      TRUE
-#> 4   ASV002  grouptreated  2.18  0.231  9.43 1.72e-11   9.65e-10   TRUE      TRUE
-#> 10  ASV005  grouptreated  2.01  0.23   8.74 1.24e-10    6.8e-09   TRUE      TRUE
-#> 2   ASV001  grouptreated  2.02  0.239  8.47 2.76e-10   1.49e-08   TRUE      TRUE
-#> 16  ASV008  grouptreated -1.68  0.259 -6.51 1.13e-07   6.01e-06   TRUE      TRUE
-#> 14  ASV007  grouptreated -1.56  0.256 -6.09 4.31e-07   2.24e-05   TRUE      TRUE
-#> 18  ASV009  grouptreated -1.3   0.242 -5.37 4.14e-06   0.000211   TRUE      TRUE
-#> 12  ASV006  grouptreated -1.37  0.257 -5.32 4.86e-06   0.000243   TRUE      TRUE
-#> 20  ASV010  grouptreated -1.26  0.25  -5.03 1.22e-05   0.000597   TRUE      TRUE
-#> 116 ASV116  grouptreated  0.918 0.249  3.69  0.00105     0.0504  FALSE      TRUE
-#> 48  ASV027  grouptreated  0.643 0.218  2.94  0.00675      0.317  FALSE      TRUE
+#>    feature covariate    log_fc    se     w  p_value p_adjusted reject passed_ss
+#>    <chr>   <chr>         <dbl> <dbl> <dbl>    <dbl>      <dbl>  <lgl>     <lgl>
+#> 8  ASV004  grouptreated   2.23 0.216 10.3  1.48e-12   8.57e-11   TRUE      TRUE
+#> 6  ASV003  grouptreated   2.06 0.217  9.49 1.44e-11   8.19e-10   TRUE      TRUE
+#> 4  ASV002  grouptreated   2.18 0.231  9.43 1.72e-11   9.65e-10   TRUE      TRUE
+#> 10 ASV005  grouptreated   2.01 0.23   8.74 1.24e-10    6.8e-09   TRUE      TRUE
+#> 2  ASV001  grouptreated   2.02 0.239  8.47 2.76e-10   1.49e-08   TRUE      TRUE
+#> 16 ASV008  grouptreated  -1.68 0.259 -6.51 1.13e-07   6.01e-06   TRUE      TRUE
+#> 14 ASV007  grouptreated  -1.56 0.256 -6.09 4.31e-07   2.24e-05   TRUE      TRUE
+#> 18 ASV009  grouptreated  -1.3  0.242 -5.37 4.14e-06   0.000211   TRUE      TRUE
+#> 12 ASV006  grouptreated  -1.37 0.257 -5.32 4.86e-06   0.000243   TRUE      TRUE
+#> 20 ASV010  grouptreated  -1.26 0.25  -5.03 1.22e-05   0.000597   TRUE      TRUE
+#> # … 48 more rows
 #> # … 1 more column: reject_robust <lgl>
+#> # Use print(x, n = ...) to see more rows
 #> # Attributes: method, formula, alpha, p_adjust, max_iters, tol, var_quantile,
 #> #   pseudocount, coef, var, vcov, dof, design, bias, n_iters,
 #> #   sample_fractions, sensitivity

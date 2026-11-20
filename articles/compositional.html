@@ -143,9 +143,9 @@ today.</p>
 <td align="left">Which log-ratio coordinates?</td>
 <td align="left">
 <code>normalize(norm = 'clr' / 'rclr')</code>,
-<code><a href="../reference/alr.html">alr()</a></code>, <code><a href="../reference/ilr.html">ilr()</a></code>
+<code><a href="../reference/alr.html">alr()</a></code>, <code><a href="../reference/ilr.html">ilr()</a></code>, <code><a href="../reference/philr.html">philr()</a></code>
 </td>
-<td align="left"><code><a href="../reference/philr.html">philr()</a></code></td>
+<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="#beta-diversity">Beta diversity</a></td>
@@ -154,9 +154,9 @@ today.</p>
 <code><a href="../reference/aitchison.html">aitchison()</a></code>,
 <code><a href="../reference/robust_aitchison.html">robust_aitchison()</a></code>, <code><a href="../reference/rpca.html">rpca()</a></code>,
 <code><a href="../reference/rpca_phylo.html">rpca_phylo()</a></code>, <code><a href="../reference/pca.html">pca()</a></code>, <code><a href="../reference/permanova.html">permanova()</a></code>,
-<code><a href="../reference/permdisp.html">permdisp()</a></code>
+<code><a href="../reference/permdisp.html">permdisp()</a></code>, <code><a href="../reference/philr_distance.html">philr_distance()</a></code>
 </td>
-<td align="left"><code><a href="../reference/philr_distance.html">philr_distance()</a></code></td>
+<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="#log-ratios">Log ratios</a></td>
@@ -444,8 +444,7 @@ mean</td>
 </tr>
 <tr class="odd">
 <td align="left">phylogenetic ilr (PhILR)</td>
-<td align="left">
-<code><a href="../reference/philr.html">philr()</a></code> (<em>planned</em>)</td>
+<td align="left"><code><a href="../reference/philr.html">philr()</a></code></td>
 <td align="left">one balance per internal node of a phylogeny</td>
 <td align="left"><strong><a href="https://doi.org/10.7554/eLife.21887" class="external-link">Silverman et
 al. 2017</a></strong></td>
@@ -474,14 +473,31 @@ alr coordinates fall in the treated group whether or not the taxa
 changed (by log 8 ≈ 2.1 for taxa without zeros; less for rare taxa,
 where zeros and the pseudocount damp it). An alr reference should be a
 taxon that is common and stable, which is hard to know in advance.</p>
+<p>PhILR needs a phylogeny. The simulated taxa get one that puts the
+five blooming taxa in one clade and the five declining taxa in another,
+and joins the other 140 at random:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/philr.html">philr</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
+<span><span class="va">random_clade</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">len</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.05</span>, <span class="fl">0.3</span><span class="op">)</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'%s:%.3f'</span>, <span class="va">tips</span>, <span class="va">len</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'(%s,%s):%.3f'</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">tips</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">]</span><span class="op">)</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">tips</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>, <span class="va">len</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_tree.html">read_tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'(%s,(%s,%s):0.2);'</span>,</span>
+<span>  <span class="fu">random_clade</span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  <span class="fu">random_clade</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>tips <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span>, internal_nodes <span class="op">=</span> <span class="va">tree</span><span class="op">$</span><span class="va">Nnode</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           tips internal_nodes </span></span>
+<span><span class="co">#&gt;            150            149</span></span></code></pre></div>
+<p><code><a href="../reference/philr.html">philr()</a></code> gives one balance per internal node of the tree.
+These weights are those of Silverman et al. (2017), as in the philr
+package (Bioconductor):</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/philr.html">philr</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>           part_weights <span class="op">=</span> <span class="st">'enorm.x.gm.counts'</span>, ilr_weights <span class="op">=</span> <span class="st">'blw.sqrt'</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Available now, in philr (Bioconductor):</span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">philr</span><span class="fu">::</span><span class="fu">philr</span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, pseudocount <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>                  part.weights <span class="op">=</span> <span class="st">'enorm.x.gm.counts'</span>, ilr.weights <span class="op">=</span> <span class="st">'blw.sqrt'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span>   <span class="co"># one coordinate per internal node of the 150-tip tree</span></span>
+<span><span class="co">#&gt; [1]  40 149</span></span></code></pre></div>
 <p><strong>Used in practice.</strong> <a href="https://doi.org/10.1080/19490976.2021.1888673" class="external-link">Ruuskanen et
 al. (2021)</a> PhILR-transformed shotgun metagenomes from the FINRISK
 cohort and modelled the balances to find clades linked to fatty liver;
@@ -496,7 +512,7 @@ wild bird population.</p>
 between clr coordinates, and it is the compositional counterpart of
 Bray-Curtis. Its robust version uses the rclr. Both work with every
 ecodive ordination and test.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dm_ait</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/aitchison.html">aitchison</a></span><span class="op">(</span><span class="va">counts</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">dm_rait</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/robust_aitchison.html">robust_aitchison</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span></span>
@@ -540,10 +556,26 @@ the rclr table directly, completing the missing (zero) entries with a
 low-rank model, and returns taxon loadings for a biplot. It is the
 method of DEICODE and of QIIME 2’s gemelli plugin (<strong><a href="https://doi.org/10.1128/mSystems.00016-19" class="external-link">Martino et al.
 2019</a></strong>).</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca.html">rpca</a></span><span class="op">(</span><span class="va">counts</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>   <span class="co"># proportion of variance per axis</span></span>
-<span><span class="co">#&gt; [1] 0.931 0.069</span></span>
+<span><span class="va">ord</span>   <span class="co"># its title, % of variance per axis, and first samples</span></span>
+<span><span class="co">#&gt; # A matrix: 40 samples × 2 axes</span></span>
+<span><span class="co">#&gt; # Robust Aitchison PCA</span></span>
+<span><span class="co">#&gt; # % of variance: 93.1, 6.9</span></span>
+<span><span class="co">#&gt;     RPCA1   RPCA2</span></span>
+<span><span class="co">#&gt; S01 -4.47  0.513</span></span>
+<span><span class="co">#&gt; S02 -4.67  0.21</span></span>
+<span><span class="co">#&gt; S03 -5.12  0.788</span></span>
+<span><span class="co">#&gt; S04 -2.55 -0.31</span></span>
+<span><span class="co">#&gt; S05 -6.01  0.889</span></span>
+<span><span class="co">#&gt; S06 -4.19  0.0524</span></span>
+<span><span class="co">#&gt; S07 -4.84  0.369</span></span>
+<span><span class="co">#&gt; S08 -4.89  0.302</span></span>
+<span><span class="co">#&gt; S09 -3.71  0.245</span></span>
+<span><span class="co">#&gt; S10 -5.01  1.15</span></span>
+<span><span class="co">#&gt; # … 30 more samples</span></span>
+<span><span class="co">#&gt; # Use print(x, n = ...) to see more samples</span></span>
+<span><span class="co">#&gt; # Attributes: method, eig, prop, trace, loadings, cost, n_iters</span></span>
 <span></span>
 <span><span class="co"># A biplot: the samples by group, and the ten longest taxon loadings.</span></span>
 <span><span class="va">grp</span> <span class="op">&lt;-</span> <span class="va">groups</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
@@ -558,31 +590,31 @@ al. 2022</a></strong>) runs RPCA on counts summed over every clade of a
 phylogeny, weighted by branch length, so clades that shift together show
 up as single features. It’s the compositional counterpart of a UniFrac
 PCoA, and gives loadings for every clade as well as every tip.</p>
-<p>The simulated taxa need a tree. This one puts the five blooming taxa
-in one clade and the five declining taxa in another, and joins the other
-140 at random:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
-<span><span class="va">random_clade</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">len</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.05</span>, <span class="fl">0.3</span><span class="op">)</span></span>
-<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'%s:%.3f'</span>, <span class="va">tips</span>, <span class="va">len</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tips</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'(%s,%s):%.3f'</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">tips</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">]</span><span class="op">)</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">tips</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>, <span class="va">len</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_tree.html">read_tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'(%s,(%s,%s):0.2);'</span>,</span>
-<span>  <span class="fu">random_clade</span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span>, <span class="fu">random_clade</span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  <span class="fu">random_clade</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">taxa</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>tips <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span>, internal_nodes <span class="op">=</span> <span class="va">tree</span><span class="op">$</span><span class="va">Nnode</span><span class="op">)</span></span>
-<span><span class="co">#&gt;           tips internal_nodes </span></span>
-<span><span class="co">#&gt;            150            149</span></span></code></pre></div>
-<p>As in the <a href="#log-ratios">log ratios</a> below, rare tips get
-large loadings from noise alone, so leave out tips present in half the
-samples or fewer (<code>min_feature_frequency</code>, a percentage, as
-in <code><a href="../reference/rpca.html">rpca()</a></code>):</p>
+<p>It uses the tree built for <a href="#transforms">PhILR</a> above. As
+in the <a href="#log-ratios">log ratios</a> below, rare tips get large
+loadings from noise alone, so leave out tips present in half the samples
+or fewer (<code>min_feature_frequency</code>, a percentage, as in
+<code><a href="../reference/rpca.html">rpca()</a></code>):</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord_phy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca_phylo.html">rpca_phylo</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, n_axes <span class="op">=</span> <span class="fl">2</span>, min_feature_frequency <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord_phy</span>, <span class="st">'prop'</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.947 0.053</span></span>
+<span><span class="va">ord_phy</span></span>
+<span><span class="co">#&gt; # A matrix: 40 samples × 2 axes</span></span>
+<span><span class="co">#&gt; # Phylogenetic Robust Aitchison PCA</span></span>
+<span><span class="co">#&gt; # % of variance: 94.7, 5.3</span></span>
+<span><span class="co">#&gt;     RPCA1   RPCA2</span></span>
+<span><span class="co">#&gt; S01 -5.17  0.273</span></span>
+<span><span class="co">#&gt; S02 -4.52  0.719</span></span>
+<span><span class="co">#&gt; S03 -5.8  -0.254</span></span>
+<span><span class="co">#&gt; S04 -3.58 -0.482</span></span>
+<span><span class="co">#&gt; S05 -5.01  0.954</span></span>
+<span><span class="co">#&gt; S06 -2.96  0.853</span></span>
+<span><span class="co">#&gt; S07 -4.92  0.0509</span></span>
+<span><span class="co">#&gt; S08 -4.33  0.295</span></span>
+<span><span class="co">#&gt; S09 -2.49  1.29</span></span>
+<span><span class="co">#&gt; S10 -4.77  0.0854</span></span>
+<span><span class="co">#&gt; # … 30 more samples</span></span>
+<span><span class="co">#&gt; # Use print(x, n = ...) to see more samples</span></span>
+<span><span class="co">#&gt; # Attributes: method, eig, prop, trace, loadings, cost, n_iters, tree</span></span>
 <span></span>
 <span><span class="co"># The nodes with the largest loadings on the first axis:</span></span>
 <span><span class="va">load_phy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord_phy</span>, <span class="st">'loadings'</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
@@ -607,13 +639,25 @@ in <code><a href="../reference/rpca.html">rpca()</a></code>):</p>
 <p>The top node is the clade of the five blooming taxa.
 <code>attr(ord_phy, 'tree')</code> is the tree as it was used (pruned to
 the kept tips), with its internal nodes named as in the loadings.</p>
-<p>The <strong>PhILR distance</strong> (Euclidean distance on PhILR
-coordinates, with the weights of Silverman et al. 2017) is planned:</p>
+<p>The <strong>PhILR distance</strong> is the Euclidean distance between
+PhILR coordinates, with the weights of Silverman et al. (2017):</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
-<span><span class="va">dm_philr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/philr_distance.html">philr_distance</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span><span class="op">)</span>   <span class="co"># also beta_div(counts, 'philr', tree = tree)</span></span>
-<span></span>
-<span><span class="co"># Available now: philr (Bioconductor), then dist() on its coordinates.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># The same as beta_div(counts, 'philr', tree = tree, pseudocount = 1):</span></span>
+<span><span class="va">dm_philr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/philr_distance.html">philr_distance</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">tree</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm_philr</span>, <span class="va">groups</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA) of PhILR Distance</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; F = 32.33, p = 0.001, z = 43.02</span></span>
+<span><span class="co">#&gt; Permutations: 999 (free)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Model R2 = 0.4597. Model tested as a whole:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;          Df SumOfSqs     R2     F Pr(&gt;F)    </span></span>
+<span><span class="co">#&gt; Model     1    14210 0.4597 32.33  0.001 ***</span></span>
+<span><span class="co">#&gt; Residual 38    16702 0.5403                 </span></span>
+<span><span class="co">#&gt; Total    39    30912 1.0000                 </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p><strong>Used in practice.</strong></p>
 <ul>
 <li>Aitchison distance and clr PCA: <a href="https://doi.org/10.1128/mSphere.00327-17" class="external-link">Bian et al. (2017)</a>,
@@ -737,8 +781,8 @@ other taxa differ between groups (its W), and declares the taxa with the
 largest W differentially abundant:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_ancom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancom.html">ancom</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_ancom</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">res_ancom</span><span class="op">$</span><span class="va">W</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A data.frame: 12 × 3</span></span>
+<span><span class="va">res_ancom</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">res_ancom</span><span class="op">$</span><span class="va">W</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt; # A data.frame: 150 × 3</span></span>
 <span><span class="co">#&gt; # ANCOM: control vs treated</span></span>
 <span><span class="co">#&gt;    feature     W reject</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;   &lt;int&gt;  &lt;lgl&gt;</span></span>
@@ -752,8 +796,8 @@ largest W differentially abundant:</p>
 <span><span class="co">#&gt; 3  ASV003     58  FALSE</span></span>
 <span><span class="co">#&gt; 1  ASV001     54  FALSE</span></span>
 <span><span class="co">#&gt; 5  ASV005     51  FALSE</span></span>
-<span><span class="co">#&gt; 12 ASV012     40  FALSE</span></span>
-<span><span class="co">#&gt; 14 ASV014     38  FALSE</span></span>
+<span><span class="co">#&gt; # … 140 more rows</span></span>
+<span><span class="co">#&gt; # Use print(x, n = ...) to see more rows</span></span>
 <span><span class="co">#&gt; # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,</span></span>
 <span><span class="co">#&gt; #   pseudocount</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span>, rejected <span class="op">=</span> <span class="va">res_ancom</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
@@ -773,24 +817,25 @@ version, with Welch’s t-test; <code>contrast</code> is
 <code>c(treatment, reference)</code>:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'feature'</span>, <span class="st">'log2_fc'</span>, <span class="st">'ci_lower'</span>, <span class="st">'ci_upper'</span>, <span class="st">'p_adjusted'</span>, <span class="st">'reject'</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="va">cols</span><span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A data.frame: 12 × 6</span></span>
+<span><span class="va">res_dm</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt; # A data.frame: 150 × 8</span></span>
 <span><span class="co">#&gt; # Dirichlet-multinomial t-test</span></span>
-<span><span class="co">#&gt;    feature log2_fc ci_lower ci_upper p_adjusted reject</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;</span></span>
-<span><span class="co">#&gt; 4  ASV004    2.52      1.96    3.06    5.26e-12   TRUE</span></span>
-<span><span class="co">#&gt; 2  ASV002    2.45      1.81    3.04    3.44e-10   TRUE</span></span>
-<span><span class="co">#&gt; 8  ASV008   -3.11     -4.01   -2.31    1.66e-09   TRUE</span></span>
-<span><span class="co">#&gt; 3  ASV003    2.28      1.66    2.85    4.96e-09   TRUE</span></span>
-<span><span class="co">#&gt; 1  ASV001    2.22      1.55    2.86     2.8e-08   TRUE</span></span>
-<span><span class="co">#&gt; 10 ASV010   -2.51     -3.32   -1.73     8.3e-08   TRUE</span></span>
-<span><span class="co">#&gt; 9  ASV009   -2.57     -3.49   -1.72    8.56e-08   TRUE</span></span>
-<span><span class="co">#&gt; 5  ASV005    2.21      1.49    2.88    3.01e-07   TRUE</span></span>
-<span><span class="co">#&gt; 7  ASV007   -2.94     -4.02   -2.03    3.99e-07   TRUE</span></span>
-<span><span class="co">#&gt; 6  ASV006   -2.67     -3.75   -1.83    1.01e-06   TRUE</span></span>
-<span><span class="co">#&gt; 12 ASV012   -1.14     -1.96   -0.357      0.062  FALSE</span></span>
-<span><span class="co">#&gt; 14 ASV014   -0.815    -1.51   -0.159      0.222  FALSE</span></span>
+<span><span class="co">#&gt;    feature      t log2_fc ci_lower ci_upper  p_value p_adjusted reject</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; 4  ASV004   12.1     2.52     1.96     3.06 3.51e-14   5.26e-12   TRUE</span></span>
+<span><span class="co">#&gt; 2  ASV002   10.6     2.45     1.81     3.04 2.31e-12   3.44e-10   TRUE</span></span>
+<span><span class="co">#&gt; 8  ASV008  -11.2    -3.11    -4.01    -2.31 1.12e-11   1.66e-09   TRUE</span></span>
+<span><span class="co">#&gt; 3  ASV003    9.9     2.28     1.66     2.85 3.37e-11   4.96e-09   TRUE</span></span>
+<span><span class="co">#&gt; 1  ASV001    8.79    2.22     1.55     2.86 1.92e-10    2.8e-08   TRUE</span></span>
+<span><span class="co">#&gt; 10 ASV010   -9.25   -2.51    -3.32    -1.73 5.73e-10    8.3e-08   TRUE</span></span>
+<span><span class="co">#&gt; 9  ASV009   -8.56   -2.57    -3.49    -1.72 5.94e-10   8.56e-08   TRUE</span></span>
+<span><span class="co">#&gt; 5  ASV005    8.29    2.21     1.49     2.88 2.11e-09   3.01e-07   TRUE</span></span>
+<span><span class="co">#&gt; 7  ASV007   -9      -2.94    -4.02    -2.03 2.81e-09   3.99e-07   TRUE</span></span>
+<span><span class="co">#&gt; 6  ASV006   -8.44   -2.67    -3.75    -1.83 7.14e-09   1.01e-06   TRUE</span></span>
+<span><span class="co">#&gt; # … 140 more rows</span></span>
+<span><span class="co">#&gt; # Use print(x, n = ...) to see more rows</span></span>
+<span><span class="co">#&gt; # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,</span></span>
+<span><span class="co">#&gt; #   p_adjust, seed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span>, rejected <span class="op">=</span> <span class="va">res_dm</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>
@@ -892,24 +937,24 @@ them).</p>
 <span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc2</a></span><span class="op">(</span><span class="va">counts</span><span class="op">[</span>, <span class="va">keep</span><span class="op">]</span>, <span class="op">~</span> <span class="va">group</span>, <span class="va">meta</span><span class="op">)</span></span>
 <span><span class="va">res_bc</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">[</span><span class="va">fit</span><span class="op">$</span><span class="va">covariate</span> <span class="op">==</span> <span class="st">'grouptreated'</span>, <span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res_bc</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_bc</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">12</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A data.frame: 12 × 10</span></span>
+<span><span class="va">res_bc</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_bc</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt; # A data.frame: 58 × 10</span></span>
 <span><span class="co">#&gt; # ANCOM-BC2</span></span>
-<span><span class="co">#&gt;     feature covariate    log_fc    se     w  p_value p_adjusted reject passed_ss</span></span>
-<span><span class="co">#&gt;     &lt;chr&gt;   &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;     &lt;lgl&gt;</span></span>
-<span><span class="co">#&gt; 8   ASV004  grouptreated  2.23  0.216 10.3  1.48e-12   8.57e-11   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 6   ASV003  grouptreated  2.06  0.217  9.49 1.44e-11   8.19e-10   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 4   ASV002  grouptreated  2.18  0.231  9.43 1.72e-11   9.65e-10   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 10  ASV005  grouptreated  2.01  0.23   8.74 1.24e-10    6.8e-09   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 2   ASV001  grouptreated  2.02  0.239  8.47 2.76e-10   1.49e-08   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 16  ASV008  grouptreated -1.68  0.259 -6.51 1.13e-07   6.01e-06   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 14  ASV007  grouptreated -1.56  0.256 -6.09 4.31e-07   2.24e-05   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 18  ASV009  grouptreated -1.3   0.242 -5.37 4.14e-06   0.000211   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 12  ASV006  grouptreated -1.37  0.257 -5.32 4.86e-06   0.000243   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 20  ASV010  grouptreated -1.26  0.25  -5.03 1.22e-05   0.000597   TRUE      TRUE</span></span>
-<span><span class="co">#&gt; 116 ASV116  grouptreated  0.918 0.249  3.69  0.00105     0.0504  FALSE      TRUE</span></span>
-<span><span class="co">#&gt; 48  ASV027  grouptreated  0.643 0.218  2.94  0.00675      0.317  FALSE      TRUE</span></span>
+<span><span class="co">#&gt;    feature covariate    log_fc    se     w  p_value p_adjusted reject passed_ss</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;     &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; 8  ASV004  grouptreated   2.23 0.216 10.3  1.48e-12   8.57e-11   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 6  ASV003  grouptreated   2.06 0.217  9.49 1.44e-11   8.19e-10   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 4  ASV002  grouptreated   2.18 0.231  9.43 1.72e-11   9.65e-10   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 10 ASV005  grouptreated   2.01 0.23   8.74 1.24e-10    6.8e-09   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 2  ASV001  grouptreated   2.02 0.239  8.47 2.76e-10   1.49e-08   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 16 ASV008  grouptreated  -1.68 0.259 -6.51 1.13e-07   6.01e-06   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 14 ASV007  grouptreated  -1.56 0.256 -6.09 4.31e-07   2.24e-05   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 18 ASV009  grouptreated  -1.3  0.242 -5.37 4.14e-06   0.000211   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 12 ASV006  grouptreated  -1.37 0.257 -5.32 4.86e-06   0.000243   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; 20 ASV010  grouptreated  -1.26 0.25  -5.03 1.22e-05   0.000597   TRUE      TRUE</span></span>
+<span><span class="co">#&gt; # … 48 more rows</span></span>
 <span><span class="co">#&gt; # … 1 more column: reject_robust &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; # Use print(x, n = ...) to see more rows</span></span>
 <span><span class="co">#&gt; # Attributes: method, formula, alpha, p_adjust, max_iters, tol, var_quantile,</span></span>
 <span><span class="co">#&gt; #   pseudocount, coef, var, vcov, dof, design, bias, n_iters,</span></span>
 <span><span class="co">#&gt; #   sample_fractions, sensitivity</span></span>

@@ -88,19 +88,30 @@ answers to.
 Every method returns the same kind of object: a matrix with one row per
 sample and one column per axis, so it goes straight into
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) or a data
-frame.
+frame. Printed, it shows its title, each axis’s share of the variance,
+and its first rows.
 
 ``` r
 
 ord <- pcoa(dm)
-head(ord)
-#>          PCoA1       PCoA2        PCoA3
-#> [1,] 0.1692812 -0.02591990 -0.005053611
-#> [2,] 0.1706354  0.02346821  0.030848760
-#> [3,] 0.1870090 -0.00320247  0.032221661
-#> [4,] 0.1801593  0.01132449  0.037211653
-#> [5,] 0.1763516 -0.02998591 -0.006128668
-#> [6,] 0.1363264 -0.03979963 -0.043074846
+ord
+#> # A matrix: 150 samples × 3 axes
+#> # Principal Coordinates Analysis of Bray-Curtis Dissimilarity
+#> # % of variance: 89.0, 9.3, 2.9
+#>    PCoA1   PCoA2    PCoA3
+#>  1 0.169 -0.0259 -0.00505
+#>  2 0.171  0.0235  0.0308
+#>  3 0.187 -0.0032  0.0322
+#>  4 0.18   0.0113  0.0372
+#>  5 0.176 -0.03   -0.00613
+#>  6 0.136 -0.0398 -0.0431
+#>  7 0.186 -0.0182  0.0156
+#>  8 0.167 -0.0165  0.00287
+#>  9 0.194  0.0406  0.0413
+#> 10 0.171  0.011   0.0286
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, correction, constant
 ```
 
 Its attributes say how the ordination was made and how good it is. They
@@ -126,9 +137,11 @@ str(ord)
 
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the first
 two axes, and takes its labels from the attributes: the title from
-`method`, and each axis’s share of the variance from `prop`. Give
-`groups` (and `data`) as for the tests to colour the samples, with a
-legend. The axes share one scale (`asp = 1`), to keep distances true.
+`display` (see
+[`?ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)),
+and each axis’s share of the variance from `prop`. Give `groups` (and
+`data`) as for the tests to colour the samples, with a legend. The axes
+share one scale (`asp = 1`), to keep distances true.
 
 ``` r
 
@@ -633,8 +646,24 @@ which suits sparse microbiome counts.
 ``` r
 
 ord <- rpca(iris[, 1:4])
-round(100 * attr(ord, 'prop'), 1)
-#> [1] 96.8  2.7  0.5
+ord
+#> # A matrix: 150 samples × 3 axes
+#> # Robust Aitchison PCA
+#> # % of variance: 96.8, 2.7, 0.5
+#>    RPCA1    RPCA2    RPCA3
+#> 1  1.24   0.00549  0.00832
+#> 2  1.14  -0.0501   0.0566
+#> 3  1.17   0.0369   0.0156
+#> 4  1.12  -0.0828  -0.0332
+#> 5  1.25   0.0188  -0.0217
+#> 6  0.787  0.234   -0.0196
+#> 7  0.898  0.207   -0.0291
+#> 8  1.2   -0.0565  -0.0155
+#> 9  1.08  -0.0507  -0.0103
+#> 10 1.63  -0.433   -0.0324
+#> # … 140 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, eig, prop, trace, loadings, cost, n_iters
 ```
 
 [`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md), double
