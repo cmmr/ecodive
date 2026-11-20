@@ -59,8 +59,11 @@ replacement.
 }
 \section{Auto-Depth Selection}{
 
-If \code{depth} is \code{NULL}, the function defaults to the highest depth that retains
-at least 10\% of the total observations in the dataset.
+If \code{depth} is \code{NULL}, the depth is the smallest library size at which
+the observations kept (that depth times the number of samples with at
+least that many) make up at least 10\% of all the observations in the
+table. \code{\link[=beta_div_rarefied]{beta_div_rarefied()}} and \code{\link[=alpha_div_rarefied]{alpha_div_rarefied()}} choose their
+default depth the same way.
 }
 
 \section{One Depth per Sample}{

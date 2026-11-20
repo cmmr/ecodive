@@ -25,6 +25,8 @@
 #'   * `'binary'`: Presence/absence (each count is either 0 or 1).
 #'   * `'clr'`: Centered log ratio, giving an Aitchison PCA.
 #'   * `'rclr'`: Robust centered log ratio. Zeros stay 0.
+#'   * `'log'`: Log relative abundance (log-TSS), with `pseudocount` added
+#'     to every value first.
 #'
 #'   Default: `'none'`.
 #'

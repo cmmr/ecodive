@@ -9,6 +9,7 @@ NORM_CHORD   <- 3L
 NORM_BINARY  <- 4L
 NORM_RCLR    <- 5L
 NORM_HELLINGER <- 6L
+NORM_LOG     <- 7L
 
 
 # The stored values of a count table, with repeated (i, j) entries of a
@@ -316,7 +317,7 @@ validate_power <- function (env = parent.frame()) {
 validate_pseudocount <- function (env = parent.frame()) {
   with(env, {
     
-    if (!identical(norm, NORM_CLR)) {
+    if (!(identical(norm, NORM_CLR) || identical(norm, NORM_LOG))) {
 
       # sqrt() of a negative proportion would be NaN.
       if (identical(norm, NORM_HELLINGER) && isTRUE(any(stored_values(counts) < 0)))
@@ -326,7 +327,9 @@ validate_pseudocount <- function (env = parent.frame()) {
     }
 
     else {
-      pseudocount <- log_pseudocount(counts, pseudocount, 'CLR normalization')
+      pseudocount <- log_pseudocount(
+        counts, pseudocount,
+        if (identical(norm, NORM_CLR)) 'CLR normalization' else 'log normalization' )
     }
   })
 }
@@ -429,14 +432,15 @@ validate_norm <- function (env = parent.frame()) {
     norm <- switch(
       EXPR = match.arg(
         arg     = tolower(norm), 
-        choices = c('none', 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr') ),
+        choices = c('none', 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log') ),
       'none'      = NORM_NONE,
       'percent'   = NORM_PERCENT,
       'chord'     = NORM_CHORD,
       'hellinger' = NORM_HELLINGER,
       'binary'    = NORM_BINARY,
       'clr'       = NORM_CLR,
-      'rclr'      = NORM_RCLR )
+      'rclr'      = NORM_RCLR,
+      'log'       = NORM_LOG )
     
   })
 }

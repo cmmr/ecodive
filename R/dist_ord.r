@@ -264,6 +264,8 @@ match_dist_ord <- function (method) {
   }
   if (needle %in% names(exact_names('DIST_TESTS')))
     stop('`method = "', method, '"` is a test, not an ordination: use dist_test().')
+  if (needle %in% names(exact_names('DA_TESTS')))
+    stop('`method = "', method, '"` is a differential abundance test, not an ordination: use da_test().')
 
   match <- match_name(needle, 'ORDINATIONS', df$id)
 

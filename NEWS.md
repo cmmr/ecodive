@@ -716,10 +716,63 @@
   2017), as scikit-bio's `struc_zero()`, returning a features-by-groups
   logical matrix.
 
+* New `da_test()` runs any differential-abundance method by name, as
+  `count_ord()` runs ordinations: `ancom()`, `ancombc()`, `ancombc2()`,
+  `dirmult_ttest()` and the new `da_wilcoxon()`, `da_ttest()` and `da_lm()`
+  (`list_da_tests()`, `match_da_test()`; `'Mann-Whitney'`, `'t-test'`,
+  `'lm'` or `'ALDEx2'` work too). Its result is the method's own, unchanged.
+  It sets one convention for what to compare: group methods take `groups`
+  (a column of `data`, or one value per sample); model methods take
+  `formula`, with `groups` naming the term of interest, and `groups` alone
+  is `formula = ~ groups`. `ancombc()` and `ancombc2()` follow it: `formula`
+  and `data` now default to `NULL`, `ancombc(counts, groups = grp)` fits
+  `~ group`, and their `groups` need only be a term of `formula`; that it is
+  categorical with three or more levels is now checked by the post-hoc tests
+  that need it. `ancom()` and `dirmult_ttest()` results gain a `method`
+  attribute, as `ancombc()`'s has.
+
+* New `da_wilcoxon()`, `da_ttest()` and `da_lm()` test every feature of a
+  normalized table with the classical tests that benchmarks found to control
+  false discoveries (Wirbel et al. 2024; Pelto et al. 2025): Wilcoxon's
+  rank-sum test, Welch's (or Student's, `var_equal = TRUE`) t-test, and a
+  linear model of any `formula`, each feature's p-values adjusted with
+  `p_adjust` (default `'holm'`, as the other DA methods). They give the
+  results of `wilcox.test()`, `t.test()` and `summary(lm())` / `confint()`
+  feature by feature, to about 1e-12, from a sparse table without a dense
+  copy, in parallel C, identical for any `cpus`. `norm` chooses the values
+  compared (`'clr'` by default; `'log'`, `'percent'`, `'rclr'`, whose zeros
+  are left out, ...). Their results print as tables and `plot()` as volcano
+  plots.
+
+* New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
+  `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's
+  proportions after adding `pseudocount` (log-TSS), with the same
+  pseudocount rule as `'clr'`, of which it is a shift by one constant per
+  sample.
+
 * `rarefy(depth =)` now also takes one depth per sample (matched to the
   samples by name when named). `drop` and `warn` then compare each sample
   with its own depth. A single depth gives exactly the same results as
   before.
+
+* New `beta_div_rarefied()` and `alpha_div_rarefied()` rarefy a table many
+  times (`times = 100` by default), compute any beta or alpha diversity
+  metric from each rarefied table, and average the results: the mean (as
+  `vegan::avgdist()` and mothur), the median, or for beta diversity the
+  medoid (the matrix of the rarefaction closest to all the others, as in
+  q2-boots). `sd = TRUE` adds each value's standard deviation over the
+  rarefactions. Iteration t is exactly `rarefy(counts, depth, seed = seed +
+  t - 1)`, so results are reproducible and the same for any `cpus`; the
+  mean needs memory for only a few distance matrices, and the median and
+  medoid work through the pairs of samples in blocks. Titles say so: an
+  ordination of the result is a "Principal Coordinates Analysis of
+  Bray-Curtis Dissimilarity (rarefied 100×)".
+
+* `rarefy()` of a slam `simple_triplet_matrix` now draws exactly the same
+  observations as the same table in any other class, for the same `seed`.
+  Before, slam's samples were seeded by their 1-based positions, so its
+  draws differed from those of a `matrix` or `dgCMatrix`. Rarefying slam
+  input therefore gives different (equally random) results than before.
 
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument

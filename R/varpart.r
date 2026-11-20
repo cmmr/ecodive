@@ -45,8 +45,8 @@
 #'        name (or, without row names, in the same order). Default: `NULL`.
 #'
 #' @param norm  Normalize the count table first, as in [rda()]: `'none'`,
-#'        `'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, or
-#'        `'rclr'`. `vegan::varpart(transfo = 'hel')` is `norm =
+#'        `'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`,
+#'        `'rclr'`, or `'log'`. `vegan::varpart(transfo = 'hel')` is `norm =
 #'        'hellinger'`. Not used for distances, and only `'none'` with
 #'        `chisquare = TRUE`. Default: `'none'`.
 #'
@@ -352,7 +352,7 @@ varpart_response <- function (x, norm, pseudocount, margin, chisquare) {
     counts      = counts,
     margin      = margin,
     norm        = norm,
-    norm_name   = match.arg(norm_name, c('none', 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr')),
+    norm_name   = match.arg(norm_name, c('none', 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log')),
     pseudocount = pseudocount )
 }
 

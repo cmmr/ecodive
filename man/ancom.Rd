@@ -87,7 +87,7 @@ differs significantly between the groups (integer, \code{0} to \eqn{D -
 (scikit-bio's \code{Signif}).
 }
 
-Attributes: \code{groups} (the groups, in order), \code{sig_test}, \code{p_adjust},
+Attributes: \code{method} (\code{"ancom"}), \code{groups} (the groups, in order), \code{sig_test}, \code{p_adjust},
 \code{alpha}, \code{tau}, \code{theta}, \code{cutoff} (the chosen \eqn{\nu}, as a proportion
 of the number of features, or \code{NA} when nothing could be rejected
 because the largest \eqn{W} was below \code{theta}), and \code{pseudocount} (the
