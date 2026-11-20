@@ -1,6 +1,6 @@
 # `phate()`: Potential of Heat-diffusion for Affinity-based Trajectory Embedding
 
-**Priority:** 68. **Tier:** clean room, with a **license warning on the
+**Priority:** 87. **Tier:** clean room, with a **license warning on the
 reference itself**. Read [README.md](README.md) first.
 
 

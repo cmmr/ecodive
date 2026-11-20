@@ -1,6 +1,6 @@
 # `dirmult_lm()`: linear models on Dirichlet draws, with scale models (ALDEx3)
 
-**Priority:** 50. **Tier:** port (ALDEx3 1.4.0, CRAN, **MIT**:
+**Priority:** 42. **Tier:** port (ALDEx3 1.4.0, CRAN, **MIT**:
 `DESCRIPTION` "MIT + file LICENSE", `LICENSE` "YEAR: 2026 / COPYRIGHT
 HOLDER: ALDEx3 authors"; verified 2026-11-20; already the source of
 `dirmult_ttest()`'s scale model and credited in `src/dirmult.c` and

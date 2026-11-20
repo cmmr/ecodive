@@ -1,6 +1,6 @@
 # Documentation: depth, scale, machine learning and predicted loads
 
-**Priority:** 34. **Tier:** docs (roxygen comments, two articles, NEWS; no
+**Priority:** 27. **Tier:** docs (roxygen comments, two articles, NEWS; no
 new functions, no changed results). Read [README.md](README.md) first, and
 [compositional.md](compositional.md) § "The 2026-11-20 review" for why.
 
@@ -27,8 +27,8 @@ should say so, cite it, and not overclaim in either direction.
   that rarefaction is required: present Schloss as a counterpoint with a
   check users can run. Label ecodive's own reasoning as inference.
 - Name only functions that exist when this item is done.
-  `beta_div_rarefied()` (item 37), `da_sensitivity()` (41) and
-  `dirmult_lm()` (50) come later; their plans update these pages.
+  `beta_div_rarefied()` (item 30), `da_sensitivity()` (34) and
+  `dirmult_lm()` (42) come later; their plans update these pages.
 - Article chunks use only ecodive and base R. Describe a chunk's output
   only after knitting it.
 
@@ -76,7 +76,7 @@ normalization", *Genome Biology*, 26, 139.
   robust clr as [rpca()], so the caveat about sequencing depth there
   applies too." Cite Schloss 2026. *Unverified:* whether Schloss tested the
   plain robust Aitchison distance; read the paper before writing more.
-- **Planned `rpca_joint()` (30) and `ctf()` (31):** their Docs steps should
+- **Planned `rpca_joint()` (82) and `ctf()` (86):** their Docs steps should
   add `@inheritSection rpca Sequencing depth` and both Schloss references;
   `rpca_joint()` should cite its now-published paper (Cordazzo Vargas,
   Martino, et al. 2026, *Mol. Syst. Biol.* 22, 1789–1808,
@@ -232,14 +232,14 @@ Asked of the user at the start:
   only) get none. With `ancombc()`, `ancombc2()` (`exp(1)`) and
   `dirmult_ttest()` (`2`), every DA result with a log fold change now
   carries it, as `da_wilcoxon()`, `da_ttest()` and `da_lm()` already did
-  (item 36).
+  (item 29).
 - **Which plots label from `log_base`:** the ANCOM-BC volcano plot's x axis
   and the pairwise / Dunnett heatmap's subtitle, and `dirmult_ttest()`'s
-  volcano plot. The item-36 plots (`da_wilcoxon()`, `da_ttest()`,
+  volcano plot. The item-29 plots (`da_wilcoxon()`, `da_ttest()`,
   `da_lm()`) keep their norm-based labels ("Difference in medians (clr)");
-  item 35 restyles every DA plot.
+  item 28 restyles every DA plot.
 - **Article:** the depth check extends the "Rarefied or compositional?"
-  paragraph that item 37 added, instead of a separate "Is it depth?" block
+  paragraph that item 30 added, instead of a separate "Is it depth?" block
   after the `rpca` chunk that would repeat it.
 
 Made while implementing:
@@ -252,14 +252,14 @@ Made while implementing:
   and `lfc_label()` for each base (14 new results).
 - **Attribute order:** `log_base` follows `p_adjust` in the ANCOM-BC
   results and comes last in `dirmult_ttest()`'s; the values are the
-  doubles `exp(1)` and `2`, as item 36's. The sensitivity fits inside
+  doubles `exp(1)` and `2`, as item 29's. The sensitivity fits inside
   `attr(fit, 'sensitivity')` get it too, being results of the same call.
 - **`rpca()`'s "Sequencing depth"** is a `@section` (Rd prints sections
   after Details, so it follows **Distances** as asked). The plan's wording
   is kept, with the mechanism ("depth can reach the result" through which
   values are missing) labelled as an inference from the method. The check
   uses `beta_div_rarefied(counts, 'robust_aitchison', depth =
-  min(depth))` (item 37's request) instead of `robust_aitchison(rarefy())`;
+  min(depth))` (item 30's request) instead of `robust_aitchison(rarefy())`;
   rarefying to the smallest library drops no sample, which
   `procrustes_test()` needs (it requires the same samples). `[beta_div_rarefied()]`
   joined `rpca()`'s `@seealso`.
@@ -307,6 +307,6 @@ Made while implementing:
 - **NEWS:** two bullets (the documentation, and `log_base`), placed after
   the `beta_div_rarefied()` bullet rather than at the end of 2.4.0.
 - The ground rule that `beta_div_rarefied()` "comes later" was out of date
-  (item 37, 963647f): it is named on `rpca()`, `robust_aitchison()`, the
-  article and `bdiv_guide.Rmd`. `da_sensitivity()` (item 41, written in
+  (item 30, 963647f): it is named on `rpca()`, `robust_aitchison()`, the
+  article and `bdiv_guide.Rmd`. `da_sensitivity()` (item 34, written in
   parallel) is not named.

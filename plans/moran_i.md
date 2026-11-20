@@ -1,6 +1,6 @@
 # `moran_i()`: Moran's I test of spatial autocorrelation
 
-**Priority:** 27. **Tier:** port from PySAL esda (BSD-3). Read
+**Priority:** 59. **Tier:** port from PySAL esda (BSD-3). Read
 [README.md](README.md) first.
 
 **Name:** `moran_i()`, after the statistic. A bare `moran()` would be easy

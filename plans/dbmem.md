@@ -1,6 +1,6 @@
 # `dbmem()`: distance-based Moran's eigenvector maps
 
-**Priority:** 66. **Tier:** clean room. Write it from Borcard & Legendre
+**Priority:** 78. **Tier:** clean room. Write it from Borcard & Legendre
 (2002) and Dray, Legendre & Peres-Neto (2006). adespatial `dbmem()` (GPL)
 is output-only. It uses `moran_i()` ([moran_i.md](moran_i.md)) to select
 eigenvectors. Read [README.md](README.md) first.

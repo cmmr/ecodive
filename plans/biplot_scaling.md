@@ -1,6 +1,6 @@
 # Biplot scalings and links: `plot(ord, scaling =, links =)`
 
-**Priority:** 43. **Tier:** formula (no reference code is read or ported;
+**Priority:** 44. **Tier:** formula (no reference code is read or ported;
 compositions, robCompositions, easyCODA and coda.base are GPL and
 output-only). Read [README.md](README.md) first, and
 [compositional.md](compositional.md) for the conventions the compositional

@@ -1,6 +1,6 @@
 # `coda_lasso()` and `coda_lasso_pairwise()`: penalized log-contrast regression
 
-**Priority:** 48. **Tier:** port. `coda_lasso()` ports zeroSum 2.0.7's
+**Priority:** 74. **Tier:** port. `coda_lasso()` ports zeroSum 2.0.7's
 solver (R/C++, **MIT**, github.com/rehbergT/zeroSum). `coda_lasso_pairwise()`
 ports coda4microbiome 0.2.4's model setup (CRAN, **MIT**) on ecodive's own
 coordinate descent. glmnet (GPL-2) is output-only. Read

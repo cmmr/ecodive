@@ -1,6 +1,6 @@
 # `assoc_network()`, `assoc_network_compare()`, `assoc_network_diff()`: association networks
 
-**Priority:** 40. **Tier:** clean room, from textbook formulas and the NetCoMi
+**Priority:** 33. **Tier:** clean room, from textbook formulas and the NetCoMi
 paper (Peschel et al. 2021, *Brief Bioinform*). NetCoMi is GPL-3 and
 output-only: its paper, its Rd documentation (quoted below as "NetCoMi docs")
 and its outputs may be used, its R source may not. igraph (GPL ≥ 2,
@@ -45,9 +45,9 @@ or just before it:
 
 - `feature_assoc(counts, method, ...)` with registry `FEATURE_ASSOCS` and
   `list_feature_assocs()` / `match_feature_assoc()`, shaped like `count_ord()`.
-  **`FEATURE_ASSOCS` itself landed with item 39** (`R/feature_assoc.r`, rows
+  **`FEATURE_ASSOCS` itself landed with item 32** (`R/feature_assoc.r`, rows
   for `vlr`, `rho_p`, `phi_s`, `sparcc`; the range as numeric `lower` and
-  `upper` columns); see sparcc.md's "What item 40 can rely on".
+  `upper` columns); see sparcc.md's "What item 33 can rely on".
 - Registry columns: `id`, `name`, `alt_ids`, `fun`, plus `kind`
   (`'dissimilarity'` for vlr and phi_s; `'similarity'` for the rest), `range`
   (`'[-1,1]'`, `'[0,1]'`, `'[0,Inf)'`), `fisher_z` (TRUE only for
@@ -364,7 +364,7 @@ Follows [README.md](README.md) § "Result attributes and plots".
   (cited by NetCoMi for the signed/unsigned distances; not checked here).
 
 
-## Decisions made while implementing (item 40, 2026-11-20)
+## Decisions made while implementing (item 33, 2026-11-20)
 
 Asked of the user at the start:
 
@@ -521,7 +521,7 @@ Made while implementing. Every NetCoMi convention below was read from its
     compare result is `nodes`, `global`, `jaccard`, `ari` (named vector
     `value`, `p_value`), `clusters`, `edges_x`, `edges_y`.
 
-### What `spiec_easi_*` (item 56) and `secom_*` (item 57) need to add
+### What `spiec_easi_*` (item 65) and `secom_*` (item 75) need to add
 
 - A `FEATURE_ASSOCS` row each (the function name as `id`): spiec_easi_*
   with `kind = similarity`, `lower = -1`, `upper = 1`, `fisher_z = FALSE`,

@@ -1,6 +1,6 @@
 # `rademu()`: fold-difference estimation with robust score tests (radEmu)
 
-**Priority:** 67. **Tier:** port (radEmu 2.3.2.0, CRAN, **MIT**:
+**Priority:** 88. **Tier:** port (radEmu 2.3.2.0, CRAN, **MIT**:
 `DESCRIPTION` "MIT + file LICENSE", `LICENSE` "YEAR: 2023 / COPYRIGHT
 HOLDER: radEmu authors"; verified 2026-11-20; pure R, no compiled code,
 `Depends: MASS, Matrix, methods, magrittr, rlang`). Read

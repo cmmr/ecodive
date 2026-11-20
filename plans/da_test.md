@@ -1,6 +1,6 @@
 # `da_test()` wrapper, and `da_wilcoxon()`, `da_ttest()`, `da_lm()`
 
-**Priority:** 36. **Tier:** derived (a registry wrapper over ecodive's own
+**Priority:** 29. **Tier:** derived (a registry wrapper over ecodive's own
 functions) + formula (three classical per-feature tests; base R's
 `wilcox.test()`, `t.test()` and `lm()` are the references, run directly in
 the tests). Read [README.md](README.md) first, and
@@ -377,7 +377,7 @@ Made while implementing:
   decomposed once; features with missing values (rclr) get their own QR.
 - **`da_lm()` per factor level:** one t-test per design column, as the
   plan; `(Intercept)` rows included.
-- **Plots:** volcano only (item 35 adds the other types):
+- **Plots:** volcano only (item 28 adds the other types):
   `plot.ecodive_da_wilcoxon()` / `_da_ttest()` (x: difference in medians or
   means, with the norm in the label) and `plot.ecodive_da_lm(x, covariate =
   NULL)` (default: the first column of `groups`'s term, else the first
@@ -385,12 +385,12 @@ Made while implementing:
   (`da_plot_title()`), in `R/plot_da.r`. Printing: `print_table_result`,
   header from `da_method_name()`.
 - **Not done (later steps):** the stratified (van Elteren) Wilcoxon; the
-  effect / MA / forest plots (item 35); `log_base` on the *existing* DA
-  results (item 34; the new ones have it).
+  effect / MA / forest plots (item 28); `log_base` on the *existing* DA
+  results (item 27; the new ones have it).
 
 What later items can rely on:
 
-- **Item 41 (`da_sensitivity()`):** `list_da_tests()` gives `design`,
+- **Item 34 (`da_sensitivity()`):** `list_da_tests()` gives `design`,
   `effect` (column name), `base` and `zero_free_ok` per method;
   `da_test(counts, id, groups, data, formula, ...)` runs any of them with
   one call shape; every result has `method`, `alpha`, `reject` (and
@@ -399,9 +399,9 @@ What later items can rely on:
   non-intercept term. Effects: `log_fc` (ancombc*), `log2_fc`
   (dirmult_ttest), `median_diff` / `diff` / `estimate` (da_*, in `norm`
   units, `log_base` attribute). ancom has no effect column.
-- **Item 34 (`log_base`):** `da_wilcoxon()`, `da_ttest()`, `da_lm()` already
+- **Item 27 (`log_base`):** `da_wilcoxon()`, `da_ttest()`, `da_lm()` already
   set it; `ancombc()`, `ancombc2()` and `dirmult_ttest()` still need it.
-- **Item 35 (DA plots):** `da_ttest()` has `pooled_sd` and `mean` columns;
+- **Item 28 (DA plots):** `da_ttest()` has `pooled_sd` and `mean` columns;
   `da_lm()` has `resid_sd`, `mean` and `dof` attributes and `ci_lower` /
   `ci_upper` columns; `da_plot_title()` / `da_method_name()` give titles.
 - **linda / fastancom / dirmult_lm:** `da_design()`, `da_table_init()` /

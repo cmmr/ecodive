@@ -1,6 +1,6 @@
 # `replace_zeros()` and its methods: zero replacement for compositional data
 
-**Priority:** 15 (the wrapper and `replace_zeros_mult()`) and 46 (the four `cmultRepl()` methods and CZM). **Tier:**
+**Priority:** 15 (the wrapper and `replace_zeros_mult()`) and 55 (the four `cmultRepl()` methods and CZM). **Tier:**
 - `replace_zeros()` (wrapper, registry, `list_*` / `match_*`) and
   `replace_zeros_mult()`: port (scikit-bio 0.7.4 `multi_replace()`,
   BSD-3).
@@ -281,7 +281,7 @@ Asked of the user at the start:
 
 1. **The 80%-zeros warning:** none for `replace_zeros_mult()` (scikit-bio
    gives none, and in microbiome tables most features are ≥ 80% zeros).
-   Only the Bayesian methods (item 46) warn. The check is ready in
+   Only the Bayesian methods (item 55) warn. The check is ready in
    `zero_replacement_input(mostly_zero = TRUE)`, covering samples and
    features: "1 sample ('a') and 1 feature ('f3') are at least 80% zeros,
    so most of their values will be imputed. Consider filtering them out
@@ -369,10 +369,10 @@ Made while implementing:
     `log_ratio_pseudocount_section`) now point to `replace_zeros()`.
     pkgdown: "Compositional Data" → "Zeros".
 
-For item 46 (the Bayesian methods and CZM):
+For item 55 (the Bayesian methods and CZM):
 
 - The plan's line "rows get the mult/czm functions in the first item" was
-  superseded by TODO.md: **czm is item 46** too. The registry has only the
+  superseded by TODO.md: **czm is item 55** too. The registry has only the
   `mult` row; add one row per method (the planned rows and aliases are in
   `test-replace_zeros.r`'s `planned` table).
 - Write `replace_zeros_<id>(counts, margin = 1L, ...)`; start with

@@ -1,6 +1,6 @@
 # `linda()`: linear models for differential abundance (LinDA)
 
-**Priority:** 38. **Tier:** **clean room**. LinDA's code is GPL: the
+**Priority:** 31. **Tier:** **clean room**. LinDA's code is GPL: the
 standalone `zhouhj1994/LinDA` is GPL-2 (per the review's notes) and the
 maintained copy in CRAN **MicrobiomeStat 1.4 is GPL-3** (DESCRIPTION
 verified 2026-11-20). Work only from the open-access paper (Zhou et al.
@@ -213,7 +213,7 @@ exactly). NEWS. New glossary entries: `zero_handling`, `corr_cut`,
   bbaf130. doi:10.1093/bib/bbaf130.
 
 
-## Decisions made while implementing (item 38, 2026-11-20)
+## Decisions made while implementing (item 31, 2026-11-20)
 
 Asked of the user at the start:
 
@@ -307,11 +307,11 @@ Made while implementing:
   `outlier_pct`, `alpha`, `p_adjust`, `log_base = 2`, `bias` (per reported
   covariate), `vcov` (D × P × P, intercept included, \eqn{s^2 (X'X)^{-1}}),
   and per feature `mean` (mean centred log2 value; named `mean`, not the
-  plan's `mean_clr`, as `da_lm()` and `ancombc()` name it for item 35's
+  plan's `mean_clr`, as `da_lm()` and `ancombc()` name it for item 28's
   MA plots) and `resid_sd`. `baseMean` left out, as planned.
 - **Registry:** `LinDA, linda, formula, log2_fc, 2, TRUE`, no aliases (an
   alias starting `linear` would break `match_da_test('linear')` → `da_lm`).
-- **Plots (after item 35 landed mid-task, at the user's request):**
+- **Plots (after item 28 landed mid-task, at the user's request):**
   `plot.ecodive_linda()` calls `da_plot()` with linda's columns: volcano
   (default), effect (`resid_sd`, two-level covariates), MA (`mean`), and
   forest with t intervals `log2_fc ± qt((1 + conf_level)/2, dof) se`

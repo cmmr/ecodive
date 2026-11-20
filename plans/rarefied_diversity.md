@@ -1,6 +1,6 @@
 # `beta_div_rarefied()` and `alpha_div_rarefied()`: diversity over repeated rarefactions
 
-**Priority:** 37. **Tier:** derived: loops over ecodive's own `rarefy()`,
+**Priority:** 30. **Tier:** derived: loops over ecodive's own `rarefy()`,
 `beta_div()` and `alpha_div()`. The averaging choices come from q2-boots
 (BSD-3, read; see below); vegan's `avgdist()` (GPL-2) is output-only. Read
 [README.md](README.md) first, and [compositional.md](compositional.md)
@@ -258,7 +258,7 @@ Follows [README.md](README.md) § "Result attributes and plots".
 
 ## Decisions made while implementing
 
-Recorded 2026-11-20 (item 37).
+Recorded 2026-11-20 (item 30).
 
 **Asked the user, at the start:**
 
@@ -347,7 +347,7 @@ Recorded 2026-11-20 (item 37).
   section now describes the rule as coded (the smallest library size whose
   yield is at least 10% of all observations).
 - **Docs follow-ups:** `rpca()` has no "Sequencing depth" section yet
-  (item 34, not done), so that replacement is left for item 34, which
+  (item 27, not done), so that replacement is left for item 27, which
   should use `beta_div_rarefied(counts, 'robust_aitchison')` there. The
   compositional article gains "Rarefied or compositional?" after the PhILR
   chunk: `beta_div_rarefied(counts, 'bray', times = 20)`, a

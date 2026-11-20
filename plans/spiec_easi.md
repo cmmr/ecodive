@@ -1,6 +1,6 @@
 # `spiec_easi_mb()`, `spiec_easi_glasso()`: sparse inverse-covariance networks (SPIEC-EASI)
 
-**Priority:** 56. **Tier:** clean room for the SPIEC-EASI pipeline and StARS.
+**Priority:** 65. **Tier:** clean room for the SPIEC-EASI pipeline and StARS.
 SpiecEasi is GPL (≥ 3; also on Bioconductor 2.0.0) and output-only, and so
 are its back ends huge (GPL-2) and pulsar (GPL ≥ 3), checked on CRAN on
 2026-11-20. The solvers are a **port** from scikit-learn 1.9.1 (BSD-3, verified

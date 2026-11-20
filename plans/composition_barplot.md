@@ -1,6 +1,6 @@
 # `composition_barplot()`: ordered, hierarchically shaded stacked bars
 
-**Priority:** 61. **Tier:** port of an idea (microshades 1.13, MIT; its
+**Priority:** 47. **Tier:** port of an idea (microshades 1.13, MIT; its
 colour logic was read, nothing is copied). Read [README.md](README.md)
 first, and [compositional.md](compositional.md).
 

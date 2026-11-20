@@ -1,6 +1,6 @@
 # `variation_array()` and `zero_pattern()`: two compositional diagnostics
 
-**Priority:** 53. **Tier:** clean room (easyCODA, propr, zCompositions,
+**Priority:** 60. **Tier:** clean room (easyCODA, propr, zCompositions,
 robCompositions: GPL, no code read). The variation array is formulas over
 ecodive's own `vlr()`; the zero patterns are bookkeeping. Read
 [README.md](README.md) first, and [compositional.md](compositional.md).

@@ -1,6 +1,6 @@
 # `enterotype()`, `valencia()`, `dmm()`: community types
 
-**Priority:** 45 (`enterotype()`), 52 (`valencia()`), 55 (`dmm()`).
+**Priority:** 35 (`enterotype()`), 45 (`valencia()`), 66 (`dmm()`).
 **Tier:**
 - `enterotype()`: clean room. PAM is written from Kaufman & Rousseeuw;
   `cluster` and `clusterSim` are GPL (≥ 2), output-only.
@@ -371,7 +371,7 @@ Follows [README.md](README.md) § "Result attributes and plots".
 
 ## Decisions made while implementing (enterotype)
 
-Item 45, 2026-11-20. `enterotype()` is in `R/enterotype.r` and `src/pam.c`;
+Item 35, 2026-11-20. `enterotype()` is in `R/enterotype.r` and `src/pam.c`;
 the shared `ecodive_types` output (constructor, registry, `print()` and
 `plot()`) is in `R/community_types.r`.
 

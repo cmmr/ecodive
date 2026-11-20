@@ -1,6 +1,6 @@
 # Library-size normalizations as `norm` choices: CSS, TMM, RLE, GMPR; `size_factors()`
 
-**Priority:** 51. **Tier:** port for CSS (metagenomeSeq 1.54.0,
+**Priority:** 43. **Tier:** port for CSS (metagenomeSeq 1.54.0,
 Artistic-2.0: keep its notice) + clean room for TMM (edgeR, GPL ≥ 2), RLE
 (DESeq2, LGPL ≥ 3) and GMPR (GUniFrac, GPL-3), from the papers, the
 manuals, and outputs. Read [README.md](README.md) and

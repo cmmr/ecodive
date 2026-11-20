@@ -1,6 +1,6 @@
 # `dpcoa()`: double principal coordinate analysis
 
-**Priority:** 33, second of the clean-room methods (after `philr()`). **Tier:** clean
+**Priority:** 26, second of the clean-room methods (after `philr()`). **Tier:** clean
 room. No permissive implementation exists, so write it from Pavoine,
 Dufour & Chessel (2004). The reference, ade4 `dpcoa()` (GPL), is
 output-only: run it for fixtures, but don't read its source. Read
@@ -112,7 +112,7 @@ Asked of the user at the start:
    Gower product, which stops as soon as a Ritz value proves it; otherwise
    an error, as ade4 gives ("an Euclidean matrix is needed").
 2. **Trees: accepted quietly** (recommended). Tree preparation reuses
-   `philr_tree()` / `C_philr_tree()` (item 32). Polytomies, an unrooted
+   `philr_tree()` / `C_philr_tree()` (item 25). Polytomies, an unrooted
    tree and single-child nodes don't change path lengths, so DPCoA's
    results don't depend on how they are resolved: no warning (unlike
    `philr()`). Tips that aren't taxa are pruned quietly; a taxon missing

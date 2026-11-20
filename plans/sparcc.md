@@ -1,6 +1,6 @@
 # `sparcc()`: sparse correlations for compositional data (SparCC)
 
-**Priority:** 39. **Tier:** clean room. Write it from Friedman & Alm
+**Priority:** 32. **Tier:** clean room. Write it from Friedman & Alm
 (2012, *PLoS Comput Biol*, CC-BY). The original Python 2 code
 (bitbucket.org/yonatanf/sparcc) is gone and its license is unknown. FastSpar
 and SpiecEasi's `sparcc()` are GPL-3. The MIT/BSD Python ports (dlegor/SparCC,
@@ -296,7 +296,7 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - Erb, I., & Notredame, C. (2016), for \eqn{\rho_p}; see proportionality.md.
 
 
-## Decisions made while implementing (item 39, 2026-11-20)
+## Decisions made while implementing (item 32, 2026-11-20)
 
 Asked of the user at the start:
 
@@ -314,7 +314,7 @@ Asked of the user at the start:
    `lower`, `upper`, `fisher_z`, `sparse` and `strict`. The range is two
    numeric columns rather than assoc_network.md's `range` string: `'[-1,1]'`
    contains the table's separator, and plots need numbers. `feature_assoc()`,
-   `list_feature_assocs()` and `match_feature_assoc()` are left to item 40.
+   `list_feature_assocs()` and `match_feature_assoc()` are left to item 33.
 
 Made while implementing:
 
@@ -518,7 +518,7 @@ Made while implementing:
     give `max_exclusions = D - 3` to reproduce FastSpar there. Tested both
     ways against the fixtures.
 
-### What item 40 (`assoc_network()`) can rely on
+### What item 33 (`assoc_network()`) can rely on
 
 - A `sparcc()` result is an `ecodive_dist` over features with `method =
   "sparcc"`, top-level `n_samples`, `variances` (named, in label order),

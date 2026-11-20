@@ -1,6 +1,6 @@
 # `coda_dendrogram()`: balances of a sequential binary partition, as a tree
 
-**Priority:** 62. **Tier:** clean room (`compositions::CoDaDendrogram()` is
+**Priority:** 85. **Tier:** clean room (`compositions::CoDaDendrogram()` is
 GPL ≥ 2: its documentation was read, its code was not). Read
 [README.md](README.md) first, [compositional.md](compositional.md), and
 [log_ratio_transforms.md](log_ratio_transforms.md) for `ilr(basis =)`.
@@ -187,7 +187,7 @@ Follows [README.md](README.md) § "Result attributes and plots".
 
 - Variances: Σ var(b) over balances = `sum(apply(clr, 2, var))` (total
   variance) at 1e-12; equals `attr(variation_array(x), 'total_var')` if
-  item 53 has landed. Means equal `colMeans(ilr(x, sbp))` exactly.
+  item 60 has landed. Means equal `colMeans(ilr(x, sbp))` exactly.
 - `sbp_from_hclust()` on a hand-built merge matrix gives the expected SBP;
   every SBP produced passes `ilr_basis()`'s checks. `sbp_from_phylo()` on
   `ex_tree` gives balances equal to `philr(ex_counts, ex_tree)`'s uniform

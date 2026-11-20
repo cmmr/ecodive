@@ -337,7 +337,7 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, ✓ `da_test`, ✓ `feature_assoc` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, ✓ `da_test`, ✓ `feature_assoc`, `alpha_test`, `batch_correct` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
 | Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, ✓ `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
@@ -348,22 +348,32 @@ can't be mistaken for one another:
 | Model building | ✓ `varpart`, ✓ `forward_select`, ✓ `bioenv` |
 | Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, ✓ `mantel_partial`, `mirkat` |
 | Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
-| Composition | ✓ `simper` |
-| Beta metrics (`beta_div`) | ✓ `philr_distance` |
+| Composition | ✓ `simper`, `indicator_species` |
+| Alpha metrics (`alpha_div`) | `pielou`, `heip`, `simpson_evenness`, `mcintosh_evenness`, `goods_coverage`, `hill`, `renyi`, `tsallis`, `dominance`, `strong`, `gini_index` |
+| Alpha diversity tests (`alpha_test`) | `alpha_wilcoxon`, `alpha_kruskal`, `alpha_ttest`, `alpha_lm`, `alpha_cor` |
+| Sampling effort | `rarefaction_curve`, `hill_extrapolation`, `hill_standardize` |
+| Beta metrics (`beta_div`) | ✓ `philr_distance`, `sorensen_turnover`, `sorensen_nestedness`, `jaccard_turnover`, `jaccard_nestedness`, `bray_balanced`, `bray_gradient`, `soergel_balanced`, `soergel_gradient`, `kulczynski`, `mountford`, `raup_crick`, `binomial_deviance`, `chao_jaccard`, `cao`, `mahalanobis_distance`, `alt_gower`, `chisq_distance` |
+| Beta partitioning | `beta_partition`, `beta_partition_multi` |
+| Community assembly | `mpd`, `mntd`, `mpd_ses`, `mntd_ses`, `beta_mntd`, `beta_mpd`, `beta_nti`, `raup_crick_bray`, `assembly_processes`, `neutral_model` |
 | Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance`, `log_ratio_features` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
-| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, ✓ `linda`, `maaslin3`, `fastancom`, `rademu`, ✓ `da_sensitivity` |
+| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, ✓ `linda`, `maaslin3`, `fastancom`, `rademu`, `lefse`, `deseq2`, ✓ `da_sensitivity` |
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
 | Rarefied diversity | ✓ `beta_div_rarefied`, ✓ `alpha_div_rarefied` |
 | Normalization | ✓ `normalize`, `size_factors` (new `norm` choices: see [normalization_factors.md](normalization_factors.md)) |
 | Associations and networks (`feature_assoc`) | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s`, ✓ `sparcc`, ✓ `assoc_pairs`, `spiec_easi_mb`, `spiec_easi_glasso`, `secom_pearson`, `secom_distance`, ✓ `assoc_network`, ✓ `assoc_network_compare`, ✓ `assoc_network_diff` |
+| Associations between two tables | `cross_assoc`, `halla` |
 | Community types | ✓ `enterotype`, `valencia`, `dmm` |
 | Compositional plots | `ternary_plot`, `variation_array`, `zero_pattern`, `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
 | Spatial | `moran_i`, `dbmem` |
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
 | Source tracking | ✓ `sourcetracker`, `feast` |
+| Quality control | `decontam`, `decontam_not` |
+| Batch correction (`batch_correct`) | `batch_mmuphin`, `batch_combat`, `batch_combat_seq`, `batch_conqur` |
+| Longitudinal | `first_differences`, `first_distances`, `volatility`, `nmit`, `feature_volatility` |
+| Prediction | `random_forest` |
 
 Names still worth a word of warning in the docs:
 - `lda` also means latent Dirichlet allocation (topic models) and LEfSe's

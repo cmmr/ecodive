@@ -1,6 +1,6 @@
 # `largevis()`: LargeVis
 
-**Priority:** 70 (last). **Tier:** port from uwot's C++ headers (BSD-2).
+**Priority:** 90 (last). **Tier:** port from uwot's C++ headers (BSD-2).
 **Superseded** by UMAP. Read [README.md](README.md) first.
 
 

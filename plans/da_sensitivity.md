@@ -1,6 +1,6 @@
 # `da_sensitivity()`: rerun a differential-abundance method over settings
 
-**Priority:** 41. **Tier:** derived (a loop over `da_test()` and
+**Priority:** 34. **Tier:** derived (a loop over `da_test()` and
 `replace_zeros()`, with a tidy result and a `plot()` method). No reference
 code is ported: ANCOMBC's sensitivity analysis is already in `ancombc()`
 (Artistic-2.0 notices in place), and ALDEx2's `plotGamma` (GPL ≥ 3) is only
@@ -297,7 +297,7 @@ Made while implementing:
 - **Attributes:** `method`, `effect_name`, `alpha` (the base fit's),
   `log_base` (the base fit's `log_base` attribute when present, else from
   the registry's `base`: `'e'` → `exp(1)`, `'2'` → 2; so it is right
-  before item 34 adds `log_base` to ancombc / dirmult results), `covariate`
+  before item 27 adds `log_base` to ancombc / dirmult results), `covariate`
   (model methods only: the first design column of `groups`'s term, else
   the first non-intercept column; `da_term_covariate()`, the rule of
   `plot.ecodive_da_lm()`), `runs`, `fits` and `summary`.
@@ -325,7 +325,7 @@ Made while implementing:
   `da_sens_plot_title()` (tested).
 - **Docs:** cross-references from `da_test()`'s and `dirmult_ttest()`'s
   "See also", and a γ example in `dirmult_ttest()`'s examples, kept small
-  because item 34 is editing those pages. Glossary row in
+  because item 27 is editing those pages. Glossary row in
   parameter_names.md; NEWS; pkgdown (`da_sensitivity` under Differential
   abundance, its plot method under Plotting).
 

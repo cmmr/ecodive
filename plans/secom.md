@@ -1,6 +1,6 @@
 # `secom_pearson()`, `secom_distance()`: bias-corrected correlations (SECOM)
 
-**Priority:** 57. **Tier:** port of R code from the Bioconductor package
+**Priority:** 75. **Tier:** port of R code from the Bioconductor package
 ANCOMBC (**Artistic-2.0**: verified 2026-11-20 from the DESCRIPTION of the
 `devel` branch, version 2.15.1, commit `fe21fa6`; author and copyright
 holder Huang Lin). Artistic-2.0 code may be ported with its notices (README

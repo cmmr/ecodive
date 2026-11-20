@@ -1,6 +1,6 @@
 # `tree_plot()`: a base-R phylogenetic tree with values on nodes and tips
 
-**Priority:** 63. **Tier:** first principles (ape, ggtree, phytools,
+**Priority:** 83. **Tier:** first principles (ape, ggtree, phytools,
 philr and metacoder are GPL or LGPL: none of their code is read; the
 rectangular layout is textbook). Read [README.md](README.md) first, and
 [philr.md](philr.md) and [rpca_phylo.md](rpca_phylo.md) for the trees they
@@ -143,7 +143,7 @@ lay$y, ...)`).
 
 ### Reuse
 
-`coda_dendrogram()` (item 62) needs a preorder walk and child lists for
+`coda_dendrogram()` (item 85) needs a preorder walk and child lists for
 SBPs built from trees; whichever item is built first writes `tree_check()`
 and the walk in `R/plot_tree.r`, and the other reuses them.
 `coda_dendrogram()`'s variance-driven x positions are its own.

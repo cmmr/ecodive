@@ -1,6 +1,6 @@
 # `ternary_plot()`: three-part subcompositions in the simplex
 
-**Priority:** 49. **Tier:** clean room (ggtern GPL-2, Ternary GPL ≥ 2,
+**Priority:** 54. **Tier:** clean room (ggtern GPL-2, Ternary GPL ≥ 2,
 robCompositions and compositions GPL ≥ 2: none of their code is read; work
 from the papers and their documentation). Read [README.md](README.md)
 first, and [compositional.md](compositional.md).

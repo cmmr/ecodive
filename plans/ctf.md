@@ -1,6 +1,6 @@
 # `ctf()`: compositional tensor factorization
 
-**Priority:** 31. **Tier:** port (gemelli 0.0.13,
+**Priority:** 86. **Tier:** port (gemelli 0.0.13,
 `ctf()`, BSD-3). The largest of the gemelli ports, with several apparent
 bugs in the reference to decide on first. Read [README.md](README.md)
 first, and [compositional.md](compositional.md) for the conventions the

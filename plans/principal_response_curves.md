@@ -1,6 +1,6 @@
 # `principal_response_curves()`: principal response curves
 
-**Priority:** 25. **Tier:** *derived* (a partial RDA). **Requires
+**Priority:** 57. **Tier:** *derived* (a partial RDA). **Requires
 [rda.md](rda.md) first.** Read [README.md](README.md) first.
 
 **Name:** spelled out, not `prc`. `prc` is easily mistaken for

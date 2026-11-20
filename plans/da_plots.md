@@ -1,6 +1,6 @@
 # Effect, MA and forest plots for differential-abundance results
 
-**Priority:** 35. **Tier:** formula (plots over existing results). The
+**Priority:** 28. **Tier:** formula (plots over existing results). The
 new `dirmult_ttest()` dispersion column follows ALDEx3 1.4.0's
 `aldex.effect()` (`R/aldex-summary.R`, **MIT**, verified); ALDEx2 (GPL ≥ 3)
 is output-only; CoDaSeq's `codaSeq.effect()` is a cross-check only (see
@@ -161,7 +161,7 @@ plot.ecodive_ancombc(x, covariate = NULL,
 
 Follows [README.md](README.md) § "Result attributes and plots".
 
-- Needs item 34's `log_base` attribute on `dirmult_ttest()` and ANCOM-BC
+- Needs item 27's `log_base` attribute on `dirmult_ttest()` and ANCOM-BC
   results. The new columns (`pooled_sd`, `mean_clr`, `effect`) and
   attributes (`resid_sd`, `mean_clr`) are computed when the result is
   made; `plot()` only reads them.
@@ -240,9 +240,9 @@ Asked of the user at the start:
   still `log2_fc`); the two never meet in code.
 - **`mean`, not `mean_clr`, everywhere:** `dirmult_ttest()`'s column (log2
   units), `ancombc()` / `ancombc2()`'s attribute (natural logs; the rclr
-  with zeros as missing values), matching item 36's `da_ttest()` column
+  with zeros as missing values), matching item 29's `da_ttest()` column
   and `da_lm()` attribute, so that one MA-plot path reads them all.
-- **Item 36's plots were extended and restyled too:** `da_ttest()` (all
+- **Item 29's plots were extended and restyled too:** `da_ttest()` (all
   four types), `da_lm()` (as ANCOM-BC, `covariate` second, `type` third),
   `da_wilcoxon()` (volcano and MA). `da_wilcoxon()` results gained a
   `mean` column (after `median_diff`) so that its MA plot has an x axis:
@@ -286,7 +286,7 @@ Made while implementing:
   differ, when coefficients are `NaN`).
 - **Axis labels:** dirmult and ANCOM-BC from `lfc_label()`; the `da_*()`
   plots now say "Log fold change (difference in means, clr)" when
-  `log_base` is finite, else "Difference in means (percent)" (item 34
+  `log_base` is finite, else "Difference in means (percent)" (item 27
   left them norm-based). Dispersion axes: "Pooled within-group standard
   deviation (log2)" (dirmult), "Residual standard deviation (natural
   log)" (ANCOM-BC), "(clr, natural log)" / "(percent)" for the `da_*()`

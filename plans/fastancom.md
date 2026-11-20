@@ -1,6 +1,6 @@
 # `fastancom()`: ANCOM from K marginal models
 
-**Priority:** 54. **Tier:** **clean room**. fastANCOM 0.0.4
+**Priority:** 80. **Tier:** **clean room**. fastANCOM 0.0.4
 (github.com/ZRChao/fastANCOM, not on CRAN) is **GPL-3** (`DESCRIPTION`
 verified 2026-11-20; the repository has no LICENSE file). Work only from
 the paper, the package documentation (`man/fastANCOM.Rd`, README, the

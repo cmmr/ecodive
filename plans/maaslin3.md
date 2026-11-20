@@ -1,20 +1,21 @@
 # `maaslin3()`: prevalence and abundance models with a median comparison
 
-**Priority:** 42. **Tier:** port (maaslin3 1.4.0, Bioconductor, **MIT**:
+**Priority:** 49. **Tier:** port (maaslin3 1.4.0, Bioconductor, **MIT**:
 `DESCRIPTION` "MIT + file LICENSE", `LICENSE` "YEAR: 2025 / COPYRIGHT
 HOLDER: Harvard School of Public Health", and the full MIT text in
 `R/utility_scripts.R`; verified 2026-11-20). lme4, lmerTest, multcomp and
 survival, which it calls, are GPL: output-only. Read
 [README.md](README.md) first, and [compositional.md](compositional.md).
 
-> **SCOPE DECISION FOR THE USER.** MaAsLin3 is a general per-feature
-> regression framework (any formula, two models per feature, optional
-> random effects), not a compositional method in the narrow sense. Porting
-> it widens ecodive from "compositional DA" to "per-feature association
-> modelling". The review recommends it anyway (reconciliation table): its
+> **Scope approved by the user (2026-11-20).** MaAsLin3 is a general
+> per-feature regression framework (any formula, two models per feature,
+> optional random effects), not a compositional method in the narrow
+> sense, so porting it widens ecodive from "compositional DA" to
+> "per-feature association modelling". The user approved that widening as
+> part of making ecodive a one-stop shop for microbiome analysis: its
 > family has the highest uptake, its median comparison *is* a
 > compositional correction, and the separate prevalence model is new to
-> ecodive. Confirm before building.
+> ecodive.
 
 
 ## What it is

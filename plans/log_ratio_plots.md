@@ -1,6 +1,6 @@
 # Rank plots, `plot()` of log ratios, and `log_ratio_features()` (Qurro-style)
 
-**Priority:** 44. **Tier:** port (Qurro 0.9.0, BSD-3; its display rules,
+**Priority:** 46. **Tier:** port (Qurro 0.9.0, BSD-3; its display rules,
 not its code: Qurro is Python/JavaScript/Vega-Lite and nothing in it is
 algorithmically hard). Read [README.md](README.md) first, and
 [compositional.md](compositional.md) and [log_ratio.md](log_ratio.md).
@@ -34,10 +34,10 @@ on ecodive's DA results and RPCA loadings is cheap. Moderate demand.
 ## Names
 
 - **(a)** an argument value, `type = 'rank'`, as `plot.ecodive_test()` uses
-  `type`. [da_plots.md](da_plots.md) (item 35) adds `type = c('volcano',
+  `type`. [da_plots.md](da_plots.md) (item 28) adds `type = c('volcano',
   'effect', 'ma', 'forest')` to the DA plot methods; this item appends
-  `'rank'` to that list. If item 35 hasn't landed, add `type = c('volcano',
-  'rank')` here, in the position item 35 specifies (second for
+  `'rank'` to that list. If item 28 hasn't landed, add `type = c('volcano',
+  'rank')` here, in the position item 28 specifies (second for
   `dirmult_ttest`; after `covariate` for `ancombc`, because
   `plot(fit, 'age')` passes `covariate` by position and is tested).
 - **(b)** an S3 method, no new export besides the method.
@@ -72,8 +72,8 @@ plot.ecodive_ord(x, groups = NULL, data = NULL, axes = c(1, 2), loadings = 10,
 ```
 
 (`'effect'`, `'ma'`, `'forest'`, `n_features` and `conf_level` come from
-[da_plots.md](da_plots.md), item 35; `scaling` and `links` from
-[biplot_scaling.md](biplot_scaling.md), item 43. `numerator` /
+[da_plots.md](da_plots.md), item 28; `scaling` and `links` from
+[biplot_scaling.md](biplot_scaling.md), item 44. `numerator` /
 `denominator` are used only by `type = 'rank'`.)
 
 - **Ranking:** `dirmult_ttest`: `log2_fc`; `ancombc` / `ancombc2`:
