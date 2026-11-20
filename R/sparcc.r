@@ -67,16 +67,19 @@
 #'     p-value per pair, **parallel to the triangle** (same length and
 #'     order: `p_value[k]` belongs to `x[k]`). Not adjusted for testing
 #'     every pair: see [stats::p.adjust()].
-#'   * `display`: its title, `"SparCC Correlation"` (see
-#'     [ecodive_display]), and `clust`; and `order` when clustered.
+#'   * `display`: the title for plots and printing, `"SparCC
+#'     Correlation"`, and the `clust` it was made with (see
+#'     [ecodive_display]).
+#'   * `order`: with `clust`, each feature's position in the input.
 #'
 #'   The correlations are a **similarity** in a `dist` container:
 #'   `as.matrix()` puts 0 on the diagonal, where they are 1, and they must
-#'   not be given as `dm` to an ordination or test. Threshold them to find
-#'   strongly associated pairs (`which(abs(r) > 0.3)`, or `abs(as.matrix(r))
-#'   > 0.3` for an adjacency matrix), or use `1 - r` for a dissimilarity.
-#'   With p-values, `r[p.adjust(attr(r, "p_value"), "BH") <= 0.05]` keeps
-#'   the significant pairs.
+#'   not be given as `dm` to an ordination or test. To find strongly
+#'   associated pairs, threshold them: `which(abs(r) > 0.3)` gives their
+#'   positions in the triangle, and `abs(as.matrix(r)) > 0.3` an adjacency
+#'   matrix. For a dissimilarity, use `1 - r`. With p-values,
+#'   `p <- p.adjust(attr(r, "p_value"), "BH")` adjusts them for testing
+#'   every pair, and `r[p <= 0.05]` keeps the significant pairs.
 #'
 #' @details
 #' **What is estimated.** Let \eqn{y_i} be the log of feature \eqn{i}'s

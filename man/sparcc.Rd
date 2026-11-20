@@ -75,14 +75,19 @@ feature and in the order of the result's labels.
 p-value per pair, \strong{parallel to the triangle} (same length and
 order: \code{p_value[k]} belongs to \code{x[k]}). Not adjusted for testing
 every pair: see \code{\link[stats:p.adjust]{stats::p.adjust()}}.
-\item \code{display}: its title, \code{"SparCC Correlation"} (see
-\link{ecodive_display}), and \code{clust}; and \code{order} when clustered.
+\item \code{display}: the title for plots and printing, \code{"SparCC Correlation"}, and the \code{clust} it was made with (see
+\link{ecodive_display}).
+\item \code{order}: with \code{clust}, each feature's position in the input.
 }
 
 The correlations are a \strong{similarity} in a \code{dist} container:
 \code{as.matrix()} puts 0 on the diagonal, where they are 1, and they must
-not be given as \code{dm} to an ordination or test. Threshold them to find
-strongly associated pairs (\code{which(abs(r) > 0.3)}, or `abs(as.matrix(r))0.3for an adjacency matrix), or use1 - rfor a dissimilarity.   With p-values,rp.adjust(attr(r, "p_value"), "BH") <= 0.05` keepsthe significant pairs.
+not be given as \code{dm} to an ordination or test. To find strongly
+associated pairs, threshold them: \code{which(abs(r) > 0.3)} gives their
+positions in the triangle, and \code{abs(as.matrix(r)) > 0.3} an adjacency
+matrix. For a dissimilarity, use \code{1 - r}. With p-values,
+\code{p <- p.adjust(attr(r, "p_value"), "BH")} adjusts them for testing
+every pair, and \code{r[p <= 0.05]} keeps the significant pairs.
 }
 \description{
 Estimates the correlations between the log \strong{absolute} abundances of
