@@ -352,7 +352,7 @@ can't be mistaken for one another:
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
 | Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, `linda`, `maaslin3`, `fastancom`, `rademu`, `da_sensitivity` |
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
-| Rarefied diversity | `beta_div_rarefied`, `alpha_div_rarefied` |
+| Rarefied diversity | ✓ `beta_div_rarefied`, ✓ `alpha_div_rarefied` |
 | Normalization | ✓ `normalize`, `size_factors` (new `norm` choices: see [normalization_factors.md](normalization_factors.md)) |
 | Associations and networks (`feature_assoc`, proposed) | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s`, `sparcc`, `spiec_easi_mb`, `spiec_easi_glasso`, `secom_pearson`, `secom_distance`, `assoc_network`, `assoc_network_compare`, `assoc_network_diff` |
 | Community types | `enterotype`, `valencia`, `dmm` |
