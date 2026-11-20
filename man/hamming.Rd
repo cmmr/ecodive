@@ -40,7 +40,7 @@ which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-\rho_p}.}
+       \rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -91,9 +91,9 @@ Hamming, R. W. (1950). Error detecting and error correcting codes. \emph{Bell Sy
 \seealso{
 \code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
-Other Presence/Absence metrics:
-\code{\link[=jaccard]{jaccard()}},
-\code{\link[=ochiai]{ochiai()}},
-\code{\link[=sorensen]{sorensen()}}
+Other Presence/Absence metrics: 
+\code{\link{jaccard}()},
+\code{\link{ochiai}()},
+\code{\link{sorensen}()}
 }
 \concept{Presence/Absence metrics}

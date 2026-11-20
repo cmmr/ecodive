@@ -63,12 +63,12 @@ Faith, D. P. (1992). Conservation evaluation and phylogenetic diversity. \emph{B
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Phylogenetic metrics:
-\code{\link[=generalized_unifrac]{generalized_unifrac()}},
-\code{\link[=normalized_unifrac]{normalized_unifrac()}},
-\code{\link[=philr_distance]{philr_distance()}},
-\code{\link[=unweighted_unifrac]{unweighted_unifrac()}},
-\code{\link[=variance_adjusted_unifrac]{variance_adjusted_unifrac()}},
-\code{\link[=weighted_unifrac]{weighted_unifrac()}}
+Other Phylogenetic metrics: 
+\code{\link{generalized_unifrac}()},
+\code{\link{normalized_unifrac}()},
+\code{\link{philr_distance}()},
+\code{\link{unweighted_unifrac}()},
+\code{\link{variance_adjusted_unifrac}()},
+\code{\link{weighted_unifrac}()}
 }
 \concept{Phylogenetic metrics}

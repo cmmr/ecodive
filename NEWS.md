@@ -611,6 +611,22 @@
   keep the table's class and orientation, and sparse tables stay sparse:
   2,000 samples by 5,000 taxa take under 0.1 seconds.
 
+* New `enterotype()` clusters samples into community types as Arumugam et
+  al. (2011) did: partitioning around medoids (PAM) on Jensen-Shannon
+  distances (or any `dist`), with the number of types chosen by the
+  Calinski-Harabasz index and each sample's fit given by its silhouette.
+  PAM, the silhouettes and the index are threaded C written from the
+  published algorithms; medoids, assignments, objectives and silhouettes
+  match `cluster::pam()` and `cluster::silhouette()`, and the index matches
+  `clusterSim::index.G1()` as Arumugam et al.'s script calls it (`ch =
+  "medoids"`), or is the distances' pseudo-F (`ch = "centroids"`). The
+  result, a data frame of class `ecodive_types` (see `?ecodive_types`),
+  holds each sample's type, as a factor to use as `groups` in any test, and
+  as attributes each type's medoid, size and mean composition (with its
+  most abundant feature) and the index for every number of types tried.
+  `plot()` draws the types' mean compositions or the index; `print()` shows
+  the types, the selection and the first samples.
+
 * New `ancom()` runs ANCOM (Mandal et al. 2015), the analysis of
   composition of microbiomes: it tests every log ratio between two features
   for a difference between `groups` (`sig_test = 'anova'`, or `'kruskal'`),

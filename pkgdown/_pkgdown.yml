@@ -98,6 +98,11 @@ reference:
   contents:
   - qmp_scale
   - qmp_rarefy
+- subtitle: Community types
+  desc: Assign each sample to one of a few community types. The types come back as a data frame whose `type` column can be used as `groups` in any test or ordination plot.
+  contents:
+  - enterotype
+  - ecodive_types
 
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
@@ -167,6 +172,7 @@ reference:
   - plot.ecodive_varpart
   - plot.ecodive_forward_select
   - plot.ecodive_bioenv
+  - plot.ecodive_types
   - ecodive_display
   - print_ecodive
 

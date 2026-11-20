@@ -32,7 +32,7 @@ class (e.g. \code{phyloseq}). Default: \code{1}}
 a group when it is zero in every sample of that group. \code{TRUE}:
 when the lower bound of the 95\% interval of its proportion of
 non-zero samples, \eqn{\hat p - 1.96 \sqrt{\hat p (1 - \hat p) /
-n}}, is at most 0; recommended for large groups.}
+       n}}, is at most 0; recommended for large groups.}
 }
 \value{
 A logical matrix, features \eqn{\times} groups, \code{TRUE} where the

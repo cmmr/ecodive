@@ -63,7 +63,7 @@ Berger, W. H., & Parker, F. L. (1970). Diversity of planktonic foraminifera in d
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Dominance metrics:
-\code{\link[=mcintosh]{mcintosh()}}
+Other Dominance metrics: 
+\code{\link{mcintosh}()}
 }
 \concept{Dominance metrics}

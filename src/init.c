@@ -38,6 +38,9 @@ extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mult_default_delta(SEXP);
 extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_calinski(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_pam(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_silhouette(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_philr_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_philr_stats(SEXP, SEXP, SEXP);
@@ -109,6 +112,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_mult_default_delta", (DL_FUNC) &C_mult_default_delta, 1},
   {"C_nmds",      (DL_FUNC) &C_nmds,      6},
   {"C_normalize", (DL_FUNC) &C_normalize, 6},
+  {"C_calinski",  (DL_FUNC) &C_calinski,  6},
+  {"C_pam",       (DL_FUNC) &C_pam,       4},
+  {"C_silhouette", (DL_FUNC) &C_silhouette, 5},
   {"C_pca",       (DL_FUNC) &C_pca,       7},
   {"C_philr_coords", (DL_FUNC) &C_philr_coords, 9},
   {"C_philr_stats",  (DL_FUNC) &C_philr_stats,  3},

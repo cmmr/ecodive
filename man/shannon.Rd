@@ -66,10 +66,10 @@ Shannon, C. E., & Weaver, W. (1949). \emph{The Mathematical Theory of Communicat
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Diversity metrics:
-\code{\link[=brillouin]{brillouin()}},
-\code{\link[=fisher]{fisher()}},
-\code{\link[=inv_simpson]{inv_simpson()}},
-\code{\link[=simpson]{simpson()}}
+Other Diversity metrics: 
+\code{\link{brillouin}()},
+\code{\link{fisher}()},
+\code{\link{inv_simpson}()},
+\code{\link{simpson}()}
 }
 \concept{Diversity metrics}

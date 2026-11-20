@@ -212,6 +212,12 @@
   expect_identical(dim(be), c(2L, 3L))
   expect_true(all(is.finite(be$correlation)) && all(abs(be$correlation) <= 1))
 
+  et <- enterotype(counts, n_types = 2:3, cpus = cpus)
+  expect_inherits(et, c('ecodive_enterotype', 'ecodive_types', 'data.frame'))
+  expect_identical(dim(et), c(20L, 3L))
+  expect_true(is.factor(et$type) && all(is.finite(et$silhouette)))
+  expect_true(all(is.finite(attr(et, 'selection')$ch)))
+
   vp <- varpart(counts, ~ grp, ~ x, data = meta, norm = 'hellinger', cpus = cpus)
   expect_inherits(vp, c('ecodive_varpart', 'data.frame'))
   expect_identical(dim(vp), c(4L, 5L))

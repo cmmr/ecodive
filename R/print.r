@@ -17,7 +17,10 @@
 #'        (a distance matrix), or one of ecodive's data frames: from
 #'        [ancom()], [ancombc()], [ancombc2()], [ancombc_global()],
 #'        [ancombc_pairwise()], [ancombc_dunnett()], [ancombc_trend()],
-#'        [dirmult_ttest()], [simper()], [bioenv()] or [envfit()].
+#'        [dirmult_ttest()], [simper()], [bioenv()], [envfit()] or
+#'        [enterotype()]. A community-types result (see [ecodive_types])
+#'        prints its types and how their number was chosen before its
+#'        first samples.
 #'
 #' @param n  The number of rows to print (samples, for a distance matrix).
 #'        `NULL`, the default, prints every row of up to 20, and the first

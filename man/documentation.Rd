@@ -59,7 +59,7 @@ which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-\rho_p}.}
+       \rho_p}.}
 
 \item{pairwise}{Also test each pair of groups: run the same test on just
 the two groups' samples, for every pair, and adjust the pairs'

@@ -76,7 +76,7 @@ fitted to. Default \code{TRUE}.}
 given, so that \code{col = iris$Species} works as for any matrix. With
 \code{groups}, one colour per group (in order, or named by group); for
 numeric \code{groups}, the colours of the gradient, from low to high.
-Defaults to \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}}'s \code{"Dark 3"} palette for
+Defaults to \code{\link[grDevices:palettes]{grDevices::hcl.colors()}}'s \code{"Dark 3"} palette for
 groups and its \code{"Viridis"} palette for a gradient.}
 
 \item{pch}{The points' symbols, as for \code{plot()}. Default \code{1} (open
