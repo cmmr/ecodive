@@ -9,7 +9,15 @@ of their post-hoc tests, from what each holds:
 
 ``` r
 # S3 method for class 'ecodive_ancombc'
-plot(x, covariate = NULL, labels = 10, ...)
+plot(
+  x,
+  covariate = NULL,
+  type = c("volcano", "effect", "ma", "forest"),
+  labels = 10,
+  n_features = 30,
+  conf_level = 0.95,
+  ...
+)
 
 # S3 method for class 'ecodive_ancombc_pairwise'
 plot(x, n_features = 30, digits = 2L, ...)
@@ -46,31 +54,47 @@ plot(x, n_features = 30, ...)
   `covariate` column (such as `"statusmoderate"` or `"age"`). Defaults
   to the first covariate that isn't the intercept.
 
+- type:
+
+  For [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
+  and
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md):
+  the plot, `"volcano"` (the default), `"effect"`, `"ma"`, or
+  `"forest"`.
+
 - labels:
 
   For [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
   and
   [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md):
-  how many of the differentially abundant features to name, those with
-  the smallest adjusted p-values. Default `10`; `0` for none.
+  how many of the differentially abundant features to name (in the
+  volcano, effect and MA plots), those with the smallest adjusted
+  p-values. Default `10`; `0` for none.
+
+- n_features:
+
+  How many features to show: for the forest plot, those with the
+  smallest adjusted p-value (ties in the table's order); for the
+  heatmap, those with the smallest adjusted p-value in any comparison;
+  for the dot chart, those with the largest statistic. Default `30`;
+  `Inf` for all.
+
+- conf_level:
+
+  For the forest plot: the confidence level of the intervals. Default
+  `0.95`.
 
 - ...:
 
   Passed on to
   [`graphics::plot.default()`](https://rdrr.io/r/graphics/plot.default.html)
-  for the volcano plot,
+  for the volcano, effect, MA and forest plots,
   [`graphics::image()`](https://rdrr.io/r/graphics/image.html) for the
   heatmap (where `col` is the colour scale, from most negative to most
   positive), and
   [`graphics::dotchart()`](https://rdrr.io/r/graphics/dotchart.html) for
   the dot chart (`col` as its `color`), such as `main`, `sub`, `xlab` or
   `cex`.
-
-- n_features:
-
-  How many features to show: for the heatmap, those with the smallest
-  adjusted p-value in any comparison; for the dot chart, those with the
-  largest statistic. Default `30`; `Inf` for all.
 
 - digits:
 
@@ -84,9 +108,14 @@ plot(x, n_features = 30, ...)
 ## Details
 
 - [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
-  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md): a
-  volcano plot of one covariate's bias-corrected log fold changes
-  against their adjusted p-values.
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md):
+  one covariate's bias-corrected log fold changes, as one of four plots
+  (`type`): `"volcano"` (the default), against their adjusted p-values;
+  `"effect"`, against each feature's residual standard deviation (Gloor
+  et al. 2016; ALDEx2's `"MW"` plot), for a two-level comparison;
+  `"ma"`, against each feature's mean clr abundance (ALDEx2's `"MA"`
+  plot); or `"forest"`, with their confidence intervals, for the
+  `n_features` most significant features.
 
 - [`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
   [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md):
@@ -107,12 +136,36 @@ italics).
 
 Log fold changes are natural logs, as ANCOM-BC estimates them; the axis
 label and the heatmap's subtitle say so from the result's `log_base`
-attribute. In the volcano plot, the y axis is \\-\log\_{10}\\ of
-`p_adjusted`, with a dashed line at `alpha`; coefficients that couldn't
-be estimated (`NaN`) are left out. In the heatmap, red cells are
-increases and blue cells decreases, on a scale symmetric about 0, and
-the value of each cell is written in it, in bold when that comparison is
-significant for that feature. For
+attribute. Coefficients that couldn't be estimated (`NaN`) are left out.
+
+- **Volcano plot.** The y axis is \\-\log\_{10}\\ of `p_adjusted`, with
+  a dashed line at `alpha`.
+
+- **Effect plot.** The x axis is the feature's residual standard
+  deviation (the `resid_sd` attribute, natural logs); the dashed lines
+  are \\y = \pm x\\, so features beyond them differ by more than they
+  vary within the groups. Only for a covariate whose design column is 0
+  or 1 (a factor's level against its reference): for a model of that
+  factor alone, `resid_sd` is the pooled within-group standard
+  deviation; with other covariates, it is the spread left after them.
+
+- **MA plot.** The x axis is the feature's mean clr abundance (the
+  `mean` attribute; the rclr with zeros as missing values).
+
+- **Forest plot.** Bars over Wald intervals, \\\mathrm{log\\fc} \pm
+  q\\\mathrm{se}\\, with \\q\\ the \\(1 + \\`conf_level`\\)/2\\ quantile
+  of the standard normal
+  ([`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md))
+  or of the t distribution with the feature's `dof`
+  ([`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md)),
+  as the p-values; they aren't adjusted for testing many features, so a
+  bar can miss 0 while the feature isn't rejected. The ANCOM-BC2
+  vignette's bar charts of log fold changes and standard errors show the
+  same.
+
+In the heatmap, red cells are increases and blue cells decreases, on a
+scale symmetric about 0, and the value of each cell is written in it, in
+bold when that comparison is significant for that feature. For
 [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
 each feature's label gives the pattern with the largest statistic.
 
@@ -139,6 +192,15 @@ each feature's label gives the pattern with the largest statistic.
     plot(fit)
 
     plot(fit, 'age')
+
+
+    # Each feature's difference against its spread, its abundance, and
+    # with its interval.
+    plot(fit, type = 'effect')
+
+    plot(fit, type = 'ma')
+
+    plot(fit, 'age', type = 'forest')
 
 
     # Every pair of groups.

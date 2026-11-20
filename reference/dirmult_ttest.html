@@ -205,6 +205,20 @@ treatment minus reference, in log2 units, averaged over the draws
 <li><p><code>ci_lower</code>, <code>ci_upper</code>: the lowest lower bound and the highest upper
 bound of the draws' intervals for that difference, in log2 units
 (<code>CI(2.5)</code>, <code>CI(97.5)</code> for the default <code>conf_level</code>).</p></li>
+<li><p><code>pooled_sd</code>: the pooled within-group standard deviation of the
+feature's clr values, \(\sqrt{(q_1 + q_2) / (n_1 + n_2 - 2)}\)
+with \(q\) each side's sum of squared deviations from its mean,
+averaged over the draws, in log2 units (ALDEx3's <code>pooled.SD</code>). The
+scale model doesn't change it. <code>NaN</code> when each side has one sample.</p></li>
+<li><p><code>mean</code>: the feature's mean clr value over the samples in the
+contrast, averaged over the draws, in log2 units: its typical
+abundance relative to the sample's geometric mean, the x axis of an
+MA plot. With two named groups, the samples in other groups are not
+included.</p></li>
+<li><p><code>effect</code>: each draw's difference (with the scale model's shift)
+divided by its pooled standard deviation, averaged over the draws:
+a standardised effect size, Cohen's \(d\) (ALDEx3's <code>cohens.d</code>).
+Not <code>log2_fc / pooled_sd</code>, which is a ratio of averages.</p></li>
 <li><p><code>p_value</code>: Welch's two-sided p-value, averaged over the draws
 (<code>pvalue</code>).</p></li>
 <li><p><code>p_adjusted</code>: <code>p_value</code> adjusted across the features with <code>p_adjust</code>
@@ -305,6 +319,25 @@ Benjamini-Hochberg adjusted p-values over the draws, and gives its own
 effect size; its scale model (<code>gamma</code>) is off by default. ALDEx3 fits
 linear models to each draw instead of t-tests. Their results agree with
 this function's in direction and rough size, not exactly.</p>
+<p><strong>Effect sizes.</strong> <code>pooled_sd</code>, <code>mean</code> and <code>effect</code> describe each feature
+for the effect and MA plots (<code><a href="plot.ecodive_dirmult_ttest.html">plot.ecodive_dirmult_ttest()</a></code>).
+<code>pooled_sd</code> and <code>effect</code> are ALDEx3's <code>aldex.effect()</code> statistics, and
+match them for the same draws. ALDEx2's <code>aldex.effect()</code> reports
+related but different quantities, from random pairs of draws and
+medians. Its <code>diff.btw</code> is the median difference between the groups,
+like <code>log2_fc</code>. Its <code>diff.win</code>, "the per-feature maximum median
+difference between Dirichlet instances within conditions", measures the
+spread within the groups as <code>pooled_sd</code> does, but on another scale: for
+normal data, the median absolute difference of two values is
+\(0.954\sigma\), and taking the larger of the two groups' values
+makes it larger still (1.2 to 1.5 times <code>pooled_sd</code> on a test table
+with six samples a group). So ALDEx2's <code>effect</code>, the median ratio of
+the two, is smaller than <code>effect</code> (by about a quarter on that table)
+and ranks the features almost the same way (correlation 0.998). Its
+<code>rab.all</code> is a median over all samples, where <code>mean</code> is a mean over
+those in the contrast. Features with \(|\)<code>effect</code>\(| &gt; 1\)
+differ between the groups by more than they vary within them, as with
+ALDEx2's rule of thumb.</p>
 <p><strong>Computation.</strong> The draws run in parallel C, one draw at a time, with
 memory for one draw (8 bytes per value of the samples in the contrast).
 Every sample of every draw has its own random stream, so results are
@@ -379,36 +412,42 @@ Computational Biology</em>, 22, e1014728.
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">x</span>, <span class="va">grp</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treatment'</span>, <span class="st">'placebo'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">res</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 7 × 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 7 × 11</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Dirichlet-multinomial t-test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   feature      t log2_fc ci_lower ci_upper p_value p_adjusted reject</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 b1      -15.4    -5      -7.82     -2.3  0.00311    0.0186    TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 b2      -17      -2.52   -3.72     -1.33 0.00102    0.00717   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 b3        6.9     1.61   -1.24      4.97 0.0236     0.0651   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 b4        6.75    1.7    -0.389     4.04 0.012      0.0602   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 b5        6.26    1.52   -1.3       4.55 0.0193     0.0651   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 b6        3.57    1.15   -1.25      3.29 0.0487     0.0651   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7 b7        8.32    1.53   -1.11      3.81 0.0163     0.0651   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   feature      t log2_fc ci_lower ci_upper pooled_sd   mean effect p_value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 b1      -15.4    -5      -7.82     -2.3      0.43   0.502 -12.6  0.00311</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 b2      -17      -2.52   -3.72     -1.33     0.206  1.74  -13.9  0.00102</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 b3        6.9     1.61   -1.24      4.97     0.35  -0.378   5.63 0.0236</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 b4        6.75    1.7    -0.389     4.04     0.348 -0.463   5.51 0.012</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 b5        6.26    1.52   -1.3       4.55     0.342 -0.416   5.11 0.0193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 b6        3.57    1.15   -1.25      3.29     0.422 -0.539   2.91 0.0487</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7 b7        8.32    1.53   -1.11      3.81     0.28  -0.448   6.79 0.0163</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 2 more columns: p_adjusted &lt;dbl&gt;, reject &lt;lgl&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   conf_level, p_adjust, seed, log_base</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="dirmult_ttest-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Each feature's difference against its spread within the groups.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">'effect'</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="dirmult_ttest-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># With a scale model, the intervals widen and fewer features are</span></span></span>
 <span class="r-in"><span>    <span class="co"># rejected.</span></span></span>
 <span class="r-in"><span>    <span class="fu">dirmult_ttest</span><span class="op">(</span><span class="va">x</span>, <span class="va">grp</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treatment'</span>, <span class="st">'placebo'</span><span class="op">)</span>, scale_sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 7 × 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A data.frame: 7 × 11</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Dirichlet-multinomial t-test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   feature      t log2_fc ci_lower ci_upper p_value p_adjusted reject</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 b1      -15.4    -4.97   -8.05    -1.83  0.00331     0.0199   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 b2      -16.8    -2.49   -4.52    -0.387 0.00154     0.0108   TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 b3        7.08    1.64   -1.65     4.99  0.0402      0.139   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 b4        6.86    1.73   -1.18     4.31  0.0278      0.139   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 b5        6.44    1.55   -2.41     4.85  0.0397      0.139   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 b6        3.68    1.18   -1.81     3.6   0.102       0.139   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7 b7        8.37    1.56   -0.774    4.57  0.0279      0.139   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   feature      t log2_fc ci_lower ci_upper pooled_sd   mean effect p_value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 b1      -15.4    -4.97   -8.05    -1.83      0.43   0.502 -12.5  0.00331</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 b2      -16.8    -2.49   -4.52    -0.387     0.206  1.74  -13.8  0.00154</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 b3        7.08    1.64   -1.65     4.99      0.35  -0.378   5.78 0.0402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 b4        6.86    1.73   -1.18     4.31      0.348 -0.463   5.6  0.0278</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 b5        6.44    1.55   -2.41     4.85      0.342 -0.416   5.25 0.0397</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 b6        3.68    1.18   -1.81     3.6       0.422 -0.539   3    0.102</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7 b7        8.37    1.56   -0.774    4.57      0.28  -0.448   6.84 0.0279</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # … 2 more columns: p_adjusted &lt;dbl&gt;, reject &lt;lgl&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   conf_level, p_adjust, seed, log_base</span>
 <span class="r-in"><span></span></span>
@@ -421,7 +460,7 @@ Computational Biology</em>, 22, e1014728.
 <span class="r-in"><span>    <span class="co"># gamma): see da_sensitivity().</span></span></span>
 <span class="r-in"><span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="da_sensitivity.html">da_sensitivity</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">'dirmult_ttest'</span>, <span class="va">grp</span>, scale_sds <span class="op">=</span> <span class="cn">TRUE</span>, n_draws <span class="op">=</span> <span class="fl">32</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">'traces'</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="dirmult_ttest-2.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="dirmult_ttest-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

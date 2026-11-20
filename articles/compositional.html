@@ -933,21 +933,22 @@ version, with Welch’s t-test; <code>contrast</code> is
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">res_dm</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt; # A data.frame: 150 × 8</span></span>
+<span><span class="co">#&gt; # A data.frame: 150 × 11</span></span>
 <span><span class="co">#&gt; # Dirichlet-multinomial t-test</span></span>
-<span><span class="co">#&gt;    feature      t log2_fc ci_lower ci_upper  p_value p_adjusted reject</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;lgl&gt;</span></span>
-<span><span class="co">#&gt; 4  ASV004   12.1     2.52     1.96     3.06 3.51e-14   5.26e-12   TRUE</span></span>
-<span><span class="co">#&gt; 2  ASV002   10.6     2.45     1.81     3.04 2.31e-12   3.44e-10   TRUE</span></span>
-<span><span class="co">#&gt; 8  ASV008  -11.2    -3.11    -4.01    -2.31 1.12e-11   1.66e-09   TRUE</span></span>
-<span><span class="co">#&gt; 3  ASV003    9.9     2.28     1.66     2.85 3.37e-11   4.96e-09   TRUE</span></span>
-<span><span class="co">#&gt; 1  ASV001    8.79    2.22     1.55     2.86 1.92e-10    2.8e-08   TRUE</span></span>
-<span><span class="co">#&gt; 10 ASV010   -9.25   -2.51    -3.32    -1.73 5.73e-10    8.3e-08   TRUE</span></span>
-<span><span class="co">#&gt; 9  ASV009   -8.56   -2.57    -3.49    -1.72 5.94e-10   8.56e-08   TRUE</span></span>
-<span><span class="co">#&gt; 5  ASV005    8.29    2.21     1.49     2.88 2.11e-09   3.01e-07   TRUE</span></span>
-<span><span class="co">#&gt; 7  ASV007   -9      -2.94    -4.02    -2.03 2.81e-09   3.99e-07   TRUE</span></span>
-<span><span class="co">#&gt; 6  ASV006   -8.44   -2.67    -3.75    -1.83 7.14e-09   1.01e-06   TRUE</span></span>
+<span><span class="co">#&gt;    feature      t log2_fc ci_lower ci_upper pooled_sd  mean effect  p_value</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 4  ASV004   12.1     2.52     1.96     3.06     0.66   8.68   3.83 3.51e-14</span></span>
+<span><span class="co">#&gt; 2  ASV002   10.6     2.45     1.81     3.04     0.73   9.59   3.36 2.31e-12</span></span>
+<span><span class="co">#&gt; 8  ASV008  -11.2    -3.11    -4.01    -2.31     0.885  5.02  -3.54 1.12e-11</span></span>
+<span><span class="co">#&gt; 3  ASV003    9.9     2.28     1.66     2.85     0.729  8.92   3.13 3.37e-11</span></span>
+<span><span class="co">#&gt; 1  ASV001    8.79    2.22     1.55     2.86     0.801 10.7    2.78 1.92e-10</span></span>
+<span><span class="co">#&gt; 10 ASV010   -9.25   -2.51    -3.32    -1.73     0.86   4.7   -2.93 5.73e-10</span></span>
+<span><span class="co">#&gt; 9  ASV009   -8.56   -2.57    -3.49    -1.72     0.953  4.97  -2.71 5.94e-10</span></span>
+<span><span class="co">#&gt; 5  ASV005    8.29    2.21     1.49     2.88     0.844  8.29   2.62 2.11e-09</span></span>
+<span><span class="co">#&gt; 7  ASV007   -9      -2.94    -4.02    -2.03     1.04   5.02  -2.85 2.81e-09</span></span>
+<span><span class="co">#&gt; 6  ASV006   -8.44   -2.67    -3.75    -1.83     1.01   5.01  -2.67 7.14e-09</span></span>
 <span><span class="co">#&gt; # … 140 more rows</span></span>
+<span><span class="co">#&gt; # … 2 more columns: p_adjusted &lt;dbl&gt;, reject &lt;lgl&gt;</span></span>
 <span><span class="co">#&gt; # Use print(x, n = ...) to see more rows</span></span>
 <span><span class="co">#&gt; # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,</span></span>
 <span><span class="co">#&gt; #   conf_level, p_adjust, seed, log_base</span></span>
@@ -967,6 +968,20 @@ for the declines:</p>
 <span><span class="co">#&gt; -2.672671  2.277540</span></span></code></pre></div>
 <p>Every estimate is shifted down by about 0.7 log2 units, which is the
 subject of the next section.</p>
+<p>A volcano plot can mislead: with many samples, tiny differences reach
+small p-values (<strong><a href="https://doi.org/10.1080/10618600.2015.1131161" class="external-link">Gloor, Macklaim
+&amp; Fernandes 2016</a></strong>). The effect plot (ALDEx2’s “MW” plot)
+sets each taxon’s difference between the groups against its spread
+within them; taxa beyond the dashed lines differ by more than they
+vary:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_dm</span>, <span class="st">'effect'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="compositional_files/figure-html/dirmult-effect-1.png" class="r-plt" alt="Effect plot of the Dirichlet-multinomial t-test: each taxon's log2 fold change against its pooled within-group standard deviation, with dashed lines where the two are equal and the differentially abundant taxa highlighted." width="576"></p>
+<p><code>type = 'ma'</code> plots the differences against each taxon’s
+mean abundance, and <code>type = 'forest'</code> the most significant
+taxa with their intervals; the same types work for
+<code><a href="../reference/ancombc.html">ancombc()</a></code>, <code><a href="../reference/ancombc.html">ancombc2()</a></code>, <code><a href="../reference/da_wilcoxon.html">da_ttest()</a></code>
+and <code><a href="../reference/da_wilcoxon.html">da_lm()</a></code>.</p>
 <div class="section level3">
 <h3 id="why-the-reference-matters">Why the reference matters<a class="anchor" aria-label="anchor" href="#why-the-reference-matters"></a>
 </h3>
@@ -975,7 +990,7 @@ relative abundances the reference is the sample’s total, which the bloom
 inflates; with the clr it is the sample’s geometric mean over all taxa.
 Compare the estimated group difference (natural log) for the prevalent
 unchanged taxa, whose true difference is 0:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ok</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="va">changed</span> <span class="op">&amp;</span> <span class="va">prevalent</span></span>
 <span><span class="va">d_rel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rel</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'treated'</span>, <span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span></span>
 <span>         <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rel</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'control'</span>, <span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
@@ -1010,7 +1025,7 @@ zero. In <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></co
 standard deviation, in log2 units, of a random shift in the typical
 taxon’s abundance between the groups, drawn afresh in every Monte Carlo
 draw. Nixon et al. suggest 0.5; use more draws with it:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_sm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">sd</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span>,</span>
 <span>                scale_sd <span class="op">=</span> <span class="va">sd</span>, n_draws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">)</span></span>
@@ -1056,7 +1071,7 @@ of rare taxa.</p>
 they are too sparse to estimate well, and here they are the source of
 every false positive (without the filter, ANCOM-BC2 calls 7 of
 them).</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">counts</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">0.7</span>   <span class="co"># taxa in at least 70% of samples</span></span>
 <span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span></span>
 <span></span>
@@ -1082,7 +1097,7 @@ them).</p>
 <span><span class="co">#&gt; # Use print(x, n = ...) to see more rows</span></span>
 <span><span class="co">#&gt; # Attributes: method, formula, alpha, p_adjust, log_base, max_iters, tol,</span></span>
 <span><span class="co">#&gt; #   var_quantile, pseudocount, coef, var, vcov, dof, design, bias, n_iters,</span></span>
-<span><span class="co">#&gt; #   sample_fractions, sensitivity</span></span>
+<span><span class="co">#&gt; #   resid_sd, mean, sample_fractions, sensitivity</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, rejected <span class="op">=</span> <span class="va">res_bc</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>
@@ -1107,7 +1122,7 @@ does a little less well on this table, with two false positives and
 estimates further from the truth. It needs a pseudocount for the zeros,
 and the bias a pseudocount introduces differs between rare and abundant
 taxa, so a single shift can’t remove it all:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc</a></span><span class="op">(</span><span class="va">counts</span><span class="op">[</span>, <span class="va">keep</span><span class="op">]</span>, <span class="op">~</span> <span class="va">group</span>, <span class="va">meta</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="va">fit1</span><span class="op">[</span><span class="va">fit1</span><span class="op">$</span><span class="va">covariate</span> <span class="op">==</span> <span class="st">'grouptreated'</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, rejected <span class="op">=</span> <span class="va">res1</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
@@ -1122,7 +1137,7 @@ taxa, so a single shift can’t remove it all:</p>
 of a group has no log fold change to estimate.
 <code><a href="../reference/structural_zeros.html">structural_zeros()</a></code> finds such taxa, so they can be reported
 as present in one group only:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/structural_zeros.html">structural_zeros</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span><span class="op">)</span></span>
 <span><span class="va">sz</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">sz</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        control treated</span></span>
@@ -1136,7 +1151,7 @@ differ between any groups?), <code><a href="../reference/ancombc_global.html">an
 of levels), <code><a href="../reference/ancombc_global.html">ancombc_dunnett()</a></code> (each level against the
 reference) and <code><a href="../reference/ancombc_global.html">ancombc_trend()</a></code> (a monotone trend across
 ordered levels). Each has a <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc2</a></span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">diet</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta3</span>, groups <span class="op">=</span> <span class="st">'diet'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/ancombc_global.html">ancombc_global</a></span><span class="op">(</span><span class="va">fit3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/ancombc_global.html">ancombc_pairwise</a></span><span class="op">(</span><span class="va">fit3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -1163,7 +1178,7 @@ al. 2017</a></strong>).</p>
 <code><a href="../reference/phi_s.html">phi_s()</a></code> compute every pair of taxa in parallel C, and
 return a <code>dist</code> object over the taxa (here on the zero-free
 table from the <a href="#zeros">Zeros</a> section):</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rho</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rho_p.html">rho_p</a></span><span class="op">(</span><span class="va">zf</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">rho</span><span class="op">)</span>   <span class="co"># one value for each pair of the 150 taxa</span></span>
 <span><span class="co">#&gt; [1] 11175</span></span>
@@ -1213,7 +1228,7 @@ relative profile, so (we infer) it can’t confirm a compositional result
 (see <code><a href="../reference/qmp.html">qmp_scale()</a></code>’s help, “Predicted loads”).</p>
 <p>Here the load is measured with 20% error, as a real measurement would
 be:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measured</span> <span class="op">&lt;-</span> <span class="va">load</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">0</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">q_scale</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qmp.html">qmp_scale</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">measured</span><span class="op">)</span>            <span class="co"># relative abundance x load</span></span>
@@ -1264,7 +1279,7 @@ separates differences between subjects from changes over time.</li>
 several tables measured on the same samples (e.g. 16S, metagenomics and
 metabolomics) with shared sample scores.</li>
 </ul>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">ctf</span><span class="op">(</span><span class="va">counts</span>, subjects <span class="op">=</span> <span class="st">'subject_id'</span>, states <span class="op">=</span> <span class="st">'week'</span>, data <span class="op">=</span> <span class="va">meta</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">rpca_joint</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>amplicon <span class="op">=</span> <span class="va">counts16s</span>, metabolites <span class="op">=</span> <span class="va">metab</span><span class="op">)</span>, n_axes <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
@@ -1358,6 +1373,11 @@ high-throughput sequencing datasets: characterizing RNA-seq, 16S rRNA
 gene sequencing and selective growth experiments by compositional data
 analysis. <em>Microbiome</em>, 2, 15. <a href="https://doi.org/10.1186/2049-2618-2-15" class="external-link">doi:10.1186/2049-2618-2-15</a>
 </li>
+<li>Gloor, G. B., Macklaim, J. M., &amp; Fernandes, A. D. (2016).
+Displaying variation in large datasets: plotting a visual summary of
+effect sizes. <em>Journal of Computational and Graphical
+Statistics</em>, 25, 971–979. <a href="https://doi.org/10.1080/10618600.2015.1131161" class="external-link">doi:10.1080/10618600.2015.1131161</a>
+†</li>
 <li>Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., &amp; Egozcue,
 J. J. (2017). Microbiome datasets are compositional: and this is not
 optional. <em>Frontiers in Microbiology</em>, 8, 2224. <a href="https://doi.org/10.3389/fmicb.2017.02224" class="external-link">doi:10.3389/fmicb.2017.02224</a>

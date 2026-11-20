@@ -168,8 +168,9 @@ covariate), in the order of `counts`, of class
   ([`wilcox.test()`](https://rdrr.io/r/stats/wilcox.test.html)'s
   statistic: the treatment's rank sum minus its smallest possible
   value); `auc`, \\W / (n_1 n_2)\\, the probability that a treatment
-  sample's value is above a reference sample's (ties count half); and
-  `median_diff`, the treatment's median minus the reference's.
+  sample's value is above a reference sample's (ties count half);
+  `median_diff`, the treatment's median minus the reference's; and
+  `mean`, the mean of both groups' values.
 
 - `da_ttest()`: `diff`, the treatment's mean minus the reference's;
   `ci_lower`, `ci_upper`, its confidence interval; `t`; `dof`, the
@@ -372,17 +373,17 @@ abundance analysis. *Briefings in Bioinformatics*, 26, bbaf130.
 
     # With relative abundances (TSS), as the benchmarks.
     da_wilcoxon(x, grp, norm = 'percent', p_adjust = 'BH')
-#> # A data.frame: 7 × 7
+#> # A data.frame: 7 × 8
 #> # Wilcoxon Rank-Sum Test
-#>   feature     w   auc median_diff p_value p_adjusted reject
-#>   <chr>   <dbl> <dbl>       <dbl>   <dbl>      <dbl>  <lgl>
-#> 1 b1          9     1       0.408     0.1        0.1  FALSE
-#> 2 b2          9     1       0.27      0.1        0.1  FALSE
-#> 3 b3          0     0      -0.153     0.1        0.1  FALSE
-#> 4 b4          0     0      -0.136     0.1        0.1  FALSE
-#> 5 b5          0     0      -0.135     0.1        0.1  FALSE
-#> 6 b6          0     0      -0.126     0.1        0.1  FALSE
-#> 7 b7          0     0      -0.133     0.1        0.1  FALSE
+#>   feature     w   auc median_diff   mean p_value p_adjusted reject
+#>   <chr>   <dbl> <dbl>       <dbl>  <dbl>   <dbl>      <dbl>  <lgl>
+#> 1 b1          9     1       0.408 0.237      0.1        0.1  FALSE
+#> 2 b2          9     1       0.27  0.308      0.1        0.1  FALSE
+#> 3 b3          0     0      -0.153 0.0973     0.1        0.1  FALSE
+#> 4 b4          0     0      -0.136 0.0944     0.1        0.1  FALSE
+#> 5 b5          0     0      -0.135 0.0926     0.1        0.1  FALSE
+#> 6 b6          0     0      -0.126 0.0789     0.1        0.1  FALSE
+#> 7 b7          0     0      -0.133 0.0909     0.1        0.1  FALSE
 #> # Attributes: method, contrast, n, norm, pseudocount, alpha, p_adjust,
 #> #   log_base
 

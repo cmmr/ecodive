@@ -47,7 +47,8 @@
   ANCOM-BC and ANCOM-BC2 ('ANCOMBC'), via scikit-bio's port
 
 - **ALDEx3 authors**. Contributor, copyright holder.  
-  the scale model of dirmult_ttest(), following 'ALDEx3'
+  the scale model and effect sizes of dirmult_ttest(), following
+  'ALDEx3'
 
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.

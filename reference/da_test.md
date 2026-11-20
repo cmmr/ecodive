@@ -180,16 +180,16 @@ uncertainties.
 ``` r
     grp <- c('oral', 'oral', 'other', 'other')
     da_test(ex_counts, 'da_wilcoxon', grp, pseudocount = 1)
-#> # A data.frame: 6 × 7
+#> # A data.frame: 6 × 8
 #> # Wilcoxon Rank-Sum Test
-#>   feature               w   auc median_diff p_value p_adjusted reject
-#>   <chr>             <dbl> <dbl>       <dbl>   <dbl>      <dbl>  <lgl>
-#> 1 Streptococcus         4  1           4.43   0.333          1  FALSE
-#> 2 Bacteroides           2  0.5        -1.95   1              1  FALSE
-#> 3 Corynebacterium       0  0          -2.99   0.333          1  FALSE
-#> 4 Haemophilus           4  1           4.4    0.333          1  FALSE
-#> 5 Propionibacterium     1  0.25       -1.61   0.667          1  FALSE
-#> 6 Staphylococcus        0  0          -2.28   0.333          1  FALSE
+#>   feature               w   auc median_diff   mean p_value p_adjusted reject
+#>   <chr>             <dbl> <dbl>       <dbl>  <dbl>   <dbl>      <dbl>  <lgl>
+#> 1 Streptococcus         4  1           4.43  1.48    0.333          1  FALSE
+#> 2 Bacteroides           2  0.5        -1.95  0.141   1              1  FALSE
+#> 3 Corynebacterium       0  0          -2.99 -0.689   0.333          1  FALSE
+#> 4 Haemophilus           4  1           4.4   0.452   0.333          1  FALSE
+#> 5 Propionibacterium     1  0.25       -1.61 -0.686   0.667          1  FALSE
+#> 6 Staphylococcus        0  0          -2.28 -0.702   0.333          1  FALSE
 #> # Attributes: method, contrast, n, norm, pseudocount, alpha, p_adjust,
 #> #   log_base
 

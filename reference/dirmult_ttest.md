@@ -147,6 +147,22 @@ row per feature, in the order of `counts`, with columns:
   bound of the draws' intervals for that difference, in log2 units
   (`CI(2.5)`, `CI(97.5)` for the default `conf_level`).
 
+- `pooled_sd`: the pooled within-group standard deviation of the
+  feature's clr values, \\\sqrt{(q_1 + q_2) / (n_1 + n_2 - 2)}\\ with
+  \\q\\ each side's sum of squared deviations from its mean, averaged
+  over the draws, in log2 units (ALDEx3's `pooled.SD`). The scale model
+  doesn't change it. `NaN` when each side has one sample.
+
+- `mean`: the feature's mean clr value over the samples in the contrast,
+  averaged over the draws, in log2 units: its typical abundance relative
+  to the sample's geometric mean, the x axis of an MA plot. With two
+  named groups, the samples in other groups are not included.
+
+- `effect`: each draw's difference (with the scale model's shift)
+  divided by its pooled standard deviation, averaged over the draws: a
+  standardised effect size, Cohen's \\d\\ (ALDEx3's `cohens.d`). Not
+  `log2_fc / pooled_sd`, which is a ratio of averages.
+
 - `p_value`: Welch's two-sided p-value, averaged over the draws
   (`pvalue`).
 
@@ -267,6 +283,26 @@ effect size; its scale model (`gamma`) is off by default. ALDEx3 fits
 linear models to each draw instead of t-tests. Their results agree with
 this function's in direction and rough size, not exactly.
 
+**Effect sizes.** `pooled_sd`, `mean` and `effect` describe each feature
+for the effect and MA plots
+([`plot.ecodive_dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_ttest.md)).
+`pooled_sd` and `effect` are ALDEx3's `aldex.effect()` statistics, and
+match them for the same draws. ALDEx2's `aldex.effect()` reports related
+but different quantities, from random pairs of draws and medians. Its
+`diff.btw` is the median difference between the groups, like `log2_fc`.
+Its `diff.win`, "the per-feature maximum median difference between
+Dirichlet instances within conditions", measures the spread within the
+groups as `pooled_sd` does, but on another scale: for normal data, the
+median absolute difference of two values is \\0.954\sigma\\, and taking
+the larger of the two groups' values makes it larger still (1.2 to 1.5
+times `pooled_sd` on a test table with six samples a group). So ALDEx2's
+`effect`, the median ratio of the two, is smaller than `effect` (by
+about a quarter on that table) and ranks the features almost the same
+way (correlation 0.998). Its `rab.all` is a median over all samples,
+where `mean` is a mean over those in the contrast. Features with
+\\\|\\`effect`\\\| \> 1\\ differ between the groups by more than they
+vary within them, as with ALDEx2's rule of thumb.
+
 **Computation.** The draws run in parallel C, one draw at a time, with
 memory for one draw (8 bytes per value of the samples in the contrast).
 Every sample of every draw has its own random stream, so results are
@@ -351,36 +387,42 @@ Computational Biology*, 22, e1014728.
 
     res <- dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'))
     res
-#> # A data.frame: 7 × 8
+#> # A data.frame: 7 × 11
 #> # Dirichlet-multinomial t-test
-#>   feature      t log2_fc ci_lower ci_upper p_value p_adjusted reject
-#>   <chr>    <dbl>   <dbl>    <dbl>    <dbl>   <dbl>      <dbl>  <lgl>
-#> 1 b1      -15.4    -5      -7.82     -2.3  0.00311    0.0186    TRUE
-#> 2 b2      -17      -2.52   -3.72     -1.33 0.00102    0.00717   TRUE
-#> 3 b3        6.9     1.61   -1.24      4.97 0.0236     0.0651   FALSE
-#> 4 b4        6.75    1.7    -0.389     4.04 0.012      0.0602   FALSE
-#> 5 b5        6.26    1.52   -1.3       4.55 0.0193     0.0651   FALSE
-#> 6 b6        3.57    1.15   -1.25      3.29 0.0487     0.0651   FALSE
-#> 7 b7        8.32    1.53   -1.11      3.81 0.0163     0.0651   FALSE
+#>   feature      t log2_fc ci_lower ci_upper pooled_sd   mean effect p_value
+#>   <chr>    <dbl>   <dbl>    <dbl>    <dbl>     <dbl>  <dbl>  <dbl>   <dbl>
+#> 1 b1      -15.4    -5      -7.82     -2.3      0.43   0.502 -12.6  0.00311
+#> 2 b2      -17      -2.52   -3.72     -1.33     0.206  1.74  -13.9  0.00102
+#> 3 b3        6.9     1.61   -1.24      4.97     0.35  -0.378   5.63 0.0236
+#> 4 b4        6.75    1.7    -0.389     4.04     0.348 -0.463   5.51 0.012
+#> 5 b5        6.26    1.52   -1.3       4.55     0.342 -0.416   5.11 0.0193
+#> 6 b6        3.57    1.15   -1.25      3.29     0.422 -0.539   2.91 0.0487
+#> 7 b7        8.32    1.53   -1.11      3.81     0.28  -0.448   6.79 0.0163
+#> # … 2 more columns: p_adjusted <dbl>, reject <lgl>
 #> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
 #> #   conf_level, p_adjust, seed, log_base
     plot(res)
 
 
+    # Each feature's difference against its spread within the groups.
+    plot(res, 'effect')
+
+
     # With a scale model, the intervals widen and fewer features are
     # rejected.
     dirmult_ttest(x, grp, contrast = c('treatment', 'placebo'), scale_sd = 0.5)
-#> # A data.frame: 7 × 8
+#> # A data.frame: 7 × 11
 #> # Dirichlet-multinomial t-test
-#>   feature      t log2_fc ci_lower ci_upper p_value p_adjusted reject
-#>   <chr>    <dbl>   <dbl>    <dbl>    <dbl>   <dbl>      <dbl>  <lgl>
-#> 1 b1      -15.4    -4.97   -8.05    -1.83  0.00331     0.0199   TRUE
-#> 2 b2      -16.8    -2.49   -4.52    -0.387 0.00154     0.0108   TRUE
-#> 3 b3        7.08    1.64   -1.65     4.99  0.0402      0.139   FALSE
-#> 4 b4        6.86    1.73   -1.18     4.31  0.0278      0.139   FALSE
-#> 5 b5        6.44    1.55   -2.41     4.85  0.0397      0.139   FALSE
-#> 6 b6        3.68    1.18   -1.81     3.6   0.102       0.139   FALSE
-#> 7 b7        8.37    1.56   -0.774    4.57  0.0279      0.139   FALSE
+#>   feature      t log2_fc ci_lower ci_upper pooled_sd   mean effect p_value
+#>   <chr>    <dbl>   <dbl>    <dbl>    <dbl>     <dbl>  <dbl>  <dbl>   <dbl>
+#> 1 b1      -15.4    -4.97   -8.05    -1.83      0.43   0.502 -12.5  0.00331
+#> 2 b2      -16.8    -2.49   -4.52    -0.387     0.206  1.74  -13.8  0.00154
+#> 3 b3        7.08    1.64   -1.65     4.99      0.35  -0.378   5.78 0.0402
+#> 4 b4        6.86    1.73   -1.18     4.31      0.348 -0.463   5.6  0.0278
+#> 5 b5        6.44    1.55   -2.41     4.85      0.342 -0.416   5.25 0.0397
+#> 6 b6        3.68    1.18   -1.81     3.6       0.422 -0.539   3    0.102
+#> 7 b7        8.37    1.56   -0.774    4.57      0.28  -0.448   6.84 0.0279
+#> # … 2 more columns: p_adjusted <dbl>, reject <lgl>
 #> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
 #> #   conf_level, p_adjust, seed, log_base
 

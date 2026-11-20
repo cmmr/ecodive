@@ -823,21 +823,22 @@ is scikit-bio’s version, with Welch’s t-test; `contrast` is
 
 res_dm <- dirmult_ttest(counts, groups, contrast = c('treated', 'control'))
 res_dm[order(res_dm$p_adjusted), ]
-#> # A data.frame: 150 × 8
+#> # A data.frame: 150 × 11
 #> # Dirichlet-multinomial t-test
-#>    feature      t log2_fc ci_lower ci_upper  p_value p_adjusted reject
-#>    <chr>    <dbl>   <dbl>    <dbl>    <dbl>    <dbl>      <dbl>  <lgl>
-#> 4  ASV004   12.1     2.52     1.96     3.06 3.51e-14   5.26e-12   TRUE
-#> 2  ASV002   10.6     2.45     1.81     3.04 2.31e-12   3.44e-10   TRUE
-#> 8  ASV008  -11.2    -3.11    -4.01    -2.31 1.12e-11   1.66e-09   TRUE
-#> 3  ASV003    9.9     2.28     1.66     2.85 3.37e-11   4.96e-09   TRUE
-#> 1  ASV001    8.79    2.22     1.55     2.86 1.92e-10    2.8e-08   TRUE
-#> 10 ASV010   -9.25   -2.51    -3.32    -1.73 5.73e-10    8.3e-08   TRUE
-#> 9  ASV009   -8.56   -2.57    -3.49    -1.72 5.94e-10   8.56e-08   TRUE
-#> 5  ASV005    8.29    2.21     1.49     2.88 2.11e-09   3.01e-07   TRUE
-#> 7  ASV007   -9      -2.94    -4.02    -2.03 2.81e-09   3.99e-07   TRUE
-#> 6  ASV006   -8.44   -2.67    -3.75    -1.83 7.14e-09   1.01e-06   TRUE
+#>    feature      t log2_fc ci_lower ci_upper pooled_sd  mean effect  p_value
+#>    <chr>    <dbl>   <dbl>    <dbl>    <dbl>     <dbl> <dbl>  <dbl>    <dbl>
+#> 4  ASV004   12.1     2.52     1.96     3.06     0.66   8.68   3.83 3.51e-14
+#> 2  ASV002   10.6     2.45     1.81     3.04     0.73   9.59   3.36 2.31e-12
+#> 8  ASV008  -11.2    -3.11    -4.01    -2.31     0.885  5.02  -3.54 1.12e-11
+#> 3  ASV003    9.9     2.28     1.66     2.85     0.729  8.92   3.13 3.37e-11
+#> 1  ASV001    8.79    2.22     1.55     2.86     0.801 10.7    2.78 1.92e-10
+#> 10 ASV010   -9.25   -2.51    -3.32    -1.73     0.86   4.7   -2.93 5.73e-10
+#> 9  ASV009   -8.56   -2.57    -3.49    -1.72     0.953  4.97  -2.71 5.94e-10
+#> 5  ASV005    8.29    2.21     1.49     2.88     0.844  8.29   2.62 2.11e-09
+#> 7  ASV007   -9      -2.94    -4.02    -2.03     1.04   5.02  -2.85 2.81e-09
+#> 6  ASV006   -8.44   -2.67    -3.75    -1.83     1.01   5.01  -2.67 7.14e-09
 #> # … 140 more rows
+#> # … 2 more columns: p_adjusted <dbl>, reject <lgl>
 #> # Use print(x, n = ...) to see more rows
 #> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
 #> #   conf_level, p_adjust, seed, log_base
@@ -867,6 +868,32 @@ tapply(res_dm$log2_fc[changed], fold[changed], median)
 
 Every estimate is shifted down by about 0.7 log2 units, which is the
 subject of the next section.
+
+A volcano plot can mislead: with many samples, tiny differences reach
+small p-values (**[Gloor, Macklaim & Fernandes
+2016](https://doi.org/10.1080/10618600.2015.1131161)**). The effect plot
+(ALDEx2’s “MW” plot) sets each taxon’s difference between the groups
+against its spread within them; taxa beyond the dashed lines differ by
+more than they vary:
+
+``` r
+
+plot(res_dm, 'effect')
+```
+
+![Effect plot of the Dirichlet-multinomial t-test: each taxon's log2
+fold change against its pooled within-group standard deviation, with
+dashed lines where the two are equal and the differentially abundant
+taxa highlighted.](compositional_files/figure-html/dirmult-effect-1.png)
+
+`type = 'ma'` plots the differences against each taxon’s mean abundance,
+and `type = 'forest'` the most significant taxa with their intervals;
+the same types work for
+[`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+[`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+[`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+and
+[`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md).
 
 ### Why the reference matters
 
@@ -999,7 +1026,7 @@ res_bc[order(res_bc$p_adjusted), ]
 #> # Use print(x, n = ...) to see more rows
 #> # Attributes: method, formula, alpha, p_adjust, log_base, max_iters, tol,
 #> #   var_quantile, pseudocount, coef, var, vcov, dof, design, bias, n_iters,
-#> #   sample_fractions, sensitivity
+#> #   resid_sd, mean, sample_fractions, sensitivity
 table(changed = changed[keep], rejected = res_bc$reject)
 #>        rejected
 #> changed FALSE TRUE
@@ -1310,6 +1337,12 @@ noted where one exists.
   gene sequencing and selective growth experiments by compositional data
   analysis. *Microbiome*, 2, 15.
   [doi:10.1186/2049-2618-2-15](https://doi.org/10.1186/2049-2618-2-15)
+- Gloor, G. B., Macklaim, J. M., & Fernandes, A. D. (2016). Displaying
+  variation in large datasets: plotting a visual summary of effect
+  sizes. *Journal of Computational and Graphical Statistics*, 25,
+  971–979.
+  [doi:10.1080/10618600.2015.1131161](https://doi.org/10.1080/10618600.2015.1131161)
+  †
 - Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J.
   (2017). Microbiome datasets are compositional: and this is not
   optional. *Frontiers in Microbiology*, 8, 2224.

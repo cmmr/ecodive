@@ -45,7 +45,7 @@
     gives a dot chart of the taxa that contribute most to each pair’s
     dissimilarity,
     [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
-    a volcano plot,
+    a volcano, effect, MA or forest plot (see below),
     [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) a dot
     chart of W,
     [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md) a
@@ -73,7 +73,8 @@
   - [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
     and
     [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
-    give a volcano plot of one covariate’s log fold changes,
+    give a volcano, effect, MA or forest plot of one covariate’s log
+    fold changes,
     [`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
     and
     [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md)
@@ -1208,6 +1209,48 @@
   and
   [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
   results have. Their plots label log fold changes from it.
+
+- The plots of differential-abundance results take `type`: besides the
+  volcano plot (the default), `"effect"`, each feature’s difference
+  against its dispersion within the groups, with lines where the two are
+  equal (Gloor et al. 2016; ALDEx2’s `"MW"` plot); `"ma"`, against its
+  mean abundance (ALDEx2’s `"MA"`); and `"forest"`, the effects and
+  intervals of the `n_features` most significant features. For
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+  [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  and
+  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  (all four types) and
+  [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  (volcano and MA). The effect plot of a model result needs a two-level
+  comparison (a covariate coded 0/1). Titles name the plot and the
+  method (“Effect plot of ANCOM-BC2”), and subtitles the comparison.
+  `type` is the second argument of the
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+  [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  and
+  [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  methods, before `labels`, and the third of the
+  [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md) and
+  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  ones, after `covariate`.
+
+- [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+  results gain three columns, for these plots: `pooled_sd`, the pooled
+  within-group standard deviation, `mean`, the mean clr abundance (both
+  averaged over the draws, in log2 units), and `effect`, each draw’s
+  difference over its pooled standard deviation, averaged (Cohen’s d).
+  `pooled_sd` and `effect` are ALDEx3’s `aldex.effect()` statistics and
+  match them for the same draws.
+  [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md) and
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
+  results gain `resid_sd` and `mean` attributes (each feature’s residual
+  standard deviation and mean clr), and
+  [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  results a `mean` column, as
+  [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)’s.
 
 - [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md) of a
   slam `simple_triplet_matrix` now draws exactly the same observations

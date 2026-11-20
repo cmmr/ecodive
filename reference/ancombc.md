@@ -224,6 +224,19 @@ Attributes:
   squares estimate (`delta_wls`) and that estimate's variance
   (`var_delta`); `n_iters`: the EM iterations run per covariate.
 
+- Per feature (named by feature), for the effect and MA plots
+  ([`plot.ecodive_ancombc()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)):
+  `resid_sd`, the residual standard deviation of the fit behind the
+  variances, \\\sqrt{\mathrm{RSS} / (n\_{obs} - \mathrm{rank})}\\ over
+  the feature's observed samples (ANCOM-BC: the initial fit, about each
+  sample's estimated sampling fraction; ANCOM-BC2: the final fit), in
+  natural logs; `NaN` for a fit that failed or has no residual degrees
+  of freedom. For a design of one two-level factor, it is the pooled
+  within-group standard deviation. And `mean`, the feature's mean clr
+  value (natural logs, with `pseudocount`), or with zeros as missing
+  values (`ancombc2()`, `pseudocount = 0`) its mean rclr value, over its
+  observed samples.
+
 - `sample_fractions` (`ancombc2()`): each sample's estimated log
   sampling fraction.
 
@@ -458,7 +471,7 @@ methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
 #> 7  F2      statussevere   2.94   0.304   9.65 4.96e-22   3.96e-21   TRUE
 #> 12 F3      age            0.0626 0.0218  2.87  0.00409     0.0328   TRUE
 #> # Attributes: method, formula, alpha, p_adjust, log_base, max_iters, tol,
-#> #   pseudocount, coef, var, vcov, design, bias, n_iters
+#> #   pseudocount, coef, var, vcov, design, bias, n_iters, resid_sd, mean
 
     # A volcano plot of one covariate, here the first: moderate vs mild.
     plot(res)
@@ -478,7 +491,7 @@ methods for human gut 16S rRNA microbiome data (2026). *bioRxiv*
 #> # … 1 more column: reject_robust <lgl>
 #> # Attributes: method, formula, groups, alpha, p_adjust, log_base, max_iters,
 #> #   tol, var_quantile, pseudocount, coef, var, vcov, dof, design, bias,
-#> #   n_iters, sample_fractions, sensitivity
+#> #   n_iters, resid_sd, mean, sample_fractions, sensitivity
 
     # ANCOMBC's preprocessing, done first: keep features present in at
     # least 10% of samples (prv_cut = 0.1), and samples with at least 10

@@ -261,6 +261,17 @@ of each factor).</p></li>
 (<code>delta_em</code>, subtracted from the coefficients), its weighted least
 squares estimate (<code>delta_wls</code>) and that estimate's variance
 (<code>var_delta</code>); <code>n_iters</code>: the EM iterations run per covariate.</p></li>
+<li><p>Per feature (named by feature), for the effect and MA plots
+(<code><a href="plot.ecodive_ancombc.html">plot.ecodive_ancombc()</a></code>): <code>resid_sd</code>, the residual standard
+deviation of the fit behind the variances, \(\sqrt{\mathrm{RSS}
+    / (n_{obs} - \mathrm{rank})}\) over the feature's observed samples
+(ANCOM-BC: the initial fit, about each sample's estimated sampling
+fraction; ANCOM-BC2: the final fit), in natural logs; <code>NaN</code> for a
+fit that failed or has no residual degrees of freedom. For a design
+of one two-level factor, it is the pooled within-group standard
+deviation. And <code>mean</code>, the feature's mean clr value (natural logs,
+with <code>pseudocount</code>), or with zeros as missing values (<code>ancombc2()</code>,
+<code>pseudocount = 0</code>) its mean rclr value, over its observed samples.</p></li>
 <li><p><code>sample_fractions</code> (<code>ancombc2()</code>): each sample's estimated log
 sampling fraction.</p></li>
 <li><p>With <code>sensitivity</code>: <code>sensitivity</code>, a list of <code>pseudocounts</code> and
@@ -461,7 +472,7 @@ methods for human gut 16S rRNA microbiome data (2026). <em>bioRxiv</em>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7  F2      statussevere   2.94   0.304   9.65 4.96e-22   3.96e-21   TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12 F3      age            0.0626 0.0218  2.87  0.00409     0.0328   TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, alpha, p_adjust, log_base, max_iters, tol,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   pseudocount, coef, var, vcov, design, bias, n_iters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   pseudocount, coef, var, vcov, design, bias, n_iters, resid_sd, mean</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A volcano plot of one covariate, here the first: moderate vs mild.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
@@ -481,7 +492,7 @@ methods for human gut 16S rRNA microbiome data (2026). <em>bioRxiv</em>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # … 1 more column: reject_robust &lt;lgl&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, formula, groups, alpha, p_adjust, log_base, max_iters,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   tol, var_quantile, pseudocount, coef, var, vcov, dof, design, bias,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   n_iters, sample_fractions, sensitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   n_iters, resid_sd, mean, sample_fractions, sensitivity</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># ANCOMBC's preprocessing, done first: keep features present in at</span></span></span>
 <span class="r-in"><span>    <span class="co"># least 10% of samples (prv_cut = 0.1), and samples with at least 10</span></span></span>
