@@ -51,8 +51,8 @@ planned function the article shows the call it will have, marked
 | Step | Question | In ecodive now | Planned |
 |:-----|:---------|:---------------|:--------|
 | [Zeros](#zeros) | How do I take logs of zeros? | `pseudocount`, `norm = 'rclr'`, `replace_zeros()` (`'mult'`) | Bayesian-multiplicative methods (`'gbm'`, ...) |
-| [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`, `alr()`, `ilr()` | `philr()` |
-| [Beta diversity](#beta-diversity) | Do communities differ? | `aitchison()`, `robust_aitchison()`, `rpca()`, `rpca_phylo()`, `pca()`, `permanova()`, `permdisp()` | `philr_distance()` |
+| [Transforms](#transforms) | Which log-ratio coordinates? | `normalize(norm = 'clr' / 'rclr')`, `alr()`, `ilr()`, `philr()` | |
+| [Beta diversity](#beta-diversity) | Do communities differ? | `aitchison()`, `robust_aitchison()`, `rpca()`, `rpca_phylo()`, `pca()`, `permanova()`, `permdisp()`, `philr_distance()` | |
 | [Log ratios](#log-ratios) | Which taxa shift relative to which? | `rpca()` loadings, `log_ratio()`, `balance()` | |
 | [Differential abundance](#differential-abundance) | Which taxa differ? | `ancom()`, `dirmult_ttest()`, `ancombc()`, `ancombc2()` and their post-hoc tests, `structural_zeros()` | |
 | [Co-occurrence](#proportionality) | Which taxa move together? | `vlr()`, `rho_p()`, `phi_s()` | |
@@ -257,7 +257,7 @@ where ordinary statistics apply.
 | robust clr (rclr) | `normalize(norm = 'rclr')` | non-zero taxa only | zeros are missing, not imputed |
 | additive log ratio (alr) | `alr()` | each taxon relative to one reference taxon | easy to interpret; not isometric |
 | isometric log ratio (ilr) | `ilr()` | D − 1 orthonormal balances | Euclidean distance on ilr = Aitchison distance |
-| phylogenetic ilr (PhILR) | `philr()` (*planned*) | one balance per internal node of a phylogeny | **[Silverman et al. 2017](https://doi.org/10.7554/eLife.21887)** |
+| phylogenetic ilr (PhILR) | `philr()` | one balance per internal node of a phylogeny | **[Silverman et al. 2017](https://doi.org/10.7554/eLife.21887)** |
 
 ```{r transforms}
 a <- alr(counts, denominator = 'ASV001', pseudocount = 1)
@@ -280,14 +280,32 @@ taxa without zeros; less for rare taxa, where zeros and the pseudocount
 damp it). An alr reference should be a taxon that is common and
 stable, which is hard to know in advance.
 
-```{r philr-planned, eval = FALSE}
-# Planned in ecodive:
+PhILR needs a phylogeny. The simulated taxa get one that puts the five
+blooming taxa in one clade and the five declining taxa in another, and
+joins the other 140 at random:
+
+```{r tree}
+set.seed(7)
+random_clade <- function (tips) {
+  len <- runif(1, 0.05, 0.3)
+  if (length(tips) == 1) return (sprintf('%s:%.3f', tips, len))
+  k <- sample(length(tips) - 1, 1)
+  sprintf('(%s,%s):%.3f', random_clade(tips[1:k]), random_clade(tips[-(1:k)]), len)
+}
+tree <- read_tree(sprintf('(%s,(%s,%s):0.2);',
+  random_clade(taxa[1:5]), random_clade(taxa[6:10]),
+  random_clade(sample(taxa[-(1:10)])) ))
+c(tips = length(tree$tip.label), internal_nodes = tree$Nnode)
+```
+
+`philr()` gives one balance per internal node of the tree. These weights
+are those of Silverman et al. (2017), as in the philr package
+(Bioconductor):
+
+```{r philr}
 p <- philr(counts, tree, pseudocount = 1,
            part_weights = 'enorm.x.gm.counts', ilr_weights = 'blw.sqrt')
-
-# Available now, in philr (Bioconductor):
-p <- philr::philr(counts, tree, pseudocount = 1,
-                  part.weights = 'enorm.x.gm.counts', ilr.weights = 'blw.sqrt')
+dim(p)   # one coordinate per internal node of the 150-tip tree
 ```
 
 **Used in practice.**
@@ -346,26 +364,9 @@ clades that shift together show up as single features. It's the
 compositional counterpart of a UniFrac PCoA, and gives loadings for every
 clade as well as every tip.
 
-The simulated taxa need a tree. This one puts the five blooming taxa in
-one clade and the five declining taxa in another, and joins the other 140
-at random:
-
-```{r tree}
-set.seed(7)
-random_clade <- function (tips) {
-  len <- runif(1, 0.05, 0.3)
-  if (length(tips) == 1) return (sprintf('%s:%.3f', tips, len))
-  k <- sample(length(tips) - 1, 1)
-  sprintf('(%s,%s):%.3f', random_clade(tips[1:k]), random_clade(tips[-(1:k)]), len)
-}
-tree <- read_tree(sprintf('(%s,(%s,%s):0.2);',
-  random_clade(taxa[1:5]), random_clade(taxa[6:10]),
-  random_clade(sample(taxa[-(1:10)])) ))
-c(tips = length(tree$tip.label), internal_nodes = tree$Nnode)
-```
-
-As in the [log ratios](#log-ratios) below, rare tips get large loadings
-from noise alone, so leave out tips present in half the samples or fewer
+It uses the tree built for [PhILR](#transforms) above. As in the [log
+ratios](#log-ratios) below, rare tips get large loadings from noise alone,
+so leave out tips present in half the samples or fewer
 (`min_feature_frequency`, a percentage, as in `rpca()`):
 
 ```{r rpca-phylo}
@@ -395,14 +396,13 @@ The top node is the clade of the five blooming taxa. `attr(ord_phy,
 'tree')` is the tree as it was used (pruned to the kept tips), with its
 internal nodes named as in the loadings.
 
-The **PhILR distance** (Euclidean distance on PhILR coordinates, with the
-weights of Silverman et al. 2017) is planned:
+The **PhILR distance** is the Euclidean distance between PhILR
+coordinates, with the weights of Silverman et al. (2017):
 
-```{r philr-distance-planned, eval = FALSE}
-# Planned in ecodive:
-dm_philr <- philr_distance(counts, tree)   # also beta_div(counts, 'philr', tree = tree)
-
-# Available now: philr (Bioconductor), then dist() on its coordinates.
+```{r philr-distance}
+# The same as beta_div(counts, 'philr', tree = tree, pseudocount = 1):
+dm_philr <- philr_distance(counts, tree, pseudocount = 1)
+permanova(dm_philr, groups, seed = 1)
 ```
 
 **Used in practice.**
