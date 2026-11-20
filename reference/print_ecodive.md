@@ -14,6 +14,9 @@ in full.
 ## Usage
 
 ``` r
+# S3 method for class 'ecodive_types'
+print(x, n = NULL, width = NULL, digits = 3L, ...)
+
 # S3 method for class 'ecodive_ord'
 print(x, n = NULL, width = NULL, digits = 3L, ...)
 
@@ -36,8 +39,13 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
   [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
   [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md),
-  [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) or
-  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md).
+  [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md),
+  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) or
+  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md).
+  A community-types result (see
+  [ecodive_types](https://cmmr.github.io/ecodive/reference/ecodive_types.md))
+  prints its types and how their number was chosen before its first
+  samples.
 
 - n:
 

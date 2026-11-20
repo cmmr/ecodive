@@ -208,9 +208,16 @@ valid alternative to correlation. A dist over the features.
 
 ### Differential abundance
 
-Which features’ abundances differ between groups, from log ratios or clr
-values, so that the samples’ totals don’t matter.
+Which features’ abundances differ between groups. da_test() runs any
+method by name; the classical per-feature tests compare normalized
+values, the others log ratios or clr values, so that the samples’ totals
+don’t matter.
 
+- [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md) :
+  Differential Abundance Testing
+- [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md)
+  [`match_da_test()`](https://cmmr.github.io/ecodive/reference/da_tests.md)
+  : Find and Browse Differential Abundance Methods
 - [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) :
   Analysis of Composition of Microbiomes (ANCOM)
 - [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
@@ -226,6 +233,10 @@ values, so that the samples’ totals don’t matter.
   : Structural zeros
 - [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
   : Dirichlet-multinomial Welch t-tests (ALDEx2-style)
+- [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md) :
+  Per-feature Wilcoxon, t and Linear Model Tests
 
 ### Absolute abundance
 
@@ -236,6 +247,17 @@ spike-in), estimate absolute abundances instead of ratios.
   [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) :
   Quantitative Microbiome Profiling: Absolute Abundances from a Measured
   Load
+
+### Community types
+
+Assign each sample to one of a few community types. The types come back
+as a data frame whose `type` column can be used as `groups` in any test
+or ordination plot.
+
+- [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
+  : Enterotypes
+- [`ecodive_types`](https://cmmr.github.io/ecodive/reference/ecodive_types.md)
+  : Community types
 
 ## Ordination
 
@@ -372,15 +394,22 @@ than every value.
   [`plot(`*`<ecodive_ancombc_global>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
   [`plot(`*`<ecodive_ancombc_trend>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
   : Plot an ANCOM-BC result
+- [`plot(`*`<ecodive_da_ttest>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
+  [`plot(`*`<ecodive_da_wilcoxon>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
+  [`plot(`*`<ecodive_da_lm>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
+  : Plot a Per-feature Test Result
 - [`plot(`*`<ecodive_varpart>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.md)
   : Plot a variation partitioning
 - [`plot(`*`<ecodive_forward_select>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.md)
   : Plot a forward selection
 - [`plot(`*`<ecodive_bioenv>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.md)
   : Plot a BIO-ENV result
+- [`plot(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_types.md)
+  : Plot community types
 - [`ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)
   : Titles of results
-- [`print(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+- [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+  [`print(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   : Print ecodive's results
 
@@ -395,6 +424,9 @@ Tools for programmatic access, data manipulation, and configuration.
   : Read a newick formatted phylogenetic tree.
 - [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md) :
   Rarefy Observation Counts
+- [`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
+  [`alpha_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
+  : Diversity Averaged over Repeated Rarefactions
 - [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   : Normalize a Count Table
 - [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md) :

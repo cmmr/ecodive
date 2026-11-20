@@ -133,13 +133,13 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
 <dd><p>Normalize <code>counts</code> before fitting them, as in
 <code><a href="beta_div.html">beta_div()</a></code>: <code>'none'</code>, <code>'percent'</code>, <code>'chord'</code>, <code>'hellinger'</code>,
-<code>'binary'</code>, <code>'clr'</code>, or <code>'rclr'</code>. Default: <code>'none'</code>. <code>margin</code>, <code>norm</code>, and
+<code>'binary'</code>, <code>'clr'</code>, <code>'rclr'</code>, or <code>'log'</code>. Default: <code>'none'</code>. <code>margin</code>, <code>norm</code>, and
 <code>pseudocount</code> apply only to <code>counts</code>.</p></dd>
 
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
 <dd><p>Value added to counts to handle zeros when
-<code>norm = 'clr'</code>. Ignored for other normalization methods. See
+<code>norm = 'clr'</code> or <code>'log'</code>. Ignored for other normalization methods. See
 <strong>Pseudocount</strong> section.</p></dd>
 
 

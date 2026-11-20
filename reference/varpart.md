@@ -75,15 +75,15 @@ varpart(
 
   Normalize the count table first, as in
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md): `'none'`,
-  `'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, or
-  `'rclr'`. `vegan::varpart(transfo = 'hel')` is `norm = 'hellinger'`.
+  `'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`, `'rclr'`,
+  or `'log'`. `vegan::varpart(transfo = 'hel')` is `norm = 'hellinger'`.
   Not used for distances, and only `'none'` with `chisquare = TRUE`.
   Default: `'none'`.
 
 - pseudocount:
 
-  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
-  other normalization methods. See **Pseudocount** section.
+  Value added to counts to handle zeros when `norm = 'clr'` or `'log'`.
+  Ignored for other normalization methods. See **Pseudocount** section.
 
 - margin:
 
@@ -251,12 +251,14 @@ parallel processing.
 
 ## Pseudocount
 
-The `pseudocount` parameter is only relevant when `norm = 'clr'`.
+The `pseudocount` parameter is only relevant when `norm = 'clr'` or
+`norm = 'log'`.
 
-Zeros are undefined in the centered log-ratio (CLR) transformation. If
-`norm = 'clr'`, `pseudocount` is `NULL` (the default), and zeros are
-detected, the function uses half the minimum non-zero value
-(`min(x[x>0]) / 2`) and issues a warning.
+Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If `norm` is `'clr'` or `'log'`,
+`pseudocount` is `NULL` (the default), and zeros are detected, the
+function uses half the minimum non-zero value (`min(x[x>0]) / 2`) and
+issues a warning.
 
 To suppress the warning, provide an explicit value (e.g., `1`), or
 replace the zeros first with

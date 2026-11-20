@@ -54,9 +54,11 @@
     <h2 id="pseudocount">Pseudocount<a class="anchor" aria-label="anchor" href="#pseudocount"></a></h2>
 
 
-<p>The <code>pseudocount</code> parameter is only relevant when <code>norm = 'clr'</code>.</p>
-<p>Zeros are undefined in the centered log-ratio (CLR) transformation. If
-<code>norm = 'clr'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
+<p>The <code>pseudocount</code> parameter is only relevant when <code>norm = 'clr'</code>
+or <code>norm = 'log'</code>.</p>
+<p>Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If <code>norm</code> is <code>'clr'</code> or
+<code>'log'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (<code>min(x[x&gt;0]) / 2</code>) and issues a warning.</p>
 <p>To suppress the warning, provide an explicit value (e.g., <code>1</code>), or

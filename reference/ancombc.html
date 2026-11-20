@@ -74,8 +74,8 @@ follow scikit-bio's <code>ancombc()</code> and <code>ancombc2()</code>.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ancombc</span><span class="op">(</span></span>
 <span>  <span class="va">counts</span>,</span>
-<span>  <span class="va">formula</span>,</span>
-<span>  <span class="va">data</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  groups <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  pseudocount <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -89,8 +89,8 @@ follow scikit-bio's <code>ancombc()</code> and <code>ancombc2()</code>.</p>
 <span></span>
 <span><span class="fu">ancombc2</span><span class="op">(</span></span>
 <span>  <span class="va">counts</span>,</span>
-<span>  <span class="va">formula</span>,</span>
-<span>  <span class="va">data</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  groups <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  pseudocount <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -121,7 +121,8 @@ fraction.</p></dd>
 such as <code>~ status + age</code>, or the same as a string (<code>'status + age'</code>, with or without the <code>~</code>). Anything <code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">stats::model.matrix()</a></code>
 accepts may be used, including interactions (<code>status * age</code>) and
 a model without an intercept (<code>~ 0 + status</code>). Every factor is
-coded with treatment contrasts (see <strong>Covariates</strong>).</p></dd>
+coded with treatment contrasts (see <strong>Covariates</strong>). <code>NULL</code> (the
+default) is <code>~ groups</code>: give <code>formula</code>, <code>groups</code>, or both.</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
@@ -129,16 +130,21 @@ coded with treatment contrasts (see <strong>Covariates</strong>).</p></dd>
 <code>formula</code>. Its rows are matched to the samples of <code>counts</code> by
 name when both have names (rows for other samples are left out),
 else by position. A single vector or factor is taken as one
-variable named <code>group</code>.</p></dd>
+variable named <code>group</code>. Not needed when <code>groups</code> is given as one
+value per sample.</p></dd>
 
 
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p><code>NULL</code> (the default), or the name of a categorical
-variable of <code>data</code> that is a term of <code>formula</code>, with at least
-three levels: the grouping the post-hoc tests
-(<code><a href="ancombc_global.html">ancombc_global()</a></code>, <code><a href="ancombc_global.html">ancombc_pairwise()</a></code>, <code><a href="ancombc_global.html">ancombc_dunnett()</a></code>,
-<code><a href="ancombc_global.html">ancombc_trend()</a></code>) compare by default. It doesn't change the
-results (scikit-bio's <code>grouping</code>).</p></dd>
+<dd><p>The term of interest. With <code>formula</code>, <code>NULL</code> (the
+default) or the name of a variable of <code>data</code> that is a term of
+<code>formula</code>: the grouping the post-hoc tests (<code><a href="ancombc_global.html">ancombc_global()</a></code>,
+<code><a href="ancombc_global.html">ancombc_pairwise()</a></code>, <code><a href="ancombc_global.html">ancombc_dunnett()</a></code>, <code><a href="ancombc_global.html">ancombc_trend()</a></code>)
+compare by default (scikit-bio's <code>grouping</code>), which must then be
+categorical with at least three levels. It doesn't change the
+fit. Without <code>formula</code>, it is the model: <code>groups</code> alone is
+<code>formula = ~ groups</code>, given as the name of a column of <code>data</code> or as
+one value per sample (which becomes the variable <code>group</code>), as for
+<code><a href="da_test.html">da_test()</a></code>'s other methods.</p></dd>
 
 
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>

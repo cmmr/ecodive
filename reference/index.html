@@ -623,7 +623,7 @@
       </dl></div><div class="section level2">
 
       <h3 id="differential-abundance">Differential abundance<a class="anchor" aria-label="anchor" href="#differential-abundance"></a></h3>
-      <div class="section-desc"><p>Which features’ abundances differ between groups, from log ratios or clr values, so that the samples’ totals don’t matter.</p></div>
+      <div class="section-desc"><p>Which features’ abundances differ between groups. da_test() runs any method by name; the classical per-feature tests compare normalized values, the others log ratios or clr values, so that the samples’ totals don’t matter.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -631,6 +631,20 @@
 
 
       <dl><dt>
+
+          <code><a href="da_test.html">da_test()</a></code>
+
+        </dt>
+        <dd>Differential Abundance Testing</dd>
+
+        <dt>
+
+          <code><a href="da_tests.html">list_da_tests()</a></code> <code><a href="da_tests.html">match_da_test()</a></code>
+
+        </dt>
+        <dd>Find and Browse Differential Abundance Methods</dd>
+
+        <dt>
 
           <code><a href="ancom.html">ancom()</a></code>
 
@@ -664,6 +678,13 @@
 
         </dt>
         <dd>Dirichlet-multinomial Welch t-tests (ALDEx2-style)</dd>
+
+        <dt>
+
+          <code><a href="da_wilcoxon.html">da_wilcoxon()</a></code> <code><a href="da_wilcoxon.html">da_ttest()</a></code> <code><a href="da_wilcoxon.html">da_lm()</a></code>
+
+        </dt>
+        <dd>Per-feature Wilcoxon, t and Linear Model Tests</dd>
       </dl></div><div class="section level2">
 
       <h3 id="absolute-abundance">Absolute abundance<a class="anchor" aria-label="anchor" href="#absolute-abundance"></a></h3>
@@ -680,6 +701,29 @@
 
         </dt>
         <dd>Quantitative Microbiome Profiling: Absolute Abundances from a Measured Load</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="community-types">Community types<a class="anchor" aria-label="anchor" href="#community-types"></a></h3>
+      <div class="section-desc"><p>Assign each sample to one of a few community types. The types come back as a data frame whose <code>type</code> column can be used as <code>groups</code> in any test or ordination plot.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="enterotype.html">enterotype()</a></code>
+
+        </dt>
+        <dd>Enterotypes</dd>
+
+        <dt>
+
+          <code><a href="ecodive_types.html">ecodive_types</a></code>
+
+        </dt>
+        <dd>Community types</dd>
       </dl></div><div class="section level2">
       <h2 id="ordination">Ordination<a class="anchor" aria-label="anchor" href="#ordination"></a></h2>
 
@@ -1057,6 +1101,13 @@
 
         <dt>
 
+          <code><a href="plot.ecodive_da_ttest.html">plot(<i>&lt;ecodive_da_ttest&gt;</i>)</a></code> <code><a href="plot.ecodive_da_ttest.html">plot(<i>&lt;ecodive_da_wilcoxon&gt;</i>)</a></code> <code><a href="plot.ecodive_da_ttest.html">plot(<i>&lt;ecodive_da_lm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot a Per-feature Test Result</dd>
+
+        <dt>
+
           <code><a href="plot.ecodive_varpart.html">plot(<i>&lt;ecodive_varpart&gt;</i>)</a></code>
 
         </dt>
@@ -1078,6 +1129,13 @@
 
         <dt>
 
+          <code><a href="plot.ecodive_types.html">plot(<i>&lt;ecodive_types&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot community types</dd>
+
+        <dt>
+
           <code><a href="ecodive_display.html">ecodive_display</a></code>
 
         </dt>
@@ -1085,7 +1143,7 @@
 
         <dt>
 
-          <code><a href="print_ecodive.html">print(<i>&lt;ecodive_ord&gt;</i>)</a></code> <code><a href="print_ecodive.html">print(<i>&lt;ecodive_dist&gt;</i>)</a></code>
+          <code><a href="print_ecodive.html">print(<i>&lt;ecodive_types&gt;</i>)</a></code> <code><a href="print_ecodive.html">print(<i>&lt;ecodive_ord&gt;</i>)</a></code> <code><a href="print_ecodive.html">print(<i>&lt;ecodive_dist&gt;</i>)</a></code>
 
         </dt>
         <dd>Print ecodive's results</dd>
@@ -1119,6 +1177,13 @@
 
         </dt>
         <dd>Rarefy Observation Counts</dd>
+
+        <dt>
+
+          <code><a href="rarefied_diversity.html">beta_div_rarefied()</a></code> <code><a href="rarefied_diversity.html">alpha_div_rarefied()</a></code>
+
+        </dt>
+        <dd>Diversity Averaged over Repeated Rarefactions</dd>
 
         <dt>
 

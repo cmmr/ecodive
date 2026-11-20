@@ -14,8 +14,8 @@ follow scikit-bio's `ancombc()` and `ancombc2()`.
 ``` r
 ancombc(
   counts,
-  formula,
-  data,
+  formula = NULL,
+  data = NULL,
   groups = NULL,
   margin = 1L,
   pseudocount = NULL,
@@ -29,8 +29,8 @@ ancombc(
 
 ancombc2(
   counts,
-  formula,
-  data,
+  formula = NULL,
+  data = NULL,
   groups = NULL,
   margin = 1L,
   pseudocount = 0,
@@ -63,26 +63,33 @@ ancombc2(
   [`stats::model.matrix()`](https://rdrr.io/r/stats/model.matrix.html)
   accepts may be used, including interactions (`status * age`) and a
   model without an intercept (`~ 0 + status`). Every factor is coded
-  with treatment contrasts (see **Covariates**).
+  with treatment contrasts (see **Covariates**). `NULL` (the default) is
+  `~ groups`: give `formula`, `groups`, or both.
 
 - data:
 
   A data frame of sample metadata, with the variables of `formula`. Its
   rows are matched to the samples of `counts` by name when both have
   names (rows for other samples are left out), else by position. A
-  single vector or factor is taken as one variable named `group`.
+  single vector or factor is taken as one variable named `group`. Not
+  needed when `groups` is given as one value per sample.
 
 - groups:
 
-  `NULL` (the default), or the name of a categorical variable of `data`
-  that is a term of `formula`, with at least three levels: the grouping
-  the post-hoc tests
+  The term of interest. With `formula`, `NULL` (the default) or the name
+  of a variable of `data` that is a term of `formula`: the grouping the
+  post-hoc tests
   ([`ancombc_global()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
   [`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
   [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
   [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md))
-  compare by default. It doesn't change the results (scikit-bio's
-  `grouping`).
+  compare by default (scikit-bio's `grouping`), which must then be
+  categorical with at least three levels. It doesn't change the fit.
+  Without `formula`, it is the model: `groups` alone is
+  `formula = ~ groups`, given as the name of a column of `data` or as
+  one value per sample (which becomes the variable `group`), as for
+  [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md)'s
+  other methods.
 
 - margin:
 

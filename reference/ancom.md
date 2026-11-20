@@ -119,11 +119,11 @@ feature, in the order of `counts`, with columns:
 - `reject`: `TRUE` for the features declared differentially abundant
   (scikit-bio's `Signif`).
 
-Attributes: `groups` (the groups, in order), `sig_test`, `p_adjust`,
-`alpha`, `tau`, `theta`, `cutoff` (the chosen \\\nu\\, as a proportion
-of the number of features, or `NA` when nothing could be rejected
-because the largest \\W\\ was below `theta`), and `pseudocount` (the
-pseudocount used; `0` for none).
+Attributes: `method` (`"ancom"`), `groups` (the groups, in order),
+`sig_test`, `p_adjust`, `alpha`, `tau`, `theta`, `cutoff` (the chosen
+\\\nu\\, as a proportion of the number of features, or `NA` when nothing
+could be rejected because the largest \\W\\ was below `theta`), and
+`pseudocount` (the pseudocount used; `0` for none).
 
 ANCOM gives **no effect size and no p-value per feature**, only \\W\\
 and a decision. For effect sizes and their uncertainty, see
@@ -279,7 +279,7 @@ Microbiology*, 8, 2114.
 #> 5 b5          1  FALSE
 #> 6 b6          0  FALSE
 #> 7 b7          1  FALSE
-#> # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
+#> # Attributes: method, groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
 #> #   pseudocount
     plot(res)
 
@@ -297,6 +297,6 @@ Microbiology*, 8, 2114.
 #> 4 Haemophilus           0  FALSE
 #> 5 Propionibacterium     0  FALSE
 #> 6 Staphylococcus        0  FALSE
-#> # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
+#> # Attributes: method, groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
 #> #   pseudocount
 ```

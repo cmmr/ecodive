@@ -79,7 +79,7 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
 <dd><p>Value added to counts to handle zeros when
-<code>norm = 'clr'</code>. Ignored for other normalization methods. See
+<code>norm = 'clr'</code> or <code>'log'</code>. Ignored for other normalization methods. See
 <strong>Pseudocount</strong> section.</p></dd>
 
 
@@ -111,7 +111,7 @@ which <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> foll
 for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
 order. <code>clust</code> needs every distance, so it cannot be used with
 <code>pairs</code>. <code><a href="rho_p.html">rho_p()</a></code>'s similarities are clustered as \(1 -
-\rho_p\).</p></dd>
+       \rho_p\).</p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>

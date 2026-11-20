@@ -117,14 +117,14 @@ name (or, without row names, in the same order). Default: <code>NULL</code>.</p>
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
 <dd><p>Normalize the count table first, as in <code><a href="rda.html">rda()</a></code>: <code>'none'</code>,
-<code>'percent'</code>, <code>'chord'</code>, <code>'hellinger'</code>, <code>'binary'</code>, <code>'clr'</code>, or
-<code>'rclr'</code>. <code>vegan::varpart(transfo = 'hel')</code> is <code>norm = 'hellinger'</code>. Not used for distances, and only <code>'none'</code> with
+<code>'percent'</code>, <code>'chord'</code>, <code>'hellinger'</code>, <code>'binary'</code>, <code>'clr'</code>,
+<code>'rclr'</code>, or <code>'log'</code>. <code>vegan::varpart(transfo = 'hel')</code> is <code>norm = 'hellinger'</code>. Not used for distances, and only <code>'none'</code> with
 <code>chisquare = TRUE</code>. Default: <code>'none'</code>.</p></dd>
 
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
 <dd><p>Value added to counts to handle zeros when
-<code>norm = 'clr'</code>. Ignored for other normalization methods. See
+<code>norm = 'clr'</code> or <code>'log'</code>. Ignored for other normalization methods. See
 <strong>Pseudocount</strong> section.</p></dd>
 
 
@@ -258,9 +258,11 @@ seamlessly supports objects from the following biological data packages:</p><ul>
     <h2 id="pseudocount">Pseudocount<a class="anchor" aria-label="anchor" href="#pseudocount"></a></h2>
 
 
-<p>The <code>pseudocount</code> parameter is only relevant when <code>norm = 'clr'</code>.</p>
-<p>Zeros are undefined in the centered log-ratio (CLR) transformation. If
-<code>norm = 'clr'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
+<p>The <code>pseudocount</code> parameter is only relevant when <code>norm = 'clr'</code>
+or <code>norm = 'log'</code>.</p>
+<p>Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If <code>norm</code> is <code>'clr'</code> or
+<code>'log'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (<code>min(x[x&gt;0]) / 2</code>) and issues a warning.</p>
 <p>To suppress the warning, provide an explicit value (e.g., <code>1</code>), or

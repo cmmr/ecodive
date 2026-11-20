@@ -130,8 +130,11 @@ matches the input class.</p>
     <h2 id="auto-depth-selection">Auto-Depth Selection<a class="anchor" aria-label="anchor" href="#auto-depth-selection"></a></h2>
 
 
-<p>If <code>depth</code> is <code>NULL</code>, the function defaults to the highest depth that retains
-at least 10% of the total observations in the dataset.</p>
+<p>If <code>depth</code> is <code>NULL</code>, the depth is the smallest library size at which
+the observations kept (that depth times the number of samples with at
+least that many) make up at least 10% of all the observations in the
+table. <code><a href="rarefied_diversity.html">beta_div_rarefied()</a></code> and <code><a href="rarefied_diversity.html">alpha_div_rarefied()</a></code> choose their
+default depth the same way.</p>
     </div>
     <div class="section level2">
     <h2 id="one-depth-per-sample">One Depth per Sample<a class="anchor" aria-label="anchor" href="#one-depth-per-sample"></a></h2>

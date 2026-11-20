@@ -50,6 +50,9 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/clark.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/count_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/count_ords.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/da_test.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/da_tests.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/da_wilcoxon.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dbrda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dirmult_ttest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dist_ord.html</loc></url>
@@ -60,6 +63,8 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/documentation.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dpcoa.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ecodive_display.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/ecodive_types.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/enterotype.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/envfit.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/euclidean.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ex_counts.html</loc></url>
@@ -116,6 +121,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_ttest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.html</loc></url>
@@ -123,6 +129,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_simper.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_test.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_types.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plsda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/print_ecodive.html</loc></url>
@@ -131,6 +138,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/pseudocount_section.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/psym_chisq.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/qmp.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/rarefied_diversity.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefy.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/read_tree.html</loc></url>

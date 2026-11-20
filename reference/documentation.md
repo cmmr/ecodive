@@ -49,6 +49,9 @@ documentation
 
   - `'rclr'`: Robust centered log ratio.
 
+  - `'log'`: Log relative abundance (log-TSS), with `pseudocount` added
+    to every value first.
+
   Default: `'none'`.
 
 - pairs:
@@ -111,8 +114,8 @@ documentation
 
 - pseudocount:
 
-  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
-  other normalization methods. See **Pseudocount** section.
+  Value added to counts to handle zeros when `norm = 'clr'` or `'log'`.
+  Ignored for other normalization methods. See **Pseudocount** section.
 
 - strata:
 

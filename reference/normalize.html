@@ -85,6 +85,11 @@ too, so the result is dense. See <strong>Pseudocount</strong> below.</p></li>
 <li><p><code>'rclr'</code>: Robust centered log ratio: \(\log(x)\) minus the mean
 log of the sample's non-zero counts, for non-zero counts only; zeros
 stay 0.</p></li>
+<li><p><code>'log'</code>: Log relative abundance (log-TSS): \(\log\) of each
+sample's proportions after adding <code>pseudocount</code> to every value,
+\(\log((x + pseudocount) / \sum (x + pseudocount))\). It is the
+clr shifted by one constant per sample. Zeros get a value too, so the
+result is dense. See <strong>Pseudocount</strong> below.</p></li>
 <li><p><code>'none'</code>: No transformation.</p></li>
 </ul></dd>
 
@@ -97,7 +102,7 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
 <dd><p>Value added to counts to handle zeros when
-<code>norm = 'clr'</code>. Ignored for other normalization methods. See
+<code>norm = 'clr'</code> or <code>'log'</code>. Ignored for other normalization methods. See
 <strong>Pseudocount</strong> section.</p></dd>
 
 
@@ -117,7 +122,7 @@ same class, and a <span class="pkg">slam</span> <code>simple_triplet_matrix</cod
 <li><p>A <code>phyloseq</code>, <code>rbiom</code>, or <code>SummarizedExperiment</code> object gives its
 normalized count matrix (not the object), in that object's
 orientation.</p></li>
-</ul><p><code>norm = 'clr'</code> always gives a dense base <code>matrix</code>, since every zero
+</ul><p><code>norm = 'clr'</code> (and <code>'log'</code>) always gives a dense base <code>matrix</code>, since every zero
 becomes a (usually negative) value, which can take far more memory than
 a sparse input. <code><a href="beta_div.html">beta_div()</a></code>, <code><a href="pca.html">pca()</a></code>, and <code><a href="envfit.html">envfit()</a></code> accept <code>norm = 'clr'</code> themselves and never make that dense copy, so prefer them where
 you can. <code>normalize()</code> warns when the result would have more than
@@ -138,9 +143,11 @@ Whichever package was attached last masks the other's, so call
     <h2 id="pseudocount">Pseudocount<a class="anchor" aria-label="anchor" href="#pseudocount"></a></h2>
 
 
-<p>The <code>pseudocount</code> parameter is only relevant when <code>norm = 'clr'</code>.</p>
-<p>Zeros are undefined in the centered log-ratio (CLR) transformation. If
-<code>norm = 'clr'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
+<p>The <code>pseudocount</code> parameter is only relevant when <code>norm = 'clr'</code>
+or <code>norm = 'log'</code>.</p>
+<p>Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If <code>norm</code> is <code>'clr'</code> or
+<code>'log'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (<code>min(x[x&gt;0]) / 2</code>) and issues a warning.</p>
 <p>To suppress the warning, provide an explicit value (e.g., <code>1</code>), or

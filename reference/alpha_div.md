@@ -50,6 +50,9 @@ alpha_div(
 
   - `'rclr'`: Robust centered log ratio.
 
+  - `'log'`: Log relative abundance (log-TSS), with `pseudocount` added
+    to every value first.
+
   Default: `'none'`.
 
 - cutoff:

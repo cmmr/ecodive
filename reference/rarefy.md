@@ -77,8 +77,14 @@ matches the input class.
 
 ## Auto-Depth Selection
 
-If `depth` is `NULL`, the function defaults to the highest depth that
-retains at least 10% of the total observations in the dataset.
+If `depth` is `NULL`, the depth is the smallest library size at which
+the observations kept (that depth times the number of samples with at
+least that many) make up at least 10% of all the observations in the
+table.
+[`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
+and
+[`alpha_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
+choose their default depth the same way.
 
 ## One Depth per Sample
 

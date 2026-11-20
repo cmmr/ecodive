@@ -658,6 +658,62 @@ PhILR coordinates, with the weights of Silverman et al. (2017):</p>
 <span><span class="co">#&gt; Total    39    30912 1.0000                 </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<p><strong>Rarefied or compositional?</strong> Rarefying every sample to
+the same depth is the other answer to uneven sequencing depth, and
+Schloss (<strong><a href="https://doi.org/10.1128/msphere.00354-23" class="external-link">2024</a></strong>,
+<strong><a href="https://doi.org/10.1128/msystems.00930-26" class="external-link">2026</a></strong>)
+argues that it controls for depth better than robust Aitchison PCA does.
+Averaging many rarefactions (<code><a href="../reference/rarefied_diversity.html">beta_div_rarefied()</a></code>) removes
+most of the noise that a single one adds. A Procrustes test shows how
+far the two views agree on these samples, and <code><a href="../reference/envfit.html">envfit()</a></code>
+whether either ordination still follows sequencing depth:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dm_rare</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rarefied_diversity.html">beta_div_rarefied</a></span><span class="op">(</span><span class="va">counts</span>, <span class="st">'bray'</span>, times <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">dm_rare</span></span>
+<span><span class="co">#&gt; # A dist: 40 samples (lower triangle)</span></span>
+<span><span class="co">#&gt; # Bray-Curtis Dissimilarity (rarefied 20×)</span></span>
+<span><span class="co">#&gt;       S01   S02   S03   S04   S05   S06   S07   S08   S09   S10</span></span>
+<span><span class="co">#&gt; S02 0.244</span></span>
+<span><span class="co">#&gt; S03 0.367 0.298</span></span>
+<span><span class="co">#&gt; S04 0.275 0.227 0.32</span></span>
+<span><span class="co">#&gt; S05 0.306 0.305 0.296 0.272</span></span>
+<span><span class="co">#&gt; S06 0.278 0.281 0.371 0.33  0.384</span></span>
+<span><span class="co">#&gt; S07 0.251 0.178 0.302 0.238 0.279 0.287</span></span>
+<span><span class="co">#&gt; S08 0.329 0.272 0.265 0.237 0.256 0.33  0.255</span></span>
+<span><span class="co">#&gt; S09 0.24  0.235 0.271 0.204 0.313 0.259 0.217 0.219</span></span>
+<span><span class="co">#&gt; S10 0.33  0.276 0.265 0.259 0.264 0.346 0.257 0.242 0.259</span></span>
+<span><span class="co">#&gt; S11 0.281 0.278 0.315 0.314 0.322 0.305 0.285 0.333 0.268 0.323</span></span>
+<span><span class="co">#&gt; # … 29 more samples</span></span>
+<span><span class="co">#&gt; # Use print(x, n = ...) to see more samples</span></span>
+<span><span class="co">#&gt; # Attributes: method, depth, dropped</span></span>
+<span><span class="va">ord_rare</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcoa.html">pcoa</a></span><span class="op">(</span><span class="va">dm_rare</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/procrustes_test.html">procrustes_test</a></span><span class="op">(</span><span class="va">ord_rare</span>, <span class="va">ord</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Procrustes randomization test (PROTEST)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; r = 0.7434, p = 0.001, z =     8</span></span>
+<span><span class="co">#&gt; Permutations: 999 (free)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Symmetric Procrustes sum of squares (m^2): 0.4474</span></span>
+<span><span class="co">#&gt; Samples: 40, axes: 2</span></span>
+<span></span>
+<span><span class="va">log_depth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>log_depth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/envfit.html">envfit</a></span><span class="op">(</span><span class="va">ord_rare</span>, <span class="va">log_depth</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A data.frame: 1 × 7</span></span>
+<span><span class="co">#&gt; # Fitted variables on Principal Coordinates Analysis of Bray-Curtis Dissimilarity (rarefied 20×)</span></span>
+<span><span class="co">#&gt;           variable  level   PCoA1 PCoA2     r2 p_value     z</span></span>
+<span><span class="co">#&gt;           &lt;chr&gt;     &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; log_depth log_depth NA    0.00208    -1 0.0806   0.209 0.616</span></span>
+<span><span class="co">#&gt; # Attributes: r2_perm, n_perm</span></span>
+<span><span class="fu"><a href="../reference/envfit.html">envfit</a></span><span class="op">(</span><span class="va">ord</span>, <span class="va">log_depth</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A data.frame: 1 × 7</span></span>
+<span><span class="co">#&gt; # Fitted variables on Robust Aitchison PCA</span></span>
+<span><span class="co">#&gt;           variable  level  RPCA1  RPCA2    r2 p_value     z</span></span>
+<span><span class="co">#&gt;           &lt;chr&gt;     &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; log_depth log_depth NA    -0.166 -0.986 0.499   0.001  8.75</span></span>
+<span><span class="co">#&gt; # Attributes: r2_perm, n_perm</span></span></code></pre></div>
+<p>The larger an ordination’s r² for <code>log_depth</code>, the more it
+still reflects how deeply each sample happened to be sequenced rather
+than what is in it.</p>
 <p><strong>Used in practice.</strong></p>
 <ul>
 <li>Aitchison distance and clr PCA: <a href="https://doi.org/10.1128/mSphere.00327-17" class="external-link">Bian et al. (2017)</a>,
@@ -684,7 +740,7 @@ log ratio of the top ones over the bottom ones as a single per-sample
 variable. Qurro does this interactively (<strong><a href="https://doi.org/10.1093/nargab/lqaa023" class="external-link">Fedarko et
 al. 2020</a></strong>). Choose among prevalent taxa: rare taxa can have
 large loadings from noise alone, and their sums are often zero.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">load_ax1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ord</span>, <span class="st">'loadings'</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">load_ax1</span> <span class="op">&lt;-</span> <span class="va">load_ax1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">load_ax1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">taxa</span><span class="op">[</span><span class="va">prevalent</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">top</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">load_ax1</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
@@ -695,7 +751,7 @@ large loadings from noise alone, and their sums are often zero.</p>
 <span><span class="co">#&gt; [1] "ASV007" "ASV008" "ASV006" "ASV009" "ASV010"</span></span></code></pre></div>
 <p><code><a href="../reference/log_ratio.html">log_ratio()</a></code> gives one value per sample, which can go
 straight into any test or model, or into the metadata:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/log_ratio.html">log_ratio</a></span><span class="op">(</span><span class="va">counts</span>, numerator <span class="op">=</span> <span class="va">top</span>, denominator <span class="op">=</span> <span class="va">bottom</span><span class="op">)</span>   <span class="co"># log of summed counts</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">lr</span>, <span class="va">groups</span>, <span class="va">median</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  control  treated </span></span>
@@ -705,13 +761,13 @@ straight into any test or model, or into the metadata:</p>
 <p>Which way the axis points depends on its sign, so check which group
 the “top” taxa belong to before interpreting (here, compare with the
 true <code>fold</code>):</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fold</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">top</span>, <span class="va">bottom</span><span class="op">)</span>, <span class="va">taxa</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;  [1] 8.00 8.00 8.00 8.00 8.00 0.25 0.25 0.25 0.25 0.25</span></span></code></pre></div>
 <p>A <strong>balance</strong> (<code><a href="../reference/balance.html">balance()</a></code>) uses geometric
 means instead of sums, scaled so that balances of different sizes are
 comparable; it is one coordinate of an <code><a href="../reference/ilr.html">ilr()</a></code>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/balance.html">balance</a></span><span class="op">(</span><span class="va">counts</span>, numerator <span class="op">=</span> <span class="va">top</span>, denominator <span class="op">=</span> <span class="va">bottom</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">b</span>, <span class="va">groups</span>, <span class="va">median</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  control  treated </span></span>
@@ -779,7 +835,7 @@ removes it</td>
 et al. 2015) counts, for each taxon, how many of its log ratios with
 other taxa differ between groups (its W), and declares the taxa with the
 largest W differentially abundant:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_ancom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancom.html">ancom</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">res_ancom</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">res_ancom</span><span class="op">$</span><span class="va">W</span><span class="op">)</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt; # A data.frame: 150 × 3</span></span>
@@ -798,7 +854,7 @@ largest W differentially abundant:</p>
 <span><span class="co">#&gt; 5  ASV005     51  FALSE</span></span>
 <span><span class="co">#&gt; # … 140 more rows</span></span>
 <span><span class="co">#&gt; # Use print(x, n = ...) to see more rows</span></span>
-<span><span class="co">#&gt; # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,</span></span>
+<span><span class="co">#&gt; # Attributes: method, groups, sig_test, p_adjust, alpha, tau, theta, cutoff,</span></span>
 <span><span class="co">#&gt; #   pseudocount</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span>, rejected <span class="op">=</span> <span class="va">res_ancom</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        rejected</span></span>
@@ -815,7 +871,7 @@ Monte Carlo draws from a Dirichlet distribution, takes the clr of each
 draw, and tests each taxon. <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></code> is scikit-bio’s
 version, with Welch’s t-test; <code>contrast</code> is
 <code>c(treatment, reference)</code>:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">res_dm</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">$</span><span class="va">p_adjusted</span><span class="op">)</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt; # A data.frame: 150 × 8</span></span>
@@ -834,8 +890,8 @@ version, with Welch’s t-test; <code>contrast</code> is
 <span><span class="co">#&gt; 6  ASV006   -8.44   -2.67    -3.75    -1.83 7.14e-09   1.01e-06   TRUE</span></span>
 <span><span class="co">#&gt; # … 140 more rows</span></span>
 <span><span class="co">#&gt; # Use print(x, n = ...) to see more rows</span></span>
-<span><span class="co">#&gt; # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,</span></span>
-<span><span class="co">#&gt; #   p_adjust, seed</span></span>
+<span><span class="co">#&gt; # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,</span></span>
+<span><span class="co">#&gt; #   conf_level, p_adjust, seed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span>, rejected <span class="op">=</span> <span class="va">res_dm</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        rejected</span></span>
 <span><span class="co">#&gt; changed FALSE TRUE</span></span>
@@ -846,7 +902,7 @@ version, with Welch’s t-test; <code>contrast</code> is
 <p>It finds all ten changed taxa and nothing else. But compare its fold
 changes with the truth, log2(8) = 3 for the blooms and log2(1/4) = −2
 for the declines:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">res_dm</span><span class="op">$</span><span class="va">log2_fc</span><span class="op">[</span><span class="va">changed</span><span class="op">]</span>, <span class="va">fold</span><span class="op">[</span><span class="va">changed</span><span class="op">]</span>, <span class="va">median</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      0.25         8 </span></span>
 <span><span class="co">#&gt; -2.672671  2.277540</span></span></code></pre></div>
@@ -860,7 +916,7 @@ relative abundances the reference is the sample’s total, which the bloom
 inflates; with the clr it is the sample’s geometric mean over all taxa.
 Compare the estimated group difference (natural log) for the prevalent
 unchanged taxa, whose true difference is 0:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ok</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="va">changed</span> <span class="op">&amp;</span> <span class="va">prevalent</span></span>
 <span><span class="va">d_rel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rel</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'treated'</span>, <span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span></span>
 <span>         <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rel</span><span class="op">[</span><span class="va">groups</span> <span class="op">==</span> <span class="st">'control'</span>, <span class="va">ok</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
@@ -895,7 +951,7 @@ zero. In <code><a href="../reference/dirmult_ttest.html">dirmult_ttest()</a></co
 standard deviation, in log2 units, of a random shift in the typical
 taxon’s abundance between the groups, drawn afresh in every Monte Carlo
 draw. Nixon et al. suggest 0.5; use more draws with it:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_sm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">sd</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="../reference/dirmult_ttest.html">dirmult_ttest</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'treated'</span>, <span class="st">'control'</span><span class="op">)</span>,</span>
 <span>                scale_sd <span class="op">=</span> <span class="va">sd</span>, n_draws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">)</span></span>
@@ -931,7 +987,7 @@ of rare taxa.</p>
 they are too sparse to estimate well, and here they are the source of
 every false positive (without the filter, ANCOM-BC2 calls 7 of
 them).</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">counts</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">0.7</span>   <span class="co"># taxa in at least 70% of samples</span></span>
 <span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="va">groups</span>, row.names <span class="op">=</span> <span class="va">samples</span><span class="op">)</span></span>
 <span></span>
@@ -982,7 +1038,7 @@ does a little less well on this table, with two false positives and
 estimates further from the truth. It needs a pseudocount for the zeros,
 and the bias a pseudocount introduces differs between rare and abundant
 taxa, so a single shift can’t remove it all:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc</a></span><span class="op">(</span><span class="va">counts</span><span class="op">[</span>, <span class="va">keep</span><span class="op">]</span>, <span class="op">~</span> <span class="va">group</span>, <span class="va">meta</span>, pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="va">fit1</span><span class="op">[</span><span class="va">fit1</span><span class="op">$</span><span class="va">covariate</span> <span class="op">==</span> <span class="st">'grouptreated'</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>changed <span class="op">=</span> <span class="va">changed</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, rejected <span class="op">=</span> <span class="va">res1</span><span class="op">$</span><span class="va">reject</span><span class="op">)</span></span>
@@ -997,7 +1053,7 @@ taxa, so a single shift can’t remove it all:</p>
 of a group has no log fold change to estimate.
 <code><a href="../reference/structural_zeros.html">structural_zeros()</a></code> finds such taxa, so they can be reported
 as present in one group only:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/structural_zeros.html">structural_zeros</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">groups</span><span class="op">)</span></span>
 <span><span class="va">sz</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">sz</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        control treated</span></span>
@@ -1011,7 +1067,7 @@ differ between any groups?), <code><a href="../reference/ancombc_global.html">an
 of levels), <code><a href="../reference/ancombc_global.html">ancombc_dunnett()</a></code> (each level against the
 reference) and <code><a href="../reference/ancombc_global.html">ancombc_trend()</a></code> (a monotone trend across
 ordered levels). Each has a <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ancombc.html">ancombc2</a></span><span class="op">(</span><span class="va">counts</span>, <span class="op">~</span> <span class="va">diet</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">meta3</span>, groups <span class="op">=</span> <span class="st">'diet'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/ancombc_global.html">ancombc_global</a></span><span class="op">(</span><span class="va">fit3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/ancombc_global.html">ancombc_pairwise</a></span><span class="op">(</span><span class="va">fit3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -1038,7 +1094,7 @@ al. 2017</a></strong>).</p>
 <code><a href="../reference/phi_s.html">phi_s()</a></code> compute every pair of taxa in parallel C, and
 return a <code>dist</code> object over the taxa (here on the zero-free
 table from the <a href="#zeros">Zeros</a> section):</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rho</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rho_p.html">rho_p</a></span><span class="op">(</span><span class="va">zf</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">rho</span><span class="op">)</span>   <span class="co"># one value for each pair of the 150 taxa</span></span>
 <span><span class="co">#&gt; [1] 11175</span></span>
@@ -1083,7 +1139,7 @@ abundances by the load (<strong><a href="https://doi.org/10.1371/journal.pone.02
 the same number of reads per cell.</p>
 <p>Here the load is measured with 20% error, as a real measurement would
 be:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">measured</span> <span class="op">&lt;-</span> <span class="va">load</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">0</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">q_scale</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qmp.html">qmp_scale</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">measured</span><span class="op">)</span>            <span class="co"># relative abundance x load</span></span>
@@ -1134,7 +1190,7 @@ separates differences between subjects from changes over time.</li>
 several tables measured on the same samples (e.g. 16S, metagenomics and
 metabolomics) with shared sample scores.</li>
 </ul>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Planned in ecodive:</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">ctf</span><span class="op">(</span><span class="va">counts</span>, subjects <span class="op">=</span> <span class="st">'subject_id'</span>, states <span class="op">=</span> <span class="st">'week'</span>, data <span class="op">=</span> <span class="va">meta</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">rpca_joint</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>amplicon <span class="op">=</span> <span class="va">counts16s</span>, metabolites <span class="op">=</span> <span class="va">metab</span><span class="op">)</span>, n_axes <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>

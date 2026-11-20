@@ -526,6 +526,69 @@ permanova(dm_philr, groups, seed = 1)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
+**Rarefied or compositional?** Rarefying every sample to the same depth
+is the other answer to uneven sequencing depth, and Schloss
+(**[2024](https://doi.org/10.1128/msphere.00354-23)**,
+**[2026](https://doi.org/10.1128/msystems.00930-26)**) argues that it
+controls for depth better than robust Aitchison PCA does. Averaging many
+rarefactions
+([`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md))
+removes most of the noise that a single one adds. A Procrustes test
+shows how far the two views agree on these samples, and
+[`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) whether
+either ordination still follows sequencing depth:
+
+``` r
+
+dm_rare  <- beta_div_rarefied(counts, 'bray', times = 20)
+dm_rare
+#> # A dist: 40 samples (lower triangle)
+#> # Bray-Curtis Dissimilarity (rarefied 20×)
+#>       S01   S02   S03   S04   S05   S06   S07   S08   S09   S10
+#> S02 0.244
+#> S03 0.367 0.298
+#> S04 0.275 0.227 0.32
+#> S05 0.306 0.305 0.296 0.272
+#> S06 0.278 0.281 0.371 0.33  0.384
+#> S07 0.251 0.178 0.302 0.238 0.279 0.287
+#> S08 0.329 0.272 0.265 0.237 0.256 0.33  0.255
+#> S09 0.24  0.235 0.271 0.204 0.313 0.259 0.217 0.219
+#> S10 0.33  0.276 0.265 0.259 0.264 0.346 0.257 0.242 0.259
+#> S11 0.281 0.278 0.315 0.314 0.322 0.305 0.285 0.333 0.268 0.323
+#> # … 29 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: method, depth, dropped
+ord_rare <- pcoa(dm_rare, n_axes = 2)
+procrustes_test(ord_rare, ord, seed = 1)
+#> Procrustes randomization test (PROTEST)
+#> 
+#> r = 0.7434, p = 0.001, z =     8
+#> Permutations: 999 (free)
+#> 
+#> Symmetric Procrustes sum of squares (m^2): 0.4474
+#> Samples: 40, axes: 2
+
+log_depth <- data.frame(log_depth = log(rowSums(counts)))
+envfit(ord_rare, log_depth, seed = 1)
+#> # A data.frame: 1 × 7
+#> # Fitted variables on Principal Coordinates Analysis of Bray-Curtis Dissimilarity (rarefied 20×)
+#>           variable  level   PCoA1 PCoA2     r2 p_value     z
+#>           <chr>     <chr>   <dbl> <dbl>  <dbl>   <dbl> <dbl>
+#> log_depth log_depth NA    0.00208    -1 0.0806   0.209 0.616
+#> # Attributes: r2_perm, n_perm
+envfit(ord, log_depth, seed = 1)
+#> # A data.frame: 1 × 7
+#> # Fitted variables on Robust Aitchison PCA
+#>           variable  level  RPCA1  RPCA2    r2 p_value     z
+#>           <chr>     <chr>  <dbl>  <dbl> <dbl>   <dbl> <dbl>
+#> log_depth log_depth NA    -0.166 -0.986 0.499   0.001  8.75
+#> # Attributes: r2_perm, n_perm
+```
+
+The larger an ordination’s r² for `log_depth`, the more it still
+reflects how deeply each sample happened to be sequenced rather than
+what is in it.
+
 **Used in practice.**
 
 - Aitchison distance and clr PCA: [Bian et al.
@@ -664,7 +727,7 @@ res_ancom[order(-res_ancom$W), ]
 #> 5  ASV005     51  FALSE
 #> # … 140 more rows
 #> # Use print(x, n = ...) to see more rows
-#> # Attributes: groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
+#> # Attributes: method, groups, sig_test, p_adjust, alpha, tau, theta, cutoff,
 #> #   pseudocount
 table(changed = changed, rejected = res_ancom$reject)
 #>        rejected
@@ -709,8 +772,8 @@ res_dm[order(res_dm$p_adjusted), ]
 #> 6  ASV006   -8.44   -2.67    -3.75    -1.83 7.14e-09   1.01e-06   TRUE
 #> # … 140 more rows
 #> # Use print(x, n = ...) to see more rows
-#> # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,
-#> #   p_adjust, seed
+#> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
+#> #   conf_level, p_adjust, seed
 table(changed = changed, rejected = res_dm$reject)
 #>        rejected
 #> changed FALSE TRUE

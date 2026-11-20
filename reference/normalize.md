@@ -45,6 +45,12 @@ normalize(counts, norm, margin = 1L, pseudocount = NULL, cpus = n_cpus())
     of the sample's non-zero counts, for non-zero counts only; zeros
     stay 0.
 
+  - `'log'`: Log relative abundance (log-TSS): \\\log\\ of each sample's
+    proportions after adding `pseudocount` to every value, \\\log((x +
+    pseudocount) / \sum (x + pseudocount))\\. It is the clr shifted by
+    one constant per sample. Zeros get a value too, so the result is
+    dense. See **Pseudocount** below.
+
   - `'none'`: No transformation.
 
 - margin:
@@ -55,8 +61,8 @@ normalize(counts, norm, margin = 1L, pseudocount = NULL, cpus = n_cpus())
 
 - pseudocount:
 
-  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
-  other normalization methods. See **Pseudocount** section.
+  Value added to counts to handle zeros when `norm = 'clr'` or `'log'`.
+  Ignored for other normalization methods. See **Pseudocount** section.
 
 - cpus:
 
@@ -80,9 +86,9 @@ form where zeros stay zero:
   normalized count matrix (not the object), in that object's
   orientation.
 
-`norm = 'clr'` always gives a dense base `matrix`, since every zero
-becomes a (usually negative) value, which can take far more memory than
-a sparse input.
+`norm = 'clr'` (and `'log'`) always gives a dense base `matrix`, since
+every zero becomes a (usually negative) value, which can take far more
+memory than a sparse input.
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), and
 [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) accept
@@ -104,12 +110,14 @@ sure of getting this one.
 
 ## Pseudocount
 
-The `pseudocount` parameter is only relevant when `norm = 'clr'`.
+The `pseudocount` parameter is only relevant when `norm = 'clr'` or
+`norm = 'log'`.
 
-Zeros are undefined in the centered log-ratio (CLR) transformation. If
-`norm = 'clr'`, `pseudocount` is `NULL` (the default), and zeros are
-detected, the function uses half the minimum non-zero value
-(`min(x[x>0]) / 2`) and issues a warning.
+Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If `norm` is `'clr'` or `'log'`,
+`pseudocount` is `NULL` (the default), and zeros are detected, the
+function uses half the minimum non-zero value (`min(x[x>0]) / 2`) and
+issues a warning.
 
 To suppress the warning, provide an explicit value (e.g., `1`), or
 replace the zeros first with

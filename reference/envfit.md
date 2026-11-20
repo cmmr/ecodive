@@ -75,13 +75,13 @@ envfit(
   Normalize `counts` before fitting them, as in
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md):
   `'none'`, `'percent'`, `'chord'`, `'hellinger'`, `'binary'`, `'clr'`,
-  or `'rclr'`. Default: `'none'`. `margin`, `norm`, and `pseudocount`
-  apply only to `counts`.
+  `'rclr'`, or `'log'`. Default: `'none'`. `margin`, `norm`, and
+  `pseudocount` apply only to `counts`.
 
 - pseudocount:
 
-  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
-  other normalization methods. See **Pseudocount** section.
+  Value added to counts to handle zeros when `norm = 'clr'` or `'log'`.
+  Ignored for other normalization methods. See **Pseudocount** section.
 
 - axes:
 

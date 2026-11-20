@@ -894,6 +894,29 @@
   tables stay sparse: 2,000 samples by 5,000 taxa take under 0.1
   seconds.
 
+- New
+  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
+  clusters samples into community types as Arumugam et al. (2011) did:
+  partitioning around medoids (PAM) on Jensen-Shannon distances (or any
+  `dist`), with the number of types chosen by the Calinski-Harabasz
+  index and each sample’s fit given by its silhouette. PAM, the
+  silhouettes and the index are threaded C written from the published
+  algorithms; medoids, assignments, objectives and silhouettes match
+  [`cluster::pam()`](https://rdrr.io/pkg/cluster/man/pam.html) and
+  [`cluster::silhouette()`](https://rdrr.io/pkg/cluster/man/silhouette.html),
+  and the index matches `clusterSim::index.G1()` as Arumugam et al.’s
+  script calls it (`ch = "medoids"`), or is the distances’ pseudo-F
+  (`ch = "centroids"`). The result, a data frame of class
+  `ecodive_types` (see
+  [`?ecodive_types`](https://cmmr.github.io/ecodive/reference/ecodive_types.md)),
+  holds each sample’s type, as a factor to use as `groups` in any test,
+  and as attributes each type’s medoid, size and mean composition (with
+  its most abundant feature) and the index for every number of types
+  tried. [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws
+  the types’ mean compositions or the index;
+  [`print()`](https://rdrr.io/r/base/print.html) shows the types, the
+  selection and the first samples.
+
 - New [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md)
   runs ANCOM (Mandal et al. 2015), the analysis of composition of
   microbiomes: it tests every log ratio between two features for a
@@ -1012,10 +1035,95 @@
   finds features absent from a group (Kaul et al. 2017), as scikit-bio’s
   `struc_zero()`, returning a features-by-groups logical matrix.
 
+- New [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md)
+  runs any differential-abundance method by name, as
+  [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md)
+  runs ordinations:
+  [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md),
+  [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+  and the new
+  [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
+  [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  and
+  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  ([`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md),
+  [`match_da_test()`](https://cmmr.github.io/ecodive/reference/da_tests.md);
+  `'Mann-Whitney'`, `'t-test'`, `'lm'` or `'ALDEx2'` work too). Its
+  result is the method’s own, unchanged. It sets one convention for what
+  to compare: group methods take `groups` (a column of `data`, or one
+  value per sample); model methods take `formula`, with `groups` naming
+  the term of interest, and `groups` alone is `formula = ~ groups`.
+  [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md) and
+  [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
+  follow it: `formula` and `data` now default to `NULL`,
+  `ancombc(counts, groups = grp)` fits `~ group`, and their `groups`
+  need only be a term of `formula`; that it is categorical with three or
+  more levels is now checked by the post-hoc tests that need it.
+  [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md) and
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+  results gain a `method` attribute, as
+  [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)’s
+  has.
+
+- New
+  [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
+  [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  and
+  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+  test every feature of a normalized table with the classical tests that
+  benchmarks found to control false discoveries (Wirbel et al. 2024;
+  Pelto et al. 2025): Wilcoxon’s rank-sum test, Welch’s (or Student’s,
+  `var_equal = TRUE`) t-test, and a linear model of any `formula`, each
+  feature’s p-values adjusted with `p_adjust` (default `'holm'`, as the
+  other DA methods). They give the results of
+  [`wilcox.test()`](https://rdrr.io/r/stats/wilcox.test.html),
+  [`t.test()`](https://rdrr.io/r/stats/t.test.html) and `summary(lm())`
+  / [`confint()`](https://rdrr.io/r/stats/confint.html) feature by
+  feature, to about 1e-12, from a sparse table without a dense copy, in
+  parallel C, identical for any `cpus`. `norm` chooses the values
+  compared (`'clr'` by default; `'log'`, `'percent'`, `'rclr'`, whose
+  zeros are left out, …). Their results print as tables and
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) as volcano
+  plots.
+
+- New `norm = 'log'`, wherever `norm` is offered (beta diversity
+  metrics, [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+  [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),
+  [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md),
+  …): the log of each sample’s proportions after adding `pseudocount`
+  (log-TSS), with the same pseudocount rule as `'clr'`, of which it is a
+  shift by one constant per sample.
+
 - `rarefy(depth =)` now also takes one depth per sample (matched to the
   samples by name when named). `drop` and `warn` then compare each
   sample with its own depth. A single depth gives exactly the same
   results as before.
+
+- New
+  [`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
+  and
+  [`alpha_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
+  rarefy a table many times (`times = 100` by default), compute any beta
+  or alpha diversity metric from each rarefied table, and average the
+  results: the mean (as `vegan::avgdist()` and mothur), the median, or
+  for beta diversity the medoid (the matrix of the rarefaction closest
+  to all the others, as in q2-boots). `sd = TRUE` adds each value’s
+  standard deviation over the rarefactions. Iteration t is exactly
+  `rarefy(counts, depth, seed = seed + t - 1)`, so results are
+  reproducible and the same for any `cpus`; the mean needs memory for
+  only a few distance matrices, and the median and medoid work through
+  the pairs of samples in blocks. Titles say so: an ordination of the
+  result is a “Principal Coordinates Analysis of Bray-Curtis
+  Dissimilarity (rarefied 100×)”.
+
+- [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md) of a
+  slam `simple_triplet_matrix` now draws exactly the same observations
+  as the same table in any other class, for the same `seed`. Before,
+  slam’s samples were seeded by their 1-based positions, so its draws
+  differed from those of a `matrix` or `dgCMatrix`. Rarefying slam input
+  therefore gives different (equally random) results than before.
 
 - New
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)

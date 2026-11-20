@@ -86,12 +86,14 @@ transformation).</p></li>
 <li><p><code>'binary'</code>: Unweighted presence/absence (each count is either 0 or 1).</p></li>
 <li><p><code>'clr'</code>: Centered log ratio.</p></li>
 <li><p><code>'rclr'</code>: Robust centered log ratio.</p></li>
+<li><p><code>'log'</code>: Log relative abundance (log-TSS), with <code>pseudocount</code> added
+to every value first.</p></li>
 </ul><p>Default: <code>'none'</code>.</p></dd>
 
 
 <dt id="arg-pseudocount">pseudocount<a class="anchor" aria-label="anchor" href="#arg-pseudocount"></a></dt>
 <dd><p>Value added to counts to handle zeros when
-<code>norm = 'clr'</code>. Ignored for other normalization methods. See
+<code>norm = 'clr'</code> or <code>'log'</code>. Ignored for other normalization methods. See
 <strong>Pseudocount</strong> section.</p></dd>
 
 
@@ -123,7 +125,7 @@ which <code><a href="plot.ecodive_dist.html">plot.ecodive_dist()</a></code> foll
 for the heatmap (<code>"average"</code>), and with <code>"none"</code> it keeps their
 order. <code>clust</code> needs every distance, so it cannot be used with
 <code>pairs</code>. <code><a href="rho_p.html">rho_p()</a></code>'s similarities are clustered as \(1 -
-\rho_p\).</p></dd>
+       \rho_p\).</p></dd>
 
 
 <dt id="arg-cpus">cpus<a class="anchor" aria-label="anchor" href="#arg-cpus"></a></dt>
@@ -160,9 +162,11 @@ seamlessly supports objects from the following biological data packages:</p><ul>
     <h2 id="pseudocount">Pseudocount<a class="anchor" aria-label="anchor" href="#pseudocount"></a></h2>
 
 
-<p>The <code>pseudocount</code> parameter is only relevant when <code>norm = 'clr'</code>.</p>
-<p>Zeros are undefined in the centered log-ratio (CLR) transformation. If
-<code>norm = 'clr'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
+<p>The <code>pseudocount</code> parameter is only relevant when <code>norm = 'clr'</code>
+or <code>norm = 'log'</code>.</p>
+<p>Zeros are undefined in the centered log-ratio (CLR) transformation and
+in the log of proportions. If <code>norm</code> is <code>'clr'</code> or
+<code>'log'</code>, <code>pseudocount</code> is <code>NULL</code> (the default), and
 zeros are detected, the function uses half the minimum non-zero value
 (<code>min(x[x&gt;0]) / 2</code>) and issues a warning.</p>
 <p>To suppress the warning, provide an explicit value (e.g., <code>1</code>), or

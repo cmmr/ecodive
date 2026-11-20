@@ -32,8 +32,8 @@ aitchison(
 
 - pseudocount:
 
-  Value added to counts to handle zeros when `norm = 'clr'`. Ignored for
-  other normalization methods. See **Pseudocount** section.
+  Value added to counts to handle zeros when `norm = 'clr'` or `'log'`.
+  Ignored for other normalization methods. See **Pseudocount** section.
 
 - pairs:
 

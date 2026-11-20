@@ -210,7 +210,7 @@ bound of the draws' intervals for that difference, in log2 units
 (<code>qvalue</code>).</p></li>
 <li><p><code>reject</code>: <code>TRUE</code> when <code>p_adjusted &lt;= alpha</code> and the interval
 (<code>ci_lower</code>, <code>ci_upper</code>) excludes 0 (<code>Signif</code>).</p></li>
-</ul><p>Attributes: <code>contrast</code> (the treatment and reference groups; the
+</ul><p>Attributes: <code>method</code> (<code>"dirmult_ttest"</code>), <code>contrast</code> (the treatment and reference groups; the
 reference is <code>NA</code> when all other samples were pooled), <code>n</code> (the number
 of samples on each side), <code>n_draws</code>, <code>pseudocount</code>, <code>scale_sd</code>,
 <code>alpha</code>, <code>conf_level</code>, <code>p_adjust</code> and <code>seed</code>.</p>
@@ -365,8 +365,8 @@ scale uncertainty into differential expression analyses using ALDEx2.
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 b5        6.26    1.52   -1.3       4.55 0.0193     0.0651   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 b6        3.57    1.15   -1.25      3.29 0.0487     0.0651   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7 b7        8.32    1.53   -1.11      3.81 0.0163     0.0651   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   p_adjust, seed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   conf_level, p_adjust, seed</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="dirmult_ttest-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -384,8 +384,8 @@ scale uncertainty into differential expression analyses using ALDEx2.
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 b5        6.44    1.55   -2.41     4.85  0.0397      0.139   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 b6        3.68    1.18   -1.81     3.6   0.102       0.139   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7 b7        8.37    1.56   -0.774    4.57  0.0279      0.139   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   p_adjust, seed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   conf_level, p_adjust, seed</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># The default contrast: the first group ('placebo', in sorted order)</span></span></span>
 <span class="r-in"><span>    <span class="co"># against the rest.</span></span></span>

@@ -155,10 +155,10 @@ row per feature, in the order of `counts`, with columns:
 - `reject`: `TRUE` when `p_adjusted <= alpha` and the interval
   (`ci_lower`, `ci_upper`) excludes 0 (`Signif`).
 
-Attributes: `contrast` (the treatment and reference groups; the
-reference is `NA` when all other samples were pooled), `n` (the number
-of samples on each side), `n_draws`, `pseudocount`, `scale_sd`, `alpha`,
-`conf_level`, `p_adjust` and `seed`.
+Attributes: `method` (`"dirmult_ttest"`), `contrast` (the treatment and
+reference groups; the reference is `NA` when all other samples were
+pooled), `n` (the number of samples on each side), `n_draws`,
+`pseudocount`, `scale_sd`, `alpha`, `conf_level`, `p_adjust` and `seed`.
 
 ## Details
 
@@ -331,8 +331,8 @@ scale uncertainty into differential expression analyses using ALDEx2.
 #> 5 b5        6.26    1.52   -1.3       4.55 0.0193     0.0651   FALSE
 #> 6 b6        3.57    1.15   -1.25      3.29 0.0487     0.0651   FALSE
 #> 7 b7        8.32    1.53   -1.11      3.81 0.0163     0.0651   FALSE
-#> # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,
-#> #   p_adjust, seed
+#> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
+#> #   conf_level, p_adjust, seed
     plot(res)
 
 
@@ -350,8 +350,8 @@ scale uncertainty into differential expression analyses using ALDEx2.
 #> 5 b5        6.44    1.55   -2.41     4.85  0.0397      0.139   FALSE
 #> 6 b6        3.68    1.18   -1.81     3.6   0.102       0.139   FALSE
 #> 7 b7        8.37    1.56   -0.774    4.57  0.0279      0.139   FALSE
-#> # Attributes: contrast, n, n_draws, pseudocount, scale_sd, alpha, conf_level,
-#> #   p_adjust, seed
+#> # Attributes: method, contrast, n, n_draws, pseudocount, scale_sd, alpha,
+#> #   conf_level, p_adjust, seed
 
     # The default contrast: the first group ('placebo', in sorted order)
     # against the rest.
