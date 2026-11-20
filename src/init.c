@@ -73,6 +73,9 @@ extern SEXP C_medoid_accum(SEXP, SEXP, SEXP);
 extern SEXP C_row_medians(SEXP, SEXP);
 extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
 extern SEXP C_rng_dist(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_st_collapse(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_st_cond_prob(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_sourcetracker(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_p(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_run(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_ab(SEXP, SEXP);
@@ -149,6 +152,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_row_medians",  (DL_FUNC) &C_row_medians,  2},
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
   {"C_rng_dist",  (DL_FUNC) &C_rng_dist,  5},
+  {"C_st_collapse",   (DL_FUNC) &C_st_collapse,   4},
+  {"C_st_cond_prob",  (DL_FUNC) &C_st_cond_prob,  9},
+  {"C_sourcetracker", (DL_FUNC) &C_sourcetracker, 16},
   {"C_rpca",      (DL_FUNC) &C_rpca,     12},
   {"C_rpca_phylo", (DL_FUNC) &C_rpca_phylo, 18},
   {"C_simper",    (DL_FUNC) &C_simper,    7},

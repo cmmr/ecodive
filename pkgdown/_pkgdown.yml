@@ -113,6 +113,11 @@ reference:
   - enterotype
   - ecodive_types
 
+- title: Source Tracking
+  desc: What share of each sink sample's community came from each of several source environments, and from an unknown source.
+  contents:
+  - sourcetracker
+
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
   contents:
@@ -184,6 +189,7 @@ reference:
   - plot.ecodive_forward_select
   - plot.ecodive_bioenv
   - plot.ecodive_types
+  - plot.ecodive_source
   - ecodive_display
   - print_ecodive
 

@@ -51,8 +51,8 @@ same thing.
 | `fit` | **(new)** a fitted result given to a post-hoc test | planned `ancombc_*` |
 | `family`, `l1_ratio`, `lambda`, `n_lambdas`, `lambda_min_ratio` | **(new, 2026-11-19)** the outcome distribution (`'gaussian'`, `'binomial'`), elastic-net mixing (1 = lasso), and the penalty path | planned `coda_lasso`, `coda_lasso_pairwise` |
 | `n_folds`, `folds`, `select` | **(new)** cross-validation: a fold count or a per-sample fold vector (overrides `seed`), and which λ to report (`'min'`, `'1se'`) | planned `coda_lasso`, `coda_lasso_pairwise` |
-| `sources`, `sink_depth` | **(new)** per-sample source-environment labels (`NA` marks a sink), and the sinks' rarefaction depth (`depth` is the sources', as in `rarefy`) | planned `sourcetracker`; `sources` also `feast` |
-| `n_restarts`, `burnin`, `delay`, `loo`, `features` | **(new)** the Gibbs schedule, leave-one-out over environments, and per-feature output | planned `sourcetracker` |
+| `sources`, `sink_depth` | **(new)** per-sample source-environment labels (`NA` marks a sink), and the sinks' rarefaction depth (`depth` is the sources', as in `rarefy`) | `sourcetracker` (exists); `sources` also planned `feast` |
+| `n_restarts`, `n_burnin`, `thin`, `loo`, `features` | **(new)** the Gibbs schedule (independent chains, passes before the first draw, passes between draws), leave-one-out over environments, and per-feature output. `n_burnin` and `thin` replace SourceTracker's `burnin` and `delay` (the user's choice, 2026-11-20): `n_burnin` is an exact count (`n_<unit>` rule) and `thin` is the usual MCMC term | `sourcetracker` (exists) |
 | `n_types` | **(new, 2026-11-20)** the candidate numbers of community types (a single value fixes it) | `enterotype`; planned `dmm` |
 | `ch` | **(new, 2026-11-20)** the form of the Calinski-Harabasz index: `'medoids'` (clusterSim's, as in Arumugam et al.'s script) or `'centroids'` (the distances' pseudo-F) | `enterotype` |
 | `centroids` | **(new)** reference type profiles to classify against | planned `valencia` |

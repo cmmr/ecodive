@@ -782,6 +782,18 @@
   run's `seed`, and is the same for any `cpus`; ANCOM-BC's pseudocount runs
   are the fits behind its `passed_ss`, reused when the base run made them.
 
+* New `sourcetracker()` estimates what share of each sink sample's community
+  came from each of several source environments, and from an unknown
+  source, with SourceTracker's Gibbs sampler (Knights et al. 2011), ported
+  from SourceTracker2. One `sources` vector gives each sample's environment,
+  with `NA` for the sinks; `loo = TRUE` tracks each environment against the
+  others, and `features = TRUE` also returns each sink's reads by source and
+  feature. The sampler runs in threaded C, with one random stream per sink
+  and restart, so results are reproducible and the same for any `cpus`
+  (SourceTracker2's parallel runs are neither). It returns a sinks x sources
+  matrix of proportions (class `ecodive_source`) with their standard
+  deviations, and `plot()` draws the usual stacked bar chart.
+
 * New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
   `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's
   proportions after adding `pseudocount` (log-TSS), with the same
