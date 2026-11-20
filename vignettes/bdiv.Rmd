@@ -126,7 +126,7 @@ Given:
 
 |                   |                             |
 | :---------------- | :-------------------------- |
-| **Dice-Sorensen dissimilarity** <br> `sorensen()` | $\displaystyle \frac{2J}{(A + B)}$        |
+| **Dice-Sorensen dissimilarity** <br> `sorensen()` | $\displaystyle 1 - \frac{2J}{(A + B)}$    |
 | **Hamming distance**            <br> `hamming()`  | $\displaystyle (A + B) - 2J$              |
 | **Jaccard distance**            <br> `jaccard()`  | $\displaystyle 1 - \frac{J}{(A + B - J)}$ |
 | **Otsuka-Ochiai dissimilarity** <br> `ochiai()`   | $\displaystyle 1 - \frac{J}{\sqrt{AB}}$   |

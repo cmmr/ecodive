@@ -590,7 +590,7 @@ static void *motyka(void *arg) {
 
 //======================================================
 // Dice-Sorensen
-// 2 * sum(x & y) / sum(x>0, y>0)
+// 1 - 2 * sum(x & y) / sum(x>0, y>0)
 //======================================================
 static void *sorensen(void *arg) {
   FOREACH_PAIR(

@@ -1489,7 +1489,7 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cp
 #' 
 #' @details
 #' The Dice-Sorensen dissimilarity is defined as:
-#' \deqn{\frac{2J}{(A + B)}}
+#' \deqn{1 - \frac{2J}{(A + B)}}
 #' 
 #' Where:
 #' * \eqn{A}, \eqn{B} : Number of features in each sample.
@@ -1499,7 +1499,7 @@ ochiai <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_cp
 #' ```r
 #' x <- ex_counts[1,]
 #' y <- ex_counts[2,]
-#' 2 * sum(x & y) / sum(x>0, y>0)
+#' 1 - 2 * sum(x & y) / sum(x>0, y>0)
 #' ```
 #' 
 #' @references
