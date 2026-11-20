@@ -160,6 +160,7 @@
 #' @export
 #' @examples
 #'     ord <- dpcoa(ex_counts, ex_tree, n_axes = 2)
+#'     ord
 #'     plot(ord)
 #'     str(ord)
 #'

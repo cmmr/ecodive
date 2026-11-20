@@ -226,7 +226,7 @@
 #'     str(ord)
 #'
 #'     # Without constraints, a correspondence analysis.
-#'     head(cca(counts))
+#'     cca(counts)
 #'
 cca <- function (
     counts, groups, data = NULL, formula = NULL, margin = 1L, n_axes = 3L,
@@ -424,6 +424,7 @@ cca <- function (
 #' @export
 #' @examples
 #'     ord <- ca(ex_counts)
+#'     ord
 #'     plot(ord)
 #'     attr(ord, 'prop')
 #'     head(attr(ord, 'loadings'))

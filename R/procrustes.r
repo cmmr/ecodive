@@ -155,6 +155,7 @@
 #'     jc <- pcoa(jaccard(counts), n_axes = 2)
 #'
 #'     fit <- procrustes(jc, bc)
+#'     fit
 #'     attr(fit, 'ss')
 #'     attr(fit, 'residuals')
 #'

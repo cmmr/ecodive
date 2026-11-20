@@ -167,6 +167,7 @@ For large datasets, standard matrix operations may be slow. See
 
 \examples{
     ord <- ca(ex_counts)
+    ord
     plot(ord)
     attr(ord, 'prop')
     head(attr(ord, 'loadings'))

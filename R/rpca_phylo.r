@@ -212,6 +212,7 @@
 #' @export
 #' @examples
 #'     ord <- rpca_phylo(ex_counts, ex_tree, n_axes = 2)
+#'     ord
 #'     plot(ord)
 #'     str(ord)
 #'

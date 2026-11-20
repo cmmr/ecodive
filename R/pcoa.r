@@ -200,7 +200,7 @@
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- pcoa(dm)
 #'     plot(ord, 'Species', iris)
-#'     head(ord)
+#'     ord
 #'     str(ord)
 #'
 pcoa <- function (dm, n_axes = 3L, correction = 'none', cpus = n_cpus()) {

@@ -188,9 +188,9 @@
     names(attributes(no_display(x))),
     c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings', 'class') )
   expect_identical(class(x), c('ecodive_ord', 'matrix', 'array'))
-  # print() lists the loadings by name instead of printing them (and adds a
-  # line for each record of how it was made).
-  expect_true(length(capture.output(print(x))) < nrow(x) + 7)
+  # print() lists the loadings by name instead of printing them, and shows
+  # only the first rows.
+  expect_true(length(capture.output(print(x))) < 20)
   expect_identical(attr(x, 'method'), 'pca')
 
   # Each axis's largest absolute score is positive.

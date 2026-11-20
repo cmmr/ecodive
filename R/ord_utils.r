@@ -256,44 +256,35 @@ ord_result <- function (
 
 
 
-#' Print an ordination result
-#'
-#' Prints the coordinates, then the ordination's title (see
-#' [ecodive_display]), one line on the axes, and the names of the other
-#' attributes, rather than every attribute in full (such as `pca()`'s
-#' loadings).
-#'
-#' @param x  An ordination result, from [dist_ord()], [count_ord()],
-#'        [pcoa()], [pca()], [rpca()], [rpca_phylo()], [dpcoa()], [rda()], [cca()], [ca()], [lda()], [plsda()], [oplsda()], [dbrda()], [capscale()],
-#'        [mds()], [nmds()], [isomap()], [tsne()], [umap()], or [procrustes()].
-#'
-#' @param ...  Passed on to `print()` for the matrix of coordinates.
-#'
-#' @return `x`, invisibly.
-#'
-#' @keywords internal
+# An ordination prints its first rows of coordinates (see ?print_ecodive),
+# under a header: its size, title and the axes' % of variance; and in the
+# footer, the names of its other attributes, rather than every attribute in
+# full (such as pca()'s loadings).
+#' @rdname print_ecodive
 #' @export
-print.ecodive_ord <- function (x, ...) {
+print.ecodive_ord <- function (x, n = NULL, width = NULL, digits = 3L, ...) {
 
-  att <- attributes(x)
-  m   <- unclass(x)
-  attributes(m) <- att[c('dim', 'dimnames')]
-  print(m, ...)
-
-  title <- display_title(x)
-  if (!is.null(title)) cat('\n', title, sep = '')
-
+  att  <- attributes(x)
+  sym  <- print_sym()
   k    <- ncol(x)
   prop <- att$prop
-  line <- sprintf('\n%s: %d sample%s, %d ax%s', att$method,
-    nrow(x), if (nrow(x) == 1) '' else 's', k, if (k == 1) 'is' else 'es')
-  if (k > 0 && !anyNA(prop))
-    line <- paste0(line, sprintf('; %% of variance: %s',
-      paste(format(round(100 * prop, 1), nsmall = 1, trim = TRUE), collapse = ', ')))
-  cat(line, '\n', sep = '')
 
-  more <- setdiff(names(att), c('dim', 'dimnames', 'class', 'display'))
-  cat('Attributes: ', paste(more, collapse = ', '), '\n', sep = '')
+  head <- c(
+    sprintf('A matrix: %d sample%s %s %d ax%s', nrow(x), if (nrow(x) == 1) '' else 's',
+            sym$times, k, if (k == 1) 'is' else 'es'),
+    display_title(x),
+    if (k > 0 && !anyNA(prop)) sprintf('%% of variance: %s',
+      paste(format(round(100 * prop, 1), nsmall = 1, trim = TRUE), collapse = ', ')) )
 
+  m <- unclass(x)
+  attributes(m) <- att[c('dim', 'dimnames')]
+  df <- as.data.frame(m, stringsAsFactors = FALSE, optional = TRUE)
+  if (is.null(colnames(m))) names(df) <- sprintf('[,%d]', seq_len(k))
+
+  cat(
+    print_table_lines(
+      df, head, n = n, width = width, digits = digits, types = FALSE,
+      rows = 'samples', attrs = print_attrs(x, c('dim', 'dimnames', 'class')) ),
+    sep = '\n' )
   invisible(x)
 }

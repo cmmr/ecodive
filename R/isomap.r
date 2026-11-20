@@ -248,7 +248,7 @@
 #'     # Enough neighbours to link setosa to the other two species.
 #'     ord <- isomap(dm, n_neighbors = 50)
 #'     plot(ord, 'Species', iris)
-#'     head(ord)
+#'     ord
 #'     str(ord)
 #'
 isomap <- function (dm, n_axes = 3L, n_neighbors = 5L, radius = NULL, cpus = n_cpus()) {

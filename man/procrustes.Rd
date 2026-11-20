@@ -146,6 +146,7 @@ other: call \code{ecodive::procrustes()} to be sure.
     jc <- pcoa(jaccard(counts), n_axes = 2)
 
     fit <- procrustes(jc, bc)
+    fit
     attr(fit, 'ss')
     attr(fit, 'residuals')
 

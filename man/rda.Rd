@@ -321,7 +321,7 @@ See \code{\link{aitchison}} for references.
     permanova(euclidean(counts, norm = 'hellinger'), 'Species', iris, permutations = 99)
 
     # Without constraints, a PCA.
-    head(rda(counts))
+    rda(counts)
 
 }
 \references{

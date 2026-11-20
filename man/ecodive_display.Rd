@@ -44,6 +44,7 @@ page describes them.
 \examples{
     d   <- bray(iris[, 1:4])
     ord <- pcoa(d)
+    ord
     attr(ord, 'display')$title
 
     # Arithmetic drops the title.

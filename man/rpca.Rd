@@ -311,7 +311,7 @@ For large datasets, standard matrix operations may be slow. See
 \examples{
     ord <- rpca(iris[, 1:4])
     plot(ord, 'Species', iris)
-    head(ord)
+    ord
     str(ord)
 
 }

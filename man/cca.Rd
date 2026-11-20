@@ -283,7 +283,7 @@ For large datasets, standard matrix operations may be slow. See
     str(ord)
 
     # Without constraints, a correspondence analysis.
-    head(cca(counts))
+    cca(counts)
 
 }
 \references{

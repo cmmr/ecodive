@@ -284,6 +284,7 @@ See \code{\link{aitchison}} for references.
     # PLS-DA of iris, as if its measurements were counts.
     counts <- round(iris[, 1:4] * 10)
     ord    <- plsda(counts, 'Species', iris)
+    ord
     plot(ord)
     attr(ord, 'prop')
     attr(ord, 'vip')

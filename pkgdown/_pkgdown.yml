@@ -153,8 +153,8 @@ reference:
   contents:
   - simper
 
-- title: Plotting
-  desc: plot() methods for ecodive's results. They draw what a result already holds, with titles, labels and legends taken from its attributes, in base graphics.
+- title: Plotting and Printing
+  desc: plot() and print() methods for ecodive's results. They show what a result already holds, with titles, labels and legends taken from its attributes; plots use base graphics, and printing shows a preview rather than every value.
   contents:
   - plot.ecodive_ord
   - plot.ecodive_dist
@@ -168,6 +168,7 @@ reference:
   - plot.ecodive_forward_select
   - plot.ecodive_bioenv
   - ecodive_display
+  - print_ecodive
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.

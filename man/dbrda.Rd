@@ -217,7 +217,7 @@ matrix or data frame without the attributes.
     dm  <- bray(iris[, 1:4])
     ord <- dbrda(dm, 'Species', iris)
     plot(ord, 'Species', iris)
-    head(ord)
+    ord
     str(ord)
 
 }

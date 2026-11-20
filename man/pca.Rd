@@ -210,7 +210,7 @@ See \code{\link{aitchison}} for references.
 \examples{
     ord <- pca(iris[, 1:4])
     plot(ord, 'Species', iris)
-    head(ord)
+    ord
     str(ord)
 
 }

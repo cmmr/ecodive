@@ -195,7 +195,7 @@
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- mds(dm)
 #'     plot(ord, 'Species', iris)
-#'     head(ord)
+#'     ord
 #'     str(ord)
 #'
 mds <- function (

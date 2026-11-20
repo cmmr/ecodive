@@ -295,7 +295,7 @@
 #' @examples
 #'     ord <- rpca(iris[, 1:4])
 #'     plot(ord, 'Species', iris)
-#'     head(ord)
+#'     ord
 #'     str(ord)
 #'
 rpca <- function (

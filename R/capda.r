@@ -189,6 +189,7 @@
 #'     # CAP of iris, from Bray-Curtis distances.
 #'     dm  <- bray(iris[, 1:4])
 #'     ord <- capda(dm, 'Species', iris, permutations = 99)
+#'     ord
 #'     plot(ord, 'Species', iris)
 #'
 #'     # The number of PCoA axes chosen, and the classification success.

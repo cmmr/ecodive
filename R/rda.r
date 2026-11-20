@@ -233,7 +233,7 @@
 #'     permanova(euclidean(counts, norm = 'hellinger'), 'Species', iris, permutations = 99)
 #'
 #'     # Without constraints, a PCA.
-#'     head(rda(counts))
+#'     rda(counts)
 #'
 rda <- function (
     counts, groups, data = NULL, formula = NULL, margin = 1L, norm = 'none',

@@ -238,7 +238,7 @@ matrix or data frame without the attributes.
     # Enough neighbours to link setosa to the other two species.
     ord <- isomap(dm, n_neighbors = 50)
     plot(ord, 'Species', iris)
-    head(ord)
+    ord
     str(ord)
 
 }

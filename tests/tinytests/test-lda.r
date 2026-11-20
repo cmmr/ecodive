@@ -145,7 +145,7 @@
   expect_equal(unname(attr(ord, 'eig')), unname(bm), tolerance = 1e-10)
 
   print_out <- capture.output(print(ord))
-  expect_true(any(grepl('lda: 150 samples, 2 axes', print_out, fixed = TRUE)))
+  expect_true(any(grepl('^# A matrix: 150 samples . 2 axes$', print_out)))
 
 
   # Groups given as a column of `data`, a factor, characters, numbers, or

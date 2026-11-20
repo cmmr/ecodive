@@ -96,7 +96,7 @@
   expect_false(attr(res, 'symmetric'))
   expect_equal(crossprod(attr(res, 'rotation')), diag(2), check.attributes = FALSE)
   expect_equal(attr(res, 'ss'), sum(attr(res, 'residuals')^2))
-  expect_stdout(print(res), 'procrustes: 24 samples, 2 axes')
+  expect_stdout(print(res), '# A matrix: 24 samples . 2 axes')
 
   # The fitted coordinates: dilation * ord %*% rotation + translation fits
   # target, with the same residuals.

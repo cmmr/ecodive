@@ -160,7 +160,8 @@
   expect_equal(unname(colMeans(attr(ord, 'vip')^2)), rep(1, 3), tolerance = 1e-12)
 
   print_out <- capture.output(print(ord))
-  expect_true(any(grepl('plsda: 20 samples, 3 axes; % of variance', print_out, fixed = TRUE)))
+  expect_true(any(grepl('^# A matrix: 20 samples . 3 axes$', print_out)))
+  expect_true(any(grepl('^# % of variance: ', print_out)))
 
 
   # Groups given as a column of `data`, a factor, characters, numbers, or

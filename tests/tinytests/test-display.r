@@ -61,7 +61,7 @@
   expect_identical(attr(o, 'display'), list(title = 'Principal Coordinates Analysis of Bray-Curtis Dissimilarity'))
   expect_null(attr(o, 'dist'))
   expect_null(attr(o, 'ord'))
-  expect_true(any(capture.output(print(o)) == 'Principal Coordinates Analysis of Bray-Curtis Dissimilarity'))
+  expect_true(any(capture.output(print(o)) == '# Principal Coordinates Analysis of Bray-Curtis Dissimilarity'))
   expect_identical(attr(pcoa(dc, cpus = cpus), 'display')$title, 'Principal Coordinates Analysis of Bray-Curtis Dissimilarity')
   for (m in list_dist_ords('id')) {
     args <- list(d, m, cpus = cpus)

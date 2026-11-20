@@ -74,6 +74,18 @@
   its values. `vlr()`, `rho_p()` and `phi_s()` no longer return their
   `denominator` and `pseudocount` as attributes.
 
+* Ordinations, distance matrices and ecodive's data frames (from `ancom()`,
+  `ancombc()`, `ancombc2()` and their post-hoc tests, `dirmult_ttest()`,
+  `simper()`, `bioenv()` and `envfit()`) print a preview, in the manner of
+  the tibble package, rather than every value (`?print_ecodive`): a header
+  with the object's kind, size and title; the first 10 rows (all of up to
+  20), with each column's type; the columns that fit the console; and a
+  footer counting what was left out and naming the other attributes. A
+  distance matrix shows the top-left corner of its lower triangle.
+  `print(x, n = Inf)` shows every row, and `as.data.frame()`,
+  `as.matrix()` or `unclass()` give the plain object. Every function's
+  examples print its result.
+
 * New `pcoa()` runs a principal coordinates analysis (classical
   multidimensional scaling) on a `dist` object, such as from `beta_div()`. It
   gives the same coordinates and eigenvalues as `cmdscale()`, `ape::pcoa()`,
