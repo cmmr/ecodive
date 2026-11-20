@@ -146,6 +146,8 @@ particular), **the per-method plans and this README win.**
   argument (e.g. `pcoa(correction)`, `permdisp(type)`, `mantel(method)`).
 - **Zero replacements** join `replace_zeros()`: add a row to
   `ZERO_REPLACEMENTS` (see [zero_replacement.md](zero_replacement.md)).
+  **Differential-abundance methods** join `da_test()`: add a row to
+  `DA_TESTS` (see [da_test.md](da_test.md)).
   **Ordinations of distances** join `dist_ord()`: add a row to `ORDINATIONS`
   in `R/dist_ord.r`. **Ordinations of a count table** join `count_ord()`:
   add a row to `COUNT_ORDS` in `R/count_ord.r`. **Tests of `dm` against
@@ -181,6 +183,7 @@ particular), **the per-method plans and this README win.**
   | `count_ord()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
   | `dist_test()` | `dm`, `test`, `groups`, `data` | an argument named `test`, or any prefix of `test`, `groups` or `data` (`t`, `g`, `gr`, `d`, `da`, ...) |
   | `replace_zeros()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
+  | `da_test()` | `counts`, `method` | an argument named `method`, or any prefix of `method` or `counts` (`m`, `c`, `co`, ...) |
 
   `groups` and `data` themselves are fine in `dist_test()`: it passes
   them through on purpose. Tests may take a `method` argument (as
@@ -232,7 +235,7 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, `da_test` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
 | Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, ✓ `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
@@ -249,8 +252,12 @@ can't be mistaken for one another:
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
-| Differential abundance | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest` |
+| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, `da_wilcoxon`, `da_ttest`, `da_lm`, `linda`, `maaslin3`, `fastancom`, `rademu`, `da_sensitivity` |
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
+| Rarefied diversity | `beta_div_rarefied`, `alpha_div_rarefied` |
+| Associations and networks | `sparcc`, `spiec_easi_mb`, `spiec_easi_glasso`, `secom_pearson`, `secom_distance`, `assoc_network`, `assoc_network_compare`, `assoc_network_diff` |
+| Community types | `enterotype`, `valencia`, `dmm` |
+| Compositional plots | `ternary_plot`, `variation_array`, `zero_pattern`, `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
 | Spatial | `moran_i`, `dbmem` |
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
 | Source tracking | `sourcetracker`, `feast` |
@@ -266,7 +273,7 @@ Names still worth a word of warning in the docs:
 To check a new alias (run with ecodive installed):
 
 ```r
-for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS', 'ZERO_REPLACEMENTS'))
+for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS', 'ZERO_REPLACEMENTS', 'DA_TESTS'))
   print(grep('^newalias', names(ecodive:::exact_names(reg)), value = TRUE))
 ```
 

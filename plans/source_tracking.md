@@ -1,6 +1,6 @@
 # `sourcetracker()` and `feast()`: microbial source tracking
 
-**Priority:** 35 (`sourcetracker()`) and 37 (`feast()`). **Tier:**
+**Priority:** 47 (`sourcetracker()`) and 58 (`feast()`). **Tier:**
 - `sourcetracker()` is a port of SourceTracker2 (Python, **BSD-3**,
   github.com/biota/sourcetracker2, master 2.0.1-dev).
 - `feast()` is **clean room**: FEAST's code is CC BY-NC-SA 4.0, which is

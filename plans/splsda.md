@@ -1,6 +1,6 @@
 # `splsda()`: sparse PLS discriminant analysis
 
-**Priority:** 40. **Tier:** clean room. Write it from Lê Cao, Boitard &
+**Priority:** 64. **Tier:** clean room. Write it from Lê Cao, Boitard &
 Besse (2011). mixOmics `splsda()` (GPL) is output-only. **Build after
 `plsda()`** ([plsda_oplsda.md](plsda_oplsda.md)), whose NIPALS core this
 extends. Read [README.md](README.md) first.

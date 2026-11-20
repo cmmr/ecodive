@@ -54,18 +54,51 @@ meaningful sense, so they sit just after the methods they build on.
 | 31 | [ ] `ctf()` | [ctf.md](ctf.md) | port (gemelli, BSD-3) | Longitudinal designs; the largest gemelli port, with reference quirks to settle with the user first. |
 | 32 | [x] `philr()`, `philr_distance()` (5f8d7bb) | [philr.md](philr.md) | **clean room** (philr GPL-3; formulas from the open-access paper) | First among the clean-room methods: phylogeny-aware, high demand, and an O(D) formula per sample. |
 | 33 | [x] `dpcoa()` (6ed9799) | [dpcoa.md](dpcoa.md) | **clean room** | Second among the clean-room methods, after `philr()`: phyloseq "DPCoA", phylogeny-aware. |
-| 34 | [ ] `replace_zeros_czm()`, `replace_zeros_gbm()`, `replace_zeros_sq()`, `replace_zeros_bl()` | [zero_replacement.md](zero_replacement.md) | **clean room** (zCompositions GPL; the defining paper is closed access, so formulas are confirmed from outputs) | Simple once the formulas are pinned down; `cmultRepl()`'s GBM is the field's default. |
-| 35 | [ ] `sourcetracker()` | [source_tracking.md](source_tracking.md) | port (SourceTracker2, BSD-3) | Source tracking is in steady high demand (Knights 2011: ~200 citations a year); simple; SourceTracker2's per-read Python loop is slow and its `multiprocessing` isn't reproducible, so threaded C with per-sink PCG streams is a clear win. |
-| 36 | [ ] `coda_lasso()`, then `coda_lasso_pairwise()` | [coda_lasso.md](coda_lasso.md) | port (zeroSum MIT; coda4microbiome MIT; glmnet output-only) | Compositional ML: log-contrast lasso / elastic net for prediction and taxon selection, in active use (coda4microbiome, selbal); builds on the log-ratio conventions; CV folds thread naturally. |
-| 37 | [ ] `feast()` | [source_tracking.md](source_tracking.md) | **clean room** (FEAST is CC BY-NC-SA: non-commercial; even its outputs as fixtures need the user's OK) | FEAST is the other standard source-tracking method, rising (~140 citations a year); an EM fully stated in the paper, but its initialisation must be settled first. |
-| 38 | [ ] `mantel_regression()` (MRM) | [mantel_regression.md](mantel_regression.md) | clean room | Simple algebra; biogeography. |
-| 39 | [ ] `mirkat()` | [mirkat.md](mirkat.md) | clean room | In demand in microbiome methods work; needs Davies or Liu p-values written from the papers. |
-| 40 | [ ] `splsda()` | [splsda.md](splsda.md) | clean room | mixOmics users; sparse PLS-DA is its own algorithm. |
-| 41 | [ ] `coinertia()` | [coinertia.md](coinertia.md) | clean room (RV from hoggorm, BSD-2) | Multi-omics. |
-| 42 | [ ] `dbmem()` | [dbmem.md](dbmem.md) | clean room | Spatial ecology. |
-| 43 | [ ] `phate()` | [phate.md](phate.md) | clean room; the reference's license is non-commercial | Single-cell crossover; legal care needed even for fixtures. |
-| 44 | [ ] `dca()` | [dca.md](dca.md) | clean room; **superseded** (criticised; NMDS preferred) | Kept for users who expect it, written to match vegan. |
-| 45 | [ ] `largevis()` | [largevis.md](largevis.md) | port (uwot's BSD-2 headers); **superseded** by UMAP | Cheap, since `umap()` already uses these headers. |
+| 34 | [ ] Documentation: Schloss (2026) and depth in the RPCA family; `scale_sd` sensitivity; ML caveats; predicted loads in `qmp_scale()` | [compositional_docs.md](compositional_docs.md) | docs | No code, and it corrects how existing functions are presented: Schloss's 2026 rebuttal of robust Aitchison PCA, scale-assumption FDR results. |
+| 35 | [ ] Effect (MW), MA and forest plots for DA results (`plot(type = )`), with new dispersion and mean-abundance columns in `dirmult_ttest()` | [da_plots.md](da_plots.md) | formula (CoDaSeq MIT; ALDEx2 output-only) | Low effort on results users already have; Gloor et al. (2016) show volcano plots, ecodive's only DA display, mislead. |
+| 36 | [ ] `da_test()` wrapper (+ `list_da_tests()`, `match_da_test()`); `da_wilcoxon()`, `da_ttest()`, `da_lm()` | [da_test.md](da_test.md) | formula | Very low effort; the plain tests are what Wirbel (2024) and Pelto (2025) found best at controlling false discoveries; four DA methods now justify the wrapper. |
+| 37 | [ ] `beta_div_rarefied()`, `alpha_div_rarefied()` | [rarefied_diversity.md](rarefied_diversity.md) | derived (on `rarefy()`) | Low effort; rarefaction is the most mentioned normalization (~3,600 papers a year) and Schloss (2024, 2026) argues for it; lets users compare with RPCA. |
+| 38 | [ ] `linda()` | [linda.md](linda.md) | clean room (LinDA GPL) | Short estimator sharing `ancombc()`'s code; 494 citations and fast-rising; most robust under strong compositional effects. |
+| 39 | [ ] `sparcc()` | [sparcc.md](sparcc.md) | clean room (CC-BY paper) | The most-used compositional network method (1,848 citations 2022–26); builds on `vlr()` and the existing Gamma sampler. |
+| 40 | [ ] `assoc_network()`, `assoc_network_compare()`, `assoc_network_diff()` | [assoc_network.md](assoc_network.md) | clean room (NetCoMi GPL) | Textbook formulas over `rho_p()` / `sparcc()`; NetCoMi uptake grew 3.1× from 2021–22 to 2024–25. |
+| 41 | [ ] `da_sensitivity()` | [da_sensitivity.md](da_sensitivity.md) | derived (on `da_test()`) | Reruns and plots DA calls over pseudocounts, zero treatments and `scale_sd`; the benchmarks' central concern. Needs item 36. |
+| 42 | [ ] `maaslin3()` — **scope decision: ask the user first** | [maaslin3.md](maaslin3.md) | port (maaslin3, MIT) | The highest-uptake DA family (MaAsLin2 2,850 citations; MaAsLin3 rising steeply); moderate effort; widens ecodive into general per-feature regression. |
+| 43 | [ ] Biplot scalings (`plot(ord, scaling = )`) with links | [biplot_scaling.md](biplot_scaling.md) | formula | Low effort; the compositional biplot Gloor (2017) recommends; Aitchison & Greenacre 2002 has 830 citations. |
+| 44 | [ ] Rank plots and `plot()` of `log_ratio()` / `balance()` results (Qurro-style) | [log_ratio_plots.md](log_ratio_plots.md) | port (Qurro, BSD) | Low effort on ported code; turns DA effects and loadings into interpretable log ratios (reference frames: 668 citations). |
+| 45 | [ ] `enterotype()` | [community_typing.md](community_typing.md) | clean room (PAM; `cluster` is GPL) | Low effort on `jsd()`; enterotyping is among the most cited community analyses (Arumugam 2011: 3,182 citations 2022–26). |
+| 46 | [ ] `replace_zeros_czm()`, `replace_zeros_gbm()`, `replace_zeros_sq()`, `replace_zeros_bl()` | [zero_replacement.md](zero_replacement.md) | **clean room** (zCompositions GPL; the defining paper is closed access, so formulas are confirmed from outputs) | Simple once the formulas are pinned down; `cmultRepl()`'s GBM is the field's default. |
+| 47 | [ ] `sourcetracker()` | [source_tracking.md](source_tracking.md) | port (SourceTracker2, BSD-3) | Source tracking is in steady high demand (Knights 2011: ~200 citations a year); simple; SourceTracker2's per-read Python loop is slow and its `multiprocessing` isn't reproducible, so threaded C with per-sink PCG streams is a clear win. |
+| 48 | [ ] `coda_lasso()`, then `coda_lasso_pairwise()` | [coda_lasso.md](coda_lasso.md) | port (zeroSum MIT; coda4microbiome MIT; glmnet output-only) | Compositional ML: log-contrast lasso / elastic net for prediction and taxon selection, in active use (coda4microbiome, selbal); builds on the log-ratio conventions; CV folds thread naturally. |
+| 49 | [ ] `ternary_plot()` | [ternary_plot.md](ternary_plot.md) | clean room (ggtern, Ternary GPL) | The most used classic CoDa display (331 microbiome papers 2022–26); low-to-medium effort. |
+| 50 | [ ] `dirmult_lm()` | [dirmult_lm.md](dirmult_lm.md) | port (ALDEx3, MIT) | Extends `dirmult_ttest()` beyond two groups with covariates and load-informed scale priors; low-to-moderate effort; ALDEx2 is widely used, ALDEx3 is new. |
+| 51 | [ ] Normalization `norm` choices: CSS, TMM, RLE, GMPR | [normalization_factors.md](normalization_factors.md) | port (CSS, Artistic-2.0) + clean room | Low effort each; CSS and TMM are mentioned ~120–145 times a year; they can later centre scale models. |
+| 52 | [ ] `valencia()` | [community_typing.md](community_typing.md) | port (VALENCIA, MIT) | Low effort; the standard vaginal community-state-type classifier, rising (499 citations, 121 in 2026). |
+| 53 | [ ] `variation_array()`, `zero_pattern()` | [coda_diagnostic_plots.md](coda_diagnostic_plots.md) | clean room | Low effort diagnostics (Aitchison's variation array; zero patterns as in zCompositions); modest uptake. |
+| 54 | [ ] `fastancom()` | [fastancom.md](fastancom.md) | clean room (GPL) | Low effort; the only microbiome-specific method Wirbel (2024) found to control FDR, but little use (22 citations). |
+| 55 | [ ] `dmm()` | [community_typing.md](community_typing.md) | clean room (DirichletMultinomial LGPL; mothur GPL) | Medium effort (EM with model selection); steady use (506 citations 2022–26). |
+| 56 | [ ] `spiec_easi_mb()`, `spiec_easi_glasso()` | [spiec_easi.md](spiec_easi.md) | clean room (SpiecEasi GPL) | High demand (1,335 citations 2022–26) but medium-to-high effort: graphical lasso and StARS selection. |
+| 57 | [ ] `secom_pearson()`, `secom_distance()` | [secom.md](secom.md) | port (ANCOMBC, Artistic-2.0) | Bias-corrected correlations on `ancombc()`'s code; rising (195 citations); medium effort. |
+| 58 | [ ] `feast()` | [source_tracking.md](source_tracking.md) | **clean room** (FEAST is CC BY-NC-SA: non-commercial; even its outputs as fixtures need the user's OK) | FEAST is the other standard source-tracking method, rising (~140 citations a year); an EM fully stated in the paper, but its initialisation must be settled first. |
+| 59 | [ ] `mantel_regression()` (MRM) | [mantel_regression.md](mantel_regression.md) | clean room | Simple algebra; biogeography. |
+| 60 | [ ] `mirkat()` | [mirkat.md](mirkat.md) | clean room | In demand in microbiome methods work; needs Davies or Liu p-values written from the papers. |
+| 61 | [ ] `composition_barplot()` | [composition_barplot.md](composition_barplot.md) | port (microshades idea, MIT) | Low effort, but stacked bars are not a compositional analysis; a better-ordered version of a ubiquitous figure. |
+| 62 | [ ] `coda_dendrogram()` | [coda_dendrogram.md](coda_dendrogram.md) | clean room (compositions GPL) | Medium effort; well cited in CoDa but rarely used in microbiome papers. |
+| 63 | [ ] `tree_plot()` | [tree_plot.md](tree_plot.md) | first principles (ape GPL) | Medium-to-high effort (a base-R tree drawer); shows `rpca_phylo()` clade loadings and `philr()` balances on the tree. |
+| 64 | [ ] `splsda()` | [splsda.md](splsda.md) | clean room | mixOmics users; sparse PLS-DA is its own algorithm. |
+| 65 | [ ] `coinertia()` | [coinertia.md](coinertia.md) | clean room (RV from hoggorm, BSD-2) | Multi-omics. |
+| 66 | [ ] `dbmem()` | [dbmem.md](dbmem.md) | clean room | Spatial ecology. |
+| 67 | [ ] `rademu()` | [rademu.md](rademu.md) | port (radEmu, MIT) | High effort and little uptake so far (≤15 citations); methodologically strong, so kept for later. |
+| 68 | [ ] `phate()` | [phate.md](phate.md) | clean room; the reference's license is non-commercial | Single-cell crossover; legal care needed even for fixtures. |
+| 69 | [ ] `dca()` | [dca.md](dca.md) | clean room; **superseded** (criticised; NMDS preferred) | Kept for users who expect it, written to match vegan. |
+| 70 | [ ] `largevis()` | [largevis.md](largevis.md) | port (uwot's BSD-2 headers); **superseded** by UMAP | Cheap, since `umap()` already uses these headers. |
+
+**Second compositional batch (2026-11-20).** Items 34 onward were
+re-ranked when the plans of the 2026-11-19 literature review were added
+(see [compositional.md](compositional.md)). The user set the rule: rank
+by **ease of implementation and demand in the field** (citations and
+full-text mentions in 2022–2026). Clean-room work counts as harder than a
+port, and superseded methods have little demand, so they stay last. Items
+before 34 keep their numbers.
 
 **Compositional methods (added 2026-11-19).** The plans in
 [compositional.md](compositional.md) were inserted by the same rules. The
