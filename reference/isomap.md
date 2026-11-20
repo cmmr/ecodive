@@ -199,11 +199,13 @@ rounding, and the same embedding (`embedding_`) and eigenvalues as
   and `reconstruction_error()` are not offered. The components of the
   neighbor graph are returned as attributes.
 
-**Coming from `vegan::isomap()`**
+**Coming from
+[`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)**
 
-- `vegan::isomap()`'s `k` is the number of neighbors; the number of axes
-  (`vegan`'s `ndim`) is `isomap()`'s `n_axes`. Give the number of
-  neighbors as `n_neighbors`.
+- [`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)'s
+  `k` is the number of neighbors; the number of axes (`vegan`'s `ndim`)
+  is `isomap()`'s `n_axes`. Give the number of neighbors as
+  `n_neighbors`.
 
 - `vegan`'s `epsilon` corresponds to `radius`.
 

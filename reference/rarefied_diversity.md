@@ -76,7 +76,8 @@ alpha_div_rarefied(
 - times:
 
   The number of rarefactions to average, a whole number of at least 1.
-  Default: `100`, as `vegan::avgdist()`.
+  Default: `100`, as
+  [`vegan::avgdist()`](https://vegandevs.github.io/vegan/reference/avgdist.html).
 
 - average:
 
@@ -272,9 +273,10 @@ dropped matter.
 
 ## Choosing how to average
 
-- `"mean"` (the default, as in `vegan::avgdist()` and mothur): the
-  average of each value over the rarefactions. It needs one pass over
-  them, and memory for a few distance matrices.
+- `"mean"` (the default, as in
+  [`vegan::avgdist()`](https://vegandevs.github.io/vegan/reference/avgdist.html)
+  and mothur): the average of each value over the rarefactions. It needs
+  one pass over them, and memory for a few distance matrices.
 
 - `"median"`: the median of each value; less affected by an unusual
   rarefaction.
@@ -316,9 +318,11 @@ of them raised it.
 
 ## Same names in other packages
 
-None, but `vegan::avgdist()` computes the same as `beta_div_rarefied()`
-with `average = "mean"` (or `"median"`), from R's random number
-generator, so their results agree only up to Monte Carlo error.
+None, but
+[`vegan::avgdist()`](https://vegandevs.github.io/vegan/reference/avgdist.html)
+computes the same as `beta_div_rarefied()` with `average = "mean"` (or
+`"median"`), from R's random number generator, so their results agree
+only up to Monte Carlo error.
 
 ## Differences from q2-boots
 

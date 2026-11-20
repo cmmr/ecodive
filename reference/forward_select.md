@@ -9,7 +9,9 @@ each step the variable that raises the adjusted \\R^2\\ most is added,
 if a permutation test of it (given the variables already chosen) is
 significant, and if the adjusted \\R^2\\ stays within that of all the
 candidates together: the double stopping rule of Blanchet et al. (2008),
-as in `vegan::ordiR2step()`, with the same results. Usually run before
+as in
+[`vegan::ordiR2step()`](https://vegandevs.github.io/vegan/reference/ordistep.html),
+with the same results. Usually run before
 [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md).
 
 ## Usage
@@ -117,11 +119,11 @@ forward_select(
 
   The number of permutations for each test. Default: `999`.
   Alternatively, a matrix with one permutation of `1:n` per row, as from
-  `permute::shuffleSet()`, to use instead of random ones; the same
-  permutations then serve every test, as when the same matrix is given
-  to `ordiR2step()`. `0` runs no tests: variables are then chosen by
-  adjusted \\R^2\\ alone (rules 1, 2 and 4 below), `alpha` is not used,
-  and p-values are `NA`.
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
+  to use instead of random ones; the same permutations then serve every
+  test, as when the same matrix is given to `ordiR2step()`. `0` runs no
+  tests: variables are then chosen by adjusted \\R^2\\ alone (rules 1, 2
+  and 4 below), `alpha` is not used, and p-values are `NA`.
 
 - strata:
 
@@ -206,7 +208,8 @@ With the variables chosen so far, \\S\\ (and any `Condition()` terms,
 \\Z\\), each remaining candidate \\t\\ gives a model \\S + t\\, whose
 adjusted \\R^2\\ is Ezekiel's, \\1 - (1 - R^2)(n - 1)/(n - m - 1)\\ for
 \\n\\ samples and \\m\\ model columns (with conditions, the adjusted
-\\R^2\\ of \\Z + S + t\\ less that of \\Z\\, as `vegan::RsquareAdj()`
+\\R^2\\ of \\Z + S + t\\ less that of \\Z\\, as
+[`vegan::RsquareAdj()`](https://vegandevs.github.io/vegan/reference/RsquareAdj.html)
 gives it). The best candidate is added if:
 
 1.  its adjusted \\R^2\\ is higher than that of \\S\\;
@@ -362,7 +365,7 @@ of explanatory variables. *Ecology*, 89, 2623-2632.
     fs <- forward_select(bray(counts), ~ ph + temp + depth + site, meta)
     attr(fs, 'selected')
 #> ~ph + temp
-#> <environment: 0x62791f1bbce8>
+#> <environment: 0x5fa83b32e380>
     varpart(bray(counts), env = attr(fs, 'selected'), site = ~ site, data = meta)
 #> Variation partitioning by db-RDA: 40 samples, 2 sets
 #> Total inertia: 1.5469

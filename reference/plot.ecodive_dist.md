@@ -5,11 +5,12 @@ A heatmap of a distance matrix from
 any of its metric functions (such as
 [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md) or
 [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md)),
-or of the proportionality of features from
+or of the associations of features from
 [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
-[`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) or
-[`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md): one row
-and one column per sample (or feature), each cell coloured by the
+[`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md),
+[`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) or
+[`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md): one
+row and one column per sample (or feature), each cell coloured by the
 distance between its row's and its column's, with the samples ordered as
 the `clust` it was made with says.
 
@@ -48,10 +49,12 @@ plot(x, groups = NULL, data = NULL, col = NULL, key = TRUE, ...)
 
   The colour scale, from the smallest value to the largest. Defaults to
   [`grDevices::hcl.colors()`](https://rdrr.io/r/grDevices/palettes.html)'s
-  `"YlOrRd"` palette, light for near and dark for far; or, when some
-  values are negative (as from
-  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md)), its
-  `"Blue-Red 3"` palette, symmetric about 0.
+  `"YlOrRd"` palette, light for near and dark for far; or, for
+  correlations such as
+  [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
+  [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md) (at
+  least from -1 to 1, with the diagonal at 1), and when some values are
+  negative, its `"Blue-Red 3"` palette, symmetric about 0.
 
 - key:
 

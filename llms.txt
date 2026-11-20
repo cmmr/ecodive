@@ -581,6 +581,14 @@ valid alternative to correlation. A dist over the features.
 - [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) :
   Symmetric Proportionality
 
+### Associations and networks
+
+Correlations between features’ absolute abundances, estimated from
+relative abundances. A dist over the features.
+
+- [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md) :
+  SparCC Correlation
+
 ### Differential abundance
 
 Which features’ abundances differ between groups. da_test() runs any

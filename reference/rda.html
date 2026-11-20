@@ -63,7 +63,7 @@ Condition() terms, partial RDA."><meta property="og:image" content="https://cmmr
     <p>Constrained ordination of samples from their feature abundances: the
 axes of a (normalized) count table that sample metadata explain, followed
 by principal components of what they leave unexplained. Gives the same
-results as <code>vegan::rda()</code>, computed straight from sparse input without
+results as <code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::rda()</a></code>, computed straight from sparse input without
 forming any \(n \times n\) or dense table, so it takes far less
 time and memory for large datasets. With <code>norm = 'hellinger'</code> or
 <code>norm = 'chord'</code> it is transformation-based RDA (tb-RDA); with
@@ -93,7 +93,7 @@ time and memory for large datasets. With <code>norm = 'hellinger'</code> or
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
 <dd><p>A numeric matrix of feature abundances (samples
 \(\times\) features), or any of the table types listed under
-"Input Types". Alternatively, as in <code>vegan::rda()</code>, a formula with
+"Input Types". Alternatively, as in <code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::rda()</a></code>, a formula with
 the table on its left-hand side and the constraints on its right,
 such as <code>counts ~ treatment</code>, in place of <code>counts</code> and <code>formula</code>;
 the metadata may then be given second, as in
@@ -125,7 +125,7 @@ one-sided formula naming the variables in <code>data</code> that constrain the
 ordination, such as <code>~ treatment + ph</code>. Factors, numeric
 covariates, and interactions are all allowed. Wrap variables in
 <code>Condition()</code> to remove their effect first (partial RDA), as in
-<code>vegan::rda()</code>: <code>~ treatment + Condition(site)</code>. With only
+<code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::rda()</a></code>: <code>~ treatment + Condition(site)</code>. With only
 <code>Condition()</code> terms, the result is the PCA of the table after
 removing their effect. A left-hand side, if given, is ignored.
 Default: <code>NULL</code>.</p></dd>
@@ -183,7 +183,7 @@ named <code>"RDA1"</code>, <code>"RDA2"</code>, etc. If the constraints give few
 <code>n_axes</code> of them, unconstrained axes follow, named <code>"PC1"</code>, <code>"PC2"</code>,
 etc. The values are <code>vegan</code>'s site scores ("wa" scores, scaling 2):
 what <code>vegan::scores(x, display = "sites")</code> returns and what
-<code>phyloseq::plot_ordination()</code> plots. Its attributes are those of
+<code><a href="https://rdrr.io/pkg/phyloseq/man/plot_ordination.html" class="external-link">phyloseq::plot_ordination()</a></code> plots. Its attributes are those of
 <code><a href="dbrda.html">dbrda()</a></code>, with the same meanings, plus <code>loadings</code>:</p><ul><li><p><code>method</code>: <code>"rda"</code>.</p></li>
 <li><p><code>eig</code>: The variance of each axis.</p></li>
 <li><p><code>prop</code>: The proportion of the variance that each axis explains, not
@@ -261,7 +261,7 @@ scores point the same way as <code><a href="pca.html">pca()</a></code>'s, but ar
 2: each axis's scores are <code><a href="pca.html">pca()</a></code>'s divided by
 \(\sqrt{(n - 1) \cdot eig}\) and multiplied by
 \(\sqrt[4]{(n - 1) \cdot trace}\).</p></li>
-<li><p>The permutation test of an RDA (<code>vegan::anova.cca()</code>) is PERMANOVA of
+<li><p>The permutation test of an RDA (<code><a href="https://vegandevs.github.io/vegan/reference/anova.cca.html" class="external-link">vegan::anova.cca()</a></code>) is PERMANOVA of
 the Euclidean distances between the normalized samples: e.g.
 <code>permanova(euclidean(counts, norm = 'hellinger'), 'treatment', meta)</code>.
 Its \(R^2\) is <code>rda()</code>'s <code>r_squared</code>, and its pseudo-F and
@@ -270,13 +270,13 @@ p-value those of <code>anova(vegan::rda(...))</code> for the same permutations.<
 are planned for ecodive, will build on <code>rda()</code>.</p>
 <p><strong>Matching vegan</strong></p>
 <p><code>rda()</code> gives the same scores, eigenvalues, inertia, \(R^2\), biplot
-scores, centroids and species scores as <code>vegan::rda()</code> on the normalized
+scores, centroids and species scores as <code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::rda()</a></code> on the normalized
 table, up to the signs of the axes. Columns of the model matrix that are
 linear combinations of earlier ones are dropped, with a message, as in
 <code>vegan</code>. With <code>scale = TRUE</code>, features with constant values are left out
 (their loadings are 0), where <code>vegan</code> would stop with an error.</p>
 <p><strong>Same names in other packages</strong></p>
-<p><code>vegan::rda()</code> shares its name with ecodive's <code>rda()</code>, and whichever
+<p><code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::rda()</a></code> shares its name with ecodive's <code>rda()</code>, and whichever
 package was attached last masks the other's. Write <code>ecodive::rda()</code>, or
 use <code><a href="count_ord.html">count_ord()</a></code>, which always runs ecodive's, to be sure.</p>
 <p><strong>Axis signs and reproducibility</strong></p>

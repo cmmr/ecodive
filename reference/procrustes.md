@@ -6,7 +6,8 @@ closely as possible, and reports how close the fit is: the Procrustes
 sum of squares, \\m^2\\. Use it to ask how similar two pictures of the
 same samples are: the same samples under two beta diversity metrics,
 say, or from 16S and from shotgun metagenomics. Gives the same results
-as `vegan::procrustes()`.
+as
+[`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html).
 [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
 tests whether the fit is better than chance (PROTEST).
 
@@ -51,22 +52,25 @@ procrustes(
   Which axes (columns) of `ord` and `target` to use: whole numbers, as
   in [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md).
   When one of the two has fewer columns than asked for, it is padded
-  with columns of zeros, as in `vegan::procrustes()`. Default: `NULL`,
-  the first `min(ncol(ord), ncol(target))` axes.
+  with columns of zeros, as in
+  [`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html).
+  Default: `NULL`, the first `min(ncol(ord), ncol(target))` axes.
 
 - symmetric:
 
   Use the symmetric Procrustes statistic: scale both `ord` and `target`
   to unit sum of squares first, so that \\m^2\\ is between 0 and 1 and
   is the same whichever of the two is rotated. As
-  `vegan::procrustes()`'s `symmetric`. Default: `FALSE`.
+  [`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html)'s
+  `symmetric`. Default: `FALSE`.
 
 - dilate:
 
   Allow a uniform dilation (scaling) of `ord`, as well as the rotation
-  and reflection. `vegan::procrustes()`'s `scale`, renamed because
-  `scale` means "standardise each feature" elsewhere in ecodive.
-  Default: `TRUE`.
+  and reflection.
+  [`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html)'s
+  `scale`, renamed because `scale` means "standardise each feature"
+  elsewhere in ecodive. Default: `TRUE`.
 
 - n_axes:
 
@@ -85,9 +89,10 @@ procrustes(
 
 The rotated `ord`: a numeric matrix of class `ecodive_ord`, with one row
 per sample and one column per axis (named for `target`'s axes), as
-`vegan::procrustes()`'s `Yrot`. It is centred, and in `target`'s frame:
-`target`'s centred coordinates (scaled to unit sum of squares, if
-`symmetric`) are attribute `target`. Its attributes:
+[`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html)'s
+`Yrot`. It is centred, and in `target`'s frame: `target`'s centred
+coordinates (scaled to unit sum of squares, if `symmetric`) are
+attribute `target`. Its attributes:
 
 - `method`: `'procrustes'`.
 
@@ -112,7 +117,8 @@ per sample and one column per axis (named for `target`'s axes), as
 
 - `residuals`: Each sample's distance between `target` and the rotated
   `ord`, as [`residuals()`](https://rdrr.io/r/stats/residuals.html) of a
-  `vegan::procrustes()` result.
+  [`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html)
+  result.
 
 - `symmetric`: Whether the symmetric statistic was used.
 
@@ -167,9 +173,10 @@ number from each ordination, as the default `axes` does.
 
 **Same names in other packages**
 
-`vegan::procrustes()` takes its arguments the other way round (see
-above). When both packages are attached, the one attached last masks the
-other: call `ecodive::procrustes()` to be sure.
+[`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html)
+takes its arguments the other way round (see above). When both packages
+are attached, the one attached last masks the other: call
+`ecodive::procrustes()` to be sure.
 
 ## References
 

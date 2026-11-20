@@ -59,7 +59,7 @@ the same results. Every subset is searched, in parallel C."><meta property="og:i
     <p>Finds the subset of environmental variables whose distances among the
 samples best match the community distances: for each subset size, the
 subset with the highest (rank) correlation between its distances and
-<code>dm</code>. This is BIOENV (Clarke &amp; Ainsworth 1993), as <code>vegan::bioenv()</code> and
+<code>dm</code>. This is BIOENV (Clarke &amp; Ainsworth 1993), as <code><a href="https://vegandevs.github.io/vegan/reference/bioenv.html" class="external-link">vegan::bioenv()</a></code> and
 scikit-bio's <code>bioenv()</code> (QIIME 2's <code>diversity bioenv</code>) compute it, with
 the same results. Every subset is searched, in parallel C.</p>
     </div>
@@ -123,14 +123,14 @@ number of variables. Their correlations equal <code>'manhattan'</code>'s.</p></l
 
 
 <dt id="arg-max-vars">max_vars<a class="anchor" aria-label="anchor" href="#arg-max-vars"></a></dt>
-<dd><p>The largest subset size to search, as <code>vegan::bioenv()</code>'s
+<dd><p>The largest subset size to search, as <code><a href="https://vegandevs.github.io/vegan/reference/bioenv.html" class="external-link">vegan::bioenv()</a></code>'s
 <code>upto</code>. Default: <code>NULL</code>, every size up to the number of
 variables.</p></dd>
 
 
 <dt id="arg-given">given<a class="anchor" aria-label="anchor" href="#arg-given"></a></dt>
 <dd><p>Distances whose effect is removed from each correlation,
-as <code>vegan::bioenv()</code>'s <code>partial</code>: the partial correlation of <code>dm</code>
+as <code><a href="https://vegandevs.github.io/vegan/reference/bioenv.html" class="external-link">vegan::bioenv()</a></code>'s <code>partial</code>: the partial correlation of <code>dm</code>
 and each subset's distances, given these. A <code>dist</code> object or a
 symmetric matrix, matched to <code>dm</code>'s samples by name when both
 have names; numeric values, one per row of <code>data</code>, whose absolute
@@ -146,7 +146,7 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame of class <code>c('ecodive_bioenv', 'data.frame')</code>, with
-one row per subset size, as <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of <code>vegan::bioenv()</code> and
+one row per subset size, as <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of <code><a href="https://vegandevs.github.io/vegan/reference/bioenv.html" class="external-link">vegan::bioenv()</a></code> and
 scikit-bio's <code>bioenv()</code>:</p><ul><li><p><code>size</code>: The number of variables.</p></li>
 <li><p><code>variables</code>: The best subset of that size: the variables' names,
 joined by <code>", "</code>.</p></li>
@@ -194,7 +194,7 @@ searched, even with <code>'gower'</code>.</p></li>
 <li><p>Samples are matched by name between <code>dm</code>, <code>data</code>, and <code>given</code>.</p></li>
 <li><p>The result is the table that <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of vegan's result gives.</p></li>
 </ul><p><strong>Same names in other packages</strong></p>
-<p><code>vegan::bioenv()</code> has the same name. When both packages are attached,
+<p><code><a href="https://vegandevs.github.io/vegan/reference/bioenv.html" class="external-link">vegan::bioenv()</a></code> has the same name. When both packages are attached,
 the one attached last masks the other; call <code>ecodive::bioenv()</code> to be
 sure.</p>
     </div>

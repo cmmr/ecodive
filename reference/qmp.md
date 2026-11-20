@@ -129,10 +129,10 @@ them, so read them first.
   `counts`; non-integer counts are an error.
 
 - Targets \\s\_{min} L_i\\ are floored (as the script's call to
-  `phyloseq::rarefy_even_depth()` does), but a value within \\10^{-9}\\
-  (relative) of a whole number counts as that number, so that
-  floating-point rounding never costs a read; the sample with the
-  smallest sampling depth keeps all its reads.
+  [`phyloseq::rarefy_even_depth()`](https://rdrr.io/pkg/phyloseq/man/rarefy_even_depth.html)
+  does), but a value within \\10^{-9}\\ (relative) of a whole number
+  counts as that number, so that floating-point rounding never costs a
+  read; the sample with the smallest sampling depth keeps all its reads.
 
 - A sample whose target is 0 reads (a load so small that \\s\_{min} L_i
   \< 1\\) is an error, naming it, where the script returns `NaN`s. So is

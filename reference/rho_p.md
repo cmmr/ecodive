@@ -117,6 +117,16 @@ coefficient of \\z_i\\ and \\z_j\\. Unlike
 on the `denominator`. A pair of features that are both constant relative
 to the reference has no defined \\\rho_p\\ (`NaN`).
 
+**Not a correlation of abundances.** \\\rho_p\\ asks whether two
+features keep a constant ratio: it is 1 only for a log ratio with slope
+1, and pairs related by a power law with another exponent, or with
+unequal variances, score low.
+[`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md) starts
+from the same variance of log ratios but divides by estimated variances
+of the log *absolute* abundances instead, to estimate their Pearson
+correlation; that is possible only under its assumption that most pairs
+are uncorrelated.
+
 This is the coefficient that propr computes with
 `propr(counts, metric = "rho")` (see **Zeros** for its zero handling).
 propr also estimates false discovery rates by permutation
@@ -183,6 +193,7 @@ using compositional data analysis. *Scientific Reports*, 7, 16252.
 
 [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
 [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md),
+[`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md),
 [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md),
 [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
 (`'clr'`),

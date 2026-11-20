@@ -60,7 +60,7 @@ mantel_partial() removes the effect of a third distance matrix."><meta property=
     <div class="ref-description section level2">
     <p>Tests whether two distance matrices are correlated: for instance, whether
 samples with more different communities are also further apart, or more
-different in pH. Gives the same statistic as <code>vegan::mantel()</code> (Pearson,
+different in pH. Gives the same statistic as <code><a href="https://vegandevs.github.io/vegan/reference/mantel.html" class="external-link">vegan::mantel()</a></code> (Pearson,
 Spearman, or Kendall correlation), with permutation p-values. Computes
 them in parallel C, straight from the distances, without the
 \(n \times n\) matrices that <code>mantel()</code> builds for every permutation.
@@ -121,7 +121,7 @@ or <code>'kendall'</code> (tau-b), as in <code><a href="https://rdrr.io/r/stats/
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of permutations. Default: <code>999</code>.
 Alternatively, a matrix with one permutation of <code>1:n</code> per row, as
-from <code>permute::shuffleSet()</code>, to use instead of random ones.</p></dd>
+from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
@@ -135,7 +135,7 @@ by name when it has names, otherwise in the same order. Default:
 
 <dt id="arg-alternative">alternative<a class="anchor" aria-label="anchor" href="#arg-alternative"></a></dt>
 <dd><p>Which correlations count as more extreme than the
-observed one: <code>'greater'</code> (more positive, as in <code>vegan::mantel()</code>),
+observed one: <code>'greater'</code> (more positive, as in <code><a href="https://vegandevs.github.io/vegan/reference/mantel.html" class="external-link">vegan::mantel()</a></code>),
 <code>'less'</code> (more negative), or <code>'two.sided'</code> (larger in absolute
 value). Default: <code>'greater'</code>.</p></dd>
 
@@ -153,7 +153,7 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list of class <code>c('ecodive_mantel', 'ecodive_test')</code>, with:</p><ul><li><p><code>statistic</code>: The Mantel statistic, <code>c(r = ...)</code>: the correlation of
-<code>dm</code> and <code>y</code>. <code>vegan::mantel()</code>'s <code>statistic</code>.</p></li>
+<code>dm</code> and <code>y</code>. <code><a href="https://vegandevs.github.io/vegan/reference/mantel.html" class="external-link">vegan::mantel()</a></code>'s <code>statistic</code>.</p></li>
 <li><p><code>p_value</code>: The permutation p-value.</p></li>
 <li><p><code>z</code>: The standardized effect size, <code>(r - mean(r_perm)) / sd(r_perm)</code>.</p></li>
 <li><p><code>n_perm</code>: The number of permutations.</p></li>
@@ -165,7 +165,7 @@ default, <code><a href="n_cpus.html">n_cpus()</a></code>, will use all logical C
 <li><p><code>permutation</code>: How samples were permuted: <code>'free'</code>, <code>'within strata'</code>,
 or <code>'supplied matrix'</code>.</p></li>
 </ul><p>Attribute <code>r_perm</code> is a vector of the statistics of the permutations, as
-<code>vegan::mantel()</code>'s <code>perm</code>. <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> gives the main results as
+<code><a href="https://vegandevs.github.io/vegan/reference/mantel.html" class="external-link">vegan::mantel()</a></code>'s <code>perm</code>. <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> gives the main results as
 one row.</p>
     </div>
     <div class="section level2">
@@ -179,7 +179,7 @@ together, <code>y</code> is held fixed, and the correlation is recomputed. The
 p-value is the proportion of permutations, counting the observed one,
 with a correlation at least as extreme:
 \((1 + \#\{r_{perm} \ge r\}) / (1 + permutations)\) for
-<code>alternative = 'greater'</code>. As in <code>vegan::mantel()</code>, permuted statistics
+<code>alternative = 'greater'</code>. As in <code><a href="https://vegandevs.github.io/vegan/reference/mantel.html" class="external-link">vegan::mantel()</a></code>, permuted statistics
 within <code>sqrt(.Machine$double.eps)</code> of the observed one count as ties.</p>
 <p><strong>Speed and memory</strong></p>
 <p><code>dm</code> and <code>y</code> are centred and scaled once (after ranking them, for
@@ -192,7 +192,7 @@ merge sort, in \(O(n^2 \log n)\) per permutation, where
 <p>The permutations come from <code>seed</code>, not from R's random number generator,
 so <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> has no effect, and each permutation has a random number
 stream of its own. P-values are identical from run to run and for any
-number of <code>cpus</code>. The random permutations differ from <code>vegan::mantel()</code>'s,
+number of <code>cpus</code>. The random permutations differ from <code><a href="https://vegandevs.github.io/vegan/reference/mantel.html" class="external-link">vegan::mantel()</a></code>'s,
 so p-values agree with it only up to sampling error, unless the same
 <code>permutations</code> matrix is given to both.</p>
 <p><strong>Differences from vegan::mantel()</strong></p><ul><li><p><code>y</code> may also be a numeric vector, one value per sample, or the name of
@@ -201,7 +201,7 @@ a column of <code>data</code>.</p></li>
 <li><p><code>alternative</code> adds lower-tail and two-sided tests.</p></li>
 <li><p>There's no <code>na.rm</code>: distances must not be <code>NA</code>.</p></li>
 <li><p>When there are fewer possible permutations than requested,
-<code>vegan::mantel()</code> (via <code>permute</code>) runs each of them once instead.
+<code><a href="https://vegandevs.github.io/vegan/reference/mantel.html" class="external-link">vegan::mantel()</a></code> (via <code>permute</code>) runs each of them once instead.
 <code>mantel()</code> always draws random permutations.</p></li>
 </ul></div>
     <div class="section level2">

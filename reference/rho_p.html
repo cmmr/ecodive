@@ -160,6 +160,13 @@ where \(\mathrm{var}(z_i - z_j)\) is <code><a href="vlr.html">vlr()</a></code>. 
 \(z_i\) and \(z_j\). Unlike <code><a href="vlr.html">vlr()</a></code>, it depends on the <code>denominator</code>.
 A pair of features that are both constant relative to the reference has
 no defined \(\rho_p\) (<code>NaN</code>).</p>
+<p><strong>Not a correlation of abundances.</strong> \(\rho_p\) asks whether two
+features keep a constant ratio: it is 1 only for a log ratio with slope 1,
+and pairs related by a power law with another exponent, or with unequal
+variances, score low. <code><a href="sparcc.html">sparcc()</a></code> starts from the same variance of log
+ratios but divides by estimated variances of the log <em>absolute</em>
+abundances instead, to estimate their Pearson correlation; that is
+possible only under its assumption that most pairs are uncorrelated.</p>
 <p>This is the coefficient that propr computes with <code>propr(counts, metric = "rho")</code> (see <strong>Zeros</strong> for its zero handling). propr also estimates false discovery
 rates by permutation (<code>updateCutoffs()</code>), and offers <code>ivar = "iqlr"</code>, a
 clr over the features of mid-range variance; neither is offered here.</p>
@@ -216,8 +223,8 @@ using compositional data analysis. <em>Scientific Reports</em>, 7, 16252.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="vlr.html">vlr()</a></code>, <code><a href="phi_s.html">phi_s()</a></code>, <code><a href="alr.html">alr()</a></code>, <code><a href="normalize.html">normalize()</a></code> (<code>'clr'</code>),
-<code><a href="replace_zeros.html">replace_zeros()</a></code>.</p></div>
+    <div class="dont-index"><p><code><a href="vlr.html">vlr()</a></code>, <code><a href="phi_s.html">phi_s()</a></code>, <code><a href="sparcc.html">sparcc()</a></code>, <code><a href="alr.html">alr()</a></code>, <code><a href="normalize.html">normalize()</a></code>
+(<code>'clr'</code>), <code><a href="replace_zeros.html">replace_zeros()</a></code>.</p></div>
     </div>
 
     <div class="section level2">
