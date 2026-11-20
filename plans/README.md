@@ -333,7 +333,7 @@ can't be mistaken for one another:
 
 | Family | Functions |
 |:-------|:----------|
-| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, `da_test` (+ `list_*` / `match_*`) |
+| Wrappers | ✓ `dist_ord`, ✓ `count_ord`, ✓ `dist_test`, ✓ `replace_zeros`, ✓ `da_test` (+ `list_*` / `match_*`) |
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
 | Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, ✓ `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
@@ -350,7 +350,7 @@ can't be mistaken for one another:
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance`, `log_ratio_features` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
-| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, `da_wilcoxon`, `da_ttest`, `da_lm`, `linda`, `maaslin3`, `fastancom`, `rademu`, `da_sensitivity` |
+| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, `linda`, `maaslin3`, `fastancom`, `rademu`, `da_sensitivity` |
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
 | Rarefied diversity | `beta_div_rarefied`, `alpha_div_rarefied` |
 | Normalization | ✓ `normalize`, `size_factors` (new `norm` choices: see [normalization_factors.md](normalization_factors.md)) |
