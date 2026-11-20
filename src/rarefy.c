@@ -17,6 +17,7 @@ static int       n_sams;
 static int       n_otus;
 static int       n_vals;
 static uint32_t *depth_vec;
+static int       sam_offset; // 1 for slam, whose sample indices are 1-based.
 
 
 #define TARGET(sam) target_vec[(n_targets == 1) ? 0 : (sam)]
@@ -152,11 +153,14 @@ static void *rarefy_triplet(void *arg) {
   int      n_threads = ((worker_t *)arg)->n;
   knuth_t *knuth_vec = rarefy_triplet_knuth_vec;
   
-  // Initialize RNGs for this thread's samples.
+  // Initialize RNGs for this thread's samples. Each sample's stream is its
+  // 0-based position, as for every other class, so that slam input draws
+  // the same observations as the same table in any other class.
   for (uint64_t sam = thread_i; sam < n_sams; sam += n_threads) {
     knuth_vec[sam].tried = 0;
     knuth_vec[sam].kept  = 0;
-    pcg32_srandom_r(&(knuth_vec[sam].rng), seed, sam);
+    if (sam >= (uint64_t) sam_offset)
+      pcg32_srandom_r(&(knuth_vec[sam].rng), seed, sam - sam_offset);
   }
   
   // Iterate over all tuples (sam,otu,val though otu is ignored).
@@ -295,6 +299,10 @@ static pthread_func_t setup_slam(void) {
   val_vec = REAL(sexp_val_vec);
   res_vec = REAL(sexp_res_vec);
   n_vals  = LENGTH(sexp_val_vec);
+  
+  // slam's indices are 1-based: sample k is at index k, and index 0 is
+  // an empty sample that is never rarefied.
+  sam_offset = 1;
   
   if (margin == 1) {
     sam_vec = INTEGER(sexp_i);
@@ -632,6 +640,7 @@ SEXP C_rarefy(
   
   seed   = (uint64_t) asInteger(sexp_seed);
   margin = asInteger(sexp_margin);
+  sam_offset = 0;
   
   int n_threads = asInteger(sexp_n_threads);
   

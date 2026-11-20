@@ -261,7 +261,9 @@
   # -----------------------------------------------------------------------
   # A single depth: bit-identical to ecodive before rarefy(depth =) took
   # one depth per sample (data-raw/expected/rarefy.r), for every class,
-  # margin and cpus.
+  # margin and cpus. slam input now draws what every other class draws (its
+  # samples were seeded by 1-based position before), so its results are
+  # those of the base matrix.
   # -----------------------------------------------------------------------
   
   fx <- readRDS(file.path('expected', 'rarefy.rds'))
@@ -279,7 +281,7 @@
       r <- rarefy(
         fx_classes[[p[[2]]]](m), depth = as.integer(p[[4]]), seed = as.integer(p[[5]]),
         margin = as.integer(p[[3]]), drop = FALSE, warn = FALSE, cpus = cpus )
-      expect_identical(as.matrix(r), fx$results[[key]], info = paste(key, cpus))
+      expect_identical(as.matrix(r), fx$results[[sub('^slam_', 'matrix_', key)]], info = paste(key, cpus))
     }
   }
   
@@ -298,11 +300,10 @@
   for (i in seq_len(nrow(x)))
     expect_identical(rd[i, ], rarefy(x, depth = d[[i]], seed = 3, drop = FALSE, warn = FALSE)[i, ])
   
-  # Any cpus, any class (slam's draws are seeded by 1-based sample number,
-  # so they differ from the others', as with a single depth).
+  # Any cpus, any class.
   for (cpus in c(1L, 2L, 4L)) {
     expect_identical(rarefy(x, depth = d, seed = 3, drop = FALSE, warn = FALSE, cpus = cpus), rd)
-    for (cl in c('dgC', 'dgT', 'dge')) {
+    for (cl in c('dgC', 'dgT', 'dge', 'slam')) {
       expect_identical(
         as.matrix(rarefy(fx_classes[[cl]](x), depth = d, seed = 3, drop = FALSE, warn = FALSE, cpus = cpus)),
         rd, info = cl )

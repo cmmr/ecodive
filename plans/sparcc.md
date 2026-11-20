@@ -294,3 +294,249 @@ Follows [README.md](README.md) § "Result attributes and plots".
   zero. *Statistical Applications in Genetics and Molecular Biology*, 9, 39.
   doi:10.2202/1544-6115.1585
 - Erb, I., & Notredame, C. (2016), for \eqn{\rho_p}; see proportionality.md.
+
+
+## Decisions made while implementing (item 39, 2026-11-20)
+
+Asked of the user at the start:
+
+1. **Defaults: the paper's** (`n_draws = 100L`, `max_exclusions = 20L`,
+   `exclusion_threshold = 0.1`). Checked from the references' help:
+   FastSpar's are 50 / 10 / 0.1 (`fastspar --help`) and SpiecEasi's
+   `sparcc(iter = 20, inner_iter = 10, th = 0.1)` (its Rd). The docs give
+   both.
+2. **No `n_null_draws`.** The null runs use `n_draws`, so null and observed
+   medians carry the same Monte Carlo noise. The P-values section suggests
+   a smaller `n_draws` for the whole call when p-values are too slow.
+3. **Registry only, no wrapper.** `FEATURE_ASSOCS` (internal,
+   `R/feature_assoc.r`) has rows for `vlr`, `rho_p`, `phi_s` and `sparcc`,
+   with columns `name` (the title), `id`, `alt_ids` (all empty), `kind`,
+   `lower`, `upper`, `fisher_z`, `sparse` and `strict`. The range is two
+   numeric columns rather than assoc_network.md's `range` string: `'[-1,1]'`
+   contains the table's separator, and plots need numbers. `feature_assoc()`,
+   `list_feature_assocs()` and `match_feature_assoc()` are left to item 40.
+
+Made while implementing:
+
+4. **References: run, output only.** FastSpar 1.0.0 and SpiecEasi 1.1.1
+   came from the jsDelivr mirror of their GitHub repositories. The first
+   attempts to build FastSpar and `R CMD INSTALL` SpiecEasi were refused by
+   the session's permission classifier; the user then allowed them.
+   FastSpar was built with `autoreconf -fi && ./configure && make` (the
+   mirror loses `autogen.sh`'s executable bit); SpiecEasi's CRAN
+   dependencies `huge` and `pulsar` went into the scratch library.
+   **Exposure record:** no source file of either package was opened. Read:
+   SpiecEasi's `DESCRIPTION` (its `Imports`), its Rd for `sparcc` and
+   `sparccboot` (via `tools::Rd2txt`), FastSpar's `README.md` (grep for
+   usage and p-values) and `--help` output, the programs' messages, and the
+   top-level directory listings. Fixtures: `data-raw/expected/sparcc_refs.r`
+   (input tables; SpiecEasi's outputs), `data-raw/expected/sparcc_fastspar.sh`
+   (FastSpar's), folded into `sparcc.rds` by `data-raw/expected/sparcc.r`
+   (with the base-R cases). Results, same settings, largest absolute
+   difference over all pairs:
+
+   | Table | Reference | Settings | ecodive draws | Max diff | Mean diff |
+   |:------|:----------|:---------|--------------:|---------:|----------:|
+   | 40 × 20, counts ~ e^9 | FastSpar | 100 draws, 10 excl. | 100 | 0.0026 | 0.0007 |
+   | same | FastSpar | 17 (its 20; see 21) | 100 | 0.0014 | 0.0004 |
+   | same | SpiecEasi | 100, 10 | 100 | 0.0017 | 0.0005 |
+   | 40 × 8, counts ~ e^8 | FastSpar | 200, 5 (its 10) | 200 | 0.0012 | 0.0005 |
+   | same | SpiecEasi | 200, 10 | 200 | 0.0013 | 0.0005 |
+   | 60 × 30, counts ~ 20 | FastSpar | 1000, 20 | 1000 | 0.0188 | 0.0025 |
+
+   Variances against FastSpar's covariance diagonal: within 0.4% (tight)
+   and 1.8% (moderate). Tests: 0.02 absolute (tight), mean < 0.005 and max
+   < 0.05 (moderate). SpiecEasi and FastSpar differ from each other by
+   0.0021 on the tight table. The moderate table's 0.019 is Monte Carlo
+   noise: single draws spread identically in both (median per-draw sd of
+   ρ 0.0582 FastSpar, 0.0578 ecodive; of the variances 0.212 and 0.209),
+   and two ecodive seeds differ by 0.018 (mean 0.0025, the 0.0026 expected
+   for independent 1,000-draw medians). FastSpar's own seeds differ less
+   (1 vs 2: 8e-4; 1 vs 100: 0.0038), as they would if FastSpar's seeds
+   shared most of their iterations' streams (not checked further).
+   Earlier checks kept as well:
+   - the deterministic steps against a base-R implementation
+     (`data-raw/expected/sparcc.r`, dense `solve()` of the variance
+     system, `var()`, `median()`): 6 cases, per-draw ρ, variances,
+     exclusion order, stop reason and medians. Largest difference
+     **7.2e-15** (tested at 1e-12; exclusion order identical);
+   - a tight posterior (counts around e^9): the median over 40 Dirichlet
+     draws is within 0.02 of SparCC of the observed log fractions;
+   - recovery of planted correlations (ρ > 0.8 and < −0.8; 90% of the
+     other pairs within ±0.3), and the null check (feature-shuffled data,
+     n = 200: fewer than 0.5% of pairs with |r| > 0.3).
+
+   Ties can't be compared with the references, which always draw. Other
+   notes: FastSpar's long option is `--exclude_iterations` (its `--help`
+   says `--exclusion_iterations`, which it rejects), and SpiecEasi's
+   `inner_iter = 0` doesn't give the basic SparCC (0.17 from both FastSpar
+   and ecodive with no exclusions, which agree to 0.0017).
+5. **The variance step is least squares.** With B the (unsigned)
+   incidence matrix of the pairs kept, M = B'B and t_i = B't, so the
+   variances are the least-squares fit of t_ij ≈ ω_i² + ω_j², and
+   ρ_ij is proportional to that fit's residual. So a pair whose exclusion
+   would drop a component (its last pair) or make M singular (the kept
+   pairs become bipartite) has leverage 1 and a residual, so ρ, of
+   exactly 0. **With any threshold above rounding error, neither can
+   happen.** They happen only at `exclusion_threshold = 0`, where rounding
+   (|ρ| around 1e-16) decides. There they are handled, and tested against
+   dense solves using the C code's own exclusion list (30 tables, every
+   stop reason reached):
+   - a component left with no pair is dropped from the draw (its ρ and
+     variance are `NA`);
+   - fewer than 4 components left: stop, keeping the last estimates
+     (the plan's "stop at 3");
+   - M singular (a Cholesky pivot of Woodbury's K × K matrix ≤ 1e-10):
+     undo that exclusion and stop.
+
+   The fixtures use a threshold of 1e-6 so that rounding can't decide;
+   their first version used 0, and the base-R and C versions then
+   disagreed on which zero-correlation pair came next. The docs'
+   "Other implementations" section says this.
+6. **Solving.** No exclusions: ω_i² = (t_i − Σt_k/(2m − 2))/(m − 2) over
+   the m active components. With K exclusions: Woodbury on M = A − UU',
+   A = (m − 2)I + 11' (A⁻¹ = (I − 11'/(2m − 2))/(m − 2)), so
+   S = I − U'A⁻¹U (K × K, entries from how many components two excluded
+   pairs share), Cholesky, ω² = y + A⁻¹U S⁻¹ U'y with y = A⁻¹t. O(D² + K³)
+   per iteration, never an m × m factorisation. Matched against dense
+   `solve()` after 0 to 20 exclusions (the fixtures, and the threshold-0
+   tests at 1e-10 relative).
+7. **The exclusion step.** The largest |ρ| strictly above the threshold,
+   among pairs not yet excluded and with both components active; `NaN`
+   (a non-positive variance) is never chosen; ties go to the first pair
+   in packed order (tested with three identical features). Excluded pairs
+   keep their ρ, recomputed from each new set of variances (eq. 10).
+8. **Draws.** `rng_log_gamma(N + 1)` per value (shape ≥ 1, so always
+   Marsaglia–Tsang). Stream `(b · n_draws + d)(n + 1) + s` for sample s
+   of draw d of dataset b (0 = observed, as the plan's `d(n + 1) + s`;
+   1..B the null datasets). Draw d doesn't depend on `n_draws` (tested:
+   the first 20 of 30 draws equal a 20-draw run's). Each draw's logs are
+   centred per feature and t_ij = Σ(a_si − a_sj)²/(n − 1), summed in
+   sample order, on a dense feature-major D × n block per thread.
+9. **Null datasets** (`permutations`): **FastSpar's resampling.** From
+   `fastspar_bootstrap`'s outputs (99 tables of the moderate table): no
+   feature's row is a permutation of its original (0 of 2,970), every value
+   comes from the same feature's own counts (2,970 of 2,970), rows have
+   fewer distinct values (resampling with replacement), and each feature
+   uses its own sample indices. So each feature's counts are resampled
+   across the samples with replacement, independently. ecodive does the
+   same: stream `2^62 + (b − 1)D + f`, sample j = ⌊u n⌋ with `rng_unif()`
+   for each position; then the full SparCC with the dataset's own draw
+   streams. (The first version shuffled, Fisher–Yates, as the plan
+   proposed; changed once FastSpar's outputs were seen.) SpiecEasi's
+   documented `sparccboot()` null permutes each feature instead
+   (`apply(data[indices, ], 2, sample)`); the docs say so.
+10. **p-values** are computed in C exactly as `perm_p(alternative =
+    'two.sided')` would from the null medians (hit when |r_b| ≥ |r| −
+    √ε; a missing null median is not a hit and B + 1 stays the
+    denominator; a missing r gives `NA`), so the null medians never need
+    a B × pairs matrix. Tested equal (`identical()`) to `perm_p()` on the
+    null medians that `sparcc_details()` returns. **This is FastSpar's
+    estimate exactly:** recomputing (1 + #{|r_b| ≥ |r|})/(B + 1) from the
+    99 bootstrap correlation tables matches `fastspar_pvalues`' output on
+    all 435 pairs (difference 0; with > instead of ≥, or k/B, it is 0.01).
+    The README's "accounts for the possibility of repetitious data
+    permutations" didn't show in these outputs. Against FastSpar's own
+    p-values (B = 99, 20 draws, 10 exclusions, its own nulls): Spearman
+    0.91, the planted pair at 0.01 in both, 92% agreement on p ≤ 0.05
+    (21 pairs in both, 8 and 7 in one only), as random nulls allow.
+11. **Medians.** Per pair over the draws' non-missing values (`NA` for a
+    dropped component, `NaN` for a non-positive variance), by quickselect;
+    the mean of the middle two for an even count. All missing gives `NA`,
+    with a warning. Each feature's `variances` is the median of its
+    variances where active, non-positive values included. Tested
+    `identical()` to `apply(..., median, na.rm = TRUE)` on the details.
+12. **Memory.** The draws' ρ are stored pair-major (`n_draws` × block)
+    up to 256 MB. Beyond that the pairs are taken in blocks, and each
+    later block draws again (same streams), computing t only for its pairs
+    and ρ from each draw's variances, kept from the first pass. Tested
+    `identical()` for blocks of 1, 7, 100 and 299 pairs, with and without
+    permutations. Per thread: n × D + 2 × pairs doubles plus pairs bytes.
+13. **Threads:** one task per draw (`threads_for()`, at most `n_draws`
+    threads), then one per pair for the medians. Identical for `cpus` 1, 2,
+    3, 4 and 8; Matrix, slam, `margin = 2`, double and data-frame input
+    give identical results. Timing on this container (4 cores): 200
+    samples × 500 features, 100 draws: 4.7 s on 1 thread, 1.5 s on 4; 100
+    × 2,000, 20 draws: 3.7 s on 4 (4.4 s with forced 200,000-pair blocks).
+14. **Input.** Own checks (`sparcc_input()`): numeric, finite,
+    non-negative; a warning when not whole numbers; errors for fewer than
+    4 features or 3 samples. The counts are copied densely (D × n) in C;
+    there is no sparse path, as planned. `max_exclusions` above the number
+    of pairs is treated as that number (its K × K scratch would otherwise
+    be allocated at the requested size).
+15. **Result.** As planned: `method = "sparcc"`, `n_samples`,
+    `variances` and, with permutations, `p_value`; title "SparCC
+    Correlation" from the registry's `name`. `variances` follows the
+    labels: reordered by `clust` and named by `Labels` (positions for
+    unnamed features). `proportionality()` now takes its titles from the
+    registry too (same strings as before).
+16. **Warnings:** non-positive variances (how many draws, how many
+    values); pairs `NA` in every draw; medians beyond ±1. `ex_counts`
+    (4 samples) warns about non-positive variances, so the examples
+    simulate 60 samples instead.
+17. **Shared code changed** (the plan's two small changes):
+    - `dist_clust_order()` clusters any `kind = 'similarity'` registry
+      method as `1 - x` (was: `method == 'rho_p'`), via `is_similarity()`;
+    - `dist_plot_name()` treats any registry method as over features (was
+      the `vlr`/`rho_p`/`phi_s` test). `plot.ecodive_dist()` now draws a
+      similarity on the diverging scale, at least from −1 to 1, with the
+      diagonal at 1 (it was blank, and `rho_p()`'s range came from the
+      data);
+    - `DIST_PARALLEL <- c('p_value', 'stability', 'n_pairs')` in
+      `R/dist_clust.r`; `dist_reorder()` reorders those attributes with
+      the triangle when their length matches it (tested: p-values stay with
+      their pairs after `clust = 'average'`).
+18. **`sparcc_details()`** (internal) returns the result plus per-draw ρ
+    (`n_draws` × pairs), variances (`n_draws` × D), exclusions (packed,
+    1-based, in order), `stop` per draw (`'max_exclusions'`,
+    `'threshold'`, `'three'`, `'singular'`) and the null medians. It
+    takes `log_fractions` (a list of n × D matrices, one per draw) and
+    `block_pairs`.
+19. **Docs:** `sparcc.Rd` (what is estimated, the assumptions and the
+    paper's rule of thumb, zeros, "Why not rho_p()", P-values and their
+    cost, Other implementations, Size, Same names); `rho_p.Rd` gained the
+    matching paragraph and links to `sparcc()`; `plot.ecodive_dist.Rd`
+    mentions `sparcc()`. pkgdown: "Compositional Data" → "Associations and
+    networks". NEWS. `parameter_names.md` §6 gains `max_exclusions` and
+    `exclusion_threshold`. No registry has an alias starting `spar`
+    (tested; DA_TESTS doesn't exist yet).
+20. **roxygen:** run with roxygen2 7.3.1 (the container's) when the
+    docs were final, and once more after the reference comparisons
+    changed `sparcc()`'s docs. It reformatted about 70 Rd files that were
+    last written by 8.1.1, and added `RoxygenNote: 7.3.1` to
+    `DESCRIPTION`; committed as written, per the README rule.
+21. **FastSpar stops at D − 3 exclusions; ecodive and SpiecEasi don't.**
+    FastSpar's output is identical for every `--exclude_iterations` from
+    D − 3 up (D = 8, 10, 12, 20: from 5, 7, 9, 17), and it prints
+    "Exclusion iterations ending early; we need at least 4 non-excluded
+    pairs for SparCC". SpiecEasi keeps going and agrees with ecodive (D =
+    8, 10 exclusions: 0.0013), while FastSpar then differs from both by up
+    to 0.43. ecodive keeps the plan's rule (stop when fewer than 4
+    components are left, which by 5 can't happen above rounding), so it
+    matches SpiecEasi. The cap matters only for fewer than
+    `max_exclusions + 3` features (22 at the defaults); the docs say to
+    give `max_exclusions = D - 3` to reproduce FastSpar there. Tested both
+    ways against the fixtures.
+
+### What item 40 (`assoc_network()`) can rely on
+
+- A `sparcc()` result is an `ecodive_dist` over features with `method =
+  "sparcc"`, top-level `n_samples`, `variances` (named, in label order),
+  and `p_value` (only with `permutations > 0`) parallel to the triangle,
+  in `[1/(B+1), 1]` and on a grid of `1/(B+1)`; `NA` where the
+  correlation is `NA`.
+- Values are correlations, normally in [−1, 1]; medians beyond ±1 are
+  possible (warned) and should be clamped or kept as the user prefers,
+  e.g. before Fisher's z.
+- `FEATURE_ASSOCS` (`R/feature_assoc.r`): `feature_assoc_info(id)` gives a
+  row as a list; `is_similarity(d)` tests a result. `fisher_z` is `TRUE`
+  for `sparcc` only. Add rows (and `fun`, if the wrapper needs it) for
+  `spiec_easi_*` and `secom_*`; `alt_ids` is there for
+  `match_feature_assoc()`.
+- `dist_reorder()` keeps `p_value`, `stability` and `n_pairs` aligned
+  through `clust`, but **not** per-feature attributes: `sparcc()` reorders
+  its own `variances`.
+- Re-running "the same association" on permuted samples (for
+  `assoc_network_compare()`): `sparcc()` needs only `counts` and its
+  arguments; its `seed` streams are by (dataset, draw, sample), so a
+  caller wanting independent runs should vary `seed`.

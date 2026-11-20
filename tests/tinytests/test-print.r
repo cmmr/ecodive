@@ -6,6 +6,10 @@
 
   cpus <- 1L
 
+  # The footer's ellipsis: one character in a UTF-8 locale, "..." otherwise
+  # (print_sym()), as a regular expression.
+  ell <- if (isTRUE(l10n_info()[['UTF-8']])) '\u2026' else '\\.\\.\\.'
+
   # How many rows, and how wide.
   expect_equal(print_n_rows(20, NULL), 20)
   expect_equal(print_n_rows(21, NULL), 10)
@@ -46,7 +50,7 @@
   expect_identical(out[[4]], '   <int> <chr> <dbl>')
   expect_identical(out[[5]], ' 1     1 a       0.5')
   expect_identical(length(out), 2L + 2L + 10L + 3L)
-  expect_true(grepl('^# . 20 more rows$', out[[15]]))
+  expect_true(grepl(paste0('^# ', ell, ' 20 more rows$'), out[[15]]))
   expect_identical(out[[16]], '# Use print(x, n = ...) to see more rows')
   expect_identical(out[[17]], '# Attributes: n_perm')
   expect_identical(length(capture.output(print(x, n = Inf))), 2L + 2L + 30L + 1L)
@@ -64,7 +68,7 @@
   class(w) <- c('ecodive_simper', 'data.frame')
   out <- capture.output(print(w, width = 30))
   expect_true(all(nchar(out) <= 30))
-  expect_true(any(grepl('^# . 26 more columns:', out)))
+  expect_true(any(grepl(paste0('^# ', ell, ' 26 more columns:'), out)))
   expect_true(any(grepl('^#   and 6 more$', out)))
   expect_false(any(grepl('V25', out, fixed = TRUE)))
 
@@ -99,7 +103,7 @@
   expect_true(grepl('^# % of variance: [0-9.]+, [0-9.]+, [0-9.]+$', out[[3]]))
   expect_identical(strsplit(trimws(out[[4]]), ' +')[[1]], c('PCoA1', 'PCoA2', 'PCoA3'))
   expect_identical(length(out), 3L + 1L + 10L + 3L)
-  expect_true(grepl('^# . 140 more samples$', out[[15]]))
+  expect_true(grepl(paste0('^# ', ell, ' 140 more samples$'), out[[15]]))
   expect_identical(out[[17]], '# Attributes: method, eig, prop, trace, correction, constant')
   expect_identical(length(capture.output(print(o, n = 2))), 3L + 1L + 2L + 3L)
   # No axes.
@@ -125,7 +129,7 @@
   # 10 rows of 29.
   d30 <- euclidean(matrix(1:60, 30), cpus = cpus)
   out <- capture.output(print(d30))
-  expect_true(any(grepl('^# . 19 more samples$', out)))
+  expect_true(any(grepl(paste0('^# ', ell, ' 19 more samples$'), out)))
   expect_identical(length(capture.output(print(d30, n = Inf, width = 1000))), 2L + 1L + 29L + 1L)
   # Tiny matrices.
   one <- structure(numeric(0), Size = 1L, class = c('ecodive_dist', 'dist'))

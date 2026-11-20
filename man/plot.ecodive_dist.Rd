@@ -24,8 +24,10 @@ sort the samples from smallest to largest.}
 
 \item{col}{The colour scale, from the smallest value to the largest.
 Defaults to \code{\link[grDevices:palettes]{grDevices::hcl.colors()}}'s \code{"YlOrRd"} palette, light
-for near and dark for far; or, when some values are negative (as
-from \code{\link[=rho_p]{rho_p()}}), its \code{"Blue-Red 3"} palette, symmetric about 0.}
+for near and dark for far; or, for correlations such as \code{\link[=rho_p]{rho_p()}}
+and \code{\link[=sparcc]{sparcc()}} (at least from -1 to 1, with the diagonal at 1), and
+when some values are negative, its \code{"Blue-Red 3"} palette,
+symmetric about 0.}
 
 \item{key}{Whether to draw the colour key on the right. Default \code{TRUE}.}
 
@@ -38,10 +40,10 @@ from \code{\link[=rho_p]{rho_p()}}), its \code{"Blue-Red 3"} palette, symmetric 
 \description{
 A heatmap of a distance matrix from \code{\link[=beta_div]{beta_div()}} or any of its metric
 functions (such as \code{\link[=bray]{bray()}} or \code{\link[=unweighted_unifrac]{unweighted_unifrac()}}), or of the
-proportionality of features from \code{\link[=vlr]{vlr()}}, \code{\link[=rho_p]{rho_p()}} or \code{\link[=phi_s]{phi_s()}}: one row
-and one column per sample (or feature), each cell coloured by the
-distance between its row's and its column's, with the samples ordered as
-the \code{clust} it was made with says.
+associations of features from \code{\link[=vlr]{vlr()}}, \code{\link[=rho_p]{rho_p()}}, \code{\link[=phi_s]{phi_s()}} or
+\code{\link[=sparcc]{sparcc()}}: one row and one column per sample (or feature), each cell
+coloured by the distance between its row's and its column's, with the
+samples ordered as the \code{clust} it was made with says.
 }
 \details{
 \strong{Order.} The samples are ordered by the \code{clust} argument of the

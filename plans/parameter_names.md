@@ -21,7 +21,7 @@ same thing.
 | `counts` | a count table (first argument) | metrics, `pca`, `rpca`, `normalize`, `rarefy`, `count_ord`, and all planned count-table methods |
 | `dm` | beta diversity distances (first argument) | `pcoa`, ..., all tests, `dist_ord`, `dist_test` |
 | `ord` | an ordination result (first argument) | `envfit`, `pcoa_biplot`; planned `procrustes` |
-| `x`, `y` | two inputs of equal standing, or a first argument that can be either `dm` or `counts` | planned `coinertia(x, y)`, `varpart(x, ...)`, `forward_select(x, ...)`; `mantel(dm, y)` |
+| `x`, `y` | two inputs of equal standing, or a first argument that can be either `dm` or `counts` | planned `coinertia(x, y)`, `varpart(x, ...)`, `forward_select(x, ...)`; `enterotype(x, ...)` (with `counts` as a later, optional argument when `x` is a dist); `mantel(dm, y)` |
 | `n_axes` | **the number of axes returned** (proposed rename of `k`; see §2.0) | every ordination |
 | `axes` | **which** axes of an input ordination to use (indices) | `envfit`; planned `procrustes` |
 | `groups`, `data`, `formula` | the grouping variable or model, and the sample metadata it comes from. DA model methods (2026-11-20, `da_test()`): `formula` is the model and `groups` its term of interest; `groups` alone is `formula = ~ groups` | tests, `dbrda`, `capscale`, DA methods, and planned constrained and discriminant methods |
@@ -52,6 +52,9 @@ same thing.
 | `n_folds`, `folds`, `select` | **(new)** cross-validation: a fold count or a per-sample fold vector (overrides `seed`), and which λ to report (`'min'`, `'1se'`) | planned `coda_lasso`, `coda_lasso_pairwise` |
 | `sources`, `sink_depth` | **(new)** per-sample source-environment labels (`NA` marks a sink), and the sinks' rarefaction depth (`depth` is the sources', as in `rarefy`) | planned `sourcetracker`; `sources` also `feast` |
 | `n_restarts`, `burnin`, `delay`, `loo`, `features` | **(new)** the Gibbs schedule, leave-one-out over environments, and per-feature output | planned `sourcetracker` |
+| `n_types` | **(new, 2026-11-20)** the candidate numbers of community types (a single value fixes it) | `enterotype`; planned `dmm` |
+| `ch` | **(new, 2026-11-20)** the form of the Calinski-Harabasz index: `'medoids'` (clusterSim's, as in Arumugam et al.'s script) or `'centroids'` (the distances' pseudo-F) | `enterotype` |
+| `centroids` | **(new)** reference type profiles to classify against | planned `valencia` |
 | `cpus` | threads (always last) | everything threaded |
 
 
@@ -194,6 +197,7 @@ reuse §1's names and add these:
 | `pseudocounts`, `zeros`, `scale_sds` | the settings grids of a sensitivity analysis. Plural, and after `...`, so they can't capture the method's own `pseudocount` / `scale_sd` (arguments after `...` match only exactly) | `da_sensitivity` |
 | `load_sd` | the uncertainty of a measured load in a scale model | `dirmult_lm` (with `qmp_scale()`'s `load`) |
 | `n_draws` | also used by `dirmult_lm` and `sparcc` | |
+| `max_exclusions`, `exclusion_threshold` | **(added 2026-11-20, item 39)** SparCC's cap on exclusion iterations (`max_<unit>` rule; `0L` for none) and the \|r\| above which a pair is excluded from the variance estimate. Not `threshold`, which is `assoc_network()`'s edge cutoff | `sparcc` (exists) |
 
 Open naming questions for the user are flagged "ask" in the plans: the
 `feature_assoc()` wrapper name ([assoc_network.md](assoc_network.md)),

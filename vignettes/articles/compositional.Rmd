@@ -405,6 +405,30 @@ dm_philr <- philr_distance(counts, tree, pseudocount = 1)
 permanova(dm_philr, groups, seed = 1)
 ```
 
+**Rarefied or compositional?** Rarefying every sample to the same depth
+is the other answer to uneven sequencing depth, and Schloss
+(**[2024](https://doi.org/10.1128/msphere.00354-23)**,
+**[2026](https://doi.org/10.1128/msystems.00930-26)**) argues that it
+controls for depth better than robust Aitchison PCA does. Averaging many
+rarefactions (`beta_div_rarefied()`) removes most of the noise that a
+single one adds. A Procrustes test shows how far the two views agree on
+these samples, and `envfit()` whether either ordination still follows
+sequencing depth:
+
+```{r rarefied}
+dm_rare  <- beta_div_rarefied(counts, 'bray', times = 20)
+dm_rare
+ord_rare <- pcoa(dm_rare, n_axes = 2)
+procrustes_test(ord_rare, ord, seed = 1)
+
+log_depth <- data.frame(log_depth = log(rowSums(counts)))
+envfit(ord_rare, log_depth, seed = 1)
+envfit(ord, log_depth, seed = 1)
+```
+
+The larger an ordination's r² for `log_depth`, the more it still reflects
+how deeply each sample happened to be sequenced rather than what is in it.
+
 **Used in practice.**
 
 * Aitchison distance and clr PCA: [Bian et al.

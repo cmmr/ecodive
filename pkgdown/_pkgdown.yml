@@ -85,6 +85,10 @@ reference:
   - vlr
   - rho_p
   - phi_s
+- subtitle: Associations and networks
+  desc: Correlations between features' absolute abundances, estimated from relative abundances. A dist over the features.
+  contents:
+  - sparcc
 - subtitle: Differential abundance
   desc: Which features' abundances differ between groups. da_test() runs any method by name; the classical per-feature tests compare normalized values, the others log ratios or clr values, so that the samples' totals don't matter.
   contents:
@@ -101,6 +105,11 @@ reference:
   contents:
   - qmp_scale
   - qmp_rarefy
+- subtitle: Community types
+  desc: Assign each sample to one of a few community types. The types come back as a data frame whose `type` column can be used as `groups` in any test or ordination plot.
+  contents:
+  - enterotype
+  - ecodive_types
 
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
@@ -171,6 +180,7 @@ reference:
   - plot.ecodive_varpart
   - plot.ecodive_forward_select
   - plot.ecodive_bioenv
+  - plot.ecodive_types
   - ecodive_display
   - print_ecodive
 
@@ -181,6 +191,8 @@ reference:
   - list_metrics
   - read_tree
   - rarefy
+  - beta_div_rarefied
+  - alpha_div_rarefied
   - normalize
   - n_cpus
   - blas_threads

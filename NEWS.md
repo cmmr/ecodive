@@ -599,6 +599,22 @@
   4.5 million pairs of 3,000 taxa in 500 samples take about a second on 4
   cores.
 
+* New `sparcc()` estimates the correlations between taxa's log absolute
+  abundances from relative abundances with SparCC (Friedman & Alm 2012),
+  the co-occurrence networks most often reported for microbiome data:
+  Dirichlet draws of each sample's fractions (so zeros need no
+  pseudocount), basis variances under SparCC's sparsity assumption, and
+  the iterative exclusion of strongly correlated pairs, with each pair's
+  median over the draws. With the same settings it agrees with FastSpar
+  and SpiecEasi to within the noise of the random draws (about 0.002 for
+  counts in the thousands). `permutations` adds FastSpar's p-values
+  (resampled null datasets; never 0), parallel to the triangle. Like
+  `rho_p()`, it returns a `dist` over the features, which `plot()` draws
+  on a diverging scale and `clust` clusters as `1 - r`. Draws run in
+  parallel, with results identical for any `cpus`: 500 taxa in 200
+  samples, 100 draws, take about 1.5 seconds on 4 cores. Its docs explain
+  how it differs from `rho_p()`.
+
 * New `qmp_scale()` and `qmp_rarefy()` turn relative abundances into
   absolute abundances when each sample's total microbial `load` was measured
   (flow cytometry, qPCR, a spike-in). `qmp_scale()` multiplies each sample's
@@ -610,6 +626,22 @@
   is matched to the samples by name, or given as a column of `data`. Both
   keep the table's class and orientation, and sparse tables stay sparse:
   2,000 samples by 5,000 taxa take under 0.1 seconds.
+
+* New `enterotype()` clusters samples into community types as Arumugam et
+  al. (2011) did: partitioning around medoids (PAM) on Jensen-Shannon
+  distances (or any `dist`), with the number of types chosen by the
+  Calinski-Harabasz index and each sample's fit given by its silhouette.
+  PAM, the silhouettes and the index are threaded C written from the
+  published algorithms; medoids, assignments, objectives and silhouettes
+  match `cluster::pam()` and `cluster::silhouette()`, and the index matches
+  `clusterSim::index.G1()` as Arumugam et al.'s script calls it (`ch =
+  "medoids"`), or is the distances' pseudo-F (`ch = "centroids"`). The
+  result, a data frame of class `ecodive_types` (see `?ecodive_types`),
+  holds each sample's type, as a factor to use as `groups` in any test, and
+  as attributes each type's medoid, size and mean composition (with its
+  most abundant feature) and the index for every number of types tried.
+  `plot()` draws the types' mean compositions or the index; `print()` shows
+  the types, the selection and the first samples.
 
 * New `ancom()` runs ANCOM (Mandal et al. 2015), the analysis of
   composition of microbiomes: it tests every log ratio between two features
@@ -741,6 +773,25 @@
   samples by name when named). `drop` and `warn` then compare each sample
   with its own depth. A single depth gives exactly the same results as
   before.
+
+* New `beta_div_rarefied()` and `alpha_div_rarefied()` rarefy a table many
+  times (`times = 100` by default), compute any beta or alpha diversity
+  metric from each rarefied table, and average the results: the mean (as
+  `vegan::avgdist()` and mothur), the median, or for beta diversity the
+  medoid (the matrix of the rarefaction closest to all the others, as in
+  q2-boots). `sd = TRUE` adds each value's standard deviation over the
+  rarefactions. Iteration t is exactly `rarefy(counts, depth, seed = seed +
+  t - 1)`, so results are reproducible and the same for any `cpus`; the
+  mean needs memory for only a few distance matrices, and the median and
+  medoid work through the pairs of samples in blocks. Titles say so: an
+  ordination of the result is a "Principal Coordinates Analysis of
+  Bray-Curtis Dissimilarity (rarefied 100×)".
+
+* `rarefy()` of a slam `simple_triplet_matrix` now draws exactly the same
+  observations as the same table in any other class, for the same `seed`.
+  Before, slam's samples were seeded by their 1-based positions, so its
+  draws differed from those of a `matrix` or `dgCMatrix`. Rarefying slam
+  input therefore gives different (equally random) results than before.
 
 * New `normalize()` returns a count table after any of the transformations
   that `beta_div()`, `pca()` and `envfit()` apply with their `norm` argument

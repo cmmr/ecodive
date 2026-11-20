@@ -17,7 +17,10 @@
 #'        (a distance matrix), or one of ecodive's data frames: from
 #'        [ancom()], [ancombc()], [ancombc2()], [ancombc_global()],
 #'        [ancombc_pairwise()], [ancombc_dunnett()], [ancombc_trend()],
-#'        [dirmult_ttest()], [simper()], [bioenv()] or [envfit()].
+#'        [dirmult_ttest()], [simper()], [bioenv()], [envfit()] or
+#'        [enterotype()]. A community-types result (see [ecodive_types])
+#'        prints its types and how their number was chosen before its
+#'        first samples.
 #'
 #' @param n  The number of rows to print (samples, for a distance matrix).
 #'        `NULL`, the default, prints every row of up to 20, and the first
@@ -91,11 +94,14 @@ print_type <- function (v) {
 }
 
 
-# Strings no wider than `w`, cut with an ellipsis.
+# Strings no wider than `w`, cut with an ellipsis (one character wide in
+# UTF-8, "..." otherwise).
 print_cut <- function (s, w = 40L) {
   long <- !is.na(s) & nchar(s, type = 'width') > w
-  if (any(long))
-    s[long] <- paste0(substr(s[long], 1L, w - 1L), print_sym()$more)
+  if (any(long)) {
+    more <- print_sym()$more
+    s[long] <- paste0(substr(s[long], 1L, w - nchar(more, type = 'width')), more)
+  }
   s
 }
 

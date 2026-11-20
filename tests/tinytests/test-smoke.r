@@ -41,6 +41,12 @@
   r <- rarefy(counts, depth = 31:50, cpus = cpus)
   expect_equal(unname(rowSums(r)), 31:50)
 
+  # Diversity over repeated rarefactions.
+  z <- beta_div_rarefied(counts, 'bray', depth = 40, times = 3, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 20L && all(is.finite(z)))
+  z <- alpha_div_rarefied(counts, 'shannon', depth = 40, times = 3, cpus = cpus)
+  expect_true(is.numeric(z) && length(z) == 20L && all(is.finite(z)))
+
   # Absolute abundance.
   load <- seq(1, 2, length.out = 20) * 1e9
   z <- qmp_scale(counts, load, cpus = cpus)
@@ -92,6 +98,14 @@
   }
   z <- rho_p(counts, denominator = 'F1', cpus = cpus)
   expect_true(attr(z, 'Size') == 11L && all(is.finite(z)) && all(abs(z) <= 1))
+
+  # Associations: SparCC.
+  z <- sparcc(counts[, 1:10], n_draws = 5L, permutations = 9L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 10L && length(z) == 45L)
+  expect_true(all(is.finite(z)) && identical(attr(z, 'method'), 'sparcc'))
+  expect_identical(attr(z, 'Labels'), colnames(counts)[1:10])
+  expect_identical(names(attr(z, 'variances')), colnames(counts)[1:10])
+  expect_true(length(attr(z, 'p_value')) == 45L && all(attr(z, 'p_value') > 0 & attr(z, 'p_value') <= 1))
 
   # Differential abundance.
   z <- ancom(counts, 'grp', meta, cpus = cpus)
@@ -225,6 +239,12 @@
   expect_identical(dim(be), c(2L, 3L))
   expect_true(all(is.finite(be$correlation)) && all(abs(be$correlation) <= 1))
 
+  et <- enterotype(counts, n_types = 2:3, cpus = cpus)
+  expect_inherits(et, c('ecodive_enterotype', 'ecodive_types', 'data.frame'))
+  expect_identical(dim(et), c(20L, 3L))
+  expect_true(is.factor(et$type) && all(is.finite(et$silhouette)))
+  expect_true(all(is.finite(attr(et, 'selection')$ch)))
+
   vp <- varpart(counts, ~ grp, ~ x, data = meta, norm = 'hellinger', cpus = cpus)
   expect_inherits(vp, c('ecodive_varpart', 'data.frame'))
   expect_identical(dim(vp), c(4L, 5L))
@@ -295,6 +315,7 @@
   expect_true(drawn(fs))
   expect_true(drawn(ancom(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)))
+  expect_true(drawn(sparcc(counts, n_draws = 5L, cpus = cpus)))
   expect_true(drawn(fit))   # ancombc2()
   expect_true(drawn(ancombc_global(fit, cpus = cpus)))
   expect_true(drawn(ancombc_pairwise(fit, cpus = cpus)))

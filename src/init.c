@@ -41,6 +41,9 @@ extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mult_default_delta(SEXP);
 extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_calinski(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_pam(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_silhouette(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_philr_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_philr_stats(SEXP, SEXP, SEXP);
@@ -64,7 +67,10 @@ extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rpca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rpca_phylo(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_simper(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_sparcc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_read_tree(SEXP, SEXP);
+extern SEXP C_medoid_accum(SEXP, SEXP, SEXP);
+extern SEXP C_row_medians(SEXP, SEXP);
 extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
 extern SEXP C_rng_dist(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_p(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -115,6 +121,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_mult_default_delta", (DL_FUNC) &C_mult_default_delta, 1},
   {"C_nmds",      (DL_FUNC) &C_nmds,      6},
   {"C_normalize", (DL_FUNC) &C_normalize, 6},
+  {"C_calinski",  (DL_FUNC) &C_calinski,  6},
+  {"C_pam",       (DL_FUNC) &C_pam,       4},
+  {"C_silhouette", (DL_FUNC) &C_silhouette, 5},
   {"C_pca",       (DL_FUNC) &C_pca,       7},
   {"C_philr_coords", (DL_FUNC) &C_philr_coords, 9},
   {"C_philr_stats",  (DL_FUNC) &C_philr_stats,  3},
@@ -136,11 +145,14 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_qmp_scale", (DL_FUNC) &C_qmp_scale, 5},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
+  {"C_medoid_accum", (DL_FUNC) &C_medoid_accum, 3},
+  {"C_row_medians",  (DL_FUNC) &C_row_medians,  2},
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
   {"C_rng_dist",  (DL_FUNC) &C_rng_dist,  5},
   {"C_rpca",      (DL_FUNC) &C_rpca,     12},
   {"C_rpca_phylo", (DL_FUNC) &C_rpca_phylo, 18},
   {"C_simper",    (DL_FUNC) &C_simper,    7},
+  {"C_sparcc",    (DL_FUNC) &C_sparcc,   11},
   {"C_tsne_p",    (DL_FUNC) &C_tsne_p,    7},
   {"C_tsne_run",  (DL_FUNC) &C_tsne_run,  4},
   {"C_umap_ab",       (DL_FUNC) &C_umap_ab,       2},
