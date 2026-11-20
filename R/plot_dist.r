@@ -6,10 +6,10 @@
 #'
 #' A heatmap of a distance matrix from [beta_div()] or any of its metric
 #' functions (such as [bray()] or [unweighted_unifrac()]), or of the
-#' proportionality of features from [vlr()], [rho_p()] or [phi_s()]: one row
-#' and one column per sample (or feature), each cell coloured by the
-#' distance between its row's and its column's, with the samples ordered as
-#' the `clust` it was made with says.
+#' associations of features from [vlr()], [rho_p()], [phi_s()] or
+#' [sparcc()]: one row and one column per sample (or feature), each cell
+#' coloured by the distance between its row's and its column's, with the
+#' samples ordered as the `clust` it was made with says.
 #'
 #' @param x  A distance matrix of class `ecodive_dist`, as ecodive's
 #'        distance functions return. (`plot(as.dist(m))` of another matrix
@@ -28,8 +28,10 @@
 #'
 #' @param col  The colour scale, from the smallest value to the largest.
 #'        Defaults to [grDevices::hcl.colors()]'s `"YlOrRd"` palette, light
-#'        for near and dark for far; or, when some values are negative (as
-#'        from [rho_p()]), its `"Blue-Red 3"` palette, symmetric about 0.
+#'        for near and dark for far; or, for correlations such as [rho_p()]
+#'        and [sparcc()] (at least from -1 to 1, with the diagonal at 1), and
+#'        when some values are negative, its `"Blue-Red 3"` palette,
+#'        symmetric about 0.
 #'
 #' @param key  Whether to draw the colour key on the right. Default `TRUE`.
 #'
@@ -128,8 +130,11 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
     ord <- base[order(g$values[base])]
   }
 
+  # A similarity over features (rho_p(), sparcc()) is drawn on a diverging
+  # scale centred on 0, at least from -1 to 1, with its diagonal at 1.
+  sim <- is_similarity(x)
   m <- as.matrix(x)[ord, ord, drop = FALSE]
-  diag(m) <- NA
+  diag(m) <- if (sim) 1 else NA
   names_ <- names_[ord]
 
 
@@ -138,8 +143,9 @@ plot.ecodive_dist <- function (x, groups = NULL, data = NULL, col = NULL, key = 
   #--------------------------------------------------
   v   <- as.vector(x)
   v   <- v[is.finite(v)]
-  neg <- length(v) > 0 && any(v < 0)
+  neg <- sim || (length(v) > 0 && any(v < 0))
   top <- if (length(v)) max(abs(v)) else 0
+  if (sim) top <- max(top, 1)
   if (top == 0) top <- 1
   lim <- if (neg) c(-top, top) else c(0, top)
   pal <- if (!is.null(col)) col
@@ -228,7 +234,7 @@ dist_plot_order_name <- function (clust) {
 dist_plot_name <- function (x) {
   m     <- dist_metric_of(x)
   title <- plot_title(x, if (nzchar(m)) m else 'Distances')
-  features <- m %in% c('vlr', 'rho_p', 'phi_s')
+  features <- !is.null(feature_assoc_info(m))
   list(
     title = title,
     unit  = if (features) 'features' else 'samples',

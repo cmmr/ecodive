@@ -599,6 +599,22 @@
   4.5 million pairs of 3,000 taxa in 500 samples take about a second on 4
   cores.
 
+* New `sparcc()` estimates the correlations between taxa's log absolute
+  abundances from relative abundances with SparCC (Friedman & Alm 2012),
+  the co-occurrence networks most often reported for microbiome data:
+  Dirichlet draws of each sample's fractions (so zeros need no
+  pseudocount), basis variances under SparCC's sparsity assumption, and
+  the iterative exclusion of strongly correlated pairs, with each pair's
+  median over the draws. With the same settings it agrees with FastSpar
+  and SpiecEasi to within the noise of the random draws (about 0.002 for
+  counts in the thousands). `permutations` adds FastSpar's p-values
+  (resampled null datasets; never 0), parallel to the triangle. Like
+  `rho_p()`, it returns a `dist` over the features, which `plot()` draws
+  on a diverging scale and `clust` clusters as `1 - r`. Draws run in
+  parallel, with results identical for any `cpus`: 500 taxa in 200
+  samples, 100 draws, take about 1.5 seconds on 4 cores. Its docs explain
+  how it differs from `rho_p()`.
+
 * New `qmp_scale()` and `qmp_rarefy()` turn relative abundances into
   absolute abundances when each sample's total microbial `load` was measured
   (flow cytometry, qPCR, a spike-in). `qmp_scale()` multiplies each sample's

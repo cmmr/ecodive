@@ -76,11 +76,11 @@ Chao, A., & Lee, S. M. (1992). Estimating the number of classes via sample cover
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Richness metrics:
-\code{\link[=chao1]{chao1()}},
-\code{\link[=margalef]{margalef()}},
-\code{\link[=menhinick]{menhinick()}},
-\code{\link[=observed]{observed()}},
-\code{\link[=squares]{squares()}}
+Other Richness metrics: 
+\code{\link{chao1}()},
+\code{\link{margalef}()},
+\code{\link{menhinick}()},
+\code{\link{observed}()},
+\code{\link{squares}()}
 }
 \concept{Richness metrics}

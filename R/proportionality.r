@@ -172,6 +172,14 @@ vlr <- function (
 #' A pair of features that are both constant relative to the reference has
 #' no defined \eqn{\rho_p} (`NaN`).
 #'
+#' **Not a correlation of abundances.** \eqn{\rho_p} asks whether two
+#' features keep a constant ratio: it is 1 only for a log ratio with slope 1,
+#' and pairs related by a power law with another exponent, or with unequal
+#' variances, score low. [sparcc()] starts from the same variance of log
+#' ratios but divides by estimated variances of the log *absolute*
+#' abundances instead, to estimate their Pearson correlation; that is
+#' possible only under its assumption that most pairs are uncorrelated.
+#'
 #' This is the coefficient that propr computes with `propr(counts, metric =
 #' "rho")` (see **Zeros** for its zero handling). propr also estimates false discovery
 #' rates by permutation (`updateCutoffs()`), and offers `ivar = "iqlr"`, a
@@ -193,8 +201,8 @@ vlr <- function (
 #' propr: an R-package for identifying proportionally abundant features
 #' using compositional data analysis. *Scientific Reports*, 7, 16252.
 #'
-#' @seealso [vlr()], [phi_s()], [alr()], [normalize()] (`'clr'`),
-#'   [replace_zeros()].
+#' @seealso [vlr()], [phi_s()], [sparcc()], [alr()], [normalize()]
+#'   (`'clr'`), [replace_zeros()].
 #'
 #' @aliases propr
 #' @export
@@ -323,10 +331,6 @@ proportionality <- function (method, what, denominator, env = parent.frame()) {
     if (!is.null(ref)) ref - 1L, keep - 1L, labels, pseudocount, cpus )
 
   attr(res, 'method') <- method
-  res <- set_display(res, title = switch(
-    method,
-    vlr   = 'Variance of Log Ratios',
-    rho_p = 'Proportionality (rho_p)',
-    phi_s = 'Proportionality (phi_s)' ))
+  res <- set_display(res, title = FEATURE_ASSOCS$name[match(method, FEATURE_ASSOCS$id)])
   dist_clust(res, env$clust, cpus)
 }

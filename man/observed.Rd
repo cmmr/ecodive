@@ -54,11 +54,11 @@ For large datasets, standard matrix operations may be slow. See
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Richness metrics:
-\code{\link[=ace]{ace()}},
-\code{\link[=chao1]{chao1()}},
-\code{\link[=margalef]{margalef()}},
-\code{\link[=menhinick]{menhinick()}},
-\code{\link[=squares]{squares()}}
+Other Richness metrics: 
+\code{\link{ace}()},
+\code{\link{chao1}()},
+\code{\link{margalef}()},
+\code{\link{menhinick}()},
+\code{\link{squares}()}
 }
 \concept{Richness metrics}

@@ -64,10 +64,10 @@ Brillouin, L. (1956). Science and information theory. Academic Press.
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Diversity metrics:
-\code{\link[=fisher]{fisher()}},
-\code{\link[=inv_simpson]{inv_simpson()}},
-\code{\link[=shannon]{shannon()}},
-\code{\link[=simpson]{simpson()}}
+Other Diversity metrics: 
+\code{\link{fisher}()},
+\code{\link{inv_simpson}()},
+\code{\link{shannon}()},
+\code{\link{simpson}()}
 }
 \concept{Diversity metrics}

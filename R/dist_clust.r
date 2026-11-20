@@ -3,7 +3,7 @@
 
 
 # Clustering the samples of a distance matrix: the `clust` argument of
-# beta_div(), its metric functions, vlr(), rho_p() and phi_s(), and the
+# beta_div(), its metric functions, vlr(), rho_p(), phi_s() and sparcc(), and the
 # default order of plot.ecodive_dist().
 #
 #   dist_result()        labels a distance matrix with its metric, then
@@ -92,14 +92,15 @@ dist_metric_of <- function (d) {
 
 # The order of the samples of `d` (a vector of their positions) that `clust`
 # gives: the leaf order of stats::hclust() with that linkage, or for 'pcoa',
-# their order along the first axis of pcoa(). Similarities from rho_p() are
-# clustered as the dissimilarities 1 - rho.
+# their order along the first axis of pcoa(). Similarities over features
+# (rho_p(), sparcc(): kind 'similarity' in FEATURE_ASSOCS) are clustered as
+# the dissimilarities 1 - x.
 dist_clust_order <- function (d, clust, cpus = 1L) {
 
   n <- attr(d, 'Size', exact = TRUE)
   if (n < 3 || identical(clust, 'none')) return (seq_len(n))
 
-  if (identical(dist_metric_of(d), 'rho_p')) {
+  if (is_similarity(d)) {
     a <- attributes(d)
     d <- 1 - d
     attributes(d) <- a
@@ -118,31 +119,45 @@ dist_clust_order <- function (d, clust, cpus = 1L) {
 
 
 
+# Attributes that hold one value per element of a distance matrix's packed
+# triangle, in the same order (such as sparcc()'s `p_value`): dist_reorder()
+# reorders them with the triangle. Listed here rather than found by length,
+# which can match by chance (at n = 3, `order` has length 3 too).
+DIST_PARALLEL <- c('p_value', 'stability', 'n_pairs')
+
+
 # `d` with its samples in the order `ord` (a permutation of their positions):
 # element (i, j) of the result is element (ord[i], ord[j]) of `d`. Keeps
-# every attribute, with `Labels` reordered; samples without labels are
-# labelled with their positions in `d`, so that each stays identifiable.
-# Filled one column at a time, so that it needs little memory besides the
-# result.
+# every attribute, with `Labels` and the DIST_PARALLEL attributes
+# reordered; samples without labels are labelled with their positions in
+# `d`, so that each stays identifiable. Filled one column at a time, so that
+# it needs little memory besides the result.
 dist_reorder <- function (d, ord) {
 
   n   <- attr(d, 'Size', exact = TRUE)
-  out <- numeric(length(d))
-  pos <- 0L
+  att <- attributes(d)
+  par <- intersect(DIST_PARALLEL, names(att))
+  par <- par[vapply(att[par], function (v) length(v) == length(d), logical(1))]
+
+  out  <- numeric(length(d))
+  pout <- lapply(att[par], function (v) v[0][seq_along(d)])
+  pos  <- 0L
 
   for (j in seq_len(n - 1L)) {
-    r  <- (j + 1L):n
-    a  <- ord[r]
-    b  <- ord[[j]]
-    lo <- pmin(a, b)
-    hi <- pmax(a, b)
-    k  <- length(r)
-    out[pos + seq_len(k)] <- d[(lo - 1) * (n - lo / 2) + (hi - lo)]
+    r   <- (j + 1L):n
+    a   <- ord[r]
+    b   <- ord[[j]]
+    lo  <- pmin(a, b)
+    hi  <- pmax(a, b)
+    k   <- length(r)
+    idx <- (lo - 1) * (n - lo / 2) + (hi - lo)
+    out[pos + seq_len(k)] <- d[idx]
+    for (p in par) pout[[p]][pos + seq_len(k)] <- att[[p]][idx]
     pos <- pos + k
   }
 
-  att <- attributes(d)
   att$Labels <- if (is.null(att$Labels)) as.character(ord) else att$Labels[ord]
+  for (p in par) att[[p]] <- pout[[p]]
   attributes(out) <- att
   out
 }

@@ -93,6 +93,14 @@
   z <- rho_p(counts, denominator = 'F1', cpus = cpus)
   expect_true(attr(z, 'Size') == 11L && all(is.finite(z)) && all(abs(z) <= 1))
 
+  # Associations: SparCC.
+  z <- sparcc(counts[, 1:10], n_draws = 5L, permutations = 9L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 10L && length(z) == 45L)
+  expect_true(all(is.finite(z)) && identical(attr(z, 'method'), 'sparcc'))
+  expect_identical(attr(z, 'Labels'), colnames(counts)[1:10])
+  expect_identical(names(attr(z, 'variances')), colnames(counts)[1:10])
+  expect_true(length(attr(z, 'p_value')) == 45L && all(attr(z, 'p_value') > 0 & attr(z, 'p_value') <= 1))
+
   # Differential abundance.
   z <- ancom(counts, 'grp', meta, cpus = cpus)
   expect_true(inherits(z, 'ecodive_ancom') && nrow(z) == 12L)
@@ -282,6 +290,7 @@
   expect_true(drawn(fs))
   expect_true(drawn(ancom(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)))
+  expect_true(drawn(sparcc(counts, n_draws = 5L, cpus = cpus)))
   expect_true(drawn(fit))   # ancombc2()
   expect_true(drawn(ancombc_global(fit, cpus = cpus)))
   expect_true(drawn(ancombc_pairwise(fit, cpus = cpus)))
