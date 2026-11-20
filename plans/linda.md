@@ -160,6 +160,20 @@ Separate commit, after the fixed-effects version.
   (to pin down steps 1–2) as text under `data-raw/expected/linda/`.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`da` record** "LinDA" via `call_step()`: `formula` (text), `groups`
+  (column name), `pseudocount` / zero handling, `p_adjust`, `alpha`,
+  `winsor` settings, and mixed-model settings when that step lands.
+- Attributes for plots: `alpha`, `log_base` (`2` if LinDA's
+  log2-scale coefficients are kept, else `exp(1)`; say which), `bias`
+  (the estimated mode per covariate, for an optional bias display), and the
+  input's `transform` record.
+- `plot()`: [da_plots.md](da_plots.md)'s types (volcano, forest), titled
+  "LinDA: <covariate>".
+
 ## Tests
 
 - Steps 1–4 exact at 1e-10 against `feature.dat.use` and the biased

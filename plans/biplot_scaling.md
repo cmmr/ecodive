@@ -178,6 +178,20 @@ validates and draws. One-axis results ignore `scaling` (strip chart).
   `princomp`. Not needed as fixtures: the identities below are exact.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- No new record: the scaling is a display choice, not part of the
+  result. `plot()` reads the existing `ord` record to decide whether links
+  are log-ratio SDs: `attr(x, 'ord')$method` in the rpca family, or
+  `$method == "pca"` with `$norm == "clr"` and `$scale == FALSE`; anything
+  else gets a warning instead of link annotations.
+- The subtitle names the scaling ("covariance biplot") and, when the input
+  table had a `transform` record (item 34), its name.
+- Tests: the link check follows the record, not the result's column
+  names.
+
 ## Tests (`tests/tinytests/test-plot.r`, section "Biplot scalings")
 
 Numeric helpers, exactly (at 1e-12):

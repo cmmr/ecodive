@@ -151,6 +151,17 @@ test, radEmu's `score_test_hyperparams$converged`), `penalize`,
   `score_test_hyperparams`.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`da` record** "radEmu" via `call_step()`: `formula`, `constraint`
+  (reference rule), `test` settings, `p_adjust`, `alpha`.
+- Attributes for plots: `alpha`, `log_base` (`exp(1)`), `conf_level`; the
+  input's `transform` record.
+- `plot()`: [da_plots.md](da_plots.md)'s forest type (estimates with
+  intervals are radEmu's main output).
+
 ## Tests
 
 - `estimate` at 1e-6 (relative to `tol`), CIs at 1e-5, score statistics

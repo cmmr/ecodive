@@ -191,6 +191,25 @@ no license issue. The registry and wrapper copy `R/count_ord.r`'s
 structure.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`da` record** on every per-feature result, from `call_step(method,
+  da_method_name(method))`, where `da_method_name()` reads the `DA_TESTS`
+  registry's `name` column (as `ord_method_name()` reads the ordination
+  registries). `da_test()` itself adds no record: the method's own record
+  is the record, so `da_test(x, 'ancombc2')` and `ancombc2(x)` give
+  identical results, attributes included (test with `identical()`).
+- `da_wilcoxon()`, `da_ttest()`, `da_lm()`: settings `norm`,
+  `pseudocount`, `p_adjust`, `alpha`, `formula` (text) or `groups` (when a
+  column name), `contrast`; attributes `contrast`, `alpha`, `log_base`
+  (`exp(1)`: differences of natural-log transformed values) and the input's
+  `transform` record.
+- **Plots**: each new class gets a `plot()` method sharing
+  [da_plots.md](da_plots.md)'s types (volcano default), titled
+  `step_title(<type>, attr(x, 'da'))`.
+
 ## Tests
 
 - Each test equals base R per feature at 1e-12 (statistics, p, CI) for

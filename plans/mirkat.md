@@ -83,6 +83,17 @@ named `mirkat_<variant>()`, later.
   `liu()` for the mixture p-values themselves.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- Tests carry their distance matrix's `dist` record through
+  `new_ecodive_test(dist = )`, so `plot()` titles "MiRKAT of <metric>".
+- Store what the plot needs on the result (named below).
+
+- Omnibus over several kernels: keep each kernel's `dist` record in the
+  `kernels` table (a `metric` column) for per-kernel labels.
+
 ## Tests
 
 - Q equals the formula rᵀKr, computed in R in the test.

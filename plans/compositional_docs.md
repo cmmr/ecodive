@@ -188,6 +188,47 @@ One bullet: "Documentation: `rpca()`, `rpca_phylo()` and
 machine learning; `qmp_scale()` explains predicted loads."
 
 
+## Step records for existing functions (retrofit)
+
+This item also brings the compositional functions that already exist up to
+the convention in [compositional.md](compositional.md) § "Step records and
+what plots read", so that the planned plots and wrappers can rely on it.
+It is code, not only docs, but small and mechanical.
+
+1. **Helpers** in `R/steps.r`: generalise `ord_step()` into
+   `call_step(method, name, ...)` (keep `ord_step()` as a one-line
+   wrapper, so no ordination changes); add `keep_steps(res, ...)`, which
+   copies the `ecodive_step` attributes of its inputs onto `res`; extend
+   `STEP_SKIP` with `fit`, `basis`, `load`, `subjects`, `states`,
+   `numerator`, `denominator`.
+2. **`transform` records** on the tables of `replace_zeros()` /
+   `replace_zeros_mult()` ("Multiplicative Replacement"; `method`,
+   `delta`), `alr()` ("Additive Log Ratio"; `denominator` when one
+   feature, `pseudocount`), `ilr()` ("Isometric Log Ratio"; `basis` as
+   `"helmert"`, `"sbp"` or `"matrix"`, `pseudocount`), `philr()`
+   ("Phylogenetic Isometric Log Ratio"; `part_weights`, `ilr_weights`,
+   `pseudocount`), `qmp_scale()` / `qmp_rarefy()` ("Quantitative Microbiome
+   Profiling", `method`; `seed` for the rarefied one), `normalize()` (the
+   norm's display name; `norm`, `pseudocount`) and `rarefy()`
+   ("Rarefaction"; `depth` when one value, `seed`). Each nests its input's
+   `transform` record as `from`.
+3. **Propagation of `transform`**: every function taking `counts` reads
+   `attr(counts, 'transform')` before `validate_counts()` and copies it onto
+   its result (`dist_result()`, `ord_result()`, the per-feature tables).
+4. **`da` records** on `ancom()`, `ancombc()`, `ancombc2()` and
+   `dirmult_ttest()` (display names "ANCOM", "ANCOM-BC", "ANCOM-BC2",
+   "Dirichlet-Multinomial Welch t-Test"), via `call_step()`; their post-hoc
+   tests keep the fit's record. Add a `log_base` attribute (`2` for
+   `dirmult_ttest()`, `exp(1)` for ANCOM-BC) and let their `plot()` methods
+   title with `step_title()` and label axes from `log_base`.
+5. **`log_ratio` records** on `log_ratio()` / `balance()` results
+   (`n_numerator`, `n_denominator`, `pseudocount`).
+6. **`?ecodive_steps`**: sections for `transform`, `da` and `log_ratio`.
+7. **Tests**: each record's class, name and settings; `str()` one line;
+   `transform` survives `beta_div()`, `pca()`, `ancombc2()`; titles use it.
+
+Add "and step records" to item 34's title in TODO.md (done 2026-11-20).
+
 ## Checks
 
 `R CMD check` (examples, codoc); both articles knit

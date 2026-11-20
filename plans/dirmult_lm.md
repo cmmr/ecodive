@@ -165,6 +165,19 @@ the closed-form random-intercept fit. Separate step.
   `tss.sm`, `sample.sm` draws captured the same way.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`da` record** "Dirichlet-Multinomial Linear Model" via `call_step()`:
+  `formula`, `scale_sd`, `load_sd`, the scale model (`"clr"`, `"tss"`,
+  `"load"`), `se_type`, `n_draws`, `pseudocount`, `p_adjust`, `seed`.
+- Attributes for plots: `alpha`, `log_base` (`2`, as ALDEx3), `conf_level`
+  if intervals are returned; the input's `transform` record; and, when a
+  measured or predicted `load` was used, its source in the record
+  (`load_from`: `"measured"` or `"predicted"`), so titles can say so.
+- `plot()`: [da_plots.md](da_plots.md)'s types per covariate.
+
 ## Tests
 
 - With injected draws: `estimate`, `se`, `p_value`, `p_adjusted` match

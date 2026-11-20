@@ -162,6 +162,16 @@ group).
   Hotelling's F or a χ² radius; ecodive documents its own (F).
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- A plotting function: it sets no record on the data, but returns its
+  coordinates invisibly with a small `ecodive_step("Ternary Plot", parts =,
+  centre =, ...)` attribute named `plot`, so the drawing can be reproduced.
+- Title: `step_title("Ternary Plot", attr(counts, 'transform'))` when the
+  input had a `transform` record (for example a zero-replaced table).
+
 ## Tests (`test-ternary_plot.r`)
 
 - Barycentric map: the three unit compositions go to the vertices;

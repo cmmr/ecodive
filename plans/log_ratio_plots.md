@@ -195,6 +195,20 @@ log_ratio_features(x, n = 5L, covariate = NULL, axes = 1L)
 - Songbird (BSD-3) produces the differentials Qurro ranks; not needed.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- `log_ratio()` / `balance()` results get their `log_ratio` record in item
+  34; this item adds the S3 class and reads the record in `plot()` (title
+  "Log Ratio of 5 over 5 features", or the feature names when few).
+- `log_ratio_features(x, n)` records where its features came from: the
+  `log_ratio` record built from them gets `from = attr(x, 'da')` (or
+  `attr(x, 'ord')`), so the strip plot's subtitle can say "top and bottom 5
+  by ANCOM-BC2 log fold change".
+- The rank plot (`type = 'rank'`) titles from the result's `da` or `ord`
+  record and reads `log_base` for its axis label.
+
 ## Tests
 
 - `log_ratio_features()` exactly: a named vector with ties (feature order

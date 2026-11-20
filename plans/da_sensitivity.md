@@ -155,6 +155,22 @@ plot.ecodive_da_sensitivity(x, type = c('tiles', 'traces'),
   direct call".
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`sensitivity` record** "Sensitivity Analysis" (`n_settings`,
+  `crossed`, and which grids were given), plus the base method's `da`
+  record, taken from the first fit, beside it.
+- Each row of the tidy table names its setting in plain text (for example
+  `"pseudocount 0.5"`, `"zeros: mult"`, `"scale_sd 1"`) so the tile plot's
+  columns need no lookup; replacement settings take their names from the
+  `ZERO_REPLACEMENTS` registry, or from the replaced table's `transform`
+  record.
+- `plot()` (`'tiles'`, `'traces'`): title `step_title("Sensitivity of",
+  attr(x, 'da'))`; `alpha` and `log_base` come from the base method's
+  attributes, stored on the result.
+
 ## Tests
 
 - Every run's rows equal the direct call's (`identical()` on `effect`,

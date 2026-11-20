@@ -171,6 +171,22 @@ Revisit a `plot(ord, depth = )` overlay only if users ask for one.
   R's RNG, so its results agree only within Monte Carlo error.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`dist` record** (beta): `beta_div()`'s, plus `depth`, `times`,
+  `average`, `seed`, with the name changed to "<metric name> (rarefied
+  <times>×)" so titles say so; the `sd` dist carries the same record with
+  `sd = TRUE`.
+- **Alpha**: a record of its own kind would be new; instead attach the
+  `transform` record of the rarefaction ("Repeated Rarefaction"; `depth`,
+  `times`, `average`, `seed`) to the vector, as item 34 does for
+  `rarefy()`, so a plot or test of it can label it.
+- Downstream: `pcoa()` / `permanova()` of the beta result keep the record
+  and their titles read "Principal Coordinates Analysis of Bray-Curtis
+  Dissimilarity (rarefied 100×)". Test that.
+
 ## Tests (`tests/tinytests/test-rarefied_diversity.r`)
 
 - `times = 1`: `identical()` (values and labels) to

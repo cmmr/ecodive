@@ -240,6 +240,20 @@ The registry marks `fisher_z = TRUE` for `secom_pearson` only.
   implementation of the permutation test.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`dist` record** per function ("SECOM (Pearson)", "SECOM (distance
+  correlation)"): `similarity = TRUE`, `features = TRUE`, the bias
+  estimate's settings, `bias_counts`, filters, `seed` where permutations
+  are used; keep the input's `transform` record.
+- `p_value` attribute parallel to the triangle (as in
+  [sparcc.md](sparcc.md)), reordered by `clust`.
+- Plots: `plot.ecodive_dist()` (similarity scale) and, via
+  `assoc_network()`, the network plot titled "Association Network of SECOM
+  (Pearson)".
+
 ## Tests
 
 - Fixtures as above. Identities: dCor = 1 for exact linear pairs and ~0.5

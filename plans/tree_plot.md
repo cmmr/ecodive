@@ -160,6 +160,17 @@ and the walk in `R/plot_tree.r`, and the other reuses them.
   check that tip y and node x agree on `ex_tree` — optional, not a fixture.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- A plotting function: no record of its own. Title from what is drawn:
+  `step_name(attr(x, 'ord'))` for an `rpca_phylo()` result ("Phylogenetic
+  Robust Aitchison PCA: loadings on axis 1"), the `transform` record's
+  name for a `philr()` result.
+- Return the layout (node coordinates) invisibly, so values can be
+  overlaid by a later call.
+
 ## Tests (`test-tree_plot.r`)
 
 - `tree_layout()` exactly, on `ex_tree` and on hand-written Newick strings

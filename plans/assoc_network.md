@@ -140,9 +140,10 @@ assoc_network(x, threshold = NULL, alpha = NULL, p_adjust = 'BH',
 - `nodes`: a data.frame `feature`, `degree`, `betweenness`, `closeness`,
   `eigenvector`, `cluster` (integer), `hub` (logical), `in_lcc`;
 - `global`: a named numeric vector;
-- attributes `settings` (an `ecodive_step` with the arguments) and `source`
-  (the input's `dist` record, which has the association method, its settings
-  and `n_samples`).
+- attributes `network` (its step record, an `ecodive_step` with the
+  arguments) and `dist` (the input's `dist` record, which has the
+  association method, its settings and `n_samples`); see "Step records and
+  plotting" below.
 
 Plus a `print` method (counts, hubs) and `as.data.frame()` (the `nodes`
 table).
@@ -266,6 +267,22 @@ method, with `fisher_z = TRUE` in its registry row.
 - igraph outputs (`betweenness()`, `closeness()`, `cluster_fast_greedy()`)
   serve as a second check of the textbook formulas.
 
+
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`network` record** `ecodive_step("Association Network", threshold =,
+  sparsify =, cluster =, hub_quantile =, ...)`, with the input's `dist`
+  record (the association method) kept beside it. `assoc_network_compare()` and `assoc_network_diff()` results
+  keep both networks' records (`network_x`, `network_y` hold the two
+  `network` records; their `dist` records stay inside them as `from`).
+- **Plot parameters stored on the result**: the circular layout's node
+  order (by cluster) as `layout`, so plots of compared networks reuse it;
+  `threshold` (legend), the edge `sign` (colour), node `hub` (size/label).
+- Title: `step_title("Association Network", attr(x, 'dist'))`, e.g.
+  "Association Network of SparCC Correlation"; subtitle the threshold and
+  number of edges.
 
 ## Tests
 

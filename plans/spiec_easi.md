@@ -190,6 +190,18 @@ heatmap); leave it for later.
   indices it draws itself, using the huge path on each subsample.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`dist` record** per function ("SPIEC-EASI (neighbourhood selection)",
+  "SPIEC-EASI (graphical lasso)"): `similarity = TRUE`, `features = TRUE`,
+  the chosen `lambda`, `stars_threshold`, `n_subsamples`, `seed`; the
+  input's `transform` record beside it.
+- Store the StARS path (lambda vs instability) as an attribute, so a
+  `plot(type = 'stability')` can show the selection; the default plot is
+  the `plot.ecodive_dist()` heatmap of the selected network's weights.
+
 ## Tests
 
 - glasso and lasso kernels against the sklearn fixtures (1e-10).

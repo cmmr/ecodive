@@ -157,6 +157,27 @@ plot.ecodive_ancombc(x, covariate = NULL,
   only as a sanity check.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- Needs item 34's retrofit (`da` records, `log_base` on `dirmult_ttest()`
+  and ANCOM-BC results). The new columns (`pooled_sd`, `mean_clr`,
+  `effect`) and attributes (`resid_sd`, `mean_clr`) are computed when the
+  result is made; `plot()` only reads them.
+- **Titles**: `main = step_title(<type label>, attr(x, 'da'))`, for
+  example "Effect plot of ANCOM-BC2", with the covariate or contrast in
+  the subtitle (`attr(x, 'contrast')`, or the `covariate` chosen), and the
+  input's `transform` record, if any, after it.
+- **Guides and units**: `alpha` → the significance line (volcano) and
+  highlight rule; `conf_level` → the forest plot's interval label;
+  `log_base` → "log2 fold change" vs "log fold change"; `|effect| = 1`
+  guides (effect plot) are fixed.
+- **Highlights**: `reject`, plus `reject_robust` / `passed_ss` when
+  `attr(x, 'sensitivity')` exists (solid vs open symbols, as the existing
+  ANCOM-BC plots do).
+- Tests: each `type` titles from the record; axis label follows `log_base`.
+
 ## Tests
 
 - `pooled_sd`, `mean_clr`, `effect`: an R reference computed from

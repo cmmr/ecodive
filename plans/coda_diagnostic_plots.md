@@ -155,6 +155,19 @@ zero_pattern(counts, margin = 1L)
   `data-raw/expected/coda_diagnostics.r` if run; not required.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- `variation_array()`: the `dist`-style record above is its record (with
+  `features = TRUE`); keep the input's `transform` record beside it.
+- `zero_pattern()`: a record of a new kind, attribute **`zeros`**:
+  `ecodive_step("Zero Patterns", n_patterns =, n_features =, n_samples =)`
+  (add the kind to `?ecodive_steps` when this lands); keep the input's
+  `transform` record beside it.
+- Both `plot()` methods title from their own record, then the input's
+  `transform` record ("Zero Patterns of <the table's transform>").
+
 ## Tests (`test-coda_diagnostics.r`)
 
 - `variation_array()`: upper triangle equals `as.matrix(vlr(x))` exactly

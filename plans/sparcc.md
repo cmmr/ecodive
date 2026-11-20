@@ -230,6 +230,20 @@ This is the convention that `spiec_easi_*()` and `secom_*()` follow and that
   it at 1e-12 (exclusion order and \eqn{\rho}).
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- The `dist` record described above is the record (`similarity = TRUE`,
+  `features = TRUE`, `n_samples`, `n_draws`, `max_exclusions`,
+  `exclusion_threshold`, `permutations`, `seed`), plus the input's
+  `transform` record copied beside it.
+- `plot()`: the existing `plot.ecodive_dist()` heatmap, which must read
+  `similarity` (diverging colour scale centred on 0, diagonal 1) and
+  `features` (axis labels say "features"); title from the record's name.
+- `p_value` is reordered with the triangle by `dist_reorder()` (`clust`).
+- Downstream: `assoc_network()` keeps this record as its input record.
+
 ## Tests
 
 - `sparcc_details()` against the base-R reference at 1e-12, including:

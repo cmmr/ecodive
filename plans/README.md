@@ -96,6 +96,17 @@ particular), **the per-method plans and this README win.**
 
 ## Internals worth reusing
 
+- **Step records (provenance):** every result records how it was made in
+  one attribute per kind of step, an `ecodive_step` (`R/steps.r`,
+  `?ecodive_steps`): `dist` and `ord` today; `transform`, `da`,
+  `log_ratio`, `network`, `types`, `sensitivity`, `model`, `zeros` and
+  `space` by the
+  convention in [compositional.md](compositional.md) § "Step records and
+  what plots read". Ordinations get `ord` for free from `ord_result()`
+  (pass the distance matrix's record as `dist =`); tests keep their
+  matrix's `dist` through `new_ecodive_test(dist =)`. Every new function
+  sets its record, copies its inputs' records, and stores what its `plot()`
+  method needs (titles from records, guides and units from attributes).
 - **Ordination results:** `ord_result()` in `R/ord_utils.r` builds the
   sample × axis matrix of class `ecodive_ord`. Its attributes start with
   `method`, `eig` and `prop` (`NA` where undefined); method-specific

@@ -56,6 +56,17 @@ which eigenvectors to keep ([dbmem.md](dbmem.md)).
   fixed weights, to check row standardisation and the analytic p-values.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- An `ecodive_test`: when `x` is a distance matrix, keep its `dist` record
+  through `new_ecodive_test(dist = )`; when `space` came from `dbmem()`,
+  keep its `space` record. Record whether `space` was coordinates,
+  distances or weights as `space_type` in the result.
+- `plot()` (the permutation null, as other tests) titles "Moran's I of
+  <x's record>".
+
 ## Tests
 
 - I, E[I], sd and the analytic p-value match ape (raw weights) and esda

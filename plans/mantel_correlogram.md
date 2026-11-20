@@ -56,6 +56,17 @@ ecodist `mgram()`.
   - ecodist `mgram()` as a second check.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- The result is a data frame, not an `ecodive_test`: keep `dm`'s `dist`
+  record as `dist` and `y`'s (when `y` is a dist) as `dist_y`, so
+  `plot()` titles "Mantel Correlogram of <dm> by <y>".
+- Store what the plot needs: the classes' breaks and midpoints, the
+  per-class statistics and `p_adjusted` in plotting order, `alpha` for
+  filled vs open points.
+
 ## Tests
 
 - Fixtures from vegan, written by `data-raw/expected/mantel_correlogram.r`

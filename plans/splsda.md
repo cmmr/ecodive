@@ -45,6 +45,20 @@ ordinates. It's popular with mixOmics users in microbiome work.
   `$prop_expl_var`. Also sgPLS (GPL), optionally.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- Ordination results get their `ord` record from `ord_result()`
+  (`ord_step()` captures the single-valued arguments); pass the input
+  distance matrix's record through `dist =` (from `dist_vector()`'s
+  `step`), and copy a count table's `transform` record (item 34).
+- The existing `plot.ecodive_ord()` titles from them, e.g. "Sparse PLS-DA of
+  Bray-Curtis Dissimilarity"; store anything extra that a plot type of this
+  method needs as an attribute of the result (named below).
+
+- Extra: the selected features per component (for a loadings plot type).
+
 ## Tests
 
 - With `n_features` equal to all features, `splsda()` equals `plsda()`.

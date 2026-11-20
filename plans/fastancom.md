@@ -135,6 +135,17 @@ by default, `type = 'volcano'` / `'forest'` via [da_plots.md](da_plots.md).
   consistency test once step 3 is pinned down.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`da` record** "fastANCOM" via `call_step()`: `pseudocount`,
+  `sig_level`/`alpha`, `p_adjust`, reference-set rule, `formula` or
+  `groups`.
+- Attributes for plots: `alpha`, `log_base` (`exp(1)`, check), the `W`
+  cutoff (for the ANCOM-style dot chart), the input's `transform` record.
+- `plot()`: the ANCOM dot chart and [da_plots.md](da_plots.md)'s volcano.
+
 ## Tests
 
 - After the protocol: `w`, `reject` identical to fastANCOM; `log2_fc`,

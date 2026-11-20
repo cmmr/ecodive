@@ -195,6 +195,19 @@ work. Separate step, after the fixed-effects port.
   order) and pass those draws to an internal `maaslin3_details(sims = )`.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`da` record** "MaAsLin 3" via `call_step()`: `formula`, transform
+  and normalization settings, `p_adjust`, `alpha`, median-comparison
+  settings, `seed` (its Monte Carlo covariance).
+- Two models in one table: a `model` column (`"abundance"`,
+  `"prevalence"`) lets `plot()` facet or colour by model; store `log_base`
+  (`2`, as MaAsLin 3 reports log2 coefficients — check) and `alpha`.
+- `plot()`: [da_plots.md](da_plots.md)'s volcano and forest types, one
+  panel per model, titled "MaAsLin 3: <covariate>".
+
 ## Tests
 
 - Abundance coefficients, SEs, p at 1e-10; prevalence at 1e-6 (IRLS

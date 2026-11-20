@@ -332,6 +332,18 @@ coda4microbiome's two standard figures, side by side
   - `data-raw/expected/coda_lasso.py`: c-lasso R1 path breakpoints.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- **`model` record** per function ("Compositional Lasso", "Compositional
+  Lasso (pairwise log ratios)"): `family`, `l1_ratio`, the chosen `lambda`
+  and the rule that chose it (`lambda_rule`), `n_folds`, `seed`; keep the
+  input's `transform` record.
+- The signature plot reads only the result: the selected coefficients, the
+  `y` attribute (added for the signature plot) and the record's name for
+  its title.
+
 ## Tests
 
 - Match zeroSum's coefficients and intercept at about 1e-6 (an iterative

@@ -218,6 +218,18 @@ must be **established from documentation and outputs only**:
   Martín-Fernández (2015) for the zCompositions documentation.
 
 
+## Step records and plotting
+
+Follow [compositional.md](compositional.md) § "Step records and what plots read" (records: `R/steps.r`, `?ecodive_steps`).
+
+- The Bayesian-multiplicative functions set the same `transform` record
+  as `replace_zeros_mult()` does after item 34: names from the
+  `ZERO_REPLACEMENTS` registry ("Geometric Bayesian-Multiplicative
+  Replacement", ...), settings `method`, `frac`, `threshold`, `adjust`;
+  `from` the input's `transform` record.
+- [da_sensitivity.md](da_sensitivity.md) labels its zero-treatment
+  settings from these records.
+
 ## Tests
 
 - Fixtures as above, both margins, dense and sparse input.
