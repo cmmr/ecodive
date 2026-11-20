@@ -217,6 +217,43 @@ void* maybe_free_one(void *ptr);
 /* --- normalize.c --- */
 void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_);
 
+/* --- da_tests.c: a normalized table by feature, for the DA tests --- */
+typedef struct {
+  int     n, D;     // Samples, features.
+  int    *fpos;     // Feature f's stored values are fval[fpos[f] ..
+  int    *fsam;     //   fpos[f + 1] - 1], of samples fsam[...] (in order).
+  double *fval;
+  double *z0;       // Each sample's value for a zero (NaN: missing).
+} da_table_t;
+
+void da_table_init(SEXP sexp_counts, SEXP sexp_margin, int norm, double pc,
+                   int n_threads, da_table_t *t);
+void da_table_column(const da_table_t *t, int f, double *y);
+
+/* --- feature_lm.c: least squares for one design and many responses --- */
+// A pivoted Householder QR of an n x p design, as LINPACK's dqrdc2 (which
+// lm() uses): columns whose remaining norm falls below tol times their own
+// are moved to the end and left out (aliased, coefficient NaN).
+typedef struct {
+  int     n, p, rank;
+  double *a;        // n x p: R above the diagonal, Householder vectors below.
+  double *qraux;    // p: each reflection's first element (0: none).
+  int    *pivot;    // p: the design column in each position.
+  double *rinv;     // p x p: the inverse of R (rank x rank, upper).
+  double *q1;       // n x p: Q's first rank columns, or NULL.
+  double *h;        // n: leverages, or NULL (with q1).
+  double *work;     // n + p scratch.
+} flm_t;
+
+size_t flm_doubles(int n, int p, int want_q1);
+void   flm_init(flm_t *q, double *mem, int *imem, int n, int p, int want_q1);
+void   flm_decompose(flm_t *q, const double *X, int ldx, const int *rows,
+                     int n, int p, double tol);
+void   flm_fit(const flm_t *q, const double *y, double *qty, double *coef,
+               double *rss);
+void   flm_se(const flm_t *q, const double *y, const double *qty, double rss,
+              int se_type, double *se, double *resid);
+
 /* --- rpca.c: shared with rpca_phylo.c --- */
 void rpca_filter(int N0, int P0, const int *tpos, const int *tidx, const double *tval,
                  double msc, double mfc, double mff, int drop_single,

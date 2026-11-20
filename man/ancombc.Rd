@@ -7,8 +7,8 @@
 \usage{
 ancombc(
   counts,
-  formula,
-  data,
+  formula = NULL,
+  data = NULL,
   groups = NULL,
   margin = 1L,
   pseudocount = NULL,
@@ -22,8 +22,8 @@ ancombc(
 
 ancombc2(
   counts,
-  formula,
-  data,
+  formula = NULL,
+  data = NULL,
   groups = NULL,
   margin = 1L,
   pseudocount = 0,
@@ -47,20 +47,26 @@ fraction.}
 such as \code{~ status + age}, or the same as a string (\code{'status + age'}, with or without the \code{~}). Anything \code{\link[stats:model.matrix]{stats::model.matrix()}}
 accepts may be used, including interactions (\code{status * age}) and
 a model without an intercept (\code{~ 0 + status}). Every factor is
-coded with treatment contrasts (see \strong{Covariates}).}
+coded with treatment contrasts (see \strong{Covariates}). \code{NULL} (the
+default) is \code{~ groups}: give \code{formula}, \code{groups}, or both.}
 
 \item{data}{A data frame of sample metadata, with the variables of
 \code{formula}. Its rows are matched to the samples of \code{counts} by
 name when both have names (rows for other samples are left out),
 else by position. A single vector or factor is taken as one
-variable named \code{group}.}
+variable named \code{group}. Not needed when \code{groups} is given as one
+value per sample.}
 
-\item{groups}{\code{NULL} (the default), or the name of a categorical
-variable of \code{data} that is a term of \code{formula}, with at least
-three levels: the grouping the post-hoc tests
-(\code{\link[=ancombc_global]{ancombc_global()}}, \code{\link[=ancombc_pairwise]{ancombc_pairwise()}}, \code{\link[=ancombc_dunnett]{ancombc_dunnett()}},
-\code{\link[=ancombc_trend]{ancombc_trend()}}) compare by default. It doesn't change the
-results (scikit-bio's \code{grouping}).}
+\item{groups}{The term of interest. With \code{formula}, \code{NULL} (the
+default) or the name of a variable of \code{data} that is a term of
+\code{formula}: the grouping the post-hoc tests (\code{\link[=ancombc_global]{ancombc_global()}},
+\code{\link[=ancombc_pairwise]{ancombc_pairwise()}}, \code{\link[=ancombc_dunnett]{ancombc_dunnett()}}, \code{\link[=ancombc_trend]{ancombc_trend()}})
+compare by default (scikit-bio's \code{grouping}), which must then be
+categorical with at least three levels. It doesn't change the
+fit. Without \code{formula}, it is the model: \code{groups} alone is
+\code{formula = ~ groups}, given as the name of a column of \code{data} or as
+one value per sample (which becomes the variable \code{group}), as for
+\code{\link[=da_test]{da_test()}}'s other methods.}
 
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object

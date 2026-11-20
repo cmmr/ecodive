@@ -94,7 +94,7 @@
 #'   * `reject`: `TRUE` when `p_adjusted <= alpha` and the interval
 #'     (`ci_lower`, `ci_upper`) excludes 0 (`Signif`).
 #'
-#'   Attributes: `contrast` (the treatment and reference groups; the
+#'   Attributes: `method` (`"dirmult_ttest"`), `contrast` (the treatment and reference groups; the
 #'   reference is `NA` when all other samples were pooled), `n` (the number
 #'   of samples on each side), `n_draws`, `pseudocount`, `scale_sd`,
 #'   `alpha`, `conf_level`, `p_adjust` and `seed`.
@@ -355,6 +355,7 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
     reject     = reject,
     stringsAsFactors = FALSE )
 
+  attr(out, 'method')      <- 'dirmult_ttest'
   attr(out, 'contrast')    <- ct$contrast
   attr(out, 'n')           <- c(treatment = n1, reference = n2)
   attr(out, 'n_draws')     <- n_draws

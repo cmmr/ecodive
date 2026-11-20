@@ -25,6 +25,9 @@ extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cord_cross(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dpcoa(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_da_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_da_tests(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_feature_lm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dirmult_ttest(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -98,6 +101,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_cord_cross", (DL_FUNC) &C_cord_cross, 8},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
   {"C_dpcoa",     (DL_FUNC) &C_dpcoa,     8},
+  {"C_da_lm",         (DL_FUNC) &C_da_lm,         8},
+  {"C_da_tests",      (DL_FUNC) &C_da_tests,      7},
+  {"C_feature_lm",    (DL_FUNC) &C_feature_lm,    4},
   {"C_dirmult_ttest", (DL_FUNC) &C_dirmult_ttest, 11},
   {"C_envfit",    (DL_FUNC) &C_envfit,   12},
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},

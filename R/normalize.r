@@ -27,6 +27,11 @@
 #'   * `'rclr'`: Robust centered log ratio: \eqn{\log(x)} minus the mean
 #'     log of the sample's non-zero counts, for non-zero counts only; zeros
 #'     stay 0.
+#'   * `'log'`: Log relative abundance (log-TSS): \eqn{\log} of each
+#'     sample's proportions after adding `pseudocount` to every value,
+#'     \eqn{\log((x + pseudocount) / \sum (x + pseudocount))}. It is the
+#'     clr shifted by one constant per sample. Zeros get a value too, so the
+#'     result is dense. See **Pseudocount** below.
 #'   * `'none'`: No transformation.
 #'
 #' @return The normalized table, with the same orientation (samples in rows
@@ -41,7 +46,7 @@
 #'     normalized count matrix (not the object), in that object's
 #'     orientation.
 #'
-#'   `norm = 'clr'` always gives a dense base `matrix`, since every zero
+#'   `norm = 'clr'` (and `'log'`) always gives a dense base `matrix`, since every zero
 #'   becomes a (usually negative) value, which can take far more memory than
 #'   a sparse input. [beta_div()], [pca()], and [envfit()] accept `norm =
 #'   'clr'` themselves and never make that dense copy, so prefer them where
@@ -81,10 +86,10 @@ normalize <- function (
     counts, norm, margin = 1L, pseudocount = NULL, cpus = n_cpus() ) {
 
   if (missing(norm))
-    stop("`norm` is required: 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', or 'none'.",
+    stop("`norm` is required: 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log', or 'none'.",
          call. = FALSE)
   if (!is.character(norm) || length(norm) != 1 || is.na(norm))
-    stop("`norm` must be one of 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', or 'none'.",
+    stop("`norm` must be one of 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log', or 'none'.",
          call. = FALSE)
 
   validate_counts()
@@ -107,14 +112,15 @@ normalize <- function (
     'slam'   = { dims <- c(counts$nrow, counts$ncol); dn <- counts$dimnames  },
     'Matrix' = { dims <- counts@Dim;                  dn <- counts@Dimnames  } )
 
-  clr   <- identical(norm, NORM_CLR)
+  clr   <- identical(norm, NORM_CLR) || identical(norm, NORM_LOG)
   dense <- clr || pkg == 'base' || inherits(counts, 'dgeMatrix')
 
   if (clr && prod(as.double(dims)) > 1e8)
     warning(
-      sprintf('normalize(norm = "clr") gives a dense %s x %s matrix (%.1f GB). ',
+      sprintf('normalize(norm = "%s") gives a dense %s x %s matrix (%.1f GB). ',
+        if (identical(norm, NORM_CLR)) 'clr' else 'log',
         dims[[1]], dims[[2]], prod(as.double(dims)) * 8 / 1e9),
-      'beta_div(), pca() and envfit() accept norm = "clr" without it.', call. = FALSE )
+      'beta_div(), pca() and envfit() accept it as `norm` without the copy.', call. = FALSE )
 
   if (is.logical(counts) && is.matrix(counts)) storage.mode(counts) <- 'double'
 

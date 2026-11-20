@@ -68,11 +68,11 @@ Alroy, J. (2018). Limits to species richness estimates based on subsampling. \em
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Richness metrics:
-\code{\link[=ace]{ace()}},
-\code{\link[=chao1]{chao1()}},
-\code{\link[=margalef]{margalef()}},
-\code{\link[=menhinick]{menhinick()}},
-\code{\link[=observed]{observed()}}
+Other Richness metrics: 
+\code{\link{ace}()},
+\code{\link{chao1}()},
+\code{\link{margalef}()},
+\code{\link{menhinick}()},
+\code{\link{observed}()}
 }
 \concept{Richness metrics}

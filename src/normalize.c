@@ -11,6 +11,7 @@
 #define NORM_BINARY  4
 #define NORM_RCLR    5
 #define NORM_HELLINGER 6
+#define NORM_LOG     7
 
 static int     n_samples;
 static int     n_otus;
@@ -116,6 +117,32 @@ static void *norm_clr(void *arg) {
 
 
 //======================================================
+// Log of proportions (log-TSS)
+// log((x + pseudocount) / sum(x + pseudocount)), over
+// every feature, zeros included: the clr shifted by a
+// constant per sample.
+//======================================================
+static void *norm_log(void *arg) {
+  FOREACH_SAMPLE(
+
+    int n_zeros = n_otus - (int)(val_end - val_begin);
+
+    double sum = 0;
+    FOREACH_VAL(sum += *val + pseudocount);
+    if (n_zeros > 0) sum += pseudocount * n_zeros;
+
+    double log_sum = log(sum);
+    FOREACH_VAL(*val = log(*val + pseudocount) - log_sum);
+
+    // Value for zero abundance OTUs (unused when n_zeros is 0)
+    clr_vec[sam] = (n_zeros > 0) ? log(pseudocount) - log_sum : 0;
+
+  );
+  return NULL;
+}
+
+
+//======================================================
 // Chord-Transformed Relative Abundance
 // x / sqrt(sum(x ^ 2))
 //======================================================
@@ -214,7 +241,7 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
       if (is_percent_normalized) return;
     }
   }
-  else if (norm == NORM_CLR) {
+  else if (norm == NORM_CLR || norm == NORM_LOG) {
     clr_vec = rw_clr_vec(em);
   }
   
@@ -227,6 +254,7 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
     case NORM_BINARY:  norm_func = norm_binary;  break;
     case NORM_RCLR:    norm_func = norm_rclr;    break;
     case NORM_HELLINGER: norm_func = norm_hellinger; break;
+    case NORM_LOG:     norm_func = norm_log;     break;
   }
   
   pseudocount = pseudocount_;
@@ -342,7 +370,7 @@ SEXP C_normalize(
   ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
   if (norm) normalize(em, norm, n_thr, pc);
 
-  const double *z0 = (norm == NORM_CLR) ? em->clr_vec : NULL;
+  const double *z0 = (norm == NORM_CLR || norm == NORM_LOG) ? em->clr_vec : NULL;
   SEXP result = PROTECT(ecomatrix_table(em, margin, dense, z0));
 
   free_all();

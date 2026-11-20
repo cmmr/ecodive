@@ -52,7 +52,7 @@ which \code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}} follows: with \code{
 for the heatmap (\code{"average"}), and with \code{"none"} it keeps their
 order. \code{clust} needs every distance, so it cannot be used with
 \code{pairs}. \code{\link[=rho_p]{rho_p()}}'s similarities are clustered as \eqn{1 -
-\rho_p}.}
+       \rho_p}.}
 
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, will use all logical CPU cores.}
@@ -97,12 +97,12 @@ Lozupone, C. A., Hamady, M., Kelley, S. T., & Knight, R. (2007). Quantitative an
 \seealso{
 \code{beta_div()}, \code{vignette('bdiv')}, \code{vignette('bdiv_guide')}
 
-Other Phylogenetic metrics:
-\code{\link[=faith]{faith()}},
-\code{\link[=generalized_unifrac]{generalized_unifrac()}},
-\code{\link[=philr_distance]{philr_distance()}},
-\code{\link[=unweighted_unifrac]{unweighted_unifrac()}},
-\code{\link[=variance_adjusted_unifrac]{variance_adjusted_unifrac()}},
-\code{\link[=weighted_unifrac]{weighted_unifrac()}}
+Other Phylogenetic metrics: 
+\code{\link{faith}()},
+\code{\link{generalized_unifrac}()},
+\code{\link{philr_distance}()},
+\code{\link{unweighted_unifrac}()},
+\code{\link{variance_adjusted_unifrac}()},
+\code{\link{weighted_unifrac}()}
 }
 \concept{Phylogenetic metrics}

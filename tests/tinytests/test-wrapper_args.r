@@ -1,6 +1,6 @@
 #test_that("wrapper arguments don't shadow the methods' arguments", {
 
-  # dist_ord(), count_ord(), dist_test() and replace_zeros() pass `...` on to
+  # dist_ord(), count_ord(), dist_test(), replace_zeros() and da_test() pass `...` on to
   # the function of
   # the method they run. R matches named arguments to the wrapper's own
   # arguments before `...`, exactly or by prefix, so a method argument that
@@ -26,6 +26,7 @@
   expect_identical(shadowed(count_ord, list_count_ords('func')), character(0))
   expect_identical(shadowed(dist_test, list_dist_tests('func'), passed = c('groups', 'data')), character(0))
   expect_identical(shadowed(replace_zeros, list_zero_replacements('func')), character(0))
+  expect_identical(shadowed(da_test, list_da_tests('func'), passed = c('groups', 'data', 'formula')), character(0))
 
   # The wrappers' own arguments, which the rule protects. Changing them
   # changes what methods may take.
@@ -33,6 +34,7 @@
   expect_identical(names(formals(count_ord)), c('counts', 'method', '...'))
   expect_identical(names(formals(dist_test)), c('dm', 'test', 'groups', 'data', '...'))
   expect_identical(names(formals(replace_zeros)), c('counts', 'method', '...'))
+  expect_identical(names(formals(da_test)), c('counts', 'method', 'groups', 'data', 'formula', '...'))
 
   # The check itself catches exact names and prefixes, and allows the
   # pass-through ones.
@@ -44,6 +46,10 @@
   expect_identical(shadowed(dist_ord, f), c('prefix: m', 'exact: method'))
   expect_identical(shadowed(replace_zeros, list(z = function (counts, margin, co, delta) NULL)), 'z: co')
   expect_identical(shadowed(dist_test, f['data'], passed = c('groups', 'data')), 'data: te')
+  expect_identical(
+    shadowed(da_test, list(z = function (counts, groups, data, formula, form, me, g) NULL),
+             passed = c('groups', 'data', 'formula')),
+    c('z: form', 'z: me', 'z: g') )
 
   # Arguments that do pass through, by name, reach the method.
   dm <- bray(iris[1:30, 1:4])
@@ -54,5 +60,8 @@
   x <- matrix(c(0, 1, 2, 3, 0, 5), 2)
   expect_identical(replace_zeros(x, 'mult', delta = 0.01, margin = 2L),
                    replace_zeros_mult(x, delta = 0.01, margin = 2L))
+  x <- matrix(1:24 + 0, 6, dimnames = list(NULL, paste0('f', 1:4)))
+  expect_identical(da_test(x, 'da_ttest', rep(1:2, 3), conf_level = 0.9, p_adjust = 'BH', cpus = 1),
+                   da_ttest(x, rep(1:2, 3), conf_level = 0.9, p_adjust = 'BH', cpus = 1))
 
 #})

@@ -64,10 +64,10 @@ Simpson, E. H. (1949). Measurement of diversity. \emph{Nature}, 163, 688. \doi{1
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}
 
-Other Diversity metrics:
-\code{\link[=brillouin]{brillouin()}},
-\code{\link[=fisher]{fisher()}},
-\code{\link[=shannon]{shannon()}},
-\code{\link[=simpson]{simpson()}}
+Other Diversity metrics: 
+\code{\link{brillouin}()},
+\code{\link{fisher}()},
+\code{\link{shannon}()},
+\code{\link{simpson}()}
 }
 \concept{Diversity metrics}

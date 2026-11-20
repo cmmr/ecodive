@@ -80,7 +80,7 @@ difference. Strictly between 0 and 1. Default: \code{0.95}, as
 scikit-bio (which fixes it).}
 
 \item{p_adjust}{How to adjust the averaged p-values for testing every
-feature: one of \link[stats:p.adjust.methods]{stats::p.adjust.methods} (\code{'holm'}, the default,
+feature: one of \link[stats:p.adjust]{stats::p.adjust.methods} (\code{'holm'}, the default,
 \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'}, \code{'fdr'},
 or \code{'none'}).}
 
@@ -112,7 +112,7 @@ bound of the draws' intervals for that difference, in log2 units
 (\code{ci_lower}, \code{ci_upper}) excludes 0 (\code{Signif}).
 }
 
-Attributes: \code{contrast} (the treatment and reference groups; the
+Attributes: \code{method} (\code{"dirmult_ttest"}), \code{contrast} (the treatment and reference groups; the
 reference is \code{NA} when all other samples were pooled), \code{n} (the number
 of samples on each side), \code{n_draws}, \code{pseudocount}, \code{scale_sd},
 \code{alpha}, \code{conf_level}, \code{p_adjust} and \code{seed}.
@@ -195,7 +195,7 @@ the results are those of scikit-bio's \code{dirmult_ttest()} (0.7.4) to about
 \code{1e-13}: the tests feed both the same draws. The draws themselves come from ecodive's
 own Gamma sampler (Marsaglia & Tsang 2000, on PCG), not NumPy's, so for
 the same data the results differ from scikit-bio's by Monte Carlo error
-only. The t distribution is R's \code{\link[stats:pt]{stats::pt()}} and \code{\link[stats:qt]{stats::qt()}} (SciPy's
+only. The t distribution is R's \code{\link[stats:TDist]{stats::pt()}} and \code{\link[stats:TDist]{stats::qt()}} (SciPy's
 \code{stdtr()} and \code{stdtrit()} in scikit-bio), and \code{p_adjust} is
 \code{\link[stats:p.adjust]{stats::p.adjust()}}, with \code{NaN} p-values left out of the family, as
 scikit-bio. Differences from scikit-bio: the optional scale model
