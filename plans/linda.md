@@ -412,3 +412,23 @@ Reference results:
   stopped short), bias 2.5e-7, `reject` identical.
 - Speed, 200 samples (50 subjects) × 2000 features: MicrobiomeStat 117 s,
   ecodive 0.37 s on one thread, 0.21 s on four.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 31, done 2026-11-20.** Commits `f09370e` (work), `ee868bf` (tick);
+`8f3cf63` (random intercepts, `~ g + (1 | id)`).
+
+- Tests: 20,686 at home, 363 in CRAN mode (after `8f3cf63`).
+- MicrobiomeStat 1.4: log2 fold changes ≤ 2.9e-15 absolute, SE 8.4e-16,
+  p 1.5e-14, bias 1.3e-15; reject and df identical. modeest 2.5.0
+  `shorth()` / `meanshift()` ≤ 1e-13.
+- Mixed models: lme4 / lmerTest at the same θ — coefficients 3e-13, SE
+  9e-15, Satterthwaite df 4e-9; ecodive solves the REML optimum exactly.
+  MicrobiomeStat mixed: reject identical, other quantities within lme4's
+  optimizer tolerance (≈1e-6–1e-5).
+- Speed: 300 × 5,000 in 0.47 s (27× MicrobiomeStat); mixed 200 × 2,000 in
+  0.37 s (about 300×).
+- Found: MicrobiomeStat reports imputation but adds a pseudocount; ecodive
+  does what it reports. `src/feature_lmm.c` is reusable (maaslin3,
+  dirmult_lm).

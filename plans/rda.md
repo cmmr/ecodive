@@ -235,3 +235,22 @@ Reference results:
 - **Speed:** 3,000 samples × 2,000 taxa (5% non-zero), `~ g + x +
   Condition(z)`, 8 axes. `rda()` takes 0.46 s on 4 threads and
   `vegan::rda()` 63 s, with eigenvalues equal to 6e-18.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 3, done 2026-11-18.** Commits `46db60b` (work), `4ddf3df` (tick).
+
+- Tests: 6,210 at home, 185 in CRAN mode.
+- vegan 2.7.8, 29 cases (dune, varespec, a 110 × 40 table; six `norm`s;
+  partial, conditions-only and no-model; aliased, saturated, constant
+  features; `n_axes` beyond the rank): everything at 1e-10; largest
+  differences about 2e-15 (constrained) and 7e-14 (unconstrained axes).
+- scikit-bio 0.7.4 (scaling 2): site, species and biplot scores on all 19
+  axes to about 7e-15 (its "eigvals" are singular values).
+- `permanova()` on Hellinger distances equals `anova.cca()` (full and
+  partial) with shared permutations.
+- Speed: 3,000 × 2,000 in 0.46 s against vegan's 63 s.
+- No code ported: `dbrda()`'s solver was generalised (`src/dbrda.c`,
+  `src/pca.c`).
+- Open: `match_count_ord('r')` became ambiguous (`rda` / `rpca`).

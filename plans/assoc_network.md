@@ -539,3 +539,16 @@ Made while implementing. Every NetCoMi convention below was read from its
 - Test that `assoc_network()` of their results gives the expected edges,
   and add their aliases to the cross-registry check in
   `test-assoc_network.r`.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 33, done 2026-11-20.** Commits `a4d81fd` (work, with
+`feature_assoc()`), `e28f5b8` (tick), `834f9b2` (merge).
+
+- Tests: 20,351 at home, 362 in CRAN mode (merged tree).
+- NetCoMi 1.2.0 + igraph 1.6.0, 160 networks: eigenvector 3.2e-14, degree
+  8.9e-16, betweenness exact; hubs and clusterings identical; Jaccard and its
+  p-values 2e-16; ARI test matches in distribution.
+- Clean room: two NetCoMi internals were called for outputs only (recorded
+  above).

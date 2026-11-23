@@ -99,3 +99,15 @@ correlation extensions of the Mantel test of matrix correspondence.
 - **Docs:** `vignettes/stat_tests.Rmd` gains a `mantel_partial()` row and a
   short example; `vignettes/ecodive.Rmd`, `README.md` and the draft
   benchmark article list it too.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 1, done 2026-11-18.** Commits `3074a20` (split), `5bf2064` (tick).
+
+- Tests: 5,317 at home, 168 in CRAN mode (5,214 / 163 before).
+- vegan 2.6-4 `mantel.partial()` live, 54 fresh cases (n 12–60; Pearson,
+  Spearman, Kendall; tied and untied), shared permutations: statistic
+  ≤ 7e-14 relative, permuted r ≤ 4e-16, every p-value identical; the stored
+  fixture (vegan 2.7.6) is reproduced to 1e-12.
+- `R CMD check`: clean apart from the container's locale warning.

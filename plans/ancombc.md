@@ -628,3 +628,28 @@ pseudocounts are used (they are on the scale of counts); `ancombc()` stays
 `sensitivity = FALSE` (neither reference offers it there). scikit-bio's
 columns are unchanged; the fixture comparisons pass `sensitivity = FALSE`.
 The default roughly quadruples `ancombc2()`'s time and fit memory.
+
+
+## Outcome (from the implementing session's final report)
+
+### Item 22 (`ancombc()`, `ancombc2()`), done 2026-11-19
+
+Commits `49a6e59` (work), `c4c9361` (tick), `5f80b89` (merge). Later:
+`210a989` / `5856378` (pseudocount sensitivity, on by default in
+`ancombc2()`); item 29 made `formula` / `data` default to `NULL`.
+
+### Item 23 (post-hoc tests, `structural_zeros()`), done 2026-11-19
+
+Commits `7d9b859` (work), `a0e4a93` (tick), `3773221` (merge); `c90b9cf`
+(fixtures 266 KB → 73 KB).
+
+- Tests (final tree): 15,259 at home, 304 in CRAN mode.
+- scikit-bio 0.7.4: fold changes ≤ 2.1e-8, p-values ≤ 2.5e-8, decisions
+  identical; global and pairwise ≤ about 3e-8; Dunnett on scikit-bio's own
+  draws ≤ 2.5e-12; structural zeros identical on 6 tables. Trend statistic
+  ≤ 3e-7 (one case 5.4e-5 where SLSQP stops short; ecodive's active-set QP is
+  exact).
+- ANCOMBC 2.8.1: fold changes ≤ 2.4e-6 on the 9 cases where it agrees with
+  scikit-bio; global and pairwise ≤ about 3e-8 where its EM converges.
+- Open: ANCOMBC crashes with BY and no feature passing its screen (worked
+  around in the fixture script; ecodive is unaffected).

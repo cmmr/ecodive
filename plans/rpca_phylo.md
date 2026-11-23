@@ -265,3 +265,18 @@ Decided along the way:
   for absent tips the wrong dimnames when `margin = 2`, so every
   tree-taking function (`faith()`, the UniFrac family) failed with samples
   as columns and a tree with tips not in the table. Fixed; tested.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 21, done 2026-11-19.** Commits `4b259ba` (work), `d11fafb` (tick).
+
+- Tests: 13,754 at home, 255 in CRAN mode.
+- gemelli 0.0.13 (+ scikit-bio 0.7.4, iow 1.0.8), 8 cases: node names,
+  structure, lengths and counts identical; loadings 1.9e-14, eigenvalues
+  7.3e-15, distances 4.2e-15. Plain `rpca()` bit-identical after the
+  refactor.
+- Speed: 2,000 samples × 12,000 nodes in 1.3 s (1 thread), 0.65 s (4).
+- Fixed along the way: `validate_tree()` mislabelled padded rows with
+  `margin = 2` (affected `faith()` and UniFrac).
+- iow (Daniel McDonald) credited.

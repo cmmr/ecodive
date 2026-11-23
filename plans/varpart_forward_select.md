@@ -372,3 +372,33 @@ Reference results:
 - **Tests:** 9,171 results at home and 211 in CRAN mode (from 9,014 and
   207). `R CMD check --no-manual --ignore-vignettes`: only the known
   en_US.UTF-8 locale WARNING.
+
+
+## Outcome (from the implementing session's final report)
+
+### `varpart()`: item 12, done 2026-11-19
+
+Commits `eb06b58` (work), `1a415b5` (tick).
+
+- Tests: 9,014 at home, 207 in CRAN mode.
+- vegan 2.7.8, 23 cases (mite, varespec / varechem; 2–4 sets; Hellinger
+  table, Bray-Curtis and Euclidean-of-Hellinger dist; factor, nested,
+  collinear and noise sets; CCA with 2–3 sets): fractions ≤ 2.3e-15, df
+  exact. Unique fractions equal partial `rda()` / `dbrda()` to 1e-12.
+- Speed: 3,000 × 2,000, three sets: 0.13 s against vegan's 3.5 s.
+- Open: vegan 2.7.8's four-set `chisquare = TRUE` output is internally
+  inconsistent (SS.Y 13.8 against its own 1.70); four-set CCA is tested
+  against `cca()` per union instead.
+
+### `forward_select()`: item 13, done 2026-11-19
+
+Commits `d0b6339` (work), `5daf54a` (tick).
+
+- Tests: 9,171 at home, 211 in CRAN mode.
+- vegan 2.7.8 `ordiR2step()`, 7 cases: same variables, order and stop, p
+  identical; adjusted R² 1.4e-15, F 1.6e-14. adespatial 0.3-30
+  `forward.sel()`: same 7 variables in the same order.
+- Found from outputs: `ordiR2step()` tests a step by comparing the nested
+  models (not a partial test of the added term).
+- Speed: 1,000 × 500, 11 candidates, 199 permutations: 0.17 s against
+  vegan's 58 s (Hellinger).

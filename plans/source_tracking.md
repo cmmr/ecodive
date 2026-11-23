@@ -472,3 +472,22 @@ Made while implementing:
     the test checks both within 0.02. (A first attempt to run it was refused
     by the session's permission checks; the user then asked for it, and it
     ran.)
+
+
+## Outcome (from the implementing session's final report)
+
+### `sourcetracker()`: item 36, done 2026-11-20
+
+Commits `12034fd` (work), `31e124c` (tick), `19cc412` (merge), `3fb6a5c`
+(SourceTracker v1 cross-check).
+
+- Tests: 19,491 at home, 348 in CRAN mode.
+- SourceTracker2 2.0.1-dev: pooled environments and draw schedule exact,
+  conditional probabilities 4.6e-13; mixing proportions by distribution
+  (largest mean difference 0.0055, max z 2.5). SourceTracker v1: 0.0038
+  from ecodive, 0.0045 from SourceTracker2.
+- Speed: about 300× SourceTracker2 on one thread.
+- Found in SourceTracker2: its SD is too small by the number of draws; its
+  leave-one-out keeps the held-out environment.
+- Reusable for `feast()`: `ecodive_source`, `SOURCE_TRACKERS`,
+  `C_st_collapse`.

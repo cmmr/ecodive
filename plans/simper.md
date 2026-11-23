@@ -181,3 +181,20 @@ My own calls:
 - **Open issue (not changed):** when `groups` has the wrong length, the
   shared `per_sample()` message says "`dm` has 4 samples" even for count
   tables (also in `plsda()`).
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 8, done 2026-11-18/19.** Commits `dbf0c2b` (work), `2154083` (tick),
+`e2a789b` (Clarke's "at least as large" rule, by the user's choice).
+
+- Tests: 7,723 at home, 198 in CRAN mode (after `e2a789b`).
+- vegan 2.7.8 / permute 0.10.0, four cases: `average`, `sd`, `ratio`, means,
+  `cumsum` ≤ 5e-16 relative, taxa in the same order. Under vegan's strict
+  rule p-values were identical; under Clarke's rule they match a direct R
+  computation on the fixture permutations and are never below vegan's
+  (e.g. dune up to +0.15; a taxon present in 2 samples of one group rises
+  from 0.335 to 1, which is correct).
+- Speed: 300 × 3,000, 3 pairs, 99 permutations: 1.8 s (1 thread), 0.8 s
+  (4); vegan 27 s for one pair.
+- ecopy credited (Nathan Lemoine, MIT).

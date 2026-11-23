@@ -358,3 +358,15 @@ Made while implementing:
   of `res_dm` after the volcano plot, with a sentence on the other types,
   citing Gloor, Macklaim & Fernandes (2016) († : closed access; no free
   version found on arXiv).
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 28, done 2026-11-20.** Commits `48cf7ad` (work), `a6c7a2c` (tick).
+
+- Tests: 18,780 at home, 342 in CRAN mode.
+- ALDEx3 1.4.0 `aldex.effect()` on the same draws: ≤ 3.9e-15 (with a scale
+  model). ALDEx2 1.34.0 (outputs): effect r = 0.998, mean ρ = 0.994;
+  `diff.win` is 1.2–1.5× `pooled_sd` (docs say so).
+- ANCOM-BC `resid_sd` equals `sigma(lm())` to 1e-10.
+- Plot titles are now "<Type> plot of <method>".

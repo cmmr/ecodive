@@ -578,3 +578,15 @@ correlation matrix; `vlr()` and `phi_s()` give an error pointing to
   20 features the nulls' largest |r| was 0.55. The method's behaviour, not
   a bug; the docs already warn about few features.
 - Tests: `tests/tinytests/test-assoc_pairs.r` (63) and two smoke lines.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 32, done 2026-11-20.** Commits `21c3da7` (work), `ecb3651` (tick).
+
+- Tests: 18,336 at home, 337 in CRAN mode.
+- Base-R version on the same draws: 7.2e-15. FastSpar 1.0.0 and SpiecEasi
+  1.1.1: 0.0012–0.0026 on large counts, 0.019 on small counts (two ecodive
+  seeds differ by 0.018). p-values follow FastSpar's (1 + k)/(B + 1) exactly.
+- Speed: 200 × 500, 100 draws: 4.7 s (1 thread), 1.5 s (4).
+- Null datasets resample (as FastSpar), not permute (as SpiecEasi).

@@ -376,3 +376,19 @@ Decided along the way:
   which would remove both problems but depart from ALDEx3's sampled model;
   and a mixture-quantile interval, which needs every draw's statistics
   stored and many more `pt()` calls.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 20, done 2026-11-19.** Commits `2291a31` (port), `c88b95b` (scale
+model, ALDEx3 MIT, credited), `08bba93` (tick); later `b2aaf8f` (by the user:
+`scale_sd` defaults to 0; mirrored contrasts).
+
+- Tests: 13,351 at home, 254 in CRAN mode.
+- scikit-bio on the same Gamma draws: every column ≤ 3.4e-14, reject
+  identical; bounds ≤ 3.3e-13. With its own draws: `log2_fc` ≤ 1.4e-3.
+- ALDEx3 by distribution: per-draw SD ratio 0.95–1.05; ALDEx2 1.34.0
+  (outputs): `diff.btw` correlates 0.989–1.000.
+- New shared samplers `src/rng_dist.c` (uniform, normal, Gamma) pass
+  moment and KS tests.
+- Speed: 500 × 5,000, 128 draws: 16 s (1 core), 4.8 s (4).

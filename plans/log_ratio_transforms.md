@@ -271,3 +271,16 @@ For later compositional items, the reusable internals (all in
   rows of any count) or `NULL` for Helmert. `philr()` can feed it a
   tree-derived SBP's CSR (O(nnz) per sample, no dense basis) if it doesn't
   write its own O(D) recurrence; `balance()` can pass a one-row CSR.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 14, done 2026-11-19.** Commits `51fd7d0` (work), `2488e23` (tick),
+`9396845` (merge).
+
+- Tests: 9,367 at home, 217 in CRAN mode.
+- scikit-bio 0.7.4: `alr()`, the default (Helmert) basis and `sbp_basis()`
+  bit-identical; `ilr()` ≤ 1.3e-15. compositions 2.0.9: `alr(x, D)` and
+  `-ilr(x)` equal its `alr()` / `ilr()` to 1.3e-15.
+- robCompositions not installable (dependency left CRAN).
+- Speed: 2,000 × 5,000 sparse in 0.2 s.

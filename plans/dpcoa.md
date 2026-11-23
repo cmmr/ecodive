@@ -209,3 +209,15 @@ Reference results (fixtures `data-raw/expected/dpcoa.r`, 37 KB):
 reached this session through error messages: the ones seen ("Remove empty
 samples", "Non convenient row.w (p=0)", "an Euclidean matrix is needed")
 print no code.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 26, done 2026-11-19.** Commits `6ed9799` (work), `e7ccd62` (tick).
+
+- Tests: 16,495 at home, 312 in CRAN mode.
+- ade4 1.7-24, six cases (trees and `taxa_dm`): coordinates, eigenvalues,
+  Rao diversities ≤ 1.4e-14 relative. phyloseq 1.46.0 DPCoA: the same on
+  GlobalPatterns.
+- Speed: 300 × 1,000 in 0.02 s against ade4's 252 s; all 19,216
+  GlobalPatterns taxa in 0.03 s. No taxa × taxa matrix is formed.

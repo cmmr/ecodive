@@ -392,3 +392,34 @@ Made while implementing:
     gives the products only 2 threads. (An earlier version of this note
     said `pcoa()` gained nothing from `cpus`; that holds only at
     n = 1,000.)
+
+
+## Outcome (from the implementing session's final report)
+
+### `lda()`: item 10, done 2026-11-19
+
+Commits `7323057` (work), `abe09e0` (tick).
+
+- Tests: 8,317 at home, 202 in CRAN mode.
+- MASS 7.3-60: scaling 1.1e-14, scores 4.5e-15, eig 2.2e-15, leave-one-out
+  posteriors 5.4e-15, leave-one-out classes identical. scikit-learn 1.9.1:
+  scores 8.5e-15 after the constant √(n/(n−g)) factor.
+- Speed: 5,000 × 200 in 0.2 s against MASS's 0.77 s.
+
+### `capda()`: item 24, done 2026-11-19
+
+Commits `06f2fbf` (work), `dd2a736` (tick).
+
+- Tests: 15,796 at home, 306 in CRAN mode.
+- BiodiversityR 2.18-1 `CAPdiscrim()` (dune by Management, Use, Moisture;
+  mite by Shrub): m, success rates and leave-one-out classes identical;
+  δ² 3.7e-15, Pillai's trace 1.1e-15, scores 1.6e-14. Exception: mite at
+  m ≥ 20, one sample whose MASS posteriors underflow (ecodive matches exact
+  refits).
+- No p-value match possible (`CAPdiscrim()` permutes success with R's RNG);
+  the trace test equals MANOVA's Pillai and `adonis2()` with 199 shared
+  permutations (p identical).
+- `capda(dm, n_pcoa_axes = M)` equals `lda(pcoa(dm, n_axes = M))` to 1e-12.
+- Follow-ups in the same session: threaded `lanczos()` for `pcoa()`
+  (`562c3e9`) and every caller (`ef45391`); `test-ecomatrix.r` fix
+  (`560f878`).

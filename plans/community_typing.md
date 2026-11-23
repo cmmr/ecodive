@@ -508,3 +508,20 @@ shared `ecodive_types` methods (no per-method S3 methods needed), and add
 choice from `selection$selected`, never by recomputing a max or min, so
 `dmm()`'s minimum-Laplace choice needs no change there (the `best` column
 documents it).
+
+
+## Outcome (from the implementing session's final report)
+
+### `enterotype()`: item 35, done 2026-11-20
+
+Commits `20f28e1` (work), `bdf2842` (tick); `582773b` (print locale fix).
+
+- Tests: 18,326 at home, 337 in CRAN mode (after the locale fix).
+- cluster 2.1.6 `pam()` / `silhouette()`, clusterSim 0.51.6: medoids and
+  partitions identical; objectives 1.6e-16, silhouettes exact, CH 3.4e-15;
+  2,099 of 2,100 tie-heavy fits identical (one six-way tie).
+- Speed: n = 2,000, k = 2–6: 1.07 s (1 thread), 0.62 s (4); 3.55 s for
+  cluster + clusterSim.
+- Reusable for `valencia()` / `dmm()`: `new_ecodive_types()`,
+  `COMMUNITY_TYPES`, shared `print` / `plot` (valencia needs a `'scores'`
+  plot type).

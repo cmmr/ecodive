@@ -151,3 +151,18 @@ QIIME 2 (`diversity bioenv`) and vegan (`bioenv()`).
   0.45 s on four, where `vegan::bioenv()` takes 5.5 s; varechem's 14
   variables: about 0.1 s, where vegan takes 1.6–29 s depending on the
   options.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 9, done 2026-11-19.** Commits `b78f35f` (`counts` in sample-count
+messages), `96381a6` (work), `5c0023d` (tick).
+
+- Tests: 8,117 at home, 201 in CRAN mode.
+- vegan 2.7.8, every method × metric × `partial` × `upto`: best subsets
+  identical, correlations ≤ 1.1e-14; exception: Spearman / Kendall with
+  Mahalanobis at size 1 differ ≤ 5.8e-5 (vegan's whitening breaks exact
+  ties; ecodive keeps them).
+- scikit-bio 0.7.4 defaults: identical subsets, ≤ 3.9e-16.
+- Speed: 100 samples × 12 variables in 1.2 s (1 thread), 0.45 s (4); vegan
+  5.5 s. Port of scikit-bio's search (credited).

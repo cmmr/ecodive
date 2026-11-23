@@ -256,3 +256,17 @@ For later items:
   `C_balance()` takes any (feature, coefficient) row, so a weighted PhILR
   row can be checked against it, and `C_log_ratio_coords()` remains the
   fast path for all D − 1 balances.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 16, done 2026-11-19.** Commits `c56ea2a` (work), `324a969` (tick).
+
+- Tests: 9,942 at home, 228 in CRAN mode.
+- scikit-bio 0.7.4 `ilr()` with a one-row SBP: 5.6e-16. Qurro 0.9.0
+  `qarcoal()`: bit-identical, `NA` exactly where Qurro drops a sample.
+  compositions 2.0.9 `balance()`: 1.3e-15. ecodive's `ilr()` with a
+  matching SBP: bit-identical.
+- Speed: 2,000 × 5,000 sparse: `log_ratio()` 0.04 s, `balance()` 0.07 s.
+- Nothing ported from Qurro (one-line formula), so it isn't credited.
+  selbal and coda4microbiome not run.

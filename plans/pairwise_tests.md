@@ -208,3 +208,19 @@ My own calls:
   5580 results, all OK. CRAN mode gave 184, all OK. `R CMD check --no-manual
   --ignore-vignettes` gave only the known en_US.UTF-8 locale WARNING.
   `vignettes/stat_tests.Rmd` renders.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 2, done 2026-11-18.** Commits `575da24` (work), `8f23a5e` (tick).
+
+- Tests: 5,580 at home, 184 in CRAN mode.
+- vegan 2.6-4 `adonis2()`, `anosim()`, `mrpp()` on each pair's samples with the
+  induced permutations: statistics ≤ 1e-10, p-values identical.
+- RVAideMemoire `pairwise.perm.manova()` (own permutations): within sampling
+  error, 0.015 on raw and 0.03 on Holm-adjusted p-values.
+- pairwiseAdonis not run (GitHub only; attaching it was refused); the vegan
+  fixtures check what its `pairwise.adonis2()` does.
+- Pair seeding, induced permutation matrices, NA rows and the extra `z` / `n`
+  columns were the user's choices; `permdisp()`'s pairwise table gained
+  `z`, `n`, `n_perm`.

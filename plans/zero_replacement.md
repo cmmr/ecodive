@@ -390,3 +390,18 @@ For item 55 (the Bayesian methods and CZM):
   list.
 - The "confirm" formulas (t, s, the adjust step, CZM's adjust) remain
   open, as the plan says.
+
+
+## Outcome (from the implementing session's final report)
+
+### Item 15 (`replace_zeros()` wrapper, `replace_zeros_mult()`), done 2026-11-19
+
+Commits `7d84f63` (work), `199eea8` (tick).
+
+- Tests: 9,638 at home, 223 in CRAN mode.
+- scikit-bio 0.7.4 `multi_replace()`: bit-identical on 21 cases (D 2–1,037;
+  given and per-sample `delta`), after summing in NumPy's pairwise order
+  and taking the default delta from C's `pow()`. zCompositions 1.6.2
+  `multRepl()`: ≤ 3.3e-16 relative. NumPy credited.
+- Open: the four Bayesian / CZM methods are a later item; the planned
+  five-row registry is written into `test-replace_zeros.r`.

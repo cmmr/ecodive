@@ -267,3 +267,18 @@ Made while implementing:
   several test files (and all of `test-qmp.r`) don't run with it. With
   tinytest 1.4.3 (CRAN) the suite gave 10,893 results at home and 246 in
   CRAN mode after this item; with 1.4.1, 10,213 at home (10,206 before).
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 18, done 2026-11-19.** Commits `068453a` (work), `dea9e24` (tick).
+
+- Tests (tinytest 1.4.3): 10,893 at home, 246 in CRAN mode.
+- `QMP.R` (via jsDelivr; ported, Raes Lab credited) run with phyloseq 1.46.0:
+  sampling depths identical; targets identical except 3 samples where the
+  script loses a read to floating point (ecodive's rounding-safe floor keeps
+  it); with ecodive's rarefied table substituted, its output equals
+  `qmp_rarefy()` exactly; 400 seeds agree by distribution (|z| ≤ 2.2).
+- `qmp_scale()` equals `x / rowSums(x) * load` exactly. `rarefy()` with one
+  depth is bit-identical to before.
+- Open: slam draws differed (fixed later in item 30, `963647f`).

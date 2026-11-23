@@ -348,3 +348,13 @@ Made while implementing:
   ancombc2, dirmult_ttest, da_lm in the tests; every method on the larger
   table).
 - No numerical differences anywhere: every comparison is exact.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 34, done 2026-11-20.** Commits `8d25396` (work), `b2e82ac` (tick).
+
+- Tests: 18,597 at home, 342 in CRAN mode.
+- Every run `identical()` to the direct call (135 / 135, all seven methods);
+  pseudocount runs equal `ancombc2()`'s own sensitivity fits; `passed` /
+  `robust` equal ANCOMBC's `passed_ss` / `reject_robust`.

@@ -310,3 +310,20 @@ Made while implementing:
   (item 30, 963647f): it is named on `rpca()`, `robust_aitchison()`, the
   article and `bdiv_guide.Rmd`. `da_sensitivity()` (item 34, written in
   parallel) is not named.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 27, done 2026-11-20.** Commits `60b71df` (work), `44f34b9` (tick).
+
+- Tests: 18,435 at home, 340 in CRAN mode; `R CMD check` OK; both articles
+  knit.
+- Pages changed: `rpca()` ("Sequencing depth", Schloss 2026 / 2024, with a
+  check users can run), `rpca_phylo()`, `robust_aitchison()`,
+  `dirmult_ttest()` ("Choosing `scale_sd`"), a shared "Machine learning"
+  section, `qmp_scale()` ("Predicted loads"), the compositional and
+  bdiv_guide articles, NEWS.
+- `log_base` on ANCOM-BC fits, pairwise and Dunnett (e) and
+  `dirmult_ttest()` (2); `lfc_label()` added.
+- Open: MLP's return value (row names) unverified — running the downloaded
+  package was refused by the permission check.

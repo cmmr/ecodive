@@ -361,3 +361,17 @@ preorder so every child's id is above its parent's, tips mapped to feature
 indices, cladewise edge list), and `philr_tree()` wraps it with the name and tip checks;
 patristic distances or clade sums for DPCoA can start from its `c1`, `c2`
 and `edge_len`.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 25, done 2026-11-19.** Commits `5f8d7bb` (work), `57324ce` (tick).
+
+- Tests: 16,291 at home, 311 in CRAN mode.
+- philr 1.28.0 (Bioconductor 3.18), 24 weightings on several tree shapes:
+  coordinates 6.9e-15 relative, weights 1e-12, paper-weight distances
+  4.4e-16. Uniform weights equal `aitchison()` (1.8e-15) and `ilr()` on the
+  tree's SBP. scikit-bio `tree_basis()`: sign-flipped, 3.1e-16.
+- Speed: 2,000 × 5,000 sparse: `philr()` 0.2 s against philr's 161 s.
+- Clean room: one philr error message printed a code fragment after the
+  formulas were settled; nothing was used (recorded above).

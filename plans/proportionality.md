@@ -313,3 +313,17 @@ Made while implementing:
 
 Still for later (unchanged): the permutation FDR (`rho_p_fdr()`), an
 `iqlr` option, and a `metric` wrapper.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 17, done 2026-11-19.** Commits `60d304e` (work), `4600cb8` (tick).
+
+- Tests: 10,206 at home, 239 in CRAN mode.
+- scikit-bio 0.7.4 `vlr` / `pairwise_vlr`: ≤ 3.6e-15 absolute (3.7e-12
+  relative on a nearly proportional table, where scikit-bio loses
+  precision).
+- `rho_p()` / `phi_s()`: base-R formulas only (≤ 1e-12). **propr not
+  compared:** 4.2.6 (CRAN archive) won't load on R 4.3.3 and GitHub was
+  blocked; deferred by the user (2026-11-19).
+- Speed: 500 × 3,000 (4.5 M pairs) in 3.0 s (1 thread), about 1 s (4).

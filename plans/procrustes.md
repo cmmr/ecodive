@@ -193,3 +193,19 @@ Made while implementing:
   samples); a "Comparing ordinations" row in the README table.
 - Credit: "The SciPy developers" added to `Authors@R` (ctb, cph), with a
   `Files: src/procrustes.c R/procrustes.r` stanza in `inst/COPYRIGHTS`.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 6, done 2026-11-18.** Commits `a1c2a66` (work), `0756364` (tick).
+
+- Tests: 7,186 at home, 194 in CRAN mode.
+- vegan 2.7.8 `procrustes()`, 20 cases: rotated coordinates, rotation and
+  residuals about 5e-16 relative, translation 1e-17, dilation exact, m²
+  about 2e-15.
+- vegan `protest()` with a shared 199-row matrix: r and every permuted r
+  ≤ 2.8e-16; p-values identical.
+- SciPy 1.18.1 `scipy.spatial.procrustes`: symmetric disparity ≤ 2.8e-17.
+- Speed: 2,000 samples, 999 permutations: 0.03 s against vegan's 0.25 s.
+- Default `axes` is the first `min(ncol)` (vegan zero-pads; `axes = 1:k`
+  reproduces it). SciPy credited (`Authors@R`, `inst/COPYRIGHTS`).

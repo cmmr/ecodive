@@ -340,3 +340,30 @@ Made while implementing:
     section; rows in the README and `vignette("ecodive")` tables;
     `count_ord()` docs; NEWS under 2.4.0. `oplsda()` docs say Q² is not
     computed and point to `permanova()` or cross-validation.
+
+
+## Outcome (from the implementing session's final report)
+
+### `plsda()`: item 7, done 2026-11-18
+
+Commits `b3c81a4` (work), `af77eb3` (tick).
+
+- Tests: 7,354 at home, 195 in CRAN mode.
+- scikit-learn 1.9.1 `PLSRegression` (`tol = 1e-28`): scores, weights,
+  loadings ≤ 2.2e-14 relative. mixOmics 6.26.0 (newest for R 4.3.3): scores,
+  weights, explained variance, `vip()` ≤ 3e-15.
+- Speed: 1,000 × 5,000 in 0.06 s against mixOmics' 1.2 s.
+- Open: VIP differs from `mixOmics::vip()` with `scale = FALSE` (1.3%);
+  `count_ord('p')` became ambiguous (`pca` / `plsda`).
+
+### `oplsda()`: item 11, done 2026-11-19
+
+Commits `4c7e646` (work), `fcb4a0a` (tick).
+
+- Tests: 8,562 at home, 203 in CRAN mode.
+- pyopls 20.3.post1 (predictive part via scikit-learn on its filtered
+  table): ≤ 6.8e-14. ropls 1.34.0 (newest for R 4.3.3): scores, loadings,
+  weights ≤ 1.5e-13, VIP 4e-14, R²X / R²Y 6.7e-15.
+- Speed: 1,000 × 5,000 in 0.13 s (0.06 s sparse).
+- Note: `oplsda()` takes `n_orthogonal`, not `n_axes`, because it changes the
+  fit (p1 moves with it); `count_ord(..., n_axes =)` errors for it by design.

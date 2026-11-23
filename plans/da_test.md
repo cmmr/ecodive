@@ -407,3 +407,16 @@ What later items can rely on:
 - **linda / fastancom / dirmult_lm:** `da_design()`, `da_table_init()` /
   `da_table_column()` (normalized table by feature, any norm, rclr zeros as
   `NaN`) and the `flm_*` kernel (with HC0 / HC3).
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 29, done 2026-11-20.** Commits `4d0226c` (work), `e5ad4a3` (tick).
+
+- Tests: 17,173 at home, 325 in CRAN mode.
+- `wilcox.test()`: W identical, p < 1e-12. `t.test()`: < 1e-12. `lm()` /
+  `confint()`: < 1e-10, HC0 / HC3 standard errors < 1e-10. `da_test()` is
+  `identical()` to calling each of the 7 methods directly.
+- Speed: 500 × 5,000 in 0.1–0.4 s per test (5–7 s for a base-R loop).
+- Also: `norm = 'log'`; `aldex` / `aldex2` aliases; cross-wrapper
+  redirects; `ancombc()` `formula` / `data` default to `NULL`.

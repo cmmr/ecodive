@@ -246,3 +246,16 @@ column with no such quirk, so it should call `stats::p.adjust()` (or reuse
 `pairwise_method()` directly). The group handling (`test_group_values()`,
 then radix-sorted levels unless a factor) and `log_ratio_input()` use are
 reusable as they are.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 19, done 2026-11-19.** Commits `63822a8` (work), `d443a92` (tick).
+
+- Tests: 12,845 at home, 250 in CRAN mode.
+- scikit-bio 0.7.4, 184 runs (its test tables, singleton groups, zeros,
+  ties; both `sig_test`; every `p_adjust`): W and reject identical. Kruskal
+  H bit-identical; F ≤ 2.6e-12 relative (SciPy's rounding; ecodive within
+  1.5e-13 of exact); p-values ≤ 6.7e-16 absolute; adjusted ≤ 2.2e-14.
+- Speed (4 cores, 3,000 features × 200 samples): 2.6 s ANOVA, 10.5 s
+  Kruskal-Wallis.

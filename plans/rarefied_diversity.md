@@ -362,3 +362,17 @@ Recorded 2026-11-20 (item 30).
   (209), `avgdist(iterations = 5000)` run twice from `set.seed(1)` with
   `meanfun = mean` and `meanfun = sd` (the same draws), so the test's
   combined SE uses vegan's own spread. vegan 2.7-8.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 30, done 2026-11-20.** Commits `963647f` (work, plus the slam
+seeding fix in `rarefy()`), `1d08533` (tick).
+
+- Tests: 17,373 at home, 327 in CRAN mode (merged tree).
+- Exactly equal to rebuilding from `rarefy()` + `beta_div()` /
+  `alpha_div()`; medoid matches q2-boots' `_medoid()`. vegan 2.7.8
+  `avgdist()` (5,000 rarefactions): within 2.5 standard errors.
+- Speed: 5,000 rarefactions in 1.2 s (`hold_n_cpus()`).
+- Open: the per-call `n_cpus()` cost (later addressed upstream by
+  `6d93ccf`); memory for large median / medoid runs.

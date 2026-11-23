@@ -319,3 +319,33 @@ Reference results (`data-raw/expected/ca.r` and `ca.py`, fixtures in
   sites 2.4e-13, species 8.5e-14, eigenvalues 1e-15.
 - **Speed:** 3,000 samples × 2,000 taxa (5% non-zero), 8 axes: `ca()`
   1.1 s on 4 threads, `vegan::ca()` 29 s, eigenvalues equal to 3e-16.
+
+
+## Outcome (from the implementing session's final report)
+
+### `cca()`: item 4, done 2026-11-18
+
+Commits `e33c7e1` (work), `b91a5a7` (tick), `59d6408` (partial adjusted R²).
+
+- Tests: 6,701 at home, 186 in CRAN mode.
+- vegan 2.7.8, 24 cases: all at 1e-10 (site scores 6e-13, species 1e-13 on
+  the unconstrained axes; about 1e-14 constrained); adjusted R², partial
+  models included, to 7e-16 with shared permutations.
+- scikit-bio 0.7.4: site and species scores and eigenvalues at 1e-10 (its
+  biplot uses unweighted correlations, not compared).
+- Speed: 3,000 × 2,000 in 0.53 s against vegan's 66 s.
+- The user allowed reading `vegan:::RsquareAdj.cca` as a one-off exception
+  for the partial-model adjusted R² (adj(X+Z) − adj(Z)); the README's rule
+  is unchanged.
+
+### `ca()`: item 5, done 2026-11-18
+
+Commits `80c8a86` (work), `e2ce8a3` (tick).
+
+- Tests: 6,938 at home, 187 in CRAN mode.
+- vegan 2.7.8 `ca()` (9 cases): site 2.6e-13, species 9e-14, eigenvalues
+  1e-15. ade4 1.7-24 `dudi.coa()`: eigenvalues 1.1e-15, scores 3.9e-13.
+  scikit-bio 0.7.4: sites 2.4e-13.
+- Speed: 3,000 × 2,000 in 1.1 s against vegan's 29 s.
+- No new solver: `ca()` calls `C_cca()` with an empty design.
+- `dist_ord('ca')` now errors, pointing to `count_ord()`.
