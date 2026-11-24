@@ -385,3 +385,25 @@ Reference results (`data-raw/expected/dirmult_lm.r`, fixture
   s); `p_adjust = 'none'` 2.6 s. 500 × 5,000, 128 draws: 13.4 s on 1 core,
   6.8 s on 4 (`dirmult_ttest()` 5.4 s). Mixed (25 subjects), 100 draws: 2.8
   s on 4 cores against 0.3 s without the random intercept.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 42, done 2026-11-24.** Commits `6fd2b9e` (work), merged with item
+47 in `699fdc2` (no conflicts); this tick.
+
+- Tests: 28,594 at home, 409 in CRAN mode on the merged tree (28,492 and
+  408 before the merge; baseline 28,140 and 406). `R CMD check
+  --no-manual --ignore-vignettes`: one NOTE (installed size).
+- ALDEx3 1.4.0 on the same draws, 36 linear-model cases: estimate 2.1e-13,
+  se 7.2e-15, p 6.6e-14, adjusted p 5.7e-14 (per draw: estimate 5.3e-12,
+  ALDEx3's normal equations); `reject` identical. Random intercepts against
+  lme4 / lmerTest: 4e-5 (df 3e-4), lme4's optimizer tolerance.
+- With their own draws: ALDEx3 (2,000 draws) estimates within 0.0094 (the
+  scale shift's Monte Carlo error), per-draw spread 0.996–1.04; ALDEx2
+  1.34.0 `aldex.glm()` (outputs only) estimates r = 0.999999, se within
+  0.15%.
+- `dirmult_lm(~ group)` with `scale_sd = 0` equals `dirmult_ttest()`'s
+  `log2_fc`, `pooled_sd` and `mean` to 1.8e-15 (shared draws).
+- Speed: 100 × 1,000, 1,000 draws: 3.2 s on 4 cores; 500 × 5,000, 128
+  draws: 6.8 s.
