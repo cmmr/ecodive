@@ -121,6 +121,7 @@ reference:
   - dirmult_ttest
   - da_wilcoxon
   - linda
+  - lefse
 - subtitle: Absolute abundance
   desc: With each sample's total microbial load measured (cell counts, qPCR, a spike-in), estimate absolute abundances instead of ratios.
   contents:
@@ -212,6 +213,7 @@ reference:
   - plot.ecodive_ancombc
   - plot.ecodive_da_ttest
   - plot.ecodive_linda
+  - plot.ecodive_lefse
   - plot.ecodive_da_sensitivity
   - plot.ecodive_varpart
   - plot.ecodive_forward_select

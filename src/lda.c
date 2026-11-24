@@ -162,7 +162,7 @@ static void lda_qr(double *A, int n, int p, double *R, double *v, int n_threads)
 // holds m * c + c doubles. Returns 0 if converged.
 //======================================================
 
-static int lda_jacobi_svd(double *A, int m, int c, double *V, double *s, double *tmp) {
+int lda_jacobi_svd(double *A, int m, int c, double *V, double *s, double *tmp) {
 
   memset(V, 0, (size_t) c * c * sizeof(double));
   for (int j = 0; j < c; j++) V[j + (size_t) j * c] = 1;

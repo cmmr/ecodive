@@ -124,6 +124,17 @@
   expect_identical(attr(res, 'covariate'), 'grpb')
   expect_error(da_sensitivity(x, 'linda', 'grp', meta, zero_handling = 'imputation', pseudocounts = TRUE), 'imputation')
 
+  # lefse (no pseudocount: the zeros runs only; its seed in every run; no
+  # log base).
+  res <- da_sensitivity(x, 'lefse', 'grp', meta, n_boots = 5L, seed = 4L, zeros = TRUE, cpus = 1)
+  fits <- attr(res, 'fits')
+  expect_identical(length(fits), 2L)
+  expect_identical(fits[[1]], lefse(x, 'grp', meta, n_boots = 5L, seed = 4L, cpus = 1))
+  expect_identical(fits[[2]], lefse(xz, 'grp', meta, n_boots = 5L, seed = 4L, cpus = 1))
+  for (k in 0:1) expect_true(same_rows(res, k, fits[[k + 1]], 'lda_score'), info = k)
+  expect_identical(attr(res, 'log_base'), NA_real_)
+  expect_error(da_sensitivity(x, 'lefse', 'grp', meta, pseudocounts = TRUE), 'no `pseudocount` argument')
+
   # A partial argument name is completed, so the run's setting replaces it.
   res <- da_sensitivity(x, 'da_ttest', 'grp', meta, pseudo = 1, pseudocounts = 2, cpus = 1)
   expect_identical(attr(res, 'fits')[[1]], da_ttest(x, 'grp', meta, pseudocount = 1, cpus = 1))

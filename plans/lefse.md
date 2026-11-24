@@ -364,3 +364,127 @@ Rd page in *Differential abundance*:
 - Fisher, R. A. (1936). The use of multiple measurements in taxonomic
   problems. *Annals of Eugenics*, 7, 179–188.
   doi:10.1111/j.1469-1809.1936.tb02137.x
+
+
+## Decisions made while implementing (2026-11-24)
+
+Asked of the user at the start:
+
+- **`total = 1e6`, named `total`** (the recommendation): counts per
+  million, as Galaxy and lefser; `NULL` uses the values as given (LEfSe's
+  command-line default). The `total` attribute is `NA` for none.
+- **`p_adjust = 'holm'`** (the user's choice, over the recommended
+  `'none'`): consistent with ecodive's other DA methods, so the default
+  result is *not* LEfSe's; `p_adjust = 'none'` reproduces it, and the docs
+  recommend `'BH'`. Adjusted over the features with a p-value (`NaN` ones
+  left out), before the strict `< alpha` cut.
+
+Found from outputs (GPL code not read):
+
+- **coin's asymptotic `wilcox_test()`** p-value equals `wilcox.test(exact =
+  FALSE, correct = FALSE)` (300 random tied cases, 4.9e-15 relative): the
+  normal approximation with the tie-corrected variance and no continuity
+  correction, computed in R from C's rank sum and \eqn{\sum t^3 - t}.
+- **`MASS::lda()`'s rank rule:** each variable is scaled by its pooled
+  within-group sd with divisor **n − 1** (`var()` of the residuals), the
+  SVD of the scaled residuals over \eqn{\sqrt{n - g}} keeps singular values
+  **> tol** (crafted collinear pairs put the cut between the n − 1 and n − g
+  predictions, and only n − 1 fits), and it stops ("appears to be constant
+  within groups") when that sd is **< tol**. For p > n, my formula
+  reproduced MASS's `scaling` to 1e-15 (ratio exactly 1).
+
+Made while implementing:
+
+- **C (`src/lefse.c`)**, four entry points: `C_lefse_kw` (class means and
+  H, threaded over features, from a sparse table), `C_lefse_columns` (the
+  dense rescaled columns of the features that reach the LDA),
+  `C_lefse_wilcoxon` (per feature and pair of subgroups: rank sum, ties,
+  numpy-style medians, and the both-constant-and-equal flag) and
+  `C_lefse_lda` (jitter, then bootstraps threaded one per task).
+- **Shared rank kernel:** ancom.c's sort and Kruskal-Wallis H moved to
+  `src/rank_tests.c` (`rank_sort_vg()`, `rank_kruskal_h()`, plus
+  `rank_sum_ties()`), `vg_t` to `ecodive.h`; ancom's code is otherwise
+  unchanged (its 1,948 tests pass, bit-identical H).
+- **The discriminant** is a worker-safe serial routine in `src/lefse.c`,
+  not a change to `lda()` (which keeps its singular-table error): features
+  with sd < 1e-10 left out (coefficient 0); for q ≤ m features a serial
+  Householder QR then lda.c's one-sided Jacobi SVD (now exported as
+  `lda_jacobi_svd()`); for q > m Jacobi directly on Z' (its columns become
+  U D, giving the right singular vectors as Z'u / d). Rank cut d > 1e-10.
+  Only the first discriminant is formed: Jacobi on B' (r × g), whose first
+  column / its norm is B's first right singular vector. Degenerate
+  subsamples (a class missing so g < 2, m − g < 1, rank 0, identical group
+  means) give u = 0, so each pair contributes half its mean difference
+  (LEfSe would crash or give NaN coefficients, which it zeroes).
+- **Rescaling exactly as `numerical_values()`:** `value * (total / sum)`,
+  the sum in feature order, zero-total samples 0, and its rounding of a
+  feature with relative sd < 1e-10 to 6 decimals (`nearbyint`, half-even
+  like Python's `round()`). The rescaled table is **bit-identical** to
+  LEfSe's in every fixture.
+- **Wilcoxon logic** ported line by line, vectorised over features: a pair
+  of subgroups that both hold one and the same value fails; the first
+  comparison passes under `min_subgroup` even with equal medians (direction
+  "not less"); `p < 2 * wilcoxon_alpha`; one-against-all needs a class
+  whose k − 1 pairs all differ.
+- **`same_subgroups` matches subgroups by name** (documented difference):
+  LEfSe compares the ends of the (renamed) subclass names after dropping
+  `len(class)` characters, which also pairs some different names that occur
+  in one class only. Without `subgroups` it has no effect (as in LEfSe,
+  whose `<class>_subcl` names always match).
+- **Orders:** classes and each class's subgroups by factor levels, else
+  `sort(method = 'radix')` (LEfSe sorts by code point). `enriched` is the
+  first class with the largest mean.
+- **Random streams:** bootstrap b uses PCG stream (seed, b), with
+  `pcg32_bounded()` draws; the jitter of feature f (its table index) uses
+  stream (seed, 2^32 + f) and `rng_norm()`. The redraw check
+  (`contast_within_classes_or_few_per_class()`) is ported exactly (up to
+  1000 tries, then the last). Bootstrap sums are kept per bootstrap and
+  averaged in order: identical for any `cpus` (tested 1, 2, 3, 4, 8, and
+  the rank-deficient case on 1 and 4).
+- **`run_parallel()` stays serial under 100 tasks**, so the bootstrap call
+  passes `max(100, n_boots)` once `threads_for()` has judged the work
+  (found when 4 threads gave no speed-up).
+- **Result:** columns as the plan; `wilcoxon` is `NA` when not run;
+  doubles' missing values are `NaN`; `enriched` and `log_max_mean` for
+  every feature. Attributes as the plan plus `log_base = NA_real_` (the
+  item-27 convention; the registry's `base` is `NA`). Print header
+  "LEfSe: a vs b".
+- **Checks:** `boot_fraction` in (0, 1], and floor(n × boot_fraction) must
+  exceed the number of classes; `min_subgroup` ≥ 0; `lda_threshold` any
+  finite number (negative: every feature that passed both tests is
+  reported, as LEfSe's `-l` < 0 does, though here the scores are still
+  computed); NA in `groups` or `subgroups` is an error.
+- **`lefse_details()`** (internal) takes `jitter` and `boots` (1-based) to
+  replace the draws, and returns the jittered values, the subsamples, each
+  pair's averaged effects and every Wilcoxon p-value.
+- **Plot:** LEfSe's layout (two classes: the first to the left, sorted by
+  signed score; more: grouped by class), `plot_palette()` colours, dashed
+  lines at ±`lda_threshold`, legend bottom right, "No features reported"
+  when empty. Title "LDA scores of LEfSe" (from `da_method_name()`),
+  subtitle "a vs b: k of D features reported".
+- **Registry:** `LEfSe, lefse, groups, lda_score, NA, TRUE, lefser`. The
+  alias collides with nothing; `match_da_test('l')` now lists three
+  methods (it already listed two).
+- **`da_sensitivity()`:** zero replacements only (no `pseudocount`
+  argument, so `pseudocounts` errors with the usual message); added to its
+  per-method `identical()` tests.
+- **References used:** LEfSe 1.1.2 from PyPI (identical to jsDelivr's
+  GitHub copy) with **rpy2 3.5.17** (rpy2 3.6 needs R ≥ 4.4). rpy2 3.5
+  returns `None` for R's invisible results, which `test_lda_r()` reads
+  (`mm <- z$means`), so the generator sets `robjects.r._invisible = False`;
+  `lefse_format_input.py` also needs a subject row (`-u`) or it stops with
+  `KeyError: 'subject'`. coin 1.4-3, MASS 7.3-60.0.1, R 4.3.3.
+  **lefser 1.12.1** (Bioconductor 3.18, the newest that installs on R
+  4.3.3), not 1.22.0: its code differs from the plan's description of
+  1.22.0 (1.12.1 *does* bootstrap, 30 subsamples of 2/3, and jitters, with
+  one sd per class column from its largest value), so "Differences from
+  lefser" describes 1.12.1.
+- **Fixtures** (`data-raw/expected/lefse.r` + `.py`, 9 cases, 56 KB rds):
+  two classes (with an all-zero feature and a jittered one); two classes
+  with two subclasses each, one under `min_c`; same subclass names with
+  `-e 1`; three classes with `-y 0`, `-y 1` and `--wilc 0`; a wide case
+  (40 features scored, 13 samples a subsample); one bootstrap at f = 0.5
+  with `min_c = 5` (every pair tested); and deep samples whose rare
+  features score below 2. The generator records each bootstrap's samples
+  by wrapping `contast_within_classes_or_few_per_class()`, and the jitter
+  from `test_lda_r()`'s in-place changes.

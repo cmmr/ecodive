@@ -1,0 +1,10 @@
+name,input,wilc,multiclass,same_subcl,min_c,n_boots,f
+two,two,1,0,0,10,30,0.67
+sub,sub,1,0,0,10,30,0.67
+same,same,1,0,1,10,30,0.67
+three_all,three,1,0,0,10,30,0.67
+three_one,three,1,1,0,10,30,0.67
+three_nowilc,three,0,0,0,10,30,0.67
+wide,wide,1,0,0,10,30,0.67
+sub_boots,sub,1,0,0,5,1,0.5
+low,low,1,0,0,10,30,0.67
