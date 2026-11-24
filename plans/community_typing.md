@@ -644,3 +644,31 @@ option):
   dense matrix (mostly the dense-to-sparse import), 0.22 s on four from a
   dgCMatrix; Valencia.py takes 7.2 s for 200 samples.
 
+
+## Outcome (from the implementing session's final report, valencia)
+
+### `valencia()`: item 45, done 2026-11-24
+
+Commits `582e456` (work), `a4b6d0d` (merge with the lefse and biplot
+scaling work; one conflict, `Authors@R` in `DESCRIPTION`, both sides kept),
+and the tick commit that adds this section.
+
+- Tests: 27,818 at home, 404 in CRAN mode on the merged tree (26,750 and
+  399 before the merge; baseline 26,600 and 396 at b745aa6). R CMD check
+  (`--no-manual --ignore-vignettes`): only the existing installed-size
+  NOTE.
+- Valencia.py (8559d45; pandas 2.2.3, numpy 1.26.4): similarities match to
+  2.8e-15 (synthetic 2.8e-15, ties 2.1e-15, publication 2.1e-15), sub-CST,
+  CST and NaN pattern identical, with `totals` and with row sums; exact
+  ties go to the first sub-CST as in pandas.
+- Speed: 100,000 samples × 196 taxa in 0.51 s (dense, 1 thread) or
+  0.22 s (dgCMatrix, 4 threads); Valencia.py: 7.2 s for 200 samples.
+- For `dmm()`: reuse `new_ecodive_types()` (pass the `selection` data
+  frame; extra attributes such as `posterior` go through `...`),
+  `types_profiles()`, `types_top_feature()`, `validate_n_types()`, the
+  shared `print()` (now also says "(k with samples)" and "k without a
+  type") and `plot()` (`'profiles'`, `'selection'`); add a
+  `COMMUNITY_TYPES` row with `criterion = 'laplace'`, `best = 'min'`.
+  `'scores'` is valencia-only (it reads `types$reference_score_*` and the
+  `score` column).
+
