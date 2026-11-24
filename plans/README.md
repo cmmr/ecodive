@@ -348,7 +348,7 @@ can't be mistaken for one another:
 | Model building | ✓ `varpart`, ✓ `forward_select`, ✓ `bioenv` |
 | Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, ✓ `mantel_partial`, `mirkat` |
 | Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
-| Composition | ✓ `simper`, `indicator_species` |
+| Composition | ✓ `simper`, ✓ `indicator_species` |
 | Alpha metrics (`alpha_div`) | ✓ `pielou`, ✓ `heip`, ✓ `simpson_evenness`, ✓ `mcintosh_evenness`, ✓ `goods_coverage`, ✓ `hill`, ✓ `renyi`, ✓ `tsallis`, ✓ `dominance`, ✓ `strong`, ✓ `gini` (id `gini`, not `gini_index`: the user's choice, 2026-11-24) |
 | Alpha diversity tests (`alpha_test`) | `alpha_wilcoxon`, `alpha_kruskal`, `alpha_ttest`, `alpha_lm`, `alpha_cor` |
 | Sampling effort | ✓ `rarefaction_curve`, `hill_extrapolation`, `hill_standardize` |
@@ -359,7 +359,7 @@ can't be mistaken for one another:
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance`, ✓ `log_ratio_features` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
-| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, ✓ `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, ✓ `linda`, `maaslin3`, `fastancom`, `rademu`, ✓ `lefse`, `deseq2`, ✓ `da_sensitivity` |
+| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, ✓ `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, ✓ `linda`, ✓ `maaslin3`, `fastancom`, `rademu`, ✓ `lefse`, `deseq2`, ✓ `da_sensitivity` |
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
 | Rarefied diversity | ✓ `beta_div_rarefied`, ✓ `alpha_div_rarefied` |
 | Normalization | ✓ `normalize`, `size_factors` (new `norm` choices: see [normalization_factors.md](normalization_factors.md)) |
@@ -371,7 +371,7 @@ can't be mistaken for one another:
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
 | Source tracking | ✓ `sourcetracker`, `feast` |
 | Quality control | ✓ `decontam`, ✓ `decontam_not` |
-| Batch correction (`batch_correct`) | `batch_mmuphin`, `batch_combat`, `batch_combat_seq`, `batch_conqur` |
+| Batch correction (`batch_correct`) | ✓ `batch_mmuphin`, ✓ `batch_combat`, `batch_combat_seq`, `batch_conqur` |
 | Longitudinal | `first_differences`, `first_distances`, `volatility`, `nmit`, `feature_volatility` |
 | Prediction | `random_forest` |
 

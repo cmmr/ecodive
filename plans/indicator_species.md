@@ -265,3 +265,173 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - Tichý, L., & Chytrý, M. (2006). Statistical determination of diagnostic
   species for site groups of unequal size. *Journal of Vegetation
   Science*, 17, 809–818. doi:10.1111/j.1654-1103.2006.tb02504.x
+
+
+## Decisions made while implementing (2026-11-24)
+
+**Asked the user at the start** (all three answered with the
+recommendation):
+
+1. **Join `da_test()`**: a `DA_TESTS` row, `indicator_species`, design
+   `groups`, effect `stat`, base `NA`, `zero_free_ok = FALSE`,
+   `signed = FALSE`; aliases `indval`, `multipatt`, `indicatorvalue`,
+   `multilevelpatternanalysis` (checked against every registry: no
+   collisions). pkgdown lists it under "Differential abundance".
+2. **`index`**, not `func`. indicspecies' spellings (`'IndVal.g'`, `'r.g'`)
+   are accepted too, matched ignoring case and non-letters.
+3. **`p_adjust = 'holm'`** by default; `'none'` reproduces multipatt.
+
+**Clean-room record: each ✱ and the output that settled it.** Probes are
+in the session's scratch scripts; the decisive ones are re-run by
+`data-raw/expected/indicator_species.r` and checked by the tests.
+
+- **Formulas.** On 40 × 30 abundance and presence-absence tables in three
+  unequal groups (8, 13, 19), multipatt's `$str` for all 7 (6)
+  combinations equals: IndVal `sqrt(A B)` with `A = S_C / S`,
+  `B = P_C / n_C`; IndVal.g with `A = sum_C m_k / sum_k m_k` and **B
+  pooled over C** (`P_C / n_C`, not the mean of per-group fidelities); r =
+  Pearson's correlation with the indicator of C; r.g = the weighted
+  correlation with sample weights `1 / n_k` (each group weighs the same).
+  Differences ≤ 1.4e-15 (exactly 0 for IndVal). So the plan's invariance
+  test (duplicating one group's samples leaves IndVal.g unchanged) holds
+  only for single groups (pooled B changes for a combination); the test
+  uses `max_order = 1`.
+- **labdsv's `indval()`** is `index = 'indval_g'` (not `'indval'`), single
+  groups, squared (indicspecies' docs say so; the outputs agree to 1e-15).
+  The plan's "max_order = 1, index = 'indval'" cross-check is therefore
+  done with `'indval_g'`.
+- **Permutation statistic: reading (b).** With a supplied permutation
+  matrix (199 random permutations), multipatt's p-values equal the count
+  of permutations whose **maximum over the considered combinations** is ≥
+  the observed best value, with sample `i` taking group
+  `cluster[perm[i]]`; reading (a) (the same combination) gave different
+  counts. With `allow.negative = TRUE`, the maximum of |value|. Which
+  combinations are maximized over: those considered (`max.order`,
+  `restcomb`). The all-groups combination's IndVal is invariant under
+  permutation, so including it or not changes nothing.
+- **p-value formula and ties.** `(1 + #{perm ≥ obs}) / (1 + n_perm)`,
+  compared **exactly**: a one-permutation probe whose permuted value is
+  below the observed one by 1e-15 … 1e-2 (relative ~3e-17 … 3e-4) gives
+  p = 1/2 every time. I first used a relative 1e-12 tolerance (ecodive's
+  usual practice); it counted two permutations for one feature of the
+  IndVal/duleg fixture whose values equal the observed one mathematically
+  (from different group sums) but not in floating point, where multipatt
+  doesn't count them. ecodive's IndVal arithmetic is bit-identical to
+  multipatt's on these data, so exact comparison matches it; it is now
+  exact. A permutation that leaves the best combination's samples in it
+  gives bit-identical group sums (same summation order), so it always
+  counts.
+- **Best combination and ties.** multipatt breaks ties **at random**: the
+  same data gave index 1 in one run and 4 in the next, and a probe with a
+  perturbation of relative size e showed random choices for e ≤ 2e-5 and a
+  fixed one for e ≥ 1e-4 (consistent with `max.col()`'s relative 1e-5
+  tolerance; not confirmed from source). ecodive breaks ties
+  deterministically: values within a relative 1e-12 of the largest are
+  ties (so a combination and its complement, equal in |r| up to rounding,
+  tie), and ties go to the first combination (fewest groups, then group
+  order), which is multipatt's documented rule for `allow.negative`
+  (confirmed: it always chose the smaller order). The fixture flags
+  features whose two best values are within 1e-5 (`near_tie`: 4 of the
+  920 feature rows over all cases, e.g. F10, the same in every sample,
+  with single groups; complement pairs excluded for `allow.negative`);
+  the tests compare their values but not their combinations or
+  p-values.
+- **Combination order and ids.** Singletons first, then pairs, ...,
+  lexicographic within a size (`colnames(mp$comb)` for 3 and 4 groups:
+  `1+2, 1+3, 1+4, 2+3, ...`). Character groups are sorted, factor groups
+  keep their level order (multipatt's columns follow it). **multipatt's
+  `index` is the position among the combinations considered**, not among
+  all 2^K - 1: with `min.order = 2` or `restcomb = c(2, 5, 11, 15)` the
+  first considered is index 1. So `combination_id` is the id among all
+  combinations (what `restcomb` takes), equal to multipatt's `index` only
+  when nothing before it is left out (`max_order` alone keeps them
+  equal). The tests compare combination names.
+- **`restcomb` with `max.order`** intersect (`restcomb = c(1, 2, 4, 7)`,
+  `max.order = 2` considers 1, 2, 4): ecodive's `combinations` and the
+  orders intersect too.
+- **All groups.** For the correlations multipatt never considers the
+  all-groups combination (undefined), even with `max.order = K` or
+  `restcomb` naming it (it is dropped silently); ecodive caps `max_order`
+  at K - 1 for them and drops it from `combinations` (an error only if
+  nothing is left, or `min_order = K`). For the IndVal indices, a best
+  combination of all groups gets p = `NA` in multipatt — **except with
+  `restcomb`**, where multipatt tests it and gives p = 1 (21 features of
+  the `restcomb_all` fixture). ecodive always gives `NA`; documented under
+  "Differences", and the tests map multipatt's 1 to `NA` there.
+- **Undefined indices.** A feature absent everywhere: multipatt gives
+  `NA` index, stat, p (all `$str` NaN); a feature with the same value in
+  every sample: r and r.g undefined (NaN). ecodive gives `NA` combination,
+  id, stat and p. `strassoc()` returns 0 for these instead of NaN (the
+  tests check that ours is `NA` exactly there). `multipatt(allow.negative
+  = TRUE)` **stops with an error** on such a feature
+  ("missing value where TRUE/FALSE needed"; no source text was printed),
+  so its negative fixtures leave them out.
+- **`strata`** = `permute::how(blocks = )`: ecodive's within-strata
+  permutations (`C_perm_indices` with strata codes) keep every sample in
+  its block, and given to multipatt as a matrix they give identical
+  p-values (the `*/strata` fixtures). `strata` and a matrix together are
+  an error, as in `simper()`.
+
+**Other decisions**
+
+- **Too many combinations.** Refused when more than 2^20 combinations
+  would be considered (so 21 groups with the default `max_order`, as the
+  plan's "K > 20" test asks), rather than refusing K > 20 outright: 21+
+  groups work with `max_order = 2`. K > 30 is refused (bit masks).
+- **`combinations` by name**: groups joined with `"+"` in any order
+  (`'b+a'` is `'a+b'`), and group names may themselves contain `"+"` (a
+  small backtracking parser). Ids are ranked/unranked arithmetically, so
+  no list of all 2^K - 1 combinations is built.
+- **No `norm` argument** (the plan's signature has none): values are used
+  as given, and the docs say to normalize first. `zero_free_ok = FALSE`,
+  so `da_sensitivity(zeros = )` refuses it (its message says the method
+  "models counts", which is loose for IndVal; left as is, shared code).
+- **Result**: columns as planned; `combination_id` and `n_groups` integer;
+  `a`, `b` `NA` for r / r.g; `reject` is `FALSE` where `p_adjusted` is
+  `NA`. The plan's `combinations` attribute is the considered ids named by
+  combination. `means` is groups × features. No `display` (a count-table
+  input); prints and plots are titled "Indicator species (IndVal.g)" etc.
+- **`indicator_species_details()`** (internal) also returns every
+  combination's value (features × combinations), for the tests'
+  comparison with `$str`; the exported function never keeps it.
+- **C**: `da_table_init()` (norm none) gives the table by feature; per
+  feature and permutation one pass over its non-zeros (stored zeros
+  skipped) for S_k, P_k and (r.g) the sum of squares around the feature's
+  mean, then O(K) per combination. r uses the invariant total sum of
+  squares, r.g the weighted variance `sum_k Q_k / n_k - K (mu - M/K)^2`
+  from sums around the feature mean (no `Q - S^2/n` cancellation).
+  Threads over blocks of 16 permutations; integer counts only. Observed
+  values over blocks of 64 features.
+- **Fixture data** are simulated (not indicspecies' `wetland`), the
+  permutations are ecodive's own (`C_perm_indices`, seed 7) so the tests
+  check random and supplied permutations against the same p-values.
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commits:** 9737ada (`indicator_species()`, C, docs, fixtures, tests),
+  then this one (ticks and outcome).
+- **Files:** `R/indicator_species.r`, `src/indicator_species.c`,
+  `data-raw/expected/indicator_species.r`,
+  `tests/tinytests/expected/indicator_species.rds` (34 KB),
+  `tests/tinytests/test-indicator_species.r` (512 tests); a `DA_TESTS`
+  row, NAMESPACE, print label, NEWS, pkgdown, smoke line,
+  `parameter_names.md`.
+- **Reference agreement** (indicspecies 1.8.0, labdsv 2.3.1; 33 multipatt
+  cases over 4 indices, abundance / presence-absence / relative tables,
+  `duleg`, `max.order`, `min.order`, `restcomb`, `allow.negative`, strata,
+  3 and 4 groups): every combination's value within 1.4e-15 (exactly 0
+  for IndVal); best combinations identical except the 4 of 920 feature
+  rows that multipatt breaks at random (near ties); p-values identical
+  with ecodive's own random permutations and with the same permutations
+  supplied as a matrix (and within strata). strassoc() for all indices
+  and A, A.g, B within 1e-12 (it gives 0 where multipatt and ecodive give
+  NaN/NA); labdsv::indval() = `'indval_g'`, single groups, squared, within
+  1e-12.
+- **Tests:** 30,149 at home (baseline 29,628), 434 in CRAN mode (432);
+  `R CMD check --no-manual --ignore-vignettes`: only the existing
+  installed-size NOTE. Identical results for `cpus` 1, 2, 4, dense,
+  `Matrix`, `slam` and `margin = 2`.
+- **Open:** bootstrap confidence intervals (`strassoc(nboot.ci)`) and
+  `indicators()` (species combinations) not provided; `da_sensitivity()`'s
+  refusal message for `zeros` says the method "models counts".

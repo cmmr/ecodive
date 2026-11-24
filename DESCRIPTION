@@ -105,6 +105,18 @@ Authors@R: c(
       role    = "cph",
       comment = "pandas' Pearson and Spearman correlation kernels, followed by nmit()"),
     person(
+      "Siyuan", "Ma",
+      role    = "ctb",
+      comment = "MMUPHin batch correction (batch_mmuphin()), ported from 'MMUPHin'"),
+    person(
+      "Harvard School of Public Health",
+      role    = c("ctb", "cph"),
+      comment = "'MMUPHin', from which batch_mmuphin() is ported; multivariable abundance and prevalence models with a median comparison (maaslin3()), ported from 'maaslin3'"),
+    person(
+      "sva authors",
+      role    = c("ctb", "cph"),
+      comment = "ComBat batch correction (batch_combat()), ported from 'sva'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

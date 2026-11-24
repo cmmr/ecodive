@@ -476,3 +476,155 @@ diagnostic figure (`diagnostic_adjust_batch()`), in base graphics:
 - Gibbons, S. M., Duvallet, C., & Alm, E. J. (2018). Correcting for batch
   effects in case-control microbiome studies. *PLoS Computational
   Biology*, 14, e1006102. doi:10.1371/journal.pcbi.1006102
+
+
+## Decisions made while implementing (item 53, 2026-11-24)
+
+Asked of the user at the start:
+
+- **Names:** the `batch_` family and the planned `batch_correct()`
+  wrapper (item 81) with aliases `mmuphin` / `zicombat`, `combat`,
+  `combatseq` are confirmed. The wrapper, `list_batch_corrections()` and
+  `match_batch_correction()` are left to item 81; item 53 adds only an
+  internal `BATCH_CORRECTIONS` table (`name`, `id`, `means`) in
+  `R/batch_correct.r`, which `plot()` and `print()` read for the display
+  name and the "means" axis label. Item 81 adds its rows, an `alt_ids`
+  column and the wrapper. Neither function takes `method`, `m`, `c`, `co`
+  or other prefixes of the wrapper's arguments.
+- **MMUPHin's quirks** (standard deviation as \eqn{\hat\delta}, pooled
+  variance over n − 1, pseudocount before TSS): replicated, and listed
+  under "Differences from ComBat" in `?batch_mmuphin`.
+- **`batch_combat()`'s iteration:** `tol = 1e-4` and `max_iters = 1000L`
+  are arguments (the user's choice; sva fixes conv = 1e-4 and has no cap).
+  More iterations, or NaN in the iteration, is an error.
+- **Non-parametric priors:** the likelihood weights are computed on the
+  log scale, relative to the largest, so large batches give finite values
+  where sva's products underflow to 0 and give NaN; listed under
+  "Differences from sva".
+
+Settled while implementing:
+
+- **Files:** `R/batch_correct.r` (ecodive's own: the registry, input
+  checks `batch_input()`, `batch_design()` / `batch_covariates()`, the
+  result `batch_result()`, `print()` and `plot()`), `R/batch_mmuphin.r` +
+  `src/batch_mmuphin.c` (MMUPHin's MIT notice), `R/batch_combat.r` +
+  `src/batch_combat.c` (sva's Artistic-2.0 notice and "how it differs").
+  Item 81's methods can call `batch_input()`, `batch_design()`
+  (`min_size` sets the smallest batch) and `batch_result()` (any
+  per-feature × batch `gamma_hat` ... `delta_star`, means before and
+  after) unchanged.
+- **Reference versions:** MMUPHin 2.0.0 can't be installed into R 4.3.3
+  (it imports maaslin3, which needs R ≥ 4.4). Its `R/adjust_batch.R`,
+  `R/helpers_adjust_batch.R` and `R/helpers.R` differ from MMUPHin
+  1.16.0's (Bioconductor 3.18) only in an author's e-mail address, so the
+  fixture comes from 1.16.0, and `data-raw/expected/batch_mmuphin.r` also
+  sources 2.0.0's own R files (`MMUPHIN_SRC`) and checks that they give
+  identical results (they do). sva 3.60.0 installed from its source
+  tarball into R 4.3.3 (dependencies from Bioconductor 3.18).
+- **Least squares:** both ports use `src/feature_lm.c`'s pivoted QR
+  (`flm_decompose()` / `flm_fit()`, R's `qr()` rank rule with tol 1e-7)
+  instead of the references' normal equations: one QR of the whole design
+  (ComBat; MMUPHin without zero inflation), or one per feature of its
+  non-zero samples and present batches (MMUPHin with zero inflation, which
+  also gives `construct_ind()`'s rank check). Agreement is ~1e-13 or
+  better; very ill-conditioned covariates may agree less (documented).
+- **Sums:** R's own algorithms where they matter for parity (`mean()` and
+  `var()` with long double sums, `rowSums()` / `rowMeans()` in long
+  double, BLAS's double sums in column order for the matrix products,
+  `pow(2, x)` for `2^x`, `nearbyint()` for `round()`); every sum in
+  feature or sample order, so results are identical for any `cpus`.
+- **Threads:** features in blocks (values, fits, standardisation, batch
+  moments, adjustment, back-transform), samples for the totals, one task
+  per batch for the shrinkage iteration (its stopping rule is a maximum
+  over features), and (batch, feature) tasks for the non-parametric
+  integral.
+- **Batches:** a factor's levels in order (unused ones dropped), else the
+  sorted unique values (`sort(method = 'radix')`, locale-independent;
+  MMUPHin's `as.factor()` sorts in the locale). `batch_mmuphin()` needs at
+  least two samples per batch (the plan's rule); `batch_combat()` accepts
+  a one-sample batch and, as sva, turns on `mean_only`, with a **warning**
+  (sva: a message).
+- **Covariates:** `formula` (one-sided; a character string or a two-sided
+  formula's right-hand side also work) over `data`; characters and
+  logicals become factors with sorted levels; the model matrix always has
+  an intercept, which is dropped (so the batch indicators carry it). The
+  column space, hence the result, doesn't depend on the contrasts. A
+  categorical covariate with one value, covariates confounded with each
+  other, and covariates confounded with batch are errors ("Covariates and
+  batch are confounded: ..."); sva's dropping of an all-ones covariate
+  column is not reproduced.
+- **Inputs:** `batch_mmuphin()` takes any non-negative table; it rounds
+  the result only for MMUPHin's "counts" (whole numbers, not all ≤ 1).
+  `pseudocount = 0` is allowed with `zero_inflation = TRUE` (zeros never
+  enter); otherwise it needs a table without zeros. `batch_combat()`
+  takes any finite values with `norm = 'none'`, and non-negative ones with
+  `norm = 'clr'` or `'log'` (natural logs, `normalize()`'s pseudocount
+  rule and warning). `NA` is an error in both.
+- **Errors for MMUPHin's stops** (all features single-batch, batches that
+  can't be adjusted, the iteration cap, a shrunken scale of NA) carry
+  ecodive's wording with the batch or feature named; MMUPHin's own "This
+  shouldn't happen" checks are unreachable and not ported.
+- **Silent where the references print:** MMUPHin's `verbose` messages and
+  sva's progress messages and "Found %d genes with uniform expression"
+  line are not printed; features ComBat leaves unchanged are marked
+  `FALSE` in the `adjusted` attribute.
+- **Result attributes:** `method`, `batch_effects` (data frame `feature`,
+  `batch`, `gamma_hat`, `gamma_star`, `delta_hat`, `delta_star`; NA where
+  not adjusted; batch-major rows, as `as.vector()` of MMUPHin's feature ×
+  batch matrices), `adjusted`, then `pseudocount` (only when chosen from
+  the data), `mean_only` (`batch_combat()`, as it can be switched on by
+  the data), `n_iters` (per batch, when the parametric iteration ran),
+  `batch_means`, `batch_means_adjusted` (feature × batch) and
+  `overall_means`. `batch_mmuphin()`'s means are of relative abundances
+  (TSS, an all-zero sample counting 0), `batch_combat()`'s of the values
+  corrected (after `norm`). No `display`.
+- **Printing:** `print.ecodive_batch()` previews the matrix like
+  `print.ecodive_source()`, with the method's display name and how many
+  features were adjusted; rows are called samples or features by matching
+  the dimnames with the `adjusted` names.
+- **Plotting:** `plot.ecodive_batch(type = c('shrinkage', 'means'))` in
+  base graphics; the "means" plot draws each feature's batch means as a
+  vertical line of points at its overall mean, before (black) and after
+  (`PLOT_HIGHLIGHT`, offset 1% of the largest overall mean to the right,
+  or 2% on a log x axis, as MMUPHin's figure offsets it); the 1:1 line in
+  both. `mean_only` results say so in the subtitle.
+- **Fixtures:** `tests/tinytests/expected/batch_mmuphin.rds` (159 KB, xz):
+  MMUPHin's CRC data cut to 75 samples (15 per study) and the 40 most
+  prevalent species, and a simulated count table (48 × 30, three batches,
+  planted shifts, features absent from a batch, present in one batch only,
+  and nearly absent), eight cases (zero inflation on/off, with and without
+  covariates, a given pseudocount), with MMUPHin's internal estimates.
+  `tests/tinytests/expected/batch_combat.rds` (77 KB): eleven cases of
+  `ComBat()` (parametric and not, with and without `mod`, `mean.only`,
+  `ref.batch`, a one-sample batch, features constant within a batch, and
+  clr values).
+
+
+## Outcome (from the implementing session's final report, item 53)
+
+- **Commit:** 442ed7c (`batch_mmuphin()`, `batch_combat()`), merged with
+  item 50's `indicator_species()` without conflicts.
+- **Tests:** `tests/tinytests/test-batch_correct.r` (238 results) and
+  eight smoke-test lines. Full suite on the merged tree, `-O2` install:
+  30,393 results at home, 440 in CRAN mode, all passing. `R CMD check
+  --no-manual --ignore-vignettes` (LANG=C.UTF-8): 1 NOTE, the existing
+  installed size.
+- **Reference agreement** (largest differences): MMUPHin's
+  `adjust_batch()` on count tables, **identical** (rounded counts, every
+  case); proportions (CRC data) 6.8e-15 relative; its internal
+  \eqn{\hat\gamma}, \eqn{\gamma^*}, \eqn{\hat\delta}, \eqn{\delta^*} at
+  ≤ 1.1e-12 relative (NA pattern identical). sva's `ComBat()`: ≤ 4.2e-14
+  absolute in all eleven fixture cases (parametric, non-parametric,
+  `mean.only`, `ref.batch`, `mod`, a one-sample batch, clr). The fixture
+  comes from MMUPHin 1.16.0, checked identical to 2.0.0's sourced code.
+- **Speed** (400 samples × 1,000 features, 4 batches, 4 cores):
+  `adjust_batch()` 1.23 s, `batch_mmuphin()` 0.057 s (1 thread) / 0.030 s
+  (4); non-parametric `ComBat()` 15.3 s, `batch_combat()` 0.30 s / 0.089 s;
+  parametric `ComBat()` 0.09 s, `batch_combat()` 0.021 s.
+- **For item 81:** reuse `batch_input()`, `batch_design()` (`min_size`)
+  and `batch_result()` from `R/batch_correct.r`; add rows (and an
+  `alt_ids` column) to `BATCH_CORRECTIONS` with the wrapper and its
+  `list_*` / `match_*` functions; `plot.ecodive_batch()` and
+  `print.ecodive_batch()` work for any method that stores the same
+  attributes. ComBat-seq's shrinkage plot should say when
+  \eqn{\gamma^* = \hat\gamma} (`shrink = FALSE`).

@@ -128,7 +128,9 @@ reference:
   - dirmult_lm
   - da_wilcoxon
   - linda
+  - maaslin3
   - lefse
+  - indicator_species
 - subtitle: Absolute abundance
   desc: With each sample's total microbial load measured (cell counts, qPCR, a spike-in), estimate absolute abundances instead of ratios.
   contents:
@@ -168,6 +170,13 @@ reference:
   - volatility
   - nmit
   - plot_longitudinal
+
+- title: Batch Correction
+  desc: Remove batch effects (study, sequencing run, extraction kit) from a table while keeping the effects of named covariates (MMUPHin, ComBat).
+  contents:
+  - batch_mmuphin
+  - batch_combat
+  - plot.ecodive_batch
 
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
@@ -238,7 +247,9 @@ reference:
   - plot.ecodive_ancombc
   - plot.ecodive_da_ttest
   - plot.ecodive_linda
+  - plot.ecodive_maaslin3
   - plot.ecodive_lefse
+  - plot.ecodive_indicator_species
   - plot.ecodive_da_sensitivity
   - plot.ecodive_varpart
   - plot.ecodive_forward_select

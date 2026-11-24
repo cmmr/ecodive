@@ -284,6 +284,9 @@ typedef struct {
 
 void   lmm_design_init(lmm_design_t *d, const double *X, const int *grp,
                        int n, int p, int J);
+size_t lmm_design_doubles(int n, int p, int J);
+void   lmm_design_init_mem(lmm_design_t *d, const double *X, const int *grp,
+                           int n, int p, int J, double *mem, long double *acc);
 size_t lmm_doubles(int n, int p, int J);
 double lmm_fit(const lmm_design_t *d, const double *y, double theta,
                double *mem, double *coef, double *vcov, double *df,

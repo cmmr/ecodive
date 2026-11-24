@@ -108,6 +108,12 @@
   expect_identical(unique(res$covariate), c('grpb', 'age'))
   expect_error(da_sensitivity(x, 'dirmult_lm', 'grp', meta, zeros = TRUE), 'models counts')
 
+  # MaAsLin 3: no pseudocount or scale, and its prevalence model needs the
+  # zeros, so there is nothing to vary.
+  expect_error(da_sensitivity(x, 'maaslin3', 'grp', meta, pseudocounts = TRUE), 'no `pseudocount`')
+  expect_error(da_sensitivity(x, 'maaslin3', 'grp', meta, zeros = TRUE), 'presence')
+  expect_error(da_sensitivity(x, 'maaslin3', 'grp', meta, scale_sds = TRUE), 'no `scale_sd`')
+
   # da_lm, da_ttest, da_wilcoxon (base pseudocount given; the zeros runs
   # drop it).
   res <- da_sensitivity(x, 'da_lm', 'grp', meta, ~ grp + age, pseudocount = 0.5, pseudocounts = 1, zeros = 'mult', cpus = 1)

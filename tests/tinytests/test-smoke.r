@@ -168,6 +168,16 @@
   nm <- nmit(counts, 'subj', lm_meta, cpus = cpus)
   expect_true(inherits(nm, 'ecodive_dist') && attr(nm, 'Size') == 5L && all(is.finite(nm)) && all(nm >= 0))
 
+  # Batch correction: MMUPHin and ComBat.
+  bm <- batch_mmuphin(counts, 'grp', ~ x, meta, cpus = cpus)
+  expect_true(inherits(bm, 'ecodive_batch') && identical(dim(bm), dim(counts)) && all(is.finite(bm)))
+  expect_true(identical(dimnames(bm), dimnames(counts)) && all(bm == round(bm)) && nrow(attr(bm, 'batch_effects')) == 24L)
+  bc <- batch_combat(counts, 'grp', ~ x, meta, norm = 'clr', cpus = cpus)
+  expect_true(inherits(bc, 'ecodive_batch') && identical(dim(bc), dim(counts)) && all(is.finite(bc)))
+  z <- batch_combat(counts, 'grp', data = meta, norm = 'log', parametric = FALSE, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_batch') && all(is.finite(z)) && is.logical(attr(z, 'adjusted')))
+
+  # Associations: SparCC.
   z <- sparcc(counts[, 1:10], n_draws = 5L, permutations = 9L, cpus = cpus)
   expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 10L && length(z) == 45L)
   expect_true(all(is.finite(z)) && identical(attr(z, 'method'), 'sparcc'))
@@ -257,8 +267,14 @@
   z <- suppressWarnings(linda(cz, ~ grp + x, meta, cpus = cpus))
   expect_true(inherits(z, 'ecodive_linda') && nrow(z) == 24L && !anyNA(z$reject))
   expect_true(all(is.finite(z$log2_fc)) && all(z$p_value >= 0 & z$p_value <= 1))
+  z <- indicator_species(cz, 'grp', meta, permutations = 19, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_indicator_species') && nrow(z) == 12L && identical(attr(z, 'method'), 'indicator_species'))
+  expect_true(all(is.na(z$p_value) | (z$p_value > 0 & z$p_value <= 1)) && is.logical(z$reject) && !anyNA(z$reject))
   z <- linda(counts, ~ grp + x + (1 | subj), data.frame(meta, subj = rep(sprintf('s%d', 1:5), 4)), cpus = cpus)
   expect_true(inherits(z, 'ecodive_linda') && nrow(z) == 24L && all(z$dof > 0) && !anyNA(z$reject))
+  z <- maaslin3(cz, ~ grp + x, meta, n_sims = 200L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_maaslin3') && nrow(z) == 24L && !anyNA(z$reject) && identical(attr(z, 'method'), 'maaslin3'))
+  expect_true(all(z$p_value >= 0 & z$p_value <= 1, na.rm = TRUE) && any(is.finite(z$coef_abundance)))
   expect_true(is.data.frame(list_da_tests()) && 'da_ttest' %in% list_da_tests('id'))
   expect_identical(match_da_test('Mann-Whitney')$id, 'da_wilcoxon')
   z <- da_sensitivity(counts, 'da_ttest', 'grp', meta, pseudocounts = TRUE, cpus = cpus)
@@ -442,6 +458,8 @@
   expect_true(drawn(fdi))    # first_differences()
   expect_true(drawn(fdt))    # first_distances()
   expect_true(drawn(vol))    # volatility()
+  expect_true(drawn(bm))   # batch_mmuphin()
+  expect_true(drawn(bc, type = 'means'))   # batch_combat()
   expect_true(is.data.frame(decontam_frequency_plot(counts, 'F1', dc_conc, dc_neg)))
   expect_true(drawn(fit))   # ancombc2()
   expect_true(drawn(ancombc_global(fit, cpus = cpus)))
@@ -452,6 +470,7 @@
   expect_true(drawn(da_ttest(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(da_lm(counts, ~ grp + x, meta, cpus = cpus)))
   expect_true(drawn(linda(counts, ~ grp + x, meta, cpus = cpus)))
+  expect_true(drawn(maaslin3(cz, ~ grp + x, meta, n_sims = 200L, cpus = cpus)))
   for (nm in names(tests)) {
     expect_true(drawn(tests[[nm]]), info = nm)
     expect_true(drawn(tests[[nm]], type = 'null'), info = nm)
