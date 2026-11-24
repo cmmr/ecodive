@@ -441,3 +441,35 @@ Recorded 2026-11-24 (item 38).
 21. **pkgdown:** `rarefaction_curve` under "Utilities & Helpers" beside
     `rarefy` and `alpha_div_rarefied`; its `plot()` method in "Plotting and
     Printing" with the others.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 38, done 2026-11-24.** Commits `0d65d46` (work), and the tick and
+this outcome after it.
+
+- Tests (`-O2` install, `LANG=C.UTF-8`): 23,121 at home (baseline 22,864),
+  390 in CRAN mode (baseline 388), all passing. `R CMD check --no-manual
+  --ignore-vignettes`: 1 NOTE (installed size, as before).
+- Closed forms against a 50-digit mpmath computation of the published
+  formulas (ex_counts at every depth, seven edge samples, two samples of
+  about 10^5): largest relative difference 2.3e-13 (richness), 5.4e-13
+  (sd), 7.5e-15 (coverage). vegan 2.7.8 `rarefy(se = TRUE)` against the
+  same reference: 1.4e-12 (richness), 7.4e-6 absolute in sd (1e-8
+  relative where sd > 0.001), from its lchoose() differences; ecodive
+  against vegan: 1.3e-12 (richness), 1.1e-8 (sd, deep samples). iNEXT
+  3.0.2's `SC`: within 1.5e-10 of the reference and of ecodive.
+- q2-diversity: the depth grid equals NumPy's `np.linspace(1, M, n,
+  dtype = int)` in 12 cases; `average = "median"` equals pandas'
+  `describe()` 50% exactly.
+- Resampled curves `identical()` to rebuilding from `rarefy()` +
+  `alpha_div()` (times 1 and 4, mean and median; sd within 1e-12);
+  nested draws checked for dense, `dgCMatrix` (both margins),
+  `dgTMatrix`, `dgeMatrix` and slam; identical for `cpus` 1, 2 and 4, and
+  for every class and margin.
+- Speed (500 samples × 2,000 features, 4 cores): closed form 0.3 s,
+  resampled Shannon (10 × 20 rarefactions) 4.7 s, `rarefy(coverage =)`
+  0.3 s; 20 deep samples × 3,000 depths in closed form 5.3 s (vegan's
+  `rarefy()` with a vector of depths did not finish in 90 s).
+- Open: none known. `hill_extrapolation()` (item 64) can reuse the
+  coverage helpers in `src/rarefaction_curve.c`.
