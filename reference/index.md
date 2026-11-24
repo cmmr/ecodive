@@ -531,6 +531,14 @@ than every value.
   [`print(`*`<ecodive_source>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   : Print ecodive's results
 
+### Compositional displays
+
+Plots drawn straight from a count table, ordered and coloured to be
+read; not compositional analyses themselves.
+
+- [`composition_barplot()`](https://cmmr.github.io/ecodive/reference/composition_barplot.md)
+  : Composition Barplot
+
 ## Utilities & Helpers
 
 Tools for programmatic access, data manipulation, and configuration.
