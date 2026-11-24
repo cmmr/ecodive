@@ -206,6 +206,16 @@ double rng_norm(rng_t *r);
 double rng_gamma(rng_t *r, double shape);
 double rng_log_gamma(rng_t *r, double shape);
 
+/* --- rank_tests.c: rank tests shared by ancom.c and lefse.c --- */
+typedef struct { double v; int g; } vg_t;   // a value and its group
+
+void   rank_sort_vg(vg_t *a, int n);
+double rank_kruskal_h(vg_t *vg, int n, const int *ng, int k, double *rsum);
+double rank_sum_ties(vg_t *vg, int n, double *ties);
+
+/* --- lda.c: the one-sided Jacobi SVD, shared with lefse.c --- */
+int lda_jacobi_svd(double *A, int m, int c, double *V, double *s, double *tmp);
+
 /* --- rarefaction_curve.c: closed forms of rarefaction, shared with hill_extrapolation --- */
 int    rc_freq(const double *vals, int nnz, double *buf, double *k, double *f,
                double *N, double *S);

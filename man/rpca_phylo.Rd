@@ -80,7 +80,10 @@ axis, named \code{"RPCA1"}, \code{"RPCA2"}, etc., with the same attributes as
 \item \code{method} is \code{"rpca_phylo"}.
 \item \code{loadings} has one row per \strong{node} of the tree that is used: the
 tips, named by their labels, and the internal nodes, named
-\code{"n<id>"} as gemelli names them (see "Method").
+\code{"n<id>"} as gemelli names them (see "Method"). In a covariance
+biplot, \code{plot(ord, scaling = 'covariance', links = )}, links between
+nodes are log ratios of their branch-length-weighted counts (see
+"Compositional biplots" in \code{\link[=plot.ecodive_ord]{plot.ecodive_ord()}}).
 \item \code{tree}: the tree that was used, as a \code{phylo} object: \code{tree} cut down
 to the tips with counts, with nodes merged and removed as described in
 "Method", and with internal nodes labelled with the names used in

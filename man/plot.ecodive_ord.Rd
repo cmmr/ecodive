@@ -16,6 +16,8 @@
   legend = "topright",
   col = NULL,
   pch = NULL,
+  scaling = NULL,
+  links = NULL,
   type = "samples",
   numerator = NULL,
   denominator = NULL,
@@ -56,7 +58,9 @@ Default \code{10}. In a rank plot, how many features to name, those
 with the largest loadings (among \code{numerator} and \code{denominator},
 when given). Drawn as arrows for \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}},
 \code{\link[=rpca_phylo]{rpca_phylo()}}, \code{\link[=rda]{rda()}}, \code{\link[=plsda]{plsda()}} and \code{\link[=oplsda]{oplsda()}}, and as labelled
-points for the species scores of \code{\link[=ca]{ca()}} and \code{\link[=cca]{cca()}}.}
+points for the species scores of \code{\link[=ca]{ca()}} and \code{\link[=cca]{cca()}}. With
+\code{scaling = 'contribution'}, those contributing most to the plane
+first.}
 
 \item{biplot}{Whether to draw the arrows of the constraints in the
 \code{biplot} attribute of \code{\link[=dbrda]{dbrda()}}, \code{\link[=capscale]{capscale()}}, \code{\link[=rda]{rda()}} and \code{\link[=cca]{cca()}}.
@@ -86,6 +90,31 @@ groups and its \code{"Viridis"} palette for a gradient.}
 
 \item{pch}{The points' symbols, as for \code{plot()}. Default \code{1} (open
 circles), or \code{16} (filled circles) with \code{groups}.}
+
+\item{scaling}{How the samples and features of a biplot are scaled
+against each other (see "Compositional biplots" and "Scalings of
+rda(), cca() and ca()" below):
+\itemize{
+\item For \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}} and \code{\link[=rpca_phylo]{rpca_phylo()}}: \code{'form'} (or \code{1}), the
+default; \code{'covariance'} (or \code{2}); or \code{'contribution'}.
+\item For \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}} and \code{\link[=ca]{ca()}}: \code{vegan}'s scaling \code{1} (or
+\code{'sites'}), \code{2} (or \code{'species'}), the default, as the result is
+stored, or \code{3} (or \code{'symmetric'}).
+}
+
+Default \code{NULL}: the default of the method, which draws the result as it
+is stored. Other ordinations take no \code{scaling}. Names may be
+abbreviated (\code{'cov'}), and \code{'form'} and \code{'covariance'} also stand for 1
+and 2 with \code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}} and \code{\link[=ca]{ca()}}.}
+
+\item{links}{Features to join with dashed links in a covariance biplot
+(\code{scaling = 'covariance'}) of \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}} or \code{\link[=rpca_phylo]{rpca_phylo()}}:
+a vector of at least two features (names or positions in the
+\code{loadings}), every pair of which is linked, or a two-column matrix
+of pairs of them. Each link is labelled with its length, which
+approximates the standard deviation of the log ratio of its two
+features (see "Compositional biplots"). The linked features are
+drawn whatever \code{loadings} is. Default \code{NULL}, for none.}
 
 \item{type}{\code{"samples"} (the default): the samples on two axes, with
 the overlays below. \code{"rank"}: a rank plot of the feature loadings
@@ -141,9 +170,91 @@ Arrows (loadings and constraints) are scaled to fit among the samples, as
 in any biplot: only their directions and relative lengths have meaning.
 Loadings and constraints are scaled separately. Centroids, and the
 species scores of \code{\link[=ca]{ca()}} and \code{\link[=cca]{cca()}} (\code{vegan}'s scaling 2), are drawn
-where they are.
+where they are. The covariance and contribution biplots below draw the
+features as rays from the origin, at their own coordinates.
 
-\strong{Rank plots.} With \code{type = "rank"}, each feature is a bar from 0 to
+\strong{Compositional biplots}
+
+A PCA of clr-transformed counts, \code{pca(counts, norm = 'clr')}, is
+Aitchison and Greenacre's (2002) biplot of compositional data, which
+Gloor et al. (2017) recommend for microbiome tables. With \eqn{S} the
+scores, \eqn{V} the unit \code{loadings} and \eqn{\lambda} each axis's
+variance (\code{eig}), each \code{scaling} draws the samples (rows) and features
+(columns) on the plotted axes as:\tabular{llll}{
+   \code{scaling} \tab Samples \tab Features \tab What reads off the plot \cr
+   \code{'form'} \tab \eqn{S} \tab \eqn{V}, scaled to fit \tab distances between samples approximate their Aitchison distances \cr
+   \code{'covariance'} \tab \eqn{S / \sqrt{\lambda}} (unit variance) \tab \eqn{V \sqrt{\lambda}} \tab rays' lengths approximate the clr values' standard deviations; links, the log ratios' \cr
+   \code{'contribution'} \tab \eqn{S} \tab \eqn{V}, times a round number \tab features far from the origin contribute most to the plane \cr
+}
+
+
+In each, a sample's coordinates times a feature's (divided by the
+features' multiplier) are what the PCA fits for that sample and feature,
+\eqn{S V^T}. Aitchison and Greenacre's rules for the covariance biplot,
+which hold for clr data (\code{norm = 'clr'}, \code{scale = FALSE}):
+\itemize{
+\item A \strong{link} between the tips of two rays approximates the standard
+deviation of the log ratio of those two features, \eqn{\log(x_j /
+  x_k)}; the label on each link drawn by \code{links} is its length on the
+plane. Over all axes the lengths are exact, so the plane approximates
+them \strong{from below}: a short link can hide a large standard deviation
+on the other axes, and a long one cannot. With \code{\link[=vlr]{vlr()}},
+\code{sqrt(vlr(counts))} gives the exact values.
+\item Links are least-squares fits of the log ratios, as rays are of the clr
+values, and explain the same share of their variance. The subtitle
+gives that share (the plane's percentage of the variance). When it is
+under 50\%, drawing \code{links} warns that their lengths may greatly
+underestimate the standard deviations.
+\item The cosine of the angle between two links approximates the
+correlation of their log ratios: perpendicular links are uncorrelated
+log ratios, and parallel ones correlated.
+\item Three features whose tips lie on a line, at distances \eqn{\lambda}
+(A to B) and \eqn{\mu} (B to C), suggest that the log contrast
+\eqn{\mu \log A + \lambda \log C - (\lambda + \mu) \log B} is
+nearly constant across samples; four that form a parallelogram A, B,
+C, D, that \eqn{\log A - \log B + \log C - \log D} is.
+}
+
+Links are log ratios only for clr data. Of a \code{pca()} with another \code{norm},
+or with \code{scale = TRUE}, they show standard deviations of differences of
+the transformed values, and drawing them warns so. \code{\link[=rpca]{rpca()}}'s and
+\code{\link[=rpca_phylo]{rpca_phylo()}}'s completed rclr tables are row-centred as clr data are,
+so their links are log ratios, of the completed values; for
+\code{\link[=rpca_phylo]{rpca_phylo()}}, those of the tree's nodes (branch-length-weighted
+counts). Their \code{prop}, and so the subtitle's share, is relative to the
+completed low-rank table, which overstates the fit to the data.
+
+The \strong{contribution biplot} (Greenacre 2013) draws each feature at its
+contribution coordinates, which for an unweighted PCA such as
+\code{pca()}'s are the unit loadings \eqn{V} themselves: the squared
+coordinate on an axis is the feature's share of that axis's variance. It
+differs from \code{'form'} only in using a fixed, round multiplier, given in
+the subtitle ("feature coordinates \eqn{\times} 20"), so that lengths
+can be compared between plots, and in highlighting and labelling the
+features whose contribution to either plotted axis is above the average,
+\eqn{1/p} for \eqn{p} features. \code{loadings} then counts features by
+their contribution to the plane, \eqn{(\lambda_a v_{ja}^2 + \lambda_b
+v_{jb}^2) / (\lambda_a + \lambda_b)}, rather than by length.
+
+\strong{Scalings of \code{rda()}, \code{cca()} and \code{ca()}}
+
+\code{\link[=rda]{rda()}}, \code{\link[=cca]{cca()}} and \code{\link[=ca]{ca()}} store \code{vegan}'s scaling 2 (species scaled by
+their eigenvalues), drawn by default. \code{scaling = 1} scales the sites by
+the eigenvalues instead (so that distances between sites approximate
+their Euclidean or chi-square distances), and \code{scaling = 3} splits the
+scaling between the two, as \code{vegan::scores(x, scaling = 1)} and \code{3} do:
+each axis's site scores, centroids and constraints are multiplied by
+\eqn{f} or \eqn{\sqrt{f}}, and its species scores divided by them,
+where \eqn{f = \sqrt{\lambda / \mathrm{trace}}} for \code{\link[=rda]{rda()}} and
+\eqn{\sqrt{\lambda}} for \code{\link[=cca]{cca()}} and \code{\link[=ca]{ca()}}. The subtitle names the
+scaling when one is given.
+
+Base graphics draw on the current device, so further points, text or
+arrows can be added on top. Use \code{\link[=envfit]{envfit()}}'s plot method, \code{plot(fit, add = TRUE)}, to add fitted variables.
+
+\strong{Rank plots}
+
+With \code{type = "rank"}, each feature is a bar from 0 to
 its loading on axis \code{axes[1]}, sorted from the smallest at the left to
 the largest at the right (ties in the order of \code{loadings}), as Qurro's
 rank plot of feature loadings (Fedarko et al. 2020,
@@ -156,10 +267,9 @@ with \code{\link[=plot.ecodive_log_ratio]{plot.ecodive_log_ratio()}}. The bars a
 \code{denominator} colour theirs, with a legend in the top-left corner
 (\code{legend} moves it, and \code{NULL} leaves it out). The title is "Rank plot
 of" the ordination's title. The loadings of \code{\link[=rpca_phylo]{rpca_phylo()}} include the
-tree's internal nodes.
-
-Base graphics draw on the current device, so further points, text or
-arrows can be added on top. Use \code{\link[=envfit]{envfit()}}'s plot method, \code{plot(fit, add = TRUE)}, to add fitted variables.
+tree's internal nodes. \code{scaling} and \code{links} don't apply: each scaling
+multiplies an axis's loadings by one positive number, which leaves their
+ranking unchanged.
 }
 \examples{
     # Colour by a column of metadata, with a legend.
@@ -171,6 +281,18 @@ arrows can be added on top. Use \code{\link[=envfit]{envfit()}}'s plot method, \
 
     # A PCA biplot: the loadings as arrows.
     plot(pca(iris[, 1:4], scale = TRUE), iris$Species)
+
+    # A compositional (covariance) biplot, with links whose lengths
+    # approximate the standard deviations of log ratios.
+    ord <- pca(ex_counts, norm = 'clr', pseudocount = 1)
+    plot(ord, scaling = 'covariance',
+         links = c('Streptococcus', 'Bacteroides', 'Corynebacterium'))
+
+    # The features that contribute most to the plane.
+    plot(ord, scaling = 'contribution')
+
+    # vegan's scaling 1 of an RDA.
+    plot(rda(iris[, 1:4]), iris$Species, scaling = 1)
 
     # A constrained ordination: centroids of each species, and an arrow
     # for the numeric constraint.
@@ -185,6 +307,19 @@ arrows can be added on top. Use \code{\link[=envfit]{envfit()}}'s plot method, \
 
     # Any argument of plot() still works.
     plot(nmds(bray(iris[, 1:4]), seed = 1), col = 'grey40', main = 'NMDS')
+}
+\references{
+Aitchison, J., & Greenacre, M. (2002). Biplots of compositional data.
+\emph{Journal of the Royal Statistical Society: Series C (Applied
+Statistics)}, 51(4), 375-392. \doi{10.1111/1467-9876.00275}
+
+Greenacre, M. (2013). Contribution biplots. \emph{Journal of Computational
+and Graphical Statistics}, 22(1), 107-122.
+\doi{10.1080/10618600.2012.702494}
+
+Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J.
+(2017). Microbiome datasets are compositional: and this is not optional.
+\emph{Frontiers in Microbiology}, 8, 2224. \doi{10.3389/fmicb.2017.02224}
 }
 \seealso{
 \code{\link[=envfit]{envfit()}} and its plot method, \code{plot(fit, add = TRUE)}, to add

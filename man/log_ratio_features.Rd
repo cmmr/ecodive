@@ -48,8 +48,9 @@ Features whose effect isn't finite (an estimate that couldn't be made,
 \code{NaN}) are left out first. The rest are sorted by their effect,
 ascending, with ties left in the result's order (Qurro's stable sort);
 the last \code{n} are the numerator and the first \code{n} the denominator.
-\code{\link[=ancom]{ancom()}} has no signed effect, and so no reference frame: its \code{W}
-counts significant log ratios without a direction.
+\code{\link[=ancom]{ancom()}} and \code{\link[=lefse]{lefse()}} have no signed effect, and so no reference
+frame: ANCOM's \code{W} counts significant log ratios without a direction,
+and LEfSe's LDA score is a magnitude, with the class in \code{enriched}.
 
 \strong{Phylogenetic RPCA.} The loadings of \code{\link[=rpca_phylo]{rpca_phylo()}} include the tree's
 internal nodes (\code{"n12"}), which aren't columns of the count table. Only

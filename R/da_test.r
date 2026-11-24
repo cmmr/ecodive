@@ -15,8 +15,13 @@
 #                 for a log-ratio `norm`, none otherwise); NA: no effect.
 #   zero_free_ok  Whether the input may be a zero-free table, such as
 #                 replace_zeros()'s (FALSE: the method models counts).
+#   signed        Whether the effect has a direction, so that it ranks the
+#                 features into a reference frame (rank plots and
+#                 log_ratio_features()); FALSE for LEfSe's LDA score, a
+#                 magnitude with the class in `enriched`, and without one.
 #
-# `effect`, `base` and `zero_free_ok` are for da_sensitivity().
+# `effect`, `base` and `zero_free_ok` are for da_sensitivity(); `effect`
+# and `signed` for log_ratio_features() and the rank plots.
 DA_TESTS <- local({
 
   df <- read.table(
@@ -27,18 +32,20 @@ DA_TESTS <- local({
     stringsAsFactors = FALSE,
     na.strings       = "",
     text             = "
-      name,                                    id,            design,  effect,      base, zero_free_ok, alt_ids
-      Analysis of Composition of Microbiomes,  ancom,         groups,  ,            ,     TRUE,         analysisofcompositionsofmicrobiomes
-      ANCOM-BC,                                ancombc,       formula, log_fc,      e,    TRUE,         ancombiascorrected analysisofcompositionsofmicrobiomeswithbiascorrection
-      ANCOM-BC2,                               ancombc2,      formula, log_fc,      e,    TRUE,
-      Dirichlet-Multinomial t-test,            dirmult_ttest, groups,  log2_fc,     2,    FALSE,        dirichletmultinomialwelchttest aldex aldex2
-      Wilcoxon Rank-Sum Test,                  da_wilcoxon,   groups,  median_diff, norm, TRUE,         wilcoxon wilcox wilcoxontest mannwhitney mannwhitneyu ranksum
-      Welch t-test,                            da_ttest,      groups,  diff,        norm, TRUE,         ttest welch studentttest
-      Linear Model,                            da_lm,         formula, estimate,    norm, TRUE,         lm linearregression ols
-      LinDA,                                   linda,         formula, log2_fc,     2,    TRUE,
+      name,                                    id,            design,  effect,      base, zero_free_ok, signed, alt_ids
+      Analysis of Composition of Microbiomes,  ancom,         groups,  ,            ,     TRUE,         FALSE,  analysisofcompositionsofmicrobiomes
+      ANCOM-BC,                                ancombc,       formula, log_fc,      e,    TRUE,         TRUE,   ancombiascorrected analysisofcompositionsofmicrobiomeswithbiascorrection
+      ANCOM-BC2,                               ancombc2,      formula, log_fc,      e,    TRUE,         TRUE,
+      Dirichlet-Multinomial t-test,            dirmult_ttest, groups,  log2_fc,     2,    FALSE,        TRUE,   dirichletmultinomialwelchttest aldex aldex2
+      Wilcoxon Rank-Sum Test,                  da_wilcoxon,   groups,  median_diff, norm, TRUE,         TRUE,   wilcoxon wilcox wilcoxontest mannwhitney mannwhitneyu ranksum
+      Welch t-test,                            da_ttest,      groups,  diff,        norm, TRUE,         TRUE,   ttest welch studentttest
+      Linear Model,                            da_lm,         formula, estimate,    norm, TRUE,         TRUE,   lm linearregression ols
+      LinDA,                                   linda,         formula, log2_fc,     2,    TRUE,         TRUE,
+      LEfSe,                                   lefse,         groups,  lda_score,   ,     TRUE,         FALSE,  lefser
   " )
 
   df$zero_free_ok <- as.logical(df$zero_free_ok)
+  df$signed       <- as.logical(df$signed)
   df$base         <- as.character(df$base)
   return (df)
 })
@@ -57,7 +64,7 @@ DA_TESTS <- local({
 #'
 #' @param method   The name of a DA method: `"ancom"`, `"ancombc"`,
 #'        `"ancombc2"`, `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`,
-#'        `"dirmult_ttest"`, or `"linda"`. Flexible matching is supported
+#'        `"dirmult_ttest"`, `"lefse"`, or `"linda"`. Flexible matching is supported
 #'        (see below). Programmatic access via `list_da_tests()`.
 #'
 #' @param groups  The grouping to compare: the name of a column of `data`,
@@ -79,8 +86,9 @@ DA_TESTS <- local({
 #'        [da_wilcoxon()], [dirmult_ttest()]), `norm` and `pseudocount`. Each
 #'        method keeps its own defaults; see [ancom()], [ancombc()],
 #'        [ancombc2()], [da_lm()], [da_ttest()], [da_wilcoxon()],
-#'        [dirmult_ttest()], and [linda()]. `seed` is ignored by the methods
-#'        that have no random parts (all but [dirmult_ttest()]).
+#'        [dirmult_ttest()], [lefse()], and [linda()]. `seed` is ignored by
+#'        the methods that have no random parts (all but [dirmult_ttest()]
+#'        and [lefse()]).
 #'
 #' @return The method's result, unchanged: `da_test(counts, 'ancombc2',
 #'   ...)` is identical to `ancombc2(counts, ...)`, attributes included.
@@ -100,6 +108,7 @@ DA_TESTS <- local({
 #' | `da_ttest`             | Welch t-test per feature               | groups  |
 #' | `da_wilcoxon`          | Wilcoxon rank-sum test per feature     | groups  |
 #' | `dirmult_ttest`        | Dirichlet-multinomial t-test (ALDEx2-style) | groups |
+#' | `lefse`                | LDA effect size (LEfSe)                | groups  |
 #' | `linda`                | Linear models for differential abundance (LinDA) | formula |
 #'
 #' **Groups and models.** *Group methods* compare the samples of one
@@ -158,7 +167,7 @@ DA_TESTS <- local({
 #' \doi{10.1093/bib/bbaf130}
 #'
 #' @seealso [ancom()], [ancombc()], [da_lm()], [da_ttest()],
-#'   [da_wilcoxon()], [dirmult_ttest()], [linda()], [list_da_tests()];
+#'   [da_wilcoxon()], [dirmult_ttest()], [lefse()], [linda()], [list_da_tests()];
 #'   [replace_zeros()] for the zeros; [da_sensitivity()] to rerun a method
 #'   over pseudocounts, zero replacements and scale uncertainties.
 #'
@@ -272,6 +281,10 @@ da_formula_groups <- function (formula, id) {
 #'   effect sizes
 #' * `zero_free_ok` : Whether the method may be given a table with its zeros
 #'   replaced ([replace_zeros()]): `FALSE` for the methods that model counts
+#' * `signed` : Whether the effect sizes have a direction, so that they rank
+#'   the features for [log_ratio_features()] and rank plots: `FALSE` for
+#'   LEfSe's LDA scores (a magnitude, with the class in `enriched`) and for
+#'   ANCOM
 #' * `func` : The function for this method, e.g. `ecodive::da_ttest`
 #' * `params` : Formal args for `func`, e.g. `c("counts", "groups", ...)`
 #'

@@ -29,6 +29,10 @@ extern SEXP C_dpcoa(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_decontam(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_tests(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_lefse_kw(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_lefse_columns(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_lefse_wilcoxon(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_lefse_lda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_feature_lm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_feature_lmm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dirmult_ttest(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -98,6 +102,7 @@ extern SEXP C_umap_rand(SEXP, SEXP, SEXP);
 extern SEXP C_umap_sgd(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_spectral(SEXP, SEXP, SEXP);
 extern SEXP C_unifrac(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_valencia(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_zero_counts(SEXP, SEXP);
 
 extern void init_blas_threads(void);
@@ -127,6 +132,10 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_decontam",  (DL_FUNC) &C_decontam,  8},
   {"C_da_lm",         (DL_FUNC) &C_da_lm,         8},
   {"C_da_tests",      (DL_FUNC) &C_da_tests,      7},
+  {"C_lefse_kw",       (DL_FUNC) &C_lefse_kw,        6},
+  {"C_lefse_columns",  (DL_FUNC) &C_lefse_columns,   5},
+  {"C_lefse_wilcoxon", (DL_FUNC) &C_lefse_wilcoxon,  9},
+  {"C_lefse_lda",      (DL_FUNC) &C_lefse_lda,      13},
   {"C_feature_lm",    (DL_FUNC) &C_feature_lm,    4},
   {"C_feature_lmm",   (DL_FUNC) &C_feature_lmm,   4},
   {"C_dirmult_ttest", (DL_FUNC) &C_dirmult_ttest, 11},
@@ -196,6 +205,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_umap_sgd",      (DL_FUNC) &C_umap_sgd,      6},
   {"C_umap_spectral", (DL_FUNC) &C_umap_spectral, 3},
   {"C_unifrac",   (DL_FUNC) &C_unifrac,   7},
+  {"C_valencia",  (DL_FUNC) &C_valencia,  6},
   {"C_zero_counts", (DL_FUNC) &C_zero_counts, 2},
   {NULL, NULL, 0}
 };

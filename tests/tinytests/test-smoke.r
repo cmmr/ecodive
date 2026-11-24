@@ -215,6 +215,10 @@
   z <- da_lm(cz, ~ grp + x, meta, norm = 'rclr', cpus = cpus)
   expect_true(inherits(z, 'ecodive_da_lm') && nrow(z) == 36L && !anyNA(z$reject))
   expect_identical(unique(z$covariate), c('(Intercept)', 'grpb', 'x'))
+  z <- lefse(cz, 'grp', meta, n_boots = 5L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_lefse') && nrow(z) == 12L && identical(attr(z, 'method'), 'lefse'))
+  expect_true(all(z$p_value >= 0 & z$p_value <= 1) && is.logical(z$reject) && !anyNA(z$reject))
+  expect_true(all(is.nan(z$lda_score) | z$lda_score >= 0))
   z <- da_test(counts, 'da_lm', 'grp', meta, cpus = cpus)
   expect_true(inherits(z, 'ecodive_da_lm') && nrow(z) == 24L)
   z <- suppressWarnings(linda(cz, ~ grp + x, meta, cpus = cpus))
@@ -316,6 +320,11 @@
   expect_true(is.factor(et$type) && all(is.finite(et$silhouette)))
   expect_true(all(is.finite(attr(et, 'selection')$ch)))
 
+  vl <- valencia(round(ecodive::valencia_centroids * 1000), cpus = cpus)
+  expect_inherits(vl, c('ecodive_valencia', 'ecodive_types', 'data.frame'))
+  expect_identical(dim(vl), c(13L, 5L))
+  expect_true(is.factor(vl$type) && all(vl$score > 0 & vl$score <= 1))
+
   vp <- varpart(counts, ~ grp, ~ x, data = meta, norm = 'hellinger', cpus = cpus)
   expect_inherits(vp, c('ecodive_varpart', 'data.frame'))
   expect_identical(dim(vp), c(4L, 5L))
@@ -375,6 +384,8 @@
   expect_true(drawn(o, 'grp', meta))
   expect_true(drawn(o, 'x', meta, axes = c(1, 3)))
   expect_true(drawn(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'grp', meta))
+  expect_true(suppressWarnings(drawn(pca(counts, norm = 'clr', cpus = cpus), scaling = 'covariance', links = 1:3)))  # biplot scalings
+  expect_true(drawn(rda(counts, norm = 'hellinger', cpus = cpus), scaling = 1))
   expect_true(drawn(lda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus)))  # one axis
   expect_true(drawn(capda(dm, 'grp', meta, permutations = 0, cpus = cpus), 'grp', meta))  # one axis
   expect_true(drawn(pr))

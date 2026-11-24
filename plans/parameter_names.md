@@ -28,7 +28,8 @@ same thing.
 | `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv`; `cross_assoc` (covariates: a formula over `data`, column names, or a table) |
 | `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20) | everything that takes `counts` |
 | `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
-| `scaling` | **reserved** for score scaling (vegan's scaling 1/2), if ever needed | — |
+| `scaling` | how a biplot scales samples against features: `'form'` (1), `'covariance'` (2), `'contribution'`; vegan's 1, 2, 3 for `rda`, `cca`, `ca` (item 44, 2026-11-24) | `plot.ecodive_ord` |
+| `links` | pairs of features joined in a covariance biplot (Aitchison & Greenacre's term) | `plot.ecodive_ord` |
 | `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
 | `metric` | a beta diversity metric name | `beta_div`, `alpha_div`; planned `bioenv` |
 | `alternative` | `'greater'`, `'less'` or `'two.sided'` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `moran_i` |
@@ -56,13 +57,18 @@ same thing.
 | `n_restarts`, `n_burnin`, `thin`, `loo`, `features` | **(new)** the Gibbs schedule (independent chains, passes before the first draw, passes between draws), leave-one-out over environments, and per-feature output. `n_burnin` and `thin` replace SourceTracker's `burnin` and `delay` (the user's choice, 2026-11-20): `n_burnin` is an exact count (`n_<unit>` rule) and `thin` is the usual MCMC term | `sourcetracker` (exists) |
 | `n_types` | **(new, 2026-11-20)** the candidate numbers of community types (a single value fixes it) | `enterotype`; planned `dmm` |
 | `ch` | **(new, 2026-11-20)** the form of the Calinski-Harabasz index: `'medoids'` (clusterSim's, as in Arumugam et al.'s script) or `'centroids'` (the distances' pseudo-F) | `enterotype` |
-| `centroids` | **(new)** reference type profiles to classify against | planned `valencia` |
+| `centroids` | **(new)** reference type profiles to classify against: a types × features matrix, types named in the row names | `valencia` |
+| `totals` | **(new, 2026-11-24)** each sample's total read count, by which its counts are divided instead of its sum (VALENCIA's `read_count`); one per sample, by name or position | `valencia` |
 | `q` | **(new, 2026-11-24)** the order of a Hill number or of Rényi's or Tsallis's entropy: a single number ≥ 0, `Inf` allowed; default 2, as scikit-bio's `order` (vegan's `scales`) | `hill`, `renyi`, `tsallis`, `alpha_div`, `alpha_div_rarefied`, `rarefaction_curve` |
 | `bias_corrected` | **(new, 2026-11-24)** Chao1's bias-corrected form (`TRUE`, the default, as scikit-bio) or the classic one (`FALSE`), as scikit-bio's `bias_corrected` | `chao1`, `alpha_div`, `alpha_div_rarefied` |
 | `conc` | **(new, 2026-11-24)** each sample's DNA concentration before sequencing (any quantity proportional to the input DNA; only its inverse relation with a contaminant's frequency matters): finite and > 0, matched by name, else by position, or a column name of `data` (`per_sample()`'s rule). Kept as decontam's name rather than reusing `load` (a measured total microbial load used as a scale), the user's choice | `decontam`, `decontam_frequency_plot` |
 | `neg` | **(new, 2026-11-24)** which samples are negative controls: logical, `TRUE` a control, `NA` left out of the tests; by `per_sample()`'s rule | `decontam`, `decontam_not`, `decontam_frequency_plot` |
 | `batch`, `batch_combine` | **(new, 2026-11-24)** per-sample batches (sequencing run, extraction plate) scored separately, by `per_sample()`'s rule; and how a feature's per-batch scores are combined (`'minimum'`, `'product'`, `'fisher'`: decontam's `batch.combine`, snake case) | `decontam`; `batch` also planned for `batch_correct` |
 | `threshold` | a cutoff. In the networks, an association cutoff; in `decontam()` and `decontam_not()` (2026-11-24), a **score** cutoff with decontam's strict `<` (a feature is called when its score is below it; the frequency score is a heuristic, not a p-value, so not `alpha`), two values for `method = 'either'` / `'both'` | `assoc_network`, `assoc_pairs`, `decontam`, `decontam_not` |
+| `subgroups`, `same_subgroups`, `min_subgroup` | **(new, 2026-11-24)** subclasses within the `groups` classes, by `per_sample()`'s rule (LEfSe's `-s`); whether to compare only same-named subgroups (`-e`); the size under which a subgroup is compared by its median alone (`--min_c`) | `lefse` |
+| `total` | **(new, 2026-11-24)** each sample is rescaled to sum to this (`NULL`: as given); `norm` takes names, not a target sum | `lefse` |
+| `wilcoxon`, `wilcoxon_alpha` | **(new, 2026-11-24)** whether to run LEfSe's Wilcoxon step, and its level (LEfSe's `--wilc`, `-w`) | `lefse` |
+| `lda_threshold`, `n_boots`, `boot_fraction`, `one_against_one` | **(new, 2026-11-24)** LEfSe's LDA-score cutoff (strict `>`, `-l`), bootstrap count and subsample fraction (`-b`, `-f`), and the multi-class rule (`-y`) | `lefse` |
 | `features` | in `decontam_frequency_plot()` (2026-11-24), **which** features to draw (names, indices or a logical vector, as `numerator`); not `sourcetracker(features = TRUE)`'s per-feature output switch | `decontam_frequency_plot` |
 | `depths`, `n_depths`, `max_depth` | **(new, 2026-11-24, item 38)** the depths of rarefaction curves (whole numbers ≥ 1; plural, since `depth` is one depth per sample), the number of points in the default grid (`n_<unit>` rule; q2's `steps`), and the largest depth computed (q2's name) | `rarefaction_curve` |
 | `analytic` | **(new, item 38)** which metrics to compute in closed form: `NULL` (those that have one), `TRUE` (all, an error if one has none) or `FALSE` (resample all) | `rarefaction_curve` |
@@ -205,7 +211,7 @@ reuse §1's names and add these:
 
 | Name | Meaning | Used by (planned) |
 |:-----|:--------|:------------------|
-| `scaling` | the biplot scaling (`'form'`, `'covariance'`, `'contribution'`); the use §1 reserved it for | `plot.ecodive_ord` |
+| `scaling` | the biplot scaling (`'form'`, `'covariance'`, `'contribution'`, and vegan's 1, 2, 3 for `rda`, `cca`, `ca`); used by `plot.ecodive_ord()` since item 44 | `plot.ecodive_ord` |
 | `threshold` | the association cutoff that makes an edge | `assoc_network`, `assoc_pairs` (exist) and the association functions' sparsification |
 | `average`, `sd` | how repeated rarefactions are combined (`'mean'`, `'median'`, `'medoid'`), and whether to return their spread | `beta_div_rarefied`, `alpha_div_rarefied` (with `rarefy()`'s `times`) |
 | `pseudocounts`, `zeros`, `scale_sds` | the settings grids of a sensitivity analysis. Plural, and after `...`, so they can't capture the method's own `pseudocount` / `scale_sd` (arguments after `...` match only exactly) | `da_sensitivity` |

@@ -67,6 +67,10 @@ below. Its attributes are:
 \code{norm} and \code{scale}), which is also the sum of all axes' \code{eig}.
 \item \code{loadings}: A matrix with one row per feature and one column per axis:
 the unit-length principal axes, \code{prcomp()}'s \code{rotation}.
+\item \code{norm}, \code{scale}: The transform the loadings are in (\code{norm}'s name and
+\code{scale}), which qualifies them: \link[=plot.ecodive_ord]{plot()} reads
+them to say whether the links of a compositional biplot are log
+ratios.
 }
 }
 \description{
@@ -105,6 +109,15 @@ between the normalized samples: \code{pca(counts)} and
 are \eqn{s^2}, so \code{pca()}'s \code{eig} is \code{pcoa()}'s divided by \eqn{n - 1};
 \code{prop} is the same for both. What \code{pca()} adds is the \code{loadings}: how much
 each feature contributes to each axis, e.g. for a biplot.
+
+\strong{Biplots}
+
+\code{plot(ord)} draws a form biplot: the samples at their scores, and the
+loadings as arrows scaled to fit. \code{plot(ord, scaling = 'covariance')} of
+a \code{norm = 'clr'} PCA is Aitchison and Greenacre's (2002) compositional
+biplot, in which the rays' lengths and the \code{links} between their tips
+read as standard deviations of clr values and log ratios; \code{scaling = 'contribution'} marks the features that contribute most to the plane.
+See "Compositional biplots" in \code{\link[=plot.ecodive_ord]{plot.ecodive_ord()}}.
 
 \strong{Robust Aitchison PCA}
 

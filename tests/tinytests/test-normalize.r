@@ -37,10 +37,12 @@
   expect_equal(lw, log((x + 0.5) / rowSums(x + 0.5)), tolerance = 1e-14)
   expect_equal(normalize(x + 1, 'log', cpus = 1), log((x + 1) / rowSums(x + 1)), tolerance = 1e-14)
 
-  # Every function with `norm` takes it, with the same values.
+  # Every function with `norm` takes it, with the same values. (pca()'s
+  # `norm` attribute names the transform it applied, so it differs.)
+  no_norm <- function (o) { attr(o, 'norm') <- NULL; o }
   expect_equal(
-    pca(x, norm = 'log', pseudocount = 1, n_axes = 2, cpus = 1),
-    pca(lg, n_axes = 2, cpus = 1), tolerance = 1e-12 )
+    no_norm(pca(x, norm = 'log', pseudocount = 1, n_axes = 2, cpus = 1)),
+    no_norm(pca(lg, n_axes = 2, cpus = 1)), tolerance = 1e-12 )
   expect_equal(
     as.vector(euclidean(x, norm = 'log', pseudocount = 1, cpus = 1)),
     as.vector(stats::dist(lg)), tolerance = 1e-12 )
@@ -62,12 +64,12 @@
   # pca()'s CLR path keeps the table sparse, with each sample's value for
   # zeros as an offset, so it sums in another order: equal to rounding.
   expect_equal(
-    pca(x, norm = 'clr', pseudocount = 1, n_axes = 2, cpus = 1),
-    pca(normalize(x, 'clr', pseudocount = 1, cpus = 1), n_axes = 2, cpus = 1),
+    no_norm(pca(x, norm = 'clr', pseudocount = 1, n_axes = 2, cpus = 1)),
+    no_norm(pca(normalize(x, 'clr', pseudocount = 1, cpus = 1), n_axes = 2, cpus = 1)),
     tolerance = 1e-12 )
   expect_identical(
-    pca(x, norm = 'percent', n_axes = 2, cpus = 1),
-    pca(normalize(x, 'percent', cpus = 1), n_axes = 2, cpus = 1) )
+    no_norm(pca(x, norm = 'percent', n_axes = 2, cpus = 1)),
+    no_norm(pca(normalize(x, 'percent', cpus = 1), n_axes = 2, cpus = 1)) )
   # Distances made two ways may have different metrics (?ecodive_display);
   # their values and samples must be the same.
   dvals <- function (d) {

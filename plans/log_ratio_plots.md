@@ -264,12 +264,17 @@ option):
    `dirmult_ttest()` / `ancombc()` / `ancombc2()`: also `da_ttest()`,
    `da_wilcoxon()` (`type = c('volcano', 'ma', 'rank')`), `da_lm()` and
    `linda()`. The effect column is read from `DA_TESTS$effect` by the
-   result's `method` (`rank_source()`), so a new method (such as
-   `lefse()`) needs no special case in `log_ratio_features()` if its
-   registry row names a signed effect; its own `plot()` method still has to
-   add `'rank'` and pass `num` / `den` to `da_plot()`. `ancom()` (no effect
-   column) is refused: "ancom() results have no signed effect, so they rank
-   no features into a reference frame."
+   result's `method` (`rank_source()`), so a new method needs no special
+   case in `log_ratio_features()` if its registry row names a signed
+   effect; its own `plot()` method still has to add `'rank'` and pass
+   `num` / `den` to `da_plot()`. `ancom()` (no effect column) is refused:
+   "ancom() results have no signed effect, so they rank no features into a
+   reference frame." **`lefse()`** (item 41, merged while this was being
+   built) registered `lda_score`, which is a magnitude (the class is in
+   `enriched`), so `DA_TESTS` gained a **`signed`** column (`FALSE` for
+   `ancom` and `lefse`, listed by `list_da_tests()`), and `rank_source()`
+   refuses unsigned effects with the same message. `plot.ecodive_lefse()`
+   gets no `'rank'` type.
 2. **Arithmetic drops the class** (the plan said it keeps it):
    `Ops.ecodive_log_ratio` and `Math.ecodive_log_ratio` return a plain
    named numeric vector, as `[`, `sort()` and `rev()` already do, so `-lr`

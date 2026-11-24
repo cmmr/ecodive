@@ -146,7 +146,7 @@ silhouettes at 1e-12.
 
 ---
 
-## 2. `valencia()` (priority 52)
+## 2. `valencia()` (priority 45; was 52 before the renumbering)
 
 ```r
 valencia(counts, margin = 1L, centroids = valencia_centroids)
@@ -525,3 +525,150 @@ Commits `20f28e1` (work), `bdf2842` (tick); `582773b` (print locale fix).
 - Reusable for `valencia()` / `dmm()`: `new_ecodive_types()`,
   `COMMUNITY_TYPES`, shared `print` / `plot` (valencia needs a `'scores'`
   plot type).
+
+
+## Decisions made while implementing (valencia)
+
+Item 45, 2026-11-24. `valencia()` is in `R/valencia.r` and `src/valencia.c`;
+its centroids are `data/valencia_centroids.rda` (built by
+`data-raw/valencia_centroids.r`); the shared `ecodive_types` code in
+`R/community_types.r` gained a registry row, a `'scores'` plot and a small
+`print()` change.
+
+**Asked of the user up front** (all four answered with the recommended
+option):
+- **A per-sample totals argument: yes.** `totals = NULL` (each sample's
+  sum); otherwise one value per sample, matched by name when both are
+  named, else by position, for exact parity with Valencia.py's
+  `read_count`. Non-finite, negative, wrong-length, or 0 for a sample with
+  counts is an error; a total below the sample's sum (beyond 1e-6
+  relative, so rounded proportions with `totals = 1` pass) is allowed, as
+  VALENCIA allows it, with a warning.
+- **A sample sharing no taxa with any centroid** scores 0 against all 13;
+  ecodive follows Valencia.py (pandas `idxmax`: the first, I-A, score 0),
+  with a warning naming the samples.
+- **The matched fraction is a per-sample column, `matched`** (the share of
+  the sample's proportions in taxa that the centroids name; NA for a
+  sample of total 0), not an attribute.
+- **`type` always has all 13 levels** (the centroids' row names, in their
+  order), and `types` always has one row per centroid (n_samples 0 where
+  none), parallel to `profiles`; `cst` likewise has all its levels (I, II,
+  III, IV-A, IV-B, IV-C, V). Tests already drop unused levels of `groups`
+  (checked with `permanova()`).
+
+**Other decisions:**
+- **Signature:** `valencia(counts, centroids = valencia_centroids,
+  totals = NULL, margin = 1L, cpus = n_cpus())`. `cpus` is added for
+  `run_parallel()`; `margin` and `cpus` go last, as in the other count
+  functions (the plan had `counts, margin, centroids`).
+- **The default `centroids`** shows as `valencia_centroids` in the usage,
+  but a lazy-loaded dataset isn't visible from the namespace, so the body
+  takes `getExportedValue('ecodive', 'valencia_centroids')` when the
+  argument is missing (the default promise is never forced). A user's own
+  object of that name is used only when passed. `utils::globalVariables()`
+  declares the name, for R CMD check's "no visible binding" NOTE.
+- **`centroids`** may be a matrix (sub-CSTs in the row names, taxa in the
+  column names, both unique; finite, non-negative; no all-zero centroid) or
+  a data frame read from VALENCIA's file (its `sub_CST` column names the
+  rows). Any number of centroids and any names are allowed: `cst` maps
+  VALENCIA's names (I-A/I-B → I, III-A/B → III, IV-C0–C4 → IV-C) and keeps
+  others; reference scores are `NA` and colours come from `plot_palette()`
+  for other names.
+- **Similarity:** \eqn{\sum pq/(\sum p^2 + \sum q^2 - \sum pq)} over each
+  sample's non-zero taxa, with each centroid's \eqn{\sum q^2} precomputed.
+  Its denominator is at least half of \eqn{\sum p^2 + \sum q^2}, so there
+  is no cancellation; the largest difference from Valencia.py over all
+  fixtures is 2.8e-15. A sample identical to a centroid (with `totals = 1`)
+  scores exactly 1.
+- **Assignment:** the largest similarity, first on ties, skipping NaN (as
+  `idxmax` does); `score` is that similarity. A sample of total 0 has NaN
+  scores, `NA` type and cst, NaN score, `NA` matched, and a warning
+  (`print()` reports "k without a type").
+- **Taxon-name warning:** instead of the plan's hard-coded list, the key
+  taxa are each centroid's most abundant taxon where it makes up at least
+  a quarter; for VALENCIA's centroids that is exactly the plan's 10 (IV-C0,
+  an even community led by g_Corynebacterium_1 at 0.099, is left out). The
+  warning lists the key taxa that `counts` has no feature for. Matching is
+  by exact name only (no case folding or renaming); duplicated or missing
+  feature names are errors.
+- **A named vector** is one sample.
+- **Result:** columns `sample`, `type`, `cst`, `score`, `matched`;
+  attributes `types` (`type`, `n_samples`, `top_feature`, `cst`,
+  `score_mean`, `reference_score_mean`, `reference_score_sd`), `profiles`
+  (the centroids, as given), no `selection` (absent: `new_ecodive_types()`
+  with `NULL`), `scores` (n × 13, sample and sub-CST names), `method`.
+  `score_mean` (each sub-CST's mean score) is beyond the plan's columns.
+  No `display` is set: counts have no title, so `print()` and `plot()` take
+  "VALENCIA Community State Types" from `COMMUNITY_TYPES`.
+- **Registry:** `COMMUNITY_TYPES` gained `valencia` with `criterion`,
+  `criterion_label` and `best` all `NA`; `plot(type = 'selection')` then
+  errors ("no criterion"), as it should.
+- **print():** the header says "(k with samples)" when some types are
+  empty, and "; k without a type" for NA types; unchanged for enterotype.
+- **plot(type = 'scores'):** boxplots (no notches: R warns when notches
+  pass the hinges, common with few samples) of `score` for each sub-CST with
+  samples, filled with VALENCIA's `CST_color_scheme`, beside a diamond and
+  bar for VALENCIA's reference mean ± sd (`ref_ave`, `ref_std`, stored in
+  `types` when the result is made), y from 0 to 1, with a legend. Valencia.py
+  fills its boxes black (`boxprops = dict(color = 'k')` with
+  `patch_artist`); not copied. `'profiles'` shrinks the bar labels when
+  there are more than 8 types (13 for valencia).
+- **Data provenance and licence:** `data-raw/valencia_centroids.r`
+  downloads the CSV at commit 8559d45 through jsDelivr and checks its MD5
+  (40029ff8...), keeping the names as they are (`check.names = FALSE`:
+  'BVAB2/BVAB3', 'g_Escherichia.Shigella'). The MIT notice is in
+  `?valencia_centroids`, in `src/valencia.c` and `R/valencia.r`, in
+  `data-raw/expected/valencia/LICENSE`, and in a `Files:` stanza of
+  `inst/COPYRIGHTS` covering the C and R files, the `.rda` and the test
+  fixture (which holds 50 publication samples). `Authors@R` gained
+  "ravel-lab" (ctb, cph).
+- **Fixtures** (`data-raw/expected/valencia.r` and `.py`): Valencia.py
+  (pandas 2.2.3, numpy 1.26.4; pandas 3 breaks its positional `Series`
+  indexing) on (a) 195 Dirichlet-multinomial samples around the centroids,
+  with two unmatched taxa in some, read counts above the sum in a quarter,
+  an all-zero sample, an unmatched-only sample and three mixtures; (b) 30 of
+  them against centroids with I-B = I-A and III-A = III-B (exact ties, the
+  first wins), passed as a data frame with `sub_CST`; (c) 50 samples of the
+  publication data, about 4 per sub-CST. Similarities are written as hex
+  floats. Valencia.py reproduces VALENCIA's published assignments for all
+  50; its similarities differ from the published ones because the
+  publication table names BVAB2/BVAB3 as g_Fastidiosipila (renamed,
+  `valencia()` gives the published similarities to 6.5e-8). The
+  publication case thus also covers a centroid taxon absent from `counts`
+  and a sample taxon absent from the centroids.
+- **Threads:** samples are split over threads (`run_parallel()`); each
+  sample's sums run in a fixed order, so results are `identical()` for any
+  `cpus` (tested 1–4; n = 200 and 234, above `run_parallel()`'s 100-task
+  threshold).
+- **Speed:** 100,000 samples × 196 taxa: 0.51 s on one thread from a
+  dense matrix (mostly the dense-to-sparse import), 0.22 s on four from a
+  dgCMatrix; Valencia.py takes 7.2 s for 200 samples.
+
+
+## Outcome (from the implementing session's final report, valencia)
+
+### `valencia()`: item 45, done 2026-11-24
+
+Commits `582e456` (work), `a4b6d0d` (merge with the lefse and biplot
+scaling work; one conflict, `Authors@R` in `DESCRIPTION`, both sides kept),
+and the tick commit that adds this section.
+
+- Tests: 27,818 at home, 404 in CRAN mode on the merged tree (26,750 and
+  399 before the merge; baseline 26,600 and 396 at b745aa6). R CMD check
+  (`--no-manual --ignore-vignettes`): only the existing installed-size
+  NOTE.
+- Valencia.py (8559d45; pandas 2.2.3, numpy 1.26.4): similarities match to
+  2.8e-15 (synthetic 2.8e-15, ties 2.1e-15, publication 2.1e-15), sub-CST,
+  CST and NaN pattern identical, with `totals` and with row sums; exact
+  ties go to the first sub-CST as in pandas.
+- Speed: 100,000 samples × 196 taxa in 0.51 s (dense, 1 thread) or
+  0.22 s (dgCMatrix, 4 threads); Valencia.py: 7.2 s for 200 samples.
+- For `dmm()`: reuse `new_ecodive_types()` (pass the `selection` data
+  frame; extra attributes such as `posterior` go through `...`),
+  `types_profiles()`, `types_top_feature()`, `validate_n_types()`, the
+  shared `print()` (now also says "(k with samples)" and "k without a
+  type") and `plot()` (`'profiles'`, `'selection'`); add a
+  `COMMUNITY_TYPES` row with `criterion = 'laplace'`, `best = 'min'`.
+  `'scores'` is valencia-only (it reads `types$reference_score_*` and the
+  `score` column).
+

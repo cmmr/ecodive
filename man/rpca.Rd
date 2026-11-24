@@ -169,7 +169,11 @@ samples are preserved and each feature's arrow shows the direction in
 which its robust clr increases. (gemelli, and QIIME 2's Emperor, plot
 \eqn{u} and \eqn{v}.) The loadings are much shorter than the scores;
 \code{plot(ord)} scales them to fit among the samples and draws them as
-arrows (see \code{\link[=plot.ecodive_ord]{plot.ecodive_ord()}}):
+arrows (see \code{\link[=plot.ecodive_ord]{plot.ecodive_ord()}}). \code{plot(ord, scaling = 'covariance')}
+draws the compositional (covariance) biplot instead, in which rays and
+\code{links} read as standard deviations of the completed rclr values and of
+their log ratios, and \code{scaling = 'contribution'} marks the features that
+contribute most; see "Compositional biplots" in \code{\link[=plot.ecodive_ord]{plot.ecodive_ord()}}:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{ord <- rpca(ex_counts, n_axes = 2)
 plot(ord)

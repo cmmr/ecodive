@@ -39,6 +39,10 @@ A \code{list} with the following elements.
 effect sizes
 \item \code{zero_free_ok} : Whether the method may be given a table with its zeros
 replaced (\code{\link[=replace_zeros]{replace_zeros()}}): \code{FALSE} for the methods that model counts
+\item \code{signed} : Whether the effect sizes have a direction, so that they rank
+the features for \code{\link[=log_ratio_features]{log_ratio_features()}} and rank plots: \code{FALSE} for
+LEfSe's LDA scores (a magnitude, with the class in \code{enriched}) and for
+ANCOM
 \item \code{func} : The function for this method, e.g. \code{ecodive::da_ttest}
 \item \code{params} : Formal args for \code{func}, e.g. \code{c("counts", "groups", ...)}
 }

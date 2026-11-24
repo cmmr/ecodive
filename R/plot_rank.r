@@ -15,7 +15,7 @@
 # a subtitle), kind ('da' or 'ord'), axis (an ordination's axis name)).
 #
 #   * DA results: the effect column that DA_TESTS names for the result's
-#     `method`, for one covariate of a model result (`covariate`, by
+#     `method`, if it is `signed`, for one covariate of a model result (`covariate`, by
 #     da_rank_covariate()'s default); `reject` from the result.
 #   * Ordinations: column `axes` of the `loadings` attribute.
 #   * A numeric vector: itself.
@@ -58,7 +58,7 @@ rank_source <- function (x, covariate = NULL, axes = 1L, has_cov = !is.null(cova
         'list_da_tests()), an ordination with loadings, or a named numeric ',
         'vector.', call. = FALSE )
     col <- DA_TESTS$effect[[i]]
-    if (is.na(col) || !col %in% names(x))
+    if (is.na(col) || !isTRUE(DA_TESTS$signed[[i]]) || !col %in% names(x))
       stop(
         method, '() results have no signed effect, so they rank no features ',
         'into a reference frame.', call. = FALSE )

@@ -124,6 +124,7 @@
   expect_error(log_ratio_features(ord, 1, axes = 9), '`axes` must be an axis number from 1 to')
   expect_error(log_ratio_features(pcoa(bray(x)), 1), 'no feature loadings')
   expect_error(log_ratio_features(ancom(x, meta$grp, pseudocount = 0.5), 1), 'ancom\\(\\) results have no signed effect')
+  expect_error(log_ratio_features(lefse(x, meta$grp, cpus = 1L), 1), 'lefse\\(\\) results have no signed effect')
   expect_error(log_ratio_features(iris, 1), '`x` must be the result of')
   expect_error(log_ratio_features('a', 1), '`x` must be the result of')
 

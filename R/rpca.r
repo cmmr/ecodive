@@ -185,7 +185,11 @@
 #' which its robust clr increases. (gemelli, and QIIME 2's Emperor, plot
 #' \eqn{u} and \eqn{v}.) The loadings are much shorter than the scores;
 #' `plot(ord)` scales them to fit among the samples and draws them as
-#' arrows (see [plot.ecodive_ord()]):
+#' arrows (see [plot.ecodive_ord()]). `plot(ord, scaling = 'covariance')`
+#' draws the compositional (covariance) biplot instead, in which rays and
+#' `links` read as standard deviations of the completed rclr values and of
+#' their log ratios, and `scaling = 'contribution'` marks the features that
+#' contribute most; see "Compositional biplots" in [plot.ecodive_ord()]:
 #'
 #' ```r
 #' ord <- rpca(ex_counts, n_axes = 2)

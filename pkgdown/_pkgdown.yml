@@ -122,6 +122,7 @@ reference:
   - dirmult_ttest
   - da_wilcoxon
   - linda
+  - lefse
 - subtitle: Absolute abundance
   desc: With each sample's total microbial load measured (cell counts, qPCR, a spike-in), estimate absolute abundances instead of ratios.
   contents:
@@ -131,6 +132,8 @@ reference:
   desc: Assign each sample to one of a few community types. The types come back as a data frame whose `type` column can be used as `groups` in any test or ordination plot.
   contents:
   - enterotype
+  - valencia
+  - valencia_centroids
   - ecodive_types
 
 - title: Source Tracking
@@ -213,6 +216,7 @@ reference:
   - plot.ecodive_ancombc
   - plot.ecodive_da_ttest
   - plot.ecodive_linda
+  - plot.ecodive_lefse
   - plot.ecodive_da_sensitivity
   - plot.ecodive_varpart
   - plot.ecodive_forward_select

@@ -40,7 +40,8 @@ table divided by its grand total (\code{vegan}'s \code{tot.chi}), which is
 also the sum of all the eigenvalues.
 \item \code{loadings}: The species scores: one row per feature and one column
 per axis, \code{vegan::scores(x, display = "species")} (scaling 2).
-Features with no observations get \code{0}.
+Features with no observations get \code{0}. \code{plot(x, scaling = 1)} (or
+\code{3}) draws \code{vegan}'s other scalings.
 }
 }
 \description{

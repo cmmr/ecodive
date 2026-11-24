@@ -4,40 +4,55 @@
 \alias{plot.ecodive_types}
 \title{Plot community types}
 \usage{
-\method{plot}{ecodive_types}(x, type = c("profiles", "selection"), n_features = 10, ...)
+\method{plot}{ecodive_types}(x, type = c("profiles", "selection", "scores"), n_features = 10, ...)
 }
 \arguments{
-\item{x}{A result of \code{\link[=enterotype]{enterotype()}}.}
+\item{x}{A result of \code{\link[=enterotype]{enterotype()}} or \code{\link[=valencia]{valencia()}}.}
 
-\item{type}{\code{"profiles"} or \code{"selection"}.}
+\item{type}{\code{"profiles"}, \code{"selection"} or \code{"scores"}.}
 
 \item{n_features}{The number of features to show in \code{"profiles"}.
 Default \code{10}.}
 
-\item{...}{Passed on to \code{\link[graphics:barplot]{graphics::barplot()}} or
-\code{\link[graphics:plot.default]{graphics::plot.default()}}, such as \code{main}, \code{ylab} or \code{col}.}
+\item{...}{Passed on to \code{\link[graphics:barplot]{graphics::barplot()}},
+\code{\link[graphics:plot.default]{graphics::plot.default()}} or \code{\link[graphics:boxplot]{graphics::boxplot()}}, such as
+\code{main}, \code{ylab} or \code{col}.}
 }
 \value{
 \code{x}, invisibly.
 }
 \description{
-Draws a result of \code{\link[=enterotype]{enterotype()}} with base graphics.
+Draws a result of \code{\link[=enterotype]{enterotype()}} or \code{\link[=valencia]{valencia()}} with base graphics.
 }
 \details{
 \itemize{
-\item \code{"profiles"} (the default): stacked bars of each type's mean
-composition, with the \code{n_features} features that reach the largest
-mean proportion in any type, and the rest pooled as "Other". The bars
-are labelled with the type and its number of samples.
+\item \code{"profiles"} (the default): stacked bars of each type's composition
+(for \code{\link[=enterotype]{enterotype()}}, its samples' mean proportions; for \code{\link[=valencia]{valencia()}},
+the centroids), with the \code{n_features} features that reach the largest
+proportion in any type, and the rest pooled as "Other". The bars are
+labelled with the type and its number of samples.
 \item \code{"selection"}: the criterion that chose the number of types (for
 \code{\link[=enterotype]{enterotype()}}, the Calinski-Harabasz index) against the number of
-types, with the one chosen circled.
+types, with the one chosen circled. Not for \code{\link[=valencia]{valencia()}}, whose
+centroids fix the types.
+\item \code{"scores"} (\code{\link[=valencia]{valencia()}} only): boxplots of the samples' scores (their
+similarity to their sub-CST's centroid), one per sub-CST with samples,
+in VALENCIA's colours, each beside a diamond and bar for the mean
+\eqn{\pm} standard deviation of VALENCIA's reference samples, as
+VALENCIA's own plot shows them.
 }
 
-The types keep the order and colours of \code{levels(x$type)} in every plot.
+The types keep the order of \code{levels(x$type)} in every plot.
 }
 \examples{
     et <- enterotype(iris[, 1:4], n_types = 2:5)
     plot(et)
     plot(et, 'selection')
+
+    # VALENCIA on thirteen samples made from its centroids.
+    counts <- round(valencia_centroids * 10000)
+    rownames(counts) <- paste0('S', 1:13)
+    vl <- valencia(counts)
+    plot(vl)
+    plot(vl, 'scores')
 }

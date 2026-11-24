@@ -170,7 +170,10 @@
   }
 
   # Binary is presence/absence.
-  expect_equal(no_display(pca(m30, norm = 'binary')), no_display(pca((m30 > 0) + 0)))
+  b1 <- no_display(pca(m30, norm = 'binary'))
+  expect_identical(attr(b1, 'norm'), 'binary')
+  attr(b1, 'norm') <- 'none'
+  expect_equal(b1, no_display(pca((m30 > 0) + 0)))
 
 
 
@@ -186,7 +189,7 @@
   # The shared ordination result format.
   expect_identical(
     names(attributes(no_display(x))),
-    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings', 'class') )
+    c('dim', 'dimnames', 'method', 'eig', 'prop', 'trace', 'loadings', 'norm', 'scale', 'class') )
   expect_identical(class(x), c('ecodive_ord', 'matrix', 'array'))
   # print() lists the loadings by name instead of printing them, and shows
   # only the first rows.

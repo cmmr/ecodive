@@ -447,8 +447,9 @@ ratio_result <- function (res, method, sel, info, pseudocount) {
 #' `NaN`) are left out first. The rest are sorted by their effect,
 #' ascending, with ties left in the result's order (Qurro's stable sort);
 #' the last `n` are the numerator and the first `n` the denominator.
-#' [ancom()] has no signed effect, and so no reference frame: its `W`
-#' counts significant log ratios without a direction.
+#' [ancom()] and [lefse()] have no signed effect, and so no reference
+#' frame: ANCOM's `W` counts significant log ratios without a direction,
+#' and LEfSe's LDA score is a magnitude, with the class in `enriched`.
 #'
 #' **Phylogenetic RPCA.** The loadings of [rpca_phylo()] include the tree's
 #' internal nodes (`"n12"`), which aren't columns of the count table. Only
