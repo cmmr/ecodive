@@ -55,6 +55,14 @@
 - **Biota Technology**. Contributor, copyright holder.  
   the Gibbs sampler of sourcetracker(), from 'SourceTracker2'
 
+- **Benjamin Callahan**. Contributor, copyright holder.  
+  contaminant identification (decontam(), decontam_not()), ported from
+  'decontam'
+
+- **Nicole Marie Davis**. Contributor, copyright holder.  
+  contaminant identification (decontam(), decontam_not()), ported from
+  'decontam'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

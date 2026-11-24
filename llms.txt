@@ -718,6 +718,21 @@ source environments, and from an unknown source.
 - [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)
   : Microbial source tracking (SourceTracker)
 
+## Quality Control
+
+Find the features that come from contaminating DNA, by their frequency
+against each sample’s DNA concentration and their prevalence in negative
+controls (decontam).
+
+- [`decontam()`](https://cmmr.github.io/ecodive/reference/decontam.md)
+  [`decontam_not()`](https://cmmr.github.io/ecodive/reference/decontam.md)
+  : Contaminant Identification (decontam)
+- [`plot(`*`<ecodive_decontam>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_decontam.md)
+  [`plot(`*`<ecodive_decontam_not>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_decontam.md)
+  : Plot decontam() results
+- [`decontam_frequency_plot()`](https://cmmr.github.io/ecodive/reference/decontam_frequency_plot.md)
+  : Plot Feature Frequency against DNA Concentration (decontam)
+
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods
