@@ -4,12 +4,17 @@
 \alias{chao1}
 \title{Chao1 Richness Estimator}
 \usage{
-chao1(counts, margin = 1L, cpus = n_cpus())
+chao1(counts, bias_corrected = TRUE, margin = 1L, cpus = n_cpus())
 }
 \arguments{
 \item{counts}{A numeric matrix of count data (samples \eqn{\times} features).
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
+
+\item{bias_corrected}{For Chao1 only: use the bias-corrected form
+(the default, as scikit-bio and QIIME 2), or the classic form when
+a sample has both singletons and doubletons (\code{FALSE}). See
+\code{\link[=chao1]{chao1()}}.}
 
 \item{margin}{The margin containing samples. \code{1} if samples are rows,
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
@@ -23,8 +28,16 @@ within any limits set on it. Results are the same for any \code{cpus}.}
 A non-parametric estimator of the lower bound of species richness.
 }
 \details{
-The Chao1 estimator uses the ratio of singletons to doubletons to estimate the number of missing species:
+The Chao1 estimator uses the ratio of singletons to doubletons to
+estimate the number of missing species. By default it is the
+bias-corrected form (Chao 1987), as in scikit-bio and QIIME 2:
+\deqn{n + \frac{F_1 (F_1 - 1)}{2 (F_2 + 1)}}
+
+With \code{bias_corrected = FALSE}, it is the classic form (Chao 1984):
 \deqn{n + \frac{(F_1)^2}{2 F_2}}
+which is infinite when there are no doubletons. So, as scikit-bio's
+\code{chao1(bias_corrected = False)}, the classic form is used only when
+\eqn{F_1 > 0} and \eqn{F_2 > 0}, and the bias-corrected form otherwise.
 
 Where:
 \itemize{
@@ -33,10 +46,21 @@ Where:
 \item \eqn{F_2} : Number of features observed twice (doubletons).
 }
 
+\code{vegan::estimateR()} and iNEXT multiply the bias-corrected term by
+\eqn{(N - 1)/N}, where \eqn{N} is the number of observations, so their
+estimates are slightly smaller than these for shallow samples with
+singletons.
+
+ecodive before version 2.4.0 used the classic form without the fallback,
+which gave \code{Inf} without doubletons and \code{NaN} without singletons and
+doubletons.
+
 \strong{Base R Equivalent:}
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{x <- ex_counts[1,]
-sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{x  <- ex_counts[1,]
+F1 <- sum(x == 1)
+F2 <- sum(x == 2)
+sum(x > 0) + F1 * (F1 - 1) / (2 * (F2 + 1))
 }\if{html}{\out{</div>}}
 }
 \section{Input Types}{
@@ -58,9 +82,14 @@ For large datasets, standard matrix operations may be slow. See
 
 \examples{
     chao1(ex_counts)
+    
+    # The classic form
+    chao1(ex_counts, bias_corrected = FALSE)
 }
 \references{
 Chao, A. (1984). Nonparametric estimation of the number of classes in a population. \emph{Scandinavian Journal of Statistics}, 11, 265-270.
+
+Chao, A. (1987). Estimating the population size for capture-recapture data with unequal catchability. \emph{Biometrics}, 43(4), 783-791. \doi{10.2307/2531532}
 }
 \seealso{
 \code{alpha_div()}, \code{vignette('adiv')}

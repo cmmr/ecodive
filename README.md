@@ -36,7 +36,7 @@ with large datasets. `ecodive` addresses this by providing:
 
 | Task                  | Wrapper         | Functions                                                                                |
 | :-------------------- | :-------------- | :--------------------------------------------------------------------------------------- |
-| Alpha diversity       | `alpha_div()`   | `shannon()`, `simpson()`, `chao1()`, `faith()`, and 10 more                               |
+| Alpha diversity       | `alpha_div()`   | `shannon()`, `simpson()`, `chao1()`, `faith()`, `pielou()`, `hill()`, and 19 more         |
 | Beta diversity        | `beta_div()`    | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 33 more                   |
 | Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`, `capda()` |
 | Ordination of counts  | `count_ord()`   | `pca()`, `rpca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`              |
@@ -235,9 +235,15 @@ for statistical tests.
 ``` r
 # Alpha Diversity
 list_metrics('alpha', 'id')
-#>  [1] "ace"         "berger"      "brillouin"   "chao1"       "faith"      
-#>  [6] "fisher"      "simpson"     "inv_simpson" "margalef"    "mcintosh"   
-#> [11] "menhinick"   "observed"    "shannon"     "squares"
+#>  [1] "ace"               "berger"            "brillouin"        
+#>  [4] "chao1"             "faith"             "fisher"           
+#>  [7] "gini"              "simpson"           "goods_coverage"   
+#> [10] "heip"              "hill"              "inv_simpson"      
+#> [13] "margalef"          "mcintosh"          "mcintosh_evenness"
+#> [16] "menhinick"         "observed"          "pielou"           
+#> [19] "renyi"             "shannon"           "dominance"        
+#> [22] "simpson_evenness"  "squares"           "strong"           
+#> [25] "tsallis"          
 
 # Beta Diversity
 list_metrics('beta', 'id')

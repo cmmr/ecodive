@@ -12,6 +12,8 @@ alpha_div(
   digits = 3L,
   tree = NULL,
   margin = 1L,
+  q = 2,
+  bias_corrected = TRUE,
   cpus = n_cpus()
 )
 }
@@ -20,8 +22,11 @@ alpha_div(
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
 
-\item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson', 'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson', 'squares')}. Case-insensitive and partial name matching is supported.
-Programmatic access via \code{list_metrics('alpha')}.}
+\item{metric}{The name of an alpha diversity metric, or several names
+to compute several metrics at once. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis')}. Case-insensitive and partial name matching is supported,
+as are scikit-bio's names (such as \code{'pielou_e'}, \code{'simpson_d'},
+\code{'observed_features'} and \code{'enspie'}). Programmatic access via
+\code{list_metrics('alpha')}.}
 
 \item{norm}{Normalize the incoming counts. Options are:
 \itemize{
@@ -53,12 +58,25 @@ the \code{counts} object or as \code{attr(counts, 'tree')}.}
 \code{2} if samples are columns. Ignored when \code{counts} is a special object
 class (e.g. \code{phyloseq}). Default: \code{1}}
 
+\item{q}{The order of a Hill number, or of Rényi's or Tsallis's entropy:
+a single number of at least 0, where \code{Inf} is allowed. Only used
+by \code{\link[=hill]{hill()}}, \code{\link[=renyi]{renyi()}} and \code{\link[=tsallis]{tsallis()}}. Default: \code{2}, as
+scikit-bio (which calls it \code{order}).}
+
+\item{bias_corrected}{For Chao1 only: use the bias-corrected form
+(the default, as scikit-bio and QIIME 2), or the classic form when
+a sample has both singletons and doubletons (\code{FALSE}). See
+\code{\link[=chao1]{chao1()}}.}
+
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, is the CPU cores this R process may use,
 within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
-A numeric vector.
+A numeric vector, one value per sample, named by the samples.
+With several metrics, a numeric matrix with one row per sample and one
+column per metric, named by the metrics' IDs in the order given; each
+column is exactly what that metric alone returns.
 }
 \description{
 Alpha Diversity Wrapper Function
@@ -82,6 +100,9 @@ integer counts will return an error message.
 \item Menhinick's Index
 \item Fisher's Alpha
 \item Brillouin Index
+\item McIntosh Index
+\item McIntosh's Evenness
+\item Good's Coverage
 }
 }
 
@@ -91,12 +112,43 @@ integer counts will return an error message.
 \item Shannon Index
 \item Gini-Simpson Index
 \item Inverse Simpson Index
+\item Hill Numbers, Rényi and Tsallis Entropies
+\item Pielou's, Heip's and Simpson's Evenness
 \item Berger-Parker Index
-\item McIntosh Index
+\item Simpson's and Strong's Dominance Indices
+\item Gini Index
 \item Faith's PD
 }
 }
 
+}
+
+\subsection{Several Metrics at Once}{
+
+\code{alpha_div(counts, c('observed', 'shannon', 'pielou'))} returns a matrix
+with a column for each metric. Each metric is computed by its own
+function, so a column is \code{identical()} to the vector that metric gives
+alone; naming a metric twice is an error.
+}
+
+\subsection{Differences from scikit-bio}{
+
+The metrics follow \code{skbio.diversity.alpha} (scikit-bio 0.7.4), which
+QIIME 2's \verb{diversity alpha} runs, with these differences:
+\itemize{
+\item Logarithms are natural. scikit-bio's \code{shannon()}, \code{pielou_e()} and
+\code{renyi()} take a \code{base}; divide ecodive's \code{\link[=shannon]{shannon()}} and \code{\link[=renyi]{renyi()}} by
+\code{log(base)} instead. Pielou's evenness doesn't depend on the base.
+\item No \code{finite} option for \code{\link[=simpson]{simpson()}}, \code{\link[=dominance]{dominance()}} and \code{\link[=inv_simpson]{inv_simpson()}}
+(scikit-bio's estimator without replacement).
+\item The \code{\link[=gini]{gini()}} index is computed by rectangles only (scikit-bio's default
+\code{method = "rectangles"}, not \code{"trapezoids"}).
+\item A sample with no observations is \code{NA} for every metric. scikit-bio
+gives \code{nan} for most metrics, but \code{0} for \code{chao1()} and \code{gini_index()}.
+\item \code{chao1(bias_corrected = FALSE)} is the classic formula, falling back on
+the bias-corrected one when a sample has no singletons or no doubletons,
+exactly as scikit-bio does.
+}
 }
 }
 \section{Input Types}{
@@ -119,15 +171,20 @@ For large datasets, standard matrix operations may be slow. See
 \examples{
     # Example counts matrix
     ex_counts
-    
+
     # Shannon diversity values
     alpha_div(ex_counts, 'Shannon')
-    
+
     # Chao1 diversity values
     alpha_div(ex_counts, 'c')
-    
+
     # Faith PD values
     alpha_div(ex_counts, 'faith', tree = ex_tree)
-    
-    
+
+    # Hill number of order 1 (the exponential of Shannon's entropy)
+    alpha_div(ex_counts, 'hill', q = 1)
+
+    # Several metrics at once
+    alpha_div(ex_counts, c('observed', 'shannon', 'pielou'))
+
 }

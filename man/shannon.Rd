@@ -70,7 +70,10 @@ Shannon, C. E., & Weaver, W. (1949). \emph{The Mathematical Theory of Communicat
 Other Diversity metrics:
 \code{\link[=brillouin]{brillouin()}},
 \code{\link[=fisher]{fisher()}},
+\code{\link[=hill]{hill()}},
 \code{\link[=inv_simpson]{inv_simpson()}},
-\code{\link[=simpson]{simpson()}}
+\code{\link[=renyi]{renyi()}},
+\code{\link[=simpson]{simpson()}},
+\code{\link[=tsallis]{tsallis()}}
 }
 \concept{Diversity metrics}

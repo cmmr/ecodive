@@ -33,6 +33,14 @@ reference:
   desc: Indices focused on the abundance of the most dominant species.
   contents:
   - has_concept('Dominance metrics')
+- subtitle: Evenness metrics
+  desc: Indices of how equally abundant the observed features are.
+  contents:
+  - has_concept('Evenness metrics')
+- subtitle: Coverage metrics
+  desc: Estimates of how completely a sample covers its community.
+  contents:
+  - has_concept('Coverage metrics')
 - subtitle: Phylogenetic metrics
   desc: Diversity based on phylogenetic branch lengths.
   contents:

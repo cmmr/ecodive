@@ -308,3 +308,95 @@ None: the results are plain vectors, as for the existing metrics.
 - Simpson, E. H. (1949). Measurement of diversity. *Nature*, 163, 688. doi:10.1038/163688a0
 - Gini, C. (1912). *Variabilità e mutabilità*. Cuppini, Bologna.
 - Chao, A., & Jost, L. (2012). Coverage-based rarefaction and extrapolation: standardizing samples by completeness rather than size. *Ecology*, 93, 2533–2547. doi:10.1890/11-1952.1
+
+
+## Decisions made while implementing
+
+Asked upfront (2026-11-24), with the user's answers:
+
+1. **Gini index id: `gini`**, and `alpha_div(x, 'gini')` now means the Gini
+   index (it used to prefix-match the Gini-Simpson index). Display name
+   "Gini Index", so `'gini_index'` (scikit-bio's name) matches it through
+   the name's letters; the Gini-Simpson index stays `'simpson'` (or
+   `'Gini-Simpson'`). NEWS says so under "Changed matching".
+2. **`q` default 2**, as scikit-bio (so `hill()` equals `inv_simpson()` by
+   default; the docs tell users to give `q`).
+3. **`chao1(bias_corrected = TRUE)` by default** (open question 3), with a
+   `bias_corrected` formal on `alpha_div()` and `alpha_div_rarefied()` too
+   (after `q`, before `cpus`). The formula follows **scikit-bio exactly**:
+   \eqn{S + F_1(F_1 - 1)/(2(F_2 + 1))}, *without* the \eqn{(N-1)/N} factor
+   that this plan's question attributed to scikit-bio (scikit-bio 0.7.4's
+   `_chao1.py` has none; vegan's `estimateR()` and iNEXT do). The docs say
+   so. `bias_corrected = FALSE` is scikit-bio's too: the classic
+   \eqn{S + F_1^2/(2F_2)} only when \eqn{F_1 > 0} and \eqn{F_2 > 0}, else the
+   bias-corrected value, so it is never `Inf` or `NaN` (the old `chao1()`
+   gave both). This changes released results; NEWS says so under "Changed
+   results".
+4. **`alpha_div_rarefied()` takes several metrics**, all computed from the
+   same rarefied tables; the result and its `sd` attribute are n × M
+   matrices, each column identical to the single-metric call.
+
+Made while implementing:
+
+5. **Display name "Renyi Entropy"** (ASCII, as the registry's existing
+   "Dice-Sorensen Dissimilarity"): with "Rényi", `list_metrics()` printed
+   `R<U+00E9>nyi` in a C locale, and the letters-only matcher dropped the
+   é (`'rnyientropy'`). The Rd pages and vignette spell it Rényi.
+6. **`strong()` and `gini()` run on raw values** (`norm = 'none'`) and divide
+   cumulative sums by the sample's total in C, in scikit-bio's order of
+   operations; they still accept proportions (`int_only` NO). The
+   proportion-based metrics use `norm = 'percent'`; `goods_coverage()` and
+   `mcintosh_evenness()` use `'none'` plus `assert_integer_counts()`.
+7. **Heip's evenness uses `exp(H)`** (as the plan said), not scikit-bio's
+   `prod(p^-p)`: they differ by up to 1.4e-14 relative, the largest
+   difference from scikit-bio.
+8. **Gini docs:** by rectangles, one feature of \eqn{K} gives
+   \eqn{1 - 2/K} (not \eqn{1 - 1/K}); an even sample gives 0 after the
+   `max(0, .)` clamp. The page says the index depends on the table's
+   absent features.
+9. **Empty samples are `NA` for every metric**, as before; scikit-bio gives
+   `nan`, except `0` for `chao1()` and `gini_index()`. Listed in
+   `alpha_div()`'s "Differences from scikit-bio".
+10. **Several metrics:** `alpha_div()` loops over an internal
+    `match_metrics(metric, div)` (a named list of `match_metric()`
+    results; duplicated IDs are an error naming them); `match_metric()`
+    stays scalar. The matrix is plain (no class or attributes), with
+    `dimnames = list(sample names or NULL, IDs)`.
+11. **`validate_q()`** coerces to double, so `q = 1L` works;
+    `validate_bias_corrected()` takes only `TRUE` or `FALSE`.
+12. **Aliases:** as planned, plus none for `gini` (its name gives
+    `giniindex`), `strong` or `tsallis`. All checked with README's snippet
+    against METRICS, ORDINATIONS, COUNT_ORDS, DIST_TESTS,
+    ZERO_REPLACEMENTS, DA_TESTS and FEATURE_ASSOCS: no collisions. Short
+    prefixes that matched one metric and now match several: `'mc'`
+    (mcintosh, mcintosh_evenness), `'g'`, `'h'`, `'sim'`; new single
+    matches: `'p'` pielou, `'r'` renyi, `'t'` tsallis, `'d'` dominance,
+    `'e'` inv_simpson (via `enspie`).
+13. **Exports** are in NAMESPACE's alpha-metric block (after `squares`),
+    not at the end, and the NEWS entries follow the rarefied-diversity
+    entry, to keep clear of the concurrent item-39 session's appends.
+14. **Fixtures:** five tables (`ex_counts`; nine edge rows; the same with 12
+    absent features; a 30 × 40 sparse random table; a 6 × 25 deep table
+    with counts around 1e5) and 2,146 scikit-bio values, including the
+    existing metrics under scikit-bio's names (a check of the aliases).
+    vegan 2.7.8's `renyi()` (with and without `hill = TRUE`),
+    `diversity() / log(specnumber())` and `1 - diversity('simpson')` are
+    stored in the same `.rds` and tested. hillR was not run: it would pull
+    a large dependency tree into the scratch library, and vegan's
+    `renyi(hill = TRUE)` already checks the Hill numbers.
+15. **Smoke tests** now require every alpha metric to be finite on the
+    smoke table (chao1 no longer gives `NaN`), and call each new export
+    once, plus several metrics in `alpha_div()` and
+    `alpha_div_rarefied()`.
+16. **Vignettes:** `adiv.Rmd` gains Evenness, Hill numbers, Coverage and
+    "Several metrics at once" sections and the new formulas, and its
+    `chao1()` outputs are the bias-corrected values; `ecodive.Rmd`'s and the
+    README's `list_metrics()` outputs are regenerated.
+
+**For items 38 and 48:** `alpha_div(counts, metric, q =, bias_corrected =)`
+accepts a character vector of metrics and returns an n × M matrix (columns
+named by metric ID, in the order given, each `identical()` to that metric's
+own call); one metric still returns the named vector. `alpha_div_rarefied()`
+does the same over shared draws. The internal `validate_q()` (in
+`R/validate.r`, reading `q` from the caller's environment) and
+`match_metrics(metric, div = 'alpha')` are there to reuse.

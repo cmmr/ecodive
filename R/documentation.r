@@ -11,6 +11,11 @@
 #'        between 0 and 1, inclusive. Setting `alpha=1` is equivalent to 
 #'        `normalized_unifrac()`.
 #'        
+#' @param bias_corrected   For Chao1 only: use the bias-corrected form
+#'        (the default, as scikit-bio and QIIME 2), or the classic form when
+#'        a sample has both singletons and doubletons (`FALSE`). See
+#'        [chao1()].
+#' 
 #' @param counts   A numeric matrix of count data (samples \eqn{\times} features). 
 #'        Typically contains absolute abundances (integer counts), though 
 #'        proportions are also accepted.
@@ -38,6 +43,11 @@
 #'     to every value first.
 #'   
 #'   Default: `'none'`.
+#' 
+#' @param q   The order of a Hill number, or of Rényi's or Tsallis's entropy:
+#'        a single number of at least 0, where `Inf` is allowed. Only used
+#'        by [hill()], [renyi()] and [tsallis()]. Default: `2`, as
+#'        scikit-bio (which calls it `order`).
 #' 
 #' @param pairs   Which combinations of samples should distances be 
 #'        calculated for? The default value (`NULL`) calculates all-vs-all. 
