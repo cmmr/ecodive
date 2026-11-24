@@ -63,6 +63,12 @@
   contaminant identification (decontam(), decontam_not()), ported from
   'decontam'
 
+- **Nicola Segata**. Contributor, copyright holder.  
+  LDA effect size biomarker discovery (lefse()), ported from 'LEfSe'
+
+- **Curtis Huttenhower**. Contributor, copyright holder.  
+  LDA effect size biomarker discovery (lefse()), ported from 'LEfSe'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

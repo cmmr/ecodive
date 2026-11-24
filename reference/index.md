@@ -307,6 +307,8 @@ don’t matter.
   Per-feature Wilcoxon, t and Linear Model Tests
 - [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md) :
   Linear Models for Differential Abundance (LinDA)
+- [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md) :
+  LEfSe: LDA Effect Size Biomarker Discovery
 
 ### Absolute abundance
 
@@ -497,6 +499,8 @@ than every value.
   : Plot a Per-feature Test Result
 - [`plot(`*`<ecodive_linda>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.md)
   : Plot a LinDA Result
+- [`plot(`*`<ecodive_lefse>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_lefse.md)
+  : Plot a LEfSe result
 - [`plot(`*`<ecodive_da_sensitivity>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.md)
   : Plot a Differential Abundance Sensitivity Analysis
 - [`plot(`*`<ecodive_varpart>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.md)

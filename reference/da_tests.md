@@ -101,6 +101,7 @@ will be applied to the
 #> 6                           Welch t-test      da_ttest  groups        diff norm
 #> 7                           Linear Model         da_lm formula    estimate norm
 #> 8                                  LinDA         linda formula     log2_fc    2
+#> 9                                  LEfSe         lefse  groups   lda_score <NA>
 #>   zero_free_ok
 #> 1         TRUE
 #> 2         TRUE
@@ -110,6 +111,7 @@ will be applied to the
 #> 6         TRUE
 #> 7         TRUE
 #> 8         TRUE
+#> 9         TRUE
 
     # Find the method for 'Mann-Whitney'.
     m <- match_da_test('Mann-Whitney')
