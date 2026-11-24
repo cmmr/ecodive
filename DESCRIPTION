@@ -73,6 +73,14 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "contaminant identification (decontam(), decontam_not()), ported from 'decontam'"),
     person(
+      "Nicola", "Segata",
+      role    = c("ctb", "cph"),
+      comment = "LDA effect size biomarker discovery (lefse()), ported from 'LEfSe'"),
+    person(
+      "Curtis", "Huttenhower",
+      role    = c("ctb", "cph"),
+      comment = "LDA effect size biomarker discovery (lefse()), ported from 'LEfSe'"),
+    person(
       "ravel-lab",
       role    = c("ctb", "cph"),
       comment = "vaginal community state types (valencia()) and their reference centroids, from 'VALENCIA'"),

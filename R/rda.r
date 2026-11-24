@@ -103,6 +103,7 @@
 #'     [pca()]'s `loadings`, these are not unit-length: each axis's are
 #'     scaled by the square root of its share of the variance, so that the
 #'     sites and species form a correlation biplot, as in `vegan`.
+#'     `plot(x, scaling = 1)` (or `3`) draws `vegan`'s other scalings.
 #'
 #' @details
 #'

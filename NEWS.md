@@ -884,6 +884,20 @@
   controls against the samples, and `decontam_frequency_plot()` a feature's
   frequency against `conc` with both fitted models.
 
+* New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
+  2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
+  pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,
+  `same_subgroups`, `one_against_one`), and the bootstrapped LDA score,
+  with each sample rescaled to `total` (counts per million by default).
+  Given LEfSe's own jitter and subsamples, the scores match LEfSe's to
+  rounding, more features than samples included; the tests match R's
+  `kruskal.test()` and coin's `wilcox_test()`. New `p_adjust` (default
+  `'holm'`; LEfSe adjusts nothing, `'none'`). Threaded C over a sparse
+  table, the bootstraps with one random stream each, so the same for any
+  `cpus`. `plot()` draws LEfSe's bar chart of LDA scores. It joins
+  `da_test()` (`"lefse"`, alias `"lefser"`) and `da_sensitivity()` (zero
+  replacements). The docs say why the plain tests are preferable.
+
 * New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
   `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's
   proportions after adding `pseudocount` (log-TSS), with the same
@@ -919,6 +933,23 @@
   also has the expected sample coverage (Chao & Jost 2012), and `plot()`
   draws depth, coverage-based or sample-completeness curves, by group,
   with a line at a planned rarefaction depth.
+
+* `plot()` of an ordination takes `scaling` and `links`, for compositional
+  biplots (Aitchison & Greenacre 2002). For `pca()`, `rpca()` and
+  `rpca_phylo()`: `scaling = 'form'` (the default, as before),
+  `'covariance'` (samples of unit variance and features at the loadings
+  times `sqrt(eig)`, so that in a clr PCA the rays' lengths
+  approximate the clr values' standard deviations), or `'contribution'`
+  (Greenacre 2013: the unit loadings times a stated round number, with the
+  features contributing more than average highlighted). In a covariance
+  biplot, `links = c("a", "b", "c")` joins the features' tips with dashed
+  links labelled with their length, which approximates (from below) the
+  standard deviation of their log ratio; drawing them warns when the plane
+  explains under half the variance, or when the PCA is not of clr values.
+  For `rda()`, `cca()` and `ca()`, `scaling = 1`, `2` (the default, as
+  stored) or `3` draws `vegan`'s scalings, matching
+  `vegan::scores(scaling =)`. `pca()`'s result gains `norm` and `scale`
+  attributes, which qualify its loadings.
 
 * `rarefy()` takes a new last argument, `coverage`, to rarefy each sample
   to the smallest depth whose expected coverage reaches it
