@@ -18,7 +18,8 @@
 #'        [ancom()], [ancombc()], [ancombc2()], [ancombc_global()],
 #'        [ancombc_pairwise()], [ancombc_dunnett()], [ancombc_trend()],
 #'        [dirmult_ttest()], [da_sensitivity()], [simper()], [bioenv()],
-#'        [envfit()], [assoc_pairs()], [assoc_network_diff()], [enterotype()] or [valencia()], or a source-tracking
+#'        [envfit()], [assoc_pairs()], [assoc_network_diff()], [first_differences()],
+#'        [first_distances()], [enterotype()] or [valencia()], or a source-tracking
 #'        matrix of class `ecodive_source` (from [sourcetracker()]). A community-types result (see
 #'        [ecodive_types]) prints its types and how their number was chosen
 #'        before its first samples.
@@ -308,6 +309,8 @@ print_df_label <- function (x) {
     ecodive_simper        = 'SIMPER',
     ecodive_rarefaction_curve = 'Rarefaction curves',
     ecodive_neutral_model = neutral_model_label(x),
+    ecodive_first_differences = 'First Differences',
+    ecodive_first_distances   = 'First Distances',
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
     ecodive_decontam      = ,
     ecodive_decontam_not  = {
@@ -384,6 +387,10 @@ print.ecodive_decontam_not     <- print_table_result
 print.ecodive_rarefaction_curve <- print_table_result
 #' @export
 print.ecodive_neutral_model   <- print_table_result
+#' @export
+print.ecodive_first_differences <- print_table_result
+#' @export
+print.ecodive_first_distances <- print_table_result
 
 
 

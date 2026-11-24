@@ -154,7 +154,20 @@
   expect_true(inherits(nmod, 'ecodive_neutral_model') && nrow(nmod) == 60L && is.factor(nmod$partition))
   expect_true(all(is.finite(attr(nmod, 'm'))) && all(attr(nmod, 'm') > 0) && identical(names(attr(nmod, 'm')), c('a', 'b')))
 
-  # Associations: SparCC.
+  # Longitudinal: 5 subjects at 4 states.
+  lm_meta <- data.frame(
+    row.names = rownames(counts), subj = rep(sprintf('m%d', 1:5), each = 4),
+    day = rep(c(0, 3, 7, 14), 5), grp = rep(c('a', 'b'), each = 10) )
+  shan <- shannon(counts)
+  fdi <- first_differences(shan, 'subj', 'day', lm_meta)
+  expect_true(inherits(fdi, 'ecodive_first_differences') && nrow(fdi) == 15L && all(is.finite(fdi$difference)))
+  fdt <- first_distances(dm, 'subj', 'day', lm_meta, baseline = 0)
+  expect_true(inherits(fdt, 'ecodive_first_distances') && nrow(fdt) == 15L && all(fdt$distance >= 0))
+  vol <- volatility(shan, 'subj', 'day', 'grp', lm_meta, n_resamples = 50L)
+  expect_true(inherits(vol, 'ecodive_volatility') && nrow(vol$means) == 8L && all(is.finite(vol$global)))
+  nm <- nmit(counts, 'subj', lm_meta, cpus = cpus)
+  expect_true(inherits(nm, 'ecodive_dist') && attr(nm, 'Size') == 5L && all(is.finite(nm)) && all(nm >= 0))
+
   z <- sparcc(counts[, 1:10], n_draws = 5L, permutations = 9L, cpus = cpus)
   expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 10L && length(z) == 45L)
   expect_true(all(is.finite(z)) && identical(attr(z, 'method'), 'sparcc'))
@@ -426,6 +439,9 @@
   expect_true(drawn(dc))   # decontam()
   expect_true(drawn(dc, 'prevalence'))
   expect_true(drawn(nmod))   # neutral_model()
+  expect_true(drawn(fdi))    # first_differences()
+  expect_true(drawn(fdt))    # first_distances()
+  expect_true(drawn(vol))    # volatility()
   expect_true(is.data.frame(decontam_frequency_plot(counts, 'F1', dc_conc, dc_neg)))
   expect_true(drawn(fit))   # ancombc2()
   expect_true(drawn(ancombc_global(fit, cpus = cpus)))

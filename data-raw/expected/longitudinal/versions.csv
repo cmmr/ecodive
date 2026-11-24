@@ -1,0 +1,8 @@
+package,version
+python,3.13.18
+numpy,2.5.5
+pandas,2.3.3
+scipy,1.18.1
+scikit-bio,0.7.4
+statsmodels,0.14.6
+q2-longitudinal,2026.10.0

@@ -317,3 +317,102 @@ volatility chart of a chosen feature. Write its signature when
 - Subramanian, S., Huq, S., Yatsunenko, T., et al. (2014). Persistent gut
   microbiota immaturity in malnourished Bangladeshi children. *Nature*,
   510, 417–421. doi:10.1038/nature13421 (the maturity index)
+
+
+## Decisions made while implementing (item 56, 2026-11-24)
+
+Asked of the user at the start:
+
+- **`nmit()` returns the distances only** (q2's output and this plan's
+  design), not a test: NMIT's test is `permanova()` on them, with one group
+  per subject; the docs show how to collapse `data` to subjects. Its
+  p-values then come from `permanova()`'s own `perm_matrix()` / `perm_ss()`
+  machinery, so they match any PERMANOVA of the same distances given the
+  same permutations.
+- **Subjects with fewer than 3 samples** (q2 computes ±1 or 0
+  correlations for them): computed as q2 does, with a warning naming them
+  and their sample counts. Confirmed from q2's outputs: one sample gives
+  Kendall's diagonal 1 and everything else 0, Pearson and Spearman all 0;
+  two samples give ±1 (0 for a tie).
+- **`plot()` for `first_differences()` and `first_distances()`**: the values
+  against the later state, a box per state, a faint line per subject, a
+  dashed 0 line for differences. Subtitle "Consecutive states" or
+  "Differences (Distances) from state b".
+- **`replicates = 'random'` re-draws for every pair of states**, as q2
+  does: PCG stream `((k - 1) S + (s - 1)) 2 + side` for pair of states k,
+  subject s (1-based) and side 0 (earlier) or 1 (later), one draw each
+  (`C_rng_dist`), the pick `floor(u m) + 1` of the cell's m samples in input
+  order.
+
+Made while implementing:
+
+- **`NA` in `subjects`, `states` or `groups` is an error**, as `groups` is
+  everywhere else in ecodive (q2 has no rule; its sorted state list breaks
+  on NaN). `NA` in `x` drops the pairs (q2's rule) and is left out of
+  volatility's means.
+- **Subject order**: a factor's levels (those used), else sorted (radix,
+  so locale-free). Rows are ordered by pair of states, then subject.
+  `nmit()` labels the subjects by subject id in that order (q2: each
+  subject's first sample id, in order of first appearance).
+- **States come from the samples of `x` / `dm` only** (q2 reads them from
+  every metadata row, even samples missing from the distance matrix).
+- **`replicates = 'error'`** reports the first replicated (state,
+  subject) cell, with q2's wording adapted to ecodive's argument names.
+- **Correlation kernels are new code in `src/longitudinal.c`**, not
+  `cross_assoc()`'s: its kernels are bound to its file-level state (an x
+  table against y columns grouped by missing-value pattern) and Knight's
+  merge sort for Kendall. A subject has few samples, so Kendall counts the
+  signs of every sample pair directly (exact integers, so identical to
+  SciPy's tau-b), and Pearson and Spearman repeat pandas' own loops
+  (Welford's updates; average ranks centred on (n + 1)/2), including
+  pandas' diagonal rule (Kendall 1; Pearson and Spearman 0 for a constant
+  feature, where R's `cor()` gives 1).
+- **The nuclear norm** uses `lz_sym_eigen()` (JAMA's tred2/tql2, already in
+  `src/lanczos.c`) rather than LAPACK's `dsyevd`, which ecodive doesn't call
+  from threads; it computes eigenvectors too, about twice the work of
+  eigenvalues alone (D = 100, 50 subjects: 1.6 s on 1 thread, 0.7 s on 4).
+- **`nmit()` also takes `clust = NULL`**, as every other function that
+  returns a `dist` does; `print()` calls its units "subjects"
+  (`dist_plot_name()`).
+- **`volatility()`**: `subjects` may be `NULL` (no trajectories; q2's
+  `individual_id_column` is optional too); `groups = NULL` is one group,
+  `"all"`. `n` counts the values used (Vega's tooltip `count` also counts
+  samples whose value is missing; documented). The SD of a single value is
+  0, as Vega's `stdev`. Means are `sum / n` in sample order (Vega keeps a
+  running mean; the difference is rounding). The x and y labels and the
+  legend title (the column names of `states`, `x` and `groups`) are in
+  `display`, read only by `plot()`.
+- **Bootstrap streams**: one per (group, state) row of `means`, numbered
+  from 0 in row order and seeded as `C_rng_dist` seeds, so that the
+  internal `volatility_details()` returns the exact uniforms for the
+  test's base-R transcription of `bootstrapCI()` (index `floor(u n)`,
+  type-7 quantiles).
+- **Vega was compared as code read, not run**: its `bootstrapCI()` was read
+  from the `vega.min.js` (Vega 4.2.0) that q2-longitudinal 2026.10.0
+  bundles; running that file under Node was refused by the session's
+  permission classifier. The tests compare ecodive's intervals with a base-R
+  transcription exactly (same uniforms) and in distribution (coverage and
+  width over 400 groups, with R's `runif()`).
+- **Titles**: "First Distances of <dm's title>" (title case, as ecodive's
+  other titles), "NMIT Distance", "Volatility"; `first_differences()` sets
+  none (its input has none), and its print header and plot say "First
+  Differences".
+- **A count table in `first_differences()`** is normalized with
+  `normalize()` and made dense: the result has a column per feature
+  anyway.
+- **pkgdown**: a "Longitudinal" section of the four functions and
+  `plot_longitudinal`; `ctf()` and `principal_response_curves()` don't
+  exist yet, so they aren't linked.
+- **Credits**: `Authors@R` gains the QIIME 2 development team (ctb, cph),
+  the University of Washington Interactive Data Lab (cph, Vega) and the
+  PyData Development Team (cph, pandas' correlation loops);
+  `inst/COPYRIGHTS` has one stanza for `R/longitudinal.r` and
+  `src/longitudinal.c` with the four BSD-3 notices (SciPy's too).
+- **Fixtures**: `data-raw/expected/longitudinal.py` loads
+  `q2_longitudinal/_utilities.py` from the 2026.10.0 tag (fetched through
+  jsDelivr) on its own, with an empty package object in place of its
+  `__init__.py` (which imports the QIIME 2 framework) and an empty
+  `q2templates`, and calls `_first_differences()` and `_nmit()` directly,
+  under Python 3.13, pandas 2.3.3, NumPy 2.5.5, SciPy 1.18.1, scikit-bio
+  0.7.4 and statsmodels 0.14.6 (0.15 no longer has the `multipletests`
+  import q2 uses; pandas is kept below 3, as QIIME 2 releases are).

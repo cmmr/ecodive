@@ -57,6 +57,7 @@ extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mult_default_delta(SEXP);
 extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_nmit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_normalize(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_calinski(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pam(SEXP, SEXP, SEXP, SEXP);
@@ -97,6 +98,7 @@ extern SEXP C_medoid_accum(SEXP, SEXP, SEXP);
 extern SEXP C_row_medians(SEXP, SEXP);
 extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
 extern SEXP C_rng_dist(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_volatility_ci(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_st_collapse(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_st_cond_prob(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_sourcetracker(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -166,6 +168,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
   {"C_mult_default_delta", (DL_FUNC) &C_mult_default_delta, 1},
   {"C_nmds",      (DL_FUNC) &C_nmds,      6},
+  {"C_nmit",      (DL_FUNC) &C_nmit,      9},
   {"C_normalize", (DL_FUNC) &C_normalize, 6},
   {"C_calinski",  (DL_FUNC) &C_calinski,  6},
   {"C_pam",       (DL_FUNC) &C_pam,       4},
@@ -197,6 +200,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_row_medians",  (DL_FUNC) &C_row_medians,  2},
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
   {"C_rng_dist",  (DL_FUNC) &C_rng_dist,  5},
+  {"C_volatility_ci", (DL_FUNC) &C_volatility_ci, 4},
   {"C_st_collapse",   (DL_FUNC) &C_st_collapse,   4},
   {"C_st_cond_prob",  (DL_FUNC) &C_st_cond_prob,  9},
   {"C_sourcetracker", (DL_FUNC) &C_sourcetracker, 16},

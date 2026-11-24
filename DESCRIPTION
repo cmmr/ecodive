@@ -93,6 +93,18 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "the neutral community model fit (neutral_model()), following 'neufit'"),
     person(
+      "QIIME 2 development team",
+      role    = c("ctb", "cph"),
+      comment = "first differences, first distances, volatility and NMIT (first_differences(), first_distances(), volatility(), nmit()), ported from 'q2-longitudinal'"),
+    person(
+      "University of Washington Interactive Data Lab",
+      role    = "cph",
+      comment = "Vega's bootstrap confidence interval, followed by volatility()"),
+    person(
+      "PyData Development Team",
+      role    = "cph",
+      comment = "pandas' Pearson and Spearman correlation kernels, followed by nmit()"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

@@ -160,6 +160,15 @@ reference:
   - neutral_model
   - plot.ecodive_neutral_model
 
+- title: Longitudinal
+  desc: Repeated measures of the same subjects over time (q2-longitudinal). Each subject's change from one time point to the next or from a baseline, a control chart of a variable over time, and distances between subjects in how their features vary together (NMIT, then tested with permanova()).
+  contents:
+  - first_differences
+  - first_distances
+  - volatility
+  - nmit
+  - plot_longitudinal
+
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
   contents:

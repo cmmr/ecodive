@@ -961,6 +961,28 @@
   the fitted curve and its band over the features (`type = "binomial"`
   adds the binomial model's curve).
 
+* Longitudinal analyses, ported from q2-longitudinal 2026.10.0 (Bokulich
+  et al. 2018, BSD-3), for repeated measures of the same subjects over time
+  (`subjects` and numeric `states` given per sample or as columns of
+  `data`):
+  * New `first_differences()` gives each subject's change in a variable from
+    one state to the next, or from a `baseline` state, and
+    `first_distances()` the distance between its two samples, from any
+    `dist`. A vector of values, a column of `data`, or every feature of a
+    count table (after `norm`) at once. Pairs follow q2's rules (consecutive
+    states over all samples; `replicates` = `"error"`, `"drop"` or a seeded
+    `"random"` pick), and match q2's differences and distances exactly.
+  * New `volatility()` computes q2's volatility chart: each group's mean at
+    each state with Vega's bootstrap confidence interval (on ecodive's
+    seeded generator), the global mean and the 2 and 3 SD control limits,
+    and each subject's trajectory. `plot()` draws the control chart.
+  * New `nmit()` gives the distances between subjects in how their
+    features vary together over time (Zhang et al. 2017, NMIT): each
+    subject's Kendall, Pearson or Spearman correlations of its features,
+    and the Frobenius or nuclear norm of their differences, in threaded C,
+    the same for any `cpus`. It matches q2's distances to about 1e-15;
+    `permanova()` on the result is NMIT's test.
+
 * New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
   2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
   pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,

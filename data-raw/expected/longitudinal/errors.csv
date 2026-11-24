@@ -1,0 +1,5 @@
+case,message
+replicate,ValueError: Detected replicate samples for individual (subject) S05 at state (state) 14.0. Remove replicate values from input files or set replicate_handling parameter to select how replicates are handled.
+baseline,"ValueError: baseline must be a valid state: 5.0 is not in [np.float64(0.0), np.float64(3.0), np.float64(7.0), np.float64(14.0), np.float64(28.0)]"
+one_state,KeyError: 'Difference'
+validate_one_state,ValueError: state_column must contain at least two unique values. Values in state: [3.]

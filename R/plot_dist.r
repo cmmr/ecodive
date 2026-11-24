@@ -237,7 +237,7 @@ dist_plot_name <- function (x) {
   features <- !is.null(feature_assoc_info(m))
   list(
     title = title,
-    unit  = if (features) 'features' else 'samples',
+    unit  = if (features) 'features' else if (identical(m, 'nmit')) 'subjects' else 'samples',
     key   = if (features) m else 'Distance' )
 }
 
