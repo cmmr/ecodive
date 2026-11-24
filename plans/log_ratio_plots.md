@@ -380,3 +380,27 @@ Made while implementing:
     driver in `data-raw/` loads Qurro's file at fixture time and isn't
     built into the package), so Qurro still gets no `Authors@R` or
     `inst/COPYRIGHTS` entry; the docs cite the paper.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 46, done 2026-11-24.** Commits `32f2e17` (work), `9ead0e5` (merge
+with items 41, 44 and 45: `DA_TESTS$signed`, `plot.ecodive_ord()`'s
+arguments `scaling`, `links`, `type`, `numerator`, `denominator`), and the
+tick.
+
+- Tests on the merged tree: 28,140 at home, 406 in CRAN mode (before this
+  item: 26,600 and 396; the new file has 319). `R CMD check --no-manual
+  --ignore-vignettes`: 1 NOTE (installed size 5.5 MB), as before.
+- Qurro 0.9.0, 26 cases: autoselection (`feature_computation.js` under
+  Node.js) identical in every case, ties included; `process_input()` keeps
+  every ranked feature in the ranking's order; `qarcoal()` within 3.5e-18
+  (one value differs by an ulp of `log()`, numpy vs C); the sample plot's
+  `computeBalance()` within 6.7e-16.
+- `cpus` 1, 2, 4 and sparse vs dense: identical selections and log ratios.
+- New: `log_ratio_features()`; `type = 'rank'` on the plots of
+  `dirmult_ttest`, `ancombc` / `ancombc2`, `da_ttest`, `da_wilcoxon`,
+  `da_lm`, `linda` and ordinations with loadings; class
+  `ecodive_log_ratio` with `print()`, `plot()`, `Ops`, `Math`;
+  `DA_TESTS$signed` (`ancom` and `lefse` refused).
+- Nothing ported from Qurro; not credited (the docs cite the paper).

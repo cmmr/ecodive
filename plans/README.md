@@ -357,7 +357,7 @@ can't be mistaken for one another:
 | Community assembly | `mpd`, `mntd`, `mpd_ses`, `mntd_ses`, `beta_mntd`, `beta_mpd`, `beta_nti`, `raup_crick_bray`, `assembly_processes`, `neutral_model` |
 | Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
-| Log ratios | ✓ `log_ratio`, ✓ `balance`, `log_ratio_features` |
+| Log ratios | ✓ `log_ratio`, ✓ `balance`, ✓ `log_ratio_features` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
 | Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, ✓ `linda`, `maaslin3`, `fastancom`, `rademu`, ✓ `lefse`, `deseq2`, ✓ `da_sensitivity` |
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
