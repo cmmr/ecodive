@@ -389,3 +389,45 @@ Decided while implementing:
   of the subset over the full fit's curve).
 - **pkgdown:** a new "Community Assembly" section after "Quality
   Control".
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commits:** 0490b63 (`neutral_model()`, `plot()` and `print()`
+  methods, `src/neutral_model.c`, fixtures, tests, docs and the shared
+  files), and this one (ticks and outcome). Built on 046fde04, which
+  already held items 42, 47 and 52: no merge conflicts.
+- **Tests:** the full suite against an `-O2` install, `LANG=C.UTF-8`:
+  29,628 results at home (`NOT_CRAN=true`; 28,140 at fb930a6, the rest
+  from items 42, 47, 52 and the 539 in `test-neutral_model.r`) and 432 in
+  CRAN mode, all OK. `R CMD check --no-manual --ignore-vignettes`: 1 NOTE
+  (installed size, 6.1 Mb, from Debian's `-g` flags).
+- **Reference comparisons (largest differences):**
+  - 40-digit mpmath: m 1.1e-13 (relative), `m_lower` / `m_upper` 1.7e-14,
+    on five cases including the pool and m̂ = 1.22.
+  - neufit: m 1.5e-6 (lmfit's stopping rule; neufit's m is the same
+    distance from the 40-digit m), R² 8e-13, `m_se` 3.3e-5 (lmfit's
+    finite-difference Jacobian); given neufit's m, predictions 7e-15 and
+    Wilson bands 2e-14; p exact to 2e-16. On the near-saturated table
+    neufit stops at its bound m = 1 (least squares: 1.22).
+  - Burns et al. via tyRa `fit_sncm()`: m 6.7e-6, `m.ci` (m − lower)
+    3.4e-4 (`confint()`'s interpolated profile), R² 1e-6; given tyRa's m,
+    predictions and bands 1e-12 / 2e-16 and partitions identical away
+    from the rounding edges at occurrence 1.
+  - Burns et al. via iCAMP `snm()`: m 1e-5 (`sat`), profile ends 1.3e-4,
+    AIC / BIC 2.1e-6 (its numerical `mle()`), binomial / Poisson R² and
+    RMSE to 1e-15, their AIC / BIC to 4e-8.
+  - Wilson intervals vs statsmodels and Hmisc, edges included: 1e-14
+    (exact 0 and 1 at the edges).
+- **Permission refusal:** downloading the Wayback Machine's copy of the
+  Burns et al. supplement was refused by the auto-mode classifier
+  ("Unauthorized Access"), command: `curl -sSfL -o burns_sncm.R
+  "https://web.archive.org/web/20161021110816id_/http://www.nature.com:80/ismej/journal/v10/n3/extref/ismej2015142x4.txt"`.
+  Not retried; iCAMP and tyRa stand in for it (see the decisions).
+- **Licence exposure:** none. No source text of Burns et al.'s script,
+  iCAMP, tyRa or MicEco was read (tyRa's `R/modeling.R` was sourced
+  unseen; only Rd files, `DESCRIPTION` and `NAMESPACE` were viewed).
+- **Open issues:** the original supplementary script remains unrun (only
+  its descendants were); MicEco's ML fit was not compared; the plan's
+  Dirichlet-multinomial simulation does not follow Sloan's detection
+  rule, so the coverage test draws from the model itself.
