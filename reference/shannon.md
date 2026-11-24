@@ -82,8 +82,11 @@ Communication*. University of Illinois Press.
 Other Diversity metrics:
 [`brillouin()`](https://cmmr.github.io/ecodive/reference/brillouin.md),
 [`fisher()`](https://cmmr.github.io/ecodive/reference/fisher.md),
+[`hill()`](https://cmmr.github.io/ecodive/reference/hill.md),
 [`inv_simpson()`](https://cmmr.github.io/ecodive/reference/inv_simpson.md),
-[`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md)
+[`renyi()`](https://cmmr.github.io/ecodive/reference/renyi.md),
+[`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md),
+[`tsallis()`](https://cmmr.github.io/ecodive/reference/tsallis.md)
 
 ## Examples
 

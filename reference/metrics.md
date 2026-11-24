@@ -166,9 +166,15 @@ will be applied to the
     
     # All alpha diversity function names.
     list_metrics('alpha', val = 'id')
-#>  [1] "ace"         "berger"      "brillouin"   "chao1"       "faith"      
-#>  [6] "fisher"      "simpson"     "inv_simpson" "margalef"    "mcintosh"   
-#> [11] "menhinick"   "observed"    "shannon"     "squares"    
+#>  [1] "ace"               "berger"            "brillouin"        
+#>  [4] "chao1"             "faith"             "fisher"           
+#>  [7] "gini"              "simpson"           "goods_coverage"   
+#> [10] "heip"              "hill"              "inv_simpson"      
+#> [13] "margalef"          "mcintosh"          "mcintosh_evenness"
+#> [16] "menhinick"         "observed"          "pielou"           
+#> [19] "renyi"             "shannon"           "dominance"        
+#> [22] "simpson_evenness"  "squares"           "strong"           
+#> [25] "tsallis"          
     
     # Try to find a metric named 'otus'.
     m <- match_metric('otus')

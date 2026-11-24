@@ -45,7 +45,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 
 | Task | Wrapper | Functions |
 |:---|:---|:---|
-| Alpha diversity | [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md) | [`shannon()`](https://cmmr.github.io/ecodive/reference/shannon.md), [`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md), [`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md), [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md), and 10 more |
+| Alpha diversity | [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md) | [`shannon()`](https://cmmr.github.io/ecodive/reference/shannon.md), [`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md), [`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md), [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md), [`pielou()`](https://cmmr.github.io/ecodive/reference/pielou.md), [`hill()`](https://cmmr.github.io/ecodive/reference/hill.md), and 19 more |
 | Beta diversity | [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md) | [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md), [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/weighted_unifrac.md), and 33 more |
 | Ordination | [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) | [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md), [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md), [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md), [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md), [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md), [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md), [`capda()`](https://cmmr.github.io/ecodive/reference/capda.md) |
 | Ordination of counts | [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md) | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md), [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md), [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) |
@@ -258,9 +258,15 @@ for statistical tests.
 
 # Alpha Diversity
 list_metrics('alpha', 'id')
-#>  [1] "ace"         "berger"      "brillouin"   "chao1"       "faith"      
-#>  [6] "fisher"      "simpson"     "inv_simpson" "margalef"    "mcintosh"   
-#> [11] "menhinick"   "observed"    "shannon"     "squares"
+#>  [1] "ace"               "berger"            "brillouin"        
+#>  [4] "chao1"             "faith"             "fisher"           
+#>  [7] "gini"              "simpson"           "goods_coverage"   
+#> [10] "heip"              "hill"              "inv_simpson"      
+#> [13] "margalef"          "mcintosh"          "mcintosh_evenness"
+#> [16] "menhinick"         "observed"          "pielou"           
+#> [19] "renyi"             "shannon"           "dominance"        
+#> [22] "simpson_evenness"  "squares"           "strong"           
+#> [25] "tsallis"          
 
 # Beta Diversity
 list_metrics('beta', 'id')

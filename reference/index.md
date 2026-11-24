@@ -32,12 +32,18 @@ Indices accounting for both richness and evenness.
   : Brillouin Index
 - [`fisher()`](https://cmmr.github.io/ecodive/reference/fisher.md) :
   Fisher's Alpha
+- [`hill()`](https://cmmr.github.io/ecodive/reference/hill.md) : Hill
+  Numbers
 - [`inv_simpson()`](https://cmmr.github.io/ecodive/reference/inv_simpson.md)
   : Inverse Simpson Index
+- [`renyi()`](https://cmmr.github.io/ecodive/reference/renyi.md) : Rényi
+  Entropy
 - [`shannon()`](https://cmmr.github.io/ecodive/reference/shannon.md) :
   Shannon Diversity Index
 - [`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md) :
   Gini-Simpson Index
+- [`tsallis()`](https://cmmr.github.io/ecodive/reference/tsallis.md) :
+  Tsallis Entropy
 
 ### Dominance metrics
 
@@ -45,8 +51,34 @@ Indices focused on the abundance of the most dominant species.
 
 - [`berger()`](https://cmmr.github.io/ecodive/reference/berger.md) :
   Berger-Parker Index
+- [`dominance()`](https://cmmr.github.io/ecodive/reference/dominance.md)
+  : Simpson's Dominance Index
+- [`gini()`](https://cmmr.github.io/ecodive/reference/gini.md) : Gini
+  Index
 - [`mcintosh()`](https://cmmr.github.io/ecodive/reference/mcintosh.md) :
   McIntosh Index
+- [`strong()`](https://cmmr.github.io/ecodive/reference/strong.md) :
+  Strong's Dominance Index
+
+### Evenness metrics
+
+Indices of how equally abundant the observed features are.
+
+- [`heip()`](https://cmmr.github.io/ecodive/reference/heip.md) : Heip's
+  Evenness
+- [`mcintosh_evenness()`](https://cmmr.github.io/ecodive/reference/mcintosh_evenness.md)
+  : McIntosh's Evenness
+- [`pielou()`](https://cmmr.github.io/ecodive/reference/pielou.md) :
+  Pielou's Evenness
+- [`simpson_evenness()`](https://cmmr.github.io/ecodive/reference/simpson_evenness.md)
+  : Simpson's Evenness
+
+### Coverage metrics
+
+Estimates of how completely a sample covers its community.
+
+- [`goods_coverage()`](https://cmmr.github.io/ecodive/reference/goods_coverage.md)
+  : Good's Coverage
 
 ### Phylogenetic metrics
 

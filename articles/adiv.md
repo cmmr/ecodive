@@ -23,8 +23,8 @@ t(counts)
 ## Alpha Diversity
 
 Alpha diversity measures diversity within a single sample. In `ecodive`,
-metrics are grouped into four categories based on the aspect of
-diversity they quantify.
+metrics are grouped into categories based on the aspect of diversity
+they quantify.
 
 ### Richness Metrics
 
@@ -47,19 +47,24 @@ unobserved, low-abundance features based on the ratio of singletons
 
 ``` r
 
-# Infers 8 unobserved genera
+# Infers 3 unobserved genera
 chao1(c(1, 1, 1, 1, 2, 5, 5, 5))
-#> [1] 16
+#> [1] 11
 
-# Infers less than 1 unobserved genera
+# Infers no unobserved genera
 chao1(c(1, 2, 2, 2, 2, 5, 5, 5))
-#> [1] 8.125
+#> [1] 8
 
-# Datasets without 1s and 2s give Inf or NaN
 chao1(counts)
 #> Saliva   Gums   Nose  Stool 
-#>    4.5    3.0    NaN    Inf 
+#>      4      3      4     11 
 ```
+
+By default,
+[`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md) is the
+bias-corrected estimator, as in scikit-bio and QIIME 2.
+`chao1(bias_corrected = FALSE)` gives the classic formula, which is
+larger when there are few doubletons.
 
 ### Diversity Metrics
 
@@ -114,6 +119,86 @@ sort(berger(counts))
 #> 0.4956522 0.5217391 0.8956522 0.9884058 
 ```
 
+### Evenness Metrics
+
+Evenness metrics measure how equally the observed features share the
+sample, apart from how many there are. **Pielou’s evenness** is
+Shannon’s entropy divided by its largest possible value, \ln n for n
+observed features; QIIME 2’s `core-metrics` reports it.
+
+``` r
+
+# Perfectly even (1) vs dominated by one genus (0.13)
+pielou(c(20, 20, 20, 20, 20))
+#> [1] 1
+pielou(c(100, 1, 1, 1, 1))
+#> [1] 0.1344212
+
+# Stool < Gums < Saliva < Nose
+sort(pielou(counts))
+#>      Stool       Gums     Saliva       Nose 
+#> 0.04925817 0.32488369 0.53466213 0.79792108 
+```
+
+[`heip()`](https://cmmr.github.io/ecodive/reference/heip.md),
+[`simpson_evenness()`](https://cmmr.github.io/ecodive/reference/simpson_evenness.md)
+and
+[`mcintosh_evenness()`](https://cmmr.github.io/ecodive/reference/mcintosh_evenness.md)
+are other evenness indices.
+
+### Hill Numbers
+
+The **Hill numbers** ^qD are the “effective number of species”: how many
+equally abundant features would give the same diversity. The order q
+sets how much weight abundant features get, and unifies the common
+indices: q = 0 is richness, q = 1 is the exponential of Shannon’s
+entropy, q = 2 is the inverse Simpson index, and q = \infty is the
+inverse Berger-Parker index.
+
+``` r
+
+# A diversity profile: q = 0, 1, 2 and Inf
+sapply(c(0, 1, 2, Inf), function (q) hill(counts, q = q))
+#>        [,1]     [,2]     [,3]     [,4]
+#> Saliva    4 2.098450 2.029446 1.916667
+#> Gums      3 1.428923 1.231620 1.116505
+#> Nose      4 3.022709 2.742701 2.017544
+#> Stool     5 1.082505 1.023563 1.011730
+```
+
+[`renyi()`](https://cmmr.github.io/ecodive/reference/renyi.md) and
+[`tsallis()`](https://cmmr.github.io/ecodive/reference/tsallis.md) are
+the entropies of the same orders.
+
+### Coverage
+
+**Good’s coverage**, 1 - F_1 / X_T, estimates the fraction of the
+community’s individuals that belong to features seen in the sample:
+values near 1 mean that deeper sequencing would find few new features.
+
+``` r
+
+goods_coverage(counts)
+#>    Saliva      Gums      Nose     Stool 
+#> 0.9971014 1.0000000 1.0000000 0.9884058 
+```
+
+### Several Metrics at Once
+
+Give
+[`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)
+several metric names to get a matrix with a column for each.
+
+``` r
+
+alpha_div(counts, c('observed', 'shannon', 'pielou', 'goods_coverage'))
+#>        observed    shannon     pielou goods_coverage
+#> Saliva        4 0.74119910 0.53466213      0.9971014
+#> Gums          3 0.35692121 0.32488369      1.0000000
+#> Nose          4 1.10615349 0.79792108      1.0000000
+#> Stool         5 0.07927797 0.04925817      0.9884058
+```
+
 ### Phylogenetic Metrics
 
 Phylogenetic metrics use a phylogenetic tree to incorporate evolutionary
@@ -160,6 +245,8 @@ Given:
 - P_i : Proportional abundance of the i-th feature. P_i = X_i / X_T
 - F_1 : Number of singletons (X_i = 1).
 - F_2 : Number of doubletons (X_i = 2).
+- H : Shannon’s entropy, -\sum\_{i=1}^{n} P_i \ln P_i.
+- q : The order of a Hill number or entropy (`q`, default 2).
 
 [TABLE]
 

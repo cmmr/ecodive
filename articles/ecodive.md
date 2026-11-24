@@ -48,21 +48,32 @@ The available alpha diversity metrics can be listed using
 ``` r
 
 list_metrics('alpha')[,1:5]
-#>                                        name          id phylo weighted int_only
-#> 1  Abundance-based Coverage Estimator (ACE)         ace FALSE     TRUE     TRUE
-#> 3                       Berger-Parker Index      berger FALSE     TRUE    FALSE
-#> 6                           Brillouin Index   brillouin FALSE     TRUE     TRUE
-#> 8                                     Chao1       chao1 FALSE     TRUE     TRUE
-#> 15           Faith's Phylogenetic Diversity       faith  TRUE    FALSE    FALSE
-#> 16                           Fisher's Alpha      fisher FALSE     TRUE     TRUE
-#> 18                       Gini-Simpson Index     simpson FALSE     TRUE    FALSE
-#> 23                    Inverse Simpson Index inv_simpson FALSE     TRUE    FALSE
-#> 29                Margalef's Richness Index    margalef FALSE     TRUE     TRUE
-#> 31                           McIntosh Index    mcintosh FALSE     TRUE     TRUE
-#> 32               Menhinick's Richness Index   menhinick FALSE     TRUE     TRUE
-#> 37                        Observed Features    observed FALSE    FALSE    FALSE
-#> 40                  Shannon Diversity Index     shannon FALSE     TRUE    FALSE
-#> 45               Squares Richness Estimator     squares FALSE     TRUE     TRUE
+#>                                        name                id phylo weighted int_only
+#> 1  Abundance-based Coverage Estimator (ACE)               ace FALSE     TRUE     TRUE
+#> 3                       Berger-Parker Index            berger FALSE     TRUE    FALSE
+#> 6                           Brillouin Index         brillouin FALSE     TRUE     TRUE
+#> 8                                     Chao1             chao1 FALSE     TRUE     TRUE
+#> 15           Faith's Phylogenetic Diversity             faith  TRUE    FALSE    FALSE
+#> 16                           Fisher's Alpha            fisher FALSE     TRUE     TRUE
+#> 18                               Gini Index              gini FALSE     TRUE    FALSE
+#> 19                       Gini-Simpson Index           simpson FALSE     TRUE    FALSE
+#> 20                          Good's Coverage    goods_coverage FALSE     TRUE     TRUE
+#> 23                          Heip's Evenness              heip FALSE     TRUE    FALSE
+#> 25                              Hill Number              hill FALSE     TRUE    FALSE
+#> 27                    Inverse Simpson Index       inv_simpson FALSE     TRUE    FALSE
+#> 33                Margalef's Richness Index          margalef FALSE     TRUE     TRUE
+#> 35                           McIntosh Index          mcintosh FALSE     TRUE     TRUE
+#> 36                      McIntosh's Evenness mcintosh_evenness FALSE     TRUE     TRUE
+#> 37               Menhinick's Richness Index         menhinick FALSE     TRUE     TRUE
+#> 42                        Observed Features          observed FALSE    FALSE    FALSE
+#> 45                        Pielou's Evenness            pielou FALSE     TRUE    FALSE
+#> 48                            Renyi Entropy             renyi FALSE     TRUE    FALSE
+#> 49                  Shannon Diversity Index           shannon FALSE     TRUE    FALSE
+#> 50                Simpson's Dominance Index         dominance FALSE     TRUE    FALSE
+#> 51                       Simpson's Evenness  simpson_evenness FALSE     TRUE    FALSE
+#> 56               Squares Richness Estimator           squares FALSE     TRUE     TRUE
+#> 57                 Strong's Dominance Index            strong FALSE     TRUE    FALSE
+#> 59                          Tsallis Entropy           tsallis FALSE     TRUE    FALSE
 ```
 
 - Further reading:

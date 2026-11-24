@@ -66,6 +66,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/dist_tests.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/divergence.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/documentation.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/dominance.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dpcoa.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ecodive_display.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ecodive_types.html</loc></url>
@@ -80,9 +81,13 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/fisher.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/forward_select.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/generalized_unifrac.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/gini.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/goods_coverage.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/gower.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/hamming.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/heip.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/hellinger.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/hill.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/horn.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ilr.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/index.html</loc></url>
@@ -102,6 +107,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/margalef.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/matusita.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mcintosh.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/mcintosh_evenness.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mds.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/menhinick.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/metrics.html</loc></url>
@@ -127,6 +133,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/phi_s.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/philr.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/philr_distance.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/pielou.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.html</loc></url>
@@ -155,6 +162,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefy.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/read_tree.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/renyi.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/replace_zeros.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/replace_zeros_mult.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rho_p.html</loc></url>
@@ -164,6 +172,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/shannon.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/simper.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/simpson.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/simpson_evenness.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/soergel.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/sorensen.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/sourcetracker.html</loc></url>
@@ -172,8 +181,10 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/squared_chord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/squared_euclidean.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/squares.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/strong.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/structural_zeros.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/topsoe.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/tsallis.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/tsne.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/umap.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/unweighted_unifrac.html</loc></url>

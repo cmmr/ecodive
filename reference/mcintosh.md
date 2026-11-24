@@ -78,7 +78,10 @@ certain concepts to diversity. *Ecology*, 48(3), 392-404.
 [`vignette('adiv')`](https://cmmr.github.io/ecodive/articles/adiv.md)
 
 Other Dominance metrics:
-[`berger()`](https://cmmr.github.io/ecodive/reference/berger.md)
+[`berger()`](https://cmmr.github.io/ecodive/reference/berger.md),
+[`dominance()`](https://cmmr.github.io/ecodive/reference/dominance.md),
+[`gini()`](https://cmmr.github.io/ecodive/reference/gini.md),
+[`strong()`](https://cmmr.github.io/ecodive/reference/strong.md)
 
 ## Examples
 

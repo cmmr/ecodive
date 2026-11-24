@@ -10,6 +10,13 @@ documentation
   1, inclusive. Setting `alpha=1` is equivalent to
   [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/normalized_unifrac.md).
 
+- bias_corrected:
+
+  For Chao1 only: use the bias-corrected form (the default, as
+  scikit-bio and QIIME 2), or the classic form when a sample has both
+  singletons and doubletons (`FALSE`). See
+  [`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md).
+
 - counts:
 
   A numeric matrix of count data (samples \\\times\\ features).
@@ -54,6 +61,15 @@ documentation
     to every value first.
 
   Default: `'none'`.
+
+- q:
+
+  The order of a Hill number, or of Rényi's or Tsallis's entropy: a
+  single number of at least 0, where `Inf` is allowed. Only used by
+  [`hill()`](https://cmmr.github.io/ecodive/reference/hill.md),
+  [`renyi()`](https://cmmr.github.io/ecodive/reference/renyi.md) and
+  [`tsallis()`](https://cmmr.github.io/ecodive/reference/tsallis.md).
+  Default: `2`, as scikit-bio (which calls it `order`).
 
 - pairs:
 

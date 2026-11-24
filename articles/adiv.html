@@ -13,7 +13,7 @@
 <!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Noto_Sans-0.4.10/font.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Noto_Sans-0.5.0/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
@@ -103,8 +103,8 @@ samples.</p>
 <h2 id="alpha-diversity">Alpha Diversity<a class="anchor" aria-label="anchor" href="#alpha-diversity"></a>
 </h2>
 <p>Alpha diversity measures diversity within a single sample. In
-<code>ecodive</code>, metrics are grouped into four categories based on
-the aspect of diversity they quantify.</p>
+<code>ecodive</code>, metrics are grouped into categories based on the
+aspect of diversity they quantify.</p>
 <div class="section level3">
 <h3 id="richness-metrics">Richness Metrics<a class="anchor" aria-label="anchor" href="#richness-metrics"></a>
 </h3>
@@ -121,18 +121,21 @@ number of unobserved, low-abundance features based on the ratio of
 singletons (<code>counts == 1</code>) to doubletons
 (<code>counts == 2</code>).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Infers 8 unobserved genera</span></span>
+<code class="sourceCode R"><span><span class="co"># Infers 3 unobserved genera</span></span>
 <span><span class="fu"><a href="../reference/chao1.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 16</span></span>
+<span><span class="co">#&gt; [1] 11</span></span>
 <span></span>
-<span><span class="co"># Infers less than 1 unobserved genera</span></span>
+<span><span class="co"># Infers no unobserved genera</span></span>
 <span><span class="fu"><a href="../reference/chao1.html">chao1</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 8.125</span></span>
+<span><span class="co">#&gt; [1] 8</span></span>
 <span></span>
-<span><span class="co"># Datasets without 1s and 2s give Inf or NaN</span></span>
 <span><span class="fu"><a href="../reference/chao1.html">chao1</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Saliva   Gums   Nose  Stool </span></span>
-<span><span class="co">#&gt;    4.5    3.0    NaN    Inf </span></span></code></pre></div>
+<span><span class="co">#&gt;      4      3      4     11 </span></span></code></pre></div>
+<p>By default, <code><a href="../reference/chao1.html">chao1()</a></code> is the bias-corrected estimator, as
+in scikit-bio and QIIME 2. <code>chao1(bias_corrected = FALSE)</code>
+gives the classic formula, which is larger when there are few
+doubletons.</p>
 </div>
 <div class="section level3">
 <h3 id="diversity-metrics">Diversity Metrics<a class="anchor" aria-label="anchor" href="#diversity-metrics"></a>
@@ -179,13 +182,81 @@ of the single most abundant feature.</p>
 <span><span class="co">#&gt; 0.4956522 0.5217391 0.8956522 0.9884058 </span></span></code></pre></div>
 </div>
 <div class="section level3">
+<h3 id="evenness-metrics">Evenness Metrics<a class="anchor" aria-label="anchor" href="#evenness-metrics"></a>
+</h3>
+<p>Evenness metrics measure how equally the observed features share the
+sample, apart from how many there are. <strong>Pielou’s
+evenness</strong> is Shannon’s entropy divided by its largest possible
+value, <span class="math inline">\ln n</span> for <span class="math inline">n</span> observed features; QIIME 2’s
+<code>core-metrics</code> reports it.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Perfectly even (1) vs dominated by one genus (0.13)</span></span>
+<span><span class="fu"><a href="../reference/pielou.html">pielou</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="fu"><a href="../reference/pielou.html">pielou</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.1344212</span></span>
+<span></span>
+<span><span class="co"># Stool &lt; Gums &lt; Saliva &lt; Nose</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/pielou.html">pielou</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      Stool       Gums     Saliva       Nose </span></span>
+<span><span class="co">#&gt; 0.04925817 0.32488369 0.53466213 0.79792108 </span></span></code></pre></div>
+<p><code><a href="../reference/heip.html">heip()</a></code>, <code><a href="../reference/simpson_evenness.html">simpson_evenness()</a></code> and
+<code><a href="../reference/mcintosh_evenness.html">mcintosh_evenness()</a></code> are other evenness indices.</p>
+</div>
+<div class="section level3">
+<h3 id="hill-numbers">Hill Numbers<a class="anchor" aria-label="anchor" href="#hill-numbers"></a>
+</h3>
+<p>The <strong>Hill numbers</strong> <span class="math inline">^qD</span> are the “effective number of species”:
+how many equally abundant features would give the same diversity. The
+order <span class="math inline">q</span> sets how much weight abundant
+features get, and unifies the common indices: <span class="math inline">q = 0</span> is richness, <span class="math inline">q = 1</span> is the exponential of Shannon’s
+entropy, <span class="math inline">q = 2</span> is the inverse Simpson
+index, and <span class="math inline">q = \infty</span> is the inverse
+Berger-Parker index.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># A diversity profile: q = 0, 1, 2 and Inf</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="cn">Inf</span><span class="op">)</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">q</span><span class="op">)</span> <span class="fu"><a href="../reference/hill.html">hill</a></span><span class="op">(</span><span class="va">counts</span>, q <span class="op">=</span> <span class="va">q</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        [,1]     [,2]     [,3]     [,4]</span></span>
+<span><span class="co">#&gt; Saliva    4 2.098450 2.029446 1.916667</span></span>
+<span><span class="co">#&gt; Gums      3 1.428923 1.231620 1.116505</span></span>
+<span><span class="co">#&gt; Nose      4 3.022709 2.742701 2.017544</span></span>
+<span><span class="co">#&gt; Stool     5 1.082505 1.023563 1.011730</span></span></code></pre></div>
+<p><code><a href="../reference/renyi.html">renyi()</a></code> and <code><a href="../reference/tsallis.html">tsallis()</a></code> are the entropies of
+the same orders.</p>
+</div>
+<div class="section level3">
+<h3 id="coverage">Coverage<a class="anchor" aria-label="anchor" href="#coverage"></a>
+</h3>
+<p><strong>Good’s coverage</strong>, <span class="math inline">1 - F_1 /
+X_T</span>, estimates the fraction of the community’s individuals that
+belong to features seen in the sample: values near 1 mean that deeper
+sequencing would find few new features.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/goods_coverage.html">goods_coverage</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Saliva      Gums      Nose     Stool </span></span>
+<span><span class="co">#&gt; 0.9971014 1.0000000 1.0000000 0.9884058 </span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="several-metrics-at-once">Several Metrics at Once<a class="anchor" aria-label="anchor" href="#several-metrics-at-once"></a>
+</h3>
+<p>Give <code><a href="../reference/alpha_div.html">alpha_div()</a></code> several metric names to get a matrix
+with a column for each.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/alpha_div.html">alpha_div</a></span><span class="op">(</span><span class="va">counts</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'observed'</span>, <span class="st">'shannon'</span>, <span class="st">'pielou'</span>, <span class="st">'goods_coverage'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        observed    shannon     pielou goods_coverage</span></span>
+<span><span class="co">#&gt; Saliva        4 0.74119910 0.53466213      0.9971014</span></span>
+<span><span class="co">#&gt; Gums          3 0.35692121 0.32488369      1.0000000</span></span>
+<span><span class="co">#&gt; Nose          4 1.10615349 0.79792108      1.0000000</span></span>
+<span><span class="co">#&gt; Stool         5 0.07927797 0.04925817      0.9884058</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="phylogenetic-metrics">Phylogenetic Metrics<a class="anchor" aria-label="anchor" href="#phylogenetic-metrics"></a>
 </h3>
 <p>Phylogenetic metrics use a phylogenetic tree to incorporate
 evolutionary distance. <strong>Faith’s Phylogenetic Diversity
 (PD)</strong> calculates the total branch length spanned by the features
 present in a sample.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># ex_tree:</span></span>
 <span><span class="co">#</span></span>
 <span><span class="co">#       +----------44---------- Haemophilus</span></span>
@@ -236,6 +307,11 @@ X_i</span>
 <span class="math inline">F_1</span> : Number of singletons (<span class="math inline">X_i = 1</span>).</li>
 <li>
 <span class="math inline">F_2</span> : Number of doubletons (<span class="math inline">X_i = 2</span>).</li>
+<li>
+<span class="math inline">H</span> : Shannon’s entropy, <span class="math inline">-\sum_{i=1}^{n} P_i \ln P_i</span>.</li>
+<li>
+<span class="math inline">q</span> : The order of a Hill number or
+entropy (<code>q</code>, default 2).</li>
 </ul>
 <table class="table">
 <colgroup>
@@ -264,8 +340,9 @@ X_i</span>
 </tr>
 <tr class="even">
 <td align="left"><strong>Chao1</strong></td>
-<td align="left"><span class="math inline">\displaystyle n +
-\frac{(F_1)^2}{2 F_2}</span></td>
+<td align="left">
+<span class="math inline">\displaystyle n + \frac{F_1
+(F_1 - 1)}{2 (F_2 + 1)}</span> <br> (classic: <span class="math inline">\displaystyle n + \frac{(F_1)^2}{2 F_2}</span>)</td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>Faith’s Phylogenetic Diversity</strong></td>
@@ -277,6 +354,29 @@ X_i</span>
 <span class="math inline">\displaystyle
 \frac{n}{\alpha} = \ln{\left(1 + \frac{X_T}{\alpha}\right)}</span> <br>
 (<span class="math inline">\alpha</span> is solved for iteratively)</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Gini Index</strong></td>
+<td align="left">
+<span class="math inline">\displaystyle \max\left(0,\ 1
+- \frac{2}{K} \sum_{j = 1}^{K} L_j\right)</span> <br> (<span class="math inline">L_j</span>: share of the <span class="math inline">j</span> least abundant of all <span class="math inline">K</span> features in the table)</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Good’s Coverage</strong></td>
+<td align="left"><span class="math inline">\displaystyle 1 -
+\frac{F_1}{X_T}</span></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Heip’s Evenness</strong></td>
+<td align="left"><span class="math inline">\displaystyle \frac{e^H -
+1}{n - 1}</span></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Hill Number</strong></td>
+<td align="left">
+<span class="math inline">\displaystyle \left(\sum_{i =
+1}^{n} P_i^q\right)^{1/(1-q)}</span> <br> (<span class="math inline">e^H</span> at <span class="math inline">q =
+1</span>)</td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>Gini-Simpson Index</strong></td>
@@ -299,23 +399,64 @@ P_i^2</span></td>
 \sqrt{\sum_{i = 1}^{n} (X_i)^2}}{X_T - \sqrt{X_T}}</span></td>
 </tr>
 <tr class="odd">
+<td align="left"><strong>McIntosh’s Evenness</strong></td>
+<td align="left"><span class="math inline">\displaystyle
+\frac{\sqrt{\sum_{i = 1}^{n} (X_i)^2}}{\sqrt{(X_T - n + 1)^2 + n -
+1}}</span></td>
+</tr>
+<tr class="even">
 <td align="left"><strong>Menhinick’s Richness Index</strong></td>
 <td align="left"><span class="math inline">\displaystyle
 \frac{n}{\sqrt{X_T}}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Observed Features</strong></td>
 <td align="left"><span class="math inline">n</span></td>
 </tr>
+<tr class="even">
+<td align="left"><strong>Pielou’s Evenness</strong></td>
+<td align="left"><span class="math inline">\displaystyle \frac{H}{\ln
+n}</span></td>
+</tr>
 <tr class="odd">
+<td align="left"><strong>Rényi Entropy</strong></td>
+<td align="left">
+<span class="math inline">\displaystyle \frac{1}{1 - q}
+\ln \sum_{i = 1}^{n} P_i^q</span> <br> (<span class="math inline">H</span> at <span class="math inline">q =
+1</span>)</td>
+</tr>
+<tr class="even">
 <td align="left"><strong>Shannon Diversity Index</strong></td>
 <td align="left"><span class="math inline">-\sum_{i = 1}^{n} P_i \times
 \ln(P_i)</span></td>
 </tr>
+<tr class="odd">
+<td align="left"><strong>Simpson’s Dominance Index</strong></td>
+<td align="left"><span class="math inline">\sum_{i = 1}^{n}
+P_i^2</span></td>
+</tr>
 <tr class="even">
+<td align="left"><strong>Simpson’s Evenness</strong></td>
+<td align="left"><span class="math inline">\displaystyle \frac{1}{n
+\sum_{i = 1}^{n} P_i^2}</span></td>
+</tr>
+<tr class="odd">
 <td align="left"><strong>Squares Richness Estimator</strong></td>
 <td align="left"><span class="math inline">\displaystyle n +
 \frac{(F_1)^2 \sum_{i=1}^{n} (X_i)^2}{X_T^2 - nF_1}</span></td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Strong’s Dominance Index</strong></td>
+<td align="left">
+<span class="math inline">\displaystyle \max_i
+\left(\frac{c_i}{X_T} - \frac{i}{n}\right)</span> <br> (<span class="math inline">c_i</span>: sum of the <span class="math inline">i</span> largest counts)</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Tsallis Entropy</strong></td>
+<td align="left">
+<span class="math inline">\displaystyle \frac{1}{q - 1}
+\left(1 - \sum_{i = 1}^{n} P_i^q\right)</span> <br> (<span class="math inline">H</span> at <span class="math inline">q =
+1</span>)</td>
 </tr>
 </tbody>
 </table>

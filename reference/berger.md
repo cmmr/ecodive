@@ -75,7 +75,10 @@ foraminifera in deep-sea sediments. *Science*, 168(3937), 1345-1347.
 [`vignette('adiv')`](https://cmmr.github.io/ecodive/articles/adiv.md)
 
 Other Dominance metrics:
-[`mcintosh()`](https://cmmr.github.io/ecodive/reference/mcintosh.md)
+[`dominance()`](https://cmmr.github.io/ecodive/reference/dominance.md),
+[`gini()`](https://cmmr.github.io/ecodive/reference/gini.md),
+[`mcintosh()`](https://cmmr.github.io/ecodive/reference/mcintosh.md),
+[`strong()`](https://cmmr.github.io/ecodive/reference/strong.md)
 
 ## Examples
 

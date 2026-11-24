@@ -86,9 +86,12 @@ sample of an animal population. *Journal of Animal Ecology*, 12, 42-58.
 
 Other Diversity metrics:
 [`brillouin()`](https://cmmr.github.io/ecodive/reference/brillouin.md),
+[`hill()`](https://cmmr.github.io/ecodive/reference/hill.md),
 [`inv_simpson()`](https://cmmr.github.io/ecodive/reference/inv_simpson.md),
+[`renyi()`](https://cmmr.github.io/ecodive/reference/renyi.md),
 [`shannon()`](https://cmmr.github.io/ecodive/reference/shannon.md),
-[`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md)
+[`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md),
+[`tsallis()`](https://cmmr.github.io/ecodive/reference/tsallis.md)
 
 ## Examples
 

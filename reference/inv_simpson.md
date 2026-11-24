@@ -79,8 +79,11 @@ Simpson, E. H. (1949). Measurement of diversity. *Nature*, 163, 688.
 Other Diversity metrics:
 [`brillouin()`](https://cmmr.github.io/ecodive/reference/brillouin.md),
 [`fisher()`](https://cmmr.github.io/ecodive/reference/fisher.md),
+[`hill()`](https://cmmr.github.io/ecodive/reference/hill.md),
+[`renyi()`](https://cmmr.github.io/ecodive/reference/renyi.md),
 [`shannon()`](https://cmmr.github.io/ecodive/reference/shannon.md),
-[`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md)
+[`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md),
+[`tsallis()`](https://cmmr.github.io/ecodive/reference/tsallis.md)
 
 ## Examples
 

@@ -1264,6 +1264,55 @@
   result is a “Principal Coordinates Analysis of Bray-Curtis
   Dissimilarity (rarefied 100×)”.
 
+- Eleven new alpha diversity metrics, ported from scikit-bio’s
+  `skbio.diversity.alpha` (which QIIME 2 runs) and matching it to
+  rounding: Pielou’s evenness
+  [`pielou()`](https://cmmr.github.io/ecodive/reference/pielou.md)
+  (QIIME 2’s `evenness_vector`),
+  [`heip()`](https://cmmr.github.io/ecodive/reference/heip.md),
+  [`simpson_evenness()`](https://cmmr.github.io/ecodive/reference/simpson_evenness.md)
+  and
+  [`mcintosh_evenness()`](https://cmmr.github.io/ecodive/reference/mcintosh_evenness.md);
+  Good’s coverage
+  [`goods_coverage()`](https://cmmr.github.io/ecodive/reference/goods_coverage.md);
+  the Hill numbers
+  [`hill()`](https://cmmr.github.io/ecodive/reference/hill.md) and the
+  Rényi and Tsallis entropies
+  [`renyi()`](https://cmmr.github.io/ecodive/reference/renyi.md) and
+  [`tsallis()`](https://cmmr.github.io/ecodive/reference/tsallis.md), of
+  order `q` (default 2, as scikit-bio; `Inf` allowed); and Simpson’s and
+  Strong’s dominance indices
+  [`dominance()`](https://cmmr.github.io/ecodive/reference/dominance.md)
+  and [`strong()`](https://cmmr.github.io/ecodive/reference/strong.md)
+  and the Gini index
+  [`gini()`](https://cmmr.github.io/ecodive/reference/gini.md). All run
+  through
+  [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md),
+  which also accepts scikit-bio’s names (`'pielou_e'`, `'simpson_d'`,
+  `'observed_features'`, `'enspie'`, …).
+
+- [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)
+  and
+  [`alpha_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
+  take several metrics at once,
+  `metric = c('observed', 'shannon', 'pielou')`, and return a matrix
+  with a column for each (computed from the same rarefied tables). They
+  take the new `q` and `bias_corrected` arguments, before `cpus`.
+
+- **Changed results:**
+  [`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md) is now
+  the bias-corrected estimator, `S + F1 (F1 - 1) / (2 (F2 + 1))`, by
+  default, as scikit-bio and QIIME 2: it is never `Inf` or `NaN`.
+  `chao1(bias_corrected = FALSE)` gives the classic `S + F1^2 / (2 F2)`
+  when a sample has singletons and doubletons, and the bias-corrected
+  value otherwise, as scikit-bio.
+
+- **Changed matching:** `alpha_div(x, 'gini')` is now the new Gini
+  index; it used to match the Gini-Simpson index, which is `'simpson'`.
+  Some short prefixes that matched one metric now match several, and
+  give an error listing them (e.g. `'mc'`: `mcintosh` and
+  `mcintosh_evenness`).
+
 - Documentation:
   [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
   [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md)

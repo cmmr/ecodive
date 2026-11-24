@@ -41,6 +41,8 @@ alpha_div_rarefied(
   digits = 3L,
   tree = NULL,
   margin = 1L,
+  q = 2,
+  bias_corrected = TRUE,
   seed = 0L,
   cpus = n_cpus()
 )
@@ -58,10 +60,11 @@ alpha_div_rarefied(
 
   The name of a diversity metric: for `beta_div_rarefied()`, one of
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)'s
-  metrics, such as `'bray'`; for `alpha_div_rarefied()`, one of
+  metrics, such as `'bray'`; for `alpha_div_rarefied()`, one or several
+  of
   [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)'s,
-  such as `'shannon'`. Matched as those functions match it
-  (case-insensitive, with prefixes and aliases). See
+  such as `'shannon'` or `c('observed', 'shannon')`. Matched as those
+  functions match it (case-insensitive, with prefixes and aliases). See
   [`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md).
 
 - depth:
@@ -203,6 +206,22 @@ alpha_div_rarefied(
   Precision of the returned values, in number of decimal places. E.g.
   the default `digits=3` could return `6.392`.
 
+- q:
+
+  The order of a Hill number, or of Rényi's or Tsallis's entropy: a
+  single number of at least 0, where `Inf` is allowed. Only used by
+  [`hill()`](https://cmmr.github.io/ecodive/reference/hill.md),
+  [`renyi()`](https://cmmr.github.io/ecodive/reference/renyi.md) and
+  [`tsallis()`](https://cmmr.github.io/ecodive/reference/tsallis.md).
+  Default: `2`, as scikit-bio (which calls it `order`).
+
+- bias_corrected:
+
+  For Chao1 only: use the bias-corrected form (the default, as
+  scikit-bio and QIIME 2), or the classic form when a sample has both
+  singletons and doubletons (`FALSE`). See
+  [`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md).
+
 ## Value
 
 `beta_div_rarefied()`: a distance matrix of class
@@ -232,7 +251,12 @@ of it are titled after it. Further attributes:
 `alpha_div_rarefied()`: a named numeric vector over the kept samples, as
 [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)
 returns, with attributes `depth`, `dropped`, and with `sd = TRUE`, `sd`
-(a named numeric vector).
+(a named numeric vector). With several metrics, a matrix with a column
+for each metric, as
+[`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)
+returns, all computed from the same rarefied tables, and `sd` is a
+matrix of the same shape. Each column is exactly what that metric alone
+gives.
 
 ## Details
 

@@ -19,8 +19,10 @@
   phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA
   biplot scores, BIOENV, the alr and ilr transforms and balances,
   multiplicative zero replacement, the variance of log ratios, ANCOM,
-  ANCOM-BC and ANCOM-BC2, and Dirichlet-multinomial t-tests, from
-  scikit-bio
+  ANCOM-BC and ANCOM-BC2, Dirichlet-multinomial t-tests, and alpha
+  diversity metrics (evenness, coverage, Hill numbers, Renyi and Tsallis
+  entropies, dominance, the Gini index, and the bias-corrected Chao1),
+  from scikit-bio
 
 - **NumPy Developers**. Copyright holder.  
   numpy's pairwise summation, followed by replace_zeros_mult()
