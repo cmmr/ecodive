@@ -316,3 +316,128 @@ plot(x, metric = NULL, groups = NULL, data = NULL,
 - Chao, A., Gotelli, N. J., Hsieh, T. C., Sander, E. L., Ma, K. H., Colwell, R. K., & Ellison, A. M. (2014). Rarefaction and extrapolation with Hill numbers: a framework for sampling and estimation in species diversity studies. *Ecological Monographs*, 84, 45–67. doi:10.1890/13-0133.1
 - Bolyen, E., et al. (2019). Reproducible, interactive, scalable and extensible microbiome data science using QIIME 2. *Nature Biotechnology*, 37, 852–857. doi:10.1038/s41587-019-0209-9
 - Schloss, P. D. (2024). Rarefaction is currently the best approach to control for uneven sequencing effort in amplicon sequence analyses. *mSphere*, 9, e00354-23. doi:10.1128/msphere.00354-23
+
+
+## Decisions made while implementing
+
+Recorded 2026-11-24 (item 38).
+
+**Asked the user, at the start:**
+
+1. **Several metrics per call: yes.** `metric` takes one or more alpha
+   metrics. The result is always the same long data frame (a `metric`
+   column), whatever the number of metrics, so the return type never
+   depends on the input's length (the user's rule in
+   [alpha_metrics.md](alpha_metrics.md), decision 4). Each rarefied table
+   is used for every resampled metric. Duplicates (by ID, so `'obs'` and
+   `'observed'`) are dropped; the order given is kept.
+2. **`times = 10` by default**, as q2-diversity's `iterations` (not
+   `alpha_div_rarefied()`'s 100).
+3. **Coverage-based rarefaction done now**, as `rarefy(coverage =)`, a new
+   last argument (after `warn`). Each sample's depth is the smallest
+   \eqn{d \in [1, N]} whose expected coverage reaches the target (by
+   bisection: \eqn{C_d} increases with \eqn{d}, and at \eqn{d = N} the
+   Eq. 12 estimate is at least \eqn{C_{N-1} = 1 - f_1/N}). A sample whose
+   whole-sample estimate falls short gets depth \eqn{N + 1}, so `drop`
+   drops it (or `drop = FALSE` returns it unrarefied) exactly as for an
+   unreachable `depth`; `warn` says "k samples have an estimated coverage
+   below c and will be dropped / returned unrarefied". Then it rarefies with
+   one depth per sample, so the draws are those of `rarefy(depth = <those
+   depths>)` with the same seed. Giving both `depth` and `coverage` is an
+   error ("Give `depth` or `coverage`, not both."); `validate_coverage()`
+   takes a single number in (0, 1]. No attribute is added (count tables
+   stay plain); `rowSums()` gives the depths. Empty samples are dropped.
+
+**Decided while implementing:**
+
+4. **`bias_corrected`** is a formal too (after `q`), passed to `chao1`, as
+   in `alpha_div_rarefied()` (the plan predates it).
+5. **Shared helpers in `R/rarefied.r`:** `rarefied_setup()` is split into
+   `rarefied_counts()` (counts, margin, integer, seed and cpus checks,
+   negatives, doubles), `rarefied_times()`, `rarefied_average()` and
+   `rarefied_seeds()`, which `rarefaction_curve()` reuses; the old
+   function's checks, order and messages are unchanged.
+6. **Validation order:** metrics (a misspelt metric is the error
+   reported), counts/margin/integers/seed/cpus/negatives, `times`,
+   `depths`, `n_depths`, `max_depth`, `analytic`, `average`, `cutoff`,
+   `digits`, `q`, `bias_corrected`. Messages: "`metric` must be one or
+   more alpha diversity metric names.", "`depths` must be NULL or whole
+   numbers of at least 1.", "`n_depths` must be a whole number of at
+   least 2.", "`max_depth` must be NULL or a whole number of at least 1.",
+   "`analytic` must be NULL, TRUE or FALSE.", "`analytic = TRUE` needs a
+   closed form, which only "observed" has; not "shannon". Use `analytic =
+   NULL` to resample the other metrics."
+7. **`max_depth` with `depths`:** defaults to `max(depths)`; depths above
+   `max_depth` are dropped. A sample's total is added to its depths only
+   when it is at most `max_depth` (with `depths = c(10, 400, 700)`, a
+   sample of 886 gets rows 10, 400, 700; one of 615, rows 10, 400, 615).
+8. **The grid** is computed as NumPy does it: `(0:(n-1)) * ((M - 1) / (n -
+   1)) + 1`, the last set to \eqn{M}, `floor()`, `unique()`. Identical to
+   `np.linspace(1, M, num = n, dtype = int)` for 12 cases (fixture). No
+   error when `max_depth` exceeds every total (q2 refuses): those depths
+   just have no rows.
+9. **Empty samples** have no rows and keep their 0 in `totals`.
+10. **Unnamed samples** are labelled "1", "2", ... in `sample` and
+    `totals`; `plot()` treats labels equal to the positions as unnamed, so
+    `groups` is matched in order.
+11. **Resampled rows at a sample's own total:** `rarefy(counts, N_s)`
+    leaves sample \eqn{s} as it is, so these values come from the metric
+    on the unrarefied samples, computed once and added in every
+    iteration (so the mean is still the sequential sum over iterations
+    divided by `times`, and `identical()` to the rebuild). Only the grid
+    depths are rarefied: `n_depths` rarefactions per iteration, not
+    `n_depths` + the number of samples.
+12. **Each rarefaction is `C_rarefy` of the whole table** then the samples
+    below the depth dropped (as `rarefied_draw()`), never a subset first,
+    since streams are seeded by sample position.
+13. **Summaries:** mean = sequential sum / `times`, sd by Welford (as the
+    beta mean); median by `C_row_medians` over the `R × times` matrix, sd
+    two-pass from it. sd is `NA` with `times = 1`. The median equals
+    pandas' `describe()` 50% (q2's summary) exactly (fixture).
+14. **Closed forms in C, no `lchoose()`:**
+    - absence probabilities by one running product over the sorted
+      distinct abundances (`rc_absence()`), stopping at 0;
+    - **Heck's variance without cancellation.** As a difference,
+      \eqn{a_{k+l} - a_k a_l} lost up to 10 digits for deep samples at
+      small depths (and vegan's lchoose() form loses as many). With
+      \eqn{g_m = a_{k+m}/a_k}, \eqn{\delta_m = g_m - a_m} follows
+      \eqn{\delta_{m+1} = \delta_m s_m + g_m (r_m - s_m)}, \eqn{r_m - s_m =
+      -dk/((N-k-m)(N-m))} computed exactly; all terms have one sign. Cost
+      per depth: at most the sum of the distinct abundances (≤ N) steps,
+      O(K) memory (no K² pair table).
+    - **Exact values where the formulas are exact:** `value` = 1 and `sd`
+      = 0 at depth 1, `sd` = 0 at the total (where Eq. 12 gives the
+      coverage).
+15. **Threads over rows**, not samples (`row r` to thread `r % n`), so a
+    few samples with a dense grid still use every thread (20 samples × 3,000
+    depths: 21 s → 5.3 s on 4 cores). Identical for any `cpus`.
+16. **The coverage helpers** (`rc_freq()`, `rc_absence()`,
+    `rc_coverage()`, `rc_coverage_full()`) are declared in `ecodive.h` for
+    `hill_extrapolation()`; [hill_extrapolation.md](hill_extrapolation.md)
+    says so.
+17. **Plot:** `legend = 'bottomright'` and `col` are formals (as
+    `plot.ecodive_ord()`); without groups every line is grey
+    (`PLOT_MUTED`), with groups each group's colour and its median curve 3×
+    as thick: at each depth shared by at least two of its samples (all its
+    depths for a group of one), the median of x and of y. Numeric `groups`
+    become a factor (one colour per value). `depth` with `type =
+    "coverage"` is an error (the x axis is coverage). Subtitles: "Expected
+    values", "Mean of 10 rarefactions", "Median of 1 rarefaction";
+    `type = "completeness"` always "Expected values". The labels come from
+    an internal `rc_plot_labels()`, which the tests check.
+18. **No `display`:** the input is a count table with no title; the
+    print header is "Rarefaction curves" (`print_df_label()`).
+19. **References for the closed forms:** besides vegan 2.7.8 and iNEXT
+    3.0.2 (output only), the fixture has a 50-digit mpmath computation of
+    the published formulas (`data-raw/expected/rarefaction_curve.py`),
+    which shows ecodive within 5.4e-13 of the exact values everywhere,
+    vegan within 1.4e-12 (richness) and 7e-6 (sd, absolute; 1e-8 relative
+    where sd > 0.001), iNEXT within 1.5e-10 (coverage). The tests compare
+    with vegan at 1e-12 (richness) and 1e-10 (sd > 0.001), relaxed to
+    1e-11 and 1e-7 for the deep samples because of vegan's own error.
+20. **q2-diversity:** nothing ported (only the grid rule and design), so
+    no notice in `inst/COPYRIGHTS` and no `Authors@R` entry; the R file's
+    header names it.
+21. **pkgdown:** `rarefaction_curve` under "Utilities & Helpers" beside
+    `rarefy` and `alpha_div_rarefied`; its `plot()` method in "Plotting and
+    Printing" with the others.

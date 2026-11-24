@@ -211,6 +211,7 @@ reference:
   - plot.ecodive_bioenv
   - plot.ecodive_types
   - plot.ecodive_source
+  - plot.ecodive_rarefaction_curve
   - ecodive_display
   - print_ecodive
 
@@ -223,6 +224,7 @@ reference:
   - rarefy
   - beta_div_rarefied
   - alpha_div_rarefied
+  - rarefaction_curve
   - normalize
   - n_cpus
   - blas_threads

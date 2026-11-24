@@ -57,8 +57,11 @@ same thing.
 | `n_types` | **(new, 2026-11-20)** the candidate numbers of community types (a single value fixes it) | `enterotype`; planned `dmm` |
 | `ch` | **(new, 2026-11-20)** the form of the Calinski-Harabasz index: `'medoids'` (clusterSim's, as in Arumugam et al.'s script) or `'centroids'` (the distances' pseudo-F) | `enterotype` |
 | `centroids` | **(new)** reference type profiles to classify against | planned `valencia` |
-| `q` | **(new, 2026-11-24)** the order of a Hill number or of Rényi's or Tsallis's entropy: a single number ≥ 0, `Inf` allowed; default 2, as scikit-bio's `order` (vegan's `scales`) | `hill`, `renyi`, `tsallis`, `alpha_div`, `alpha_div_rarefied`; planned `rarefaction_curve` |
+| `q` | **(new, 2026-11-24)** the order of a Hill number or of Rényi's or Tsallis's entropy: a single number ≥ 0, `Inf` allowed; default 2, as scikit-bio's `order` (vegan's `scales`) | `hill`, `renyi`, `tsallis`, `alpha_div`, `alpha_div_rarefied`, `rarefaction_curve` |
 | `bias_corrected` | **(new, 2026-11-24)** Chao1's bias-corrected form (`TRUE`, the default, as scikit-bio) or the classic one (`FALSE`), as scikit-bio's `bias_corrected` | `chao1`, `alpha_div`, `alpha_div_rarefied` |
+| `depths`, `n_depths`, `max_depth` | **(new, 2026-11-24, item 38)** the depths of rarefaction curves (whole numbers ≥ 1; plural, since `depth` is one depth per sample), the number of points in the default grid (`n_<unit>` rule; q2's `steps`), and the largest depth computed (q2's name) | `rarefaction_curve` |
+| `analytic` | **(new, item 38)** which metrics to compute in closed form: `NULL` (those that have one), `TRUE` (all, an error if one has none) or `FALSE` (resample all) | `rarefaction_curve` |
+| `coverage` | **(new, item 38)** a target sample coverage in (0, 1], for coverage-based rarefaction (Chao & Jost 2012); exclusive with `depth`. Also planned `hill_standardize(coverage =)` | `rarefy` |
 | `cpus` | threads (always last) | everything threaded |
 
 

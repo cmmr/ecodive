@@ -70,6 +70,8 @@ extern SEXP C_pthreads(void);
 extern SEXP C_stop_thread_pool(void);
 extern SEXP C_qmp_scale(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rarefy(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rarefaction_curve(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_coverage_depth(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rpca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rpca_phylo(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_simper(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -165,6 +167,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_stop_thread_pool", (DL_FUNC) &C_stop_thread_pool, 0},
   {"C_qmp_scale", (DL_FUNC) &C_qmp_scale, 5},
   {"C_rarefy",    (DL_FUNC) &C_rarefy,    5},
+  {"C_rarefaction_curve", (DL_FUNC) &C_rarefaction_curve, 5},
+  {"C_coverage_depth",    (DL_FUNC) &C_coverage_depth,    4},
   {"C_read_tree", (DL_FUNC) &C_read_tree, 2},
   {"C_medoid_accum", (DL_FUNC) &C_medoid_accum, 3},
   {"C_row_medians",  (DL_FUNC) &C_row_medians,  2},

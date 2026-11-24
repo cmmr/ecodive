@@ -1,0 +1,20 @@
+row,median
+Saliva 1,0x0.0p+0
+Saliva 50,0x1.627b4d3a45b87p-1
+Saliva 200,0x1.7b2e6fdf9331bp-1
+Saliva 345,0x1.7b7e72da4399fp-1
+Gums 1,0x0.0p+0
+Gums 50,0x1.d0d4593327678p-3
+Gums 200,0x1.6239a004acf33p-2
+Gums 345,0x1.6a8aaf2d9e984p-2
+Gums 600,0x1.6d1049d5a3e1ap-2
+Nose 1,0x0.0p+0
+Nose 50,0x1.2218e40d45a50p+0
+Nose 200,0x1.242384dd9173dp+0
+Nose 345,0x1.1cdc5c99ba7a9p+0
+Nose 600,0x1.22d4a59028393p+0
+Stool 1,0x0.0p+0
+Stool 50,0x0.0p+0
+Stool 200,0x1.01c60a34c4f56p-4
+Stool 345,0x1.e7301265b9fc4p-5
+Stool 600,0x1.93c9dd66ab81ap-5

@@ -332,5 +332,6 @@ microbiome data is inadmissible. \emph{PLoS Computational Biology}, 10,
 e1003531. \doi{10.1371/journal.pcbi.1003531}
 }
 \seealso{
-\code{\link[=rarefy]{rarefy()}}, \code{\link[=beta_div]{beta_div()}}, \code{\link[=alpha_div]{alpha_div()}}, \code{\link[=rpca]{rpca()}}
+\code{\link[=rarefy]{rarefy()}}, \code{\link[=beta_div]{beta_div()}}, \code{\link[=alpha_div]{alpha_div()}}, \code{\link[=rpca]{rpca()}}, and
+\code{\link[=rarefaction_curve]{rarefaction_curve()}} to choose a depth.
 }

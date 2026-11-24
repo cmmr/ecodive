@@ -182,6 +182,24 @@ validate_cutoff <- function (env = parent.frame()) {
 }
 
 
+validate_coverage <- function (env = parent.frame()) {
+  tryCatch(
+    with(env, {
+      if (!is.null(coverage)) {
+        stopifnot(is.numeric(coverage))
+        stopifnot(is.null(dim(coverage)))
+        stopifnot(length(coverage) == 1)
+        stopifnot(!is.na(coverage))
+        stopifnot(coverage > 0 && coverage <= 1)
+        coverage <- as.double(coverage)
+      }
+    }),
+    error = function (e)
+      stop(e$message, '\n`coverage` must be NULL or a single number greater than 0 and at most 1.')
+  )
+}
+
+
 validate_depth <- function (env = parent.frame()) {
   tryCatch(
     with(env, {

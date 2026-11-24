@@ -878,6 +878,23 @@
   ordination of the result is a "Principal Coordinates Analysis of
   Bray-Curtis Dissimilarity (rarefied 100×)".
 
+* New `rarefaction_curve()`: alpha diversity against sequencing depth, one
+  row per sample, metric and depth, with `plot()`. Richness (`'observed'`)
+  is computed exactly in closed form, as `vegan::rarefy()` and
+  `rarecurve()` do (Hurlbert's expected richness and Heck et al.'s standard
+  deviation, without vegan's rounding error); any other alpha metric, or
+  several at once, by rarefying `times` times at each depth (as QIIME 2's
+  `alpha-rarefaction`, whose depth grid it uses), with the same seed at
+  every depth, so that each rarefaction's subsamples are nested. Every row
+  also has the expected sample coverage (Chao & Jost 2012), and `plot()`
+  draws depth, coverage-based or sample-completeness curves, by group,
+  with a line at a planned rarefaction depth.
+
+* `rarefy()` takes a new last argument, `coverage`, to rarefy each sample
+  to the smallest depth whose expected coverage reaches it
+  (coverage-based rarefaction, Chao & Jost 2012), instead of to one
+  `depth`.
+
 * Eleven new alpha diversity metrics, ported from scikit-bio's
   `skbio.diversity.alpha` (which QIIME 2 runs) and matching it to rounding:
   Pielou's evenness `pielou()` (QIIME 2's `evenness_vector`), `heip()`,

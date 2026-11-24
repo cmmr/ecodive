@@ -301,6 +301,7 @@ print_df_label <- function (x) {
     ecodive_cross_assoc   = cross_assoc_label(x),
     ecodive_network_diff  = 'Differential Associations',
     ecodive_simper        = 'SIMPER',
+    ecodive_rarefaction_curve = 'Rarefaction curves',
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
     NULL )
 }
@@ -358,6 +359,8 @@ print.ecodive_simper           <- print_table_result
 print.ecodive_bioenv           <- print_table_result
 #' @export
 print.ecodive_envfit           <- print_table_result
+#' @export
+print.ecodive_rarefaction_curve <- print_table_result
 
 
 
