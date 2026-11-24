@@ -36,6 +36,7 @@ extern SEXP C_da_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_batch_combat(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_batch_mmuphin(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_tests(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_indicator_species(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lefse_kw(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lefse_columns(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lefse_wilcoxon(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -147,6 +148,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_batch_combat",  (DL_FUNC) &C_batch_combat,  13},
   {"C_batch_mmuphin", (DL_FUNC) &C_batch_mmuphin, 11},
   {"C_da_tests",      (DL_FUNC) &C_da_tests,      7},
+  {"C_indicator_species", (DL_FUNC) &C_indicator_species, 13},
   {"C_lefse_kw",       (DL_FUNC) &C_lefse_kw,        6},
   {"C_lefse_columns",  (DL_FUNC) &C_lefse_columns,   5},
   {"C_lefse_wilcoxon", (DL_FUNC) &C_lefse_wilcoxon,  9},
