@@ -401,3 +401,37 @@ Decided here:
   session. abdiv 0.2.0's `R/beta_components.R` (MIT) was read and
   followed; its notice is in `src/beta_div.c`, `R/beta_partition.r` and
   `inst/COPYRIGHTS`, and Kyle Bittinger is in `Authors@R` (ctb, cph).
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 52, done 2026-11-24.** Commit `8d5eb46` (work), merged with
+items 42 (`dirmult_lm()`) and 47 (`composition_barplot()`) with no
+conflicts; then this tick.
+
+- **Built:** `sorensen_turnover()`, `sorensen_nestedness()`,
+  `jaccard_turnover()`, `jaccard_nestedness()`, `bray_balanced()`,
+  `bray_gradient()`, `soergel_balanced()`, `soergel_gradient()` (METRICS
+  rows, run by `beta_div()`), `beta_partition()` and
+  `beta_partition_multi()`, with `print()` and `plot()` methods; aliases
+  `braycurtis` and `bc` for `bray`.
+- **Reference comparisons** (largest absolute differences): betapart
+  1.6.1 `beta.pair()` / `beta.pair.abund()` 1.1e-16 (NaN in the same
+  places), `beta.multi()` / `beta.multi.abund()` 6.6e-17 (this confirms
+  the abundance shared term A = Σ_k (Σ_i x_ik − max_i x_ik)); abdiv 0.2.0's
+  eight functions 1.1e-16 on every pair; betapart's `ceram.s` / `ceram.n`
+  1.1e-16 (pairwise) and 5.6e-17 (multiple-site), not stored. Every random
+  draw equals betapart's value of its subset (≤ 1e-12), and 2000-draw means
+  agree with `beta.sample()` / `beta.sample.abund()` within 5 SE. The test
+  tolerance is 1e-12.
+- **Determinism:** `identical()` results for `cpus` 1, 2, 4 and 7
+  (pairwise, all-samples value with 160 samples, 250 draws); dense, `Matrix`
+  and `slam` input agree exactly; `margin = 2` too.
+- **Tests:** `test-beta_partition.r` (432 expectations) and smoke lines.
+  The full suite at home was 28,632 before the merge (baseline 28,140) and
+  426 in CRAN mode (baseline 406). `R CMD check --no-manual
+  --ignore-vignettes` gave only the installed-size NOTE.
+- **Open:** `DESCRIPTION`'s "Implements 51 ... indices" dates from when
+  METRICS had 51 rows and was already stale before this item; left for
+  whoever next edits the Description. The phylogenetic partition (see
+  "Later") is not done.
