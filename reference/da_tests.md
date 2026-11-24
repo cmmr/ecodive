@@ -98,26 +98,28 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_da_tests()
-#>                                     name            id  design      effect base
-#> 1 Analysis of Composition of Microbiomes         ancom  groups        <NA> <NA>
-#> 2                               ANCOM-BC       ancombc formula      log_fc    e
-#> 3                              ANCOM-BC2      ancombc2 formula      log_fc    e
-#> 4           Dirichlet-Multinomial t-test dirmult_ttest  groups     log2_fc    2
-#> 5                 Wilcoxon Rank-Sum Test   da_wilcoxon  groups median_diff norm
-#> 6                           Welch t-test      da_ttest  groups        diff norm
-#> 7                           Linear Model         da_lm formula    estimate norm
-#> 8                                  LinDA         linda formula     log2_fc    2
-#> 9                                  LEfSe         lefse  groups   lda_score <NA>
-#>   zero_free_ok signed
-#> 1         TRUE  FALSE
-#> 2         TRUE   TRUE
-#> 3         TRUE   TRUE
-#> 4        FALSE   TRUE
-#> 5         TRUE   TRUE
-#> 6         TRUE   TRUE
-#> 7         TRUE   TRUE
-#> 8         TRUE   TRUE
-#> 9         TRUE  FALSE
+#>                                      name            id  design      effect
+#> 1  Analysis of Composition of Microbiomes         ancom  groups        <NA>
+#> 2                                ANCOM-BC       ancombc formula      log_fc
+#> 3                               ANCOM-BC2      ancombc2 formula      log_fc
+#> 4            Dirichlet-Multinomial t-test dirmult_ttest  groups     log2_fc
+#> 5      Dirichlet-Multinomial Linear Model    dirmult_lm formula    estimate
+#> 6                  Wilcoxon Rank-Sum Test   da_wilcoxon  groups median_diff
+#> 7                            Welch t-test      da_ttest  groups        diff
+#> 8                            Linear Model         da_lm formula    estimate
+#> 9                                   LinDA         linda formula     log2_fc
+#> 10                                  LEfSe         lefse  groups   lda_score
+#>    base zero_free_ok signed
+#> 1  <NA>         TRUE  FALSE
+#> 2     e         TRUE   TRUE
+#> 3     e         TRUE   TRUE
+#> 4     2        FALSE   TRUE
+#> 5     2        FALSE   TRUE
+#> 6  norm         TRUE   TRUE
+#> 7  norm         TRUE   TRUE
+#> 8  norm         TRUE   TRUE
+#> 9     2         TRUE   TRUE
+#> 10 <NA>         TRUE  FALSE
 
     # Find the method for 'Mann-Whitney'.
     m <- match_da_test('Mann-Whitney')

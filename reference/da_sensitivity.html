@@ -84,7 +84,7 @@ Types</strong>.</p></dd>
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>The name of a DA method, as for <code><a href="da_test.html">da_test()</a></code>: <code>"ancom"</code>,
 <code>"ancombc"</code>, <code>"ancombc2"</code>, <code>"da_lm"</code>, <code>"da_ttest"</code>,
-<code>"da_wilcoxon"</code>, <code>"dirmult_ttest"</code>, or <code>"linda"</code>. Flexible
+<code>"da_wilcoxon"</code>, <code>"dirmult_lm"</code>, <code>"dirmult_ttest"</code>, or <code>"linda"</code>. Flexible
 matching is supported.</p></dd>
 
 
@@ -107,7 +107,8 @@ method's <code>pseudocount</code>. Default: <code>NULL</code> (none).</p></dd>
 method <code>replace_zeros(counts, z)</code> instead of <code>counts</code>, with the
 method's default <code>pseudocount</code> (which adds nothing to a table
 without zeros). Not for the methods that model counts
-(<code>zero_free_ok = FALSE</code> in <code><a href="da_tests.html">list_da_tests()</a></code>: <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>).
+(<code>zero_free_ok = FALSE</code> in <code><a href="da_tests.html">list_da_tests()</a></code>: <code><a href="dirmult_lm.html">dirmult_lm()</a></code>,
+<code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>).
 Default: <code>NULL</code> (none).</p></dd>
 
 
@@ -115,7 +116,7 @@ Default: <code>NULL</code> (none).</p></dd>
 <dd><p>Scale uncertainties to try: <code>TRUE</code> for
 <code>c(0, 0.25, 0.5, 1)</code>, or a vector of non-negative numbers. Each
 run sets the method's <code>scale_sd</code>, so only for methods that have
-one (<code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>). Default: <code>NULL</code> (none).</p></dd>
+one (<code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>). Default: <code>NULL</code> (none).</p></dd>
 
 
 <dt id="arg-crossed">crossed<a class="anchor" aria-label="anchor" href="#arg-crossed"></a></dt>
@@ -131,7 +132,7 @@ each other: each of them is crossed with each <code>scale_sds</code>.</p></dd>
     <p>A data frame of class <code>c('ecodive_da_sensitivity', 'data.frame')</code>, one row per feature (and covariate, for the model
 methods) and run, with columns:</p><ul><li><p><code>feature</code>: the feature's name, as in the method's result.</p></li>
 <li><p><code>covariate</code>: for the model methods (<code><a href="ancombc.html">ancombc()</a></code>, <code><a href="ancombc.html">ancombc2()</a></code>,
-<code><a href="da_wilcoxon.html">da_lm()</a></code>), the column of the design; every covariate but the
+<code><a href="da_wilcoxon.html">da_lm()</a></code>, <code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="linda.html">linda()</a></code>), the column of the design; every covariate but the
 intercept is kept. <code>NA</code> for the group methods.</p></li>
 <li><p><code>run</code>: the run's number, <code>0</code> for the base run.</p></li>
 <li><p><code>parameter</code>: what the run changed: <code>'base'</code>, <code>'pseudocount'</code>,
@@ -194,16 +195,19 @@ every value before the logs, to patch the zeros (for the last three,
 only with <code>norm = 'clr'</code> or <code>'log'</code>, the norms that take logs). For
 <code><a href="ancombc.html">ancombc()</a></code>
 and <code><a href="ancombc.html">ancombc2()</a></code> it is added to every value, as in ANCOMBC's own
-sensitivity analysis. For <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code> it is the Dirichlet
-prior, added to the counts before the posterior draws. For <code><a href="linda.html">linda()</a></code>
+sensitivity analysis. For <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code> and <code><a href="dirmult_lm.html">dirmult_lm()</a></code> it is
+the Dirichlet prior, added to the counts before the posterior draws. For <code><a href="linda.html">linda()</a></code>
 it is added to every count when the zeros get a pseudocount
 (<code>zero_handling = 'pseudocount'</code>, or <code>'adaptive'</code> choosing it); when
 they are imputed, every run is the same.</p></li>
 <li><p><code>zeros</code>: replaces the zeros with <code><a href="replace_zeros.html">replace_zeros()</a></code> instead of a
 pseudocount, for the methods that take any table of positive values.</p></li>
-<li><p><code>scale_sds</code>: <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>'s scale model, the standard deviation of
-the samples' log total load (ALDEx2's gamma): <code>0</code> assumes the loads are
-the same, larger values allow more variation and give wider intervals.</p></li>
+<li><p><code>scale_sds</code>: <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>'s and <code><a href="dirmult_lm.html">dirmult_lm()</a></code>'s scale model, the
+standard deviation of the samples' log total load (ALDEx2's and
+ALDEx3's gamma): <code>0</code> assumes the loads are as the method's assumption
+puts them, larger values allow more variation and give wider intervals
+(and, for <code><a href="dirmult_lm.html">dirmult_lm()</a></code>, larger p-values). Not with <code><a href="dirmult_lm.html">dirmult_lm()</a></code>'s
+<code>load</code>, whose error is <code>load_sd</code>.</p></li>
 </ul><p><strong>Relation to ANCOMBC's <code>passed_ss</code>.</strong> <code>summary$passed</code> is ANCOMBC's
 <code>passed_ss</code> generalised to any method and setting: with <code>method = 'ancombc2'</code> and <code>pseudocounts = TRUE</code>, it is exactly <code><a href="ancombc.html">ancombc2()</a></code>'s
 <code>passed_ss</code> (and <code>robust</code> its <code>reject_robust</code>). These pseudocount runs

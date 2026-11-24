@@ -49,8 +49,8 @@
   ANCOM-BC and ANCOM-BC2 ('ANCOMBC'), via scikit-bio's port
 
 - **ALDEx3 authors**. Contributor, copyright holder.  
-  the scale model and effect sizes of dirmult_ttest(), following
-  'ALDEx3'
+  the scale model and effect sizes of dirmult_ttest(), and dirmult_lm(),
+  following 'ALDEx3'
 
 - **Biota Technology**. Contributor, copyright holder.  
   the Gibbs sampler of sourcetracker(), from 'SourceTracker2'

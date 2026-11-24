@@ -63,6 +63,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/dbrda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/decontam.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/decontam_frequency_plot.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/dirmult_lm.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dirmult_ttest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dist_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dist_ords.html</loc></url>
@@ -147,6 +148,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_decontam.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_lm.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_ttest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.html</loc></url>

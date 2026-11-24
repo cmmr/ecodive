@@ -1299,6 +1299,32 @@
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 - New
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md):
+  ALDEx3’s linear models (McGovern & Silverman 2026; Nixon et al. 2025),
+  the regression form of
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md).
+  Every Monte Carlo draw of the samples’ Dirichlet posteriors gets a
+  scale model (`scale_model = 'clr'` or `'tss'` with uncertainty
+  `scale_sd`, or measured or predicted loads, `load` with error
+  `load_sd`), and each feature’s log2 abundance is regressed on any
+  `formula`, with HC3 (default), HC0 or classical standard errors, or
+  with a random intercept, `~ group + (1 | subject)` (REML and
+  Satterthwaite, as
+  [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md)).
+  Estimates and p-values are averaged over the draws as ALDEx3’s
+  `aldex()` and [`summary()`](https://rdrr.io/r/base/summary.html) do,
+  and match ALDEx3 1.4.0 to about 1e-12 on the same draws. Its draws are
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)’s
+  for the same `seed`, so with `scale_sd = 0` and two groups its
+  estimate is
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)’s
+  `log2_fc`. Parallel C, the same for any `cpus`; one of
+  [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md)’s
+  methods (also as `"ALDEx3"`) and
+  [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md)’s
+  (`scale_sds`), with volcano, effect, MA, forest and rank plots.
+
+- New
   [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)
   estimates what share of each sink sample’s community came from each of
   several source environments, and from an unknown source, with

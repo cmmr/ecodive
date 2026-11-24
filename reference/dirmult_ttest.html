@@ -318,7 +318,8 @@ random seed.</p>
 details: it reports both Welch's and Wilcoxon's tests, averages
 Benjamini-Hochberg adjusted p-values over the draws, and gives its own
 effect size; its scale model (<code>gamma</code>) is off by default. ALDEx3 fits
-linear models to each draw instead of t-tests. Their results agree with
+linear models to each draw instead of t-tests: <code><a href="dirmult_lm.html">dirmult_lm()</a></code> ports
+them, from the same draws. Their results agree with
 this function's in direction and rough size, not exactly.</p>
 <p><strong>Effect sizes.</strong> <code>pooled_sd</code>, <code>mean</code> and <code>effect</code> describe each feature
 for the effect and MA plots (<code><a href="plot.ecodive_dirmult_ttest.html">plot.ecodive_dirmult_ttest()</a></code>).
@@ -395,7 +396,7 @@ Computational Biology</em>, 22, e1014728.
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="ancom.html">ancom()</a></code>, <code><a href="replace_zeros.html">replace_zeros()</a></code>, <code><a href="da_sensitivity.html">da_sensitivity()</a></code>.</p></div>
+    <div class="dont-index"><p><code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="ancom.html">ancom()</a></code>, <code><a href="replace_zeros.html">replace_zeros()</a></code>, <code><a href="da_sensitivity.html">da_sensitivity()</a></code>.</p></div>
     </div>
 
     <div class="section level2">

@@ -21,9 +21,9 @@ da_test(counts, method, groups = NULL, data = NULL, formula = NULL, ...)
 - method:
 
   The name of a DA method: `"ancom"`, `"ancombc"`, `"ancombc2"`,
-  `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`, `"dirmult_ttest"`,
-  `"lefse"`, or `"linda"`. Flexible matching is supported (see below).
-  Programmatic access via
+  `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`, `"dirmult_lm"`,
+  `"dirmult_ttest"`, `"lefse"`, or `"linda"`. Flexible matching is
+  supported (see below). Programmatic access via
   [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md).
 
 - groups:
@@ -60,10 +60,12 @@ da_test(counts, method, groups = NULL, data = NULL, formula = NULL, ...)
   [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
   [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
   [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
   [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md), and
   [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md). `seed`
   is ignored by the methods that have no random parts (all but
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
   and [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md)).
 
@@ -87,6 +89,7 @@ methods) and a `method` attribute, the method's id.
 | `da_lm` | Linear model per feature | formula |
 | `da_ttest` | Welch t-test per feature | groups |
 | `da_wilcoxon` | Wilcoxon rank-sum test per feature | groups |
+| `dirmult_lm` | Dirichlet-multinomial linear model with a scale model (ALDEx3) | formula |
 | `dirmult_ttest` | Dirichlet-multinomial t-test (ALDEx2-style) | groups |
 | `lefse` | LDA effect size (LEfSe) | groups |
 | `linda` | Linear models for differential abundance (LinDA) | formula |
@@ -120,7 +123,8 @@ Case insensitive and partial matching, ignoring anything but letters
 `da_wilcoxon`; `'t-test'` or `'Welch'` selects `da_ttest`; `'lm'` or
 `'linear model'` selects `da_lm`; and `'ALDEx2'` selects
 `dirmult_ttest`, an ALDEx2-style method (not ALDEx2 itself, whose
-results agree with it in direction and rough size only).
+results agree with it in direction and rough size only); `'ALDEx3'`
+selects `dirmult_lm`, a port of ALDEx3's linear models.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -172,6 +176,7 @@ abundance analysis. *Briefings in Bioinformatics*, 26, bbaf130.
 [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
 [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
 [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
+[`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
 [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
 [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md),
 [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md),

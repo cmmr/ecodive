@@ -32,8 +32,8 @@ da_sensitivity(
   The name of a DA method, as for
   [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md):
   `"ancom"`, `"ancombc"`, `"ancombc2"`, `"da_lm"`, `"da_ttest"`,
-  `"da_wilcoxon"`, `"dirmult_ttest"`, or `"linda"`. Flexible matching is
-  supported.
+  `"da_wilcoxon"`, `"dirmult_lm"`, `"dirmult_ttest"`, or `"linda"`.
+  Flexible matching is supported.
 
 - ...:
 
@@ -58,6 +58,7 @@ da_sensitivity(
   adds nothing to a table without zeros). Not for the methods that model
   counts (`zero_free_ok = FALSE` in
   [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md):
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)).
   Default: `NULL` (none).
 
@@ -66,7 +67,8 @@ da_sensitivity(
   Scale uncertainties to try: `TRUE` for `c(0, 0.25, 0.5, 1)`, or a
   vector of non-negative numbers. Each run sets the method's `scale_sd`,
   so only for methods that have one
-  ([`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)).
+  ([`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)).
   Default: `NULL` (none).
 
 - crossed:
@@ -88,9 +90,11 @@ columns:
 - `covariate`: for the model methods
   ([`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
   [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
-  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)),
-  the column of the design; every covariate but the intercept is kept.
-  `NA` for the group methods.
+  [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
+  [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md)), the
+  column of the design; every covariate but the intercept is kept. `NA`
+  for the group methods.
 
 - `run`: the run's number, `0` for the base run.
 
@@ -185,6 +189,8 @@ each, and not when the base run already gave them.
   [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md) it
   is added to every value, as in ANCOMBC's own sensitivity analysis. For
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
+  and
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md)
   it is the Dirichlet prior, added to the counts before the posterior
   draws. For
   [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md) it is
@@ -199,9 +205,16 @@ each, and not when the base run already gave them.
 
 - `scale_sds`:
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)'s
+  and
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md)'s
   scale model, the standard deviation of the samples' log total load
-  (ALDEx2's gamma): `0` assumes the loads are the same, larger values
-  allow more variation and give wider intervals.
+  (ALDEx2's and ALDEx3's gamma): `0` assumes the loads are as the
+  method's assumption puts them, larger values allow more variation and
+  give wider intervals (and, for
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
+  larger p-values). Not with
+  [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md)'s
+  `load`, whose error is `load_sd`.
 
 **Relation to ANCOMBC's `passed_ss`.** `summary$passed` is ANCOMBC's
 `passed_ss` generalised to any method and setting: with

@@ -684,6 +684,8 @@ don’t matter.
   : Structural zeros
 - [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
   : Dirichlet-multinomial Welch t-tests (ALDEx2-style)
+- [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md)
+  : Dirichlet-multinomial linear models with scale models (ALDEx3)
 - [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
   [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
   [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md) :
@@ -872,6 +874,8 @@ than every value.
   : Plot a SIMPER result
 - [`plot(`*`<ecodive_dirmult_ttest>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_ttest.md)
   : Plot a Dirichlet-multinomial t-test
+- [`plot(`*`<ecodive_dirmult_lm>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_lm.md)
+  : Plot a Dirichlet-multinomial Linear Model
 - [`plot(`*`<ecodive_ancom>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.md)
   : Plot an ANCOM result
 - [`plot(`*`<ecodive_ancombc>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)

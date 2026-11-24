@@ -281,8 +281,10 @@ random seed.
 details: it reports both Welch's and Wilcoxon's tests, averages
 Benjamini-Hochberg adjusted p-values over the draws, and gives its own
 effect size; its scale model (`gamma`) is off by default. ALDEx3 fits
-linear models to each draw instead of t-tests. Their results agree with
-this function's in direction and rough size, not exactly.
+linear models to each draw instead of t-tests:
+[`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md)
+ports them, from the same draws. Their results agree with this
+function's in direction and rough size, not exactly.
 
 **Effect sizes.** `pooled_sd`, `mean` and `effect` describe each feature
 for the effect and MA plots
@@ -368,6 +370,7 @@ Computational Biology*, 22, e1014728.
 
 ## See also
 
+[`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
 [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md),
 [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md),
 [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md).
