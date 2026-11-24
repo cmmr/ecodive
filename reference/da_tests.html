@@ -96,6 +96,10 @@ matching. All non-alpha characters are ignored.</p></dd>
 effect sizes</p></li>
 <li><p><code>zero_free_ok</code> : Whether the method may be given a table with its zeros
 replaced (<code><a href="replace_zeros.html">replace_zeros()</a></code>): <code>FALSE</code> for the methods that model counts</p></li>
+<li><p><code>signed</code> : Whether the effect sizes have a direction, so that they rank
+the features for <code><a href="log_ratio_features.html">log_ratio_features()</a></code> and rank plots: <code>FALSE</code> for
+LEfSe's LDA scores (a magnitude, with the class in <code>enriched</code>) and for
+ANCOM</p></li>
 <li><p><code>func</code> : The function for this method, e.g. <code><a href="da_wilcoxon.html">ecodive::da_ttest</a></code></p></li>
 <li><p><code>params</code> : Formal args for <code>func</code>, e.g. <code>c("counts", "groups", ...)</code></p></li>
 </ul><p><strong><code>list_da_tests()</code></strong></p>
@@ -125,16 +129,16 @@ be applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="ex
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7                           Linear Model         da_lm formula    estimate norm</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8                                  LinDA         linda formula     log2_fc    2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9                                  LEfSe         lefse  groups   lda_score &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   zero_free_ok</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8         TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9         TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   zero_free_ok signed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1         TRUE  FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         TRUE   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         TRUE   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        FALSE   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5         TRUE   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         TRUE   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7         TRUE   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8         TRUE   TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9         TRUE  FALSE</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Find the method for 'Mann-Whitney'.</span></span></span>
 <span class="r-in"><span>    <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">match_da_test</span><span class="op">(</span><span class="st">'Mann-Whitney'</span><span class="op">)</span></span></span>

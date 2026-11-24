@@ -854,6 +854,51 @@
       needs none. Both take every table type and keep sparse tables
       sparse: 2,000 samples by 5,000 taxa take under 0.1 seconds.
 
+- Qurro-style rank plots and log ratios (Fedarko et al. 2020; Morton et
+  al. 2019’s reference frames):
+
+  - `plot(fit, type = "rank")` draws every feature as a bar of its
+    effect, sorted, for the results of
+    [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+    [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+    [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
+    [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
+    [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
+    [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
+    and [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md),
+    and `plot(ord, type = "rank")` the loadings on one axis of
+    [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+    [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md),
+    [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md),
+    [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) and other
+    ordinations with loadings. `numerator` and `denominator` highlight a
+    log ratio’s features. `plot(ord, type = "n")` and other `type`s
+    still reach
+    [`plot.default()`](https://rdrr.io/r/graphics/plot.default.html).
+  - New `log_ratio_features(x, n)` picks the `n` top- and bottom-ranked
+    features of such a result (Qurro’s “autoselection”), as `numerator`
+    and `denominator` for
+    [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md)
+    or
+    [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md).
+    It selects the same features as Qurro 0.9.0’s own code in every
+    reference case, ties included, and their
+    [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md)
+    matches Qurro’s `qarcoal()` to within one rounding of
+    [`log()`](https://rdrr.io/r/base/Log.html).
+  - [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md)
+    and
+    [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md)
+    results have class `ecodive_log_ratio`, with a short
+    [`print()`](https://rdrr.io/r/base/print.html) and a
+    [`plot()`](https://rdrr.io/r/graphics/plot.default.html): the
+    samples’ values by group (box plot with the samples over it, spread
+    without the random number generator), against a numeric variable, or
+    all together, leaving out and counting undefined values. They stay
+    numeric vectors everywhere else; subsetting,
+    [`sort()`](https://rdrr.io/r/base/sort.html) and arithmetic return
+    plain named vectors.
+
 - New [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
   [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
   [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) measure

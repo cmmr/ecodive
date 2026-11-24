@@ -107,7 +107,13 @@ numerator. Attributes:</p><ul><li><p><code>method</code>: <code>'balance'</code>
 <li><p><code>numerator</code>, <code>denominator</code>: the selected features' names (their
 indices when the features have no names), in the order of <code>counts</code>.</p></li>
 <li><p><code>pseudocount</code>: the pseudocount used (<code>0</code> for none).</p></li>
-</ul></div>
+</ul><p>Its class, <code>ecodive_log_ratio</code>, gives it a short <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> (a header
+naming the features, then the values) and a <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> by group or
+against a numeric variable (<code><a href="plot.ecodive_log_ratio.html">plot.ecodive_log_ratio()</a></code>). Everything
+else treats it as a plain numeric vector (<code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric()</a></code> is <code>TRUE</code>);
+subsetting (<code>x[1:5]</code>), <code><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort()</a></code>, and arithmetic or maths (<code>-x</code>, <code>x - mean(x)</code>, <code>abs(x)</code>) return a plain named vector without the
+attributes, which no longer describe the values.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>For a sample \(x\), numerator features \(N\) (\(r\) of them) and
@@ -192,16 +198,11 @@ together.</p></div>
 <span class="r-in"><span>      numerator   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Streptococcus'</span>, <span class="st">'Haemophilus'</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>      denominator <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Propionibacterium'</span>, <span class="st">'Staphylococcus'</span>, <span class="st">'Corynebacterium'</span><span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">b</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Balance of 2 over 3 features; pseudocount 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Numerator:   'Streptococcus', 'Haemophilus'</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Denominator: 'Corynebacterium', 'Propionibacterium', 'Staphylococcus'</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Saliva      Gums      Nose     Stool </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  3.938659  4.922648 -4.207824 -1.046615 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"method")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "balance"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"numerator")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Streptococcus" "Haemophilus"  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"denominator")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Corynebacterium"   "Propionibacterium" "Staphylococcus"   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"pseudocount")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># The first coordinate of ilr() with a partition that starts with it</span></span></span>
 <span class="r-in"><span>    <span class="va">sbp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span></span>
@@ -212,9 +213,10 @@ together.</p></div>
 <span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>,  <span class="fl">1</span>,  <span class="fl">1</span>,  <span class="fl">1</span>,  <span class="fl">1</span><span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="ilr.html">ilr</a></span><span class="op">(</span><span class="va">x</span>, basis <span class="op">=</span> <span class="va">sbp</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Attributes: &lt; Modes: list, NULL &gt;"                   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "Attributes: &lt; Lengths: 4, 0 &gt;"                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "Attributes: &lt; Lengths: 5, 0 &gt;"                       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3] "Attributes: &lt; names for target but not for current &gt;"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4] "Attributes: &lt; current is not list-like &gt;"            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "target is ecodive_log_ratio, current is numeric"     </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -57,6 +57,18 @@ Attributes:
 
 - `pseudocount`: the pseudocount used (`0` for none).
 
+Its class, `ecodive_log_ratio`, gives it a short
+[`print()`](https://rdrr.io/r/base/print.html) (a header naming the
+features, then the values) and a
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) by group or
+against a numeric variable
+([`plot.ecodive_log_ratio()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.md)).
+Everything else treats it as a plain numeric vector
+([`is.numeric()`](https://rdrr.io/r/base/numeric.html) is `TRUE`);
+subsetting (`x[1:5]`), [`sort()`](https://rdrr.io/r/base/sort.html), and
+arithmetic or maths (`-x`, `x - mean(x)`, `abs(x)`) return a plain named
+vector without the attributes, which no longer describe the values.
+
 ## Details
 
 For a sample \\x\\, numerator features \\N\\ (\\r\\ of them) and
@@ -161,16 +173,11 @@ finding features that move together.
       numerator   = c('Streptococcus', 'Haemophilus'),
       denominator = c('Propionibacterium', 'Staphylococcus', 'Corynebacterium') )
     b
+#> Balance of 2 over 3 features; pseudocount 0
+#> Numerator:   'Streptococcus', 'Haemophilus'
+#> Denominator: 'Corynebacterium', 'Propionibacterium', 'Staphylococcus'
 #>    Saliva      Gums      Nose     Stool 
 #>  3.938659  4.922648 -4.207824 -1.046615 
-#> attr(,"method")
-#> [1] "balance"
-#> attr(,"numerator")
-#> [1] "Streptococcus" "Haemophilus"  
-#> attr(,"denominator")
-#> [1] "Corynebacterium"   "Propionibacterium" "Staphylococcus"   
-#> attr(,"pseudocount")
-#> [1] 0
 
     # The first coordinate of ilr() with a partition that starts with it
     sbp <- rbind(
@@ -181,7 +188,8 @@ finding features that move together.
       c(1, -1,  1,  1,  1,  1) )
     all.equal(unname(b), unname(ilr(x, basis = sbp)[, 1]))
 #> [1] "Attributes: < Modes: list, NULL >"                   
-#> [2] "Attributes: < Lengths: 4, 0 >"                       
+#> [2] "Attributes: < Lengths: 5, 0 >"                       
 #> [3] "Attributes: < names for target but not for current >"
 #> [4] "Attributes: < current is not list-like >"            
+#> [5] "target is ecodive_log_ratio, current is numeric"     
 ```

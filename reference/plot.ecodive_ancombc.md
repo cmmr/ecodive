@@ -12,10 +12,12 @@ of their post-hoc tests, from what each holds:
 plot(
   x,
   covariate = NULL,
-  type = c("volcano", "effect", "ma", "forest"),
+  type = c("volcano", "effect", "ma", "forest", "rank"),
   labels = 10,
   n_features = 30,
   conf_level = 0.95,
+  numerator = NULL,
+  denominator = NULL,
   ...
 )
 
@@ -59,8 +61,8 @@ plot(x, n_features = 30, ...)
   For [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md)
   and
   [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md):
-  the plot, `"volcano"` (the default), `"effect"`, `"ma"`, or
-  `"forest"`.
+  the plot, `"volcano"` (the default), `"effect"`, `"ma"`, `"forest"`,
+  or `"rank"`.
 
 - labels:
 
@@ -69,7 +71,8 @@ plot(x, n_features = 30, ...)
   [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md):
   how many of the differentially abundant features to name (in the
   volcano, effect and MA plots), those with the smallest adjusted
-  p-values. Default `10`; `0` for none.
+  p-values. In the rank plot, the highlighted features with the largest
+  effects. Default `10`; `0` for none.
 
 - n_features:
 
@@ -83,6 +86,16 @@ plot(x, n_features = 30, ...)
 
   For the forest plot: the confidence level of the intervals. Default
   `0.95`.
+
+- numerator, denominator:
+
+  For `"rank"`: the features to highlight as the numerator (red) and
+  denominator (blue) of a log ratio, such as those that
+  [`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md)
+  picks: their names, their indices among the result's features, or a
+  logical vector with one value per feature, as for
+  [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md).
+  They must not overlap.
 
 - ...:
 
@@ -115,7 +128,8 @@ plot(x, n_features = 30, ...)
   et al. 2016; ALDEx2's `"MW"` plot), for a two-level comparison;
   `"ma"`, against each feature's mean clr abundance (ALDEx2's `"MA"`
   plot); or `"forest"`, with their confidence intervals, for the
-  `n_features` most significant features.
+  `n_features` most significant features; or `"rank"`, all of them
+  sorted by their log fold change (see **Rank plots**).
 
 - [`ancombc_pairwise()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
   [`ancombc_dunnett()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md):
@@ -169,6 +183,31 @@ bold when that comparison is significant for that feature. For
 [`ancombc_trend()`](https://cmmr.github.io/ecodive/reference/ancombc_global.md),
 each feature's label gives the pattern with the largest statistic.
 
+## Rank plots
+
+A rank plot (`type = "rank"`) draws every feature as a bar from 0 to its
+effect, sorted from the smallest at the left to the largest at the right
+(ties in the result's order), as Qurro's rank plot does (Fedarko et al.
+2020,
+[doi:10.1093/nargab/lqaa023](https://doi.org/10.1093/nargab/lqaa023) ).
+With relative abundances, every feature's effect is known only up to a
+shift shared by all of them, the unknown change in the total (Morton et
+al. 2019,
+[doi:10.1038/s41467-019-10656-5](https://doi.org/10.1038/s41467-019-10656-5)
+): the ranking is what the data show, and the log ratio of features from
+its two ends can be read without knowing the total. Pick them with
+[`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md),
+show where they sit with `numerator` and `denominator`, and plot their
+log ratio sample by sample with
+[`plot.ecodive_log_ratio()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.md).
+
+Without `numerator` or `denominator`, the differentially abundant
+features (`reject = TRUE`) are drawn dark and the others light; with
+them, the numerator's bars are red and the denominator's blue, with a
+legend. The `labels` highlighted features with the largest effects are
+named. Features with no estimate (`NaN`) are left out and counted in the
+subtitle; for a model result, the bars are `covariate`'s effects.
+
 ## Examples
 
 ``` r
@@ -201,6 +240,14 @@ each feature's label gives the pattern with the largest statistic.
     plot(fit, type = 'ma')
 
     plot(fit, 'age', type = 'forest')
+
+
+    # The features ranked, with the two at each end as a log ratio.
+    sel <- log_ratio_features(fit, n = 2)
+    plot(fit, type = 'rank', numerator = sel$numerator, denominator = sel$denominator)
+
+    plot(do.call(log_ratio, c(list(x), sel)), 'status', meta)
+#> Warning: 1 sample ('S14') has a numerator or denominator that sums to 0, so its log ratio is NA. A positive `pseudocount` gives it a value.
 
 
     # Every pair of groups.

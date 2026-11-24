@@ -54,6 +54,18 @@ Attributes:
 
 - `pseudocount`: the pseudocount used (`0` for none).
 
+Its class, `ecodive_log_ratio`, gives it a short
+[`print()`](https://rdrr.io/r/base/print.html) (a header naming the
+features, then the values) and a
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) by group or
+against a numeric variable
+([`plot.ecodive_log_ratio()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.md)).
+Everything else treats it as a plain numeric vector
+([`is.numeric()`](https://rdrr.io/r/base/numeric.html) is `TRUE`);
+subsetting (`x[1:5]`), [`sort()`](https://rdrr.io/r/base/sort.html), and
+arithmetic or maths (`-x`, `x - mean(x)`, `abs(x)`) return a plain named
+vector without the attributes, which no longer describe the values.
+
 The vector drops straight into metadata (`data$ratio <- log_ratio(...)`)
 and into any test or fit that takes a per-sample variable, such as
 [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) or
@@ -135,6 +147,11 @@ feature against one;
 [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
 [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) for
 finding features that move together.
+[`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md)
+to take the numerator and denominator from the two ends of a ranking,
+and
+[`plot.ecodive_log_ratio()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.md)
+to plot the result.
 
 ## Examples
 
@@ -145,38 +162,24 @@ finding features that move together.
       numerator   = c('Streptococcus', 'Haemophilus'),
       denominator = c('Propionibacterium', 'Staphylococcus', 'Corynebacterium') )
     r
+#> Log ratio of 2 over 3 features; pseudocount 0
+#> Numerator:   'Streptococcus', 'Haemophilus'
+#> Denominator: 'Corynebacterium', 'Propionibacterium', 'Staphylococcus'
 #>    Saliva      Gums      Nose     Stool 
 #>  5.834811  6.086775 -3.714588  0.000000 
-#> attr(,"method")
-#> [1] "log_ratio"
-#> attr(,"numerator")
-#> [1] "Streptococcus" "Haemophilus"  
-#> attr(,"denominator")
-#> [1] "Corynebacterium"   "Propionibacterium" "Staphylococcus"   
-#> attr(,"pseudocount")
-#> [1] 0
 
     # The same, by index; zero sums give NA
     log_ratio(ex_counts, c(1, 4), c(3, 5, 6))
+#> Log ratio of 2 over 3 features; pseudocount 0
+#> Numerator:   'Streptococcus', 'Haemophilus'
+#> Denominator: 'Corynebacterium', 'Propionibacterium', 'Staphylococcus'
 #>    Saliva      Gums      Nose     Stool 
 #>  5.834811  6.086775 -3.714588  0.000000 
-#> attr(,"method")
-#> [1] "log_ratio"
-#> attr(,"numerator")
-#> [1] "Streptococcus" "Haemophilus"  
-#> attr(,"denominator")
-#> [1] "Corynebacterium"   "Propionibacterium" "Staphylococcus"   
-#> attr(,"pseudocount")
-#> [1] 0
     suppressWarnings(log_ratio(ex_counts, 2, 6))
+#> Log ratio of 1 over 1 feature; pseudocount 0
+#> Numerator:   'Bacteroides'
+#> Denominator: 'Staphylococcus'
+#> 1 sample is NA (a zero sum)
 #>    Saliva      Gums      Nose     Stool 
 #>        NA  1.386294 -4.770685  6.415097 
-#> attr(,"method")
-#> [1] "log_ratio"
-#> attr(,"numerator")
-#> [1] "Bacteroides"
-#> attr(,"denominator")
-#> [1] "Staphylococcus"
-#> attr(,"pseudocount")
-#> [1] 0
 ```

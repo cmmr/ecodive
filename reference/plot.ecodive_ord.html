@@ -84,6 +84,9 @@ this is a quick look at results already in hand.</p>
 <span>  pch <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scaling <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  links <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"samples"</span>,</span>
+<span>  numerator <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  denominator <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -130,7 +133,9 @@ which case <code>axes</code> is not used).</p></dd>
 <dd><p>How many of the features in the <code>loadings</code> attribute to
 draw, those furthest from the origin on the plotted axes first: a
 number, <code>Inf</code> (or <code>TRUE</code>) for all, or <code>0</code> (or <code>FALSE</code>) for none.
-Default <code>10</code>. Drawn as arrows for <code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>,
+Default <code>10</code>. In a rank plot, how many features to name, those
+with the largest loadings (among <code>numerator</code> and <code>denominator</code>,
+when given). Drawn as arrows for <code><a href="pca.html">pca()</a></code>, <code><a href="rpca.html">rpca()</a></code>,
 <code><a href="rpca_phylo.html">rpca_phylo()</a></code>, <code><a href="rda.html">rda()</a></code>, <code><a href="plsda.html">plsda()</a></code> and <code><a href="oplsda.html">oplsda()</a></code>, and as labelled
 points for the species scores of <code><a href="ca.html">ca()</a></code> and <code><a href="cca.html">cca()</a></code>. With
 <code>scaling = 'contribution'</code>, those contributing most to the plane
@@ -201,6 +206,23 @@ of pairs of them. Each link is labelled with its length, which
 approximates the standard deviation of the log ratio of its two
 features (see "Compositional biplots"). The linked features are
 drawn whatever <code>loadings</code> is. Default <code>NULL</code>, for none.</p></dd>
+
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p><code>"samples"</code> (the default): the samples on two axes, with
+the overlays below. <code>"rank"</code>: a rank plot of the feature loadings
+on axis <code>axes[1]</code> (see <strong>Rank plots</strong>), for ordinations of a count
+table with a <code>loadings</code> attribute. Any other value is passed on to
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">graphics::plot.default()</a></code>, so <code>type = "n"</code> sets up the plot
+without drawing the samples, as for any matrix.</p></dd>
+
+
+<dt id="arg-numerator-denominator">numerator, denominator<a class="anchor" aria-label="anchor" href="#arg-numerator-denominator"></a></dt>
+<dd><p>For <code>type = "rank"</code>: the features to
+highlight as the numerator (red) and denominator (blue) of a log
+ratio, such as those that <code><a href="log_ratio_features.html">log_ratio_features()</a></code> picks: names
+(rows of <code>loadings</code>), indices, or a logical vector, as for
+<code><a href="log_ratio.html">log_ratio()</a></code>. They must not overlap.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -297,6 +319,25 @@ where \(f = \sqrt{\lambda / \mathrm{trace}}\) for <code><a href="rda.html">rda()
 scaling when one is given.</p>
 <p>Base graphics draw on the current device, so further points, text or
 arrows can be added on top. Use <code><a href="envfit.html">envfit()</a></code>'s plot method, <code>plot(fit, add = TRUE)</code>, to add fitted variables.</p>
+<p><strong>Rank plots</strong></p>
+<p>With <code>type = "rank"</code>, each feature is a bar from 0 to
+its loading on axis <code>axes[1]</code>, sorted from the smallest at the left to
+the largest at the right (ties in the order of <code>loadings</code>), as Qurro's
+rank plot of feature loadings (Fedarko et al. 2020,
+<a href="https://doi.org/10.1093/nargab/lqaa023" class="external-link">doi:10.1093/nargab/lqaa023</a>
+). For a compositional ordination such as
+<code><a href="rpca.html">rpca()</a></code>, the features at the two ends pull the samples apart along the
+axis, and their log ratio (Morton et al. 2019,
+<a href="https://doi.org/10.1038/s41467-019-10656-5" class="external-link">doi:10.1038/s41467-019-10656-5</a>
+) follows the axis without depending on
+the samples' totals: pick them with <code><a href="log_ratio_features.html">log_ratio_features()</a></code> and plot it
+with <code><a href="plot.ecodive_log_ratio.html">plot.ecodive_log_ratio()</a></code>. The bars are grey; <code>numerator</code> and
+<code>denominator</code> colour theirs, with a legend in the top-left corner
+(<code>legend</code> moves it, and <code>NULL</code> leaves it out). The title is "Rank plot
+of" the ordination's title. The loadings of <code><a href="rpca_phylo.html">rpca_phylo()</a></code> include the
+tree's internal nodes. <code>scaling</code> and <code>links</code> don't apply: each scaling
+multiplies an axis's loadings by one positive number, which leaves their
+ranking unchanged.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -356,9 +397,13 @@ fitted variables to an ordination plot.</p></div>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="lda.html">lda</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.ecodive_ord-8.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># The features ranked by their loadings on the first axis.</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="pca.html">pca</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">'rank'</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot.ecodive_ord-9.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Any argument of plot() still works.</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="nmds.html">nmds</a></span><span class="op">(</span><span class="fu"><a href="bray.html">bray</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'grey40'</span>, main <span class="op">=</span> <span class="st">'NMDS'</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.ecodive_ord-9.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="plot.ecodive_ord-10.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

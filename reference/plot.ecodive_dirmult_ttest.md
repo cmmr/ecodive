@@ -11,9 +11,11 @@ results, each feature a point (or a row), with the features that differ
 # S3 method for class 'ecodive_dirmult_ttest'
 plot(
   x,
-  type = c("volcano", "effect", "ma", "forest"),
+  type = c("volcano", "effect", "ma", "forest", "rank"),
   labels = 10,
   n_features = 30,
+  numerator = NULL,
+  denominator = NULL,
   ...
 )
 ```
@@ -27,20 +29,31 @@ plot(
 
 - type:
 
-  The plot: `"volcano"` (the default), `"effect"`, `"ma"`, or
-  `"forest"`.
+  The plot: `"volcano"` (the default), `"effect"`, `"ma"`, `"forest"`,
+  or `"rank"`.
 
 - labels:
 
   How many of the differentially abundant features to name (in the
   volcano, effect and MA plots), those with the smallest adjusted
-  p-values. Default `10`; `0` for none.
+  p-values. In the rank plot, the highlighted features with the largest
+  effects. Default `10`; `0` for none.
 
 - n_features:
 
   For `"forest"`: how many features to show, those with the smallest
   adjusted p-values (ties in the table's order). Default `30`; `Inf` for
   all.
+
+- numerator, denominator:
+
+  For `"rank"`: the features to highlight as the numerator (red) and
+  denominator (blue) of a log ratio, such as those that
+  [`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md)
+  picks: their names, their indices among the result's features, or a
+  logical vector with one value per feature, as for
+  [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md).
+  They must not overlap.
 
 - ...:
 
@@ -65,6 +78,9 @@ plot(
 
 - `"forest"`: the log2 fold changes and their intervals of the
   `n_features` most significant features, largest at the top.
+
+- `"rank"`: every feature's log2 fold change, sorted (see **Rank
+  plots**).
 
 **Volcano plot.** The y axis is \\-\log\_{10}\\ of `p_adjusted` (an
 adjusted p-value of 0 is drawn at the smallest positive double). The
@@ -97,6 +113,31 @@ wider than a single confidence interval.
 Features whose value is `NaN` are left out of each plot. The subtitle
 names the contrast and counts the features rejected.
 
+## Rank plots
+
+A rank plot (`type = "rank"`) draws every feature as a bar from 0 to its
+effect, sorted from the smallest at the left to the largest at the right
+(ties in the result's order), as Qurro's rank plot does (Fedarko et al.
+2020,
+[doi:10.1093/nargab/lqaa023](https://doi.org/10.1093/nargab/lqaa023) ).
+With relative abundances, every feature's effect is known only up to a
+shift shared by all of them, the unknown change in the total (Morton et
+al. 2019,
+[doi:10.1038/s41467-019-10656-5](https://doi.org/10.1038/s41467-019-10656-5)
+): the ranking is what the data show, and the log ratio of features from
+its two ends can be read without knowing the total. Pick them with
+[`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md),
+show where they sit with `numerator` and `denominator`, and plot their
+log ratio sample by sample with
+[`plot.ecodive_log_ratio()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.md).
+
+Without `numerator` or `denominator`, the differentially abundant
+features (`reject = TRUE`) are drawn dark and the others light; with
+them, the numerator's bars are red and the denominator's blue, with a
+legend. The `labels` highlighted features with the largest effects are
+named. Features with no estimate (`NaN`) are left out and counted in the
+subtitle; for a model result, the bars are `covariate`'s effects.
+
 ## References
 
 Gloor, G. B., Macklaim, J. M., & Fernandes, A. D. (2016). Displaying
@@ -115,4 +156,6 @@ variation in large datasets: plotting a visual summary of effect sizes.
     plot(res, 'ma')
 
     plot(res, 'forest')
+
+    plot(res, 'rank', numerator = 'Petal.Width', denominator = 'Sepal.Width')
 ```

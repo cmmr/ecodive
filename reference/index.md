@@ -225,6 +225,8 @@ variable in tests and models.
   : Log Ratio of Summed Abundances
 - [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md) :
   Isometric Log-Ratio Balance
+- [`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md)
+  : Features for a Log Ratio from a Ranking
 
 ### Proportionality
 
@@ -519,6 +521,8 @@ than every value.
   : Plot source contributions
 - [`plot(`*`<ecodive_rarefaction_curve>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_rarefaction_curve.md)
   : Plot rarefaction curves
+- [`plot(`*`<ecodive_log_ratio>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.md)
+  : Plot Log Ratios
 - [`ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)
   : Titles of results
 - [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)

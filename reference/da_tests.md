@@ -58,6 +58,12 @@ A `list` with the following elements.
   ([`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)):
   `FALSE` for the methods that model counts
 
+- `signed` : Whether the effect sizes have a direction, so that they
+  rank the features for
+  [`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md)
+  and rank plots: `FALSE` for LEfSe's LDA scores (a magnitude, with the
+  class in `enriched`) and for ANCOM
+
 - `func` : The function for this method, e.g.
   [`ecodive::da_ttest`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
 
@@ -102,16 +108,16 @@ will be applied to the
 #> 7                           Linear Model         da_lm formula    estimate norm
 #> 8                                  LinDA         linda formula     log2_fc    2
 #> 9                                  LEfSe         lefse  groups   lda_score <NA>
-#>   zero_free_ok
-#> 1         TRUE
-#> 2         TRUE
-#> 3         TRUE
-#> 4        FALSE
-#> 5         TRUE
-#> 6         TRUE
-#> 7         TRUE
-#> 8         TRUE
-#> 9         TRUE
+#>   zero_free_ok signed
+#> 1         TRUE  FALSE
+#> 2         TRUE   TRUE
+#> 3         TRUE   TRUE
+#> 4        FALSE   TRUE
+#> 5         TRUE   TRUE
+#> 6         TRUE   TRUE
+#> 7         TRUE   TRUE
+#> 8         TRUE   TRUE
+#> 9         TRUE  FALSE
 
     # Find the method for 'Mann-Whitney'.
     m <- match_da_test('Mann-Whitney')

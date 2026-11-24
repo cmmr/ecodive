@@ -103,6 +103,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/lefse.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/linda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/log_ratio.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/log_ratio_features.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/log_ratio_pseudocount_section.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/lorentzian.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/manhattan.html</loc></url>
@@ -151,6 +152,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_lefse.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_network.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_rarefaction_curve.html</loc></url>
