@@ -441,3 +441,28 @@ tests, `feature_specific_covariate`, `unscaled_abundance` (could map to
 warnings (maaslin3 turns them into flags), `evaluate_only`. The draft
 article `vignettes/articles/compositional.Rmd` doesn't mention
 `maaslin3()` yet.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 49, done 2026-11-24.** Commit `7bd94a3` (work); this tick.
+
+- Tests: 29,906 at home, 435 in CRAN mode (baseline 29,628 and 432).
+  `R CMD check --no-manual --ignore-vignettes`: one NOTE (installed size).
+- maaslin3 1.4.0 with its median comparison's rnorm() draws regenerated
+  (fixed effects, 8 cases): coefficients 1.1e-13 (abundance) and 2.4e-13
+  (prevalence), standard errors 1.2e-15 and 6.3e-15, prevalence p 7.1e-14,
+  median-comparison p 3.4e-8 (multcomp's numerical t integral); flags and
+  `reject` identical. Without augmentation, a separated feature: 3.3e-6.
+- Random intercepts: abundance against lmerTest 8.3e-7 (coefficients),
+  p 4.4e-6; prevalence against glmer's best of three optimizers 6.6e-7
+  (coefficients, absolute), 1.8e-6 (SE). maaslin3's own glmer fits
+  (nloptwrap first) stop short on flat criteria by up to 0.3; `reject`
+  still identical.
+- Speed: 200 x 2,000, 10,000 draws: 1.2 s on 1 core, 0.39 s on 4; with
+  `(1 | id)`, 3.9 s and 1.1 s.
+- Found: glmer's criterion with maaslin3's fractional augmentation
+  weights counts only the original samples' likelihood; glmer's SEs for
+  singular fits come from RX, not the Hessian; maaslin3's CLR filter drops
+  features whose CLR values are all <= 0; letters-only matching sent
+  'MaAsLin2' to maaslin3 (now an error).

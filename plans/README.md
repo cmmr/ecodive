@@ -359,7 +359,7 @@ can't be mistaken for one another:
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance`, ✓ `log_ratio_features` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
-| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, ✓ `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, ✓ `linda`, `maaslin3`, `fastancom`, `rademu`, ✓ `lefse`, `deseq2`, ✓ `da_sensitivity` |
+| Differential abundance (`da_test`) | ✓ `ancom`, ✓ `ancombc`, ✓ `ancombc2`, ✓ `ancombc_global`, ✓ `ancombc_pairwise`, ✓ `ancombc_dunnett`, ✓ `ancombc_trend`, ✓ `structural_zeros`, ✓ `dirmult_ttest`, ✓ `dirmult_lm`, ✓ `da_wilcoxon`, ✓ `da_ttest`, ✓ `da_lm`, ✓ `linda`, ✓ `maaslin3`, `fastancom`, `rademu`, ✓ `lefse`, `deseq2`, ✓ `da_sensitivity` |
 | Absolute abundance | ✓ `qmp_scale`, ✓ `qmp_rarefy` |
 | Rarefied diversity | ✓ `beta_div_rarefied`, ✓ `alpha_div_rarefied` |
 | Normalization | ✓ `normalize`, `size_factors` (new `norm` choices: see [normalization_factors.md](normalization_factors.md)) |
