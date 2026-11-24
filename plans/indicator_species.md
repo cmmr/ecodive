@@ -405,3 +405,33 @@ in the session's scratch scripts; the decisive ones are re-run by
 - **Fixture data** are simulated (not indicspecies' `wetland`), the
   permutations are ecodive's own (`C_perm_indices`, seed 7) so the tests
   check random and supplied permutations against the same p-values.
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commits:** 9737ada (`indicator_species()`, C, docs, fixtures, tests),
+  then this one (ticks and outcome).
+- **Files:** `R/indicator_species.r`, `src/indicator_species.c`,
+  `data-raw/expected/indicator_species.r`,
+  `tests/tinytests/expected/indicator_species.rds` (34 KB),
+  `tests/tinytests/test-indicator_species.r` (512 tests); a `DA_TESTS`
+  row, NAMESPACE, print label, NEWS, pkgdown, smoke line,
+  `parameter_names.md`.
+- **Reference agreement** (indicspecies 1.8.0, labdsv 2.3.1; 33 multipatt
+  cases over 4 indices, abundance / presence-absence / relative tables,
+  `duleg`, `max.order`, `min.order`, `restcomb`, `allow.negative`, strata,
+  3 and 4 groups): every combination's value within 1.4e-15 (exactly 0
+  for IndVal); best combinations identical except the 4 of 920 feature
+  rows that multipatt breaks at random (near ties); p-values identical
+  with ecodive's own random permutations and with the same permutations
+  supplied as a matrix (and within strata). strassoc() for all indices
+  and A, A.g, B within 1e-12 (it gives 0 where multipatt and ecodive give
+  NaN/NA); labdsv::indval() = `'indval_g'`, single groups, squared, within
+  1e-12.
+- **Tests:** 30,149 at home (baseline 29,628), 434 in CRAN mode (432);
+  `R CMD check --no-manual --ignore-vignettes`: only the existing
+  installed-size NOTE. Identical results for `cpus` 1, 2, 4, dense,
+  `Matrix`, `slam` and `margin = 2`.
+- **Open:** bootstrap confidence intervals (`strassoc(nboot.ci)`) and
+  `indicators()` (species combinations) not provided; `da_sensitivity()`'s
+  refusal message for `zeros` says the method "models counts".

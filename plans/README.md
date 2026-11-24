@@ -348,7 +348,7 @@ can't be mistaken for one another:
 | Model building | ✓ `varpart`, ✓ `forward_select`, ✓ `bioenv` |
 | Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, ✓ `mantel_partial`, `mirkat` |
 | Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
-| Composition | ✓ `simper`, `indicator_species` |
+| Composition | ✓ `simper`, ✓ `indicator_species` |
 | Alpha metrics (`alpha_div`) | ✓ `pielou`, ✓ `heip`, ✓ `simpson_evenness`, ✓ `mcintosh_evenness`, ✓ `goods_coverage`, ✓ `hill`, ✓ `renyi`, ✓ `tsallis`, ✓ `dominance`, ✓ `strong`, ✓ `gini` (id `gini`, not `gini_index`: the user's choice, 2026-11-24) |
 | Alpha diversity tests (`alpha_test`) | `alpha_wilcoxon`, `alpha_kruskal`, `alpha_ttest`, `alpha_lm`, `alpha_cor` |
 | Sampling effort | ✓ `rarefaction_curve`, `hill_extrapolation`, `hill_standardize` |
