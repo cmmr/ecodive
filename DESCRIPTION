@@ -93,6 +93,18 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "the neutral community model fit (neutral_model()), following 'neufit'"),
     person(
+      "Siyuan", "Ma",
+      role    = "ctb",
+      comment = "MMUPHin batch correction (batch_mmuphin()), ported from 'MMUPHin'"),
+    person(
+      "Harvard School of Public Health",
+      role    = "cph",
+      comment = "'MMUPHin', from which batch_mmuphin() is ported"),
+    person(
+      "sva authors",
+      role    = c("ctb", "cph"),
+      comment = "ComBat batch correction (batch_combat()), ported from 'sva'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

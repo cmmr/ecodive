@@ -160,6 +160,13 @@ reference:
   - neutral_model
   - plot.ecodive_neutral_model
 
+- title: Batch Correction
+  desc: Remove batch effects (study, sequencing run, extraction kit) from a table while keeping the effects of named covariates (MMUPHin, ComBat).
+  contents:
+  - batch_mmuphin
+  - batch_combat
+  - plot.ecodive_batch
+
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
   contents:

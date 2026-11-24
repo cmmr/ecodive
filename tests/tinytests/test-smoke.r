@@ -154,6 +154,15 @@
   expect_true(inherits(nmod, 'ecodive_neutral_model') && nrow(nmod) == 60L && is.factor(nmod$partition))
   expect_true(all(is.finite(attr(nmod, 'm'))) && all(attr(nmod, 'm') > 0) && identical(names(attr(nmod, 'm')), c('a', 'b')))
 
+  # Batch correction: MMUPHin and ComBat.
+  bm <- batch_mmuphin(counts, 'grp', ~ x, meta, cpus = cpus)
+  expect_true(inherits(bm, 'ecodive_batch') && identical(dim(bm), dim(counts)) && all(is.finite(bm)))
+  expect_true(identical(dimnames(bm), dimnames(counts)) && all(bm == round(bm)) && nrow(attr(bm, 'batch_effects')) == 24L)
+  bc <- batch_combat(counts, 'grp', ~ x, meta, norm = 'clr', cpus = cpus)
+  expect_true(inherits(bc, 'ecodive_batch') && identical(dim(bc), dim(counts)) && all(is.finite(bc)))
+  z <- batch_combat(counts, 'grp', data = meta, norm = 'log', parametric = FALSE, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_batch') && all(is.finite(z)) && is.logical(attr(z, 'adjusted')))
+
   # Associations: SparCC.
   z <- sparcc(counts[, 1:10], n_draws = 5L, permutations = 9L, cpus = cpus)
   expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 10L && length(z) == 45L)
@@ -426,6 +435,8 @@
   expect_true(drawn(dc))   # decontam()
   expect_true(drawn(dc, 'prevalence'))
   expect_true(drawn(nmod))   # neutral_model()
+  expect_true(drawn(bm))   # batch_mmuphin()
+  expect_true(drawn(bc, type = 'means'))   # batch_combat()
   expect_true(is.data.frame(decontam_frequency_plot(counts, 'F1', dc_conc, dc_neg)))
   expect_true(drawn(fit))   # ancombc2()
   expect_true(drawn(ancombc_global(fit, cpus = cpus)))

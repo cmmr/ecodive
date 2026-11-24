@@ -19,7 +19,9 @@
 #'        [ancombc_pairwise()], [ancombc_dunnett()], [ancombc_trend()],
 #'        [dirmult_ttest()], [da_sensitivity()], [simper()], [bioenv()],
 #'        [envfit()], [assoc_pairs()], [assoc_network_diff()], [enterotype()] or [valencia()], or a source-tracking
-#'        matrix of class `ecodive_source` (from [sourcetracker()]). A community-types result (see
+#'        matrix of class `ecodive_source` (from [sourcetracker()]), or a
+#'        batch-corrected table of class `ecodive_batch` (from
+#'        [batch_mmuphin()] or [batch_combat()]). A community-types result (see
 #'        [ecodive_types]) prints its types and how their number was chosen
 #'        before its first samples.
 #'

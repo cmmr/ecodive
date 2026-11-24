@@ -961,6 +961,25 @@
   the fitted curve and its band over the features (`type = "binomial"`
   adds the binomial model's curve).
 
+* New `batch_mmuphin()` and `batch_combat()` remove batch effects (study,
+  sequencing run, extraction kit) from a table, keeping the effects of the
+  covariates named in `formula`. `batch_mmuphin()` ports MMUPHin's
+  `adjust_batch()` (Ma et al. 2022; MMUPHin 2.0.0, MIT): zero-inflated
+  empirical Bayes adjustment of log relative abundances, re-closed to each
+  sample's total, with zeros left as zeros (`zero_inflation = FALSE` fits
+  every value). `batch_combat()` ports sva 3.60.0's `ComBat()` (Johnson et
+  al. 2007; Artistic-2.0) for continuous values (or `norm = 'clr'` /
+  `'log'`), with parametric or non-parametric priors, `mean_only` and
+  `ref_batch`; its non-parametric priors are weighed on the log scale, so
+  large batches don't underflow to `NaN` as in sva. Both match their
+  references to rounding (MMUPHin's rounded counts exactly), in threaded C
+  over a sparse table, the same for any `cpus`. `batch` can be a column of
+  `data`. The result is the corrected table (dense, in the input's
+  orientation) of class `ecodive_batch`, with the batch effects before and
+  after shrinkage as attributes; `plot()` draws MMUPHin's diagnostics (the
+  shrinkage of the batch effects, and each feature's batch means before
+  and after).
+
 * New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
   2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
   pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,
