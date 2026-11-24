@@ -488,3 +488,25 @@ Made while implementing:
   features score below 2. The generator records each bootstrap's samples
   by wrapping `contast_within_classes_or_few_per_class()`, and the jitter
   from `test_lda_r()`'s in-place changes.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 41, done 2026-11-24.** Commits `18c8d9d` (work), this tick.
+
+- Tests: 26,838 at home, 399 in CRAN mode (from 26,600 and 396); `R CMD
+  check --no-manual --ignore-vignettes`: 1 NOTE (installed size).
+- LEfSe 1.1.2 with its own jitter and subsamples injected (9 cases): the
+  rescaled table bit-identical; LDA scores ≤ 4.9e-16 relative, the
+  rank-deficient case (40 features, 13 samples a subsample) included;
+  class means ≤ 3.6e-16; Kruskal-Wallis p ≤ 2.1e-13 (LEfSe's equal R's);
+  Wilcoxon decisions, the features scored and `reject` identical. coin's
+  `wilcox_test()` p-values ≤ 2.0e-12.
+- With ecodive's own draws: `reject` identical in every fixture, scores
+  within 4.7% (30 bootstraps) and 9.6% (one bootstrap). On 100 × 1,000:
+  the tests' 520 survivors identical, 301 of LEfSe's 312 calls shared, the
+  25 differing calls all with scores 1.92–2.08; scores median 0.6% apart.
+- lefser 1.12.1: within 3% for features richer in the second class; its
+  first-class scores negative and smaller, as documented.
+- Speed (100 × 1,000): LEfSe 13.5 s; ecodive 0.99 s on 1 thread, 0.64 s on
+  4. On 300 × 5,000 (373 features scored): 6.6 s on 1 thread, 1.9 s on 4.
