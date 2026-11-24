@@ -50,6 +50,8 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),
   [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md),
   [`assoc_network_diff()`](https://cmmr.github.io/ecodive/reference/assoc_network_diff.md),
+  [`first_differences()`](https://cmmr.github.io/ecodive/reference/first_differences.md),
+  [`first_distances()`](https://cmmr.github.io/ecodive/reference/first_distances.md),
   [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
   or
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md),

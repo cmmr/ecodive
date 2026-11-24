@@ -80,6 +80,17 @@
 - **Michael Sieber**. Contributor, copyright holder.  
   the neutral community model fit (neutral_model()), following 'neufit'
 
+- **QIIME 2 development team**. Contributor, copyright holder.  
+  first differences, first distances, volatility and NMIT
+  (first_differences(), first_distances(), volatility(), nmit()), ported
+  from 'q2-longitudinal'
+
+- **University of Washington Interactive Data Lab**. Copyright holder.  
+  Vega's bootstrap confidence interval, followed by volatility()
+
+- **PyData Development Team**. Copyright holder.  
+  pandas' Pearson and Spearman correlation kernels, followed by nmit()
+
 - **Siyuan Ma**. Contributor.  
   MMUPHin batch correction (batch_mmuphin()), ported from 'MMUPHin'
 

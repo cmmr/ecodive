@@ -781,6 +781,26 @@ How far drift and dispersal alone explain a community’s composition
 - [`plot(`*`<ecodive_neutral_model>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_neutral_model.md)
   : Plot a Neutral Community Model Fit
 
+## Longitudinal
+
+Repeated measures of the same subjects over time (q2-longitudinal). Each
+subject’s change from one time point to the next or from a baseline, a
+control chart of a variable over time, and distances between subjects in
+how their features vary together (NMIT, then tested with permanova()).
+
+- [`first_differences()`](https://cmmr.github.io/ecodive/reference/first_differences.md)
+  : First Differences Within Subjects
+- [`first_distances()`](https://cmmr.github.io/ecodive/reference/first_distances.md)
+  : First Distances Within Subjects
+- [`volatility()`](https://cmmr.github.io/ecodive/reference/volatility.md)
+  : Volatility of a Variable Over Time
+- [`nmit()`](https://cmmr.github.io/ecodive/reference/nmit.md) :
+  Nonparametric Microbial Interdependence Test (NMIT) Distances
+- [`plot(`*`<ecodive_first_differences>`*`)`](https://cmmr.github.io/ecodive/reference/plot_longitudinal.md)
+  [`plot(`*`<ecodive_first_distances>`*`)`](https://cmmr.github.io/ecodive/reference/plot_longitudinal.md)
+  [`plot(`*`<ecodive_volatility>`*`)`](https://cmmr.github.io/ecodive/reference/plot_longitudinal.md)
+  : Plot Longitudinal Results
+
 ## Batch Correction
 
 Remove batch effects (study, sequencing run, extraction kit) from a
