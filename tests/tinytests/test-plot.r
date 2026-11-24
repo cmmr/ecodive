@@ -176,7 +176,7 @@
   expect_identical(rownames(bp), 'Sepal.Width')
   bp <- ord_plot_biplot(attr(ords$capscale, 'biplot'), 1:2, NULL)
   expect_identical(nrow(bp), 3L)
-  ld <- ord_plot_loadings(attr(ords$pca, 'loadings'), 1:2, 2)
+  ld <- ord_plot_scaling(ords$pca, 1:2, NULL, 2)$cols
   len <- rowSums(attr(ords$pca, 'loadings')[, 1:2] ^ 2)
   expect_identical(rownames(ld), names(sort(len, decreasing = TRUE))[1:2])
 
@@ -195,6 +195,296 @@
   expect_error(plot(ord, 'Nope', iris), 'not one')
   expect_error(plot(ord, 'Species', iris[1:10, ]), 'has 10 rows, but `x` has 150 samples')
 
+
+
+  # Biplot scalings. ====
+
+  # Reference coordinates, written by data-raw/expected/biplot_scaling.r:
+  # vegan 2.7.8's scores() in scalings 1-3, easyCODA's unweighted PCA() and
+  # compositions' princomp.acomp().
+  ref <- readRDS(file.path('expected', 'biplot_scaling.rds'))
+
+  # `a` with each column's sign matched to `b`'s.
+  sign_to <- function (a, b) sweep(a, 2, sign(colSums(a * b)), '*')
+  # The drawn features, in the loadings' order.
+  in_order <- function (cols, nms) cols[match(nms, rownames(cols)), , drop = FALSE]
+  # Axis pairs that cover all k axes.
+  pairs_of <- function (k) unique(lapply(seq(1, k - 1, 2), function (i) c(min(i, k - 1), min(i, k - 1) + 1)))
+
+  sc_fn <- ord_plot_scaling
+
+  # Canonical names, vegan's numbers and names, and prefixes.
+  expect_identical(ord_scaling_arg(NULL), NULL)
+  expect_identical(ord_scaling_arg(1), 'form')
+  expect_identical(ord_scaling_arg(2L), 'covariance')
+  expect_identical(ord_scaling_arg(3), 'symmetric')
+  expect_identical(ord_scaling_arg('sites'), 'form')
+  expect_identical(ord_scaling_arg('species'), 'covariance')
+  expect_identical(ord_scaling_arg('cov'), 'covariance')
+  expect_identical(ord_scaling_arg('contr'), 'contribution')
+  expect_identical(ord_scaling_arg('Form'), 'form')
+  expect_error(ord_scaling_arg('x'), "`scaling` must be 'form', 'covariance', 'contribution' or 'symmetric'")
+  expect_error(ord_scaling_arg('co'), '`scaling` must be')    # ambiguous
+  expect_error(ord_scaling_arg(4), '`scaling` must be')
+  expect_error(ord_scaling_arg(c(1, 2)), '`scaling` must be')
+  expect_error(ord_scaling_arg(NA), '`scaling` must be')
+
+  # Round multipliers: 1, 2 or 5 times a power of 10, rounded down.
+  expect_identical(ord_round_mult(0.37), 0.2)
+  expect_identical(ord_round_mult(23), 20)
+  expect_identical(ord_round_mult(7.9), 5)
+  expect_identical(ord_round_mult(1), 1)
+  expect_identical(ord_round_mult(0.05), 0.05)
+  expect_identical(ord_round_mult(Inf), 1)
+  is_round <- function (m) signif(m / 10 ^ floor(log10(m)), 10) %in% c(1, 2, 5)
+
+
+  # A zero-free composition: its clr PCA on all axes.
+  bx  <- ref$clr$counts
+  bn  <- nrow(bx)
+  bp  <- ncol(bx)
+  bk  <- bp - 1L
+  clr <- log(bx) - rowMeans(log(bx))
+  bo  <- pca(bx, norm = 'clr', n_axes = bk, cpus = cpus)
+  S   <- unclass(bo)[, ]
+  V   <- attr(bo, 'loadings')
+  lam <- attr(bo, 'eig')
+  expect_identical(attr(bo, 'norm'), 'clr')
+  expect_false(attr(bo, 'scale'))
+  expect_identical(attr(pca(bx, norm = 'Hellinger', scale = TRUE, cpus = cpus), 'norm'), 'hellinger')
+
+  # Covariance column points over all axes: their lengths are the clr
+  # values' standard deviations, and the links between them the standard
+  # deviations of the log ratios (Aitchison & Greenacre 2002, section 3).
+  cv <- sweep(V, 2, sqrt(lam), '*')
+  expect_equal(sqrt(rowSums(cv ^ 2)), apply(clr, 2, stats::sd), tolerance = 1e-12)
+  expect_equal(as.matrix(stats::dist(cv)), sqrt(as.matrix(vlr(bx))), tolerance = 1e-12, check.attributes = FALSE)
+  lr_sd <- outer(seq_len(bp), seq_len(bp), Vectorize(function (i, j) stats::sd(log(bx[, i] / bx[, j]))))
+  expect_equal(as.matrix(stats::dist(cv)), lr_sd, tolerance = 1e-12, check.attributes = FALSE)
+
+  # On two axes, each link is its planar length, and no longer than the
+  # full value ("from below").
+  r <- suppressWarnings(sc_fn(bo, 1:2, 'covariance', 0, links = colnames(bx)))
+  expect_identical(nrow(r$links), as.integer(choose(bp, 2)))
+  expect_identical(nrow(r$cols), bp)        # the linked features, though loadings = 0
+  nm   <- rownames(r$cols)
+  full <- lr_sd[cbind(match(nm[r$links$from], colnames(bx)), match(nm[r$links$to], colnames(bx)))]
+  expect_equal(r$links$length, sqrt(rowSums((cv[nm[r$links$from], 1:2] - cv[nm[r$links$to], 1:2]) ^ 2)), tolerance = 1e-12, check.attributes = FALSE)
+  expect_true(all(r$links$length <= full + 1e-12))
+  expect_true(any(r$links$length < full - 1e-3))
+
+  # Each scaling, on every axis pair: rows x cols / mult = S V', and the
+  # references.
+  v1 <- ref$clr$vegan
+  ec <- ref$clr$easycoda
+  const <- ((bn - 1) * v1$tot_chi) ^ 0.25   # vegan's scores() constant
+  expect_equal(attr(bo, 'trace'), v1$tot_chi, tolerance = 1e-12)
+  expect_equal(lam, ref$clr$compositions$sdev[1:bk] ^ 2, tolerance = 1e-10)
+  expect_equal(sign_to(V, ref$clr$compositions$loadings[, 1:bk]), ref$clr$compositions$loadings[, 1:bk], tolerance = 1e-10, check.attributes = FALSE)
+  expect_equal(sign_to(S, ref$clr$compositions$scores[, 1:bk]), ref$clr$compositions$scores[, 1:bk], tolerance = 1e-10, check.attributes = FALSE)
+  expect_equal(ec$sv[1:bk], sqrt(lam * (bn - 1) / (bn * bp)), tolerance = 1e-12)
+
+  for (ax in pairs_of(bk)) {
+    info <- paste(ax, collapse = ',')
+    fm <- sc_fn(bo, ax, 'form', Inf)
+    cvr <- sc_fn(bo, ax, 'covariance', Inf)
+    ct <- sc_fn(bo, ax, 'contribution', Inf)
+
+    for (r in list(fm, cvr, ct))
+      expect_equal(r$rows %*% t(r$cols) / r$mult, S[, ax] %*% t(V[rownames(r$cols), ax]), tolerance = 1e-12, info = info)
+
+    # Form: vegan's scaling 1 (times constants); easyCODA's row principal
+    # coordinates (times sqrt(p)).
+    expect_equal(sign_to(fm$rows, v1$sites1[, ax]), v1$sites1[, ax] * sqrt((bn - 1) * v1$tot_chi) / const, tolerance = 1e-10, check.attributes = FALSE, info = info)
+    expect_equal(sign_to(in_order(fm$cols, colnames(bx)) / fm$mult, v1$species1[, ax]), v1$species1[, ax] / const, tolerance = 1e-10, check.attributes = FALSE, info = info)
+    expect_equal(sign_to(fm$rows, ec$rowpcoord[, ax]), ec$rowpcoord[, ax] * sqrt(bp), tolerance = 1e-10, check.attributes = FALSE, info = info)
+
+    # Covariance: unit-variance rows, and vegan's scaling 2 and easyCODA's
+    # standard rows and principal columns (times constants).
+    expect_equal(apply(cvr$rows, 2, stats::var), c(1, 1), tolerance = 1e-12, check.attributes = FALSE, info = info)
+    expect_identical(cvr$mult, 1)
+    expect_equal(sign_to(cvr$rows, v1$sites2[, ax]), v1$sites2[, ax] * sqrt(bn - 1) / const, tolerance = 1e-10, check.attributes = FALSE, info = info)
+    expect_equal(sign_to(in_order(cvr$cols, colnames(bx)), v1$species2[, ax]), v1$species2[, ax] * sqrt(v1$tot_chi) / const, tolerance = 1e-10, check.attributes = FALSE, info = info)
+    expect_equal(sign_to(cvr$rows, ec$rowcoord[, ax]), ec$rowcoord[, ax] * sqrt((bn - 1) / bn), tolerance = 1e-10, check.attributes = FALSE, info = info)
+    expect_equal(sign_to(in_order(cvr$cols, colnames(bx)), ec$colpcoord[, ax]), ec$colpcoord[, ax] * sqrt(bn / (bn - 1)), tolerance = 1e-10, check.attributes = FALSE, info = info)
+
+    # Contribution: the loadings themselves, easyCODA's contribution
+    # coordinates (standard coordinates times the square root of the
+    # columns' equal masses), times a round multiplier.
+    expect_true(is_round(ct$mult), info = info)
+    cc <- sweep(ec$colcoord[, ax], 1, sqrt(ec$colmass), '*')
+    expect_equal(sign_to(in_order(ct$cols, colnames(bx)) / ct$mult, cc), cc, tolerance = 1e-10, check.attributes = FALSE, info = info)
+  }
+
+  # The default is the form biplot, without a subtitle.
+  d0 <- sc_fn(bo, 1:2, NULL, 10)
+  expect_identical(d0[c('rows', 'cols', 'mult')], sc_fn(bo, 1:2, 'form', 10)[c('rows', 'cols', 'mult')])
+  expect_null(d0$sub)
+  expect_identical(sc_fn(bo, 1:2, 1, 10)$rows, d0$rows)
+  expect_identical(sc_fn(bo, 1:2, 2, 10)$rows, cvr <- sc_fn(bo, 1:2, 'covariance', 10)$rows)
+  expect_identical(sc_fn(bo, 1:2, 'form', 10)$sub, 'form biplot')
+  expect_identical(
+    sc_fn(bo, 1:2, 'covariance', 10)$sub,
+    sprintf('covariance biplot, plane explains %s%% of the variance', round(100 * sum(attr(bo, 'prop')[1:2]))) )
+  ct <- sc_fn(bo, 1:2, 'contribution', 10)
+  expect_identical(ct$sub, paste('contribution biplot, feature coordinates', print_sym()$times, format(ct$mult)))
+
+  # Which features: the longest, or (contribution) those contributing most
+  # to the plane, highlighted and labelled when above average on an axis.
+  expect_equal(colSums(V ^ 2), rep(1, bk), tolerance = 1e-12, check.attributes = FALSE)
+  r <- sc_fn(bo, 2:3, 'contribution', 3)
+  contrib <- (lam[2] * V[, 2] ^ 2 + lam[3] * V[, 3] ^ 2) / (lam[2] + lam[3])
+  expect_identical(rownames(r$cols), names(sort(contrib, decreasing = TRUE))[1:3])
+  hi <- unname(V[rownames(r$cols), 2] ^ 2 > 1 / bp | V[rownames(r$cols), 3] ^ 2 > 1 / bp)
+  expect_identical(r$label, hi)
+  expect_identical(r$col, ifelse(hi, PLOT_HIGHLIGHT, PLOT_MUTED))
+  r <- sc_fn(bo, 1:2, 'covariance', 2)
+  expect_identical(rownames(r$cols), names(sort(rowSums(cv[, 1:2] ^ 2), decreasing = TRUE))[1:2])
+  r <- sc_fn(bo, 1:2, 'form', 2)
+  expect_identical(rownames(r$cols), names(sort(rowSums(V[, 1:2] ^ 2), decreasing = TRUE))[1:2])
+
+  # Links: every pair of a vector, or the rows of a pair matrix, by name or
+  # position, with their features always drawn.
+  expect_identical(ord_link_pairs(c('b', 'a', 'c'), letters[1:4]), rbind(c(2L, 1L), c(2L, 3L), c(1L, 3L)))
+  expect_identical(ord_link_pairs(c(4, 1), letters[1:4]), rbind(c(4L, 1L)))
+  expect_identical(ord_link_pairs(rbind(c('a', 'd'), c('b', 'c')), letters[1:4]), rbind(c(1L, 4L), c(2L, 3L)))
+  expect_identical(ord_link_pairs(data.frame(x = 1:2, y = 3:4), letters[1:4]), rbind(c(1L, 3L), c(2L, 4L)))
+  expect_identical(ord_link_pairs(factor(c('a', 'b')), letters[1:4]), rbind(c(1L, 2L)))
+  expect_error(ord_link_pairs('a', letters[1:4]), 'needs at least two features')
+  expect_error(ord_link_pairs(c('a', 'a'), letters[1:4]), 'needs at least two features')
+  expect_error(ord_link_pairs(c('a', 'x', 'y'), letters[1:4]), "not in the loadings: 'x', 'y'")
+  expect_error(ord_link_pairs(c(1, 5), letters[1:4]), "not in the loadings: '5'")
+  expect_error(ord_link_pairs(rbind(c('a', 'a')), letters[1:4]), 'pairs a feature with itself')
+  expect_error(ord_link_pairs(matrix(1:6, 2), letters[1:4]), 'two-column matrix')
+  expect_error(ord_link_pairs(c(TRUE, FALSE), letters[1:4]), 'must be a vector')
+  expect_error(ord_link_pairs(c('a', NA), letters[1:4]), 'must be a vector')
+
+  r <- suppressWarnings(sc_fn(bo, 1:2, 'covariance', 1, links = c('F6', 'F7')))
+  expect_identical(nrow(r$cols), 3L)
+  expect_identical(rownames(r$cols)[r$links$from], 'F6')
+  expect_identical(rownames(r$cols)[r$links$to],   'F7')
+
+
+  # rpca() and rpca_phylo(): the same identities.
+  phy <- suppressWarnings(rpca_phylo(ecodive::ex_counts, ecodive::ex_tree, n_axes = 2, cpus = cpus))
+  for (o in list(ords$rpca, phy)) {
+    info <- attr(o, 'method')
+    So   <- unclass(o)[, 1:2]
+    Vo   <- attr(o, 'loadings')
+    lo   <- attr(o, 'eig')[1:2]
+    expect_equal(colSums(Vo ^ 2), rep(1, ncol(Vo)), tolerance = 1e-10, check.attributes = FALSE, info = info)
+    for (s in c('form', 'covariance', 'contribution')) {
+      r <- sc_fn(o, 1:2, s, Inf)
+      expect_equal(r$rows %*% t(r$cols) / r$mult, So %*% t(Vo[rownames(r$cols), 1:2]), tolerance = 1e-10, info = info)
+    }
+    r <- sc_fn(o, 1:2, 'covariance', Inf)
+    expect_equal(apply(r$rows, 2, stats::var), c(1, 1), tolerance = 1e-10, check.attributes = FALSE, info = info)
+    expect_equal(in_order(r$cols, rownames(Vo)), sweep(Vo[, 1:2], 2, sqrt(lo), '*'), tolerance = 1e-12, check.attributes = FALSE, info = info)
+    r <- sc_fn(o, 1:2, 'contribution', 2)
+    contrib <- as.vector(Vo[, 1:2] ^ 2 %*% lo) / sum(lo)
+    expect_identical(rownames(r$cols), rownames(Vo)[order(contrib, decreasing = TRUE)[1:2]], info = info)
+    expect_true(is_round(r$mult), info = info)
+  }
+
+
+  # rda(), cca() and ca(): vegan's scalings 1, 2 and 3 of sites, species,
+  # constraints and centroids, from the stored scaling 2.
+  vfits <- list(
+    rda   = function (k) suppressMessages(rda(ref$dune, data = ref$dune_env, formula = ~ Management + A1 + Condition(Moisture), norm = 'hellinger', n_axes = k, cpus = cpus)),
+    rda_u = function (k) rda(ref$dune, norm = 'hellinger', n_axes = k, cpus = cpus),
+    cca   = function (k) cca(ref$dune, data = ref$dune_env, formula = ~ Management + A1, n_axes = k, cpus = cpus),
+    ca    = function (k) ca(ref$dune, n_axes = k, cpus = cpus) )
+
+  for (nm in names(vfits)) {
+    vr  <- ref[[nm]]
+    o   <- vfits[[nm]](vr$k)
+    expect_identical(ncol(o), vr$k, info = nm)
+    pts <- 'sites'   # vegan names the "wa" scores so
+    for (s in 1:3) {
+      vs <- vr[[paste0('scaling', s)]]
+      for (ax in pairs_of(vr$k)) {
+        info <- sprintf('%s, scaling %d, axes %s', nm, s, paste(ax, collapse = ','))
+        r    <- sc_fn(o, ax, s, Inf)
+        sg   <- sign(colSums(r$rows * vs[[pts]][, ax]))
+        flip <- function (m) sweep(m, 2, sg, '*')
+        expect_equal(flip(r$rows), vs[[pts]][, ax], tolerance = 1e-10, check.attributes = FALSE, info = info)
+        expect_equal(
+          flip(in_order(r$cols, rownames(vs$species)) / r$mult), vs$species[, ax],
+          tolerance = 1e-10, check.attributes = FALSE, info = info )
+        expect_equal(r$col_mul, 1 / r$row_mul, info = info)
+        if (!is.null(vs$biplot)) {
+          bpr <- sweep(attr(o, 'biplot')[rownames(vs$biplot), ax, drop = FALSE], 2, r$row_mul, '*')
+          expect_equal(flip(bpr), vs$biplot[, ax], tolerance = 1e-10, check.attributes = FALSE, info = info)
+          cnr <- sweep(attr(o, 'centroids')[rownames(vs$centroids), ax, drop = FALSE], 2, r$row_mul, '*')
+          expect_equal(flip(cnr), vs$centroids[, ax], tolerance = 1e-10, check.attributes = FALSE, info = info)
+        }
+        expect_identical(r$sub, sprintf('scaling %d', s), info = info)
+        expect_identical(r$style, if (startsWith(nm, 'rda')) 'arrows' else 'points', info = info)
+      }
+    }
+    # The default is what is stored, scaling 2, without a subtitle.
+    r <- sc_fn(o, 1:2, NULL, Inf)
+    expect_equal(r$rows, unclass(o)[, 1:2], check.attributes = FALSE, info = nm)
+    expect_null(r$sub, info = nm)
+    expect_identical(sc_fn(o, 1:2, 'sites', 5)$rows, sc_fn(o, 1:2, 1, 5)$rows, info = nm)
+    expect_identical(sc_fn(o, 1:2, 'symmetric', 5)$rows, sc_fn(o, 1:2, 3, 5)$rows, info = nm)
+  }
+
+
+  # Drawing: each scaling and alias, with links; existing calls unchanged.
+  lx <- colnames(bx)
+  expect_true(invisibly(bo))
+  for (s in list('form', 'covariance', 'contribution', 1, 2, 'sites', 'species'))
+    expect_true(invisibly(bo, scaling = s), info = format(s))
+  expect_true(invisibly(bo, scaling = 'covariance', links = lx[1:3]))
+  expect_true(invisibly(bo, scaling = 'covariance', links = rbind(lx[1:2], lx[c(3, 5)]), loadings = 0))
+  expect_true(invisibly(bo, 'g', data.frame(g = rep(c('a', 'b'), c(12, 13))), scaling = 'contribution', axes = c(2, 3), legend = NULL))
+  expect_true(invisibly(bo, scaling = 'covariance', sub = 'mine', main = 'x'))
+  for (nm in c('rpca', 'rpca_phy')) {
+    expect_true(invisibly(ords[[nm]], scaling = 'covariance'), info = nm)
+    expect_true(invisibly(ords[[nm]], scaling = 'contribution', loadings = 3), info = nm)
+  }
+  expect_true(invisibly(ords$rpca, scaling = 'covariance', links = 1:3))
+  for (nm in c('rda', 'rda_u', 'cca', 'ca')) for (s in list(1, 2, 3, 'symmetric'))
+    expect_true(invisibly(ords[[nm]], scaling = s), info = nm)
+  expect_true(invisibly(ords$rda, 'Species', iris, scaling = 1, centroids = FALSE))
+  expect_true(invisibly(pc1, scaling = 'covariance'))    # one axis: a strip chart
+  expect_error(plot(pc1, scaling = 'x'), '`scaling` must be')
+
+  # Errors and warnings.
+  expect_error(plot(bo, scaling = 'x'), "`scaling` must be 'form', 'covariance'")
+  expect_error(plot(bo, scaling = 3), "is for rda\\(\\), cca\\(\\) and ca\\(\\). A pca\\(\\) biplot takes")
+  expect_error(plot(ords$rpca, scaling = 'symmetric'), 'A rpca\\(\\) biplot takes')
+  expect_error(plot(ord, scaling = 'covariance'), 'not pcoa\\(\\)')
+  expect_error(plot(ord, scaling = 1), 'not pcoa\\(\\)')
+  expect_error(plot(ords$cca, scaling = 'contribution'), "An cca\\(\\) result takes vegan's scaling 1, 2 or 3")
+  expect_error(plot(bo, links = lx[1:2]), "`links` needs `scaling = 'covariance'`: only there")
+  expect_error(plot(bo, scaling = 'contribution', links = lx[1:2]), "`links` needs `scaling = 'covariance'`")
+  expect_error(plot(ords$rda, scaling = 2, links = 1:2), 'only for the results of pca\\(\\), rpca\\(\\) and rpca_phylo\\(\\)')
+  expect_error(plot(bo, scaling = 'covariance', links = lx[1]), 'needs at least two features')
+  expect_error(plot(bo, scaling = 'covariance', links = c(lx[1], 'nope')), "not in the loadings: 'nope'")
+
+  expect_warning(
+    plot(pca(bx, norm = 'hellinger', cpus = cpus), scaling = 'covariance', links = lx[1:2]),
+    "links of `pca\\(norm = 'hellinger'\\)` show standard deviations of differences of hellinger values, not of log ratios" )
+  expect_warning(
+    plot(pca(bx, norm = 'clr', scale = TRUE, cpus = cpus), scaling = 'covariance', links = lx[1:2]),
+    "pca\\(norm = 'clr', scale = TRUE\\)` show standard deviations of differences of standardized clr values" )
+  expect_identical(ord_links_norm_msg('clr', FALSE), NULL)
+  expect_true(grepl('the untransformed values', ord_links_norm_msg('none', FALSE)))
+  expect_true(grepl('may not show', ord_links_norm_msg(NULL, NULL)))
+  expect_silent(plot(bo, scaling = 'covariance', links = lx[1:3]))   # 95% on the plane
+  expect_true(sum(attr(bo, 'prop')[1:2]) >= 0.5)
+
+  # A plane with under half the variance: independent features.
+  set.seed(1)
+  flat <- matrix(round(exp(rnorm(40 * 10, 4))), 40, 10, dimnames = list(NULL, paste0('f', 1:10)))
+  fo   <- pca(flat + 1, norm = 'clr', cpus = cpus)
+  expect_true(sum(attr(fo, 'prop')[1:2]) < 0.5)
+  expect_warning(
+    plot(fo, scaling = 'covariance', links = c('f1', 'f2')),
+    'The two axes explain [0-9]+% of the variance, so link lengths may greatly underestimate' )
+  expect_silent(plot(fo, scaling = 'covariance'))   # no links, no warning
 
 
   # Permutation tests. ====
@@ -526,6 +816,9 @@
   set.seed(42)
   seed <- .Random.seed
   plot(ord, 'Species', iris)
+  plot(bo, scaling = 'covariance', links = lx[1:3])
+  plot(bo, scaling = 'contribution')
+  plot(ords$rda, scaling = 1)
   plot(ords$lda)
   plot(ord1)
   plot(res$permanova)

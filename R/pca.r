@@ -49,6 +49,10 @@
 #'     `norm` and `scale`), which is also the sum of all axes' `eig`.
 #'   * `loadings`: A matrix with one row per feature and one column per axis:
 #'     the unit-length principal axes, `prcomp()`'s `rotation`.
+#'   * `norm`, `scale`: The transform the loadings are in (`norm`'s name and
+#'     `scale`), which qualifies them: [plot()][plot.ecodive_ord()] reads
+#'     them to say whether the links of a compositional biplot are log
+#'     ratios.
 #'
 #' @details
 #'
@@ -80,6 +84,17 @@
 #' are \eqn{s^2}, so `pca()`'s `eig` is `pcoa()`'s divided by \eqn{n - 1};
 #' `prop` is the same for both. What `pca()` adds is the `loadings`: how much
 #' each feature contributes to each axis, e.g. for a biplot.
+#'
+#'
+#' **Biplots**
+#'
+#' `plot(ord)` draws a form biplot: the samples at their scores, and the
+#' loadings as arrows scaled to fit. `plot(ord, scaling = 'covariance')` of
+#' a `norm = 'clr'` PCA is Aitchison and Greenacre's (2002) compositional
+#' biplot, in which the rays' lengths and the `links` between their tips
+#' read as standard deviations of clr values and log ratios; `scaling =
+#' 'contribution'` marks the features that contribute most to the plane.
+#' See "Compositional biplots" in [plot.ecodive_ord()].
 #'
 #'
 #' **Robust Aitchison PCA**
@@ -142,6 +157,9 @@ pca <- function (
   validate_cpus()
   k <- ord_k(n_axes)
 
+  # The transform's name (validate_norm() leaves its code), for the result.
+  norm_name <- c('none', 'percent', 'clr', 'chord', 'binary', 'rclr', 'hellinger', 'log')[[norm + 1L]]
+
   if (!isTRUE(scale) && !isFALSE(scale))
     stop('`scale` must be TRUE or FALSE.', call. = FALSE)
 
@@ -194,5 +212,7 @@ pca <- function (
     eig      = eig / denom,
     prop     = if (total > 0) eig / total else eig,
     trace    = total / denom,
-    loadings = loadings )
+    loadings = loadings,
+    norm     = norm_name,
+    scale    = scale )
 }

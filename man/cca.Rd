@@ -116,7 +116,8 @@ axis, as \code{vegan::scores(x, display = "cn")}, or \code{NULL} if no
 variable is a factor.
 \item \code{loadings}: The species scores: one row per feature and one column
 per axis, \code{vegan::scores(x, display = "species")} (scaling 2).
-Features with no observations get \code{0}.
+Features with no observations get \code{0}. \code{plot(x, scaling = 1)} (or
+\code{3}) draws \code{vegan}'s other scalings.
 }
 }
 \description{

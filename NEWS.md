@@ -904,6 +904,23 @@
   draws depth, coverage-based or sample-completeness curves, by group,
   with a line at a planned rarefaction depth.
 
+* `plot()` of an ordination takes `scaling` and `links`, for compositional
+  biplots (Aitchison & Greenacre 2002). For `pca()`, `rpca()` and
+  `rpca_phylo()`: `scaling = 'form'` (the default, as before),
+  `'covariance'` (samples of unit variance and features at the loadings
+  times `sqrt(eig)`, so that in a clr PCA the rays' lengths
+  approximate the clr values' standard deviations), or `'contribution'`
+  (Greenacre 2013: the unit loadings times a stated round number, with the
+  features contributing more than average highlighted). In a covariance
+  biplot, `links = c("a", "b", "c")` joins the features' tips with dashed
+  links labelled with their length, which approximates (from below) the
+  standard deviation of their log ratio; drawing them warns when the plane
+  explains under half the variance, or when the PCA is not of clr values.
+  For `rda()`, `cca()` and `ca()`, `scaling = 1`, `2` (the default, as
+  stored) or `3` draws `vegan`'s scalings, matching
+  `vegan::scores(scaling =)`. `pca()`'s result gains `norm` and `scale`
+  attributes, which qualify its loadings.
+
 * `rarefy()` takes a new last argument, `coverage`, to rarefy each sample
   to the smallest depth whose expected coverage reaches it
   (coverage-based rarefaction, Chao & Jost 2012), instead of to one

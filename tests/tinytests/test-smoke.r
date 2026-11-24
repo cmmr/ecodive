@@ -372,6 +372,8 @@
   expect_true(drawn(o, 'grp', meta))
   expect_true(drawn(o, 'x', meta, axes = c(1, 3)))
   expect_true(drawn(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'grp', meta))
+  expect_true(suppressWarnings(drawn(pca(counts, norm = 'clr', cpus = cpus), scaling = 'covariance', links = 1:3)))  # biplot scalings
+  expect_true(drawn(rda(counts, norm = 'hellinger', cpus = cpus), scaling = 1))
   expect_true(drawn(lda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus)))  # one axis
   expect_true(drawn(capda(dm, 'grp', meta, permutations = 0, cpus = cpus), 'grp', meta))  # one axis
   expect_true(drawn(pr))

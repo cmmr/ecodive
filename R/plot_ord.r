@@ -43,7 +43,9 @@
 #'        number, `Inf` (or `TRUE`) for all, or `0` (or `FALSE`) for none.
 #'        Default `10`. Drawn as arrows for [pca()], [rpca()],
 #'        [rpca_phylo()], [rda()], [plsda()] and [oplsda()], and as labelled
-#'        points for the species scores of [ca()] and [cca()].
+#'        points for the species scores of [ca()] and [cca()]. With
+#'        `scaling = 'contribution'`, those contributing most to the plane
+#'        first.
 #'
 #' @param biplot  Whether to draw the arrows of the constraints in the
 #'        `biplot` attribute of [dbrda()], [capscale()], [rda()] and [cca()].
@@ -74,6 +76,29 @@
 #' @param pch  The points' symbols, as for `plot()`. Default `1` (open
 #'        circles), or `16` (filled circles) with `groups`.
 #'
+#' @param scaling  How the samples and features of a biplot are scaled
+#'        against each other (see "Compositional biplots" and "Scalings of
+#'        rda(), cca() and ca()" below):
+#'   * For [pca()], [rpca()] and [rpca_phylo()]: `'form'` (or `1`), the
+#'     default; `'covariance'` (or `2`); or `'contribution'`.
+#'   * For [rda()], [cca()] and [ca()]: `vegan`'s scaling `1` (or
+#'     `'sites'`), `2` (or `'species'`), the default, as the result is
+#'     stored, or `3` (or `'symmetric'`).
+#'
+#'   Default `NULL`: the default of the method, which draws the result as it
+#'   is stored. Other ordinations take no `scaling`. Names may be
+#'   abbreviated (`'cov'`), and `'form'` and `'covariance'` also stand for 1
+#'   and 2 with [rda()], [cca()] and [ca()].
+#'
+#' @param links  Features to join with dashed links in a covariance biplot
+#'        (`scaling = 'covariance'`) of [pca()], [rpca()] or [rpca_phylo()]:
+#'        a vector of at least two features (names or positions in the
+#'        `loadings`), every pair of which is linked, or a two-column matrix
+#'        of pairs of them. Each link is labelled with its length, which
+#'        approximates the standard deviation of the log ratio of its two
+#'        features (see "Compositional biplots"). The linked features are
+#'        drawn whatever `loadings` is. Default `NULL`, for none.
+#'
 #' @param ...  Passed on to [graphics::plot.default()], such as `main`,
 #'        `sub`, `xlab`, `xlim`, `asp` or `cex`. They replace the defaults
 #'        made from `x`. To leave out the axes, use `xaxt = "n"` and `yaxt =
@@ -103,13 +128,102 @@
 #' in any biplot: only their directions and relative lengths have meaning.
 #' Loadings and constraints are scaled separately. Centroids, and the
 #' species scores of [ca()] and [cca()] (`vegan`'s scaling 2), are drawn
-#' where they are.
+#' where they are. The covariance and contribution biplots below draw the
+#' features as rays from the origin, at their own coordinates.
+#'
+#' **Compositional biplots**
+#'
+#' A PCA of clr-transformed counts, `pca(counts, norm = 'clr')`, is
+#' Aitchison and Greenacre's (2002) biplot of compositional data, which
+#' Gloor et al. (2017) recommend for microbiome tables. With \eqn{S} the
+#' scores, \eqn{V} the unit `loadings` and \eqn{\lambda} each axis's
+#' variance (`eig`), each `scaling` draws the samples (rows) and features
+#' (columns) on the plotted axes as:
+#'
+#' | `scaling` | Samples | Features | What reads off the plot |
+#' |:----------|:--------|:---------|:------------------------|
+#' | `'form'` | \eqn{S} | \eqn{V}, scaled to fit | distances between samples approximate their Aitchison distances |
+#' | `'covariance'` | \eqn{S / \sqrt{\lambda}} (unit variance) | \eqn{V \sqrt{\lambda}} | rays' lengths approximate the clr values' standard deviations; links, the log ratios' |
+#' | `'contribution'` | \eqn{S} | \eqn{V}, times a round number | features far from the origin contribute most to the plane |
+#'
+#' In each, a sample's coordinates times a feature's (divided by the
+#' features' multiplier) are what the PCA fits for that sample and feature,
+#' \eqn{S V^T}. Aitchison and Greenacre's rules for the covariance biplot,
+#' which hold for clr data (`norm = 'clr'`, `scale = FALSE`):
+#'
+#' * A **link** between the tips of two rays approximates the standard
+#'   deviation of the log ratio of those two features, \eqn{\log(x_j /
+#'   x_k)}; the label on each link drawn by `links` is its length on the
+#'   plane. Over all axes the lengths are exact, so the plane approximates
+#'   them **from below**: a short link can hide a large standard deviation
+#'   on the other axes, and a long one cannot. With [vlr()],
+#'   `sqrt(vlr(counts))` gives the exact values.
+#' * Links are least-squares fits of the log ratios, as rays are of the clr
+#'   values, and explain the same share of their variance. The subtitle
+#'   gives that share (the plane's percentage of the variance). When it is
+#'   under 50%, drawing `links` warns that their lengths may greatly
+#'   underestimate the standard deviations.
+#' * The cosine of the angle between two links approximates the
+#'   correlation of their log ratios: perpendicular links are uncorrelated
+#'   log ratios, and parallel ones correlated.
+#' * Three features whose tips lie on a line, at distances \eqn{\lambda}
+#'   (A to B) and \eqn{\mu} (B to C), suggest that the log contrast
+#'   \eqn{\mu \log A + \lambda \log C - (\lambda + \mu) \log B} is
+#'   nearly constant across samples; four that form a parallelogram A, B,
+#'   C, D, that \eqn{\log A - \log B + \log C - \log D} is.
+#'
+#' Links are log ratios only for clr data. Of a `pca()` with another `norm`,
+#' or with `scale = TRUE`, they show standard deviations of differences of
+#' the transformed values, and drawing them warns so. [rpca()]'s and
+#' [rpca_phylo()]'s completed rclr tables are row-centred as clr data are,
+#' so their links are log ratios, of the completed values; for
+#' [rpca_phylo()], those of the tree's nodes (branch-length-weighted
+#' counts). Their `prop`, and so the subtitle's share, is relative to the
+#' completed low-rank table, which overstates the fit to the data.
+#'
+#' The **contribution biplot** (Greenacre 2013) draws each feature at its
+#' contribution coordinates, which for an unweighted PCA such as
+#' `pca()`'s are the unit loadings \eqn{V} themselves: the squared
+#' coordinate on an axis is the feature's share of that axis's variance. It
+#' differs from `'form'` only in using a fixed, round multiplier, given in
+#' the subtitle ("feature coordinates \eqn{\times} 20"), so that lengths
+#' can be compared between plots, and in highlighting and labelling the
+#' features whose contribution to either plotted axis is above the average,
+#' \eqn{1/p} for \eqn{p} features. `loadings` then counts features by
+#' their contribution to the plane, \eqn{(\lambda_a v_{ja}^2 + \lambda_b
+#' v_{jb}^2) / (\lambda_a + \lambda_b)}, rather than by length.
+#'
+#' **Scalings of `rda()`, `cca()` and `ca()`**
+#'
+#' [rda()], [cca()] and [ca()] store `vegan`'s scaling 2 (species scaled by
+#' their eigenvalues), drawn by default. `scaling = 1` scales the sites by
+#' the eigenvalues instead (so that distances between sites approximate
+#' their Euclidean or chi-square distances), and `scaling = 3` splits the
+#' scaling between the two, as `vegan::scores(x, scaling = 1)` and `3` do:
+#' each axis's site scores, centroids and constraints are multiplied by
+#' \eqn{f} or \eqn{\sqrt{f}}, and its species scores divided by them,
+#' where \eqn{f = \sqrt{\lambda / \mathrm{trace}}} for [rda()] and
+#' \eqn{\sqrt{\lambda}} for [cca()] and [ca()]. The subtitle names the
+#' scaling when one is given.
 #'
 #' Base graphics draw on the current device, so further points, text or
 #' arrows can be added on top. Use [envfit()]'s plot method, `plot(fit, add =
 #' TRUE)`, to add fitted variables.
 #'
 #' @return `x`, invisibly.
+#'
+#' @references
+#' Aitchison, J., & Greenacre, M. (2002). Biplots of compositional data.
+#' *Journal of the Royal Statistical Society: Series C (Applied
+#' Statistics)*, 51(4), 375-392. \doi{10.1111/1467-9876.00275}
+#'
+#' Greenacre, M. (2013). Contribution biplots. *Journal of Computational
+#' and Graphical Statistics*, 22(1), 107-122.
+#' \doi{10.1080/10618600.2012.702494}
+#'
+#' Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J.
+#' (2017). Microbiome datasets are compositional: and this is not optional.
+#' *Frontiers in Microbiology*, 8, 2224. \doi{10.3389/fmicb.2017.02224}
 #'
 #' @seealso [envfit()] and its plot method, `plot(fit, add = TRUE)`, to add
 #'   fitted variables to an ordination plot.
@@ -126,6 +240,18 @@
 #'     # A PCA biplot: the loadings as arrows.
 #'     plot(pca(iris[, 1:4], scale = TRUE), iris$Species)
 #'
+#'     # A compositional (covariance) biplot, with links whose lengths
+#'     # approximate the standard deviations of log ratios.
+#'     ord <- pca(ex_counts, norm = 'clr', pseudocount = 1)
+#'     plot(ord, scaling = 'covariance',
+#'          links = c('Streptococcus', 'Bacteroides', 'Corynebacterium'))
+#'
+#'     # The features that contribute most to the plane.
+#'     plot(ord, scaling = 'contribution')
+#'
+#'     # vegan's scaling 1 of an RDA.
+#'     plot(rda(iris[, 1:4]), iris$Species, scaling = 1)
+#'
 #'     # A constrained ordination: centroids of each species, and an arrow
 #'     # for the numeric constraint.
 #'     ord <- rda(iris[, 1:4], data = iris, formula = ~ Species + Sepal.Width)
@@ -139,7 +265,7 @@
 plot.ecodive_ord <- function (
     x, groups = NULL, data = NULL, axes = c(1, 2), loadings = 10,
     biplot = TRUE, centroids = TRUE, target = TRUE, legend = 'topright',
-    col = NULL, pch = NULL, ... ) {
+    col = NULL, pch = NULL, scaling = NULL, links = NULL, ... ) {
 
   args     <- list(...)
   att      <- attributes(x)
@@ -151,6 +277,7 @@ plot.ecodive_ord <- function (
 
   if (ncol(x) > 1) axes <- plot_axes(axes, ncol(x))
   else if (ncol(x) == 0) stop('`x` has no axes to plot.', call. = FALSE)
+  ord_scaling_arg(scaling)
   xy   <- unclass(x)
   attributes(xy) <- att[c('dim', 'dimnames')]
 
@@ -184,20 +311,29 @@ plot.ecodive_ord <- function (
   #--------------------------------------------------
   # Two axes: the samples, then the overlays.
   #--------------------------------------------------
-  pts <- xy[, axes, drop = FALSE]
+  # The samples and features in the chosen scaling (see
+  # ord_plot_scaling()): `load` holds the features to draw, in the plot's
+  # coordinates.
+  sc   <- ord_plot_scaling(x, axes, scaling, loadings, links)
+  pts  <- sc$rows
+  load <- sc$cols
+  sub  <- paste(c(sub, sc$sub), collapse = '; ')
+  if (!nzchar(sub)) sub <- NULL
 
-  # ca() and cca() hold species scores, drawn where they are; the others,
-  # loadings, drawn as arrows.
-  sp_pts   <- isTRUE(att$method %in% c('ca', 'cca'))
-  load     <- if (loadings > 0) ord_plot_loadings(att$loadings, axes, loadings)
   arr_con  <- if (biplot) ord_plot_biplot(att$biplot, axes, if (centroids) att$centroids)
   cen      <- if (centroids && !is.null(att$centroids) && nrow(att$centroids))
-    att$centroids[, axes, drop = FALSE]
+    sweep(att$centroids[, axes, drop = FALSE], 2, sc$row_mul, '*')
   tgt      <- if (target && !is.null(att$target))
     att$target[, axes, drop = FALSE]
+  if (!is.null(arr_con)) arr_con <- sweep(arr_con, 2, sc$row_mul, '*')
 
-  # The plot holds the samples, centroids, species and Procrustes targets.
-  all_xy <- rbind(pts, cen, tgt, if (sp_pts) load)
+  # The plot holds the samples, centroids, Procrustes targets, and the
+  # features drawn where they are (species scores, and the rays of the
+  # covariance and contribution biplots).
+  all_xy <- rbind(
+    pts, cen, tgt,
+    if (sc$style == 'points') load,
+    if (sc$style == 'rays') load * 1.1 )   # with room for the labels
 
   plot_do(
     graphics::plot.default, c(list(pts[, 1], pts[, 2]), args),
@@ -213,14 +349,20 @@ plot.ecodive_ord <- function (
   ext <- c(max(abs(pts[, 1])), max(abs(pts[, 2])))
 
   if (!is.null(load) && nrow(load)) {
-    if (sp_pts) {
+    if (sc$style == 'points') {
       graphics::points(load[, 1], load[, 2], pch = 4, col = PLOT_MUTED)
       plot_label(load[, 1], load[, 2], rownames(load), col = PLOT_MUTED, pos = 3, cex = 0.8)
     }
+    else if (sc$style == 'rays') {
+      ord_plot_rays(load, sc$col, sc$label)
+    }
     else {
-      plot_arrows(load * plot_arrow_mul(load, ext), col = PLOT_MUTED)
+      plot_arrows(load, col = PLOT_MUTED)
     }
   }
+
+  if (!is.null(sc$links))
+    ord_plot_links(load, sc$links)
 
   if (!is.null(arr_con) && nrow(arr_con))
     plot_arrows(arr_con * plot_arrow_mul(arr_con, ext), col = PLOT_HIGHLIGHT)
@@ -444,18 +586,6 @@ ord_plot_look <- function (g, col, pch) {
 
 
 
-# The `n` longest loadings on the plotted axes, as a two-column matrix, or
-# NULL.
-ord_plot_loadings <- function (load, axes, n) {
-  if (is.null(load) || !is.matrix(load) || nrow(load) == 0 || ncol(load) < max(axes))
-    return (NULL)
-  a <- load[, axes, drop = FALSE]
-  if (is.null(rownames(a))) rownames(a) <- as.character(seq_len(nrow(a)))
-  len <- rowSums(a ^ 2)
-  a[utils::head(order(len, decreasing = TRUE), n), , drop = FALSE]
-}
-
-
 # The constraints' arrows on the plotted axes, leaving out those of factor
 # levels when their centroids are drawn (vegan names both alike), or NULL.
 ord_plot_biplot <- function (bp, axes, cen) {
@@ -475,5 +605,306 @@ ord_plot_target <- function (pts, tgt) {
     graphics::arrows(
       pts[keep, 1], pts[keep, 2], tgt[keep, 1], tgt[keep, 2],
       length = 0.05, col = PLOT_MUTED )
+  invisible()
+}
+
+
+
+#--------------------------------------------------
+# Biplot scalings and links (see "Compositional biplots" in
+# ?plot.ecodive_ord).
+#--------------------------------------------------
+
+# The methods whose results take each kind of `scaling`: unweighted PCAs
+# (scores U S, unit loadings V, eig = s^2 / (n - 1)), and vegan's methods,
+# stored in its scaling 2.
+ORD_PCA_FAMILY   <- c('pca', 'rpca', 'rpca_phylo')
+ORD_VEGAN_FAMILY <- c('rda', 'cca', 'ca')
+
+
+# Checks `scaling`: NULL, a name, or vegan's number. Returns NULL, or the
+# canonical name: 'form' (vegan's 1, "sites"), 'covariance' (2, "species"),
+# 'symmetric' (3) or 'contribution'.
+ord_scaling_arg <- function (scaling) {
+
+  if (is.null(scaling)) return (NULL)
+
+  canon <- c(
+    form = 'form', covariance = 'covariance', contribution = 'contribution',
+    symmetric = 'symmetric', sites = 'form', species = 'covariance' )
+
+  if (is.numeric(scaling) && length(scaling) == 1 && isTRUE(scaling %in% 1:3))
+    return (c('form', 'covariance', 'symmetric')[[scaling]])
+
+  if (is.character(scaling) && length(scaling) == 1 && !is.na(scaling)) {
+    i <- pmatch(tolower(scaling), names(canon))
+    if (!is.na(i)) return (canon[[i]])
+  }
+
+  stop(
+    "`scaling` must be 'form', 'covariance', 'contribution' or 'symmetric', ",
+    "or vegan's scaling 1, 2 or 3 ('sites', 'species' or 'symmetric').",
+    call. = FALSE )
+}
+
+
+# The samples and features of a biplot on `axes` in the chosen `scaling`,
+# with the `n_load` features to draw and the pairs of `links`. Returns
+# list(
+#   rows     = the samples' coordinates,
+#   cols     = the features to draw, in the plot's coordinates (times
+#              `mult`), or NULL,
+#   mult     = the multiplier of `cols` (1 when drawn where they are),
+#   style    = 'arrows' (scaled to fit), 'rays' (from the origin, where they
+#              are) or 'points' (species scores),
+#   col      = each drawn feature's colour, label = whether it is labelled,
+#   row_mul  = the per-axis multiplier of the rows (for centroids and
+#              constraints), col_mul = the same for the features,
+#   sub      = the subtitle's part, or NULL,
+#   scaling  = the canonical scaling,
+#   links    = NULL, or a data frame of the drawn links: `from` and `to`
+#              (rows of `cols`) and `length` (planar) ).
+#
+# For pca(), rpca() and rpca_phylo(), with S the scores, V the unit
+# loadings and l = sqrt(eig) on `axes`:
+#   'form':         rows S,     cols V, times a factor that fits them in;
+#   'covariance':   rows S / l, cols V l (true coordinates);
+#   'contribution': rows S,     cols V, times a round factor (1, 2 or 5
+#                   times a power of 10).
+# so that rows %*% t(cols) / mult = S %*% t(V) in each. For rda(), cca()
+# and ca(), stored in vegan's scaling 2, with f = sqrt(eig / trace) for rda
+# and sqrt(eig) for cca and ca, vegan's scaling 1 multiplies the sites
+# (and centroids and constraints) by f and the species by 1 / f, and its
+# scaling 3 by sqrt(f) and 1 / sqrt(f).
+ord_plot_scaling <- function (x, axes, scaling = NULL, n_load = 10, links = NULL) {
+
+  att    <- attributes(x)
+  method <- as.character(att$method)
+  s      <- ord_scaling_arg(scaling)
+  given  <- !is.null(s)
+  pca_f  <- length(method) == 1 && method %in% ORD_PCA_FAMILY
+  veg_f  <- length(method) == 1 && method %in% ORD_VEGAN_FAMILY
+
+  if (given && !pca_f && !veg_f)
+    stop(
+      '`scaling` applies to the results of pca(), rpca(), rpca_phylo(), rda(), ',
+      'cca() and ca(), not ', if (length(method) == 1) paste0(method, '()') else 'this one', '.',
+      call. = FALSE )
+  if (pca_f && identical(s, 'symmetric'))
+    stop(
+      "`scaling = 'symmetric'` (vegan's 3) is for rda(), cca() and ca(). ",
+      "A ", method, "() biplot takes 'form', 'covariance' or 'contribution'.", call. = FALSE )
+  if (veg_f && identical(s, 'contribution'))
+    stop(
+      "`scaling = 'contribution'` is for pca(), rpca() and rpca_phylo(). ",
+      "An ", method, "() result takes vegan's scaling 1, 2 or 3.", call. = FALSE )
+  if (!is.null(links)) {
+    if (!pca_f)
+      stop('`links` are drawn only for the results of pca(), rpca() and rpca_phylo().', call. = FALSE)
+    if (!identical(s, 'covariance'))
+      stop(
+        "`links` needs `scaling = 'covariance'`: only there do link lengths ",
+        "approximate the standard deviations of log ratios.", call. = FALSE )
+  }
+
+  # What the result holds is vegan's scaling 2, or else a form biplot.
+  if (!given) s <- if (veg_f) 'covariance' else 'form'
+
+  xy <- unclass(x)
+  attributes(xy) <- att[c('dim', 'dimnames')]
+  rows <- xy[, axes, drop = FALSE]
+  eig  <- att$eig[axes]
+
+  # Per-axis multipliers of the rows and of the features.
+  rmul <- cmul <- c(1, 1)
+  if (veg_f) {
+    f    <- sqrt(if (method == 'rda') eig / att$trace else eig)
+    rmul <- switch(s, form = f, covariance = c(1, 1), symmetric = sqrt(f))
+    cmul <- 1 / rmul
+  }
+  else if (pca_f && s == 'covariance') {
+    rmul <- 1 / sqrt(eig)
+    cmul <- sqrt(eig)
+  }
+  rows <- sweep(rows, 2, rmul, '*')
+
+  style <- if (veg_f && method != 'rda') 'points'
+           else if (pca_f && s != 'form') 'rays'
+           else 'arrows'
+
+  # The features: those furthest from the origin (or, for 'contribution',
+  # those contributing most to the plane), and those that `links` names.
+  load <- att$loadings
+  if (is.null(load) || !is.matrix(load) || nrow(load) == 0 || ncol(load) < max(axes))
+    load <- NULL
+  pairs <- NULL
+  cols  <- NULL
+  sel   <- integer(0)
+  if (!is.null(load)) {
+    v <- load[, axes, drop = FALSE]
+    if (is.null(rownames(v))) rownames(v) <- as.character(seq_len(nrow(v)))
+    if (!is.null(links)) pairs <- ord_link_pairs(links, rownames(v))
+    v <- sweep(v, 2, cmul, '*')
+    score <- if (s == 'contribution') as.vector(v ^ 2 %*% eig) / sum(eig) else rowSums(v ^ 2)
+    if (n_load > 0) sel <- utils::head(order(score, decreasing = TRUE), n_load)
+    sel  <- c(sel, setdiff(unique(as.vector(pairs)), sel))
+    cols <- v[sel, , drop = FALSE]
+  }
+
+  # Arrows scaled to fit among the samples; contribution coordinates, by a
+  # round factor that fits them.
+  mult <- 1
+  if (!is.null(cols) && nrow(cols) && (style == 'arrows' || s == 'contribution')) {
+    ext  <- c(max(abs(rows[, 1])), max(abs(rows[, 2])))
+    mult <- plot_arrow_mul(cols, ext)
+    if (s == 'contribution') mult <- ord_round_mult(mult)
+    cols <- cols * mult
+  }
+
+  # Colours and labels: in a contribution biplot, the features above the
+  # average contribution (1/p) to either axis are highlighted and labelled.
+  nc    <- if (is.null(cols)) 0L else nrow(cols)
+  colv  <- rep(PLOT_MUTED, nc)
+  label <- rep(TRUE, nc)
+  if (s == 'contribution' && nc) {
+    hi <- unname(rowSums(load[sel, axes, drop = FALSE] ^ 2 > 1 / nrow(load)) > 0)
+    colv[hi] <- PLOT_HIGHLIGHT
+    label    <- hi
+  }
+
+  # Links: their planar lengths, and the warnings about their meaning.
+  lk <- NULL
+  if (!is.null(pairs)) {
+    from <- match(pairs[, 1], sel)
+    to   <- match(pairs[, 2], sel)
+    lk   <- data.frame(
+      from   = from,
+      to     = to,
+      length = sqrt(rowSums((cols[from, , drop = FALSE] - cols[to, , drop = FALSE]) ^ 2)) )
+    if (method == 'pca') {
+      msg <- ord_links_norm_msg(att$norm, att$scale)
+      if (!is.null(msg)) warning(msg, call. = FALSE)
+    }
+    plane <- sum(att$prop[axes])
+    if (isTRUE(plane < 0.5))
+      warning(
+        sprintf('The two axes explain %s%% of the variance, ', format(round(100 * plane))),
+        'so link lengths may greatly underestimate the log-ratio standard deviations.',
+        call. = FALSE )
+  }
+
+  sub <- NULL
+  if (given && pca_f) {
+    plane <- sum(att$prop[axes])
+    sub   <- switch(
+      s,
+      form         = 'form biplot',
+      covariance   = paste0(
+        'covariance biplot',
+        if (!is.na(plane)) sprintf(', plane explains %s%% of the variance', format(round(100 * plane)))),
+      contribution = sprintf(
+        'contribution biplot, feature coordinates %s %s', print_sym()$times,
+        format(mult, scientific = mult < 1e-4 || mult >= 1e5)) )
+  }
+  else if (given && veg_f) {
+    sub <- sprintf('scaling %d', match(s, c('form', 'covariance', 'symmetric')))
+  }
+
+  list(
+    rows = rows, cols = cols, mult = mult, style = style, col = colv, label = label,
+    row_mul = rmul, col_mul = cmul, sub = sub, scaling = s, links = lk )
+}
+
+
+# `m` rounded down to 1, 2 or 5 times a power of 10.
+ord_round_mult <- function (m) {
+  if (!is.finite(m) || m <= 0) return (1)
+  k <- floor(log10(m))
+  d <- m / 10 ^ k
+  d <- if (d >= 5 - 1e-9) 5 else if (d >= 2 - 1e-9) 2 else 1
+  as.numeric(format(d * 10 ^ k, digits = 1))
+}
+
+
+# Why the links of a pca() result in the transform `norm` (scaled or not)
+# are not log ratios, or NULL when they are.
+ord_links_norm_msg <- function (norm, scale) {
+  scaled <- isTRUE(scale)
+  if (identical(norm, 'clr') && !scaled) return (NULL)
+  if (!is.character(norm) || length(norm) != 1)
+    return ('links of this pca() result may not show standard deviations of log ratios.')
+  what <- if (scaled) paste('standardized', norm, 'values')
+          else switch(
+            norm,
+            none    = 'the untransformed values',
+            percent = 'relative abundances',
+            rclr    = 'rclr values, whose zeros stay 0',
+            paste(norm, 'values') )
+  sprintf(
+    "links of `pca(norm = '%s'%s)` show standard deviations of differences of %s, not of log ratios.",
+    norm, if (scaled) ', scale = TRUE' else '', what )
+}
+
+
+# The pairs of features that `links` names, among `nms`: every pair of a
+# vector of features (names or positions), or the rows of a two-column
+# matrix of pairs. Returns a two-column integer matrix of positions.
+ord_link_pairs <- function (links, nms) {
+
+  bad <- function ()
+    stop(
+      '`links` must be a vector of at least two features (names or positions ',
+      'in the loadings), or a two-column matrix of pairs of them.', call. = FALSE )
+
+  is_mat <- is.matrix(links) || is.data.frame(links)
+  if (is.data.frame(links)) links <- as.matrix(links)
+  if (is_mat && (ncol(links) != 2 || nrow(links) == 0)) bad()
+  v <- if (is.factor(links)) as.character(links) else as.vector(links)
+  if (!(is.character(v) || is.numeric(v)) || anyNA(v)) bad()
+
+  p   <- length(nms)
+  idx <- if (is.character(v)) match(v, nms)
+         else ifelse(v == round(v) & v >= 1 & v <= p, as.integer(v), NA_integer_)
+  if (anyNA(idx))
+    stop('`links` names features not in the loadings: ', name_list(unique(v[is.na(idx)])), '.', call. = FALSE)
+
+  if (is_mat) {
+    pairs <- matrix(idx, ncol = 2)
+  }
+  else {
+    u <- unique(idx)
+    if (length(u) < 2)
+      stop('`links` needs at least two features: every pair among them is linked.', call. = FALSE)
+    pairs <- t(utils::combn(u, 2))
+  }
+
+  if (any(pairs[, 1] == pairs[, 2]))
+    stop('`links` pairs a feature with itself.', call. = FALSE)
+
+  pairs
+}
+
+
+# Rays from the origin to `cols`, coloured by `col`, labelled where `label`.
+ord_plot_rays <- function (cols, col, label) {
+  keep <- plot_arrow_keep(0, 0, cols[, 1], cols[, 2])
+  if (!any(keep)) return (invisible())
+  graphics::arrows(0, 0, cols[keep, 1], cols[keep, 2], length = 0.06, col = col[keep])
+  lab <- keep & label
+  if (any(lab))
+    plot_label(cols[lab, 1] * 1.08, cols[lab, 2] * 1.08, rownames(cols)[lab], col = col[lab], cex = 0.8)
+  invisible()
+}
+
+
+# Dashed links between the tips of `cols`, each labelled at its midpoint
+# with its length on the plane.
+ord_plot_links <- function (cols, lk) {
+  x0 <- cols[lk$from, 1]; y0 <- cols[lk$from, 2]
+  x1 <- cols[lk$to,   1]; y1 <- cols[lk$to,   2]
+  graphics::segments(x0, y0, x1, y1, lty = 2, col = PLOT_HIGHLIGHT)
+  plot_label(
+    (x0 + x1) / 2, (y0 + y1) / 2, vapply(lk$length, plot_num, '', digits = 2L),
+    col = PLOT_HIGHLIGHT, cex = 0.75 )
   invisible()
 }

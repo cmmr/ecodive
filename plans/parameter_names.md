@@ -28,7 +28,8 @@ same thing.
 | `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv`; `cross_assoc` (covariates: a formula over `data`, column names, or a table) |
 | `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20) | everything that takes `counts` |
 | `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
-| `scaling` | **reserved** for score scaling (vegan's scaling 1/2), if ever needed | — |
+| `scaling` | how a biplot scales samples against features: `'form'` (1), `'covariance'` (2), `'contribution'`; vegan's 1, 2, 3 for `rda`, `cca`, `ca` (item 44, 2026-11-24) | `plot.ecodive_ord` |
+| `links` | pairs of features joined in a covariance biplot (Aitchison & Greenacre's term) | `plot.ecodive_ord` |
 | `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
 | `metric` | a beta diversity metric name | `beta_div`, `alpha_div`; planned `bioenv` |
 | `alternative` | `'greater'`, `'less'` or `'two.sided'` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `moran_i` |
@@ -203,7 +204,7 @@ reuse §1's names and add these:
 
 | Name | Meaning | Used by (planned) |
 |:-----|:--------|:------------------|
-| `scaling` | the biplot scaling (`'form'`, `'covariance'`, `'contribution'`); the use §1 reserved it for | `plot.ecodive_ord` |
+| `scaling` | the biplot scaling (`'form'`, `'covariance'`, `'contribution'`, and vegan's 1, 2, 3 for `rda`, `cca`, `ca`); used by `plot.ecodive_ord()` since item 44 | `plot.ecodive_ord` |
 | `threshold` | the association cutoff that makes an edge | `assoc_network`, `assoc_pairs` (exist) and the association functions' sparsification |
 | `average`, `sd` | how repeated rarefactions are combined (`'mean'`, `'median'`, `'medoid'`), and whether to return their spread | `beta_div_rarefied`, `alpha_div_rarefied` (with `rarefy()`'s `times`) |
 | `pseudocounts`, `zeros`, `scale_sds` | the settings grids of a sensitivity analysis. Plural, and after `...`, so they can't capture the method's own `pseudocount` / `scale_sd` (arguments after `...` match only exactly) | `da_sensitivity` |

@@ -134,6 +134,7 @@ per axis, \code{vegan::scores(x, display = "species")} (scaling 2). Unlike
 \code{\link[=pca]{pca()}}'s \code{loadings}, these are not unit-length: each axis's are
 scaled by the square root of its share of the variance, so that the
 sites and species form a correlation biplot, as in \code{vegan}.
+\code{plot(x, scaling = 1)} (or \code{3}) draws \code{vegan}'s other scalings.
 }
 }
 \description{
