@@ -239,10 +239,11 @@ sequencing would find few new features.</p>
 <div class="section level3">
 <h3 id="several-metrics-at-once">Several Metrics at Once<a class="anchor" aria-label="anchor" href="#several-metrics-at-once"></a>
 </h3>
-<p>Give <code><a href="../reference/alpha_div.html">alpha_div()</a></code> several metric names to get a matrix
-with a column for each.</p>
+<p><code><a href="../reference/alpha_div.html">alpha_div()</a></code> computes one metric per call, and always
+returns one value per sample. To collect several metrics in a matrix,
+call it for each:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/alpha_div.html">alpha_div</a></span><span class="op">(</span><span class="va">counts</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'observed'</span>, <span class="st">'shannon'</span>, <span class="st">'pielou'</span>, <span class="st">'goods_coverage'</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'observed'</span>, <span class="st">'shannon'</span>, <span class="st">'pielou'</span>, <span class="st">'goods_coverage'</span><span class="op">)</span>, <span class="va">alpha_div</span>, counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        observed    shannon     pielou goods_coverage</span></span>
 <span><span class="co">#&gt; Saliva        4 0.74119910 0.53466213      0.9971014</span></span>
 <span><span class="co">#&gt; Gums          3 0.35692121 0.32488369      1.0000000</span></span>

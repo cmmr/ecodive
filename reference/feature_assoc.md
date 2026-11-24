@@ -104,7 +104,9 @@ parallel processing.
 [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md),
 [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md),
 [`list_feature_assocs()`](https://cmmr.github.io/ecodive/reference/feature_assocs.md);
-[`assoc_network()`](https://cmmr.github.io/ecodive/reference/assoc_network.md).
+[`assoc_network()`](https://cmmr.github.io/ecodive/reference/assoc_network.md);
+[`cross_assoc()`](https://cmmr.github.io/ecodive/reference/cross_assoc.md)
+for the associations between the features of two tables.
 
 ## Examples
 

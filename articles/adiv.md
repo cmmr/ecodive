@@ -185,13 +185,13 @@ goods_coverage(counts)
 
 ### Several Metrics at Once
 
-Give
 [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)
-several metric names to get a matrix with a column for each.
+computes one metric per call, and always returns one value per sample.
+To collect several metrics in a matrix, call it for each:
 
 ``` r
 
-alpha_div(counts, c('observed', 'shannon', 'pielou', 'goods_coverage'))
+sapply(c('observed', 'shannon', 'pielou', 'goods_coverage'), alpha_div, counts = counts)
 #>        observed    shannon     pielou goods_coverage
 #> Saliva        4 0.74119910 0.53466213      0.9971014
 #> Gums          3 0.35692121 0.32488369      1.0000000

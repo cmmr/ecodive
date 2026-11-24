@@ -60,11 +60,10 @@ alpha_div_rarefied(
 
   The name of a diversity metric: for `beta_div_rarefied()`, one of
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)'s
-  metrics, such as `'bray'`; for `alpha_div_rarefied()`, one or several
-  of
+  metrics, such as `'bray'`; for `alpha_div_rarefied()`, one of
   [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)'s,
-  such as `'shannon'` or `c('observed', 'shannon')`. Matched as those
-  functions match it (case-insensitive, with prefixes and aliases). See
+  such as `'shannon'`. Matched as those functions match it
+  (case-insensitive, with prefixes and aliases). See
   [`list_metrics()`](https://cmmr.github.io/ecodive/reference/metrics.md).
 
 - depth:
@@ -251,12 +250,7 @@ of it are titled after it. Further attributes:
 `alpha_div_rarefied()`: a named numeric vector over the kept samples, as
 [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)
 returns, with attributes `depth`, `dropped`, and with `sd = TRUE`, `sd`
-(a named numeric vector). With several metrics, a matrix with a column
-for each metric, as
-[`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)
-returns, all computed from the same rarefied tables, and `sd` is a
-matrix of the same shape. Each column is exactly what that metric alone
-gives.
+(a named numeric vector).
 
 ## Details
 

@@ -288,7 +288,9 @@ the pairs above a cutoff;
 proportionality of features;
 [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), the
 variation matrix;
-[`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md).
+[`plot.ecodive_dist()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.md);
+[`cross_assoc()`](https://cmmr.github.io/ecodive/reference/cross_assoc.md)
+for correlations between the features of two tables.
 
 ## Examples
 

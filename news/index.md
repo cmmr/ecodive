@@ -944,6 +944,23 @@
   with Fisher’s z, as NetCoMi’s `diffnet(diffMethod = "fisherTest")`.
 
 - New
+  [`cross_assoc()`](https://cmmr.github.io/ecodive/reference/cross_assoc.md)
+  correlates every feature of one table (taxa) with every variable of
+  another measured on the same samples (environmental factors,
+  metabolites, clinical variables): Spearman, Pearson or Kendall’s
+  tau-b, optionally partial (`given`), with p-values as SciPy’s
+  `spearmanr()`, `pearsonr()` and `kendalltau()` compute them (or by
+  permutation), adjusted over all pairs (Benjamini-Hochberg by default).
+  Missing values in `y` are left out pair by pair, as `Hmisc::rcorr()`
+  does. [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws
+  the familiar heatmap, clustered, with stars on the significant cells,
+  and [`as.matrix()`](https://rdrr.io/r/base/matrix.html) gives any
+  column as a taxa x variables matrix. It agrees with SciPy,
+  [`cor.test()`](https://rdrr.io/r/stats/cor.test.html), Hmisc, psych,
+  ppcor and microeco to about 1e-14. Sparse tables stay sparse, and the
+  correlations run in parallel in C, identical for any `cpus`.
+
+- New
   [`feature_assoc()`](https://cmmr.github.io/ecodive/reference/feature_assoc.md)
   runs any association measure
   ([`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
@@ -1294,9 +1311,6 @@
 - [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)
   and
   [`alpha_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
-  take several metrics at once,
-  `metric = c('observed', 'shannon', 'pielou')`, and return a matrix
-  with a column for each (computed from the same rarefied tables). They
   take the new `q` and `bias_corrected` arguments, before `cpus`.
 
 - **Changed results:**

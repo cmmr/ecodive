@@ -200,7 +200,9 @@ using compositional data analysis. *Scientific Reports*, 7, 16252.
 [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md),
 [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
 (`'clr'`),
-[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md).
+[`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md);
+[`cross_assoc()`](https://cmmr.github.io/ecodive/reference/cross_assoc.md)
+for associations between the features of two tables.
 
 ## Examples
 

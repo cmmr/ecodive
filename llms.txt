@@ -642,6 +642,17 @@ measure by name.
 - [`assoc_network_diff()`](https://cmmr.github.io/ecodive/reference/assoc_network_diff.md)
   : Differential Associations
 
+### Associations between tables
+
+Correlations between the features of one table (taxa) and the variables
+of another measured on the same samples (environmental factors,
+metabolites), with adjusted p-values and a starred heatmap.
+
+- [`cross_assoc()`](https://cmmr.github.io/ecodive/reference/cross_assoc.md)
+  : Associations Between Two Tables
+- [`plot(`*`<ecodive_cross_assoc>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_cross_assoc.md)
+  : Plot Associations Between Two Tables
+
 ### Differential abundance
 
 Which features’ abundances differ between groups. da_test() runs any

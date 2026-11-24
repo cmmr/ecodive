@@ -54,6 +54,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/clark.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/count_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/count_ords.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/cross_assoc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/da_sensitivity.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/da_test.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/da_tests.html</loc></url>
@@ -137,6 +138,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_cross_assoc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_ttest.html</loc></url>

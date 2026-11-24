@@ -29,8 +29,7 @@ alpha_div(
 
 - metric:
 
-  The name of an alpha diversity metric, or several names to compute
-  several metrics at once. One of
+  The name of an alpha diversity metric. One of
   `c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis')`.
   Case-insensitive and partial name matching is supported, as are
   scikit-bio's names (such as `'pielou_e'`, `'simpson_d'`,
@@ -107,10 +106,8 @@ alpha_div(
 
 ## Value
 
-A numeric vector, one value per sample, named by the samples. With
-several metrics, a numeric matrix with one row per sample and one column
-per metric, named by the metrics' IDs in the order given; each column is
-exactly what that metric alone returns.
+A numeric vector, one value per sample, named by the samples. To compute
+several metrics, call `alpha_div()` once for each (see the examples).
 
 ## Details
 
@@ -168,14 +165,6 @@ message.
 - Gini Index
 
 - Faith's PD
-
-### Several Metrics at Once
-
-`alpha_div(counts, c('observed', 'shannon', 'pielou'))` returns a matrix
-with a column for each metric. Each metric is computed by its own
-function, so a column is
-[`identical()`](https://rdrr.io/r/base/identical.html) to the vector
-that metric gives alone; naming a metric twice is an error.
 
 ### Differences from scikit-bio
 
@@ -245,32 +234,34 @@ parallel processing.
 #> Gums                1
 #> Nose              236
 #> Stool               1
-
+    
     # Shannon diversity values
     alpha_div(ex_counts, 'Shannon')
 #>     Saliva       Gums       Nose      Stool 
 #> 0.74119910 0.36684449 1.14222899 0.04824952 
-
+    
     # Chao1 diversity values
     alpha_div(ex_counts, 'c')
 #> Saliva   Gums   Nose  Stool 
 #>      4      6      6     11 
-
+    
     # Faith PD values
     alpha_div(ex_counts, 'faith', tree = ex_tree)
 #> Saliva   Gums   Nose  Stool 
 #>    180    191    215    202 
-
+    
     # Hill number of order 1 (the exponential of Shannon's entropy)
     alpha_div(ex_counts, 'hill', q = 1)
 #>   Saliva     Gums     Nose    Stool 
 #> 2.098450 1.443173 3.133746 1.049432 
-
-    # Several metrics at once
-    alpha_div(ex_counts, c('observed', 'shannon', 'pielou'))
+    
+    # Several metrics: one call each
+    sapply(c('observed', 'shannon', 'pielou'), alpha_div, counts = ex_counts)
 #>        observed    shannon     pielou
 #> Saliva        4 0.74119910 0.53466213
 #> Gums          5 0.36684449 0.22793330
 #> Nose          6 1.14222899 0.63749014
 #> Stool         5 0.04824952 0.02997911
+    
+    
 ```

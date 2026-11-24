@@ -114,10 +114,9 @@ phylogenetic metrics.</p></dd>
 <dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
 <dd><p>The name of a diversity metric: for <code>beta_div_rarefied()</code>,
 one of <code><a href="beta_div.html">beta_div()</a></code>'s metrics, such as <code>'bray'</code>; for
-<code>alpha_div_rarefied()</code>, one or several of <code><a href="alpha_div.html">alpha_div()</a></code>'s, such
-as <code>'shannon'</code> or <code>c('observed', 'shannon')</code>. Matched as those
-functions match it (case-insensitive, with prefixes and aliases).
-See <code><a href="metrics.html">list_metrics()</a></code>.</p></dd>
+<code>alpha_div_rarefied()</code>, one of <code><a href="alpha_div.html">alpha_div()</a></code>'s, such as
+<code>'shannon'</code>. Matched as those functions match it (case-insensitive,
+with prefixes and aliases). See <code><a href="metrics.html">list_metrics()</a></code>.</p></dd>
 
 
 <dt id="arg-depth">depth<a class="anchor" aria-label="anchor" href="#arg-depth"></a></dt>
@@ -272,10 +271,7 @@ distance matrix was returned.</p></li>
 <li><p><code>order</code> (with <code>clust</code>): see <code><a href="beta_div.html">beta_div()</a></code>.</p></li>
 </ul><p><code>alpha_div_rarefied()</code>: a named numeric vector over the kept samples, as
 <code><a href="alpha_div.html">alpha_div()</a></code> returns, with attributes <code>depth</code>, <code>dropped</code>, and with
-<code>sd = TRUE</code>, <code>sd</code> (a named numeric vector). With several metrics, a
-matrix with a column for each metric, as <code><a href="alpha_div.html">alpha_div()</a></code> returns, all
-computed from the same rarefied tables, and <code>sd</code> is a matrix of the same
-shape. Each column is exactly what that metric alone gives.</p>
+<code>sd = TRUE</code>, <code>sd</code> (a named numeric vector).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
