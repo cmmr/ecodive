@@ -979,6 +979,25 @@
   the fitted curve and its band over the features (`type = "binomial"`
   adds the binomial model's curve).
 
+* New `batch_mmuphin()` and `batch_combat()` remove batch effects (study,
+  sequencing run, extraction kit) from a table, keeping the effects of the
+  covariates named in `formula`. `batch_mmuphin()` ports MMUPHin's
+  `adjust_batch()` (Ma et al. 2022; MMUPHin 2.0.0, MIT): zero-inflated
+  empirical Bayes adjustment of log relative abundances, re-closed to each
+  sample's total, with zeros left as zeros (`zero_inflation = FALSE` fits
+  every value). `batch_combat()` ports sva 3.60.0's `ComBat()` (Johnson et
+  al. 2007; Artistic-2.0) for continuous values (or `norm = 'clr'` /
+  `'log'`), with parametric or non-parametric priors, `mean_only` and
+  `ref_batch`; its non-parametric priors are weighed on the log scale, so
+  large batches don't underflow to `NaN` as in sva. Both match their
+  references to rounding (MMUPHin's rounded counts exactly), in threaded C
+  over a sparse table, the same for any `cpus`. `batch` can be a column of
+  `data`. The result is the corrected table (dense, in the input's
+  orientation) of class `ecodive_batch`, with the batch effects before and
+  after shrinkage as attributes; `plot()` draws MMUPHin's diagnostics (the
+  shrinkage of the batch effects, and each feature's batch means before
+  and after).
+
 * New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
   2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
   pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,
@@ -992,6 +1011,25 @@
   `cpus`. `plot()` draws LEfSe's bar chart of LDA scores. It joins
   `da_test()` (`"lefse"`, alias `"lefser"`) and `da_sensitivity()` (zero
   replacements). The docs say why the plain tests are preferable.
+
+* New `indicator_species()`: indicator species analysis (Dufrene & Legendre
+  1997) with group combinations, De Caceres et al.'s (2010) multilevel
+  pattern analysis. Each feature's association with every group and
+  combination of groups (`min_order`, `max_order`, `combinations`, by name
+  or id) by the group-equalized indicator value (`index = 'indval_g'`, the
+  default), the plain one (`'indval'`, with its specificity `a` and
+  fidelity `b`), or the point-biserial correlation (`'r'`, `'r_g'`, with
+  `negative` associations), the best combination, and a permutation test of
+  it against the largest value over the combinations (`strata`, or a
+  supplied matrix). Matches indicspecies' `multipatt()` and `strassoc()`
+  and labdsv's `indval()` to rounding, with identical p-values given the
+  same permutations; ties between combinations go the same way every time
+  (multipatt breaks them at random). New `p_adjust` (default `'holm'`;
+  multipatt adjusts nothing, `'none'`). Threaded C over a sparse table,
+  permutations in fixed blocks, so the same for any `cpus`. `plot()` draws
+  the indicators' values as bars, or their groups' means as a heatmap. It
+  joins `da_test()` (`"indicator_species"`, aliases `"indval"` and
+  `"multipatt"`).
 
 * New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
   `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's

@@ -19,7 +19,9 @@
 #'        [ancombc_pairwise()], [ancombc_dunnett()], [ancombc_trend()],
 #'        [dirmult_ttest()], [da_sensitivity()], [simper()], [bioenv()],
 #'        [envfit()], [assoc_pairs()], [assoc_network_diff()], [enterotype()] or [valencia()], or a source-tracking
-#'        matrix of class `ecodive_source` (from [sourcetracker()]). A community-types result (see
+#'        matrix of class `ecodive_source` (from [sourcetracker()]), or a
+#'        batch-corrected table of class `ecodive_batch` (from
+#'        [batch_mmuphin()] or [batch_combat()]). A community-types result (see
 #'        [ecodive_types]) prints its types and how their number was chosen
 #'        before its first samples.
 #'
@@ -307,6 +309,7 @@ print_df_label <- function (x) {
     ecodive_cross_assoc   = cross_assoc_label(x),
     ecodive_network_diff  = 'Differential Associations',
     ecodive_simper        = 'SIMPER',
+    ecodive_indicator_species = indsp_label(x),
     ecodive_rarefaction_curve = 'Rarefaction curves',
     ecodive_neutral_model = neutral_model_label(x),
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
@@ -367,6 +370,8 @@ print.ecodive_da_ttest         <- print_table_result
 print.ecodive_da_lm            <- print_table_result
 #' @export
 print.ecodive_lefse            <- print_table_result
+#' @export
+print.ecodive_indicator_species <- print_table_result
 #' @export
 print.ecodive_linda            <- print_table_result
 #' @export

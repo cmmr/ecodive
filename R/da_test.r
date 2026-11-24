@@ -50,6 +50,7 @@ DA_TESTS <- local({
       LinDA,                                   linda,         formula, log2_fc,     2,    TRUE,         TRUE,
       MaAsLin 3,                               maaslin3,      formula, coef_abundance, 2, FALSE,        TRUE,   maaslin
       LEfSe,                                   lefse,         groups,  lda_score,   ,     TRUE,         FALSE,  lefser
+      Indicator Species Analysis,              indicator_species, groups, stat,     ,     FALSE,        FALSE,  indval multipatt indicatorvalue multilevelpatternanalysis
   " )
 
   df$zero_free_ok <- as.logical(df$zero_free_ok)
@@ -74,8 +75,8 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #'
 #' @param method   The name of a DA method: `"ancom"`, `"ancombc"`,
 #'        `"ancombc2"`, `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`,
-#'        `"dirmult_lm"`, `"dirmult_ttest"`, `"lefse"`, `"linda"`, or
-#'        `"maaslin3"`. Flexible matching is supported
+#'        `"dirmult_lm"`, `"dirmult_ttest"`, `"indicator_species"`, `"lefse"`,
+#'        `"linda"`, or `"maaslin3"`. Flexible matching is supported
 #'        (see below). Programmatic access via `list_da_tests()`.
 #'
 #' @param groups  The grouping to compare: the name of a column of `data`,
@@ -97,10 +98,10 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #'        [da_wilcoxon()], [dirmult_ttest()]), `norm` and `pseudocount`. Each
 #'        method keeps its own defaults; see [ancom()], [ancombc()],
 #'        [ancombc2()], [da_lm()], [da_ttest()], [da_wilcoxon()],
-#'        [dirmult_lm()], [dirmult_ttest()], [lefse()], [linda()], and
-#'        [maaslin3()]. `seed` is ignored by the methods that have no random
-#'        parts (all but [dirmult_lm()], [dirmult_ttest()], [lefse()] and
-#'        [maaslin3()]).
+#'        [dirmult_lm()], [dirmult_ttest()], [indicator_species()], [lefse()],
+#'        [linda()], and [maaslin3()]. `seed` is ignored by the methods that
+#'        have no random parts (all but [dirmult_lm()], [dirmult_ttest()],
+#'        [indicator_species()], [lefse()] and [maaslin3()]).
 #'
 #' @return The method's result, unchanged: `da_test(counts, 'ancombc2',
 #'   ...)` is identical to `ancombc2(counts, ...)`, attributes included.
@@ -121,6 +122,7 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #' | `da_wilcoxon`          | Wilcoxon rank-sum test per feature     | groups  |
 #' | `dirmult_lm`           | Dirichlet-multinomial linear model with a scale model (ALDEx3) | formula |
 #' | `dirmult_ttest`        | Dirichlet-multinomial t-test (ALDEx2-style) | groups |
+#' | `indicator_species`    | Indicator species analysis (IndVal, multilevel pattern analysis) | groups |
 #' | `lefse`                | LDA effect size (LEfSe)                | groups  |
 #' | `linda`                | Linear models for differential abundance (LinDA) | formula |
 #' | `maaslin3`             | Abundance and prevalence models with a median comparison (MaAsLin 3) | formula |
@@ -153,8 +155,9 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #' `'linear model'` selects `da_lm`; and `'ALDEx2'` selects
 #' `dirmult_ttest`, an ALDEx2-style method (not ALDEx2 itself, whose
 #' results agree with it in direction and rough size only); `'ALDEx3'`
-#' selects `dirmult_lm`, a port of ALDEx3's linear models; `'MaAsLin 3'` or
-#' `'maaslin'` selects `maaslin3` (MaAsLin 2 isn't in ecodive).
+#' selects `dirmult_lm`, a port of ALDEx3's linear models; `'IndVal'` or
+#' `'multipatt'` selects `indicator_species`; `'MaAsLin 3'` or `'maaslin'`
+#' selects `maaslin3` (MaAsLin 2 isn't in ecodive).
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
@@ -183,7 +186,7 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #' \doi{10.1093/bib/bbaf130}
 #'
 #' @seealso [ancom()], [ancombc()], [da_lm()], [da_ttest()],
-#'   [da_wilcoxon()], [dirmult_lm()], [dirmult_ttest()], [lefse()], [linda()], [maaslin3()], [list_da_tests()];
+#'   [da_wilcoxon()], [dirmult_lm()], [dirmult_ttest()], [indicator_species()], [lefse()], [linda()], [maaslin3()], [list_da_tests()];
 #'   [replace_zeros()] for the zeros; [da_sensitivity()] to rerun a method
 #'   over pseudocounts, zero replacements and scale uncertainties.
 #'
