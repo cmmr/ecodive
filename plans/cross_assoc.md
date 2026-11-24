@@ -461,3 +461,28 @@ Made while implementing:
   can call the same kernel with `x`'s own standardised columns as `Y`
   (it computes the full p × p block; take the packed triangle).
 - Ties within a feature (zeros) get average ranks, as SciPy's `rankdata`.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 39, done 2026-11-24.** Commits `70f49b4` (work), `da2f59a` (merge of
+item 37's commits from `origin/main`; no conflicts), and the tick and this
+outcome in the commit after it.
+
+- Tests (`-O2` install, `LANG=C.UTF-8`): 20,923 at home before the merge
+  (baseline 20,773; `test-cross_assoc.r` has 149), 365 in CRAN mode
+  (baseline 364); on the merged tree **22,886 at home, 389 in CRAN mode**,
+  all passing. `R CMD check --no-manual --ignore-vignettes`: 1 NOTE
+  (installed size, as before).
+- SciPy 1.18.1: r to 8.3e-16, p-values to 3.8e-14 relative (Spearman,
+  Pearson, Kendall asymptotic). `cor.test(exact = FALSE)` 2.9e-14, psych
+  2.6.9 5.5e-15, ppcor 1.1 (partial) 9.2e-14, Hmisc 5.3-1 r 1.7e-16 (its
+  small p-values only to 4.4e-16 absolutely), microeco 2.4.3 r 5.6e-16 (its
+  exact AS 89 p-values for untied pairs skipped). Permutation p-values equal
+  base-R loops exactly, with and without `given` and with NA patterns.
+- Identical for `cpus` 1–4; sparse and dense input identical.
+- Speed (4 cores): 200 × 2,000 sparse taxa × 1,000 variables in 0.8 s
+  (kernel ≈ 0.25 s; the rest is R's `pt()`/`p.adjust()`); 200 × 200 × 50
+  with 999 permutations in 0.3 s.
+- Open: no bipartite network of the significant pairs (a follow-up, as
+  planned); `halla()` (item 84) can reuse the internals listed above.
