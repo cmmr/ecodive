@@ -267,3 +267,29 @@ Made while implementing:
 - **par():** `mai` and `cex` are restored on exit, and `mfrow` too after the
   heatmap's `layout()`; without the heatmap `mfrow` is untouched, so the plot
   can fill one of the user's own panels.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 47, done 2026-11-24.** Commit `68b12bd` (work), and the tick.
+
+- Tests: 28,242 at home, 407 in CRAN mode (before this item: 28,140 and
+  406; the new file has 101, the smoke file one more line). `R CMD check
+  --no-manual --ignore-vignettes` with `LANG=C.UTF-8`: 1 NOTE (installed
+  size 5.8 MB), as before.
+- microshades 1.13 (`create_color_dfs()`, sourced with dplyr 1.2.1, tidyr
+  1.3.2, forcats 1.0.1, rlang 1.3.0; no phyloseq), 3 cases (4 groups x 4
+  members with an "Unassigned" group, 3 x 2, and a 2-member group with no
+  "Other"): the same groups (microshades given the largest summed
+  proportions), the same members in the same order of shade, and each
+  group's "Other" lightest, in every case.
+- Direct formulas: proportions and "Other" to 1e-15, the chosen features
+  and groups (ties by position), the PCoA and `hclust` orders
+  (`order(pcoa(aitchison(x))[, 1])`), stable group sorting, the colours,
+  and the centred clr of the heatmap (1e-12).
+- `cpus` 1, 2, 4, dense vs `dgCMatrix` / `dgTMatrix` / slam, and either
+  `margin`: identical results.
+- New: `composition_barplot()`; C entry points `C_comp_bar_means` and
+  `C_comp_bar_segments` (`src/composition_barplot.c`). Nothing copied from
+  microshades (the colours are re-derived in HCL; the docs cite the paper),
+  so no notice, `Files:` stanza or `Authors@R` entry.
