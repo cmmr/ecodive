@@ -244,6 +244,8 @@ the methods that take distances.
 #>   ..- attr(*, "dimnames")=List of 2
 #>   .. ..$ : chr [1:6] "Streptococcus" "Bacteroides" "Corynebacterium" "Haemophilus" ...
 #>   .. ..$ : chr [1:3] "PC1" "PC2" "PC3"
+#>  - attr(*, "norm")= chr "clr"
+#>  - attr(*, "scale")= logi FALSE
 #>  - attr(*, "display")=List of 1
 #>   ..$ title: chr "Principal Component Analysis"
 

@@ -154,7 +154,8 @@ same meanings, but for inertia in place of variance:
 
 - `loadings`: The species scores: one row per feature and one column per
   axis, `vegan::scores(x, display = "species")` (scaling 2). Features
-  with no observations get `0`.
+  with no observations get `0`. `plot(x, scaling = 1)` (or `3`) draws
+  `vegan`'s other scalings.
 
 ## Details
 

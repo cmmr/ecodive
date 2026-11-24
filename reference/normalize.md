@@ -181,5 +181,5 @@ learning applications. *Microbiome*, 12, 45.
     a <- pca(ex_counts, norm = 'clr', pseudocount = 1, n_axes = 2)
     b <- pca(clr, n_axes = 2)
     all.equal(a, b)
-#> [1] TRUE
+#> [1] "Attributes: < Component “norm”: 1 string mismatch >"
 ```

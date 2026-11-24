@@ -236,7 +236,11 @@ samples are preserved and each feature's arrow shows the direction in
 which its robust clr increases. (gemelli, and QIIME 2's Emperor, plot
 \(u\) and \(v\).) The loadings are much shorter than the scores;
 <code>plot(ord)</code> scales them to fit among the samples and draws them as
-arrows (see <code><a href="plot.ecodive_ord.html">plot.ecodive_ord()</a></code>):</p>
+arrows (see <code><a href="plot.ecodive_ord.html">plot.ecodive_ord()</a></code>). <code>plot(ord, scaling = 'covariance')</code>
+draws the compositional (covariance) biplot instead, in which rays and
+<code>links</code> read as standard deviations of the completed rclr values and of
+their log ratios, and <code>scaling = 'contribution'</code> marks the features that
+contribute most; see "Compositional biplots" in <code><a href="plot.ecodive_ord.html">plot.ecodive_ord()</a></code>:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rpca.html">rpca</a></span><span class="op">(</span><span class="va">ex_counts</span>, n_axes <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></code></pre><p></p></div>
 <p><strong>Iterations</strong></p>

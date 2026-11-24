@@ -119,7 +119,11 @@ named `"RPCA1"`, `"RPCA2"`, etc., with the same attributes as
 
 - `loadings` has one row per **node** of the tree that is used: the
   tips, named by their labels, and the internal nodes, named `"n<id>"`
-  as gemelli names them (see "Method").
+  as gemelli names them (see "Method"). In a covariance biplot,
+  `plot(ord, scaling = 'covariance', links = )`, links between nodes are
+  log ratios of their branch-length-weighted counts (see "Compositional
+  biplots" in
+  [`plot.ecodive_ord()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)).
 
 - `tree`: the tree that was used, as a `phylo` object: `tree` cut down
   to the tips with counts, with nodes merged and removed as described in

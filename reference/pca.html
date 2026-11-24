@@ -142,6 +142,10 @@ below. Its attributes are:</p><ul><li><p><code>method</code>: <code>"pca"</code>
 <code>norm</code> and <code>scale</code>), which is also the sum of all axes' <code>eig</code>.</p></li>
 <li><p><code>loadings</code>: A matrix with one row per feature and one column per axis:
 the unit-length principal axes, <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp()</a></code>'s <code>rotation</code>.</p></li>
+<li><p><code>norm</code>, <code>scale</code>: The transform the loadings are in (<code>norm</code>'s name and
+<code>scale</code>), which qualifies them: <a href="plot.ecodive_ord.html">plot()</a> reads
+them to say whether the links of a compositional biplot are log
+ratios.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -168,6 +172,13 @@ between the normalized samples: <code>pca(counts)</code> and
 are \(s^2\), so <code>pca()</code>'s <code>eig</code> is <code><a href="pcoa.html">pcoa()</a></code>'s divided by \(n - 1\);
 <code>prop</code> is the same for both. What <code>pca()</code> adds is the <code>loadings</code>: how much
 each feature contributes to each axis, e.g. for a biplot.</p>
+<p><strong>Biplots</strong></p>
+<p><code>plot(ord)</code> draws a form biplot: the samples at their scores, and the
+loadings as arrows scaled to fit. <code>plot(ord, scaling = 'covariance')</code> of
+a <code>norm = 'clr'</code> PCA is Aitchison and Greenacre's (2002) compositional
+biplot, in which the rays' lengths and the <code>links</code> between their tips
+read as standard deviations of clr values and log ratios; <code>scaling = 'contribution'</code> marks the features that contribute most to the plane.
+See "Compositional biplots" in <code><a href="plot.ecodive_ord.html">plot.ecodive_ord()</a></code>.</p>
 <p><strong>Robust Aitchison PCA</strong></p>
 <p><code>norm = 'rclr'</code> with <code>pca()</code> is a plain PCA of the rclr-transformed table,
 with its zeros left as 0. DEICODE and gemelli's Robust Aitchison PCA
@@ -295,7 +306,7 @@ and Journal of Science</em>, 2(11), 559-572. <a href="https://doi.org/10.1080/14
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 -2.67 -0.114  -0.198</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # … 140 more samples</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Use print(x, n = ...) to see more samples</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, trace, loadings</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method, eig, prop, trace, loadings, norm, scale</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  'ecodive_ord' num [1:150, 1:3] -2.68 -2.71 -2.89 -2.75 -2.73 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dimnames")=List of 2</span>
@@ -309,6 +320,8 @@ and Journal of Science</em>, 2(11), 559-572. <a href="https://doi.org/10.1080/14
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "Sepal.Length" "Sepal.Width" "Petal.Length" "Petal.Width"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:3] "PC1" "PC2" "PC3"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "norm")= chr "none"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "scale")= logi FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "display")=List of 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ title: chr "Principal Component Analysis"</span>
 <span class="r-in"><span></span></span>

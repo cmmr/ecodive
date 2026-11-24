@@ -1338,6 +1338,31 @@
   coverage-based or sample-completeness curves, by group, with a line at
   a planned rarefaction depth.
 
+- [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of an
+  ordination takes `scaling` and `links`, for compositional biplots
+  (Aitchison & Greenacre 2002). For
+  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
+  [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md) and
+  [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md):
+  `scaling = 'form'` (the default, as before), `'covariance'` (samples
+  of unit variance and features at the loadings times `sqrt(eig)`, so
+  that in a clr PCA the rays’ lengths approximate the clr values’
+  standard deviations), or `'contribution'` (Greenacre 2013: the unit
+  loadings times a stated round number, with the features contributing
+  more than average highlighted). In a covariance biplot,
+  `links = c("a", "b", "c")` joins the features’ tips with dashed links
+  labelled with their length, which approximates (from below) the
+  standard deviation of their log ratio; drawing them warns when the
+  plane explains under half the variance, or when the PCA is not of clr
+  values. For
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
+  [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
+  [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md),
+  `scaling = 1`, `2` (the default, as stored) or `3` draws `vegan`’s
+  scalings, matching `vegan::scores(scaling =)`.
+  [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)’s result
+  gains `norm` and `scale` attributes, which qualify its loadings.
+
 - [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md) takes
   a new last argument, `coverage`, to rarefy each sample to the smallest
   depth whose expected coverage reaches it (coverage-based rarefaction,

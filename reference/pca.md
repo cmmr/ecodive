@@ -103,6 +103,12 @@ attributes are:
   the unit-length principal axes,
   [`prcomp()`](https://rdrr.io/r/stats/prcomp.html)'s `rotation`.
 
+- `norm`, `scale`: The transform the loadings are in (`norm`'s name and
+  `scale`), which qualifies them:
+  [plot()](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md)
+  reads them to say whether the links of a compositional biplot are log
+  ratios.
+
 ## Details
 
 **Method**
@@ -136,6 +142,17 @@ are \\s^2\\, so `pca()`'s `eig` is
 by \\n - 1\\; `prop` is the same for both. What `pca()` adds is the
 `loadings`: how much each feature contributes to each axis, e.g. for a
 biplot.
+
+**Biplots**
+
+`plot(ord)` draws a form biplot: the samples at their scores, and the
+loadings as arrows scaled to fit. `plot(ord, scaling = 'covariance')` of
+a `norm = 'clr'` PCA is Aitchison and Greenacre's (2002) compositional
+biplot, in which the rays' lengths and the `links` between their tips
+read as standard deviations of clr values and log ratios;
+`scaling = 'contribution'` marks the features that contribute most to
+the plane. See "Compositional biplots" in
+[`plot.ecodive_ord()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.md).
 
 **Robust Aitchison PCA**
 
@@ -315,7 +332,7 @@ data. *Biometrika*, 70(1), 57-65.
 #> 10 -2.67 -0.114  -0.198
 #> # … 140 more samples
 #> # Use print(x, n = ...) to see more samples
-#> # Attributes: method, eig, prop, trace, loadings
+#> # Attributes: method, eig, prop, trace, loadings, norm, scale
     str(ord)
 #>  'ecodive_ord' num [1:150, 1:3] -2.68 -2.71 -2.89 -2.75 -2.73 ...
 #>  - attr(*, "dimnames")=List of 2
@@ -329,6 +346,8 @@ data. *Biometrika*, 70(1), 57-65.
 #>   ..- attr(*, "dimnames")=List of 2
 #>   .. ..$ : chr [1:4] "Sepal.Length" "Sepal.Width" "Petal.Length" "Petal.Width"
 #>   .. ..$ : chr [1:3] "PC1" "PC2" "PC3"
+#>  - attr(*, "norm")= chr "none"
+#>  - attr(*, "scale")= logi FALSE
 #>  - attr(*, "display")=List of 1
 #>   ..$ title: chr "Principal Component Analysis"
 ```

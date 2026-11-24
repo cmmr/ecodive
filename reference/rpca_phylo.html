@@ -174,7 +174,10 @@ axis, named <code>"RPCA1"</code>, <code>"RPCA2"</code>, etc., with the same attr
 <code><a href="rpca.html">rpca()</a></code>'s (see "Ordination result" below), except that:</p><ul><li><p><code>method</code> is <code>"rpca_phylo"</code>.</p></li>
 <li><p><code>loadings</code> has one row per <strong>node</strong> of the tree that is used: the
 tips, named by their labels, and the internal nodes, named
-<code>"n&lt;id&gt;"</code> as gemelli names them (see "Method").</p></li>
+<code>"n&lt;id&gt;"</code> as gemelli names them (see "Method"). In a covariance
+biplot, <code>plot(ord, scaling = 'covariance', links = )</code>, links between
+nodes are log ratios of their branch-length-weighted counts (see
+"Compositional biplots" in <code><a href="plot.ecodive_ord.html">plot.ecodive_ord()</a></code>).</p></li>
 <li><p><code>tree</code>: the tree that was used, as a <code>phylo</code> object: <code>tree</code> cut down
 to the tips with counts, with nodes merged and removed as described in
 "Method", and with internal nodes labelled with the names used in
