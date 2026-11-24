@@ -972,6 +972,18 @@
   draws depth, coverage-based or sample-completeness curves, by group,
   with a line at a planned rarefaction depth.
 
+* New `composition_barplot()` draws stacked bars of relative abundance, one
+  per sample and never averaged, ordered so they can be read: samples by
+  their Aitchison PCoA axis 1 (or a clustering, `clust` as in `beta_div()`),
+  within panels by `groups`; the most abundant features on the baseline.
+  With `feature_groups` (e.g. each genus's phylum) it shades the bars
+  hierarchically, after microshades (Dahl et al. 2022): one hue per group,
+  shades for its top members, the group's own "Other" lightest. The
+  subtitle says how much "Other" holds. `heatmap = TRUE` adds the drawn
+  features' centred clr values below, aligned with the bars. It returns the
+  drawn proportions, colours and sample order invisibly; sparse tables stay
+  sparse.
+
 * `plot()` of an ordination takes `scaling` and `links`, for compositional
   biplots (Aitchison & Greenacre 2002). For `pca()`, `rpca()` and
   `rpca_phylo()`: `scaling = 'form'` (the default, as before),

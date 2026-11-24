@@ -75,6 +75,9 @@ same thing.
 | `coverage` | **(new, item 38)** a target sample coverage in (0, 1], for coverage-based rarefaction (Chao & Jost 2012); exclusive with `depth`. Also planned `hill_standardize(coverage =)` | `rarefy` |
 | `n` | **(new, 2026-11-24, item 46)** in `log_ratio_features()`, how many features to take from **each** end of a ranking (a whole number ≥ 1; Qurro's autoselection count). Not `n_features`, which the DA plots use for how many to show | `log_ratio_features` |
 | `type` | the kind of plot of a `plot()` method; `'rank'` (item 46) on DA results and ordinations. On `plot.ecodive_ord()`, any value but `'samples'` and `'rank'` goes on to `plot.default()` (`type = 'n'`) | `plot.*` |
+| `feature_groups`, `n_feature_groups` | **(new, 2026-11-24, item 47)** each feature's higher-level group (e.g. its phylum; the feature-side counterpart of `groups`): one value per feature, matched by name when named by every feature, else by position, `NA` = `"Unassigned"`; and how many groups to draw (`n_<unit>` rule) | `composition_barplot` |
+| `heatmap` | **(new, item 47)** also draw a heatmap (of centred clr values) below a plot | `composition_barplot` |
+| `clust` | how to order samples from their distances: an `hclust()` linkage, `'pcoa'`, or `'none'`/`FALSE`; `composition_barplot()` (item 47) orders by Aitchison distances with it, with the same values | `beta_div` and the metric functions, `vlr`, `rho_p`, `phi_s`, `sparcc`, `composition_barplot` |
 | `cpus` | threads (always last) | everything threaded |
 
 

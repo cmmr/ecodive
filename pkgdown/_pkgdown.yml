@@ -229,6 +229,10 @@ reference:
   - plot.ecodive_log_ratio
   - ecodive_display
   - print_ecodive
+- subtitle: Compositional displays
+  desc: Plots drawn straight from a count table, ordered and coloured to be read; not compositional analyses themselves.
+  contents:
+  - composition_barplot
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.
