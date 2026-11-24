@@ -377,3 +377,33 @@ Made while implementing:
     input only (`'auto'`), `normalize = FALSE`; `isNotContaminant()` at two
     thresholds. Hex floats in `data-raw/expected/decontam/`,
     `tests/tinytests/expected/decontam.rds` (29 KB).
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 40, done 2026-11-24.** Commits `5f01091` (work), `e23e787` (merge of
+item 38's commits from `origin/main`: `NAMESPACE`, `R/print.r` and
+`plans/parameter_names.md` conflicted, both sides kept, all additions),
+and the tick and this outcome in the commit after it.
+
+- Tests (`-O2` install, `LANG=C.UTF-8`): baseline at cbf9c7e 22,864 at
+  home and 388 in CRAN mode; before the merge 26,343 and 394
+  (`test-decontam.r` has 3,473); on the merged tree **26,600 at home, 396
+  in CRAN mode**, all passing. `R CMD check --no-manual
+  --ignore-vignettes`: 1 NOTE (installed size; 5.3 MB at the baseline
+  too).
+- decontam 1.32.0 (fixtures; 1.22.0 byte-identical): every method, batch
+  combination, with and without batches, one- and two-value thresholds,
+  `normalize = FALSE`, and `isNotContaminant()`: largest relative
+  difference **1.4e-14** (scores, `freq`), tested at 1e-12; `prev` and
+  every call identical. Prevalence formulas against `prop.test()` /
+  `fisher.test()` on all 241,425 tables with margins up to 30 × 30:
+  warning rule identical, 6.7e-15 (chi-squared branch), 0 (Fisher mid-p).
+- Identical for `cpus` 1, 2, 3, 4, 7; dense, `dgCMatrix`, `dgTMatrix`,
+  `dgeMatrix`, slam and `margin = 2` identical.
+- Speed: 500 samples × 20,000 features (5% non-zero), 4 batches, both
+  tests: 0.11 s on 1 thread, 0.09 s on 4 (the C pass is a small share; the
+  rest is R's `pf()` and the prevalence formulas).
+- Open: none known. decontam's `plot_condition()` (DNA concentration
+  against an experimental condition) wasn't ported; it is a plain boxplot
+  or scatter of metadata.
