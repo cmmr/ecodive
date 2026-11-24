@@ -2,8 +2,8 @@
 // Licensed under the MIT License: https://opensource.org/license/mit
 //
 // Linear mixed models with one random intercept, fitted by REML, for one
-// design and many responses (features): for linda(), and planned for
-// maaslin3() and dirmult_lm().
+// design and many responses (features): for linda(), dirmult_lm() and
+// maaslin3().
 //
 //   y = X b + Z u + e,  u ~ N(0, s^2 t^2 I_J),  e ~ N(0, s^2 I_n),
 //
@@ -47,14 +47,30 @@
 // The design, once for all responses.
 //======================================================
 void lmm_design_init(lmm_design_t *d, const double *X, const int *grp, int n, int p, int J) {
+  double      *mem  = (double *) R_alloc(lmm_design_doubles(n, p, J), sizeof(double));
+  long double *lmem = (long double *) R_alloc((size_t) J + 1, sizeof(long double));
+  lmm_design_init_mem(d, X, grp, n, p, J, mem, lmem);
+}
+
+
+// The same, in the caller's memory (lmm_design_doubles(n, p, J) doubles and
+// J long doubles), so that worker threads can set up a design per response
+// (maaslin3(), whose responses are observed in different samples).
+size_t lmm_design_doubles(int n, int p, int J) {
+  return (size_t) J + (size_t) J * p + (size_t) n * p + (size_t) p * p + 4;
+}
+
+
+void lmm_design_init_mem(
+    lmm_design_t *d, const double *X, const int *grp, int n, int p, int J,
+    double *mem, long double *acc ) {
 
   d->n = n; d->p = p; d->J = J; d->grp = grp;
 
-  double *nj   = (double *) R_alloc((size_t) J, sizeof(double));
-  double *xbar = (double *) R_alloc((size_t) J * p + 1, sizeof(double));   // J x p
-  double *xc   = (double *) R_alloc((size_t) n * p + 1, sizeof(double));   // n x p
-  double *wxx  = (double *) R_alloc((size_t) p * p + 1, sizeof(double));
-  long double *acc = (long double *) R_alloc((size_t) J + 1, sizeof(long double));
+  double *nj   = mem;  mem += J;
+  double *xbar = mem;  mem += (size_t) J * p;   // J x p
+  double *xc   = mem;  mem += (size_t) n * p;   // n x p
+  double *wxx  = mem;
 
   for (int j = 0; j < J; j++) nj[j] = 0;
   for (int i = 0; i < n; i++) nj[grp[i]]++;

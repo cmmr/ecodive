@@ -1559,3 +1559,38 @@ License:
    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE.
+
+Files: src/maaslin3.c R/maaslin3.r
+Copyright: 2025 Harvard School of Public Health
+Comment: maaslin3() is a port of MaAsLin 3 from maaslin3 1.4.0
+ (Bioconductor), restructured for ecodive: TSSnorm(), CLRnorm(),
+ NONEnorm() and LOG() (R/utility_scripts.R); augment_data(),
+ check_for_zero_one_obs(), check_missing_first_factor_level(),
+ fit.model(), run_median_comparison() and
+ run_median_comparison_general(), add_qvals(), create_combined_pval(),
+ flag_abundance_turned_prevalence() and add_joint_signif() (R/fit.R); and
+ maaslin_fit()'s flags (R/maaslin3.R). Its per-feature models call lm(),
+ glm(), lme4 and lmerTest (GPL), whose code was not read: ecodive fits them
+ from their documented definitions, matched to their outputs. The rest of
+ these files is Copyright 2026 ecodive authors, under the MIT license
+ above.
+License:
+   Copyright (c) 2025 Harvard School of Public Health
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.

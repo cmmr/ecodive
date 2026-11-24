@@ -503,7 +503,7 @@
   expect_identical(names(df), c('name', 'id', 'design', 'effect', 'base', 'zero_free_ok', 'signed'))
   expect_identical(df$id[!df$signed], c('ancom', 'lefse'))
   expect_identical(sort(df$id), sort(c('ancom', 'ancombc', 'ancombc2', 'dirmult_ttest', 'dirmult_lm',
-                                       'da_wilcoxon', 'da_ttest', 'da_lm', 'linda', 'lefse')))
+                                       'da_wilcoxon', 'da_ttest', 'da_lm', 'linda', 'maaslin3', 'lefse')))
   expect_true(all(df$design %in% c('groups', 'formula')) && is.logical(df$zero_free_ok))
   expect_identical(rownames(list_da_tests(nm = 'id')), df$id)
   expect_identical(names(list_da_tests('func')), df$id)

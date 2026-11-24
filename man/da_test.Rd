@@ -13,7 +13,8 @@ Types}.}
 
 \item{method}{The name of a DA method: \code{"ancom"}, \code{"ancombc"},
 \code{"ancombc2"}, \code{"da_lm"}, \code{"da_ttest"}, \code{"da_wilcoxon"},
-\code{"dirmult_lm"}, \code{"dirmult_ttest"}, \code{"lefse"}, or \code{"linda"}. Flexible matching is supported
+\code{"dirmult_lm"}, \code{"dirmult_ttest"}, \code{"lefse"}, \code{"linda"}, or
+\code{"maaslin3"}. Flexible matching is supported
 (see below). Programmatic access via \code{list_da_tests()}.}
 
 \item{groups}{The grouping to compare: the name of a column of \code{data},
@@ -35,9 +36,10 @@ formula of one variable, \code{~ status}, as \code{groups = "status"}.}
 \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}), \code{norm} and \code{pseudocount}. Each
 method keeps its own defaults; see \code{\link[=ancom]{ancom()}}, \code{\link[=ancombc]{ancombc()}},
 \code{\link[=ancombc2]{ancombc2()}}, \code{\link[=da_lm]{da_lm()}}, \code{\link[=da_ttest]{da_ttest()}}, \code{\link[=da_wilcoxon]{da_wilcoxon()}},
-\code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=lefse]{lefse()}}, and \code{\link[=linda]{linda()}}. \code{seed}
-is ignored by the methods that have no random parts (all but
-\code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}} and \code{\link[=lefse]{lefse()}}).}
+\code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=lefse]{lefse()}}, \code{\link[=linda]{linda()}}, and
+\code{\link[=maaslin3]{maaslin3()}}. \code{seed} is ignored by the methods that have no random
+parts (all but \code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=lefse]{lefse()}} and
+\code{\link[=maaslin3]{maaslin3()}}).}
 }
 \value{
 The method's result, unchanged: \code{da_test(counts, 'ancombc2', ...)} is identical to \code{ancombc2(counts, ...)}, attributes included.
@@ -62,6 +64,7 @@ or model to compare.
    \code{dirmult_ttest} \tab Dirichlet-multinomial t-test (ALDEx2-style) \tab groups \cr
    \code{lefse} \tab LDA effect size (LEfSe) \tab groups \cr
    \code{linda} \tab Linear models for differential abundance (LinDA) \tab formula \cr
+   \code{maaslin3} \tab Abundance and prevalence models with a median comparison (MaAsLin 3) \tab formula \cr
 }
 
 
@@ -92,7 +95,8 @@ Case insensitive and partial matching, ignoring anything but letters
 \code{'linear model'} selects \code{da_lm}; and \code{'ALDEx2'} selects
 \code{dirmult_ttest}, an ALDEx2-style method (not ALDEx2 itself, whose
 results agree with it in direction and rough size only); \code{'ALDEx3'}
-selects \code{dirmult_lm}, a port of ALDEx3's linear models.
+selects \code{dirmult_lm}, a port of ALDEx3's linear models; \code{'MaAsLin 3'} or
+\code{'maaslin'} selects \code{maaslin3} (MaAsLin 2 isn't in ecodive).
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -158,7 +162,7 @@ abundance analysis. \emph{Briefings in Bioinformatics}, 26, bbaf130.
 }
 \seealso{
 \code{\link[=ancom]{ancom()}}, \code{\link[=ancombc]{ancombc()}}, \code{\link[=da_lm]{da_lm()}}, \code{\link[=da_ttest]{da_ttest()}},
-\code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=lefse]{lefse()}}, \code{\link[=linda]{linda()}}, \code{\link[=list_da_tests]{list_da_tests()}};
+\code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=lefse]{lefse()}}, \code{\link[=linda]{linda()}}, \code{\link[=maaslin3]{maaslin3()}}, \code{\link[=list_da_tests]{list_da_tests()}};
 \code{\link[=replace_zeros]{replace_zeros()}} for the zeros; \code{\link[=da_sensitivity]{da_sensitivity()}} to rerun a method
 over pseudocounts, zero replacements and scale uncertainties.
 }

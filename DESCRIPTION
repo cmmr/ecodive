@@ -93,6 +93,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "the neutral community model fit (neutral_model()), following 'neufit'"),
     person(
+      "Harvard School of Public Health",
+      role    = c("ctb", "cph"),
+      comment = "multivariable abundance and prevalence models with a median comparison (maaslin3()), ported from 'maaslin3'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

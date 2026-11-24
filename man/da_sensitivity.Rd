@@ -37,9 +37,9 @@ method's \code{pseudocount}. Default: \code{NULL} (none).}
 \code{\link[=list_zero_replacements]{list_zero_replacements()}}, or their names. Each run gives the
 method \code{replace_zeros(counts, z)} instead of \code{counts}, with the
 method's default \code{pseudocount} (which adds nothing to a table
-without zeros). Not for the methods that model counts
-(\code{zero_free_ok = FALSE} in \code{\link[=list_da_tests]{list_da_tests()}}: \code{\link[=dirmult_lm]{dirmult_lm()}},
-\code{\link[=dirmult_ttest]{dirmult_ttest()}}).
+without zeros). Not for the methods that model counts or
+presence (\code{zero_free_ok = FALSE} in \code{\link[=list_da_tests]{list_da_tests()}}:
+\code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=maaslin3]{maaslin3()}}).
 Default: \code{NULL} (none).}
 
 \item{scale_sds}{Scale uncertainties to try: \code{TRUE} for

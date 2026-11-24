@@ -230,6 +230,9 @@ reuse §1's names and add these:
 | `n_samples` | **(item 33)** the numbers of samples behind two correlation matrices, as the `n_samples` attribute of an association result | `assoc_network_diff` (exists) |
 | `y_norm` | **(added 2026-11-24, item 39; the user chose it over `norm_y`)** the transformation of the second table `y`, with `norm`'s choices; `norm` stays the first table's | `cross_assoc` (exists); planned `halla` |
 | `min_samples` | **(item 39)** the fewest samples (after leaving out `NA`s) a pair needs for a correlation, at least 3 | `cross_assoc` (exists) |
+| `transform`, `augment`, `standardize` | **(added 2026-11-24, item 49)** maaslin3's names: the transform after `norm` (`'log'` = log2, `'none'`), the prevalence model's data augmentation, and the scaling of numeric covariates (as `linda()`'s `standardize`) | `maaslin3` (exists) |
+| `median_comparison_abundance`, `median_comparison_prevalence`, `median_comparison_abundance_threshold`, `median_comparison_prevalence_threshold`, `subtract_median`, `warn_prevalence`, `small_random_effects` | **(item 49)** maaslin3's own names, kept snake case and all because its users type them: whether each model is tested against the median coefficient, the radius around it given p = 1, whether reported coefficients have it subtracted, the flag for prevalence associations induced by abundance ones, and the grouping as a fixed effect in the prevalence model | `maaslin3` (exists) |
+| `n_sims` | **(item 49)** the number of Monte Carlo draws of the median comparison (maaslin3's fixed 10,000). Not `n_draws`, which counts posterior draws that each give a full result | `maaslin3` (exists) |
 
 Open naming questions for the user are flagged "ask" in the plans:
 `bias_counts` ([secom.md](secom.md)), and the `da_test()` groups/formula

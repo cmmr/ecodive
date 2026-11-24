@@ -289,7 +289,8 @@ print_df_label <- function (x) {
     ecodive_da_ttest      = ,
     ecodive_da_lm         = ,
     ecodive_dirmult_lm    = ,
-    ecodive_linda         = {
+    ecodive_linda         = ,
+    ecodive_maaslin3      = {
       # Subsetting rows with `[` drops the `method` attribute.
       m <- attr(x, 'method', exact = TRUE)
       if (is.null(m)) NULL else da_method_name(m)
@@ -368,6 +369,8 @@ print.ecodive_da_lm            <- print_table_result
 print.ecodive_lefse            <- print_table_result
 #' @export
 print.ecodive_linda            <- print_table_result
+#' @export
+print.ecodive_maaslin3         <- print_table_result
 #' @export
 print.ecodive_da_sensitivity   <- print_table_result
 #' @export

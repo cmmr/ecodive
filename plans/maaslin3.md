@@ -245,3 +245,199 @@ the `median_comparison_*` names. NEWS.
   17(11), e1009442. doi:10.1371/journal.pcbi.1009442 (MaAsLin2).
 - Pelto, J., et al. (2025). *Briefings in Bioinformatics*, 26(2),
   bbaf130. doi:10.1093/bib/bbaf130.
+
+
+## Decisions made while implementing (item 49, 2026-11-24)
+
+Asked of the user at the start:
+
+- **Random intercepts: included now** (`~ g + (1 | id)`), for both models,
+  rather than in a later step: abundance through `src/feature_lmm.c`
+  (REML at the exact optimum, Satterthwaite df, as lmerTest), prevalence
+  through a new Laplace logistic mixed model (as `glmer()`), plus
+  maaslin3's `small_random_effects` (the grouping as a fixed effect in the
+  prevalence model).
+- **`p_adjust = 'holm'`, `alpha = 0.05`** (ecodive's DA convention; maaslin3:
+  `'BH'`, `max_significance = 0.1`). The docs give maaslin3's settings.
+
+Settled from maaslin3 1.4.0's source (MIT) and from the outputs of lm(),
+glm(), lme4 2.1.0, lmerTest 3.2-1, multcomp 1.4-25 and R's binomial()
+family (GPL, run only; their code was not opened, except that printing
+`binomial()$initialize` once showed its starting values, which the plan
+already named):
+
+- **Version.** maaslin3 1.4.0 (Bioconductor 3.23) installed on R 4.3.3
+  from its tarball with `Depends: R (>= 4.4)` relaxed; it needs collapse
+  >= 2.1 (2.0.10 fails in `rowbind()`), so collapse 2.1.9 and data.table
+  1.18 came from CRAN. Every fixture is from 1.4.0.
+- **The median comparison's test** (`multcomp::glht(rhs = offset)`): a t
+  test on the fit's residual df for `lm`, the normal for `glm`/`glmer`,
+  Satterthwaite's F (= t^2) for `lmer` (`lmerTest::contest`). Here
+  `2 pt(-|t|, df)` with t computed as glht does, `(b - offset) / se`;
+  multcomp's own numerical integral (mvtnorm) is off by up to ~1e-8
+  relative, the largest difference in the fixed-effects fixtures.
+- **Draw order.** maaslin3 calls `replicate(10000, rnorm(n, coefs,
+  sigmas))` per covariate in design order, over the rows without an error,
+  only when the covariate's median is defined. The tests regenerate those
+  standard normals with `set.seed(seed); rnorm()` and give them to
+  `maaslin3_details(sims = )`, reproducing maaslin3's medians to 1e-14 and
+  covariances to 6e-16.
+- **glm's IRLS**: convergence `|dev - dev_old| / (|dev| + 0.1) < 1e-8`,
+  25 iterations, starts `(w y + 0.5) / (w + 1)`; the augmented copies
+  collapse into one weighted row per sample (the first iteration combines
+  the three copies' working weights and responses, which differ only
+  there); the deviance is summed over the copies, so the iteration count
+  is glm's; QR tolerance 1e-11 (glm's `min(1e-7, epsilon / 1000)`); the
+  standard errors come from the last iteration's QR (weights before the
+  final update). The logit's inverse is `e / (1 + e)` with `e = exp(eta)`,
+  saturating to `eps` / `1 / eps` beyond |eta| = 30, and its derivative is
+  `eps` there: settled from `binomial()$linkinv(c(29, 30, 31))` and
+  `mu.eta`. Warnings become flags exactly as maaslin3 records them:
+  "glm.fit: algorithm did not converge", "glm.fit: fitted probabilities
+  numerically 0 or 1 occurred" (`mu` within 10 eps of 0 or 1; the later
+  warning wins).
+- **glmer's criterion with the augmentation**: `glmer(..., devFunOnly =
+  TRUE)` equals, to 1e-15, -2 log L of the **original** samples only (the
+  copies' fractional weights round to 0 binomial trials) + |u|^2 +
+  log det(I + theta^2 Z'WZ), with the conditional modes u and working
+  weights W of the augmented (weighted) data. So the augmentation only
+  enters through u and the log determinant, and at theta = 0 the criterion
+  is the plain, unaugmented likelihood.
+- **glmer's standard errors**: 2 Hess^-1 of that criterion in (theta,
+  beta), fixed-effects block (matches lme4's `vcov()` to its
+  finite-difference Hessian, ~1e-6); but for a **singular fit** (theta <
+  1e-4, lme4's `isSingular()`), lme4 stores no derivatives and uses the
+  penalized least squares' (RX) covariance, X'WX - sum_j theta^2 / (1 +
+  theta^2 S_j) (X'W 1_j)(X'W 1_j)' inverted, with the augmented weights.
+  Both are implemented (checked on fits with theta = 0, 1e-7, 4e-5, 9e-5).
+- **lm()'s per-feature failures**: a feature present at a single level of
+  a factor makes lm() fail ("contrasts can be applied only to factors with
+  2 or more levels"), for every coefficient; reproduced (status 7). The
+  baseline check comes first, as maaslin3's.
+- **The `warn_prevalence` refit** is maaslin3's percent + log abundance
+  model without a median comparison; with the default `norm` and
+  `transform` it is the main fit before its median comparison, so it isn't
+  refitted. maaslin3 forbids `warn_prevalence` with CLR or a transform
+  other than LOG: ported as errors naming `warn_prevalence = FALSE`.
+- **The flag's tie**: a two-group prevalence coefficient that is 0 in
+  theory (equal presence counts) is -1.4e-15 in glm and 0 here; its sign
+  decides `warn_prevalence`'s flag, so such ties can flag differently. The
+  fixture tables avoid exact ties (`unbalance()` in the generator).
+
+Made while implementing:
+
+- **Signature:** `maaslin3(counts, formula = NULL, data = NULL, groups =
+  NULL, margin = 1L, norm = 'percent', transform = 'log', standardize =
+  TRUE, augment = TRUE, median_comparison_abundance = TRUE,
+  median_comparison_prevalence = FALSE,
+  median_comparison_abundance_threshold = 0,
+  median_comparison_prevalence_threshold = 0, subtract_median = FALSE,
+  warn_prevalence = TRUE, small_random_effects = FALSE, n_sims = 10000L,
+  alpha = 0.05, p_adjust = 'holm', seed = 0L, cpus = n_cpus())`. No
+  argument shadows `da_test()` or `da_sensitivity()`
+  (`test-wrapper_args.r` passes).
+- **`transform`: `'log'` and `'none'` only.** maaslin3's PLOG replaces
+  zeros, but zeros are already missing (`zero_threshold = 0`), so it equals
+  LOG; maaslin3 itself refuses PLOG unless `zero_threshold < 0`.
+- **`norm`: `'percent'` (TSS, proportions), `'rclr'` (its CLR: natural
+  log, non-zero part), `'none'`.** `transform = 'log'` with `'rclr'` is an
+  error, as maaslin3's.
+- **Every feature is reported.** A feature with fewer than two non-zero
+  values or constant non-zero values (maaslin3's `min_variance = 0` drops
+  them) gets "All linear values are the same" for abundance and its
+  prevalence model as usual, and that prevalence p-value joins the
+  adjustments. With CLR, maaslin3's `min_abundance = 0` filter also drops
+  features whose CLR values are all <= 0 (found from outputs); kept here.
+  The fixture tables are made so that maaslin3 keeps every feature
+  (checked in the generator).
+- **Result:** the plan's columns plus `dof_abundance` (after
+  `se_abundance`: residual or Satterthwaite df, for the forest plot's t
+  intervals), and `reject_abundance` / `reject_prevalence` after `reject`.
+  `reject` = q_joint <= alpha, or either model's own q <= alpha without a
+  flag (the "<4 average observations" flag doesn't count), which is
+  maaslin3's "significant results" over its two rows; each model's own
+  reject is its q <= alpha without a flag. Flags keep maaslin3's texts;
+  lme4's error texts for too few or too many random-intercept groups among
+  a feature's samples ("grouping factors must have > 1 sampled level",
+  "number of levels of each grouping factor must be < number of
+  observations"), and ecodive's own "The mixed model did not converge" and
+  "The model could not be fitted". Attributes: `method`, `formula`,
+  `groups`, `design`, `random` (mixed), `norm`, `transform`, `alpha`,
+  `p_adjust`, `log_base` (2 with log, e with rclr, NA otherwise), and per
+  feature `mean` (mean transformed abundance where present), `prevalence`,
+  `resid_sd`, `random_sd` (mixed). `print()` is `print_table_result`.
+- **`DA_TESTS` row:** `MaAsLin 3, maaslin3, formula, coef_abundance, 2,
+  FALSE, TRUE`, alias `maaslin` (letters only, so `'MaAsLin3'` and
+  `'MaAsLin 3'` match too). `match_da_test('MaAsLin2')` (any other digit)
+  is an error saying ecodive has MaAsLin 3; without it, letters-only
+  matching sent MaAsLin 2 to maaslin3. `zero_free_ok = FALSE`
+  (`da_sensitivity()`'s message now says "needs the table's zeros (it
+  models counts, or presence)"). `da_sensitivity()` has nothing to vary for
+  maaslin3 (no `pseudocount` or `scale_sd`; zeros refused): its three
+  errors are tested.
+- **Ordering:** rows by feature (table order), then covariate (design
+  order), as the other model methods; maaslin3 sorts by q.
+- **Reference levels:** `da_design()`'s (a factor's own order with unused
+  levels dropped, else radix-sorted). maaslin3 requires `reference` for a
+  non-factor with more than two levels. NA in `data` is an error (maaslin3
+  drops the samples per fit), as in the other DA methods.
+- **The intercept** is required (maaslin3 drops the first coefficient
+  whatever it is); without one, every column is reported.
+- **C (`src/maaslin3.c`):** `C_maaslin3_fit` reads the table by feature
+  with `da_table_init()` (raw values), the per-sample divisors (TSS totals
+  in long double, feature order; CLR's `exp(1)^mean(log x)` with R's
+  two-pass mean) once; threads over features (interleaved, each feature
+  independent): masked OLS (`flm_*`, tol 1e-7), or `lmm_fit()` on the
+  feature's samples, its groups renumbered and its full-rank columns
+  (`lmm_design_init_mem()`, added to `feature_lmm.c` so worker threads can
+  set up a design in their own memory); `m3_glm()` (IRLS on the weighted
+  QR); `m3_glmm()` (Newton on (theta, beta) with the analytic gradient
+  of the Laplace criterion through the implicit conditional modes, the
+  Hessian by central differences of that gradient, a backtracking line
+  search, theta reflected to >= 0, start theta = 1 and the glm fit, as
+  lme4's start). `C_maaslin3_median`: blocks of 256 draws, each draw's
+  normals from stream `(model * 65536 + k) << 32 + draw`, the median by
+  quickselect, per-block sums of z and z (m - c) (c the observed median,
+  for accuracy), added in block order; covariance = se (S_zm - S_z S_m / N)
+  / (N - 1).
+- **Speed** (4 cores, -O2): 200 samples x 2,000 features, `~ g + age`,
+  10,000 draws: 1.2 s on 1 core, 0.39 s on 4 (the median comparison is
+  80%); with `(1 | id)` (50 subjects): 3.9 s and 1.1 s. maaslin3 fits one
+  R model per feature.
+
+Reference results (`data-raw/expected/maaslin3.r`, fixture
+`tests/tinytests/expected/maaslin3.rds`, 53 KB; 10 cases on 5 tables: two
+groups; a three-level factor + numeric + character with a feature absent
+at the reference level, one only at the reference level and a rare one
+(holm); CLR/NONE; NONE/LOG; TSS/NONE; both median comparisons with
+thresholds and subtract_median; no augmentation, no median comparison,
+unstandardized; a random intercept (12 subjects x 4); small groups (15 x
+3) with and without small_random_effects), maaslin3's draws regenerated:
+
+- Fixed effects: abundance coefficients 1.1e-13, standard errors 1.2e-15
+  relative; prevalence coefficients 2.4e-13 (9.4e-10 on a coefficient near
+  0, floor 1e-6), standard errors 6.3e-15; prevalence p 7.1e-14; median
+  comparison p 3.4e-8 (multcomp's integral), and the q and joint values
+  through it; nulls 1.8e-14. Without augmentation, a separated feature's
+  25 non-converging iterations: 3.3e-6. Every flag and `reject` identical.
+- Random intercept, abundance (lmerTest): coefficients 8.3e-7, standard
+  errors 6.3e-8, p 4.4e-6 (lme4's optimizer).
+- Random intercept, prevalence, against the best of glmer's nloptwrap,
+  bobyqa and Nelder_Mead fits (lowest criterion): coefficients 6.6e-7
+  absolute, standard errors 1.8e-6 relative (22 of 40 and 45 of 60 fits
+  singular). Against maaslin3's own glmer fits, up to 1.4e-3 (12 x 4) and
+  0.30 (15 x 3) absolute: maaslin3 keeps nloptwrap's fit, which stops
+  short on flat criteria (ecodive's criterion is lower). `reject` still
+  identical.
+- With PCG's own draws: -log p within 2% of maaslin3's (Monte Carlo
+  error, amplified in the tails: p up to 8% relative at p ~ 1e-6).
+- Threads 1, 2, 4 (and mixed 1, 4), dense, `Matrix`, `slam`, `margin = 2`
+  and double input: identical; `da_test(counts, 'maaslin3', ...)` and
+  `'MaAsLin 3'` identical to the direct call.
+
+Not done: `group()`, `ordered()` and `strata()` terms (clogit), contrast
+tests, `feature_specific_covariate`, `unscaled_abundance` (could map to
+`load`), several random effects or slopes, lme4's convergence-check
+warnings (maaslin3 turns them into flags), `evaluate_only`. The draft
+article `vignettes/articles/compositional.Rmd` doesn't mention
+`maaslin3()` yet.

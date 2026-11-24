@@ -32,9 +32,9 @@
 #'        [list_zero_replacements()], or their names. Each run gives the
 #'        method `replace_zeros(counts, z)` instead of `counts`, with the
 #'        method's default `pseudocount` (which adds nothing to a table
-#'        without zeros). Not for the methods that model counts
-#'        (`zero_free_ok = FALSE` in [list_da_tests()]: [dirmult_lm()],
-#'        [dirmult_ttest()]).
+#'        without zeros). Not for the methods that model counts or
+#'        presence (`zero_free_ok = FALSE` in [list_da_tests()]:
+#'        [dirmult_lm()], [dirmult_ttest()], [maaslin3()]).
 #'        Default: `NULL` (none).
 #'
 #' @param scale_sds  Scale uncertainties to try: `TRUE` for
@@ -443,8 +443,9 @@ da_sens_grids <- function (method, args, pseudocounts, zeros, scale_sds) {
     if (!isTRUE(method$zero_free_ok)) {
       ok <- list_da_tests()
       stop(
-        '`zeros`: `', id, '` models counts, so it can\'t take a table with ',
-        'its zeros replaced. Methods that can: ',
+        '`zeros`: `', id, '` needs the table\'s zeros (it models counts, ',
+        'or presence), so it can\'t take a table with its zeros replaced. ',
+        'Methods that can: ',
         paste(ok$id[ok$zero_free_ok], collapse = ', '), '.', call. = FALSE )
     }
     if (isTRUE(zeros)) {
