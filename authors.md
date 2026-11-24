@@ -77,6 +77,9 @@
   turnover, nestedness, balanced and gradient components of beta
   diversity, ported from 'abdiv'
 
+- **Michael Sieber**. Contributor, copyright holder.  
+  the neutral community model fit (neutral_model()), following 'neufit'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

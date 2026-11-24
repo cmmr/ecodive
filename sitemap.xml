@@ -127,6 +127,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/motyka.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mrpp.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/n_cpus.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/neutral_model.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/nmds.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/normalize.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/normalized_unifrac.html</loc></url>
@@ -161,6 +162,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_network.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_neutral_model.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_rarefaction_curve.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_simper.html</loc></url>

@@ -767,6 +767,16 @@ controls (decontam).
 - [`decontam_frequency_plot()`](https://cmmr.github.io/ecodive/reference/decontam_frequency_plot.md)
   : Plot Feature Frequency against DNA Concentration (decontam)
 
+## Community Assembly
+
+How far drift and dispersal alone explain a community’s composition
+(Sloan’s neutral community model).
+
+- [`neutral_model()`](https://cmmr.github.io/ecodive/reference/neutral_model.md)
+  : Sloan's Neutral Community Model
+- [`plot(`*`<ecodive_neutral_model>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_neutral_model.md)
+  : Plot a Neutral Community Model Fit
+
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods
