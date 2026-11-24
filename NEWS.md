@@ -944,6 +944,23 @@
   controls against the samples, and `decontam_frequency_plot()` a feature's
   frequency against `conc` with both fitted models.
 
+* New `neutral_model()` fits Sloan et al.'s (2006) neutral community model
+  as Burns et al. (2016) do: each feature's occurrence frequency against
+  its mean relative abundance, with the immigration probability `m` fitted
+  by least squares (exactly, without an upper bound; a warning when it
+  exceeds 1), its profile confidence interval and standard error, R-squared
+  and RMSE, and the AIC and BIC of the neutral, binomial and Poisson
+  models. Each feature is partitioned as above, within or below the
+  model's Wilson band (Wilson 1927). It follows neufit (Sieber et al. 2019,
+  BSD-2); `pool` gives a separate source metacommunity, and `groups` (or a
+  column of `data`) fits each group of samples on its own. It matches a
+  40-digit computation of the fit, Burns et al.'s code (via iCAMP's
+  `snm()` and tyRa's `fit_sncm()`) to their optimizers' tolerances, and
+  neufit's predictions and bands to rounding. The per-feature sums run in
+  threaded C over a sparse table, the same for any `cpus`. `plot()` draws
+  the fitted curve and its band over the features (`type = "binomial"`
+  adds the binomial model's curve).
+
 * New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
   2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
   pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,

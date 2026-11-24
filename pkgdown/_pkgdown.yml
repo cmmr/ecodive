@@ -154,6 +154,12 @@ reference:
   - plot.ecodive_decontam
   - decontam_frequency_plot
 
+- title: Community Assembly
+  desc: How far drift and dispersal alone explain a community's composition (Sloan's neutral community model).
+  contents:
+  - neutral_model
+  - plot.ecodive_neutral_model
+
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
   contents:

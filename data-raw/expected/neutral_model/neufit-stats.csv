@@ -1,0 +1,5 @@
+table,n_reads,n_samples,m,m_stderr,r_squared,m_tight
+sim,1000,50,0x1.f9e5981bf7728p-5,0x1.21237d01a2103p-9,0x1.e91d265c2e0e9p-1,0x1.f9e5e12a51de8p-5
+dm,2000,40,0x1.73533c0ff3c30p-6,0x1.173c02f137762p-10,0x1.dcbdd3832b34dp-1,0x1.73533c0ff3c30p-6
+uneven,520,30,0x1.bbe2ea47ba810p-4,0x1.df5cb4e5c9e06p-8,0x1.e2a18725cb27dp-1,0x1.bbe2ea57f2378p-4
+sat,1000,25,0x1.fffffff3a7476p-1,0x1.30458e63fa2d2p-3,0x1.eb632de35e2edp-1,0x1.ffffffffff3f0p-1

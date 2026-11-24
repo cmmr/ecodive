@@ -1518,3 +1518,44 @@ License:
    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Files: R/neutral_model.r tests/tinytests/expected/neutral_model.rds
+Copyright: 2018 Michael Sieber
+Comment: neutral_model() in R/neutral_model.r follows neufit.py from neufit
+ (github.com/misieber/neufit, Michael Sieber 2018; the licence text is in
+ neufit.py's header): its model function (the probability that a feature
+ of metacommunity abundance p is detected above 1/N), its definitions of
+ the mean relative abundance and the occurrence frequency, its Wilson band
+ around the fit and its rule for features above and below it. The fit of
+ m, its interval, the alternative models and the per-feature sums in
+ src/neutral_model.c are ecodive's own. tests/tinytests/expected/neutral_model.rds
+ holds neufit's example table, sim_data.csv, and neufit's outputs.
+ data-raw/expected/neutral_model.r (not in the built package) runs iCAMP
+ (GPL) and tyRa's fit_sncm() (Burns et al. 2016; no licence) to record
+ reference outputs only. The rest of these files is Copyright 2026 ecodive
+ authors, under the MIT licence above.
+License:
+   Copyright (C) 2018 Michael Sieber (sieber.ecoevo.de)
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+   2. Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE.

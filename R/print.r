@@ -307,6 +307,7 @@ print_df_label <- function (x) {
     ecodive_network_diff  = 'Differential Associations',
     ecodive_simper        = 'SIMPER',
     ecodive_rarefaction_curve = 'Rarefaction curves',
+    ecodive_neutral_model = neutral_model_label(x),
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
     ecodive_decontam      = ,
     ecodive_decontam_not  = {
@@ -381,6 +382,8 @@ print.ecodive_decontam         <- print_table_result
 print.ecodive_decontam_not     <- print_table_result
 #' @export
 print.ecodive_rarefaction_curve <- print_table_result
+#' @export
+print.ecodive_neutral_model   <- print_table_result
 
 
 

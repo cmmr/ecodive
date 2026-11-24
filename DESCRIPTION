@@ -89,6 +89,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "turnover, nestedness, balanced and gradient components of beta diversity, ported from 'abdiv'"),
     person(
+      "Michael", "Sieber",
+      role    = c("ctb", "cph"),
+      comment = "the neutral community model fit (neutral_model()), following 'neufit'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

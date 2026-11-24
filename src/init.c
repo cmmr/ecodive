@@ -31,6 +31,7 @@ extern SEXP C_cord_cross(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dpcoa(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_decontam(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_neutral_stats(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_tests(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lefse_kw(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -139,6 +140,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
   {"C_dpcoa",     (DL_FUNC) &C_dpcoa,     8},
   {"C_decontam",  (DL_FUNC) &C_decontam,  8},
+  {"C_neutral_stats", (DL_FUNC) &C_neutral_stats, 5},
   {"C_da_lm",         (DL_FUNC) &C_da_lm,         8},
   {"C_da_tests",      (DL_FUNC) &C_da_tests,      7},
   {"C_lefse_kw",       (DL_FUNC) &C_lefse_kw,        6},

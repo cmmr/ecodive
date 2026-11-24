@@ -144,6 +144,16 @@
   z <- decontam_not(counts, dc_neg, cpus = cpus)
   expect_true(inherits(z, 'ecodive_decontam_not') && nrow(z) == 12L && is.logical(z$not_contaminant))
 
+  # Sloan's neutral community model: a sparse table of equal depths (the
+  # last feature tops each sample up), with no random numbers.
+  nc <- outer(1:20, 1:30, function (i, j) (i * 7L + j * 13L) %% 11L + j %/% 3L)
+  nc[outer(1:20, 1:30, function (i, j) (i * 7L + j * 13L) %% 11L) < (30:1) %/% 3L] <- 0L
+  nc[, 30] <- nc[, 30] + (max(rowSums(nc)) - rowSums(nc)) + 5L
+  dimnames(nc) <- list(rownames(counts), paste0('F', 1:30))
+  nmod <- neutral_model(nc, 'grp', meta, cpus = cpus)
+  expect_true(inherits(nmod, 'ecodive_neutral_model') && nrow(nmod) == 60L && is.factor(nmod$partition))
+  expect_true(all(is.finite(attr(nmod, 'm'))) && all(attr(nmod, 'm') > 0) && identical(names(attr(nmod, 'm')), c('a', 'b')))
+
   # Associations: SparCC.
   z <- sparcc(counts[, 1:10], n_draws = 5L, permutations = 9L, cpus = cpus)
   expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 10L && length(z) == 45L)
@@ -415,6 +425,7 @@
   expect_true(drawn(st))   # sourcetracker()
   expect_true(drawn(dc))   # decontam()
   expect_true(drawn(dc, 'prevalence'))
+  expect_true(drawn(nmod))   # neutral_model()
   expect_true(is.data.frame(decontam_frequency_plot(counts, 'F1', dc_conc, dc_neg)))
   expect_true(drawn(fit))   # ancombc2()
   expect_true(drawn(ancombc_global(fit, cpus = cpus)))

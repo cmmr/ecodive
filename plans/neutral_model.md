@@ -253,3 +253,139 @@ NEWS.
   Association*, 22, 209–212. doi:10.1080/01621459.1927.10502953
 - Brent, R. P. (1973). *Algorithms for Minimization without Derivatives*.
   Prentice-Hall. (The method of `stats::optimize()`.)
+
+
+## Decisions made while implementing
+
+Asked of the user at the start (2026-11-24):
+
+- **m̂ > 1** (the ✱ point): **no cap**, as Burns et al.; a warning says
+  when the fitted m exceeds 1 (the user's choice). neufit's bound at 1 is
+  listed under "Differences".
+- **Burns et al.'s reference:** the user chose to download the original
+  supplementary script (Supplementary Code 1, `ismej2015142x4.txt`) as well
+  as iCAMP and tyRa. It could not be fetched: nature.com now answers 404
+  (ISME J moved to Oxford University Press), PMC serves a reCAPTCHA page,
+  OUP answers 403, and the Wayback Machine's copy of the nature.com file
+  was refused by the session's permission classifier (see "Outcome").
+  Burns et al.'s code was therefore run through **iCAMP 1.9.1 `snm()`**
+  (CRAN; its docs say it holds Burns et al.'s original code) and **tyRa
+  0.1.0 `fit_sncm()`** (jsDelivr; credited to Adam Burns), both as black
+  boxes: `sys.source()` of tyRa's `R/modeling.R` without viewing it, and
+  only their documentation read.
+- **Uncertainty of m:** the exact **profile interval** (`m_lower`,
+  `m_upper`) **and** `m_se`, the delta-method standard error that neufit
+  (lmfit) prints (the user's choice).
+- **Extras (all three chosen):** the **Poisson model**
+  (`predicted_poisson` and `*_poisson` attributes), **`plot(type =
+  'binomial')`**, and **`groups` / `data`**: one fit per group, as
+  subsetting `counts` would, returned in one table with a leading `group`
+  column and attributes that become vectors named by group (`dropped`
+  becomes a list).
+
+Black-box protocol (settled from iCAMP's and tyRa's outputs on neufit's
+`sim_data.csv`):
+
+- **RMSE divisor:** K − 1 (`sqrt(SS / (K - 1))`), for all three models.
+- **Binomial model:** `pbinom(1/N, N, p, lower.tail = FALSE)` = 1 − (1 −
+  p)^N, computed as `-expm1(N * log1p(-p))` so that a non-integer mean
+  depth works (matches `pbinom` to 1e-15). Poisson: 1 − e^(−Np).
+- **AIC / BIC:** k = 2 for every model; BIC uses log K. The neutral model's
+  likelihood has mean 0 and parameters (m, σ); the binomial's and
+  Poisson's have a fitted mean and σ (variance with divisor K). iCAMP's
+  `maxLL`, `binoLL`, `poisLL` are *negative* log-likelihoods. The closed
+  forms match iCAMP's numerical `mle()` to 2e-6 (neutral) and 1e-10
+  (binomial, Poisson), and a direct `optim()` in the test to 1e-8.
+- **`confint()` cutoff:** F(1, K − 1) = t²(K − 1) (not the normal
+  quantile): ecodive's exact ends match iCAMP's interpolated profile to
+  ~1e-5. tyRa's `m.ci` is m − lower.
+- **Wilson edges:** exactly 0 at x = 0 and 1 at x = n (Hmisc,
+  statsmodels). ecodive computes the lower end as x² / (n (x + z²/2 +
+  z√S)) and the upper as 1 − lower(n − x): the same without cancellation,
+  matching both references to 1e-14 everywhere and exact at the edges.
+- **Order of rows:** by mean abundance, ties in input order (`order(method
+  = 'radix')`); the references order ties differently, so tests match rows
+  by feature.
+
+Decided while implementing:
+
+- **Signature:** `neutral_model(counts, groups = NULL, data = NULL, pool =
+  NULL, margin = 1L, conf_level = 0.95, cpus = n_cpus())`. `groups` and
+  `data` come right after `counts`, as in every other ecodive function that
+  takes them; `pool` (second in the plan's signature) follows.
+- **`pool`:** p is each feature's share of **all** the pool's counts
+  (iCAMP's definition). Burns et al.'s (tyRa) divides the feature's mean
+  count in the pool by the N of `counts`, which is the same when the pool
+  is rarefied to that depth (as in the fixture, which then matches tyRa).
+  Matched by feature name (by position when either table has no feature
+  names, with an error if the counts differ); a feature **present** in
+  `counts` but missing from `pool` is an error (an absent one is simply
+  dropped). Pool features not in `counts` still count in its total.
+- **Dropping:** features with p = 0 or occurrence 0 are dropped (Burns,
+  tyRa) and named in `dropped`; iCAMP keeps pool features with p = 0, so
+  the pool case is compared with tyRa only.
+- **N:** the unrounded mean depth (tyRa); iCAMP rounds it to a whole
+  number, so the unequal-depth case is compared with tyRa only.
+- **Empty samples** are left out with a warning (the plan didn't say).
+- **Degenerate fits:** fewer than 2 features left → error (with `groups`,
+  naming the group); every sample at least 2 is required per group; an
+  exact fit (RSS = 0, e.g. every feature in every sample with predicted
+  occurrence 1) → warning that m is not identifiable, interval `NA`; all
+  occurrences equal → R² `NA` with a warning (the plan's case); AIC / BIC
+  `NA` when the residual variance is 0; the profile interval's end is 0 or
+  `Inf` when the cutoff is never reached on that side.
+- **Partition margin:** above / below only by more than 1e-12. At
+  occurrence 1 the band's upper end is 1 to within rounding, and the
+  references' strict comparisons flipped on the last bit (iCAMP said
+  "above" where ecodive's strict test said "neutral", and the reverse, on
+  two fixture tables). Given a reference's m, ecodive's bands match its
+  bands to 2e-16 and its partitions everywhere away from those edges.
+- **Optimizer:** a 61-point grid over log m in [1e-12, 1e4]; Brent
+  (`optimize(tol = 1e-12)`) around each grid minimum (a warning if two
+  distinct minima are within 1e-8 relative RSS, and if the best is at the
+  edge of the bracket); then `uniroot(tol = 1e-15)` on the gradient,
+  whose per-feature derivatives are central differences with Richardson
+  extrapolation. The profile ends are `uniroot()` roots in log m.
+- **High-precision reference:** instead of R's `optimize(tol = 1e-15)`
+  (the RSS is flat at its minimum, so `optimize()` can't place m better
+  than ~1e-8), the Python fixture solves for the gradient's zero and the
+  profile ends with **mpmath at 40 digits** (`betainc`). ecodive matches
+  it to ~1e-13 in m and ~1e-16 at the interval ends, on five cases
+  (neufit's `sim_data`, a Dirichlet-multinomial draw, a rarefied
+  uneven-depth table, a near-saturated table with m̂ = 1.22, and a pool).
+- **neufit's m** agrees only to ~1.5e-6 (lmfit's stopping rule; refitting
+  neufit's model with `ftol = xtol = gtol = 1e-15` doesn't help, since
+  lmfit's finite-difference Jacobian limits it). Given neufit's m,
+  ecodive's predictions match to 1e-14 and its Wilson bands to 1e-14; R²
+  matches to 1e-12 (it's flat in m). The test checks m at 1e-5.
+- **The simulation test:** the plan's Dirichlet-multinomial simulation is
+  not Sloan's model (a read count ≥ 1 is not x > 1/N): it biased m̂ by
+  +15% and the interval covered m in 9 of 20 replicates. The test draws
+  occurrences from the model itself (`rbeta`, x > 1/N); then m̂ is
+  unbiased and the 95% interval covers m in 86–88% of 200 replicates (it
+  assumes equal residual variances; occurrences are binomial). The docs say
+  so; the test asks for ≥ 14 of 20.
+- **MicEco's `neutral.fit()`** was not run; the docs mention its maximum
+  likelihood estimator only qualitatively (iCAMP's `m.mle` showed the size
+  of that difference: 1e-4 relative on `sim_data`).
+- **C:** `C_neutral_stats()` (`src/neutral_model.c`) returns, per group
+  and feature, the total count and the number of samples with the feature,
+  in one pass over `da_table_init()`'s feature-major table, threaded over
+  features with fixed-order sums (identical for any `cpus`; tested on a
+  300 × 1000 table with 1, 2, 4 and 7 threads). Everything else is R over
+  K-length vectors. 2,000 × 20,000 sparse (1.2M values) takes ~0.9 s, nearly
+  all in `pbeta()`.
+- **Licensing:** the R file carries neufit's BSD-2 notice (model function,
+  p and occurrence definitions, Wilson band, above/below rule);
+  `inst/COPYRIGHTS` has a stanza for it (and for neufit's `sim_data.csv`
+  in the test fixture), and Michael Sieber is `ctb`/`cph` in `Authors@R`.
+  No source text of Burns et al.'s code, iCAMP, tyRa or MicEco was read.
+- **Display:** no `display` attribute (the input is a count table, so the
+  title has no "of ..."): `print()` and `plot()` use "Neutral Community
+  Model" (with groups, "Neutral Community Model: <group>", one panel per
+  group, `group =` picks them). The print header shows m with its
+  interval, Nm, R² and the partition counts, one line per group. Row
+  subsets keep their attributes in R 4.3, so they print and plot (points
+  of the subset over the full fit's curve).
+- **pkgdown:** a new "Community Assembly" section after "Quality
+  Control".
