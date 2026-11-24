@@ -154,15 +154,15 @@ will be applied to the
 #> 2                       Aitchison Distance     aitchison FALSE     TRUE
 #> 3                      Berger-Parker Index        berger FALSE     TRUE
 #> 4                   Bhattacharyya Distance bhattacharyya FALSE     TRUE
-#> 5                Bray-Curtis Dissimilarity          bray FALSE     TRUE
-#> 6                          Brillouin Index     brillouin FALSE     TRUE
+#> 5           Bray-Curtis Abundance Gradient bray_gradient FALSE     TRUE
+#> 6           Bray-Curtis Balanced Variation bray_balanced FALSE     TRUE
 #>   int_only true_metric   div
 #> 1     TRUE          NA alpha
 #> 2    FALSE        TRUE  beta
 #> 3    FALSE          NA alpha
 #> 4    FALSE        TRUE  beta
 #> 5    FALSE       FALSE  beta
-#> 6     TRUE          NA alpha
+#> 6    FALSE       FALSE  beta
     
     # All alpha diversity function names.
     list_metrics('alpha', val = 'id')

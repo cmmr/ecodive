@@ -73,6 +73,10 @@
   vaginal community state types (valencia()) and their reference
   centroids, from 'VALENCIA'
 
+- **Kyle Bittinger**. Contributor, copyright holder.  
+  turnover, nestedness, balanced and gradient components of beta
+  diversity, ported from 'abdiv'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

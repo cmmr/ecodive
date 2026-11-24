@@ -31,7 +31,7 @@ beta_div(
 - metric:
 
   The name of a beta diversity metric. One of
-  `c('aitchison', 'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'psym_chisq', 'soergel', 'sorensen', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')`.
+  `c('aitchison', 'bhattacharyya', 'bray', 'bray_balanced', 'bray_gradient', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jaccard_nestedness', 'jaccard_turnover', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'philr_distance', 'psym_chisq', 'robust_aitchison', 'soergel', 'soergel_balanced', 'soergel_gradient', 'sorensen', 'sorensen_nestedness', 'sorensen_turnover', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')`.
   Flexible matching is supported (see below). Programmatic access via
   `list_metrics('beta')`.
 
@@ -167,6 +167,8 @@ method (see
 | `aitchison` | Aitchison distance |
 | `bhattacharyya` | Bhattacharyya distance |
 | `bray` | Bray-Curtis dissimilarity |
+| `bray_balanced` | Bray-Curtis balanced variation |
+| `bray_gradient` | Bray-Curtis abundance gradient |
 | `canberra` | Canberra distance |
 | `chebyshev` | Chebyshev distance |
 | `chord` | Chord distance |
@@ -179,6 +181,8 @@ method (see
 | `hellinger` | Hellinger distance |
 | `horn` | Horn-Morisita dissimilarity |
 | `jaccard` | Jaccard distance |
+| `jaccard_nestedness` | Jaccard nestedness |
+| `jaccard_turnover` | Jaccard turnover |
 | `jensen` | Jensen-Shannon distance |
 | `jsd` | Jesen-Shannon divergence (JSD) |
 | `lorentzian` | Lorentzian distance |
@@ -192,7 +196,11 @@ method (see
 | `philr_distance` | PhILR distance |
 | `psym_chisq` | Probabilistic Symmetric Chi-Squared distance |
 | `soergel` | Soergel distance |
+| `soergel_balanced` | Ruzicka (Soergel) balanced variation |
+| `soergel_gradient` | Ruzicka (Soergel) abundance gradient |
 | `sorensen` | Dice-Sorensen dissimilarity |
+| `sorensen_nestedness` | Sorensen nestedness |
+| `sorensen_turnover` | Simpson dissimilarity (Sorensen turnover) |
 | `squared_chisq` | Squared Chi-Squared distance |
 | `squared_chord` | Squared Chord distance |
 | `squared_euclidean` | Squared Euclidean distance |
@@ -214,6 +222,13 @@ matching.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the metrics list.
+
+The turnover / nestedness and balanced / gradient components are
+Baselga's partition of `sorensen`, `jaccard`, `bray` and `soergel`; see
+[`sorensen_turnover()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md),
+[`bray_balanced()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md)
+and
+[`beta_partition()`](https://cmmr.github.io/ecodive/reference/beta_partition.md).
 
 ## Input Types
 

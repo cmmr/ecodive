@@ -549,6 +549,30 @@ Distance measures using binary (presence/absence) data.
 - [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md) :
   Dice-Sorensen dissimilarity
 
+### Partitioned metrics
+
+Baselga’s partition of beta diversity into turnover and nestedness, or
+balanced variation and abundance gradients.
+
+- [`beta_partition()`](https://cmmr.github.io/ecodive/reference/beta_partition.md)
+  : Partition beta diversity into turnover and nestedness
+- [`beta_partition_multi()`](https://cmmr.github.io/ecodive/reference/beta_partition_multi.md)
+  : Multiple-site partition of beta diversity
+- [`bray_balanced()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md)
+  [`bray_gradient()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md)
+  [`soergel_balanced()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md)
+  [`soergel_gradient()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md)
+  : Balanced variation and abundance gradients of abundance
+  dissimilarity
+- [`sorensen_turnover()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md)
+  [`sorensen_nestedness()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md)
+  [`jaccard_turnover()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md)
+  [`jaccard_nestedness()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md)
+  : Turnover and nestedness of presence/absence dissimilarity
+- [`plot(`*`<ecodive_beta_partition>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_beta_partition.md)
+  [`plot(`*`<ecodive_beta_partition_multi>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_beta_partition.md)
+  : Plot a partition of beta diversity
+
 ### Phylogenetic metrics
 
 Distance measures based on phylogenetic branch lengths (the UniFrac

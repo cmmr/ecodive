@@ -108,6 +108,50 @@
   then clusters it by average linkage for the heatmap; `clust = FALSE`
   (kept as `"none"`) keeps the input order in the plot too.
 
+- New partition of beta diversity (Baselga 2010, 2012, 2013, 2017), as
+  ‘betapart’ computes it:
+
+  - Eight new beta metrics, run by
+    [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
+    like any other:
+    [`sorensen_turnover()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md)
+    (Simpson dissimilarity, `"betasim"`),
+    [`sorensen_nestedness()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md),
+    [`jaccard_turnover()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md)
+    and
+    [`jaccard_nestedness()`](https://cmmr.github.io/ecodive/reference/sorensen_turnover.md)
+    of presence/absence; and
+    [`bray_balanced()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md),
+    [`bray_gradient()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md),
+    [`soergel_balanced()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md)
+    and
+    [`soergel_gradient()`](https://cmmr.github.io/ecodive/reference/bray_balanced.md)
+    (the Ruzicka components) of abundances, ported from ‘abdiv’ (MIT).
+    Each pair of components adds up to
+    [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md),
+    [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md),
+    [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md) or
+    [`soergel()`](https://cmmr.github.io/ecodive/reference/soergel.md).
+  - New
+    [`beta_partition()`](https://cmmr.github.io/ecodive/reference/beta_partition.md)
+    returns all three distance matrices of a family
+    (`index = "sorensen"`, `"jaccard"`, `"bray"` or `"ruzicka"`) from
+    one pass over the pairs, as `betapart::beta.pair()` and
+    `beta.pair.abund()`;
+    [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws each
+    pair’s turnover against its nestedness.
+  - New
+    [`beta_partition_multi()`](https://cmmr.github.io/ecodive/reference/beta_partition_multi.md)
+    gives the multiple-site values of a whole set of samples, as
+    `beta.multi()` and `beta.multi.abund()`, and with `n_sites`, of
+    `n_draws` random subsets of that many samples (as `beta.sample()`,
+    with ecodive’s own random numbers: `seed`);
+    [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+    draws’ densities.
+  - `beta_div(x, "Bray-Curtis")` (alias `"braycurtis"`, or `"bc"`) still
+    selects [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md)
+    now that other metric names begin with “Bray-Curtis”.
+
 - Distance matrices, ordinations, permutation tests and
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) have
   a title, which

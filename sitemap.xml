@@ -38,10 +38,13 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_percent_normalized.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/berger.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/beta_div.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/beta_partition.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/beta_partition_multi.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bhattacharyya.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bioenv.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/blas_threads.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bray.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/bray_balanced.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/brillouin.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ca.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/canberra.html</loc></url>
@@ -143,6 +146,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/pielou.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_beta_partition.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_cross_assoc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.html</loc></url>
@@ -189,6 +193,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/simpson_evenness.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/soergel.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/sorensen.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/sorensen_turnover.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/sourcetracker.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/sparcc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/squared_chisq.html</loc></url>
