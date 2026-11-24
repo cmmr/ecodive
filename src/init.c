@@ -16,6 +16,8 @@ extern SEXP C_ancombc_trend(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP
 extern SEXP C_ancombc_nonzero(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_anosim(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_beta_div(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_beta_multi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_beta_partition(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_balance(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_bioenv(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_blas_settable(void);
@@ -119,6 +121,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_ancombc_nonzero", (DL_FUNC) &C_ancombc_nonzero,  4},
   {"C_anosim",    (DL_FUNC) &C_anosim,    6},
   {"C_beta_div",  (DL_FUNC) &C_beta_div,  8},
+  {"C_beta_multi",     (DL_FUNC) &C_beta_multi,     8},
+  {"C_beta_partition", (DL_FUNC) &C_beta_partition, 6},
   {"C_balance",   (DL_FUNC) &C_balance,   5},
   {"C_bioenv",    (DL_FUNC) &C_bioenv,    5},
   {"C_blas_settable", (DL_FUNC) &C_blas_settable, 0},

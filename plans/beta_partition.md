@@ -297,3 +297,107 @@ NEWS.
   phylogenetic beta diversity: distinguishing between "true" turnover of
   lineages and phylogenetic diversity gradients. *PLoS ONE*, 7, e42760.
   doi:10.1371/journal.pone.0042760
+
+
+## Decisions made while implementing
+
+Asked up front (the user's answers, 2026-11-24):
+
+- **No `ruzicka` alias of `soergel`.** The component metrics keep their
+  Ružička aliases (`ruzickabalanced`, `ruzbal`, `ruzickagradient`,
+  `ruzgra`), and their display names are "Ruzicka Balanced Variation" and
+  "Ruzicka Abundance Gradient", so `beta_div(x, 'ruzicka')` now reports
+  "matches multiple options" (soergel_balanced, soergel_gradient).
+- **`braycurtis` and `bc` became aliases of `bray`.** With the new names
+  "Bray-Curtis Balanced Variation" / "... Abundance Gradient",
+  `beta_div(x, 'Bray-Curtis')` (used in `test-dist_clust.r`) would
+  otherwise be ambiguous. Truncated prefixes such as `'soren'`, `'jacc'`,
+  `'soerg'` and `'bra'` are now ambiguous too; that is accepted (the docs
+  already ask for full ids).
+- **The abundance components refuse `norm = 'clr'`, `'rclr'` and `'log'`**
+  (negative values; the message follows `simper()`'s) **and take no
+  `pseudocount`.** Signatures: `bray_balanced(counts, margin, norm, pairs,
+  clust, cpus)`, likewise `bray_gradient`, `soergel_balanced`,
+  `soergel_gradient`. `'none'`, `'percent'`, `'chord'`, `'hellinger'` and
+  `'binary'` are allowed.
+- **`beta_partition()` takes `clust`:** the samples are ordered by the
+  clustering of `total`, and `turnover` / `nestedness` are reordered the
+  same way (same `order` attribute, same `display$clust`), so the three
+  stay aligned. `total` is then identical to e.g. `jaccard(x, clust =)`.
+
+Decided here:
+
+- **Negative values are refused** by all ten new functions (an error
+  naming the partition), not only the abundance ones: betapart and the
+  formulas assume abundances ≥ 0.
+- **`index`:** `'sorensen'`, `'jaccard'`, `'bray'`, `'ruzicka'`
+  (case-insensitive, no partial matching); `'soergel'` is accepted and
+  stored as `'ruzicka'`. A non-`'none'` `norm` with an incidence index is
+  an error. The display name of a family ("Sorensen Dissimilarity",
+  "Ruzicka Dissimilarity", ...) and its part names live in a small
+  internal registry `PARTITIONS` keyed by `index`; `print()` and `plot()`
+  read it.
+- **Undefined values:** where a sample is empty, turnover / balanced and
+  nestedness / gradient are `NaN` (as abdiv and betapart); the total keeps
+  the base metric's value (1 for one empty sample, `NaN` for two).
+- **Nestedness = total − turnover** (abdiv's arithmetic), computed in the
+  same kernel pass from the total exactly as `sorensen()`, `jaccard()`,
+  `bray()` and `soergel()` compute it. So `total` is `identical()` to the
+  base metric and the two parts add up to it exactly; betapart's own
+  product formula for β_sne / β_jne differs by ≤ 1.1e-16, and at equal
+  richness can give ±1e-17 instead of an exact 0.
+- **`true_metric` is NO for all eight.** No triangle search was needed:
+  x = {1}, y = {1, 2}, z = {2} gives β_sim(x, y) = β_sim(y, z) = 0 and
+  β_sim(x, z) = 1 (likewise β_jtu and the balanced components); tested.
+- **C:** the eight metrics are four kernels in `src/beta_div.c` (one per
+  family; a static `part_mode` picks the component), on the existing
+  `FOREACH_PAIR` / `FOREACH_OTU` / `WITH_ABJ` macros. `FOREACH_PAIR` now
+  exposes `out_idx` so a kernel can write two more triangles;
+  `C_beta_partition()` uses that to write all three in one pass.
+- **Multiple-site sums, deterministic:** for all samples, each row s of
+  the pair triangle (pairs (s, t > s)) is a task that sums its pairs in
+  order of t; the row sums are then added in row order. A draw uses the
+  same row-by-row grouping, so a draw of all N samples is `identical()` to
+  `value`. Memory is O(N) (no triangle is stored). The shared term is
+  Σ x − Σ_k max_i x_ik, summed over sites then features in a fixed order.
+- **Draws:** draw r seeds PCG with `(seed, r)` and picks `n_sites` samples
+  by Floyd's algorithm, then sorts them (input order); each draw is a task
+  with its own scratch block (per worker). `n_sites = NULL` gives only
+  `value`; `n_sites` must be 2 ... N, `n_draws` ≥ 1, `seed` any integer.
+- **Result of `beta_partition_multi()`:** `value`, and with `n_sites`,
+  `draws` (n_draws × 3, named columns), `mean` and `sd` (betapart's
+  `sd.values` too). Attributes `index`, `n_samples` (behind `value`), and
+  with draws `n_sites` and `n_draws`.
+- **Plots:** `plot(beta_partition())` draws turnover (x) against
+  nestedness (y), equal axes, dashed iso-total lines at 0.25, 0.5, 0.75 and
+  1, undefined pairs left out (counted in the subtitle); `groups` colours
+  within-group pairs (grey between), following `clust`'s `order`. Title
+  "Partition of <family name>". `plot(beta_partition_multi())`: the three
+  densities of the draws (a vertical line for a component with no
+  spread), or without draws a stacked bar of the two components.
+- **`print()`** methods live in `R/beta_partition.r` (not `R/print.r`):
+  one line per matrix with its mean (and how many are NA / NaN), or the
+  three values (with draws: mean and sd).
+- **Fixtures** (`data-raw/expected/beta_partition.r`): `ex_counts`, a
+  12 × 10 table of edge cases (empty, nested, identical, disjoint, equal
+  richness, pure balanced variation) and a sparse 40 × 300 table (empty,
+  nested, identical, disjoint samples and a pure abundance gradient);
+  betapart's `beta.pair()`, `beta.pair.abund()`, `beta.multi()`,
+  `beta.multi.abund()` on each, with every family; abdiv's eight
+  functions on every pair; betapart's multiple-site values of all 126
+  subsets of 4 of 9 samples (every ecodive draw must equal one of them);
+  and `beta.sample()` / `beta.sample.abund()` means for a 5-SE check.
+- **betapart's `ceram.s` / `ceram.n` are not stored** (data of a GPL
+  package; their licence is unclear). The generator compares them and
+  prints the differences: pairwise ≤ 1.1e-16, multiple-site ≤ 5.6e-17.
+- **Docs:** the eight metrics are on two Rd pages (`?sorensen_turnover`,
+  `?bray_balanced`), with `beta_partition()` and `beta_partition_multi()`
+  in the new family "Partitioned metrics", which has its own subsection
+  under Beta Diversity in `_pkgdown.yml`. The `sorensen()` Rd bug the plan
+  mentions was already fixed by 14b0e81.
+- **Clean room:** only betapart's Rd pages (`beta.multi`,
+  `beta.multi.abund`, `beta.sample`, `beta.pair.abund`, `betapart.core`,
+  `betapart.core.abund`, `ceram.s`) were read; no GPL source reached this
+  session. abdiv 0.2.0's `R/beta_components.R` (MIT) was read and
+  followed; its notice is in `src/beta_div.c`, `R/beta_partition.r` and
+  `inst/COPYRIGHTS`, and Kyle Bittinger is in `Authors@R` (ctb, cph).

@@ -19,7 +19,9 @@ METRICS <- local({
       Aitchison Distance,                            aitchison,                 NO,    YES,      NO,       YES,         beta,  
       Berger-Parker Index,                           berger,                    NO,    YES,      NO,       NA,          alpha, bergerparkerd
       Bhattacharyya Distance,                        bhattacharyya,             NO,    YES,      NO,       YES,         beta,  
-      Bray-Curtis Dissimilarity,                     bray,                      NO,    YES,      NO,       NO,          beta,  
+      Bray-Curtis Abundance Gradient,                bray_gradient,             NO,    YES,      NO,       NO,          beta,  bcgra braygra
+      Bray-Curtis Balanced Variation,                bray_balanced,             NO,    YES,      NO,       NO,          beta,  bcbal braybal
+      Bray-Curtis Dissimilarity,                     bray,                      NO,    YES,      NO,       NO,          beta,  braycurtis bc
       Brillouin Index,                               brillouin,                 NO,    YES,      YES,      NA,          alpha, brillouind
       Canberra Distance,                             canberra,                  NO,    YES,      NO,       YES,         beta,  
       Chao1,                                         chao1,                     NO,    YES,      YES,      NA,          alpha, 
@@ -43,6 +45,8 @@ METRICS <- local({
       Horn-Morisita Dissimilarity,                   horn,                      NO,    YES,      NO,       NO,          beta,  
       Inverse Simpson Index,                         inv_simpson,               NO,    YES,      NO,       NA,          alpha, enspie
       Jaccard Distance,                              jaccard,                   NO,    NO,       NO,       YES,         beta,  
+      Jaccard Nestedness,                            jaccard_nestedness,        NO,    NO,       NO,       NO,          beta,  betajne
+      Jaccard Turnover,                              jaccard_turnover,          NO,    NO,       NO,       NO,          beta,  betajtu
       Jensen-Shannon Distance,                       jensen,                    NO,    YES,      NO,       YES,         beta,  
       Jensen-Shannon Divergence (JSD),               jsd,                       NO,    YES,      NO,       YES,         beta,  
       Lorentzian Distance,                           lorentzian,                NO,    YES,      NO,       NO,          beta,  
@@ -63,10 +67,14 @@ METRICS <- local({
       Probabilistic Symmetric Chi-Squared Distance,  psym_chisq,                NO,    YES,      NO,       NO,          beta,  
       Robust Aitchison Distance,                     robust_aitchison,          NO,    YES,      NO,       NO,          beta,  raitchison
       Renyi Entropy,                                 renyi,                     NO,    YES,      NO,       NA,          alpha, 
+      Ruzicka Abundance Gradient,                    soergel_gradient,          NO,    YES,      NO,       NO,          beta,  ruzickagradient ruzgra
+      Ruzicka Balanced Variation,                    soergel_balanced,          NO,    YES,      NO,       NO,          beta,  ruzickabalanced ruzbal
       Shannon Diversity Index,                       shannon,                   NO,    YES,      NO,       NA,          alpha, 
+      Simpson Dissimilarity (Sorensen Turnover),     sorensen_turnover,         NO,    NO,       NO,       NO,          beta,  simpsondissimilarity betasim
       Simpson's Dominance Index,                     dominance,                 NO,    YES,      NO,       NA,          alpha, simpsond
       Simpson's Evenness,                            simpson_evenness,          NO,    YES,      NO,       NA,          alpha, simpsone
       Soergel Distance,                              soergel,                   NO,    YES,      NO,       YES,         beta,  
+      Sorensen Nestedness,                           sorensen_nestedness,       NO,    NO,       NO,       NO,          beta,  betasne
       Squared Chi-Squared Distance,                  squared_chisq,             NO,    YES,      NO,       NO,          beta,  
       Squared Chord Distance,                        squared_chord,             NO,    YES,      NO,       NO,          beta,  
       Squared Euclidean Distance,                    squared_euclidean,         NO,    YES,      NO,       NO,          beta,  

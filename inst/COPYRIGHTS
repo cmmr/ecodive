@@ -1473,3 +1473,39 @@ License:
    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
+
+
+Files: src/beta_div.c R/beta_partition.r
+Copyright: 2020 Kyle Bittinger
+Comment: The turnover, nestedness, balanced-variation and abundance-gradient
+ components of beta diversity (sorensen_turnover(), ..., soergel_gradient(),
+ beta_partition()) follow abdiv 0.2.0's R/beta_components.R
+ (jaccard_turnover(), sorenson_turnover(), bray_curtis_balanced(),
+ ruzicka_balanced() and their nestedness / gradient counterparts), which is
+ distributed under the MIT License (LICENSE: "YEAR: 2020, COPYRIGHT HOLDER:
+ Kyle Bittinger"). The multiple-site values (beta_partition_multi()) are
+ written from Baselga (2010, 2012, 2017). data-raw/expected/beta_partition.r
+ (not in the built package) calls betapart (GPL) to record reference
+ outputs only. The rest of these files is Copyright 2026 ecodive authors,
+ under the MIT licence above.
+License:
+   Copyright (c) 2020 Kyle Bittinger
+
+   Permission is hereby granted, free of charge, to any person obtaining a
+   copy of this software and associated documentation files (the
+   "Software"), to deal in the Software without restriction, including
+   without limitation the rights to use, copy, modify, merge, publish,
+   distribute, sublicense, and/or sell copies of the Software, and to
+   permit persons to whom the Software is furnished to do so, subject to
+   the following conditions:
+
+   The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -3,6 +3,33 @@
 
 // https://pdodds.w3.uvm.edu/research/papers/others/everything/cha2007a.pdf
 
+// The partition of beta diversity (the *_part() kernels below) follows
+// abdiv 0.2.0's R/beta_components.R, under the MIT License:
+//
+//   Copyright (c) 2020 Kyle Bittinger
+//
+//   Permission is hereby granted, free of charge, to any person obtaining a
+//   copy of this software and associated documentation files (the
+//   "Software"), to deal in the Software without restriction, including
+//   without limitation the rights to use, copy, modify, merge, publish,
+//   distribute, sublicense, and/or sell copies of the Software, and to
+//   permit persons to whom the Software is furnished to do so, subject to
+//   the following conditions:
+//
+//   The above copyright notice and this permission notice shall be included
+//   in all copies or substantial portions of the Software.
+//
+//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+//   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+//   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+//   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+//   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+//   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+// The multiple-site values (C_beta_multi()) are written from Baselga
+// (2010, 2012, 2017), and checked against betapart's outputs only.
+
 #include "ecodive.h"
 
 #define BDIV_BHATTACHARYYA  1
@@ -29,6 +56,22 @@
 #define BDIV_SQUARED_CHORD 23
 #define BDIV_WAVE_HEDGES   24
 
+// Baselga's partition of beta diversity: one component of one family.
+#define BDIV_SORENSEN_TURNOVER   25
+#define BDIV_SORENSEN_NESTEDNESS 26
+#define BDIV_JACCARD_TURNOVER    27
+#define BDIV_JACCARD_NESTEDNESS  28
+#define BDIV_BRAY_BALANCED       29
+#define BDIV_BRAY_GRADIENT       30
+#define BDIV_SOERGEL_BALANCED    31
+#define BDIV_SOERGEL_GRADIENT    32
+
+// The families of beta_partition() and beta_partition_multi().
+#define PART_SORENSEN 1
+#define PART_JACCARD  2
+#define PART_BRAY     3
+#define PART_RUZICKA  4
+
 static int     n_samples;
 static int     n_otus;
 static int     n_dist;
@@ -40,6 +83,12 @@ static double *clr_vec;
 static int    *pairs_vec;
 static double *dist_vec;
 static SEXP   *sexp_extra;
+
+// For the partition kernels: which component goes to dist_vec (PART_OUT()),
+// and the triangles of the other two when all three are wanted.
+static int     part_mode;
+static double *dist_vec2;
+static double *dist_vec3;
 
 
 /*
@@ -67,9 +116,11 @@ static SEXP   *sexp_extra;
           if (dist_idx % n_threads == thread_i) {              \
                                                                \
             double distance = 0;                               \
+            int    out_idx  = dist_idx;                        \
                                                                \
             expression;                                        \
                                                                \
+            (void)out_idx;                                     \
             dist_vec[dist_idx] = distance;                     \
           }                                                    \
           dist_idx++;                                          \
@@ -96,9 +147,11 @@ static SEXP   *sexp_extra;
         sam_j += sam_i;                                        \
                                                                \
         double distance = 0;                                   \
+        int    out_idx  = dist_idx - 1;                        \
                                                                \
         expression;                                            \
                                                                \
+        (void)out_idx;                                         \
         dist_vec[dist_idx - 1] = distance;                     \
       }                                                        \
     }                                                          \
@@ -690,6 +743,241 @@ static void *wave_hedges(void *arg) {
 
 
 
+
+//======================================================
+// Baselga's partition of beta diversity
+//
+// Incidence (Baselga 2010, 2012), with a shared features, and b and c
+// only in the first and second sample:
+//   Sorensen  total (b+c)/(2a+b+c), turnover min(b,c) / (a + min(b,c))
+//   Jaccard   total (b+c)/(a+b+c),  turnover 2 min(b,c) / (a + 2 min(b,c))
+// Abundance (Baselga 2013, 2017), with A = sum(min(x, y)),
+// B = sum(max(x - y, 0)) and C = sum(max(y - x, 0)):
+//   Bray-Curtis  total (B+C)/(2A+B+C), balanced min(B,C) / (A + min(B,C))
+//   Ruzicka      total (B+C)/(A+B+C),  balanced 2 min(B,C) / (A + 2 min(B,C))
+// The nestedness (abundance gradient) component is total - turnover
+// (balanced), as abdiv 0.2.0 (MIT, Kyle Bittinger) computes it. Each total
+// is computed exactly as sorensen(), jaccard(), bray() and soergel()
+// compute it, so that it is identical to theirs.
+//
+// part_mode selects the component that goes to dist_vec: 0 turnover
+// (balanced), 1 nestedness (gradient), 2 total; 3 writes all three, to
+// dist_vec, dist_vec2 and dist_vec3.
+//======================================================
+
+#define PART_OUT(tu, to)                                       \
+  do {                                                         \
+    double tu_ = (tu), to_ = (to), ne_ = to_ - tu_;            \
+    if (part_mode == 3) {                                      \
+      distance           = tu_;                                \
+      dist_vec2[out_idx] = ne_;                                \
+      dist_vec3[out_idx] = to_;                                \
+    }                                                          \
+    else if (part_mode == 0) distance = tu_;                   \
+    else if (part_mode == 1) distance = ne_;                   \
+    else                     distance = to_;                   \
+  } while (0)
+
+
+static void *sorensen_part(void *arg) {
+  FOREACH_PAIR(
+    WITH_ABJ(
+      double mn = (A < B ? A : B) - J;
+      PART_OUT(mn / (J + mn), 1 - (2 * J) / (A + B));
+    );
+  );
+  return NULL;
+}
+
+static void *jaccard_part(void *arg) {
+  FOREACH_PAIR(
+    WITH_ABJ(
+      double mn = (A < B ? A : B) - J;
+      PART_OUT(2 * mn / (J + 2 * mn), (A + B - 2 * J) / (A + B - J));
+    );
+  );
+  return NULL;
+}
+
+static void *bray_part(void *arg) {
+  FOREACH_PAIR(
+    double diffs = 0; double sums = 0;
+    double a = 0; double b = 0; double c = 0;
+    FOREACH_OTU(
+      sums  += x + y;
+      diffs += fabs(x - y);
+      if (x < y) { a += x; c += y - x; }
+      else       { a += y; b += x - y; }
+    );
+    double mn = b < c ? b : c;
+    PART_OUT(mn / (a + mn), diffs / sums);
+  );
+  return NULL;
+}
+
+static void *soergel_part(void *arg) {
+  FOREACH_PAIR(
+    double min_sum = 0; double max_sum = 0;
+    double b = 0; double c = 0;
+    FOREACH_OTU(
+      if (x < y) { min_sum += x; max_sum += y; c += y - x; }
+      else       { min_sum += y; max_sum += x; b += x - y; }
+    );
+    double mn = b < c ? b : c;
+    PART_OUT(2 * mn / (min_sum + 2 * mn), 1 - (min_sum / max_sum));
+  );
+  return NULL;
+}
+
+
+// For the multiple-site values: the smaller and larger of the pair's two
+// unshared parts, (b, c) or (B, C), to dist_vec and dist_vec2.
+static int part_incidence;
+
+static inline void part_bc(int sam_i, int sam_j, double *b_out, double *c_out) {
+  if (part_incidence) {
+    WITH_ABJ(*b_out = A - J; *c_out = B - J;);
+  }
+  else {
+    double b = 0, c = 0;
+    FOREACH_OTU(
+      if (x < y) c += y - x;
+      else       b += x - y;
+    );
+    *b_out = b; *c_out = c;
+  }
+}
+
+// The sums over the pairs (s, t > s) of sites[] of the smaller and larger
+// unshared parts, row by row: row s's sums in order of t, then the rows'
+// sums in order of s. The same order whether a row is summed here or by
+// multi_rows() on another thread.
+static inline void row_sums(const int *sites, int n, int s, double *mn, double *mx) {
+  double sum_min = 0, sum_max = 0;
+  for (int t = s + 1; t < n; t++) {
+    double b, c;
+    part_bc(sites[s], sites[t], &b, &c);
+    sum_min += b < c ? b : c;
+    sum_max += b < c ? c : b;
+  }
+  *mn = sum_min;
+  *mx = sum_max;
+}
+
+// All the sites: each row is a task, its two sums to dist_vec[s] and
+// dist_vec2[s] (n_samples doubles each).
+static int *multi_all;
+
+static void *multi_rows(void *arg) {
+  int thread_i  = ((worker_t *)arg)->i;
+  int n_threads = ((worker_t *)arg)->n;
+  for (int s = thread_i; s < n_samples - 1; s += n_threads)
+    row_sums(multi_all, n_samples, s, dist_vec + s, dist_vec2 + s);
+  return NULL;
+}
+
+
+// The three multiple-site values (turnover, nestedness, total) of family
+// `index` from: sum_min and sum_max, the sums over pairs of sites of the
+// smaller and larger unshared parts; and shared, the multiple-site shared
+// part: sum(S_i) - S_T for incidence (Baselga 2010, 2012), and
+// sum_k (sum_i x_ik - max_i x_ik) for abundance (Baselga 2017).
+static void multi_values(int index, double shared, double sum_min, double sum_max, double *out) {
+  double tu, to;
+  switch (index) {
+    case PART_SORENSEN:
+    case PART_BRAY:
+      tu = sum_min / (shared + sum_min);
+      to = (sum_min + sum_max) / (2 * shared + sum_min + sum_max);
+      break;
+    default: // PART_JACCARD, PART_RUZICKA
+      tu = 2 * sum_min / (shared + 2 * sum_min);
+      to = (sum_min + sum_max) / (shared + sum_min + sum_max);
+      break;
+  }
+  out[0] = tu;
+  out[1] = to - tu;
+  out[2] = to;
+}
+
+
+// The multiple-site shared part of the `n_sites` sites in `sites` (in
+// order), with `fmax` a scratch vector of n_otus doubles. The two sums run
+// in a fixed order: sites, then features.
+static double multi_shared(const int *sites, int n_sites, double *fmax) {
+  double total = 0, maxes = 0;
+  for (int k = 0; k < n_otus; k++) fmax[k] = 0;
+  for (int s = 0; s < n_sites; s++) {
+    int sam = sites[s];
+    for (int p = pos_vec[sam]; p < pos_vec[sam + 1]; p++) {
+      double v = part_incidence ? 1 : val_vec[p];
+      total += v;
+      if (v > fmax[otu_vec[p]]) fmax[otu_vec[p]] = v;
+    }
+  }
+  for (int k = 0; k < n_otus; k++) maxes += fmax[k];
+  return total - maxes;
+}
+
+
+// Resampled multiple-site values (betapart's beta.sample()): draw r picks
+// multi_n_sites of the sites without replacement, with PCG stream
+// (seed, r) and Floyd's algorithm, and writes its three values to row r of
+// the n_draws x 3 matrix multi_out. Each draw is one task.
+static int     multi_index;
+static int     multi_n_sites;
+static int     multi_n_draws;
+static int     multi_seed;
+static double *multi_out;
+static double *multi_scratch;  // per worker: n_otus doubles, n_samples ints
+
+static int cmp_int(const void *a, const void *b) {
+  int x = *(const int *)a, y = *(const int *)b;
+  return (x > y) - (x < y);
+}
+
+static void *multi_draws(void *arg) {
+  int thread_i  = ((worker_t *)arg)->i;
+  int n_threads = ((worker_t *)arg)->n;
+
+  size_t  stride = (size_t) n_otus + (size_t) n_samples;
+  double *fmax   = multi_scratch + (size_t) thread_i * stride;
+  int    *sites  = (int *)(fmax + n_otus);
+  int     k      = multi_n_sites;
+
+  for (int r = thread_i; r < multi_n_draws; r += n_threads) {
+
+    pcg32_random_t rng;
+    pcg32_srandom_r(&rng, (uint64_t) (uint32_t) multi_seed, (uint64_t) r);
+
+    // Floyd's algorithm: k distinct sites of n_samples.
+    int n = 0;
+    for (int j = n_samples - k; j < n_samples; j++) {
+      int t = (int) pcg32_bounded(&rng, (uint32_t) j + 1u), seen = 0;
+      for (int s = 0; s < n; s++) if (sites[s] == t) { seen = 1; break; }
+      sites[n++] = seen ? j : t;
+    }
+    qsort(sites, (size_t) k, sizeof(int), cmp_int);
+
+    double sum_min = 0, sum_max = 0;
+    for (int s = 0; s < k - 1; s++) {
+      double mn, mx;
+      row_sums(sites, k, s, &mn, &mx);
+      sum_min += mn;
+      sum_max += mx;
+    }
+
+    double vals[3];
+    multi_values(multi_index, multi_shared(sites, k, fmax), sum_min, sum_max, vals);
+    for (int v = 0; v < 3; v++)
+      multi_out[r + (size_t) v * multi_n_draws] = vals[v];
+  }
+
+  return NULL;
+}
+
+
+
 //======================================================
 // R interface. Distributes work across threads.
 //======================================================
@@ -744,6 +1032,14 @@ SEXP C_beta_div(
     case BDIV_SQUARED_CHISQ: bdiv_func = squared_chisq; break;
     case BDIV_SQUARED_CHORD: bdiv_func = squared_chord; break;
     case BDIV_WAVE_HEDGES:   bdiv_func = wave_hedges;   break;
+    case BDIV_SORENSEN_TURNOVER:   part_mode = 0; bdiv_func = sorensen_part; break;
+    case BDIV_SORENSEN_NESTEDNESS: part_mode = 1; bdiv_func = sorensen_part; break;
+    case BDIV_JACCARD_TURNOVER:    part_mode = 0; bdiv_func = jaccard_part;  break;
+    case BDIV_JACCARD_NESTEDNESS:  part_mode = 1; bdiv_func = jaccard_part;  break;
+    case BDIV_BRAY_BALANCED:       part_mode = 0; bdiv_func = bray_part;     break;
+    case BDIV_BRAY_GRADIENT:       part_mode = 1; bdiv_func = bray_part;     break;
+    case BDIV_SOERGEL_BALANCED:    part_mode = 0; bdiv_func = soergel_part;  break;
+    case BDIV_SOERGEL_GRADIENT:    part_mode = 1; bdiv_func = soergel_part;  break;
   }
   
   if (bdiv_func == NULL) { // # nocov start
@@ -798,4 +1094,154 @@ SEXP C_beta_div(
   free_all();
   UNPROTECT(5);
   return sexp_result_dist;
+}
+
+
+
+//======================================================
+// A dist object of n_samples samples, labelled as `em`'s, with every
+// distance NA when only some pairs will be computed. Unprotected.
+//======================================================
+static SEXP part_dist(ecomatrix_t *em, int na) {
+
+  SEXP d = PROTECT(allocVector(REALSXP, n_dist));
+  if (na) for (int i = 0; i < n_dist; i++) REAL(d)[i] = NA_REAL;
+
+  SEXP cls = PROTECT(allocVector(STRSXP, 2));
+  SET_STRING_ELT(cls, 0, mkChar("ecodive_dist"));
+  SET_STRING_ELT(cls, 1, mkChar("dist"));
+  setAttrib(d, R_ClassSymbol,     cls);
+  setAttrib(d, install("Size"),   PROTECT(ScalarInteger(n_samples)));
+  setAttrib(d, install("Diag"),   PROTECT(ScalarLogical(0)));
+  setAttrib(d, install("Upper"),  PROTECT(ScalarLogical(0)));
+  setAttrib(d, install("Labels"), em->sexp_sample_names);
+
+  UNPROTECT(5);
+  return d;
+}
+
+
+// The table of beta_partition() and beta_partition_multi(): read, then
+// normalized, and its arrays set as this file's globals.
+static ecomatrix_t *part_table(SEXP sexp_otu_mtx, SEXP sexp_margin,
+                               SEXP sexp_norm, int n_threads) {
+  int norm = asInteger(sexp_norm);
+  ecomatrix_t *em = new_ecomatrix(sexp_otu_mtx, sexp_margin);
+  if (norm) normalize(em, norm, n_threads, 0);
+  n_samples = em->n_samples;
+  n_otus    = em->n_otus;
+  pos_vec   = em->pos_vec;
+  otu_vec   = em->otu_vec;
+  val_vec   = em->val_vec;
+  clr_vec   = em->clr_vec;
+  n_dist    = n_samples * (n_samples - 1) / 2;
+  return em;
+}
+
+
+//======================================================
+// beta_partition(): the turnover (balanced), nestedness (gradient) and
+// total dissimilarity matrices of family `index`, in one pass over the
+// pairs. Returns a list of the three dist objects.
+//======================================================
+SEXP C_beta_partition(
+    SEXP sexp_index,     SEXP sexp_otu_mtx,  SEXP sexp_margin,
+    SEXP sexp_norm,      SEXP sexp_pairs_vec, SEXP sexp_n_threads ) {
+
+  int n_threads = asInteger(sexp_n_threads);
+  init_n_ptrs(16);
+  ecomatrix_t *em = part_table(sexp_otu_mtx, sexp_margin, sexp_norm, n_threads);
+
+  pthread_func_t func = NULL;
+  switch (asInteger(sexp_index)) {
+    case PART_SORENSEN: func = sorensen_part; break;
+    case PART_JACCARD:  func = jaccard_part;  break;
+    case PART_BRAY:     func = bray_part;     break;
+    case PART_RUZICKA:  func = soergel_part;  break;
+  }
+  if (func == NULL) { // # nocov start
+    free_all();
+    error("Invalid beta partition index.");
+  } // # nocov end
+
+  int some = !isNull(sexp_pairs_vec);
+
+  SEXP res = PROTECT(allocVector(VECSXP, 3));
+  for (int k = 0; k < 3; k++) SET_VECTOR_ELT(res, k, part_dist(em, some));
+  dist_vec  = REAL(VECTOR_ELT(res, 0));
+  dist_vec2 = REAL(VECTOR_ELT(res, 1));
+  dist_vec3 = REAL(VECTOR_ELT(res, 2));
+  part_mode = 3;
+
+  if (some) {
+    pairs_vec = INTEGER(sexp_pairs_vec);
+    n_pairs   = LENGTH(sexp_pairs_vec);
+  } else {
+    pairs_vec = NULL;
+    n_pairs   = n_dist;
+  }
+
+  if (n_pairs > 0) run_parallel(func, n_threads, n_pairs);
+
+  free_all();
+  UNPROTECT(1);
+  return res;
+}
+
+
+//======================================================
+// beta_partition_multi(): the multiple-site turnover (balanced),
+// nestedness (gradient) and total dissimilarity of family `index`. With
+// n_sites = 0, of all the sites: a 1 x 3 matrix. Otherwise, of n_draws
+// random sets of n_sites sites: an n_draws x 3 matrix.
+//======================================================
+SEXP C_beta_multi(
+    SEXP sexp_index,   SEXP sexp_otu_mtx, SEXP sexp_margin,
+    SEXP sexp_norm,    SEXP sexp_n_sites, SEXP sexp_n_draws,
+    SEXP sexp_seed,    SEXP sexp_n_threads ) {
+
+  int n_threads  = asInteger(sexp_n_threads);
+  multi_index    = asInteger(sexp_index);
+  multi_n_sites  = asInteger(sexp_n_sites);
+  multi_n_draws  = multi_n_sites ? asInteger(sexp_n_draws) : 1;
+  multi_seed     = asInteger(sexp_seed);
+  part_incidence = multi_index == PART_SORENSEN || multi_index == PART_JACCARD;
+
+  init_n_ptrs(16);
+  part_table(sexp_otu_mtx, sexp_margin, sexp_norm, n_threads);
+
+  SEXP res  = PROTECT(allocMatrix(REALSXP, multi_n_draws, 3));
+  multi_out = REAL(res);
+
+  if (multi_n_sites == 0) {
+
+    // All sites: the rows' sums in parallel, then summed in row order.
+    double *mins  = (double *) safe_malloc((size_t) n_samples * sizeof(double));
+    double *maxs  = (double *) safe_malloc((size_t) n_samples * sizeof(double));
+    int    *sites = (int *)    safe_malloc((size_t) n_samples * sizeof(int));
+    double *fmax  = (double *) safe_malloc((size_t) n_otus    * sizeof(double));
+    for (int i = 0; i < n_samples; i++) sites[i] = i;
+    dist_vec  = mins;
+    dist_vec2 = maxs;
+    multi_all = sites;
+    run_parallel(multi_rows, n_threads, n_samples - 1);
+
+    double sum_min = 0, sum_max = 0;
+    for (int i = 0; i < n_samples - 1; i++) { sum_min += mins[i]; sum_max += maxs[i]; }
+
+    multi_values(multi_index, multi_shared(sites, n_samples, fmax), sum_min, sum_max, multi_out);
+  }
+
+  else {
+
+    // One scratch block per worker.
+    int    n_workers = n_threads < 1 ? 1 : n_threads;
+    size_t stride    = (size_t) n_otus + (size_t) n_samples;
+    multi_scratch    = (double *) safe_malloc((size_t) n_workers * stride * sizeof(double));
+    run_parallel(multi_draws, n_workers, multi_n_draws);
+  }
+
+  free_all();
+  UNPROTECT(1);
+  return res;
 }

@@ -49,6 +49,14 @@
 
   expect_identical(match_metric('bray')$id, 'bray')
 
+  # Partition of beta diversity.
+  bp <- beta_partition(counts, 'bray', cpus = cpus)
+  expect_inherits(bp, 'ecodive_beta_partition')
+  expect_true(all(vapply(bp, function (d) inherits(d, 'dist') && all(is.finite(d)), TRUE)))
+  bm <- beta_partition_multi(counts, 'sorensen', n_sites = 5, n_draws = 20, cpus = cpus)
+  expect_inherits(bm, 'ecodive_beta_partition_multi')
+  expect_true(all(is.finite(bm$value)) && identical(dim(bm$draws), c(20L, 3L)))
+
   r <- rarefy(counts, depth = 40, cpus = cpus)
   expect_equal(unname(rowSums(r)), rep(40, 20))
   r <- rarefy(counts, depth = 31:50, cpus = cpus)

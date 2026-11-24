@@ -61,6 +61,28 @@
   linkage for the heatmap; `clust = FALSE` (kept as `"none"`) keeps the
   input order in the plot too.
 
+* New partition of beta diversity (Baselga 2010, 2012, 2013, 2017), as
+  'betapart' computes it:
+  * Eight new beta metrics, run by `beta_div()` like any other:
+    `sorensen_turnover()` (Simpson dissimilarity, `"betasim"`),
+    `sorensen_nestedness()`, `jaccard_turnover()` and
+    `jaccard_nestedness()` of presence/absence; and `bray_balanced()`,
+    `bray_gradient()`, `soergel_balanced()` and `soergel_gradient()` (the
+    Ruzicka components) of abundances, ported from 'abdiv' (MIT). Each pair
+    of components adds up to `sorensen()`, `jaccard()`, `bray()` or
+    `soergel()`.
+  * New `beta_partition()` returns all three distance matrices of a family
+    (`index = "sorensen"`, `"jaccard"`, `"bray"` or `"ruzicka"`) from one
+    pass over the pairs, as `betapart::beta.pair()` and `beta.pair.abund()`;
+    `plot()` draws each pair's turnover against its nestedness.
+  * New `beta_partition_multi()` gives the multiple-site values of a whole
+    set of samples, as `beta.multi()` and `beta.multi.abund()`, and with
+    `n_sites`, of `n_draws` random subsets of that many samples (as
+    `beta.sample()`, with ecodive's own random numbers: `seed`); `plot()`
+    draws the draws' densities.
+  * `beta_div(x, "Bray-Curtis")` (alias `"braycurtis"`, or `"bc"`) still
+    selects `bray()` now that other metric names begin with "Bray-Curtis".
+
 * Distance matrices, ordinations, permutation tests and `envfit()` have a
   title, which `plot()` uses unless given `main` (`?ecodive_display`): the
   method's name, then the title of the result it was computed from, such

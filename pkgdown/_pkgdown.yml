@@ -58,6 +58,11 @@ reference:
   desc: Distance measures using binary (presence/absence) data.
   contents:
   - has_concept('Presence/Absence metrics')
+- subtitle: Partitioned metrics
+  desc: Baselga's partition of beta diversity into turnover and nestedness, or balanced variation and abundance gradients.
+  contents:
+  - has_concept('Partitioned metrics')
+  - plot.ecodive_beta_partition
 - subtitle: Phylogenetic metrics
   desc: Distance measures based on phylogenetic branch lengths (the UniFrac family, and the compositional PhILR distance).
   contents:

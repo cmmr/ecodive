@@ -23,7 +23,7 @@ beta_div(
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted by some diversity metrics.}
 
-\item{metric}{The name of a beta diversity metric. One of \code{c('aitchison', 'bhattacharyya', 'bray', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'psym_chisq', 'soergel', 'sorensen', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')}. Flexible
+\item{metric}{The name of a beta diversity metric. One of \code{c('aitchison', 'bhattacharyya', 'bray', 'bray_balanced', 'bray_gradient', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jaccard_nestedness', 'jaccard_turnover', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'philr_distance', 'psym_chisq', 'robust_aitchison', 'soergel', 'soergel_balanced', 'soergel_gradient', 'sorensen', 'sorensen_nestedness', 'sorensen_turnover', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')}. Flexible
 matching is supported (see below). Programmatic access via
 \code{list_metrics('beta')}.}
 
@@ -119,6 +119,8 @@ Beta Diversity Wrapper Function
    \code{aitchison} \tab Aitchison distance \cr
    \code{bhattacharyya} \tab Bhattacharyya distance \cr
    \code{bray} \tab Bray-Curtis dissimilarity \cr
+   \code{bray_balanced} \tab Bray-Curtis balanced variation \cr
+   \code{bray_gradient} \tab Bray-Curtis abundance gradient \cr
    \code{canberra} \tab Canberra distance \cr
    \code{chebyshev} \tab Chebyshev distance \cr
    \code{chord} \tab Chord distance \cr
@@ -131,6 +133,8 @@ Beta Diversity Wrapper Function
    \code{hellinger} \tab Hellinger distance \cr
    \code{horn} \tab Horn-Morisita dissimilarity \cr
    \code{jaccard} \tab Jaccard distance \cr
+   \code{jaccard_nestedness} \tab Jaccard nestedness \cr
+   \code{jaccard_turnover} \tab Jaccard turnover \cr
    \code{jensen} \tab Jensen-Shannon distance \cr
    \code{jsd} \tab Jesen-Shannon divergence (JSD) \cr
    \code{lorentzian} \tab Lorentzian distance \cr
@@ -144,7 +148,11 @@ Beta Diversity Wrapper Function
    \code{philr_distance} \tab PhILR distance \cr
    \code{psym_chisq} \tab Probabilistic Symmetric Chi-Squared distance \cr
    \code{soergel} \tab Soergel distance \cr
+   \code{soergel_balanced} \tab Ruzicka (Soergel) balanced variation \cr
+   \code{soergel_gradient} \tab Ruzicka (Soergel) abundance gradient \cr
    \code{sorensen} \tab Dice-Sorensen dissimilarity \cr
+   \code{sorensen_nestedness} \tab Sorensen nestedness \cr
+   \code{sorensen_turnover} \tab Simpson dissimilarity (Sorensen turnover) \cr
    \code{squared_chisq} \tab Squared Chi-Squared distance \cr
    \code{squared_chord} \tab Squared Chord distance \cr
    \code{squared_euclidean} \tab Squared Euclidean distance \cr
@@ -167,6 +175,10 @@ UniFrac names can be shortened to the first letter plus "unifrac". E.g.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the metrics list.
+
+The turnover / nestedness and balanced / gradient components are
+Baselga's partition of \code{sorensen}, \code{jaccard}, \code{bray} and \code{soergel}; see
+\code{\link[=sorensen_turnover]{sorensen_turnover()}}, \code{\link[=bray_balanced]{bray_balanced()}} and \code{\link[=beta_partition]{beta_partition()}}.
 }
 \section{Input Types}{
 

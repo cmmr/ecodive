@@ -74,6 +74,7 @@ same thing.
 | `analytic` | **(new, item 38)** which metrics to compute in closed form: `NULL` (those that have one), `TRUE` (all, an error if one has none) or `FALSE` (resample all) | `rarefaction_curve` |
 | `coverage` | **(new, item 38)** a target sample coverage in (0, 1], for coverage-based rarefaction (Chao & Jost 2012); exclusive with `depth`. Also planned `hill_standardize(coverage =)` | `rarefy` |
 | `n` | **(new, 2026-11-24, item 46)** in `log_ratio_features()`, how many features to take from **each** end of a ranking (a whole number ≥ 1; Qurro's autoselection count). Not `n_features`, which the DA plots use for how many to show | `log_ratio_features` |
+| `index`, `n_sites` | **(new, 2026-11-24, item 52)** the family of a partition of beta diversity (`'sorensen'`, `'jaccard'`, `'bray'`, `'ruzicka'`: betapart's `index.family`; not `family`, which is an outcome distribution), and how many samples each random draw takes (betapart's `sites`; with `n_draws`, betapart's `samples`) | `beta_partition`, `beta_partition_multi` |
 | `type` | the kind of plot of a `plot()` method; `'rank'` (item 46) on DA results and ordinations. On `plot.ecodive_ord()`, any value but `'samples'` and `'rank'` goes on to `plot.default()` (`type = 'n'`) | `plot.*` |
 | `cpus` | threads (always last) | everything threaded |
 

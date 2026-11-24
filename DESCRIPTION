@@ -85,6 +85,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "vaginal community state types (valencia()) and their reference centroids, from 'VALENCIA'"),
     person(
+      "Kyle", "Bittinger",
+      role    = c("ctb", "cph"),
+      comment = "turnover, nestedness, balanced and gradient components of beta diversity, ported from 'abdiv'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,
