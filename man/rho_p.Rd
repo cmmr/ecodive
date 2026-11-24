@@ -177,5 +177,6 @@ using compositional data analysis. \emph{Scientific Reports}, 7, 16252.
 }
 \seealso{
 \code{\link[=vlr]{vlr()}}, \code{\link[=phi_s]{phi_s()}}, \code{\link[=sparcc]{sparcc()}}, \code{\link[=alr]{alr()}}, \code{\link[=normalize]{normalize()}}
-(\code{'clr'}), \code{\link[=replace_zeros]{replace_zeros()}}.
+(\code{'clr'}), \code{\link[=replace_zeros]{replace_zeros()}}; \code{\link[=cross_assoc]{cross_assoc()}} for associations between
+the features of two tables.
 }

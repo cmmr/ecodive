@@ -298,6 +298,7 @@ print_df_label <- function (x) {
       if (is.null(m)) NULL else paste('Sensitivity of', da_method_name(m))
     },
     ecodive_assoc_pairs   = assoc_pairs_label(x),
+    ecodive_cross_assoc   = cross_assoc_label(x),
     ecodive_network_diff  = 'Differential Associations',
     ecodive_simper        = 'SIMPER',
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
@@ -325,6 +326,8 @@ print_table_result <- function (x, n = NULL, width = NULL, digits = 3L, ...) {
 print.ecodive_ancom            <- print_table_result
 #' @export
 print.ecodive_assoc_pairs      <- print_table_result
+#' @export
+print.ecodive_cross_assoc      <- print_table_result
 #' @export
 print.ecodive_network_diff     <- print_table_result
 #' @export

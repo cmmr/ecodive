@@ -648,6 +648,19 @@
   difference between two groups with Fisher's z, as NetCoMi's
   `diffnet(diffMethod = "fisherTest")`.
 
+* New `cross_assoc()` correlates every feature of one table (taxa) with
+  every variable of another measured on the same samples (environmental
+  factors, metabolites, clinical variables): Spearman, Pearson or Kendall's
+  tau-b, optionally partial (`given`), with p-values as SciPy's
+  `spearmanr()`, `pearsonr()` and `kendalltau()` compute them (or by
+  permutation), adjusted over all pairs (Benjamini-Hochberg by default).
+  Missing values in `y` are left out pair by pair, as `Hmisc::rcorr()`
+  does. `plot()` draws the familiar heatmap, clustered, with stars on the
+  significant cells, and `as.matrix()` gives any column as a taxa x
+  variables matrix. It agrees with SciPy, `cor.test()`, Hmisc, psych, ppcor
+  and microeco to about 1e-14. Sparse tables stay sparse, and the
+  correlations run in parallel in C, identical for any `cpus`.
+
 * New `feature_assoc()` runs any association measure (`vlr()`, `rho_p()`,
   `phi_s()`, `sparcc()`) by name, with `list_feature_assocs()` and
   `match_feature_assoc()`.

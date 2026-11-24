@@ -54,13 +54,13 @@ MaAsLin.
 
 ```r
 halla(x, y, data = NULL, method = 'spearman', margin = 1L,
-      norm = 'percent', norm_y = 'none', pseudocount = NULL,
+      norm = 'percent', y_norm = 'none', pseudocount = NULL,
       alpha = 0.05, p_adjust = 'BH', fnr = 0.2, rank_by = 'best',
       gini_tolerance = 0.02, linkage = 'average', max_freq = 1,
       cpus = n_cpus())
 ```
 
-Inputs, `method`, `norm`, `norm_y`, `pseudocount`, `alpha`, `p_adjust` mean
+Inputs, `method`, `norm`, `y_norm`, `pseudocount`, `alpha`, `p_adjust` mean
 exactly what they mean in `cross_assoc()` (same validation code). HAllA's
 names and defaults (`config.yaml` of 0.8.40, as read from GitHub master;
 re-check against the sdist):

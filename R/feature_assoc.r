@@ -117,7 +117,8 @@ is_similarity <- function (d) {
 #' @inheritSection documentation Input Types
 #'
 #' @seealso [vlr()], [rho_p()], [phi_s()], [sparcc()],
-#'   [list_feature_assocs()]; [assoc_network()].
+#'   [list_feature_assocs()]; [assoc_network()]; [cross_assoc()] for the
+#'   associations between the features of two tables.
 #'
 #' @export
 #' @examples

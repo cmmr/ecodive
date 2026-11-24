@@ -203,7 +203,8 @@ vlr <- function (
 #' using compositional data analysis. *Scientific Reports*, 7, 16252.
 #'
 #' @seealso [vlr()], [phi_s()], [sparcc()], [alr()], [normalize()]
-#'   (`'clr'`), [replace_zeros()].
+#'   (`'clr'`), [replace_zeros()]; [cross_assoc()] for associations between
+#'   the features of two tables.
 #'
 #' @aliases propr
 #' @export
