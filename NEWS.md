@@ -876,10 +876,8 @@
   `alpha_div()`, which also accepts scikit-bio's names (`'pielou_e'`,
   `'simpson_d'`, `'observed_features'`, `'enspie'`, ...).
 
-* `alpha_div()` and `alpha_div_rarefied()` take several metrics at once,
-  `metric = c('observed', 'shannon', 'pielou')`, and return a matrix with a
-  column for each (computed from the same rarefied tables). They take the
-  new `q` and `bias_corrected` arguments, before `cpus`.
+* `alpha_div()` and `alpha_div_rarefied()` take the new `q` and
+  `bias_corrected` arguments, before `cpus`.
 
 * **Changed results:** `chao1()` is now the bias-corrected estimator,
   `S + F1 (F1 - 1) / (2 (F2 + 1))`, by default, as scikit-bio and QIIME 2:

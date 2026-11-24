@@ -28,9 +28,12 @@ QIIME 2 users `alpha-group-significance` (Kruskal-Wallis plus pairwise) and
 `alpha-correlation`.
 
 Several metrics are tested at once: `x` is a vector, or a matrix with one
-column per metric (as [alpha_metrics.md](alpha_metrics.md)'s
-`alpha_div(counts, metric = c(...))` returns), and the result has one row
-per metric (× pair, term or coefficient).
+column per metric (as `sapply(metrics, alpha_div, counts = counts)` builds;
+`alpha_div()` itself takes one metric and always returns a vector, the
+user's rule of 2026-11-24 that a return type must not depend on the
+input's length), and the result has one row per metric (× pair, term or
+coefficient). **Check that rule against this design before implementing:**
+a result whose shape is fixed by `x`'s shape may be fine, but ask.
 
 
 ## Names

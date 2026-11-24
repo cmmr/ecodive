@@ -67,13 +67,12 @@ ADIV_TSALLIS     <- 25L
 
 
 #' Alpha Diversity Wrapper Function
-#'
+#' 
 #' @inherit documentation
 #' @name alpha_div
-#'
-#' @param metric   The name of an alpha diversity metric, or several names
-#'   to compute several metrics at once. One of `c('ace', 'berger',
-#'   'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini',
+#' 
+#' @param metric   The name of an alpha diversity metric. One of `c('ace',
+#'   'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini',
 #'   'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef',
 #'   'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou',
 #'   'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong',
@@ -81,16 +80,15 @@ ADIV_TSALLIS     <- 25L
 #'   as are scikit-bio's names (such as `'pielou_e'`, `'simpson_d'`,
 #'   `'observed_features'` and `'enspie'`). Programmatic access via
 #'   `list_metrics('alpha')`.
-#'
+#' 
 #' @return A numeric vector, one value per sample, named by the samples.
-#'   With several metrics, a numeric matrix with one row per sample and one
-#'   column per metric, named by the metrics' IDs in the order given; each
-#'   column is exactly what that metric alone returns.
-#'
+#'   To compute several metrics, call `alpha_div()` once for each (see the
+#'   examples).
+#' 
 #' @details
-#'
+#' 
 #' ## Integer Count Requirements
-#'
+#' 
 #' A frequent and critical error in alpha diversity analysis is providing the
 #' wrong type of data to a metric's formula. Some indices are mathematically
 #' defined based on counts of individuals and require raw, integer abundance
@@ -98,10 +96,10 @@ ADIV_TSALLIS     <- 25L
 #' integer counts (which are then converted to proportions) or pre-normalized
 #' proportional data. Using proportional data with a metric that requires
 #' integer counts will return an error message.
-#'
+#' 
 #' ### Requires Integer Counts Only
-#'
-#' * Chao1
+#' 
+#' * Chao1  
 #' * ACE
 #' * Squares Richness Estimator
 #' * Margalef's Index
@@ -111,9 +109,9 @@ ADIV_TSALLIS     <- 25L
 #' * McIntosh Index
 #' * McIntosh's Evenness
 #' * Good's Coverage
-#'
+#' 
 #' ### Can Use Proportional Data
-#'
+#' 
 #' * Observed Features
 #' * Shannon Index
 #' * Gini-Simpson Index
@@ -124,21 +122,13 @@ ADIV_TSALLIS     <- 25L
 #' * Simpson's and Strong's Dominance Indices
 #' * Gini Index
 #' * Faith's PD
-#'
-#'
-#' ## Several Metrics at Once
-#'
-#' `alpha_div(counts, c('observed', 'shannon', 'pielou'))` returns a matrix
-#' with a column for each metric. Each metric is computed by its own
-#' function, so a column is `identical()` to the vector that metric gives
-#' alone; naming a metric twice is an error.
-#'
-#'
+#' 
+#' 
 #' ## Differences from scikit-bio
-#'
+#' 
 #' The metrics follow `skbio.diversity.alpha` (scikit-bio 0.7.4), which
 #' QIIME 2's `diversity alpha` runs, with these differences:
-#'
+#' 
 #' * Logarithms are natural. scikit-bio's `shannon()`, `pielou_e()` and
 #'   `renyi()` take a `base`; divide ecodive's [shannon()] and [renyi()] by
 #'   `log(base)` instead. Pielou's evenness doesn't depend on the base.
@@ -151,82 +141,45 @@ ADIV_TSALLIS     <- 25L
 #' * `chao1(bias_corrected = FALSE)` is the classic formula, falling back on
 #'   the bias-corrected one when a sample has no singletons or no doubletons,
 #'   exactly as scikit-bio does.
-#'
-#'
+#' 
+#' 
 #' @export
 #' @examples
 #'     # Example counts matrix
 #'     ex_counts
-#'
+#'     
 #'     # Shannon diversity values
 #'     alpha_div(ex_counts, 'Shannon')
-#'
+#'     
 #'     # Chao1 diversity values
 #'     alpha_div(ex_counts, 'c')
-#'
+#'     
 #'     # Faith PD values
 #'     alpha_div(ex_counts, 'faith', tree = ex_tree)
-#'
+#'     
 #'     # Hill number of order 1 (the exponential of Shannon's entropy)
 #'     alpha_div(ex_counts, 'hill', q = 1)
-#'
-#'     # Several metrics at once
-#'     alpha_div(ex_counts, c('observed', 'shannon', 'pielou'))
-#'
+#'     
+#'     # Several metrics: one call each
+#'     sapply(c('observed', 'shannon', 'pielou'), alpha_div, counts = ex_counts)
+#'     
+#'     
 alpha_div <- function (
-    counts,
-    metric,
-    norm   = 'percent',
-    cutoff = 10L,
-    digits = 3L,
-    tree   = NULL,
+    counts, 
+    metric, 
+    norm   = 'percent', 
+    cutoff = 10L, 
+    digits = 3L, 
+    tree   = NULL, 
     margin = 1L,
     q      = 2,
     bias_corrected = TRUE,
     cpus   = n_cpus() ) {
-
-  metrics <- match_metrics(metric, div = 'alpha')
-
-  results <- lapply(metrics, function (metric) {
-    args <- mget(metric$params, parent.frame(2L))
-    do.call(metric$func, args)
-  })
-
-  if (length(results) == 1L) return (results[[1]])
-
-  multi_metric_matrix(results, metrics)
-}
-
-
-# match_metric() for each of `metric`'s names; duplicated IDs are an error.
-match_metrics <- function (metric, div) {
-
-  if (!is.character(metric) || length(metric) == 0 || anyNA(metric))
-    stop('`metric` must be one or more metric names.', call. = FALSE)
-
-  metrics <- lapply(metric, match_metric, div = div)
-  ids     <- vapply(metrics, `[[`, '', 'id')
-
-  if (anyDuplicated(ids)) {
-    dup <- unique(ids[duplicated(ids)])
-    stop(
-      '`metric` names ', paste0('"', dup, '"', collapse = ', '),
-      ' more than once.', call. = FALSE )
-  }
-
-  names(metrics) <- ids
-  metrics
-}
-
-
-# The samples x metrics matrix of several metrics' per-sample vectors.
-multi_metric_matrix <- function (results, metrics) {
-  n   <- length(results[[1]])
-  mtx <- matrix(
-    data     = unlist(lapply(results, as.vector), use.names = FALSE),
-    nrow     = n,
-    dimnames = list(names(results[[1]]), names(metrics)) )
-  mtx
+  
+  metric <- match_metric(metric, div = 'alpha')
+  args   <- mget(metric$params, environment())
+  
+  do.call(metric$func, args)
 }
 
 

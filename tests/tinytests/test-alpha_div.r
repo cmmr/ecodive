@@ -327,7 +327,7 @@
   expect_identical(alpha_div(counts, 'tsallis', q = Inf), tsallis(counts, q = Inf))
 
 
-  # alpha_div(): IDs, aliases, several metrics. ====
+  # alpha_div(): IDs and aliases. ====
 
   ids <- c(
     'dominance', 'gini', 'goods_coverage', 'heip', 'hill', 'mcintosh_evenness',
@@ -351,23 +351,12 @@
   expect_identical(match_metric('gini')$id, 'gini')
   expect_identical(match_metric('Gini-Simpson')$id, 'simpson')
 
-  mm <- alpha_div(counts_int, c('shannon', 'pielou', 'obs', 'hill'), q = 1)
-  expect_true(is.matrix(mm) && is.double(mm))
-  expect_identical(dimnames(mm), list(rownames(counts_int), c('shannon', 'pielou', 'observed', 'hill')))
-  expect_identical(mm[, 'shannon'],  shannon(counts_int))
-  expect_identical(mm[, 'pielou'],   pielou(counts_int))
-  expect_identical(mm[, 'observed'], observed(counts_int))
-  expect_identical(mm[, 'hill'],     hill(counts_int, q = 1))
+  # One metric per call, always a named vector.
   expect_identical(alpha_div(counts_int, 'shannon'), shannon(counts_int))
-  expect_identical(colnames(alpha_div(ecodive::ex_counts, c('faith', 'shannon'), tree = ecodive::ex_tree)), c('faith', 'shannon'))
-  m2 <- alpha_div(unname(counts_int), c('shannon', 'gini'))
-  expect_identical(dimnames(m2), list(NULL, c('shannon', 'gini')))
-  expect_error(alpha_div(counts_int, c('shannon', 'Shannon')), '`metric` names "shannon" more than once.', fixed = TRUE)
-  expect_error(alpha_div(counts_int, c('pielou_e', 'pielou', 'hill', 'hill_number')), '"pielou", "hill"', fixed = TRUE)
-  expect_error(alpha_div(counts_int, character(0)), '`metric` must be one or more metric names.', fixed = TRUE)
-  expect_error(alpha_div(counts_int, c('shannon', NA)), '`metric` must be one or more metric names.', fixed = TRUE)
-  expect_error(alpha_div(counts_int, 1), '`metric` must be one or more metric names.', fixed = TRUE)
-  expect_error(alpha_div(counts_int, c('shannon', 'nonesuch')), 'does not match any option')
+  expect_identical(alpha_div(counts_int, 'hill', q = 1), hill(counts_int, q = 1))
+  expect_error(alpha_div(counts_int, c('shannon', 'pielou')), '`metric` must be length 1', fixed = TRUE)
+  expect_error(alpha_div(counts_int, character(0)), '`metric` must be length 1', fixed = TRUE)
+  expect_error(alpha_div(counts_int, 1), '`metric` must be a character vector', fixed = TRUE)
 
 
   # Results are identical for any cpus (and big enough to run threads). ====
@@ -381,8 +370,8 @@
   }
 
 
-  # alpha_div_rarefied() passes q and bias_corrected, and takes several
-  # metrics. ====
+  # alpha_div_rarefied() passes q and bias_corrected, one metric per call.
+  # ====
 
   x  <- fx$tables$rand
   dd <- 30L
@@ -393,19 +382,10 @@
   expect_equal(as.vector(a0), Reduce(`+`, lapply(r, chao1, bias_corrected = FALSE)) / 3)
   expect_error(alpha_div_rarefied(x, 'hill', q = -1, depth = dd), q_msg, fixed = TRUE)
 
-  am <- suppressWarnings(alpha_div_rarefied(x, c('shannon', 'hill', 'gini'), q = 0.5, depth = dd, times = 4, seed = 2, sd = TRUE))
-  expect_true(is.matrix(am))
-  expect_identical(colnames(am), c('shannon', 'hill', 'gini'))
-  expect_identical(dim(attr(am, 'sd')), dim(am))
-  expect_identical(attr(am, 'depth'), dd)
-  for (m in colnames(am)) {
-    a1 <- suppressWarnings(alpha_div_rarefied(x, m, q = 0.5, depth = dd, times = 4, seed = 2, sd = TRUE))
-    expect_identical(am[, m], setNames(as.vector(a1), names(a1)), info = m)
-    expect_identical(attr(am, 'sd')[, m], attr(a1, 'sd'), info = m)
-    expect_identical(attr(am, 'dropped'), attr(a1, 'dropped'))
-  }
-  amed <- suppressWarnings(alpha_div_rarefied(x, c('observed', 'strong'), depth = dd, times = 5, average = 'median'))
-  expect_identical(amed[, 'strong'], {
-    a1 <- suppressWarnings(alpha_div_rarefied(x, 'strong', depth = dd, times = 5, average = 'median'))
-    setNames(as.vector(a1), names(a1)) })
-  expect_error(alpha_div_rarefied(x, c('shannon', 'shannon'), depth = dd), 'more than once')
+  at <- suppressWarnings(alpha_div_rarefied(x, 'tsallis', q = 0.5, depth = dd, times = 3, seed = 2, sd = TRUE))
+  expect_true(is.numeric(at) && is.null(dim(at)))
+  expect_identical(names(attr(at, "sd")), names(at))
+  expect_equal(as.vector(at), Reduce(`+`, lapply(r, tsallis, q = 0.5)) / 3)
+  expect_error(
+    suppressWarnings(alpha_div_rarefied(x, c('shannon', 'hill'), depth = dd)),
+    '`metric` must be length 1', fixed = TRUE )

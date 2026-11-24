@@ -161,13 +161,12 @@ alpha_div(
   `validate_<arg>` for every formal): a single non-NA number ≥ 0; `Inf`
   allowed. Message: "`q` must be a single number of at least 0 (Inf is
   allowed)."
-- **Several metrics at once:** `alpha_div(counts, metric = c('shannon',
-  'pielou', 'observed'))` returns an n × M matrix, columns named by the
-  matched ids in the order given; one metric still returns the named vector
-  of today. Each column is exactly the single-metric call. Duplicated ids
-  are an error. This is what [alpha_test.md](alpha_test.md) and
-  [rarefaction_curves.md](rarefaction_curves.md) take. `match_metric()`
-  stays scalar; `alpha_div()` loops.
+- ~~**Several metrics at once:** `alpha_div(counts, metric = c('shannon',
+  'pielou', 'observed'))` returns an n × M matrix.~~ **Dropped** (the
+  user, 2026-11-24, after it was first implemented in `9f1add2`): the
+  return type must not depend on the input's length. `alpha_div()` and
+  `alpha_div_rarefied()` take one metric and return a named vector; build a
+  matrix with `sapply(metrics, alpha_div, counts = counts)`. See decision 4.
 
 ### C (`src/alpha_div.c`)
 
@@ -332,9 +331,13 @@ Asked upfront (2026-11-24), with the user's answers:
    bias-corrected value, so it is never `Inf` or `NaN` (the old `chao1()`
    gave both). This changes released results; NEWS says so under "Changed
    results".
-4. **`alpha_div_rarefied()` takes several metrics**, all computed from the
-   same rarefied tables; the result and its `sd` attribute are n × M
-   matrices, each column identical to the single-metric call.
+4. ~~**`alpha_div_rarefied()` takes several metrics**~~. First built (with
+   several metrics in `alpha_div()` too) in `9f1add2`, then **reverted at
+   the user's request** (2026-11-24): "I don't like mixing return object
+   types based on input length. It can break things unexpectedly."
+   `alpha_div()` and `alpha_div_rarefied()` again take exactly one metric
+   (`match_metric()`'s "`metric` must be length 1" error otherwise) and
+   always return a named vector. `q` and `bias_corrected` stay.
 
 Made while implementing:
 
@@ -357,11 +360,10 @@ Made while implementing:
 9. **Empty samples are `NA` for every metric**, as before; scikit-bio gives
    `nan`, except `0` for `chao1()` and `gini_index()`. Listed in
    `alpha_div()`'s "Differences from scikit-bio".
-10. **Several metrics:** `alpha_div()` loops over an internal
-    `match_metrics(metric, div)` (a named list of `match_metric()`
-    results; duplicated IDs are an error naming them); `match_metric()`
-    stays scalar. The matrix is plain (no class or attributes), with
-    `dimnames = list(sample names or NULL, IDs)`.
+10. ~~**Several metrics**~~ (reverted, see 4): the internal
+    `match_metrics()` and `multi_metric_matrix()` helpers are gone, and
+    `alpha_div()`'s body is as before item 37. Its docs and `adiv.Rmd` show
+    `sapply(metrics, alpha_div, counts = counts)` instead.
 11. **`validate_q()`** coerces to double, so `q = 1L` works;
     `validate_bias_corrected()` takes only `TRUE` or `FALSE`.
 12. **Aliases:** as planned, plus none for `gini` (its name gives
@@ -386,30 +388,34 @@ Made while implementing:
     `renyi(hill = TRUE)` already checks the Hill numbers.
 15. **Smoke tests** now require every alpha metric to be finite on the
     smoke table (chao1 no longer gives `NaN`), and call each new export
-    once, plus several metrics in `alpha_div()` and
-    `alpha_div_rarefied()`.
+    once, plus `alpha_div_rarefied()` with `q`.
 16. **Vignettes:** `adiv.Rmd` gains Evenness, Hill numbers, Coverage and
-    "Several metrics at once" sections and the new formulas, and its
+    "Several metrics at once" (an `sapply()` over `alpha_div()`) sections
+    and the new formulas, and its
     `chao1()` outputs are the bias-corrected values; `ecodive.Rmd`'s and the
     README's `list_metrics()` outputs are regenerated.
 
 **For items 38 and 48:** `alpha_div(counts, metric, q =, bias_corrected =)`
-accepts a character vector of metrics and returns an n × M matrix (columns
-named by metric ID, in the order given, each `identical()` to that metric's
-own call); one metric still returns the named vector. `alpha_div_rarefied()`
-does the same over shared draws. The internal `validate_q()` (in
-`R/validate.r`, reading `q` from the caller's environment) and
-`match_metrics(metric, div = 'alpha')` are there to reuse.
+and `alpha_div_rarefied()` take **one** metric and return a named vector
+(after the revert in decision 4). Several metrics mean one call each, e.g.
+`sapply(metrics, alpha_div, counts = counts)`; a function that offers
+several metrics should keep a fixed return type too. The internal
+`validate_q()` and `validate_bias_corrected()` (in `R/validate.r`, reading
+from the caller's environment) are there to reuse.
 
 
 ## Outcome (from the implementing session's final report)
 
-**Item 37, done 2026-11-24.** Commits `9f1add2` (work), and the tick and
-this outcome in the commit after it.
+**Item 37, done 2026-11-24.** Commits `9f1add2` (work), `4ea15be` (tick
+and this outcome), and a follow-up that reverted several metrics at once
+in `alpha_div()` and `alpha_div_rarefied()` at the user's request
+(decision 4).
 
 - Tests (`-O2` install, `LANG=C.UTF-8`): 22,736 at home (baseline 20,773),
   388 in CRAN mode (baseline 364), all passing. `R CMD check --no-manual
   --ignore-vignettes`: 1 NOTE (installed size, as before).
+  After the revert (one metric per call): 22,714 at home and 387 in CRAN
+  mode, all passing; `R CMD check` again 1 NOTE (installed size).
 - scikit-bio 0.7.4: 2,146 values on five tables, every new metric, both
   `chao1()` forms, `hill` / `renyi` / `tsallis` at q = 0, 0.5, 1, 2, 3,
   Inf, and the existing metrics under scikit-bio's names. Largest relative

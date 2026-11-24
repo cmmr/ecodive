@@ -22,8 +22,7 @@ alpha_div(
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
 
-\item{metric}{The name of an alpha diversity metric, or several names
-to compute several metrics at once. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis')}. Case-insensitive and partial name matching is supported,
+\item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis')}. Case-insensitive and partial name matching is supported,
 as are scikit-bio's names (such as \code{'pielou_e'}, \code{'simpson_d'},
 \code{'observed_features'} and \code{'enspie'}). Programmatic access via
 \code{list_metrics('alpha')}.}
@@ -74,9 +73,8 @@ within any limits set on it. Results are the same for any \code{cpus}.}
 }
 \value{
 A numeric vector, one value per sample, named by the samples.
-With several metrics, a numeric matrix with one row per sample and one
-column per metric, named by the metrics' IDs in the order given; each
-column is exactly what that metric alone returns.
+To compute several metrics, call \code{alpha_div()} once for each (see the
+examples).
 }
 \description{
 Alpha Diversity Wrapper Function
@@ -123,14 +121,6 @@ integer counts will return an error message.
 
 }
 
-\subsection{Several Metrics at Once}{
-
-\code{alpha_div(counts, c('observed', 'shannon', 'pielou'))} returns a matrix
-with a column for each metric. Each metric is computed by its own
-function, so a column is \code{identical()} to the vector that metric gives
-alone; naming a metric twice is an error.
-}
-
 \subsection{Differences from scikit-bio}{
 
 The metrics follow \code{skbio.diversity.alpha} (scikit-bio 0.7.4), which
@@ -171,20 +161,21 @@ For large datasets, standard matrix operations may be slow. See
 \examples{
     # Example counts matrix
     ex_counts
-
+    
     # Shannon diversity values
     alpha_div(ex_counts, 'Shannon')
-
+    
     # Chao1 diversity values
     alpha_div(ex_counts, 'c')
-
+    
     # Faith PD values
     alpha_div(ex_counts, 'faith', tree = ex_tree)
-
+    
     # Hill number of order 1 (the exponential of Shannon's entropy)
     alpha_div(ex_counts, 'hill', q = 1)
-
-    # Several metrics at once
-    alpha_div(ex_counts, c('observed', 'shannon', 'pielou'))
-
+    
+    # Several metrics: one call each
+    sapply(c('observed', 'shannon', 'pielou'), alpha_div, counts = ex_counts)
+    
+    
 }
