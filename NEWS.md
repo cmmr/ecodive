@@ -693,6 +693,22 @@
   `plot()` draws the types' mean compositions or the index; `print()` shows
   the types, the selection and the first samples.
 
+* New `valencia()` assigns vaginal microbiome samples to community state
+  types with VALENCIA (France et al. 2020): each sample goes to the most
+  similar of 13 reference centroids (sub-CSTs I-A to V), by Yue and
+  Clayton's similarity, and its sub-CSTs are grouped into CSTs. It is a
+  threaded C port of VALENCIA's `Valencia.py` (MIT) that keeps sparse tables
+  sparse; its similarities match `Valencia.py`'s to 3e-15, with the same
+  assignments. VALENCIA's centroids ship as the dataset
+  `valencia_centroids`, and revised ones can be given as `centroids`;
+  `totals` gives each sample's read count, as VALENCIA's `read_count`
+  column does. The result is an `ecodive_types` data frame with each
+  sample's sub-CST, CST, score and share of matched reads, and every
+  similarity as an attribute. It warns when the centroids' key taxa are
+  missing from the table (VALENCIA matches taxa by exact name).
+  `plot(x, "scores")` compares the samples' scores with VALENCIA's
+  reference ones, as VALENCIA's own plot does.
+
 * New `ancom()` runs ANCOM (Mandal et al. 2015), the analysis of
   composition of microbiomes: it tests every log ratio between two features
   for a difference between `groups` (`sig_test = 'anova'`, or `'kruskal'`),

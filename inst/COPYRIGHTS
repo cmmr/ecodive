@@ -1405,3 +1405,39 @@ License:
    HOLDER OR CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT,
    INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE
    OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: src/valencia.c R/valencia.r data/valencia_centroids.rda
+   tests/tinytests/expected/valencia.rds
+Copyright: 2023 ravel-lab
+Comment: valencia() in src/valencia.c and R/valencia.r is a C and R port of
+ the similarity, assignment and score steps of Valencia.py from VALENCIA
+ (github.com/ravel-lab/VALENCIA, commit 8559d45), with the reference scores
+ and colours of its plot. data/valencia_centroids.rda holds VALENCIA's
+ reference centroids, CST_centroids_012920.csv at the same commit (the means
+ of 13,160 profiles; no individual data). tests/tinytests/expected/valencia.rds
+ holds 50 samples of VALENCIA's publication data
+ (Publication_materials/Data_and_metadata/all_samples_taxonomic_composition_data.csv),
+ a modified copy of the centroids, and Valencia.py's outputs. The rest of
+ these files is Copyright 2026 ecodive authors, under the MIT licence above.
+License:
+   MIT License
+
+   Copyright (c) 2023 ravel-lab
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.

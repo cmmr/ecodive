@@ -189,5 +189,8 @@ Computational and Applied Mathematics}, 20, 53-65.
 }
 \seealso{
 \link{ecodive_types}, \code{\link[=plot.ecodive_types]{plot.ecodive_types()}}, \code{\link[=jensen]{jensen()}}
+
+Other community types:
+\code{\link[=valencia]{valencia()}}
 }
 \concept{community types}

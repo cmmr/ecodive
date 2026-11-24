@@ -73,6 +73,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "contaminant identification (decontam(), decontam_not()), ported from 'decontam'"),
     person(
+      "ravel-lab",
+      role    = c("ctb", "cph"),
+      comment = "vaginal community state types (valencia()) and their reference centroids, from 'VALENCIA'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

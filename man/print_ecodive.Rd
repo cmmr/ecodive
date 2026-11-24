@@ -23,7 +23,7 @@
 \code{\link[=ancom]{ancom()}}, \code{\link[=ancombc]{ancombc()}}, \code{\link[=ancombc2]{ancombc2()}}, \code{\link[=ancombc_global]{ancombc_global()}},
 \code{\link[=ancombc_pairwise]{ancombc_pairwise()}}, \code{\link[=ancombc_dunnett]{ancombc_dunnett()}}, \code{\link[=ancombc_trend]{ancombc_trend()}},
 \code{\link[=dirmult_ttest]{dirmult_ttest()}}, \code{\link[=da_sensitivity]{da_sensitivity()}}, \code{\link[=simper]{simper()}}, \code{\link[=bioenv]{bioenv()}},
-\code{\link[=envfit]{envfit()}}, \code{\link[=assoc_pairs]{assoc_pairs()}}, \code{\link[=assoc_network_diff]{assoc_network_diff()}} or \code{\link[=enterotype]{enterotype()}}, or a source-tracking
+\code{\link[=envfit]{envfit()}}, \code{\link[=assoc_pairs]{assoc_pairs()}}, \code{\link[=assoc_network_diff]{assoc_network_diff()}}, \code{\link[=enterotype]{enterotype()}} or \code{\link[=valencia]{valencia()}}, or a source-tracking
 matrix of class \code{ecodive_source} (from \code{\link[=sourcetracker]{sourcetracker()}}). A community-types result (see
 \link{ecodive_types}) prints its types and how their number was chosen
 before its first samples.}

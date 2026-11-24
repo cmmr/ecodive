@@ -4,7 +4,7 @@
 \alias{ecodive_types}
 \title{Community types}
 \description{
-\code{\link[=enterotype]{enterotype()}} (and the planned \code{valencia()} and \code{dmm()}) assign each
+\code{\link[=enterotype]{enterotype()}} and \code{\link[=valencia]{valencia()}} (and the planned \code{dmm()}) assign each
 sample to one of a few community types, and return a data frame of class
 \code{c("ecodive_<method>", "ecodive_types", "data.frame")}, with one row per
 sample, in the input's order, and the sample names as row names.
@@ -13,10 +13,13 @@ sample, in the input's order, and the sample names as row names.
 
 \itemize{
 \item \code{sample}: the sample's name (or its position, for unnamed samples).
-\item \code{type}: the type assigned to it, a factor whose levels (\code{"1"}, \code{"2"},
-...) are the types in order.
+\item \code{type}: the type assigned to it, a factor whose levels are the types in
+order: \code{"1"}, \code{"2"}, ... for \code{\link[=enterotype]{enterotype()}}; the sub-CSTs \code{"I-A"} to
+\code{"V"} for \code{\link[=valencia]{valencia()}}.
 \item Columns of the method: for \code{\link[=enterotype]{enterotype()}}, \code{silhouette}, the sample's
-silhouette width.
+silhouette width; for \code{\link[=valencia]{valencia()}}, \code{cst} (the higher-order community
+state type), \code{score} (the similarity to the assigned centroid) and
+\code{matched}.
 }
 }
 
@@ -26,12 +29,17 @@ silhouette width.
 \item \code{types}: a data frame, one row per type: \code{type}, \code{n_samples},
 \code{top_feature} (the feature of largest mean proportion, Arumugam et
 al.'s "driver"; \code{NA} without abundances), and columns of the method,
-such as \code{\link[=enterotype]{enterotype()}}'s \code{medoid} and \code{silhouette}.
+such as \code{\link[=enterotype]{enterotype()}}'s \code{medoid} and \code{silhouette}, or \code{\link[=valencia]{valencia()}}'s
+\code{cst} and reference scores.
 \item \code{profiles}: a types \eqn{\times} features matrix of each type's mean
-proportions (\code{NULL} without abundances).
+proportions (\code{NULL} without abundances); for \code{\link[=valencia]{valencia()}}, the
+centroids.
 \item \code{selection}: a data frame, one row per number of types tried, with the
 criterion that chose among them, and \code{selected}, \code{TRUE} for the one
-chosen.
+chosen. Absent (\code{NULL}) for \code{\link[=valencia]{valencia()}}, whose centroids fix the
+types.
+\item Attributes of the method, such as \code{\link[=valencia]{valencia()}}'s \code{scores} (every
+sample's similarity to every centroid).
 \item \code{method}: the function that made the result, such as \code{"enterotype"}.
 }
 }
@@ -54,5 +62,5 @@ samples by type.
     permanova(jensen(iris[, 1:4]), et$type)
 }
 \seealso{
-\code{\link[=enterotype]{enterotype()}}, \code{\link[=plot.ecodive_types]{plot.ecodive_types()}}
+\code{\link[=enterotype]{enterotype()}}, \code{\link[=valencia]{valencia()}}, \code{\link[=plot.ecodive_types]{plot.ecodive_types()}}
 }

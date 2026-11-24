@@ -98,6 +98,7 @@ extern SEXP C_umap_rand(SEXP, SEXP, SEXP);
 extern SEXP C_umap_sgd(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_spectral(SEXP, SEXP, SEXP);
 extern SEXP C_unifrac(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_valencia(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_zero_counts(SEXP, SEXP);
 
 extern void init_blas_threads(void);
@@ -196,6 +197,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_umap_sgd",      (DL_FUNC) &C_umap_sgd,      6},
   {"C_umap_spectral", (DL_FUNC) &C_umap_spectral, 3},
   {"C_unifrac",   (DL_FUNC) &C_unifrac,   7},
+  {"C_valencia",  (DL_FUNC) &C_valencia,  6},
   {"C_zero_counts", (DL_FUNC) &C_zero_counts, 2},
   {NULL, NULL, 0}
 };

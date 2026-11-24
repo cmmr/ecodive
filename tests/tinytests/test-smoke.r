@@ -313,6 +313,11 @@
   expect_true(is.factor(et$type) && all(is.finite(et$silhouette)))
   expect_true(all(is.finite(attr(et, 'selection')$ch)))
 
+  vl <- valencia(round(ecodive::valencia_centroids * 1000), cpus = cpus)
+  expect_inherits(vl, c('ecodive_valencia', 'ecodive_types', 'data.frame'))
+  expect_identical(dim(vl), c(13L, 5L))
+  expect_true(is.factor(vl$type) && all(vl$score > 0 & vl$score <= 1))
+
   vp <- varpart(counts, ~ grp, ~ x, data = meta, norm = 'hellinger', cpus = cpus)
   expect_inherits(vp, c('ecodive_varpart', 'data.frame'))
   expect_identical(dim(vp), c(4L, 5L))
