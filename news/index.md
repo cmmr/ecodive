@@ -1369,6 +1369,28 @@
   (`scale_sds`), with volcano, effect, MA, forest and rank plots.
 
 - New
+  [`maaslin3()`](https://cmmr.github.io/ecodive/reference/maaslin3.md):
+  MaAsLin 3 (Nickols et al. 2026), ported from maaslin3 1.4.0. Each
+  feature gets two models of any `formula`: its abundance where present
+  (log2 proportions by default, zeros left out) and its prevalence (an
+  augmented logistic regression, finite under separation). Abundance
+  coefficients are tested against their median over the features (the
+  median comparison, a compositional correction), a joint p-value
+  combines the two models, and maaslin3’s warnings become per-model
+  flags (`warn_prevalence` and its misfit checks). Repeated measures
+  take a random intercept, `~ group + (1 | subject)`: REML with
+  Satterthwaite degrees of freedom for abundance, a Laplace logistic
+  mixed model (as lme4’s `glmer()`) for prevalence, both at their exact
+  optimum, or the grouping as a fixed effect (`small_random_effects`).
+  It matches maaslin3 to about 1e-10 with its median comparison’s draws
+  given (the draws come from PCG streams, keyed by `seed`), reports
+  every feature, and runs in parallel C from a sparse table, the same
+  for any `cpus` (200 samples x 2,000 features in about a second on one
+  core). One of
+  [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md)’s
+  methods, with volcano, MA, forest and rank plots of either model.
+
+- New
   [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)
   estimates what share of each sink sample’s community came from each of
   several source environments, and from an unknown source, with

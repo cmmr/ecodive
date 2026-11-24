@@ -22,8 +22,9 @@ da_test(counts, method, groups = NULL, data = NULL, formula = NULL, ...)
 
   The name of a DA method: `"ancom"`, `"ancombc"`, `"ancombc2"`,
   `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`, `"dirmult_lm"`,
-  `"dirmult_ttest"`, `"indicator_species"`, `"lefse"`, or `"linda"`.
-  Flexible matching is supported (see below). Programmatic access via
+  `"dirmult_ttest"`, `"indicator_species"`, `"lefse"`, `"linda"`, or
+  `"maaslin3"`. Flexible matching is supported (see below). Programmatic
+  access via
   [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md).
 
 - groups:
@@ -63,13 +64,15 @@ da_test(counts, method, groups = NULL, data = NULL, formula = NULL, ...)
   [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
   [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md),
-  [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md), and
-  [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md). `seed`
-  is ignored by the methods that have no random parts (all but
+  [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md),
+  [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md), and
+  [`maaslin3()`](https://cmmr.github.io/ecodive/reference/maaslin3.md).
+  `seed` is ignored by the methods that have no random parts (all but
   [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
-  [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md)
-  and [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md)).
+  [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md),
+  [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md) and
+  [`maaslin3()`](https://cmmr.github.io/ecodive/reference/maaslin3.md)).
 
 ## Value
 
@@ -96,6 +99,7 @@ methods) and a `method` attribute, the method's id.
 | `indicator_species` | Indicator species analysis (IndVal, multilevel pattern analysis) | groups |
 | `lefse` | LDA effect size (LEfSe) | groups |
 | `linda` | Linear models for differential abundance (LinDA) | formula |
+| `maaslin3` | Abundance and prevalence models with a median comparison (MaAsLin 3) | formula |
 
 **Groups and models.** *Group methods* compare the samples of one
 categorical variable: `groups`, a column name of `data` or one value per
@@ -128,7 +132,8 @@ Case insensitive and partial matching, ignoring anything but letters
 `dirmult_ttest`, an ALDEx2-style method (not ALDEx2 itself, whose
 results agree with it in direction and rough size only); `'ALDEx3'`
 selects `dirmult_lm`, a port of ALDEx3's linear models; `'IndVal'` or
-`'multipatt'` selects `indicator_species`.
+`'multipatt'` selects `indicator_species`; `'MaAsLin 3'` or `'maaslin'`
+selects `maaslin3` (MaAsLin 2 isn't in ecodive).
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -185,6 +190,7 @@ abundance analysis. *Briefings in Bioinformatics*, 26, bbaf130.
 [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md),
 [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md),
 [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md),
+[`maaslin3()`](https://cmmr.github.io/ecodive/reference/maaslin3.md),
 [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md);
 [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md)
 for the zeros;

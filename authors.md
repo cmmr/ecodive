@@ -83,8 +83,10 @@
 - **Siyuan Ma**. Contributor.  
   MMUPHin batch correction (batch_mmuphin()), ported from 'MMUPHin'
 
-- **Harvard School of Public Health**. Copyright holder.  
-  'MMUPHin', from which batch_mmuphin() is ported
+- **Harvard School of Public Health**. Contributor, copyright holder.  
+  'MMUPHin', from which batch_mmuphin() is ported; multivariable
+  abundance and prevalence models with a median comparison (maaslin3()),
+  ported from 'maaslin3'
 
 - **sva authors**. Contributor, copyright holder.  
   ComBat batch correction (batch_combat()), ported from 'sva'

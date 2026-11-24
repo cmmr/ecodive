@@ -716,6 +716,8 @@ don’t matter.
   Per-feature Wilcoxon, t and Linear Model Tests
 - [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md) :
   Linear Models for Differential Abundance (LinDA)
+- [`maaslin3()`](https://cmmr.github.io/ecodive/reference/maaslin3.md) :
+  Multivariable Association with Linear Models (MaAsLin 3)
 - [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md) :
   LEfSe: LDA Effect Size Biomarker Discovery
 - [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md)
@@ -938,6 +940,8 @@ than every value.
   : Plot a Per-feature Test Result
 - [`plot(`*`<ecodive_linda>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.md)
   : Plot a LinDA Result
+- [`plot(`*`<ecodive_maaslin3>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_maaslin3.md)
+  : Plot a MaAsLin 3 Result
 - [`plot(`*`<ecodive_lefse>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_lefse.md)
   : Plot a LEfSe result
 - [`plot(`*`<ecodive_indicator_species>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_indicator_species.md)

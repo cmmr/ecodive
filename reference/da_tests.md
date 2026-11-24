@@ -98,30 +98,32 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_da_tests()
-#>                                      name                id  design      effect
-#> 1  Analysis of Composition of Microbiomes             ancom  groups        <NA>
-#> 2                                ANCOM-BC           ancombc formula      log_fc
-#> 3                               ANCOM-BC2          ancombc2 formula      log_fc
-#> 4            Dirichlet-Multinomial t-test     dirmult_ttest  groups     log2_fc
-#> 5      Dirichlet-Multinomial Linear Model        dirmult_lm formula    estimate
-#> 6                  Wilcoxon Rank-Sum Test       da_wilcoxon  groups median_diff
-#> 7                            Welch t-test          da_ttest  groups        diff
-#> 8                            Linear Model             da_lm formula    estimate
-#> 9                                   LinDA             linda formula     log2_fc
-#> 10                                  LEfSe             lefse  groups   lda_score
-#> 11             Indicator Species Analysis indicator_species  groups        stat
-#>    base zero_free_ok signed
-#> 1  <NA>         TRUE  FALSE
-#> 2     e         TRUE   TRUE
-#> 3     e         TRUE   TRUE
-#> 4     2        FALSE   TRUE
-#> 5     2        FALSE   TRUE
-#> 6  norm         TRUE   TRUE
-#> 7  norm         TRUE   TRUE
-#> 8  norm         TRUE   TRUE
-#> 9     2         TRUE   TRUE
-#> 10 <NA>         TRUE  FALSE
-#> 11 <NA>        FALSE  FALSE
+#>                                      name                id  design
+#> 1  Analysis of Composition of Microbiomes             ancom  groups
+#> 2                                ANCOM-BC           ancombc formula
+#> 3                               ANCOM-BC2          ancombc2 formula
+#> 4            Dirichlet-Multinomial t-test     dirmult_ttest  groups
+#> 5      Dirichlet-Multinomial Linear Model        dirmult_lm formula
+#> 6                  Wilcoxon Rank-Sum Test       da_wilcoxon  groups
+#> 7                            Welch t-test          da_ttest  groups
+#> 8                            Linear Model             da_lm formula
+#> 9                                   LinDA             linda formula
+#> 10                              MaAsLin 3          maaslin3 formula
+#> 11                                  LEfSe             lefse  groups
+#> 12             Indicator Species Analysis indicator_species  groups
+#>            effect base zero_free_ok signed
+#> 1            <NA> <NA>         TRUE  FALSE
+#> 2          log_fc    e         TRUE   TRUE
+#> 3          log_fc    e         TRUE   TRUE
+#> 4         log2_fc    2        FALSE   TRUE
+#> 5        estimate    2        FALSE   TRUE
+#> 6     median_diff norm         TRUE   TRUE
+#> 7            diff norm         TRUE   TRUE
+#> 8        estimate norm         TRUE   TRUE
+#> 9         log2_fc    2         TRUE   TRUE
+#> 10 coef_abundance    2        FALSE   TRUE
+#> 11      lda_score <NA>         TRUE  FALSE
+#> 12           stat <NA>        FALSE  FALSE
 
     # Find the method for 'Mann-Whitney'.
     m <- match_da_test('Mann-Whitney')

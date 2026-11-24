@@ -73,7 +73,8 @@ Types</strong>.</p></dd>
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>The name of a DA method: <code>"ancom"</code>, <code>"ancombc"</code>,
 <code>"ancombc2"</code>, <code>"da_lm"</code>, <code>"da_ttest"</code>, <code>"da_wilcoxon"</code>,
-<code>"dirmult_lm"</code>, <code>"dirmult_ttest"</code>, <code>"indicator_species"</code>, <code>"lefse"</code>, or <code>"linda"</code>. Flexible matching is supported
+<code>"dirmult_lm"</code>, <code>"dirmult_ttest"</code>, <code>"indicator_species"</code>, <code>"lefse"</code>,
+<code>"linda"</code>, or <code>"maaslin3"</code>. Flexible matching is supported
 (see below). Programmatic access via <code><a href="da_tests.html">list_da_tests()</a></code>.</p></dd>
 
 
@@ -103,9 +104,10 @@ formula of one variable, <code>~ status</code>, as <code>groups = "status"</code
 <code><a href="da_wilcoxon.html">da_wilcoxon()</a></code>, <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>), <code>norm</code> and <code>pseudocount</code>. Each
 method keeps its own defaults; see <code><a href="ancom.html">ancom()</a></code>, <code><a href="ancombc.html">ancombc()</a></code>,
 <code><a href="ancombc.html">ancombc2()</a></code>, <code><a href="da_wilcoxon.html">da_lm()</a></code>, <code><a href="da_wilcoxon.html">da_ttest()</a></code>, <code><a href="da_wilcoxon.html">da_wilcoxon()</a></code>,
-<code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>, <code><a href="indicator_species.html">indicator_species()</a></code>, <code><a href="lefse.html">lefse()</a></code>, and <code><a href="linda.html">linda()</a></code>. <code>seed</code>
-is ignored by the methods that have no random parts (all but
-<code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>, <code><a href="indicator_species.html">indicator_species()</a></code> and <code><a href="lefse.html">lefse()</a></code>).</p></dd>
+<code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>, <code><a href="indicator_species.html">indicator_species()</a></code>, <code><a href="lefse.html">lefse()</a></code>,
+<code><a href="linda.html">linda()</a></code>, and <code><a href="maaslin3.html">maaslin3()</a></code>. <code>seed</code> is ignored by the methods that
+have no random parts (all but <code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>,
+<code><a href="indicator_species.html">indicator_species()</a></code>, <code><a href="lefse.html">lefse()</a></code> and <code><a href="maaslin3.html">maaslin3()</a></code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -116,7 +118,7 @@ the model methods) and a <code>method</code> attribute, the method's id.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>List of DA Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td><td>Design</td></tr><tr><td><code>ancom</code></td><td>Analysis of Composition of Microbiomes (ANCOM)</td><td>groups</td></tr><tr><td><code>ancombc</code></td><td>ANCOM with bias correction (ANCOM-BC)</td><td>formula</td></tr><tr><td><code>ancombc2</code></td><td>ANCOM-BC2</td><td>formula</td></tr><tr><td><code>da_lm</code></td><td>Linear model per feature</td><td>formula</td></tr><tr><td><code>da_ttest</code></td><td>Welch t-test per feature</td><td>groups</td></tr><tr><td><code>da_wilcoxon</code></td><td>Wilcoxon rank-sum test per feature</td><td>groups</td></tr><tr><td><code>dirmult_lm</code></td><td>Dirichlet-multinomial linear model with a scale model (ALDEx3)</td><td>formula</td></tr><tr><td><code>dirmult_ttest</code></td><td>Dirichlet-multinomial t-test (ALDEx2-style)</td><td>groups</td></tr><tr><td><code>indicator_species</code></td><td>Indicator species analysis (IndVal, multilevel pattern analysis)</td><td>groups</td></tr><tr><td><code>lefse</code></td><td>LDA effect size (LEfSe)</td><td>groups</td></tr><tr><td><code>linda</code></td><td>Linear models for differential abundance (LinDA)</td><td>formula</td></tr></table><p><strong>Groups and models.</strong> <em>Group methods</em> compare the samples of one
+    <p><strong>List of DA Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td><td>Design</td></tr><tr><td><code>ancom</code></td><td>Analysis of Composition of Microbiomes (ANCOM)</td><td>groups</td></tr><tr><td><code>ancombc</code></td><td>ANCOM with bias correction (ANCOM-BC)</td><td>formula</td></tr><tr><td><code>ancombc2</code></td><td>ANCOM-BC2</td><td>formula</td></tr><tr><td><code>da_lm</code></td><td>Linear model per feature</td><td>formula</td></tr><tr><td><code>da_ttest</code></td><td>Welch t-test per feature</td><td>groups</td></tr><tr><td><code>da_wilcoxon</code></td><td>Wilcoxon rank-sum test per feature</td><td>groups</td></tr><tr><td><code>dirmult_lm</code></td><td>Dirichlet-multinomial linear model with a scale model (ALDEx3)</td><td>formula</td></tr><tr><td><code>dirmult_ttest</code></td><td>Dirichlet-multinomial t-test (ALDEx2-style)</td><td>groups</td></tr><tr><td><code>indicator_species</code></td><td>Indicator species analysis (IndVal, multilevel pattern analysis)</td><td>groups</td></tr><tr><td><code>lefse</code></td><td>LDA effect size (LEfSe)</td><td>groups</td></tr><tr><td><code>linda</code></td><td>Linear models for differential abundance (LinDA)</td><td>formula</td></tr><tr><td><code>maaslin3</code></td><td>Abundance and prevalence models with a median comparison (MaAsLin 3)</td><td>formula</td></tr></table><p><strong>Groups and models.</strong> <em>Group methods</em> compare the samples of one
 categorical variable: <code>groups</code>, a column name of <code>data</code> or one value per
 sample. <em>Model methods</em> fit a linear model, <code>formula</code>, of any number of
 variables; <code>groups</code> names its term of interest (the one their plots and
@@ -141,7 +143,8 @@ is a firmer finding than one found by one.</p>
 <code>dirmult_ttest</code>, an ALDEx2-style method (not ALDEx2 itself, whose
 results agree with it in direction and rough size only); <code>'ALDEx3'</code>
 selects <code>dirmult_lm</code>, a port of ALDEx3's linear models; <code>'IndVal'</code> or
-<code>'multipatt'</code> selects <code>indicator_species</code>.</p>
+<code>'multipatt'</code> selects <code>indicator_species</code>; <code>'MaAsLin 3'</code> or <code>'maaslin'</code>
+selects <code>maaslin3</code> (MaAsLin 2 isn't in ecodive).</p>
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.</p>
 <p><strong>Same names in other packages</strong></p>
@@ -179,7 +182,7 @@ abundance analysis. <em>Briefings in Bioinformatics</em>, 26, bbaf130.
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="ancom.html">ancom()</a></code>, <code><a href="ancombc.html">ancombc()</a></code>, <code><a href="da_wilcoxon.html">da_lm()</a></code>, <code><a href="da_wilcoxon.html">da_ttest()</a></code>,
-<code><a href="da_wilcoxon.html">da_wilcoxon()</a></code>, <code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>, <code><a href="indicator_species.html">indicator_species()</a></code>, <code><a href="lefse.html">lefse()</a></code>, <code><a href="linda.html">linda()</a></code>, <code><a href="da_tests.html">list_da_tests()</a></code>;
+<code><a href="da_wilcoxon.html">da_wilcoxon()</a></code>, <code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="dirmult_ttest.html">dirmult_ttest()</a></code>, <code><a href="indicator_species.html">indicator_species()</a></code>, <code><a href="lefse.html">lefse()</a></code>, <code><a href="linda.html">linda()</a></code>, <code><a href="maaslin3.html">maaslin3()</a></code>, <code><a href="da_tests.html">list_da_tests()</a></code>;
 <code><a href="replace_zeros.html">replace_zeros()</a></code> for the zeros; <code><a href="da_sensitivity.html">da_sensitivity()</a></code> to rerun a method
 over pseudocounts, zero replacements and scale uncertainties.</p></div>
     </div>

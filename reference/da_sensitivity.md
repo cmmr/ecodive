@@ -56,10 +56,11 @@ da_sensitivity(
   or their names. Each run gives the method `replace_zeros(counts, z)`
   instead of `counts`, with the method's default `pseudocount` (which
   adds nothing to a table without zeros). Not for the methods that model
-  counts (`zero_free_ok = FALSE` in
+  counts or presence (`zero_free_ok = FALSE` in
   [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md):
   [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
-  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)).
+  [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+  [`maaslin3()`](https://cmmr.github.io/ecodive/reference/maaslin3.md)).
   Default: `NULL` (none).
 
 - scale_sds:
