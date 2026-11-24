@@ -23,6 +23,8 @@ extern SEXP C_blas_threads(SEXP);
 extern SEXP C_capda_trace(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cpu_info(SEXP);
+extern SEXP C_comp_bar_means(SEXP, SEXP, SEXP);
+extern SEXP C_comp_bar_segments(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cord_cross(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dpcoa(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -126,6 +128,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_capda_trace", (DL_FUNC) &C_capda_trace, 6},
   {"C_cca",       (DL_FUNC) &C_cca,      10},
   {"C_cpu_info",  (DL_FUNC) &C_cpu_info,  1},
+  {"C_comp_bar_means",    (DL_FUNC) &C_comp_bar_means,     3},
+  {"C_comp_bar_segments", (DL_FUNC) &C_comp_bar_segments, 10},
   {"C_cord_cross", (DL_FUNC) &C_cord_cross, 8},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
   {"C_dpcoa",     (DL_FUNC) &C_dpcoa,     8},

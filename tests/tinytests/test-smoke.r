@@ -418,6 +418,9 @@
     expect_true(drawn(tests[[nm]]), info = nm)
     expect_true(drawn(tests[[nm]], type = 'null'), info = nm)
   }
+  z <- withVisible(composition_barplot(counts, 'grp', meta, n_features = 5, heatmap = TRUE, cpus = cpus))
+  expect_true(!z$visible && identical(dim(z$value$proportions), c(6L, 20L)) &&
+              all(abs(colSums(z$value$proportions) - 1) < 1e-12) && all(is.finite(z$value$clr)))
   grDevices::dev.off()
 
 
