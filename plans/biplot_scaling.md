@@ -368,3 +368,25 @@ biplots, 6e-14; of `rda()` (partial), unconstrained `rda()`, `cca()` and
 2e-14, 5e-14, 5e-14 and 3e-14; easyCODA 0.50, 2e-14; compositions 2.0-9,
 8e-14. Link lengths over all axes against `sqrt(vlr(x))`, 5e-16; ray lengths
 against the clr values' standard deviations, 6e-16.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 44, done 2026-11-24.** Commits `811adb2` (work), `bcbd51c` (merge
+with item 41, `lefse()`, no conflicts), and the tick.
+
+- `plot.ecodive_ord(scaling =, links =)`: `'form'`, `'covariance'` and
+  `'contribution'` for `pca()`, `rpca()` and `rpca_phylo()`; `vegan`'s
+  scalings 1, 2 and 3 for `rda()`, `cca()` and `ca()` (scope widened by the
+  user). Default `NULL`, so existing plots are unchanged. `pca()` gains
+  `norm` and `scale` attributes.
+- Tests: 27,668 at home and 401 in CRAN mode on the merged tree (26,600
+  and 396 before); `R CMD check --no-manual --ignore-vignettes`: 1 NOTE
+  (installed size, as before).
+- References (largest relative differences): `vegan` 2.7.8, 2e-14 to 6e-14;
+  easyCODA 0.50, 2e-14; compositions 2.0-9, 8e-14; links against
+  `sqrt(vlr())`, 5e-16.
+- No code read or ported; no GPL source text seen.
+- Open: `dbrda()` and `capscale()` could take `vegan`'s scalings by the same
+  per-axis rule; `ord_plot_loadings()` was removed (item 46 should use
+  `ord_plot_scaling()`).
