@@ -66,6 +66,9 @@ McIntosh, R. P. (1967). An index of diversity and the relation of certain concep
 \code{alpha_div()}, \code{vignette('adiv')}
 
 Other Dominance metrics:
-\code{\link[=berger]{berger()}}
+\code{\link[=berger]{berger()}},
+\code{\link[=dominance]{dominance()}},
+\code{\link[=gini]{gini()}},
+\code{\link[=strong]{strong()}}
 }
 \concept{Dominance metrics}

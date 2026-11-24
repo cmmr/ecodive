@@ -67,8 +67,11 @@ Brillouin, L. (1956). Science and information theory. Academic Press.
 
 Other Diversity metrics:
 \code{\link[=fisher]{fisher()}},
+\code{\link[=hill]{hill()}},
 \code{\link[=inv_simpson]{inv_simpson()}},
+\code{\link[=renyi]{renyi()}},
 \code{\link[=shannon]{shannon()}},
-\code{\link[=simpson]{simpson()}}
+\code{\link[=simpson]{simpson()}},
+\code{\link[=tsallis]{tsallis()}}
 }
 \concept{Diversity metrics}

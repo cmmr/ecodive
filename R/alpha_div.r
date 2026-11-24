@@ -1,5 +1,41 @@
 # Copyright (c) 2026 ecodive authors
 # Licensed under the MIT License: https://opensource.org/license/mit
+#
+# The metrics dominance(), gini(), goods_coverage(), heip(), hill(),
+# mcintosh_evenness(), pielou(), renyi(), simpson_evenness(), strong() and
+# tsallis(), and chao1()'s bias correction, follow skbio.diversity.alpha
+# (scikit-bio 0.7.4), whose formulas and edge cases src/alpha_div.c ports,
+# under this licence:
+#
+# Copyright (c) 2013--, scikit-bio development team.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright
+#   notice, this list of conditions and the following disclaimer in the
+#   documentation and/or other materials provided with the distribution.
+#
+# * Neither the names scikit-bio, skbio, or biocore nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+# IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 # Integer IDs for C code.
@@ -17,25 +53,44 @@ ADIV_OBSERVED    <- 11L
 ADIV_SHANNON     <- 12L
 ADIV_SIMPSON     <- 13L
 ADIV_SQUARES     <- 14L
+ADIV_DOMINANCE   <- 15L
+ADIV_GINI        <- 16L
+ADIV_GOODS       <- 17L
+ADIV_HEIP        <- 18L
+ADIV_HILL        <- 19L
+ADIV_MCINTOSH_E  <- 20L
+ADIV_PIELOU      <- 21L
+ADIV_RENYI       <- 22L
+ADIV_SIMPSON_E   <- 23L
+ADIV_STRONG      <- 24L
+ADIV_TSALLIS     <- 25L
 
 
 #' Alpha Diversity Wrapper Function
-#' 
+#'
 #' @inherit documentation
 #' @name alpha_div
-#' 
-#' @param metric   The name of an alpha diversity metric. One of `c('ace',
-#'   'berger', 'brillouin', 'chao1', 'faith', 'fisher', 'inv_simpson',
-#'   'margalef', 'mcintosh', 'menhinick', 'observed', 'shannon', 'simpson',
-#'   'squares')`. Case-insensitive and partial name matching is supported.
-#'   Programmatic access via `list_metrics('alpha')`.
-#' 
-#' @return A numeric vector.
-#' 
+#'
+#' @param metric   The name of an alpha diversity metric, or several names
+#'   to compute several metrics at once. One of `c('ace', 'berger',
+#'   'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini',
+#'   'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef',
+#'   'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou',
+#'   'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong',
+#'   'tsallis')`. Case-insensitive and partial name matching is supported,
+#'   as are scikit-bio's names (such as `'pielou_e'`, `'simpson_d'`,
+#'   `'observed_features'` and `'enspie'`). Programmatic access via
+#'   `list_metrics('alpha')`.
+#'
+#' @return A numeric vector, one value per sample, named by the samples.
+#'   With several metrics, a numeric matrix with one row per sample and one
+#'   column per metric, named by the metrics' IDs in the order given; each
+#'   column is exactly what that metric alone returns.
+#'
 #' @details
-#' 
+#'
 #' ## Integer Count Requirements
-#' 
+#'
 #' A frequent and critical error in alpha diversity analysis is providing the
 #' wrong type of data to a metric's formula. Some indices are mathematically
 #' defined based on counts of individuals and require raw, integer abundance
@@ -43,58 +98,135 @@ ADIV_SQUARES     <- 14L
 #' integer counts (which are then converted to proportions) or pre-normalized
 #' proportional data. Using proportional data with a metric that requires
 #' integer counts will return an error message.
-#' 
+#'
 #' ### Requires Integer Counts Only
-#' 
-#' * Chao1  
+#'
+#' * Chao1
 #' * ACE
 #' * Squares Richness Estimator
 #' * Margalef's Index
 #' * Menhinick's Index
 #' * Fisher's Alpha
 #' * Brillouin Index
-#' 
+#' * McIntosh Index
+#' * McIntosh's Evenness
+#' * Good's Coverage
+#'
 #' ### Can Use Proportional Data
-#' 
+#'
 #' * Observed Features
 #' * Shannon Index
 #' * Gini-Simpson Index
 #' * Inverse Simpson Index
+#' * Hill Numbers, Rényi and Tsallis Entropies
+#' * Pielou's, Heip's and Simpson's Evenness
 #' * Berger-Parker Index
-#' * McIntosh Index
+#' * Simpson's and Strong's Dominance Indices
+#' * Gini Index
 #' * Faith's PD
-#' 
-#' 
-#' 
+#'
+#'
+#' ## Several Metrics at Once
+#'
+#' `alpha_div(counts, c('observed', 'shannon', 'pielou'))` returns a matrix
+#' with a column for each metric. Each metric is computed by its own
+#' function, so a column is `identical()` to the vector that metric gives
+#' alone; naming a metric twice is an error.
+#'
+#'
+#' ## Differences from scikit-bio
+#'
+#' The metrics follow `skbio.diversity.alpha` (scikit-bio 0.7.4), which
+#' QIIME 2's `diversity alpha` runs, with these differences:
+#'
+#' * Logarithms are natural. scikit-bio's `shannon()`, `pielou_e()` and
+#'   `renyi()` take a `base`; divide ecodive's [shannon()] and [renyi()] by
+#'   `log(base)` instead. Pielou's evenness doesn't depend on the base.
+#' * No `finite` option for [simpson()], [dominance()] and [inv_simpson()]
+#'   (scikit-bio's estimator without replacement).
+#' * The [gini()] index is computed by rectangles only (scikit-bio's default
+#'   `method = "rectangles"`, not `"trapezoids"`).
+#' * A sample with no observations is `NA` for every metric. scikit-bio
+#'   gives `nan` for most metrics, but `0` for `chao1()` and `gini_index()`.
+#' * `chao1(bias_corrected = FALSE)` is the classic formula, falling back on
+#'   the bias-corrected one when a sample has no singletons or no doubletons,
+#'   exactly as scikit-bio does.
+#'
+#'
 #' @export
 #' @examples
 #'     # Example counts matrix
 #'     ex_counts
-#'     
+#'
 #'     # Shannon diversity values
 #'     alpha_div(ex_counts, 'Shannon')
-#'     
+#'
 #'     # Chao1 diversity values
 #'     alpha_div(ex_counts, 'c')
-#'     
+#'
 #'     # Faith PD values
 #'     alpha_div(ex_counts, 'faith', tree = ex_tree)
-#'     
-#'     
+#'
+#'     # Hill number of order 1 (the exponential of Shannon's entropy)
+#'     alpha_div(ex_counts, 'hill', q = 1)
+#'
+#'     # Several metrics at once
+#'     alpha_div(ex_counts, c('observed', 'shannon', 'pielou'))
+#'
 alpha_div <- function (
-    counts, 
-    metric, 
-    norm   = 'percent', 
-    cutoff = 10L, 
-    digits = 3L, 
-    tree   = NULL, 
+    counts,
+    metric,
+    norm   = 'percent',
+    cutoff = 10L,
+    digits = 3L,
+    tree   = NULL,
     margin = 1L,
+    q      = 2,
+    bias_corrected = TRUE,
     cpus   = n_cpus() ) {
-  
-  metric <- match_metric(metric, div = 'alpha')
-  args   <- mget(metric$params, environment())
-  
-  do.call(metric$func, args)
+
+  metrics <- match_metrics(metric, div = 'alpha')
+
+  results <- lapply(metrics, function (metric) {
+    args <- mget(metric$params, parent.frame(2L))
+    do.call(metric$func, args)
+  })
+
+  if (length(results) == 1L) return (results[[1]])
+
+  multi_metric_matrix(results, metrics)
+}
+
+
+# match_metric() for each of `metric`'s names; duplicated IDs are an error.
+match_metrics <- function (metric, div) {
+
+  if (!is.character(metric) || length(metric) == 0 || anyNA(metric))
+    stop('`metric` must be one or more metric names.', call. = FALSE)
+
+  metrics <- lapply(metric, match_metric, div = div)
+  ids     <- vapply(metrics, `[[`, '', 'id')
+
+  if (anyDuplicated(ids)) {
+    dup <- unique(ids[duplicated(ids)])
+    stop(
+      '`metric` names ', paste0('"', dup, '"', collapse = ', '),
+      ' more than once.', call. = FALSE )
+  }
+
+  names(metrics) <- ids
+  metrics
+}
+
+
+# The samples x metrics matrix of several metrics' per-sample vectors.
+multi_metric_matrix <- function (results, metrics) {
+  n   <- length(results[[1]])
+  mtx <- matrix(
+    data     = unlist(lapply(results, as.vector), use.names = FALSE),
+    nrow     = n,
+    dimnames = list(names(results[[1]]), names(metrics)) )
+  mtx
 }
 
 
@@ -239,33 +371,57 @@ brillouin <- function (counts, margin = 1L, cpus = n_cpus()) {
 #' @seealso `alpha_div()`, `vignette('adiv')`
 #' 
 #' @details
-#' The Chao1 estimator uses the ratio of singletons to doubletons to estimate the number of missing species:
+#' The Chao1 estimator uses the ratio of singletons to doubletons to
+#' estimate the number of missing species. By default it is the
+#' bias-corrected form (Chao 1987), as in scikit-bio and QIIME 2:
+#' \deqn{n + \frac{F_1 (F_1 - 1)}{2 (F_2 + 1)}}
+#' 
+#' With `bias_corrected = FALSE`, it is the classic form (Chao 1984):
 #' \deqn{n + \frac{(F_1)^2}{2 F_2}}
+#' which is infinite when there are no doubletons. So, as scikit-bio's
+#' `chao1(bias_corrected = False)`, the classic form is used only when
+#' \eqn{F_1 > 0} and \eqn{F_2 > 0}, and the bias-corrected form otherwise.
 #' 
 #' Where:
 #' * \eqn{n} : The number of observed features.
 #' * \eqn{F_1} : Number of features observed once (singletons).
 #' * \eqn{F_2} : Number of features observed twice (doubletons).
 #' 
+#' `vegan::estimateR()` and iNEXT multiply the bias-corrected term by
+#' \eqn{(N - 1)/N}, where \eqn{N} is the number of observations, so their
+#' estimates are slightly smaller than these for shallow samples with
+#' singletons.
+#' 
+#' ecodive before version 2.4.0 used the classic form without the fallback,
+#' which gave `Inf` without doubletons and `NaN` without singletons and
+#' doubletons.
+#' 
 #' **Base R Equivalent:**
 #' ```r
-#' x <- ex_counts[1,]
-#' sum(x>0) + (sum(x == 1) ** 2) / (2 * sum(x == 2))
+#' x  <- ex_counts[1,]
+#' F1 <- sum(x == 1)
+#' F2 <- sum(x == 2)
+#' sum(x > 0) + F1 * (F1 - 1) / (2 * (F2 + 1))
 #' ```
 #' 
 #' @references
 #' Chao, A. (1984). Nonparametric estimation of the number of classes in a population. *Scandinavian Journal of Statistics*, 11, 265-270.
 #' 
+#' Chao, A. (1987). Estimating the population size for capture-recapture data with unequal catchability. *Biometrics*, 43(4), 783-791. \doi{10.2307/2531532}
+#' 
 #' @export
 #' @examples
 #'     chao1(ex_counts)
-chao1 <- function (counts, margin = 1L, cpus = n_cpus()) {
+#'     
+#'     # The classic form
+#'     chao1(ex_counts, bias_corrected = FALSE)
+chao1 <- function (counts, bias_corrected = TRUE, margin = 1L, cpus = n_cpus()) {
   
   norm <- 'none'
   validate_args()
   assert_integer_counts()
   
-  .Call(C_alpha_div, ADIV_CHAO1, counts, margin, norm, cpus, NULL)
+  .Call(C_alpha_div, ADIV_CHAO1, counts, margin, norm, cpus, bias_corrected)
 }
 
 
@@ -662,4 +818,563 @@ squares <- function (counts, margin = 1L, cpus = n_cpus()) {
   assert_integer_counts()
   
   .Call(C_alpha_div, ADIV_SQUARES, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Simpson's Dominance Index
+#' 
+#' The probability that two entities taken at random (with replacement) are
+#' of the same type.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Dominance metrics
+#' @seealso `alpha_div()`, `vignette('adiv')`
+#' 
+#' @details
+#' Simpson's dominance index \eqn{D} is defined as:
+#' \deqn{\sum_{i = 1}^{n} P_i^2}
+#' 
+#' Where:
+#' * \eqn{n} : The number of features.
+#' * \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
+#' 
+#' It is `1 - simpson()` (the Gini-Simpson index) and `1 / inv_simpson()`.
+#' scikit-bio calls it `dominance()` and `simpson_d()`; both names are
+#' aliases in [alpha_div()].
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' p <- x / sum(x)
+#' sum(p ** 2)
+#' ```
+#' 
+#' @section Same names in other packages:
+#' scikit-bio's `dominance()` is the same index.
+#' 
+#' @references
+#' Simpson, E. H. (1949). Measurement of diversity. *Nature*, 163, 688. \doi{10.1038/163688a0}
+#' 
+#' @export
+#' @examples
+#'     dominance(ex_counts)
+dominance <- function (counts, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'percent'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_DOMINANCE, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Gini Index
+#' 
+#' The inequality of the features' abundances: 0 when all features of the
+#' table are equally abundant, approaching 1 when one feature has them all.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Dominance metrics
+#' @seealso `alpha_div()`, `vignette('adiv')`
+#' 
+#' @details
+#' The Gini index is computed from the Lorenz curve of all \eqn{K} features
+#' of the table, by rectangles, as scikit-bio's `gini_index()`:
+#' \deqn{\max\left(0,\ 1 - \frac{2}{K} \sum_{j = 1}^{K} L_j\right)}
+#' 
+#' Where:
+#' * \eqn{K} : The number of features in the table, including those absent
+#'   from the sample.
+#' * \eqn{L_j} : The Lorenz curve: the share of the sample's total held by
+#'   the \eqn{j} least abundant features, \eqn{\sum_{i \le j} X_{(i)} / X_T},
+#'   with \eqn{X_{(1)} \le \ldots \le X_{(K)}} the sorted abundances.
+#' 
+#' **The Gini index depends on how many features the table has,** including
+#' features the sample lacks: each absent feature makes the sample look less
+#' even. Filtering features out of a table (or adding all-zero ones)
+#' changes it, so compare samples only from the same table. A sample of one
+#' table with \eqn{K} features, all equally abundant, has index 0; a sample
+#' with all its counts in one feature has index \eqn{1 - 2/K} (by
+#' rectangles, the Lorenz curve's area is overestimated by \eqn{1/(2K)}).
+#' 
+#' `alpha_div(counts, 'gini')` is this index; the Gini-Simpson index is
+#' `'simpson'`.
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' L <- cumsum(sort(x)) / sum(x)
+#' max(0, 1 - 2 * sum(L) / length(x))
+#' ```
+#' 
+#' @section Same names in other packages:
+#' scikit-bio's `gini_index()` is the same index (with its default
+#' `method = "rectangles"`).
+#' 
+#' @references
+#' Gini, C. (1912). *Variabilità e mutabilità*. Cuppini, Bologna.
+#' 
+#' Wittebolle, L., Marzorati, M., Clement, L., Balloi, A., Daffonchio, D., Heylen, K., De Vos, P., Verstraete, W., & Boon, N. (2009). Initial community evenness favours functionality under selective stress. *Nature*, 458, 623-626. \doi{10.1038/nature07840}
+#' 
+#' @export
+#' @examples
+#'     gini(ex_counts)
+gini <- function (counts, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'none'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_GINI, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Good's Coverage
+#' 
+#' The estimated fraction of a community's individuals that belong to the
+#' features observed in the sample: a check that sequencing was deep
+#' enough.
+#' 
+#' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
+#' @family Coverage metrics
+#' @seealso `alpha_div()`, `vignette('adiv')`
+#' 
+#' @details
+#' Good's coverage is defined as:
+#' \deqn{1 - \frac{F_1}{X_T}}
+#' 
+#' Where:
+#' * \eqn{F_1} : Number of features observed once (singletons).
+#' * \eqn{X_T} : Total of all counts (sequencing depth).
+#' 
+#' It is Good's (1953) estimate of the sample coverage: the probability
+#' that the next individual drawn belongs to a feature already seen. A
+#' sample of only singletons has coverage 0. Chao & Jost (2012) give a less
+#' biased estimator, which uses doubletons too.
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' 1 - sum(x == 1) / sum(x)
+#' ```
+#' 
+#' @section Same names in other packages:
+#' scikit-bio's `goods_coverage()` is the same estimate.
+#' 
+#' @references
+#' Good, I. J. (1953). The population frequencies of species and the estimation of population parameters. *Biometrika*, 40, 237-264. \doi{10.1093/biomet/40.3-4.237}
+#' 
+#' Chao, A., & Jost, L. (2012). Coverage-based rarefaction and extrapolation: standardizing samples by completeness rather than size. *Ecology*, 93, 2533-2547. \doi{10.1890/11-1952.1}
+#' 
+#' @export
+#' @examples
+#'     goods_coverage(ex_counts)
+goods_coverage <- function (counts, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'none'
+  validate_args()
+  assert_integer_counts()
+  
+  .Call(C_alpha_div, ADIV_GOODS, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Heip's Evenness
+#' 
+#' An evenness index derived from the exponential of Shannon's entropy.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Evenness metrics
+#' @seealso `alpha_div()`, `vignette('adiv')`
+#' 
+#' @details
+#' Heip's evenness is defined as:
+#' \deqn{\frac{e^H - 1}{n - 1}}
+#' 
+#' Where:
+#' * \eqn{H} : Shannon's entropy, `shannon()`.
+#' * \eqn{n} : The number of observed features.
+#' 
+#' A sample with one feature has evenness 1, as in scikit-bio.
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' p <- x[x > 0] / sum(x)
+#' (exp(-sum(p * log(p))) - 1) / (length(p) - 1)
+#' ```
+#' 
+#' @references
+#' Heip, C. (1974). A new index measuring evenness. *Journal of the Marine Biological Association of the UK*, 54, 555-557. \doi{10.1017/S0025315400022736}
+#' 
+#' @export
+#' @examples
+#'     heip(ex_counts)
+heip <- function (counts, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'percent'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_HEIP, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Hill Numbers
+#' 
+#' The effective number of species of order \eqn{q}: how many equally
+#' abundant features would give the same diversity.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Diversity metrics
+#' @seealso `alpha_div()`, `renyi()`, `tsallis()`, `vignette('adiv')`
+#' 
+#' @details
+#' The Hill number of order \eqn{q} is defined as:
+#' \deqn{{}^qD = \left(\sum_{i = 1}^{n} P_i^q\right)^{1/(1-q)}}
+#' 
+#' with its limits \eqn{{}^1D = e^H} (\eqn{H}: Shannon's entropy) and
+#' \eqn{{}^\infty D = 1 / \max(P_i)}.
+#' 
+#' Where:
+#' * \eqn{n} : The number of features.
+#' * \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
+#' 
+#' The order sets how much weight abundant features get. The Hill numbers
+#' are a profile that unifies the common indices:
+#' * \eqn{q = 0}: richness, `observed()`.
+#' * \eqn{q = 1}: the exponential of Shannon's entropy, `exp(shannon())`,
+#'   which weighs every feature by its frequency (Jost 2006).
+#' * \eqn{q = 2}: the inverse Simpson index, `inv_simpson()`.
+#' * \eqn{q = \infty}: the inverse Berger-Parker index, `1 / berger()`.
+#' 
+#' The default order, 2, is scikit-bio's, which makes `hill()` equal to
+#' `inv_simpson()`; give `q` for any other order.
+#' [renyi()] is `log(hill())`, and [tsallis()] is another function of it.
+#' 
+#' Observed Hill numbers grow with sequencing depth, most for small
+#' \eqn{q}; compare samples at equal depth, for instance with
+#' [alpha_div_rarefied()].
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' q <- 2
+#' p <- x[x > 0] / sum(x)
+#' sum(p ** q) ** (1 / (1 - q))
+#' ```
+#' 
+#' @section Same names in other packages:
+#' scikit-bio's `hill()` is the same (its `order` is `q`).
+#' `vegan::renyi(x, scales, hill = TRUE)` gives a profile of Hill numbers
+#' over several orders.
+#' 
+#' @references
+#' Hill, M. O. (1973). Diversity and evenness: a unifying notation and its consequences. *Ecology*, 54, 427-432. \doi{10.2307/1934352}
+#' 
+#' Jost, L. (2006). Entropy and diversity. *Oikos*, 113, 363-375. \doi{10.1111/j.2006.0030-1299.14714.x}
+#' 
+#' @export
+#' @examples
+#'     hill(ex_counts)
+#'     
+#'     # Richness, exp(Shannon), inverse Simpson
+#'     sapply(c(0, 1, 2), function (q) hill(ex_counts, q = q))
+hill <- function (counts, q = 2, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'percent'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_HILL, counts, margin, norm, cpus, as.double(q))
+}
+
+
+#' McIntosh's Evenness
+#' 
+#' An evenness index derived from the McIntosh index.
+#' 
+#' @inherit documentation
+#' @inherit adiv_assert_integer
+#' 
+#' @family Evenness metrics
+#' @seealso `alpha_div()`, `mcintosh()`, `vignette('adiv')`
+#' 
+#' @details
+#' McIntosh's evenness is defined as:
+#' \deqn{\frac{\sqrt{\sum_{i = 1}^{n} (X_i)^2}}{\sqrt{(X_T - n + 1)^2 + n - 1}}}
+#' 
+#' Where:
+#' * \eqn{n} : The number of observed features.
+#' * \eqn{X_i} : Integer count of the \eqn{i}-th feature.
+#' * \eqn{X_T} : Total of all counts.
+#' 
+#' This follows scikit-bio's `mcintosh_e()` (Heip & Engels 1974).
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' n <- sum(x > 0)
+#' sqrt(sum(x^2)) / sqrt((sum(x) - n + 1)^2 + n - 1)
+#' ```
+#' 
+#' @references
+#' Heip, C., & Engels, P. (1974). Comparing species diversity and evenness indices. *Journal of the Marine Biological Association of the UK*, 54, 559-563. \doi{10.1017/S0025315400022748}
+#' 
+#' @export
+#' @examples
+#'     mcintosh_evenness(ex_counts)
+mcintosh_evenness <- function (counts, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'none'
+  validate_args()
+  assert_integer_counts()
+  
+  .Call(C_alpha_div, ADIV_MCINTOSH_E, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Pielou's Evenness
+#' 
+#' Shannon's entropy relative to its largest possible value for the number
+#' of observed features.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Evenness metrics
+#' @seealso `alpha_div()`, `shannon()`, `vignette('adiv')`
+#' 
+#' @details
+#' Pielou's evenness \eqn{J} is defined as:
+#' \deqn{\frac{H}{\ln n}}
+#' 
+#' Where:
+#' * \eqn{H} : Shannon's entropy, `shannon()`.
+#' * \eqn{n} : The number of observed features.
+#' 
+#' It is one of the alpha diversity outputs of QIIME 2's `core-metrics`
+#' (`evenness_vector`). It doesn't depend on the base of the logarithm.
+#' 
+#' A sample with one feature has evenness 1, as in scikit-bio (where
+#' `vegan::diversity(x) / log(vegan::specnumber(x))` gives `NaN`).
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' p <- x[x > 0] / sum(x)
+#' -sum(p * log(p)) / log(length(p))
+#' ```
+#' 
+#' @references
+#' Pielou, E. C. (1966). The measurement of diversity in different types of biological collections. *Journal of Theoretical Biology*, 13, 131-144. \doi{10.1016/0022-5193(66)90013-0}
+#' 
+#' @export
+#' @examples
+#'     pielou(ex_counts)
+pielou <- function (counts, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'percent'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_PIELOU, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Rényi Entropy
+#' 
+#' The generalized entropy of order \eqn{q}: the logarithm of the Hill
+#' number of the same order.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Diversity metrics
+#' @seealso `alpha_div()`, `hill()`, `tsallis()`, `vignette('adiv')`
+#' 
+#' @details
+#' Rényi's entropy of order \eqn{q} is defined as:
+#' \deqn{{}^qH = \frac{1}{1 - q} \ln \sum_{i = 1}^{n} P_i^q}
+#' 
+#' with its limits \eqn{{}^1H = H} (Shannon's entropy) and
+#' \eqn{{}^\infty H = -\ln \max(P_i)}; \eqn{{}^0H} is the log of the number
+#' of observed features.
+#' 
+#' Where:
+#' * \eqn{n} : The number of features.
+#' * \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
+#' 
+#' It is `log(hill(counts, q))`. A sample with one feature has entropy 0.
+#' Logarithms are natural; for another base \eqn{b}, divide by `log(b)`.
+#' The default order, 2, is scikit-bio's.
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' q <- 2
+#' p <- x[x > 0] / sum(x)
+#' log(sum(p ** q)) / (1 - q)
+#' ```
+#' 
+#' @section Same names in other packages:
+#' scikit-bio's `renyi()` is the same (its `order` is `q`).
+#' `vegan::renyi()` gives a profile over several orders (`scales`).
+#' 
+#' @references
+#' Rényi, A. (1961). On measures of entropy and information. *Proceedings of the Fourth Berkeley Symposium on Mathematical Statistics and Probability*, 1, 547-561.
+#' 
+#' @export
+#' @examples
+#'     renyi(ex_counts)
+#'     renyi(ex_counts, q = 1) # Shannon's entropy
+renyi <- function (counts, q = 2, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'percent'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_RENYI, counts, margin, norm, cpus, as.double(q))
+}
+
+
+#' Simpson's Evenness
+#' 
+#' The inverse Simpson index relative to the number of observed features.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Evenness metrics
+#' @seealso `alpha_div()`, `inv_simpson()`, `vignette('adiv')`
+#' 
+#' @details
+#' Simpson's evenness is defined as:
+#' \deqn{\frac{1}{n \sum_{i = 1}^{n} P_i^2}}
+#' 
+#' Where:
+#' * \eqn{n} : The number of observed features.
+#' * \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
+#' 
+#' It is `inv_simpson() / observed()`.
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' p <- x[x > 0] / sum(x)
+#' 1 / (length(p) * sum(p ** 2))
+#' ```
+#' 
+#' @references
+#' Smith, B., & Wilson, J. B. (1996). A consumer's guide to evenness indices. *Oikos*, 76, 70-82. \doi{10.2307/3545749}
+#' 
+#' @export
+#' @examples
+#'     simpson_evenness(ex_counts)
+simpson_evenness <- function (counts, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'percent'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_SIMPSON_E, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Strong's Dominance Index
+#' 
+#' The largest gap between the cumulative share of the most abundant
+#' features and the share they would have if all were equally abundant.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Dominance metrics
+#' @seealso `alpha_div()`, `vignette('adiv')`
+#' 
+#' @details
+#' Strong's dominance index is defined as:
+#' \deqn{\max_{i} \left( \frac{c_i}{X_T} - \frac{i}{n} \right)}
+#' 
+#' Where:
+#' * \eqn{n} : The number of observed features.
+#' * \eqn{c_i} : The sum of the \eqn{i} largest counts.
+#' * \eqn{X_T} : Total of all counts.
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' x <- sort(x[x > 0], decreasing = TRUE)
+#' max(cumsum(x) / sum(x) - seq_along(x) / length(x))
+#' ```
+#' 
+#' @section Same names in other packages:
+#' scikit-bio's `strong()` is the same index.
+#' 
+#' @references
+#' Strong, W. L. (2002). Assessing species abundance unevenness within and between plant communities. *Community Ecology*, 3, 237-246. \doi{10.1556/ComEc.3.2002.2.9}
+#' 
+#' @export
+#' @examples
+#'     strong(ex_counts)
+strong <- function (counts, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'none'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_STRONG, counts, margin, norm, cpus, NULL)
+}
+
+
+#' Tsallis Entropy
+#' 
+#' The non-additive generalized entropy of order \eqn{q}.
+#' 
+#' @inherit documentation
+#' @inherit adiv_percent_normalized
+#' 
+#' @family Diversity metrics
+#' @seealso `alpha_div()`, `hill()`, `renyi()`, `vignette('adiv')`
+#' 
+#' @details
+#' Tsallis's entropy of order \eqn{q} is defined as:
+#' \deqn{{}^qS = \frac{1}{q - 1} \left(1 - \sum_{i = 1}^{n} P_i^q\right)}
+#' 
+#' with its limits \eqn{{}^1S = H} (Shannon's entropy) and
+#' \eqn{{}^\infty S = 0}.
+#' 
+#' Where:
+#' * \eqn{n} : The number of features.
+#' * \eqn{P_i} : Proportional abundance of the \eqn{i}-th feature.
+#' 
+#' At \eqn{q = 0} it is the number of observed features minus 1, and at
+#' \eqn{q = 2} the Gini-Simpson index, `simpson()`. A sample with one
+#' feature has entropy 0. The default order, 2, is scikit-bio's.
+#' 
+#' **Base R Equivalent:**
+#' ```r
+#' x <- ex_counts[1,]
+#' q <- 2
+#' p <- x[x > 0] / sum(x)
+#' (1 - sum(p ** q)) / (q - 1)
+#' ```
+#' 
+#' @section Same names in other packages:
+#' scikit-bio's `tsallis()` is the same (its `order` is `q`).
+#' 
+#' @references
+#' Tsallis, C. (1988). Possible generalization of Boltzmann-Gibbs statistics. *Journal of Statistical Physics*, 52, 479-487. \doi{10.1007/BF01016429}
+#' 
+#' @export
+#' @examples
+#'     tsallis(ex_counts)
+tsallis <- function (counts, q = 2, margin = 1L, cpus = n_cpus()) {
+  
+  norm <- 'percent'
+  validate_args()
+  
+  .Call(C_alpha_div, ADIV_TSALLIS, counts, margin, norm, cpus, as.double(q))
 }

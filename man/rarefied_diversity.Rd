@@ -36,6 +36,8 @@ alpha_div_rarefied(
   digits = 3L,
   tree = NULL,
   margin = 1L,
+  q = 2,
+  bias_corrected = TRUE,
   seed = 0L,
   cpus = n_cpus()
 )
@@ -48,9 +50,10 @@ phylogenetic metrics.}
 
 \item{metric}{The name of a diversity metric: for \code{beta_div_rarefied()},
 one of \code{\link[=beta_div]{beta_div()}}'s metrics, such as \code{'bray'}; for
-\code{alpha_div_rarefied()}, one of \code{\link[=alpha_div]{alpha_div()}}'s, such as
-\code{'shannon'}. Matched as those functions match it (case-insensitive,
-with prefixes and aliases). See \code{\link[=list_metrics]{list_metrics()}}.}
+\code{alpha_div_rarefied()}, one or several of \code{\link[=alpha_div]{alpha_div()}}'s, such
+as \code{'shannon'} or \code{c('observed', 'shannon')}. Matched as those
+functions match it (case-insensitive, with prefixes and aliases).
+See \code{\link[=list_metrics]{list_metrics()}}.}
 
 \item{depth}{The number of observations to rarefy every sample to: a
 single whole number of at least 1. Samples with fewer observations
@@ -145,6 +148,16 @@ Default: \code{10}.}
 
 \item{digits}{Precision of the returned values, in number of decimal
 places. E.g. the default \code{digits=3} could return \code{6.392}.}
+
+\item{q}{The order of a Hill number, or of Rényi's or Tsallis's entropy:
+a single number of at least 0, where \code{Inf} is allowed. Only used
+by \code{\link[=hill]{hill()}}, \code{\link[=renyi]{renyi()}} and \code{\link[=tsallis]{tsallis()}}. Default: \code{2}, as
+scikit-bio (which calls it \code{order}).}
+
+\item{bias_corrected}{For Chao1 only: use the bias-corrected form
+(the default, as scikit-bio and QIIME 2), or the classic form when
+a sample has both singletons and doubletons (\code{FALSE}). See
+\code{\link[=chao1]{chao1()}}.}
 }
 \value{
 \code{beta_div_rarefied()}: a distance matrix of class \code{c("ecodive_dist", "dist")} over the kept samples, as \code{\link[=beta_div]{beta_div()}} returns, with attribute
@@ -165,7 +178,10 @@ distance matrix was returned.
 
 \code{alpha_div_rarefied()}: a named numeric vector over the kept samples, as
 \code{\link[=alpha_div]{alpha_div()}} returns, with attributes \code{depth}, \code{dropped}, and with
-\code{sd = TRUE}, \code{sd} (a named numeric vector).
+\code{sd = TRUE}, \code{sd} (a named numeric vector). With several metrics, a
+matrix with a column for each metric, as \code{\link[=alpha_div]{alpha_div()}} returns, all
+computed from the same rarefied tables, and \code{sd} is a matrix of the same
+shape. Each column is exactly what that metric alone gives.
 }
 \description{
 Rarefy a count table many times, compute alpha or beta diversity from

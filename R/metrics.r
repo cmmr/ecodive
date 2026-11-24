@@ -17,10 +17,10 @@ METRICS <- local({
       name,                                          id,                        phylo, weighted, int_only, true_metric, div,   alt_ids
       Abundance-based Coverage Estimator (ACE),      ace,                       NO,    YES,      YES,      NA,          alpha, 
       Aitchison Distance,                            aitchison,                 NO,    YES,      NO,       YES,         beta,  
-      Berger-Parker Index,                           berger,                    NO,    YES,      NO,       NA,          alpha, 
+      Berger-Parker Index,                           berger,                    NO,    YES,      NO,       NA,          alpha, bergerparkerd
       Bhattacharyya Distance,                        bhattacharyya,             NO,    YES,      NO,       YES,         beta,  
       Bray-Curtis Dissimilarity,                     bray,                      NO,    YES,      NO,       NO,          beta,  
-      Brillouin Index,                               brillouin,                 NO,    YES,      YES,      NA,          alpha, 
+      Brillouin Index,                               brillouin,                 NO,    YES,      YES,      NA,          alpha, brillouind
       Canberra Distance,                             canberra,                  NO,    YES,      NO,       YES,         beta,  
       Chao1,                                         chao1,                     NO,    YES,      YES,      NA,          alpha, 
       Chebyshev Distance,                            chebyshev,                 NO,    YES,      NO,       YES,         beta,  
@@ -30,14 +30,18 @@ METRICS <- local({
       Divergence,                                    divergence,                NO,    YES,      NO,       YES,         beta,  
       Euclidean Distance,                            euclidean,                 NO,    YES,      NO,       YES,         beta,  
       Faith's Phylogenetic Diversity,                faith,                     YES,   NO,       NO,       NA,          alpha, faithpd
-      Fisher's Alpha,                                fisher,                    NO,    YES,      YES,      NA,          alpha, 
+      Fisher's Alpha,                                fisher,                    NO,    YES,      YES,      NA,          alpha, fisheralpha
       Generalized UniFrac (GUniFrac),                generalized_unifrac,       YES,   YES,      NO,       YES,         beta,  gunifrac
+      Gini Index,                                    gini,                      NO,    YES,      NO,       NA,          alpha, 
       Gini-Simpson Index,                            simpson,                   NO,    YES,      NO,       NA,          alpha, 
+      Good's Coverage,                               goods_coverage,            NO,    YES,      YES,      NA,          alpha, goods good
       Gower Distance,                                gower,                     NO,    YES,      NO,       YES,         beta,  
       Hamming Distance,                              hamming,                   NO,    NO,       NO,       YES,         beta,  
+      Heip's Evenness,                               heip,                      NO,    YES,      NO,       NA,          alpha, heipe
       Hellinger Distance,                            hellinger,                 NO,    YES,      NO,       YES,         beta,  
+      Hill Number,                                   hill,                      NO,    YES,      NO,       NA,          alpha, hillnumber
       Horn-Morisita Dissimilarity,                   horn,                      NO,    YES,      NO,       NO,          beta,  
-      Inverse Simpson Index,                         inv_simpson,               NO,    YES,      NO,       NA,          alpha, 
+      Inverse Simpson Index,                         inv_simpson,               NO,    YES,      NO,       NA,          alpha, enspie
       Jaccard Distance,                              jaccard,                   NO,    NO,       NO,       YES,         beta,  
       Jensen-Shannon Distance,                       jensen,                    NO,    YES,      NO,       YES,         beta,  
       Jensen-Shannon Divergence (JSD),               jsd,                       NO,    YES,      NO,       YES,         beta,  
@@ -45,24 +49,31 @@ METRICS <- local({
       Manhattan Distance,                            manhattan,                 NO,    YES,      NO,       YES,         beta,  
       Margalef's Richness Index,                     margalef,                  NO,    YES,      YES,      NA,          alpha, 
       Matusita Distance,                             matusita,                  NO,    YES,      NO,       YES,         beta,  
-      McIntosh Index,                                mcintosh,                  NO,    YES,      YES,      NA,          alpha, 
+      McIntosh Index,                                mcintosh,                  NO,    YES,      YES,      NA,          alpha, mcintoshd
+      McIntosh's Evenness,                           mcintosh_evenness,         NO,    YES,      YES,      NA,          alpha, mcintoshe
       Menhinick's Richness Index,                    menhinick,                 NO,    YES,      YES,      NA,          alpha, 
       Minkowski Distance,                            minkowski,                 NO,    YES,      NO,       YES,         beta,  
       Morisita Dissimilarity,                        morisita,                  NO,    YES,      YES,      NO,          beta,  
       Motyka Dissimilarity,                          motyka,                    NO,    YES,      NO,       NO,          beta,  
       Normalized Weighted UniFrac,                   normalized_unifrac,        YES,   YES,      NO,       YES,         beta,  nunifrac
-      Observed Features,                             observed,                  NO,    NO,       NO,       NA,          alpha, otus asvs
+      Observed Features,                             observed,                  NO,    NO,       NO,       NA,          alpha, otus asvs sobs observedfeatures
       Otsuka-Ochiai Dissimilarity,                   ochiai,                    NO,    NO,       NO,       NO,          beta,  
       PhILR Distance,                                philr_distance,            YES,   YES,      NO,       YES,         beta,  philr phylogeneticilr
+      Pielou's Evenness,                             pielou,                    NO,    YES,      NO,       NA,          alpha, pieloue pielouj
       Probabilistic Symmetric Chi-Squared Distance,  psym_chisq,                NO,    YES,      NO,       NO,          beta,  
       Robust Aitchison Distance,                     robust_aitchison,          NO,    YES,      NO,       NO,          beta,  raitchison
+      Renyi Entropy,                                 renyi,                     NO,    YES,      NO,       NA,          alpha, 
       Shannon Diversity Index,                       shannon,                   NO,    YES,      NO,       NA,          alpha, 
+      Simpson's Dominance Index,                     dominance,                 NO,    YES,      NO,       NA,          alpha, simpsond
+      Simpson's Evenness,                            simpson_evenness,          NO,    YES,      NO,       NA,          alpha, simpsone
       Soergel Distance,                              soergel,                   NO,    YES,      NO,       YES,         beta,  
       Squared Chi-Squared Distance,                  squared_chisq,             NO,    YES,      NO,       NO,          beta,  
       Squared Chord Distance,                        squared_chord,             NO,    YES,      NO,       NO,          beta,  
       Squared Euclidean Distance,                    squared_euclidean,         NO,    YES,      NO,       NO,          beta,  
       Squares Richness Estimator,                    squares,                   NO,    YES,      YES,      NA,          alpha, 
+      Strong's Dominance Index,                      strong,                    NO,    YES,      NO,       NA,          alpha, 
       Topsoe Distance,                               topsoe,                    NO,    YES,      NO,       YES,         beta,  
+      Tsallis Entropy,                               tsallis,                   NO,    YES,      NO,       NA,          alpha, 
       Unweighted UniFrac,                            unweighted_unifrac,        YES,   NO,       NO,       YES,         beta,  uunifrac
       Variance-Adjusted Weighted UniFrac,            variance_adjusted_unifrac, YES,   YES,      NO,       YES,         beta,  vunifrac
       Wave Hedges Distance,                          wave_hedges,               NO,    YES,      NO,       NO,          beta,  

@@ -23,7 +23,7 @@ Authors@R: c(
     person(
       "scikit-bio development team",
       role    = c("ctb", "cph"),
-      comment = "phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, ANCOM, ANCOM-BC and ANCOM-BC2, and Dirichlet-multinomial t-tests, from scikit-bio"),
+      comment = "phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, ANCOM, ANCOM-BC and ANCOM-BC2, Dirichlet-multinomial t-tests, and alpha diversity metrics (evenness, coverage, Hill numbers, Renyi and Tsallis entropies, dominance, the Gini index, and the bias-corrected Chao1), from scikit-bio"),
     person(
       "NumPy Developers",
       role    = "cph",

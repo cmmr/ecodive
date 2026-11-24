@@ -36,9 +36,10 @@
 #'
 #' @param metric  The name of a diversity metric: for `beta_div_rarefied()`,
 #'        one of [beta_div()]'s metrics, such as `'bray'`; for
-#'        `alpha_div_rarefied()`, one of [alpha_div()]'s, such as
-#'        `'shannon'`. Matched as those functions match it (case-insensitive,
-#'        with prefixes and aliases). See [list_metrics()].
+#'        `alpha_div_rarefied()`, one or several of [alpha_div()]'s, such
+#'        as `'shannon'` or `c('observed', 'shannon')`. Matched as those
+#'        functions match it (case-insensitive, with prefixes and aliases).
+#'        See [list_metrics()].
 #'
 #' @param depth  The number of observations to rarefy every sample to: a
 #'        single whole number of at least 1. Samples with fewer observations
@@ -89,7 +90,10 @@
 #'
 #' `alpha_div_rarefied()`: a named numeric vector over the kept samples, as
 #' [alpha_div()] returns, with attributes `depth`, `dropped`, and with
-#' `sd = TRUE`, `sd` (a named numeric vector).
+#' `sd = TRUE`, `sd` (a named numeric vector). With several metrics, a
+#' matrix with a column for each metric, as [alpha_div()] returns, all
+#' computed from the same rarefied tables, and `sd` is a matrix of the same
+#' shape. Each column is exactly what that metric alone gives.
 #'
 #' @section When to use it:
 #' Rarefying controls for uneven sequencing depth: every sample is compared
@@ -250,6 +254,8 @@ alpha_div_rarefied <- function (
     digits  = 3L,
     tree    = NULL,
     margin  = 1L,
+    q       = 2,
+    bias_corrected = TRUE,
     seed    = 0L,
     cpus    = n_cpus() ) {
 
@@ -257,44 +263,67 @@ alpha_div_rarefied <- function (
 
   validate_cutoff()
   validate_digits()
+  validate_q()
+  validate_bias_corrected()
 
-  args <- list(
-    cutoff = cutoff, digits = digits, tree = s$tree,
-    margin = s$margin, cpus = s$cpus )
-  args <- args[intersect(names(args), s$metric$params)]
+  all_args <- list(
+    cutoff = cutoff, digits = digits, tree = s$tree, margin = s$margin,
+    q = q, bias_corrected = bias_corrected, cpus = s$cpus )
 
-  times <- s$times
-  warns <- new.env(parent = emptyenv())
-  M     <- NULL
+  metrics <- s$metrics
+  n_m     <- length(metrics)
+  times   <- s$times
+  warns   <- new.env(parent = emptyenv())
+  M       <- vector('list', n_m)  # per metric: samples x times
+  acc     <- vector('list', n_m)
 
   rarefied_quietly(warns, {
     for (t in seq_len(times)) {
-      a <- do.call(s$metric$func, c(list(counts = rarefied_draw(s, t)), args))
-      if (t == 1L) {
-        nms <- names(a)
-        M   <- matrix(NA_real_, length(a), times)
-        acc <- as.vector(a)
+      draw <- rarefied_draw(s, t)
+      for (k in seq_len(n_m)) {
+        m <- metrics[[k]]
+        a <- do.call(m$func, c(
+          list(counts = draw),
+          all_args[intersect(names(all_args), m$params)] ))
+        if (t == 1L) {
+          nms      <- names(a)
+          M[[k]]   <- matrix(NA_real_, length(a), times)
+          acc[[k]] <- as.vector(a)
+        }
+        else {
+          acc[[k]] <- acc[[k]] + as.vector(a)
+        }
+        M[[k]][, t] <- a
       }
-      else {
-        acc <- acc + as.vector(a)
-      }
-      M[, t] <- a
     }
   })
 
-  val <- switch(
-    EXPR   = s$average,
-    mean   = acc / times,
-    median = .Call(C_row_medians, M, s$cpus) )
-  names(val) <- nms
+  vals <- lapply(seq_len(n_m), function (k) {
+    val <- switch(
+      EXPR   = s$average,
+      mean   = acc[[k]] / times,
+      median = .Call(C_row_medians, M[[k]], s$cpus) )
+    names(val) <- nms
+    val
+  })
+  sds <- if (s$sd) lapply(M, function (Mk) {
+    sds <- apply(Mk, 1L, stats::sd)
+    names(sds) <- nms
+    sds
+  })
+
+  if (n_m == 1L) {
+    val <- vals[[1]]
+    sds <- sds[[1]]
+  }
+  else {
+    val <- multi_metric_matrix(vals, metrics)
+    if (s$sd) sds <- multi_metric_matrix(sds, metrics)
+  }
 
   attr(val, 'depth')   <- s$depth
   attr(val, 'dropped') <- s$dropped
-  if (s$sd) {
-    sds <- apply(M, 1L, stats::sd)
-    names(sds) <- nms
-    attr(val, 'sd') <- sds
-  }
+  if (s$sd) attr(val, 'sd') <- sds
 
   rarefied_rewarn(warns)
   val
@@ -459,7 +488,15 @@ rarefied_beta_fit <- function (
 rarefied_setup <- function (div, env = parent.frame()) {
 
   # The metric first, so that a misspelt metric is the error reported.
-  metric <- match_metric(env$metric, div = div)
+  # Alpha diversity takes several metrics.
+  if (div == 'alpha') {
+    metrics <- match_metrics(env$metric, div = div)
+    metric  <- metrics[[1]]
+  }
+  else {
+    metric  <- match_metric(env$metric, div = div)
+    metrics <- list(metric)
+  }
 
   validate_counts(env)
   validate_margin(env)
@@ -565,6 +602,7 @@ rarefied_setup <- function (div, env = parent.frame()) {
     seeds   = ((env$seed + 2**31 - 1 + seq_len(times)) %% 2**32) - 2**31,
     cpus    = env$cpus,
     metric  = metric,
+    metrics = metrics,
     keep    = keep,
     dropped = dropped )
 }

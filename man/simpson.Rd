@@ -68,7 +68,10 @@ Simpson, E. H. (1949). Measurement of diversity. \emph{Nature}, 163, 688. \doi{1
 Other Diversity metrics:
 \code{\link[=brillouin]{brillouin()}},
 \code{\link[=fisher]{fisher()}},
+\code{\link[=hill]{hill()}},
 \code{\link[=inv_simpson]{inv_simpson()}},
-\code{\link[=shannon]{shannon()}}
+\code{\link[=renyi]{renyi()}},
+\code{\link[=shannon]{shannon()}},
+\code{\link[=tsallis]{tsallis()}}
 }
 \concept{Diversity metrics}

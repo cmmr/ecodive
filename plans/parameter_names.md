@@ -57,6 +57,8 @@ same thing.
 | `n_types` | **(new, 2026-11-20)** the candidate numbers of community types (a single value fixes it) | `enterotype`; planned `dmm` |
 | `ch` | **(new, 2026-11-20)** the form of the Calinski-Harabasz index: `'medoids'` (clusterSim's, as in Arumugam et al.'s script) or `'centroids'` (the distances' pseudo-F) | `enterotype` |
 | `centroids` | **(new)** reference type profiles to classify against | planned `valencia` |
+| `q` | **(new, 2026-11-24)** the order of a Hill number or of Rényi's or Tsallis's entropy: a single number ≥ 0, `Inf` allowed; default 2, as scikit-bio's `order` (vegan's `scales`) | `hill`, `renyi`, `tsallis`, `alpha_div`, `alpha_div_rarefied`; planned `rarefaction_curve` |
+| `bias_corrected` | **(new, 2026-11-24)** Chao1's bias-corrected form (`TRUE`, the default, as scikit-bio) or the classic one (`FALSE`), as scikit-bio's `bias_corrected` | `chao1`, `alpha_div`, `alpha_div_rarefied` |
 | `cpus` | threads (always last) | everything threaded |
 
 

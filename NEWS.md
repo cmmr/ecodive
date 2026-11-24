@@ -878,6 +878,33 @@
   ordination of the result is a "Principal Coordinates Analysis of
   Bray-Curtis Dissimilarity (rarefied 100×)".
 
+* Eleven new alpha diversity metrics, ported from scikit-bio's
+  `skbio.diversity.alpha` (which QIIME 2 runs) and matching it to rounding:
+  Pielou's evenness `pielou()` (QIIME 2's `evenness_vector`), `heip()`,
+  `simpson_evenness()` and `mcintosh_evenness()`; Good's coverage
+  `goods_coverage()`; the Hill numbers `hill()` and the Rényi and Tsallis
+  entropies `renyi()` and `tsallis()`, of order `q` (default 2, as
+  scikit-bio; `Inf` allowed); and Simpson's and Strong's dominance indices
+  `dominance()` and `strong()` and the Gini index `gini()`. All run through
+  `alpha_div()`, which also accepts scikit-bio's names (`'pielou_e'`,
+  `'simpson_d'`, `'observed_features'`, `'enspie'`, ...).
+
+* `alpha_div()` and `alpha_div_rarefied()` take several metrics at once,
+  `metric = c('observed', 'shannon', 'pielou')`, and return a matrix with a
+  column for each (computed from the same rarefied tables). They take the
+  new `q` and `bias_corrected` arguments, before `cpus`.
+
+* **Changed results:** `chao1()` is now the bias-corrected estimator,
+  `S + F1 (F1 - 1) / (2 (F2 + 1))`, by default, as scikit-bio and QIIME 2:
+  it is never `Inf` or `NaN`. `chao1(bias_corrected = FALSE)` gives the
+  classic `S + F1^2 / (2 F2)` when a sample has singletons and
+  doubletons, and the bias-corrected value otherwise, as scikit-bio.
+
+* **Changed matching:** `alpha_div(x, 'gini')` is now the new Gini index; it
+  used to match the Gini-Simpson index, which is `'simpson'`. Some short
+  prefixes that matched one metric now match several, and give an error
+  listing them (e.g. `'mc'`: `mcintosh` and `mcintosh_evenness`).
+
 * Documentation: `rpca()`, `rpca_phylo()` and `robust_aitchison()` discuss
   sequencing depth (Schloss 2026) and show how to check an ordination
   against library size and a rarefied analysis; `dirmult_ttest()`

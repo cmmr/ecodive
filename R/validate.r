@@ -55,6 +55,12 @@ validate_alpha <- function (env = parent.frame()) {
 }
 
 
+validate_bias_corrected <- function (env = parent.frame()) {
+  if (!(identical(env$bias_corrected, TRUE) || identical(env$bias_corrected, FALSE)))
+    stop('`bias_corrected` must be TRUE or FALSE.', call. = FALSE)
+}
+
+
 validate_counts <- function (env = parent.frame()) {
   tryCatch(
     with(env, {
@@ -450,6 +456,14 @@ validate_norm <- function (env = parent.frame()) {
       'log'       = NORM_LOG )
     
   })
+}
+
+
+validate_q <- function (env = parent.frame()) {
+  q <- env$q
+  if (!is.numeric(q) || length(q) != 1 || is.na(q) || q < 0)
+    stop('`q` must be a single number of at least 0 (Inf is allowed).', call. = FALSE)
+  env$q <- as.double(q)
 }
 
 

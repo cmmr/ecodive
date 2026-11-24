@@ -24,8 +24,23 @@
 
   for (m in list_metrics('alpha', 'id')) {
     a <- if (m == 'faith') alpha_div(ecodive::ex_counts, m, tree = ecodive::ex_tree) else alpha_div(counts, m, cpus = cpus)
-    expect_true(is.numeric(a) && length(a) > 0, info = m)  # chao1 is NaN without singletons and doubletons
+    expect_true(is.numeric(a) && length(a) > 0 && all(is.finite(a)), info = m)
   }
+
+  # The alpha metrics ported from scikit-bio, and several metrics at once.
+  expect_true(all(is.finite(dominance(counts, cpus = cpus))))
+  expect_true(all(is.finite(gini(counts, cpus = cpus))))
+  expect_true(all(is.finite(goods_coverage(counts, cpus = cpus))))
+  expect_true(all(is.finite(heip(counts, cpus = cpus))))
+  expect_true(all(is.finite(hill(counts, q = 1, cpus = cpus))))
+  expect_true(all(is.finite(mcintosh_evenness(counts, cpus = cpus))))
+  expect_true(all(is.finite(pielou(counts, cpus = cpus))))
+  expect_true(all(is.finite(renyi(counts, q = Inf, cpus = cpus))))
+  expect_true(all(is.finite(simpson_evenness(counts, cpus = cpus))))
+  expect_true(all(is.finite(strong(counts, cpus = cpus))))
+  expect_true(all(is.finite(tsallis(counts, q = 0.5, cpus = cpus))))
+  a <- alpha_div(counts, c('observed', 'shannon', 'pielou'), cpus = cpus)
+  expect_true(is.matrix(a) && identical(dim(a), c(20L, 3L)) && all(is.finite(a)))
 
   for (m in list_metrics('beta', 'id')) {
     b <- if (m %in% list_metrics('beta', 'id', phylo = TRUE))
@@ -46,6 +61,8 @@
   expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 20L && all(is.finite(z)))
   z <- alpha_div_rarefied(counts, 'shannon', depth = 40, times = 3, cpus = cpus)
   expect_true(is.numeric(z) && length(z) == 20L && all(is.finite(z)))
+  z <- alpha_div_rarefied(counts, c('shannon', 'hill'), q = 1, depth = 40, times = 3, cpus = cpus)
+  expect_true(is.matrix(z) && identical(dim(z), c(20L, 2L)) && all(is.finite(z)))
 
   # Absolute abundance.
   load <- seq(1, 2, length.out = 20) * 1e9

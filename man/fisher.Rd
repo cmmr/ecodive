@@ -69,8 +69,11 @@ Fisher, R. A., Corbet, A. S., & Williams, C. B. (1943). The relation between the
 
 Other Diversity metrics:
 \code{\link[=brillouin]{brillouin()}},
+\code{\link[=hill]{hill()}},
 \code{\link[=inv_simpson]{inv_simpson()}},
+\code{\link[=renyi]{renyi()}},
 \code{\link[=shannon]{shannon()}},
-\code{\link[=simpson]{simpson()}}
+\code{\link[=simpson]{simpson()}},
+\code{\link[=tsallis]{tsallis()}}
 }
 \concept{Diversity metrics}
