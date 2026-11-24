@@ -6,25 +6,34 @@
 \usage{
 \method{plot}{ecodive_dirmult_ttest}(
   x,
-  type = c("volcano", "effect", "ma", "forest"),
+  type = c("volcano", "effect", "ma", "forest", "rank"),
   labels = 10,
   n_features = 30,
+  numerator = NULL,
+  denominator = NULL,
   ...
 )
 }
 \arguments{
 \item{x}{The result of \code{\link[=dirmult_ttest]{dirmult_ttest()}}.}
 
-\item{type}{The plot: \code{"volcano"} (the default), \code{"effect"}, \code{"ma"}, or
-\code{"forest"}.}
+\item{type}{The plot: \code{"volcano"} (the default), \code{"effect"}, \code{"ma"},
+\code{"forest"}, or \code{"rank"}.}
 
 \item{labels}{How many of the differentially abundant features to name
 (in the volcano, effect and MA plots), those with the smallest
-adjusted p-values. Default \code{10}; \code{0} for none.}
+adjusted p-values. In the rank plot, the highlighted features with
+the largest effects. Default \code{10}; \code{0} for none.}
 
 \item{n_features}{For \code{"forest"}: how many features to show, those with
 the smallest adjusted p-values (ties in the table's order).
 Default \code{30}; \code{Inf} for all.}
+
+\item{numerator, denominator}{For \code{"rank"}: the features to highlight
+as the numerator (red) and denominator (blue) of a log ratio, such
+as those that \code{\link[=log_ratio_features]{log_ratio_features()}} picks: their names, their
+indices among the result's features, or a logical vector with one
+value per feature, as for \code{\link[=log_ratio]{log_ratio()}}. They must not overlap.}
 
 \item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}}, such as \code{main},
 \code{sub}, \code{xlab}, \code{xlim} or \code{cex}.}
@@ -47,6 +56,8 @@ standard deviation (Gloor et al. 2016; ALDEx2's \code{"MW"} plot).
 \code{"MA"} plot).
 \item \code{"forest"}: the log2 fold changes and their intervals of the
 \code{n_features} most significant features, largest at the top.
+\item \code{"rank"}: every feature's log2 fold change, sorted (see \strong{Rank
+plots}).
 }
 
 \strong{Volcano plot.} The y axis is \eqn{-\log_{10}} of \code{p_adjusted} (an
@@ -78,12 +89,35 @@ of one draw: wider than a single confidence interval.
 Features whose value is \code{NaN} are left out of each plot. The subtitle
 names the contrast and counts the features rejected.
 }
+\section{Rank plots}{
+
+A rank plot (\code{type = "rank"}) draws every feature as a bar from 0 to its
+effect, sorted from the smallest at the left to the largest at the right
+(ties in the result's order), as Qurro's rank plot does (Fedarko et al.
+2020, \doi{10.1093/nargab/lqaa023}). With relative abundances, every
+feature's effect is known only up to a shift shared by all of them, the
+unknown change in the total (Morton et al. 2019,
+\doi{10.1038/s41467-019-10656-5}): the ranking is what the data show, and
+the log ratio of features from its two ends can be read without knowing
+the total. Pick them with \code{\link[=log_ratio_features]{log_ratio_features()}}, show where they sit
+with \code{numerator} and \code{denominator}, and plot their log ratio sample by
+sample with \code{\link[=plot.ecodive_log_ratio]{plot.ecodive_log_ratio()}}.
+
+Without \code{numerator} or \code{denominator}, the differentially abundant
+features (\code{reject = TRUE}) are drawn dark and the others light; with
+them, the numerator's bars are red and the denominator's blue, with a
+legend. The \code{labels} highlighted features with the largest effects are
+named. Features with no estimate (\code{NaN}) are left out and counted in
+the subtitle; for a model result, the bars are \code{covariate}'s effects.
+}
+
 \examples{
     res <- dirmult_ttest(round(iris[, 1:4] * 10), 'Species', iris)
     plot(res)
     plot(res, 'effect')
     plot(res, 'ma')
     plot(res, 'forest')
+    plot(res, 'rank', numerator = 'Petal.Width', denominator = 'Sepal.Width')
 }
 \references{
 Gloor, G. B., Macklaim, J. M., & Fernandes, A. D. (2016). Displaying

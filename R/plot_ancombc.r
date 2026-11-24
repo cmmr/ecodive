@@ -13,7 +13,9 @@
 #'   residual standard deviation (Gloor et al. 2016; ALDEx2's `"MW"`
 #'   plot), for a two-level comparison; `"ma"`, against each feature's mean
 #'   clr abundance (ALDEx2's `"MA"` plot); or `"forest"`, with their
-#'   confidence intervals, for the `n_features` most significant features.
+#'   confidence intervals, for the `n_features` most significant features;
+#'   or `"rank"`, all of them sorted by their log fold change (see **Rank
+#'   plots**).
 #' * [ancombc_pairwise()], [ancombc_dunnett()]: a heatmap of the log fold
 #'   change of each feature (rows) in each comparison (columns), with the
 #'   significant ones in bold.
@@ -35,12 +37,13 @@
 #'        covariate that isn't the intercept.
 #'
 #' @param type  For [ancombc()] and [ancombc2()]: the plot, `"volcano"`
-#'        (the default), `"effect"`, `"ma"`, or `"forest"`.
+#'        (the default), `"effect"`, `"ma"`, `"forest"`, or `"rank"`.
 #'
 #' @param labels  For [ancombc()] and [ancombc2()]: how many of the
 #'        differentially abundant features to name (in the volcano, effect
-#'        and MA plots), those with the smallest adjusted p-values. Default
-#'        `10`; `0` for none.
+#'        and MA plots), those with the smallest adjusted p-values. In the
+#'        rank plot, the highlighted features with the largest effects.
+#'        Default `10`; `0` for none.
 #'
 #' @param n_features  How many features to show: for the forest plot, those
 #'        with the smallest adjusted p-value (ties in the table's order);
@@ -50,6 +53,32 @@
 #'
 #' @param conf_level  For the forest plot: the confidence level of the
 #'        intervals. Default `0.95`.
+#'
+#' @param numerator,denominator  For `"rank"`: the features to highlight
+#'        as the numerator (red) and denominator (blue) of a log ratio, such
+#'        as those that [log_ratio_features()] picks: their names, their
+#'        indices among the result's features, or a logical vector with one
+#'        value per feature, as for [log_ratio()]. They must not overlap.
+#'
+#' @section Rank plots:
+#' A rank plot (`type = "rank"`) draws every feature as a bar from 0 to its
+#' effect, sorted from the smallest at the left to the largest at the right
+#' (ties in the result's order), as Qurro's rank plot does (Fedarko et al.
+#' 2020, \doi{10.1093/nargab/lqaa023}). With relative abundances, every
+#' feature's effect is known only up to a shift shared by all of them, the
+#' unknown change in the total (Morton et al. 2019,
+#' \doi{10.1038/s41467-019-10656-5}): the ranking is what the data show, and
+#' the log ratio of features from its two ends can be read without knowing
+#' the total. Pick them with [log_ratio_features()], show where they sit
+#' with `numerator` and `denominator`, and plot their log ratio sample by
+#' sample with [plot.ecodive_log_ratio()].
+#'
+#' Without `numerator` or `denominator`, the differentially abundant
+#' features (`reject = TRUE`) are drawn dark and the others light; with
+#' them, the numerator's bars are red and the denominator's blue, with a
+#' legend. The `labels` highlighted features with the largest effects are
+#' named. Features with no estimate (`NaN`) are left out and counted in
+#' the subtitle; for a model result, the bars are `covariate`'s effects.
 #'
 #' @param digits  For the heatmap: the number of decimal places of the log
 #'        fold changes written in its cells. Default `2`.
@@ -120,25 +149,25 @@
 #'     plot(fit, type = 'ma')
 #'     plot(fit, 'age', type = 'forest')
 #'
+#'     # The features ranked, with the two at each end as a log ratio.
+#'     sel <- log_ratio_features(fit, n = 2)
+#'     plot(fit, type = 'rank', numerator = sel$numerator, denominator = sel$denominator)
+#'     plot(do.call(log_ratio, c(list(x), sel)), 'status', meta)
+#'
 #'     # Every pair of groups.
 #'     plot(ancombc_pairwise(fit))
 #'
 #'     # Any difference between the groups.
 #'     plot(ancombc_global(fit))
 plot.ecodive_ancombc <- function (
-    x, covariate = NULL, type = c('volcano', 'effect', 'ma', 'forest'),
-    labels = 10, n_features = 30, conf_level = 0.95, ... ) {
+    x, covariate = NULL, type = c('volcano', 'effect', 'ma', 'forest', 'rank'),
+    labels = 10, n_features = 30, conf_level = 0.95, numerator = NULL,
+    denominator = NULL, ... ) {
 
-  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest'))
+  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest', 'rank'))
   da_plot_need(x, type, c(effect = 'resid_sd', ma = 'mean'), column = FALSE)
 
-  covs <- unique(x$covariate)
-  if (is.null(covariate)) {
-    covariate <- setdiff(covs, '(Intercept)')
-    covariate <- if (length(covariate)) covariate[[1]] else covs[[1]]
-  }
-  if (!is.character(covariate) || length(covariate) != 1 || !covariate %in% covs)
-    stop('`covariate` must be one of ', name_list(covs), '.', call. = FALSE)
+  covariate <- da_rank_covariate(x, covariate)
   if (type == 'effect') da_plot_binary(x, covariate)
 
   if (!is.numeric(conf_level) || length(conf_level) != 1L || is.na(conf_level) ||
@@ -165,7 +194,8 @@ plot.ecodive_ancombc <- function (
     est_lab  = lfc_label(x),
     sd_lab   = 'Residual standard deviation (natural log)',
     mean_lab = mean_lab,
-    interval = sprintf('unadjusted %s Wald intervals', plot_pct(conf_level)) )
+    interval = sprintf('unadjusted %s Wald intervals', plot_pct(conf_level)),
+    num = numerator, den = denominator )
 
   invisible(x)
 }

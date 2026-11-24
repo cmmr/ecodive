@@ -87,6 +87,7 @@ reference:
   contents:
   - log_ratio
   - balance
+  - log_ratio_features
 - subtitle: Proportionality
   desc: Which features keep a constant ratio across samples, the compositionally valid alternative to correlation. A dist over the features.
   contents:
@@ -219,6 +220,7 @@ reference:
   - plot.ecodive_types
   - plot.ecodive_source
   - plot.ecodive_rarefaction_curve
+  - plot.ecodive_log_ratio
   - ecodive_display
   - print_ecodive
 

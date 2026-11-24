@@ -18,11 +18,13 @@
 #' * `"forest"` ([da_ttest()], [da_lm()]): the effects and their confidence
 #'   intervals of the `n_features` most significant features, largest at
 #'   the top.
+#' * `"rank"`: every feature's effect, sorted (see **Rank plots**).
 #'
 #' @param x  The result of [da_wilcoxon()], [da_ttest()], or [da_lm()].
 #'
-#' @param type  The plot: `"volcano"` (the default), `"effect"`, `"ma"`, or
-#'        `"forest"` (for [da_wilcoxon()], `"volcano"` or `"ma"`).
+#' @param type  The plot: `"volcano"` (the default), `"effect"`, `"ma"`,
+#'        `"forest"`, or `"rank"` (for [da_wilcoxon()], `"volcano"`, `"ma"`
+#'        or `"rank"`).
 #'
 #' @param covariate  For [da_lm()]: which covariate's coefficients to plot,
 #'        as named in the result's `covariate` column (such as
@@ -32,14 +34,19 @@
 #'
 #' @param labels  How many of the differentially abundant features to name
 #'        (in the volcano, effect and MA plots), those with the smallest
-#'        adjusted p-values. Default `10`; `0` for none.
+#'        adjusted p-values. In the rank plot, the highlighted features with
+#'        the largest effects. Default `10`; `0` for none.
 #'
 #' @param n_features  For `"forest"`: how many features to show, those with
 #'        the smallest adjusted p-values (ties in the table's order).
 #'        Default `30`; `Inf` for all.
 #'
+#' @inheritParams plot.ecodive_ancombc
+#'
 #' @param ...  Passed on to [graphics::plot.default()], such as `main`,
 #'        `sub`, `xlab`, `xlim` or `cex`.
+#'
+#' @inheritSection plot.ecodive_ancombc Rank plots
 #'
 #' @details
 #' The effect is the difference in medians ([da_wilcoxon()]), in means
@@ -86,11 +93,12 @@
 #'     plot(res, 'effect')
 #'     plot(res, 'forest', n_features = 10)
 #'     plot(da_lm(x, groups = grp), type = 'ma')
+#'     plot(res, 'rank', numerator = 'Staphylococcus', denominator = 'Bacteroides')
 plot.ecodive_da_ttest <- function (
-    x, type = c('volcano', 'effect', 'ma', 'forest'), labels = 10,
-    n_features = 30, ... ) {
+    x, type = c('volcano', 'effect', 'ma', 'forest', 'rank'), labels = 10,
+    n_features = 30, numerator = NULL, denominator = NULL, ... ) {
 
-  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest'))
+  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest', 'rank'))
   da_plot_need(x, type, c(effect = 'pooled_sd', ma = 'mean'), column = TRUE)
 
   units <- da_norm_units(x)
@@ -102,7 +110,8 @@ plot.ecodive_da_ttest <- function (
     est_lab  = da_effect_label(x, 'Difference in means'),
     sd_lab   = sprintf('Pooled within-group standard deviation (%s)', units),
     mean_lab = sprintf('Mean abundance (%s)', units),
-    interval = sprintf('%s confidence intervals', plot_pct(attr(x, 'conf_level', exact = TRUE))) )
+    interval = sprintf('%s confidence intervals', plot_pct(attr(x, 'conf_level', exact = TRUE))),
+    num = numerator, den = denominator )
 
   invisible(x)
 }
@@ -110,9 +119,11 @@ plot.ecodive_da_ttest <- function (
 
 #' @rdname plot.ecodive_da_ttest
 #' @export
-plot.ecodive_da_wilcoxon <- function (x, type = c('volcano', 'ma'), labels = 10, ...) {
+plot.ecodive_da_wilcoxon <- function (
+    x, type = c('volcano', 'ma', 'rank'), labels = 10, numerator = NULL,
+    denominator = NULL, ... ) {
 
-  type <- test_plot_type(type, c('volcano', 'ma'))
+  type <- test_plot_type(type, c('volcano', 'ma', 'rank'))
   da_plot_need(x, type, c(ma = 'mean'), column = TRUE)
 
   da_plot(
@@ -121,7 +132,8 @@ plot.ecodive_da_wilcoxon <- function (x, type = c('volcano', 'ma'), labels = 10,
     mean     = x$mean,
     what     = da_plot_contrast(x),
     est_lab  = da_effect_label(x, 'Difference in medians'),
-    mean_lab = sprintf('Mean abundance (%s)', da_norm_units(x)) )
+    mean_lab = sprintf('Mean abundance (%s)', da_norm_units(x)),
+    num = numerator, den = denominator )
 
   invisible(x)
 }
@@ -130,27 +142,13 @@ plot.ecodive_da_wilcoxon <- function (x, type = c('volcano', 'ma'), labels = 10,
 #' @rdname plot.ecodive_da_ttest
 #' @export
 plot.ecodive_da_lm <- function (
-    x, covariate = NULL, type = c('volcano', 'effect', 'ma', 'forest'),
-    labels = 10, n_features = 30, ... ) {
+    x, covariate = NULL, type = c('volcano', 'effect', 'ma', 'forest', 'rank'),
+    labels = 10, n_features = 30, numerator = NULL, denominator = NULL, ... ) {
 
-  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest'))
+  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest', 'rank'))
   da_plot_need(x, type, c(effect = 'resid_sd', ma = 'mean'), column = FALSE)
 
-  covs <- unique(x$covariate)
-  if (is.null(covariate)) {
-    g    <- attr(x, 'groups', exact = TRUE)
-    asg  <- attr(attr(x, 'design', exact = TRUE), 'assign')
-    term <- attr(attr(x, 'design', exact = TRUE), 'term.labels')
-    covariate <- NULL
-    if (is.character(g) && length(g) == 1L && !is.null(asg) && g %in% term)
-      covariate <- utils::head(covs[asg == match(g, term)], 1L)
-    if (!length(covariate)) {
-      covariate <- setdiff(covs, '(Intercept)')
-      covariate <- if (length(covariate)) covariate[[1]] else covs[[1]]
-    }
-  }
-  if (!is.character(covariate) || length(covariate) != 1 || !covariate %in% covs)
-    stop('`covariate` must be one of ', name_list(covs), '.', call. = FALSE)
+  covariate <- da_rank_covariate(x, covariate)
   if (type == 'effect') da_plot_binary(x, covariate)
 
   r     <- x[x$covariate == covariate, , drop = FALSE]
@@ -164,28 +162,33 @@ plot.ecodive_da_lm <- function (
     est_lab  = da_effect_label(x, 'Coefficient'),
     sd_lab   = sprintf('Residual standard deviation (%s)', units),
     mean_lab = sprintf('Mean abundance (%s)', units),
-    interval = sprintf('%s confidence intervals', plot_pct(attr(x, 'conf_level', exact = TRUE))) )
+    interval = sprintf('%s confidence intervals', plot_pct(attr(x, 'conf_level', exact = TRUE))),
+    num = numerator, den = denominator )
 
   invisible(x)
 }
 
 
 
-# Draws a DA result's plot of `type` ('volcano', 'effect', 'ma' or
-# 'forest') from per-feature vectors: the effects `est`, adjusted p-values
+# Draws a DA result's plot of `type` ('volcano', 'effect', 'ma', 'forest'
+# or 'rank') from per-feature vectors: the effects `est`, adjusted p-values
 # `p`, decisions `reject` (and `robust`, with a sensitivity analysis),
 # names `feature`, dispersions `sd`, mean abundances `mean`, and interval
 # bounds `lo`, `hi`. `what` is the comparison (for the subtitle), the
 # `*_lab` are axis labels and `interval` describes the forest plot's bars
-# (in its x axis label).
+# (in its x axis label). `num` and `den` are the rank plot's numerator and
+# denominator, as the user gave them.
 # The title is da_plot_title()'s.
 da_plot <- function (
     x, type, labels, n_features, args, est, p, reject, feature,
     sd = NULL, mean = NULL, lo = NULL, hi = NULL, robust = NULL, what = NULL,
     est_lab = 'Log fold change', sd_lab = NULL, mean_lab = NULL,
-    interval = NULL ) {
+    interval = NULL, num = NULL, den = NULL ) {
 
   labels <- plot_count(labels, 'labels')
+  rank_only(type, num, den)
+  if (type == 'rank')
+    return (da_plot_rank(x, est, reject, feature, labels, args, num, den, what, est_lab))
   main   <- da_plot_title(x, type)
   sub    <- da_plot_sub(what, reject, robust)
   rob    <- function (i) if (!is.null(robust)) robust[i]
@@ -218,7 +221,9 @@ da_plot <- function (
 # "Volcano plot of Welch t-test", from the plot's type and the result's
 # `method`.
 da_plot_title <- function (x, type = 'volcano') {
-  lab <- c(volcano = 'Volcano plot', effect = 'Effect plot', ma = 'MA plot', forest = 'Forest plot')
+  lab <- c(
+    volcano = 'Volcano plot', effect = 'Effect plot', ma = 'MA plot',
+    forest = 'Forest plot', rank = 'Rank plot' )
   paste(lab[[type]], 'of', da_method_name(attr(x, 'method', exact = TRUE)))
 }
 

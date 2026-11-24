@@ -23,7 +23,7 @@ same thing.
 | `ord` | an ordination result (first argument) | `envfit`, `pcoa_biplot`; planned `procrustes` |
 | `x`, `y` | two inputs of equal standing, or a first argument that can be either `dm` or `counts` | planned `coinertia(x, y)`, `varpart(x, ...)`, `forward_select(x, ...)`; `enterotype(x, ...)` (with `counts` as a later, optional argument when `x` is a dist); `mantel(dm, y)` |
 | `n_axes` | **the number of axes returned** (proposed rename of `k`; see §2.0) | every ordination |
-| `axes` | **which** axes of an input ordination to use (indices) | `envfit`; planned `procrustes` |
+| `axes` | **which** axes of an input ordination to use (indices) | `envfit`; planned `procrustes`; `log_ratio_features` (one axis, 2026-11-24, item 46) |
 | `groups`, `data`, `formula` | the grouping variable or model, and the sample metadata it comes from. DA model methods (2026-11-20, `da_test()`): `formula` is the model and `groups` its term of interest; `groups` alone is `formula = ~ groups` | tests, `dbrda`, `capscale`, DA methods, and planned constrained and discriminant methods |
 | `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv`; `cross_assoc` (covariates: a formula over `data`, column names, or a table) |
 | `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20) | everything that takes `counts` |
@@ -39,7 +39,7 @@ same thing.
 | `tol` | a convergence tolerance | `mds`, `nmds`, `rpca`; planned `splsda` |
 | `init`, `learning_rate` | starting layout, step size | `tsne`, `umap`; planned `pacmap`, `largevis` |
 | `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights | planned `moran_i`, `dbmem` |
-| `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only), `log_ratio`, `balance`, `rho_p`, `phi_s` (`denominator` only: one feature for an alr, or a set) |
+| `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only), `log_ratio`, `balance`, `rho_p`, `phi_s` (`denominator` only: one feature for an alr, or a set); the rank plots (`type = 'rank'`, item 46) of the DA plot methods and `plot.ecodive_ord()`, the features to highlight; `log_ratio_features()` returns them as a list |
 | `basis` | **(new)** an ILR basis or a sequential binary partition | `ilr` |
 | `load` | **(new, 2026-11-19)** each sample's measured total microbial load: one finite value > 0 per sample (matched by name, else by position), or a column name of `data`, by the same `per_sample()` rule as `groups` | `qmp_scale`, `qmp_rarefy` |
 | `contrast` | **(new)** the samples compared, `c(treatment, reference)`; `reference = NA` pools all other samples | `dirmult_ttest`, `da_wilcoxon`, `da_ttest` |
@@ -67,6 +67,8 @@ same thing.
 | `depths`, `n_depths`, `max_depth` | **(new, 2026-11-24, item 38)** the depths of rarefaction curves (whole numbers ≥ 1; plural, since `depth` is one depth per sample), the number of points in the default grid (`n_<unit>` rule; q2's `steps`), and the largest depth computed (q2's name) | `rarefaction_curve` |
 | `analytic` | **(new, item 38)** which metrics to compute in closed form: `NULL` (those that have one), `TRUE` (all, an error if one has none) or `FALSE` (resample all) | `rarefaction_curve` |
 | `coverage` | **(new, item 38)** a target sample coverage in (0, 1], for coverage-based rarefaction (Chao & Jost 2012); exclusive with `depth`. Also planned `hill_standardize(coverage =)` | `rarefy` |
+| `n` | **(new, 2026-11-24, item 46)** in `log_ratio_features()`, how many features to take from **each** end of a ranking (a whole number ≥ 1; Qurro's autoselection count). Not `n_features`, which the DA plots use for how many to show | `log_ratio_features` |
+| `type` | the kind of plot of a `plot()` method; `'rank'` (item 46) on DA results and ordinations. On `plot.ecodive_ord()`, any value but `'samples'` and `'rank'` goes on to `plot.default()` (`type = 'n'`) | `plot.*` |
 | `cpus` | threads (always last) | everything threaded |
 
 

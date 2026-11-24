@@ -109,6 +109,9 @@
   z <- balance(counts, c('F1', 'F2'), 3:5)
   expect_true(is.numeric(z) && length(z) == 20 && all(is.finite(z)))
   expect_identical(attr(z, 'method'), 'balance')
+  expect_true(inherits(z, 'ecodive_log_ratio') && !inherits(z[1:2], 'ecodive_log_ratio'))
+  z <- log_ratio_features(pca(counts, cpus = cpus), n = 2)
+  expect_true(is.character(z$numerator) && length(z$numerator) == 2 && length(z$denominator) == 2)
 
   # Proportionality.
   for (f in c('vlr', 'rho_p', 'phi_s')) {

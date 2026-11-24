@@ -215,22 +215,29 @@ simper_plot_rows <- function (pair, pairs, n) {
 #'   `"MA"` plot).
 #' * `"forest"`: the log2 fold changes and their intervals of the
 #'   `n_features` most significant features, largest at the top.
+#' * `"rank"`: every feature's log2 fold change, sorted (see **Rank
+#'   plots**).
 #'
 #' @param x  The result of [dirmult_ttest()].
 #'
-#' @param type  The plot: `"volcano"` (the default), `"effect"`, `"ma"`, or
-#'        `"forest"`.
+#' @param type  The plot: `"volcano"` (the default), `"effect"`, `"ma"`,
+#'        `"forest"`, or `"rank"`.
 #'
 #' @param labels  How many of the differentially abundant features to name
 #'        (in the volcano, effect and MA plots), those with the smallest
-#'        adjusted p-values. Default `10`; `0` for none.
+#'        adjusted p-values. In the rank plot, the highlighted features with
+#'        the largest effects. Default `10`; `0` for none.
 #'
 #' @param n_features  For `"forest"`: how many features to show, those with
 #'        the smallest adjusted p-values (ties in the table's order).
 #'        Default `30`; `Inf` for all.
 #'
+#' @inheritParams plot.ecodive_ancombc
+#'
 #' @param ...  Passed on to [graphics::plot.default()], such as `main`,
 #'        `sub`, `xlab`, `xlim` or `cex`.
+#'
+#' @inheritSection plot.ecodive_ancombc Rank plots
 #'
 #' @details
 #' **Volcano plot.** The y axis is \eqn{-\log_{10}} of `p_adjusted` (an
@@ -278,11 +285,12 @@ simper_plot_rows <- function (pair, pairs, n) {
 #'     plot(res, 'effect')
 #'     plot(res, 'ma')
 #'     plot(res, 'forest')
+#'     plot(res, 'rank', numerator = 'Petal.Width', denominator = 'Sepal.Width')
 plot.ecodive_dirmult_ttest <- function (
-    x, type = c('volcano', 'effect', 'ma', 'forest'), labels = 10,
-    n_features = 30, ... ) {
+    x, type = c('volcano', 'effect', 'ma', 'forest', 'rank'), labels = 10,
+    n_features = 30, numerator = NULL, denominator = NULL, ... ) {
 
-  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest'))
+  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest', 'rank'))
   da_plot_need(x, type, c(effect = 'pooled_sd', ma = 'mean'), column = TRUE)
 
   conf <- attr(x, 'conf_level', exact = TRUE)
@@ -294,7 +302,8 @@ plot.ecodive_dirmult_ttest <- function (
     est_lab  = lfc_label(x),
     sd_lab   = 'Pooled within-group standard deviation (log2)',
     mean_lab = 'Mean clr abundance (log2)',
-    interval = sprintf("envelope of the draws' %s intervals", plot_pct(conf)) )
+    interval = sprintf("envelope of the draws' %s intervals", plot_pct(conf)),
+    num = numerator, den = denominator )
 
   invisible(x)
 }

@@ -41,7 +41,9 @@
 #' @param loadings  How many of the features in the `loadings` attribute to
 #'        draw, those furthest from the origin on the plotted axes first: a
 #'        number, `Inf` (or `TRUE`) for all, or `0` (or `FALSE`) for none.
-#'        Default `10`. Drawn as arrows for [pca()], [rpca()],
+#'        Default `10`. In a rank plot, how many features to name, those
+#'        with the largest loadings (among `numerator` and `denominator`,
+#'        when given). Drawn as arrows for [pca()], [rpca()],
 #'        [rpca_phylo()], [rda()], [plsda()] and [oplsda()], and as labelled
 #'        points for the species scores of [ca()] and [cca()].
 #'
@@ -74,6 +76,19 @@
 #' @param pch  The points' symbols, as for `plot()`. Default `1` (open
 #'        circles), or `16` (filled circles) with `groups`.
 #'
+#' @param type  `"samples"` (the default): the samples on two axes, with
+#'        the overlays below. `"rank"`: a rank plot of the feature loadings
+#'        on axis `axes[1]` (see **Rank plots**), for ordinations of a count
+#'        table with a `loadings` attribute. Any other value is passed on to
+#'        [graphics::plot.default()], so `type = "n"` sets up the plot
+#'        without drawing the samples, as for any matrix.
+#'
+#' @param numerator,denominator  For `type = "rank"`: the features to
+#'        highlight as the numerator (red) and denominator (blue) of a log
+#'        ratio, such as those that [log_ratio_features()] picks: names
+#'        (rows of `loadings`), indices, or a logical vector, as for
+#'        [log_ratio()]. They must not overlap.
+#'
 #' @param ...  Passed on to [graphics::plot.default()], such as `main`,
 #'        `sub`, `xlab`, `xlim`, `asp` or `cex`. They replace the defaults
 #'        made from `x`. To leave out the axes, use `xaxt = "n"` and `yaxt =
@@ -105,6 +120,21 @@
 #' species scores of [ca()] and [cca()] (`vegan`'s scaling 2), are drawn
 #' where they are.
 #'
+#' **Rank plots.** With `type = "rank"`, each feature is a bar from 0 to
+#' its loading on axis `axes[1]`, sorted from the smallest at the left to
+#' the largest at the right (ties in the order of `loadings`), as Qurro's
+#' rank plot of feature loadings (Fedarko et al. 2020,
+#' \doi{10.1093/nargab/lqaa023}). For a compositional ordination such as
+#' [rpca()], the features at the two ends pull the samples apart along the
+#' axis, and their log ratio (Morton et al. 2019,
+#' \doi{10.1038/s41467-019-10656-5}) follows the axis without depending on
+#' the samples' totals: pick them with [log_ratio_features()] and plot it
+#' with [plot.ecodive_log_ratio()]. The bars are grey; `numerator` and
+#' `denominator` colour theirs, with a legend in the top-left corner
+#' (`legend` moves it, and `NULL` leaves it out). The title is "Rank plot
+#' of" the ordination's title. The loadings of [rpca_phylo()] include the
+#' tree's internal nodes.
+#'
 #' Base graphics draw on the current device, so further points, text or
 #' arrows can be added on top. Use [envfit()]'s plot method, `plot(fit, add =
 #' TRUE)`, to add fitted variables.
@@ -134,17 +164,34 @@
 #'     # Supervised methods colour by their own groups.
 #'     plot(lda(iris[, 1:4], 'Species', iris))
 #'
+#'     # The features ranked by their loadings on the first axis.
+#'     plot(pca(iris[, 1:4], scale = TRUE), type = 'rank')
+#'
 #'     # Any argument of plot() still works.
 #'     plot(nmds(bray(iris[, 1:4]), seed = 1), col = 'grey40', main = 'NMDS')
 plot.ecodive_ord <- function (
     x, groups = NULL, data = NULL, axes = c(1, 2), loadings = 10,
     biplot = TRUE, centroids = TRUE, target = TRUE, legend = 'topright',
-    col = NULL, pch = NULL, ... ) {
+    col = NULL, pch = NULL, type = 'samples', numerator = NULL,
+    denominator = NULL, ... ) {
 
   args     <- list(...)
   att      <- attributes(x)
   pos      <- plot_legend_pos(legend)
   loadings <- plot_count(loadings, 'loadings')
+
+  # The rank plot of the loadings on axes[[1]], or else any other `type`
+  # is plot.default()'s, such as type = "n".
+  if (identical(type, 'rank')) {
+    if (!is.numeric(axes) || length(axes) < 1L)
+      stop('`axes` must be an axis number.', call. = FALSE)
+    ord_plot_rank(
+      x, axes, loadings, args, numerator, denominator,
+      if (missing(legend)) 'topleft' else pos )
+    return (invisible(x))
+  }
+  rank_only(type, numerator, denominator)
+  if (!identical(type, 'samples')) args$type <- type
   for (arg in c('biplot', 'centroids', 'target'))
     if (!isTRUE(get(arg)) && !isFALSE(get(arg)))
       stop('`', arg, '` must be TRUE or FALSE.', call. = FALSE)

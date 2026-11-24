@@ -41,6 +41,13 @@ indices when the features have no names), in the order of \code{counts}.
 \item \code{pseudocount}: the pseudocount used (\code{0} for none).
 }
 
+Its class, \code{ecodive_log_ratio}, gives it a short \code{print()} (a header
+naming the features, then the values) and a \code{plot()} by group or
+against a numeric variable (\code{\link[=plot.ecodive_log_ratio]{plot.ecodive_log_ratio()}}). Everything
+else treats it as a plain numeric vector (\code{is.numeric()} is \code{TRUE});
+subsetting (\code{x[1:5]}), \code{sort()}, and arithmetic or maths (\code{-x}, \code{x - mean(x)}, \code{abs(x)}) return a plain named vector without the
+attributes, which no longer describe the values.
+
 The vector drops straight into metadata (\code{data$ratio <- log_ratio(...)})
 and into any test or fit that takes a per-sample variable, such as
 \code{\link[=envfit]{envfit()}} or \code{\link[=mantel]{mantel()}}.
@@ -126,5 +133,7 @@ Bioinformatics}, 2, lqaa023.
 \seealso{
 \code{\link[=balance]{balance()}} for the ratio of geometric means; \code{\link[=alr]{alr()}} for every
 feature against one; \code{\link[=vlr]{vlr()}}, \code{\link[=rho_p]{rho_p()}} and \code{\link[=phi_s]{phi_s()}} for finding
-features that move together.
+features that move together. \code{\link[=log_ratio_features]{log_ratio_features()}} to take the
+numerator and denominator from the two ends of a ranking, and
+\code{\link[=plot.ecodive_log_ratio]{plot.ecodive_log_ratio()}} to plot the result.
 }

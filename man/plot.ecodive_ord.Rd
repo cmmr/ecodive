@@ -16,6 +16,9 @@
   legend = "topright",
   col = NULL,
   pch = NULL,
+  type = "samples",
+  numerator = NULL,
+  denominator = NULL,
   ...
 )
 }
@@ -49,7 +52,9 @@ which case \code{axes} is not used).}
 \item{loadings}{How many of the features in the \code{loadings} attribute to
 draw, those furthest from the origin on the plotted axes first: a
 number, \code{Inf} (or \code{TRUE}) for all, or \code{0} (or \code{FALSE}) for none.
-Default \code{10}. Drawn as arrows for \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}},
+Default \code{10}. In a rank plot, how many features to name, those
+with the largest loadings (among \code{numerator} and \code{denominator},
+when given). Drawn as arrows for \code{\link[=pca]{pca()}}, \code{\link[=rpca]{rpca()}},
 \code{\link[=rpca_phylo]{rpca_phylo()}}, \code{\link[=rda]{rda()}}, \code{\link[=plsda]{plsda()}} and \code{\link[=oplsda]{oplsda()}}, and as labelled
 points for the species scores of \code{\link[=ca]{ca()}} and \code{\link[=cca]{cca()}}.}
 
@@ -81,6 +86,19 @@ groups and its \code{"Viridis"} palette for a gradient.}
 
 \item{pch}{The points' symbols, as for \code{plot()}. Default \code{1} (open
 circles), or \code{16} (filled circles) with \code{groups}.}
+
+\item{type}{\code{"samples"} (the default): the samples on two axes, with
+the overlays below. \code{"rank"}: a rank plot of the feature loadings
+on axis \code{axes[1]} (see \strong{Rank plots}), for ordinations of a count
+table with a \code{loadings} attribute. Any other value is passed on to
+\code{\link[graphics:plot.default]{graphics::plot.default()}}, so \code{type = "n"} sets up the plot
+without drawing the samples, as for any matrix.}
+
+\item{numerator, denominator}{For \code{type = "rank"}: the features to
+highlight as the numerator (red) and denominator (blue) of a log
+ratio, such as those that \code{\link[=log_ratio_features]{log_ratio_features()}} picks: names
+(rows of \code{loadings}), indices, or a logical vector, as for
+\code{\link[=log_ratio]{log_ratio()}}. They must not overlap.}
 
 \item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}}, such as \code{main},
 \code{sub}, \code{xlab}, \code{xlim}, \code{asp} or \code{cex}. They replace the defaults
@@ -125,6 +143,21 @@ Loadings and constraints are scaled separately. Centroids, and the
 species scores of \code{\link[=ca]{ca()}} and \code{\link[=cca]{cca()}} (\code{vegan}'s scaling 2), are drawn
 where they are.
 
+\strong{Rank plots.} With \code{type = "rank"}, each feature is a bar from 0 to
+its loading on axis \code{axes[1]}, sorted from the smallest at the left to
+the largest at the right (ties in the order of \code{loadings}), as Qurro's
+rank plot of feature loadings (Fedarko et al. 2020,
+\doi{10.1093/nargab/lqaa023}). For a compositional ordination such as
+\code{\link[=rpca]{rpca()}}, the features at the two ends pull the samples apart along the
+axis, and their log ratio (Morton et al. 2019,
+\doi{10.1038/s41467-019-10656-5}) follows the axis without depending on
+the samples' totals: pick them with \code{\link[=log_ratio_features]{log_ratio_features()}} and plot it
+with \code{\link[=plot.ecodive_log_ratio]{plot.ecodive_log_ratio()}}. The bars are grey; \code{numerator} and
+\code{denominator} colour theirs, with a legend in the top-left corner
+(\code{legend} moves it, and \code{NULL} leaves it out). The title is "Rank plot
+of" the ordination's title. The loadings of \code{\link[=rpca_phylo]{rpca_phylo()}} include the
+tree's internal nodes.
+
 Base graphics draw on the current device, so further points, text or
 arrows can be added on top. Use \code{\link[=envfit]{envfit()}}'s plot method, \code{plot(fit, add = TRUE)}, to add fitted variables.
 }
@@ -146,6 +179,9 @@ arrows can be added on top. Use \code{\link[=envfit]{envfit()}}'s plot method, \
 
     # Supervised methods colour by their own groups.
     plot(lda(iris[, 1:4], 'Species', iris))
+
+    # The features ranked by their loadings on the first axis.
+    plot(pca(iris[, 1:4], scale = TRUE), type = 'rank')
 
     # Any argument of plot() still works.
     plot(nmds(bray(iris[, 1:4]), seed = 1), col = 'grey40', main = 'NMDS')

@@ -252,3 +252,126 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - Martino, C., Morton, J. T., Marotz, C. A., et al. (2019). A novel sparse
   compositional technique reveals microbial perturbations. *mSystems*, 4,
   e00016-19. \doi{10.1128/mSystems.00016-19}
+
+
+## Decisions made while implementing (item 46, 2026-11-24)
+
+Asked of the user at the start (all three answered with the recommended
+option):
+
+1. **Every DA result with a signed effect** gets `type = 'rank'` and is
+   accepted by `log_ratio_features()`, not only the plan's
+   `dirmult_ttest()` / `ancombc()` / `ancombc2()`: also `da_ttest()`,
+   `da_wilcoxon()` (`type = c('volcano', 'ma', 'rank')`), `da_lm()` and
+   `linda()`. The effect column is read from `DA_TESTS$effect` by the
+   result's `method` (`rank_source()`), so a new method (such as
+   `lefse()`) needs no special case in `log_ratio_features()` if its
+   registry row names a signed effect; its own `plot()` method still has to
+   add `'rank'` and pass `num` / `den` to `da_plot()`. `ancom()` (no effect
+   column) is refused: "ancom() results have no signed effect, so they rank
+   no features into a reference frame."
+2. **Arithmetic drops the class** (the plan said it keeps it):
+   `Ops.ecodive_log_ratio` and `Math.ecodive_log_ratio` return a plain
+   named numeric vector, as `[`, `sort()` and `rev()` already do, so `-lr`
+   or `lr - mean(lr)` never plots or prints as `log(N / D)`. This follows
+   README's "arithmetic drops the label" rule for distance matrices.
+3. **No Vega from npm.** Qurro's own `feature_computation.js` runs under
+   the container's Node.js (autoselection and `computeBalance()`);
+   rank-plot positions are tested against a direct stable ascending sort.
+
+Made while implementing:
+
+4. **Files.** The rank-plot code is in a new `R/plot_rank.r` (not
+   `R/plot_tables.r`, which other sessions were editing):
+   `rank_source()` (the ranking a result defines), `da_rank_covariate()`,
+   `rank_layout()` (the bars' coordinates, classes, colours and labels, as
+   a data frame that the tests read), `plot_rank_bars()`,
+   `rank_selection()`, `da_plot_rank()`, `ord_plot_rank()`, `rank_only()`.
+   The class methods and the sample plot are in a new `R/plot_log_ratio.r`;
+   `log_ratio_features()` is in `R/log_ratio.r`.
+5. **Titles** follow item 28's pattern, "Rank plot of ANCOM-BC2" /
+   "Rank plot of Dirichlet-Multinomial t-test" (via `da_plot_title(x,
+   'rank')`) and "Rank plot of <the ordination's title>", rather than the
+   plan's "<method>: ranked features".
+6. **Axis labels and subtitle.** The y label is the effect label the
+   method's other DA plots use ("Log2 fold change", "Log fold change
+   (difference in means, clr)", ...); the comparison or covariate goes in
+   the subtitle with the rejection count, as in the other DA plots
+   (`da_plot_sub()`), plus "2 features with no estimate not shown".
+   Ordinations: "Loading on PC1"; x: "Feature rank (of m)".
+7. **One covariate rule.** `da_rank_covariate()` picks the default
+   covariate for the plot methods and `log_ratio_features()` alike:
+   ANCOM-BC's first non-intercept covariate, else `da_term_covariate()`
+   (the term of interest's first column). It replaces the inline copies in
+   `plot.ecodive_ancombc()`, `plot.ecodive_da_lm()` and
+   `plot.ecodive_linda()` (same results; the suite is unchanged).
+8. **Highlighting.** Without a selection, rejected features `'grey30'`,
+   others `'grey85'`; ordinations all `'grey50'` (`PLOT_MUTED`). With
+   `numerator` / `denominator`: `PLOT_HIGHLIGHT` and `'royalblue3'`, the
+   rest `'grey85'`, legend "Numerator (k)" / "Denominator (k)" in the
+   top-left corner (empty in an ascending rank plot); on ordinations,
+   `legend` moves it only when given. Sensitivity analyses'
+   `reject_robust` isn't shown (only `reject`).
+9. **Labels.** DA plots: the `labels` highlighted features (selected, else
+   rejected) with the largest |effect|. Ordinations have no `labels`
+   argument (the plan's signature has none), so `loadings` (default 10)
+   names the features with the largest |loading| (among the selection,
+   when given). The y range is padded 5% so the names fit.
+10. **`numerator` / `denominator` with another `type`** is an error
+    ("are for `type = \"rank\"`"), on DA results and ordinations.
+11. **Messages.** `feature_set()` gained `src` (default `` `counts` ``),
+    so a rank plot's selection errors name "the result" instead.
+12. **`log_ratio_features()` details.** `covariate` on a result without a
+    `covariate` column, and `axes` (given explicitly) on anything but an
+    ordination, are errors rather than ignored. An unnamed vector gives
+    integer indices. The vector form must be a plain numeric vector (an
+    `ecodive_log_ratio` or other classed object is refused). Numerator:
+    largest first; denominator: smallest first (Qurro returns both in
+    ascending order; the sets and the order match after reversing the
+    top). Ties keep the result's order (R's `order()` is stable, as is
+    V8's `Array.prototype.sort`).
+13. **rpca_phylo.** `log_ratio_features()` ranks tips only, with the
+    message "Ranking the 6 tips only: the 5 internal nodes of rpca_phylo()
+    aren't features of the count table."; the rank plot shows every row of
+    `loadings`, nodes included (they are features of `node_counts`).
+14. **print()**: the header "Log ratio of 2 over 3 features; pseudocount
+    0" (or "Balance of ..."), "Numerator:" and "Denominator:" lines (up to
+    5 names), "2 samples are NA (a zero sum)" when any, then the values as
+    a plain named vector (a per-sample variable prints in full, like any
+    numeric vector).
+15. **Sample plot.** Boxes with `col = NA`, `border = 'grey60'`, `boxwex
+    = 0.6`, drawn with `add = TRUE` over a `plot.default()` frame, so `...`
+    reaches `plot.default()` as everywhere else. Factor groups: the
+    plan's legend (`legend = 'topright'`) and the group names on the x
+    axis. Numeric groups: plain points (no gradient: x already shows the
+    variable). No groups: one "All samples" box with grey points. The
+    subtitle is one line ("...; 2 samples with an undefined log ratio not
+    shown"); the y label parenthesises a side of several features,
+    `log((a + b) / c)`.
+16. **No `@family`** tags: no family existed for these pages, and one
+    would add a lone "Other" section.
+17. **Qurro drops features with no counts** in the table before its rank
+    plot; ecodive ranks every feature in the result (the fixture tables
+    have none all-zero, so the comparison is like for like; Qurro's
+    `process_input()` keeps every ranked feature, in the ranking's order,
+    in all 26 cases).
+18. **References** (`data-raw/expected/log_ratio_plots.r` (two modes),
+    `.py`, `.js`; 26 cases on two tables: 13 synthetic rankings with and
+    without ties, and the effects / loadings of `dirmult_ttest()`,
+    `ancombc2()` (two covariates), `da_ttest()`, `da_wilcoxon()`,
+    `da_lm()`, `linda()`, `pca()` (two axes) and `rpca()`):
+    - Qurro 0.9.0's autoselection (`filterFeatures()`, "autoLiteralTop" /
+      "autoLiteralBot"): **identical** numerator and denominator in all 26
+      cases, ties included.
+    - `qarcoal()`: max abs difference **3.5e-18** (one value, `log(45 /
+      46)`, where numpy's `log()` and C's differ by an ulp; all others
+      bit-identical); `NA` exactly where Qurro drops a sample.
+    - The sample plot's `computeBalance()` (`log(N) - log(D)` on
+      display.js's sums): max 6.7e-16.
+    - `cpus` 1, 2, 4 give identical selections from `dirmult_ttest()`;
+      sparse and dense input give identical selections (`pca()`) and log
+      ratios.
+19. **Nothing is ported from Qurro** (its display rules only; the Node
+    driver in `data-raw/` loads Qurro's file at fixture time and isn't
+    built into the package), so Qurro still gets no `Authors@R` or
+    `inst/COPYRIGHTS` entry; the docs cite the paper.

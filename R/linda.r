@@ -605,6 +605,8 @@ linda_lm_p <- function (fit) {
 #' * `"ma"`: the log2 fold change against the mean clr abundance.
 #' * `"forest"`: the log2 fold changes and their confidence intervals of
 #'   the `n_features` most significant features.
+#' * `"rank"`: every feature's log2 fold change, sorted (see **Rank
+#'   plots**).
 #'
 #' @param x  The result of [linda()].
 #'
@@ -613,12 +615,13 @@ linda_lm_p <- function (fit) {
 #'        `"age"`). Defaults to the first column of the term of interest
 #'        (`groups`), or else to the first covariate.
 #'
-#' @param type  The plot: `"volcano"` (the default), `"effect"`, `"ma"`, or
-#'        `"forest"`.
+#' @param type  The plot: `"volcano"` (the default), `"effect"`, `"ma"`,
+#'        `"forest"`, or `"rank"`.
 #'
 #' @param labels  How many of the differentially abundant features to name
 #'        (in the volcano, effect and MA plots), those with the smallest
-#'        adjusted p-values. Default `10`; `0` for none.
+#'        adjusted p-values. In the rank plot, the highlighted features with
+#'        the largest effects. Default `10`; `0` for none.
 #'
 #' @param n_features  For `"forest"`: how many features to show, those with
 #'        the smallest adjusted p-values (ties in the table's order).
@@ -627,8 +630,12 @@ linda_lm_p <- function (fit) {
 #' @param conf_level  For `"forest"`: the confidence level of the
 #'        intervals. Default `0.95`.
 #'
+#' @inheritParams plot.ecodive_ancombc
+#'
 #' @param ...  Passed on to [graphics::plot.default()], such as `main`,
 #'        `sub`, `xlab`, `xlim` or `cex`.
+#'
+#' @inheritSection plot.ecodive_ancombc Rank plots
 #'
 #' @details
 #' Log fold changes are in log2, as LinDA estimates them (the result's
@@ -662,16 +669,15 @@ linda_lm_p <- function (fit) {
 #'     plot(res)
 #'     plot(res, type = 'effect')
 #'     plot(res, type = 'forest', n_features = 10)
+#'     plot(res, type = 'rank', numerator = 1:3)
 plot.ecodive_linda <- function (
-    x, covariate = NULL, type = c('volcano', 'effect', 'ma', 'forest'),
-    labels = 10, n_features = 30, conf_level = 0.95, ... ) {
+    x, covariate = NULL, type = c('volcano', 'effect', 'ma', 'forest', 'rank'),
+    labels = 10, n_features = 30, conf_level = 0.95, numerator = NULL,
+    denominator = NULL, ... ) {
 
-  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest'))
+  type <- test_plot_type(type, c('volcano', 'effect', 'ma', 'forest', 'rank'))
 
-  covs <- unique(x$covariate)
-  if (is.null(covariate)) covariate <- da_term_covariate(x)
-  if (!is.character(covariate) || length(covariate) != 1 || !covariate %in% covs)
-    stop('`covariate` must be one of ', name_list(covs), '.', call. = FALSE)
+  covariate <- da_rank_covariate(x, covariate)
   if (type == 'effect') da_plot_binary(x, covariate)
 
   if (!is.numeric(conf_level) || length(conf_level) != 1L || is.na(conf_level) ||
@@ -690,7 +696,8 @@ plot.ecodive_linda <- function (
     est_lab  = lfc_label(x),
     sd_lab   = 'Residual standard deviation (log2)',
     mean_lab = 'Mean abundance (clr, log2)',
-    interval = sprintf('unadjusted %s confidence intervals', plot_pct(conf_level)) )
+    interval = sprintf('unadjusted %s confidence intervals', plot_pct(conf_level)),
+    num = numerator, den = denominator )
 
   invisible(x)
 }

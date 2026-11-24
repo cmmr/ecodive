@@ -11,10 +11,12 @@
 \method{plot}{ecodive_ancombc}(
   x,
   covariate = NULL,
-  type = c("volcano", "effect", "ma", "forest"),
+  type = c("volcano", "effect", "ma", "forest", "rank"),
   labels = 10,
   n_features = 30,
   conf_level = 0.95,
+  numerator = NULL,
+  denominator = NULL,
   ...
 )
 
@@ -36,12 +38,13 @@ fold changes to plot, as named in the result's \code{covariate} column
 covariate that isn't the intercept.}
 
 \item{type}{For \code{\link[=ancombc]{ancombc()}} and \code{\link[=ancombc2]{ancombc2()}}: the plot, \code{"volcano"}
-(the default), \code{"effect"}, \code{"ma"}, or \code{"forest"}.}
+(the default), \code{"effect"}, \code{"ma"}, \code{"forest"}, or \code{"rank"}.}
 
 \item{labels}{For \code{\link[=ancombc]{ancombc()}} and \code{\link[=ancombc2]{ancombc2()}}: how many of the
 differentially abundant features to name (in the volcano, effect
-and MA plots), those with the smallest adjusted p-values. Default
-\code{10}; \code{0} for none.}
+and MA plots), those with the smallest adjusted p-values. In the
+rank plot, the highlighted features with the largest effects.
+Default \code{10}; \code{0} for none.}
 
 \item{n_features}{How many features to show: for the forest plot, those
 with the smallest adjusted p-value (ties in the table's order);
@@ -51,6 +54,12 @@ Default \code{30}; \code{Inf} for all.}
 
 \item{conf_level}{For the forest plot: the confidence level of the
 intervals. Default \code{0.95}.}
+
+\item{numerator, denominator}{For \code{"rank"}: the features to highlight
+as the numerator (red) and denominator (blue) of a log ratio, such
+as those that \code{\link[=log_ratio_features]{log_ratio_features()}} picks: their names, their
+indices among the result's features, or a logical vector with one
+value per feature, as for \code{\link[=log_ratio]{log_ratio()}}. They must not overlap.}
 
 \item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}} for the volcano,
 effect, MA and forest plots, \code{\link[graphics:image]{graphics::image()}} for the heatmap (where \code{col} is the colour
@@ -76,7 +85,9 @@ against their adjusted p-values; \code{"effect"}, against each feature's
 residual standard deviation (Gloor et al. 2016; ALDEx2's \code{"MW"}
 plot), for a two-level comparison; \code{"ma"}, against each feature's mean
 clr abundance (ALDEx2's \code{"MA"} plot); or \code{"forest"}, with their
-confidence intervals, for the \code{n_features} most significant features.
+confidence intervals, for the \code{n_features} most significant features;
+or \code{"rank"}, all of them sorted by their log fold change (see \strong{Rank
+plots}).
 \item \code{\link[=ancombc_pairwise]{ancombc_pairwise()}}, \code{\link[=ancombc_dunnett]{ancombc_dunnett()}}: a heatmap of the log fold
 change of each feature (rows) in each comparison (columns), with the
 significant ones in bold.
@@ -120,6 +131,28 @@ written in it, in bold when that comparison is significant for that
 feature. For \code{\link[=ancombc_trend]{ancombc_trend()}}, each feature's label gives the pattern
 with the largest statistic.
 }
+\section{Rank plots}{
+
+A rank plot (\code{type = "rank"}) draws every feature as a bar from 0 to its
+effect, sorted from the smallest at the left to the largest at the right
+(ties in the result's order), as Qurro's rank plot does (Fedarko et al.
+2020, \doi{10.1093/nargab/lqaa023}). With relative abundances, every
+feature's effect is known only up to a shift shared by all of them, the
+unknown change in the total (Morton et al. 2019,
+\doi{10.1038/s41467-019-10656-5}): the ranking is what the data show, and
+the log ratio of features from its two ends can be read without knowing
+the total. Pick them with \code{\link[=log_ratio_features]{log_ratio_features()}}, show where they sit
+with \code{numerator} and \code{denominator}, and plot their log ratio sample by
+sample with \code{\link[=plot.ecodive_log_ratio]{plot.ecodive_log_ratio()}}.
+
+Without \code{numerator} or \code{denominator}, the differentially abundant
+features (\code{reject = TRUE}) are drawn dark and the others light; with
+them, the numerator's bars are red and the denominator's blue, with a
+legend. The \code{labels} highlighted features with the largest effects are
+named. Features with no estimate (\code{NaN}) are left out and counted in
+the subtitle; for a model result, the bars are \code{covariate}'s effects.
+}
+
 \examples{
     x <- rbind(
       c(1, 10, 16, 0, 0, 12, 0, 7), c(0, 10, 45, 2, 1, 25, 1, 9),
@@ -146,6 +179,11 @@ with the largest statistic.
     plot(fit, type = 'effect')
     plot(fit, type = 'ma')
     plot(fit, 'age', type = 'forest')
+
+    # The features ranked, with the two at each end as a log ratio.
+    sel <- log_ratio_features(fit, n = 2)
+    plot(fit, type = 'rank', numerator = sel$numerator, denominator = sel$denominator)
+    plot(do.call(log_ratio, c(list(x), sel)), 'status', meta)
 
     # Every pair of groups.
     plot(ancombc_pairwise(fit))

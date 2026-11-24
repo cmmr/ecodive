@@ -41,6 +41,13 @@ numerator. Attributes:
 indices when the features have no names), in the order of \code{counts}.
 \item \code{pseudocount}: the pseudocount used (\code{0} for none).
 }
+
+Its class, \code{ecodive_log_ratio}, gives it a short \code{print()} (a header
+naming the features, then the values) and a \code{plot()} by group or
+against a numeric variable (\code{\link[=plot.ecodive_log_ratio]{plot.ecodive_log_ratio()}}). Everything
+else treats it as a plain numeric vector (\code{is.numeric()} is \code{TRUE});
+subsetting (\code{x[1:5]}), \code{sort()}, and arithmetic or maths (\code{-x}, \code{x - mean(x)}, \code{abs(x)}) return a plain named vector without the
+attributes, which no longer describe the values.
 }
 \description{
 One value per sample: the balance between two groups of features, the

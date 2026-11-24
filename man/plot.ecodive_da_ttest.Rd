@@ -8,36 +8,55 @@
 \usage{
 \method{plot}{ecodive_da_ttest}(
   x,
-  type = c("volcano", "effect", "ma", "forest"),
+  type = c("volcano", "effect", "ma", "forest", "rank"),
   labels = 10,
   n_features = 30,
+  numerator = NULL,
+  denominator = NULL,
   ...
 )
 
-\method{plot}{ecodive_da_wilcoxon}(x, type = c("volcano", "ma"), labels = 10, ...)
+\method{plot}{ecodive_da_wilcoxon}(
+  x,
+  type = c("volcano", "ma", "rank"),
+  labels = 10,
+  numerator = NULL,
+  denominator = NULL,
+  ...
+)
 
 \method{plot}{ecodive_da_lm}(
   x,
   covariate = NULL,
-  type = c("volcano", "effect", "ma", "forest"),
+  type = c("volcano", "effect", "ma", "forest", "rank"),
   labels = 10,
   n_features = 30,
+  numerator = NULL,
+  denominator = NULL,
   ...
 )
 }
 \arguments{
 \item{x}{The result of \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=da_ttest]{da_ttest()}}, or \code{\link[=da_lm]{da_lm()}}.}
 
-\item{type}{The plot: \code{"volcano"} (the default), \code{"effect"}, \code{"ma"}, or
-\code{"forest"} (for \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{"volcano"} or \code{"ma"}).}
+\item{type}{The plot: \code{"volcano"} (the default), \code{"effect"}, \code{"ma"},
+\code{"forest"}, or \code{"rank"} (for \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{"volcano"}, \code{"ma"}
+or \code{"rank"}).}
 
 \item{labels}{How many of the differentially abundant features to name
 (in the volcano, effect and MA plots), those with the smallest
-adjusted p-values. Default \code{10}; \code{0} for none.}
+adjusted p-values. In the rank plot, the highlighted features with
+the largest effects. Default \code{10}; \code{0} for none.}
 
 \item{n_features}{For \code{"forest"}: how many features to show, those with
 the smallest adjusted p-values (ties in the table's order).
 Default \code{30}; \code{Inf} for all.}
+
+\item{numerator, denominator}{For \code{"rank"}: the features to highlight
+as the numerator (red) and denominator (blue) of a log ratio, such
+as those that \code{\link[=log_ratio_features]{log_ratio_features()}} picks: their names, their
+indices among the result's features, or a logical vector with one
+value per feature, as for \code{\link[=log_ratio]{log_ratio()}}. They must not overlap.}
 
 \item{...}{Passed on to \code{\link[graphics:plot.default]{graphics::plot.default()}}, such as \code{main},
 \code{sub}, \code{xlab}, \code{xlim} or \code{cex}.}
@@ -67,6 +86,7 @@ plot).
 \item \code{"forest"} (\code{\link[=da_ttest]{da_ttest()}}, \code{\link[=da_lm]{da_lm()}}): the effects and their confidence
 intervals of the \code{n_features} most significant features, largest at
 the top.
+\item \code{"rank"}: every feature's effect, sorted (see \strong{Rank plots}).
 }
 
 The effect is the difference in medians (\code{\link[=da_wilcoxon]{da_wilcoxon()}}), in means
@@ -97,6 +117,28 @@ adjusted for testing many features).
 Features whose values are \code{NaN} are left out. The subtitle names the
 comparison and counts the features rejected.
 }
+\section{Rank plots}{
+
+A rank plot (\code{type = "rank"}) draws every feature as a bar from 0 to its
+effect, sorted from the smallest at the left to the largest at the right
+(ties in the result's order), as Qurro's rank plot does (Fedarko et al.
+2020, \doi{10.1093/nargab/lqaa023}). With relative abundances, every
+feature's effect is known only up to a shift shared by all of them, the
+unknown change in the total (Morton et al. 2019,
+\doi{10.1038/s41467-019-10656-5}): the ranking is what the data show, and
+the log ratio of features from its two ends can be read without knowing
+the total. Pick them with \code{\link[=log_ratio_features]{log_ratio_features()}}, show where they sit
+with \code{numerator} and \code{denominator}, and plot their log ratio sample by
+sample with \code{\link[=plot.ecodive_log_ratio]{plot.ecodive_log_ratio()}}.
+
+Without \code{numerator} or \code{denominator}, the differentially abundant
+features (\code{reject = TRUE}) are drawn dark and the others light; with
+them, the numerator's bars are red and the denominator's blue, with a
+legend. The \code{labels} highlighted features with the largest effects are
+named. Features with no estimate (\code{NaN}) are left out and counted in
+the subtitle; for a model result, the bars are \code{covariate}'s effects.
+}
+
 \examples{
     x   <- ex_counts + 1
     grp <- c('oral', 'oral', 'other', 'other')
@@ -105,6 +147,7 @@ comparison and counts the features rejected.
     plot(res, 'effect')
     plot(res, 'forest', n_features = 10)
     plot(da_lm(x, groups = grp), type = 'ma')
+    plot(res, 'rank', numerator = 'Staphylococcus', denominator = 'Bacteroides')
 }
 \references{
 Gloor, G. B., Macklaim, J. M., & Fernandes, A. D. (2016). Displaying

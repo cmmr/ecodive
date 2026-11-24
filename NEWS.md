@@ -585,6 +585,28 @@
   none. Both take every table type and keep sparse tables sparse: 2,000
   samples by 5,000 taxa take under 0.1 seconds.
 
+* Qurro-style rank plots and log ratios (Fedarko et al. 2020; Morton et
+  al. 2019's reference frames):
+  * `plot(fit, type = "rank")` draws every feature as a bar of its effect,
+    sorted, for the results of `dirmult_ttest()`, `ancombc()`,
+    `ancombc2()`, `da_ttest()`, `da_wilcoxon()`, `da_lm()` and `linda()`,
+    and `plot(ord, type = "rank")` the loadings on one axis of `pca()`,
+    `rpca()`, `rpca_phylo()`, `rda()` and other ordinations with loadings.
+    `numerator` and `denominator` highlight a log ratio's features.
+    `plot(ord, type = "n")` and other `type`s still reach `plot.default()`.
+  * New `log_ratio_features(x, n)` picks the `n` top- and bottom-ranked
+    features of such a result (Qurro's "autoselection"), as `numerator`
+    and `denominator` for `log_ratio()` or `balance()`. It selects the
+    same features as Qurro 0.9.0's own code in every reference case, ties
+    included, and their `log_ratio()` matches Qurro's `qarcoal()` to
+    within one rounding of `log()`.
+  * `log_ratio()` and `balance()` results have class `ecodive_log_ratio`,
+    with a short `print()` and a `plot()`: the samples' values by group
+    (box plot with the samples over it, spread without the random number
+    generator), against a numeric variable, or all together, leaving out
+    and counting undefined values. They stay numeric vectors everywhere
+    else; subsetting, `sort()` and arithmetic return plain named vectors.
+
 * New `vlr()`, `rho_p()` and `phi_s()` measure proportionality between
   every pair of features, the compositionally valid alternative to
   correlating relative abundances (Lovell et al. 2015). `vlr()` is the

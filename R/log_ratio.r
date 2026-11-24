@@ -44,6 +44,14 @@
 #'     indices when the features have no names), in the order of `counts`.
 #'   * `pseudocount`: the pseudocount used (`0` for none).
 #'
+#'   Its class, `ecodive_log_ratio`, gives it a short `print()` (a header
+#'   naming the features, then the values) and a `plot()` by group or
+#'   against a numeric variable ([plot.ecodive_log_ratio()]). Everything
+#'   else treats it as a plain numeric vector (`is.numeric()` is `TRUE`);
+#'   subsetting (`x[1:5]`), `sort()`, and arithmetic or maths (`-x`, `x -
+#'   mean(x)`, `abs(x)`) return a plain named vector without the
+#'   attributes, which no longer describe the values.
+#'
 #'   The vector drops straight into metadata (`data$ratio <- log_ratio(...)`)
 #'   and into any test or fit that takes a per-sample variable, such as
 #'   [envfit()] or [mantel()].
@@ -94,7 +102,9 @@
 #'
 #' @seealso [balance()] for the ratio of geometric means; [alr()] for every
 #'   feature against one; [vlr()], [rho_p()] and [phi_s()] for finding
-#'   features that move together.
+#'   features that move together. [log_ratio_features()] to take the
+#'   numerator and denominator from the two ends of a ranking, and
+#'   [plot.ecodive_log_ratio()] to plot the result.
 #'
 #' @export
 #' @examples
@@ -154,6 +164,14 @@ log_ratio <- function (
 #'   * `numerator`, `denominator`: the selected features' names (their
 #'     indices when the features have no names), in the order of `counts`.
 #'   * `pseudocount`: the pseudocount used (`0` for none).
+#'
+#'   Its class, `ecodive_log_ratio`, gives it a short `print()` (a header
+#'   naming the features, then the values) and a `plot()` by group or
+#'   against a numeric variable ([plot.ecodive_log_ratio()]). Everything
+#'   else treats it as a plain numeric vector (`is.numeric()` is `TRUE`);
+#'   subsetting (`x[1:5]`), `sort()`, and arithmetic or maths (`-x`, `x -
+#'   mean(x)`, `abs(x)`) return a plain named vector without the
+#'   attributes, which no longer describe the values.
 #'
 #' @details
 #' For a sample \eqn{x}, numerator features \eqn{N} (\eqn{r} of them) and
@@ -295,7 +313,8 @@ ratio_parts <- function (numerator, denominator, info) {
 # The 1-based indices, increasing, of a set of features given by name,
 # index or a logical vector with one value per feature. At least one, and
 # none twice. (feature_index() is the one-feature version, for alr().)
-feature_set <- function (x, features, D, arg) {
+# `src` names the features' source in messages.
+feature_set <- function (x, features, D, arg, src = '`counts`') {
 
   msg <- sprintf(
     '`%s` must select features: their names, their 1-based indices, or a logical vector with one value per feature.',
@@ -312,8 +331,8 @@ feature_set <- function (x, features, D, arg) {
   if (is.logical(x)) {
     if (length(x) != D)
       stop(sprintf(
-        'A logical `%s` needs one value per feature: `counts` has %d features, not %d.',
-        arg, D, length(x) ), call. = FALSE)
+        'A logical `%s` needs one value per feature: %s has %d features, not %d.',
+        arg, src, D, length(x) ), call. = FALSE)
     if (!any(x))
       stop(sprintf('`%s` selects no features: it is all FALSE.', arg), call. = FALSE)
     return (which(x))
@@ -321,14 +340,14 @@ feature_set <- function (x, features, D, arg) {
 
   if (is.character(x)) {
     if (is.null(features))
-      stop(sprintf('`counts` has no feature names; give `%s` as indices.', arg), call. = FALSE)
+      stop(sprintf('%s has no feature names; give `%s` as indices.', plot_cap(src), arg), call. = FALSE)
     i <- match(x, features)
     if (anyNA(i)) {
       bad <- unique(x[is.na(i)])
       stop(sprintf(
-        '`%s` names %s not in `counts`: %s.', arg,
+        '`%s` names %s not in %s: %s.', arg,
         if (length(bad) == 1L) 'a feature' else paste(length(bad), 'features'),
-        name_list(bad) ), call. = FALSE )
+        src, name_list(bad) ), call. = FALSE )
     }
   }
   else {
@@ -337,8 +356,8 @@ feature_set <- function (x, features, D, arg) {
     bad <- unique(x[x < 1 | x > D])
     if (length(bad))
       stop(sprintf(
-        '`%s` has %s outside 1 to %d (`counts` has %d features): %s.', arg,
-        if (length(bad) == 1L) 'an index' else 'indices', D, D,
+        '`%s` has %s outside 1 to %d (%s has %d features): %s.', arg,
+        if (length(bad) == 1L) 'an index' else 'indices', D, src, D,
         paste(utils::head(bad, 5), collapse = ', ') ), call. = FALSE )
     i <- as.integer(x)
   }
@@ -381,5 +400,141 @@ ratio_result <- function (res, method, sel, info, pseudocount) {
   attr(res, 'numerator')   <- lab(sel$num)
   attr(res, 'denominator') <- lab(sel$den)
   attr(res, 'pseudocount') <- pseudocount
+  class(res) <- 'ecodive_log_ratio'
   res
+}
+
+
+
+#' Features for a Log Ratio from a Ranking
+#'
+#' The `n` highest- and `n` lowest-ranked features of a differential
+#' abundance result or of an ordination's loadings, as the `numerator` and
+#' `denominator` of [log_ratio()] or [balance()]: Qurro's "autoselection"
+#' (Fedarko et al. 2020), after the reference frames of Morton et al.
+#' (2019).
+#'
+#' @param x  What ranks the features:
+#'
+#'   * a differential abundance result with a signed effect: from
+#'     [dirmult_ttest()], [ancombc()], [ancombc2()], [da_ttest()],
+#'     [da_wilcoxon()], [da_lm()], or [linda()] (any method whose `effect`
+#'     column [list_da_tests()] names); its effect column ranks them;
+#'   * an ordination with feature loadings, such as [pca()], [rpca()],
+#'     [rpca_phylo()] or [rda()]: the loadings on axis `axes` rank them;
+#'   * a numeric vector of effects, named after the features.
+#'
+#' @param n  How many features on each side: a whole number of at least 1,
+#'        with `2 * n` no more than the number of ranked features. Default
+#'        `5`.
+#'
+#' @param covariate  For a model result ([ancombc()], [ancombc2()],
+#'        [da_lm()], [linda()]): which covariate's effects rank the
+#'        features, as named in the result's `covariate` column. Defaults to
+#'        the one their plots show (see [plot.ecodive_ancombc()]).
+#'
+#' @param axes  For an ordination: which axis's loadings rank the features,
+#'        one axis number. Default `1`.
+#'
+#' @return A list of two vectors, `numerator` (the `n` features with the
+#'   largest effects, largest first) and `denominator` (the `n` with the
+#'   smallest, smallest first): feature names, or indices into the
+#'   features when they have none. So `do.call(log_ratio, c(list(counts),
+#'   sel))` is the log ratio of the top over the bottom of the ranking.
+#'
+#' @details
+#' Features whose effect isn't finite (an estimate that couldn't be made,
+#' `NaN`) are left out first. The rest are sorted by their effect,
+#' ascending, with ties left in the result's order (Qurro's stable sort);
+#' the last `n` are the numerator and the first `n` the denominator.
+#' [ancom()] has no signed effect, and so no reference frame: its `W`
+#' counts significant log ratios without a direction.
+#'
+#' **Phylogenetic RPCA.** The loadings of [rpca_phylo()] include the tree's
+#' internal nodes (`"n12"`), which aren't columns of the count table. Only
+#' the tips are ranked, with a message. To look at log ratios of clades,
+#' run [rpca_phylo()] with `node_counts = TRUE` and rank its loadings as a
+#' named vector: `log_ratio_features(attr(ord, 'loadings')[, 1], n)` with
+#' `log_ratio(attr(ord, 'node_counts'), ...)`.
+#'
+#' **Circularity.** Choosing features by how much they differ between two
+#' groups, then testing their log ratio between the same groups, finds the
+#' difference by construction: the p-value means nothing. Use the log
+#' ratio to look at the samples, or select its features on one subset of
+#' the samples and test it on another.
+#'
+#' @references
+#' Morton, J. T., Marotz, C., Washburne, A., et al. (2019). Establishing
+#' microbial composition measurement standards with reference frames.
+#' *Nature Communications*, 10, 2719. \doi{10.1038/s41467-019-10656-5}
+#'
+#' Fedarko, M. W., Martino, C., Morton, J. T., et al. (2020). Visualizing
+#' 'omic feature rankings and log-ratios using Qurro. *NAR Genomics and
+#' Bioinformatics*, 2, lqaa023. \doi{10.1093/nargab/lqaa023}
+#'
+#' @seealso [log_ratio()], [balance()], and their plot
+#'   ([plot.ecodive_log_ratio()]); the rank plots of DA results and
+#'   ordinations (`type = "rank"`, see [plot.ecodive_ancombc()]).
+#'
+#' @export
+#' @examples
+#'     x <- rbind(
+#'       c(1, 10, 16, 0, 0, 12, 0, 7), c(0, 10, 45, 2, 1, 25, 1, 9),
+#'       c(4,  8, 22, 1, 5, 14, 1, 5), c(1, 11, 22, 1, 4, 14, 1, 3),
+#'       c(4,  7, 36, 0, 0, 19, 0, 9), c(2, 30, 26, 0, 0, 12, 1, 0),
+#'       c(1, 36, 10, 1, 5, 15, 2, 9), c(1, 25, 11, 2, 2,  8, 0, 5),
+#'       c(1, 36, 23, 0, 2, 11, 1, 2), c(3, 60, 33, 3, 4, 14, 1, 6),
+#'       c(3, 57, 30, 3, 1,  3, 0, 4), c(0, 65, 23, 0, 2,  2, 0, 8),
+#'       c(2, 46, 19, 0, 1,  2, 0, 1), c(0, 41, 26, 0, 2,  0, 0, 3),
+#'       c(3, 46, 20, 0, 0,  3, 0, 0) )
+#'     dimnames(x) <- list(paste0('S', 1:15), paste0('F', 1:8))
+#'     meta <- data.frame(
+#'       status = rep(c('mild', 'moderate', 'severe'), each = 5),
+#'       row.names = rownames(x) )
+#'     fit <- ancombc2(x, ~ status, meta, groups = 'status')
+#'
+#'     # The two features that rose most with moderate status, over the two
+#'     # that fell most.
+#'     sel <- log_ratio_features(fit, n = 2)
+#'     sel
+#'
+#'     # Where they sit in the ranking, and their log ratio by status.
+#'     plot(fit, type = 'rank', numerator = sel$numerator, denominator = sel$denominator)
+#'     plot(do.call(log_ratio, c(list(x), sel)), 'status', meta)
+#'
+#'     # From an ordination's loadings.
+#'     log_ratio_features(pca(iris[, 1:4]), n = 1)
+log_ratio_features <- function (x, n = 5L, covariate = NULL, axes = 1L) {
+
+  src <- rank_source(x, covariate, axes, has_axes = !missing(axes))
+  eff <- src$effect
+  ok  <- is.finite(eff)
+
+  # rpca_phylo(): only the tips are columns of the count table.
+  tree <- if (inherits(x, 'ecodive_ord') && identical(attr(x, 'method', exact = TRUE), 'rpca_phylo'))
+    attr(x, 'tree', exact = TRUE)
+  if (!is.null(tree)) {
+    tip <- src$feature %in% tree$tip.label
+    if (any(!tip & ok))
+      message(sprintf(
+        'Ranking the %d tips only: the %d internal nodes of rpca_phylo() aren\'t features of the count table.',
+        sum(tip & ok), sum(!tip & ok) ))
+    ok <- ok & tip
+  }
+
+  m <- sum(ok)
+  if (!is.numeric(n) || length(n) != 1L || !is.finite(n) || n != floor(n) || n < 1)
+    stop('`n` must be a whole number of at least 1.', call. = FALSE)
+  if (2 * n > m)
+    stop(sprintf(
+      '`n` must be at most %d: %d %s ranked, and `2 * n` must not exceed that.',
+      m %/% 2L, m, if (m == 1L) 'feature is' else 'features are' ), call. = FALSE)
+  n <- as.integer(n)
+
+  i <- which(ok)
+  o <- i[order(eff[i])]
+  m <- length(o)
+  list(
+    numerator   = src$feature[rev(o[(m - n + 1L):m])],
+    denominator = src$feature[o[seq_len(n)]] )
 }
