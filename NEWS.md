@@ -975,6 +975,25 @@
   `da_test()` (`"lefse"`, alias `"lefser"`) and `da_sensitivity()` (zero
   replacements). The docs say why the plain tests are preferable.
 
+* New `indicator_species()`: indicator species analysis (Dufrene & Legendre
+  1997) with group combinations, De Caceres et al.'s (2010) multilevel
+  pattern analysis. Each feature's association with every group and
+  combination of groups (`min_order`, `max_order`, `combinations`, by name
+  or id) by the group-equalized indicator value (`index = 'indval_g'`, the
+  default), the plain one (`'indval'`, with its specificity `a` and
+  fidelity `b`), or the point-biserial correlation (`'r'`, `'r_g'`, with
+  `negative` associations), the best combination, and a permutation test of
+  it against the largest value over the combinations (`strata`, or a
+  supplied matrix). Matches indicspecies' `multipatt()` and `strassoc()`
+  and labdsv's `indval()` to rounding, with identical p-values given the
+  same permutations; ties between combinations go the same way every time
+  (multipatt breaks them at random). New `p_adjust` (default `'holm'`;
+  multipatt adjusts nothing, `'none'`). Threaded C over a sparse table,
+  permutations in fixed blocks, so the same for any `cpus`. `plot()` draws
+  the indicators' values as bars, or their groups' means as a heatmap. It
+  joins `da_test()` (`"indicator_species"`, aliases `"indval"` and
+  `"multipatt"`).
+
 * New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
   `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's
   proportions after adding `pseudocount` (log-TSS), with the same
