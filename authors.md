@@ -69,6 +69,10 @@
 - **Curtis Huttenhower**. Contributor, copyright holder.  
   LDA effect size biomarker discovery (lefse()), ported from 'LEfSe'
 
+- **ravel-lab**. Contributor, copyright holder.  
+  vaginal community state types (valencia()) and their reference
+  centroids, from 'VALENCIA'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

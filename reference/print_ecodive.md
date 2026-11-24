@@ -46,9 +46,10 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
   [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md),
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md),
   [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md),
-  [`assoc_network_diff()`](https://cmmr.github.io/ecodive/reference/assoc_network_diff.md)
+  [`assoc_network_diff()`](https://cmmr.github.io/ecodive/reference/assoc_network_diff.md),
+  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
   or
-  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md),
+  [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md),
   or a source-tracking matrix of class `ecodive_source` (from
   [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)).
   A community-types result (see

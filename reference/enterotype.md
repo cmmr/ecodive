@@ -214,6 +214,9 @@ Computational and Applied Mathematics*, 20, 53-65.
 [`plot.ecodive_types()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_types.md),
 [`jensen()`](https://cmmr.github.io/ecodive/reference/jensen.md)
 
+Other community types:
+[`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md)
+
 ## Examples
 
 ``` r
