@@ -239,7 +239,8 @@ random seed.
 details: it reports both Welch's and Wilcoxon's tests, averages
 Benjamini-Hochberg adjusted p-values over the draws, and gives its own
 effect size; its scale model (\code{gamma}) is off by default. ALDEx3 fits
-linear models to each draw instead of t-tests. Their results agree with
+linear models to each draw instead of t-tests: \code{\link[=dirmult_lm]{dirmult_lm()}} ports
+them, from the same draws. Their results agree with
 this function's in direction and rough size, not exactly.
 
 \strong{Effect sizes.} \code{pooled_sd}, \code{mean} and \code{effect} describe each feature
@@ -356,5 +357,5 @@ Computational Biology}, 22, e1014728.
 \doi{10.1371/journal.pcbi.1014728}
 }
 \seealso{
-\code{\link[=ancom]{ancom()}}, \code{\link[=replace_zeros]{replace_zeros()}}, \code{\link[=da_sensitivity]{da_sensitivity()}}.
+\code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=ancom]{ancom()}}, \code{\link[=replace_zeros]{replace_zeros()}}, \code{\link[=da_sensitivity]{da_sensitivity()}}.
 }

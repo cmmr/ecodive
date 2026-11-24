@@ -177,20 +177,21 @@ plot.ecodive_da_lm <- function (
 # bounds `lo`, `hi`. `what` is the comparison (for the subtitle), the
 # `*_lab` are axis labels and `interval` describes the forest plot's bars
 # (in its x axis label). `num` and `den` are the rank plot's numerator and
-# denominator, as the user gave them.
+# denominator, as the user gave them. `extra` is added to the subtitle
+# (dirmult_lm()'s scale model).
 # The title is da_plot_title()'s.
 da_plot <- function (
     x, type, labels, n_features, args, est, p, reject, feature,
     sd = NULL, mean = NULL, lo = NULL, hi = NULL, robust = NULL, what = NULL,
     est_lab = 'Log fold change', sd_lab = NULL, mean_lab = NULL,
-    interval = NULL, num = NULL, den = NULL ) {
+    interval = NULL, num = NULL, den = NULL, extra = NULL ) {
 
   labels <- plot_count(labels, 'labels')
   rank_only(type, num, den)
   if (type == 'rank')
     return (da_plot_rank(x, est, reject, feature, labels, args, num, den, what, est_lab))
   main   <- da_plot_title(x, type)
-  sub    <- da_plot_sub(what, reject, robust)
+  sub    <- da_plot_sub(what, reject, robust, extra)
   rob    <- function (i) if (!is.null(robust)) robust[i]
 
   if (type == 'volcano') {

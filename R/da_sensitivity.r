@@ -16,7 +16,7 @@
 #'
 #' @param method   The name of a DA method, as for [da_test()]: `"ancom"`,
 #'        `"ancombc"`, `"ancombc2"`, `"da_lm"`, `"da_ttest"`,
-#'        `"da_wilcoxon"`, `"dirmult_ttest"`, or `"linda"`. Flexible
+#'        `"da_wilcoxon"`, `"dirmult_lm"`, `"dirmult_ttest"`, or `"linda"`. Flexible
 #'        matching is supported.
 #'
 #' @param ...   The base run: everything [da_test()] takes after `method`
@@ -33,13 +33,14 @@
 #'        method `replace_zeros(counts, z)` instead of `counts`, with the
 #'        method's default `pseudocount` (which adds nothing to a table
 #'        without zeros). Not for the methods that model counts
-#'        (`zero_free_ok = FALSE` in [list_da_tests()]: [dirmult_ttest()]).
+#'        (`zero_free_ok = FALSE` in [list_da_tests()]: [dirmult_lm()],
+#'        [dirmult_ttest()]).
 #'        Default: `NULL` (none).
 #'
 #' @param scale_sds  Scale uncertainties to try: `TRUE` for
 #'        `c(0, 0.25, 0.5, 1)`, or a vector of non-negative numbers. Each
 #'        run sets the method's `scale_sd`, so only for methods that have
-#'        one ([dirmult_ttest()]). Default: `NULL` (none).
+#'        one ([dirmult_lm()], [dirmult_ttest()]). Default: `NULL` (none).
 #'
 #' @param crossed  `FALSE` (the default) to vary one setting at a time
 #'        around the base run; `TRUE` for every combination of the
@@ -53,7 +54,7 @@
 #'
 #'   * `feature`: the feature's name, as in the method's result.
 #'   * `covariate`: for the model methods ([ancombc()], [ancombc2()],
-#'     [da_lm()]), the column of the design; every covariate but the
+#'     [da_lm()], [dirmult_lm()], [linda()]), the column of the design; every covariate but the
 #'     intercept is kept. `NA` for the group methods.
 #'   * `run`: the run's number, `0` for the base run.
 #'   * `parameter`: what the run changed: `'base'`, `'pseudocount'`,
@@ -124,16 +125,19 @@
 #'   only with `norm = 'clr'` or `'log'`, the norms that take logs). For
 #'   [ancombc()]
 #'   and [ancombc2()] it is added to every value, as in ANCOMBC's own
-#'   sensitivity analysis. For [dirmult_ttest()] it is the Dirichlet
-#'   prior, added to the counts before the posterior draws. For [linda()]
+#'   sensitivity analysis. For [dirmult_ttest()] and [dirmult_lm()] it is
+#'   the Dirichlet prior, added to the counts before the posterior draws. For [linda()]
 #'   it is added to every count when the zeros get a pseudocount
 #'   (`zero_handling = 'pseudocount'`, or `'adaptive'` choosing it); when
 #'   they are imputed, every run is the same.
 #' * `zeros`: replaces the zeros with [replace_zeros()] instead of a
 #'   pseudocount, for the methods that take any table of positive values.
-#' * `scale_sds`: [dirmult_ttest()]'s scale model, the standard deviation of
-#'   the samples' log total load (ALDEx2's gamma): `0` assumes the loads are
-#'   the same, larger values allow more variation and give wider intervals.
+#' * `scale_sds`: [dirmult_ttest()]'s and [dirmult_lm()]'s scale model, the
+#'   standard deviation of the samples' log total load (ALDEx2's and
+#'   ALDEx3's gamma): `0` assumes the loads are as the method's assumption
+#'   puts them, larger values allow more variation and give wider intervals
+#'   (and, for [dirmult_lm()], larger p-values). Not with [dirmult_lm()]'s
+#'   `load`, whose error is `load_sd`.
 #'
 #' **Relation to ANCOMBC's `passed_ss`.** `summary$passed` is ANCOMBC's
 #' `passed_ss` generalised to any method and setting: with `method =

@@ -120,6 +120,7 @@ reference:
   - ancombc_global
   - structural_zeros
   - dirmult_ttest
+  - dirmult_lm
   - da_wilcoxon
   - linda
   - lefse
@@ -212,6 +213,7 @@ reference:
   - plot.ecodive_test
   - plot.ecodive_simper
   - plot.ecodive_dirmult_ttest
+  - plot.ecodive_dirmult_lm
   - plot.ecodive_ancom
   - plot.ecodive_ancombc
   - plot.ecodive_da_ttest

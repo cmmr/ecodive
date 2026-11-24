@@ -458,6 +458,8 @@
                    ancombc2(x, ~ grp + age, meta, cpus = 1L))
   expect_identical(da_test(xi, 'dirmult_ttest', 'grp', meta, n_draws = 8L, seed = 3L, cpus = 1L),
                    dirmult_ttest(xi, 'grp', meta, n_draws = 8L, seed = 3L, cpus = 1L))
+  expect_identical(da_test(xi, 'dirmult_lm', 'grp', meta, ~ grp + age, n_draws = 8L, seed = 3L, cpus = 1L),
+                   dirmult_lm(xi, ~ grp + age, meta, groups = 'grp', n_draws = 8L, seed = 3L, cpus = 1L))
   expect_identical(da_test(x, 'linda', 'grp', meta, ~ grp + age, pseudocount = 1, cpus = 1L),
                    linda(x, ~ grp + age, meta, groups = 'grp', pseudocount = 1, cpus = 1L))
   expect_identical(da_test(x, 'lefse', 'grp', meta, n_boots = 4L, seed = 2L, cpus = 1L),
@@ -500,7 +502,7 @@
   df <- list_da_tests()
   expect_identical(names(df), c('name', 'id', 'design', 'effect', 'base', 'zero_free_ok', 'signed'))
   expect_identical(df$id[!df$signed], c('ancom', 'lefse'))
-  expect_identical(sort(df$id), sort(c('ancom', 'ancombc', 'ancombc2', 'dirmult_ttest',
+  expect_identical(sort(df$id), sort(c('ancom', 'ancombc', 'ancombc2', 'dirmult_ttest', 'dirmult_lm',
                                        'da_wilcoxon', 'da_ttest', 'da_lm', 'linda', 'lefse')))
   expect_true(all(df$design %in% c('groups', 'formula')) && is.logical(df$zero_free_ok))
   expect_identical(rownames(list_da_tests(nm = 'id')), df$id)
@@ -519,6 +521,9 @@
   expect_identical(match_da_test('ANCOM-BC')$id,  'ancombc')
   expect_identical(match_da_test('ANCOM')$id,     'ancom')
   expect_identical(match_da_test('ALDEx2')$id,    'dirmult_ttest')
+  expect_identical(match_da_test('ALDEx3')$id,    'dirmult_lm')
+  expect_identical(match_da_test('aldex')$id,     'dirmult_ttest')
+  expect_error(match_da_test('dirmult'), 'multiple')
   expect_identical(match_da_test('Mann-Whitney U')$id, 'da_wilcoxon')
   expect_identical(match_da_test('t-test')$id,    'da_ttest')
   expect_identical(match_da_test('linear')$id,    'da_lm')

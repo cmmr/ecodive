@@ -21,7 +21,7 @@ Types}.}
 
 \item{method}{The name of a DA method, as for \code{\link[=da_test]{da_test()}}: \code{"ancom"},
 \code{"ancombc"}, \code{"ancombc2"}, \code{"da_lm"}, \code{"da_ttest"},
-\code{"da_wilcoxon"}, \code{"dirmult_ttest"}, or \code{"linda"}. Flexible
+\code{"da_wilcoxon"}, \code{"dirmult_lm"}, \code{"dirmult_ttest"}, or \code{"linda"}. Flexible
 matching is supported.}
 
 \item{...}{The base run: everything \code{\link[=da_test]{da_test()}} takes after \code{method}
@@ -38,13 +38,14 @@ method's \code{pseudocount}. Default: \code{NULL} (none).}
 method \code{replace_zeros(counts, z)} instead of \code{counts}, with the
 method's default \code{pseudocount} (which adds nothing to a table
 without zeros). Not for the methods that model counts
-(\code{zero_free_ok = FALSE} in \code{\link[=list_da_tests]{list_da_tests()}}: \code{\link[=dirmult_ttest]{dirmult_ttest()}}).
+(\code{zero_free_ok = FALSE} in \code{\link[=list_da_tests]{list_da_tests()}}: \code{\link[=dirmult_lm]{dirmult_lm()}},
+\code{\link[=dirmult_ttest]{dirmult_ttest()}}).
 Default: \code{NULL} (none).}
 
 \item{scale_sds}{Scale uncertainties to try: \code{TRUE} for
 \code{c(0, 0.25, 0.5, 1)}, or a vector of non-negative numbers. Each
 run sets the method's \code{scale_sd}, so only for methods that have
-one (\code{\link[=dirmult_ttest]{dirmult_ttest()}}). Default: \code{NULL} (none).}
+one (\code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=dirmult_ttest]{dirmult_ttest()}}). Default: \code{NULL} (none).}
 
 \item{crossed}{\code{FALSE} (the default) to vary one setting at a time
 around the base run; \code{TRUE} for every combination of the
@@ -58,7 +59,7 @@ methods) and run, with columns:
 \itemize{
 \item \code{feature}: the feature's name, as in the method's result.
 \item \code{covariate}: for the model methods (\code{\link[=ancombc]{ancombc()}}, \code{\link[=ancombc2]{ancombc2()}},
-\code{\link[=da_lm]{da_lm()}}), the column of the design; every covariate but the
+\code{\link[=da_lm]{da_lm()}}, \code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=linda]{linda()}}), the column of the design; every covariate but the
 intercept is kept. \code{NA} for the group methods.
 \item \code{run}: the run's number, \code{0} for the base run.
 \item \code{parameter}: what the run changed: \code{'base'}, \code{'pseudocount'},
@@ -135,16 +136,19 @@ every value before the logs, to patch the zeros (for the last three,
 only with \code{norm = 'clr'} or \code{'log'}, the norms that take logs). For
 \code{\link[=ancombc]{ancombc()}}
 and \code{\link[=ancombc2]{ancombc2()}} it is added to every value, as in ANCOMBC's own
-sensitivity analysis. For \code{\link[=dirmult_ttest]{dirmult_ttest()}} it is the Dirichlet
-prior, added to the counts before the posterior draws. For \code{\link[=linda]{linda()}}
+sensitivity analysis. For \code{\link[=dirmult_ttest]{dirmult_ttest()}} and \code{\link[=dirmult_lm]{dirmult_lm()}} it is
+the Dirichlet prior, added to the counts before the posterior draws. For \code{\link[=linda]{linda()}}
 it is added to every count when the zeros get a pseudocount
 (\code{zero_handling = 'pseudocount'}, or \code{'adaptive'} choosing it); when
 they are imputed, every run is the same.
 \item \code{zeros}: replaces the zeros with \code{\link[=replace_zeros]{replace_zeros()}} instead of a
 pseudocount, for the methods that take any table of positive values.
-\item \code{scale_sds}: \code{\link[=dirmult_ttest]{dirmult_ttest()}}'s scale model, the standard deviation of
-the samples' log total load (ALDEx2's gamma): \code{0} assumes the loads are
-the same, larger values allow more variation and give wider intervals.
+\item \code{scale_sds}: \code{\link[=dirmult_ttest]{dirmult_ttest()}}'s and \code{\link[=dirmult_lm]{dirmult_lm()}}'s scale model, the
+standard deviation of the samples' log total load (ALDEx2's and
+ALDEx3's gamma): \code{0} assumes the loads are as the method's assumption
+puts them, larger values allow more variation and give wider intervals
+(and, for \code{\link[=dirmult_lm]{dirmult_lm()}}, larger p-values). Not with \code{\link[=dirmult_lm]{dirmult_lm()}}'s
+\code{load}, whose error is \code{load_sd}.
 }
 
 \strong{Relation to ANCOMBC's \code{passed_ss}.} \code{summary$passed} is ANCOMBC's

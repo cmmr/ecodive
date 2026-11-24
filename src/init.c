@@ -36,6 +36,7 @@ extern SEXP C_lefse_lda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SE
 extern SEXP C_feature_lm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_feature_lmm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dirmult_ttest(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_dirmult_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_helmert_basis(SEXP);
@@ -139,6 +140,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_feature_lm",    (DL_FUNC) &C_feature_lm,    4},
   {"C_feature_lmm",   (DL_FUNC) &C_feature_lmm,   4},
   {"C_dirmult_ttest", (DL_FUNC) &C_dirmult_ttest, 11},
+  {"C_dirmult_lm",    (DL_FUNC) &C_dirmult_lm, 17},
   {"C_envfit",    (DL_FUNC) &C_envfit,   12},
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},
   {"C_lda",       (DL_FUNC) &C_lda,       5},
