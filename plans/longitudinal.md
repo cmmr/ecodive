@@ -416,3 +416,44 @@ Made while implementing:
   under Python 3.13, pandas 2.3.3, NumPy 2.5.5, SciPy 1.18.1, scikit-bio
   0.7.4 and statsmodels 0.14.6 (0.15 no longer has the `multipletests`
   import q2 uses; pandas is kept below 3, as QIIME 2 releases are).
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commits:** b701ec5 (the four functions, fixtures, tests, docs), a
+  merge of `origin/main` (items 49, 50 and 53 had landed meanwhile:
+  conflicts in `DESCRIPTION`, `NAMESPACE`, `NEWS.md`, `R/print.r`,
+  `inst/COPYRIGHTS`, `pkgdown/_pkgdown.yml` and `test-smoke.r`, each
+  resolved by keeping both sides; `man/print_ecodive.Rd` regenerated with
+  roxygen2 8.1.1 from the merged source), and this one ticking the plans.
+- **Tests:** 217 in `test-longitudinal.r` and 7 smoke lines. Before the
+  merge: 29,852 at home and 439 in CRAN mode, all passing (baseline at
+  2e2aa88: 29,628 and 432). On the merged tree the suite was re-run before
+  pushing. `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed
+  size, as before).
+- **Against q2-longitudinal 2026.10.0's own functions:**
+  `_first_differences()` (shannon: consecutive, baseline 0 and 7; every
+  feature of a relative-frequency table; distances, consecutive and
+  baseline 0): the same pairs and **identical** values (largest difference
+  0; features < 1e-15). `_nmit()` for Kendall, Pearson and Spearman with the
+  Frobenius and nuclear norms: largest difference 1.8e-14 absolute,
+  1.1e-15 relative. Errors (replicates, a baseline that is not a state, one
+  state) reproduced with q2's wording adapted.
+- **Vega's `bootstrapCI()`:** exact (1e-14) against a base-R transcription
+  on the same PCG uniforms (`volatility_details()`); in distribution, over
+  400 groups of 8 normal values, coverage within 0.05 and mean width within
+  2% of the same algorithm on R's `runif()`. Vega itself was not run (Node
+  on the bundled `vega.min.js` was refused by the permission classifier).
+- **Determinism:** `nmit()` identical for `cpus` 1, 2, 3 and 4 (40 subjects
+  × 60 features, and the fixture data, both norms), and for dense,
+  `dgCMatrix`, `simple_triplet_matrix` and transposed (`margin = 2`) input;
+  `first_differences()` identical across those input types.
+- **Speed:** 50 subjects × 500 features × 10 samples, Frobenius: Kendall
+  0.43 s on 1 thread, 0.14 s on 4; Pearson 0.35 / 0.13 s; Spearman 0.24 /
+  0.09 s. Nuclear norm with 100 features: 1.6 / 0.7 s.
+- **For item 63 (`feature_volatility()`):** `volatility()`'s per-(group,
+  state) means and `C_volatility_ci` (Vega's intervals, any number of
+  cells), `long_x()` / `long_meta()` / `long_var()` / `long_levels()` for
+  `subjects`, `states` and `groups`, `plot.ecodive_volatility()` for the
+  chosen feature's chart, and `first_differences(norm = 'percent')` for the
+  per-state mean differences of `_summarize_feature_stats()`.

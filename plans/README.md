@@ -372,7 +372,7 @@ can't be mistaken for one another:
 | Source tracking | ✓ `sourcetracker`, `feast` |
 | Quality control | ✓ `decontam`, ✓ `decontam_not` |
 | Batch correction (`batch_correct`) | ✓ `batch_mmuphin`, ✓ `batch_combat`, `batch_combat_seq`, `batch_conqur` |
-| Longitudinal | `first_differences`, `first_distances`, `volatility`, `nmit`, `feature_volatility` |
+| Longitudinal | ✓ `first_differences`, ✓ `first_distances`, ✓ `volatility`, ✓ `nmit`, `feature_volatility` |
 | Prediction | `random_forest` |
 
 Names still worth a word of warning in the docs:
