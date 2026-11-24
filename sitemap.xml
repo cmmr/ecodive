@@ -99,6 +99,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/horn.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ilr.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/index.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/indicator_species.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/inv_simpson.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/isomap.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/jaccard.html</loc></url>
@@ -158,6 +159,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_indicator_species.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_lefse.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.html</loc></url>

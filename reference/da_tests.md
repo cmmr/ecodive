@@ -98,17 +98,18 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_da_tests()
-#>                                      name            id  design      effect
-#> 1  Analysis of Composition of Microbiomes         ancom  groups        <NA>
-#> 2                                ANCOM-BC       ancombc formula      log_fc
-#> 3                               ANCOM-BC2      ancombc2 formula      log_fc
-#> 4            Dirichlet-Multinomial t-test dirmult_ttest  groups     log2_fc
-#> 5      Dirichlet-Multinomial Linear Model    dirmult_lm formula    estimate
-#> 6                  Wilcoxon Rank-Sum Test   da_wilcoxon  groups median_diff
-#> 7                            Welch t-test      da_ttest  groups        diff
-#> 8                            Linear Model         da_lm formula    estimate
-#> 9                                   LinDA         linda formula     log2_fc
-#> 10                                  LEfSe         lefse  groups   lda_score
+#>                                      name                id  design      effect
+#> 1  Analysis of Composition of Microbiomes             ancom  groups        <NA>
+#> 2                                ANCOM-BC           ancombc formula      log_fc
+#> 3                               ANCOM-BC2          ancombc2 formula      log_fc
+#> 4            Dirichlet-Multinomial t-test     dirmult_ttest  groups     log2_fc
+#> 5      Dirichlet-Multinomial Linear Model        dirmult_lm formula    estimate
+#> 6                  Wilcoxon Rank-Sum Test       da_wilcoxon  groups median_diff
+#> 7                            Welch t-test          da_ttest  groups        diff
+#> 8                            Linear Model             da_lm formula    estimate
+#> 9                                   LinDA             linda formula     log2_fc
+#> 10                                  LEfSe             lefse  groups   lda_score
+#> 11             Indicator Species Analysis indicator_species  groups        stat
 #>    base zero_free_ok signed
 #> 1  <NA>         TRUE  FALSE
 #> 2     e         TRUE   TRUE
@@ -120,6 +121,7 @@ will be applied to the
 #> 8  norm         TRUE   TRUE
 #> 9     2         TRUE   TRUE
 #> 10 <NA>         TRUE  FALSE
+#> 11 <NA>        FALSE  FALSE
 
     # Find the method for 'Mann-Whitney'.
     m <- match_da_test('Mann-Whitney')

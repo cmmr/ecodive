@@ -337,6 +337,8 @@ don’t matter.
   Linear Models for Differential Abundance (LinDA)
 - [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md) :
   LEfSe: LDA Effect Size Biomarker Discovery
+- [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md)
+  : Indicator Species Analysis
 
 ### Absolute abundance
 
@@ -545,6 +547,8 @@ than every value.
   : Plot a LinDA Result
 - [`plot(`*`<ecodive_lefse>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_lefse.md)
   : Plot a LEfSe result
+- [`plot(`*`<ecodive_indicator_species>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_indicator_species.md)
+  : Plot an Indicator Species Analysis
 - [`plot(`*`<ecodive_da_sensitivity>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.md)
   : Plot a Differential Abundance Sensitivity Analysis
 - [`plot(`*`<ecodive_varpart>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.md)
