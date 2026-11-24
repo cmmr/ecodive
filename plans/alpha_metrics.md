@@ -400,3 +400,30 @@ own call); one metric still returns the named vector. `alpha_div_rarefied()`
 does the same over shared draws. The internal `validate_q()` (in
 `R/validate.r`, reading `q` from the caller's environment) and
 `match_metrics(metric, div = 'alpha')` are there to reuse.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 37, done 2026-11-24.** Commits `9f1add2` (work), and the tick and
+this outcome in the commit after it.
+
+- Tests (`-O2` install, `LANG=C.UTF-8`): 22,736 at home (baseline 20,773),
+  388 in CRAN mode (baseline 364), all passing. `R CMD check --no-manual
+  --ignore-vignettes`: 1 NOTE (installed size, as before).
+- scikit-bio 0.7.4: 2,146 values on five tables, every new metric, both
+  `chao1()` forms, `hill` / `renyi` / `tsallis` at q = 0, 0.5, 1, 2, 3,
+  Inf, and the existing metrics under scikit-bio's names. Largest relative
+  difference 1.4e-14 (`heip`, `exp(H)` against `prod(p^-p)`); `chao1`,
+  `goods_coverage`, `mcintosh_evenness`, `strong` and every q = 0 and
+  q = Inf value are exactly equal. Dense, `margin = 2`, `Matrix` and
+  `slam` input agree; results are identical for `cpus` 1, 2, 4 and 7.
+- vegan 2.7.8 (output only): `renyi()` with and without `hill = TRUE`,
+  Pielou's J and Simpson's dominance agree within 2.8e-14 (Rényi at
+  q = 2); vegan's Pielou is `NaN` for one feature, ecodive's 1 (as
+  scikit-bio).
+- Speed (2,000 × 2,000 dense table, half zeros, 4 cores): 0.06–0.17 s
+  per metric including reading the table, against 0.24 s for vegan's
+  `renyi(hill = TRUE)` at one order and 0.35 s for its Pielou's J.
+- Open: `chao1()` differs from vegan's `estimateR()` and iNEXT by their
+  \eqn{(N-1)/N} factor (documented); `esty_ci`, `chao1_ci`, `phydiv` and
+  `finite` remain left out, as planned.
