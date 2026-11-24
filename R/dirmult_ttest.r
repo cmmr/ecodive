@@ -210,7 +210,8 @@
 #' details: it reports both Welch's and Wilcoxon's tests, averages
 #' Benjamini-Hochberg adjusted p-values over the draws, and gives its own
 #' effect size; its scale model (`gamma`) is off by default. ALDEx3 fits
-#' linear models to each draw instead of t-tests. Their results agree with
+#' linear models to each draw instead of t-tests: [dirmult_lm()] ports
+#' them, from the same draws. Their results agree with
 #' this function's in direction and rough size, not exactly.
 #'
 #' **Effect sizes.** `pooled_sd`, `mean` and `effect` describe each feature
@@ -276,7 +277,7 @@
 #' Computational Biology*, 22, e1014728.
 #' \doi{10.1371/journal.pcbi.1014728}
 #'
-#' @seealso [ancom()], [replace_zeros()], [da_sensitivity()].
+#' @seealso [dirmult_lm()], [ancom()], [replace_zeros()], [da_sensitivity()].
 #'
 #' @export
 #' @examples
@@ -453,8 +454,9 @@ dirmult_ttest_fit <- function (env, details = FALSE, gamma_draws = NULL) {
 
 
 # The table's checks: any input type, numeric, finite and non-negative, at
-# least two features. Returns list(D, n, features, samples).
-dirmult_input <- function (env) {
+# least two features (`what` names the method in that message). Returns
+# list(D, n, features, samples).
+dirmult_input <- function (env, what = 'a Dirichlet-multinomial t-test') {
 
   validate_counts(env)
   validate_margin(env)
@@ -487,7 +489,7 @@ dirmult_input <- function (env) {
   D <- as.integer(dims[[3L - margin]])
   n <- as.integer(dims[[margin]])
   if (D < 2L)
-    stop('`counts` must have at least 2 features for a Dirichlet-multinomial t-test.', call. = FALSE)
+    stop('`counts` must have at least 2 features for ', what, '.', call. = FALSE)
 
   list(
     D        = D,

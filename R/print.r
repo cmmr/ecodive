@@ -288,6 +288,7 @@ print_df_label <- function (x) {
     ecodive_da_wilcoxon   = ,
     ecodive_da_ttest      = ,
     ecodive_da_lm         = ,
+    ecodive_dirmult_lm    = ,
     ecodive_linda         = {
       # Subsetting rows with `[` drops the `method` attribute.
       m <- attr(x, 'method', exact = TRUE)
@@ -354,6 +355,8 @@ print.ecodive_ancombc_dunnett  <- print_table_result
 print.ecodive_ancombc_trend    <- print_table_result
 #' @export
 print.ecodive_dirmult_ttest    <- print_table_result
+#' @export
+print.ecodive_dirmult_lm       <- print_table_result
 #' @export
 print.ecodive_da_wilcoxon      <- print_table_result
 #' @export

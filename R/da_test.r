@@ -22,6 +22,11 @@
 #
 # `effect`, `base` and `zero_free_ok` are for da_sensitivity(); `effect`
 # and `signed` for log_ratio_features() and the rank plots.
+#
+# Aliases with digits, which the letters-only matching of `alt_ids` can't
+# tell from others ('aldex3' would be 'aldex', dirmult_ttest's alias), are
+# in DA_DIGIT_ALIASES, matched exactly (letters and digits) by
+# match_da_test().
 DA_TESTS <- local({
 
   df <- read.table(
@@ -37,6 +42,7 @@ DA_TESTS <- local({
       ANCOM-BC,                                ancombc,       formula, log_fc,      e,    TRUE,         TRUE,   ancombiascorrected analysisofcompositionsofmicrobiomeswithbiascorrection
       ANCOM-BC2,                               ancombc2,      formula, log_fc,      e,    TRUE,         TRUE,
       Dirichlet-Multinomial t-test,            dirmult_ttest, groups,  log2_fc,     2,    FALSE,        TRUE,   dirichletmultinomialwelchttest aldex aldex2
+      Dirichlet-Multinomial Linear Model,      dirmult_lm,    formula, estimate,    2,    FALSE,        TRUE,
       Wilcoxon Rank-Sum Test,                  da_wilcoxon,   groups,  median_diff, norm, TRUE,         TRUE,   wilcoxon wilcox wilcoxontest mannwhitney mannwhitneyu ranksum
       Welch t-test,                            da_ttest,      groups,  diff,        norm, TRUE,         TRUE,   ttest welch studentttest
       Linear Model,                            da_lm,         formula, estimate,    norm, TRUE,         TRUE,   lm linearregression ols
@@ -49,6 +55,8 @@ DA_TESTS <- local({
   df$base         <- as.character(df$base)
   return (df)
 })
+
+DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 
 
 
@@ -64,7 +72,7 @@ DA_TESTS <- local({
 #'
 #' @param method   The name of a DA method: `"ancom"`, `"ancombc"`,
 #'        `"ancombc2"`, `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`,
-#'        `"dirmult_ttest"`, `"lefse"`, or `"linda"`. Flexible matching is supported
+#'        `"dirmult_lm"`, `"dirmult_ttest"`, `"lefse"`, or `"linda"`. Flexible matching is supported
 #'        (see below). Programmatic access via `list_da_tests()`.
 #'
 #' @param groups  The grouping to compare: the name of a column of `data`,
@@ -86,9 +94,9 @@ DA_TESTS <- local({
 #'        [da_wilcoxon()], [dirmult_ttest()]), `norm` and `pseudocount`. Each
 #'        method keeps its own defaults; see [ancom()], [ancombc()],
 #'        [ancombc2()], [da_lm()], [da_ttest()], [da_wilcoxon()],
-#'        [dirmult_ttest()], [lefse()], and [linda()]. `seed` is ignored by
-#'        the methods that have no random parts (all but [dirmult_ttest()]
-#'        and [lefse()]).
+#'        [dirmult_lm()], [dirmult_ttest()], [lefse()], and [linda()]. `seed`
+#'        is ignored by the methods that have no random parts (all but
+#'        [dirmult_lm()], [dirmult_ttest()] and [lefse()]).
 #'
 #' @return The method's result, unchanged: `da_test(counts, 'ancombc2',
 #'   ...)` is identical to `ancombc2(counts, ...)`, attributes included.
@@ -107,6 +115,7 @@ DA_TESTS <- local({
 #' | `da_lm`                | Linear model per feature               | formula |
 #' | `da_ttest`             | Welch t-test per feature               | groups  |
 #' | `da_wilcoxon`          | Wilcoxon rank-sum test per feature     | groups  |
+#' | `dirmult_lm`           | Dirichlet-multinomial linear model with a scale model (ALDEx3) | formula |
 #' | `dirmult_ttest`        | Dirichlet-multinomial t-test (ALDEx2-style) | groups |
 #' | `lefse`                | LDA effect size (LEfSe)                | groups  |
 #' | `linda`                | Linear models for differential abundance (LinDA) | formula |
@@ -138,7 +147,8 @@ DA_TESTS <- local({
 #' `da_wilcoxon`; `'t-test'` or `'Welch'` selects `da_ttest`; `'lm'` or
 #' `'linear model'` selects `da_lm`; and `'ALDEx2'` selects
 #' `dirmult_ttest`, an ALDEx2-style method (not ALDEx2 itself, whose
-#' results agree with it in direction and rough size only).
+#' results agree with it in direction and rough size only); `'ALDEx3'`
+#' selects `dirmult_lm`, a port of ALDEx3's linear models.
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
@@ -167,7 +177,7 @@ DA_TESTS <- local({
 #' \doi{10.1093/bib/bbaf130}
 #'
 #' @seealso [ancom()], [ancombc()], [da_lm()], [da_ttest()],
-#'   [da_wilcoxon()], [dirmult_ttest()], [lefse()], [linda()], [list_da_tests()];
+#'   [da_wilcoxon()], [dirmult_lm()], [dirmult_ttest()], [lefse()], [linda()], [list_da_tests()];
 #'   [replace_zeros()] for the zeros; [da_sensitivity()] to rerun a method
 #'   over pseudocounts, zero replacements and scale uncertainties.
 #'
@@ -368,10 +378,11 @@ match_da_test <- function (method) {
     return (da_test_info(df[df$id == method,]))
 
   # An exact name with its digits, which the letters-only matching below
-  # drops: 'ANCOM-BC2' is ancombc2, 'ANCOM-BC' is ancombc.
+  # drops: 'ANCOM-BC2' is ancombc2, 'ANCOM-BC' is ancombc, 'ALDEx3' is
+  # dirmult_lm (and 'ALDEx2' dirmult_ttest, by its letters).
   digits <- gsub('[^a-z0-9]', '', tolower(method))
-  keys   <- gsub('[^a-z0-9]', '', tolower(c(df$id, df$name)))
-  hit    <- unique(c(df$id, df$id)[keys == digits])
+  keys   <- gsub('[^a-z0-9]', '', tolower(c(df$id, df$name, names(DA_DIGIT_ALIASES))))
+  hit    <- unique(c(df$id, df$id, unname(DA_DIGIT_ALIASES))[keys == digits])
   if (length(hit) == 1L)
     return (da_test_info(df[df$id == hit,]))
 

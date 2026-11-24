@@ -902,6 +902,22 @@
   same for any `cpus`; one of `da_test()`'s and `da_sensitivity()`'s
   methods, with a volcano `plot()`.
 
+* New `dirmult_lm()`: ALDEx3's linear models (McGovern & Silverman 2026;
+  Nixon et al. 2025), the regression form of `dirmult_ttest()`. Every
+  Monte Carlo draw of the samples' Dirichlet posteriors gets a scale model
+  (`scale_model = 'clr'` or `'tss'` with uncertainty `scale_sd`, or measured
+  or predicted loads, `load` with error `load_sd`), and each feature's log2
+  abundance is regressed on any `formula`, with HC3 (default), HC0 or
+  classical standard errors, or with a random intercept, `~ group + (1 |
+  subject)` (REML and Satterthwaite, as `linda()`). Estimates and p-values
+  are averaged over the draws as ALDEx3's `aldex()` and `summary()` do, and
+  match ALDEx3 1.4.0 to about 1e-12 on the same draws. Its draws are
+  `dirmult_ttest()`'s for the same `seed`, so with `scale_sd = 0` and two
+  groups its estimate is `dirmult_ttest()`'s `log2_fc`. Parallel C, the
+  same for any `cpus`; one of `da_test()`'s methods (also as `"ALDEx3"`)
+  and `da_sensitivity()`'s (`scale_sds`), with volcano, effect, MA, forest
+  and rank plots.
+
 * New `sourcetracker()` estimates what share of each sink sample's community
   came from each of several source environments, and from an unknown
   source, with SourceTracker's Gibbs sampler (Knights et al. 2011), ported
@@ -977,6 +993,18 @@
   also has the expected sample coverage (Chao & Jost 2012), and `plot()`
   draws depth, coverage-based or sample-completeness curves, by group,
   with a line at a planned rarefaction depth.
+
+* New `composition_barplot()` draws stacked bars of relative abundance, one
+  per sample and never averaged, ordered so they can be read: samples by
+  their Aitchison PCoA axis 1 (or a clustering, `clust` as in `beta_div()`),
+  within panels by `groups`; the most abundant features on the baseline.
+  With `feature_groups` (e.g. each genus's phylum) it shades the bars
+  hierarchically, after microshades (Dahl et al. 2022): one hue per group,
+  shades for its top members, the group's own "Other" lightest. The
+  subtitle says how much "Other" holds. `heatmap = TRUE` adds the drawn
+  features' centred clr values below, aligned with the bars. It returns the
+  drawn proportions, colours and sample order invisibly; sparse tables stay
+  sparse.
 
 * `plot()` of an ordination takes `scaling` and `links`, for compositional
   biplots (Aitchison & Greenacre 2002). For `pca()`, `rpca()` and

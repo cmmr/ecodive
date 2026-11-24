@@ -89,6 +89,25 @@
   expect_identical(attr(res, 'log_base'), 2)
   expect_identical(res$parameter, rep(c('base', 'pseudocount', 'pseudocount', 'scale_sd', 'scale_sd'), each = D))
 
+  # The Dirichlet-multinomial linear model: the same, a row per feature and
+  # non-intercept covariate.
+  fm  <- ~ grp + age
+  res <- da_sensitivity(
+    x, 'dirmult_lm', 'grp', meta, fm, n_draws = 16L, seed = 7L,
+    pseudocounts = c(0.1, 1), scale_sds = c(0, 1), cpus = 1 )
+  fits <- attr(res, 'fits')
+  dl <- function (...) dirmult_lm(x, fm, meta, 'grp', n_draws = 16L, seed = 7L, cpus = 1, ...)
+  expect_identical(fits[[1]], dl())
+  expect_identical(fits[[2]], dl(pseudocount = 0.1))
+  expect_identical(fits[[3]], dl(pseudocount = 1))
+  expect_identical(fits[[4]], dl(scale_sd = 0))
+  expect_identical(fits[[5]], dl(scale_sd = 1))
+  for (k in 0:4) expect_true(same_rows(res, k, fits[[k + 1]], 'estimate'), info = k)
+  expect_identical(attr(res, 'log_base'), 2)
+  expect_identical(attr(res, 'covariate'), 'grpb')
+  expect_identical(unique(res$covariate), c('grpb', 'age'))
+  expect_error(da_sensitivity(x, 'dirmult_lm', 'grp', meta, zeros = TRUE), 'models counts')
+
   # da_lm, da_ttest, da_wilcoxon (base pseudocount given; the zeros runs
   # drop it).
   res <- da_sensitivity(x, 'da_lm', 'grp', meta, ~ grp + age, pseudocount = 0.5, pseudocounts = 1, zeros = 'mult', cpus = 1)

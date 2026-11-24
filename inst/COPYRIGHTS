@@ -733,9 +733,18 @@ License:
    INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE
    OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: src/dirmult.c R/dirmult_ttest.r
+Files: src/dirmult.c R/dirmult_ttest.r src/dirmult_lm.c R/dirmult_lm.r
 Copyright: 2026 ALDEx3 authors
-Comment: The scale model of dirmult_ttest() (scale_sd) follows clr.sm() from
+Comment: dirmult_lm() (src/dirmult_lm.c, R/dirmult_lm.r) is a C port of the
+ linear-model path of aldex() from ALDEx3 1.4.0, restructured for ecodive:
+ aldex() and aldex.sampler() (R/aldex.R, R/aldex-internals.R: Dirichlet
+ draws plus a scale model, per Monte Carlo draw), rLogDirichlet()
+ (R/dirichlet.R), the scale models clr.sm(), tss.sm() and sample.sm()
+ (R/scale.R), fflm() (R/fflm.R: least squares with classical, HC0 and HC3
+ standard errors and one-sided t tail probabilities), aldex.pvals()
+ (R/aldex-internals.R: the averaging of the draws' doubled one-sided
+ p-values, raw and adjusted) and summary.aldex() (R/aldex-summary.R).
+ The scale model of dirmult_ttest() (scale_sd) follows clr.sm() from
  ALDEx3 1.4.0 (R/scale.R): one N(0, scale_sd^2) log2 shift per Monte Carlo
  draw for each coefficient of the design, here the treatment-versus-reference
  indicator of the contrast (the intercept's shift cancels from every

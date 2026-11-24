@@ -183,3 +183,113 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., & Egozcue, J. J.
   (2017). Microbiome datasets are compositional: and this is not optional.
   *Frontiers in Microbiology*, 8, 2224. \doi{10.3389/fmicb.2017.02224}
+
+
+## Decisions made while implementing
+
+Asked up front (2026-11-24), the user's answers:
+
+- **The pseudocount's default is silent.** `pseudocount = NULL` uses the
+  shared rule's value (none without zeros, else half the smallest non-zero
+  value) but doesn't warn: it only orders the bars and colours the heatmap,
+  never changes a bar. A given `pseudocount` is checked as everywhere.
+- **Every `groups` value is a category,** numbers too, in a factor's level
+  order or else sorted; `NA` is a group of its own ("NA", last).
+- **Segments that would hold nothing are dropped** (from the bars, the
+  legend, `proportions` and `col`): features whose proportion is zero in
+  every sample are never drawn, a feature group with a total of zero never
+  takes one of the `n_feature_groups` slots, and "Other" or "Other <group>"
+  exists only when it has members.
+- **microshades reference: its colour-mapping code only.** microshades 1.13
+  (downloaded through jsDelivr) has its `R/color_mapping_functions.R` and
+  `R/palettes.R` sourced with dplyr, tidyr, forcats and rlang from CRAN; no
+  phyloseq. `data-raw/expected/composition_barplot.r` builds the melted data
+  frame `prep_mdf()` would, runs `create_color_dfs()`, and stores which
+  members of each group it keeps, in which order of shade, and its "Other".
+
+Made while implementing:
+
+- **C kernel** `src/composition_barplot.c` (`C_comp_bar_means`,
+  `C_comp_bar_segments`), reading every table type through
+  `new_ecomatrix()`, so sparse input stays sparse. Per-sample work is split
+  over threads (each sample writes only its own column); each feature's mean
+  proportion is summed serially in the samples' order (O(nnz)). Results are
+  identical for any `cpus`, dense or sparse, either `margin` (tested).
+- **Proportions are `x / total`** for every sample; `normalize('percent')`'s
+  pass-through of samples already summing to 1 within 1e-6 isn't applied (a
+  table of proportions gives the same bars to 1e-15).
+- **"Other" is 1 minus the other segments** (clamped at 0), so each column
+  sums to 1 within an ulp; "Other <group>" is the sum of its members.
+- **Ordering:** `aitchison()` of the whole table, then the drawn samples'
+  distances taken from the packed triangle when some samples were left out
+  (subsetting a sparse table would need Matrix or slam), then
+  `dist_clust_order()`. That is the plan's n x n triangle; a few thousand
+  bars is already beyond reading. Fewer than 3 samples, or a table of one
+  repeated value, keep the input order; `pcoa()`'s "no positive eigenvalue"
+  warning for identical samples is muffled. `clust = NULL` is the input
+  order, like `FALSE` and `'none'`.
+- **Ties** between features go to the one first in `counts`; between feature
+  groups to a factor's level order, else first appearance ("Unassigned"
+  last unless it appears earlier).
+- **`feature_groups`** is matched by name only when its names cover every
+  feature; otherwise by position, and a wrong length is an error (with a
+  hint to name it when the features have names).
+- **Shades:** a group with k drawn members uses `l = seq(35, 80,
+  length.out = k + 1)` whether or not its "Other <group>" exists, so a
+  member's shade doesn't depend on the rest of its group.
+- **Legend** lists the segments top-down in stack order (most abundant group
+  first, its members darkest first, then its "Other"; "Other" last), each
+  group under its name in bold without a box; `'bottom'` puts it in as many
+  columns as fit. `legend` takes `'right'`, `'bottom'`, or `NULL` / `FALSE`
+  / `NA` (not every `legend()` keyword: it is drawn outside the plot).
+- **Subtitle** is drawn at the top, under the title, since the vertical
+  sample names fill the bottom margin; `sub =` replaces it. With groups,
+  "within groups" is added to the ordering's name. "Other"'s share is its
+  mean proportion over the drawn samples, to 2 significant digits.
+- **With the heatmap,** the sample names and group labels go under the
+  heatmap (the bottom panel), and both panels share margins and `xlim` so
+  the columns line up with the bars; gaps are `NA` cells. The key is
+  `dist_plot_key()` titled "clr"; row labels shrink to fit many rows.
+- **Value** adds `x` (the bars' midpoints, as `barplot()` returns them) and,
+  with `heatmap = TRUE`, `clr` (the heatmap's values) to the plan's
+  `proportions`, `col` and `order`.
+- **`col`:** named colours replace only those segments (an unknown name is an
+  error); unnamed ones must give one per segment.
+- **`n_features` / `n_feature_groups`** take whole numbers ≥ 1, `Inf` or
+  `TRUE` (all), through `plot_count()`; 0 is an error.
+- **Segment labels** are made unique with `make.unique()` (a feature named
+  "Other", say).
+- **Zero-total samples** are left out with a warning naming them; `order`
+  gives positions in the input, counting them.
+- **Docs:** the Rd names `variation_array()` and `ternary_plot()` as planned
+  functions without links (they don't exist yet); pkgdown has a new
+  "Compositional displays" subtitle under "Plotting and Printing".
+- **par():** `mai` and `cex` are restored on exit, and `mfrow` too after the
+  heatmap's `layout()`; without the heatmap `mfrow` is untouched, so the plot
+  can fill one of the user's own panels.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 47, done 2026-11-24.** Commit `68b12bd` (work), and the tick.
+
+- Tests: 28,242 at home, 407 in CRAN mode (before this item: 28,140 and
+  406; the new file has 101, the smoke file one more line). `R CMD check
+  --no-manual --ignore-vignettes` with `LANG=C.UTF-8`: 1 NOTE (installed
+  size 5.8 MB), as before.
+- microshades 1.13 (`create_color_dfs()`, sourced with dplyr 1.2.1, tidyr
+  1.3.2, forcats 1.0.1, rlang 1.3.0; no phyloseq), 3 cases (4 groups x 4
+  members with an "Unassigned" group, 3 x 2, and a 2-member group with no
+  "Other"): the same groups (microshades given the largest summed
+  proportions), the same members in the same order of shade, and each
+  group's "Other" lightest, in every case.
+- Direct formulas: proportions and "Other" to 1e-15, the chosen features
+  and groups (ties by position), the PCoA and `hclust` orders
+  (`order(pcoa(aitchison(x))[, 1])`), stable group sorting, the colours,
+  and the centred clr of the heatmap (1e-12).
+- `cpus` 1, 2, 4, dense vs `dgCMatrix` / `dgTMatrix` / slam, and either
+  `margin`: identical results.
+- New: `composition_barplot()`; C entry points `C_comp_bar_means` and
+  `C_comp_bar_segments` (`src/composition_barplot.c`). Nothing copied from
+  microshades (the colours are re-derived in HCL; the docs cite the paper),
+  so no notice, `Files:` stanza or `Authors@R` entry.

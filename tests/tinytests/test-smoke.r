@@ -185,6 +185,8 @@
   expect_identical(z$feature, colnames(counts))
   expect_true(all(is.finite(as.matrix(z[, 2:7]))) && is.logical(z$reject) && !anyNA(z$reject))
   expect_true(all(z$ci_lower <= z$log2_fc & z$log2_fc <= z$ci_upper))
+  z <- dirmult_lm(counts, ~ grp + x, meta, n_draws = 8L, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_dirmult_lm') && nrow(z) == 36L && all(is.finite(z$estimate)) && !anyNA(z$reject))
   z <- ancombc(counts, ~ grp + x, meta, cpus = cpus)
   expect_true(inherits(z, 'ecodive_ancombc') && nrow(z) == 36L)
   expect_identical(z$feature, rep(colnames(counts), each = 3L))
@@ -408,6 +410,7 @@
   expect_true(drawn(fs))
   expect_true(drawn(ancom(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)))
+  expect_true(drawn(dirmult_lm(counts, ~ grp + x, meta, n_draws = 8L, cpus = cpus)))
   expect_true(drawn(sparcc(counts, n_draws = 5L, cpus = cpus)))
   expect_true(drawn(st))   # sourcetracker()
   expect_true(drawn(dc))   # decontam()
@@ -426,6 +429,9 @@
     expect_true(drawn(tests[[nm]]), info = nm)
     expect_true(drawn(tests[[nm]], type = 'null'), info = nm)
   }
+  z <- withVisible(composition_barplot(counts, 'grp', meta, n_features = 5, heatmap = TRUE, cpus = cpus))
+  expect_true(!z$visible && identical(dim(z$value$proportions), c(6L, 20L)) &&
+              all(abs(colSums(z$value$proportions) - 1) < 1e-12) && all(is.finite(z$value$clr)))
   grDevices::dev.off()
 
 

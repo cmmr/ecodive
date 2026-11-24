@@ -125,6 +125,7 @@ reference:
   - ancombc_global
   - structural_zeros
   - dirmult_ttest
+  - dirmult_lm
   - da_wilcoxon
   - linda
   - lefse
@@ -217,6 +218,7 @@ reference:
   - plot.ecodive_test
   - plot.ecodive_simper
   - plot.ecodive_dirmult_ttest
+  - plot.ecodive_dirmult_lm
   - plot.ecodive_ancom
   - plot.ecodive_ancombc
   - plot.ecodive_da_ttest
@@ -232,6 +234,10 @@ reference:
   - plot.ecodive_log_ratio
   - ecodive_display
   - print_ecodive
+- subtitle: Compositional displays
+  desc: Plots drawn straight from a count table, ordered and coloured to be read; not compositional analyses themselves.
+  contents:
+  - composition_barplot
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.
