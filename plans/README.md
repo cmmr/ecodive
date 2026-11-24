@@ -371,7 +371,7 @@ can't be mistaken for one another:
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
 | Source tracking | ✓ `sourcetracker`, `feast` |
 | Quality control | ✓ `decontam`, ✓ `decontam_not` |
-| Batch correction (`batch_correct`) | `batch_mmuphin`, `batch_combat`, `batch_combat_seq`, `batch_conqur` |
+| Batch correction (`batch_correct`) | ✓ `batch_mmuphin`, ✓ `batch_combat`, `batch_combat_seq`, `batch_conqur` |
 | Longitudinal | `first_differences`, `first_distances`, `volatility`, `nmit`, `feature_volatility` |
 | Prediction | `random_forest` |
 

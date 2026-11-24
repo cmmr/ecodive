@@ -598,3 +598,33 @@ Settled while implementing:
   `ComBat()` (parametric and not, with and without `mod`, `mean.only`,
   `ref.batch`, a one-sample batch, features constant within a batch, and
   clr values).
+
+
+## Outcome (from the implementing session's final report, item 53)
+
+- **Commit:** 442ed7c (`batch_mmuphin()`, `batch_combat()`), merged with
+  item 50's `indicator_species()` without conflicts.
+- **Tests:** `tests/tinytests/test-batch_correct.r` (238 results) and
+  eight smoke-test lines. Full suite on the merged tree, `-O2` install:
+  30,393 results at home, 440 in CRAN mode, all passing. `R CMD check
+  --no-manual --ignore-vignettes` (LANG=C.UTF-8): 1 NOTE, the existing
+  installed size.
+- **Reference agreement** (largest differences): MMUPHin's
+  `adjust_batch()` on count tables, **identical** (rounded counts, every
+  case); proportions (CRC data) 6.8e-15 relative; its internal
+  \eqn{\hat\gamma}, \eqn{\gamma^*}, \eqn{\hat\delta}, \eqn{\delta^*} at
+  ≤ 1.1e-12 relative (NA pattern identical). sva's `ComBat()`: ≤ 4.2e-14
+  absolute in all eleven fixture cases (parametric, non-parametric,
+  `mean.only`, `ref.batch`, `mod`, a one-sample batch, clr). The fixture
+  comes from MMUPHin 1.16.0, checked identical to 2.0.0's sourced code.
+- **Speed** (400 samples × 1,000 features, 4 batches, 4 cores):
+  `adjust_batch()` 1.23 s, `batch_mmuphin()` 0.057 s (1 thread) / 0.030 s
+  (4); non-parametric `ComBat()` 15.3 s, `batch_combat()` 0.30 s / 0.089 s;
+  parametric `ComBat()` 0.09 s, `batch_combat()` 0.021 s.
+- **For item 81:** reuse `batch_input()`, `batch_design()` (`min_size`)
+  and `batch_result()` from `R/batch_correct.r`; add rows (and an
+  `alt_ids` column) to `BATCH_CORRECTIONS` with the wrapper and its
+  `list_*` / `match_*` functions; `plot.ecodive_batch()` and
+  `print.ecodive_batch()` work for any method that stores the same
+  attributes. ComBat-seq's shrinkage plot should say when
+  \eqn{\gamma^* = \hat\gamma} (`shrink = FALSE`).
