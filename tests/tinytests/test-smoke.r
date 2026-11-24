@@ -118,6 +118,15 @@
   z <- cross_assoc(counts[1:10, 1:5], data.frame(a = 1:10, b = (1:10)^2, c = c(5:1, 1:5)), cpus = cpus)
   expect_true(inherits(z, 'ecodive_cross_assoc') && nrow(z) == 15L && all(abs(z$association) <= 1) && all(z$p_value >= 0 & z$p_value <= 1))
 
+  # Contaminant identification.
+  dc_conc <- exp(seq(0, 3, length.out = 20))
+  dc_neg  <- rep(c(FALSE, TRUE), c(16, 4))
+  dc <- decontam(counts, dc_conc, dc_neg, cpus = cpus)
+  expect_true(inherits(dc, 'ecodive_decontam') && nrow(dc) == 12L && is.logical(dc$contaminant))
+  expect_true(all(dc$p >= 0 & dc$p <= 1) && identical(attr(dc, 'test'), 'combined'))
+  z <- decontam_not(counts, dc_neg, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_decontam_not') && nrow(z) == 12L && is.logical(z$not_contaminant))
+
   # Associations: SparCC.
   z <- sparcc(counts[, 1:10], n_draws = 5L, permutations = 9L, cpus = cpus)
   expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 10L && length(z) == 45L)
@@ -373,6 +382,9 @@
   expect_true(drawn(dirmult_ttest(counts, 'grp', meta, n_draws = 8L, cpus = cpus)))
   expect_true(drawn(sparcc(counts, n_draws = 5L, cpus = cpus)))
   expect_true(drawn(st))   # sourcetracker()
+  expect_true(drawn(dc))   # decontam()
+  expect_true(drawn(dc, 'prevalence'))
+  expect_true(is.data.frame(decontam_frequency_plot(counts, 'F1', dc_conc, dc_neg)))
   expect_true(drawn(fit))   # ancombc2()
   expect_true(drawn(ancombc_global(fit, cpus = cpus)))
   expect_true(drawn(ancombc_pairwise(fit, cpus = cpus)))

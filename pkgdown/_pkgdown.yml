@@ -137,6 +137,13 @@ reference:
   contents:
   - sourcetracker
 
+- title: Quality Control
+  desc: Find the features that come from contaminating DNA, by their frequency against each sample's DNA concentration and their prevalence in negative controls (decontam).
+  contents:
+  - decontam
+  - plot.ecodive_decontam
+  - decontam_frequency_plot
+
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
   contents:

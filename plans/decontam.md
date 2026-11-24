@@ -280,3 +280,100 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - Eisenhofer, R., et al. (2019). Contamination in low microbial biomass
   microbiome studies: issues and recommendations. *Trends in
   Microbiology*, 27, 105–117. doi:10.1016/j.tim.2018.11.003
+
+
+## Decisions made while implementing (item 40, 2026-11-24)
+
+Asked of the user at the start (all four answered with the
+recommendation):
+
+1. **Names: `decontam()` and `decontam_not()`.**
+2. **`conc`**, not `load`.
+3. **The frequency plot is a separate function,
+   `decontam_frequency_plot(counts, features, conc, neg = NULL, data =
+   NULL, margin = 1L, norm = 'percent', models = TRUE, log = TRUE, legend =
+   'topright', ...)`,** so `plot()` keeps the no-recompute rule. It takes
+   the data, draws one panel per feature (`par(mfrow = rev(n2mfrow(k)))`,
+   restored on exit), fits the two lines over the true samples with the
+   feature present (controls and `NA` `neg` left out, as the test), and
+   returns the plotted values invisibly as a data frame. `features` selects
+   by name, index or logical vector (`feature_set()`, as `numerator`).
+4. **pkgdown: a new "Quality Control" section** (decontam,
+   plot.ecodive_decontam, decontam_frequency_plot), after Source Tracking.
+
+Made while implementing:
+
+5. **Versions.** decontam 1.32.0 (Bioconductor 3.23) is pure R with
+   `Depends: R (>= 3.4.1)`, so its source tarball installs on this R 4.3.3;
+   the port and the committed fixtures come from it. 1.22.0 (Bioconductor
+   3.18) was installed too: its `R/decontam.R` is **byte-identical** to
+   1.32.0's, and `data-raw/expected/decontam.r` run with it writes
+   byte-identical files (only `version.txt` differs). So the computations
+   don't differ between the versions.
+6. **Copyright holder:** neither the tarball nor the GitHub repository
+   (read through jsDelivr) has a LICENSE file or a copyright line; the
+   notices name the DESCRIPTION's authors, Benjamin Callahan and Nicole
+   Marie Davis (`Authors@R`: `ctb`, `cph`). Felix G.M. Ernst (`ctb`, the
+   S4 dispatch) isn't credited: none of that code is ported. The full
+   Artistic-2.0 text is in the headers of `src/decontam.c` and
+   `R/decontam.r` and in the `inst/COPYRIGHTS` stanza, with the "how it
+   differs" paragraph in each.
+7. **The prevalence score's formulas, confirmed from outputs** on every
+   2 × 2 table with margins up to 30 × 30 (241,425 tables with a score):
+   `prop.test()` warns **exactly** when an expected count `n * p` or
+   `n * (1 - p)` (pooled `p`) is below 5; the one-sided statistic with the
+   continuity correction `min(0.5, |p1 - p2| / (1/n1 + 1/n2))` matches to
+   6.7e-15 (relative), and the Fisher mid-p is bit-identical. The mid-p is
+   computed with decontam's own arithmetic, `pg - (pg + pl - 1) / 2` from
+   the two `phyper()` tails (not `pg - dhyper()/2`), to keep its rounding.
+   The tests repeat this on tables up to 10 × 10 through `decontam()`.
+8. **`NA` in `neg`** leaves those samples out of both tests, including the
+   prevalence test's "present in at least two samples" count (decontam
+   counts them there: a feature in one control and one `NA` sample gets a
+   score from decontam and `NA` here). They still count in `freq` and
+   `prev`, as decontam's. Confirmed against decontam: its frequency test
+   returns `NA` for every feature when `neg` has an `NA`.
+9. **Per-sample codes in C instead of subsetting.** Empty samples (and, in
+   `batch`, their batch code -1) are left out by a per-sample code, so the
+   table is never copied or densified; decontam's warning text is kept
+   ("Removed n samples with zero total counts (or frequency).").
+10. **Batches.** Levels come from `factor()` of the kept samples (decontam's
+    order, so `p_freq_batch` rows match its `p.freqs`), **unused levels
+    dropped** (decontam's `table()` counts them and stops); an `NA` batch is
+    an error; a batch with fewer than 2 samples is an error, 4 or fewer a
+    warning, naming the batches. A batch with fewer than two true samples
+    gets `NA` frequency scores, where decontam stops (`apply()` on a
+    dropped dimension: "dim(X) must have a positive length").
+11. **Kept quirks:** `batch_combine = 'product'` gives 1 when no batch has
+    a score, `'fisher'` counts a missing score as 0.5, and both apply with
+    a single batch too (as decontam); `'minimum'` and `'combined'`
+    propagate `NA` (`pmin()` without `na.rm`).
+12. **`neg` must be logical** (0/1 numbers are an error), and `conc` numeric
+    and finite > 0 for every kept sample, controls included, as decontam
+    checks (`NA` too). `conc` is only checked when the frequency test runs.
+13. **`threshold`:** `[0, 1]`; for `'either'` / `'both'` one value is used
+    for both without decontam's message, more than two is an error; the
+    attribute is then length 2.
+14. **Without `neg`:** `prev_neg`, `prev_pos` are `NA`, `n_neg = 0` and
+    `n_pos` is every kept sample. `decontam_not()` has no `batch` (nor does
+    `isNotContaminant()`), so no `batch_combine` attribute, and no `p_freq`
+    column (decontam's is `1 - NA`).
+15. **Print header:** "decontam (<test>)" and "decontam_not (prevalence)";
+    no `display` (the input is a count table). Plot titles: "Contaminant
+    scores (decontam, <test>)", "Non-contaminant scores (decontam_not,
+    prevalence)", "Prevalence in controls and samples (...)". With
+    `'either'` / `'both'` the scores plot overlays the frequency and
+    prevalence histograms, each with its threshold. Plots take `legend`.
+16. **Threads:** one task per feature (`f = thread_i; f += n_threads`),
+    each writing only its own column of the batch × feature outputs, with
+    sums over its samples in order: identical for any `cpus` (tested 1, 2,
+    3, 4, 7 and on a 60 × 3000 table). `threads_for()` at ~30 ns per stored
+    value.
+17. **Fixtures:** simulated tables only (40 × 60 with 8 controls and 8
+    contaminants; a 24 × 40 low-biomass table; 30 × 30 with three batches,
+    one without controls; a 16 × 12 edge table with an empty sample and
+    features in none, one and every sample). Every method × batch
+    combination × with/without batches, one- and two-value thresholds, one
+    input only (`'auto'`), `normalize = FALSE`; `isNotContaminant()` at two
+    thresholds. Hex floats in `data-raw/expected/decontam/`,
+    `tests/tinytests/expected/decontam.rds` (29 KB).

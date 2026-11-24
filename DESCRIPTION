@@ -65,6 +65,14 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "the Gibbs sampler of sourcetracker(), from 'SourceTracker2'"),
     person(
+      "Benjamin", "Callahan",
+      role    = c("ctb", "cph"),
+      comment = "contaminant identification (decontam(), decontam_not()), ported from 'decontam'"),
+    person(
+      "Nicole Marie", "Davis",
+      role    = c("ctb", "cph"),
+      comment = "contaminant identification (decontam(), decontam_not()), ported from 'decontam'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

@@ -854,6 +854,20 @@
   matrix of proportions (class `ecodive_source`) with their standard
   deviations, and `plot()` draws the usual stacked bar chart.
 
+* New `decontam()` and `decontam_not()` identify contaminant features with
+  decontam's frequency and prevalence tests (Davis et al. 2018), ported
+  from decontam 1.32.0's `isContaminant()` and `isNotContaminant()`
+  (Artistic-2.0): a contaminant's frequency falls as the sample's DNA
+  concentration (`conc`) rises, and it is more prevalent in the negative
+  controls (`neg`). Every decontam method (`'frequency'`, `'prevalence'`,
+  `'combined'`, `'minimum'`, `'either'`, `'both'`), batches with their
+  three ways of combining scores, and decontam's scores and calls to
+  rounding. `conc`, `neg` and `batch` can be columns of `data`. Threaded C
+  over a sparse table, the same for any `cpus`. `plot()` draws the score
+  histogram (for choosing `threshold`) or each feature's prevalence in the
+  controls against the samples, and `decontam_frequency_plot()` a feature's
+  frequency against `conc` with both fitted models.
+
 * New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
   `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's
   proportions after adding `pseudocount` (log-TSS), with the same

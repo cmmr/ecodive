@@ -59,6 +59,11 @@ same thing.
 | `centroids` | **(new)** reference type profiles to classify against | planned `valencia` |
 | `q` | **(new, 2026-11-24)** the order of a Hill number or of Rényi's or Tsallis's entropy: a single number ≥ 0, `Inf` allowed; default 2, as scikit-bio's `order` (vegan's `scales`) | `hill`, `renyi`, `tsallis`, `alpha_div`, `alpha_div_rarefied`; planned `rarefaction_curve` |
 | `bias_corrected` | **(new, 2026-11-24)** Chao1's bias-corrected form (`TRUE`, the default, as scikit-bio) or the classic one (`FALSE`), as scikit-bio's `bias_corrected` | `chao1`, `alpha_div`, `alpha_div_rarefied` |
+| `conc` | **(new, 2026-11-24)** each sample's DNA concentration before sequencing (any quantity proportional to the input DNA; only its inverse relation with a contaminant's frequency matters): finite and > 0, matched by name, else by position, or a column name of `data` (`per_sample()`'s rule). Kept as decontam's name rather than reusing `load` (a measured total microbial load used as a scale), the user's choice | `decontam`, `decontam_frequency_plot` |
+| `neg` | **(new, 2026-11-24)** which samples are negative controls: logical, `TRUE` a control, `NA` left out of the tests; by `per_sample()`'s rule | `decontam`, `decontam_not`, `decontam_frequency_plot` |
+| `batch`, `batch_combine` | **(new, 2026-11-24)** per-sample batches (sequencing run, extraction plate) scored separately, by `per_sample()`'s rule; and how a feature's per-batch scores are combined (`'minimum'`, `'product'`, `'fisher'`: decontam's `batch.combine`, snake case) | `decontam`; `batch` also planned for `batch_correct` |
+| `threshold` | a cutoff. In the networks, an association cutoff; in `decontam()` and `decontam_not()` (2026-11-24), a **score** cutoff with decontam's strict `<` (a feature is called when its score is below it; the frequency score is a heuristic, not a p-value, so not `alpha`), two values for `method = 'either'` / `'both'` | `assoc_network`, `assoc_pairs`, `decontam`, `decontam_not` |
+| `features` | in `decontam_frequency_plot()` (2026-11-24), **which** features to draw (names, indices or a logical vector, as `numerator`); not `sourcetracker(features = TRUE)`'s per-feature output switch | `decontam_frequency_plot` |
 | `cpus` | threads (always last) | everything threaded |
 
 

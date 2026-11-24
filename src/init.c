@@ -26,6 +26,7 @@ extern SEXP C_cpu_info(SEXP);
 extern SEXP C_cord_cross(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbrda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dpcoa(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_decontam(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_tests(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_feature_lm(SEXP, SEXP, SEXP, SEXP);
@@ -121,6 +122,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_cord_cross", (DL_FUNC) &C_cord_cross, 8},
   {"C_dbrda",     (DL_FUNC) &C_dbrda,     8},
   {"C_dpcoa",     (DL_FUNC) &C_dpcoa,     8},
+  {"C_decontam",  (DL_FUNC) &C_decontam,  8},
   {"C_da_lm",         (DL_FUNC) &C_da_lm,         8},
   {"C_da_tests",      (DL_FUNC) &C_da_tests,      7},
   {"C_feature_lm",    (DL_FUNC) &C_feature_lm,    4},
