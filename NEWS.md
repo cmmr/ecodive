@@ -868,6 +868,20 @@
   controls against the samples, and `decontam_frequency_plot()` a feature's
   frequency against `conc` with both fitted models.
 
+* New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
+  2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
+  pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,
+  `same_subgroups`, `one_against_one`), and the bootstrapped LDA score,
+  with each sample rescaled to `total` (counts per million by default).
+  Given LEfSe's own jitter and subsamples, the scores match LEfSe's to
+  rounding, more features than samples included; the tests match R's
+  `kruskal.test()` and coin's `wilcox_test()`. New `p_adjust` (default
+  `'holm'`; LEfSe adjusts nothing, `'none'`). Threaded C over a sparse
+  table, the bootstraps with one random stream each, so the same for any
+  `cpus`. `plot()` draws LEfSe's bar chart of LDA scores. It joins
+  `da_test()` (`"lefse"`, alias `"lefser"`) and `da_sensitivity()` (zero
+  replacements). The docs say why the plain tests are preferable.
+
 * New `norm = 'log'`, wherever `norm` is offered (beta diversity metrics,
   `pca()`, `envfit()`, `normalize()`, ...): the log of each sample's
   proportions after adding `pseudocount` (log-TSS), with the same

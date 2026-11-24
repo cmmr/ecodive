@@ -293,6 +293,10 @@ print_df_label <- function (x) {
       m <- attr(x, 'method', exact = TRUE)
       if (is.null(m)) NULL else da_method_name(m)
     },
+    ecodive_lefse = {
+      g <- attr(x, 'groups', exact = TRUE)
+      if (is.character(g) && length(g)) paste('LEfSe:', paste(g, collapse = ' vs ')) else 'LEfSe'
+    },
     ecodive_da_sensitivity = {
       m <- attr(x, 'method', exact = TRUE)
       if (is.null(m)) NULL else paste('Sensitivity of', da_method_name(m))
@@ -356,6 +360,8 @@ print.ecodive_da_wilcoxon      <- print_table_result
 print.ecodive_da_ttest         <- print_table_result
 #' @export
 print.ecodive_da_lm            <- print_table_result
+#' @export
+print.ecodive_lefse            <- print_table_result
 #' @export
 print.ecodive_linda            <- print_table_result
 #' @export

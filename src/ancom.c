@@ -189,72 +189,9 @@ static void sort_order (int *idx, int *tmp, int n, const double *d) {
 }
 
 
-// A log ratio and its sample's group, for sorting.
-typedef struct { double v; int g; } vg_t;
-
-// Sorts a[0 .. n - 1] by v: quicksort (median of three), insertion sort
-// for short runs. Ties end up in any order, which changes nothing: tied
-// values share their average rank, and rank sums of half-integers are
-// exact in any order.
-static void sort_vg (vg_t *a, int n) {
-  while (n > 16) {
-    int    mid = n / 2;
-    vg_t   t;
-    if (a[mid].v   < a[0].v)   { t = a[mid];   a[mid]   = a[0];   a[0]   = t; }
-    if (a[n - 1].v < a[0].v)   { t = a[n - 1]; a[n - 1] = a[0];   a[0]   = t; }
-    if (a[n - 1].v < a[mid].v) { t = a[n - 1]; a[n - 1] = a[mid]; a[mid] = t; }
-    double pivot = a[mid].v;
-    int i = 0, j = n - 1;
-    for (;;) {
-      while (a[i].v < pivot) i++;
-      while (pivot < a[j].v) j--;
-      if (i >= j) break;
-      t = a[i]; a[i] = a[j]; a[j] = t;
-      i++; j--;
-    }
-    // Recurse on the smaller part, loop on the larger.
-    if (j + 1 < n - j - 1) { sort_vg(a, j + 1); a += j + 1; n -= j + 1; }
-    else                   { sort_vg(a + j + 1, n - j - 1); n = j + 1; }
-  }
-  for (int i = 1; i < n; i++) {
-    vg_t x = a[i];
-    int  j = i - 1;
-    while (j >= 0 && x.v < a[j].v) { a[j + 1] = a[j]; j--; }
-    a[j + 1] = x;
-  }
-}
-
-
 static double kruskal_h (const double *d, vg_t *vg, double *rsum) {
-
-  int n = an_n, k = an_k;
-
-  for (int s = 0; s < n; s++) { vg[s].v = d[s]; vg[s].g = an_grp[s]; }
-  sort_vg(vg, n);
-
-  // Average ranks of tie runs, each group's rank sum, and sum(t^3 - t),
-  // as SciPy's rankdata(method = 'average') and tie correction.
-  for (int g = 0; g < k; g++) rsum[g] = 0;
-  double T = 0;
-  for (int a = 0; a < n; ) {
-    int b = a + 1;
-    while (b < n && vg[b].v == vg[a].v) b++;
-    double r = (a + 1 + b) / 2.0;          // mean of ranks a + 1 .. b
-    for (int c = a; c < b; c++) rsum[vg[c].g] += r;
-    double t = b - a;
-    T += t * t * t - t;
-    a = b;
-  }
-
-  double N = n;
-  double ties = 1 - T / (N * N * N - N);
-  if (ties == 0) return R_NaN;             // every value tied
-
-  double ssbn = 0;
-  for (int g = 0; g < k; g++) ssbn += (rsum[g] * rsum[g]) / an_ng[g];
-
-  double h = 12.0 / (N * (N + 1)) * ssbn - 3 * (N + 1);
-  return h / ties;
+  for (int s = 0; s < an_n; s++) { vg[s].v = d[s]; vg[s].g = an_grp[s]; }
+  return rank_kruskal_h(vg, an_n, an_ng, an_k, rsum);
 }
 
 

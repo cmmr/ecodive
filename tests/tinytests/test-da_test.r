@@ -460,6 +460,8 @@
                    dirmult_ttest(xi, 'grp', meta, n_draws = 8L, seed = 3L, cpus = 1L))
   expect_identical(da_test(x, 'linda', 'grp', meta, ~ grp + age, pseudocount = 1, cpus = 1L),
                    linda(x, ~ grp + age, meta, groups = 'grp', pseudocount = 1, cpus = 1L))
+  expect_identical(da_test(x, 'lefse', 'grp', meta, n_boots = 4L, seed = 2L, cpus = 1L),
+                   lefse(x, 'grp', meta, n_boots = 4L, seed = 2L, cpus = 1L))
   expect_identical(da_test(x, 'da_wilcoxon', 'grp', meta, pseudocount = 1, cpus = 1L),
                    da_wilcoxon(x, 'grp', meta, pseudocount = 1, cpus = 1L))
   expect_identical(da_test(x, 'da_ttest', meta$grp, norm = 'percent', seed = 9L, cpus = 1L),
@@ -498,7 +500,7 @@
   df <- list_da_tests()
   expect_identical(names(df), c('name', 'id', 'design', 'effect', 'base', 'zero_free_ok'))
   expect_identical(sort(df$id), sort(c('ancom', 'ancombc', 'ancombc2', 'dirmult_ttest',
-                                       'da_wilcoxon', 'da_ttest', 'da_lm', 'linda')))
+                                       'da_wilcoxon', 'da_ttest', 'da_lm', 'linda', 'lefse')))
   expect_true(all(df$design %in% c('groups', 'formula')) && is.logical(df$zero_free_ok))
   expect_identical(rownames(list_da_tests(nm = 'id')), df$id)
   expect_identical(names(list_da_tests('func')), df$id)
