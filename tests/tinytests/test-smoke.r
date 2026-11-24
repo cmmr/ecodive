@@ -62,6 +62,12 @@
   z <- alpha_div_rarefied(counts, 'hill', q = 1, depth = 40, times = 3, cpus = cpus)
   expect_true(is.numeric(z) && length(z) == 20L && all(is.finite(z)))
 
+  # Rarefaction curves, and rarefying to equal coverage.
+  z <- rarefaction_curve(counts, c('observed', 'shannon'), n_depths = 5, times = 2, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_rarefaction_curve') && all(is.finite(as.matrix(z[, 3:6]))))
+  r <- rarefy(counts, coverage = 0.9, cpus = cpus)
+  expect_true(is.matrix(r) && ncol(r) == 12L && all(rowSums(r) <= rowSums(counts)[rownames(r)]))
+
   # Absolute abundance.
   load <- seq(1, 2, length.out = 20) * 1e9
   z <- qmp_scale(counts, load, cpus = cpus)

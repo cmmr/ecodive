@@ -36,8 +36,15 @@
 #'        or returned unrarefied due to insufficient depth. 
 #'        Default: `interactive()`
 #' 
+#' @param coverage  Rarefy to equal coverage instead of equal depth: a
+#'        sample coverage greater than 0 and at most 1, such as `0.95`. Each
+#'        sample is rarefied to the smallest depth whose expected coverage
+#'        reaches it (see "Coverage-Based Rarefaction"). Give `depth` or
+#'        `coverage`, not both. Default: `NULL` (rarefy to `depth`).
+#' 
 #' @seealso [qmp_rarefy()], which rarefies each sample to a depth set by
-#'   its measured microbial load.
+#'   its measured microbial load; [rarefaction_curve()], to choose a depth
+#'   or a coverage.
 #' 
 #' @return A rarefied matrix. The output class (`matrix`, `dgCMatrix`, etc.) 
 #'         matches the input class.
@@ -48,6 +55,33 @@
 #'   least that many) make up at least 10% of all the observations in the
 #'   table. [beta_div_rarefied()] and [alpha_div_rarefied()] choose their
 #'   default depth the same way.
+#' 
+#' @section Coverage-Based Rarefaction:
+#'   Chao & Jost (2012) compare samples at equal **coverage** (completeness:
+#'   the share of the community's individuals that belong to the features
+#'   seen) rather than at equal depth. With `coverage`, each sample is
+#'   rarefied to the smallest depth \eqn{d} whose expected coverage
+#'   \eqn{C_d} (as in [rarefaction_curve()]'s `coverage` column) is at least
+#'   `coverage`. At the sample's own total, \eqn{C_d} is the estimated
+#'   coverage of the whole sample (Chao et al. 2014, Eq. 12). Samples whose
+#'   whole-sample coverage is below `coverage` are dropped (or, with `drop =
+#'   FALSE`, returned unrarefied). The depths come from the counts alone, so
+#'   they are the same for every `seed`; each sample is then rarefied as
+#'   with one `depth` per sample. `rowSums()` of the result gives the depths
+#'   chosen.
+#'   
+#'   Any metric can then be compared at equal coverage, not only richness or
+#'   Hill numbers.
+#' 
+#' @references
+#' Chao, A., & Jost, L. (2012). Coverage-based rarefaction and extrapolation:
+#' standardizing samples by completeness rather than size. *Ecology*, 93,
+#' 2533--2547. \doi{10.1890/11-1952.1}
+#' 
+#' Chao, A., Gotelli, N. J., Hsieh, T. C., Sander, E. L., Ma, K. H., Colwell,
+#' R. K., & Ellison, A. M. (2014). Rarefaction and extrapolation with Hill
+#' numbers: a framework for sampling and estimation in species diversity
+#' studies. *Ecological Monographs*, 84, 45--67. \doi{10.1890/13-0133.1}
 #' 
 #' @section One Depth per Sample:
 #'   With one `depth` per sample, each sample is rarefied to its own depth,
@@ -91,6 +125,10 @@
 #'     r_mtx <- rarefy(counts, depth = c(A = 10, B = 15, C = 20, D = 12))
 #'     rowSums(r_mtx)
 #'     
+#'     # Rarefy each sample to an expected coverage of 80%.
+#'     r_mtx <- rarefy(counts, coverage = 0.8)
+#'     rowSums(r_mtx)
+#'     
 #'     # Perform 3 independent rarefactions.
 #'     r_list <- rarefy(counts, times = 3)
 #'     length(r_list)
@@ -103,16 +141,20 @@
 #' 
 rarefy <- function (
     counts, 
-    depth  = NULL, 
-    seed   = 0L,
-    times  = NULL, 
-    drop   = TRUE, 
-    margin = 1L, 
-    cpus   = n_cpus(),
-    warn   = interactive() ) {
+    depth    = NULL, 
+    seed     = 0L,
+    times    = NULL, 
+    drop     = TRUE, 
+    margin   = 1L, 
+    cpus     = n_cpus(),
+    warn     = interactive(),
+    coverage = NULL ) {
   
   validate_args()
   assert_integer_counts()
+  
+  if (!is.null(coverage) && !is.null(depth))
+    stop('Give `depth` or `coverage`, not both.', call. = FALSE)
   
   
   # Ensure counts are double
@@ -124,9 +166,21 @@ rarefy <- function (
   }
   
   
+  # Coverage-based rarefaction (Chao & Jost 2012): each sample's depth is
+  # the smallest whose expected coverage reaches `coverage`, or one more
+  # than its total if even the whole sample's estimated coverage falls short
+  # (so that it is dropped, or returned unrarefied, as for a depth).
+  if (!is.null(coverage)) {
+    if (any(stored_values(counts) < 0))
+      stop('`counts` must not contain negative values.', call. = FALSE)
+    depth <- .Call(C_coverage_depth, counts, margin, coverage, cpus)
+    names(depth) <- count_samples(counts, margin)$labels
+  }
+  
+  
   # One depth per sample: matched to the samples by name when both are
   # named, else in order. A single depth applies to every sample.
-  if (length(depth) > 1L) {
+  else if (length(depth) > 1L) {
     info  <- count_samples(counts, margin)
     depth <- per_sample(
       depth, 'depth', NULL, NULL, info$labels, info$n, ref = '`counts`' )
@@ -153,7 +207,12 @@ rarefy <- function (
         
         action <- if (isTRUE(drop)) "dropped" else "returned unrarefied"
         
-        if (length(depth) == 1L)
+        if (!is.null(coverage))
+          warning(sprintf(
+            "%d samples have an estimated coverage below %s and will be %s.",
+            n_insufficient, format(coverage), action
+          ), call. = FALSE)
+        else if (length(depth) == 1L)
           warning(sprintf(
             "%d samples have fewer than %d observations and will be %s.",
             n_insufficient, depth, action

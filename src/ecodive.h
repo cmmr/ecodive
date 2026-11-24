@@ -206,6 +206,14 @@ double rng_norm(rng_t *r);
 double rng_gamma(rng_t *r, double shape);
 double rng_log_gamma(rng_t *r, double shape);
 
+/* --- rarefaction_curve.c: closed forms of rarefaction, shared with hill_extrapolation --- */
+int    rc_freq(const double *vals, int nnz, double *buf, double *k, double *f,
+               double *N, double *S);
+void   rc_absence(double N, double d, const double *U, int u, double *A);
+double rc_coverage(double N, double d, int K, const double *k,
+                   const double *f, const double *a);
+double rc_coverage_full(double N, int K, const double *k, const double *f);
+
 /* --- memory.c --- */
 void  init_n_ptrs(int n);
 void* safe_malloc(size_t bytes);

@@ -117,6 +117,13 @@ hill_standardize(
 For one sample: \eqn{n} reads, counts \eqn{X_i}, frequency counts
 \eqn{f_k}, \eqn{S_{obs}}. All binomial ratios by running products, as in
 [rarefaction_curves.md](rarefaction_curves.md) (shared helpers).
+(Item 38 wrote them, in `src/rarefaction_curve.c`, declared in
+`src/ecodive.h`: `rc_freq()` (frequency counts), `rc_absence()` (the
+absence probabilities \eqn{\binom{N-k}{d}/\binom{N}{d}}),
+`rc_coverage()` (\eqn{C_m}, \eqn{m < n}) and `rc_coverage_full()`
+(Eq. 12 with Appendix G). Heck et al.'s variance there, `heck_variance()`,
+avoids the cancellation of \eqn{a_{k+l} - a_k a_l} with a recurrence: see
+its comment.)
 
 - **Undetected richness** (Chao1, bias-adjusted; Appendix G):
   \eqn{\hat f_0 = \frac{n-1}{n}\frac{f_1^2}{2 f_2}} if \eqn{f_2 > 0}, else

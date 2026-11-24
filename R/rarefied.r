@@ -183,7 +183,8 @@
 #' microbiome data is inadmissible. *PLoS Computational Biology*, 10,
 #' e1003531. \doi{10.1371/journal.pcbi.1003531}
 #'
-#' @seealso [rarefy()], [beta_div()], [alpha_div()], [rpca()]
+#' @seealso [rarefy()], [beta_div()], [alpha_div()], [rpca()], and
+#'   [rarefaction_curve()] to choose a depth.
 #'
 #' @name rarefied_diversity
 #' @export
@@ -465,25 +466,9 @@ rarefied_setup <- function (div, env = parent.frame()) {
   # The metric first, so that a misspelt metric is the error reported.
   metric <- match_metric(env$metric, div = div)
 
-  validate_counts(env)
-  validate_margin(env)
-  assert_integer_counts(env)
-  validate_seed(env)
-  validate_cpus(env)
-
-  counts <- env$counts
+  counts <- rarefied_counts(env)
   margin <- env$margin
-
-  if (isTRUE(any(stored_values(counts) < 0)))
-    stop('`counts` must not contain negative values.', call. = FALSE)
-
-
-  # times
-  times <- env$times
-  if (!is.numeric(times) || length(times) != 1 || is.na(times) ||
-      times < 1 || times %% 1 != 0 || times > .Machine$integer.max)
-    stop('`times` must be a whole number of at least 1.', call. = FALSE)
-  times <- as.integer(times)
+  times  <- rarefied_times(env$times)
 
 
   # depth: one for every sample.
@@ -500,39 +485,13 @@ rarefied_setup <- function (div, env = parent.frame()) {
   }
 
 
-  # average
-  choices <- if (div == 'beta') c('mean', 'median', 'medoid') else c('mean', 'median')
-  average <- env$average
-  if (!is.character(average) || length(average) != 1 || is.na(average) || !nzchar(average))
-    stop('`average` must be one of ', paste0('"', choices, '"', collapse = ', '), '.', call. = FALSE)
-  needle  <- tolower(average)
-  hit     <- if (needle %in% choices) needle else choices[startsWith(choices, needle)]
-  if (length(hit) != 1) {
-    if (div == 'alpha' && nchar(needle) >= 4 && startsWith('medoid', needle))
-      stop(
-        '`average = "medoid"` is only for beta diversity; ',
-        'use "mean" or "median" for alpha diversity.', call. = FALSE )
-    stop(
-      '`average = "', average, '"` must be one of ',
-      paste0('"', choices, '"', collapse = ', '),
-      if (length(hit) > 1) ' (it matches several)', '.', call. = FALSE )
-  }
-  average <- hit
+  average <- rarefied_average(env$average, div)
 
 
   # sd
   sd <- env$sd
   if (!(identical(sd, TRUE) || identical(sd, FALSE)))
     stop('`sd` must be TRUE or FALSE.', call. = FALSE)
-
-
-  # As rarefy() does, so that every iteration is exactly rarefy()'s.
-  if (is.matrix(counts)) {
-    if (!is.double(counts)) counts[] <- as.double(counts)
-  }
-  else if (inherits(counts, 'simple_triplet_matrix')) {
-    if (!is.double(counts$v)) counts$v <- as.double(counts$v)
-  }
 
 
   # The samples kept: the same in every iteration, as rarefy() drops them.
@@ -566,11 +525,77 @@ rarefied_setup <- function (div, env = parent.frame()) {
     times   = times,
     average = average,
     sd      = sd,
-    seeds   = ((env$seed + 2**31 - 1 + seq_len(times)) %% 2**32) - 2**31,
+    seeds   = rarefied_seeds(env$seed, times),
     cpus    = env$cpus,
     metric  = metric,
     keep    = keep,
     dropped = dropped )
+}
+
+
+
+# The checks of `counts`, `margin`, `seed` and `cpus` in `env` that the
+# rarefied functions and rarefaction_curve() share. Returns the counts as
+# doubles, as rarefy() makes them, so that each draw is exactly rarefy()'s.
+rarefied_counts <- function (env) {
+
+  validate_counts(env)
+  validate_margin(env)
+  assert_integer_counts(env)
+  validate_seed(env)
+  validate_cpus(env)
+
+  counts <- env$counts
+
+  if (isTRUE(any(stored_values(counts) < 0)))
+    stop('`counts` must not contain negative values.', call. = FALSE)
+
+  if (is.matrix(counts)) {
+    if (!is.double(counts)) counts[] <- as.double(counts)
+  }
+  else if (inherits(counts, 'simple_triplet_matrix')) {
+    if (!is.double(counts$v)) counts$v <- as.double(counts$v)
+  }
+
+  counts
+}
+
+
+# `times`, checked, as an integer.
+rarefied_times <- function (times) {
+  if (!is.numeric(times) || length(times) != 1 || is.na(times) ||
+      times < 1 || times %% 1 != 0 || times > .Machine$integer.max)
+    stop('`times` must be a whole number of at least 1.', call. = FALSE)
+  as.integer(times)
+}
+
+
+# `average`, matched (exactly, else by a unique prefix, ignoring case) to
+# the choices for `div` ('beta' or 'alpha').
+rarefied_average <- function (average, div) {
+  choices <- if (div == 'beta') c('mean', 'median', 'medoid') else c('mean', 'median')
+  if (!is.character(average) || length(average) != 1 || is.na(average) || !nzchar(average))
+    stop('`average` must be one of ', paste0('"', choices, '"', collapse = ', '), '.', call. = FALSE)
+  needle  <- tolower(average)
+  hit     <- if (needle %in% choices) needle else choices[startsWith(choices, needle)]
+  if (length(hit) != 1) {
+    if (div == 'alpha' && nchar(needle) >= 4 && startsWith('medoid', needle))
+      stop(
+        '`average = "medoid"` is only for beta diversity; ',
+        'use "mean" or "median" for alpha diversity.', call. = FALSE )
+    stop(
+      '`average = "', average, '"` must be one of ',
+      paste0('"', choices, '"', collapse = ', '),
+      if (length(hit) > 1) ' (it matches several)', '.', call. = FALSE )
+  }
+  hit
+}
+
+
+# The seeds of `times` rarefactions, as rarefy(times =) makes them: `seed`,
+# `seed + 1`, ..., wrapped to R's integer range.
+rarefied_seeds <- function (seed, times) {
+  ((seed + 2**31 - 1 + seq_len(times)) %% 2**32) - 2**31
 }
 
 

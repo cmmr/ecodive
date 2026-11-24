@@ -12,7 +12,8 @@ rarefy(
   drop = TRUE,
   margin = 1L,
   cpus = n_cpus(),
-  warn = interactive()
+  warn = interactive(),
+  coverage = NULL
 )
 }
 \arguments{
@@ -48,6 +49,12 @@ within any limits set on it. Results are the same for any \code{cpus}.}
 \item{warn}{Logical. If \code{TRUE}, emits a warning when samples are dropped
 or returned unrarefied due to insufficient depth.
 Default: \code{interactive()}}
+
+\item{coverage}{Rarefy to equal coverage instead of equal depth: a
+sample coverage greater than 0 and at most 1, such as \code{0.95}. Each
+sample is rarefied to the smallest depth whose expected coverage
+reaches it (see "Coverage-Based Rarefaction"). Give \code{depth} or
+\code{coverage}, not both. Default: \code{NULL} (rarefy to \code{depth}).}
 }
 \value{
 A rarefied matrix. The output class (\code{matrix}, \code{dgCMatrix}, etc.)
@@ -65,6 +72,24 @@ the observations kept (that depth times the number of samples with at
 least that many) make up at least 10\% of all the observations in the
 table. \code{\link[=beta_div_rarefied]{beta_div_rarefied()}} and \code{\link[=alpha_div_rarefied]{alpha_div_rarefied()}} choose their
 default depth the same way.
+}
+
+\section{Coverage-Based Rarefaction}{
+
+Chao & Jost (2012) compare samples at equal \strong{coverage} (completeness:
+the share of the community's individuals that belong to the features
+seen) rather than at equal depth. With \code{coverage}, each sample is
+rarefied to the smallest depth \eqn{d} whose expected coverage
+\eqn{C_d} (as in \code{\link[=rarefaction_curve]{rarefaction_curve()}}'s \code{coverage} column) is at least
+\code{coverage}. At the sample's own total, \eqn{C_d} is the estimated
+coverage of the whole sample (Chao et al. 2014, Eq. 12). Samples whose
+whole-sample coverage is below \code{coverage} are dropped (or, with \code{drop = FALSE}, returned unrarefied). The depths come from the counts alone, so
+they are the same for every \code{seed}; each sample is then rarefied as
+with one \code{depth} per sample. \code{rowSums()} of the result gives the depths
+chosen.
+
+Any metric can then be compared at equal coverage, not only richness or
+Hill numbers.
 }
 
 \section{One Depth per Sample}{
@@ -132,6 +157,10 @@ For large datasets, standard matrix operations may be slow. See
     r_mtx <- rarefy(counts, depth = c(A = 10, B = 15, C = 20, D = 12))
     rowSums(r_mtx)
     
+    # Rarefy each sample to an expected coverage of 80\%.
+    r_mtx <- rarefy(counts, coverage = 0.8)
+    rowSums(r_mtx)
+    
     # Perform 3 independent rarefactions.
     r_list <- rarefy(counts, times = 3)
     length(r_list)
@@ -143,7 +172,18 @@ For large datasets, standard matrix operations may be slow. See
     }
 
 }
+\references{
+Chao, A., & Jost, L. (2012). Coverage-based rarefaction and extrapolation:
+standardizing samples by completeness rather than size. \emph{Ecology}, 93,
+2533--2547. \doi{10.1890/11-1952.1}
+
+Chao, A., Gotelli, N. J., Hsieh, T. C., Sander, E. L., Ma, K. H., Colwell,
+R. K., & Ellison, A. M. (2014). Rarefaction and extrapolation with Hill
+numbers: a framework for sampling and estimation in species diversity
+studies. \emph{Ecological Monographs}, 84, 45--67. \doi{10.1890/13-0133.1}
+}
 \seealso{
 \code{\link[=qmp_rarefy]{qmp_rarefy()}}, which rarefies each sample to a depth set by
-its measured microbial load.
+its measured microbial load; \code{\link[=rarefaction_curve]{rarefaction_curve()}}, to choose a depth
+or a coverage.
 }
