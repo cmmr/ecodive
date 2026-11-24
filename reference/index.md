@@ -398,6 +398,18 @@ How far drift and dispersal alone explain a community’s composition
 - [`plot(`*`<ecodive_neutral_model>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_neutral_model.md)
   : Plot a Neutral Community Model Fit
 
+## Batch Correction
+
+Remove batch effects (study, sequencing run, extraction kit) from a
+table while keeping the effects of named covariates (MMUPHin, ComBat).
+
+- [`batch_mmuphin()`](https://cmmr.github.io/ecodive/reference/batch_mmuphin.md)
+  : MMUPHin Batch Correction
+- [`batch_combat()`](https://cmmr.github.io/ecodive/reference/batch_combat.md)
+  : ComBat Batch Correction
+- [`plot(`*`<ecodive_batch>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_batch.md)
+  : Plot a batch correction
+
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods
@@ -567,7 +579,8 @@ than every value.
   : Plot Log Ratios
 - [`ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)
   : Titles of results
-- [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+- [`print(`*`<ecodive_batch>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+  [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_source>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)

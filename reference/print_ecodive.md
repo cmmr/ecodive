@@ -14,6 +14,9 @@ in full.
 ## Usage
 
 ``` r
+# S3 method for class 'ecodive_batch'
+print(x, n = NULL, width = NULL, digits = 3L, ...)
+
 # S3 method for class 'ecodive_types'
 print(x, n = NULL, width = NULL, digits = 3L, ...)
 
@@ -51,7 +54,11 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
   or
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md),
   or a source-tracking matrix of class `ecodive_source` (from
-  [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)).
+  [`sourcetracker()`](https://cmmr.github.io/ecodive/reference/sourcetracker.md)),
+  or a batch-corrected table of class `ecodive_batch` (from
+  [`batch_mmuphin()`](https://cmmr.github.io/ecodive/reference/batch_mmuphin.md)
+  or
+  [`batch_combat()`](https://cmmr.github.io/ecodive/reference/batch_combat.md)).
   A community-types result (see
   [ecodive_types](https://cmmr.github.io/ecodive/reference/ecodive_types.md))
   prints its types and how their number was chosen before its first

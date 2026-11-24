@@ -33,6 +33,8 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/assoc_network_diff.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/assoc_pairs.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/balance.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/batch_combat.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/batch_mmuphin.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_assert_integer.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_binary_normalized.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bdiv_percent_normalized.html</loc></url>
@@ -148,6 +150,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/pielou.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_batch.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_beta_partition.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_cross_assoc.html</loc></url>

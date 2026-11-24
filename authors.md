@@ -80,6 +80,15 @@
 - **Michael Sieber**. Contributor, copyright holder.  
   the neutral community model fit (neutral_model()), following 'neufit'
 
+- **Siyuan Ma**. Contributor.  
+  MMUPHin batch correction (batch_mmuphin()), ported from 'MMUPHin'
+
+- **Harvard School of Public Health**. Copyright holder.  
+  'MMUPHin', from which batch_mmuphin() is ported
+
+- **sva authors**. Contributor, copyright holder.  
+  ComBat batch correction (batch_combat()), ported from 'sva'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 
