@@ -875,6 +875,8 @@ than every value.
   : Plot community types
 - [`plot(`*`<ecodive_source>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_source.md)
   : Plot source contributions
+- [`plot(`*`<ecodive_rarefaction_curve>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_rarefaction_curve.md)
+  : Plot rarefaction curves
 - [`ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)
   : Titles of results
 - [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
@@ -897,6 +899,8 @@ Tools for programmatic access, data manipulation, and configuration.
 - [`beta_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
   [`alpha_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
   : Diversity Averaged over Repeated Rarefactions
+- [`rarefaction_curve()`](https://cmmr.github.io/ecodive/reference/rarefaction_curve.md)
+  : Rarefaction Curves
 - [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)
   : Normalize a Count Table
 - [`n_cpus()`](https://cmmr.github.io/ecodive/reference/n_cpus.md) :

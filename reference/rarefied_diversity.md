@@ -383,7 +383,9 @@ e1003531.
 [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md),
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md),
 [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md),
-[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md)
+[`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), and
+[`rarefaction_curve()`](https://cmmr.github.io/ecodive/reference/rarefaction_curve.md)
+to choose a depth.
 
 ## Examples
 

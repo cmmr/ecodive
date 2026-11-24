@@ -15,7 +15,8 @@ rarefy(
   drop = TRUE,
   margin = 1L,
   cpus = n_cpus(),
-  warn = interactive()
+  warn = interactive(),
+  coverage = NULL
 )
 ```
 
@@ -71,6 +72,14 @@ rarefy(
   returned unrarefied due to insufficient depth. Default:
   [`interactive()`](https://rdrr.io/r/base/interactive.html)
 
+- coverage:
+
+  Rarefy to equal coverage instead of equal depth: a sample coverage
+  greater than 0 and at most 1, such as `0.95`. Each sample is rarefied
+  to the smallest depth whose expected coverage reaches it (see
+  "Coverage-Based Rarefaction"). Give `depth` or `coverage`, not both.
+  Default: `NULL` (rarefy to `depth`).
+
 ## Value
 
 A rarefied matrix. The output class (`matrix`, `dgCMatrix`, etc.)
@@ -86,6 +95,26 @@ table.
 and
 [`alpha_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
 choose their default depth the same way.
+
+## Coverage-Based Rarefaction
+
+Chao & Jost (2012) compare samples at equal **coverage** (completeness:
+the share of the community's individuals that belong to the features
+seen) rather than at equal depth. With `coverage`, each sample is
+rarefied to the smallest depth \\d\\ whose expected coverage \\C_d\\ (as
+in
+[`rarefaction_curve()`](https://cmmr.github.io/ecodive/reference/rarefaction_curve.md)'s
+`coverage` column) is at least `coverage`. At the sample's own total,
+\\C_d\\ is the estimated coverage of the whole sample (Chao et al. 2014,
+Eq. 12). Samples whose whole-sample coverage is below `coverage` are
+dropped (or, with `drop = FALSE`, returned unrarefied). The depths come
+from the counts alone, so they are the same for every `seed`; each
+sample is then rarefied as with one `depth` per sample.
+[`rowSums()`](https://rdrr.io/r/base/colSums.html) of the result gives
+the depths chosen.
+
+Any metric can then be compared at equal coverage, not only richness or
+Hill numbers.
 
 ## One Depth per Sample
 
@@ -129,10 +158,25 @@ For large datasets, standard matrix operations may be slow. See
 for details on using optimized formats (e.g. sparse matrices) and
 parallel processing.
 
+## References
+
+Chao, A., & Jost, L. (2012). Coverage-based rarefaction and
+extrapolation: standardizing samples by completeness rather than size.
+*Ecology*, 93, 2533–2547.
+[doi:10.1890/11-1952.1](https://doi.org/10.1890/11-1952.1)
+
+Chao, A., Gotelli, N. J., Hsieh, T. C., Sander, E. L., Ma, K. H.,
+Colwell, R. K., & Ellison, A. M. (2014). Rarefaction and extrapolation
+with Hill numbers: a framework for sampling and estimation in species
+diversity studies. *Ecological Monographs*, 84, 45–67.
+[doi:10.1890/13-0133.1](https://doi.org/10.1890/13-0133.1)
+
 ## See also
 
 [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md), which
-rarefies each sample to a depth set by its measured microbial load.
+rarefies each sample to a depth set by its measured microbial load;
+[`rarefaction_curve()`](https://cmmr.github.io/ecodive/reference/rarefaction_curve.md),
+to choose a depth or a coverage.
 
 ## Examples
 
@@ -179,6 +223,12 @@ rarefies each sample to a depth set by its measured microbial load.
     rowSums(r_mtx)
 #>  A  B  C  D 
 #> 10 15 20 12 
+    
+    # Rarefy each sample to an expected coverage of 80%.
+    r_mtx <- rarefy(counts, coverage = 0.8)
+    rowSums(r_mtx)
+#> A B C D 
+#> 4 5 5 3 
     
     # Perform 3 independent rarefactions.
     r_list <- rarefy(counts, times = 3)

@@ -65,7 +65,8 @@ replacement.</p>
 <span>  drop <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  warn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  warn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  coverage <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -121,6 +122,14 @@ within any limits set on it. Results are the same for any <code>cpus</code>.</p>
 or returned unrarefied due to insufficient depth.
 Default: <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code></p></dd>
 
+
+<dt id="arg-coverage">coverage<a class="anchor" aria-label="anchor" href="#arg-coverage"></a></dt>
+<dd><p>Rarefy to equal coverage instead of equal depth: a
+sample coverage greater than 0 and at most 1, such as <code>0.95</code>. Each
+sample is rarefied to the smallest depth whose expected coverage
+reaches it (see "Coverage-Based Rarefaction"). Give <code>depth</code> or
+<code>coverage</code>, not both. Default: <code>NULL</code> (rarefy to <code>depth</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -136,6 +145,24 @@ the observations kept (that depth times the number of samples with at
 least that many) make up at least 10% of all the observations in the
 table. <code><a href="rarefied_diversity.html">beta_div_rarefied()</a></code> and <code><a href="rarefied_diversity.html">alpha_div_rarefied()</a></code> choose their
 default depth the same way.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="coverage-based-rarefaction">Coverage-Based Rarefaction<a class="anchor" aria-label="anchor" href="#coverage-based-rarefaction"></a></h2>
+
+
+<p>Chao &amp; Jost (2012) compare samples at equal <strong>coverage</strong> (completeness:
+the share of the community's individuals that belong to the features
+seen) rather than at equal depth. With <code>coverage</code>, each sample is
+rarefied to the smallest depth \(d\) whose expected coverage
+\(C_d\) (as in <code><a href="rarefaction_curve.html">rarefaction_curve()</a></code>'s <code>coverage</code> column) is at least
+<code>coverage</code>. At the sample's own total, \(C_d\) is the estimated
+coverage of the whole sample (Chao et al. 2014, Eq. 12). Samples whose
+whole-sample coverage is below <code>coverage</code> are dropped (or, with <code>drop = FALSE</code>, returned unrarefied). The depths come from the counts alone, so
+they are the same for every <code>seed</code>; each sample is then rarefied as
+with one <code>depth</code> per sample. <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums()</a></code> of the result gives the depths
+chosen.</p>
+<p>Any metric can then be compared at equal coverage, not only richness or
+Hill numbers.</p>
     </div>
     <div class="section level2">
     <h2 id="one-depth-per-sample">One Depth per Sample<a class="anchor" aria-label="anchor" href="#one-depth-per-sample"></a></h2>
@@ -177,9 +204,20 @@ seamlessly supports objects from the following biological data packages:</p><ul>
 (e.g. sparse matrices) and parallel processing.</p>
     </div>
     <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Chao, A., &amp; Jost, L. (2012). Coverage-based rarefaction and extrapolation:
+standardizing samples by completeness rather than size. <em>Ecology</em>, 93,
+2533–2547. <a href="https://doi.org/10.1890/11-1952.1" class="external-link">doi:10.1890/11-1952.1</a></p>
+<p>Chao, A., Gotelli, N. J., Hsieh, T. C., Sander, E. L., Ma, K. H., Colwell,
+R. K., &amp; Ellison, A. M. (2014). Rarefaction and extrapolation with Hill
+numbers: a framework for sampling and estimation in species diversity
+studies. <em>Ecological Monographs</em>, 84, 45–67. <a href="https://doi.org/10.1890/13-0133.1" class="external-link">doi:10.1890/13-0133.1</a></p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="qmp.html">qmp_rarefy()</a></code>, which rarefies each sample to a depth set by
-its measured microbial load.</p></div>
+its measured microbial load; <code><a href="rarefaction_curve.html">rarefaction_curve()</a></code>, to choose a depth
+or a coverage.</p></div>
     </div>
 
     <div class="section level2">
@@ -226,6 +264,12 @@ its measured microbial load.</p></div>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">r_mtx</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  A  B  C  D </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 15 20 12 </span>
+<span class="r-in"><span>    </span></span>
+<span class="r-in"><span>    <span class="co"># Rarefy each sample to an expected coverage of 80%.</span></span></span>
+<span class="r-in"><span>    <span class="va">r_mtx</span> <span class="op">&lt;-</span> <span class="fu">rarefy</span><span class="op">(</span><span class="va">counts</span>, coverage <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">r_mtx</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A B C D </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 5 5 3 </span>
 <span class="r-in"><span>    </span></span>
 <span class="r-in"><span>    <span class="co"># Perform 3 independent rarefactions.</span></span></span>
 <span class="r-in"><span>    <span class="va">r_list</span> <span class="op">&lt;-</span> <span class="fu">rarefy</span><span class="op">(</span><span class="va">counts</span>, times <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>

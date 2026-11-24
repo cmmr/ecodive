@@ -234,6 +234,55 @@ sort(faith(counts, tree = ex_tree))
 #>    101    155    180    202 
 ```
 
+### Rarefaction Curves
+
+A **rarefaction curve** shows a sample’s diversity as it is subsampled
+to ever smaller depths. A curve that levels off says the sample was
+sequenced deeply enough; the curves also help choose a depth to rarefy
+to.
+[`rarefaction_curve()`](https://cmmr.github.io/ecodive/reference/rarefaction_curve.md)
+computes richness exactly (the expected number of features in a random
+subsample, with its standard deviation), and any other metric by
+rarefying `times` times at each depth. Every row also has the expected
+sample coverage at that depth. Use the unrarefied counts:
+
+``` r
+
+rarefaction_curve(ex_counts, n_depths = 5)
+#> # A data.frame: 17 × 6
+#> # Rarefaction curves
+#>    sample metric   depth value    sd coverage
+#>    <chr>  <chr>    <int> <dbl> <dbl>    <dbl>
+#>  1 Saliva observed     1  1    0        0.491
+#>  2 Saliva observed   253  3.66 0.51     0.996
+#>  3 Saliva observed   345  4    0        0.997
+#>  4 Gums   observed     1  1    0        0.811
+#>  5 Gums   observed   253  3.31 0.774    0.996
+#>  6 Gums   observed   506  4.11 0.722    0.997
+#>  7 Gums   observed   758  4.71 0.497    0.998
+#>  8 Gums   observed   886  5    0        0.998
+#>  9 Nose   observed     1  1    0        0.359
+#> 10 Nose   observed   253  4.87 0.702    0.997
+#> 11 Nose   observed   506  5.5  0.611    0.998
+#> 12 Nose   observed   758  5.88 0.342    0.999
+#> 13 Nose   observed  1011  6    0        1
+#> 14 Stool  observed     1  1    0        0.987
+#> 15 Stool  observed   253  2.65 0.982    0.993
+#> 16 Stool  observed   506  4.29 0.762    0.993
+#> 17 Stool  observed   615  5    0        0.994
+#> # Attributes: totals, analytic, times, average
+
+# Shannon diversity by resampling; a line at a planned depth of 345.
+rc <- rarefaction_curve(ex_counts, c('observed', 'shannon'))
+plot(rc, 'shannon', depth = 345)
+
+# Rarefy each sample to 99.5% expected coverage instead of one depth.
+# Stool's estimated coverage (99.4%) falls short, so it is dropped.
+rowSums(rarefy(ex_counts, coverage = 0.995))
+#> Saliva   Gums   Nose 
+#>    220    136    120 
+```
+
 ## Formulas
 
 Given:
