@@ -95,6 +95,11 @@ reference:
   - assoc_network
   - assoc_network_compare
   - assoc_network_diff
+- subtitle: Associations between tables
+  desc: Correlations between the features of one table (taxa) and the variables of another measured on the same samples (environmental factors, metabolites), with adjusted p-values and a starred heatmap.
+  contents:
+  - cross_assoc
+  - plot.ecodive_cross_assoc
 - subtitle: Differential abundance
   desc: Which features' abundances differ between groups. da_test() runs any method by name; the classical per-feature tests compare normalized values, the others log ratios or clr values, so that the samples' totals don't matter.
   contents:

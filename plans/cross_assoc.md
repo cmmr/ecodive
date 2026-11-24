@@ -311,3 +311,153 @@ tables) is a possible follow-up, not part of this item.
   Techniques* (pp. 79–86). Springer.
 - Virtanen, P., et al. (2020). SciPy 1.0. *Nature Methods*, 17, 261–272.
   doi:10.1038/s41592-019-0686-2
+
+
+## Decisions made while implementing (item 39, 2026-11-24)
+
+Asked of the user at the start:
+
+1. **Name: `cross_assoc()`** (the plan's recommendation). No registry has
+   an exact name or alias starting `cross` (`CROSS_ASSOCS` is a plain named
+   vector of display names, not a matching registry: `method` is matched
+   exactly, case-insensitively).
+2. **`y_norm`**, not the plan's `norm_y` (the user's choice). Recorded in
+   parameter_names.md §6 (with `min_samples`); halla.md's signature now says
+   `y_norm` too.
+3. **No `method = 'rho_p'`.** The docs point to `norm = 'clr'` (with
+   `pseudocount`) with any method as the compositional choice; `y_norm =
+   'clr'` transforms a second count table the same way.
+4. **Factor and character columns of `y` are an error** ("`y` column 'site'
+   is not numeric; use da_test() for groups"); logical columns become 0/1.
+
+Made while implementing:
+
+5. **References: run, output only.** SciPy 1.18.1 (pip, scratch
+   virtualenv; `cross_assoc.py` asserts the version and writes hex
+   floats); Hmisc 5.3-1, psych 2.6.9, ppcor 1.1 and microeco 2.4.3 from
+   CRAN into a scratch library (microeco needed igraph ≥ 2.0, so cpp11 and
+   igraph 2.x from CRAN too). **Exposure record:** read SciPy's
+   `_stats_py.py` (`kendalltau()`, `spearmanr()`, `pearsonr()`,
+   `_get_pvalue()`; BSD-3) for the formulas; for microeco, its
+   `trans_env.Rd` through `tools::Rd2txt()` (the `cal_cor()` arguments).
+   No source of R's `cor.test()`, Hmisc, psych, ppcor or microeco was
+   opened. Fixtures: `data-raw/expected/cross_assoc.r` (40 samples × 25
+   taxa, negative-binomial with many zeros and one all-zero taxon; 6
+   variables: one planted association, ties, two different NA patterns, a
+   constant column; 2 covariates) → `tests/tinytests/expected/cross_assoc.rds`
+   (17 KB). Largest differences:
+
+   | Reference | Values | p-values |
+   |:----------|-------:|---------:|
+   | SciPy `spearmanr` / `pearsonr` / `kendalltau(method = 'asymptotic')` | 2.2e-16 / 8.3e-16 / 0 | 3.3e-14 / 3.8e-14 / 3.0e-15 (relative) |
+   | `cor()`, `cor.test(exact = FALSE)` | 8.3e-16 | 2.9e-14 (relative) |
+   | Hmisc `rcorr()` | 1.7e-16 | 4.4e-16 absolute (1.8e-4 relative below 1e-8: its P is 1 − a probability) |
+   | psych `corr.test()` (p, BH-adjusted p) | 1.7e-16 | 5.5e-15 (relative) |
+   | ppcor `pcor.test()`, Spearman / Pearson | 2.2e-16 / 1.7e-14 | 1.4e-14 / 9.2e-14 (relative) |
+   | microeco `cal_cor()` | 5.6e-16 | 1.7e-11 adjusted; 0 for tied pairs |
+
+   Tested at 1e-12 (values) and 1e-10 (p-values, relative).
+   **`cor.test(method = 'kendall', exact = FALSE)` agrees with SciPy's
+   asymptotic p-value with ties too** (the plan expected a difference).
+   **Hmisc doesn't round** its r (as the plan feared); its small p-values
+   are only absolutely accurate (so compared where P > 1e-8, and absolutely
+   at 1e-14 elsewhere). **microeco 2.4.3's default is `p_adjust_type =
+   'All'`** (adjust over all pairs; the plan thought per variable) and its
+   argument is now `method` (`cor_method` is deprecated); it calls
+   `cor.test()` with `exact = NULL`, so for the 2 pairs of a taxon without
+   zeros its Spearman p-values are AS 89's (0 for r = 0.87, n = 40) — the
+   tests skip those, as the plan anticipated.
+6. **Partial Spearman ranks the covariates too** (both tables' ranks and
+   the covariates' ranks, residualised on `cbind(1, given)`), which is what
+   ppcor's outputs show (2.2e-16). With ranks of the values only, it
+   wouldn't match. Factor covariates go through `model.matrix()` (ranking a
+   dummy is affine, so the same). The residual degrees of freedom use the
+   QR rank of the covariates (`n − 2 − k`).
+7. **`given`** is a one-sided formula over `data`, names of `data`'s
+   columns, or a data frame / matrix / vector matched by row name; samples
+   with an `NA` in it are dropped from everything, with a warning naming
+   the count; `n_samples` is the samples used.
+8. **The kernel** (`src/cross_assoc.c`): one task per feature of `x`
+   (features i, i + n, ... per share). The feature is read into a dense
+   per-thread column (from dense or sparse storage: identical code after
+   that, so **sparse and dense give identical results**, not just 1e-14),
+   taken on each NA pattern's samples, ranked (average ranks, stable merge
+   sort), centred, residualised on the pattern's Q (with covariates), and
+   reduced to the weights d_s = (x_s − c)/‖x̃‖ for samples whose value
+   differs from c, c the value of the feature's zeros (or its mean if it
+   has none). Since every standardised `y` column sums to 0 and is
+   orthogonal to Q, r = Σ d_s Y_sj, over the non-zero samples only:
+   O(nnz × q). `Y` is stored row-major (one sample's q values together), so
+   each sample adds to all q sums at once, in sample order. Each pair is
+   summed by one task in sample order: identical for any `cpus` (tested 1–4,
+   with and without permutations, all three methods). No BLAS. Kendall:
+   Knight's algorithm with `mantel.c`'s `kendall_sort_count()` and
+   `kendall_tied_sorted()` (already shared through `ecodive.h`), y as
+   integer codes, x's order and tie sums once per feature and pattern.
+9. **Constant features or variables** (all values equal on their samples;
+   with covariates, a residual norm ≤ 1e-10 of the centred one) give `NA`,
+   with one warning counting both, as `cor()`'s "the standard deviation is
+   zero". Pairs with fewer than `min_samples` samples, or no residual
+   degrees of freedom, are `NA` without a warning. `min_samples` must be ≥ 3
+   (Kendall's variance divides by n − 2).
+10. **Missing values: per-pattern ranks**, as planned (columns grouped by a
+    key of their NA positions). **Permutations with NAs:** each pattern (set
+    of samples) gets its own permutations of its own samples, shared by its
+    columns: pattern 1 (in order of first column) from `seed`, pattern
+    g + 1 from `pair_seed(seed, g)`; strata are subset to the pattern.
+    Tested exactly against `C_perm_indices()` and a base-R loop. A supplied
+    `permutations` matrix needs `y` without NAs (error otherwise).
+11. **Permutations** are made in rounds of 256 (their indices, and with
+    covariates the products Q'P y), then every feature runs through the
+    round; hits are per-pair integers. With covariates the permuted
+    residual of y is no longer orthogonal to Q, so each sum subtracts
+    (Q'd)·(Q'Py) (ter Braak: permuting y's residuals and correlating with
+    x's residuals; tested exactly against base R's `lm()` residuals).
+    p = (1 + hits)/(B + 1) with perm_p()'s √ε tolerance. With permutations
+    the `statistic` column still holds the parametric t or z.
+12. **p-values:** Pearson and Spearman from t = r √(df/((1 + r)(1 − r)))
+    (SciPy's `spearmanr` form) and `pt()`; |r| = 1 gives t = ±Inf and
+    p = 0. Kendall: SciPy's tie-corrected variance, z in `statistic`,
+    p = 2 Φ(−|z|). Adjustment by `p.adjust()` over all pairs (NAs left
+    out, as `p.adjust()` does); `p_adjust` is checked by
+    `pairwise_method()`.
+13. **Result** as planned. `n` is a column only when it varies.
+    `x_features` / `y_features` are positions as text when unnamed (a
+    plain numeric `y` vector is named `"y"`). `as.matrix(x, what)` falls
+    back on the `x`/`y` columns' unique values after `[` drops the
+    attributes. Header: "Spearman Correlation: 25 x 6 features, 1 pair with
+    BH-adjusted p <= 0.05" (the display name, not "taxa × variables",
+    since `x` needn't be taxa). Print is registered in `R/print.r`.
+14. **Plot:** as planned (top `n_x`/`n_y` by smallest adjusted p, ties by
+    |r|; average-linkage clustering of rows and columns on 1 − r of their
+    profiles in the shown block; "Blue-Red 3" from −1 to 1; stars for
+    `p_adjusted` below each of `stars`; `stars = NULL` dots `reject`;
+    `dist_plot_key()`). `clust` takes any `hclust()` method or `'none'`.
+    The title is the display name ("Partial ..." with `given`); there is
+    no `display` attribute.
+15. **Speed** (this container, 4 cores): 200 samples × 2,000 sparse taxa
+    (30% non-zero) × 1,000 variables (2 million pairs): 1.0 s on 1 thread,
+    0.8 s on 4, of which the C kernel is about 0.25 s and the rest R's
+    `pt()`, `p.adjust()` and the data frame. 200 × 1,000 × 500 Spearman:
+    0.21 s (`cor()` with R's reference BLAS: 0.12 s, but it computes no
+    p-values). 200 × 200 × 50 with 999 permutations: 0.31 s on 4 threads.
+
+### What item 84 (`halla()`) can rely on
+
+- `cross_assoc(x, y, data, method, margin, norm, y_norm, pseudocount, ...,
+  alpha, p_adjust)` validates and transforms both tables, matches samples
+  by name, and returns the AllA table in x-major order with `association`
+  (NA where either side is constant over the pair's samples or the pair
+  has too few samples), `p_value`, `p_adjusted` (BH over all non-NA
+  pairs), `reject`, and `n` when it varies; `as.matrix(res, what)` gives
+  the p × q matrices with `x_features` / `y_features` as dimnames. HAllA
+  maps NA to similarity 0 and p = 1 (its convention); do that on the
+  result, then re-adjust.
+- Internals to reuse: `cross_x()` (normalised x for C, dense or CSC),
+  `cross_y()` / `cross_numeric()` (y as a double matrix in x's sample
+  order), `cross_assoc_patterns()` (per-NA-pattern standardised Y and
+  codes), and `C_cross_assoc()`, which returns the p × q correlations
+  feature-major. The within-table similarities HAllA needs (`y = x`)
+  can call the same kernel with `x`'s own standardised columns as `Y`
+  (it computes the full p × p block; take the packed triangle).
+- Ties within a feature (zeros) get average ranks, as SciPy's `rankdata`.

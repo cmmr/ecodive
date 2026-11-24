@@ -276,5 +276,6 @@ rapid and scalable correlation estimation for compositional data.
 \seealso{
 \code{\link[=assoc_pairs]{assoc_pairs()}}, the pairs above a cutoff; \code{\link[=rho_p]{rho_p()}},
 proportionality of features; \code{\link[=vlr]{vlr()}}, the variation matrix;
-\code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}.
+\code{\link[=plot.ecodive_dist]{plot.ecodive_dist()}}; \code{\link[=cross_assoc]{cross_assoc()}} for correlations between the
+features of two tables.
 }

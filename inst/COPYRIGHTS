@@ -963,7 +963,7 @@ License:
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: src/procrustes.c R/procrustes.r src/ancombc.c
+Files: src/procrustes.c R/procrustes.r src/ancombc.c src/cross_assoc.c R/cross_assoc.r
 Copyright: 2001-2002 Enthought, Inc.; 2003 SciPy Developers
 Comment: procrustes() and procrustes_test() follow
  scipy.linalg.orthogonal_procrustes() and scipy.spatial.procrustes() from
@@ -972,6 +972,11 @@ Comment: procrustes() and procrustes_test() follow
  record reference results. The bounded one-dimensional Nelder-Mead minimiser
  in src/ancombc.c (nm_minimize()) follows _minimize_neldermead() from SciPy
  1.18.1 (scipy/optimize/_optimize.py), which scikit-bio's ancombc() calls.
+ cross_assoc()'s p-values follow scipy.stats.pearsonr(), spearmanr() and
+ kendalltau(method = 'asymptotic') from SciPy 1.18.1
+ (scipy/stats/_stats_py.py), Kendall's tie-corrected variance in particular;
+ data-raw/expected/cross_assoc.py (not in the built package) calls SciPy to
+ record reference results.
 License:
    Copyright (c) 2001-2002 Enthought, Inc. 2003, SciPy Developers.
    All rights reserved.

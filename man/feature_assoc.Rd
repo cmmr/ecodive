@@ -85,5 +85,6 @@ For large datasets, standard matrix operations may be slow. See
 }
 \seealso{
 \code{\link[=vlr]{vlr()}}, \code{\link[=rho_p]{rho_p()}}, \code{\link[=phi_s]{phi_s()}}, \code{\link[=sparcc]{sparcc()}},
-\code{\link[=list_feature_assocs]{list_feature_assocs()}}; \code{\link[=assoc_network]{assoc_network()}}.
+\code{\link[=list_feature_assocs]{list_feature_assocs()}}; \code{\link[=assoc_network]{assoc_network()}}; \code{\link[=cross_assoc]{cross_assoc()}} for the
+associations between the features of two tables.
 }

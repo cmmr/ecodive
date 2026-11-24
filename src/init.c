@@ -41,6 +41,7 @@ extern SEXP C_linda_mode(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lda_loo(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_log_ratio(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_log_ratio_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_cross_assoc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mult_default_delta(SEXP);
@@ -135,6 +136,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_lda_loo",   (DL_FUNC) &C_lda_loo,   5},
   {"C_log_ratio", (DL_FUNC) &C_log_ratio, 5},
   {"C_log_ratio_coords", (DL_FUNC) &C_log_ratio_coords, 6},
+  {"C_cross_assoc", (DL_FUNC) &C_cross_assoc, 6},
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
   {"C_mult_default_delta", (DL_FUNC) &C_mult_default_delta, 1},

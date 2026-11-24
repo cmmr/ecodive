@@ -99,6 +99,10 @@
   z <- rho_p(counts, denominator = 'F1', cpus = cpus)
   expect_true(attr(z, 'Size') == 11L && all(is.finite(z)) && all(abs(z) <= 1))
 
+  # Associations between two tables.
+  z <- cross_assoc(counts[1:10, 1:5], data.frame(a = 1:10, b = (1:10)^2, c = c(5:1, 1:5)), cpus = cpus)
+  expect_true(inherits(z, 'ecodive_cross_assoc') && nrow(z) == 15L && all(abs(z$association) <= 1) && all(z$p_value >= 0 & z$p_value <= 1))
+
   # Associations: SparCC.
   z <- sparcc(counts[, 1:10], n_draws = 5L, permutations = 9L, cpus = cpus)
   expect_true(inherits(z, 'ecodive_dist') && attr(z, 'Size') == 10L && length(z) == 45L)

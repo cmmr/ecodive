@@ -208,7 +208,8 @@
 #'
 #' @seealso [assoc_pairs()], the pairs above a cutoff; [rho_p()],
 #'   proportionality of features; [vlr()], the variation matrix;
-#'   [plot.ecodive_dist()].
+#'   [plot.ecodive_dist()]; [cross_assoc()] for correlations between the
+#'   features of two tables.
 #'
 #' @export
 #' @examples

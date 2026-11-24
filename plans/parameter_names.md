@@ -25,7 +25,7 @@ same thing.
 | `n_axes` | **the number of axes returned** (proposed rename of `k`; see §2.0) | every ordination |
 | `axes` | **which** axes of an input ordination to use (indices) | `envfit`; planned `procrustes` |
 | `groups`, `data`, `formula` | the grouping variable or model, and the sample metadata it comes from. DA model methods (2026-11-20, `da_test()`): `formula` is the model and `groups` its term of interest; `groups` alone is `formula = ~ groups` | tests, `dbrda`, `capscale`, DA methods, and planned constrained and discriminant methods |
-| `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv` |
+| `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv`; `cross_assoc` (covariates: a formula over `data`, column names, or a table) |
 | `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20) | everything that takes `counts` |
 | `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
 | `scaling` | **reserved** for score scaling (vegan's scaling 1/2), if ever needed | — |
@@ -204,6 +204,8 @@ reuse §1's names and add these:
 | `quantile` | **(item 33)** the quantile a "most central" feature is above (NetCoMi's `jaccQuant`) | `assoc_network_compare` (exists) |
 | `assoc_args`, `network_args` | **(item 33)** lists of the arguments that made two networks' associations and networks, passed again when the group-permutation test re-estimates them (`<step>_args`) | `assoc_network_compare` (exists) |
 | `n_samples` | **(item 33)** the numbers of samples behind two correlation matrices, as the `n_samples` attribute of an association result | `assoc_network_diff` (exists) |
+| `y_norm` | **(added 2026-11-24, item 39; the user chose it over `norm_y`)** the transformation of the second table `y`, with `norm`'s choices; `norm` stays the first table's | `cross_assoc` (exists); planned `halla` |
+| `min_samples` | **(item 39)** the fewest samples (after leaving out `NA`s) a pair needs for a correlation, at least 3 | `cross_assoc` (exists) |
 
 Open naming questions for the user are flagged "ask" in the plans:
 `bias_counts` ([secom.md](secom.md)), and the `da_test()` groups/formula
