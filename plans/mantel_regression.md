@@ -194,3 +194,24 @@ My own decisions:
   Spearman, one to three terms, 199 shared permutations.
 - **Docs:** `vignettes/stat_tests.Rmd` gains a short example (iris);
   `mantel()`, `mantel_partial()` and `mantel_correlogram()` link to it.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 69, done 2026-11-26.** Commit `d496ac7` (function), plus the tick.
+
+- Tests: 33,088 at home and 473 in CRAN mode before merging the other
+  sessions' work (32,859 / 469 at 70dff27). `test-mantel_regression.r` has
+  225 tests.
+- ecodist 2.1.3 `MRM()`, with its permutations rebuilt as a matrix: the 5
+  stored mite cases and 300 fresh random cases (n 5–40, 1–4 terms, `mrank`
+  FALSE and TRUE, tied and untied, nperm 20–200): every coefficient, R^2 and
+  F p-value identical; coefficients within 1.6e-14 of the largest
+  coefficient (7.8e-12 relative, on near-zero ones); R^2 within 3e-14
+  absolute. ecodist's R^2 has absolute rounding errors (relative 3e-10 when
+  R^2 ~ 1e-5); ecodive's R^2 is within 5.4e-14 (relative) of `lm()`'s.
+- cpus 1, 2, 3, 4, 8 identical.
+- Speed (n = 200, 3 terms, 999 permutations): ecodist 0.10 s, ecodive
+  0.06 s on one thread.
+- `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed size, the
+  container's debug build flags).

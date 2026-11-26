@@ -100,7 +100,7 @@ historical and uses the survey's own numbering.
 | 66 | [ ] `dmm()` | [community_typing.md](community_typing.md) | clean room (DirichletMultinomial LGPL; mothur GPL) | Medium effort (EM with model selection); steady use (506 citations 2022–26). |
 | 67 | [ ] `splsda()` | [splsda.md](splsda.md) | clean room | mixOmics users; sparse PLS-DA is its own algorithm; medium effort. |
 | 68 | [ ] `feast()` | [source_tracking.md](source_tracking.md) | **clean room** (FEAST is CC BY-NC-SA: non-commercial; even its outputs as fixtures need the user's OK) | FEAST is the other standard source-tracking method, rising (~140 citations a year); an EM fully stated in the paper, but its initialisation must be settled first. |
-| 69 | [ ] `mantel_regression()` (MRM) | [mantel_regression.md](mantel_regression.md) | clean room | Simple algebra; biogeography. |
+| 69 | [x] `mantel_regression()` (MRM) (d496ac7) | [mantel_regression.md](mantel_regression.md) | clean room | Simple algebra; biogeography. |
 | 70 | [ ] `diffusion_map()` | [diffusion_map.md](diffusion_map.md) | port (pydiffmap MIT / scanpy BSD-3) | Growing use; uses neighbour and eigensolver code ecodive already has. |
 | 71 | [ ] `pacmap()` | [pacmap.md](pacmap.md) | port (PaCMAP, Apache-2.0) | Growing use; keep the Apache notices. |
 | 72 | [ ] `mpd()`, `mntd()`, `mpd_ses()`, `mntd_ses()` (NRI / NTI) | [phylo_structure.md](phylo_structure.md) | clean room (picante GPL) + port (phylocom, BSD-3) | The standard phylogenetic-structure summary (picante 3,272 citations); 999-draw null models are slow in R; tree-based threaded C avoids the cophenetic matrix; medium-to-high effort. Item 73 shares its tree code. |
