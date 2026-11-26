@@ -363,6 +363,12 @@
   expect_identical(dim(be), c(2L, 3L))
   expect_true(all(is.finite(be$correlation)) && all(abs(be$correlation) <= 1))
 
+  mc <- mantel_correlogram(dm, cbind(meta$x, rep(1:4, 5)), permutations = 9, cpus = cpus)
+  expect_inherits(mc, c('ecodive_mantel_correlogram', 'data.frame'))
+  expect_identical(ncol(mc), 7L)
+  expect_true(any(is.finite(mc$r)) && all(abs(mc$r) <= 1, na.rm = TRUE))
+  expect_true(all(mc$p_adjusted >= 0 & mc$p_adjusted <= 1, na.rm = TRUE))
+
   et <- enterotype(counts, n_types = 2:3, cpus = cpus)
   expect_inherits(et, c('ecodive_enterotype', 'ecodive_types', 'data.frame'))
   expect_identical(dim(et), c(20L, 3L))
@@ -386,6 +392,15 @@
   expect_true(is.finite(attr(fs, 'global')$adj_r_squared))
   expect_true(any(grepl('Forward selection', capture.output(print(fs)), fixed = TRUE)))
 
+  prc <- principal_response_curves(
+    counts, rep(c('c', 'd1', 'd2', 'c'), 5), rep(1:5, each = 4), norm = 'hellinger',
+    n_axes = 2, permutations = 9, cpus = cpus )
+  expect_inherits(prc, 'ecodive_prc')
+  expect_identical(dim(prc$coefficients), c(15L, 4L))
+  expect_true(all(is.finite(prc$coefficients$PRC1)) && all(is.finite(prc$weights)))
+  expect_true(all(prc$test$p_value > 0 & prc$test$p_value <= 1))
+  expect_true(any(grepl('Principal Response Curves', capture.output(print(prc)), fixed = TRUE)))
+
 
 
   # Distance-based tests. ====
@@ -397,6 +412,7 @@
     permdisp  = permdisp(dm, 'grp', meta, pairwise = TRUE, permutations = 9, cpus = cpus),
     mantel    = mantel(dm, 'x', meta, permutations = 9, cpus = cpus),
     mantel_partial = mantel_partial(dm, 'x', rep(1:4, 5), meta, permutations = 9, cpus = cpus),
+    moran_i   = moran_i('x', dm, meta, permutations = 9, cpus = cpus),
     procrustes_test = procrustes_test(o, pcoa(dm, n_axes = 2, cpus = cpus), permutations = 9, cpus = cpus),
     dist_test = dist_test(dm, 'permanova', 'grp', meta, permutations = 9, cpus = cpus) )
 
@@ -435,6 +451,7 @@
   expect_true(drawn(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'grp', meta))
   expect_true(suppressWarnings(drawn(pca(counts, norm = 'clr', cpus = cpus), scaling = 'covariance', links = 1:3)))  # biplot scalings
   expect_true(drawn(rda(counts, norm = 'hellinger', cpus = cpus), scaling = 1))
+  expect_true(drawn(prc))
   expect_true(drawn(lda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus)))  # one axis
   expect_true(drawn(capda(dm, 'grp', meta, permutations = 0, cpus = cpus), 'grp', meta))  # one axis
   expect_true(drawn(pr))

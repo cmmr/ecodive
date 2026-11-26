@@ -210,6 +210,7 @@ reference:
   - bioenv
   - varpart
   - forward_select
+  - principal_response_curves
   - procrustes
   - procrustes_test
   - list_dist_ords
@@ -229,10 +230,16 @@ reference:
   - permanova
   - mantel
   - mantel_partial
+  - mantel_correlogram
   - mrpp
   - anosim
   - permdisp
   - list_dist_tests
+
+- title: Spatial
+  desc: Spatial structure among samples from their positions (coordinates, geographic distances or spatial weights). Moran's I tests whether a variable is more alike at nearby sites.
+  contents:
+  - moran_i
 
 - title: Interpreting Differences
   desc: Which taxa drive the differences between groups.
@@ -260,10 +267,12 @@ reference:
   - plot.ecodive_da_sensitivity
   - plot.ecodive_varpart
   - plot.ecodive_forward_select
+  - plot.ecodive_prc
   - plot.ecodive_bioenv
   - plot.ecodive_types
   - plot.ecodive_source
   - plot.ecodive_rarefaction_curve
+  - plot.ecodive_mantel_correlogram
   - plot.ecodive_log_ratio
   - ecodive_display
   - print_ecodive

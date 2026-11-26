@@ -202,8 +202,8 @@ Its \eqn{R^2} is \code{rda()}'s \code{r_squared}, and its pseudo-F and
 p-value those of \code{anova(vegan::rda(...))} for the same permutations.
 }
 
-\code{varpart()}, \code{forward_select()} and \code{principal_response_curves()}, which
-are planned for ecodive, will build on \code{rda()}.
+\code{\link[=varpart]{varpart()}}, \code{\link[=forward_select]{forward_select()}} and \code{\link[=principal_response_curves]{principal_response_curves()}} build
+on \code{rda()}.
 
 \strong{Matching vegan}
 

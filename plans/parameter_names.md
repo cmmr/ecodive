@@ -28,18 +28,20 @@ same thing.
 | `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv`; `cross_assoc` (covariates: a formula over `data`, column names, or a table) |
 | `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20) | everything that takes `counts` |
 | `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
-| `scaling` | how a biplot scales samples against features: `'form'` (1), `'covariance'` (2), `'contribution'`; vegan's 1, 2, 3 for `rda`, `cca`, `ca` (item 44, 2026-11-24) | `plot.ecodive_ord` |
+| `scaling` | how a biplot scales samples against features: `'form'` (1), `'covariance'` (2), `'contribution'`; vegan's 1, 2, 3 for `rda`, `cca`, `ca` (item 44, 2026-11-24); vegan's 1, 2, 3 (`'sites'`, `'species'`, `'symmetric'`) for the coefficients and weights of `principal_response_curves` (item 57) | `plot.ecodive_ord`, `principal_response_curves` |
 | `links` | pairs of features joined in a covariance biplot (Aitchison & Greenacre's term) | `plot.ecodive_ord` |
 | `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
 | `metric` | a beta diversity metric name | `beta_div`, `alpha_div`; planned `bioenv` |
-| `alternative` | `'greater'`, `'less'` or `'two.sided'` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `moran_i` |
+| `alternative` | `'greater'`, `'less'` or `'two.sided'`; `mantel_correlogram()` adds `'sign'` (its default, vegan's: each class tested in the direction of its statistic's sign; 2026-11-25, item 58) | `mantel`, `mantel_partial`, `mantel_correlogram`, `moran_i` (for its analytic p-values too) |
 | `permutations`, `strata`, `seed` | the permutation test (a count or a matrix), restricted permutations, and the RNG seed | all tests, `envfit` |
 | `pairwise`, `p_adjust` | per-pair tests, and their p-value adjustment | planned on all group tests; `p_adjust` also on `mantel_correlogram` and optionally `simper` |
+| `breaks`, `n_classes`, `cutoff`, `progressive` | **(new, 2026-11-25, item 58)** distance classes' boundaries, or their number (equal widths; Sturges' rule by default); whether to test only the classes vegan's `cutoff` keeps; and a progressive multiple-testing adjustment (vegan's `progressive`), alongside `p_adjust` (which also takes vegan's `'sidak'` there) | `mantel_correlogram` |
 | `n_<unit>` | **an exact count** | `n_neighbors`, `n_starts`, `n_epochs`; planned `n_iters` (pacmap), `n_segments` (dca), `n_classes`, `n_landmarks`, `n_orthogonal` |
 | `max_<unit>` | **a cap** (it may stop earlier) | `max_iters` |
 | `tol` | a convergence tolerance | `mds`, `nmds`, `rpca`; planned `splsda` |
 | `init`, `learning_rate` | starting layout, step size | `tsne`, `umap`; planned `pacmap`, `largevis` |
-| `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights | planned `moran_i`, `dbmem` |
+| `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights. In `moran_i()` (2026-11-25, item 59): a square matrix is spatial weights, a `dist` is distances and other tables (or column names of `data`) are coordinates; distances and coordinates become inverse-distance weights | `moran_i`; planned `dbmem` |
+| `style` | **(new, 2026-11-25, item 59)** how spatial weights are transformed: `'row'` (row-standardised), `'binary'`, `'variance'` (variance-stabilising), `'none'` (spdep's `style`, esda's `transformation`; not `standardize` or `transform`, which mean other things in `linda()` and `maaslin3()`) | `moran_i` |
 | `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only), `log_ratio`, `balance`, `rho_p`, `phi_s` (`denominator` only: one feature for an alr, or a set); the rank plots (`type = 'rank'`, item 46) of the DA plot methods and `plot.ecodive_ord()`, the features to highlight; `log_ratio_features()` returns them as a list |
 | `basis` | **(new)** an ILR basis or a sequential binary partition | `ilr` |
 | `load` | **(new, 2026-11-19)** each sample's measured total microbial load: one finite value > 0 per sample (matched by name, else by position), or a column name of `data`, by the same `per_sample()` rule as `groups` | `qmp_scale`, `qmp_rarefy`, `dirmult_lm` (as its scale model) |
@@ -50,6 +52,7 @@ same thing.
 | `var_equal` | **(new, 2026-11-20)** `TRUE` for Student's t-test with a pooled variance, `FALSE` (the default) for Welch's (as `t.test(var.equal)`, snake_case) | `da_ttest` |
 | `part_weights`, `ilr_weights` | **(new)** PhILR's taxon and balance weights | planned `philr` |
 | `subjects`, `states` | **(new)** per-sample subject ids and time points / conditions (numeric time points for the longitudinal functions), by the same `per_sample()` rule as `groups` | `first_differences`, `first_distances`, `volatility`, `nmit` (2026-11-24, item 56); planned `ctf` |
+| `treatment`, `time`, `control`, `plots` | **(new, 2026-11-25, item 57)** each sample's treatment and time point, by `per_sample()`'s rule (time points are categories, so not `states`, which the longitudinal functions take as numbers); the control treatment (a level of `treatment`); and the experimental units whose series of samples are permuted whole (permute's `Plots(strata = )`) | `principal_response_curves` |
 | `baseline`, `replicates` | **(new, 2026-11-24)** the state that every other is compared with (`NULL`: consecutive states), and what to do with a subject's several samples at one state (`'error'`, `'drop'`, `'random'`; q2-longitudinal's `replicate_handling`) | `first_differences`, `first_distances` |
 | `matrix_norm` | **(new, 2026-11-24)** the norm of a matrix difference (`'frobenius'`, `'nuclear'`); not `norm`, which normalizes counts | `nmit` |
 | `n_resamples` | **(new, 2026-11-24)** an exact count of bootstrap resamples (`n_<unit>` rule) | `volatility` |

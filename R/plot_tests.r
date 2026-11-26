@@ -5,17 +5,17 @@
 #' Plot a permutation test
 #'
 #' Plots the result of one of ecodive's permutation tests. By default,
-#' [permanova()], [anosim()], [mantel()] and [mantel_partial()] results show
-#' the permutation distribution of their statistic, with the observed value
-#' marked; [mrpp()] shows each group's mean within-group distance;
+#' [permanova()], [anosim()], [mantel()], [mantel_partial()] and [moran_i()]
+#' results show the permutation distribution of their statistic, with the
+#' observed value marked; [mrpp()] shows each group's mean within-group distance;
 #' [permdisp()] each group's dispersion; and [procrustes_test()] the
 #' Procrustes fit. `type = "null"` shows the permutation distribution for any
 #' of them. Nothing is recomputed: the plot is made from the stored results.
 #'
 #' @param x  A permutation test result, of class `ecodive_test`: from
 #'        [permanova()], [anosim()], [mrpp()], [mantel()],
-#'        [mantel_partial()], [permdisp()], [procrustes_test()], or
-#'        [dist_test()].
+#'        [mantel_partial()], [permdisp()], [procrustes_test()],
+#'        [moran_i()], or [dist_test()].
 #'
 #' @param type  What to draw: `"null"` for the permutation distribution of
 #'        the statistic; or for [mrpp()] and [permdisp()], `"groups"` (their

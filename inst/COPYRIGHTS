@@ -1937,6 +1937,50 @@ License:
    INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE
    OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+Files: R/moran_i.r src/moran_i.c
+Copyright: 2018 PySAL Developers (esda)
+ 2007- PySAL Developers (libpysal)
+Comment: moran_i() is a port of esda 2.10.0's Moran (esda/moran.py,
+ github.com/pysal/esda, BSD-3-Clause): Moran's I, its expected value, its
+ variances under normality and randomisation and its analytic p-values; and
+ of libpysal 4.15.1's weight transformations (W.set_transform(): row-
+ standardised, binary, variance-stabilising) and the sums s0, s1 and s2
+ (libpysal/weights/weights.py, github.com/pysal/libpysal, BSD-3-Clause),
+ restructured for ecodive. The rest of these files is Copyright 2026
+ ecodive authors, under the MIT licence above.
+License:
+   esda: Copyright 2018 PySAL Developers.
+   libpysal: Copyright (c) 2007-, PySAL Developers.
+   All rights reserved. (Each of the above, under the same BSD-3-Clause
+   terms:)
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+   3. Neither the name of the copyright holder nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE.
+
 Files: src/random_forest.c
 Copyright: 1997-2002 Makoto Matsumoto and Takuji Nishimura
 Comment: The MT19937 generator of random_forest()'s parity mode (mt_seed(),

@@ -163,8 +163,8 @@
 #'   Its \eqn{R^2} is `rda()`'s `r_squared`, and its pseudo-F and
 #'   p-value those of `anova(vegan::rda(...))` for the same permutations.
 #'
-#' `varpart()`, `forward_select()` and `principal_response_curves()`, which
-#' are planned for ecodive, will build on `rda()`.
+#' [varpart()], [forward_select()] and [principal_response_curves()] build
+#' on `rda()`.
 #'
 #'
 #' **Matching vegan**
