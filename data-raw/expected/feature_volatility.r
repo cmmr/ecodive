@@ -26,21 +26,22 @@
 # Fields of the .rds:
 #
 #   meta, counts   The inputs.
-#   cases          One list per q2 run (named "rs<random_state>"), each:
+#   cases          One list per q2 run (named "rs<random_state>" without
+#                  RFE, "rfe-rs<random_state>" with q2's RFECV), each:
 #                  random_state; train and test (sample ids, in q2's order:
 #                  the shuffle's); importance (named numeric, q2's
 #                  feature_importances_ in its sorted order, from the forest
-#                  of 100 trees on the training samples' counts); predicted
+#                  of 100 trees on the training samples' counts: with RFE,
+#                  on the features RFECV kept only); predicted
 #                  (the test samples' predictions); accuracy (q2's
 #                  _linear_regress(): mse, r, r2, slope, intercept); and
 #                  stats_all / stats_10 (q2's _importance_filtering() with
 #                  feature_count 'all' and 10, then the importances joined
 #                  with _summarize_feature_stats() on relative frequencies:
 #                  a data frame, feature first, q2's columns renamed as
-#                  ecodive's).
-#   rfe            q2's actual pipeline (optimize_feature_selection = True)
-#                  for random_state 3: the features RFECV kept and their
-#                  importances (informational; ecodive has no RFE).
+#                  ecodive's). With RFE also rfe: ranking (RFECV's
+#                  ranking_, named by feature) and scores (its cv_results_:
+#                  n_features, mean, sd, fold_1 ... fold_5).
 #   perm           numpy's RandomState(rs).permutation(n): a list of
 #                  list(rs, n, perm) (0-based).
 #   versions       Of the Python packages used.
@@ -132,9 +133,9 @@ read_stats <- function (kv, prefix) {
 }
 
 cases <- list()
-for (f in sort(list.files(dir, '^case-rs[0-9]+[.]txt$'))) {
+for (f in sort(list.files(dir, '^case-(rfe-)?rs[0-9]+[.]txt$'))) {
   kv <- read_kv(f)
-  nm <- sub('^case-(rs[0-9]+)[.]txt$', '\\1', f)
+  nm <- sub('^case-((rfe-)?rs[0-9]+)[.]txt$', '\\1', f)
   cases[[nm]] <- list(
     random_state = as.integer(kv$random_state),
     train        = kv$train,
@@ -144,10 +145,15 @@ for (f in sort(list.files(dir, '^case-rs[0-9]+[.]txt$'))) {
     accuracy     = structure(unhex(kv$accuracy), names = c('mse', 'r', 'r2', 'slope', 'intercept')),
     stats_all    = read_stats(kv, 'all'),
     stats_10     = read_stats(kv, 'top10') )
+  if (!is.null(kv$rfe_ranking)) {
+    sc <- data.frame(n_features = as.integer(kv$rfe_n_features),
+                     mean = unhex(kv$rfe_mean), sd = unhex(kv$rfe_sd))
+    for (k in 1:5) sc[[paste0('fold_', k)]] <- unhex(kv[[paste0('rfe_fold_', k)]])
+    cases[[nm]]$rfe <- list(
+      ranking = structure(as.integer(kv$rfe_ranking), names = kv$rfe_features),
+      scores  = sc )
+  }
 }
-
-kv  <- read_kv('rfe.txt')
-rfe <- structure(unhex(kv$importance), names = kv$importance_features)
 
 kv   <- read_kv('perm.txt')
 perm <- lapply(grep('^perm_', names(kv), value = TRUE), function (k) {
@@ -159,7 +165,7 @@ kv <- read_kv('versions.txt')
 versions <- vapply(kv, paste, '', collapse = ' ')
 
 saveRDS(
-  list(meta = meta, counts = counts, cases = cases, rfe = rfe, perm = perm,
+  list(meta = meta, counts = counts, cases = cases, perm = perm,
        versions = versions),
   file.path('tests', 'tinytests', 'expected', 'feature_volatility.rds'),
   version = 2 )

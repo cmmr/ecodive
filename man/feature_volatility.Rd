@@ -12,6 +12,9 @@ feature_volatility(
   data = NULL,
   n_features = 100L,
   test_size = 0.2,
+  rfe = TRUE,
+  rfe_step = 0.05,
+  rfe_folds = 5L,
   importance = "impurity",
   margin = 1L,
   norm = "percent",
@@ -49,14 +52,27 @@ and rows for other samples are ignored; without row names, they
 must be in the samples' order. Default: \code{NULL}.}
 
 \item{n_features}{How many of the most important features to keep
-(q2's \code{feature_count}): a whole number, or \code{Inf} for all of them.
-Default: \code{100}, as q2.}
+(q2's \code{feature_count}), of those recursive feature elimination
+selected: a whole number, or \code{Inf} for all of them. Default: \code{100},
+as q2.}
 
 \item{test_size}{The fraction of the samples held out of the forest, to
 measure its accuracy on (q2's \code{test_size}): \eqn{\lceil}
 \code{test_size} \eqn{\times n \rceil} samples, drawn at random. \code{0}
 trains on every sample (accuracy then only out of bag). Default:
 \code{0.2}, as q2.}
+
+\item{rfe}{Whether to select features first by recursive feature
+elimination with cross-validation (scikit-learn's \code{RFECV}), as q2's
+pipeline always does (its \code{optimize_feature_selection}). Default:
+\code{TRUE}. With \code{FALSE}, one forest on every feature ranks them all.}
+
+\item{rfe_step}{How many features recursive feature elimination drops at
+each round: a fraction of the features (below 1) or a count.
+Default: \code{0.05}, as q2 (5\%, at least 1).}
+
+\item{rfe_folds}{The number of cross-validation folds that choose how
+many features to keep. Default: \code{5}, as q2.}
 
 \item{importance}{What ranks the features: \code{'impurity'} (the forest's
 mean decrease in impurity, scikit-learn's \code{feature_importances_},
@@ -127,9 +143,18 @@ predictions, \code{mse}, \code{r_squared} (\eqn{1 - SS_{res}/SS_{tot}}),
 \code{slope}, \code{intercept} and \code{r} (of the predicted on the observed
 states, as q2's scatter plot); and \code{oob_r_squared}, the forest's out
 of bag. The held-out values are \code{NA} with \code{test_size = 0}.}
+\item{\code{rfe}}{With \code{rfe = TRUE}, recursive feature elimination's
+results: \code{ranking}, a named integer vector over every feature (1 for
+the selected ones, then 2, 3, ... for those dropped later to earlier),
+and \code{scores}, a data frame of each number of features tried
+(\code{n_features}), the mean and SD (divisor n, as scikit-learn's) of the
+folds' \eqn{R^2}, and each fold's (\code{fold_1}, ...). \code{NULL} with
+\code{rfe = FALSE}.}
 \item{\code{forest}}{The \code{\link[=random_forest]{random_forest()}} result, trained on the training
-samples: every feature's importances, out-of-bag predictions, and
-(with \code{keep_forest}, the default) the forest for \code{predict()}.}
+samples (with \code{rfe}, on the selected features only): every feature's
+importances (0 for the features not selected), out-of-bag
+predictions, and (with \code{keep_forest}, the default) the forest for
+\code{predict()}.}
 }
 
 Attributes \code{conf_level} and \code{n_resamples} describe the intervals, and
@@ -149,9 +174,11 @@ the volatility chart of a chosen feature.
 \enumerate{
 \item Hold out a random \code{test_size} of the samples (scikit-learn's
 \code{train_test_split()}, not stratified).
+\item With \code{rfe}, select features by recursive feature elimination on the
+training samples (see below).
 \item Grow a random forest of \code{n_trees} regression trees of the state on
-the features of the other samples, and predict the held-out samples'
-states, to see how well the features track time.
+the (selected) features of the training samples, and predict the
+held-out samples' states, to see how well the features track time.
 \item Rank the features by the forest's importance and keep the
 \code{n_features} most important.
 \item Summarize those features' relative abundances (of the whole table,
@@ -161,24 +188,32 @@ state is over every sample at that state, whatever its group.
 group at each state, as \code{\link[=volatility]{volatility()}} computes them.
 }
 
+\strong{Recursive feature elimination} is scikit-learn's \code{RFECV} as q2 runs
+it. The training samples are split, in order and without shuffling (they
+are already in random order), into \code{rfe_folds} folds. In each, a forest
+is grown on the other folds' samples and scored (\eqn{R^2}) on the fold;
+the \code{rfe_step} least important features (impurity importance; ties in
+the table's feature order) are dropped, and so on down to one feature.
+The number of features with the largest total score over the folds (the
+fewest, on ties) is kept: the same elimination on all the training
+samples, stopped there, selects them. Every forest has the settings of
+the final one. This grows about \eqn{(}\code{rfe_folds} \eqn{+ 1) / }
+\code{rfe_step} forests (126 by default), so it takes about that many times
+as long as \code{rfe = FALSE}.
+
 \strong{Differences from q2-longitudinal}:
 \itemize{
-\item \strong{No recursive feature elimination.} q2 first runs scikit-learn's
-\code{RFECV} (cross-validated recursive feature elimination) and keeps only
-the features it selects, often a handful, so its importances are
-those of a forest on those features alone; ecodive ranks every feature
-by a forest on all of them. Its top features are much the same, and
-\code{n_features} sets how many to keep.
 \item \strong{Random draws} (the split, the forest and the intervals) are
 ecodive's own seeded PCG streams, not numpy's or JavaScript's, so they
 differ from q2's as one \code{random_state} does from another. Given q2's
-split and \code{random_state}, the forest and its importances are the same
-as q2's (see \code{\link[=random_forest]{random_forest()}}).
+split and \code{random_state}, the selected features, the forest and its
+importances are the same as q2's (see \code{\link[=random_forest]{random_forest()}}).
 \item \strong{The forest's table} is relative abundances by default; q2 grows it
 on the table it is given (usually counts): use \code{norm = 'none'} for that.
 \item \strong{Features absent from every training sample} are kept, with
-importance 0; q2 drops them. Ties in importance are ranked in the
-table's feature order.
+importance 0 (so recursive feature elimination drops them first, but
+they count towards the fraction \code{rfe_step}); q2 drops them. Ties in
+importance are ranked in the table's feature order.
 \item \strong{\code{global_cv}} is the standard deviation over the mean, as q2's
 "Global CV (\%)" column, which despite its name is not multiplied by
 100.

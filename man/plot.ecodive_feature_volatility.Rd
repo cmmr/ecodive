@@ -59,5 +59,5 @@ limits.
                              n_trees = 20, cpus = 1)
 
     plot(fv)
-    plot(fv, feature = 'F3', spaghetti = FALSE)
+    plot(fv, feature = fv$features$feature[[1]], spaghetti = FALSE, limits = FALSE)
 }

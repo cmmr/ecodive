@@ -25,16 +25,39 @@ for (p in E$perm)
 
 
 #--------------------------------------------------
-# q2's pipeline (without RFE), given its random_state: the same split,
-# forest importances and held-out predictions, exactly; the same top
-# features and statistics.
+# q2's pipeline, with and without RFE, given its random_state: the same
+# split, RFECV scores and selection, forest importances and held-out
+# predictions, exactly; the same top features and statistics.
 #--------------------------------------------------
 for (cs in E$cases) {
 
-  info <- paste('random_state', cs$random_state)
+  rfe  <- !is.null(cs$rfe)
+  info <- paste('random_state', cs$random_state, if (rfe) 'RFE')
   fv <- fv_details(cnt, 'subject', 'state', 'group', data = meta, n_features = Inf,
-                   norm = 'none', numpy_random_state = cs$random_state, cpus = 1L)
+                   norm = 'none', rfe = rfe, numpy_random_state = cs$random_state, cpus = 1L)
   smp <- rownames(cnt)
+
+  # RFECV: its scores for each number of features, each fold's exactly, and
+  # the features it keeps (ranking 1).
+  if (rfe) {
+    expect_identical(fv$rfe$ranking, cs$rfe$ranking, info = info)
+    sc <- fv$rfe$scores
+    expect_identical(names(sc), names(cs$rfe$scores), info = info)
+    expect_identical(sc$n_features, cs$rfe$scores$n_features, info = info)
+    for (k in names(sc)[-1])
+      expect_equal(sc[[k]], cs$rfe$scores[[k]], tolerance = 1e-12, info = paste(info, k))
+    expect_identical(sort(fv$features$feature), names(which(cs$rfe$ranking == 1L)), info = info)
+    imp <- fv$forest$importance
+    expect_true(all(imp$impurity[cs$rfe$ranking[imp$feature] > 1L] == 0), info = info)
+    # The same from a sparse table (a CSC forest, as scikit-learn grows from q2's).
+    fs <- fv_details(cnt, 'subject', 'state', 'group', data = meta, n_features = Inf,
+                     norm = 'none', numpy_random_state = cs$random_state, sparse = TRUE, cpus = 2L)
+    expect_identical(fs$rfe, fv$rfe, info = info)
+    expect_identical(fs$features, fv$features, info = info)
+  }
+  else {
+    expect_null(fv$rfe)
+  }
 
   expect_identical(smp[fv$split$train], cs$train, info = info)
   expect_identical(smp[fv$split$test], cs$test, info = info)
@@ -62,7 +85,7 @@ for (cs in E$cases) {
     ref <- cs[[paste0('stats_', k)]]
     res <- if (k == 'all') ft else
       fv_details(cnt, 'subject', 'state', 'group', data = meta, n_features = 10,
-                 norm = 'none', numpy_random_state = cs$random_state, cpus = 1L)$features
+                 norm = 'none', rfe = rfe, numpy_random_state = cs$random_state, cpus = 1L)$features
     expect_identical(names(res), names(ref), info = info)
     expect_identical(res$feature, ref$feature, info = paste(info, k))
     for (col in names(ref)[-1])
@@ -70,20 +93,22 @@ for (cs in E$cases) {
   }
 }
 
-# q2's actual pipeline also runs RFECV: the features it keeps are among the
-# 10 most important of the same forest on every feature.
+# RFECV keeps features that are among the most important of a forest on
+# every feature.
 fv3 <- fv_details(cnt, 'subject', 'state', data = meta, n_features = 10, norm = 'none',
-                  numpy_random_state = 3L, cpus = 1L)
-expect_true(all(names(E$rfe) %in% fv3$features$feature))
+                  rfe = FALSE, numpy_random_state = 3L, cpus = 1L)
+expect_true(all(names(which(E$cases[['rfe-rs3']]$rfe$ranking == 1L)) %in% fv3$features$feature))
 
 
 
 #--------------------------------------------------
-# The default (PCG) result.
+# The PCG result, without RFE.
 #--------------------------------------------------
-fv <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_features = 8, cpus = 1L)
+fv <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_features = 8,
+                         rfe = FALSE, cpus = 1L)
 expect_inherits(fv, 'ecodive_feature_volatility')
-expect_identical(names(fv), c('features', 'means', 'abundances', 'samples', 'predictions', 'performance', 'forest'))
+expect_identical(names(fv), c('features', 'means', 'abundances', 'samples', 'predictions', 'performance', 'rfe', 'forest'))
+expect_null(fv$rfe)
 expect_identical(names(fv$features), c(
   'feature', 'importance', 'cumulative_avg_decrease', 'cumulative_avg_increase', 'net_avg_change',
   'global_variance', 'global_mean', 'global_median', 'global_sd', 'global_cv' ))
@@ -186,13 +211,13 @@ expect_identical(attr(fv, 'display')$legend, 'group')
 # Determinism: any cpus, input types and seeds.
 #--------------------------------------------------
 for (cpus in 2:max_cpus)
-  expect_identical(feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_features = 8, cpus = cpus),
+  expect_identical(feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_features = 8, rfe = FALSE, cpus = cpus),
                    fv, info = cpus)
 fp <- feature_volatility(cnt, 'subject', 'state', data = meta, n_features = 5,
-                         importance = 'permutation', n_trees = 30, cpus = 1L)
+                         importance = 'permutation', n_trees = 30, rfe = FALSE, cpus = 1L)
 for (cpus in 2:max_cpus)
   expect_identical(feature_volatility(cnt, 'subject', 'state', data = meta, n_features = 5,
-                                      importance = 'permutation', n_trees = 30, cpus = cpus),
+                                      importance = 'permutation', n_trees = 30, rfe = FALSE, cpus = cpus),
                    fp, info = cpus)
 expect_identical(fp$features$importance, fp$forest$importance$permutation[1:5])
 expect_false(is.unsorted(-fp$forest$importance$permutation))
@@ -200,14 +225,14 @@ expect_false(is.unsorted(-fp$forest$importance$permutation))
 # The same samples and abundances from a transposed table; dense tables
 # give identical results.
 ft <- feature_volatility(t(cnt), 'subject', 'state', 'group', data = meta, margin = 2L,
-                         n_features = 8, cpus = 1L)
+                         n_features = 8, rfe = FALSE, cpus = 1L)
 expect_identical(ft, fv)
 st <- structure(
   list(i = row(cnt)[cnt > 0], j = col(cnt)[cnt > 0], v = as.double(cnt[cnt > 0]),
        nrow = nrow(cnt), ncol = ncol(cnt), dimnames = dimnames(cnt)),
   class = 'simple_triplet_matrix' )
-fs <- feature_volatility(st, 'subject', 'state', 'group', data = meta, n_features = 25, cpus = 2L)
-fd <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_features = 25, cpus = 2L)
+fs <- feature_volatility(st, 'subject', 'state', 'group', data = meta, n_features = 25, rfe = FALSE, cpus = 2L)
+fd <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_features = 25, rfe = FALSE, cpus = 2L)
 expect_identical(fs$samples, fd$samples)
 o <- match(fd$features$feature, fs$features$feature)
 expect_equal(fs$abundances[, o], fd$abundances, tolerance = 1e-15)
@@ -215,7 +240,7 @@ expect_equal(fs$features[o, -2], fd$features[, -2], tolerance = 1e-15, check.att
 expect_true(cor(fs$features$importance[o], fd$features$importance) > 0.99)
 
 # Another seed: another split.
-f7 <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_features = 8, seed = 7L, cpus = 1L)
+f7 <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_features = 8, seed = 7L, rfe = FALSE, cpus = 1L)
 expect_false(identical(f7$samples$set, fv$samples$set))
 expect_identical(sum(f7$samples$set == 'test'), 16L)
 
@@ -226,7 +251,7 @@ expect_identical(sum(f7$samples$set == 'test'), 16L)
 #--------------------------------------------------
 # No hold-out: every sample trains; accuracy only out of bag.
 f0 <- feature_volatility(cnt, 'subject', 'state', data = meta, test_size = 0, n_features = Inf,
-                         n_trees = 20, cpus = 1L)
+                         n_trees = 20, rfe = FALSE, cpus = 1L)
 expect_null(f0$predictions)
 expect_true(all(f0$samples$set == 'train'))
 expect_true(all(is.na(f0$performance[1:5])) && is.finite(f0$performance[['oob_r_squared']]))
@@ -239,21 +264,21 @@ expect_null(attr(f0, 'display')$legend)
 
 # n_features larger than the table; no subjects; states and groups as vectors.
 f1 <- feature_volatility(cnt, states = meta$state, groups = meta$group, n_features = 1000,
-                         n_trees = 20, cpus = 1L)
+                         n_trees = 20, rfe = FALSE, cpus = 1L)
 expect_identical(nrow(f1$features), 25L)
 expect_identical(names(f1$samples), c('sample', 'group', 'state', 'set'))
 expect_null(attr(f1, 'display')$xlab)
 
 # Unnamed samples and features.
 cu <- unname(cnt)
-f2 <- feature_volatility(cu, states = meta$state, n_features = 3, n_trees = 20, cpus = 1L)
+f2 <- feature_volatility(cu, states = meta$state, n_features = 3, n_trees = 20, rfe = FALSE, cpus = 1L)
 expect_identical(f2$samples$sample, as.character(seq_len(nrow(cnt))))
 expect_true(all(grepl('^F[0-9]+$', f2$features$feature)))
 expect_equal(unname(f2$abundances), unname(rel[, as.integer(sub('F', '', f2$features$feature))]),
              tolerance = 1e-14)
 
 # Forest settings through `...`; norm.
-f4 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_features = 5, n_trees = 20,
+f4 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_features = 5, n_trees = 20, rfe = FALSE,
                          max_features = 'sqrt', min_samples_leaf = 2L, n_folds = 3L,
                          keep_forest = FALSE, norm = 'clr', pseudocount = 0.5, cpus = 1L)
 expect_identical(attr(f4$forest, 'max_features'), 5L)
@@ -264,10 +289,68 @@ expect_true(is.finite(f4$forest$performance[['r_squared']]))
 expect_equal(f4$abundances, rel[, f4$features$feature], tolerance = 1e-14)
 
 # Interval settings.
-f5 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_features = 2, n_trees = 20,
+f5 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_features = 2, n_trees = 20, rfe = FALSE,
                          conf_level = 0.8, n_resamples = 50L, cpus = 1L)
 expect_identical(attr(f5, 'conf_level'), 0.8)
 expect_identical(attr(f5, 'n_resamples'), 50L)
+
+
+
+#--------------------------------------------------
+# Recursive feature elimination (PCG).
+#--------------------------------------------------
+fr <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_trees = 30, cpus = 1L)
+rk <- fr$rfe$ranking
+expect_identical(names(rk), colnames(cnt))
+sel <- names(which(rk == 1L))
+expect_true(all(fr$features$feature %in% sel))
+expect_identical(nrow(fr$features), length(sel))
+expect_identical(sort(unname(rk)), sort(c(rep(1L, length(sel)), seq_len(25L - length(sel)) + 1L)))
+# One feature dropped at each round (int(0.05 * 25) is 1), so every count is tried.
+sc <- fr$rfe$scores
+expect_identical(sc$n_features, 1:25)
+expect_identical(names(sc), c('n_features', 'mean', 'sd', paste0('fold_', 1:5)))
+f5m <- as.matrix(sc[, paste0('fold_', 1:5)])
+expect_equal(sc$mean, rowMeans(f5m), tolerance = 1e-14)
+expect_equal(sc$sd, sqrt(rowMeans((f5m - rowMeans(f5m))^2)), tolerance = 1e-12)
+expect_true(all(f5m <= 1))
+# The kept count has the largest total score, and no fewer features as large.
+tot <- rowSums(f5m)
+ns  <- length(sel)
+expect_true(tot[ns] >= max(tot) - 1e-12)
+expect_true(all(tot[seq_len(ns - 1L)] < tot[ns] + 1e-12))
+# The forest uses the selected features only.
+imp <- fr$forest$importance
+expect_true(all(imp$impurity[!imp$feature %in% sel] == 0))
+expect_equal(sum(imp$impurity), 1, tolerance = 1e-12)
+expect_identical(fr$features$importance, imp$impurity[match(fr$features$feature, imp$feature)])
+expect_true(all(predict(fr$forest, cnt, cpus = 1L) > -Inf))
+expect_true(any(grepl('Recursive feature elimination kept', capture.output(print(fr)))))
+for (cpus in 2:max_cpus)
+  expect_identical(feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_trees = 30, cpus = cpus),
+                   fr, info = cpus)
+expect_identical(attr(fr$forest, 'max_features'), length(sel))
+
+# Steps as counts or fractions: 25, 20, ..., 5, then 1.
+fr5 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_trees = 10, rfe_step = 5,
+                          rfe_folds = 3L, cpus = 1L)
+expect_identical(fr5$rfe$scores$n_features, c(1L, 5L, 10L, 15L, 20L, 25L))
+expect_identical(names(fr5$rfe$scores), c('n_features', 'mean', 'sd', paste0('fold_', 1:3)))
+expect_true(sum(fr5$rfe$ranking == 1L) %in% c(1L, 5L, 10L, 15L, 20L, 25L))
+fr2 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_trees = 10, rfe_step = 0.2,
+                          rfe_folds = 3L, cpus = 1L)
+expect_identical(fr2$rfe$scores$n_features, fr5$rfe$scores$n_features)
+expect_identical(fr2$rfe, fr5$rfe)
+
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe = NA), '`rfe` must be TRUE or FALSE')
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_step = 0), '`rfe_step`')
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_step = 1.5), '`rfe_step`')
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_folds = 1), '`rfe_folds`')
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_folds = 2.5), '`rfe_folds`')
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_folds = 40, n_trees = 5),
+             'at least two samples in each of its 40 folds')
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, max_features = c(2, 5), n_trees = 5),
+             'must be single values')
 
 
 

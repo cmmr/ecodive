@@ -1,2 +1,0 @@
-importance_features	F01 F03 F02 F06 F21 F22 F14
-importance	0x1.13252c14c5077p-1 0x1.f6eb6706e84a5p-4 0x1.96b3c576b06bfp-4 0x1.6450910b30bc0p-4 0x1.ffc7c773abdd4p-5 0x1.9b48dda111b4ap-5 0x1.4ebd1e8d5f136p-5

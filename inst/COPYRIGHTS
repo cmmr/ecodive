@@ -251,7 +251,11 @@ Comment: Ported from scikit-learn 1.9.1: the SMACOF iteration (metric and
    (sklearn/ensemble/_forest.py, _bootstrap.py, _base.py,
    sklearn/utils/class_weight.py); R/random_forest.r follows StratifiedKFold
    and KFold (sklearn/model_selection/_split.py) and roc_curve() and auc()
-   (sklearn/metrics/_ranking.py). The
+   (sklearn/metrics/_ranking.py), and its rf_rfe() (feature_volatility()'s
+   recursive feature elimination) ports RFE and RFECV
+   (sklearn/feature_selection/_rfe.py) with r2_score()
+   (sklearn/metrics/_regression.py); R/feature_volatility.r follows
+   train_test_split() and ShuffleSplit (sklearn/model_selection/_split.py). The
    R files follow the same algorithms. The rest of these files is Copyright
    2026 ecodive authors, under the MIT license above.
 License:
@@ -1596,7 +1600,7 @@ Comment: first_differences(), first_distances(), volatility() and nmit() in
  q2_longitudinal/_longitudinal.py and _utilities.py), with the
  train/test workflow of q2-sample-classifier 2026.10.0's regress_samples()
  (github.com/qiime2/q2-sample-classifier, BSD-3-Clause, same copyright),
- without its recursive feature elimination. The chart's confidence intervals follow Vega's
+ including its recursive feature elimination (_rfecv_feature_selection()). The chart's confidence intervals follow Vega's
  bootstrapCI() (vega-statistics, BSD-3-Clause, University of Washington
  Interactive Data Lab). nmit()'s correlations are computed as pandas 2.3.3
  (BSD-3-Clause) computes them in DataFrame.corr(), libalgos.nancorr() and

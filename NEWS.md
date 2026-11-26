@@ -1035,14 +1035,16 @@
     `permanova()` on the result is NMIT's test.
   * New `feature_volatility()` runs q2's feature-volatility pipeline: a
     `random_forest()` regression of the state on the features, on a random
-    80% of the samples (`test_size`), with its accuracy on the rest; the
-    `n_features` most important features with q2's statistics (cumulative
-    increase and decrease of the mean between states, net change, global
-    mean, median, variance, SD and CV); and each one's volatility chart
-    numbers. q2's recursive feature elimination is left out. Given q2's
-    `random_state`, the split, importances and predictions match q2's
-    exactly, and the statistics to about 1e-15. `plot()` draws the
-    importances beside the chosen feature's volatility chart.
+    80% of the samples (`test_size`), with its accuracy on the rest, after
+    q2's recursive feature elimination (scikit-learn's RFECV; `rfe`,
+    `rfe_step`, `rfe_folds`); the `n_features` most important selected
+    features with q2's statistics (cumulative increase and decrease of the
+    mean between states, net change, global mean, median, variance, SD and
+    CV); and each one's volatility chart numbers. Given q2's
+    `random_state`, the split, RFECV's scores and selection, importances
+    and predictions match q2's exactly, and the statistics to about 1e-15.
+    `plot()` draws the importances beside the chosen feature's volatility
+    chart.
 
 * New `batch_mmuphin()` and `batch_combat()` remove batch effects (study,
   sequencing run, extraction kit) from a table, keeping the effects of the

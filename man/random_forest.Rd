@@ -280,7 +280,8 @@ a fold's training samples).
 \item \strong{Float32:} values are rounded to single precision before growing and
 predicting, as scikit-learn does; values that differ only beyond that
 (a relative 6e-8) are ties.
-\item \strong{Not ported:} q2's recursive feature elimination
+\item \strong{Not ported:} q2's recursive feature elimination (but
+\code{\link[=feature_volatility]{feature_volatility()}} has it)
 (\code{optimize_feature_selection}) and randomized parameter search, and
 scikit-learn's \code{bootstrap = FALSE}, \code{max_leaf_nodes},
 \code{min_impurity_decrease}, \code{min_weight_fraction_leaf}, \code{ccp_alpha},

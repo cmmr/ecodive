@@ -30,16 +30,17 @@ relative frequencies (feature-table relative-frequency: biom's
 Table.norm(axis='sample')), and its filtering to the importances'
 features.
 
-Two runs with optimize_feature_selection = False (ecodive has no recursive
-feature elimination), random_state 3 and 7, and one with the pipeline's own
-optimize_feature_selection = True (random_state 3), for information.
+Runs with random_state 3 and 7, each with optimize_feature_selection = True
+(the pipeline's own setting: scikit-learn's RFECV) and False. To record
+RFECV's cross-validation scores and ranking, q2-sample-classifier's
+_extract_rfe_scores() is wrapped to keep the RFECV object it is given.
 
 Reads data-raw/expected/feature_volatility/{meta,counts}.csv and writes, to
 the same folder, text files of "key<TAB>values" lines (values separated by
 spaces; real numbers as float.hex()):
 
-  case-rs<random_state>.txt   One run (see feature_volatility.r).
-  rfe.txt                     The RFE run's importances.
+  case-rs<random_state>.txt       One run without RFE (see feature_volatility.r).
+  case-rfe-rs<random_state>.txt   One run with RFE, and RFECV's results.
   perm.txt                    numpy's RandomState(rs).permutation(n).
   versions.txt                Package versions.
 
@@ -113,6 +114,19 @@ vis, su = load("q2_sample_classifier", os.path.join(Q2SC, "q2_sample_classifier"
                ["visuals", "utilities"])
 
 
+# Keep the RFECV object that _rfecv_feature_selection() makes.
+captured = {}
+_extract_rfe_scores = su._extract_rfe_scores
+
+
+def keep_rfecv(rfecv):
+    captured["rfecv"] = rfecv
+    return _extract_rfe_scores(rfecv)
+
+
+su._extract_rfe_scores = keep_rfecv
+
+
 class StateColumn:
     """What _load_data() and _fit_estimator() use of a MetadataColumn."""
 
@@ -181,8 +195,9 @@ def stats_lines(prefix, st):
     return out
 
 
-for rs in [3, 7]:
-    X_train, X_test, y_train, y_test, imp, pred, acc = regress(rs, False)
+for rs, rfe in [(3, False), (7, False), (3, True), (7, True)]:
+    captured.clear()
+    X_train, X_test, y_train, y_test, imp, pred, acc = regress(rs, rfe)
     assert list(X_train.ids()) == list(y_train.index)
     out = [line("random_state", [str(rs)]),
            line("train", list(X_train.ids())),
@@ -194,13 +209,20 @@ for rs in [3, 7]:
                                      "Slope", "Intercept"]].values[0])]
     out += stats_lines("all", stats(imp, "all"))
     out += stats_lines("top10", stats(imp, 10))
-    with open(os.path.join(DIR, "case-rs%d.txt" % rs), "w") as f:
+    if rfe:
+        r = captured["rfecv"]
+        cvr = r.cv_results_
+        dv_names = [str(v) for v in sorted(X_train.ids("observation"))]
+        out += [line("rfe_features", dv_names),
+                line("rfe_ranking", [str(int(v)) for v in r.ranking_]),
+                line("rfe_n_features", [str(int(v)) for v in cvr["n_features"]]),
+                hexline("rfe_mean", cvr["mean_test_score"]),
+                hexline("rfe_sd", cvr["std_test_score"])]
+        for k in range(5):
+            out.append(hexline("rfe_fold_%d" % (k + 1), cvr["split%d_test_score" % k]))
+    name = ("case-rfe-rs%d.txt" if rfe else "case-rs%d.txt") % rs
+    with open(os.path.join(DIR, name), "w") as f:
         f.writelines(out)
-
-_, _, _, _, imp, _, _ = regress(3, True)
-with open(os.path.join(DIR, "rfe.txt"), "w") as f:
-    f.write(line("importance_features", [str(i) for i in imp.index]))
-    f.write(hexline("importance", imp["importance"].values))
 
 with open(os.path.join(DIR, "perm.txt"), "w") as f:
     for rs, n in [(3, 7), (3, 78), (7, 78), (11, 1000), (2147483646, 300)]:

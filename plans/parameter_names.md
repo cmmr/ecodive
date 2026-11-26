@@ -57,6 +57,7 @@ same thing.
 | `matrix_norm` | **(new, 2026-11-24)** the norm of a matrix difference (`'frobenius'`, `'nuclear'`); not `norm`, which normalizes counts | `nmit` |
 | `n_resamples` | **(new, 2026-11-24)** an exact count of bootstrap resamples (`n_<unit>` rule) | `volatility`, `feature_volatility` |
 | `test_size` | **(new, 2026-11-26, item 63)** the fraction of samples held out of a model to measure its accuracy on (scikit-learn's and q2's `test_size`; `0`: none) | `feature_volatility` |
+| `rfe`, `rfe_step`, `rfe_folds` | **(new, 2026-11-26, item 63)** recursive feature elimination with cross-validation (scikit-learn's RFECV; q2's `optimize_feature_selection`): whether to run it, how many features to drop each round (a fraction below 1 or a count; q2's `step`), and its number of folds (q2's `cv`; not `n_folds`, which is the forest's own cross-validation) | `feature_volatility` |
 | `fit` | **(new)** a fitted result given to a post-hoc test | planned `ancombc_*` |
 | `family`, `l1_ratio`, `lambda`, `n_lambdas`, `lambda_min_ratio` | **(new, 2026-11-19)** the outcome distribution (`'gaussian'`, `'binomial'`), elastic-net mixing (1 = lasso), and the penalty path | planned `coda_lasso`, `coda_lasso_pairwise` |
 | `n_folds`, `folds`, `select` | **(new)** cross-validation: a fold count or a per-sample fold vector (overrides `seed`), and which λ to report (`'min'`, `'1se'`) | `random_forest` (`n_folds`, `folds`; exists, 2026-11-25); planned `coda_lasso`, `coda_lasso_pairwise` |

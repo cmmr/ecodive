@@ -464,7 +464,8 @@ Made while implementing:
 `feature_volatility()`, 2026-11-26. Asked of the user at the start (one
 round):
 
-- **Workflow: q2's 80/20 hold-out, without RFE.** q2's pipeline runs
+- **Workflow: q2's 80/20 hold-out, without RFE** (RFE was added on the
+  user's follow-up request the same day: see "RFE added" below). q2's pipeline runs
   `regress_samples`: `train_test_split(test_size = 0.2)`, RFECV on the
   training samples, a forest on the features RFECV keeps, and the accuracy
   of the held-out predictions. ecodive keeps the hold-out (`test_size =
@@ -561,6 +562,57 @@ Made while implementing:
   NumPy 2.5.5, pandas 2.3.3, SciPy 1.18.1, biom-format 2.1.18 and
   statsmodels 0.14.6.
 
+
+### RFE added (item 63 follow-up, the user's request, 2026-11-26)
+
+After the first push, the user asked for q2's recursive feature
+elimination. Made while implementing:
+
+- **On by default:** `rfe = TRUE`, as q2's pipeline (which hard-codes
+  `optimize_feature_selection = True`), with `rfe_step = 0.05` and
+  `rfe_folds = 5L` (q2's `step` and `cv`); `rfe = FALSE` gives the
+  forest on every feature. Not `n_folds`, which `...` passes to the
+  final forest's own cross-validation.
+- **The port:** `rf_rfe()` in `R/random_forest.r` follows scikit-learn
+  1.9.1's `RFE._fit()` and `RFECV.fit()`: `int(max(1, step * p))`
+  features dropped per round, by squared impurity importance in a stable
+  order (scikit-learn's `argsort(kind = "stable")`: ties by feature
+  order); scores by `r2_score()` (numpy's pairwise sums through
+  `np_sum()`; 0/1 for a constant fold, as `force_finite`); KFold over the
+  training rows in their (already shuffled) order without shuffling; the
+  folds' scores added in fold order and the fewest features among ties
+  chosen (argmax of the reversed sums); then RFE on all the training rows
+  down to that number. It is reachable only through `rf_run(rfe = )`, so
+  `random_forest()` itself is unchanged.
+- **Forests on a subset of features** (`rf_grow(sel = )`): the table's
+  columns are copied (`rf_cols()`, dense or CSC), the forest grown on
+  them with `max_features` resolved for the subset (`rf_settings()` per
+  size), its impurity importances computed on the subset (normalized over
+  its features, as scikit-learn's, then zero elsewhere), and its trees'
+  feature numbers mapped back to the table's, so that OOB, held-out
+  predictions, permutation importance and `predict()` read the full table
+  (normalized over every feature, as in training).
+- **Streams:** in PCG mode, RFE's forests use streams from
+  2^58 + (f 2^20 + r) 2^32 for fold f (0: all training rows) and round r;
+  in numpy mode every forest uses the same tree seeds, as scikit-learn's
+  clones of one estimator do.
+- **Result:** `rfe` = list(`ranking` (named by feature; 1 = selected),
+  `scores` (`n_features`, `mean`, `sd` with divisor n, `fold_1` ...)),
+  `NULL` without RFE. `features` holds the selected features only (q2's
+  importances cover only those), up to `n_features`; the forest's
+  importance table keeps every feature, 0 for those not selected.
+  `print()` adds "Recursive feature elimination kept k of p features (CV
+  R^2 ...)".
+- **Errors:** an RFE fold with fewer than two samples (scikit-learn's
+  `r2_score()` would give NaN); a grid of `max_features` or
+  `min_samples_leaf` with RFE; `rfe_folds` above 63 (the stream layout).
+- **Fixtures:** `feature_volatility.py` now runs q2's pipeline with and
+  without RFE for random_state 3 and 7 (`case-rfe-rs*.txt`), wrapping
+  `_extract_rfe_scores()` to keep the RFECV object for its `ranking_` and
+  `cv_results_`; `rfe.txt` is gone.
+- **Credits:** the scikit-learn stanza of `inst/COPYRIGHTS` names RFE,
+  RFECV, `r2_score()` and `train_test_split()`; the QIIME 2 stanza names
+  `_rfecv_feature_selection()`.
 
 ## Outcome (item 63, from the implementing session's final report)
 

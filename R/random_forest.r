@@ -8,7 +8,8 @@
 # summary and ROC averages) follows q2-sample-classifier 2026.10.0 (BSD-3:
 # Copyright (c) 2017-2026, QIIME 2 development team; see inst/COPYRIGHTS),
 # and the folds and roc_curve() follow scikit-learn's StratifiedKFold,
-# KFold and sklearn/metrics/_ranking.py.
+# KFold and sklearn/metrics/_ranking.py. rf_rfe(), for feature_volatility(),
+# ports scikit-learn's RFE and RFECV (sklearn/feature_selection/_rfe.py).
 
 
 #' Random forests
@@ -206,7 +207,8 @@
 #' * **Float32:** values are rounded to single precision before growing and
 #'   predicting, as scikit-learn does; values that differ only beyond that
 #'   (a relative 6e-8) are ties.
-#' * **Not ported:** q2's recursive feature elimination
+#' * **Not ported:** q2's recursive feature elimination (but
+#'   [feature_volatility()] has it)
 #'   (`optimize_feature_selection`) and randomized parameter search, and
 #'   scikit-learn's `bootstrap = FALSE`, `max_leaf_nodes`,
 #'   `min_impurity_decrease`, `min_weight_fraction_leaf`, `ccp_alpha`,
@@ -342,8 +344,11 @@ random_forest_details <- function (
 # train: NULL, or the 1-based positions of the samples to train on, in that
 # order (feature_volatility()'s split); the others' predictions by the
 # full-data forest are then returned as `holdout`, list(index, value).
+# rfe: NULL, or list(step, n_folds): first select features by scikit-learn's
+# RFECV (rf_rfe()), then grow every forest on those features only; the
+# selection is returned as `rfe`.
 rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FALSE,
-                    train = NULL) {
+                    train = NULL, rfe = NULL) {
 
   with(env, {
     validate_counts()
@@ -500,6 +505,21 @@ rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FAL
     np_seeds <- as.integer(.Call(C_rf_rng_test, 3L, as.double(numpy_random_state), 0, set$n_trees))
 
 
+  # Recursive feature elimination: the forests then use features `sel` only.
+  sel <- NULL
+  rfe_res <- NULL
+  if (!is.null(rfe)) {
+    if (cls) stop('Recursive feature elimination is for regression only.', call. = FALSE) # nocov
+    if (nrow(set$grid) > 1)
+      stop('With recursive feature elimination, `max_features` and `min_samples_leaf` ',
+           'must be single values.', call. = FALSE)
+    rfe_res <- rf_rfe(x, rows, ycode, env, seed, np_seeds, cpus, rfe$step, rfe$n_folds)
+    sel <- rfe_res$support
+    if (length(sel) < p) set <- rf_settings(env, length(sel), cls, classes)
+    else sel <- NULL
+  }
+
+
   # Grow the forests: the full data (set 0), then each fold's training set.
   grid  <- set$grid
   sets  <- c(list(rows), if (n_folds >= 2) lapply(seq_len(n_folds), function (f) rows[fold != f]))
@@ -512,7 +532,7 @@ rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FAL
     best <- NULL; best_err <- Inf
     for (g in seq_len(nrow(grid))) {
       fr  <- rf_grow(x, sets[[s]], ycode[pos[[s]]], k, set, grid[g, ], seed,
-                     (s - 1) * 2^32, np_seeds, cpus, classes)
+                     (s - 1) * 2^32, np_seeds, cpus, classes, sel = sel, p = p)
       err <- NA_real_
       if (nrow(grid) > 1 || s == 1) {
         oob <- rf_oob(fr, x, sets[[s]], ycode[pos[[s]]], k, cpus)
@@ -553,13 +573,13 @@ rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FAL
       te <- which(fold == f)
       pr <- .Call(C_rf_predict, forests[[f + 1]]$forest, x, rows[te], FALSE, cpus)
       cvv[, te] <- pr$value
-      imp_cv[, f] <- .Call(C_rf_importance, forests[[f + 1]]$forest, p)
+      imp_cv[, f] <- rf_importance(forests[[f + 1]], p)
     }
   }
 
 
   # Importances.
-  imp_full <- .Call(C_rf_importance, full$forest, p)
+  imp_full <- rf_importance(full, p)
   imp <- data.frame(
     feature          = feats,
     impurity         = imp_full,
@@ -595,6 +615,10 @@ rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FAL
       index = te,
       value = if (length(te)) as.vector(.Call(C_rf_predict, full$forest, x, te - 1L, FALSE, cpus)$value)
               else numeric(0) )
+  }
+  if (!is.null(rfe_res)) {
+    rfe_res$support <- NULL
+    res$rfe <- rfe_res
   }
   if (details) {
     res$forests <- lapply(forests, function (fr) fr$forest)
@@ -796,7 +820,23 @@ rf_folds <- function (yv, cls, n_folds, seed) {
 
 
 # Grows one forest. Returns list(forest, rows).
-rf_grow <- function (x, rows, y, k, set, g, seed, stream_base, np_seeds, cpus, classes) {
+rf_grow <- function (x, rows, y, k, set, g, seed, stream_base, np_seeds, cpus, classes,
+                     sel = NULL, p = NULL) {
+
+  # On features `sel` (1-based) of the p only: grow on those columns, then
+  # renumber the trees' features to the table's, so that predictions read
+  # the full table; the impurity importances are the subset forest's
+  # (normalized over its features, as scikit-learn's), zero elsewhere.
+  if (!is.null(sel)) {
+    fr <- rf_grow(rf_cols(x, sel), rows, y, k, set, g, seed, stream_base, np_seeds, cpus, classes)
+    fr$imp <- numeric(p)
+    fr$imp[sel] <- .Call(C_rf_importance, fr$forest, length(sel))
+    f  <- fr$forest$feature
+    nl <- f >= 0L
+    f[nl] <- as.integer(sel[f[nl] + 1L] - 1L)
+    fr$forest$feature <- f
+    return (fr)
+  }
 
   cw <- NULL
   if (!is.null(set$class_weight) && !set$balanced_sub) {
@@ -833,6 +873,138 @@ rf_grow <- function (x, rows, y, k, set, g, seed, stream_base, np_seeds, cpus, c
 # x n), n_trees, pred (class code or value; NA where never OOB), error
 # (misclassification rate or MSE over the rows with OOB predictions),
 # score (accuracy or R^2)).
+# A grown forest's impurity importances over the p features.
+rf_importance <- function (fr, p) {
+  if (is.null(fr$imp)) .Call(C_rf_importance, fr$forest, p) else fr$imp
+}
+
+
+# Columns `j` (1-based, increasing) of a table as rf_table() gives it.
+rf_cols <- function (x, j) {
+  if (is.matrix(x)) return (x[, j, drop = FALSE])
+  from <- x$p[j]
+  len  <- x$p[j + 1L] - from
+  idx  <- rep(from, len) + sequence(len)
+  list(i = x$i[idx], p = c(0L, cumsum(len)), x = x$x[idx], n = x$n)
+}
+
+
+# The number of features of a table as rf_table() gives it.
+rf_ncol <- function (x) if (is.matrix(x)) ncol(x) else length(x$p) - 1L
+
+
+#------------------------------------------------------------------------------
+# Recursive feature elimination with cross-validation: a port of
+# scikit-learn 1.9.1's RFECV (sklearn/feature_selection/_rfe.py, BSD-3) as
+# q2-sample-classifier's regressors call it (RFECV(estimator, step, cv),
+# scoring by the estimator's R^2), for regression forests.
+#
+#   step     A fraction of the features (below 1) or a count, removed at
+#            each round: int(max(1, step * p)) for a fraction.
+#   n_folds  KFold(n_folds) over `rows` in their order, without shuffling.
+#
+# In each fold, RFE on the training rows: grow a forest on the remaining
+# features, score it (R^2) on the fold's test rows, then drop the `step`
+# features of smallest impurity importance (squared, as scikit-learn's
+# _get_feature_importances(transform_func = "square"), in a stable order:
+# ties go by feature order), down to one feature, which is also scored. The
+# chosen number of features is the one with the largest sum of scores over
+# folds (the fewest on ties); RFE on all `rows` down to that number gives
+# the features kept.
+#
+# Every forest is grown as rf_grow() grows it: with numpy's tree seeds in
+# numpy mode (the same seeds for each, as scikit-learn's clones), else PCG
+# streams from 2^58 + (f 2^20 + r) 2^32 for fold f (0: all rows) and round r.
+#
+# Returns list(support (the kept features, 1-based), ranking (1 for kept,
+# then 2, 3, ... in reverse order of elimination), scores (a data frame of
+# n_features, mean and sd (divisor n, numpy's std) of the folds' R^2, and
+# one column per fold, by increasing n_features)).
+#------------------------------------------------------------------------------
+rf_rfe <- function (x, rows, y, env, seed, np_seeds, cpus, step, n_folds) {
+
+  p  <- rf_ncol(x)
+  n  <- length(rows)
+  st <- if (step < 1) as.integer(max(1, floor(step * p))) else as.integer(step)
+
+  # KFold(n_folds) without shuffling: the first n %% n_folds folds have one more.
+  size  <- rep(n %/% n_folds, n_folds)
+  size[seq_len(n %% n_folds)] <- size[seq_len(n %% n_folds)] + 1L
+  fold  <- rep(seq_len(n_folds), size)
+  if (any(size < 2))
+    stop(sprintf(paste0(
+      'Recursive feature elimination needs at least two samples in each of its %d folds, ',
+      'but the training set has %d samples.'), n_folds, n), call. = FALSE)
+
+  np_sum <- function (v) .Call(C_rf_rng_test, 4L, 0, as.double(v), 0L)
+  r2 <- function (obs, pred) {     # sklearn's r2_score()
+    num <- np_sum((obs - pred)^2)
+    den <- np_sum((obs - np_sum(obs) / length(obs))^2)
+    if (den != 0) return (1 - num / den)
+    if (num == 0) 1 else 0
+  }
+
+  grow <- function (feats, tr, f, r) {
+    set <- rf_settings(env, length(feats), FALSE, NULL)
+    rf_grow(x, rows[tr], y[tr], 0L, set, set$grid[1, ], seed,
+            2^58 + (f * 2^20 + r) * 2^32, np_seeds, cpus, NULL, sel = feats, p = p)
+  }
+
+  # RFE down to n_select features; with `te`, the score of each round's forest.
+  one_rfe <- function (tr, te, n_select, f) {
+    support <- rep(TRUE, p)
+    ranking <- rep(1L, p)
+    n_feat  <- integer(0)
+    scores  <- numeric(0)
+    r <- 0
+    score <- function (fr) {
+      pr <- .Call(C_rf_predict, fr$forest, x, as.integer(rows[te]), FALSE, cpus)
+      r2(y[te], as.vector(pr$value))
+    }
+    while (sum(support) > n_select) {
+      feats <- which(support)
+      fr    <- grow(feats, tr, f, r)
+      if (!is.null(te)) { n_feat <- c(n_feat, length(feats)); scores <- c(scores, score(fr)) }
+      imp   <- fr$imp[feats]
+      drop  <- feats[order(imp * imp, method = 'radix')]
+      drop  <- drop[seq_len(min(st, sum(support) - n_select))]
+      support[drop] <- FALSE
+      ranking[!support] <- ranking[!support] + 1L
+      r <- r + 1
+    }
+    if (!is.null(te)) {
+      feats  <- which(support)
+      n_feat <- c(n_feat, length(feats))
+      scores <- c(scores, score(grow(feats, tr, f, r)))
+    }
+    list(support = which(support), ranking = ranking, n_features = n_feat, scores = scores)
+  }
+
+  cv <- lapply(seq_len(n_folds), function (f)
+    one_rfe(which(fold != f), which(fold == f), 1L, f))
+  sc <- vapply(cv, function (v) v$scores, numeric(length(cv[[1]]$scores)))
+  sc <- matrix(sc, ncol = n_folds)
+  nf <- cv[[1]]$n_features
+
+  # np.sum(scores, axis = 0) adds the folds in order; argmax of the reversed
+  # sums takes the fewest features among ties.
+  tot <- sc[, 1]
+  for (f in seq_len(n_folds)[-1]) tot <- tot + sc[, f]
+  o  <- rev(seq_along(nf))
+  n_select <- nf[o][which.max(tot[o])]
+
+  final <- one_rfe(seq_len(n), NULL, n_select, 0L)
+
+  mu <- rowMeans(sc)
+  scores <- data.frame(
+    n_features = rev(nf), mean = rev(mu),
+    sd = rev(sqrt(rowMeans((sc - mu)^2))) )
+  for (f in seq_len(n_folds)) scores[[paste0('fold_', f)]] <- rev(sc[, f])
+
+  list(support = final$support, ranking = final$ranking, scores = scores)
+}
+
+
 rf_oob <- function (fr, x, rows, y, k, cpus) {
   pr <- .Call(C_rf_predict, fr$forest, x, as.integer(rows), TRUE, cpus)
   ok <- pr$n_trees > 0

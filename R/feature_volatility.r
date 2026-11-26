@@ -3,10 +3,13 @@
 # plot_feature_volatility(), _importance_filtering() and
 # _summarize_feature_stats()) and q2-sample-classifier 2026.10.0
 # (regress_samples(): split_table(), fit_regressor(), the accuracy of the
-# held-out samples' predictions), without the recursive feature elimination.
-# The random forest is random_forest()'s (src/random_forest.c: scikit-learn
-# 1.9.1), and the train/test split is scikit-learn's train_test_split()
-# (ShuffleSplit) with PCG draws.
+# held-out samples' predictions), with its recursive feature elimination
+# (_rfecv_feature_selection()). The random forest is random_forest()'s
+# (src/random_forest.c: scikit-learn 1.9.1), the recursive feature
+# elimination is scikit-learn's RFECV (rf_rfe() in R/random_forest.r), and
+# the train/test split is scikit-learn's train_test_split() (ShuffleSplit)
+# with PCG draws (scikit-learn: BSD-3, Copyright (c) 2007-2026 The
+# scikit-learn developers; see inst/COPYRIGHTS).
 #
 # BSD 3-Clause License
 #
@@ -76,14 +79,27 @@
 #'        must be in the samples' order. Default: `NULL`.
 #'
 #' @param n_features  How many of the most important features to keep
-#'        (q2's `feature_count`): a whole number, or `Inf` for all of them.
-#'        Default: `100`, as q2.
+#'        (q2's `feature_count`), of those recursive feature elimination
+#'        selected: a whole number, or `Inf` for all of them. Default: `100`,
+#'        as q2.
 #'
 #' @param test_size  The fraction of the samples held out of the forest, to
 #'        measure its accuracy on (q2's `test_size`): \eqn{\lceil}
 #'        `test_size` \eqn{\times n \rceil} samples, drawn at random. `0`
 #'        trains on every sample (accuracy then only out of bag). Default:
 #'        `0.2`, as q2.
+#'
+#' @param rfe  Whether to select features first by recursive feature
+#'        elimination with cross-validation (scikit-learn's `RFECV`), as q2's
+#'        pipeline always does (its `optimize_feature_selection`). Default:
+#'        `TRUE`. With `FALSE`, one forest on every feature ranks them all.
+#'
+#' @param rfe_step  How many features recursive feature elimination drops at
+#'        each round: a fraction of the features (below 1) or a count.
+#'        Default: `0.05`, as q2 (5%, at least 1).
+#'
+#' @param rfe_folds  The number of cross-validation folds that choose how
+#'        many features to keep. Default: `5`, as q2.
 #'
 #' @param importance  What ranks the features: `'impurity'` (the forest's
 #'        mean decrease in impurity, scikit-learn's `feature_importances_`,
@@ -141,9 +157,18 @@
 #'     `slope`, `intercept` and `r` (of the predicted on the observed
 #'     states, as q2's scatter plot); and `oob_r_squared`, the forest's out
 #'     of bag. The held-out values are `NA` with `test_size = 0`.}
+#'   \item{`rfe`}{With `rfe = TRUE`, recursive feature elimination's
+#'     results: `ranking`, a named integer vector over every feature (1 for
+#'     the selected ones, then 2, 3, ... for those dropped later to earlier),
+#'     and `scores`, a data frame of each number of features tried
+#'     (`n_features`), the mean and SD (divisor n, as scikit-learn's) of the
+#'     folds' \eqn{R^2}, and each fold's (`fold_1`, ...). `NULL` with
+#'     `rfe = FALSE`.}
 #'   \item{`forest`}{The [random_forest()] result, trained on the training
-#'     samples: every feature's importances, out-of-bag predictions, and
-#'     (with `keep_forest`, the default) the forest for `predict()`.}
+#'     samples (with `rfe`, on the selected features only): every feature's
+#'     importances (0 for the features not selected), out-of-bag
+#'     predictions, and (with `keep_forest`, the default) the forest for
+#'     `predict()`.}
 #' }
 #'
 #' Attributes `conf_level` and `n_resamples` describe the intervals, and
@@ -154,34 +179,44 @@
 #' **The pipeline**, as q2's:
 #' 1. Hold out a random `test_size` of the samples (scikit-learn's
 #'    `train_test_split()`, not stratified).
-#' 2. Grow a random forest of `n_trees` regression trees of the state on
-#'    the features of the other samples, and predict the held-out samples'
-#'    states, to see how well the features track time.
-#' 3. Rank the features by the forest's importance and keep the
+#' 2. With `rfe`, select features by recursive feature elimination on the
+#'    training samples (see below).
+#' 3. Grow a random forest of `n_trees` regression trees of the state on
+#'    the (selected) features of the training samples, and predict the
+#'    held-out samples' states, to see how well the features track time.
+#' 4. Rank the features by the forest's importance and keep the
 #'    `n_features` most important.
-#' 4. Summarize those features' relative abundances (of the whole table,
+#' 5. Summarize those features' relative abundances (of the whole table,
 #'    every sample): q2's `_summarize_feature_stats()`. The mean at each
 #'    state is over every sample at that state, whatever its group.
-#' 5. For the chart, each feature's mean and bootstrap interval for each
+#' 6. For the chart, each feature's mean and bootstrap interval for each
 #'    group at each state, as [volatility()] computes them.
 #'
+#' **Recursive feature elimination** is scikit-learn's `RFECV` as q2 runs
+#' it. The training samples are split, in order and without shuffling (they
+#' are already in random order), into `rfe_folds` folds. In each, a forest
+#' is grown on the other folds' samples and scored (\eqn{R^2}) on the fold;
+#' the `rfe_step` least important features (impurity importance; ties in
+#' the table's feature order) are dropped, and so on down to one feature.
+#' The number of features with the largest total score over the folds (the
+#' fewest, on ties) is kept: the same elimination on all the training
+#' samples, stopped there, selects them. Every forest has the settings of
+#' the final one. This grows about \eqn{(}`rfe_folds` \eqn{+ 1) / }
+#' `rfe_step` forests (126 by default), so it takes about that many times
+#' as long as `rfe = FALSE`.
+#'
 #' **Differences from q2-longitudinal**:
-#' * **No recursive feature elimination.** q2 first runs scikit-learn's
-#'   `RFECV` (cross-validated recursive feature elimination) and keeps only
-#'   the features it selects, often a handful, so its importances are
-#'   those of a forest on those features alone; ecodive ranks every feature
-#'   by a forest on all of them. Its top features are much the same, and
-#'   `n_features` sets how many to keep.
 #' * **Random draws** (the split, the forest and the intervals) are
 #'   ecodive's own seeded PCG streams, not numpy's or JavaScript's, so they
 #'   differ from q2's as one `random_state` does from another. Given q2's
-#'   split and `random_state`, the forest and its importances are the same
-#'   as q2's (see [random_forest()]).
+#'   split and `random_state`, the selected features, the forest and its
+#'   importances are the same as q2's (see [random_forest()]).
 #' * **The forest's table** is relative abundances by default; q2 grows it
 #'   on the table it is given (usually counts): use `norm = 'none'` for that.
 #' * **Features absent from every training sample** are kept, with
-#'   importance 0; q2 drops them. Ties in importance are ranked in the
-#'   table's feature order.
+#'   importance 0 (so recursive feature elimination drops them first, but
+#'   they count towards the fraction `rfe_step`); q2 drops them. Ties in
+#'   importance are ranked in the table's feature order.
 #' * **`global_cv`** is the standard deviation over the mean, as q2's
 #'   "Global CV (%)" column, which despite its name is not multiplied by
 #'   100.
@@ -224,7 +259,8 @@
 #'     plot(fv)
 feature_volatility <- function (
     counts, subjects, states, groups = NULL, data = NULL,
-    n_features = 100L, test_size = 0.2, importance = 'impurity',
+    n_features = 100L, test_size = 0.2, rfe = TRUE, rfe_step = 0.05,
+    rfe_folds = 5L, importance = 'impurity',
     margin = 1L, norm = 'percent', pseudocount = NULL, n_trees = 100L,
     conf_level = 0.95, n_resamples = 1000L, seed = 0L, cpus = n_cpus(),
     ... ) {
@@ -240,18 +276,21 @@ feature_volatility <- function (
 #                        q2-sample-classifier does with that random_state
 #                        (numpy's RandomState permutation, scikit-learn's
 #                        tree seeds) instead of PCG.
+#   sparse               As random_forest_details()'s.
 # Returns the result with `split`: list(train, test), sample positions in
 # the order drawn.
 feature_volatility_details <- function (
     counts, subjects, states, groups = NULL, data = NULL,
-    n_features = 100L, test_size = 0.2, importance = 'impurity',
+    n_features = 100L, test_size = 0.2, rfe = TRUE, rfe_step = 0.05,
+    rfe_folds = 5L, importance = 'impurity',
     margin = 1L, norm = 'percent', pseudocount = NULL, n_trees = 100L,
     conf_level = 0.95, n_resamples = 1000L, seed = 0L, cpus = n_cpus(),
-    ..., numpy_random_state = NULL ) {
+    ..., numpy_random_state = NULL, sparse = NULL ) {
 
   if (missing(subjects)) subjects <- NULL
   if (missing(states))   states   <- NULL
-  fv_run(environment(), list(...), numpy_random_state = numpy_random_state, details = TRUE)
+  fv_run(environment(), list(...), numpy_random_state = numpy_random_state,
+         sparse = sparse, details = TRUE)
 }
 
 
@@ -261,7 +300,7 @@ FV_FOREST_ARGS <- c(
   'criterion', 'max_samples', 'n_folds', 'keep_forest' )
 
 
-fv_run <- function (env, dots, numpy_random_state = NULL, details = FALSE) {
+fv_run <- function (env, dots, numpy_random_state = NULL, sparse = NULL, details = FALSE) {
 
   # The forest's own arguments, before validation changes them.
   rf <- mget(c('counts', 'margin', 'norm', 'pseudocount', 'n_trees', 'importance',
@@ -297,6 +336,18 @@ fv_run <- function (env, dots, numpy_random_state = NULL, details = FALSE) {
   if (!is.numeric(test_size) || length(test_size) != 1 || is.na(test_size) ||
       test_size < 0 || test_size >= 1)
     stop('`test_size` must be a number from 0 up to (not including) 1.', call. = FALSE)
+
+  rfe <- env$rfe
+  if (!is.logical(rfe) || length(rfe) != 1 || is.na(rfe))
+    stop('`rfe` must be TRUE or FALSE.', call. = FALSE)
+  rfe_step <- env$rfe_step
+  if (!is.numeric(rfe_step) || length(rfe_step) != 1 || !is.finite(rfe_step) || rfe_step <= 0 ||
+      (rfe_step >= 1 && rfe_step != floor(rfe_step)))
+    stop('`rfe_step` must be a fraction below 1 or a whole number of features.', call. = FALSE)
+  rfe_folds <- env$rfe_folds
+  if (!is.numeric(rfe_folds) || length(rfe_folds) != 1 || !is.finite(rfe_folds) ||
+      rfe_folds < 2 || rfe_folds != floor(rfe_folds) || rfe_folds > 63)
+    stop('`rfe_folds` must be a whole number from 2 to 63.', call. = FALSE)
 
   imp_type <- env$importance
   if (!is.character(imp_type) || length(imp_type) != 1 || !imp_type %in% c('impurity', 'permutation'))
@@ -361,18 +412,25 @@ fv_run <- function (env, dots, numpy_random_state = NULL, details = FALSE) {
     keep_forest = TRUE ))
   fvals[names(dots)] <- dots
   for (k in names(fvals)) assign(k, fvals[[k]], envir = fenv)
-  fit <- rf_run(fenv, numpy_random_state = numpy_random_state, details = details, train = train)
+  fit <- rf_run(
+    fenv, numpy_random_state = numpy_random_state, sparse = sparse, details = details, train = train,
+    rfe = if (rfe) list(step = rfe_step, n_folds = as.integer(rfe_folds)) )
 
   ho <- fit$holdout
   fit$holdout <- NULL
+  rfe_res <- fit$rfe
+  fit$rfe <- NULL
+  feats <- count_features(counts, margin)
+  if (!is.null(rfe_res)) names(rfe_res$ranking) <- feats
 
 
   #--------------------------------------------------------
   # The most important features.
   #--------------------------------------------------------
   imp   <- fit$importance
+  if (!is.null(rfe_res))
+    imp <- imp[rfe_res$ranking[match(imp$feature, feats)] == 1L, , drop = FALSE]
   top   <- utils::head(imp, min(nrow(imp), n_features))
-  feats <- count_features(counts, margin)
   j     <- match(top$feature, feats)
   rel   <- fv_relative(counts, margin, j, n, cpus)
   dimnames(rel) <- list(smp$labels, top$feature)
@@ -429,7 +487,7 @@ fv_run <- function (env, dots, numpy_random_state = NULL, details = FALSE) {
 
   res <- list(
     features = features, means = means, abundances = rel, samples = samples,
-    predictions = predictions, performance = performance, forest = fit )
+    predictions = predictions, performance = performance, rfe = rfe_res, forest = fit )
   if (details) res$split <- list(train = train, test = test)
 
   res <- structure(
@@ -547,7 +605,7 @@ fv_stats <- function (rel, st) {
 #'                              n_trees = 20, cpus = 1)
 #'
 #'     plot(fv)
-#'     plot(fv, feature = 'F3', spaghetti = FALSE)
+#'     plot(fv, feature = fv$features$feature[[1]], spaghetti = FALSE, limits = FALSE)
 plot.ecodive_feature_volatility <- function (
     x, feature = 1L, n_bars = 20L, spaghetti = TRUE, limits = TRUE,
     legend = 'topright', col = NULL, ... ) {
@@ -652,9 +710,18 @@ print.ecodive_feature_volatility <- function (x, n = NULL, width = NULL, digits 
   cat(sprintf('; OOB R^2 %s\n', plot_num(pf[['oob_r_squared']], digits)))
   ft  <- x$features
   nf  <- nrow(fo$importance)
+  rf  <- x$rfe
+  if (!is.null(rf)) {
+    ns <- sum(rf$ranking == 1L)
+    sc <- rf$scores
+    cat(sprintf(
+      'Recursive feature elimination kept %d of %d features (CV R^2 %s)\n',
+      ns, nf, plot_num(sc$mean[match(ns, sc$n_features)], digits) ))
+    nf <- ns
+  }
   cat(sprintf(
-    'The %d most important of %d features, with relative abundances over time:\n',
-    nrow(ft), nf ))
+    'The %d most important of %d %sfeatures, with relative abundances over time:\n',
+    nrow(ft), nf, if (!is.null(rf)) 'selected ' else '' ))
   head <- sprintf('A data.frame: %d %s %d', nrow(ft), print_sym()$times, length(ft))
   cat(print_table_lines(ft, head, n = n, width = width, digits = digits), sep = '\n')
   cat(sprintf(
