@@ -177,5 +177,6 @@ Mantel, N. (1967). The detection of disease clustering and a generalized
 regression approach. \emph{Cancer Research}, 27(2), 209-220.
 }
 \seealso{
-\code{\link[=mantel_partial]{mantel_partial()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=dist_test]{dist_test()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=mantel_partial]{mantel_partial()}}, \code{\link[=mantel_correlogram]{mantel_correlogram()}}, \code{\link[=permanova]{permanova()}}, \code{\link[=dist_test]{dist_test()}},
+\code{\link[=beta_div]{beta_div()}}
 }

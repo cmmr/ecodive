@@ -341,13 +341,13 @@ can't be mistaken for one another:
 | Unconstrained, distances | ✓ `pcoa`, ✓ `mds`, ✓ `nmds`, ✓ `isomap`, ✓ `tsne`, ✓ `umap`, `diffusion_map`, `pacmap`, `phate`, `largevis` |
 | Unconstrained, counts | ✓ `pca`, ✓ `rpca`, ✓ `rpca_phylo`, ✓ `ca`, `dca`, ✓ `dpcoa` |
 | Unconstrained, several tables or time series | `rpca_joint`, `ctf` |
-| Constrained | ✓ `dbrda`, ✓ `capscale`, ✓ `rda`, ✓ `cca`, `principal_response_curves` |
+| Constrained | ✓ `dbrda`, ✓ `capscale`, ✓ `rda`, ✓ `cca`, ✓ `principal_response_curves` |
 | Discriminant (`*da`) | ✓ `lda`, ✓ `plsda`, ✓ `oplsda`, `splsda`, ✓ `capda` |
 | Fitting onto ordinations | ✓ `envfit`, ✓ `pcoa_biplot` |
 | Comparing ordinations | ✓ `procrustes`, ✓ `procrustes_test`, `coinertia` |
 | Model building | ✓ `varpart`, ✓ `forward_select`, ✓ `bioenv` |
 | Tests of `dm` against one variable (`dist_test`) | ✓ `permanova`, ✓ `permdisp`, ✓ `anosim`, ✓ `mrpp`, ✓ `mantel`, ✓ `mantel_partial`, `mirkat` |
-| Other distance tests and models | `mantel_correlogram`, `mantel_regression` |
+| Other distance tests and models | ✓ `mantel_correlogram`, `mantel_regression` |
 | Composition | ✓ `simper`, ✓ `indicator_species` |
 | Alpha metrics (`alpha_div`) | ✓ `pielou`, ✓ `heip`, ✓ `simpson_evenness`, ✓ `mcintosh_evenness`, ✓ `goods_coverage`, ✓ `hill`, ✓ `renyi`, ✓ `tsallis`, ✓ `dominance`, ✓ `strong`, ✓ `gini` (id `gini`, not `gini_index`: the user's choice, 2026-11-24) |
 | Alpha diversity tests (`alpha_test`) | `alpha_wilcoxon`, `alpha_kruskal`, `alpha_ttest`, `alpha_lm`, `alpha_cor` |

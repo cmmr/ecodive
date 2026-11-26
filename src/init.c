@@ -59,6 +59,7 @@ extern SEXP C_log_ratio(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_log_ratio_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cross_assoc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_mantel_classes(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_moran_perm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_moran_weights(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -77,6 +78,7 @@ extern SEXP C_proportionality(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_oplsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_plsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_prc_perm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa_correct(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa_biplot(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -177,6 +179,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_log_ratio_coords", (DL_FUNC) &C_log_ratio_coords, 6},
   {"C_cross_assoc", (DL_FUNC) &C_cross_assoc, 6},
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
+  {"C_mantel_classes", (DL_FUNC) &C_mantel_classes, 5},
   {"C_moran_perm",    (DL_FUNC) &C_moran_perm,    4},
   {"C_moran_weights", (DL_FUNC) &C_moran_weights, 4},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
@@ -195,6 +198,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_oplsda",    (DL_FUNC) &C_oplsda,    8},
   {"C_plsda",     (DL_FUNC) &C_plsda,     8},
   {"C_rda",       (DL_FUNC) &C_rda,       9},
+  {"C_prc_perm",  (DL_FUNC) &C_prc_perm,  9},
   {"C_pcoa",      (DL_FUNC) &C_pcoa,      4},
   {"C_pcoa_correct", (DL_FUNC) &C_pcoa_correct, 5},
   {"C_pcoa_biplot",  (DL_FUNC) &C_pcoa_biplot,  7},
