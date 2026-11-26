@@ -157,3 +157,38 @@ Made while implementing:
 - **For `dbmem()`:** `moran_space()`, `moran_weights()`, `moran_stat()`
   (with `perm_matrix(0L, n)`, the observed I alone) and `moran_moments()`
   are internal helpers it can call; see the Outcome section.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 59, done 2026-11-26.** Commit `f548a26` (function), merged with
+items 57 and 58 in `5bf8854`, plus the tick.
+
+- Tests: 31,409 at home and 457 in CRAN mode before the merge (30,895 /
+  450 at 15dc935); 32,351 and 467 on the merged tree. `test-moran_i.r`
+  has 507 tests.
+- esda 2.10.0 `Moran` (libpysal 4.15.1), 5 cases (inverse-distance,
+  asymmetric k-nearest inverse-distance, an island, a negatively
+  autocorrelated grid, n = 4) × 4 transformations (r, b, v, o): I within
+  9e-16 (relative), sd under normality and randomisation within 2e-15,
+  analytic p-values within 1.5e-14, s0, s1, s2 within 1.4e-15, and the 199
+  permuted I per case within 4e-15 of esda's, given the same permutations;
+  `p_sim` identical wherever no permuted I ties with the observed one.
+- spdep 1.3.1 `moran.test()` (styles W, B, S, U; randomisation and
+  normality; `adjust.n = FALSE`): I, variance and p-value within ~2e-14.
+- ape 5.7.1 `Moran.I()`: matches `style = 'row'` with `sd_rand` (not raw
+  weights with the normality sd, as this plan assumed), within ~1e-15.
+- cpus 1, 2, 3, 4, 8 identical.
+- Speed (n = 1000, 999 permutations, inverse-distance weights): ecodive
+  0.38 s on 1 thread, 0.11 s on 4; esda 1.2 s; spdep `moran.mc()` 13 s.
+- `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed size).
+- **For `dbmem()` (item 78):** internal helpers in `R/moran_i.r`:
+  `moran_space(space, data)` (a `dist`, coordinates or weights matrix →
+  raw weights, `n`, labels, type), `moran_weights(sp, style)` (the
+  transformed weights' packed symmetric part `S` and `s0`, `s1`, `s2`, via
+  `C_moran_weights()`), `moran_stat(x, wt, perm_matrix(0L, n))` (I alone;
+  one O(n²) pass per variable) and `moran_moments(x, wt, n)`. dbmem can
+  build its weights matrix (adespatial's choice of weights, to be checked
+  against its outputs) and call `moran_weights()` once, then `moran_stat()`
+  per MEM. `space`'s parsing (`moran_space()`) also gives dbmem its
+  `dist`/coordinate handling.
