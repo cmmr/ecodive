@@ -231,3 +231,24 @@ Reference results:
 - **Tests:** 31,598 at home and 456 in CRAN mode (from 30,895 and 450).
   `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed size, as
   before).
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 57, done 2026-11-26.** Commits `e4ce79a` (work) and the tick.
+
+- `principal_response_curves()`: a partial `rda()` with coefficients and
+  weights in vegan's scalings 1, 2, 3 (default `'symmetric'`), permutation
+  tests of the first axis and all axes (`plots` for whole-plot,
+  `strata` for within-block permutations), `plot()` (the PRC diagram) and
+  `print()`.
+- Tests: 31,598 at home and 456 in CRAN mode (from 30,895 and 450);
+  `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed size).
+- vegan 2.7.8: coefficients and weights within 7e-15, eigenvalues 5e-15,
+  F 4e-14, every permuted F 1e-13; p-values identical.
+- Speed: 480 × 2,000, both tests with 999 whole-plot permutations, 3.1 s
+  on 4 threads against vegan's 697 s.
+- No code read or ported; no GPL source text seen.
+- Open: the overall test equals `permanova()` only with vegan's coding of
+  the constraints (decision 10); at a time point with no control samples,
+  coefficients are `NA` where vegan reports aliasing artefacts.
