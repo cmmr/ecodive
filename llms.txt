@@ -915,6 +915,15 @@ Test whether sample metadata explain beta diversity distances.
   [`match_dist_test()`](https://cmmr.github.io/ecodive/reference/dist_tests.md)
   : Find and Browse Distance Tests
 
+## Spatial
+
+Spatial structure among samples from their positions (coordinates,
+geographic distances or spatial weights). Moran’s I tests whether a
+variable is more alike at nearby sites.
+
+- [`moran_i()`](https://cmmr.github.io/ecodive/reference/moran_i.md) :
+  Moran's I Test of Spatial Autocorrelation
+
 ## Interpreting Differences
 
 Which taxa drive the differences between groups.

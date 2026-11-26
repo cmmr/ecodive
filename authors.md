@@ -102,6 +102,10 @@
 - **sva authors**. Contributor, copyright holder.  
   ComBat batch correction (batch_combat()), ported from 'sva'
 
+- **PySAL Developers**. Contributor, copyright holder.  
+  Moran's I and its spatial weights (moran_i()), ported from 'esda' and
+  'libpysal'
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

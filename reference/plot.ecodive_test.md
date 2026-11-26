@@ -3,8 +3,9 @@
 Plots the result of one of ecodive's permutation tests. By default,
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
 [`anosim()`](https://cmmr.github.io/ecodive/reference/anosim.md),
-[`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) and
+[`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md),
 [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md)
+and [`moran_i()`](https://cmmr.github.io/ecodive/reference/moran_i.md)
 results show the permutation distribution of their statistic, with the
 observed value marked;
 [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) shows each
@@ -44,7 +45,7 @@ plot(x, type = c("fit", "null"), ...)
   [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md),
   [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md),
   [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md),
-  or
+  [`moran_i()`](https://cmmr.github.io/ecodive/reference/moran_i.md), or
   [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md).
 
 - type:
