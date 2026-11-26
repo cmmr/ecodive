@@ -18,8 +18,8 @@
 #' and draw them with [graphics::barplot()]; for compositional readings of
 #' the same samples, see the heatmap (`heatmap = TRUE`), [aitchison()]
 #' distances with [pcoa()], the covariance biplot of [pca()] with `norm =
-#' "clr"` (`plot(..., scaling = "covariance")`), and the planned
-#' `variation_array()` and `ternary_plot()`.
+#' "clr"` (`plot(..., scaling = "covariance")`), [ternary_plot()] for three
+#' parts at a time, and the planned `variation_array()`.
 #'
 #' @inheritParams documentation
 #'

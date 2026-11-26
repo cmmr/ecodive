@@ -499,6 +499,10 @@
   z <- withVisible(composition_barplot(counts, 'grp', meta, n_features = 5, heatmap = TRUE, cpus = cpus))
   expect_true(!z$visible && identical(dim(z$value$proportions), c(6L, 20L)) &&
               all(abs(colSums(z$value$proportions) - 1) < 1e-12) && all(is.finite(z$value$clr)))
+  z <- withVisible(ternary_plot(counts, parts = list(1, 2, NA), groups = 'grp', data = meta,
+                                center = TRUE, ellipses = 'confidence'))
+  expect_true(!z$visible && nrow(z$value) == 20L && all(abs(rowSums(z$value[, 1:3]) - 1) < 1e-12) &&
+              length(attr(z$value, 'ellipses')) == 2L)
   grDevices::dev.off()
 
 

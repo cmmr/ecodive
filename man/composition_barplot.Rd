@@ -120,8 +120,8 @@ a compositional analysis, and they say nothing about how much of anything
 a sample held. For absolute loads, scale the counts with \code{\link[=qmp_scale]{qmp_scale()}}
 and draw them with \code{\link[graphics:barplot]{graphics::barplot()}}; for compositional readings of
 the same samples, see the heatmap (\code{heatmap = TRUE}), \code{\link[=aitchison]{aitchison()}}
-distances with \code{\link[=pcoa]{pcoa()}}, the covariance biplot of \code{\link[=pca]{pca()}} with \code{norm = "clr"} (\code{plot(..., scaling = "covariance")}), and the planned
-\code{variation_array()} and \code{ternary_plot()}.
+distances with \code{\link[=pcoa]{pcoa()}}, the covariance biplot of \code{\link[=pca]{pca()}} with \code{norm = "clr"} (\code{plot(..., scaling = "covariance")}), \code{\link[=ternary_plot]{ternary_plot()}} for three
+parts at a time, and the planned \code{variation_array()}.
 
 \strong{Which features.} Each sample's counts are divided by their sum, and
 the features are ranked by their mean proportion over the samples (ties
