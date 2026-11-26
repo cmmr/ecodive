@@ -653,3 +653,15 @@ Implemented in `0d00ddb` on 2026-11-26.
 - **Tests:** 33,120 at home and 471 in CRAN mode (32,859 and 469 at
   70dff27). `R CMD check --no-manual --ignore-vignettes`: one NOTE
   (installed size 7.1 Mb), as before.
+- **RFE (follow-up, `71a961e`):** against q2-sample-classifier 2026.10.0's
+  pipeline with `optimize_feature_selection = True` (random_state 3 and 7):
+  RFECV's `ranking_` identical, every fold's score at each of the 25
+  feature counts exact (largest difference 0), the mean and SD within
+  5.6e-17; the selected features (7 and 15), their importances and the
+  held-out predictions exact; the same with a sparse (CSC) table. PCG mode
+  `identical()` for `cpus` 1–4. Speed (the 400 × 2,000 table, 5 folds,
+  step 0.05: 126 forests): 109 s on 4 threads, 361 s on 1; scikit-learn's
+  RFECV plus the final fit took 136 s on 4 threads. `test-feature_volatility.r`
+  has 391 tests; on the tree merged with items 69 and 78, 33,933 tests at
+  home and 477 in CRAN mode passed, and `R CMD check` gave the one NOTE
+  (installed size).
