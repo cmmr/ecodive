@@ -120,13 +120,18 @@ ambiguity with future additions to the list of methods.
 
 **Same names in other packages**
 
-`vegan::pca()`, `vegan::rda()`, `vegan::cca()` and `vegan::ca()` (and
-`ca::ca()`) share their names with ecodive's
+[`vegan::pca()`](https://vegandevs.github.io/vegan/reference/cca.html),
+[`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html),
+[`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html)
+and
+[`vegan::ca()`](https://vegandevs.github.io/vegan/reference/cca.html)
+(and `ca::ca()`) share their names with ecodive's
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md),
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) and
 [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), as
-`ade4::dpcoa()` does with
+[`ade4::dpcoa()`](https://adeverse.github.io/ade4/reference/dpcoa.html)
+does with
 [`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md),
 `mixOmics::plsda()` and `caret::plsda()` do with
 [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md) and

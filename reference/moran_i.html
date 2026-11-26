@@ -132,7 +132,7 @@ chance), <code>'less'</code> (more negative: neighbours are less alike), or
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of permutations. Default: <code>999</code>.
 Alternatively, a matrix with one permutation of <code>1:n</code> per row, as
-from <code>permute::shuffleSet()</code>, to use instead of random ones: each
+from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones: each
 permutation <code>p</code> gives sample <code>i</code> the value of sample <code>p[i]</code>.</p></dd>
 
 
@@ -160,7 +160,7 @@ analytic p-value of \((I - E[I]) / sd\), under the normality
 assumption (esda's <code>seI_norm</code> and <code>p_norm</code>).</p></li>
 <li><p><code>sd_rand</code>, <code>p_value_rand</code>: The same under the randomisation
 assumption (esda's <code>seI_rand</code> and <code>p_rand</code>; spdep's default; and
-<code>ape::Moran.I()</code>'s <code>sd</code> and <code>p.value</code>).</p></li>
+<code><a href="https://rdrr.io/pkg/ape/man/MoranI.html" class="external-link">ape::Moran.I()</a></code>'s <code>sd</code> and <code>p.value</code>).</p></li>
 <li><p><code>style</code>: How the weights were transformed.</p></li>
 <li><p><code>alternative</code>: <code>'greater'</code>, <code>'less'</code>, or <code>'two.sided'</code>.</p></li>
 <li><p><code>n</code>: The number of samples.</p></li>
@@ -220,7 +220,7 @@ the population standard deviation.</p></li>
 <li><p><code>space</code> may also be distances or coordinates, made into inverse-distance
 weights.</p></li>
 <li><p>Weights on the diagonal (self-weights) are ignored.</p></li>
-</ul><p><code>ape::Moran.I()</code> gives the same I as <code>style = 'row'</code> (it row-standardises
+</ul><p><code><a href="https://rdrr.io/pkg/ape/man/MoranI.html" class="external-link">ape::Moran.I()</a></code> gives the same I as <code>style = 'row'</code> (it row-standardises
 the weights), with the standard deviation under randomisation (<code>sd_rand</code>)
 and a two-sided p-value by default. <code>spdep::moran.test()</code> gives the same
 I as <code>style = 'row'</code> for <code>mat2listw()</code>'s default style <code>'W'</code>, with the

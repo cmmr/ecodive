@@ -89,8 +89,9 @@ moran_i(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  `permute::shuffleSet()`, to use instead of random ones: each
-  permutation `p` gives sample `i` the value of sample `p[i]`.
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
+  to use instead of random ones: each permutation `p` gives sample `i`
+  the value of sample `p[i]`.
 
 - seed:
 
@@ -125,7 +126,8 @@ A list of class `c('ecodive_moran_i', 'ecodive_test')`, with:
 
 - `sd_rand`, `p_value_rand`: The same under the randomisation assumption
   (esda's `seI_rand` and `p_rand`; spdep's default; and
-  `ape::Moran.I()`'s `sd` and `p.value`).
+  [`ape::Moran.I()`](https://rdrr.io/pkg/ape/man/MoranI.html)'s `sd` and
+  `p.value`).
 
 - `style`: How the weights were transformed.
 
@@ -206,13 +208,14 @@ are used.
 
 - Weights on the diagonal (self-weights) are ignored.
 
-`ape::Moran.I()` gives the same I as `style = 'row'` (it
-row-standardises the weights), with the standard deviation under
-randomisation (`sd_rand`) and a two-sided p-value by default.
-`spdep::moran.test()` gives the same I as `style = 'row'` for
-`mat2listw()`'s default style `'W'`, with the variance under
-randomisation by default (`randomisation = TRUE`); its `adjust.n` (the
-default) leaves islands out of \\n\\, which `moran_i()` doesn't.
+[`ape::Moran.I()`](https://rdrr.io/pkg/ape/man/MoranI.html) gives the
+same I as `style = 'row'` (it row-standardises the weights), with the
+standard deviation under randomisation (`sd_rand`) and a two-sided
+p-value by default. `spdep::moran.test()` gives the same I as
+`style = 'row'` for `mat2listw()`'s default style `'W'`, with the
+variance under randomisation by default (`randomisation = TRUE`); its
+`adjust.n` (the default) leaves islands out of \\n\\, which `moran_i()`
+doesn't.
 
 ## References
 

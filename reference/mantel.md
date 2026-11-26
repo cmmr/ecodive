@@ -2,7 +2,8 @@
 
 Tests whether two distance matrices are correlated: for instance,
 whether samples with more different communities are also further apart,
-or more different in pH. Gives the same statistic as `vegan::mantel()`
+or more different in pH. Gives the same statistic as
+[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)
 (Pearson, Spearman, or Kendall correlation), with permutation p-values.
 Computes them in parallel C, straight from the distances, without the
 \\n \times n\\ matrices that `mantel()` builds for every permutation.
@@ -63,7 +64,8 @@ mantel(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  `permute::shuffleSet()`, to use instead of random ones.
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
+  to use instead of random ones.
 
 - strata:
 
@@ -77,9 +79,10 @@ mantel(
 - alternative:
 
   Which correlations count as more extreme than the observed one:
-  `'greater'` (more positive, as in `vegan::mantel()`), `'less'` (more
-  negative), or `'two.sided'` (larger in absolute value). Default:
-  `'greater'`.
+  `'greater'` (more positive, as in
+  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)),
+  `'less'` (more negative), or `'two.sided'` (larger in absolute value).
+  Default: `'greater'`.
 
 - seed:
 
@@ -98,7 +101,9 @@ mantel(
 A list of class `c('ecodive_mantel', 'ecodive_test')`, with:
 
 - `statistic`: The Mantel statistic, `c(r = ...)`: the correlation of
-  `dm` and `y`. `vegan::mantel()`'s `statistic`.
+  `dm` and `y`.
+  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
+  `statistic`.
 
 - `p_value`: The permutation p-value.
 
@@ -120,9 +125,9 @@ A list of class `c('ecodive_mantel', 'ecodive_test')`, with:
   or `'supplied matrix'`.
 
 Attribute `r_perm` is a vector of the statistics of the permutations, as
-`vegan::mantel()`'s `perm`.
-[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) gives the
-main results as one row.
+[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
+`perm`. [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+gives the main results as one row.
 
 ## Details
 
@@ -136,8 +141,9 @@ together, `y` is held fixed, and the correlation is recomputed. The
 p-value is the proportion of permutations, counting the observed one,
 with a correlation at least as extreme: \\(1 + \\\\r\_{perm} \ge r\\) /
 (1 + permutations)\\ for `alternative = 'greater'`. As in
-`vegan::mantel()`, permuted statistics within
-`sqrt(.Machine$double.eps)` of the observed one count as ties.
+[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html),
+permuted statistics within `sqrt(.Machine$double.eps)` of the observed
+one count as ties.
 
 **Speed and memory**
 
@@ -155,9 +161,10 @@ The permutations come from `seed`, not from R's random number generator,
 so [`set.seed()`](https://rdrr.io/r/base/Random.html) has no effect, and
 each permutation has a random number stream of its own. P-values are
 identical from run to run and for any number of `cpus`. The random
-permutations differ from `vegan::mantel()`'s, so p-values agree with it
-only up to sampling error, unless the same `permutations` matrix is
-given to both.
+permutations differ from
+[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s,
+so p-values agree with it only up to sampling error, unless the same
+`permutations` matrix is given to both.
 
 **Differences from vegan::mantel()**
 
@@ -171,8 +178,9 @@ given to both.
 - There's no `na.rm`: distances must not be `NA`.
 
 - When there are fewer possible permutations than requested,
-  `vegan::mantel()` (via `permute`) runs each of them once instead.
-  `mantel()` always draws random permutations.
+  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)
+  (via `permute`) runs each of them once instead. `mantel()` always
+  draws random permutations.
 
 ## References
 

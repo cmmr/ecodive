@@ -122,10 +122,14 @@ ambiguity with future additions to the list of methods.
 
 **Same names in other packages**
 
-`ape::pcoa()`, `vegan::pca()`, `vegan::dbrda()`, `vegan::capscale()`,
-`vegan::isomap()` (whose `k` is the number of neighbours, not axes), and
-`uwot::umap()` share names with ecodive's functions, and whichever
-package was attached last masks the other's. Write
+[`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html),
+[`vegan::pca()`](https://vegandevs.github.io/vegan/reference/cca.html),
+[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+[`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)
+(whose `k` is the number of neighbours, not axes), and `uwot::umap()`
+share names with ecodive's functions, and whichever package was attached
+last masks the other's. Write
 [`ecodive::pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md)
 and so on, or use `dist_ord()`, which always runs ecodive's, to be sure.
 

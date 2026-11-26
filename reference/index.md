@@ -648,6 +648,8 @@ read; not compositional analyses themselves.
 
 - [`composition_barplot()`](https://cmmr.github.io/ecodive/reference/composition_barplot.md)
   : Composition Barplot
+- [`ternary_plot()`](https://cmmr.github.io/ecodive/reference/ternary_plot.md)
+  : Ternary Plot
 
 ## Utilities & Helpers
 

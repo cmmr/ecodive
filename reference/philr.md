@@ -179,7 +179,7 @@ made one in three steps (the result is the `tree` attribute):
 
 2.  **Nodes left with one child are removed**, their branch length added
     to their child's (a root with one child is dropped), as
-    `ape::drop.tip()` does.
+    [`ape::drop.tip()`](https://rdrr.io/pkg/ape/man/drop.tip.html) does.
 
 3.  **Polytomies are resolved, with a warning:** a node with children
     \\c_1, \dots, c_k\\, \\k \> 2\\, keeps \\c_1\\ and gets a new child
@@ -191,10 +191,11 @@ made one in three steps (the result is the `tree` attribute):
 
 Coordinates are in the order of the internal nodes' numbers in `tree`
 (the root first), or, when a step changed the tree, in preorder of the
-new tree (which is also the order of `ape::multi2di()`'s and
-`ape::drop.tip()`'s numbering). Branch lengths are needed only for the
-branch-length ILR weights; they must be non-negative. A root edge is
-ignored.
+new tree (which is also the order of
+[`ape::multi2di()`](https://rdrr.io/pkg/ape/man/multi2di.html)'s and
+[`ape::drop.tip()`](https://rdrr.io/pkg/ape/man/drop.tip.html)'s
+numbering). Branch lengths are needed only for the branch-length ILR
+weights; they must be non-negative. A root edge is ignored.
 
 **Same names in other packages**: `philr::philr()` computes the same
 transform, with the same orientation and order. Whichever package was

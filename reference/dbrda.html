@@ -58,10 +58,10 @@ vegan::capscale()."><meta property="og:image" content="https://cmmr.github.io/ec
     <div class="ref-description section level2">
     <p>Constrained ordination of samples from their distances: the axes of beta
 diversity that sample metadata explain. Gives the same results as
-<code>vegan::dbrda()</code>, without ever forming an \(n \times n\) matrix,
+<code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>, without ever forming an \(n \times n\) matrix,
 so it takes far less time and memory for large datasets. <code><a href="capscale.html">capscale()</a></code> is
 the same analysis of the distances' positive eigenvalues only, as in
-<code>vegan::capscale()</code>.</p>
+<code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -76,7 +76,7 @@ the same analysis of the distances' positive eigenvalues only, as in
 <dl><dt id="arg-dm">dm<a class="anchor" aria-label="anchor" href="#arg-dm"></a></dt>
 <dd><p>A <code>dist</code> object, such as from <code><a href="beta_div.html">beta_div()</a></code> or <code><a href="bray.html">bray()</a></code>, or a
 symmetric numeric matrix of distances. Must not contain <code>NA</code>s or
-negative values. Alternatively, as in <code>vegan::dbrda()</code>, a formula
+negative values. Alternatively, as in <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>, a formula
 with the distances on its left-hand side and the constraints on its
 right, such as <code>dm ~ treatment</code>, in place of <code>dm</code> and <code>formula</code>;
 the metadata may then be given second, as in
@@ -107,7 +107,7 @@ one-sided formula naming the variables in <code>data</code> that constrain the
 ordination, such as <code>~ treatment + ph</code>. Factors, numeric
 covariates, and interactions are all allowed. Wrap variables in
 <code>Condition()</code> to remove their effect first (a partial analysis), as
-in <code>vegan::dbrda()</code>: <code>~ treatment + Condition(site)</code>. With only
+in <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>: <code>~ treatment + Condition(site)</code>. With only
 <code>Condition()</code> terms, the result is the unconstrained ordination
 after removing their effect. A left-hand side, if given, is
 ignored. Give <code>groups</code> or <code>formula</code>: there is no default model.
@@ -134,7 +134,7 @@ named <code>"dbRDA1"</code>, <code>"dbRDA2"</code>, etc. If the constraints give
 of them, unconstrained axes follow, named <code>"MDS1"</code>, <code>"MDS2"</code>, etc. The
 values are <code>vegan</code>'s site scores ("wa" scores, scaling 2): what
 <code>vegan::scores(x, display = "sites")</code> returns and what
-<code>phyloseq::plot_ordination()</code> plots. Its attributes are:</p><ul><li><p><code>method</code>: <code>"dbrda"</code>.</p></li>
+<code><a href="https://rdrr.io/pkg/phyloseq/man/plot_ordination.html" class="external-link">phyloseq::plot_ordination()</a></code> plots. Its attributes are:</p><ul><li><p><code>method</code>: <code>"dbrda"</code>.</p></li>
 <li><p><code>eig</code>: The eigenvalue of each axis.</p></li>
 <li><p><code>prop</code>: The proportion of the inertia that each axis explains, not
 counting the conditional inertia:
@@ -180,9 +180,9 @@ matrix, db-RDA (McArdle &amp; Anderson 2001) analyzes Gower's centered matrix
 constraints, after removing any conditions, the constrained axes are the
 eigenvectors of \(HGH\), and the unconstrained axes are those of
 \((I-H)G(I-H)\). Non-Euclidean distances, such as Bray-Curtis, can give
-negative eigenvalues. They are kept in the inertia, as <code>vegan::dbrda()</code>
+negative eigenvalues. They are kept in the inertia, as <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>
 does, but have no axes.</p>
-<p><code>vegan::dbrda()</code> forms \(G\) and \(HGH\) in full and computes all
+<p><code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code> forms \(G\) and \(HGH\) in full and computes all
 \(n\) of their eigenvalues, which takes time proportional to \(n^3\).
 <code>dbrda()</code> instead projects \(G\) onto an orthonormal basis of the
 constraints, which only needs a few products of \(G\) with vectors,
@@ -202,15 +202,15 @@ coordinates with positive eigenvalues, so every eigenvalue is a
 variance. But it ignores the negative eigenvalues' part of the
 distances, and it needs all of the eigenvalues of \(G\), which takes
 time proportional to \(n^3\).</p></li>
-</ul><p><code>phyloseq::ordinate(method = "CAP")</code> calls <code>vegan::capscale()</code>, so its
+</ul><p><code>phyloseq::ordinate(method = "CAP")</code> calls <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code>, so its
 results match <code><a href="capscale.html">capscale()</a></code>'s, not <code>dbrda()</code>'s.</p>
 <p><strong>Matching vegan</strong></p>
 <p><code>dbrda()</code> gives the same scores, eigenvalues, inertia, \(R^2\), biplot
-scores and centroids as <code>vegan::dbrda()</code>, up to the signs of the axes.
+scores and centroids as <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>, up to the signs of the axes.
 Columns of the model matrix that are linear combinations of earlier ones
 are dropped, with a message, as in <code>vegan</code>.</p>
 <p><strong>Scale</strong></p>
-<p>Like <code>vegan::dbrda()</code>, <code>dbrda()</code> divides the distances by
+<p>Like <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>, <code>dbrda()</code> divides the distances by
 \(\sqrt{n-1}\) when any of them is 4 or more ("mean squared
 distances"). That divides <code>trace</code>, <code>eig</code>, <code>inertia</code> and <code>constrained_eig</code>
 by \(n-1\), but leaves <code>prop</code> and \(R^2\) unchanged. So for the same

@@ -8,8 +8,10 @@ removed, and what remains is the treatments' effect at each time point.
 Each treatment's curve is its canonical coefficient at each time point,
 measured from the control (whose curve is 0), and each feature's weight
 says how closely its abundance follows the curves. Gives the same
-results as `vegan::prc()`, with permutation tests of the first axis and
-of all axes as `anova(vegan::prc(...), first = TRUE)` and `anova(...)`.
+results as
+[`vegan::prc()`](https://vegandevs.github.io/vegan/reference/prc.html),
+with permutation tests of the first axis and of all axes as
+`anova(vegan::prc(...), first = TRUE)` and `anova(...)`.
 
 ## Usage
 
@@ -66,7 +68,8 @@ principal_response_curves(
 
   The control treatment: one of the values of `treatment`. Default:
   `NULL`, the first level of `treatment` (its first value in sorted
-  order, if not a factor), as in `vegan::prc()`.
+  order, if not a factor), as in
+  [`vegan::prc()`](https://vegandevs.github.io/vegan/reference/prc.html).
 
 - margin:
 
@@ -126,7 +129,8 @@ principal_response_curves(
 - permutations:
 
   The number of random permutations for the tests, or a matrix with one
-  permutation of the samples per row (such as `permute::shuffleSet()`
+  permutation of the samples per row (such as
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html)
   returns). `0` runs no tests. Default: `999`.
 
 - strata:
@@ -233,7 +237,9 @@ and give them with `norm = 'none'`, the default.
 
 **Permutation tests**
 
-Both tests are those of `vegan::anova.cca()` under the reduced model:
+Both tests are those of
+[`vegan::anova.cca()`](https://vegandevs.github.io/vegan/reference/anova.cca.html)
+under the reduced model:
 
 - all axes: \\F = (\mathrm{SS}\_X / q) / (\mathrm{RSS} / \nu)\\, for
   \\q\\ constraint columns and \\\nu = n - 1 - \mathrm{rank}(Z) - q\\
@@ -259,7 +265,8 @@ that the p-values equal `vegan`'s for the same permutations. Samples
 sampled repeatedly are not independent, so permute whole plots (`plots`)
 or within time points (`strata`) rather than freely; `vegan`'s own
 restricted designs (such as `Within(type = "series")`) can be given as a
-`permutations` matrix from `permute::shuffleSet()`.
+`permutations` matrix from
+[`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html).
 
 **Signs**
 
@@ -274,10 +281,11 @@ their signs may be the reverse of `vegan`'s.
 `coefficients` and `weights` are `vegan`'s
 `summary(prc(...), scaling = scaling)` (up to each axis's sign), and
 `eig` its eigenvalues. Where a time point has no control samples,
-`vegan::prc()` drops some other treatment's column and reports
-coefficients relative to that treatment; here they are `NA`, with a
-warning. The test statistics and p-values are those of
-`anova(prc, first = TRUE)` and `anova(prc)` for the same permutations.
+[`vegan::prc()`](https://vegandevs.github.io/vegan/reference/prc.html)
+drops some other treatment's column and reports coefficients relative to
+that treatment; here they are `NA`, with a warning. The test statistics
+and p-values are those of `anova(prc, first = TRUE)` and `anova(prc)`
+for the same permutations.
 
 ## Input Types
 

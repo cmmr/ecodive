@@ -201,18 +201,20 @@
   on a `dist` object, such as from
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md).
   It gives the same coordinates and eigenvalues as
-  [`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html), `ape::pcoa()`,
-  and `vegan::wcmdscale()` (up to each axis’s sign), but computes only
-  the first few axes (`n_axes = 3` by default), in parallel C, without
-  forming an n-by-n matrix. Its results are identical for any number of
-  `cpus`. `correction = "lingoes"` or `"cailliez"` adds the smallest
-  constant to the squared distances, or to the distances, that leaves no
-  negative eigenvalue, giving the same constants, eigenvalues and
-  coordinates as `ape::pcoa()`, `vegan::wcmdscale(add = )` and
-  `cmdscale(add = TRUE)`, again without an n-by-n (or 2n-by-2n) matrix:
-  with 2,000 samples, `"cailliez"` takes 20 seconds where
-  `cmdscale(add = TRUE)` takes 2 minutes. Every result has `correction`
-  and `constant` attributes.
+  [`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html),
+  [`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html), and
+  [`vegan::wcmdscale()`](https://vegandevs.github.io/vegan/reference/wcmdscale.html)
+  (up to each axis’s sign), but computes only the first few axes
+  (`n_axes = 3` by default), in parallel C, without forming an n-by-n
+  matrix. Its results are identical for any number of `cpus`.
+  `correction = "lingoes"` or `"cailliez"` adds the smallest constant to
+  the squared distances, or to the distances, that leaves no negative
+  eigenvalue, giving the same constants, eigenvalues and coordinates as
+  [`ape::pcoa()`](https://rdrr.io/pkg/ape/man/pcoa.html),
+  `vegan::wcmdscale(add = )` and `cmdscale(add = TRUE)`, again without
+  an n-by-n (or 2n-by-2n) matrix: with 2,000 samples, `"cailliez"` takes
+  20 seconds where `cmdscale(add = TRUE)` takes 2 minutes. Every result
+  has `correction` and `constant` attributes.
 
 - New
   [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md)
@@ -288,7 +290,8 @@
   from the PCoA solution and from `n_starts` random configurations,
   keeps the one with the lowest Kruskal stress-1, and centers it,
   rotates it to principal axes, and scales it to the distances. Tied
-  distances use Kruskal’s primary approach (as in `vegan::metaMDS()`),
+  distances use Kruskal’s primary approach (as in
+  [`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)),
   or scikit-learn’s secondary one with `ties = "secondary"`. The
   distances are sorted once and shared by all starts; nothing n-by-n is
   formed. Each start runs at most `max_iters` iterations, or stops when
@@ -319,8 +322,8 @@
   `Isomap(metric = "precomputed")`, it gives the same geodesic distances
   and embedding to rounding, breaks ties by sample order, and joins
   disconnected neighbor graphs at their closest samples, with a warning
-  (`vegan::isomap()` stops instead; note that its `k` is the number of
-  neighbors, while
+  ([`vegan::isomap()`](https://vegandevs.github.io/vegan/reference/isomap.html)
+  stops instead; note that its `k` is the number of neighbors, while
   [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md)’s
   `n_axes` is the number of axes). The neighbor and shortest-path
   searches run in parallel without an n-by-n matrix, and results are
@@ -361,7 +364,8 @@
   `groups`: one value per sample (categories or a numeric covariate), or
   a column name of `data`. For several variables, give `data` and a
   `formula` instead: factors, covariates, interactions, and
-  `Condition()` terms. It gives the same table as `vegan::adonis2()`
+  `Condition()` terms. It gives the same table as
+  [`vegan::adonis2()`](https://vegandevs.github.io/vegan/reference/adonis.html)
   (Df, sums of squares, R2, F, and p-values), testing the model as a
   whole or each term sequentially, marginally, or by contrast, with
   optional `strata`. Given the same permutation matrix, its permuted F
@@ -381,17 +385,21 @@
 
 - New [`mrpp()`](https://cmmr.github.io/ecodive/reference/mrpp.md) runs
   a multi-response permutation procedure on a `dist` object and each
-  sample’s group, as `vegan::mrpp()`: the observed and expected weighted
-  mean within-group distance (delta), the chance-corrected within-group
-  agreement A, each group’s mean distance, and a permutation p-value,
-  with group weights `'n'`, `'n-1'` or `'n(n-1)'` (vegan’s `weight.type`
-  1 to 3) and optional `strata`. It also gives the standardized effect
-  size z of `summary(vegan::permustats())`. Given the same permutation
-  matrix, its permuted deltas, p-values and z are those of
-  `vegan::mrpp()`. Each permutation costs one comparison per pair of
-  samples, read straight from the dist triangle; with 500 samples and
-  999 permutations it is about 60 times faster than `vegan::mrpp()` on
-  one thread. Results are identical for any number of `cpus`. Like
+  sample’s group, as
+  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html):
+  the observed and expected weighted mean within-group distance (delta),
+  the chance-corrected within-group agreement A, each group’s mean
+  distance, and a permutation p-value, with group weights `'n'`, `'n-1'`
+  or `'n(n-1)'` (vegan’s `weight.type` 1 to 3) and optional `strata`. It
+  also gives the standardized effect size z of
+  `summary(vegan::permustats())`. Given the same permutation matrix, its
+  permuted deltas, p-values and z are those of
+  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html).
+  Each permutation costs one comparison per pair of samples, read
+  straight from the dist triangle; with 500 samples and 999 permutations
+  it is about 60 times faster than
+  [`vegan::mrpp()`](https://vegandevs.github.io/vegan/reference/mrpp.html)
+  on one thread. Results are identical for any number of `cpus`. Like
   ecodive’s other permutation tests, it returns a list of class
   `"ecodive_test"` whose `statistic`, `p_value`, `z` and `n_perm` come
   first, and
@@ -402,24 +410,30 @@
   runs an analysis of similarities (ANOSIM) on a `dist` object and each
   sample’s group, given as a vector or as a column of sample metadata,
   with optional `strata`. Given the same permutation matrix, its R
-  statistic, permuted R values and p-value match `vegan::anosim()`’s. It
-  ranks the distances once, with a radix sort, and then each permutation
-  needs only one pass over the ranks, without the n-by-n matrices
-  `vegan::anosim()` builds; permutations run in parallel. With 300
-  samples and 999 permutations it takes under a tenth of a second,
-  against about seven for `vegan::anosim()`. Results are identical for
-  any number of `cpus`.
+  statistic, permuted R values and p-value match
+  [`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html)’s.
+  It ranks the distances once, with a radix sort, and then each
+  permutation needs only one pass over the ranks, without the n-by-n
+  matrices
+  [`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html)
+  builds; permutations run in parallel. With 300 samples and 999
+  permutations it takes under a tenth of a second, against about seven
+  for
+  [`vegan::anosim()`](https://vegandevs.github.io/vegan/reference/anosim.html).
+  Results are identical for any number of `cpus`.
 
 - New
   [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md)
   tests the homogeneity of multivariate dispersions (PERMDISP), as
-  `vegan::betadisper()` followed by `vegan::permutest()`: each sample’s
-  distance to its group’s centroid (the default) or spatial median, each
-  group’s mean distance, and the ANOVA F with a permutation p-value,
-  plus optional pairwise t tests and small-group bias adjustment.
-  Distances to centroids come from the distances within groups alone,
-  with no eigendecomposition: they match `betadisper()`’s to rounding
-  error, and are about 100 times faster with 1,000 samples.
+  [`vegan::betadisper()`](https://vegandevs.github.io/vegan/reference/betadisper.html)
+  followed by
+  [`vegan::permutest()`](https://vegandevs.github.io/vegan/reference/anova.cca.html):
+  each sample’s distance to its group’s centroid (the default) or
+  spatial median, each group’s mean distance, and the ANOVA F with a
+  permutation p-value, plus optional pairwise t tests and small-group
+  bias adjustment. Distances to centroids come from the distances within
+  groups alone, with no eigendecomposition: they match `betadisper()`’s
+  to rounding error, and are about 100 times faster with 1,000 samples.
   `betadisper()` defaults to spatial medians instead: pass
   `type = "median"` to compare with it.
   [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md)
@@ -434,15 +448,18 @@
   (Pearson, Spearman, or Kendall), and new
   [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md)
   a partial Mantel test, which removes the effect of a third (`given`).
-  They give the same statistics as `vegan::mantel()` and
-  `vegan::mantel.partial()`, and, given the same permutation matrix, the
-  same permuted statistics and p-values. The second and third matrices
-  may also be numeric vectors, one value per sample (such as age), and
-  samples are matched by name. They add lower-tail and two-sided tests
-  (`alternative`). Each permutation is one pass over the dist triangle,
-  with no n-by-n matrix (Kendall’s tau-b by Knight’s merge sort rather
-  than [`cor()`](https://rdrr.io/r/stats/cor.html)’s quadratic count),
-  and permutations run in parallel. Permutations come from a `seed`
+  They give the same statistics as
+  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)
+  and
+  [`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html),
+  and, given the same permutation matrix, the same permuted statistics
+  and p-values. The second and third matrices may also be numeric
+  vectors, one value per sample (such as age), and samples are matched
+  by name. They add lower-tail and two-sided tests (`alternative`). Each
+  permutation is one pass over the dist triangle, with no n-by-n matrix
+  (Kendall’s tau-b by Knight’s merge sort rather than
+  [`cor()`](https://rdrr.io/r/stats/cor.html)’s quadratic count), and
+  permutations run in parallel. Permutations come from a `seed`
   argument, and results are identical for any number of `cpus`.
 
 - New
@@ -454,10 +471,11 @@
   model matrix, with p-values adjusted progressively (`p_adjust`,
   `progressive`). It gives the same classes, statistics, and p-values
   (raw and adjusted, given the same permutation matrix) as
-  `vegan::mantel.correlog()`. `y` may be a distance matrix, coordinates,
-  or columns of `data`. Every class’s statistic depends on a permutation
-  only through a sum over the class, so each permutation is one pass
-  over the pairs for all classes (for Kendall’s tau-b too), in parallel.
+  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html).
+  `y` may be a distance matrix, coordinates, or columns of `data`. Every
+  class’s statistic depends on a permutation only through a sum over the
+  class, so each permutation is one pass over the pairs for all classes
+  (for Kendall’s tau-b too), in parallel.
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
   correlogram.
 
@@ -502,7 +520,8 @@
   groups of one sample, gives `NA`s with a warning.
   [`permdisp()`](https://cmmr.github.io/ecodive/reference/permdisp.md)’s
   pairwise t tests gain `p_adjusted` and `p_adjusted_perm` (each of its
-  p-value columns adjusted across the pairs, which `vegan::permutest()`
+  p-value columns adjusted across the pairs, which
+  [`vegan::permutest()`](https://vegandevs.github.io/vegan/reference/anova.cca.html)
   doesn’t do), and `z`, `n` and `n_perm` columns, so its pairwise table
   now has more columns than before.
 
@@ -519,7 +538,7 @@
   with `data`, a column name or one value per row of `data`; without it,
   one value per sample, matched by name when named, else by position.
   The same checks and messages apply everywhere. As with
-  `vegan::adonis2()`,
+  [`vegan::adonis2()`](https://vegandevs.github.io/vegan/reference/adonis.html),
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
   needs `groups` or a `formula` (use `formula = ~ .` to test every
   column of `data`). `permutations` is limited to 1e8.
@@ -528,15 +547,17 @@
   runs a distance-based redundancy analysis (db-RDA): the axes of a
   `dist` object that sample metadata explain, given as a formula such as
   `~ treatment + Condition(site)`. It gives the same eigenvalues,
-  inertia, site scores, biplot scores and centroids as `vegan::dbrda()`
-  (up to each axis’s sign; not `vegan::capscale()`, which differs for
-  non-Euclidean distances), without forming an n-by-n matrix: the
-  constrained axes come from a small eigenproblem, and unconstrained
-  axes (`MDS1`, …) are only computed when the constraints give fewer
-  than `n_axes` axes. Its results are identical for any number of
-  `cpus`. As in `vegan`, `dbrda(dm ~ treatment, data)` works too, and a
-  formula of only `Condition()` terms gives the unconstrained ordination
-  after removing their effect.
+  inertia, site scores, biplot scores and centroids as
+  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+  (up to each axis’s sign; not
+  [`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
+  which differs for non-Euclidean distances), without forming an n-by-n
+  matrix: the constrained axes come from a small eigenproblem, and
+  unconstrained axes (`MDS1`, …) are only computed when the constraints
+  give fewer than `n_axes` axes. Its results are identical for any
+  number of `cpus`. As in `vegan`, `dbrda(dm ~ treatment, data)` works
+  too, and a formula of only `Condition()` terms gives the unconstrained
+  ordination after removing their effect.
 
 - [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) takes
   the same `groups`, `data` and `formula` as
@@ -544,19 +565,22 @@
   one variable as `groups` (a vector or a column of `data`), or `data`
   and a `formula`, or `dm ~ terms`, so
   `dist_ord(dm, "dbrda", "treatment", meta)` works. Its results gain
-  `r_squared` and `adj_r_squared`, as `vegan::RsquareAdj()`, including
-  for partial models.
+  `r_squared` and `adj_r_squared`, as
+  [`vegan::RsquareAdj()`](https://vegandevs.github.io/vegan/reference/RsquareAdj.html),
+  including for partial models.
 
 - New
   [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md)
   runs a constrained analysis of principal coordinates. It gives the
-  same results as `vegan::capscale()` (and
-  `phyloseq::ordinate(method = "CAP")`), with any imaginary inertia from
-  negative eigenvalues reported in `inertia`. Euclidean distances take
-  [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)’s fast
-  path; otherwise a threaded eigendecomposition makes it about five
-  times faster than `vegan::capscale()` on one thread. Also available as
-  `dist_ord(dm, "capscale", ...)`.
+  same results as
+  [`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+  (and `phyloseq::ordinate(method = "CAP")`), with any imaginary inertia
+  from negative eigenvalues reported in `inertia`. Euclidean distances
+  take [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)’s
+  fast path; otherwise a threaded eigendecomposition makes it about five
+  times faster than
+  [`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
+  on one thread. Also available as `dist_ord(dm, "capscale", ...)`.
 
 - New [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md) runs a
   redundancy analysis of a count table: the axes of the (normalized)
@@ -565,17 +589,21 @@
   gives transformation-based RDA (tb-RDA), and `Condition()` terms
   partial RDA. It takes `groups`, `data` and `formula` as
   [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md) does
-  (and `counts ~ terms`, as `vegan::rda()`), and with no model it is a
-  PCA. It gives the same site scores, species scores (`loadings`),
-  eigenvalues, inertia, R-squared, biplot scores and centroids as
-  `vegan::rda()` (up to each axis’s sign), sharing
+  (and `counts ~ terms`, as
+  [`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html)),
+  and with no model it is a PCA. It gives the same site scores, species
+  scores (`loadings`), eigenvalues, inertia, R-squared, biplot scores
+  and centroids as
+  [`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html)
+  (up to each axis’s sign), sharing
   [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)’s
   solver and
   [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md)’s sparse
   table products, so the table is never made dense: with 3,000 samples
-  and 2,000 taxa it takes half a second where `vegan::rda()` takes a
-  minute. Results are identical for any number of `cpus`. Also available
-  as `count_ord(counts, "rda", ...)`. Its permutation test is
+  and 2,000 taxa it takes half a second where
+  [`vegan::rda()`](https://vegandevs.github.io/vegan/reference/cca.html)
+  takes a minute. Results are identical for any number of `cpus`. Also
+  available as `count_ord(counts, "rda", ...)`. Its permutation test is
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
   of Euclidean distances of the normalized table.
 
@@ -589,23 +617,31 @@
   including `Condition()` for partial CCA and `counts ~ terms`, and with
   no model it is a correspondence analysis. It gives the same site
   scores, species scores (`loadings`), eigenvalues, inertia, R-squared,
-  biplot scores and centroids as `vegan::cca()` (up to each axis’s
-  sign), and the same permutation-based adjusted R-squared as
-  `vegan::RsquareAdj()` for the same permutations (`permutations` and
-  `seed`), partial CCA included. It shares
+  biplot scores and centroids as
+  [`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html)
+  (up to each axis’s sign), and the same permutation-based adjusted
+  R-squared as
+  [`vegan::RsquareAdj()`](https://vegandevs.github.io/vegan/reference/RsquareAdj.html)
+  for the same permutations (`permutations` and `seed`), partial CCA
+  included. It shares
   [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md)’s solver,
   with the chi-square weights, and multiplies the table’s non-zero
   values only, so a sparse table is never made dense: with 3,000 samples
-  and 2,000 taxa it takes half a second where `vegan::cca()` takes a
-  minute. Results are identical for any number of `cpus`. Also available
-  as `count_ord(counts, "cca", ...)`.
+  and 2,000 taxa it takes half a second where
+  [`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html)
+  takes a minute. Results are identical for any number of `cpus`. Also
+  available as `count_ord(counts, "cca", ...)`.
 
 - New [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) runs a
   correspondence analysis of a table of abundances: the unconstrained
   ordination in the chi-square metric, with species scores (`loadings`).
   It gives the same site scores, species scores, eigenvalues and inertia
-  as `vegan::ca()` (`vegan::cca()` without constraints),
-  `ade4::dudi.coa()` and scikit-bio’s
+  as
+  [`vegan::ca()`](https://vegandevs.github.io/vegan/reference/cca.html)
+  ([`vegan::cca()`](https://vegandevs.github.io/vegan/reference/cca.html)
+  without constraints),
+  [`ade4::dudi.coa()`](https://adeverse.github.io/ade4/reference/dudi.coa.html)
+  and scikit-bio’s
   [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md) (up to each
   axis’s sign), and is the same as
   [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) with no
@@ -619,13 +655,15 @@
   taxa abundances) onto any ordination, for biplots: an arrow and
   r-squared for each numeric variable or feature, the centroid of each
   factor level, and permutation p-values. It gives the same arrows,
-  r-squared and centroids as `vegan::envfit()`, and the same p-values
-  for the same permutation matrix. Each permutation costs a few
-  multiply-adds per non-zero value of the table, with no refitting, and
-  sparse tables are never made dense, so thousands of taxa with 999
-  permutations take well under a second (minutes in `vegan`). It fits
-  every axis of the ordination by default (`vegan` fits the first two),
-  and its results are identical for any number of `cpus`.
+  r-squared and centroids as
+  [`vegan::envfit()`](https://vegandevs.github.io/vegan/reference/envfit.html),
+  and the same p-values for the same permutation matrix. Each
+  permutation costs a few multiply-adds per non-zero value of the table,
+  with no refitting, and sparse tables are never made dense, so
+  thousands of taxa with 999 permutations take well under a second
+  (minutes in `vegan`). It fits every axis of the ordination by default
+  (`vegan` fits the first two), and its results are identical for any
+  number of `cpus`.
 
 - New
   [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
@@ -634,18 +672,20 @@
   squares, m^2: how similar, say, Bray-Curtis and UniFrac PCoAs (or 16S
   and metagenomic ones) of the same samples are. It gives the same
   rotation, translation, dilation, residuals and m^2 as
-  `vegan::procrustes()` (and the same symmetric m^2 as SciPy’s
-  `scipy.spatial.procrustes()`), but takes its arguments as
-  `procrustes(ord, target)`: `vegan::procrustes(target, ord)`. vegan’s
-  `scale` is called `dilate`. Inputs may be `dist` objects, ordinated
-  with [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md)
-  first (`n_axes` axes), and samples are matched by name. The result is
-  the rotated ordination, with the rest as attributes. New
+  [`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html)
+  (and the same symmetric m^2 as SciPy’s `scipy.spatial.procrustes()`),
+  but takes its arguments as `procrustes(ord, target)`:
+  `vegan::procrustes(target, ord)`. vegan’s `scale` is called `dilate`.
+  Inputs may be `dist` objects, ordinated with
+  [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md) first
+  (`n_axes` axes), and samples are matched by name. The result is the
+  rotated ordination, with the rest as attributes. New
   [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
   runs the Procrustes randomization test (PROTEST), giving the same
-  statistic as `vegan::protest()` and the same p-values for the same
-  permutation matrix, in parallel C, with `strata`, and identical
-  results for any number of `cpus`.
+  statistic as
+  [`vegan::protest()`](https://vegandevs.github.io/vegan/reference/procrustes.html)
+  and the same p-values for the same permutation matrix, in parallel C,
+  with `strata`, and identical results for any number of `cpus`.
 
 - New [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md)
   runs a partial least squares discriminant analysis (PLS-DA): the
@@ -761,21 +801,23 @@
   [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md), and
   gives each taxon a permutation p-value (Clarke 1993), adjusted within
   each pair by `p_adjust` (Holm’s method by default). It gives the same
-  results as `vegan::simper()` and
-  [`summary()`](https://rdrr.io/r/base/summary.html) of it, as one data
-  frame. Its p-values count permuted contributions at least as large as
-  the observed one, as Clarke (1993) does; vegan counts only larger
-  ones, which makes its p-values too small for small groups. As in the
-  pairwise tests, each pair’s permutations shuffle only its own samples
-  (vegan shuffles all of them). It takes `groups` and `data` as
+  results as
+  [`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html)
+  and [`summary()`](https://rdrr.io/r/base/summary.html) of it, as one
+  data frame. Its p-values count permuted contributions at least as
+  large as the observed one, as Clarke (1993) does; vegan counts only
+  larger ones, which makes its p-values too small for small groups. As
+  in the pairwise tests, each pair’s permutations shuffle only its own
+  samples (vegan shuffles all of them). It takes `groups` and `data` as
   [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
   does, `strata`, `norm` (`'none'` by default, as vegan) and sparse
   tables, which it never makes dense, and runs in parallel C: 300
   samples and 3,000 taxa, three pairs with 99 permutations, take under 2
-  seconds on one thread, where `vegan::simper()` takes 27 seconds for
-  one pair. Results are identical for any number of `cpus`. Its docs
-  explain why SIMPER’s ranking mixes up differences in mean and in
-  variability (Warton et al. 2012).
+  seconds on one thread, where
+  [`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html)
+  takes 27 seconds for one pair. Results are identical for any number of
+  `cpus`. Its docs explain why SIMPER’s ranking mixes up differences in
+  mean and in variability (Warton et al. 2012).
 
 - New [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md)
   finds the subset of environmental variables whose distances among the
@@ -785,15 +827,17 @@
   as attribute `best`. It follows scikit-bio’s
   [`bioenv()`](https://cmmr.github.io/ecodive/reference/bioenv.md) and
   gives the same subsets and correlations as it and as
-  `vegan::bioenv()`, with vegan’s options: `method` (Spearman, Pearson
-  or Kendall), `metric` (`'euclidean'`, `'mahalanobis'`, `'manhattan'`
-  or `'gower'`), `max_vars` (vegan’s `upto`) and `given` (vegan’s
-  `partial`, also with Kendall, which vegan refuses). Variables come
-  from `data`, by `formula` or as its numeric columns, and samples are
-  matched by name. Every subset is searched in parallel C, with no
-  n-by-n matrix: 100 samples and 12 variables (4,095 subsets) take 1.2
-  seconds on one thread, where `vegan::bioenv()` takes 5.5. Results are
-  identical for any number of `cpus`.
+  [`vegan::bioenv()`](https://vegandevs.github.io/vegan/reference/bioenv.html),
+  with vegan’s options: `method` (Spearman, Pearson or Kendall),
+  `metric` (`'euclidean'`, `'mahalanobis'`, `'manhattan'` or `'gower'`),
+  `max_vars` (vegan’s `upto`) and `given` (vegan’s `partial`, also with
+  Kendall, which vegan refuses). Variables come from `data`, by
+  `formula` or as its numeric columns, and samples are matched by name.
+  Every subset is searched in parallel C, with no n-by-n matrix: 100
+  samples and 12 variables (4,095 subsets) take 1.2 seconds on one
+  thread, where
+  [`vegan::bioenv()`](https://vegandevs.github.io/vegan/reference/bioenv.html)
+  takes 5.5. Results are identical for any number of `cpus`.
 
 - New [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md)
   partitions the variation in a community among two to four sets of
@@ -803,15 +847,17 @@
   such as `"hellinger"`), db-RDAs of a `dist`, or, with
   `chisquare = TRUE`, CCAs with permutation-estimated adjusted R-squared
   (Peres-Neto et al. 2006). It gives the same fractions as
-  `vegan::varpart()` with two, three and four sets, as one data frame
-  named with vegan’s letters (`[a]`, `[b]`, …), with vegan’s union and
-  conditional fractions as attributes and a text Venn diagram when
-  printed. Each set is a formula over `data`, a data frame, a matrix, or
-  a vector, matched to the samples by name. For RDA and db-RDA, one pass
-  over the data gives every union’s R-squared, with no n-by-n matrix and
-  sparse tables kept sparse: with 3,000 samples, 2,000 taxa (5%
-  non-zero) and three sets, it takes 0.13 seconds on 4 threads
-  (Hellinger table or Bray-Curtis distances), where `vegan::varpart()`
+  [`vegan::varpart()`](https://vegandevs.github.io/vegan/reference/varpart.html)
+  with two, three and four sets, as one data frame named with vegan’s
+  letters (`[a]`, `[b]`, …), with vegan’s union and conditional
+  fractions as attributes and a text Venn diagram when printed. Each set
+  is a formula over `data`, a data frame, a matrix, or a vector, matched
+  to the samples by name. For RDA and db-RDA, one pass over the data
+  gives every union’s R-squared, with no n-by-n matrix and sparse tables
+  kept sparse: with 3,000 samples, 2,000 taxa (5% non-zero) and three
+  sets, it takes 0.13 seconds on 4 threads (Hellinger table or
+  Bray-Curtis distances), where
+  [`vegan::varpart()`](https://vegandevs.github.io/vegan/reference/varpart.html)
   takes 3.5. Results are identical for any number of `cpus`.
 
 - New
@@ -820,17 +866,19 @@
   a permutation test of each added variable and Blanchet et al.’s (2008)
   double stopping rule, for RDA of a count table (with `norm`) or db-RDA
   of a `dist`. It selects the same variables in the same order as
-  `vegan::ordiR2step()`, with the same adjusted R-squared and F, and the
-  same p-values given the same permutations. Candidates are the terms of
-  a formula over `data` (factors enter whole, interactions after their
-  main effects, `Condition()` terms are covariables). By default it
-  first tests the global model and selects nothing if that is not
-  significant; `max_vars` caps the number of variables, and `strata`
-  restricts permutations. Every candidate’s adjusted R-squared comes
-  from one pass over the data, and only the chosen candidate of each
-  step is tested: with 1,000 samples, 500 taxa, 11 candidates and 199
-  permutations, it takes 0.17 seconds on 4 threads for the Hellinger
-  table and 0.08 for Bray-Curtis distances, where `vegan::ordiR2step()`
+  [`vegan::ordiR2step()`](https://vegandevs.github.io/vegan/reference/ordistep.html),
+  with the same adjusted R-squared and F, and the same p-values given
+  the same permutations. Candidates are the terms of a formula over
+  `data` (factors enter whole, interactions after their main effects,
+  `Condition()` terms are covariables). By default it first tests the
+  global model and selects nothing if that is not significant;
+  `max_vars` caps the number of variables, and `strata` restricts
+  permutations. Every candidate’s adjusted R-squared comes from one pass
+  over the data, and only the chosen candidate of each step is tested:
+  with 1,000 samples, 500 taxa, 11 candidates and 199 permutations, it
+  takes 0.17 seconds on 4 threads for the Hellinger table and 0.08 for
+  Bray-Curtis distances, where
+  [`vegan::ordiR2step()`](https://vegandevs.github.io/vegan/reference/ordistep.html)
   takes 58 and 85. Results are identical for any number of `cpus`.
 
 - New
@@ -840,9 +888,10 @@
   `rda(counts ~ treatment:time + Condition(time))`, whose canonical
   coefficients give one curve per treatment (the control’s is 0) and
   whose species weights say how closely each taxon follows them. Its
-  coefficients, weights and eigenvalues are those of `vegan::prc()` and
-  [`summary()`](https://rdrr.io/r/base/summary.html) in each of vegan’s
-  scalings (`scaling`, `"symmetric"` by default, as vegan’s
+  coefficients, weights and eigenvalues are those of
+  [`vegan::prc()`](https://vegandevs.github.io/vegan/reference/prc.html)
+  and [`summary()`](https://rdrr.io/r/base/summary.html) in each of
+  vegan’s scalings (`scaling`, `"symmetric"` by default, as vegan’s
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html)), up to each
   axis’s sign: here each curve’s largest coefficient is positive. It
   tests the first axis and all axes by permutation, with the same F and
@@ -852,9 +901,10 @@
   Both statistics of every permutation come from one product of the
   sparse table with the permuted design, in threaded C, the same for any
   `cpus`: for 480 samples and 2,000 taxa, both tests with 999 whole-plot
-  permutations take 3 seconds on 4 threads, where `vegan::prc()` and its
-  two [`anova()`](https://rdrr.io/r/stats/anova.html) calls take 12
-  minutes. [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  permutations take 3 seconds on 4 threads, where
+  [`vegan::prc()`](https://vegandevs.github.io/vegan/reference/prc.html)
+  and its two [`anova()`](https://rdrr.io/r/stats/anova.html) calls take
+  12 minutes. [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
   draws the PRC diagram, with the taxa’s weights on a scale at its
   right.
 
@@ -1650,10 +1700,12 @@
   [`alpha_div_rarefied()`](https://cmmr.github.io/ecodive/reference/rarefied_diversity.md)
   rarefy a table many times (`times = 100` by default), compute any beta
   or alpha diversity metric from each rarefied table, and average the
-  results: the mean (as `vegan::avgdist()` and mothur), the median, or
-  for beta diversity the medoid (the matrix of the rarefaction closest
-  to all the others, as in q2-boots). `sd = TRUE` adds each value’s
-  standard deviation over the rarefactions. Iteration t is exactly
+  results: the mean (as
+  [`vegan::avgdist()`](https://vegandevs.github.io/vegan/reference/avgdist.html)
+  and mothur), the median, or for beta diversity the medoid (the matrix
+  of the rarefaction closest to all the others, as in q2-boots).
+  `sd = TRUE` adds each value’s standard deviation over the
+  rarefactions. Iteration t is exactly
   `rarefy(counts, depth, seed = seed + t - 1)`, so results are
   reproducible and the same for any `cpus`; the mean needs memory for
   only a few distance matrices, and the median and medoid work through
@@ -1667,16 +1719,16 @@
   and depth, with
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html). Richness
   (`'observed'`) is computed exactly in closed form, as
-  `vegan::rarefy()` and `rarecurve()` do (Hurlbert’s expected richness
-  and Heck et al.’s standard deviation, without vegan’s rounding error);
-  any other alpha metric, or several at once, by rarefying `times` times
-  at each depth (as QIIME 2’s `alpha-rarefaction`, whose depth grid it
-  uses), with the same seed at every depth, so that each rarefaction’s
-  subsamples are nested. Every row also has the expected sample coverage
-  (Chao & Jost 2012), and
-  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws depth,
-  coverage-based or sample-completeness curves, by group, with a line at
-  a planned rarefaction depth.
+  [`vegan::rarefy()`](https://vegandevs.github.io/vegan/reference/rarefy.html)
+  and `rarecurve()` do (Hurlbert’s expected richness and Heck et al.’s
+  standard deviation, without vegan’s rounding error); any other alpha
+  metric, or several at once, by rarefying `times` times at each depth
+  (as QIIME 2’s `alpha-rarefaction`, whose depth grid it uses), with the
+  same seed at every depth, so that each rarefaction’s subsamples are
+  nested. Every row also has the expected sample coverage (Chao & Jost
+  2012), and [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  draws depth, coverage-based or sample-completeness curves, by group,
+  with a line at a planned rarefaction depth.
 
 - New
   [`composition_barplot()`](https://cmmr.github.io/ecodive/reference/composition_barplot.md)
@@ -1692,6 +1744,21 @@
   drawn features’ centred clr values below, aligned with the bars. It
   returns the drawn proportions, colours and sample order invisibly;
   sparse tables stay sparse.
+
+- New
+  [`ternary_plot()`](https://cmmr.github.io/ecodive/reference/ternary_plot.md)
+  draws three-part compositions in a ternary diagram, and returns the
+  drawn coordinates invisibly. In samples mode (`parts`), each sample is
+  a point at three features, or three sums of features (“phyla”; one
+  part may be `NA`, for the rest). With `center = TRUE` the points are
+  centred by perturbation (von Eynatten et al. 2002), and the gridlines
+  become curves that still mark the original proportions.
+  `ellipses = "confidence"` or `"prediction"` adds each group’s
+  Hotelling region (F-based) from ilr coordinates, mapped back into the
+  triangle. In features mode (`groups` with 3 levels), each feature is a
+  point at its share of the three groups’ mean relative abundances,
+  sized by abundance and coloured by the group that holds most of it.
+  Sparse tables stay sparse.
 
 - [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of an
   ordination takes `scaling` and `links`, for compositional biplots

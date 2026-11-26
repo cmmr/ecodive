@@ -3,8 +3,9 @@
 Draws the Mantel statistic of each tested distance class against the
 class's midpoint, as
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of
-`vegan::mantel.correlog()` does: filled squares for the classes whose
-adjusted p-value is at most `alpha`, and open squares for the others.
+[`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html)
+does: filled squares for the classes whose adjusted p-value is at most
+`alpha`, and open squares for the others.
 
 ## Usage
 

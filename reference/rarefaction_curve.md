@@ -179,8 +179,10 @@ Two ways to compute a curve:
   observations, drawn without replacement (Hurlbert 1971), \$\$E\[S_d\]
   = \sum_i \left\[1 - \binom{N - x_i}{d} \Big/ \binom{N}{d}\right\],\$\$
   and its standard deviation (Heck et al. 1975). This is what
-  `vegan::rarefy()` and `vegan::rarecurve()` give. There is no
-  randomness, and `times` and `seed` are not used.
+  [`vegan::rarefy()`](https://vegandevs.github.io/vegan/reference/rarefy.html)
+  and
+  [`vegan::rarecurve()`](https://vegandevs.github.io/vegan/reference/rarefy.html)
+  give. There is no randomness, and `times` and `seed` are not used.
 
 - **By resampling**, for any alpha metric (QIIME 2's approach): the
   table is rarefied `times` times at each depth, and the metric's values
@@ -216,9 +218,10 @@ gives `NaN` there), and an empty sample has none at all.
 - QIIME 2's `alpha-rarefaction`: `n_depths = 10`, `analytic = FALSE`,
   `average = "median"`, with `max_depth` as given to it.
 
-- `vegan::rarecurve()` (every depth): `depths = seq_len(max(totals))`,
-  where `totals` are the library sizes; it computes richness in closed
-  form, as `rarefaction_curve()` does.
+- [`vegan::rarecurve()`](https://vegandevs.github.io/vegan/reference/rarefy.html)
+  (every depth): `depths = seq_len(max(totals))`, where `totals` are the
+  library sizes; it computes richness in closed form, as
+  `rarefaction_curve()` does.
 
 ## Nested rarefactions
 
@@ -243,9 +246,12 @@ completeness instead, see the `coverage` column
 
 ## Same names in other packages
 
-None, but `vegan::rarecurve()` draws the same curves for richness (and
-`vegan::rarefy()` gives their values), and `iNEXT::iNEXT()`'s
-interpolated sample coverage (`SC`) is the `coverage` column.
+None, but
+[`vegan::rarecurve()`](https://vegandevs.github.io/vegan/reference/rarefy.html)
+draws the same curves for richness (and
+[`vegan::rarefy()`](https://vegandevs.github.io/vegan/reference/rarefy.html)
+gives their values), and `iNEXT::iNEXT()`'s interpolated sample coverage
+(`SC`) is the `coverage` column.
 
 ## References
 

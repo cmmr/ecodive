@@ -4,10 +4,11 @@ Breaks down the mean Bray-Curtis dissimilarity between each pair of
 groups into the contribution of each taxon, to rank the taxa that differ
 most between the groups (Clarke 1993). Permutation tests give each
 taxon's contribution a p-value. Gives the same results as
-`vegan::simper()` and [`summary()`](https://rdrr.io/r/base/summary.html)
-of it, but runs in parallel C on sparse tables. Its p-values count ties
-with the observed contribution, as Clarke (1993) does, so they are never
-smaller than vegan's, which are too small for small groups (see
+[`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html)
+and [`summary()`](https://rdrr.io/r/base/summary.html) of it, but runs
+in parallel C on sparse tables. Its p-values count ties with the
+observed contribution, as Clarke (1993) does, so they are never smaller
+than vegan's, which are too small for small groups (see
 **Permutations**).
 
 ## Usage
@@ -64,9 +65,10 @@ simper(
 
 - norm:
 
-  Normalize `counts` first: `'none'` (as `vegan::simper()`, which uses
-  the values as given), `'percent'`, `'chord'`, `'hellinger'`, or
-  `'binary'`, as in
+  Normalize `counts` first: `'none'` (as
+  [`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html),
+  which uses the values as given), `'percent'`, `'chord'`,
+  `'hellinger'`, or `'binary'`, as in
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md).
   `'clr'` and `'rclr'` are not allowed: they give negative values, which
   Bray-Curtis can't use. Default: `'none'`.
@@ -85,9 +87,10 @@ simper(
 
   The number of permutations. `0` skips the tests, and gives `NA`
   p-values. Default: `999`. Alternatively, a matrix with one permutation
-  of `1:n` per row, as from `permute::shuffleSet()`, to use instead of
-  random ones: it is cut down to each pair's samples (see
-  **Permutations**).
+  of `1:n` per row, as from
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
+  to use instead of random ones: it is cut down to each pair's samples
+  (see **Permutations**).
 
 - strata:
 
@@ -174,15 +177,16 @@ its `average`. The p-value is \\(1 + \\\\average\_{perm} \ge average\\)
 permuted averages within a relative \\10^{-7}\\ of the observed one
 counted as ties (for rounding). Permutations that only swap samples
 within groups reproduce the observed `average` exactly, so they count.
-`vegan::simper()` counts only permuted averages that are strictly
-larger, which makes its p-values too small when groups are small: with
-two samples per group, a third of all permutations reproduce the
-observed `average`, and a taxon whose observed `average` is the largest
-possible gets \\p \approx 1 / (1 + permutations)\\ from vegan, where its
-p-value is about 1/3. So ecodive's p-values are never smaller than
-vegan's on the same permutations, and are equal for taxa that no
-permutation ties. Each pair has random permutations of its own, drawn
-from `seed` and the pair's position, as the pairwise tests of
+[`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html)
+counts only permuted averages that are strictly larger, which makes its
+p-values too small when groups are small: with two samples per group, a
+third of all permutations reproduce the observed `average`, and a taxon
+whose observed `average` is the largest possible gets \\p \approx 1 /
+(1 + permutations)\\ from vegan, where its p-value is about 1/3. So
+ecodive's p-values are never smaller than vegan's on the same
+permutations, and are equal for taxa that no permutation ties. Each pair
+has random permutations of its own, drawn from `seed` and the pair's
+position, as the pairwise tests of
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)
 and the others have. So `p_value`s are identical for any number of
 `cpus`, but differ by sampling error from `simper()` run by hand on the
@@ -190,10 +194,12 @@ pair's samples with the same `seed`. A supplied `permutations` matrix is
 cut down to each pair's samples by following each permutation's cycles,
 as in the pairwise tests (see
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md)'s
-**Pairwise comparisons**). Give `vegan::simper()` those permutations, on
-the pair's samples, for the same permutations.
+**Pairwise comparisons**). Give
+[`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html)
+those permutations, on the pair's samples, for the same permutations.
 
-The adjusted p-values (`p_adjusted`) are an addition: `vegan::simper()`
+The adjusted p-values (`p_adjusted`) are an addition:
+[`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html)
 doesn't adjust. A study of a few groups and hundreds of taxa tests many
 hypotheses, so look at `p_adjusted`, not `p_value`.
 
@@ -245,9 +251,11 @@ always in the same order, so results are identical for any `cpus`.
 
 ## Same names in other packages
 
-`vegan::simper()` has the same name: whichever package was attached last
-masks the other. Call `ecodive::simper()` or `vegan::simper()` to be
-sure.
+[`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html)
+has the same name: whichever package was attached last masks the other.
+Call `ecodive::simper()` or
+[`vegan::simper()`](https://vegandevs.github.io/vegan/reference/simper.html)
+to be sure.
 
 ## References
 
