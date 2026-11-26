@@ -1665,6 +1665,28 @@
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
   permutation distribution.
 
+- New [`dbmem()`](https://cmmr.github.io/ecodive/reference/dbmem.md):
+  distance-based Moran’s eigenvector maps (dbMEM, formerly PCNM; Borcard
+  & Legendre 2002, Dray et al. 2006), uncorrelated spatial variables
+  from broad to fine scales, to use as explanatory variables in
+  [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md),
+  [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md) or
+  [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md).
+  `space` gives the samples’ coordinates or geographic distances, as for
+  [`moran_i()`](https://cmmr.github.io/ecodive/reference/moran_i.md);
+  `threshold` is the truncation distance (by default the longest edge of
+  the minimum spanning tree), and `autocor` keeps the MEMs with positive
+  (the default), negative, non-zero or any Moran’s I, as adespatial’s
+  `MEM.autocor`. The MEMs, their eigenvalues and Moran’s I (attributes
+  `values` and `moran_i`) match adespatial’s
+  [`dbmem()`](https://cmmr.github.io/ecodive/reference/dbmem.md) to
+  about 1e-11 (up to sign), and its truncation vegan’s `pcnm()`. The
+  eigenvectors come from a Householder reduction and the QL algorithm in
+  threaded C, without the BLAS, the same for any `cpus`. The result is a
+  matrix of class `ecodive_dbmem`;
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws each
+  MEM’s Moran’s I, or maps MEMs over the samples’ coordinates.
+
 - New [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md):
   LEfSe, LDA effect size biomarker discovery (Segata et al. 2011),
   ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the

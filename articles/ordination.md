@@ -432,6 +432,86 @@ plot(fs)
 
 ![](ordination_files/figure-html/unnamed-chunk-18-1.png)
 
+### Spatial structure
+
+To ask how much of a community’s variation is spatial,
+[`dbmem()`](https://cmmr.github.io/ecodive/reference/dbmem.md) turns the
+samples’ positions (coordinates, or geographic distances) into
+distance-based Moran’s eigenvector maps (Dray et al. 2006): uncorrelated
+spatial variables, from broad-scale patterns to fine-scale ones, as
+`adespatial::dbmem()` does. By default it keeps those with positive
+spatial autocorrelation. They are then candidates for
+[`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md),
+and a set for
+[`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md). Here
+40 simulated sites have taxa that follow an east-west gradient and pH:
+
+``` r
+
+set.seed(1)
+sites <- data.frame(
+  row.names = paste0('S', 1:40),
+  east = runif(40, 0, 10), north = runif(40, 0, 10), ph = runif(40, 5, 8) )
+counts <- matrix(rpois(40 * 12, 3), 40, 12)
+counts[, 1:4] <- counts[, 1:4] + round(2 * sites$east)
+counts[, 5:8] <- counts[, 5:8] + round(3 * (sites$ph - 5))
+
+mem <- dbmem(c('east', 'north'), sites)
+mem
+#> # A matrix: 40 samples × 10 MEMs
+#> # Moran's Eigenvector Maps
+#> # Threshold: 2.51
+#>        MEM1    MEM2    MEM3    MEM4   MEM5   MEM6    MEM7    MEM8   MEM9  MEM10
+#> S1  -1.23   -0.3    -1.84    0.371   0.457  0.739 -0.21   -0.937   0.859 -0.225
+#> S2  -1.28    0.0915 -1.29    0.0456 -0.659 -0.189  0.0443  2.65   -0.907  0.355
+#> S3  -1.26   -1.46    0.625   0.354  -1.31  -1.1    0.74    0.698  -0.241  0.921
+#> S4   0.809  -0.412  -0.132  -1.66    0.401  1.9    2.03    0.0792 -0.567  1.02
+#> S5  -0.808   1.92   -0.0956 -0.812  -0.599 -0.118 -0.992   0.841  -1.27   0.713
+#> S6  -0.0021 -0.605   1.1    -0.726   1.15   2.42  -0.586   1.35    1.69   0.471
+#> S7   0.11   -0.047   0.147  -0.158   2.86  -1.73   0.405   0.338  -0.3    0.151
+#> S8   1.67   -0.432  -0.718  -0.245  -0.994 -0.711 -1.12    0.0986  0.593 -0.483
+#> S9  -0.69   -1.26    1.39    0.0979 -0.844 -0.804 -0.107  -0.819  -1.5   -0.911
+#> S10 -0.588   0.533  -0.78   -0.378   0.88   1.04  -2.08   -2.56   -1.42   0.879
+#> # … 30 more samples
+#> # Use print(x, n = ...) to see more samples
+#> # Attributes: values, moran_i, threshold, method
+plot(mem, sites[, c('east', 'north')])
+```
+
+![](ordination_files/figure-html/unnamed-chunk-19-1.png)
+
+``` r
+
+fs <- forward_select(counts, data = mem, norm = 'hellinger', permutations = 199)
+attr(fs, 'selected')
+#> ~MEM2 + MEM1
+
+varpart(
+  counts, ph = ~ ph, space = attr(fs, 'selected'),
+  data = cbind(sites, mem), norm = 'hellinger' )
+#> Variation partitioning by RDA (hellinger): 40 samples, 2 sets
+#> Total inertia: 1.81686 (sum of squares; variance 0.0465861)
+#> 
+#>   ph     ~ph                     1 df, adj. R-squared 0.0882
+#>   space  attr(fs, "selected")    2 df, adj. R-squared 0.1691
+#>   All                            3 df, adj. R-squared 0.2639
+#> 
+#>   +- ph ----------------------+
+#>   |               +-----------+---------------+
+#>   |  [a]          | [c]       |               |
+#>   |   0.0948      | -0.0067   |  [b]          |
+#>   |               |           |   0.1757      |
+#>   +---------------+-----------+               |
+#>                   +- space -------------------+
+#>   Residuals [d] 0.7361
+#> 
+#>           sets df r_squared adj_r_squared testable
+#> [a]         ph  1    0.1089        0.0948     TRUE
+#> [b]      space  2    0.2090        0.1757     TRUE
+#> [c] ph & space NA    0.0027       -0.0067    FALSE
+#> [d]  residuals NA    0.6795        0.7361    FALSE
+```
+
 [`principal_response_curves()`](https://cmmr.github.io/ecodive/reference/principal_response_curves.md),
 which is planned, will also build on
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md).
@@ -495,7 +575,7 @@ ord <- plsda(round(iris[, 1:4] * 10), 'Species', iris)
 plot(ord)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-21-1.png)
+![](ordination_files/figure-html/unnamed-chunk-23-1.png)
 
 ``` r
 
@@ -564,7 +644,7 @@ ord <- oplsda(round(two[, 1:4] * 10), 'Species', two)
 plot(ord)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-24-1.png)
+![](ordination_files/figure-html/unnamed-chunk-26-1.png)
 
 ``` r
 
@@ -630,7 +710,7 @@ attr(ord, 'loadings')
 plot(ord, 'Species', iris)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-26-1.png)
+![](ordination_files/figure-html/unnamed-chunk-28-1.png)
 
 PCA is PCoA of Euclidean distances: both give the same scores, up to
 each axis’s sign.
@@ -738,7 +818,7 @@ plot(ord, 'Species', iris)
 plot(fit, add = TRUE)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-31-1.png)
+![](ordination_files/figure-html/unnamed-chunk-33-1.png)
 
 ## Comparing two ordinations
 
@@ -789,7 +869,7 @@ two metrics disagree.
 plot(fit)
 ```
 
-![](ordination_files/figure-html/unnamed-chunk-33-1.png)
+![](ordination_files/figure-html/unnamed-chunk-35-1.png)
 
 ## Speed and reproducibility
 

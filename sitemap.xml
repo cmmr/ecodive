@@ -65,6 +65,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/da_test.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/da_tests.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/da_wilcoxon.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/dbmem.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/dbrda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/decontam.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/decontam_frequency_plot.html</loc></url>
@@ -164,6 +165,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_cross_assoc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dbmem.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_decontam.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_lm.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_ttest.html</loc></url>

@@ -941,10 +941,16 @@ Test whether sample metadata explain beta diversity distances.
 
 Spatial structure among samples from their positions (coordinates,
 geographic distances or spatial weights). Moran’s I tests whether a
-variable is more alike at nearby sites.
+variable is more alike at nearby sites; Moran’s eigenvector maps turn
+positions into spatial variables for constrained ordination and
+variation partitioning.
 
 - [`moran_i()`](https://cmmr.github.io/ecodive/reference/moran_i.md) :
   Moran's I Test of Spatial Autocorrelation
+- [`dbmem()`](https://cmmr.github.io/ecodive/reference/dbmem.md) :
+  Distance-Based Moran's Eigenvector Maps
+- [`plot(`*`<ecodive_dbmem>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_dbmem.md)
+  : Plot Moran's eigenvector maps
 
 ## Interpreting Differences
 
@@ -1027,6 +1033,7 @@ than every value.
   : Titles of results
 - [`print(`*`<ecodive_batch>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+  [`print(`*`<ecodive_dbmem>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_source>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
