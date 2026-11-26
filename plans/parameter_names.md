@@ -28,7 +28,7 @@ same thing.
 | `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv`; `cross_assoc` (covariates: a formula over `data`, column names, or a table) |
 | `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20) | everything that takes `counts` |
 | `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
-| `scaling` | how a biplot scales samples against features: `'form'` (1), `'covariance'` (2), `'contribution'`; vegan's 1, 2, 3 for `rda`, `cca`, `ca` (item 44, 2026-11-24) | `plot.ecodive_ord` |
+| `scaling` | how a biplot scales samples against features: `'form'` (1), `'covariance'` (2), `'contribution'`; vegan's 1, 2, 3 for `rda`, `cca`, `ca` (item 44, 2026-11-24); vegan's 1, 2, 3 (`'sites'`, `'species'`, `'symmetric'`) for the coefficients and weights of `principal_response_curves` (item 57) | `plot.ecodive_ord`, `principal_response_curves` |
 | `links` | pairs of features joined in a covariance biplot (Aitchison & Greenacre's term) | `plot.ecodive_ord` |
 | `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
 | `metric` | a beta diversity metric name | `beta_div`, `alpha_div`; planned `bioenv` |
@@ -50,6 +50,7 @@ same thing.
 | `var_equal` | **(new, 2026-11-20)** `TRUE` for Student's t-test with a pooled variance, `FALSE` (the default) for Welch's (as `t.test(var.equal)`, snake_case) | `da_ttest` |
 | `part_weights`, `ilr_weights` | **(new)** PhILR's taxon and balance weights | planned `philr` |
 | `subjects`, `states` | **(new)** per-sample subject ids and time points / conditions (numeric time points for the longitudinal functions), by the same `per_sample()` rule as `groups` | `first_differences`, `first_distances`, `volatility`, `nmit` (2026-11-24, item 56); planned `ctf` |
+| `treatment`, `time`, `control`, `plots` | **(new, 2026-11-25, item 57)** each sample's treatment and time point, by `per_sample()`'s rule (time points are categories, so not `states`, which the longitudinal functions take as numbers); the control treatment (a level of `treatment`); and the experimental units whose series of samples are permuted whole (permute's `Plots(strata = )`) | `principal_response_curves` |
 | `baseline`, `replicates` | **(new, 2026-11-24)** the state that every other is compared with (`NULL`: consecutive states), and what to do with a subject's several samples at one state (`'error'`, `'drop'`, `'random'`; q2-longitudinal's `replicate_handling`) | `first_differences`, `first_distances` |
 | `matrix_norm` | **(new, 2026-11-24)** the norm of a matrix difference (`'frobenius'`, `'nuclear'`); not `norm`, which normalizes counts | `nmit` |
 | `n_resamples` | **(new, 2026-11-24)** an exact count of bootstrap resamples (`n_<unit>` rule) | `volatility` |

@@ -559,6 +559,26 @@
   and 0.08 for Bray-Curtis distances, where `vegan::ordiR2step()` takes 58
   and 85. Results are identical for any number of `cpus`.
 
+* New `principal_response_curves()` (PRC; van den Brink & ter Braak 1999)
+  summarizes how treated communities diverge from a control over time: a
+  partial RDA, `rda(counts ~ treatment:time + Condition(time))`, whose
+  canonical coefficients give one curve per treatment (the control's is 0)
+  and whose species weights say how closely each taxon follows them. Its
+  coefficients, weights and eigenvalues are those of `vegan::prc()` and
+  `summary()` in each of vegan's scalings (`scaling`, `"symmetric"` by
+  default, as vegan's `plot()`), up to each axis's sign: here each curve's
+  largest coefficient is positive. It tests the first axis and all axes by
+  permutation, with the same F and p-values as `anova(prc, first = TRUE)`
+  and `anova(prc)` given the same permutations; `plots` permutes whole
+  experimental units (each one's series of samples kept together), and
+  `strata` permutes within blocks. Both statistics of every permutation
+  come from one product of the sparse table with the permuted design, in
+  threaded C, the same for any `cpus`: for 480 samples and 2,000 taxa,
+  both tests with 999 whole-plot permutations take 3 seconds on 4 threads,
+  where `vegan::prc()` and its two `anova()` calls take 12 minutes.
+  `plot()` draws the PRC diagram, with the taxa's weights on a scale at its
+  right.
+
 * New `alr()` and `ilr()`, the additive and isometric log-ratio transforms,
   complete the clr and rclr that `norm` already offers. `alr()` divides by a
   `denominator` feature that you choose (there is no default: scikit-bio

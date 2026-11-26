@@ -203,6 +203,7 @@ reference:
   - bioenv
   - varpart
   - forward_select
+  - principal_response_curves
   - procrustes
   - procrustes_test
   - list_dist_ords
@@ -253,6 +254,7 @@ reference:
   - plot.ecodive_da_sensitivity
   - plot.ecodive_varpart
   - plot.ecodive_forward_select
+  - plot.ecodive_prc
   - plot.ecodive_bioenv
   - plot.ecodive_types
   - plot.ecodive_source
