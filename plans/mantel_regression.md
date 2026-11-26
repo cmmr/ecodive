@@ -104,3 +104,93 @@ An Rd page next to `mantel()` in the reference index, and NEWS.
   *Evolution*, 48, 1487–1499.
 - Lichstein, J. W. (2007). Multiple regression on distance matrices: a
   multivariate spatial analysis tool. *Plant Ecology*, 188, 117–131.
+
+
+## Decisions made while implementing (2026-11-26)
+
+ecodist 2.1.3's `MRM()` was characterised from its documentation (its Rd
+page) and outputs only; its source was not read. What it does, as
+`mantel_regression()` now does:
+
+- **Statistics:** OLS with an intercept on the unfolded lower triangles;
+  `mrank = TRUE` ranks each vector (average ranks) first. Coefficients
+  include the intercept (`Int`), with a p-value.
+- **P-values:** each coefficient (the intercept too) is tested two-sided on
+  its pseudo-t, `b / se(b)` (|t_perm| >= |t|), as the Rd page says; R^2 and
+  F upper-tailed (always the same p-value). The observed samples count as
+  one of `nperm`, so `nperm = 1000` is `permutations = 999`.
+- **Permutations:** `MRM()` draws them in C from R's RNG, so there is no R
+  function to override with `assignInNamespace()` (its namespace has only
+  `mrmperm`, a native symbol). Instead, from its outputs: it consumes exactly
+  `(n - 1) * nperm` uniforms, and of eight candidate shuffles (with and
+  without composing, inverting, and counting the observed one), only one
+  reproduced its p-values: nperm - 1 *cumulative* Sattolo shuffles
+  (`for i = n..2: j = floor(U * (i - 1)) + 1; swap(i, j)`), each applied to
+  the already-permuted response. `data-raw/expected/mantel_regression.r`
+  rebuilds them as a permutations matrix (rows = absolute permutations of the
+  response's samples), which gives `MRM()`'s p-values exactly.
+
+The user's choices (asked at the start):
+
+- **Factor, character and logical terms** become 0 (same value) / 1
+  (different) distances.
+- **`strata`** is an argument, as in the rest of the Mantel family (an error
+  together with a permutations matrix).
+- **`plot()`** draws the standardized coefficients (`std_estimate`, a new
+  column: `b * sd(x) / sd(y)` over the pairs, ranks for Spearman), filled
+  where `p_value <= alpha`, dashed line at 0, subtitle "R2 = ..., p = ...".
+  `alpha` is a `plot()` argument, as in `mantel_correlogram()`.
+
+My own decisions:
+
+- **Signature:** the plan's, plus `strata`, in this order: `dm, ..., data,
+  formula, method, permutations, strata, seed, cpus`. `dm` may also be a
+  two-sided formula (`dm ~ ph + temp`), as in `permanova()` (`formula_dm()`).
+  A formula passed positionally (into `...`) or as `data` is an error that
+  says to name it.
+- **Term forms:** in `formula`, numeric variables give `|x_i - x_j|`, numeric
+  matrices (`cbind(lat, lon)`) Euclidean distances, factors 0/1; terms may be
+  expressions (`log(depth)`), but interactions and `Condition()` are errors.
+  `model_design()` aligns `data` and checks the variables (missing, NA,
+  infinite), and then each term label is evaluated in the aligned data. In
+  `...`: dist objects or distance matrices (matched by sample name, as
+  `mantel()`'s `y`), coordinates (a data frame, or a matrix that isn't
+  square-symmetric with a zero diagonal, as `mantel_correlogram()`), one
+  value per sample (vectors, through `per_sample()`, so they follow the same
+  rules as `strata`), or a column name of `data`. Formula terms come first,
+  then `...`'s. Unnamed `...` terms are named by their deparsed expression
+  (or the column name). Duplicate names are an error.
+- **Collinear terms** (by `qr()`'s rank, tolerance 1e-7, after centring:
+  so a constant term counts) are an error naming them, not `lm()`'s `NA`
+  coefficients. A constant `dm` is an error. Fewer than `p + 2` pairs is an
+  error (no residual degrees of freedom).
+- **Algorithm:** centre the terms and orthonormalize them once (QR), so
+  every statistic of a permutation follows from `Q'y_perm` (`m` dot products,
+  one pass over the pairs in `C_mantel_regression()` in `src/mantel.c`, the
+  explanatory pair `(i, j)` meeting response pair `(p[i], p[j])`): slopes
+  `R^-1 Q'y`, `SSR = |Q'y|^2`, `RSS = TSS - SSR`, the intercept from the
+  means. The observed RSS is taken from the residuals, exactly. Each
+  permutation is one thread's, summed in a fixed order: identical for any
+  `cpus`. It reuses `perm_source_*`, `perm_matrix()`, `perm_p()` (with its
+  `sqrt(.Machine$double.eps)` tie tolerance), `mantel_dist()`,
+  `mantel_align()`, `mantel_is_dist()`, `per_sample()` and `model_design()`.
+  It doesn't use `mantel_inputs()`, which handles exactly one `y` and one
+  `given`.
+- **Result:** the plan's list, with `coefficients` (`term`, `estimate`,
+  `std_estimate`, `t`, `p_value`; the intercept first, as `(Intercept)`),
+  `r_squared`, `F`, `p_value` (F's), `df` (`c(p, N - p - 1)`), `n_perm`,
+  `method`, `n`, `permutation`; attributes `f_perm` and `t_perm` (permutations
+  x coefficients). Title "Multiple Regression on Distance Matrices of
+  <dm's title>", or the name alone. Its own `print()` (in
+  `R/mantel_regression.r`, not `R/print.r`), and `as.data.frame()` gives
+  `coefficients`.
+- **No `method = 'logistic'`** (ecodist's logistic MRM); documented under
+  "Differences".
+- **Not in any registry** (a plain function, as the plan says), so no
+  aliases yet.
+- **Fixture:** the oribatid mites (vegan's `mite`, `mite.env`, `mite.xy`),
+  Hellinger distances on geographic distance, substrate density, water
+  content, and 0/1 microtopography and shrub matrices; 5 cases, Pearson and
+  Spearman, one to three terms, 199 shared permutations.
+- **Docs:** `vignettes/stat_tests.Rmd` gains a short example (iris);
+  `mantel()`, `mantel_partial()` and `mantel_correlogram()` link to it.

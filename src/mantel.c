@@ -625,3 +625,156 @@ SEXP C_mantel_classes(
   UNPROTECT(1);
   return sexp_s;
 }
+
+
+//======================================================
+// Multiple regression on distance matrices (MRM): for the
+// observed samples and each permutation of the
+// response's samples, the products Q'y of the response's
+// pairs, permuted, with each column of Q, an orthonormal
+// basis of the centred explanatory distances.
+//
+// The explanatory pairs stay fixed: explanatory pair
+// (i, j) meets response pair (p[i], p[j]), as y[p, p]. The
+// slopes, R^2, F and pseudo-t statistics all follow from
+// Q'y (mantel_regression() computes them), so each
+// permutation is one pass over the pairs: O(N m) for N
+// pairs and m explanatory matrices.
+//
+// Each permutation is computed by one thread, start to
+// finish, summing in a fixed order, so results are
+// identical for any thread count.
+//======================================================
+
+static int           mr_n;
+static int           mr_m;       // Explanatory matrices.
+static int           mr_total;   // Permutations + 1.
+static const double *mr_y;       // Response, packed.
+static double       *mr_qt;      // Q, pair-major: qt[s * m + c].
+static ptrdiff_t    *mr_cs1;
+static double       *mr_out;     // m x mr_total products.
+static perm_source_t mr_ps;
+static int          *mr_iwork;   // Per thread: p, q.
+static double       *mr_dwork;   // Per thread: m sums.
+static int           mr_k0;
+static int           mr_k1;
+
+
+static void *mantel_regression_worker(void *arg) {
+
+  worker_t        *w   = (worker_t *) arg;
+  int              n   = mr_n;
+  int              m   = mr_m;
+  int             *p   = mr_iwork + (size_t) w->i * 2 * n;
+  int             *q   = p + n;
+  double          *s   = mr_dwork + (size_t) w->i * m;
+  const double    *y   = mr_y;
+  const double    *qt  = mr_qt;
+  const ptrdiff_t *cs1 = mr_cs1;
+
+  for (int k = mr_k0 + w->i; k < mr_k1; k += w->n) {
+
+    perm_source_get(&mr_ps, k, p);
+    for (int a = 0; a < n; a++) q[p[a]] = a;
+
+    for (int c = 0; c < m; c++) s[c] = 0;
+
+    // Explanatory pair (i, j), i > j, meets response
+    // pair (p[i], p[j]). The columns j are visited in
+    // order of b = p[j], as in mantel_classes_worker().
+    for (int b = 0; b < n; b++) {
+      int       j  = q[b];
+      ptrdiff_t yb = cs1[b];
+      ptrdiff_t tb = cs1[j];  // tb + i: explanatory pair (i, j)
+      for (int i = j + 1; i < n; i++) {
+        int           a  = p[i];
+        double        yv = y[(a > b) ? yb + a : cs1[a] + b];
+        const double *qs = qt + (size_t) (tb + i) * m;
+        for (int c = 0; c < m; c++) s[c] += qs[c] * yv;
+      }
+    }
+
+    double *out = mr_out + (size_t) k * m;
+    for (int c = 0; c < m; c++) out[c] = s[c];
+  }
+
+  return NULL;
+}
+
+
+//======================================================
+// R interface.
+//
+// y:       The response's packed values (double).
+// q:       N x m orthonormal basis of the centred
+//          explanatory distances (double).
+// perms:   n x n_perm integer matrix of 0-based
+//          permutations, or NULL for random ones.
+// strata:  Each sample's stratum, 0 .. n_strata - 1, or NULL.
+// opts:    c(n, m, n_perm, seed, n_threads).
+//
+// Returns an m x (n_perm + 1) matrix of products Q'y,
+// column 1 for the observed samples.
+//======================================================
+SEXP C_mantel_regression(
+    SEXP sexp_y, SEXP sexp_q, SEXP sexp_perms, SEXP sexp_strata,
+    SEXP sexp_opts ) {
+
+  int n         = INTEGER(sexp_opts)[0];
+  int m         = INTEGER(sexp_opts)[1];
+  int n_perm    = INTEGER(sexp_opts)[2];
+  int seed      = INTEGER(sexp_opts)[3];
+  int n_threads = INTEGER(sexp_opts)[4];
+
+  size_t N = (size_t) n * (size_t) (n - 1) / 2;
+
+  if (n < 2 || m < 1 || n_perm < 0 || n_threads < 1 || N > INT_MAX ||
+      (size_t) XLENGTH(sexp_y) != N || (size_t) XLENGTH(sexp_q) != N * m)
+    error("Invalid arguments to C_mantel_regression()."); // # nocov
+
+  mr_n     = n;
+  mr_m     = m;
+  mr_total = n_perm + 1;
+  mr_y     = REAL(sexp_y);
+
+  // Each pair's m values together.
+  const double *qr = REAL(sexp_q);
+  mr_qt = (double *) R_alloc(N * m, sizeof(double));
+  for (int c = 0; c < m; c++)
+    for (size_t s = 0; s < N; s++)
+      mr_qt[s * m + c] = qr[(size_t) c * N + s];
+
+  mr_cs1 = (ptrdiff_t *) R_alloc(n, sizeof(ptrdiff_t));
+  for (int b = 0; b < n; b++)
+    mr_cs1[b] = (ptrdiff_t) dist_col_start(b, n) - b - 1;
+
+  perm_source_init(&mr_ps, n, sexp_perms, sexp_strata, seed);
+
+  if (n_threads > mr_total) n_threads = mr_total;
+
+  mr_iwork = (int *)    R_alloc((size_t) 2 * n * n_threads, sizeof(int));
+  mr_dwork = (double *) R_alloc((size_t) m * n_threads, sizeof(double));
+
+  SEXP sexp_u = PROTECT(allocMatrix(REALSXP, m, mr_total));
+  mr_out = REAL(sexp_u);
+
+  // Rounds of permutations, checking for interrupts
+  // between them, as C_mantel().
+  double per_perm  = (double) N * (m + 1) + n;
+  int    per_round = (int) fmin(1e8 * n_threads / per_perm, (double) mr_total);
+  if (per_round < n_threads) per_round = n_threads;
+
+  for (mr_k0 = 0; mr_k0 < mr_total; mr_k0 = mr_k1) {
+
+    mr_k1 = (mr_total - mr_k0 > per_round) ? mr_k0 + per_round : mr_total;
+
+    int nt = threads_for(n_threads, per_perm * (mr_k1 - mr_k0), 1e6);
+    if (nt > mr_k1 - mr_k0) nt = mr_k1 - mr_k0;
+    run_parallel(mantel_regression_worker, nt, (nt > 1) ? 100 : 1);
+
+    if (mr_k1 < mr_total) R_CheckUserInterrupt();
+  }
+
+  UNPROTECT(1);
+  return sexp_u;
+}

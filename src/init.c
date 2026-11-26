@@ -60,6 +60,7 @@ extern SEXP C_log_ratio_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cross_assoc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel_classes(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_mantel_regression(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_moran_perm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_moran_weights(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -186,6 +187,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_cross_assoc", (DL_FUNC) &C_cross_assoc, 6},
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
   {"C_mantel_classes", (DL_FUNC) &C_mantel_classes, 5},
+  {"C_mantel_regression", (DL_FUNC) &C_mantel_regression, 5},
   {"C_moran_perm",    (DL_FUNC) &C_moran_perm,    4},
   {"C_moran_weights", (DL_FUNC) &C_moran_weights, 4},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},

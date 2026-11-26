@@ -188,7 +188,7 @@
 #' American Statistical Association*, 21(153), 65-66.
 #' \doi{10.1080/01621459.1926.10502161}
 #'
-#' @seealso [mantel()], [mantel_partial()], [plot.ecodive_mantel_correlogram()]
+#' @seealso [mantel()], [mantel_partial()], [mantel_regression()], [plot.ecodive_mantel_correlogram()]
 #'
 #' @export
 #' @examples

@@ -249,5 +249,5 @@ American Statistical Association}, 21(153), 65-66.
 \doi{10.1080/01621459.1926.10502161}
 }
 \seealso{
-\code{\link[=mantel]{mantel()}}, \code{\link[=mantel_partial]{mantel_partial()}}, \code{\link[=plot.ecodive_mantel_correlogram]{plot.ecodive_mantel_correlogram()}}
+\code{\link[=mantel]{mantel()}}, \code{\link[=mantel_partial]{mantel_partial()}}, \code{\link[=mantel_regression]{mantel_regression()}}, \code{\link[=plot.ecodive_mantel_correlogram]{plot.ecodive_mantel_correlogram()}}
 }

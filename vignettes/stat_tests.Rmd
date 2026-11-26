@@ -182,6 +182,19 @@ res
 plot(res)
 ```
 
+`mantel_regression()` regresses `dm` on several distance matrices at once
+(multiple regression on distance matrices, MRM), with a permutation
+p-value for each term and for the whole model: here, which of petal length,
+petal width and species explains the differences in sepals. A numeric
+column's distances are its differences, and a factor's are 0 (same species)
+or 1 (different).
+
+```{r}
+res <- mantel_regression(sepals ~ Petal.Length + Petal.Width + Species, data = iris)
+res
+plot(res)
+```
+
 
 ## Running tests by name
 

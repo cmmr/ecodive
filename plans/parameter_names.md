@@ -30,7 +30,7 @@ same thing.
 | `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
 | `scaling` | how a biplot scales samples against features: `'form'` (1), `'covariance'` (2), `'contribution'`; vegan's 1, 2, 3 for `rda`, `cca`, `ca` (item 44, 2026-11-24); vegan's 1, 2, 3 (`'sites'`, `'species'`, `'symmetric'`) for the coefficients and weights of `principal_response_curves` (item 57) | `plot.ecodive_ord`, `principal_response_curves` |
 | `links` | pairs of features joined in a covariance biplot (Aitchison & Greenacre's term) | `plot.ecodive_ord` |
-| `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
+| `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `bioenv`; `mantel_regression` takes only `'pearson'` (least squares) and `'spearman'` (least squares on ranks: ecodist's `mrank = TRUE`) (2026-11-26, item 69) |
 | `metric` | a beta diversity metric name | `beta_div`, `alpha_div`; planned `bioenv` |
 | `alternative` | `'greater'`, `'less'` or `'two.sided'`; `mantel_correlogram()` adds `'sign'` (its default, vegan's: each class tested in the direction of its statistic's sign; 2026-11-25, item 58) | `mantel`, `mantel_partial`, `mantel_correlogram`, `moran_i` (for its analytic p-values too) |
 | `permutations`, `strata`, `seed` | the permutation test (a count or a matrix), restricted permutations, and the RNG seed | all tests, `envfit` |

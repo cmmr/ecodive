@@ -298,6 +298,19 @@
   pairs for all classes (for Kendall's tau-b too), in parallel. `plot()`
   draws the correlogram.
 
+* New `mantel_regression()` fits a multiple regression on distance matrices
+  (MRM): one distance matrix (such as community dissimilarities) regressed on
+  several others (geographic distance, differences in pH, ...), with
+  permutation p-values for each coefficient (pseudo-t) and for the whole
+  model (F). Terms come as distance matrices, coordinates, one value per
+  sample, or a formula of sample metadata, whose numbers become absolute
+  differences, matrices Euclidean distances, and factors 0 (same) or 1
+  (different). `method = 'spearman'` regresses the ranks. It gives the same
+  coefficients, R^2, F, and p-values (given the same permutations) as
+  `ecodist::MRM()`. Each permutation is one pass over the pairs, in
+  parallel, with `strata` for restricted permutations. `plot()` draws the
+  standardized coefficients.
+
 * New `dist_test(dm, test, groups, data, ...)` runs any of these tests by
   name, as `dist_ord()` does for ordination methods: `dist_test(dm, "mrpp",
   "treatment", meta)` is `mrpp(dm, "treatment", meta)`, and other arguments
