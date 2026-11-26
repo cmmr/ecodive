@@ -165,6 +165,9 @@
   expect_true(inherits(fdt, 'ecodive_first_distances') && nrow(fdt) == 15L && all(fdt$distance >= 0))
   vol <- volatility(shan, 'subj', 'day', 'grp', lm_meta, n_resamples = 50L)
   expect_true(inherits(vol, 'ecodive_volatility') && nrow(vol$means) == 8L && all(is.finite(vol$global)))
+  fvo <- feature_volatility(counts, 'subj', 'day', 'grp', lm_meta, n_trees = 10L, n_resamples = 50L, cpus = cpus)
+  expect_true(inherits(fvo, 'ecodive_feature_volatility') && nrow(fvo$predictions) == 4L &&
+              all(is.finite(fvo$features$importance)) && nrow(fvo$means) == 8L * nrow(fvo$features))
   nm <- nmit(counts, 'subj', lm_meta, cpus = cpus)
   expect_true(inherits(nm, 'ecodive_dist') && attr(nm, 'Size') == 5L && all(is.finite(nm)) && all(nm >= 0))
 
@@ -475,6 +478,7 @@
   expect_true(drawn(fdi))    # first_differences()
   expect_true(drawn(fdt))    # first_distances()
   expect_true(drawn(vol))    # volatility()
+  expect_true(drawn(fvo))    # feature_volatility()
   expect_true(drawn(bm))   # batch_mmuphin()
   expect_true(drawn(bc, type = 'means'))   # batch_combat()
   expect_true(is.data.frame(decontam_frequency_plot(counts, 'F1', dc_conc, dc_neg)))

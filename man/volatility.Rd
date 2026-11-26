@@ -120,6 +120,7 @@ Graphics}, 22, 659--668. \doi{10.1109/TVCG.2015.2467091}
 }
 \seealso{
 Other longitudinal:
+\code{\link[=feature_volatility]{feature_volatility()}},
 \code{\link[=first_differences]{first_differences()}},
 \code{\link[=first_distances]{first_distances()}},
 \code{\link[=nmit]{nmit()}}

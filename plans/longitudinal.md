@@ -457,3 +457,106 @@ Made while implementing:
   `subjects`, `states` and `groups`, `plot.ecodive_volatility()` for the
   chosen feature's chart, and `first_differences(norm = 'percent')` for the
   per-state mean differences of `_summarize_feature_stats()`.
+
+
+## Decisions made while implementing (item 63)
+
+`feature_volatility()`, 2026-11-26. Asked of the user at the start (one
+round):
+
+- **Workflow: q2's 80/20 hold-out, without RFE.** q2's pipeline runs
+  `regress_samples`: `train_test_split(test_size = 0.2)`, RFECV on the
+  training samples, a forest on the features RFECV keeps, and the accuracy
+  of the held-out predictions. ecodive keeps the hold-out (`test_size =
+  0.2`) and drops RFECV (as this plan said): one forest on every feature of
+  the training samples ranks them all.
+- **Ranking: the forest's impurity importance** (`importance =
+  'impurity'`, q2's `feature_importances_`); `'permutation'` is the
+  alternative.
+- **`n_trees = 100`**, q2's default (random_forest()'s is 500).
+- **`norm = 'percent'`** for the forest by default (random_forest()'s; q2
+  grows it on the table given, usually counts: `norm = 'none'`); the
+  statistics and the chart always use relative abundances, as q2's.
+
+Made while implementing:
+
+- **Signature:** `feature_volatility(counts, subjects, states, groups =
+  NULL, data = NULL, n_features = 100L, test_size = 0.2, importance =
+  'impurity', margin = 1L, norm = 'percent', pseudocount = NULL, n_trees =
+  100L, conf_level = 0.95, n_resamples = 1000L, seed = 0L, cpus = n_cpus(),
+  ...)`: `volatility()`'s order (`subjects` may be missing or `NULL`);
+  `...` takes only `max_features`, `min_samples_leaf`, `min_samples_split`,
+  `max_depth`, `criterion`, `max_samples`, `n_folds` and `keep_forest`
+  (others are an error naming the allowed ones). `n_folds` defaults to 0:
+  q2's fit has no CV without RFE or tuning; the hold-out measures accuracy.
+  q2's `importance_threshold` is not ported (filter `$features`).
+- **The split** is scikit-learn's ShuffleSplit: `ceiling(test_size * n)`
+  held out, the first of a random permutation; the rest train
+  in the permutation's order (q2's order, which the bootstrap indices
+  refer to). PCG: `C_rf_shuffle()` on stream 2^62 + 2^48. `test_size = 0`
+  trains on every sample, and the held-out metrics are `NA`; fewer than two
+  training samples is an error. Internally,
+  `feature_volatility_details(numpy_random_state = )` draws numpy's legacy
+  `RandomState(rs).permutation(n)` (new `C_rf_rng_test()` kind 5:
+  `random_interval()` is `mt_randint()`) and scikit-learn's tree seeds, so
+  the whole pipeline reproduces q2's.
+- **`rf_run()` gained an internal `train` argument** (training samples in
+  a given order; the others are predicted by the full-data forest and
+  returned as `holdout`), rather than subsetting the table, so sparse
+  tables stay sparse and every input type works.
+- **Held-out metrics** use random_forest()'s definitions: `mse`,
+  `r_squared` (the coefficient of determination; q2's scatter plot's
+  "r-squared" is `r^2`, which the tests compare), `slope`, `intercept`,
+  `r` (scipy's `linregress()` of predicted on observed, as q2), plus the
+  forest's `oob_r_squared`.
+- **Ranking ties** follow the table's feature order (random_forest()'s);
+  features absent from every training sample keep importance 0 (q2's
+  DictVectorizer drops them).
+- **Statistics** (`_summarize_feature_stats()`) are over every sample,
+  training and held out, as q2's (it summarizes the whole relative table);
+  the mean per state is over all groups; `global_cv` is SD / mean, as q2's
+  "Global CV (%)" column, which is not a percentage. Relative abundances
+  are computed only for the kept features, from `C_normalize()`'s triplets
+  for sparse tables (no dense copy of the table).
+- **`NA` in `states`, `subjects` or `groups` is an error** (the
+  longitudinal family's rule, and q2's `missing_samples = 'error'`
+  default).
+- **Chart numbers:** `volatility()`'s per-(group, state) computation moved
+  into `long_vol_cells()` (many variables at once; `volatility()`'s results
+  are unchanged, bit for bit). `C_volatility_ci()` takes an optional third
+  `args` element, a stream offset in units of 2^32; feature f's cell k
+  (0-based) draws from PCG stream 2^52 + f · cells + k, a stream R doubles
+  can name exactly (2^60 + k cannot), so the tests rebuild the intervals
+  with `C_rng_dist()`.
+- **Result:** a list of class `ecodive_feature_volatility`: `features`,
+  `means` (with a `feature` column), `abundances` (samples × kept features),
+  `samples` (`sample`, `subject`, `group`, `state`, `set`), `predictions`
+  (held-out samples), `performance`, and `forest` (the random_forest()
+  result). No `global` element: the control limits are `global_mean` ±
+  k · `global_sd` of `features` (the same numbers as volatility()'s
+  `global`), and `plot()` forms them. Attributes `method`, `conf_level`,
+  `n_resamples`, `test_size`; `display` has the title "Feature
+  Volatility", `xlab` (the `states` column) and `legend` (the `groups`
+  column).
+- **`plot()`**: `layout()` of two panels (widths 1 : 2): grey importance
+  bars of the top `n_bars` (20) features, the chosen one (`feature`, a
+  name or rank, default 1) in `PLOT_HIGHLIGHT`; then
+  `plot.ecodive_volatility()` of that feature (title its name, y label
+  "Relative abundance"), `...` going to the chart. `par()` is restored.
+- **`print()`** is its own short method: the forest and hold-out summary
+  line, then the `features` table via `print_table_lines()`.
+- **Credits:** the "QIIME 2 development team" `Authors@R` entry and the
+  longitudinal `inst/COPYRIGHTS` stanza are extended (q2-sample-classifier
+  has the same copyright line); `R/feature_volatility.r` carries the BSD-3
+  text.
+- **Fixtures:** `data-raw/expected/feature_volatility.{r,py}` (78 samples
+  of 16 subjects at 5 states × 25 features). The Python script loads
+  q2-longitudinal's `_utilities.py` and q2-sample-classifier's
+  `utilities.py` / `visuals.py` (2026.10.0 tags, fetched through jsDelivr)
+  with stubbed `qiime2.plugin`, `q2templates` and a `MetadataColumn`
+  stand-in, and calls `_prepare_training_data()`, `_fit_estimator()`
+  (`optimize_feature_selection = False`, and `True` once for information),
+  `_linear_regress()`, `_importance_filtering()` and
+  `_summarize_feature_stats()`, under Python 3.13.18, scikit-learn 1.9.1,
+  NumPy 2.5.5, pandas 2.3.3, SciPy 1.18.1, biom-format 2.1.18 and
+  statsmodels 0.14.6.

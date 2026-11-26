@@ -431,48 +431,12 @@ volatility <- function (
 
 
   #--------------------------------------------------------
-  # Each group at each state: mean, n and interval.
+  # Each group at each state, and the global control limits.
   #--------------------------------------------------------
-  st_u  <- sort(unique(st))
-  cell  <- (as.integer(grp) - 1L) * length(st_u) + match(st, st_u)
-  cells <- sort(unique(cell))
-  ok    <- !is.na(y)
-
-  # The values of each cell, in sample order.
-  o    <- order(cell, seq_len(n), method = 'radix')
-  o    <- o[ok[o]]
-  vals <- as.double(y[o])
-  cnt  <- tabulate(match(cell[o], cells), length(cells))
-  pos  <- c(0L, cumsum(cnt))
-
-  mean_v <- vapply(seq_along(cells), function (k) {
-    if (cnt[[k]] == 0) NA_real_ else sum(vals[seq_len(cnt[[k]]) + pos[[k]]]) / cnt[[k]]
-  }, numeric(1))
-
-  ci <- .Call(C_volatility_ci, vals, as.integer(pos), c(n_resamples, seed), 1 - conf_level)
-
-  gi <- (cells - 1L) %/% length(st_u) + 1L
-  si <- (cells - 1L) %%  length(st_u) + 1L
-
-  means <- data.frame(
-    group = factor(levels(grp)[gi], levels = levels(grp)),
-    state = st_u[si],
-    mean  = mean_v,
-    lower = ci[1, ],
-    upper = ci[2, ],
-    n     = cnt )
-
-
-  #--------------------------------------------------------
-  # Global control limits (Vega's mean and stdev).
-  #--------------------------------------------------------
-  yy <- as.double(y[ok])
-  gm <- if (length(yy)) sum(yy) / length(yy) else NA_real_
-  gs <- if (length(yy) > 1) sqrt(sum((yy - gm)^2) / (length(yy) - 1)) else if (length(yy)) 0 else NA_real_
-  global <- c(
-    mean = gm, sd = gs,
-    lower_3sd = gm - 3 * gs, lower_2sd = gm - 2 * gs,
-    upper_2sd = gm + 2 * gs, upper_3sd = gm + 3 * gs )
+  vc     <- long_vol_cells(matrix(y, ncol = 1), st, grp, n_resamples, seed, 1 - conf_level)
+  means  <- vc$means[, -1L]
+  rownames(means) <- NULL
+  global <- vc$global[1, ]
 
 
   #--------------------------------------------------------
@@ -1072,6 +1036,76 @@ long_levels <- function (v) {
   if (is.factor(v)) return (levels(droplevels(v)))
   as.character(sort(unique(v), method = 'radix'))
 }
+
+
+#------------------------------------------------------------------------------
+# volatility()'s numbers for each column of `ys` (samples x variables):
+# each group at each state (`grp` a factor, `st` numeric), the mean of the
+# non-NA values (in sample order), their number, and Vega's bootstrap
+# interval; and over all samples the mean, SD (n - 1; 0 for one value) and
+# the limits at 2 and 3 SDs.
+#
+# Cells are the (group, state) pairs that have samples, in group then state
+# order, the same for every variable; cell k (0-based) of variable j draws
+# from PCG stream base + (j - 1) * cells + k, base = stream_hi * 2^32
+# (volatility(): 0).
+#
+# Returns list(means: data frame of variable (column index), group, state,
+# mean, lower, upper, n; global: a matrix, one row per variable).
+#------------------------------------------------------------------------------
+long_vol_cells <- function (ys, st, grp, n_resamples, seed, alpha, stream_hi = NULL) {
+
+  n     <- nrow(ys)
+  st_u  <- sort(unique(st))
+  cell  <- (as.integer(grp) - 1L) * length(st_u) + match(st, st_u)
+  cells <- sort(unique(cell))
+  nc    <- length(cells)
+  o     <- order(cell, seq_len(n), method = 'radix')
+  co    <- match(cell[o], cells)
+  gi    <- (cells - 1L) %/% length(st_u) + 1L
+  si    <- (cells - 1L) %%  length(st_u) + 1L
+
+  vals <- vector('list', ncol(ys))
+  cnt  <- vector('list', ncol(ys))
+  for (j in seq_len(ncol(ys))) {
+    y  <- ys[o, j]
+    ok <- !is.na(y)
+    vals[[j]] <- as.double(y[ok])
+    cnt[[j]]  <- tabulate(co[ok], nc)
+  }
+  cnt  <- unlist(cnt)
+  vals <- unlist(vals)
+  pos  <- c(0L, cumsum(cnt))
+
+  mean_v <- vapply(seq_along(cnt), function (k) {
+    if (cnt[[k]] == 0) NA_real_ else sum(vals[seq_len(cnt[[k]]) + pos[[k]]]) / cnt[[k]]
+  }, numeric(1))
+
+  args <- c(n_resamples, seed, stream_hi)
+  ci <- .Call(C_volatility_ci, vals, as.integer(pos), as.integer(args), alpha)
+
+  means <- data.frame(
+    variable = rep(seq_len(ncol(ys)), each = nc),
+    group    = factor(levels(grp)[gi], levels = levels(grp))[rep(seq_len(nc), ncol(ys))],
+    state    = rep(st_u[si], ncol(ys)),
+    mean     = mean_v,
+    lower    = ci[1, ],
+    upper    = ci[2, ],
+    n        = cnt )
+
+  global <- t(vapply(seq_len(ncol(ys)), function (j) {
+    yy <- ys[, j]
+    yy <- as.double(yy[!is.na(yy)])
+    gm <- if (length(yy)) sum(yy) / length(yy) else NA_real_
+    gs <- if (length(yy) > 1) sqrt(sum((yy - gm)^2) / (length(yy) - 1)) else if (length(yy)) 0 else NA_real_
+    c(mean = gm, sd = gs,
+      lower_3sd = gm - 3 * gs, lower_2sd = gm - 2 * gs,
+      upper_2sd = gm + 2 * gs, upper_3sd = gm + 3 * gs )
+  }, numeric(6)))
+
+  list(means = means, global = global)
+}
+
 
 # `v` as a factor, in long_levels()'s order.
 long_factor <- function (v) {
