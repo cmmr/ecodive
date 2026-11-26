@@ -10,8 +10,7 @@ distance-based redundancy analysis of distances
 ([`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md)), or
 canonical correspondence analysis
 ([`cca()`](https://cmmr.github.io/ecodive/reference/cca.md)), as in
-[`vegan::varpart()`](https://vegandevs.github.io/vegan/reference/varpart.html),
-with the same results.
+`vegan::varpart()`, with the same results.
 
 ## Usage
 
@@ -104,11 +103,9 @@ varpart(
 
   With `chisquare = TRUE`: the number of permutations for each adjusted
   \\R^2\\ (at least 1), or a matrix with one permutation of the samples
-  per row (such as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html)),
-  so that results can be compared exactly with vegan's. The same
-  permutations are used for every set and union of sets. Not used
-  otherwise. Default: `1000`.
+  per row (such as from `permute::shuffleSet()`), so that results can be
+  compared exactly with vegan's. The same permutations are used for
+  every set and union of sets. Not used otherwise. Default: `1000`.
 
 - seed:
 
@@ -230,9 +227,9 @@ permutations. Results are identical for any number of `cpus`.
 
 **Same names in other packages**
 
-[`vegan::varpart()`](https://vegandevs.github.io/vegan/reference/varpart.html)
-has the same name. When both packages are attached, the one attached
-last masks the other; call `ecodive::varpart()` to be sure.
+`vegan::varpart()` has the same name. When both packages are attached,
+the one attached last masks the other; call `ecodive::varpart()` to be
+sure.
 
 ## Input Types
 

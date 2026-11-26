@@ -47,9 +47,8 @@ values are written in them, not drawn to scale. Fractions shared by
 several sets can be negative, when the sets explain more together than
 the sum of what they explain apart. The fractions are the
 `adj_r_squared` column of `x`, and its row names (`[a]`, `[b]`, ...)
-follow the regions as in
-[`vegan::showvarparts()`](https://vegandevs.github.io/vegan/reference/varpart.html):
-`[a]` is the first set's own fraction, `[b]` the second's, and so on.
+follow the regions as in `vegan::showvarparts()`: `[a]` is the first
+set's own fraction, `[b]` the second's, and so on.
 
 ## Examples
 

@@ -4,9 +4,8 @@ How does community similarity change with distance? Splits the distances
 between samples (geographic, or any other) into classes, and for each
 class runs a Mantel test of `dm` against a matrix marking the pairs of
 samples in that class. Gives the same classes, statistics, and p-values
-as
-[`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html),
-computing every class's test in one pass of parallel C per permutation.
+as `vegan::mantel.correlog()`, computing every class's test in one pass
+of parallel C per permutation.
 
 ## Usage
 
@@ -46,11 +45,11 @@ mantel_correlogram(
   names, otherwise in the same order; or the samples' coordinates, a
   numeric matrix or data frame with one row per sample (matched by row
   name, else in the same order), whose Euclidean distances are used, as
-  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html)'s
-  `XY` (a square, symmetric matrix with a zero diagonal is taken as
-  distances); or numeric values, one per sample, whose absolute
-  differences are used. With `data`, the name of one of its numeric
-  columns (one value per sample), or the names of several (coordinates).
+  `vegan::mantel.correlog()`'s `XY` (a square, symmetric matrix with a
+  zero diagonal is taken as distances); or numeric values, one per
+  sample, whose absolute differences are used. With `data`, the name of
+  one of its numeric columns (one value per sample), or the names of
+  several (coordinates).
 
 - data:
 
@@ -71,15 +70,13 @@ mantel_correlogram(
 
   The number of classes of equal width, when `breaks` isn't given.
   Default: `NULL`, for Sturges' rule, \\\lceil \log_2 N + 1 \rceil\\ for
-  \\N\\ pairs of samples, as in
-  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html).
+  \\N\\ pairs of samples, as in `vegan::mantel.correlog()`.
 
 - cutoff:
 
   `TRUE` to test, in the second half of the classes, only the classes
-  whose pairs include every sample, as
-  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html)
-  does; `FALSE` to test every class. Default: `TRUE`.
+  whose pairs include every sample, as `vegan::mantel.correlog()` does;
+  `FALSE` to test every class. Default: `TRUE`.
 
 - method:
 
@@ -91,10 +88,9 @@ mantel_correlogram(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones. Each permutation shuffles the samples
-  of `y` (the distance classes), with `dm` held fixed, as in
-  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html).
+  `permute::shuffleSet()`, to use instead of random ones. Each
+  permutation shuffles the samples of `y` (the distance classes), with
+  `dm` held fixed, as in `vegan::mantel.correlog()`.
 
 - p_adjust:
 
@@ -104,8 +100,7 @@ mantel_correlogram(
 
 - progressive:
 
-  `TRUE` for a progressive adjustment, as
-  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html)
+  `TRUE` for a progressive adjustment, as `vegan::mantel.correlog()`
   does by default (Legendre & Legendre 2012): the first tested class's
   p-value is not adjusted, and the k-th's is adjusted together with
   those of the k - 1 tested classes before it, at shorter distances.
@@ -125,8 +120,7 @@ mantel_correlogram(
 
   Which correlations count as more extreme than each class's observed
   one: `'sign'`, in the direction of its sign (more positive when it is
-  positive, more negative otherwise), as in
-  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html);
+  positive, more negative otherwise), as in `vegan::mantel.correlog()`;
   `'greater'` (more positive); `'less'` (more negative); or
   `'two.sided'` (larger in absolute value). Default: `'sign'`.
 
@@ -152,14 +146,12 @@ with one row per distance class, in order of distance:
   `class_to`; the first class also holds those equal to its
   `class_from`.
 
-- `class_mid`: The class's midpoint,
-  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html)'s
+- `class_mid`: The class's midpoint, `vegan::mantel.correlog()`'s
   `class.index`.
 
 - `n_pairs`: The number of pairs of samples in the class.
-  [`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html)'s
-  `n.dist` is twice this: it counts each pair twice, as in a full
-  distance matrix.
+  `vegan::mantel.correlog()`'s `n.dist` is twice this: it counts each
+  pair twice, as in a full distance matrix.
 
 - `r`: The Mantel statistic, the correlation of `dm` with a matrix that
   is 0 for the pairs in the class and 1 for the others. It is positive
@@ -205,13 +197,10 @@ By default, the p-values are one-tailed in the direction of each
 statistic's sign, \\(1 + \\\\r\_{perm} \ge r\\) / (1 + permutations)\\
 when \\r \> 0\\, and \\(1 + \\\\r\_{perm} \le r\\) / (1 +
 permutations)\\ otherwise (a statistic within `1e-12` of 0 counts as 0),
-as in
-[`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html).
-As in
-[`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html),
-permuted statistics within `sqrt(.Machine$double.eps)` of the observed
-one count as ties. More permutations are needed than for a single test,
-for the adjusted p-values of the later classes to reach significance.
+as in `vegan::mantel.correlog()`. As in `vegan::mantel()`, permuted
+statistics within `sqrt(.Machine$double.eps)` of the observed one count
+as ties. More permutations are needed than for a single test, for the
+adjusted p-values of the later classes to reach significance.
 
 **Speed and memory**
 
@@ -221,19 +210,17 @@ Pearson's r on the standardized distances (Spearman's on their ranks),
 and Kendall's tau-b on their midranks, as a Mann-Whitney statistic. So
 each permutation is one pass over the \\n(n-1)/2\\ pairs, which sums
 every class at once, with no \\n \times n\\ matrix, where
-[`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html)
-runs a separate Mantel test per class (and Kendall's tau in \\O(n^4)\\
-each). Permutations run in parallel.
+`vegan::mantel.correlog()` runs a separate Mantel test per class (and
+Kendall's tau in \\O(n^4)\\ each). Permutations run in parallel.
 
 **Reproducibility**
 
 The permutations come from `seed`, not from R's random number generator,
 so [`set.seed()`](https://rdrr.io/r/base/Random.html) has no effect, and
 p-values are identical from run to run and for any number of `cpus`.
-They differ from
-[`vegan::mantel.correlog()`](https://vegandevs.github.io/vegan/reference/mantel.correlog.html)'s
-random permutations, which differ between classes, so p-values agree
-with it only up to sampling error.
+They differ from `vegan::mantel.correlog()`'s random permutations, which
+differ between classes, so p-values agree with it only up to sampling
+error.
 
 **Differences from vegan::mantel.correlog()**
 

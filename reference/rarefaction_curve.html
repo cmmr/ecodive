@@ -216,7 +216,7 @@ features in a random subsample of \(d\) of a sample's \(N\)
 observations, drawn without replacement (Hurlbert 1971),
 $$E[S_d] = \sum_i \left[1 - \binom{N - x_i}{d} \Big/ \binom{N}{d}\right],$$
 and its standard deviation (Heck et al. 1975). This is what
-<code><a href="https://vegandevs.github.io/vegan/reference/rarefy.html" class="external-link">vegan::rarefy()</a></code> and <code><a href="https://vegandevs.github.io/vegan/reference/rarefy.html" class="external-link">vegan::rarecurve()</a></code> give. There is no randomness,
+<code>vegan::rarefy()</code> and <code>vegan::rarecurve()</code> give. There is no randomness,
 and <code>times</code> and <code>seed</code> are not used.</p></li>
 <li><p><strong>By resampling</strong>, for any alpha metric (QIIME 2's approach): the
 table is rarefied <code>times</code> times at each depth, and the metric's values
@@ -245,7 +245,7 @@ most <code>max_depth</code>), so that each curve ends at the sample's observed
 value. A sample has no rows at depths above its library size (QIIME 2
 gives <code>NaN</code> there), and an empty sample has none at all.</p><ul><li><p>QIIME 2's <code>alpha-rarefaction</code>: <code>n_depths = 10</code>, <code>analytic = FALSE</code>,
 <code>average = "median"</code>, with <code>max_depth</code> as given to it.</p></li>
-<li><p><code><a href="https://vegandevs.github.io/vegan/reference/rarefy.html" class="external-link">vegan::rarecurve()</a></code> (every depth): <code>depths = seq_len(max(totals))</code>,
+<li><p><code>vegan::rarecurve()</code> (every depth): <code>depths = seq_len(max(totals))</code>,
 where <code>totals</code> are the library sizes; it computes richness in closed
 form, as <code>rarefaction_curve()</code> does.</p></li>
 </ul></div>
@@ -276,8 +276,8 @@ instead, see the <code>coverage</code> column (<code>plot(x, type = "completenes
     <h2 id="same-names-in-other-packages">Same names in other packages<a class="anchor" aria-label="anchor" href="#same-names-in-other-packages"></a></h2>
 
 
-<p>None, but <code><a href="https://vegandevs.github.io/vegan/reference/rarefy.html" class="external-link">vegan::rarecurve()</a></code> draws the same curves for richness (and
-<code><a href="https://vegandevs.github.io/vegan/reference/rarefy.html" class="external-link">vegan::rarefy()</a></code> gives their values), and <code>iNEXT::iNEXT()</code>'s
+<p>None, but <code>vegan::rarecurve()</code> draws the same curves for richness (and
+<code>vegan::rarefy()</code> gives their values), and <code>iNEXT::iNEXT()</code>'s
 interpolated sample coverage (<code>SC</code>) is the <code>coverage</code> column.</p>
     </div>
     <div class="section level2">

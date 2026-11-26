@@ -113,10 +113,9 @@ indicator_species(
 
   The number of permutations. `0` skips the test, and gives `NA`
   p-values. Default: `999`. Alternatively, a matrix with one permutation
-  of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones: sample `i` then takes the group of
-  sample `permutations[k, i]`, as in
+  of `1:n` per row, as from `permute::shuffleSet()`, to use instead of
+  random ones: sample `i` then takes the group of sample
+  `permutations[k, i]`, as in
   `indicspecies::multipatt(permutations = )`.
 
 - strata:

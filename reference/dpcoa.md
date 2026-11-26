@@ -166,16 +166,14 @@ axis's sign. Differences:
   the within-samples diversity is `weighted.mean(rao, w)`.
 
 - phyloseq's DPCoA applies a Cailliez correction to the distances when
-  [`ade4::is.euclid()`](https://adeverse.github.io/ade4/reference/is.euclid.html)
-  finds them non-Euclidean. The square roots of patristic distances are
-  always Euclidean, so that only happens through rounding error;
-  `dpcoa()` never corrects them.
+  `ade4::is.euclid()` finds them non-Euclidean. The square roots of
+  patristic distances are always Euclidean, so that only happens through
+  rounding error; `dpcoa()` never corrects them.
 
 **Same names in other packages**
 
-[`ade4::dpcoa()`](https://adeverse.github.io/ade4/reference/dpcoa.html)
-shares its name with `dpcoa()`; whichever package was attached last
-masks the other's. Write `ecodive::dpcoa()`, or use
+`ade4::dpcoa()` shares its name with `dpcoa()`; whichever package was
+attached last masks the other's. Write `ecodive::dpcoa()`, or use
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md),
 to be sure.
 

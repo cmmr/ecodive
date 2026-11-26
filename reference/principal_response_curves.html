@@ -72,7 +72,7 @@ removed, and what remains is the treatments' effect at each time point.
 Each treatment's curve is its canonical coefficient at each time point,
 measured from the control (whose curve is 0), and each feature's weight
 says how closely its abundance follows the curves. Gives the same results
-as <code><a href="https://vegandevs.github.io/vegan/reference/prc.html" class="external-link">vegan::prc()</a></code>, with permutation tests of the first axis and of all
+as <code>vegan::prc()</code>, with permutation tests of the first axis and of all
 axes as <code>anova(vegan::prc(...), first = TRUE)</code> and <code>anova(...)</code>.</p>
     </div>
 
@@ -133,7 +133,7 @@ must be in the same order as the samples. Default: <code>NULL</code>.</p></dd>
 <dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
 <dd><p>The control treatment: one of the values of <code>treatment</code>.
 Default: <code>NULL</code>, the first level of <code>treatment</code> (its first value in
-sorted order, if not a factor), as in <code><a href="https://vegandevs.github.io/vegan/reference/prc.html" class="external-link">vegan::prc()</a></code>.</p></dd>
+sorted order, if not a factor), as in <code>vegan::prc()</code>.</p></dd>
 
 
 <dt id="arg-margin">margin<a class="anchor" aria-label="anchor" href="#arg-margin"></a></dt>
@@ -183,7 +183,7 @@ Default: <code>'symmetric'</code>, <code>vegan</code>'s default for <code><a hre
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of random permutations for the tests, or a
 matrix with one permutation of the samples per row (such as
-<code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code> returns). <code>0</code> runs no tests. Default: <code>999</code>.</p></dd>
+<code>permute::shuffleSet()</code> returns). <code>0</code> runs no tests. Default: <code>999</code>.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
@@ -266,7 +266,7 @@ a <code>pseudocount</code>) or <code>norm = 'hellinger'</code>. van den Brink &a
 analyzed \(\log(10 x + 1)\) counts; transform such values yourself and
 give them with <code>norm = 'none'</code>, the default.</p>
 <p><strong>Permutation tests</strong></p>
-<p>Both tests are those of <code><a href="https://vegandevs.github.io/vegan/reference/anova.cca.html" class="external-link">vegan::anova.cca()</a></code> under the reduced model:</p><ul><li><p>all axes: \(F = (\mathrm{SS}_X / q) / (\mathrm{RSS} / \nu)\),
+<p>Both tests are those of <code>vegan::anova.cca()</code> under the reduced model:</p><ul><li><p>all axes: \(F = (\mathrm{SS}_X / q) / (\mathrm{RSS} / \nu)\),
 for \(q\) constraint columns and \(\nu = n - 1 - \mathrm{rank}(Z) -
   q\) residual degrees of freedom. This is PERMANOVA of the Euclidean
 distances between the normalized samples (<code><a href="permanova.html">permanova()</a></code> of
@@ -285,7 +285,7 @@ the p-values equal <code>vegan</code>'s for the same permutations. Samples sampl
 repeatedly are not independent, so permute whole plots (<code>plots</code>) or
 within time points (<code>strata</code>) rather than freely; <code>vegan</code>'s own
 restricted designs (such as <code>Within(type = "series")</code>) can be given as a
-<code>permutations</code> matrix from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>.</p>
+<code>permutations</code> matrix from <code>permute::shuffleSet()</code>.</p>
 <p><strong>Signs</strong></p>
 <p>Each axis is flipped so that its coefficient with the largest absolute
 value is positive (the first such, if tied), and the features' weights
@@ -294,7 +294,7 @@ flipped with it. So the curves mostly rise from the control, and their
 signs may be the reverse of <code>vegan</code>'s.</p>
 <p><strong>Matching vegan</strong></p>
 <p><code>coefficients</code> and <code>weights</code> are <code>vegan</code>'s <code>summary(prc(...), scaling = scaling)</code> (up to each axis's sign), and <code>eig</code> its eigenvalues. Where a
-time point has no control samples, <code><a href="https://vegandevs.github.io/vegan/reference/prc.html" class="external-link">vegan::prc()</a></code> drops some other
+time point has no control samples, <code>vegan::prc()</code> drops some other
 treatment's column and reports coefficients relative to that treatment;
 here they are <code>NA</code>, with a warning. The test statistics and p-values are
 those of <code>anova(prc, first = TRUE)</code> and <code>anova(prc)</code> for the same

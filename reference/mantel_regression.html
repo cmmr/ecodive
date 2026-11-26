@@ -79,6 +79,8 @@ coefficients, \(R^2\), \(F\), and permutation p-values as
 <span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"pearson"</span>,</span>
 <span>  permutations <span class="op">=</span> <span class="fl">999L</span>,</span>
+<span>  backward <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">0L</span>,</span>
 <span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -141,8 +143,20 @@ distances, or <code>'spearman'</code>, for the same regression of their ranks:
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of permutations. Default: <code>999</code>.
 Alternatively, a matrix with one permutation of <code>1:n</code> per row, as
-from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones. Give
+from <code>permute::shuffleSet()</code>, to use instead of random ones. Give
 <code>0</code> for no p-values.</p></dd>
+
+
+<dt id="arg-backward">backward<a class="anchor" aria-label="anchor" href="#arg-backward"></a></dt>
+<dd><p>Whether to simplify the model by backward elimination
+(Lichstein 2007): remove the least significant term, refit, and
+repeat until every term left has a p-value of at most <code>alpha</code>. See
+<strong>Backward elimination</strong>. Default: <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>With <code>backward = TRUE</code>, the significance level a term's
+p-value must reach to stay in the model. Default: <code>0.05</code>.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
@@ -192,6 +206,12 @@ of the test, which is by permutation: the pairs aren't independent.</p></li>
 <li><p><code>n</code>: The number of samples.</p></li>
 <li><p><code>permutation</code>: How samples were permuted: <code>'free'</code>, <code>'within strata'</code>,
 or <code>'supplied matrix'</code>.</p></li>
+</ul><p>With <code>backward = TRUE</code>, these describe the final model, and there are
+also:</p><ul><li><p><code>alpha</code>: The significance level.</p></li>
+<li><p><code>elimination</code>: A data frame with one row per term removed, in order
+(no rows if none was): <code>step</code>, <code>term</code>, its <code>t</code> and <code>p_value</code> in the
+model it was removed from, and that model's \(R^2\)
+(<code>r_squared_before</code>) and the next one's (<code>r_squared_after</code>).</p></li>
 </ul><p>Attribute <code>f_perm</code> is a vector of the \(F\) statistics of the
 permutations, and attribute <code>t_perm</code> a matrix of their pseudo-t
 statistics, one row per permutation and one column per coefficient.
@@ -223,6 +243,20 @@ ranks (average ranks for ties) before the regression: <code>ecodist::MRM()</code
 and the test of \(F\) is the two-sided Mantel test.</p>
 <p>Terms whose distances are collinear (one a linear combination of the
 others, or the same for every pair) are an error.</p>
+<p><strong>Backward elimination</strong></p>
+<p>With <code>backward = TRUE</code>, the model is simplified by backward elimination,
+as in Lichstein (2007): the term with the largest p-value is removed if that p-value
+is above <code>alpha</code>, the model is refitted without it, and so on, until
+every term left has a p-value of at most <code>alpha</code>. Among terms with equal
+p-values (permutation p-values often tie), the one with the smallest
+\(|t|\) goes first. Every refit uses the same permutations, so the
+steps, like the p-values, are the same from run to run and for any number
+of <code>cpus</code>. If every term is removed, only the intercept is left: then
+\(R^2\) is 0, and \(F\) and its p-value are <code>NA</code>. The intercept is
+never removed.</p>
+<p>The final model's p-values don't account for the selection, so they are
+too small, as after any stepwise selection: report them as descriptive.
+<code>ecodist::MRM()</code> has no backward elimination.</p>
 <p><strong>Speed and memory</strong></p>
 <p>The explanatory distances are centred and orthonormalized once (by QR).
 Every statistic of a permutation then follows from their \(m\) products
@@ -246,6 +280,7 @@ distance matrices, and samples are matched by name between them all.</p></li>
 So <code>permutations = 999</code> matches <code>nperm = 1000</code>.</p></li>
 <li><p>There's no <code>method = 'logistic'</code>, for logistic regression of a binary
 response.</p></li>
+<li><p><code>backward</code> adds backward elimination of terms.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -317,6 +352,26 @@ and correlation extensions of the Mantel test of matrix correspondence.
 <span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)    88.78               6.607   1.000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           ph   0.5541       0.5535  13.82   0.001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          geo  0.03862      0.03862 0.9641   0.492</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># Keep only the terms that matter, by backward elimination.</span></span></span>
+<span class="r-in"><span>    <span class="fu">mantel_regression</span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="va">dm</span> <span class="op">~</span> <span class="va">ph</span> <span class="op">+</span> <span class="va">temp</span> <span class="op">+</span> <span class="va">soil</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">lat</span>, <span class="va">lon</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">meta</span>, backward <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Multiple Regression on Distance Matrices of Bray-Curtis Dissimilarity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> R2 = 0.361, F = 122, p = 0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Permutations: 999 (free)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Regression: least squares on the distances</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Samples: 30 (435 pairs)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         term estimate std_estimate     t p_value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)   0.1824              43.47   0.736</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           ph  0.05965       0.5925 15.41   0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         temp 0.001908      0.09682 2.517   0.032</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Backward elimination (alpha = 0.05): 2 terms removed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  step            term      t p_value r_squared_before r_squared_after</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1            soil 0.2676   0.722           0.3633          0.3632</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2 cbind(lat, lon)  1.208   0.406           0.3632           0.361</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

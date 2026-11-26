@@ -1,10 +1,9 @@
 # Correspondence Analysis (CA)
 
 Unconstrained ordination of samples from their feature abundances in the
-chi-square metric. Gives the same results as
-[`vegan::ca()`](https://vegandevs.github.io/vegan/reference/cca.html),
-computed straight from sparse input without forming any \\n \times n\\
-or dense table, so it takes far less time and memory for large datasets.
+chi-square metric. Gives the same results as `vegan::ca()`, computed
+straight from sparse input without forming any \\n \times n\\ or dense
+table, so it takes far less time and memory for large datasets.
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md) is its
 constrained form, canonical correspondence analysis.
 
@@ -47,8 +46,7 @@ A numeric matrix with one row per sample and one column per axis, named
 `"CA1"`, `"CA2"`, etc., as described in "Ordination result" below. The
 values are `vegan`'s site scores in scaling 2: what
 `vegan::scores(vegan::ca(counts), display = "sites")` returns and what
-[`phyloseq::plot_ordination()`](https://rdrr.io/pkg/phyloseq/man/plot_ordination.html)
-plots. Its attributes are:
+`phyloseq::plot_ordination()` plots. Its attributes are:
 
 - `method`: `"ca"`.
 
@@ -105,24 +103,20 @@ first).
 `ca()` gives the same site scores, eigenvalues, inertia and species
 scores as `vegan::ca(counts)` and `vegan::cca(counts)` (scaling 2), and
 as `skbio.stats.ordination.ca()` in scaling 2, up to the signs of the
-axes.
-[`ade4::dudi.coa()`](https://adeverse.github.io/ade4/reference/dudi.coa.html)
-gives the same eigenvalues; its `$l1` (row scores of unit weighted
-variance) are `ca()`'s scores, and its `$co` (column principal
-coordinates) are `ca()`'s loadings. Samples with no observations are an
-error, as in `vegan` and `ade4`; features with no observations have no
-weight, and get loadings of 0.
+axes. `ade4::dudi.coa()` gives the same eigenvalues; its `$l1` (row
+scores of unit weighted variance) are `ca()`'s scores, and its `$co`
+(column principal coordinates) are `ca()`'s loadings. Samples with no
+observations are an error, as in `vegan` and `ade4`; features with no
+observations have no weight, and get loadings of 0.
 
 **Same names in other packages**
 
-[`vegan::ca()`](https://vegandevs.github.io/vegan/reference/cca.html)
-and `ca::ca()` share their name with ecodive's `ca()`, and whichever
-package was attached last masks the other's. Write `ecodive::ca()`, or
-use
+`vegan::ca()` and `ca::ca()` share their name with ecodive's `ca()`, and
+whichever package was attached last masks the other's. Write
+`ecodive::ca()`, or use
 [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md),
-which always runs ecodive's, to be sure.
-[`ade4::dudi.coa()`](https://adeverse.github.io/ade4/reference/dudi.coa.html)
-computes the same analysis under another name.
+which always runs ecodive's, to be sure. `ade4::dudi.coa()` computes the
+same analysis under another name.
 
 **Axis signs and reproducibility**
 

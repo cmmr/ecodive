@@ -2,12 +2,10 @@
 
 Tests whether sample metadata, such as treatment groups, explain the
 differences between samples in a distance matrix. Gives the same table
-as
-[`vegan::adonis2()`](https://vegandevs.github.io/vegan/reference/adonis.html):
-degrees of freedom, sums of squares, \\R^2\\, and pseudo-\\F\\
-statistics, with permutation p-values. Computes them in parallel C,
-straight from the distances, without the \\n \times n\\ matrices that
-`adonis2()` builds for every permutation.
+as `vegan::adonis2()`: degrees of freedom, sums of squares, \\R^2\\, and
+pseudo-\\F\\ statistics, with permutation p-values. Computes them in
+parallel C, straight from the distances, without the \\n \times n\\
+matrices that `adonis2()` builds for every permutation.
 
 ## Usage
 
@@ -35,11 +33,10 @@ permanova(
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
   or [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), or a
   symmetric numeric matrix of distances. Must not contain `NA`s or
-  negative values. Alternatively, as in
-  [`vegan::adonis2()`](https://vegandevs.github.io/vegan/reference/adonis.html),
-  a formula with the distances on its left-hand side and the terms to
-  test on its right, such as `dm ~ treatment`, in place of `dm` and
-  `formula`; the metadata may then be given second, as in
+  negative values. Alternatively, as in `vegan::adonis2()`, a formula
+  with the distances on its left-hand side and the terms to test on its
+  right, such as `dm ~ treatment`, in place of `dm` and `formula`; the
+  metadata may then be given second, as in
   `permanova(dm ~ treatment, meta)`.
 
 - groups:
@@ -66,11 +63,9 @@ permanova(
   or `~ treatment * site + ph`. Factors, numeric covariates, and
   interactions are all allowed. Wrap variables in `Condition()` to
   remove their effect before the other terms are tested, as in
-  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html).
-  A left-hand side, if given, is ignored. Give `groups` or `formula`:
-  there is no default model (as in
-  [`vegan::adonis2()`](https://vegandevs.github.io/vegan/reference/adonis.html)).
-  Default: `NULL`.
+  `vegan::dbrda()`. A left-hand side, if given, is ignored. Give
+  `groups` or `formula`: there is no default model (as in
+  `vegan::adonis2()`). Default: `NULL`.
 
 - by:
 
@@ -113,8 +108,7 @@ permanova(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones.
+  `permute::shuffleSet()`, to use instead of random ones.
 
 - strata:
 
@@ -158,9 +152,8 @@ whatever `by` is (the `"Model"` row of `by = 'overall'`):
 - `r2`: The model's \\R^2\\: the proportion of the total sum of squares
   it explains.
 
-- `table`: The table of
-  [`vegan::adonis2()`](https://vegandevs.github.io/vegan/reference/adonis.html):
-  a data frame (of class `"anova"`, so it prints like
+- `table`: The table of `vegan::adonis2()`: a data frame (of class
+  `"anova"`, so it prints like
   [`stats::anova()`](https://rdrr.io/r/stats/anova.html) tables) with
   one row per term tested (or one `"Model"` row when `by = 'overall'`),
   then `"Residual"` and `"Total"` rows. When `formula` has `Condition()`
@@ -207,12 +200,9 @@ least as large: \\(1 + \\\\F\_{perm} \ge F\\) / (1 + permutations)\\. As
 in `adonis2()`, permuted statistics within `sqrt(.Machine$double.eps)`
 of the observed one count as ties.
 
-Partial models, with `Condition()` terms, follow
-[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
-and
-[`vegan::anova.cca()`](https://vegandevs.github.io/vegan/reference/anova.cca.html)'s
-default "reduced" model: the conditions' effect is removed from the
-distances, and the residuals are permuted.
+Partial models, with `Condition()` terms, follow `vegan::dbrda()` and
+`vegan::anova.cca()`'s default "reduced" model: the conditions' effect
+is removed from the distances, and the residuals are permuted.
 
 Every term is tested with the same permutations of the (conditioned)
 distances, as in `adonis2()`. PERMANOVA+ for PRIMER instead permutes the
@@ -260,8 +250,7 @@ both.
   infinite or undefined \\F\\.
 
 - `strata` permutes freely within strata. For other restricted designs,
-  pass a `permutations` matrix from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html).
+  pass a `permutations` matrix from `permute::shuffleSet()`.
 
 - When there are fewer possible permutations than requested, `adonis2()`
   (via `permute`) runs each of them once instead. `permanova()` always

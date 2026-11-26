@@ -68,8 +68,7 @@ default order, 2, is scikit-bio's.
 ## Same names in other packages
 
 scikit-bio's `renyi()` is the same (its `order` is `q`).
-[`vegan::renyi()`](https://vegandevs.github.io/vegan/reference/renyi.html)
-gives a profile over several orders (`scales`).
+`vegan::renyi()` gives a profile over several orders (`scales`).
 
 ## Input Types
 

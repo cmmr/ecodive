@@ -2,12 +2,11 @@
 
 Constrained ordination of samples from their distances: the axes of beta
 diversity that sample metadata explain. Gives the same results as
-[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
-without ever forming an \\n \times n\\ matrix, so it takes far less time
-and memory for large datasets.
+`vegan::dbrda()`, without ever forming an \\n \times n\\ matrix, so it
+takes far less time and memory for large datasets.
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md) is
 the same analysis of the distances' positive eigenvalues only, as in
-[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html).
+`vegan::capscale()`.
 
 ## Usage
 
@@ -23,12 +22,10 @@ dbrda(dm, groups, data = NULL, formula = NULL, n_axes = 3L, cpus = n_cpus())
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
   or [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), or a
   symmetric numeric matrix of distances. Must not contain `NA`s or
-  negative values. Alternatively, as in
-  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
-  a formula with the distances on its left-hand side and the constraints
-  on its right, such as `dm ~ treatment`, in place of `dm` and
-  `formula`; the metadata may then be given second, as in
-  `dbrda(dm ~ treatment, meta)`.
+  negative values. Alternatively, as in `vegan::dbrda()`, a formula with
+  the distances on its left-hand side and the constraints on its right,
+  such as `dm ~ treatment`, in place of `dm` and `formula`; the metadata
+  may then be given second, as in `dbrda(dm ~ treatment, meta)`.
 
 - groups:
 
@@ -55,11 +52,10 @@ dbrda(dm, groups, data = NULL, formula = NULL, n_axes = 3L, cpus = n_cpus())
   such as `~ treatment + ph`. Factors, numeric covariates, and
   interactions are all allowed. Wrap variables in `Condition()` to
   remove their effect first (a partial analysis), as in
-  [`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html):
-  `~ treatment + Condition(site)`. With only `Condition()` terms, the
-  result is the unconstrained ordination after removing their effect. A
-  left-hand side, if given, is ignored. Give `groups` or `formula`:
-  there is no default model. Default: `NULL`.
+  `vegan::dbrda()`: `~ treatment + Condition(site)`. With only
+  `Condition()` terms, the result is the unconstrained ordination after
+  removing their effect. A left-hand side, if given, is ignored. Give
+  `groups` or `formula`: there is no default model. Default: `NULL`.
 
 - n_axes:
 
@@ -82,8 +78,7 @@ named `"dbRDA1"`, `"dbRDA2"`, etc. If the constraints give fewer than
 `n_axes` of them, unconstrained axes follow, named `"MDS1"`, `"MDS2"`,
 etc. The values are `vegan`'s site scores ("wa" scores, scaling 2): what
 `vegan::scores(x, display = "sites")` returns and what
-[`phyloseq::plot_ordination()`](https://rdrr.io/pkg/phyloseq/man/plot_ordination.html)
-plots. Its attributes are:
+`phyloseq::plot_ordination()` plots. Its attributes are:
 
 - `method`: `"dbrda"`.
 
@@ -147,17 +142,15 @@ matrix \\G = -\frac{1}{2}JAJ\\. With \\H\\ the projection onto the
 axes are the eigenvectors of \\HGH\\, and the unconstrained axes are
 those of \\(I-H)G(I-H)\\. Non-Euclidean distances, such as Bray-Curtis,
 can give negative eigenvalues. They are kept in the inertia, as
-[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
-does, but have no axes.
+`vegan::dbrda()` does, but have no axes.
 
-[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html)
-forms \\G\\ and \\HGH\\ in full and computes all \\n\\ of their
-eigenvalues, which takes time proportional to \\n^3\\. `dbrda()` instead
-projects \\G\\ onto an orthonormal basis of the constraints, which only
-needs a few products of \\G\\ with vectors, computed in parallel
-straight from `dm`, and a small eigenproblem with one row per constraint
-column. Unconstrained axes are only computed when needed, by block
-Lanczos iteration as in
+`vegan::dbrda()` forms \\G\\ and \\HGH\\ in full and computes all \\n\\
+of their eigenvalues, which takes time proportional to \\n^3\\.
+`dbrda()` instead projects \\G\\ onto an orthonormal basis of the
+constraints, which only needs a few products of \\G\\ with vectors,
+computed in parallel straight from `dm`, and a small eigenproblem with
+one row per constraint column. Unconstrained axes are only computed when
+needed, by block Lanczos iteration as in
 [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md).
 
 **dbrda() or capscale()?**
@@ -180,31 +173,27 @@ names. For others, such as Bray-Curtis:
   distances, and it needs all of the eigenvalues of \\G\\, which takes
   time proportional to \\n^3\\.
 
-`phyloseq::ordinate(method = "CAP")` calls
-[`vegan::capscale()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
-so its results match
+`phyloseq::ordinate(method = "CAP")` calls `vegan::capscale()`, so its
+results match
 [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md)'s,
 not `dbrda()`'s.
 
 **Matching vegan**
 
 `dbrda()` gives the same scores, eigenvalues, inertia, \\R^2\\, biplot
-scores and centroids as
-[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
-up to the signs of the axes. Columns of the model matrix that are linear
-combinations of earlier ones are dropped, with a message, as in `vegan`.
+scores and centroids as `vegan::dbrda()`, up to the signs of the axes.
+Columns of the model matrix that are linear combinations of earlier ones
+are dropped, with a message, as in `vegan`.
 
 **Scale**
 
-Like
-[`vegan::dbrda()`](https://vegandevs.github.io/vegan/reference/dbrda.html),
-`dbrda()` divides the distances by \\\sqrt{n-1}\\ when any of them is 4
-or more ("mean squared distances"). That divides `trace`, `eig`,
-`inertia` and `constrained_eig` by \\n-1\\, but leaves `prop` and
-\\R^2\\ unchanged. So for the same `dm`, `attr(dbrda(dm, ...), 'trace')`
-equals `attr(pcoa(dm), 'trace')` when every distance is below 4 (e.g.
-Bray-Curtis or Jaccard), and equals it divided by \\n-1\\ otherwise
-(e.g. Euclidean distances between counts).
+Like `vegan::dbrda()`, `dbrda()` divides the distances by \\\sqrt{n-1}\\
+when any of them is 4 or more ("mean squared distances"). That divides
+`trace`, `eig`, `inertia` and `constrained_eig` by \\n-1\\, but leaves
+`prop` and \\R^2\\ unchanged. So for the same `dm`,
+`attr(dbrda(dm, ...), 'trace')` equals `attr(pcoa(dm), 'trace')` when
+every distance is below 4 (e.g. Bray-Curtis or Jaccard), and equals it
+divided by \\n-1\\ otherwise (e.g. Euclidean distances between counts).
 
 **Axis signs and reproducibility**
 

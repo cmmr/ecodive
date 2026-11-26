@@ -64,7 +64,7 @@ set explains on its own, the fractions they explain jointly, and what
 none of them explains. Each fraction is an adjusted \(R^2\) from
 (partial) redundancy analysis of a count table (<code><a href="rda.html">rda()</a></code>), distance-based
 redundancy analysis of distances (<code><a href="dbrda.html">dbrda()</a></code>), or canonical correspondence
-analysis (<code><a href="cca.html">cca()</a></code>), as in <code><a href="https://vegandevs.github.io/vegan/reference/varpart.html" class="external-link">vegan::varpart()</a></code>, with the same results.</p>
+analysis (<code><a href="cca.html">cca()</a></code>), as in <code>vegan::varpart()</code>, with the same results.</p>
     </div>
 
     <div class="section level2">
@@ -144,7 +144,7 @@ permutation, as in <code><a href="cca.html">cca()</a></code>. Default: <code>FAL
 <dd><p>With <code>chisquare = TRUE</code>: the number of permutations
 for each adjusted \(R^2\) (at least 1), or a matrix with one
 permutation of the samples per row (such as from
-<code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>), so that results can be compared exactly
+<code>permute::shuffleSet()</code>), so that results can be compared exactly
 with vegan's. The same permutations are used for every set and
 union of sets. Not used otherwise. Default: <code>1000</code>.</p></dd>
 
@@ -237,7 +237,7 @@ other tables as attributes; there is no plot.</p></li>
 <code>transfo</code>; there is no <code>scale</code>, and no <code>add</code> for distances.</p></li>
 <li><p>Samples are matched by name between <code>x</code>, <code>data</code>, and the sets.</p></li>
 </ul><p><strong>Same names in other packages</strong></p>
-<p><code><a href="https://vegandevs.github.io/vegan/reference/varpart.html" class="external-link">vegan::varpart()</a></code> has the same name. When both packages are attached,
+<p><code>vegan::varpart()</code> has the same name. When both packages are attached,
 the one attached last masks the other; call <code>ecodive::varpart()</code> to be
 sure.</p>
     </div>

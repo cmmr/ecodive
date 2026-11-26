@@ -67,7 +67,7 @@ biplot."><meta property="og:image" content="https://cmmr.github.io/ecodive/logo.
 ordination (\(r^2\)); and, for each factor, the centroid of each of its
 levels and how well the factor separates the samples. Permutation tests
 give p-values. Gives the same arrows, centroids, and \(r^2\) as
-<code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code>, and the same p-values for the same permutations, but
+<code>vegan::envfit()</code>, and the same p-values for the same permutations, but
 runs in parallel C, so that fitting thousands of taxa with 999
 permutations each takes seconds. Use it for the arrows and labels of a
 biplot.</p>
@@ -145,13 +145,13 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 
 <dt id="arg-axes">axes<a class="anchor" aria-label="anchor" href="#arg-axes"></a></dt>
 <dd><p>Which columns of <code>ord</code> to fit onto: indices or column names.
-The default, <code>NULL</code>, uses every column. <code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code> uses the
+The default, <code>NULL</code>, uses every column. <code>vegan::envfit()</code> uses the
 first two by default (its <code>choices = c(1, 2)</code>), so give <code>axes = 1:2</code> to compare with it.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
 <dd><p>Leave out samples with missing values (<code>NA</code>) in <code>ord</code> or in
-any column of <code>data</code>, as <code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code> does. <code>counts</code> must not
+any column of <code>data</code>, as <code>vegan::envfit()</code> does. <code>counts</code> must not
 have any.
 Default: <code>FALSE</code>, which stops with an error if there are any.</p></dd>
 
@@ -159,7 +159,7 @@ Default: <code>FALSE</code>, which stops with an error if there are any.</p></dd
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of permutations. Default: <code>999</code>.
 Alternatively, a matrix with one permutation of <code>1:n</code> per row, as
-from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones.</p></dd>
+from <code>permute::shuffleSet()</code>, to use instead of random ones.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
@@ -200,7 +200,7 @@ that is between its levels (repeated on each level's row).</p></li>
 factors).</p></li>
 <li><p><code>z</code>: The standardized effect size, <code>(r2 - mean(r2_perm)) / sd(r2_perm)</code>, for that variable's column of <code>r2_perm</code>.</p></li>
 </ul><p>Row names are the variables' names, and for factor levels, the
-variable's name pasted to the level's, as in <code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code>. The
+variable's name pasted to the level's, as in <code>vegan::envfit()</code>. The
 data frame has class <code>"ecodive_envfit"</code>, only to mark what made it.</p>
 <p>Attributes: <code>r2_perm</code>, a matrix of the \(r^2\) of each permutation
 (rows) for each variable (columns); and <code>n_perm</code>, the number of
@@ -219,7 +219,7 @@ squares between its levels' centroids divided by the total sum of squares
 of \(X\), as in a one-way MANOVA.</p>
 <p>The p-value is the proportion of permutations of the samples, counting
 the observed data, with an \(r^2\) at least as large: \((1 +
-\#\{r^2_{perm} \ge r^2\}) / (1 + permutations)\). As in <code><a href="https://vegandevs.github.io/vegan/reference/envfit.html" class="external-link">vegan::envfit()</a></code>,
+\#\{r^2_{perm} \ge r^2\}) / (1 + permutations)\). As in <code>vegan::envfit()</code>,
 permuted values within <code>sqrt(.Machine$double.eps)</code> of the observed one
 count as ties.</p>
 <p><strong>Speed and memory</strong></p>
@@ -248,7 +248,7 @@ in the arrows, where <code>vegan</code> gives <code>NA</code> for every arrow.</
 <li><p>There are no weights (<code>w</code>): no ecodive ordination has them. <code>vegan</code>
 uses them only for its CA and CCA results.</p></li>
 <li><p><code>strata</code> permutes freely within strata. For other restricted designs,
-pass a <code>permutations</code> matrix from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>.</p></li>
+pass a <code>permutations</code> matrix from <code>permute::shuffleSet()</code>.</p></li>
 <li><p>When there are fewer possible permutations than requested, <code>vegan</code>
 (via <code>permute</code>) runs each of them once instead. <code>envfit()</code> always draws
 random permutations.</p></li>

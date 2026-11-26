@@ -2,12 +2,10 @@
 
 Tests whether groups of samples differ in how spread out they are: their
 multivariate dispersion, or beta diversity. Gives the same results as
-[`vegan::betadisper()`](https://vegandevs.github.io/vegan/reference/betadisper.html)
-followed by
-[`vegan::permutest()`](https://vegandevs.github.io/vegan/reference/anova.cca.html):
-each sample's distance to its group's centre, each group's mean
-distance, and a permutation test of whether those distances differ
-between groups. Note that the default centre differs: see `type`.
+`vegan::betadisper()` followed by `vegan::permutest()`: each sample's
+distance to its group's centre, each group's mean distance, and a
+permutation test of whether those distances differ between groups. Note
+that the default centre differs: see `type`.
 
 ## Usage
 
@@ -64,10 +62,9 @@ permdisp(
 
   - `'median'`: The spatial median, the point with the smallest sum of
     distances to the group's samples. More robust to skewed data and
-    outlying samples. The default of
-    [`vegan::betadisper()`](https://vegandevs.github.io/vegan/reference/betadisper.html)
-    and scikit-bio's `permdisp`, so pass `type = 'median'` to compare
-    with them.
+    outlying samples. The default of `vegan::betadisper()` and
+    scikit-bio's `permdisp`, so pass `type = 'median'` to compare with
+    them.
 
 - bias_adjust:
 
@@ -96,8 +93,7 @@ permdisp(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones.
+  `permute::shuffleSet()`, to use instead of random ones.
 
 - strata:
 
@@ -214,10 +210,9 @@ count \\\|t\_{perm}\| \ge \|t\|\\.
 
 - `'median'` is the robust alternative for skewed or outlier-prone data,
   as the median-based (Brown-Forsythe) version of Levene's test is
-  (Anderson 2006). It is the default of
-  [`vegan::betadisper()`](https://vegandevs.github.io/vegan/reference/betadisper.html)
-  and of scikit-bio's (and so QIIME 2's) `permdisp`: to compare with
-  them, pass `type = 'median'`.
+  (Anderson 2006). It is the default of `vegan::betadisper()` and of
+  scikit-bio's (and so QIIME 2's) `permdisp`: to compare with them, pass
+  `type = 'median'`.
 
 `betadisper()` stops its search for the spatial median early, so its
 distances to medians are accurate only to about \\10^{-5}\\;
@@ -274,8 +269,7 @@ both.
   p-values from its permutations, as in `permutest()`.
 
 - `strata` permutes freely within strata. For other restricted designs,
-  pass a `permutations` matrix from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html).
+  pass a `permutations` matrix from `permute::shuffleSet()`.
 
 - `betadisper()`'s `sqrt.dist` and `add` options transform the distances
   first: pass `sqrt(dm)` instead, for instance.

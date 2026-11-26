@@ -20,6 +20,8 @@ mantel_regression(
   formula = NULL,
   method = "pearson",
   permutations = 999L,
+  backward = FALSE,
+  alpha = 0.05,
   strata = NULL,
   seed = 0L,
   cpus = n_cpus()
@@ -83,8 +85,20 @@ mantel_regression(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
-  to use instead of random ones. Give `0` for no p-values.
+  `permute::shuffleSet()`, to use instead of random ones. Give `0` for
+  no p-values.
+
+- backward:
+
+  Whether to simplify the model by backward elimination (Lichstein
+  2007): remove the least significant term, refit, and repeat until
+  every term left has a p-value of at most `alpha`. See **Backward
+  elimination**. Default: `FALSE`.
+
+- alpha:
+
+  With `backward = TRUE`, the significance level a term's p-value must
+  reach to stay in the model. Default: `0.05`.
 
 - strata:
 
@@ -150,6 +164,16 @@ A list of class `ecodive_mantel_regression`, with:
 - `permutation`: How samples were permuted: `'free'`, `'within strata'`,
   or `'supplied matrix'`.
 
+With `backward = TRUE`, these describe the final model, and there are
+also:
+
+- `alpha`: The significance level.
+
+- `elimination`: A data frame with one row per term removed, in order
+  (no rows if none was): `step`, `term`, its `t` and `p_value` in the
+  model it was removed from, and that model's \\R^2\\
+  (`r_squared_before`) and the next one's (`r_squared_after`).
+
 Attribute `f_perm` is a vector of the \\F\\ statistics of the
 permutations, and attribute `t_perm` a matrix of their pseudo-t
 statistics, one row per permutation and one column per coefficient.
@@ -192,6 +216,23 @@ statistic, and the test of \\F\\ is the two-sided Mantel test.
 Terms whose distances are collinear (one a linear combination of the
 others, or the same for every pair) are an error.
 
+**Backward elimination**
+
+With `backward = TRUE`, the model is simplified by backward elimination,
+as in Lichstein (2007): the term with the largest p-value is removed if
+that p-value is above `alpha`, the model is refitted without it, and so
+on, until every term left has a p-value of at most `alpha`. Among terms
+with equal p-values (permutation p-values often tie), the one with the
+smallest \\\|t\|\\ goes first. Every refit uses the same permutations,
+so the steps, like the p-values, are the same from run to run and for
+any number of `cpus`. If every term is removed, only the intercept is
+left: then \\R^2\\ is 0, and \\F\\ and its p-value are `NA`. The
+intercept is never removed.
+
+The final model's p-values don't account for the selection, so they are
+too small, as after any stepwise selection: report them as descriptive.
+`ecodist::MRM()` has no backward elimination.
+
 **Speed and memory**
 
 The explanatory distances are centred and orthonormalized once (by QR).
@@ -225,6 +266,8 @@ both.
 
 - There's no `method = 'logistic'`, for logistic regression of a binary
   response.
+
+- `backward` adds backward elimination of terms.
 
 ## References
 
@@ -303,4 +346,24 @@ and correlation extensions of the Mantel test of matrix correspondence.
 #>  (Intercept)    88.78               6.607   1.000
 #>           ph   0.5541       0.5535  13.82   0.001
 #>          geo  0.03862      0.03862 0.9641   0.492
+
+    # Keep only the terms that matter, by backward elimination.
+    mantel_regression(
+      dm ~ ph + temp + soil + cbind(lat, lon), data = meta, backward = TRUE )
+#> Multiple Regression on Distance Matrices of Bray-Curtis Dissimilarity
+#> 
+#> R2 = 0.361, F = 122, p = 0.001
+#> Permutations: 999 (free)
+#> Regression: least squares on the distances
+#> Samples: 30 (435 pairs)
+#> 
+#>         term estimate std_estimate     t p_value
+#>  (Intercept)   0.1824              43.47   0.736
+#>           ph  0.05965       0.5925 15.41   0.001
+#>         temp 0.001908      0.09682 2.517   0.032
+#> 
+#> Backward elimination (alpha = 0.05): 2 terms removed
+#>  step            term      t p_value r_squared_before r_squared_after
+#>     1            soil 0.2676   0.722           0.3633          0.3632
+#>     2 cbind(lat, lon)  1.208   0.406           0.3632           0.361
 ```
