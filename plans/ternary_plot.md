@@ -217,3 +217,111 @@ Follows [README.md](README.md) § "Result attributes and plots".
   analysis. *Mathematical Geology*, 35, 279–300. \doi{10.1023/A:1023818214614}
 - Hamilton, N. E., & Ferry, M. (2018). ggtern: ternary diagrams using
   ggplot2. *Journal of Statistical Software*, 87(3). \doi{10.18637/jss.v087.c03}
+
+
+## Decisions made while implementing
+
+- **Default pseudocount: the whole table** (the user's choice, 2026-11-26).
+  With `pseudocount = NULL`, the shared rule (`log_pseudocount()`, as
+  `balance()`) looks at the whole of `counts`: none without zeros, else
+  half the smallest non-zero value, with its usual warning. The value is
+  added once to each of the three part sums. It is used only with
+  `center = TRUE` or `ellipses`. A given `pseudocount` is checked (it must
+  be positive) even when unused. The `pseudocount` attribute is 0 when no
+  logs were taken.
+- **No `cpus`** (the user's choice). The sums run in a single-threaded C
+  pass over the sparse table (`src/ternary_plot.c`: `C_ternary_sums()`
+  for samples mode, `C_ternary_means()` for features mode), in a fixed
+  order.
+- **F vs χ² (the plan's open question), settled from outputs.**
+  ggtern 4.0.0's `geom_confidence_tern()` (run, not read) draws the curve
+  \eqn{(z-\bar z)^\top S^{-1}(z-\bar z) =} `qchisq(level, 2)`, with \eqn{S}
+  of divisor m − 1, exactly, at m = 6, 20 and 100. That is a normal
+  contour of the samples, the large-m limit of the prediction region, and
+  not a region for the mean. ecodive keeps Hotelling's F regions, as
+  planned, and the Rd says how ggtern differs. `compositions::ellipses()`
+  draws the same quadratic form with a radius the caller gives. Its
+  vertices are exactly at r², and the points it interpolates between them
+  fall up to 0.2% inside. Notably, it draws them **uncentred** even on a
+  `plot(acomp, center = TRUE)` plot.
+- `compositions::plot(acomp(x), center = TRUE)` (compositions 2.0-9) puts its vertices where
+  ecodive does: (0, 0), (1, 0), (1/2, √3/2). Its centred points match
+  ecodive's to 2.2e-16.
+- **Ellipses** are drawn with `polygon()` through 200 values of θ (no
+  repeated end point). The `ellipses` attribute holds 200 × 5 matrices
+  (the three proportions, `x`, `y`) rather than x/y only, so the identities
+  can be checked from the result. Without `groups`, one region for all the
+  samples, named `"all"`. A covariance is treated as singular when its
+  smaller eigenvalue is ≤ 1e-10 × its larger. Numeric `groups` with
+  `ellipses` warn and draw none.
+- **Samples with all three parts 0** are left out on their raw sums
+  (before any pseudocount), with one warning and a subtitle count.
+- **The result's `group` column** is present only when `groups` is given.
+- **Part labels:** the list's names, else a single feature's name,
+  `"Other"` for the `NA` part, `"Part k"` for an unnamed set of several
+  features. A named vector's names win too. `make.unique()` guards
+  duplicates. Parts keep the order given; vertices are parts 1, 2, 3 at
+  bottom left, bottom right and top.
+- **`labels`** is used in features mode only.
+- **Features mode:**
+  - Samples whose group is `NA` are in no group. Numeric `groups` become a
+    factor. A group with no samples (an unused factor level, or all-zero
+    samples) is an error, and all-zero samples are left out with a warning.
+  - `abundance` (which sizes the points) is the mean relative abundance
+    over all samples of the three groups, not the mean of the three group
+    means.
+  - Colours come from `plot_palette(3)`; ties for the largest share go to
+    the first group. The legend is titled "Mostly in" and adds "No
+    majority".
+  - `col` is one colour, one per feature of `counts`, or named by feature
+    (partial). Giving `col` drops the legend, since the convention no
+    longer holds.
+  - Points are drawn largest first, so that small ones stay visible.
+- **Gridlines:** tick labels run counter-clockwise: part 2 along the
+  bottom, part 3 up the right edge, part 1 down the left. When centred,
+  gridlines crowd together, so a tick label that would overlap another, or
+  a vertex label, is skipped; its line and tick are still drawn.
+- **Subtitle:** plot.default's `sub` clipped long subtitles, so the pieces
+  ("Centred: ... (g)", "pseudocount c", "zeros drawn on the edges",
+  dropped counts, "95% confidence regions") are joined with "; " and
+  wrapped into the bottom margin with `mtext()`. A user's `sub` replaces
+  them.
+- **`...`:** `cex`, `lwd` and `bg` go to `points()`; everything else
+  (`main`, `xlim`, ...) goes to `plot.default()`, which sets up the frame.
+- `plot_groups()` (R/plot_ord.r) gained a `ref` argument, so its messages
+  name `counts` rather than `x`.
+- `?ternary_plot` inherits the "Input Types" section.
+  `composition_barplot()`'s docs now link to it.
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commit:** `468d309` (`R/ternary_plot.r`, `src/ternary_plot.c`,
+  `tests/tinytests/test-ternary_plot.r`, `man/ternary_plot.Rd`, and the
+  shared files).
+- **Tests:** 160 new in `test-ternary_plot.r`, plus 1 smoke line. Full
+  suite on an `-O2` install (R 4.3.3): 33,020 at home (baseline 32,859)
+  and 470 in CRAN mode (baseline 469), all OK.
+  `R CMD check --no-manual --ignore-vignettes`: only the existing
+  installed-size NOTE.
+- **Exact identities** (all tested):
+  - the vertices and (1/3, 1/3, 1/3) → (1/2, √3/6) at 1e-15;
+  - the centred points' closed geometric mean is (1/3, 1/3, 1/3) and their
+    ilr mean is 0, at 1e-14; ilr differences are unchanged at 1e-12;
+  - every ellipse point satisfies the quadratic form = r² at 1e-10 (both
+    kinds, two levels, three groups); centred curves are the uncentred
+    ones perturbed by g⁻¹, at 1e-13;
+  - dense, `margin = 2`, Matrix and slam inputs give identical results.
+- **Reference cross-checks** (output only):
+  - `compositions::plot(acomp(x), center = TRUE)`: centred points agree to
+    2.2e-16.
+  - `compositions::ellipses()`: the same ilr quadratic form. Its vertices
+    are exactly at r², and the points it interpolates fall up to 0.2%
+    inside. It draws uncentred even on a centred plot.
+  - ggtern 4.0.0's `geom_confidence_tern()`: exactly the χ²₂ contour of
+    the samples at m = 6, 20 and 100. So ecodive keeps Hotelling's F, and
+    documents the difference.
+- **Renders checked by eye:** uncentred and centred samples mode with
+  confidence and prediction regions, a numeric gradient, zeros on the
+  edges, and features mode. Tick-label collisions in centred plots, and a
+  clipped subtitle, were found this way and fixed.

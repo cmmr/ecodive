@@ -1578,7 +1578,7 @@ License:
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE.
 
-Files: R/longitudinal.r src/longitudinal.c
+Files: R/longitudinal.r src/longitudinal.c R/feature_volatility.r
 Copyright: 2017-2026 QIIME 2 development team
  2015-2023 University of Washington Interactive Data Lab
  2008-2011 AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData
@@ -1590,7 +1590,13 @@ Comment: first_differences(), first_distances(), volatility() and nmit() in
  q2_longitudinal/_utilities.py's _first_differences(), _get_group_pairs(),
  _nmit(), _temporal_corr() and _temporal_distance(), and the statistics of
  its volatility chart (q2_longitudinal/_vega_specs/volatility/data.py),
- restructured for ecodive. The chart's confidence intervals follow Vega's
+ restructured for ecodive. feature_volatility() in R/feature_volatility.r
+ ports q2-longitudinal's feature_volatility(), plot_feature_volatility(),
+ _importance_filtering() and _summarize_feature_stats() (in
+ q2_longitudinal/_longitudinal.py and _utilities.py), with the
+ train/test workflow of q2-sample-classifier 2026.10.0's regress_samples()
+ (github.com/qiime2/q2-sample-classifier, BSD-3-Clause, same copyright),
+ without its recursive feature elimination. The chart's confidence intervals follow Vega's
  bootstrapCI() (vega-statistics, BSD-3-Clause, University of Washington
  Interactive Data Lab). nmit()'s correlations are computed as pandas 2.3.3
  (BSD-3-Clause) computes them in DataFrame.corr(), libalgos.nancorr() and

@@ -431,6 +431,11 @@ SEXP C_volatility_ci (SEXP sexp_vals, SEXP sexp_pos, SEXP sexp_args, SEXP sexp_a
   int           seed  = INTEGER(sexp_args)[1];
   double        alpha = asReal(sexp_alpha);
 
+  // Cell c draws from PCG stream base + c; base is args[2] * 2^32 when
+  // given (feature_volatility(): one cell per feature, group and state),
+  // else 0 (volatility()).
+  uint64_t base = length(sexp_args) > 2 ? ((uint64_t) INTEGER(sexp_args)[2]) << 32 : 0;
+
   SEXP    result = PROTECT(allocMatrix(REALSXP, 2, cells));
   double *out    = REAL(result);
   double *mu     = (double *) R_alloc((size_t) (m < 1 ? 1 : m), sizeof(double));
@@ -446,7 +451,7 @@ SEXP C_volatility_ci (SEXP sexp_vals, SEXP sexp_pos, SEXP sexp_args, SEXP sexp_a
     }
 
     rng_t r;
-    rng_seed(&r, (uint64_t) seed, (uint64_t) c);
+    rng_seed(&r, (uint64_t) seed, base + (uint64_t) c);
 
     for (int j = 0; j < m; j++) {
       double a = 0;

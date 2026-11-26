@@ -1794,6 +1794,10 @@ SEXP C_rf_shuffle (SEXP sexp_x, SEXP sexp_seed, SEXP sexp_stream) {
 //   kind 3  the forest's tree seeds: RandomState(seed)
 //           .randint(2^31 - 1), count times
 //   kind 4  np.sum() of the doubles in `n` (pairwise)
+//   kind 5  RandomState(seed).permutation(n), 0-based
+//           (count must be n): the legacy shuffle,
+//           j = random_interval(i) for i = n - 1, ..., 1,
+//           which train_test_split() draws from
 //======================================================
 SEXP C_rf_rng_test (SEXP sexp_kind, SEXP sexp_seed, SEXP sexp_n, SEXP sexp_count) {
   int kind  = asInteger(sexp_kind);
@@ -1806,6 +1810,15 @@ SEXP C_rf_rng_test (SEXP sexp_kind, SEXP sexp_seed, SEXP sexp_n, SEXP sexp_count
   mt_t m;
   mt_seed(&m, seed);
   uint32_t xs = seed;
+  if (kind == 5) {
+    for (int i = 0; i < count; i++) out[i] = i;
+    for (int i = count - 1; i > 0; i--) {
+      int j = (int) mt_randint(&m, (uint64_t) i + 1);   // random_interval(i)
+      double t = out[i]; out[i] = out[j]; out[j] = t;
+    }
+    UNPROTECT(1);
+    return res;
+  }
   for (int i = 0; i < count; i++) {
     switch (kind) {
       case 0:  out[i] = mt_double(&m); break;

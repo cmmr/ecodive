@@ -163,13 +163,15 @@ reference:
   - plot.ecodive_neutral_model
 
 - title: Longitudinal
-  desc: Repeated measures of the same subjects over time (q2-longitudinal). Each subject's change from one time point to the next or from a baseline, a control chart of a variable over time, and distances between subjects in how their features vary together (NMIT, then tested with permanova()).
+  desc: Repeated measures of the same subjects over time (q2-longitudinal). Each subject's change from one time point to the next or from a baseline, a control chart of a variable over time, distances between subjects in how their features vary together (NMIT, then tested with permanova()), and the features that change most predictably over time (feature volatility, with random_forest()).
   contents:
   - first_differences
   - first_distances
   - volatility
   - nmit
   - plot_longitudinal
+  - feature_volatility
+  - plot.ecodive_feature_volatility
 
 - title: Batch Correction
   desc: Remove batch effects (study, sequencing run, extraction kit) from a table while keeping the effects of named covariates (MMUPHin, ComBat).
@@ -282,6 +284,7 @@ reference:
   desc: Plots drawn straight from a count table, ordered and coloured to be read; not compositional analyses themselves.
   contents:
   - composition_barplot
+  - ternary_plot
 
 - title: Utilities & Helpers
   desc: Tools for programmatic access, data manipulation, and configuration.
