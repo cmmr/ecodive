@@ -36,7 +36,14 @@
       expect_identical(sum(!is.na(res$r)), cs$n_tests, info = info)
       expect_equal(res$r, cs$r, tolerance = 1e-12, info = info)
       expect_identical(res$p_value, cs$p_value, info = info)
-      expect_identical(res$p_adjusted, cs$p_adjusted, info = info)
+      # Sidak's 1 - (1 - p)^k goes through a power function, whose last bits
+      # differ between R builds and C libraries (R 4.6 and musl differ from
+      # the R 4.3 / glibc that made the fixture); p.adjust()'s methods only
+      # multiply and take minima, so they match exactly everywhere.
+      if (identical(a$mult, 'sidak'))
+        expect_equal(res$p_adjusted, cs$p_adjusted, tolerance = 1e-14, info = info)
+      else
+        expect_identical(res$p_adjusted, cs$p_adjusted, info = info)
     }
   }
 
