@@ -189,5 +189,5 @@ and correlation extensions of the Mantel test of matrix correspondence.
 \emph{Systematic Zoology}, 35(4), 627-632. \doi{10.2307/2413122}
 }
 \seealso{
-\code{\link[=mantel]{mantel()}}, \code{\link[=dist_test]{dist_test()}}, \code{\link[=beta_div]{beta_div()}}
+\code{\link[=mantel]{mantel()}}, \code{\link[=mantel_correlogram]{mantel_correlogram()}}, \code{\link[=dist_test]{dist_test()}}, \code{\link[=beta_div]{beta_div()}}
 }

@@ -298,3 +298,8 @@ export(batch_combat)
 export(batch_mmuphin)
 S3method(plot, ecodive_batch)
 S3method(print, ecodive_batch)
+
+# Mantel correlogram (mantel_correlogram.r)
+export(mantel_correlogram)
+S3method(plot, ecodive_mantel_correlogram)
+S3method(print, ecodive_mantel_correlogram)

@@ -128,7 +128,8 @@
 #' Mantel, N. (1967). The detection of disease clustering and a generalized
 #' regression approach. *Cancer Research*, 27(2), 209-220.
 #'
-#' @seealso [mantel_partial()], [permanova()], [dist_test()], [beta_div()]
+#' @seealso [mantel_partial()], [mantel_correlogram()], [permanova()], [dist_test()],
+#'   [beta_div()]
 #'
 #' @export
 #' @examples
@@ -275,7 +276,7 @@ mantel <- function (
 #' and correlation extensions of the Mantel test of matrix correspondence.
 #' *Systematic Zoology*, 35(4), 627-632. \doi{10.2307/2413122}
 #'
-#' @seealso [mantel()], [dist_test()], [beta_div()]
+#' @seealso [mantel()], [mantel_correlogram()], [dist_test()], [beta_div()]
 #'
 #' @export
 #' @examples
@@ -336,64 +337,18 @@ mantel_core <- function (
   method      <- match.arg(method, c('pearson', 'spearman', 'kendall'))
   alternative <- match.arg(alternative, c('greater', 'less', 'two.sided'))
 
-  x <- mantel_dist(dm, 'dm')
-  n <- x$n
-
-  if (n < 3)
-    stop('`dm` must have at least 3 samples.', call. = FALSE)
-
-  if (missing(y) || is.null(y))
-    stop('`y` is required: distances, one value per sample, or a column name of `data`.', call. = FALSE)
-
-
-  #--------------------------------------------------------
-  # With `data`, `y`, `given` and `strata` may name its
-  # columns; its rows are matched to dm's samples.
-  #--------------------------------------------------------
-  if (is.null(data)) {
-    for (arg in c('y', 'given')) {
-      v <- get(arg)
-      if (is.character(v) && length(v) == 1)
-        stop('`', arg, '` names a column, but `data` is not given.', call. = FALSE)
-    }
-    strata <- strata_codes(per_sample(strata, 'strata', NULL, NULL, x$labels, n))
-  }
-  else {
-    if (!is.data.frame(data) && !is.matrix(data))
-      stop('`data` must be a data.frame.', call. = FALSE)
-    des <- model_design(
-      data, formula = ~ 1, labels = x$labels, n = n, strata = strata,
-      allow_empty = TRUE )
-    strata <- des$strata
-
-    # A vector has one value per row of `data` (as `groups` and `strata`).
-    df <- as.data.frame(data, stringsAsFactors = FALSE)
-    for (arg in c('y', 'given')) {
-      v <- get(arg)
-      if (is.atomic(v) && is.null(dim(v)) && !inherits(v, 'dist') &&
-          !(is.character(v) && length(v) == 1))
-        assign(arg, unname(per_sample(v, arg, df, des$idx, x$labels, n)))
-    }
-
-    y      <- mantel_column(y,     'y',     des$data)
-    given  <- mantel_column(given, 'given', des$data)
-  }
-
-  y <- mantel_dist(y, 'y')
-  g <- if (is.null(given)) NULL else mantel_align(mantel_dist(given, 'given'), 'given', x$labels, n)
-
-  # The title names both matrices when both have titles, else `dm`'s
-  # (?ecodive_display).
-  from <- if (!is.null(x$title) && !is.null(y$title)) paste(x$title, 'and', y$title) else x$title
-
-  y <- mantel_align(y, 'y', x$labels, n)
+  inp    <- mantel_inputs(dm, y, data, given, strata)
+  n      <- inp$n
+  x      <- inp$x
+  y      <- inp$y
+  g      <- inp$g
+  strata <- inp$strata
+  from   <- inp$from
 
   pm <- perm_matrix(permutations, n)
 
   if (!is.null(pm$perms) && !is.null(strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
-
-  x <- x$dm
 
   result <- function (r_all) mantel_result(
     r_all, method, alternative, partial = !is.null(g), n = n, from = from,
@@ -444,6 +399,121 @@ mantel_core <- function (
   }
 
   result(r_all)
+}
+
+
+#------------------------------------------------------------------------------
+# The inputs of mantel(), mantel_partial() and mantel_correlogram(): dm's
+# packed distances (x), y's and given's (g, or NULL) in dm's sample order,
+# the samples' strata codes (or NULL), the number of samples, and the title
+# the result is "of" (from).
+#
+# With `coords = TRUE` (mantel_correlogram()), `y` may also name several
+# numeric columns of `data`: coordinates, whose Euclidean distances are y.
+#------------------------------------------------------------------------------
+mantel_inputs <- function (dm, y, data, given, strata, coords = FALSE) {
+  x <- mantel_dist(dm, 'dm')
+  n <- x$n
+
+  if (n < 3)
+    stop('`dm` must have at least 3 samples.', call. = FALSE)
+
+  if (missing(y) || is.null(y))
+    stop('`y` is required: distances, one value per sample, or a column name of `data`.', call. = FALSE)
+
+
+  #--------------------------------------------------------
+  # With `data`, `y`, `given` and `strata` may name its
+  # columns; its rows are matched to dm's samples.
+  #--------------------------------------------------------
+  if (is.null(data)) {
+    for (arg in c('y', 'given')) {
+      v <- get(arg)
+      if (is.character(v) && length(v) == 1)
+        stop('`', arg, '` names a column, but `data` is not given.', call. = FALSE)
+    }
+    strata <- strata_codes(per_sample(strata, 'strata', NULL, NULL, x$labels, n))
+  }
+  else {
+    if (!is.data.frame(data) && !is.matrix(data))
+      stop('`data` must be a data.frame.', call. = FALSE)
+    des <- model_design(
+      data, formula = ~ 1, labels = x$labels, n = n, strata = strata,
+      allow_empty = TRUE )
+    strata <- des$strata
+
+    # Several column names: coordinates (mantel_correlogram()).
+    if (coords && is.character(y) && length(y) > 1)
+      y <- mantel_coords(des$data, y)
+
+    # A vector has one value per row of `data` (as `groups` and `strata`).
+    df <- as.data.frame(data, stringsAsFactors = FALSE)
+    for (arg in c('y', 'given')) {
+      v <- get(arg)
+      if (is.atomic(v) && is.null(dim(v)) && !inherits(v, 'dist') &&
+          !(is.character(v) && length(v) == 1))
+        assign(arg, unname(per_sample(v, arg, df, des$idx, x$labels, n)))
+    }
+
+    y      <- mantel_column(y,     'y',     des$data)
+    given  <- mantel_column(given, 'given', des$data)
+  }
+
+  # A table of coordinates, one row per sample (mantel_correlogram()).
+  if (coords && (is.data.frame(y) || (is.matrix(y) && !mantel_is_dist(y))))
+    y <- mantel_coords(y)
+
+  y <- mantel_dist(y, 'y')
+  g <- if (is.null(given)) NULL else mantel_align(mantel_dist(given, 'given'), 'given', x$labels, n)
+
+  # The title names both matrices when both have titles, else `dm`'s
+  # (?ecodive_display).
+  from <- if (!is.null(x$title) && !is.null(y$title)) paste(x$title, 'and', y$title) else x$title
+
+  y <- mantel_align(y, 'y', x$labels, n)
+
+  list(
+    x = x$dm, y = y, g = g, strata = strata, n = n, from = from,
+    labels = x$labels )
+}
+
+
+
+#------------------------------------------------------------------------------
+# Whether matrix `m` holds distances (square, symmetric, with a zero diagonal)
+# rather than coordinates.
+#------------------------------------------------------------------------------
+mantel_is_dist <- function (m) {
+  nrow(m) == ncol(m) && is.numeric(m) && isTRUE(all(diag(m) == 0)) &&
+    isSymmetric(unname(m))
+}
+
+
+#------------------------------------------------------------------------------
+# Euclidean distances between samples' coordinates: the columns `cols` of
+# `data` (already in dm's sample order), or a matrix or data frame with one
+# row per sample (matched by row name, else in dm's order).
+#------------------------------------------------------------------------------
+mantel_coords <- function (data, cols = NULL) {
+
+  if (!is.null(cols)) {
+    if (anyNA(cols) || !all(cols %in% colnames(data)))
+      stop('`y` names columns that are not in `data`: ',
+           name_list(setdiff(cols, colnames(data))), call. = FALSE)
+    data <- data[, cols, drop = FALSE]
+    rownames(data) <- NULL
+  }
+
+  ok <- if (is.data.frame(data)) all(vapply(data, is.numeric, logical(1))) else is.numeric(data)
+  if (!ok)
+    stop('`y` coordinates must be numeric.', call. = FALSE)
+
+  m <- as.matrix(data)
+  if (!all(is.finite(m)))
+    stop('`y` coordinates must not contain NA, NaN, or infinite values.', call. = FALSE)
+  storage.mode(m) <- 'double'
+
+  stats::dist(m)
 }
 
 

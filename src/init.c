@@ -59,6 +59,7 @@ extern SEXP C_log_ratio(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_log_ratio_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cross_assoc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_mantel_classes(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mult_default_delta(SEXP);
 extern SEXP C_nmds(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -175,6 +176,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_log_ratio_coords", (DL_FUNC) &C_log_ratio_coords, 6},
   {"C_cross_assoc", (DL_FUNC) &C_cross_assoc, 6},
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
+  {"C_mantel_classes", (DL_FUNC) &C_mantel_classes, 5},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
   {"C_mult_default_delta", (DL_FUNC) &C_mult_default_delta, 1},
   {"C_nmds",      (DL_FUNC) &C_nmds,      6},

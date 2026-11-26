@@ -363,6 +363,12 @@
   expect_identical(dim(be), c(2L, 3L))
   expect_true(all(is.finite(be$correlation)) && all(abs(be$correlation) <= 1))
 
+  mc <- mantel_correlogram(dm, cbind(meta$x, rep(1:4, 5)), permutations = 9, cpus = cpus)
+  expect_inherits(mc, c('ecodive_mantel_correlogram', 'data.frame'))
+  expect_identical(ncol(mc), 7L)
+  expect_true(any(is.finite(mc$r)) && all(abs(mc$r) <= 1, na.rm = TRUE))
+  expect_true(all(mc$p_adjusted >= 0 & mc$p_adjusted <= 1, na.rm = TRUE))
+
   et <- enterotype(counts, n_types = 2:3, cpus = cpus)
   expect_inherits(et, c('ecodive_enterotype', 'ecodive_types', 'data.frame'))
   expect_identical(dim(et), c(20L, 3L))

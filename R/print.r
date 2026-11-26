@@ -315,6 +315,7 @@ print_df_label <- function (x) {
     ecodive_neutral_model = neutral_model_label(x),
     ecodive_first_differences = 'First Differences',
     ecodive_first_distances   = 'First Distances',
+    ecodive_mantel_correlogram = 'Mantel correlogram',
     ecodive_bioenv        = if (isTRUE(attr(x, 'partial', exact = TRUE))) 'BIO-ENV (partial)' else 'BIO-ENV',
     ecodive_decontam      = ,
     ecodive_decontam_not  = {
@@ -399,6 +400,8 @@ print.ecodive_neutral_model   <- print_table_result
 print.ecodive_first_differences <- print_table_result
 #' @export
 print.ecodive_first_distances <- print_table_result
+#' @export
+print.ecodive_mantel_correlogram <- print_table_result
 
 
 

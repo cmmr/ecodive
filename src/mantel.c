@@ -451,3 +451,177 @@ SEXP C_mantel(
   UNPROTECT(1);
   return sexp_r;
 }
+
+
+//======================================================
+// Mantel correlograms: for each distance class of y, the
+// sum of dm's (transformed) values over the pairs in that
+// class, for the observed samples and for each
+// permutation of y's samples.
+//
+// A class's Mantel statistic is the correlation of dm
+// with the class's 0/1 indicator, and every such
+// correlation (Pearson on standardized dm or its ranks;
+// Kendall's tau-b, given dm's midranks) depends on the
+// permutation only through that sum, so one pass over the
+// pairs gives every class: O(N) per permutation, for all
+// classes together. mantel_correlogram() turns the sums
+// into correlations.
+//
+// As vegan::mantel.correlog(), which runs mantel() with
+// the class matrix as its first argument, the classes
+// (y's samples) are permuted and dm stays fixed: dm pair
+// (i, j) meets the class of y pair (p[i], p[j]).
+//
+// Each permutation is computed by one thread, start to
+// finish, summing in a fixed order, so results are
+// identical for any thread count.
+//======================================================
+
+static int           mc_n;
+static int           mc_t;       // Classes tested.
+static int           mc_total;   // Permutations + 1.
+static int           mc_int;     // Integer values (Kendall)?
+static const int    *mc_cls;     // y pairs' classes, 0 .. t - 1, or -1.
+static const double *mc_v;       // dm, transformed (double) ...
+static const int    *mc_vi;      // ... or (integer).
+static ptrdiff_t    *mc_cs1;
+static double       *mc_out;     // t x mc_total sums.
+static perm_source_t mc_ps;
+static int          *mc_iwork;   // Per thread: p, q.
+static double       *mc_dwork;   // Per thread: t sums.
+static int64_t      *mc_lwork;   // Per thread: t sums.
+static int           mc_k0;
+static int           mc_k1;
+
+
+static void *mantel_classes_worker(void *arg) {
+
+  worker_t        *w   = (worker_t *) arg;
+  int              n   = mc_n;
+  int              t   = mc_t;
+  int             *p   = mc_iwork + (size_t) w->i * 2 * n;
+  int             *q   = p + n;
+  double          *s   = mc_dwork + (size_t) w->i * t;
+  int64_t         *si  = mc_lwork + (size_t) w->i * t;
+  const int       *cls = mc_cls;
+  const ptrdiff_t *cs1 = mc_cs1;
+
+  for (int k = mc_k0 + w->i; k < mc_k1; k += w->n) {
+
+    perm_source_get(&mc_ps, k, p);
+    for (int a = 0; a < n; a++) q[p[a]] = a;
+
+    if (mc_int) for (int c = 0; c < t; c++) si[c] = 0;
+    else        for (int c = 0; c < t; c++) s[c]  = 0;
+
+    // dm pair (i, j), i > j, meets y pair (p[i], p[j]).
+    // The columns j are visited in order of b = p[j], so
+    // that the y[a, b] with a < b, one in each column a
+    // of the packed triangle, are next to the previous
+    // column's.
+    for (int b = 0; b < n; b++) {
+      int       j  = q[b];
+      ptrdiff_t yb = cs1[b];
+      ptrdiff_t tb = cs1[j];  // tb + i: dm pair (i, j)
+      if (mc_int) {
+        const int *v = mc_vi;
+        for (int i = j + 1; i < n; i++) {
+          int a = p[i];
+          int c = cls[(a > b) ? yb + a : cs1[a] + b];
+          if (c >= 0) si[c] += v[tb + i];
+        }
+      }
+      else {
+        const double *v = mc_v;
+        for (int i = j + 1; i < n; i++) {
+          int a = p[i];
+          int c = cls[(a > b) ? yb + a : cs1[a] + b];
+          if (c >= 0) s[c] += v[tb + i];
+        }
+      }
+    }
+
+    double *out = mc_out + (size_t) k * t;
+    if (mc_int) for (int c = 0; c < t; c++) out[c] = (double) si[c];
+    else        for (int c = 0; c < t; c++) out[c] = s[c];
+  }
+
+  return NULL;
+}
+
+
+//======================================================
+// R interface.
+//
+// v:       dm's packed values: double (Pearson, Spearman)
+//          or integer (Kendall: 2 * midrank - N - 1).
+// cls:     Each packed y pair's class, 0 .. t - 1, or -1
+//          for pairs in no tested class (integer).
+// perms:   n x n_perm integer matrix of 0-based
+//          permutations, or NULL for random ones.
+// strata:  Each sample's stratum, 0 .. n_strata - 1, or NULL.
+// opts:    c(n, t, n_perm, seed, n_threads).
+//
+// Returns a t x (n_perm + 1) matrix of sums, column 1 for
+// the observed samples.
+//======================================================
+SEXP C_mantel_classes(
+    SEXP sexp_v, SEXP sexp_cls, SEXP sexp_perms, SEXP sexp_strata,
+    SEXP sexp_opts ) {
+
+  int n         = INTEGER(sexp_opts)[0];
+  int t         = INTEGER(sexp_opts)[1];
+  int n_perm    = INTEGER(sexp_opts)[2];
+  int seed      = INTEGER(sexp_opts)[3];
+  int n_threads = INTEGER(sexp_opts)[4];
+
+  size_t N = (size_t) n * (size_t) (n - 1) / 2;
+
+  if (n < 2 || t < 1 || n_perm < 0 || n_threads < 1 || N > INT_MAX ||
+      (size_t) XLENGTH(sexp_v) != N || (size_t) XLENGTH(sexp_cls) != N)
+    error("Invalid arguments to C_mantel_classes()."); // # nocov
+
+  mc_n     = n;
+  mc_t     = t;
+  mc_total = n_perm + 1;
+  mc_int   = isInteger(sexp_v);
+  mc_v     = mc_int ? NULL : REAL(sexp_v);
+  mc_vi    = mc_int ? INTEGER(sexp_v) : NULL;
+  mc_cls   = INTEGER(sexp_cls);
+
+  mc_cs1 = (ptrdiff_t *) R_alloc(n, sizeof(ptrdiff_t));
+  for (int b = 0; b < n; b++)
+    mc_cs1[b] = (ptrdiff_t) dist_col_start(b, n) - b - 1;
+
+  perm_source_init(&mc_ps, n, sexp_perms, sexp_strata, seed);
+
+  if (n_threads > mc_total) n_threads = mc_total;
+
+  mc_iwork = (int *)     R_alloc((size_t) 2 * n * n_threads, sizeof(int));
+  mc_dwork = (double *)  R_alloc((size_t) t * n_threads, sizeof(double));
+  mc_lwork = (int64_t *) R_alloc((size_t) t * n_threads, sizeof(int64_t));
+
+  SEXP sexp_s = PROTECT(allocMatrix(REALSXP, t, mc_total));
+  mc_out = REAL(sexp_s);
+
+  // Rounds of permutations, checking for interrupts
+  // between them, as C_mantel().
+  double per_perm  = (double) N + n + t;
+  int    per_round = (int) fmin(1e8 * n_threads / per_perm, (double) mc_total);
+  if (per_round < n_threads) per_round = n_threads;
+
+  for (mc_k0 = 0; mc_k0 < mc_total; mc_k0 = mc_k1) {
+
+    mc_k1 = (mc_total - mc_k0 > per_round) ? mc_k0 + per_round : mc_total;
+
+    int nt = threads_for(n_threads, per_perm * (mc_k1 - mc_k0), 1e6);
+    if (nt > mc_k1 - mc_k0) nt = mc_k1 - mc_k0;
+    run_parallel(mantel_classes_worker, nt, (nt > 1) ? 100 : 1);
+
+    if (mc_k1 < mc_total) R_CheckUserInterrupt();
+  }
+
+  UNPROTECT(1);
+  return sexp_s;
+}

@@ -32,9 +32,10 @@ same thing.
 | `links` | pairs of features joined in a covariance biplot (Aitchison & Greenacre's term) | `plot.ecodive_ord` |
 | `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
 | `metric` | a beta diversity metric name | `beta_div`, `alpha_div`; planned `bioenv` |
-| `alternative` | `'greater'`, `'less'` or `'two.sided'` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `moran_i` |
+| `alternative` | `'greater'`, `'less'` or `'two.sided'`; `mantel_correlogram()` adds `'sign'` (its default, vegan's: each class tested in the direction of its statistic's sign; 2026-11-25, item 58) | `mantel`, `mantel_partial`, `mantel_correlogram`; planned `moran_i` |
 | `permutations`, `strata`, `seed` | the permutation test (a count or a matrix), restricted permutations, and the RNG seed | all tests, `envfit` |
 | `pairwise`, `p_adjust` | per-pair tests, and their p-value adjustment | planned on all group tests; `p_adjust` also on `mantel_correlogram` and optionally `simper` |
+| `breaks`, `n_classes`, `cutoff`, `progressive` | **(new, 2026-11-25, item 58)** distance classes' boundaries, or their number (equal widths; Sturges' rule by default); whether to test only the classes vegan's `cutoff` keeps; and a progressive multiple-testing adjustment (vegan's `progressive`), alongside `p_adjust` (which also takes vegan's `'sidak'` there) | `mantel_correlogram` |
 | `n_<unit>` | **an exact count** | `n_neighbors`, `n_starts`, `n_epochs`; planned `n_iters` (pacmap), `n_segments` (dca), `n_classes`, `n_landmarks`, `n_orthogonal` |
 | `max_<unit>` | **a cap** (it may stop earlier) | `max_iters` |
 | `tol` | a convergence tolerance | `mds`, `nmds`, `rpca`; planned `splsda` |

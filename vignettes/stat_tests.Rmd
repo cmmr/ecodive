@@ -170,6 +170,18 @@ width alone.
 mantel_partial(sepals, petals, given = 'Petal.Width', data = iris, method = 'spearman')
 ```
 
+`mantel_correlogram()` splits the pairs of samples into classes by a second
+distance, usually geographic, and runs a Mantel test for each class: how
+similarity changes with distance. Here, petal measurements stand in for
+coordinates: flowers with close petals have similar sepals (a positive
+statistic), and those with distant petals dissimilar ones.
+
+```{r}
+res <- mantel_correlogram(sepals, iris[, 3:4])
+res
+plot(res)
+```
+
 
 ## Running tests by name
 

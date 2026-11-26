@@ -222,6 +222,7 @@ reference:
   - permanova
   - mantel
   - mantel_partial
+  - mantel_correlogram
   - mrpp
   - anosim
   - permdisp
@@ -257,6 +258,7 @@ reference:
   - plot.ecodive_types
   - plot.ecodive_source
   - plot.ecodive_rarefaction_curve
+  - plot.ecodive_mantel_correlogram
   - plot.ecodive_log_ratio
   - ecodive_display
   - print_ecodive
