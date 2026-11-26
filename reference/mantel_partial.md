@@ -204,6 +204,7 @@ and correlation extensions of the Mantel test of matrix correspondence.
 ## See also
 
 [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md),
+[`mantel_correlogram()`](https://cmmr.github.io/ecodive/reference/mantel_correlogram.md),
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md),
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
 

@@ -445,6 +445,22 @@
   and permutations run in parallel. Permutations come from a `seed`
   argument, and results are identical for any number of `cpus`.
 
+- New
+  [`mantel_correlogram()`](https://cmmr.github.io/ecodive/reference/mantel_correlogram.md)
+  draws a Mantel correlogram: how community similarity changes with
+  (geographic or other) distance. It splits the pairs of samples into
+  distance classes (Sturges’ rule by default, or `n_classes` or
+  `breaks`) and tests each class with a Mantel test against the class’s
+  model matrix, with p-values adjusted progressively (`p_adjust`,
+  `progressive`). It gives the same classes, statistics, and p-values
+  (raw and adjusted, given the same permutation matrix) as
+  `vegan::mantel.correlog()`. `y` may be a distance matrix, coordinates,
+  or columns of `data`. Every class’s statistic depends on a permutation
+  only through a sum over the class, so each permutation is one pass
+  over the pairs for all classes (for Kendall’s tau-b too), in parallel.
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+  correlogram.
+
 - New `dist_test(dm, test, groups, data, ...)` runs any of these tests
   by name, as
   [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md)

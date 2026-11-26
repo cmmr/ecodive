@@ -279,6 +279,43 @@ mantel_partial(sepals, petals, given = 'Petal.Width', data = iris, method = 'spe
 #> Samples: 150
 ```
 
+[`mantel_correlogram()`](https://cmmr.github.io/ecodive/reference/mantel_correlogram.md)
+splits the pairs of samples into classes by a second distance, usually
+geographic, and runs a Mantel test for each class: how similarity
+changes with distance. Here, petal measurements stand in for
+coordinates: flowers with close petals have similar sepals (a positive
+statistic), and those with distant petals dissimilar ones.
+
+``` r
+
+res <- mantel_correlogram(sepals, iris[, 3:4])
+res
+#> # A data.frame: 15 × 7
+#> # Mantel correlogram of Bray-Curtis Dissimilarity
+#>    class_from class_to class_mid n_pairs       r p_value p_adjusted
+#>         <dbl>    <dbl>     <dbl>   <int>   <dbl>   <dbl>      <dbl>
+#>  1      0        0.418     0.209    1987  0.385    0.001      0.001
+#>  2      0.418    0.835     0.626    1383  0.29     0.001      0.002
+#>  3      0.835    1.25      1.04      987  0.189    0.001      0.003
+#>  4      1.25     1.67      1.46      795  0.107    0.001      0.004
+#>  5      1.67     2.09      1.88      648 -0.0104   0.24       0.24
+#>  6      2.09     2.51      2.3       565 -0.0948   0.001      0.006
+#>  7      2.51     2.92      2.71      791 -0.11     0.001      0.007
+#>  8      2.92     3.34      3.13      793 NA       NA         NA
+#>  9      3.34     3.76      3.55      798 NA       NA         NA
+#> 10      3.76     4.18      3.97      761 NA       NA         NA
+#> 11      4.18     4.59      4.38      672 NA       NA         NA
+#> 12      4.59     5.01      4.8       560 NA       NA         NA
+#> 13      5.01     5.43      5.22      263 NA       NA         NA
+#> 14      5.43     5.85      5.64      140 NA       NA         NA
+#> 15      5.85     6.26      6.05       32 NA       NA         NA
+#> # Attributes: breaks, method, alternative, p_adjust, progressive, n_perm,
+#> #   permutation, r_perm
+plot(res)
+```
+
+![](stat_tests_files/figure-html/unnamed-chunk-13-1.png)
+
 ## Running tests by name
 
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)

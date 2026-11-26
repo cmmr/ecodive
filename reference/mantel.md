@@ -190,6 +190,7 @@ regression approach. *Cancer Research*, 27(2), 209-220.
 ## See also
 
 [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md),
+[`mantel_correlogram()`](https://cmmr.github.io/ecodive/reference/mantel_correlogram.md),
 [`permanova()`](https://cmmr.github.io/ecodive/reference/permanova.md),
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md),
 [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)

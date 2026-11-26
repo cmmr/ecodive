@@ -363,6 +363,38 @@ match after accounting for petal width alone.</p>
 <span><span class="co">#&gt; Correlation: Spearman's rank correlation rho</span></span>
 <span><span class="co">#&gt; Alternative: greater (r is more positive than by chance)</span></span>
 <span><span class="co">#&gt; Samples: 150</span></span></code></pre></div>
+<p><code><a href="../reference/mantel_correlogram.html">mantel_correlogram()</a></code> splits the pairs of samples into
+classes by a second distance, usually geographic, and runs a Mantel test
+for each class: how similarity changes with distance. Here, petal
+measurements stand in for coordinates: flowers with close petals have
+similar sepals (a positive statistic), and those with distant petals
+dissimilar ones.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mantel_correlogram.html">mantel_correlogram</a></span><span class="op">(</span><span class="va">sepals</span>, <span class="va">iris</span><span class="op">[</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">res</span></span>
+<span><span class="co">#&gt; # A data.frame: 15 × 7</span></span>
+<span><span class="co">#&gt; # Mantel correlogram of Bray-Curtis Dissimilarity</span></span>
+<span><span class="co">#&gt;    class_from class_to class_mid n_pairs       r p_value p_adjusted</span></span>
+<span><span class="co">#&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;   &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1      0        0.418     0.209    1987  0.385    0.001      0.001</span></span>
+<span><span class="co">#&gt;  2      0.418    0.835     0.626    1383  0.29     0.001      0.002</span></span>
+<span><span class="co">#&gt;  3      0.835    1.25      1.04      987  0.189    0.001      0.003</span></span>
+<span><span class="co">#&gt;  4      1.25     1.67      1.46      795  0.107    0.001      0.004</span></span>
+<span><span class="co">#&gt;  5      1.67     2.09      1.88      648 -0.0104   0.24       0.24</span></span>
+<span><span class="co">#&gt;  6      2.09     2.51      2.3       565 -0.0948   0.001      0.006</span></span>
+<span><span class="co">#&gt;  7      2.51     2.92      2.71      791 -0.11     0.001      0.007</span></span>
+<span><span class="co">#&gt;  8      2.92     3.34      3.13      793 NA       NA         NA</span></span>
+<span><span class="co">#&gt;  9      3.34     3.76      3.55      798 NA       NA         NA</span></span>
+<span><span class="co">#&gt; 10      3.76     4.18      3.97      761 NA       NA         NA</span></span>
+<span><span class="co">#&gt; 11      4.18     4.59      4.38      672 NA       NA         NA</span></span>
+<span><span class="co">#&gt; 12      4.59     5.01      4.8       560 NA       NA         NA</span></span>
+<span><span class="co">#&gt; 13      5.01     5.43      5.22      263 NA       NA         NA</span></span>
+<span><span class="co">#&gt; 14      5.43     5.85      5.64      140 NA       NA         NA</span></span>
+<span><span class="co">#&gt; 15      5.85     6.26      6.05       32 NA       NA         NA</span></span>
+<span><span class="co">#&gt; # Attributes: breaks, method, alternative, p_adjust, progressive, n_perm,</span></span>
+<span><span class="co">#&gt; #   permutation, r_perm</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="stat_tests_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="running-tests-by-name">Running tests by name<a class="anchor" aria-label="anchor" href="#running-tests-by-name"></a>
@@ -372,7 +404,7 @@ match after accounting for petal width alone.</p>
 variable suits the test (categorical or numeric), and names are matched
 forgivingly: <code>'adonis2'</code> finds <code>permanova</code> and
 <code>'betadisper'</code> finds <code>permdisp</code>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_test.html">dist_test</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'adonis2'</span>, <span class="st">'Species'</span>, <span class="va">iris</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Permutational multivariate analysis of variance (PERMANOVA) of Bray-Curtis Dissimilarity</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -389,7 +421,7 @@ forgivingly: <code>'adonis2'</code> finds <code>permanova</code> and
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>Each result converts to a one-row data frame with the same columns,
 so several tests combine into one table.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tests</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dist_tests.html">list_dist_tests</a></span><span class="op">(</span>val <span class="op">=</span> <span class="st">'id'</span>, groups <span class="op">=</span> <span class="st">'categorical'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">tests</span>, <span class="kw">function</span> <span class="op">(</span><span class="va">test</span><span class="op">)</span></span>
@@ -409,7 +441,7 @@ so several tests combine into one table.</p>
 <code>seed</code> (default <code>0</code>), so the same call always
 gives the same p-value, on any computer and with any number of
 <code>cpus</code>. R’s <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> has no effect.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/permanova.html">permanova</a></span><span class="op">(</span><span class="va">dm</span>, <span class="st">'Species'</span>, <span class="va">iris</span>, seed <span class="op">=</span> <span class="fl">1</span>, cpus <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">)</span></span>

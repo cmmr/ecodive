@@ -119,6 +119,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/maaslin3.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/manhattan.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mantel.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/mantel_correlogram.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mantel_partial.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/margalef.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/matusita.html</loc></url>
@@ -171,6 +172,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_linda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_maaslin3.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_mantel_correlogram.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_network.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_neutral_model.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.html</loc></url>
