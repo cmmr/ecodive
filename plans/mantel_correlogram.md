@@ -181,3 +181,25 @@ My own decisions:
   computed depends on it).
 - **Docs:** `vignettes/stat_tests.Rmd` gains a short correlogram example;
   `mantel()` and `mantel_partial()` link to it.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 58, done 2026-11-26.** Commit `97ddfb1` (function), plus the tick.
+
+- Tests: 31,134 at home and 454 in CRAN mode, before merging the other
+  sessions' work (30,895 / 450 at 15dc935). `test-mantel_correlogram.r` has
+  235 tests.
+- vegan 2.7-8 `mantel.correlog()`, shared permutation matrix: the 5 stored
+  mite cases (Sturges, custom breaks, n.class, cutoff = FALSE; Pearson,
+  Spearman, Kendall; Holm, BH, Šidák, Bonferroni; progressive and not) and
+  400 fresh random cases (n 5–60, tied and untied, random breaks, every
+  `mult`): classes, n and tested classes all identical; r within 9.1e-16;
+  1,528 raw p-values and 1,089 adjusted ones (cases without gaps) identical.
+- ecodist 2.1.3 `mgram()`: Pearson and Spearman r within 2.2e-16 (its
+  first class is half-open, so it drops pairs at the minimum distance).
+- cpus 1, 2, 3, 4, 8 identical.
+- Speed (n = 150, 999 permutations): vegan 2.5 s, ecodive 0.08 s on one
+  thread.
+- `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed size,
+  the container's debug build flags).
