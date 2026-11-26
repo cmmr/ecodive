@@ -151,7 +151,11 @@
     expect_equal(mi$statistic[['I']], unname(attr(res, 'moran_i'))[[j]], tolerance = 1e-12, info = j)
   }
 
-  # A larger set, against R's eigen() (BLAS-dependent, so at home only).
+  # A larger set, against R's eigen() (BLAS-dependent, so at home only). Its
+  # closest eigenvalues are 1.8e-5 apart, so eigenvectors from two correct
+  # solvers can differ by about 1e-9 there: the MEMs are checked by their
+  # residuals and orthogonality instead, and the eigenvalues (which are
+  # well-conditioned) against eigen()'s.
   if (at_home()) {
     set.seed(2)
     xy <- matrix(runif(600), ncol = 2)
@@ -159,13 +163,16 @@
     Dx <- as.matrix(dist(xy)); tx <- attr(r, 'threshold')
     Wx <- ifelse(Dx <= tx, 1 - (Dx / (4 * tx))^2, 0); diag(Wx) <- 0
     Cx <- diag(300) - 1 / 300
-    e  <- eigen(Cx %*% Wx %*% Cx, symmetric = TRUE)
+    Ax <- Cx %*% Wx %*% Cx
+    e  <- eigen(Ax, symmetric = TRUE)
     ev <- e$values[order(abs(e$values))][-1]       # without the ones vector's 0
     ev <- sort(ev, decreasing = TRUE)
-    expect_equal(300 * unname(attr(r, 'values')), ev, tolerance = 1e-12, scale = 1)
-    keep <- abs(e$values) > 1e-12
-    ref  <- e$vectors[, keep] * sqrt(300)
-    expect_true(mem_diff(r[, seq_len(sum(keep))], ref, e$values[keep]) < 1e-9)
+    lx <- 300 * unname(attr(r, 'values'))
+    expect_equal(lx, ev, tolerance = 1e-11, scale = 1)
+    Mx <- unclass(r); attributes(Mx) <- list(dim = dim(Mx))
+    expect_true(max(abs(Ax %*% Mx - sweep(Mx, 2, lx, '*'))) < 1e-10)
+    expect_true(max(abs(crossprod(Mx) - diag(300, 299))) < 1e-10)
+    expect_true(max(abs(colSums(Mx))) < 1e-10)
   }
 
 
