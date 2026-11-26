@@ -657,3 +657,69 @@ Decided while implementing (my judgement; none needed the user):
 - **Docs:** the shared "Machine learning" section (`ml_section`, item 27,
   Yerke et al. 2024) is inherited, with "Input Types" and "Pseudocount";
   new pkgdown section "Prediction".
+
+
+## Outcome (from the implementing session's final report)
+
+Implemented in `72be1a5` (merged with items 57–59 in `de32ce4`), on
+2026-11-25/26.
+
+- **Files:** `src/random_forest.c` (~1,800 lines: the scikit-learn tree,
+  splitter, partitioners, sort, criteria and forest port; MT19937, numpy's
+  masked `randint`, `random_sample`, `our_rand_r()`, numpy's pairwise sum;
+  prediction, impurity and permutation importance), `R/random_forest.r`
+  (`random_forest()`, internal `random_forest_details()`, folds, grid,
+  metrics, ROC, `predict()`, `print()`, `plot()`), `test-random_forest.r`
+  (508 tests) and two smoke lines, fixtures from
+  `data-raw/expected/random_forest.{r,py}`.
+- **Parity (numpy mode):** all 21 scikit-learn 1.9.1 cases (binary,
+  three-class, regression; dense and CSC; gini, entropy; `'balanced'`,
+  `'balanced_subsample'`, a named weight vector; `max_samples` fraction and
+  count; `min_samples_leaf = 3`; `min_samples_split = 5`; `max_depth = 3`;
+  `max_features` 1, `'log2'`, 0.5) match **exactly**: every node's
+  children, feature, sample count, threshold, value, impurity and weight,
+  the bootstrap counts, `feature_importances_`, OOB predictions and scores,
+  and `predict_proba()` (largest relative difference 0; tests allow
+  1e-12). numpy's `random_sample`, `randint` (n = 7, 60, 1000, 2^31 − 1),
+  the forest's tree seeds, `our_rand_r()` and `np.sum()` match
+  `identical()`.
+- **q2-sample-classifier 2026.10.0** (`_fit_and_predict_cv()` run from a
+  checkout): classification out-of-fold predictions and probabilities
+  exact; mean fold importances 2.2e-16; per-fold accuracy exact; every ROC
+  curve (per class, micro, macro) exact. Regression predictions exact,
+  importances 2.0e-16, fold MSEs 2.1e-16. `roc_curve()` / `auc()` on tied
+  scores: exact.
+- **Distributional (PCG mode), 500-tree forests on the binary fixture over
+  20 seeds:** OOB accuracy 0.855 (SE 0.003) vs scikit-learn's 0.857 (SE
+  0.004); mean impurity importances within 2.5 SE of scikit-learn's for
+  every feature; OOB error vs randomForest 0.141 and ranger 0.141;
+  permutation importance Spearman ρ 0.91 with randomForest's, 0.86 with
+  ranger's; the same top three features.
+- **Determinism:** `identical()` for `cpus` 1, 2, 3, 4, 8 (with a grid and
+  both importances); sparse = dense for classification; tree t identical
+  in 30- and 50-tree forests. Valgrind: 0 errors (dense and sparse,
+  classification and regression, permutation importance, class weights).
+- **Speed** (500 × 2,000 table, 76% zeros, 500 trees, 4-core container):
+  classification 0.68 s on 1 thread, 0.23 s on 4 (scikit-learn 1.55 s /
+  0.94 s with OOB; ranger 0.77 s / 0.30 s; randomForest 12.9 s); sparse
+  0.93 s / 0.24 s; regression (`'sqrt'`) 1.31 s / 0.39 s (scikit-learn
+  2.25 s / 0.88 s; ranger 1.68 s / 0.59 s); 5-fold CV plus the full forest
+  0.89 s on 4 threads.
+- **Tests:** 32,859 at home and 469 in CRAN mode on the merged tree (30,895
+  and 450 at 15dc935). `R CMD check --no-manual --ignore-vignettes`: one
+  NOTE (installed size 6.8 Mb), as before.
+- **Open issues:**
+  - Bit parity assumes no fused multiply-add; on arm64 (GCC's default
+    `-ffp-contract=fast`, clang's `on`) a split tie could break
+    differently and a home parity test fail. CRAN mode compares nothing.
+  - Regression forests from sparse and dense input can differ in tied
+    splits (as scikit-learn's do); classification forests are identical.
+- **For item 63 (`feature_volatility()`):** call `random_forest(counts, y =
+  <state column>, data = meta, ...)` (regression): `$importance`
+  (`impurity`, `impurity_cv_mean`, and `permutation` with `importance =
+  'both'`) ranks the features, `$predictions` has out-of-fold and OOB
+  predictions, and `n_trees = 100, norm = 'none'` gives q2's settings. q2's
+  `regress_samples_ncv` is `random_forest(..., n_folds = 5)`; for parity
+  with q2, `random_forest_details(numpy_random_state = , folds = )` and the
+  `data-raw/expected/random_forest.py` loader (stubbed `qiime2.plugin`,
+  `q2templates`) are reusable.

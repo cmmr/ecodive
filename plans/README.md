@@ -373,7 +373,7 @@ can't be mistaken for one another:
 | Quality control | ✓ `decontam`, ✓ `decontam_not` |
 | Batch correction (`batch_correct`) | ✓ `batch_mmuphin`, ✓ `batch_combat`, `batch_combat_seq`, `batch_conqur` |
 | Longitudinal | ✓ `first_differences`, ✓ `first_distances`, ✓ `volatility`, ✓ `nmit`, `feature_volatility` |
-| Prediction | `random_forest` |
+| Prediction | ✓ `random_forest` |
 
 Names still worth a word of warning in the docs:
 - `lda` also means latent Dirichlet allocation (topic models) and LEfSe's
