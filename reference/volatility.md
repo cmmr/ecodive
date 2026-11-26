@@ -139,6 +139,7 @@ Computer Graphics*, 22, 659–668.
 ## See also
 
 Other longitudinal:
+[`feature_volatility()`](https://cmmr.github.io/ecodive/reference/feature_volatility.md),
 [`first_differences()`](https://cmmr.github.io/ecodive/reference/first_differences.md),
 [`first_distances()`](https://cmmr.github.io/ecodive/reference/first_distances.md),
 [`nmit()`](https://cmmr.github.io/ecodive/reference/nmit.md)

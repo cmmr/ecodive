@@ -404,8 +404,10 @@ How far drift and dispersal alone explain a community’s composition
 
 Repeated measures of the same subjects over time (q2-longitudinal). Each
 subject’s change from one time point to the next or from a baseline, a
-control chart of a variable over time, and distances between subjects in
-how their features vary together (NMIT, then tested with permanova()).
+control chart of a variable over time, distances between subjects in how
+their features vary together (NMIT, then tested with permanova()), and
+the features that change most predictably over time (feature volatility,
+with random_forest()).
 
 - [`first_differences()`](https://cmmr.github.io/ecodive/reference/first_differences.md)
   : First Differences Within Subjects
@@ -419,6 +421,10 @@ how their features vary together (NMIT, then tested with permanova()).
   [`plot(`*`<ecodive_first_distances>`*`)`](https://cmmr.github.io/ecodive/reference/plot_longitudinal.md)
   [`plot(`*`<ecodive_volatility>`*`)`](https://cmmr.github.io/ecodive/reference/plot_longitudinal.md)
   : Plot Longitudinal Results
+- [`feature_volatility()`](https://cmmr.github.io/ecodive/reference/feature_volatility.md)
+  : Feature Volatility
+- [`plot(`*`<ecodive_feature_volatility>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_feature_volatility.md)
+  : Plot a Feature Volatility Result
 
 ## Batch Correction
 

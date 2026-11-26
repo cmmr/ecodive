@@ -106,6 +106,7 @@ longitudinal and paired-sample analyses of microbiome data. *mSystems*,
 ## See also
 
 Other longitudinal:
+[`feature_volatility()`](https://cmmr.github.io/ecodive/reference/feature_volatility.md),
 [`first_differences()`](https://cmmr.github.io/ecodive/reference/first_differences.md),
 [`nmit()`](https://cmmr.github.io/ecodive/reference/nmit.md),
 [`volatility()`](https://cmmr.github.io/ecodive/reference/volatility.md)

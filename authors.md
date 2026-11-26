@@ -88,10 +88,11 @@
   the neutral community model fit (neutral_model()), following 'neufit'
 
 - **QIIME 2 development team**. Contributor, copyright holder.  
-  first differences, first distances, volatility and NMIT
-  (first_differences(), first_distances(), volatility(), nmit()), ported
-  from 'q2-longitudinal'; the cross-validation workflow of
-  random_forest(), from 'q2-sample-classifier'
+  first differences, first distances, volatility, NMIT and feature
+  volatility (first_differences(), first_distances(), volatility(),
+  nmit(), feature_volatility()), ported from 'q2-longitudinal'; the
+  cross-validation workflow of random_forest() and the train/test
+  workflow of feature_volatility(), from 'q2-sample-classifier'
 
 - **University of Washington Interactive Data Lab**. Copyright holder.  
   Vega's bootstrap confidence interval, followed by volatility()
