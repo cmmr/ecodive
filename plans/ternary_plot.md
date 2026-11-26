@@ -292,3 +292,36 @@ Follows [README.md](README.md) § "Result attributes and plots".
   name `counts` rather than `x`.
 - `?ternary_plot` inherits the "Input Types" section.
   `composition_barplot()`'s docs now link to it.
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commit:** `468d309` (`R/ternary_plot.r`, `src/ternary_plot.c`,
+  `tests/tinytests/test-ternary_plot.r`, `man/ternary_plot.Rd`, and the
+  shared files).
+- **Tests:** 160 new in `test-ternary_plot.r`, plus 1 smoke line. Full
+  suite on an `-O2` install (R 4.3.3): 33,020 at home (baseline 32,859)
+  and 470 in CRAN mode (baseline 469), all OK.
+  `R CMD check --no-manual --ignore-vignettes`: only the existing
+  installed-size NOTE.
+- **Exact identities** (all tested):
+  - the vertices and (1/3, 1/3, 1/3) → (1/2, √3/6) at 1e-15;
+  - the centred points' closed geometric mean is (1/3, 1/3, 1/3) and their
+    ilr mean is 0, at 1e-14; ilr differences are unchanged at 1e-12;
+  - every ellipse point satisfies the quadratic form = r² at 1e-10 (both
+    kinds, two levels, three groups); centred curves are the uncentred
+    ones perturbed by g⁻¹, at 1e-13;
+  - dense, `margin = 2`, Matrix and slam inputs give identical results.
+- **Reference cross-checks** (output only):
+  - `compositions::plot(acomp(x), center = TRUE)`: centred points agree to
+    2.2e-16.
+  - `compositions::ellipses()`: the same ilr quadratic form. Its vertices
+    are exactly at r², and the points it interpolates fall up to 0.2%
+    inside. It draws uncentred even on a centred plot.
+  - ggtern 4.0.0's `geom_confidence_tern()`: exactly the χ²₂ contour of
+    the samples at m = 6, 20 and 100. So ecodive keeps Hotelling's F, and
+    documents the difference.
+- **Renders checked by eye:** uncentred and centred samples mode with
+  confidence and prediction regions, a numeric gradient, zeros on the
+  edges, and features mode. Tick-label collisions in centred plots, and a
+  clipped subtitle, were found this way and fixed.
