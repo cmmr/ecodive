@@ -284,6 +284,7 @@ American Statistical Association*, 21(153), 65-66.
 
 [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md),
 [`mantel_partial()`](https://cmmr.github.io/ecodive/reference/mantel_partial.md),
+[`mantel_regression()`](https://cmmr.github.io/ecodive/reference/mantel_regression.md),
 [`plot.ecodive_mantel_correlogram()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_mantel_correlogram.md)
 
 ## Examples

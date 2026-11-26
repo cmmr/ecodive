@@ -316,6 +316,35 @@ plot(res)
 
 ![](stat_tests_files/figure-html/unnamed-chunk-13-1.png)
 
+[`mantel_regression()`](https://cmmr.github.io/ecodive/reference/mantel_regression.md)
+regresses `dm` on several distance matrices at once (multiple regression
+on distance matrices, MRM), with a permutation p-value for each term and
+for the whole model: here, which of petal length, petal width and
+species explains the differences in sepals. A numeric column’s distances
+are its differences, and a factor’s are 0 (same species) or 1
+(different).
+
+``` r
+
+res <- mantel_regression(sepals ~ Petal.Length + Petal.Width + Species, data = iris)
+res
+#> Multiple Regression on Distance Matrices of Bray-Curtis Dissimilarity
+#> 
+#> R2 = 0.5388, F = 4350, p = 0.001
+#> Permutations: 999 (free)
+#> Regression: least squares on the distances
+#> Samples: 150 (11175 pairs)
+#> 
+#>          term  estimate std_estimate      t p_value
+#>   (Intercept)   0.04423               88.77   1.000
+#>  Petal.Length   0.02926        1.039  65.36   0.001
+#>   Petal.Width  -0.01933      -0.2884 -17.85   0.001
+#>       Species -0.007284     -0.07981 -8.541   0.001
+plot(res)
+```
+
+![](stat_tests_files/figure-html/unnamed-chunk-14-1.png)
+
 ## Running tests by name
 
 [`dist_test()`](https://cmmr.github.io/ecodive/reference/dist_test.md)
