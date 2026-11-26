@@ -1020,6 +1020,24 @@
   shrinkage of the batch effects, and each feature's batch means before
   and after).
 
+* New `random_forest()` grows random forests (Breiman 2001) for
+  classification (a factor, character or logical `y`) or regression (a
+  numeric `y`), and gives q2-sample-classifier's workflow (Bokulich et al.
+  2018): cross-validated predictions and class probabilities (stratified
+  folds, or `folds`), accuracy (with q2's baseline and ratio), ROC curves
+  and AUC (with q2's micro and macro averages), out-of-bag predictions and
+  scores, and impurity and out-of-bag permutation importances. Vectors of
+  `max_features` or `min_samples_leaf` make a grid, chosen inside each
+  training set by out-of-bag error. The trees are an exact port of
+  scikit-learn 1.9.1's (BSD-3): given scikit-learn's random draws, every
+  node, importance and out-of-bag prediction matches, and q2's
+  cross-validated predictions, probabilities, importances and ROC curves
+  match exactly. ecodive draws from PCG, one stream per tree, so a forest is
+  the same for any `cpus`; threaded C over sparse or dense tables (float32,
+  as scikit-learn). `predict()` matches new samples' features by name, and
+  `plot()` draws the importances, ROC curves, confusion matrix, predicted
+  against observed values, or the grid's out-of-bag errors.
+
 * New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
   2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
   pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,

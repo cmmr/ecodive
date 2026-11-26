@@ -538,3 +538,122 @@ time for the parity tests first.
   doi:10.1145/272991.272995
 - Fawcett, T. (2006). An introduction to ROC analysis. *Pattern
   Recognition Letters*, 27, 861–874. doi:10.1016/j.patrec.2005.10.010
+
+
+## Decisions made while implementing (2026-11-25)
+
+The user's answers to "Decide before writing code" (one round, at the
+start):
+
+1. **Defaults:** `n_trees = 500`; regression `max_features` = all features
+   (scikit-learn's), classification `'sqrt'`.
+2. **numpy parity mode: internal only**, as `random_forest_details(...,
+   numpy_random_state = )` for the tests and fixtures. Users get PCG.
+3. **float32** feature values, as scikit-learn (documented under
+   "Differences").
+4. **`norm = 'percent'`** by default.
+5. **`NA` in `y`: dropped with a warning** ("Left out N samples whose `y` is
+   NA.").
+6. **`criterion = 'entropy'` and `class_weight = 'balanced_subsample'`
+   included.**
+
+Decided while implementing (my judgement; none needed the user):
+
+- **`y`, not `groups`** (the plan's name; numeric `y` means regression).
+  It and `folds` are matched with `match_rows()` / `per_sample()` (messages
+  name `` `counts` ``), as `test_groups()` does, but not through
+  `test_groups()` itself, which errors on `NA`. A character `y`'s classes
+  are sorted in C-locale (radix) order, numpy's `np.unique()` order, so the
+  class order doesn't depend on the locale; a factor keeps its levels
+  (unused ones dropped with a warning); logical `y` gives `FALSE`, `TRUE`.
+- **Streams:** the full-data forest is training set 0 (PCG stream `t` for
+  tree `t`) and fold `k` uses `k * 2^32 + t`; the plan had the full data
+  last (index K), which would make the full-data forest change with
+  `n_folds`. Permutation importance: stream `2^61 + t * p + j`; folds:
+  `2^62 + c` per class (StratifiedKFold) or `2^62` (KFold), one stream per
+  class rather than one shared stream.
+- **Parallel unit:** one task per tree. R loops over training sets and grid
+  points and each `C_rf_grow()` call runs its trees on the thread pool
+  (trees claimed with an atomic counter; each writes only its own slot), so
+  results are `identical()` for any `cpus`. The plan's single
+  `run_parallel()` over (training set, grid point, tree) would save only
+  the barriers between forests.
+- **The training table is copied per training set** (float32, dense or
+  CSC, the training rows only), as scikit-learn fits `X[train]`: the sparse
+  partitioner's choice between its two extraction methods depends on the
+  column's non-zeros in the training rows, so this is needed for parity.
+- **Sparse or dense:** `slam` and `Matrix` tables (but `dgeMatrix`) stay CSC
+  unless `norm` is `'clr'` or `'log'` (which fill the zeros); base matrices
+  are dense. Classification forests are `identical()` either way (integer
+  bootstrap weights sum exactly); **regression forests can differ** in
+  which of two tied splits wins, because the partitioners leave samples in
+  different orders and the sums round differently. scikit-learn's do too:
+  468 of 600 regression trees differed between its dense and CSC input on
+  the fixture data. The tests compare regression sparse vs dense by R²
+  and correlation instead.
+- **Folds:** StratifiedKFold's allocation (`bincount(sort(y)[i::K])`, classes
+  in order of first appearance) and KFold's sizes are ported; only the
+  shuffles differ (PCG). `n_folds = 1` means no CV, like 0. A class smaller
+  than `n_folds` warns; every class smaller is an error; a fold whose
+  training samples have one class is an error. `folds` may be any labels
+  (each label a fold; a factor's unused level is an "empty fold" error).
+- **q2's refits:** q2 refits the same estimator (same `random_state`) in
+  every fold, so numpy mode gives every training set the same tree seeds.
+  q2's DictVectorizer sorts features by name and drops features absent from
+  a fold's training samples; ecodive keeps every feature in every fold
+  (documented), and the q2 fixture uses names F01... and features present in
+  ≥ 10 samples so that both agree.
+- **Without CV** (`n_folds` 0 or 1) the confusion matrix and ROC come from
+  the OOB probabilities, and the CV entries of `performance` are `NA`.
+- **Fold SDs use divisor n** (q2's `np.std`) for `accuracy_fold_sd`,
+  `mse_fold_sd` and `impurity_cv_sd`; `permutation_sd` (over trees) uses
+  n − 1.
+- **ROC:** binary results keep only the second class's curve (`auc` is its
+  AUC); more classes give each class plus q2's `'micro'` and `'macro'`
+  (macro by numpy's `interp()` semantics, ported as `rf_interp()`, which
+  differs from `approx(ties = )` at tied FPRs). `threshold` is `NA` for
+  macro.
+- **Permutation importance:** per tree, only over the features it splits
+  on, among its OOB samples, the tree's prediction being the leaf's largest
+  class fraction (first on ties) or value; the walk reads only the tree's
+  features (a small per-tree matrix), so sparse tables are never densified.
+  Mean over all trees, unscaled; `permutation_sd` its SD over trees.
+- **Never out of bag:** `NA` with a warning (counted), left out of OOB
+  scores and grid errors.
+- **`max_features`:** counts (whole numbers ≥ 1, ≤ p), fractions (< 1),
+  `'sqrt'`, `'log2'`, `'all'`; R can't tell `1` from `1.0`, so `1` is a count
+  and "all" is `'all'`. `min_samples_leaf` takes counts only (no
+  fractions). `max_samples`: a count (may exceed n, as scikit-learn) or a
+  fraction below 1; scikit-learn's small-bootstrap warning is not ported.
+  `criterion = 'mse'` is accepted as an alias of `'squared_error'`.
+- **`class_weight` as a named vector:** classes not named get 1 (scikit-learn's
+  dict); names that aren't classes are an error. `'balanced'` uses the
+  classes present in each training set (`np.unique(y_train)`).
+- **Grid:** OOB error chooses within each training set (first on ties); CV
+  forests with a single grid point skip their OOB pass. `tuning` lists
+  every training set × grid point.
+- **The stored forest** (`keep_forest`) keeps `offsets`, `left`, `right`,
+  `feature`, `threshold` and `value` (all nodes), plus `classes`,
+  `features`, `norm`, `pseudocount` (the resolved value) and `type`; the
+  node impurities, sample counts and inbag counts are dropped.
+- **`predict()`** keeps the forest's features only (missing ones are 0,
+  with a warning naming how many; extra ones dropped), *then* normalizes,
+  so `'percent'` divides by the same features' total as in training. It
+  needs `counts` (no default to OOB predictions).
+- **No `display` title:** the plots' titles are fixed per type and don't
+  name an input (README rule: set `display` only when the title names the
+  input). `print()` is its own short method (a list result).
+- **MT19937, numpy's masked `randint`, `random_sample`, `our_rand_r()` and
+  numpy's pairwise sum** are written in `src/random_forest.c` (static).
+  TODO.md says items 62 and 86 share "the MT19937 test code": `ctf()` (item
+  86) can move `mt_seed()`, `mt_gen()`, `mt_next()`, `mt_randint()` and
+  `mt_double()` to a shared header; `C_rf_rng_test()` and the fixtures in
+  `random_forest.rds$rng` test them against numpy.
+- **Fixtures:** `data-raw/expected/random_forest/` holds 1.6 MB of text
+  outputs (21 scikit-learn cases, dense and CSC; folds; ROC; q2's nested CV
+  for classification and regression; numpy draws; 20-seed references); the
+  `.rds` is 150 KB. q2-sample-classifier runs from a checkout with stubbed
+  `qiime2.plugin` and `q2templates`, as longitudinal.py does.
+- **Docs:** the shared "Machine learning" section (`ml_section`, item 27,
+  Yerke et al. 2024) is inherited, with "Input Types" and "Pseudocount";
+  new pkgdown section "Prediction".

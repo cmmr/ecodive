@@ -482,6 +482,17 @@
 
 
 
+  # Prediction: random forests. ====
+
+  rf <- random_forest(counts, 'grp', meta, n_trees = 25, n_folds = 2, cpus = cpus)
+  expect_true(inherits(rf, 'ecodive_random_forest') && nrow(rf$predictions) == 20L &&
+              nrow(rf$importance) == 12L && is.factor(predict(rf, counts, cpus = cpus)))
+  rf <- random_forest(counts, 'x', meta, n_trees = 25, n_folds = 2, cpus = cpus)
+  expect_true(identical(attr(rf, 'type'), 'regression') &&
+              all(is.finite(predict(rf, counts, cpus = cpus))))
+
+
+
   # Input checks. ====
 
   bad <- dm

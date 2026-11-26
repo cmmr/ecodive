@@ -228,7 +228,8 @@ License:
 
 
 Files: src/nmds.c src/tsne.c src/isomap.c src/plsda.c src/lda.c R/nmds.r
-   R/mds.r R/tsne.r R/isomap.r R/plsda.r R/lda.r
+   R/mds.r R/tsne.r R/isomap.r R/plsda.r R/lda.r src/random_forest.c
+   R/random_forest.r
 Copyright: 2007-2026 The scikit-learn developers
 Comment: Ported from scikit-learn 1.9.1: the SMACOF iteration (metric and
    non-metric) and isotonic regression in src/nmds.c (sklearn/manifold/_mds.py,
@@ -239,7 +240,18 @@ Comment: Ported from scikit-learn 1.9.1: the SMACOF iteration (metric and
    sklearn/neighbors/_base.py, sklearn/utils/graph.py); PLS regression
    (PLSRegression) in src/plsda.c (sklearn/cross_decomposition/_pls.py); and
    linear discriminant analysis (LinearDiscriminantAnalysis, svd solver) in
-   src/lda.c (sklearn/discriminant_analysis.py). The
+   src/lda.c (sklearn/discriminant_analysis.py); and random forests
+   (RandomForestClassifier, RandomForestRegressor) in src/random_forest.c:
+   the depth-first tree builder and Tree (sklearn/tree/_tree.pyx), the best
+   splitter (sklearn/tree/_splitter.pyx), the dense and sparse partitioners
+   (sklearn/tree/_partitioner.pyx), the sort (sklearn/utils/_sorting.pyx),
+   the Gini, entropy and squared-error criteria (sklearn/tree/_criterion.pyx),
+   our_rand_r() (sklearn/utils/_random.pxd, sklearn/tree/_utils.pyx), and
+   the bootstrap, class weights, out-of-bag predictions and importances
+   (sklearn/ensemble/_forest.py, _bootstrap.py, _base.py,
+   sklearn/utils/class_weight.py); R/random_forest.r follows StratifiedKFold
+   and KFold (sklearn/model_selection/_split.py) and roc_curve() and auc()
+   (sklearn/metrics/_ranking.py). The
    R files follow the same algorithms. The rest of these files is Copyright
    2026 ecodive authors, under the MIT license above.
 License:
@@ -810,11 +822,17 @@ License:
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: src/replace_zeros.c
+Files: src/replace_zeros.c src/random_forest.c
 Copyright: 2005-2025 NumPy Developers
 Comment: np_pairwise_sum() follows pairwise_sum_DOUBLE() from numpy 2.x
  (numpy/_core/src/umath/loops_utils.h.src), the summation np.sum() uses, so
- that replace_zeros_mult() sums each sample as scikit-bio does.
+ that replace_zeros_mult() sums each sample as scikit-bio does;
+ src/random_forest.c's np_sum() follows it too. The parity mode of
+ random_forest() (used by the tests) follows numpy's legacy RandomState:
+ MT19937 seeding and generation (numpy/random/src/mt19937/), randint()'s
+ masked bounded integers (numpy/random/src/distributions/) and
+ random_sample() (numpy/random/mtrand.pyx); MT19937 itself carries its own
+ notice, in the stanza for src/random_forest.c below.
 License:
    Copyright (c) 2005-2025, NumPy Developers.
    All rights reserved.
@@ -1918,3 +1936,81 @@ License:
    HOLDER OR CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT,
    INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE
    OF THE PACKAGE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: src/random_forest.c
+Copyright: 1997-2002 Makoto Matsumoto and Takuji Nishimura
+Comment: The MT19937 generator of random_forest()'s parity mode (mt_seed(),
+ mt_gen(), mt_next()), as numpy's legacy RandomState carries it
+ (numpy/random/src/mt19937/mt19937.c).
+License:
+   Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+
+     3. The names of its contributors may not be used to endorse or promote
+        products derived from this software without specific prior written
+        permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT
+   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: R/random_forest.r data-raw/expected/random_forest.py
+Copyright: 2017-2026 QIIME 2 development team
+Comment: random_forest()'s workflow follows q2-sample-classifier 2026.10.0
+ (github.com/qiime2/q2-sample-classifier, BSD-3-Clause):
+ _fit_and_predict_cv() and _mean_feature_importance() in
+ q2_sample_classifier/utilities.py (cross-validated predictions,
+ probabilities and per-fold accuracy, mean importances over folds), and
+ _calculate_baseline_accuracy(), _roc_per_class(), _roc_micro_average() and
+ _roc_macro_average() in q2_sample_classifier/visuals.py, restructured for
+ ecodive. The rest of these files is Copyright 2026 ecodive authors, under
+ the MIT licence above.
+License:
+   Copyright (c) 2017-2026, QIIME 2 development team.
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+
+   * Neither the name of the copyright holder nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+   PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

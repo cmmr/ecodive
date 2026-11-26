@@ -103,6 +103,12 @@ extern SEXP C_medoid_accum(SEXP, SEXP, SEXP);
 extern SEXP C_row_medians(SEXP, SEXP);
 extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
 extern SEXP C_rng_dist(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rf_grow(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rf_importance(SEXP, SEXP);
+extern SEXP C_rf_permutation(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rf_predict(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rf_rng_test(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rf_shuffle(SEXP, SEXP, SEXP);
 extern SEXP C_volatility_ci(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_st_collapse(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_st_cond_prob(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -210,6 +216,12 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_row_medians",  (DL_FUNC) &C_row_medians,  2},
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
   {"C_rng_dist",  (DL_FUNC) &C_rng_dist,  5},
+  {"C_rf_grow",        (DL_FUNC) &C_rf_grow,        11},
+  {"C_rf_importance",  (DL_FUNC) &C_rf_importance,   2},
+  {"C_rf_permutation", (DL_FUNC) &C_rf_permutation,  7},
+  {"C_rf_predict",     (DL_FUNC) &C_rf_predict,      5},
+  {"C_rf_rng_test",    (DL_FUNC) &C_rf_rng_test,     4},
+  {"C_rf_shuffle",     (DL_FUNC) &C_rf_shuffle,      3},
   {"C_volatility_ci", (DL_FUNC) &C_volatility_ci, 4},
   {"C_st_collapse",   (DL_FUNC) &C_st_collapse,   4},
   {"C_st_cond_prob",  (DL_FUNC) &C_st_cond_prob,  9},

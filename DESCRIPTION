@@ -15,7 +15,7 @@ Authors@R: c(
     person(
       "The scikit-learn developers",
       role    = c("ctb", "cph"),
-      comment = "SMACOF (MDS, NMDS), t-SNE, Isomap, PLS-DA and LDA code ported from scikit-learn"),
+      comment = "SMACOF (MDS, NMDS), t-SNE, Isomap, PLS-DA, LDA and random forest code ported from scikit-learn"),
     person(
       "James", "Melville",
       role    = "cph",
@@ -25,9 +25,17 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "phylogenetic tree pruning and node numbering (rpca_phylo()), PCoA biplot scores, BIOENV, the alr and ilr transforms and balances, multiplicative zero replacement, the variance of log ratios, ANCOM, ANCOM-BC and ANCOM-BC2, Dirichlet-multinomial t-tests, and alpha diversity metrics (evenness, coverage, Hill numbers, Renyi and Tsallis entropies, dominance, the Gini index, and the bias-corrected Chao1), from scikit-bio"),
     person(
+      "Makoto", "Matsumoto",
+      role    = "cph",
+      comment = "MT19937, in random_forest()'s parity mode"),
+    person(
+      "Takuji", "Nishimura",
+      role    = "cph",
+      comment = "MT19937, in random_forest()'s parity mode"),
+    person(
       "NumPy Developers",
       role    = "cph",
-      comment = "numpy's pairwise summation, followed by replace_zeros_mult()"),
+      comment = "numpy's pairwise summation, followed by replace_zeros_mult() and random_forest(), and its legacy random draws (random_forest()'s tests)"),
     person(
       "Cameron", "Martino",
       role    = c("ctb", "cph"),
@@ -95,7 +103,7 @@ Authors@R: c(
     person(
       "QIIME 2 development team",
       role    = c("ctb", "cph"),
-      comment = "first differences, first distances, volatility and NMIT (first_differences(), first_distances(), volatility(), nmit()), ported from 'q2-longitudinal'"),
+      comment = "first differences, first distances, volatility and NMIT (first_differences(), first_distances(), volatility(), nmit()), ported from 'q2-longitudinal'; the cross-validation workflow of random_forest(), from 'q2-sample-classifier'"),
     person(
       "University of Washington Interactive Data Lab",
       role    = "cph",

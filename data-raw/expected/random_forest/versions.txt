@@ -1,0 +1,9 @@
+sklearn	1.9.1
+numpy	2.5.5
+scipy	1.18.1
+pandas	2.2.3
+biom	2.1.18
+matplotlib	3.11.2
+seaborn	0.13.2
+python	3.13.18
+q2_sample_classifier	2026.10.0

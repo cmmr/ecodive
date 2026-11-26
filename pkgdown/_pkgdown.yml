@@ -178,6 +178,13 @@ reference:
   - batch_combat
   - plot.ecodive_batch
 
+- title: Prediction
+  desc: Predict each sample's class or a number from its features with a random forest (q2-sample-classifier's workflow on scikit-learn's trees), with cross-validated and out-of-bag accuracy, ROC curves and feature importances.
+  contents:
+  - random_forest
+  - predict.ecodive_random_forest
+  - plot.ecodive_random_forest
+
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
   contents:
