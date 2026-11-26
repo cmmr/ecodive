@@ -397,6 +397,7 @@
     permdisp  = permdisp(dm, 'grp', meta, pairwise = TRUE, permutations = 9, cpus = cpus),
     mantel    = mantel(dm, 'x', meta, permutations = 9, cpus = cpus),
     mantel_partial = mantel_partial(dm, 'x', rep(1:4, 5), meta, permutations = 9, cpus = cpus),
+    moran_i   = moran_i('x', dm, meta, permutations = 9, cpus = cpus),
     procrustes_test = procrustes_test(o, pcoa(dm, n_axes = 2, cpus = cpus), permutations = 9, cpus = cpus),
     dist_test = dist_test(dm, 'permanova', 'grp', meta, permutations = 9, cpus = cpus) )
 

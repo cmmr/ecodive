@@ -18,8 +18,8 @@
 \arguments{
 \item{x}{A permutation test result, of class \code{ecodive_test}: from
 \code{\link[=permanova]{permanova()}}, \code{\link[=anosim]{anosim()}}, \code{\link[=mrpp]{mrpp()}}, \code{\link[=mantel]{mantel()}},
-\code{\link[=mantel_partial]{mantel_partial()}}, \code{\link[=permdisp]{permdisp()}}, \code{\link[=procrustes_test]{procrustes_test()}}, or
-\code{\link[=dist_test]{dist_test()}}.}
+\code{\link[=mantel_partial]{mantel_partial()}}, \code{\link[=permdisp]{permdisp()}}, \code{\link[=procrustes_test]{procrustes_test()}},
+\code{\link[=moran_i]{moran_i()}}, or \code{\link[=dist_test]{dist_test()}}.}
 
 \item{type}{What to draw: \code{"null"} for the permutation distribution of
 the statistic; or for \code{\link[=mrpp]{mrpp()}} and \code{\link[=permdisp]{permdisp()}}, \code{"groups"} (their
@@ -37,9 +37,9 @@ default) for a bar for each group; or for \code{\link[=procrustes_test]{procrust
 }
 \description{
 Plots the result of one of ecodive's permutation tests. By default,
-\code{\link[=permanova]{permanova()}}, \code{\link[=anosim]{anosim()}}, \code{\link[=mantel]{mantel()}} and \code{\link[=mantel_partial]{mantel_partial()}} results show
-the permutation distribution of their statistic, with the observed value
-marked; \code{\link[=mrpp]{mrpp()}} shows each group's mean within-group distance;
+\code{\link[=permanova]{permanova()}}, \code{\link[=anosim]{anosim()}}, \code{\link[=mantel]{mantel()}}, \code{\link[=mantel_partial]{mantel_partial()}} and \code{\link[=moran_i]{moran_i()}}
+results show the permutation distribution of their statistic, with the
+observed value marked; \code{\link[=mrpp]{mrpp()}} shows each group's mean within-group distance;
 \code{\link[=permdisp]{permdisp()}} each group's dispersion; and \code{\link[=procrustes_test]{procrustes_test()}} the
 Procrustes fit. \code{type = "null"} shows the permutation distribution for any
 of them. Nothing is recomputed: the plot is made from the stored results.

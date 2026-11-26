@@ -88,3 +88,72 @@ An Rd page in a new "Spatial" group of the reference index, with
   *Biometrika*, 37, 17–23.
 - Cliff, A. D., & Ord, J. K. (1981). *Spatial Processes: Models and
   Applications*. Pion.
+
+
+## Decisions made while implementing
+
+Asked of the user at the start (2026-11-25), each the recommended option:
+
+- **`style`** chooses the transformation of the weights: `'row'` (the
+  default, esda's and spdep's), `'binary'`, `'variance'` (variance-
+  stabilising) and `'none'`, as libpysal's R, B, V and O. spdep calls it
+  `style`; `standardize` and `transform` already mean other things
+  (`linda()`, `maaslin3()`). esda's "D" (doubly standardised) is left out:
+  a global rescaling gives the same I and moments as `'none'`. The
+  signature is `moran_i(x, space, data = NULL, style = 'row', alternative =
+  'greater', permutations = 999L, seed = 0L, cpus = n_cpus())`.
+- **Distances and coordinates become weights `1 / d`** and nothing else: no
+  `power`, no k-nearest rule, no exported helper. Other rules are a weight
+  matrix (the docs' example builds k-nearest-neighbour weights). A zero
+  distance between two samples is an error that names them.
+- **Both analytic variances** are kept: `expected`, `sd_norm`,
+  `p_value_norm`, `sd_rand`, `p_value_rand` (the plan had `sd` and
+  `p_value_norm`). `p_value` and `z` stay the permutation ones.
+- **The diagonal of a weight matrix is ignored** (no self-weights), so
+  `1 / as.matrix(d)`, with `Inf` on its diagonal, works as is.
+
+Made while implementing:
+
+- **`space`'s form is read from its class:** a `dist` is distances; a
+  square matrix (numeric or logical) is weights; a data frame or a
+  non-square matrix is coordinates (Euclidean distances via
+  `stats::dist()`); a character vector names coordinate columns of `data`.
+  A square coordinate matrix (as many coordinates as samples) must be given
+  as a data frame. Samples are matched to `x` and `data` by `space`'s names
+  (`per_sample()` and `match_rows()`, with `space` as the reference).
+- **Only the packed lower triangle of the symmetric part `(W + W') / 2`**
+  is kept after the transformation, since `z'Wz = z'((W + W')/2)z`; the
+  transformation and libpysal's `s0`, `s1`, `s2` are computed in one C pass
+  over pairs (`C_moran_weights()`), from either a full matrix or packed
+  distances, so a `dist` never becomes an n × n matrix. Each permutation
+  is one fixed-order pass over the triangle (`C_moran_perm()`), blocks of
+  8 permutations per task, `perm_source_get()` permutations (gather: sample
+  i takes the value of sample p[i], as esda's `z[perm]`).
+- **Weights must be finite and not negative** off the diagonal; weights all
+  0 is an error.
+- **Islands** (samples whose own weights are all 0) are kept, with a
+  warning, and count in n and the mean, as in esda (and spdep with
+  `adjust.n = FALSE`).
+- **A constant `x`** gives NA statistics and p-values with a warning, as
+  `mantel()` does for constant distances.
+- **n ≥ 3 is required**; `sd_rand` is NA at n = 3 (its formula divides by
+  n - 3).
+- **A variance that is 0 to rounding** (below 1e-10 of its leading term,
+  e.g. binary weights between every pair, where I is the same for every
+  arrangement) gives NA sds and analytic p-values, where esda gives 0 and
+  p = 0.
+- **`alternative` sets the tail of the analytic p-values too.** esda's are
+  two-tailed by default, or one-tailed in the direction of z; its `p_sim`
+  is the smaller tail. The tests map each onto `alternative`.
+- **ape's `Moran.I()` is not "raw weights, normality"** as the plan said:
+  its outputs match `style = 'row'` with the randomisation sd (to about
+  1e-15), so the docs and tests say so. spdep's `mat2listw(style = 'B')`
+  keeps the matrix's own values, so the fixture gives it the binary matrix.
+- **No `strata`** (the plan's signature has none).
+- **adespatial's `moran.randtest()` was not run:** it is permutation-only,
+  and with its own random permutations it can agree only to sampling error;
+  the permuted statistics are checked exactly against esda's given the same
+  permutations instead.
+- **For `dbmem()`:** `moran_space()`, `moran_weights()`, `moran_stat()`
+  (with `perm_matrix(0L, n)`, the observed I alone) and `moran_moments()`
+  are internal helpers it can call; see the Outcome section.

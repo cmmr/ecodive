@@ -1020,6 +1020,20 @@
   shrinkage of the batch effects, and each feature's batch means before
   and after).
 
+* New `moran_i()`: Moran's I test of spatial autocorrelation, whether a
+  variable (a taxon's abundance, alpha diversity) is more alike at nearby
+  sites, ported from PySAL esda 2.10.0's `Moran` (BSD-3). `space` gives the
+  sites' positions as spatial weights (a matrix), geographic distances (a
+  `dist`) or coordinates (both made into inverse-distance weights), and
+  `style` row-standardises them (the default, as esda and spdep), makes
+  them binary or variance-stabilising, or leaves them as given. It gives the
+  expected value, the standard deviations and analytic p-values under
+  normality and under randomisation, and a permutation test in threaded C
+  over the packed weights, the same for any `cpus`. I and its moments match
+  esda, spdep's `moran.test()` and ape's `Moran.I()` to about 1e-15, and the
+  permuted statistics esda's, given the same permutations. `plot()` draws
+  the permutation distribution.
+
 * New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
   2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
   pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,

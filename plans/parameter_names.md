@@ -32,14 +32,15 @@ same thing.
 | `links` | pairs of features joined in a covariance biplot (Aitchison & Greenacre's term) | `plot.ecodive_ord` |
 | `method` | a correlation coefficient (`'pearson'`, `'spearman'`, `'kendall'`), or the method name in `dist_ord` and `count_ord` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `mantel_regression`, `bioenv` |
 | `metric` | a beta diversity metric name | `beta_div`, `alpha_div`; planned `bioenv` |
-| `alternative` | `'greater'`, `'less'` or `'two.sided'` | `mantel`; planned `mantel_partial`, `mantel_correlogram`, `moran_i` |
+| `alternative` | `'greater'`, `'less'` or `'two.sided'` | `mantel`, `moran_i` (for its analytic p-values too); planned `mantel_partial`, `mantel_correlogram` |
 | `permutations`, `strata`, `seed` | the permutation test (a count or a matrix), restricted permutations, and the RNG seed | all tests, `envfit` |
 | `pairwise`, `p_adjust` | per-pair tests, and their p-value adjustment | planned on all group tests; `p_adjust` also on `mantel_correlogram` and optionally `simper` |
 | `n_<unit>` | **an exact count** | `n_neighbors`, `n_starts`, `n_epochs`; planned `n_iters` (pacmap), `n_segments` (dca), `n_classes`, `n_landmarks`, `n_orthogonal` |
 | `max_<unit>` | **a cap** (it may stop earlier) | `max_iters` |
 | `tol` | a convergence tolerance | `mds`, `nmds`, `rpca`; planned `splsda` |
 | `init`, `learning_rate` | starting layout, step size | `tsne`, `umap`; planned `pacmap`, `largevis` |
-| `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights | planned `moran_i`, `dbmem` |
+| `space` | **(new)** sample positions: coordinates, geographic distances, or spatial weights. In `moran_i()` (2026-11-25, item 59): a square matrix is spatial weights, a `dist` is distances and other tables (or column names of `data`) are coordinates; distances and coordinates become inverse-distance weights | `moran_i`; planned `dbmem` |
+| `style` | **(new, 2026-11-25, item 59)** how spatial weights are transformed: `'row'` (row-standardised), `'binary'`, `'variance'` (variance-stabilising), `'none'` (spdep's `style`, esda's `transformation`; not `standardize` or `transform`, which mean other things in `linda()` and `maaslin3()`) | `moran_i` |
 | `numerator`, `denominator` | **(new, 2026-11-19)** features on the top and bottom of a log ratio (names, indices or a logical vector); `denominator = NULL` means the clr's geometric mean | `alr` (`denominator` only), `log_ratio`, `balance`, `rho_p`, `phi_s` (`denominator` only: one feature for an alr, or a set); the rank plots (`type = 'rank'`, item 46) of the DA plot methods and `plot.ecodive_ord()`, the features to highlight; `log_ratio_features()` returns them as a list |
 | `basis` | **(new)** an ILR basis or a sequential binary partition | `ilr` |
 | `load` | **(new, 2026-11-19)** each sample's measured total microbial load: one finite value > 0 per sample (matched by name, else by position), or a column name of `data`, by the same `per_sample()` rule as `groups` | `qmp_scale`, `qmp_rarefy`, `dirmult_lm` (as its scale model) |

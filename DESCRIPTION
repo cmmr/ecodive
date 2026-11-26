@@ -117,6 +117,10 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "ComBat batch correction (batch_combat()), ported from 'sva'"),
     person(
+      "PySAL Developers",
+      role    = c("ctb", "cph"),
+      comment = "Moran's I and its spatial weights (moran_i()), ported from 'esda' and 'libpysal'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

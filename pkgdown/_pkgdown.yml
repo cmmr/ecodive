@@ -227,6 +227,11 @@ reference:
   - permdisp
   - list_dist_tests
 
+- title: Spatial
+  desc: Spatial structure among samples from their positions (coordinates, geographic distances or spatial weights). Moran's I tests whether a variable is more alike at nearby sites.
+  contents:
+  - moran_i
+
 - title: Interpreting Differences
   desc: Which taxa drive the differences between groups.
   contents:
