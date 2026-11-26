@@ -430,7 +430,8 @@ plot(fs)
 
 ![](ordination_files/figure-html/unnamed-chunk-18-1.png)
 
-`principal_response_curves()`, which is planned, will also build on
+[`principal_response_curves()`](https://cmmr.github.io/ecodive/reference/principal_response_curves.md),
+which is planned, will also build on
 [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md).
 
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), canonical

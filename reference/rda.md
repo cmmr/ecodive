@@ -256,7 +256,8 @@ distances.
 
 [`varpart()`](https://cmmr.github.io/ecodive/reference/varpart.md),
 [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
-and `principal_response_curves()`, which are planned for ecodive, will
+and
+[`principal_response_curves()`](https://cmmr.github.io/ecodive/reference/principal_response_curves.md)
 build on `rda()`.
 
 **Matching vegan**

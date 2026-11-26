@@ -863,6 +863,8 @@ take the count table.
   Variation Partitioning
 - [`forward_select()`](https://cmmr.github.io/ecodive/reference/forward_select.md)
   : Forward Selection of Explanatory Variables
+- [`principal_response_curves()`](https://cmmr.github.io/ecodive/reference/principal_response_curves.md)
+  : Principal Response Curves (PRC)
 - [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
   : Procrustes Rotation of One Ordination onto Another
 - [`procrustes_test()`](https://cmmr.github.io/ecodive/reference/procrustes_test.md)
@@ -972,6 +974,8 @@ than every value.
   : Plot a variation partitioning
 - [`plot(`*`<ecodive_forward_select>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.md)
   : Plot a forward selection
+- [`plot(`*`<ecodive_prc>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_prc.md)
+  : Plot principal response curves
 - [`plot(`*`<ecodive_bioenv>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.md)
   : Plot a BIO-ENV result
 - [`plot(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_types.md)
