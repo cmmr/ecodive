@@ -196,3 +196,28 @@ Made while implementing:
   `forward_select()` over the MEMs, then `varpart()` of pH against the
   selected MEMs (`attr(fs, 'selected')` is a formula, so `data` is
   `cbind(sites, mem)`).
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 78, done 2026-11-26.** Commit `9325494` (function), plus the tick.
+
+- Tests: 33,147 at home and 470 in CRAN mode (32,859 / 469 at 70dff27).
+  `test-dbmem.r` has 287 tests.
+- adespatial 0.3.30 `dbmem()` on mite.xy (default threshold, 2, 0.8 on
+  its distances, and with 3 duplicate positions), an 8 x 5 grid (default
+  and 1.5) and an irregular transect, each with `MEM.autocor` positive,
+  negative, non-null and all: same number of MEMs and threshold; `values`
+  within 4e-16; MEMs within 5e-11 up to sign where eigenvalues are distinct
+  (projections onto shared spaces within 4e-13 on the grids, where they
+  are equal); Moran's I (spdep 1.3.1 `moran()` with adespatial's weights)
+  within 4e-15.
+- vegan 2.6.4 `pcnm()`: eigenvalues 8 t^2 (n values + 1) within 1e-12 of
+  the largest, its unit vectors within 1e-10, and the threshold equal to
+  `spantree()`'s longest edge; but pcnm drops pairs that lie just above a
+  user threshold by rounding (see the decisions).
+- cpus 1, 2, 3, 4, 8 identical.
+- Speed (uniform random points, 1 / 4 threads, reference BLAS): n = 500
+  0.17 / 0.15 s (adespatial 0.56 s); n = 1000 1.5 / 1.0 s (2.6 s); n = 2000
+  11.8 / 4.8 s (10.8 s).
+- `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed size).

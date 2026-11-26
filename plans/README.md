@@ -367,7 +367,7 @@ can't be mistaken for one another:
 | Associations between two tables | ✓ `cross_assoc`, `halla` |
 | Community types | ✓ `enterotype`, ✓ `valencia`, `dmm` |
 | Compositional plots | `ternary_plot`, `variation_array`, `zero_pattern`, ✓ `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
-| Spatial | ✓ `moran_i`, `dbmem` |
+| Spatial | ✓ `moran_i`, ✓ `dbmem` |
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
 | Source tracking | ✓ `sourcetracker`, `feast` |
 | Quality control | ✓ `decontam`, ✓ `decontam_not` |
