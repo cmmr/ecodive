@@ -100,7 +100,7 @@ historical and uses the survey's own numbering.
 | 66 | [ ] `dmm()` | [community_typing.md](community_typing.md) | clean room (DirichletMultinomial LGPL; mothur GPL) | Medium effort (EM with model selection); steady use (506 citations 2022–26). |
 | 67 | [ ] `splsda()` | [splsda.md](splsda.md) | clean room | mixOmics users; sparse PLS-DA is its own algorithm; medium effort. |
 | 68 | [ ] `feast()` | [source_tracking.md](source_tracking.md) | **clean room** (FEAST is CC BY-NC-SA: non-commercial; even its outputs as fixtures need the user's OK) | FEAST is the other standard source-tracking method, rising (~140 citations a year); an EM fully stated in the paper, but its initialisation must be settled first. |
-| 69 | [ ] `mantel_regression()` (MRM) | [mantel_regression.md](mantel_regression.md) | clean room | Simple algebra; biogeography. |
+| 69 | [x] `mantel_regression()` (MRM) (d496ac7) | [mantel_regression.md](mantel_regression.md) | clean room | Simple algebra; biogeography. |
 | 70 | [ ] `diffusion_map()` | [diffusion_map.md](diffusion_map.md) | port (pydiffmap MIT / scanpy BSD-3) | Growing use; uses neighbour and eigensolver code ecodive already has. |
 | 71 | [ ] `pacmap()` | [pacmap.md](pacmap.md) | port (PaCMAP, Apache-2.0) | Growing use; keep the Apache notices. |
 | 72 | [ ] `mpd()`, `mntd()`, `mpd_ses()`, `mntd_ses()` (NRI / NTI) | [phylo_structure.md](phylo_structure.md) | clean room (picante GPL) + port (phylocom, BSD-3) | The standard phylogenetic-structure summary (picante 3,272 citations); 999-draw null models are slow in R; tree-based threaded C avoids the cophenetic matrix; medium-to-high effort. Item 73 shares its tree code. |
@@ -109,7 +109,7 @@ historical and uses the survey's own numbering.
 | 75 | [ ] `secom_pearson()`, `secom_distance()` | [secom.md](secom.md) | port (ANCOMBC, Artistic-2.0) | Bias-corrected correlations (its own closed-form sample-bias estimate, not ANCOM-BC's EM); rising (195 citations); medium effort; three GPL helpers it calls must be written clean-room. |
 | 76 | [ ] `mirkat()` | [mirkat.md](mirkat.md) | clean room | In demand in microbiome methods work; needs Davies or Liu p-values written from the papers. |
 | 77 | [ ] `coinertia()` | [coinertia.md](coinertia.md) | clean room (RV from hoggorm, BSD-2) | Multi-omics; medium effort. |
-| 78 | [ ] `dbmem()` | [dbmem.md](dbmem.md) | clean room | Spatial ecology. Needs item 59. |
+| 78 | [x] `dbmem()` (`9325494`) | [dbmem.md](dbmem.md) | clean room | Spatial ecology. Needs item 59. |
 | 79 | [ ] `kulczynski()`, `mountford()`, `raup_crick()`, `binomial_deviance()`, `chao_jaccard()`, `cao()`, `mahalanobis_distance()`, `alt_gower()`, `chisq_distance()` | [vegdist_metrics.md](vegdist_metrics.md) | formula; clean room (vegan GPL) | Completes `vegdist()` parity so vegan users find every metric, threaded; each is a small C kernel; low demand ("Kulczynski": 32 mentions). |
 | 80 | [ ] `fastancom()` | [fastancom.md](fastancom.md) | clean room (GPL) | Low effort; the only microbiome-specific method Wirbel (2024) found to control FDR, but little use (22 citations). |
 | 81 | [ ] `batch_combat_seq()`, `batch_conqur()`, then the `batch_correct()` wrapper (phase 2 of batch correction) | [batch_correction.md](batch_correction.md) | port (sva, Artistic-2.0) + clean room (edgeR parts GPL; ConQuR GPL-3) | ComBat-seq (1,786 citations, all fields) and ConQuR (167, rising) need edgeR's dispersions rebuilt and a quantile-regression solver plus lasso (item 74); high effort. |

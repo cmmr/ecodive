@@ -332,9 +332,11 @@ test_details.ecodive_moran_i <- function (x, digits) {
 #------------------------------------------------------------------------------
 # `space` as list(type, n, labels, w, inverse): the raw weights `w`, either
 # an n x n matrix (inverse = FALSE) or the packed distances whose inverses
-# are the weights (inverse = TRUE).
+# are the weights (inverse = TRUE). With `distances = TRUE` (dbmem()), only
+# distances and coordinates are accepted, and `w` is the packed distances,
+# which may be 0.
 #------------------------------------------------------------------------------
-moran_space <- function (space, data) {
+moran_space <- function (space, data, distances = FALSE) {
 
   coords <- NULL
 
@@ -358,7 +360,7 @@ moran_space <- function (space, data) {
       error = function (e)
         stop(gsub('`dm`', '`space`', conditionMessage(e), fixed = TRUE), call. = FALSE) )
 
-    return (moran_inverse(v$dm, v$n, v$labels, 'distances'))
+    return (moran_inverse(v$dm, v$n, v$labels, 'distances', distances))
   }
 
   else if (is.data.frame(space) || (is.matrix(space) && nrow(space) != ncol(space))) {
@@ -366,6 +368,13 @@ moran_space <- function (space, data) {
   }
 
   else if (is.matrix(space)) {
+
+    if (distances)
+      stop(
+        '`space` must be the samples\' coordinates (a data frame, a matrix ',
+        'that isn\'t square, or the names of columns of `data`) or a dist ',
+        'object of distances between them, not a square matrix of spatial ',
+        'weights. Give a square coordinate matrix as a data frame.', call. = FALSE )
 
     if (!is.numeric(space) && !is.logical(space))
       stop('A spatial weights matrix (`space`) must be numeric.', call. = FALSE)
@@ -385,6 +394,12 @@ moran_space <- function (space, data) {
     return (list(
       type = 'weights', n = nrow(w), labels = if (is.null(rn)) cn else rn,
       w = w, inverse = FALSE ))
+  }
+
+  else if (distances) {
+    stop(
+      '`space` must be coordinates (a data frame, or the names of columns of ',
+      '`data`) or a dist object of distances.', call. = FALSE )
   }
 
   else {
@@ -414,14 +429,15 @@ moran_space <- function (space, data) {
   if (!all(is.finite(d)))
     stop('The distances between coordinates (`space`) are too large.', call. = FALSE)
 
-  moran_inverse(d, nrow(coords), labels, 'coordinates')
+  moran_inverse(d, nrow(coords), labels, 'coordinates', distances)
 }
 
 
-# Packed distances, whose inverses are the weights: none may be 0.
-moran_inverse <- function (d, n, labels, type) {
+# Packed distances, whose inverses are the weights: none may be 0 (unless
+# `zero_ok`, for dbmem()).
+moran_inverse <- function (d, n, labels, type, zero_ok = FALSE) {
 
-  zero <- which(d == 0)
+  zero <- if (zero_ok) integer(0) else which(d == 0)
   if (length(zero)) {
     j  <- rep.int(seq_len(n - 1L), (n - 1L):1)
     i  <- j + sequence((n - 1L):1)

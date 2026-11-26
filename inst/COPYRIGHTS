@@ -876,6 +876,13 @@ Comment: lz_sym_eigen() and lz_gen_eigenvalues() follow the JAMA routines
  are in the public domain, and themselves follow EISPACK. Noted as a
  courtesy; no licence terms apply.
 
+Files: src/dbmem.c
+Comment: The QL iteration in dbm_eigen() follows the JAMA routine tql2()
+ (JAMA: A Java Matrix Package, by The MathWorks and the National Institute
+ of Standards and Technology), which is in the public domain, and itself
+ follows EISPACK, as lz_sym_eigen() in src/lanczos.c does. Noted as a
+ courtesy; no licence terms apply.
+
 Files: src/rpca.c R/rpca.r
 Copyright: 2019 Cameron Martino
 Comment: Robust Aitchison PCA, ported from gemelli 0.0.13

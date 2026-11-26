@@ -372,6 +372,12 @@
   expect_true(any(is.finite(mc$r)) && all(abs(mc$r) <= 1, na.rm = TRUE))
   expect_true(all(mc$p_adjusted >= 0 & mc$p_adjusted <= 1, na.rm = TRUE))
 
+  mr <- mantel_regression(dm ~ x + grp, data = meta, z = rep(1:4, 5), permutations = 9, cpus = cpus)
+  expect_inherits(mr, 'ecodive_mantel_regression')
+  expect_identical(dim(mr$coefficients), c(4L, 5L))
+  expect_true(all(is.finite(mr$coefficients$estimate)) && is.finite(mr$r_squared))
+  expect_true(all(mr$coefficients$p_value > 0 & mr$coefficients$p_value <= 1))
+
   et <- enterotype(counts, n_types = 2:3, cpus = cpus)
   expect_inherits(et, c('ecodive_enterotype', 'ecodive_types', 'data.frame'))
   expect_identical(dim(et), c(20L, 3L))
@@ -515,6 +521,14 @@
   rf <- random_forest(counts, 'x', meta, n_trees = 25, n_folds = 2, cpus = cpus)
   expect_true(identical(attr(rf, 'type'), 'regression') &&
               all(is.finite(predict(rf, counts, cpus = cpus))))
+
+
+
+  # Spatial: Moran's eigenvector maps. ====
+
+  mem <- dbmem(data.frame(row.names = rownames(counts), x = meta$x, y = rep(0:1, 10)), cpus = cpus)
+  expect_true(inherits(mem, 'ecodive_dbmem') && nrow(mem) == 20L && ncol(mem) >= 1L &&
+              all(is.finite(mem)) && all(attr(mem, 'moran_i') > 0))
 
 
 
