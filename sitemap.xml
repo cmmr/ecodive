@@ -178,6 +178,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_neutral_model.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_prc.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_random_forest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_rarefaction_curve.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_simper.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_source.html</loc></url>
@@ -186,6 +187,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_varpart.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot_longitudinal.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plsda.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/predict.ecodive_random_forest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/principal_response_curves.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/print_ecodive.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/procrustes.html</loc></url>
@@ -193,6 +195,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/pseudocount_section.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/psym_chisq.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/qmp.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/random_forest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefaction_curve.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefied_diversity.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefy.html</loc></url>

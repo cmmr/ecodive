@@ -432,6 +432,20 @@ table while keeping the effects of named covariates (MMUPHin, ComBat).
 - [`plot(`*`<ecodive_batch>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_batch.md)
   : Plot a batch correction
 
+## Prediction
+
+Predict each sample’s class or a number from its features with a random
+forest (q2-sample-classifier’s workflow on scikit-learn’s trees), with
+cross-validated and out-of-bag accuracy, ROC curves and feature
+importances.
+
+- [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md)
+  : Random forests
+- [`predict(`*`<ecodive_random_forest>`*`)`](https://cmmr.github.io/ecodive/reference/predict.ecodive_random_forest.md)
+  : Predict with a random forest
+- [`plot(`*`<ecodive_random_forest>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_random_forest.md)
+  : Plot a random forest
+
 ## Ordination
 
 Place samples on a few axes for plotting. dist_ord() runs the methods

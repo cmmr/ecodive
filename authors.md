@@ -9,8 +9,8 @@
   PCG random number generator
 
 - **The scikit-learn developers**. Contributor, copyright holder.  
-  SMACOF (MDS, NMDS), t-SNE, Isomap, PLS-DA and LDA code ported from
-  scikit-learn
+  SMACOF (MDS, NMDS), t-SNE, Isomap, PLS-DA, LDA and random forest code
+  ported from scikit-learn
 
 - **James Melville**. Copyright holder.  
   uwot's C++ header library, followed by the UMAP code
@@ -24,8 +24,15 @@
   entropies, dominance, the Gini index, and the bias-corrected Chao1),
   from scikit-bio
 
+- **Makoto Matsumoto**. Copyright holder.  
+  MT19937, in random_forest()'s parity mode
+
+- **Takuji Nishimura**. Copyright holder.  
+  MT19937, in random_forest()'s parity mode
+
 - **NumPy Developers**. Copyright holder.  
-  numpy's pairwise summation, followed by replace_zeros_mult()
+  numpy's pairwise summation, followed by replace_zeros_mult() and
+  random_forest(), and its legacy random draws (random_forest()'s tests)
 
 - **Cameron Martino**. Contributor, copyright holder.  
   'gemelli' robust Aitchison PCA and phylogenetic robust Aitchison PCA
@@ -83,7 +90,8 @@
 - **QIIME 2 development team**. Contributor, copyright holder.  
   first differences, first distances, volatility and NMIT
   (first_differences(), first_distances(), volatility(), nmit()), ported
-  from 'q2-longitudinal'
+  from 'q2-longitudinal'; the cross-validation workflow of
+  random_forest(), from 'q2-sample-classifier'
 
 - **University of Washington Interactive Data Lab**. Copyright holder.  
   Vega's bootstrap confidence interval, followed by volatility()
