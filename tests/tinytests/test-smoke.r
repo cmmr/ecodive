@@ -392,6 +392,15 @@
   expect_true(is.finite(attr(fs, 'global')$adj_r_squared))
   expect_true(any(grepl('Forward selection', capture.output(print(fs)), fixed = TRUE)))
 
+  prc <- principal_response_curves(
+    counts, rep(c('c', 'd1', 'd2', 'c'), 5), rep(1:5, each = 4), norm = 'hellinger',
+    n_axes = 2, permutations = 9, cpus = cpus )
+  expect_inherits(prc, 'ecodive_prc')
+  expect_identical(dim(prc$coefficients), c(15L, 4L))
+  expect_true(all(is.finite(prc$coefficients$PRC1)) && all(is.finite(prc$weights)))
+  expect_true(all(prc$test$p_value > 0 & prc$test$p_value <= 1))
+  expect_true(any(grepl('Principal Response Curves', capture.output(print(prc)), fixed = TRUE)))
+
 
 
   # Distance-based tests. ====
@@ -441,6 +450,7 @@
   expect_true(drawn(rda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus), 'grp', meta))
   expect_true(suppressWarnings(drawn(pca(counts, norm = 'clr', cpus = cpus), scaling = 'covariance', links = 1:3)))  # biplot scalings
   expect_true(drawn(rda(counts, norm = 'hellinger', cpus = cpus), scaling = 1))
+  expect_true(drawn(prc))
   expect_true(drawn(lda(counts, 'grp', meta, norm = 'hellinger', cpus = cpus)))  # one axis
   expect_true(drawn(capda(dm, 'grp', meta, permutations = 0, cpus = cpus), 'grp', meta))  # one axis
   expect_true(drawn(pr))

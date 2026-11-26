@@ -76,6 +76,7 @@ extern SEXP C_proportionality(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_oplsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_plsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_prc_perm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa_correct(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_pcoa_biplot(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -193,6 +194,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_oplsda",    (DL_FUNC) &C_oplsda,    8},
   {"C_plsda",     (DL_FUNC) &C_plsda,     8},
   {"C_rda",       (DL_FUNC) &C_rda,       9},
+  {"C_prc_perm",  (DL_FUNC) &C_prc_perm,  9},
   {"C_pcoa",      (DL_FUNC) &C_pcoa,      4},
   {"C_pcoa_correct", (DL_FUNC) &C_pcoa_correct, 5},
   {"C_pcoa_biplot",  (DL_FUNC) &C_pcoa_biplot,  7},
