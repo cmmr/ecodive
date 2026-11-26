@@ -1589,15 +1589,16 @@
     runs q2’s feature-volatility pipeline: a
     [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md)
     regression of the state on the features, on a random 80% of the
-    samples (`test_size`), with its accuracy on the rest; the
-    `n_features` most important features with q2’s statistics
-    (cumulative increase and decrease of the mean between states, net
-    change, global mean, median, variance, SD and CV); and each one’s
-    volatility chart numbers. q2’s recursive feature elimination is left
-    out. Given q2’s `random_state`, the split, importances and
-    predictions match q2’s exactly, and the statistics to about 1e-15.
-    [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
-    importances beside the chosen feature’s volatility chart.
+    samples (`test_size`), with its accuracy on the rest, after q2’s
+    recursive feature elimination (scikit-learn’s RFECV; `rfe`,
+    `rfe_step`, `rfe_folds`); the `n_features` most important selected
+    features with q2’s statistics (cumulative increase and decrease of
+    the mean between states, net change, global mean, median, variance,
+    SD and CV); and each one’s volatility chart numbers. Given q2’s
+    `random_state`, the split, RFECV’s scores and selection, importances
+    and predictions match q2’s exactly, and the statistics to about
+    1e-15. [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+    draws the importances beside the chosen feature’s volatility chart.
 
 - New
   [`batch_mmuphin()`](https://cmmr.github.io/ecodive/reference/batch_mmuphin.md)

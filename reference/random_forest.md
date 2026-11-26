@@ -339,9 +339,10 @@ abundances did best with random forests).
   predicting, as scikit-learn does; values that differ only beyond that
   (a relative 6e-8) are ties.
 
-- **Not ported:** q2's recursive feature elimination
-  (`optimize_feature_selection`) and randomized parameter search, and
-  scikit-learn's `bootstrap = FALSE`, `max_leaf_nodes`,
+- **Not ported:** q2's recursive feature elimination (but
+  [`feature_volatility()`](https://cmmr.github.io/ecodive/reference/feature_volatility.md)
+  has it) (`optimize_feature_selection`) and randomized parameter
+  search, and scikit-learn's `bootstrap = FALSE`, `max_leaf_nodes`,
   `min_impurity_decrease`, `min_weight_fraction_leaf`, `ccp_alpha`,
   `monotonic_cst` and missing values (`NA` in `counts` is an error).
 

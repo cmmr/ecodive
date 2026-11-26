@@ -19,6 +19,9 @@ feature_volatility(
   data = NULL,
   n_features = 100L,
   test_size = 0.2,
+  rfe = TRUE,
+  rfe_step = 0.05,
+  rfe_folds = 5L,
   importance = "impurity",
   margin = 1L,
   norm = "percent",
@@ -69,8 +72,8 @@ feature_volatility(
 - n_features:
 
   How many of the most important features to keep (q2's
-  `feature_count`): a whole number, or `Inf` for all of them. Default:
-  `100`, as q2.
+  `feature_count`), of those recursive feature elimination selected: a
+  whole number, or `Inf` for all of them. Default: `100`, as q2.
 
 - test_size:
 
@@ -78,6 +81,24 @@ feature_volatility(
   accuracy on (q2's `test_size`): \\\lceil\\ `test_size` \\\times n
   \rceil\\ samples, drawn at random. `0` trains on every sample
   (accuracy then only out of bag). Default: `0.2`, as q2.
+
+- rfe:
+
+  Whether to select features first by recursive feature elimination with
+  cross-validation (scikit-learn's `RFECV`), as q2's pipeline always
+  does (its `optimize_feature_selection`). Default: `TRUE`. With
+  `FALSE`, one forest on every feature ranks them all.
+
+- rfe_step:
+
+  How many features recursive feature elimination drops at each round: a
+  fraction of the features (below 1) or a count. Default: `0.05`, as q2
+  (5%, at least 1).
+
+- rfe_folds:
+
+  The number of cross-validation folds that choose how many features to
+  keep. Default: `5`, as q2.
 
 - importance:
 
@@ -189,13 +210,24 @@ A list of class `ecodive_feature_volatility`:
   and `oob_r_squared`, the forest's out of bag. The held-out values are
   `NA` with `test_size = 0`.
 
+- `rfe`:
+
+  With `rfe = TRUE`, recursive feature elimination's results: `ranking`,
+  a named integer vector over every feature (1 for the selected ones,
+  then 2, 3, ... for those dropped later to earlier), and `scores`, a
+  data frame of each number of features tried (`n_features`), the mean
+  and SD (divisor n, as scikit-learn's) of the folds' \\R^2\\, and each
+  fold's (`fold_1`, ...). `NULL` with `rfe = FALSE`.
+
 - `forest`:
 
   The
   [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md)
-  result, trained on the training samples: every feature's importances,
-  out-of-bag predictions, and (with `keep_forest`, the default) the
-  forest for [`predict()`](https://rdrr.io/r/stats/predict.html).
+  result, trained on the training samples (with `rfe`, on the selected
+  features only): every feature's importances (0 for the features not
+  selected), out-of-bag predictions, and (with `keep_forest`, the
+  default) the forest for
+  [`predict()`](https://rdrr.io/r/stats/predict.html).
 
 Attributes `conf_level` and `n_resamples` describe the intervals, and
 `test_size` the held-out samples. Its title (see
@@ -209,36 +241,45 @@ is "Feature Volatility".
 1.  Hold out a random `test_size` of the samples (scikit-learn's
     `train_test_split()`, not stratified).
 
-2.  Grow a random forest of `n_trees` regression trees of the state on
-    the features of the other samples, and predict the held-out samples'
-    states, to see how well the features track time.
+2.  With `rfe`, select features by recursive feature elimination on the
+    training samples (see below).
 
-3.  Rank the features by the forest's importance and keep the
+3.  Grow a random forest of `n_trees` regression trees of the state on
+    the (selected) features of the training samples, and predict the
+    held-out samples' states, to see how well the features track time.
+
+4.  Rank the features by the forest's importance and keep the
     `n_features` most important.
 
-4.  Summarize those features' relative abundances (of the whole table,
+5.  Summarize those features' relative abundances (of the whole table,
     every sample): q2's `_summarize_feature_stats()`. The mean at each
     state is over every sample at that state, whatever its group.
 
-5.  For the chart, each feature's mean and bootstrap interval for each
+6.  For the chart, each feature's mean and bootstrap interval for each
     group at each state, as
     [`volatility()`](https://cmmr.github.io/ecodive/reference/volatility.md)
     computes them.
 
-**Differences from q2-longitudinal**:
+**Recursive feature elimination** is scikit-learn's `RFECV` as q2 runs
+it. The training samples are split, in order and without shuffling (they
+are already in random order), into `rfe_folds` folds. In each, a forest
+is grown on the other folds' samples and scored (\\R^2\\) on the fold;
+the `rfe_step` least important features (impurity importance; ties in
+the table's feature order) are dropped, and so on down to one feature.
+The number of features with the largest total score over the folds (the
+fewest, on ties) is kept: the same elimination on all the training
+samples, stopped there, selects them. Every forest has the settings of
+the final one. This grows about \\(\\`rfe_folds` \\+ 1) / \\ `rfe_step`
+forests (126 by default), so it takes about that many times as long as
+`rfe = FALSE`.
 
-- **No recursive feature elimination.** q2 first runs scikit-learn's
-  `RFECV` (cross-validated recursive feature elimination) and keeps only
-  the features it selects, often a handful, so its importances are those
-  of a forest on those features alone; ecodive ranks every feature by a
-  forest on all of them. Its top features are much the same, and
-  `n_features` sets how many to keep.
+**Differences from q2-longitudinal**:
 
 - **Random draws** (the split, the forest and the intervals) are
   ecodive's own seeded PCG streams, not numpy's or JavaScript's, so they
   differ from q2's as one `random_state` does from another. Given q2's
-  split and `random_state`, the forest and its importances are the same
-  as q2's (see
+  split and `random_state`, the selected features, the forest and its
+  importances are the same as q2's (see
   [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md)).
 
 - **The forest's table** is relative abundances by default; q2 grows it
@@ -246,8 +287,9 @@ is "Feature Volatility".
   that.
 
 - **Features absent from every training sample** are kept, with
-  importance 0; q2 drops them. Ties in importance are ranked in the
-  table's feature order.
+  importance 0 (so recursive feature elimination drops them first, but
+  they count towards the fraction `rfe_step`); q2 drops them. Ties in
+  importance are ranked in the table's feature order.
 
 - **`global_cv`** is the standard deviation over the mean, as q2's
   "Global CV (%)" column, which despite its name is not multiplied by
@@ -347,17 +389,13 @@ Other longitudinal:
                              n_trees = 20, cpus = 1)
     fv
 #> Feature Volatility
-#> Random forest of 20 trees, trained on 25 of 32 samples; on the 7 held out: MSE 4.6, R^2 0.93, r 0.984; OOB R^2 0.844
-#> The 6 most important of 6 features, with relative abundances over time:
-#> # A data.frame: 6 × 10
+#> Random forest of 20 trees, trained on 25 of 32 samples; on the 7 held out: MSE 0.332, R^2 0.995, r 0.998; OOB R^2 0.885
+#> Recursive feature elimination kept 1 of 6 features (CV R^2 0.828)
+#> The 1 most important of 1 selected features, with relative abundances over time:
+#> # A data.frame: 1 × 10
 #>   feature importance cumulative_avg_decrease cumulative_avg_increase
 #>   <chr>        <dbl>                   <dbl>                   <dbl>
-#> 1 F1         0.806                    0                     0.423
-#> 2 F6         0.0613                  -0.0986                0
-#> 3 F3         0.0566                  -0.107                 0
-#> 4 F4         0.0527                  -0.0708                0
-#> 5 F5         0.016                   -0.0715                0.000586
-#> 6 F2         0.00694                 -0.0756                0
+#> 1 F1               1                       0                   0.423
 #> # … 6 more columns: net_avg_change <dbl>, global_variance <dbl>,
 #> #   global_mean <dbl>, global_median <dbl>, global_sd <dbl>, global_cv <dbl>
 #> Means by state with 95% bootstrap intervals in $means; trajectories in $abundances
