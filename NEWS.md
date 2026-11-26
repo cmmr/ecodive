@@ -1085,6 +1085,21 @@
   permuted statistics esda's, given the same permutations. `plot()` draws
   the permutation distribution.
 
+* New `dbmem()`: distance-based Moran's eigenvector maps (dbMEM, formerly
+  PCNM; Borcard & Legendre 2002, Dray et al. 2006), uncorrelated spatial
+  variables from broad to fine scales, to use as explanatory variables in
+  `rda()`, `varpart()` or `forward_select()`. `space` gives the samples'
+  coordinates or geographic distances, as for `moran_i()`; `threshold` is
+  the truncation distance (by default the longest edge of the minimum
+  spanning tree), and `autocor` keeps the MEMs with positive (the default),
+  negative, non-zero or any Moran's I, as adespatial's `MEM.autocor`. The
+  MEMs, their eigenvalues and Moran's I (attributes `values` and `moran_i`)
+  match adespatial's `dbmem()` to about 1e-11 (up to sign), and its
+  truncation vegan's `pcnm()`. The eigenvectors come from a Householder
+  reduction and the QL algorithm in threaded C, without the BLAS, the same
+  for any `cpus`. The result is a matrix of class `ecodive_dbmem`; `plot()`
+  draws each MEM's Moran's I, or maps MEMs over the samples' coordinates.
+
 * New `lefse()`: LEfSe, LDA effect size biomarker discovery (Segata et al.
   2011), ported from LEfSe 1.1.2: a Kruskal-Wallis test of each feature, the
   pairwise Wilcoxon tests between subgroups (`subgroups`, `min_subgroup`,

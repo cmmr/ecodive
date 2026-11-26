@@ -237,9 +237,11 @@ reference:
   - list_dist_tests
 
 - title: Spatial
-  desc: Spatial structure among samples from their positions (coordinates, geographic distances or spatial weights). Moran's I tests whether a variable is more alike at nearby sites.
+  desc: Spatial structure among samples from their positions (coordinates, geographic distances or spatial weights). Moran's I tests whether a variable is more alike at nearby sites; Moran's eigenvector maps turn positions into spatial variables for constrained ordination and variation partitioning.
   contents:
   - moran_i
+  - dbmem
+  - plot.ecodive_dbmem
 
 - title: Interpreting Differences
   desc: Which taxa drive the differences between groups.

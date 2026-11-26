@@ -22,7 +22,8 @@
 #'        [first_distances()], [enterotype()] or [valencia()], or a source-tracking
 #'        matrix of class `ecodive_source` (from [sourcetracker()]), or a
 #'        batch-corrected table of class `ecodive_batch` (from
-#'        [batch_mmuphin()] or [batch_combat()]). A community-types result (see
+#'        [batch_mmuphin()] or [batch_combat()]), or Moran's eigenvector maps
+#'        of class `ecodive_dbmem` (from [dbmem()]). A community-types result (see
 #'        [ecodive_types]) prints its types and how their number was chosen
 #'        before its first samples.
 #'

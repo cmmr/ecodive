@@ -510,6 +510,14 @@
 
 
 
+  # Spatial: Moran's eigenvector maps. ====
+
+  mem <- dbmem(data.frame(row.names = rownames(counts), x = meta$x, y = rep(0:1, 10)), cpus = cpus)
+  expect_true(inherits(mem, 'ecodive_dbmem') && nrow(mem) == 20L && ncol(mem) >= 1L &&
+              all(is.finite(mem)) && all(attr(mem, 'moran_i') > 0))
+
+
+
   # Input checks. ====
 
   bad <- dm

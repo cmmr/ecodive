@@ -277,6 +277,40 @@ attr(fs, 'selected')
 plot(fs)
 ```
 
+### Spatial structure
+
+To ask how much of a community's variation is spatial, `dbmem()` turns the
+samples' positions (coordinates, or geographic distances) into
+distance-based Moran's eigenvector maps (Dray et al. 2006): uncorrelated
+spatial variables, from broad-scale patterns to fine-scale ones, as
+`adespatial::dbmem()` does. By default it keeps those with positive
+spatial autocorrelation. They are then candidates for `forward_select()`,
+and a set for `varpart()`. Here 40 simulated sites have taxa that follow an
+east-west gradient and pH:
+
+```{r}
+set.seed(1)
+sites <- data.frame(
+  row.names = paste0('S', 1:40),
+  east = runif(40, 0, 10), north = runif(40, 0, 10), ph = runif(40, 5, 8) )
+counts <- matrix(rpois(40 * 12, 3), 40, 12)
+counts[, 1:4] <- counts[, 1:4] + round(2 * sites$east)
+counts[, 5:8] <- counts[, 5:8] + round(3 * (sites$ph - 5))
+
+mem <- dbmem(c('east', 'north'), sites)
+mem
+plot(mem, sites[, c('east', 'north')])
+```
+
+```{r}
+fs <- forward_select(counts, data = mem, norm = 'hellinger', permutations = 199)
+attr(fs, 'selected')
+
+varpart(
+  counts, ph = ~ ph, space = attr(fs, 'selected'),
+  data = cbind(sites, mem), norm = 'hellinger' )
+```
+
 `principal_response_curves()`, which is planned, will also build on
 `rda()`.
 
