@@ -545,7 +545,7 @@ ord_plot_groups <- function (x, groups, data) {
 
 # The groups of `n` samples named `labels` (or NULL), from `groups` and
 # `data` (by per_sample()'s rule), or else `stored`. As ord_plot_groups().
-plot_groups <- function (n, labels, groups, data, stored = NULL) {
+plot_groups <- function (n, labels, groups, data, stored = NULL, ref = '`x`') {
 
   title <- NULL
 
@@ -560,11 +560,11 @@ plot_groups <- function (n, labels, groups, data, stored = NULL) {
         stop('`data` must be a data.frame.', call. = FALSE)
       data <- as.data.frame(data, stringsAsFactors = FALSE)
       dn   <- if (.row_names_info(data) > 0) rownames(data) else NULL
-      idx  <- match_rows(labels, n, dn, nrow(data), ref = '`x`')
+      idx  <- match_rows(labels, n, dn, nrow(data), ref = ref)
       if (is.character(groups) && length(groups) == 1 && groups %in% names(data))
         title <- groups
     }
-    v <- per_sample(groups, 'groups', data, idx, labels, n, ref = '`x`')
+    v <- per_sample(groups, 'groups', data, idx, labels, n, ref = ref)
   }
 
   if (is.numeric(v) && !is.factor(v))

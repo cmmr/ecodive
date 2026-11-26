@@ -1166,6 +1166,19 @@
   drawn proportions, colours and sample order invisibly; sparse tables stay
   sparse.
 
+* New `ternary_plot()` draws three-part compositions in a ternary diagram,
+  and returns the drawn coordinates invisibly. In samples mode (`parts`),
+  each sample is a point at three features, or three sums of features
+  ("phyla"; one part may be `NA`, for the rest). With `center = TRUE` the
+  points are centred by perturbation (von Eynatten et al. 2002), and the
+  gridlines become curves that still mark the original proportions.
+  `ellipses = "confidence"` or `"prediction"` adds each group's Hotelling
+  region (F-based) from ilr coordinates, mapped back into the triangle. In
+  features mode (`groups` with 3 levels), each feature is a point at its
+  share of the three groups' mean relative abundances, sized by abundance
+  and coloured by the group that holds most of it. Sparse tables stay
+  sparse.
+
 * `plot()` of an ordination takes `scaling` and `links`, for compositional
   biplots (Aitchison & Greenacre 2002). For `pca()`, `rpca()` and
   `rpca_phylo()`: `scaling = 'form'` (the default, as before),
