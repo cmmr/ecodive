@@ -560,3 +560,44 @@ Made while implementing:
   `_summarize_feature_stats()`, under Python 3.13.18, scikit-learn 1.9.1,
   NumPy 2.5.5, pandas 2.3.3, SciPy 1.18.1, biom-format 2.1.18 and
   statsmodels 0.14.6.
+
+
+## Outcome (item 63, from the implementing session's final report)
+
+Implemented in `0d00ddb` on 2026-11-26.
+
+- **Files:** `R/feature_volatility.r` (`feature_volatility()`, internal
+  `feature_volatility_details()`, `print()`, `plot()`), the shared
+  `long_vol_cells()` in `R/longitudinal.r`, a `train` argument to
+  `rf_run()`, `C_rf_rng_test()` kind 5 (numpy's legacy permutation) and a
+  stream offset in `C_volatility_ci()`; `test-feature_volatility.r` (258
+  tests) and two smoke lines; fixtures from
+  `data-raw/expected/feature_volatility.{r,py}` (56 KB of text, a 12 KB
+  `.rds`).
+- **Against q2-longitudinal / q2-sample-classifier 2026.10.0** (scikit-learn
+  1.9.1; random_state 3 and 7, `optimize_feature_selection = False`, the
+  forest on counts with `norm = 'none'`): the train/test split identical;
+  importances, their order, the held-out predictions and q2's accuracy
+  (MSE, r, r², slope, intercept) exact (largest difference 3.3e-16, in r²);
+  `_importance_filtering()` with `'all'` and 10 features the same features
+  in the same order; `_summarize_feature_stats()` within 5e-15 relative
+  (cumulative increase and decrease, which sum differences; the global
+  statistics within 5e-16, the median exactly). numpy's
+  `RandomState(rs).permutation(n)` identical for n up to 1,000. q2's RFE
+  run (random_state 3) kept 7 features, all among the top 10 of the same
+  forest without RFE.
+- **Intervals:** exact (1e-14) against a base-R transcription of Vega's
+  `bootstrapCI()` on the same PCG uniforms; means and counts identical to
+  `volatility()`'s per feature.
+- **Determinism:** `identical()` for `cpus` 1–4 (impurity and permutation
+  importance), and for a transposed table (`margin = 2`); a
+  `simple_triplet_matrix` gives the same abundances and statistics
+  (importances correlate > 0.99: sparse and dense regression forests can
+  break tied splits differently, as noted in random_forest.md).
+- **Speed** (400 samples × 2,000 features, 22% zeros, 100 trees, all
+  features per split): 8.9 s on 1 thread, 2.6 s on 4, for the whole
+  pipeline; scikit-learn's forest fit alone on the same 320 training
+  samples took 9.6 s and 2.7 s.
+- **Tests:** 33,120 at home and 471 in CRAN mode (32,859 and 469 at
+  70dff27). `R CMD check --no-manual --ignore-vignettes`: one NOTE
+  (installed size 7.1 Mb), as before.
