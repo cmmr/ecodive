@@ -158,6 +158,7 @@ longitudinal and paired-sample analyses of microbiome data. \emph{mSystems},
 \code{\link[=first_distances]{first_distances()}}, \code{\link[=volatility]{volatility()}}, \code{\link[=nmit]{nmit()}}.
 
 Other longitudinal:
+\code{\link[=feature_volatility]{feature_volatility()}},
 \code{\link[=first_distances]{first_distances()}},
 \code{\link[=nmit]{nmit()}},
 \code{\link[=volatility]{volatility()}}

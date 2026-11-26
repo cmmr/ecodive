@@ -165,6 +165,9 @@
   expect_true(inherits(fdt, 'ecodive_first_distances') && nrow(fdt) == 15L && all(fdt$distance >= 0))
   vol <- volatility(shan, 'subj', 'day', 'grp', lm_meta, n_resamples = 50L)
   expect_true(inherits(vol, 'ecodive_volatility') && nrow(vol$means) == 8L && all(is.finite(vol$global)))
+  fvo <- feature_volatility(counts, 'subj', 'day', 'grp', lm_meta, n_trees = 10L, n_resamples = 50L, cpus = cpus)
+  expect_true(inherits(fvo, 'ecodive_feature_volatility') && nrow(fvo$predictions) == 4L &&
+              all(is.finite(fvo$features$importance)) && nrow(fvo$means) == 8L * nrow(fvo$features))
   nm <- nmit(counts, 'subj', lm_meta, cpus = cpus)
   expect_true(inherits(nm, 'ecodive_dist') && attr(nm, 'Size') == 5L && all(is.finite(nm)) && all(nm >= 0))
 
@@ -369,6 +372,12 @@
   expect_true(any(is.finite(mc$r)) && all(abs(mc$r) <= 1, na.rm = TRUE))
   expect_true(all(mc$p_adjusted >= 0 & mc$p_adjusted <= 1, na.rm = TRUE))
 
+  mr <- mantel_regression(dm ~ x + grp, data = meta, z = rep(1:4, 5), permutations = 9, cpus = cpus)
+  expect_inherits(mr, 'ecodive_mantel_regression')
+  expect_identical(dim(mr$coefficients), c(4L, 5L))
+  expect_true(all(is.finite(mr$coefficients$estimate)) && is.finite(mr$r_squared))
+  expect_true(all(mr$coefficients$p_value > 0 & mr$coefficients$p_value <= 1))
+
   et <- enterotype(counts, n_types = 2:3, cpus = cpus)
   expect_inherits(et, c('ecodive_enterotype', 'ecodive_types', 'data.frame'))
   expect_identical(dim(et), c(20L, 3L))
@@ -475,6 +484,7 @@
   expect_true(drawn(fdi))    # first_differences()
   expect_true(drawn(fdt))    # first_distances()
   expect_true(drawn(vol))    # volatility()
+  expect_true(drawn(fvo))    # feature_volatility()
   expect_true(drawn(bm))   # batch_mmuphin()
   expect_true(drawn(bc, type = 'means'))   # batch_combat()
   expect_true(is.data.frame(decontam_frequency_plot(counts, 'F1', dc_conc, dc_neg)))
@@ -495,6 +505,10 @@
   z <- withVisible(composition_barplot(counts, 'grp', meta, n_features = 5, heatmap = TRUE, cpus = cpus))
   expect_true(!z$visible && identical(dim(z$value$proportions), c(6L, 20L)) &&
               all(abs(colSums(z$value$proportions) - 1) < 1e-12) && all(is.finite(z$value$clr)))
+  z <- withVisible(ternary_plot(counts, parts = list(1, 2, NA), groups = 'grp', data = meta,
+                                center = TRUE, ellipses = 'confidence'))
+  expect_true(!z$visible && nrow(z$value) == 20L && all(abs(rowSums(z$value[, 1:3]) - 1) < 1e-12) &&
+              length(attr(z$value, 'ellipses')) == 2L)
   grDevices::dev.off()
 
 

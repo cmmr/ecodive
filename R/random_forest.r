@@ -339,7 +339,11 @@ random_forest_details <- function (
 
 
 
-rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FALSE) {
+# train: NULL, or the 1-based positions of the samples to train on, in that
+# order (feature_volatility()'s split); the others' predictions by the
+# full-data forest are then returned as `holdout`, list(index, value).
+rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FALSE,
+                    train = NULL) {
 
   with(env, {
     validate_counts()
@@ -388,17 +392,25 @@ rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FAL
   yv <- per_sample(env$y, 'y', data, idx, sams, n, ref = '`counts`')
   fv <- per_sample(env$folds, 'folds', data, idx, sams, n, ref = '`counts`')
 
-  keep <- !is.na(yv)
-  if (!all(keep)) {
-    warning(sprintf(
-      'Left out %d sample%s whose `y` is NA.', sum(!keep), if (sum(!keep) == 1) '' else 's'),
-      call. = FALSE )
-    if (sum(keep) < 2) stop('Fewer than two samples have a `y`.', call. = FALSE)
+  # The training samples: those with a `y`, or (feature_volatility()) the
+  # given ones, in the given order.
+  if (is.null(train)) {
+    keep <- !is.na(yv)
+    if (!all(keep)) {
+      warning(sprintf(
+        'Left out %d sample%s whose `y` is NA.', sum(!keep), if (sum(!keep) == 1) '' else 's'),
+        call. = FALSE )
+      if (sum(keep) < 2) stop('Fewer than two samples have a `y`.', call. = FALSE)
+    }
+    keep <- which(keep)
   }
-  rows <- which(keep) - 1L
+  else {
+    keep <- as.integer(train)
+  }
+  rows <- keep - 1L
   yv   <- yv[keep]
   if (!is.null(fv)) fv <- fv[keep]
-  sam_out <- if (is.null(sams)) as.character(which(keep)) else sams[keep]
+  sam_out <- if (is.null(sams)) as.character(keep) else sams[keep]
   nk <- length(rows)
 
   if (is.factor(yv) || is.character(yv) || is.logical(yv)) {
@@ -576,6 +588,13 @@ rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FAL
     res$forest <- list(
       trees = fo, classes = classes, features = feats, norm = nm_norm,
       pseudocount = pseudocount, type = type )
+  }
+  if (!is.null(train)) {
+    te <- setdiff(seq_len(n), keep)
+    res$holdout <- list(
+      index = te,
+      value = if (length(te)) as.vector(.Call(C_rf_predict, full$forest, x, te - 1L, FALSE, cpus)$value)
+              else numeric(0) )
   }
   if (details) {
     res$forests <- lapply(forests, function (fr) fr$forest)

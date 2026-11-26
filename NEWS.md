@@ -298,6 +298,19 @@
   pairs for all classes (for Kendall's tau-b too), in parallel. `plot()`
   draws the correlogram.
 
+* New `mantel_regression()` fits a multiple regression on distance matrices
+  (MRM): one distance matrix (such as community dissimilarities) regressed on
+  several others (geographic distance, differences in pH, ...), with
+  permutation p-values for each coefficient (pseudo-t) and for the whole
+  model (F). Terms come as distance matrices, coordinates, one value per
+  sample, or a formula of sample metadata, whose numbers become absolute
+  differences, matrices Euclidean distances, and factors 0 (same) or 1
+  (different). `method = 'spearman'` regresses the ranks. It gives the same
+  coefficients, R^2, F, and p-values (given the same permutations) as
+  `ecodist::MRM()`. Each permutation is one pass over the pairs, in
+  parallel, with `strata` for restricted permutations. `plot()` draws the
+  standardized coefficients.
+
 * New `dist_test(dm, test, groups, data, ...)` runs any of these tests by
   name, as `dist_ord()` does for ordination methods: `dist_test(dm, "mrpp",
   "treatment", meta)` is `mrpp(dm, "treatment", meta)`, and other arguments
@@ -1033,6 +1046,16 @@
     and the Frobenius or nuclear norm of their differences, in threaded C,
     the same for any `cpus`. It matches q2's distances to about 1e-15;
     `permanova()` on the result is NMIT's test.
+  * New `feature_volatility()` runs q2's feature-volatility pipeline: a
+    `random_forest()` regression of the state on the features, on a random
+    80% of the samples (`test_size`), with its accuracy on the rest; the
+    `n_features` most important features with q2's statistics (cumulative
+    increase and decrease of the mean between states, net change, global
+    mean, median, variance, SD and CV); and each one's volatility chart
+    numbers. q2's recursive feature elimination is left out. Given q2's
+    `random_state`, the split, importances and predictions match q2's
+    exactly, and the statistics to about 1e-15. `plot()` draws the
+    importances beside the chosen feature's volatility chart.
 
 * New `batch_mmuphin()` and `batch_combat()` remove batch effects (study,
   sequencing run, extraction kit) from a table, keeping the effects of the
@@ -1179,6 +1202,19 @@
   subtitle says how much "Other" holds. `heatmap = TRUE` adds the drawn
   features' centred clr values below, aligned with the bars. It returns the
   drawn proportions, colours and sample order invisibly; sparse tables stay
+  sparse.
+
+* New `ternary_plot()` draws three-part compositions in a ternary diagram,
+  and returns the drawn coordinates invisibly. In samples mode (`parts`),
+  each sample is a point at three features, or three sums of features
+  ("phyla"; one part may be `NA`, for the rest). With `center = TRUE` the
+  points are centred by perturbation (von Eynatten et al. 2002), and the
+  gridlines become curves that still mark the original proportions.
+  `ellipses = "confidence"` or `"prediction"` adds each group's Hotelling
+  region (F-based) from ilr coordinates, mapped back into the triangle. In
+  features mode (`groups` with 3 levels), each feature is a point at its
+  share of the three groups' mean relative abundances, sized by abundance
+  and coloured by the group that holds most of it. Sparse tables stay
   sparse.
 
 * `plot()` of an ordination takes `scaling` and `links`, for compositional

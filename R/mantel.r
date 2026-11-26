@@ -128,7 +128,7 @@
 #' Mantel, N. (1967). The detection of disease clustering and a generalized
 #' regression approach. *Cancer Research*, 27(2), 209-220.
 #'
-#' @seealso [mantel_partial()], [mantel_correlogram()], [permanova()], [dist_test()],
+#' @seealso [mantel_partial()], [mantel_correlogram()], [mantel_regression()], [permanova()], [dist_test()],
 #'   [beta_div()]
 #'
 #' @export
@@ -276,7 +276,7 @@ mantel <- function (
 #' and correlation extensions of the Mantel test of matrix correspondence.
 #' *Systematic Zoology*, 35(4), 627-632. \doi{10.2307/2413122}
 #'
-#' @seealso [mantel()], [mantel_correlogram()], [dist_test()], [beta_div()]
+#' @seealso [mantel()], [mantel_correlogram()], [mantel_regression()], [dist_test()], [beta_div()]
 #'
 #' @export
 #' @examples

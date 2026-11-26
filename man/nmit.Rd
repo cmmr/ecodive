@@ -167,6 +167,7 @@ longitudinal and paired-sample analyses of microbiome data. \emph{mSystems},
 }
 \seealso{
 Other longitudinal:
+\code{\link[=feature_volatility]{feature_volatility()}},
 \code{\link[=first_differences]{first_differences()}},
 \code{\link[=first_distances]{first_distances()}},
 \code{\link[=volatility]{volatility()}}

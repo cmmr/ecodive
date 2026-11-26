@@ -61,6 +61,7 @@ extern SEXP C_cross_assoc(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mantel_classes(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dbmem(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_mantel_regression(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_moran_perm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_moran_weights(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_mrpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -118,6 +119,8 @@ extern SEXP C_volatility_ci(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_st_collapse(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_st_cond_prob(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_sourcetracker(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_ternary_means(SEXP, SEXP, SEXP);
+extern SEXP C_ternary_sums(SEXP, SEXP, SEXP);
 extern SEXP C_tsne_p(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_tsne_run(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_umap_ab(SEXP, SEXP);
@@ -188,6 +191,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_mantel",    (DL_FUNC) &C_mantel,    7},
   {"C_mantel_classes", (DL_FUNC) &C_mantel_classes, 5},
   {"C_dbmem",         (DL_FUNC) &C_dbmem,         5},
+  {"C_mantel_regression", (DL_FUNC) &C_mantel_regression, 5},
   {"C_moran_perm",    (DL_FUNC) &C_moran_perm,    4},
   {"C_moran_weights", (DL_FUNC) &C_moran_weights, 4},
   {"C_mrpp",      (DL_FUNC) &C_mrpp,      7},
@@ -245,6 +249,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_network_barrat", (DL_FUNC) &C_network_barrat, 4},
   {"C_network_eigen",  (DL_FUNC) &C_network_eigen,  5},
   {"C_perm_indices",   (DL_FUNC) &C_perm_indices,   4},
+  {"C_ternary_means", (DL_FUNC) &C_ternary_means, 3},
+  {"C_ternary_sums",  (DL_FUNC) &C_ternary_sums,  3},
   {"C_tsne_p",    (DL_FUNC) &C_tsne_p,    7},
   {"C_tsne_run",  (DL_FUNC) &C_tsne_run,  4},
   {"C_umap_ab",       (DL_FUNC) &C_umap_ab,       2},
