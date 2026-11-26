@@ -308,8 +308,12 @@
   (different). `method = 'spearman'` regresses the ranks. It gives the same
   coefficients, R^2, F, and p-values (given the same permutations) as
   `ecodist::MRM()`. Each permutation is one pass over the pairs, in
-  parallel, with `strata` for restricted permutations. `plot()` draws the
-  standardized coefficients.
+  parallel, with `strata` for restricted permutations. `backward = TRUE`
+  simplifies the model by backward elimination (Lichstein 2007): the least
+  significant term is removed and the model refitted, with the same
+  permutations, until every term left has a p-value of at most `alpha`;
+  `elimination` records each step. `plot()` draws the standardized
+  coefficients.
 
 * New `dist_test(dm, test, groups, data, ...)` runs any of these tests by
   name, as `dist_ord()` does for ordination methods: `dist_test(dm, "mrpp",

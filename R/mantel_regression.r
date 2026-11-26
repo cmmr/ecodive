@@ -60,6 +60,14 @@
 #'        from `permute::shuffleSet()`, to use instead of random ones. Give
 #'        `0` for no p-values.
 #'
+#' @param backward  Whether to simplify the model by backward elimination
+#'        (Lichstein 2007): remove the least significant term, refit, and
+#'        repeat until every term left has a p-value of at most `alpha`. See
+#'        **Backward elimination**. Default: `FALSE`.
+#'
+#' @param alpha  With `backward = TRUE`, the significance level a term's
+#'        p-value must reach to stay in the model. Default: `0.05`.
+#'
 #' @param seed  An integer seed for the random permutations. The same seed
 #'        gives the same p-values. Default: `0`
 #'
@@ -90,6 +98,15 @@
 #'   * `n`: The number of samples.
 #'   * `permutation`: How samples were permuted: `'free'`, `'within strata'`,
 #'     or `'supplied matrix'`.
+#'
+#'   With `backward = TRUE`, these describe the final model, and there are
+#'   also:
+#'
+#'   * `alpha`: The significance level.
+#'   * `elimination`: A data frame with one row per term removed, in order
+#'     (no rows if none was): `step`, `term`, its `t` and `p_value` in the
+#'     model it was removed from, and that model's \eqn{R^2}
+#'     (`r_squared_before`) and the next one's (`r_squared_after`).
 #'
 #'   Attribute `f_perm` is a vector of the \eqn{F} statistics of the
 #'   permutations, and attribute `t_perm` a matrix of their pseudo-t
@@ -130,6 +147,24 @@
 #' others, or the same for every pair) are an error.
 #'
 #'
+#' **Backward elimination**
+#'
+#' With `backward = TRUE`, the model is simplified by backward elimination,
+#' as in Lichstein (2007): the term with the largest p-value is removed if that p-value
+#' is above `alpha`, the model is refitted without it, and so on, until
+#' every term left has a p-value of at most `alpha`. Among terms with equal
+#' p-values (permutation p-values often tie), the one with the smallest
+#' \eqn{|t|} goes first. Every refit uses the same permutations, so the
+#' steps, like the p-values, are the same from run to run and for any number
+#' of `cpus`. If every term is removed, only the intercept is left: then
+#' \eqn{R^2} is 0, and \eqn{F} and its p-value are `NA`. The intercept is
+#' never removed.
+#'
+#' The final model's p-values don't account for the selection, so they are
+#' too small, as after any stepwise selection: report them as descriptive.
+#' `ecodist::MRM()` has no backward elimination.
+#'
+#'
 #' **Speed and memory**
 #'
 #' The explanatory distances are centred and orthonormalized once (by QR).
@@ -161,6 +196,7 @@
 #'   So `permutations = 999` matches `nperm = 1000`.
 #' * There's no `method = 'logistic'`, for logistic regression of a binary
 #'   response.
+#' * `backward` adds backward elimination of terms.
 #'
 #' @references
 #' Legendre, P., Lapointe, F.-J., & Casgrain, P. (1994). Modeling brain
@@ -206,12 +242,22 @@
 #'     geo <- dist(meta[, c('lat', 'lon')])
 #'     mantel_regression(dm, ph = dist(meta$ph), geo = geo, method = 'spearman')
 #'
+#'     # Keep only the terms that matter, by backward elimination.
+#'     mantel_regression(
+#'       dm ~ ph + temp + soil + cbind(lat, lon), data = meta, backward = TRUE )
+#'
 mantel_regression <- function (
     dm, ..., data = NULL, formula = NULL, method = 'pearson',
-    permutations = 999L, strata = NULL, seed = 0L, cpus = n_cpus() ) {
+    permutations = 999L, backward = FALSE, alpha = 0.05, strata = NULL,
+    seed = 0L, cpus = n_cpus() ) {
 
   validate_seed()
   validate_cpus()
+
+  if (!isTRUE(backward) && !isFALSE(backward))
+    stop('`backward` must be TRUE or FALSE.', call. = FALSE)
+  if (!is.numeric(alpha) || length(alpha) != 1 || is.na(alpha) || alpha < 0 || alpha > 1)
+    stop('`alpha` must be a single number from 0 to 1.', call. = FALSE)
 
   method <- match.arg(method, c('pearson', 'spearman'))
 
@@ -308,6 +354,9 @@ mantel_regression <- function (
   pm <- perm_matrix(permutations, n)
   if (!is.null(pm$perms) && !is.null(strata))
     stop('Give `strata` or a `permutations` matrix, not both.', call. = FALSE)
+  if (backward && pm$n_perm == 0)
+    stop('Backward elimination needs permutations: its decisions use the ',
+         'permutation p-values.', call. = FALSE)
 
 
   #--------------------------------------------------------
@@ -325,9 +374,7 @@ mantel_regression <- function (
     stop('`dm` has the same distance between every pair of samples, so ',
          'there is nothing to explain.', call. = FALSE)
 
-  xbar <- colMeans(X)
-  Xc   <- X - rep(xbar, each = N)
-  qrx  <- qr(Xc)
+  qrx <- qr(X - rep(colMeans(X), each = N))
   if (qrx$rank < p) {
     bad <- term_labels[qrx$pivot[seq.int(qrx$rank + 1L, p)]]
     stop(
@@ -336,12 +383,107 @@ mantel_regression <- function (
       'pair of samples).', call. = FALSE )
   }
 
-  Q    <- qr.Q(qrx)
-  Rinv <- backsolve(qr.R(qrx), diag(p))  # (Xc'Xc)^-1 = Rinv Rinv'
+
+  #--------------------------------------------------------
+  # The full model; then, for backward elimination, the
+  # least significant term removed and the rest refitted
+  # (with the same permutations), until every term left
+  # has p <= alpha.
+  #--------------------------------------------------------
+  fit <- function (keep) mrm_fit(
+    y, X[, keep, drop = FALSE], term_labels[keep], pm, strata, n, seed, cpus )
+
+  keep <- seq_len(p)
+  res  <- fit(keep)
+  elim <- NULL
+
+  if (backward) {
+    repeat {
+      cf <- res$coefficients[-1, , drop = FALSE]
+      if (nrow(cf) == 0 || all(cf$p_value <= alpha)) break
+
+      # The largest p-value; among ties, the smallest |t|, then the last.
+      worst <- order(-cf$p_value, abs(cf$t), -seq_len(nrow(cf)))[[1]]
+      r2    <- res$stats$r_squared
+      keep  <- keep[-worst]
+      res   <- fit(keep)
+
+      elim <- rbind(elim, data.frame(
+        step             = NROW(elim) + 1L,
+        term             = cf$term[[worst]],
+        t                = cf$t[[worst]],
+        p_value          = cf$p_value[[worst]],
+        r_squared_before = r2,
+        r_squared_after  = res$stats$r_squared,
+        stringsAsFactors = FALSE ))
+    }
+    if (is.null(elim))
+      elim <- data.frame(
+        step = integer(0), term = character(0), t = numeric(0),
+        p_value = numeric(0), r_squared_before = numeric(0),
+        r_squared_after = numeric(0), stringsAsFactors = FALSE )
+  }
+
+  out <- c(
+    res$stats,
+    list(
+      n_perm      = pm$n_perm,
+      method      = method,
+      n           = as.integer(n),
+      permutation = if (!is.null(pm$perms)) 'supplied matrix'
+                    else if (!is.null(strata)) 'within strata'
+                    else 'free' ),
+    if (backward) list(alpha = alpha, elimination = elim) )
+  out <- c(list(coefficients = res$coefficients), out)
+
+  attr(out, 'f_perm') <- res$f_perm
+  attr(out, 't_perm') <- res$t_perm
+  class(out) <- 'ecodive_mantel_regression'
+
+  set_display(out, title = title_of('Multiple Regression on Distance Matrices', x$title))
+}
+
+
+
+#------------------------------------------------------------------------------
+# The regression of y on the columns of X (N pairs x p terms, of full rank
+# after centring; p may be 0), its statistics for the observed samples, and
+# its permutation p-values.
+#
+# Returns list(coefficients, stats = list(r_squared, F, p_value, df),
+# f_perm, t_perm).
+#------------------------------------------------------------------------------
+mrm_fit <- function (y, X, term_labels, pm, strata, n, seed, cpus) {
+
+  N  <- length(y)
+  p  <- ncol(X)
+  df <- N - p - 1
 
   ybar <- mean(y)
   yc   <- y - ybar
   tss  <- sum(yc * yc)
+  sdy  <- sqrt(tss / (N - 1))
+
+  # No terms (all eliminated): the intercept is the mean, the same for
+  # every permutation, so its pseudo-t is too.
+  if (p == 0) {
+    t0     <- ybar / sqrt(tss / df / N)
+    t_perm <- matrix(t0, pm$n_perm, 1L, dimnames = list(NULL, '(Intercept)'))
+    coefs  <- data.frame(
+      term = '(Intercept)', estimate = ybar, std_estimate = NA_real_, t = t0,
+      p_value = perm_p(t0, t_perm, 'two.sided'), stringsAsFactors = FALSE )
+    return (list(
+      coefficients = coefs,
+      stats  = list(r_squared = 0, F = NA_real_, p_value = NA_real_, df = c(0, df)),
+      f_perm = rep(NA_real_, pm$n_perm),
+      t_perm = t_perm ))
+  }
+
+  xbar <- colMeans(X)
+  Xc   <- X - rep(xbar, each = N)
+  qrx  <- qr(Xc)
+  Q    <- qr.Q(qrx)
+  Rinv <- backsolve(qr.R(qrx), diag(p))  # (Xc'Xc)^-1 = Rinv Rinv'
 
 
   #--------------------------------------------------------
@@ -372,37 +514,26 @@ mantel_regression <- function (
   f_perm <- f_all[-1]
   colnames(t_perm) <- c('(Intercept)', term_labels)
 
-  b <- c(b0[[1]], B[, 1])
-  sdy <- sqrt(tss / (N - 1))
   sdx <- sqrt(colSums(Xc * Xc) / (N - 1))
 
   coefs <- data.frame(
     term         = c('(Intercept)', term_labels),
-    estimate     = b,
+    estimate     = c(b0[[1]], B[, 1]),
     std_estimate = c(NA_real_, B[, 1] * sdx / sdy),
     t            = t_obs,
     p_value      = perm_p(t_obs, t_perm, 'two.sided'),
     stringsAsFactors = FALSE )
   rownames(coefs) <- NULL
 
-  out <- list(
+  list(
     coefficients = coefs,
-    r_squared    = ssr[[1]] / tss,
-    F            = f_obs,
-    p_value      = perm_p(f_obs, f_perm, 'greater'),
-    df           = c(p, df),
-    n_perm       = pm$n_perm,
-    method       = method,
-    n            = as.integer(n),
-    permutation  = if (!is.null(pm$perms)) 'supplied matrix'
-                   else if (!is.null(strata)) 'within strata'
-                   else 'free' )
-
-  attr(out, 'f_perm') <- f_perm
-  attr(out, 't_perm') <- t_perm
-  class(out) <- 'ecodive_mantel_regression'
-
-  set_display(out, title = title_of('Multiple Regression on Distance Matrices', x$title))
+    stats = list(
+      r_squared = ssr[[1]] / tss,
+      F         = f_obs,
+      p_value   = perm_p(f_obs, f_perm, 'greater'),
+      df        = c(p, df) ),
+    f_perm = f_perm,
+    t_perm = t_perm )
 }
 
 
@@ -550,6 +681,22 @@ print.ecodive_mantel_regression <- function (x, digits = max(3L, getOption('digi
   cf$p_value <- if (x$n_perm > 0) format.pval(cf$p_value, digits = digits) else NA
   print(cf, row.names = FALSE, right = TRUE)
 
+  el <- x$elimination
+  if (is.data.frame(el)) {
+    cat('\nBackward elimination (alpha = ', fmt(x$alpha), '): ', sep = '')
+    if (nrow(el) == 0) {
+      cat('no term removed\n')
+    }
+    else {
+      cat(nrow(el), if (nrow(el) == 1) ' term' else ' terms', ' removed\n', sep = '')
+      el$t                <- formatC(el$t, digits = digits, format = 'g')
+      el$p_value          <- format.pval(el$p_value, digits = digits)
+      el$r_squared_before <- formatC(el$r_squared_before, digits = digits, format = 'g')
+      el$r_squared_after  <- formatC(el$r_squared_after, digits = digits, format = 'g')
+      print(el, row.names = FALSE, right = TRUE)
+    }
+  }
+
   invisible(x)
 }
 
@@ -603,6 +750,8 @@ plot.ecodive_mantel_regression <- function (x, alpha = 0.05, ...) {
     stop('`x` must be a mantel_regression() result.', call. = FALSE)
 
   cf  <- cf[cf$term != '(Intercept)', , drop = FALSE]
+  if (nrow(cf) == 0)
+    stop('`x` has no terms to plot: backward elimination removed them all.', call. = FALSE)
   idx <- rev(seq_len(nrow(cf)))  # dotchart() draws from the bottom up.
   est <- cf$std_estimate[idx]
   sig <- !is.na(cf$p_value[idx]) & cf$p_value[idx] <= alpha

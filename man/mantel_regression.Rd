@@ -11,6 +11,8 @@ mantel_regression(
   formula = NULL,
   method = "pearson",
   permutations = 999L,
+  backward = FALSE,
+  alpha = 0.05,
   strata = NULL,
   seed = 0L,
   cpus = n_cpus()
@@ -61,6 +63,14 @@ Alternatively, a matrix with one permutation of \code{1:n} per row, as
 from \code{permute::shuffleSet()}, to use instead of random ones. Give
 \code{0} for no p-values.}
 
+\item{backward}{Whether to simplify the model by backward elimination
+(Lichstein 2007): remove the least significant term, refit, and
+repeat until every term left has a p-value of at most \code{alpha}. See
+\strong{Backward elimination}. Default: \code{FALSE}.}
+
+\item{alpha}{With \code{backward = TRUE}, the significance level a term's
+p-value must reach to stay in the model. Default: \code{0.05}.}
+
 \item{strata}{Permute samples only within these groups (blocks), for
 designs such as repeated measures. With \code{data}, the name of one of
 its columns, or a vector with one value per row of \code{data}. Without
@@ -105,6 +115,16 @@ of the test, which is by permutation: the pairs aren't independent.
 \item \code{n}: The number of samples.
 \item \code{permutation}: How samples were permuted: \code{'free'}, \code{'within strata'},
 or \code{'supplied matrix'}.
+}
+
+With \code{backward = TRUE}, these describe the final model, and there are
+also:
+\itemize{
+\item \code{alpha}: The significance level.
+\item \code{elimination}: A data frame with one row per term removed, in order
+(no rows if none was): \code{step}, \code{term}, its \code{t} and \code{p_value} in the
+model it was removed from, and that model's \eqn{R^2}
+(\code{r_squared_before}) and the next one's (\code{r_squared_after}).
 }
 
 Attribute \code{f_perm} is a vector of the \eqn{F} statistics of the
@@ -155,6 +175,23 @@ and the test of \eqn{F} is the two-sided Mantel test.
 Terms whose distances are collinear (one a linear combination of the
 others, or the same for every pair) are an error.
 
+\strong{Backward elimination}
+
+With \code{backward = TRUE}, the model is simplified by backward elimination,
+as in Lichstein (2007): the term with the largest p-value is removed if that p-value
+is above \code{alpha}, the model is refitted without it, and so on, until
+every term left has a p-value of at most \code{alpha}. Among terms with equal
+p-values (permutation p-values often tie), the one with the smallest
+\eqn{|t|} goes first. Every refit uses the same permutations, so the
+steps, like the p-values, are the same from run to run and for any number
+of \code{cpus}. If every term is removed, only the intercept is left: then
+\eqn{R^2} is 0, and \eqn{F} and its p-value are \code{NA}. The intercept is
+never removed.
+
+The final model's p-values don't account for the selection, so they are
+too small, as after any stepwise selection: report them as descriptive.
+\code{ecodist::MRM()} has no backward elimination.
+
 \strong{Speed and memory}
 
 The explanatory distances are centred and orthonormalized once (by QR).
@@ -184,6 +221,7 @@ distance matrices, and samples are matched by name between them all.
 So \code{permutations = 999} matches \code{nperm = 1000}.
 \item There's no \code{method = 'logistic'}, for logistic regression of a binary
 response.
+\item \code{backward} adds backward elimination of terms.
 }
 }
 \examples{
@@ -212,6 +250,10 @@ response.
     # The same with distance matrices, and with ranks.
     geo <- dist(meta[, c('lat', 'lon')])
     mantel_regression(dm, ph = dist(meta$ph), geo = geo, method = 'spearman')
+
+    # Keep only the terms that matter, by backward elimination.
+    mantel_regression(
+      dm ~ ph + temp + soil + cbind(lat, lon), data = meta, backward = TRUE )
 
 }
 \references{

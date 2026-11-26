@@ -215,3 +215,38 @@ My own decisions:
   0.06 s on one thread.
 - `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed size, the
   container's debug build flags).
+
+
+## Follow-up: backward elimination (2026-11-26)
+
+The user asked for backward elimination of terms, which Lichstein (2007)
+uses with MRM and `ecodist::MRM()` lacks. Decisions:
+
+- **Arguments:** `backward = FALSE` and `alpha = 0.05` on
+  `mantel_regression()` (after `permutations`), not a separate function:
+  the selected model is an ordinary `mantel_regression()` result. `alpha`
+  is the significance level, as in `forward_select()`.
+- **Procedure:** while some term's p-value is above `alpha`, remove the term
+  with the largest p-value and refit. Permutation p-values tie often, so
+  ties go to the smallest |t|, then the last term. The intercept is never
+  removed. Every refit uses the same permutations (the same supplied matrix,
+  or the same `seed` and `strata`, which `perm_source_*` reproduces), so the
+  steps are deterministic and identical for any `cpus`.
+- **All terms removed:** the intercept-only model is returned: estimate the
+  mean distance, its pseudo-t (identical for every permutation, so p = 1),
+  `r_squared = 0`, `F` and `p_value` `NA`, `df = c(0, N - 1)`. `plot()` of it
+  is an error ("no terms to plot").
+- **Result:** the final model's fields, plus `alpha` and `elimination` (one
+  row per removed term: `step`, `term`, `t`, `p_value`, `r_squared_before`,
+  `r_squared_after`; zero rows if none was removed). Both are present only
+  with `backward = TRUE`. `print()` adds the elimination table.
+- **No p-value correction for the selection:** documented as descriptive,
+  as after any stepwise selection.
+- **`backward = TRUE` with `permutations = 0`** is an error.
+- **Code:** the fit moved, unchanged, into `mrm_fit()`, which also handles
+  zero terms; `mantel_regression()` checks the inputs, then loops.
+- **Tests:** each step is replayed by refitting the remaining terms with
+  the same permutations (removed term = largest p, smallest |t| among ties;
+  p, t and R² identical); the final model is `identical()` to a plain fit of
+  the kept terms; supplied matrix, strata, cpus 1–8; none removed, all
+  removed (against `lm(y ~ 1)`'s t); printing and errors.
