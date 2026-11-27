@@ -19,7 +19,7 @@ feature_volatility(
   data = NULL,
   n_features = 100L,
   test_size = 0.2,
-  rfe = TRUE,
+  rfe = FALSE,
   rfe_step = 0.05,
   rfe_folds = 5L,
   importance = "impurity",
@@ -86,8 +86,10 @@ feature_volatility(
 
   Whether to select features first by recursive feature elimination with
   cross-validation (scikit-learn's `RFECV`), as q2's pipeline always
-  does (its `optimize_feature_selection`). Default: `TRUE`. With
-  `FALSE`, one forest on every feature ranks them all.
+  does (its `optimize_feature_selection`). Default: `FALSE`: one forest
+  on every feature ranks them all. `TRUE` is q2's pipeline, at the cost
+  of about \\(\\`rfe_folds` \\+ 1) / \\ `rfe_step` forests instead of
+  one.
 
 - rfe_step:
 
@@ -217,7 +219,7 @@ A list of class `ecodive_feature_volatility`:
   then 2, 3, ... for those dropped later to earlier), and `scores`, a
   data frame of each number of features tried (`n_features`), the mean
   and SD (divisor n, as scikit-learn's) of the folds' \\R^2\\, and each
-  fold's (`fold_1`, ...). `NULL` with `rfe = FALSE`.
+  fold's (`fold_1`, ...). `NULL` with `rfe = FALSE` (the default).
 
 - `forest`:
 
@@ -389,13 +391,17 @@ Other longitudinal:
                              n_trees = 20, cpus = 1)
     fv
 #> Feature Volatility
-#> Random forest of 20 trees, trained on 25 of 32 samples; on the 7 held out: MSE 0.332, R^2 0.995, r 0.998; OOB R^2 0.885
-#> Recursive feature elimination kept 1 of 6 features (CV R^2 0.828)
-#> The 1 most important of 1 selected features, with relative abundances over time:
-#> # A data.frame: 1 × 10
+#> Random forest of 20 trees, trained on 25 of 32 samples; on the 7 held out: MSE 4.6, R^2 0.93, r 0.984; OOB R^2 0.844
+#> The 6 most important of 6 features, with relative abundances over time:
+#> # A data.frame: 6 × 10
 #>   feature importance cumulative_avg_decrease cumulative_avg_increase
 #>   <chr>        <dbl>                   <dbl>                   <dbl>
-#> 1 F1               1                       0                   0.423
+#> 1 F1         0.806                    0                     0.423
+#> 2 F6         0.0613                  -0.0986                0
+#> 3 F3         0.0566                  -0.107                 0
+#> 4 F4         0.0527                  -0.0708                0
+#> 5 F5         0.016                   -0.0715                0.000586
+#> 6 F2         0.00694                 -0.0756                0
 #> # … 6 more columns: net_avg_change <dbl>, global_variance <dbl>,
 #> #   global_mean <dbl>, global_median <dbl>, global_sd <dbl>, global_cv <dbl>
 #> Means by state with 95% bootstrap intervals in $means; trajectories in $abundances
