@@ -78,6 +78,12 @@
 // order (np.sum over a contiguous row), and the arithmetic is
 // multi_replace()'s, step for step: results are bit-identical to
 // scikit-bio's.
+//
+// The count zero multiplicative and Bayesian-multiplicative replacements
+// (C_replace_zeros_cmult) are a clean-room implementation: their formulas
+// were established from zCompositions' documentation and from the outputs
+// of its cmultRepl() (GPL; its source was not read), as recorded in
+// ecodive's plans/zero_replacement.md.
 
 #include "ecodive.h"
 
@@ -237,5 +243,140 @@ SEXP C_replace_zeros_mult(SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_delta) {
 
   free_all();
   UNPROTECT(1);
+  return result;
+}
+
+
+//======================================================
+// R interface for replace_zeros_czm(), _bl(), _sq() and
+// _gbm(). With c the counts, n_i = sum_j c_ij the depth
+// of sample i and x_ij = c_ij / n_i:
+//
+//   T_ij = sum_{k != i} c_kj / sum_{k != i} n_k
+//          (the other samples' pooled proportion)
+//
+//   code 0, CZM:  r_ij = frac * threshold / n_i
+//   code 1, BL:   r_ij = s_i T_ij / (n_i + s_i), s_i = D
+//   code 2, SQ:   ... s_i = sqrt(n_i)
+//   code 3, GBM:  ... s_i = 1 / exp(mean_j log T_ij)
+//
+// for every zero; with `adjust`, an r_ij above
+// m_j = min_{k: c_kj > 0} x_kj (strictly) becomes
+// frac * m_j. The non-zero parts are x_ij * (1 - the
+// sample's sum of r_ij).
+//
+// R has checked that no sample is all zeros and, for
+// the Bayesian codes, that there are at least two
+// samples and no feature is zero everywhere (and, for
+// GBM, that every feature is non-zero in at least two
+// samples, so T_ij > 0).
+//
+// Every sample is expanded into a dense vector before
+// it is summed, so dense and sparse input give the same
+// bits. Returns a list of
+//   result:     the dense matrix in the input's
+//               orientation (samples x features for
+//               margin 1, features x samples for 2);
+//   kept:       each sample's 1 - sum of r_ij, the
+//               factor of its non-zero parts;
+//   n_adjusted: the number of imputed values adjusted.
+//======================================================
+SEXP C_replace_zeros_cmult(
+    SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_code,
+    SEXP sexp_frac,   SEXP sexp_threshold, SEXP sexp_adjust ) {
+
+  int    margin    = asInteger(sexp_margin);
+  int    code      = asInteger(sexp_code);
+  double frac      = asReal(sexp_frac);
+  double threshold = asReal(sexp_threshold);
+  int    adjust    = asLogical(sexp_adjust);
+
+  init_n_ptrs(10);
+  ecomatrix_t *em = new_ecomatrix(sexp_counts, sexp_margin);
+
+  int ns = em->n_samples;
+  int D  = em->n_otus;
+
+  double *x     = (double *) R_alloc((size_t) D,  sizeof(double));
+  double *depth = (double *) R_alloc((size_t) ns, sizeof(double));
+  double *csum  = (double *) R_alloc((size_t) D,  sizeof(double));
+  double *cmin  = (double *) R_alloc((size_t) D,  sizeof(double));
+  double  total = 0;
+
+  for (int o = 0; o < D; o++) { csum[o] = 0; cmin[o] = R_PosInf; }
+
+  // Pass 1: depths, feature totals, and each feature's smallest observed
+  // proportion. Summed in sample order, then feature order.
+  for (int s = 0; s < ns; s++) {
+    dense_sample(em, s, x);
+    double n = 0;
+    for (int o = 0; o < D; o++) n += x[o];
+    depth[s] = n;
+    total   += n;
+    for (int o = 0; o < D; o++) {
+      if (x[o] == 0) continue;
+      csum[o] += x[o];
+      double p = x[o] / n;
+      if (p < cmin[o]) cmin[o] = p;
+    }
+  }
+
+  SEXP sexp_res  = PROTECT(margin == 1 ? allocMatrix(REALSXP, ns, D) : allocMatrix(REALSXP, D, ns));
+  SEXP sexp_kept = PROTECT(allocVector(REALSXP, ns));
+  double *out  = REAL(sexp_res);
+  double *kept = REAL(sexp_kept);
+  double  n_adjusted = 0;
+
+  double *r = (double *) R_alloc((size_t) D, sizeof(double));
+
+  // Pass 2: each sample.
+  for (int s = 0; s < ns; s++) {
+
+    dense_sample(em, s, x);
+    double n    = depth[s];
+    double rest = total - n;  // the other samples' depths
+
+    double str = 0;  // s_i
+    if      (code == 1) str = (double) D;
+    else if (code == 2) str = sqrt(n);
+    else if (code == 3) {
+      double lsum = 0;
+      for (int o = 0; o < D; o++) lsum += log((csum[o] - x[o]) / rest);
+      str = 1 / exp(lsum / D);
+    }
+
+    double imputed = 0;
+    for (int o = 0; o < D; o++) {
+      if (x[o] != 0) continue;
+      double v = (code == 0)
+        ? frac * threshold / n
+        : str * ((csum[o] - x[o]) / rest) / (n + str);
+      if (adjust && v > cmin[o]) { v = frac * cmin[o]; n_adjusted++; }
+      r[o]     = v;
+      imputed += v;
+    }
+
+    double k = 1 - imputed;
+    kept[s]  = k;
+
+    for (int o = 0; o < D; o++) {
+      double v = (x[o] == 0) ? r[o] : x[o] / n * k;
+      if (margin == 1) out[s + (size_t) ns * o] = v;
+      else             out[o + (size_t) D * s]  = v;
+    }
+  }
+
+  SEXP result = PROTECT(allocVector(VECSXP, 3));
+  SEXP names  = PROTECT(allocVector(STRSXP, 3));
+  SET_VECTOR_ELT(result, 0, sexp_res);
+  SET_VECTOR_ELT(result, 1, sexp_kept);
+  SET_VECTOR_ELT(result, 2, ScalarReal(n_adjusted));
+  SET_STRING_ELT(names, 0, mkChar("result"));
+  SET_STRING_ELT(names, 1, mkChar("kept"));
+  SET_STRING_ELT(names, 2, mkChar("n_adjusted"));
+  setAttrib(result, R_NamesSymbol, names);
+
+  free_all();
+  UNPROTECT(4);
   return result;
 }

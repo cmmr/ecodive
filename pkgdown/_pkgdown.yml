@@ -80,6 +80,7 @@ reference:
   contents:
   - replace_zeros
   - replace_zeros_mult
+  - replace_zeros_gbm
   - list_zero_replacements
 - subtitle: Log-ratio transforms
   desc: Coordinates for analyses of the transformed features themselves. For distances, use aitchison().
