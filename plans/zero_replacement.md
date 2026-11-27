@@ -71,7 +71,7 @@ treatment, which is a loop over `list_zero_replacements()`.
 replace_zeros(counts, method, ...)
 
 replace_zeros_mult(counts, margin = 1L, delta = NULL)
-replace_zeros_czm (counts, margin = 1L, frac = 0.65, threshold = 0.5)
+replace_zeros_czm (counts, margin = 1L, frac = 0.65, threshold = 0.5, adjust = TRUE)  # adjust added in item 55
 replace_zeros_gbm (counts, margin = 1L, frac = 0.65, adjust = TRUE)
 replace_zeros_sq  (counts, margin = 1L, frac = 0.65, adjust = TRUE)
 replace_zeros_bl  (counts, margin = 1L, frac = 0.65, adjust = TRUE)
@@ -123,28 +123,91 @@ manual): the posterior estimate of part j in sample i is
 
 \deqn{r_{ij} = \frac{s_i t_{ij}}{n_i + s_i} \text{ if } c_{ij} = 0, \qquad r_{ij} = x_{ij}\Bigl(1 - \sum_{k \in Z_i} \frac{s_i t_{ik}}{n_i + s_i}\Bigr) \text{ otherwise.}}
 
-The methods differ in \eqn{s_i} and \eqn{t_{ij}}:
+The methods differ in \eqn{s_i} and \eqn{t_{ij}}. **Confirmed on
+2026-11-27 (item 55) by black-box probes of zCompositions 1.6.2
+`cmultRepl()`** (see "Confirmed formulas" below; the table that stood here
+had BL's and SQ's \eqn{t} as "1/D?" and GBM's \eqn{t} as the mean of the
+other samples' proportions, both wrong for zCompositions):
 
-| Method | \eqn{t_{ij}} | \eqn{s_i} | Status |
-|:-------|:-------------|:----------|:-------|
-| BL | \eqn{1/D}? or the leave-one-out mean below? | \eqn{D} | **confirm** |
-| SQ | as BL | \eqn{\sqrt{n_i}} | **confirm** |
-| GBM | leave-one-out mean of part j's proportions over the other samples, \eqn{t_{ij} = \frac{1}{N-1}\sum_{k \ne i} x_{kj}} | \eqn{1 / g(t_{i\cdot})}, \eqn{g} the geometric mean over parts | **confirm** |
+| Method | \eqn{t_{ij}} | \eqn{s_i} |
+|:-------|:-------------|:----------|
+| BL | \eqn{T_{ij} = \sum_{k \ne i} c_{kj} \big/ \sum_{k \ne i} n_k} (pooled leave-one-out) | \eqn{D} |
+| SQ | \eqn{T_{ij}} | \eqn{\sqrt{n_i}} |
+| GBM | \eqn{T_{ij}} | \eqn{1 / g_i}, \eqn{g_i = \exp\bigl(\frac{1}{D}\sum_{j=1}^{D} \log T_{ij}\bigr)} over **all** D parts |
 
 - **`adjust = TRUE`** (zCompositions manual): an imputed proportion above
   the smallest observed (non-zero) proportion of that part,
   \eqn{m_j = \min_{k: c_{kj} > 0} x_{kj}}, is set to \eqn{frac \cdot m_j};
   then the sample's non-zero parts are re-scaled multiplicatively so it
-  sums to 1.
+  sums to 1. **Confirmed**, for CZM too (see below).
 - **CZM:** every zero becomes \eqn{frac \cdot threshold / n_i}
   (0.325 / n_i by default: a fraction of the "half a count" detection
-  limit), and the non-zero parts are scaled as in mult. Check whether
-  `adjust` applies to CZM too.
-- **Edge cases to establish from outputs:** a part that is non-zero in
-  only one sample (its leave-one-out \eqn{t} is 0 there, making GBM's
-  \eqn{g} zero and \eqn{s_i} infinite); a part that is zero everywhere
-  (zCompositions likely errors or drops it; ecodive should error, naming
-  it, since nothing can be estimated).
+  limit), and the non-zero parts are scaled as in mult. **Confirmed**, and
+  `adjust` applies to CZM as well.
+
+### Confirmed formulas (item 55, from documentation and outputs only)
+
+Sources: the `cmultRepl()` help page and NEWS of zCompositions 1.6.2
+(documentation), and its outputs. Its R source was never opened, and the
+2015 paper was not available.
+
+What the documentation states:
+
+- BM methods: zeros "are imputed ... by posterior estimates of the
+  multinomial probabilities generating the counts, assuming a Dirichlet
+  prior distribution" with hyper-parameters \eqn{t} (prior estimates of
+  the probabilities) and \eqn{s} (strength); `method = "user"` takes
+  them as a matrix `t` and a vector `s`.
+- `adjust`: imputations "falling above the lowest estimated probability of
+  a multinomial part (c/n) ... [are] adjusted by using a fraction (frac)
+  of the minimum c/n for that part. Lastly, the non-zero parts are
+  multiplicatively adjusted."
+- CZM "uses multiplicative simple replacement (multRepl) on the matrix of
+  estimated probabilities", upper limit \eqn{threshold / n}, imputed
+  value \eqn{frac} of it.
+- NEWS 1.4.0-1: "error thrown when GBM method not applicable due to only
+  one positive value in variable".
+
+What the probes (`data-raw/expected/zero_replacement_probe.r`) established:
+
+1. **The posterior form.** `method = "user"` with random `t` and `s`
+   equals \eqn{r_{ij} = s_i t_{ij} / (n_i + s_i)} for zeros and
+   \eqn{r_{ij} = x_{ij} (1 - \sum_{k \in Z_i} r_{ik})} otherwise
+   (\eqn{2 \times 10^{-18}}).
+2. **t and s.** With one or two zeros per row, each imputed value gives
+   \eqn{s_i t_{ij}} directly. BL's values matched \eqn{s = D} only with
+   the pooled leave-one-out \eqn{T_{ij}} above, not \eqn{1/D} and not the
+   mean of the other samples' proportions (the probe tables have unequal
+   depths, which separates the two means). SQ is the same \eqn{T} with
+   \eqn{s_i = \sqrt{n_i}}; GBM the same \eqn{T} with \eqn{s_i = 1/g_i},
+   the geometric mean taken over all D parts of \eqn{T_{i\cdot}}
+   (including the sample's non-zero parts).
+3. **The full candidate** (t, s, adjust, CZM) matches `cmultRepl()` on
+   122 random tables (3–12 samples, 3–15 parts, 1/3 zeros, mixed depths),
+   for every method, `adjust` TRUE and FALSE, `frac` 0.65 and 0.3 and
+   `threshold` 0.5 and 0.7: largest relative difference
+   \eqn{1.1 \times 10^{-15}}. The adjust step changed the result in 104
+   (BL), 111 (SQ), 107 (GBM) and 83 (CZM) of the 122 tables, so it was
+   exercised for every method.
+4. **The adjust test is strict** (`>`): an imputed value exactly equal to
+   \eqn{m_j} (1/16 against 1/16) is not adjusted.
+5. **Edge cases.**
+   - A part non-zero in only one sample: GBM errors ("not enough
+     information to compute t hyper-parameter, probably there are columns
+     with < 2 positive values"), because \eqn{T_{ij} = 0} for that sample
+     makes \eqn{g_i = 0}. BL, SQ and CZM handle it (its \eqn{T} is 0 only
+     in the sample where it is observed, which imputes nothing).
+     zCompositions errors for GBM as soon as any part has fewer than two
+     positive values, so with N = 2 and any zero, GBM always errors.
+   - A part zero everywhere: GBM errors; BL and SQ impute 0 there (so
+     zeros remain) with an R warning from `min()`; CZM imputes
+     \eqn{frac \cdot threshold / n_i} (no adjust: no observed minimum).
+   - One sample: every method errors ("at least two rows").
+   - Non-integer values are accepted and used as they are (\eqn{n_i} is
+     the row sum).
+   - No zeros: an error ("Label 0 was not found").
+   - `frac` and `threshold` are not checked (frac = 0 leaves zeros; frac =
+     1.5 is accepted).
 
 ### Unverified: pin down before writing C
 
@@ -174,7 +237,9 @@ must be **established from documentation and outputs only**:
   `replace_zeros_mult()` already sets it, then results only: for mult
   `delta` (the value the zeros got, resolved from the data when not
   given), and `n_replaced` (the number of zeros replaced). The settings
-  passed (`frac`, `threshold`, `adjust`) aren't echoed.
+  passed (`frac`, `threshold`, `adjust`) aren't echoed. Item 55 added
+  `n_adjusted` (czm, gbm, sq, bl: the number of imputed values `adjust`
+  lowered, which `cmultRepl()` prints), before `n_replaced`.
 - `phyloseq`, `rbiom`, `SummarizedExperiment` input gives the matrix, as
   `normalize()` does.
 - Warn above 1e8 values, as `normalize(norm = 'clr')`.
@@ -405,3 +470,124 @@ Commits `7d84f63` (work), `199eea8` (tick).
   `multRepl()`: ≤ 3.3e-16 relative. NumPy credited.
 - Open: the four Bayesian / CZM methods are a later item; the planned
   five-row registry is written into `test-replace_zeros.r`.
+
+
+## Decisions made while implementing (item 55)
+
+Asked of the user at the start (2026-11-27), after the probes:
+
+1. **GBM and a feature non-zero in only one sample:** an **error** naming
+   the features, as zCompositions errors ("not enough information to
+   compute t hyper-parameter"). The message explains why (the feature's
+   prior is zero in that sample, so the strength is infinite) and suggests
+   filtering (features in at least 2 samples) or `sq` / `bl`. Not chosen:
+   the \eqn{s \to \infty} limit, or a geometric mean over \eqn{t > 0} only
+   (neither has a reference).
+2. **No `cpus`** for the four methods (as the plan and
+   `replace_zeros_mult()`): two O(N·D) passes. A sparse 2,000 × 5,000
+   table (10% non-zero) takes 0.42 s for GBM, 0.26 s for CZM (0.21 s for
+   mult); dense 0.9 s. The brief's "identical for cpus 1, 2 and 4" check is
+   replaced by: identical for repeated calls, dense / `dgCMatrix` /
+   `TsparseMatrix` / slam input, integer / double / data-frame input, and
+   (transposed) margin 2.
+3. **No 80%-zeros warning for any method** (overriding item 15's plan that
+   the Bayesian methods would warn): the warning would fire on nearly every
+   microbiome table. `zero_replacement_input(mostly_zero = TRUE)` stays,
+   unused. The docs say that zCompositions warns about (or drops) such rows
+   and columns and ecodive doesn't.
+
+Made while implementing:
+
+4. **The formulas** are zCompositions 1.6.2's, as confirmed (section
+   "Confirmed formulas" above): BL's and SQ's prior is the pooled
+   leave-one-out proportion, not the paper's 1/D (which I could not
+   check; the paper is closed access). The docs state the formulas, so
+   users see what is computed.
+5. **`adjust` for CZM too** (`replace_zeros_czm(..., adjust = TRUE)`), as
+   `cmultRepl()` applies it; the plan's signature lacked it. Strict `>`,
+   as zCompositions.
+6. **`n_adjusted`** attribute (a double) on all four results, between
+   `method` and `n_replaced` (the wrapper's shape test keeps `n_replaced`
+   last). It is a result (rule 1), and `cmultRepl()` prints it.
+7. **Argument checks**, stricter than zCompositions (which checks none):
+   `frac` a single number in (0, 1) exclusive, as the plan said;
+   `threshold` in (0, 1] (a zero's upper limit can't be above one read);
+   `adjust` a single `TRUE` / `FALSE`.
+8. **Which inputs each method accepts:**
+   - all four: no sample may be all zeros (shared check); a table without
+     zeros gives its proportions (`cmultRepl()` errors); non-whole values
+     give a warning (`whole = TRUE`; zCompositions accepts them silently)
+     and are used as they are, as zCompositions does;
+   - gbm, sq, bl: at least 2 samples (new `min_samples` option of
+     `zero_replacement_input()`, checked before the empty-feature check so
+     a single sample gets the right message); no feature zero everywhere
+     (`empty_features_ok = FALSE`: BL / SQ in zCompositions would leave
+     those zeros at 0);
+   - czm: one sample is fine (a vector too), and a feature zero everywhere
+     is replaced like any zero (`cmultRepl()` refuses one row; with an empty
+     column it gives the same values, with a warning from `min()`);
+   - czm refuses (naming the samples) a sample whose imputed values add up
+     to 1 or more, where `cmultRepl()` returns negative proportions. That
+     happened in 7 of 426 random CZM runs (213 tables, `adjust` on and
+     off), all shallow samples with many zeros. The Bayesian methods can't reach it (each imputed value is
+     below \eqn{t_{ij}\, s_i / (n_i + s_i)}).
+9. **One C entry point**, `C_replace_zeros_cmult()` in
+   `src/replace_zeros.c` (method code 0–3), two passes: depths, feature
+   totals and each feature's smallest observed proportion; then each
+   sample. Every sample is expanded densely before summing, so sparse and
+   dense input give identical bits. \eqn{T_{ij}} is
+   `(feature total - c_ij) / (grand total - n_i)`, exact for counts.
+   The R wrappers share `cmult_replace()`.
+10. **One Rd page** for the four, `replace_zeros_cmult.Rd` (`@rdname`;
+    `?replace_zeros_gbm` etc. reach it), listed in pkgdown's "Zeros" as
+    `replace_zeros_gbm`.
+11. **Aliases as planned** (the `planned` table in `test-replace_zeros.r`
+    is now asserted equal to the registry). The README snippet, run over
+    all eight registries (adding `FEATURE_ASSOCS`; `BATCH_CORRECTIONS` has
+    no aliases and its ids are `mmuphin`, `combat`): no new code or alias
+    is an exact name elsewhere; only the known `sq` prefix of METRICS names
+    (item 15). `'c'` alone is ambiguous (czm and `cmultrepl` → gbm), which
+    the tests record. The collision test now also covers `DA_TESTS` and
+    `FEATURE_ASSOCS`.
+12. **`da_sensitivity(zeros = TRUE)`** tries every registry row, so it now
+    runs five zero replacements instead of one; its lefse test was updated
+    to expect them (NEWS says so).
+13. **Fixtures:** `data-raw/expected/replace_zeros_cmult.r` →
+    `tests/tinytests/expected/replace_zeros_cmult.rds` (86 kB): 8 tables
+    (four probe tables, a 2-sample table, a non-integer table, `ex_counts`,
+    and a sparse random 25 × 60 table with 72% zeros), every method ×
+    `adjust` (GBM skipped where it refuses), plus non-default `frac` /
+    `threshold`: 70 cases, with
+    `z.warning = 1`, `z.delete = FALSE`. ecodive matches them to 1.9e-15
+    (tested at 1e-13 relative), and `adjust` changes the result in at least
+    one case of every method. The probes are kept in
+    `data-raw/expected/zero_replacement_probe.r`.
+14. **No new copyright stanza:** nothing was ported (clean room), so
+    `inst/COPYRIGHTS` and `Authors@R` are unchanged; the C and R headers
+    say how the formulas were established.
+
+
+## Outcome (item 55, from the implementing session's final report)
+
+Done 2026-11-27. Commits `54fb100` (work), then this tick.
+
+- `replace_zeros_czm()`, `replace_zeros_gbm()`, `replace_zeros_sq()`,
+  `replace_zeros_bl()`: registry rows `czm`, `gbm`, `sq`, `bl` with the
+  planned aliases; one Rd page (`replace_zeros_cmult.Rd`); one C entry
+  point, `C_replace_zeros_cmult()`.
+- Formulas confirmed by black-box probes before any C was written (see
+  "Confirmed formulas"). BL and SQ use zCompositions' pooled leave-one-out
+  prior, not the paper's 1/D; `adjust` applies to CZM too.
+- zCompositions 1.6.2 `cmultRepl(output = "prop", z.delete = FALSE,
+  z.warning = 1)`: 70 fixture cases (probe tables, `ex_counts`, a sparse
+  25 × 60 table with 72% zeros; every method × `adjust`, and non-default
+  `frac` / `threshold`) within 1.9e-15 relative (tested at 1e-13); 213
+  random tables within 2.1e-15. Dense, sparse (`dgCMatrix`,
+  `TsparseMatrix`, slam) and margin-2 input give identical bits.
+- Tests: 34,792 at home and 490 in CRAN mode, all OK (baseline 34,006 and
+  477). `R CMD check --no-manual --ignore-vignettes`: one NOTE, the
+  pre-existing installed package size.
+- The user's decisions: GBM errors on single-sample features; no `cpus`;
+  no 80%-zeros warning for any method.
+- Open: none for these methods. `zero_replacement_input(mostly_zero =
+  TRUE)` is now unused (kept for a later method that wants it).

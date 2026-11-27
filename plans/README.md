@@ -355,7 +355,7 @@ can't be mistaken for one another:
 | Beta metrics (`beta_div`) | ✓ `philr_distance`, ✓ `sorensen_turnover`, ✓ `sorensen_nestedness`, ✓ `jaccard_turnover`, ✓ `jaccard_nestedness`, ✓ `bray_balanced`, ✓ `bray_gradient`, ✓ `soergel_balanced`, ✓ `soergel_gradient`, `kulczynski`, `mountford`, `raup_crick`, `binomial_deviance`, `chao_jaccard`, `cao`, `mahalanobis_distance`, `alt_gower`, `chisq_distance` |
 | Beta partitioning | ✓ `beta_partition`, ✓ `beta_partition_multi` |
 | Community assembly | `mpd`, `mntd`, `mpd_ses`, `mntd_ses`, `beta_mntd`, `beta_mpd`, `beta_nti`, `raup_crick_bray`, `assembly_processes`, ✓ `neutral_model` |
-| Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, `replace_zeros_czm`, `replace_zeros_gbm`, `replace_zeros_sq`, `replace_zeros_bl` |
+| Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, ✓ `replace_zeros_czm`, ✓ `replace_zeros_gbm`, ✓ `replace_zeros_sq`, ✓ `replace_zeros_bl` |
 | Log-ratio transforms | ✓ `alr`, ✓ `ilr`, ✓ `philr` (clr and rclr stay `norm` choices) |
 | Log ratios | ✓ `log_ratio`, ✓ `balance`, ✓ `log_ratio_features` |
 | Proportionality | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s` |
@@ -366,7 +366,7 @@ can't be mistaken for one another:
 | Associations and networks (`feature_assoc`) | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s`, ✓ `sparcc`, ✓ `assoc_pairs`, `spiec_easi_mb`, `spiec_easi_glasso`, `secom_pearson`, `secom_distance`, ✓ `assoc_network`, ✓ `assoc_network_compare`, ✓ `assoc_network_diff` |
 | Associations between two tables | ✓ `cross_assoc`, `halla` |
 | Community types | ✓ `enterotype`, ✓ `valencia`, `dmm` |
-| Compositional plots | ✓ `ternary_plot`, `variation_array`, `zero_pattern`, ✓ `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
+| Compositional plots | ✓ `ternary_plot`, ✓ `variation_array`, ✓ `zero_pattern`, ✓ `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
 | Spatial | ✓ `moran_i`, ✓ `dbmem` |
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
 | Source tracking | ✓ `sourcetracker`, `feast` |

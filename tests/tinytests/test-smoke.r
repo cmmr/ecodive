@@ -131,6 +131,15 @@
   z <- rho_p(counts, denominator = 'F1', cpus = cpus)
   expect_true(attr(z, 'Size') == 11L && all(is.finite(z)) && all(abs(z) <= 1))
 
+  # Compositional diagnostics.
+  z <- variation_array(counts, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_variation_array') && identical(dim(z), c(12L, 12L)) &&
+              all(is.finite(z[upper.tri(z)])) && all(is.na(diag(z))) &&
+              abs(sum(attr(z, 'clr_var')) - attr(z, 'total_var')) < 1e-10)
+  z <- zero_pattern(counts - 1L)
+  expect_true(inherits(z, 'ecodive_zero_pattern') && length(z) == 20L &&
+              sum(attr(z, 'n_samples')) == 20L && ncol(attr(z, 'patterns')) == 12L)
+
   # Associations between two tables.
   z <- cross_assoc(counts[1:10, 1:5], data.frame(a = 1:10, b = (1:10)^2, c = c(5:1, 1:5)), cpus = cpus)
   expect_true(inherits(z, 'ecodive_cross_assoc') && nrow(z) == 15L && all(abs(z$association) <= 1) && all(z$p_value >= 0 & z$p_value <= 1))
@@ -298,6 +307,15 @@
   expect_true(all(is.finite(phi_s(z, cpus = cpus))))
   expect_true('mult' %in% list_zero_replacements('id'))
   expect_identical(match_zero_replacement('multRepl')$id, 'mult')
+  z <- replace_zeros_czm(cz)
+  expect_true(all(is.finite(z)) && all(z > 0) && identical(attr(z, 'method'), 'czm'))
+  z <- replace_zeros_gbm(cz)
+  expect_true(all(is.finite(z)) && all(z > 0) && max(abs(rowSums(z) - 1)) < 1e-12)
+  z <- replace_zeros_sq(cz, adjust = FALSE)
+  expect_true(all(is.finite(z)) && all(z > 0) && identical(attr(z, 'n_adjusted'), 0))
+  z <- replace_zeros_bl(t(cz), margin = 2L)
+  expect_true(all(is.finite(z)) && all(z > 0) && identical(dim(z), rev(dim(cz))))
+  expect_identical(match_zero_replacement('cmultRepl')$id, 'gbm')
 
   tr <- read_tree('((A:1,B:2):1,C:3);')
   expect_inherits(tr, 'phylo')
@@ -515,6 +533,8 @@
                                 center = TRUE, ellipses = 'confidence'))
   expect_true(!z$visible && nrow(z$value) == 20L && all(abs(rowSums(z$value[, 1:3]) - 1) < 1e-12) &&
               length(attr(z$value, 'ellipses')) == 2L)
+  expect_true(drawn(variation_array(counts, cpus = cpus)))
+  expect_true(drawn(zero_pattern(counts - 1L), n_patterns = 5, n_features = 8))
   grDevices::dev.off()
 
 
