@@ -143,10 +143,13 @@ counts of the subsample, and Simpson diversity \eqn{1 / [1/m + (m-1)/m
   \sum_i X_i (X_i - 1) / (n (n - 1))]}.
 \item \strong{Extrapolation} to \eqn{n + m^*}: richness \eqn{S_{obs} + \hat f_0
   [1 - (1 - f_1 / (n \hat f_0 + f_1))^{m^*}]}, with Chao1's \eqn{\hat
-  f_0}; Shannon diversity \eqn{\exp[\frac{n}{n + m^*} H_{obs} +
-  \frac{m^*}{n + m^*} \hat H]} (Chao et al. 2014, Eq. 10c), with Chao,
-Wang & Jost's (2013) entropy \eqn{\hat H}; Simpson diversity as for
-rarefaction, with \eqn{n + m^*} for \eqn{m}.
+  f_0}; Shannon diversity \eqn{D_{obs} + (\hat D - D_{obs}) [1 - (1 -
+  \hat\beta)^{m^*}]} (Chao et al. 2023, Table 2), from the observed and
+asymptotic \eqn{\hat D}, with \eqn{\hat\beta = (D_{obs} - D(n - 1))
+  / (\hat D - D(n - 1))}, so that the curve passes through the rarefied
+value at \eqn{n - 1} (for richness, this \eqn{\hat\beta} is
+\eqn{f_1 / (n \hat f_0 + f_1)}); Simpson diversity as for rarefaction,
+with \eqn{n + m^*} for \eqn{m}.
 \item \strong{Sample coverage}, the share of the community's individuals that
 belong to features seen in a sample of that depth (Chao & Jost 2012),
 by its rarefied and extrapolated estimates, with Chao et al.'s (2014,
@@ -200,12 +203,9 @@ for estimates alone.
 \section{Differences from iNEXT}{
 
 \itemize{
-\item \strong{Shannon diversity beyond the sample's size} uses Chao et al.'s
-(2014) Eq. 10c, the formula of the iNEXT paper. iNEXT 3 uses a newer
-extrapolation for \eqn{q = 1} that these papers don't give; the two
-agree at the sample's size and at the asymptote, and differ in
-between (by under 1\% at twice the size, for iNEXT's spider data).
-Everything else equals iNEXT 3.0.2's estimates to rounding.
+\item \strong{The estimates} equal iNEXT 3.0.2's to rounding, including Shannon
+diversity beyond the sample's size, which iNEXT 3 (and ecodive) take
+from Chao et al. (2023) rather than Chao et al.'s (2014) Eq. 10c.
 \item \strong{The bootstrap} draws from ecodive's own random streams, so standard
 errors and intervals agree with iNEXT's only within Monte Carlo error.
 The asymptotes' intervals use the same \code{n_boot} replicates as the
@@ -273,6 +273,12 @@ Hsieh, T. C., Ma, K. H., & Chao, A. (2016). iNEXT: an R package for
 rarefaction and extrapolation of species diversity (Hill numbers).
 \emph{Methods in Ecology and Evolution}, 7, 1451--1456.
 \doi{10.1111/2041-210X.12613}
+
+Chao, A., Thorn, S., Chiu, C.-H., Moyes, F., Hu, K.-H., Chazdon, R. L.,
+Wu, J., Magnago, L. F. S., Dornelas, M., Zelený, D., Colwell, R. K., &
+Magurran, A. E. (2023). Rarefaction and extrapolation with beta diversity
+under a framework of Hill numbers: the iNEXT.beta3D standardization.
+\emph{Ecological Monographs}, 93, e1588. \doi{10.1002/ecm.1588}
 
 Chao, A. (1984). Nonparametric estimation of the number of classes in a
 population. \emph{Scandinavian Journal of Statistics}, 11, 265--270.

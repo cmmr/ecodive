@@ -6,7 +6,8 @@
 // Written from the papers (clean room; see plans/hill_extrapolation.md):
 //
 //   * Rarefaction (m < n) and extrapolation (m > n) of each order, and of
-//     sample coverage: Chao et al. (2014), Table 1 (Eqs. 8, 10c, 11b, 11c);
+//     sample coverage: Chao et al. (2014), Table 1 (Eqs. 8, 11b, 11c); for
+//     Shannon diversity above n, Chao et al. (2023), Table 2;
 //     the reference sample's coverage, Eq. 12 and Appendix G.
 //   * Asymptotes: Chao1 (bias-corrected, Appendix G), Chao, Wang & Jost's
 //     (2013) entropy (their Eq. 10b), and n (n - 1) / sum X (X - 1).
@@ -60,6 +61,7 @@ typedef struct {
   double Hobs;            // Shannon entropy of the sample.
   double S2;              // sum X (X - 1) / (N (N - 1)).
   double Hhat;            // Chao, Wang & Jost's entropy (NAN until needed).
+  double D1m;             // Shannon diversity rarefied to N - 1 (NAN until needed).
 } hx_t;
 
 
@@ -90,6 +92,7 @@ static void hx_prepare (hx_t *h, const double *k, const double *f, int K,
     h->Chat = 1 - f1 / N * h->Bc;
   }
   h->Hhat = NAN;
+  h->D1m  = NAN;
 }
 
 
@@ -235,6 +238,30 @@ static void hx_at_int (hx_t *h, double d, const int *need, double *A,
 }
 
 
+// Shannon diversity extrapolated to N + ms (Chao et al. 2023, Table 2, the
+// unified form that replaces Chao et al. 2014's Eq. 10c):
+//   D(N + m*) = D_obs + (D_asy - D_obs) [1 - (1 - beta)^m*],
+// with beta = (D_obs - D(N - 1)) / (D_asy - D(N - 1)), so that the curve
+// also passes through the rarefied value at N - 1. For q = 0 this beta is
+// Chao et al. (2014)'s f1 / (N f0 + f1), as the expected loss of richness
+// from dropping one observation is f1 / N. Settled against iNEXT 3.0.2.
+static double hx_q1_extrap (hx_t *h, double ms) {
+  double obs = exp(h->Hobs), asy = exp(hx_hhat(h));
+  if (!(asy != obs) || !isfinite(asy)) return obs;
+  double N = h->N;
+  if (isnan(h->D1m)) {
+    double hs = 0;
+    if (N > 2)
+      for (int i = 0; i < h->K; i++) hs += h->f[i] * hx_hyper_entropy(N, h->k[i], N - 1);
+    h->D1m = (N >= 2) ? exp(hs) : obs;
+  }
+  double beta = (obs - h->D1m) / (asy - h->D1m);
+  if (!(beta > 0)) return obs;
+  if (beta >= 1)   return asy;
+  return obs + (asy - obs) * (1 - exp(ms * log1p(-beta)));
+}
+
+
 // Estimates at any depth m >= 1, or Inf (the asymptotes, coverage 1).
 static void hx_at (hx_t *h, double m, const int *need, double *A, double *out) {
   double N = h->N;
@@ -260,7 +287,7 @@ static void hx_at (hx_t *h, double m, const int *need, double *A, double *out) {
   out[0] = (h->f1 > 0 && h->f0 > 0)
     ? h->S + h->f0 * (1 - exp(ms * log1p(-h->f1 / (N * h->f0 + h->f1))))
     : h->S;
-  out[1] = need[1] ? exp(N / m * h->Hobs + ms / m * hx_hhat(h)) : 0;
+  out[1] = need[1] ? hx_q1_extrap(h, ms) : 0;
   out[2] = 1 / (1 / m + (m - 1) / m * h->S2);
   out[3] = (h->f1 > 0 && h->Bc > 0) ? 1 - h->f1 / N * exp((ms + 1) * log(h->Bc)) : 1;
 }

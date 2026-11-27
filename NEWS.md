@@ -1264,11 +1264,10 @@
   counts, with bootstrap intervals and a `plot()` (size-based,
   completeness and coverage-based curves). `hill_standardize()` gives
   every sample's Hill numbers at one common coverage (by default) or
-  depth, as a matrix ready for testing. The estimates equal iNEXT 3.0.2's,
-  except Shannon diversity above a sample's size, which follows Chao et
-  al. (2014)'s published formula; the bootstrap runs in C, with one random
-  stream per replicate, so results are the same for any `cpus`, and is
-  tens of times faster than iNEXT per thread at microbiome depths.
+  depth, as a matrix ready for testing. The estimates equal iNEXT 3.0.2's
+  to rounding; the bootstrap runs in C, with one random stream per
+  replicate, so results are the same for any `cpus`, and is a few hundred
+  times faster than iNEXT per thread at microbiome depths.
 
 * New `composition_barplot()` draws stacked bars of relative abundance, one
   per sample and never averaged, ordered so they can be read: samples by

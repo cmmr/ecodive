@@ -415,17 +415,21 @@ Settled from iNEXT 3.0.2's outputs (the black-box protocol; ✱ items):
   `size`, iNEXT adds \eqn{n - 1, n, n + 1}; ecodive's `depths` adds only
   \eqn{n}.
 - **(b) Shannon extrapolation.** iNEXT 3 does **not** use Eq. 10c (0.8% off
-  at \eqn{2n} for spider's Girdled), nor the discovery-rate truncation, the
-  expected plug-in entropy under the Appendix G assemblage, or a weight
-  \eqn{1 - (1 - A)^{m^*}}; its \eqn{q = 3} extrapolation also differs from
-  the expected plug-in power sum, so iNEXT 3 uses a newer general-order
-  extrapolation (Chao et al. 2020, Ecological Research, Supporting
-  Information, "guided by Chao & Jost 2015"). That Supporting Information
-  isn't openly reachable (the publishers refuse automated fetches; the
-  open Zenodo copy of the article, read, has no formulas, only pointers to
-  Eq. S1.7). **ecodive uses Eq. 10c**, the formula of Chao et al. (2014) and
-  this plan; documented under "Differences from iNEXT". Every other point
-  estimate matches iNEXT to about 1e-13 (1.4e-11 at 30,000 reads).
+  at \eqn{2n} for spider's Girdled). It uses the unified form of Chao et
+  al. (2023, Ecological Monographs 93:e1588, Table 2, read from the PDF the
+  user supplied on 2026-11-27): \eqn{D_{obs} + (\hat D(\infty) - D_{obs})[1 -
+  (1 - \hat\beta)^{m^*}]}, "guided by Chao & Jost's (2015) asymptotic
+  estimator". The table defers \eqn{\hat\beta} to Chao et al. (2014), where
+  only the richness case appears (\eqn{f_1/(n\hat f_0 + f_1)}); for any
+  order it is \eqn{(D_{obs} - D(n-1)) / (\hat D(\infty) - D(n-1))}, the
+  geometric curve through the rarefied value at \eqn{n - 1}, which reduces
+  to the richness case because the expected loss of one observation is
+  \eqn{f_1/n}. This matches every iNEXT q = 1 extrapolation to 1.5e-13
+  (3e-11 on the 20,000-read sample), and `estimateD()`'s too. Implemented in
+  a follow-up commit (`hx_q1_extrap()`); c75ea2f had Eq. 10c. A \eqn{\hat\beta}
+  outside (0, 1) gives \eqn{D_{obs}} (\eqn{\le 0}) or the asymptote (\eqn{\ge
+  1}). Chao et al. (2020)'s Supporting Information (also supplied) has the
+  asymptotic estimator only.
 - **(c) f2 = 0, f1 = 0, all singletons, one feature.** Chao1's
   \eqn{\hat f_0} with \eqn{f_1 (f_1 - 1) / 2} when \eqn{f_2 = 0}; \eqn{\hat
   C(n)} and its extrapolation with Appendix G's \eqn{(n-1)(f_1-1) /
@@ -510,13 +514,15 @@ Committed in c75ea2f (2026-11-27).
   ex_counts and edge tables, and ≤ 1.4e-11 at 30,000 reads; `estimateD()`
   matches at 1e-10 (size base, and coverage base when extrapolating) and at
   1e-5 when rarefying to a coverage (iNEXT's search error), 1e-14 at iNEXT's
-  own fractional depths. The exception is **Shannon diversity above a
-  sample's size** (Eq. 10c, as decided; 0.8% off iNEXT 3 at twice the size
-  for spider's Girdled). Bootstrap SEs with iNEXT's own draws through the
-  test hook: 1e-13 (size-based, coverage, asymptotes with iNEXT's fixed 100
-  replicates, `estimateD()`); at fixed coverage 1e-6. With ecodive's own
+  own fractional depths. Shannon diversity above a sample's size first used
+  Eq. 10c (c75ea2f; 0.8% off iNEXT 3 at twice the size); the follow-up
+  commit uses Chao et al. (2023)'s form, and matches to 1.5e-13. Bootstrap
+  SEs with iNEXT's own draws through the test hook: 1e-13 (size-based,
+  coverage, asymptotes with iNEXT's fixed 100 replicates, `estimateD()`);
+  at fixed coverage 1e-6. With ecodive's own
   draws, SEs from 2,000 replicates are within 10% of iNEXT's.
-- **Tests:** 810 in test-hill_extrapolation.r plus 2 smoke tests; full
+- **Tests:** 810 in test-hill_extrapolation.r (950 after the Shannon
+  follow-up) plus 2 smoke tests; full
   suite 36,295 at home and 528 in CRAN mode (baseline 35,483 and 526), all
   ok; `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed
   size, as before).
@@ -533,6 +539,5 @@ Committed in c75ea2f (2026-11-27).
   (R) and `C_hill_ext()` (C) take per-sample depths or coverage levels and
   return estimates and bootstrap SDs, if alpha_test() needs per-sample
   values at other levels.
-- **Open:** iNEXT 3's newer Shannon (and general-order) extrapolation, from
-  Chao et al. (2020, Ecological Research) Supporting Information, which
-  wasn't reachable; with that text, it is a small change in `hx_at()`.
+- **Open:** none for the estimates. Orders other than 0, 1, 2 (Later
+  steps) would take the same Table 2 form.

@@ -21,10 +21,6 @@
     if (length(d)) max(d) else 0
   }
 
-  # Eq. 10c: Shannon diversity at depth m > n, from the observed and
-  # asymptotic diversities.
-  eq10c <- function (obs, asy, n, m) exp(n / m * log(obs) + (m - n) / m * log(asy))
-
 
 
   # Point estimates against iNEXT(). ====
@@ -42,19 +38,14 @@
     i <- match(paste(ref$sample, ref$q, ref$depth), paste(s$sample, s$q, s$depth))
     s <- s[i, ]
     expect_identical(s$method, ref$method, info = nm)
-    q1x <- ref$q == 1 & ref$method == 'extrapolation'
-    expect_true(rel(s$estimate[!q1x], ref$qD[!q1x]) < 1e-10, info = nm)
+    expect_true(rel(s$estimate, ref$qD) < 1e-10, info = nm)
     expect_true(max(abs(s$coverage - ref$SC)) < 1e-10, info = nm)
 
-    # Shannon diversity beyond the sample's size: Eq. 10c, with iNEXT's
-    # observed and asymptotic values (iNEXT 3 extrapolates otherwise).
+    # Shannon diversity beyond the sample's size (Chao et al. 2023, Table
+    # 2), on its own.
+    q1x <- ref$q == 1 & ref$method == 'extrapolation'
+    if (any(q1x)) expect_true(rel(s$estimate[q1x], ref$qD[q1x]) < 1e-10, info = nm)
     a <- fx$asy[[nm]]
-    if (any(q1x)) {
-      k   <- which(q1x)
-      ai  <- match(paste(ref$sample[k], 1), paste(a$sample, a$q))
-      ns  <- fx$info[[nm]]$n[match(ref$sample[k], fx$info[[nm]]$sample)]
-      expect_true(rel(s$estimate[k], eq10c(a$observed[ai], a$estimate[ai], ns, ref$depth[k])) < 1e-10, info = nm)
-    }
 
     # Asymptotes and observed values.
     ha <- he$asymptotic[match(paste(a$sample, a$q), paste(he$asymptotic$sample, he$asymptotic$q)), ]
@@ -72,7 +63,7 @@
     # By coverage: iNEXT's depths come from a numerical search (about
     # 1e-5 off); where coverage is flat over a range of depths, its depth
     # can be anywhere in the range. So: the rows whose coverage is a level
-    # of ours, away from flat stretches and Shannon's extrapolation.
+    # of ours, away from flat stretches.
     cv  <- he$coverage
     rc  <- fx$cov[[nm]]
     j   <- match(paste(rc$sample, rc$q, rc$method != 'extrapolation'), paste(cv$sample, cv$q, cv$method != 'extrapolation'))
@@ -84,7 +75,6 @@
       # between them).
       sr <- ref$qD[ref$sample == rc$sample[r] & ref$q == rc$q[r] & ref$depth == rc$depth[r]]
       if (length(sr) == 1 && abs(sr / rc$qD[r] - 1) > 1e-4) next
-      if (rc$q[r] == 1 && cv$depth[w] > fx$info[[nm]]$n[fx$info[[nm]]$sample == rc$sample[r]]) next
       if (rc$method[r] == 'extrapolation' || rc$method[r] == 'observed')
         expect_true(rel(cv$estimate[w], rc$qD[r]) < 1e-10, info = paste(nm, r))
       else if (abs(cv$depth[w] - rc$depth[r]) < 1e-3)
@@ -142,8 +132,7 @@
         hs <- hill_standardize(x, depth = lv, n_boot = 0, cpus = cpus)
         r  <- e[e$depth == lv, ]
         v  <- unclass(hs)[cbind(match(r$sample, rownames(hs)), r$q + 1)]
-        keep <- !(r$q == 1 & r$method == 'extrapolation')
-        expect_true(rel(v[keep], r$qD[keep]) < 1e-10, info = paste(tb, lv))
+        expect_true(rel(v, r$qD) < 1e-10, info = paste(tb, lv))
         expect_true(max(abs(attr(hs, 'coverage')[r$sample] - r$SC)) < 1e-10, info = paste(tb, lv))
         expect_identical(unname(attr(hs, 'method')[r$sample]), r$method, info = paste(tb, lv))
       }
@@ -167,11 +156,10 @@
         if (nrow(r) == 0) next
         v  <- unclass(hs)[cbind(match(r$sample, rownames(hs)), r$q + 1)]
         ext  <- r$method == 'extrapolation'
-        keep <- !(r$q == 1 & ext)
         # Extrapolated depths are in closed form; rarefied ones come from
         # iNEXT's search, about 1e-5 off.
-        expect_true(rel(v[keep & ext], r$qD[keep & ext]) < 1e-10, info = paste(tb, lv))
-        if (any(keep & !ext)) expect_true(rel(v[keep & !ext], r$qD[keep & !ext]) < 1e-5, info = paste(tb, lv))
+        expect_true(rel(v[ext], r$qD[ext]) < 1e-10, info = paste(tb, lv))
+        if (any(!ext)) expect_true(rel(v[!ext], r$qD[!ext]) < 1e-5, info = paste(tb, lv))
       }
     }
 
@@ -208,7 +196,7 @@
   r1 <- ecodive:::hx_run(x, 1L, list(sz), list(rep(NA_real_, length(sz))), list(sz), 0:2, 200L, 0L, cpus, boot = list(b$draws1))
   bs <- b$size
   for (q in 0:2) {
-    k  <- which(bs$q == q & bs$depth > 1 & !(q == 1 & bs$depth > n))
+    k  <- which(bs$q == q & bs$depth > 1)
     se <- r1$size_sd[match(bs$depth[k], sz), q + 1]
     expect_true(rel(se, bs$se[k]) < 1e-10, info = q)
   }
@@ -217,7 +205,7 @@
 
   # At fixed coverage, each replicate solves for its own depth (iNEXT's
   # levels are its search's, so about 1e-5 off).
-  bc  <- b$coverage[b$coverage$depth <= 50 & b$coverage$depth > 1, ]
+  bc  <- b$coverage[b$coverage$depth > 1, ]
   lv  <- unique(bc$SC)
   rc  <- ecodive:::hx_run(x, 1L, em, list(lv), list(rep(NA_real_, length(lv))), 0:2, 200L, 0L, cpus, boot = list(b$draws1))
   expect_true(rel(rc$cov_sd[cbind(match(bc$SC, lv), bc$q + 1)], bc$se) < 1e-4)
@@ -226,12 +214,11 @@
   r2 <- ecodive:::hx_run(x, 1L, em, em, em, 0:2, 100L, 0L, cpus, boot = list(b$draws2))
   expect_true(rel(r2$asy_sd[1, ], b$asy_se) < 1e-10)
 
-  # estimateD(): at size 100 exactly; at coverage 0.9, q = 0 and 2 (q = 1's
-  # replicates extrapolate there).
+  # estimateD(): at size 100 exactly; at coverage 0.9 to iNEXT's search.
   re <- ecodive:::hx_run(x, 1L, list(100), em, em, 0:2, 60L, 0L, cpus, boot = list(b$draws_e))
   expect_true(rel(re$size_sd[1, 1:3], b$estd_size_se) < 1e-10)
   re <- ecodive:::hx_run(x, 1L, em, list(0.9), list(NA_real_), 0:2, 60L, 0L, cpus, boot = list(b$draws_e))
-  expect_true(rel(re$cov_sd[1, c(1, 3)], b$estd_cov_se[c(1, 3)]) < 1e-5)
+  expect_true(rel(re$cov_sd[1, ], b$estd_cov_se) < 1e-5)
 
   # The intervals: estimate +- z se, lower limits stopping at 0 (and the
   # asymptotic richness's at the observed richness), coverage's at 0 and 1.
@@ -259,7 +246,7 @@
     he <- hill_extrapolation(x, depths = c(floor(n / 2), 2 * n), n_boot = 2000, seed = 5, cpus = cpus)
     ref <- fx$se2000[[s]]
     expect_true(rel(he$asymptotic$se, ref$asy$se) < 0.1, info = s)
-    sz <- ref$size[!(ref$size$q == 1 & ref$size$depth > n) & !ref$size$clipped & ref$size$se > 1e-8, ]
+    sz <- ref$size[!ref$size$clipped & ref$size$se > 1e-8, ]
     h  <- he$size[match(paste(sz$q, sz$depth), paste(he$size$q, he$size$depth)), ]
     se <- (h$upper - h$estimate) / stats::qnorm(0.975)
     expect_true(rel(se, sz$se) < 0.1, info = s)
