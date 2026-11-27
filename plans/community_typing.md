@@ -786,3 +786,35 @@ R 4.3.3, GSL 2.7.1):
   numbers) instead of `ex_counts`, which has only 6 features.
 - **mothur** was not run: its binaries are GitHub release assets, not
   reachable through jsDelivr, and no other authorised channel has it.
+
+
+## Outcome (dmm, from the implementing session's final report)
+
+### `dmm()`: item 66, done 2026-11-27
+
+Commits `54bb93c` (work), `4d9812b` (merge with items 55 and 60; no
+conflicts), and the tick commit that adds this section.
+
+- Tests: 35,178 at home, 498 in CRAN mode on the merged tree (34,247 and
+  481 before the merge; baseline 34,006 and 477 at c83fa7e). R CMD check
+  (`--no-manual --ignore-vignettes`): only the existing installed-size
+  NOTE.
+- DirichletMultinomial 1.44.0 `dmn()`, from its own posteriors as shared
+  starting weights (simulated 120 x 30, dune 20 x 30, Twins 278 x 130;
+  K = 1..5): NLE to 2e-9 relative (always equal or slightly lower), AIC and
+  BIC to 3e-5 absolute, weights to 1e-5, posteriors to 9e-4, assignments
+  identical; alpha median 5e-5 relative, at most 1e-2 for alpha well under
+  0.01 (dmn() stops with gradients ~1e-3). Laplace matches for K = 1 (to
+  3e-7 relative); for K > 1 it differs (-100 to +16) because dmn()'s
+  Hessian is indefinite there (its own bounds are NaN), so ecodive uses the
+  posterior's Hessian. From ecodive's own k-means starts: the same optima
+  as dmn() for the simulated K = 1..3; other local optima elsewhere, often
+  better (Twins K = 3..5, dune K = 3 with more starts), sometimes worse.
+- mothur: not run (no authorised download channel).
+- Speed (K = 1..5): Twins 278 x 130, 0.99 s on 1 thread and 0.68 s on 4,
+  against 99.8 s for dmn(); simulated 600 x 150, 1.17 s and 0.66 s,
+  against 102 s.
+- Decisions: see "Decisions made while implementing (dmm)": `eta`/`nu` and
+  `criterion` arguments; Newton M-step instead of a liblbfgs port (written,
+  17x slower, removed); log|H| in O(S); `tol = 1e-10`; best-of-10 k-means++
+  start.
