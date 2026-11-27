@@ -50,7 +50,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Compositional data       | `replace_zeros()` | `replace_zeros_mult()`, `alr()`, `ilr()`, `philr()`, `log_ratio()`, `balance()`, `log_ratio_features()`                                                   |
 | Feature associations     | `feature_assoc()` | `vlr()`, `rho_p()`, `phi_s()`, `sparcc()`, `assoc_pairs()`, `assoc_network()`, `cross_assoc()`                                                            |
 | Absolute abundance       |                   | `qmp_scale()`, `qmp_rarefy()`                                                                                                                             |
-| Community types          |                   | `enterotype()`, `valencia()`                                                                                                                              |
+| Community types          |                   | `enterotype()`, `valencia()`, `dmm()`                                                                                                                     |
 | Source tracking          |                   | `sourcetracker()`                                                                                                                                         |
 | Quality control          |                   | `decontam()`                                                                                                                                              |
 | Community assembly       |                   | `neutral_model()`                                                                                                                                         |

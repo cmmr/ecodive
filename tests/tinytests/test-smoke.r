@@ -389,6 +389,12 @@
   expect_identical(dim(vl), c(13L, 5L))
   expect_true(is.factor(vl$type) && all(vl$score > 0 & vl$score <= 1))
 
+  dmx <- dmm(counts, n_types = 1:2, cpus = cpus)
+  expect_inherits(dmx, c('ecodive_dmm', 'ecodive_types', 'data.frame'))
+  expect_identical(dim(dmx), c(20L, 3L))
+  expect_true(is.factor(dmx$type) && all(dmx$probability > 0 & dmx$probability <= 1))
+  expect_true(all(is.finite(as.matrix(attr(dmx, 'selection')[, c('laplace', 'aic', 'bic', 'nle')]))))
+
   vp <- varpart(counts, ~ grp, ~ x, data = meta, norm = 'hellinger', cpus = cpus)
   expect_inherits(vp, c('ecodive_varpart', 'data.frame'))
   expect_identical(dim(vp), c(4L, 5L))

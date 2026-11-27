@@ -192,6 +192,7 @@ Sciences}, 108, 4680-4687. \doi{10.1073/pnas.1002611107}
 \link{valencia_centroids}, \link{ecodive_types}, \code{\link[=plot.ecodive_types]{plot.ecodive_types()}}
 
 Other community types:
+\code{\link[=dmm]{dmm()}},
 \code{\link[=enterotype]{enterotype()}}
 }
 \concept{community types}

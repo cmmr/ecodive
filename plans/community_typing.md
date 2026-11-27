@@ -672,3 +672,117 @@ and the tick commit that adds this section.
   `'scores'` is valencia-only (it reads `types$reference_score_*` and the
   `score` column).
 
+
+
+## Decisions made while implementing (dmm)
+
+Item 66, 2026-11-27. `dmm()` is in `R/dmm.r` and `src/dmm.c`; the shared
+`ecodive_types` code in `R/community_types.r` gained a registry row and a
+`criterion` override. Clean room: written from Holmes et al. (2012) (whose
+equations are images only, so the model, gradient and Hessian were derived
+afresh) and from DirichletMultinomial's documentation and outputs; no LGPL
+or GPL source was read.
+
+**Asked of the user up front:**
+- **`eta` and `nu` are arguments** (default 0.1 and 0.1, the pinned values),
+  not fixed constants.
+- **Non-integer counts:** warn and fit as given (the plan's choice).
+- **A `criterion` argument:** `criterion = c('laplace', 'aic', 'bic')`;
+  the result's `criterion` attribute (a setting that qualifies the
+  `selected` column) overrides the registry's for `print()` and the
+  selection plot, through `TYPES_CRITERIA` in `R/community_types.r`.
+- **`n_starts = 1`** by default.
+
+**Pinned from DirichletMultinomial 1.44.0's outputs** (Bioconductor 3.18,
+R 4.3.3, GSL 2.7.1):
+- **The prior:** Gamma(eta, nu) on every alpha, carried to lambda = log
+  alpha, i.e. the M-step objective has `+ nu sum(alpha) - eta sum(lambda)`.
+  Regressing dmn()'s stationarity residuals (S equations per type,
+  two unknowns) gave eta = 0.09997-0.10015 and nu = 0.09994-0.10009 in every
+  type of every fit: 0.1 and 0.1, as believed.
+- **`NLE`** is the negative log posterior *including* the multinomial
+  coefficients log(J!/prod x!) and the prior's normalising constants
+  (eta log nu - lgamma(eta) per parameter); no prior on pi. Matches dmn()'s
+  to 2.5e-13 relative at its own alpha and pi.
+- **M = KS + K - 1; `AIC` = NLE + M; `BIC` = NLE + M/2 log n** (half the
+  usual scale, as dmn() reports them); **`Laplace` = NLE + LogDet/2 -
+  M/2 log(2 pi)** (identity checked on every fit).
+- **`LogDet` for K = 1** is log|H| of the exact Hessian of the negative log
+  posterior in lambda (matches to 1e-10). **For K > 1 it could not be
+  reproduced:** dmn()'s own 95% bounds (`Lower`, `Upper` =
+  `Estimate * exp(-/+ 2 sd)`, which identify sd from the same Hessian) are
+  `NaN` for most parameters when K > 1, i.e. its Hessian is not positive
+  definite there. 256 combinations of posterior-weighted versus unweighted
+  terms, posterior/weight powers, transposed indexing of z or alpha, and
+  five forms of a pi block were tried on two data sets (including a
+  two-feature one), and none fitted. ecodive therefore uses the Hessian of
+  the negative log posterior: block-diagonal, the exact lambda block of each
+  type with weights z_ik (the paper's description), plus the multinomial's
+  (K - 1)-dimensional pi block, log det = (K - 1) log n - sum log pi_k.
+  `laplace` thus differs from dmn()'s for K > 1 (by -76 to +16 on the
+  fixtures); documented under "Differences from DirichletMultinomial".
+  Both choose 3 types for the simulated three-type fixture.
+
+**Other decisions:**
+- **No liblbfgs.** The lambda block of the Hessian is diag(d) + c alpha
+  alpha', so Newton steps solve in O(S) by Sherman-Morrison. A
+  safeguarded Newton method (|d_j| where d_j <= 0, the rank-one term dropped
+  if it would make the matrix indefinite, steps capped at 5 in lambda,
+  Armijo halving, stop on a Newton decrement below 1e-13 |f| after taking
+  that step) reaches the M-step optimum to rounding (gradient 1e-13) in a
+  few steps. A faithful port of liblbfgs 1.10's L-BFGS with More-Thuente
+  line search (MIT, `COPYING` verified) was written first and gave the same
+  fits, but 17x slower (3.8 s against 0.22 s for K = 1..7 on the simulated
+  fixture): near the optimum f's rounding (~1e-10, from thousands of lgamma
+  terms) ends each run with `LBFGSERR_ROUNDING_ERROR`, and the ill-conditioned
+  small-alpha directions take ~100 evaluations per M-step. It was removed
+  before committing, so there is no ported code, no `COPYRIGHTS` stanza and
+  no `Authors@R` entry.
+- **digamma and trigamma** are the recurrence plus asymptotic series in
+  `src/dmm.c` (no state, so thread-safe; ~1e-16), not Rmath's; `lgammafn`
+  is Rmath's (no state for positive arguments, as `src/alpha_div.c`
+  notes). The tests check the criteria against R's `digamma()`/`trigamma()`
+  at 1e-8.
+- **log|H| in O(S)** as sum log d_j + log(1 + c sum alpha_j^2/d_j): no
+  S x S matrix and no Cholesky, so the plan's O(K S^3) cost and the warning
+  above S = 2,000 are unnecessary; `laplace` is `NaN` (with a warning) if a
+  block is not positive definite.
+- **Sparse throughout:** the likelihood, gradient and Hessian sums run over
+  non-zero counts only (zero counts cancel); a by-feature copy of the table
+  serves the M-step, the by-sample one the E-step.
+- **Start:** k-means++ seeding (PCG stream (seed, start)) then Lloyd's
+  iterations on proportions, **the best of 10 runs by within-cluster sum of
+  squares** (one run with seed 0 merged two of the simulated types at
+  K = 3); an empty cluster takes the sample farthest from its centre; then
+  each type's lambda from moment estimates of its cluster (precision: the
+  geometric mean over features of m(1 - m)/v - 1, clamped to [0.01, 1e6];
+  alpha floored at 1e-6). EM: M-step (Newton per type), pi = mean z, E-step,
+  NLE; stop when |change| <= tol |NLE|.
+- **`tol` default 1e-10** (the plan's 1e-6 stopped EM too early: Laplace
+  off by up to 3.3 at K = 5 on the simulated fixture; 1e-10 is within
+  4e-4 of a fully converged fit, at the same speed). `max_iters = 1000`.
+- **`n_types` default 1:7, cut to 1:n**; values from 1 to n; fewer than 2
+  samples or 2 features is an error; a sample of total 0 is an error; a
+  feature absent everywhere is kept (its alpha falls to the prior's small
+  value). If k-means cannot fill K clusters (fewer distinct samples than
+  K), an error names the K.
+- **Result:** columns `sample`, `type` (levels "1".."K" by decreasing
+  weight, stable on ties), `probability`; attributes `types` (`type`,
+  `n_samples`, `top_feature`, `weight`, `precision`), `profiles`
+  (alpha / A, types x features), `selection` (`n_types`, `laplace`, `aic`,
+  `bic`, `nle`, `n_iters`, `converged`, `selected`), `posterior` (n x K),
+  `alpha` (K x S), `criterion`, `method`. `nle`, `n_iters`, `converged` and
+  `alpha` are beyond the plan's list. No `display`: the title comes from
+  `COMMUNITY_TYPES` ("Dirichlet-Multinomial Mixtures").
+- **Threads:** the E-step over samples; each M-step evaluation over features
+  and samples, each to its own slot, summed in index order; k-means
+  assignment over samples. `identical()` for cpus 1-4 and for dense,
+  dgCMatrix, slam and transposed input (tested).
+- **Internal hook:** `dmm_core(..., init =)` starts EM from given weights
+  (one K), for the shared-start comparisons (as items 20, 41 and 62 did).
+- **Fixtures** (`data-raw/expected/dmm.r`, 19 KB): dmn(counts, k, seed = 1)
+  for k = 1..4 on (a) a simulated 120 x 30 three-type table (depths 500 to
+  3,000; precisions 40, 15, 80) and (b) vegan's `dune` (20 x 30 whole
+  numbers) instead of `ex_counts`, which has only 6 features.
+- **mothur** was not run: its binaries are GitHub release assets, not
+  reachable through jsDelivr, and no other authorised channel has it.

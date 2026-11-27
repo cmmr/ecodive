@@ -7,7 +7,7 @@
 \method{plot}{ecodive_types}(x, type = c("profiles", "selection", "scores"), n_features = 10, ...)
 }
 \arguments{
-\item{x}{A result of \code{\link[=enterotype]{enterotype()}} or \code{\link[=valencia]{valencia()}}.}
+\item{x}{A result of \code{\link[=enterotype]{enterotype()}}, \code{\link[=valencia]{valencia()}} or \code{\link[=dmm]{dmm()}}.}
 
 \item{type}{\code{"profiles"}, \code{"selection"} or \code{"scores"}.}
 
@@ -22,17 +22,19 @@ Default \code{10}.}
 \code{x}, invisibly.
 }
 \description{
-Draws a result of \code{\link[=enterotype]{enterotype()}} or \code{\link[=valencia]{valencia()}} with base graphics.
+Draws a result of \code{\link[=enterotype]{enterotype()}}, \code{\link[=valencia]{valencia()}} or \code{\link[=dmm]{dmm()}} with base
+graphics.
 }
 \details{
 \itemize{
 \item \code{"profiles"} (the default): stacked bars of each type's composition
 (for \code{\link[=enterotype]{enterotype()}}, its samples' mean proportions; for \code{\link[=valencia]{valencia()}},
-the centroids), with the \code{n_features} features that reach the largest
+the centroids; for \code{\link[=dmm]{dmm()}}, the Dirichlet means), with the \code{n_features} features that reach the largest
 proportion in any type, and the rest pooled as "Other". The bars are
 labelled with the type and its number of samples.
 \item \code{"selection"}: the criterion that chose the number of types (for
-\code{\link[=enterotype]{enterotype()}}, the Calinski-Harabasz index) against the number of
+\code{\link[=enterotype]{enterotype()}}, the Calinski-Harabasz index; for \code{\link[=dmm]{dmm()}}, the Laplace
+approximation, or the AIC or BIC that chose) against the number of
 types, with the one chosen circled. Not for \code{\link[=valencia]{valencia()}}, whose
 centroids fix the types.
 \item \code{"scores"} (\code{\link[=valencia]{valencia()}} only): boxplots of the samples' scores (their

@@ -803,6 +803,26 @@
   `plot(x, "scores")` compares the samples' scores with VALENCIA's
   reference ones, as VALENCIA's own plot does.
 
+* New `dmm()` clusters samples into community types with Dirichlet-
+  multinomial mixtures (Holmes, Harris & Quince 2012): each type is a
+  Dirichlet distribution of compositions, fitted to raw counts by EM for
+  each number of types (`n_types`, default 1 to 7), with the number chosen
+  by the Laplace approximation to the model evidence, or by AIC or BIC
+  (`criterion`). It is threaded C written from the paper: each EM iteration
+  costs time in proportion to the table's non-zero counts, and each type's
+  Hessian, a diagonal plus a rank-one matrix, gives exact Newton steps and
+  the Laplace term without any features x features matrix. From the same
+  starting weights, its fits match Bioconductor's DirichletMultinomial
+  `dmn()` (posteriors, weights, the negative log posterior, AIC and BIC);
+  the Laplace approximation matches for one type and, for more, uses the
+  posterior's Hessian, where DirichletMultinomial's is not positive
+  definite. Starts are k-means++ clusters drawn from `seed` (`n_starts`
+  for more), so results are the same for any `cpus`; `eta` and `nu` set the
+  Gamma prior. The result is an `ecodive_types` data frame with each
+  sample's type and posterior probability, and as attributes each type's
+  weight, precision and Dirichlet means, every posterior, and the criteria
+  for every number of types.
+
 * New `ancom()` runs ANCOM (Mandal et al. 2015), the analysis of
   composition of microbiomes: it tests every log ratio between two features
   for a difference between `groups` (`sig_test = 'anova'`, or `'kruskal'`),

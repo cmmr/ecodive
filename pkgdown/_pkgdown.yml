@@ -142,6 +142,7 @@ reference:
   - enterotype
   - valencia
   - valencia_centroids
+  - dmm
   - ecodive_types
 
 - title: Source Tracking
