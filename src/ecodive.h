@@ -236,6 +236,10 @@ int    ptree_vtree(const ptree_t *pt, ptree_ws_t *ws, int S, const int *tips,
                    const double *wt);
 double ptree_pair_sum(ptree_ws_t *ws, int m);
 
+/* --- rng_binomial.c: binomial and multinomial draws (NumPy's sampler) --- */
+int64_t rng_binom(rng_t *rng, int64_t n, double p);
+void    rng_multinom(rng_t *rng, int64_t n, const double *p, int d, int64_t *out);
+
 /* --- rank_tests.c: rank tests shared by ancom.c and lefse.c --- */
 typedef struct { double v; int g; } vg_t;   // a value and its group
 

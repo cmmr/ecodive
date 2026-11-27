@@ -1276,6 +1276,20 @@
   draws depth, coverage-based or sample-completeness curves, by group,
   with a line at a planned rarefaction depth.
 
+* New `hill_extrapolation()` and `hill_standardize()`: interpolated and
+  extrapolated Hill numbers of orders 0, 1 and 2 (richness, Shannon and
+  Simpson diversity), as iNEXT's `iNEXT()` and `estimateD()` give them
+  (Chao et al. 2014). `hill_extrapolation()` gives each sample's curves by
+  depth and by sample coverage, from rarefaction below its size to
+  extrapolation above it, its asymptotic estimates and its frequency
+  counts, with bootstrap intervals and a `plot()` (size-based,
+  completeness and coverage-based curves). `hill_standardize()` gives
+  every sample's Hill numbers at one common coverage (by default) or
+  depth, as a matrix ready for testing. The estimates equal iNEXT 3.0.2's
+  to rounding; the bootstrap runs in C, with one random stream per
+  replicate, so results are the same for any `cpus`, and is a few hundred
+  times faster than iNEXT per thread at microbiome depths.
+
 * New `composition_barplot()` draws stacked bars of relative abundance, one
   per sample and never averaged, ordered so they can be read: samples by
   their Aitchison PCoA axis 1 (or a clustering, `clust` as in `beta_div()`),

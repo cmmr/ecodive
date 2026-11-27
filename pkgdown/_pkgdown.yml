@@ -45,6 +45,12 @@ reference:
   desc: Diversity based on phylogenetic branch lengths.
   contents:
   - faith
+- subtitle: Depth and coverage
+  desc: Diversity against sequencing depth and sample coverage. Rarefaction and extrapolation of Hill numbers (iNEXT), and every sample's Hill numbers at one common depth or coverage, to compare or test.
+  contents:
+  - hill_extrapolation
+  - plot.ecodive_hill_extrapolation
+  - rarefaction_curve
 
 - title: Beta Diversity
   desc: Calculate between-sample similarity or distance.
