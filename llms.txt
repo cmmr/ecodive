@@ -56,7 +56,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 | Interpreting differences |  | [`simper()`](https://cmmr.github.io/ecodive/reference/simper.md) |
 | Spatial |  | [`moran_i()`](https://cmmr.github.io/ecodive/reference/moran_i.md), [`dbmem()`](https://cmmr.github.io/ecodive/reference/dbmem.md), [`mantel_correlogram()`](https://cmmr.github.io/ecodive/reference/mantel_correlogram.md) |
 | Differential abundance | [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md) | [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md), [`ancombc()`](https://cmmr.github.io/ecodive/reference/ancombc.md), [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md), [`maaslin3()`](https://cmmr.github.io/ecodive/reference/maaslin3.md), [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md), [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md), [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md), [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md), [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md), [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md) |
-| Compositional data | [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md) | [`replace_zeros_mult()`](https://cmmr.github.io/ecodive/reference/replace_zeros_mult.md), [`replace_zeros_gbm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md), [`replace_zeros_sq()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md), [`replace_zeros_bl()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md), [`replace_zeros_czm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md), [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md), [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md), [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md), [`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md) |
+| Compositional data | [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md) | [`replace_zeros_mult()`](https://cmmr.github.io/ecodive/reference/replace_zeros_mult.md), [`replace_zeros_gbm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md), [`replace_zeros_sq()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md), [`replace_zeros_bl()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md), [`replace_zeros_czm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md), [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md), [`ilr()`](https://cmmr.github.io/ecodive/reference/ilr.md), [`philr()`](https://cmmr.github.io/ecodive/reference/philr.md), [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md), [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md), [`log_ratio_features()`](https://cmmr.github.io/ecodive/reference/log_ratio_features.md), [`variation_array()`](https://cmmr.github.io/ecodive/reference/variation_array.md), [`zero_pattern()`](https://cmmr.github.io/ecodive/reference/zero_pattern.md) |
 | Feature associations | [`feature_assoc()`](https://cmmr.github.io/ecodive/reference/feature_assoc.md) | [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md), [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md), [`sparcc()`](https://cmmr.github.io/ecodive/reference/sparcc.md), [`assoc_pairs()`](https://cmmr.github.io/ecodive/reference/assoc_pairs.md), [`assoc_network()`](https://cmmr.github.io/ecodive/reference/assoc_network.md), [`cross_assoc()`](https://cmmr.github.io/ecodive/reference/cross_assoc.md) |
 | Absolute abundance |  | [`qmp_scale()`](https://cmmr.github.io/ecodive/reference/qmp.md), [`qmp_rarefy()`](https://cmmr.github.io/ecodive/reference/qmp.md) |
 | Community types |  | [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md), [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md) |
@@ -663,6 +663,18 @@ valid alternative to correlation. A dist over the features.
 - [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) :
   Symmetric Proportionality
 
+### Diagnostics
+
+First looks at a composition before analysing it. variation_array()
+summarizes every pair of features’ log ratios and each feature’s share
+of the total variance; zero_pattern() shows which features are zero
+together, before choosing a pseudocount or replace_zeros() method.
+
+- [`variation_array()`](https://cmmr.github.io/ecodive/reference/variation_array.md)
+  : Variation Array
+- [`zero_pattern()`](https://cmmr.github.io/ecodive/reference/zero_pattern.md)
+  : Zero Patterns
+
 ### Associations and networks
 
 Correlations between features’ absolute abundances, estimated from
@@ -1047,6 +1059,10 @@ than every value.
   : Plot a multiple regression on distance matrices
 - [`plot(`*`<ecodive_log_ratio>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.md)
   : Plot Log Ratios
+- [`plot(`*`<ecodive_variation_array>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_variation_array.md)
+  : Plot a variation array
+- [`plot(`*`<ecodive_zero_pattern>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_zero_pattern.md)
+  : Plot zero patterns
 - [`ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)
   : Titles of results
 - [`print(`*`<ecodive_batch>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)

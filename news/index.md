@@ -1788,6 +1788,33 @@
   sized by abundance and coloured by the group that holds most of it.
   Sparse tables stay sparse.
 
+- New
+  [`variation_array()`](https://cmmr.github.io/ecodive/reference/variation_array.md)
+  gives Aitchison’s variation array, the standard first summary of a
+  composition: for every pair of features, the variance of their log
+  ratio (the same as
+  [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md), above the
+  diagonal) and its mean (row over column, below), with each feature’s
+  clr variance and the total variance as attributes. It matches
+  `compositions::variation()` and `mvar()`. `clust` orders the features
+  by clustering the square roots of the variances, and
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws both
+  triangles as heatmaps, with each feature’s share of the total variance
+  beside its row.
+
+- New
+  [`zero_pattern()`](https://cmmr.github.io/ecodive/reference/zero_pattern.md)
+  groups the samples by which features are zero in them, as
+  zCompositions’ `zPatterns()` does (same patterns and counts), and
+  gives each feature’s proportion of zeros;
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+  most frequent patterns with bars of both. A look at the zeros before
+  choosing a pseudocount or
+  [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md),
+  or testing
+  [`structural_zeros()`](https://cmmr.github.io/ecodive/reference/structural_zeros.md).
+  Sparse tables stay sparse in both.
+
 - [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of an
   ordination takes `scaling` and `links`, for compositional biplots
   (Aitchison & Greenacre 2002). For

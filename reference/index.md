@@ -269,6 +269,18 @@ valid alternative to correlation. A dist over the features.
 - [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md) :
   Symmetric Proportionality
 
+### Diagnostics
+
+First looks at a composition before analysing it. variation_array()
+summarizes every pair of features’ log ratios and each feature’s share
+of the total variance; zero_pattern() shows which features are zero
+together, before choosing a pseudocount or replace_zeros() method.
+
+- [`variation_array()`](https://cmmr.github.io/ecodive/reference/variation_array.md)
+  : Variation Array
+- [`zero_pattern()`](https://cmmr.github.io/ecodive/reference/zero_pattern.md)
+  : Zero Patterns
+
 ### Associations and networks
 
 Correlations between features’ absolute abundances, estimated from
@@ -653,6 +665,10 @@ than every value.
   : Plot a multiple regression on distance matrices
 - [`plot(`*`<ecodive_log_ratio>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_log_ratio.md)
   : Plot Log Ratios
+- [`plot(`*`<ecodive_variation_array>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_variation_array.md)
+  : Plot a variation array
+- [`plot(`*`<ecodive_zero_pattern>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_zero_pattern.md)
+  : Plot zero patterns
 - [`ecodive_display`](https://cmmr.github.io/ecodive/reference/ecodive_display.md)
   : Titles of results
 - [`print(`*`<ecodive_batch>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)

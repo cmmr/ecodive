@@ -169,7 +169,8 @@ covariance biplot of
 [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md) with
 `norm = "clr"` (`plot(..., scaling = "covariance")`),
 [`ternary_plot()`](https://cmmr.github.io/ecodive/reference/ternary_plot.md)
-for three parts at a time, and the planned `variation_array()`.
+for three parts at a time, and the planned
+[`variation_array()`](https://cmmr.github.io/ecodive/reference/variation_array.md).
 
 **Which features.** Each sample's counts are divided by their sum, and
 the features are ranked by their mean proportion over the samples (ties
