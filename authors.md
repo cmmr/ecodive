@@ -116,6 +116,15 @@
   Moran's I and its spatial weights (moran_i()), ported from 'esda' and
   'libpysal'
 
+- **Campbell O. Webb**. Contributor, copyright holder.  
+  phylocom's independent and trial swaps (mpd_ses(), mntd_ses())
+
+- **David D. Ackerly**. Contributor, copyright holder.  
+  phylocom's independent and trial swaps (mpd_ses(), mntd_ses())
+
+- **Steven W. Kembel**. Contributor, copyright holder.  
+  phylocom's independent and trial swaps (mpd_ses(), mntd_ses())
+
 - **Alkek Center for Metagenomics and Microbiome Research**. Copyright
   holder, funder.
 

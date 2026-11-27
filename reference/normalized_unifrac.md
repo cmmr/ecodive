@@ -130,6 +130,8 @@ Environmental Microbiology*, 73(5), 1576-1585.
 Other Phylogenetic metrics:
 [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md),
 [`generalized_unifrac()`](https://cmmr.github.io/ecodive/reference/generalized_unifrac.md),
+[`mpd()`](https://cmmr.github.io/ecodive/reference/mpd.md),
+[`mpd_ses()`](https://cmmr.github.io/ecodive/reference/mpd_ses.md),
 [`philr_distance()`](https://cmmr.github.io/ecodive/reference/philr_distance.md),
 [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md),
 [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.md),

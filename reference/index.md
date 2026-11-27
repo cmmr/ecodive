@@ -451,6 +451,23 @@ How far drift and dispersal alone explain a community’s composition
 - [`plot(`*`<ecodive_neutral_model>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_neutral_model.md)
   : Plot a Neutral Community Model Fit
 
+### Phylogenetic community structure
+
+How closely related the taxa in each sample are along a phylogeny (mean
+pairwise and nearest taxon distances), and whether more or less than in
+random communities (NRI and NTI). See also Faith’s PD, faith().
+
+- [`mpd()`](https://cmmr.github.io/ecodive/reference/mpd.md)
+  [`weighted_mpd()`](https://cmmr.github.io/ecodive/reference/mpd.md)
+  [`mntd()`](https://cmmr.github.io/ecodive/reference/mpd.md)
+  [`weighted_mntd()`](https://cmmr.github.io/ecodive/reference/mpd.md) :
+  Mean Pairwise and Mean Nearest Taxon Distance
+- [`mpd_ses()`](https://cmmr.github.io/ecodive/reference/mpd_ses.md)
+  [`mntd_ses()`](https://cmmr.github.io/ecodive/reference/mpd_ses.md)
+  [`plot(`*`<ecodive_mpd_ses>`*`)`](https://cmmr.github.io/ecodive/reference/mpd_ses.md)
+  [`plot(`*`<ecodive_mntd_ses>`*`)`](https://cmmr.github.io/ecodive/reference/mpd_ses.md)
+  : Net Relatedness and Nearest Taxon Indices (SES of MPD and MNTD)
+
 ## Longitudinal
 
 Repeated measures of the same subjects over time (q2-longitudinal). Each

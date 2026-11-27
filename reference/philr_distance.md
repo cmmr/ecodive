@@ -171,6 +171,8 @@ microbiota data. *eLife*, 6, e21887.
 Other Phylogenetic metrics:
 [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md),
 [`generalized_unifrac()`](https://cmmr.github.io/ecodive/reference/generalized_unifrac.md),
+[`mpd()`](https://cmmr.github.io/ecodive/reference/mpd.md),
+[`mpd_ses()`](https://cmmr.github.io/ecodive/reference/mpd_ses.md),
 [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/normalized_unifrac.md),
 [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md),
 [`variance_adjusted_unifrac()`](https://cmmr.github.io/ecodive/reference/variance_adjusted_unifrac.md),

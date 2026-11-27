@@ -149,32 +149,33 @@ will be applied to the
 
     # A data.frame of all available metrics.
     head(list_metrics())
-#>                                       name                id phylo weighted
-#> 1 Abundance-based Coverage Estimator (ACE)               ace FALSE     TRUE
-#> 2                       Aitchison Distance         aitchison FALSE     TRUE
-#> 3               Alternative Gower Distance         alt_gower FALSE     TRUE
-#> 4                      Berger-Parker Index            berger FALSE     TRUE
-#> 5                   Bhattacharyya Distance     bhattacharyya FALSE     TRUE
-#> 6          Binomial Deviance Dissimilarity binomial_deviance FALSE     TRUE
+#>                                             name            id phylo weighted
+#> 1       Abundance-based Coverage Estimator (ACE)           ace FALSE     TRUE
+#> 2 Abundance-Weighted Mean Nearest Taxon Distance weighted_mntd  TRUE     TRUE
+#> 3      Abundance-Weighted Mean Pairwise Distance  weighted_mpd  TRUE     TRUE
+#> 4                             Aitchison Distance     aitchison FALSE     TRUE
+#> 5                     Alternative Gower Distance     alt_gower FALSE     TRUE
+#> 6                            Berger-Parker Index        berger FALSE     TRUE
 #>   int_only true_metric   div
 #> 1     TRUE          NA alpha
-#> 2    FALSE        TRUE  beta
-#> 3    FALSE       FALSE  beta
-#> 4    FALSE          NA alpha
-#> 5    FALSE        TRUE  beta
-#> 6    FALSE       FALSE  beta
+#> 2    FALSE          NA alpha
+#> 3    FALSE          NA alpha
+#> 4    FALSE        TRUE  beta
+#> 5    FALSE       FALSE  beta
+#> 6    FALSE          NA alpha
     
     # All alpha diversity function names.
     list_metrics('alpha', val = 'id')
-#>  [1] "ace"               "berger"            "brillouin"        
-#>  [4] "chao1"             "faith"             "fisher"           
-#>  [7] "gini"              "simpson"           "goods_coverage"   
-#> [10] "heip"              "hill"              "inv_simpson"      
-#> [13] "margalef"          "mcintosh"          "mcintosh_evenness"
-#> [16] "menhinick"         "observed"          "pielou"           
-#> [19] "renyi"             "shannon"           "dominance"        
-#> [22] "simpson_evenness"  "squares"           "strong"           
-#> [25] "tsallis"          
+#>  [1] "ace"               "weighted_mntd"     "weighted_mpd"     
+#>  [4] "berger"            "brillouin"         "chao1"            
+#>  [7] "faith"             "fisher"            "gini"             
+#> [10] "simpson"           "goods_coverage"    "heip"             
+#> [13] "hill"              "inv_simpson"       "margalef"         
+#> [16] "mcintosh"          "mcintosh_evenness" "mntd"             
+#> [19] "mpd"               "menhinick"         "observed"         
+#> [22] "pielou"            "renyi"             "shannon"          
+#> [25] "dominance"         "simpson_evenness"  "squares"          
+#> [28] "strong"            "tsallis"          
     
     # Try to find a metric named 'otus'.
     m <- match_metric('otus')

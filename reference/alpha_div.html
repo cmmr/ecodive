@@ -61,7 +61,8 @@
 <span>  margin <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  q <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  bias_corrected <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  cpus <span class="op">=</span> <span class="fu"><a href="n_cpus.html">n_cpus</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  taxa_dm <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -76,7 +77,7 @@ proportions are also accepted.</p></dd>
 
 
 <dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
-<dd><p>The name of an alpha diversity metric. One of <code>c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis')</code>. Case-insensitive and partial name matching is supported,
+<dd><p>The name of an alpha diversity metric. One of <code>c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'mntd', 'mpd', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis', 'weighted_mntd', 'weighted_mpd')</code>. Case-insensitive and partial name matching is supported,
 as are scikit-bio's names (such as <code>'pielou_e'</code>, <code>'simpson_d'</code>,
 <code>'observed_features'</code> and <code>'enspie'</code>). Programmatic access via
 <code>list_metrics('alpha')</code>.</p></dd>
@@ -139,6 +140,12 @@ a sample has both singletons and doubletons (<code>FALSE</code>). See
 default, <code><a href="n_cpus.html">n_cpus()</a></code>, is the CPU cores this R process may use,
 within any limits set on it. Results are the same for any <code>cpus</code>.</p></dd>
 
+
+<dt id="arg-taxa-dm">taxa_dm<a class="anchor" aria-label="anchor" href="#arg-taxa-dm"></a></dt>
+<dd><p>For <code><a href="mpd.html">mpd()</a></code>, <code><a href="mpd.html">mntd()</a></code>, <code><a href="mpd.html">weighted_mpd()</a></code> and
+<code><a href="mpd.html">weighted_mntd()</a></code> only: dissimilarities among the taxa, instead of
+<code>tree</code> (see <code><a href="mpd.html">mpd()</a></code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -187,6 +194,7 @@ integer counts will return an error message.</p><div class="section">
 <li><p>Simpson's and Strong's Dominance Indices</p></li>
 <li><p>Gini Index</p></li>
 <li><p>Faith's PD</p></li>
+<li><p>MPD and MNTD, and their abundance-weighted forms</p></li>
 </ul></div>
 
 

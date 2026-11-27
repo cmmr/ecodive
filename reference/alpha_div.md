@@ -15,7 +15,8 @@ alpha_div(
   margin = 1L,
   q = 2,
   bias_corrected = TRUE,
-  cpus = n_cpus()
+  cpus = n_cpus(),
+  taxa_dm = NULL
 )
 ```
 
@@ -30,7 +31,7 @@ alpha_div(
 - metric:
 
   The name of an alpha diversity metric. One of
-  `c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis')`.
+  `c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'mntd', 'mpd', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis', 'weighted_mntd', 'weighted_mpd')`.
   Case-insensitive and partial name matching is supported, as are
   scikit-bio's names (such as `'pielou_e'`, `'simpson_d'`,
   `'observed_features'` and `'enspie'`). Programmatic access via
@@ -108,6 +109,16 @@ alpha_div(
   the CPU cores this R process may use, within any limits set on it.
   Results are the same for any `cpus`.
 
+- taxa_dm:
+
+  For [`mpd()`](https://cmmr.github.io/ecodive/reference/mpd.md),
+  [`mntd()`](https://cmmr.github.io/ecodive/reference/mpd.md),
+  [`weighted_mpd()`](https://cmmr.github.io/ecodive/reference/mpd.md)
+  and
+  [`weighted_mntd()`](https://cmmr.github.io/ecodive/reference/mpd.md)
+  only: dissimilarities among the taxa, instead of `tree` (see
+  [`mpd()`](https://cmmr.github.io/ecodive/reference/mpd.md)).
+
 ## Value
 
 A numeric vector, one value per sample, named by the samples. To compute
@@ -169,6 +180,8 @@ message.
 - Gini Index
 
 - Faith's PD
+
+- MPD and MNTD, and their abundance-weighted forms
 
 ### Differences from scikit-bio
 

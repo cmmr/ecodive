@@ -82,6 +82,8 @@ Faith, D. P. (1992). Conservation evaluation and phylogenetic diversity.
 
 Other Phylogenetic metrics:
 [`generalized_unifrac()`](https://cmmr.github.io/ecodive/reference/generalized_unifrac.md),
+[`mpd()`](https://cmmr.github.io/ecodive/reference/mpd.md),
+[`mpd_ses()`](https://cmmr.github.io/ecodive/reference/mpd_ses.md),
 [`normalized_unifrac()`](https://cmmr.github.io/ecodive/reference/normalized_unifrac.md),
 [`philr_distance()`](https://cmmr.github.io/ecodive/reference/philr_distance.md),
 [`unweighted_unifrac()`](https://cmmr.github.io/ecodive/reference/unweighted_unifrac.md),
