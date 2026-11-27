@@ -471,3 +471,56 @@ My own calls:
   Community Assembly, pointing to `faith()`.
 - **README:** `mpd()`, `mntd()` in the Alpha diversity row; `mpd_ses()`,
   `mntd_ses()` in the Community assembly row (no new row).
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commits:** `c3aad31` (the implementation), merged with item 64's
+  `hill_extrapolation()` in `8d030da` (conflicts in `README.md`,
+  `inst/COPYRIGHTS` and `src/ecodive.h`, all kept both sides), then this
+  bookkeeping commit.
+- **Exports:** `mpd()`, `mntd()`, `weighted_mpd()`, `weighted_mntd()`
+  (METRICS rows; `alpha_div()` gains `taxa_dm`), `mpd_ses()`,
+  `mntd_ses()`, with `print()` and `plot()` methods. Files:
+  `R/phylo_structure.r`, `src/phylo_structure.c`,
+  `tests/tinytests/test-phylo_structure.r` (645 results),
+  `data-raw/expected/phylo_structure.r` and its 31 KB `.rds`.
+- **Tests:** 36,141 at home and 539 in CRAN mode before the merge
+  (baseline 35,483 / 526); 37,093 / 541 on the merged tree, all OK.
+  `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed size,
+  pre-existing).
+- **References** (picante 1.8.4): observed MPD / MNTD, both weightings,
+  tree and `taxa_dm` routes, the phylocom example, a 300-tip sparse case
+  and trait distances: identical (largest difference 0; tests use 1e-12).
+  Given picante's own random communities (rebuilt in the fixture script
+  and fed to the `null_tables` hook), `null_mean`, `null_sd`, `z`, `rank`
+  and `p_value` match for taxa.labels, richness, frequency, sample.pool,
+  independentswap and trialswap, × both weightings × MPD / MNTD: largest
+  difference 1.8e-14. Statistically (9,999 draws): taxa_labels,
+  phylogeny_pool and both swaps within 2.3 SE of picante; richness and
+  frequency differ from picante by 5–11 SE because picante's shuffles
+  aren't uniform, so they are tested against exact moments and a base-R
+  uniform shuffle. Exact moments: equal to full enumeration (≤ 4.4e-16).
+  Deep tree (depths 1e6, tip distances 1e-3): MNTD within 1e-6 relative of
+  plain-R path sums (1e-10 relative to the depth scale).
+- **Not compared:** phylocom `comstruct` (running the compiled binary was
+  refused by the permission classifier) and PhyloMeasures (installing it
+  was refused).
+- **Speed** (500 samples × 4,000 taxa, ~240 per sample, 5,000-tip tree,
+  999 draws, taxa_labels): `mpd_ses()` 4.4 s on 1 thread, 1.4 s on 4;
+  `mntd_ses()` 5.8 s / 1.8 s. picante: `ses.mpd()` ≈ 17 min, `ses.mntd()`
+  ≈ 27 min (extrapolated from 5 runs), plus a 200 MB cophenetic matrix.
+  Observed `mpd()`: 0.01 s vs picante's 0.7 s.
+- **For item 73:** `src/ecodive.h` declares `ptree_t`, `ptree_ws_t`,
+  `ptree_init()` (from `C_philr_tree()`'s edges), `ptree_ws_init()`,
+  `ptree_vtree()` (a sample's virtual tree, parents before children) and
+  `ptree_pair_sum()`. βMPD between samples A and B is a pair sum over the
+  union's virtual tree with cross weights (Σ_e L_e (w_A,e (W_B − w_B,e) +
+  w_B,e (W_A − w_A,e)) / (W_A W_B), which the bottom-up pass in
+  `ptree_pair_sum()` extends directly); βMNTD needs each tip's nearest tip
+  of the *other* sample, the two-pass nearest-tip code in `score()`
+  (`src/phylo_structure.c`) run with two "colours". The PCG stream layout,
+  batch Welford sums and `null_tables` hook pattern carry over. The user
+  chose METRICS rows with fixed weighting for alpha, and asked to decide
+  beta the same way: `beta_mpd`, `weighted_beta_mpd`, ....
+- **Open:** no exact MNTD moments; phylocom outputs unchecked.
