@@ -142,6 +142,8 @@ microbiota data. \emph{eLife}, 6, e21887. \doi{10.7554/eLife.21887}
 Other Phylogenetic metrics:
 \code{\link[=faith]{faith()}},
 \code{\link[=generalized_unifrac]{generalized_unifrac()}},
+\code{\link[=mpd]{mpd()}},
+\code{\link[=mpd_ses]{mpd_ses()}},
 \code{\link[=normalized_unifrac]{normalized_unifrac()}},
 \code{\link[=unweighted_unifrac]{unweighted_unifrac()}},
 \code{\link[=variance_adjusted_unifrac]{variance_adjusted_unifrac()}},

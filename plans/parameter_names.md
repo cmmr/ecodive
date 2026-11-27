@@ -106,6 +106,9 @@ same thing.
 | `grid` | **(new, item 54)** whether to draw gridlines (`TRUE`/`FALSE`) | `ternary_plot` |
 | `heatmap` | **(new, item 47)** also draw a heatmap (of centred clr values) below a plot | `composition_barplot` |
 | `clust` | how to order samples from their distances: an `hclust()` linkage, `'pcoa'`, or `'none'`/`FALSE`; `composition_barplot()` (item 47) orders by Aitchison distances with it, with the same values | `beta_div` and the metric functions, `vlr`, `rho_p`, `phi_s`, `sparcc`, `composition_barplot` |
+| `weighted` | **(new, 2026-11-27, item 72)** weight a phylogenetic mean (MPD, MNTD) by the taxa's abundances (picante's `abundance.weighted`, phylocom's `-a`); not UniFrac's weighting. The observed metrics instead have fixed-weighting ids (`weighted_mpd()`, `weighted_mntd()`, as `weighted_unifrac()`), the user's choice | `mpd_ses`, `mntd_ses`; planned `beta_mpd`, `beta_mntd` |
+| `null_model`, `n_swaps` | **(new, item 72)** how a null community is made (picante's `null.model` names in snake case: `'taxa_labels'`, `'richness'`, `'frequency'`, `'sample_pool'`, `'phylogeny_pool'`, `'independent_swap'`, `'trial_swap'`, plus `'exact'`), and the exact number of swaps from the observed table to each null table (picante's `iterations`; `n_<unit>` rule). The number of null communities is `n_draws` | `mpd_ses`, `mntd_ses` |
+| `taxa_dm` | a dissimilarity among the taxa, instead of `tree` (exactly one of the two) | `dpcoa`, `mpd`, `mntd`, `weighted_mpd`, `weighted_mntd`, `mpd_ses`, `mntd_ses`, `alpha_div` (item 72) |
 | `cpus` | threads (always last) | everything threaded |
 
 

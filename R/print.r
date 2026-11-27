@@ -314,6 +314,8 @@ print_df_label <- function (x) {
     ecodive_indicator_species = indsp_label(x),
     ecodive_rarefaction_curve = 'Rarefaction curves',
     ecodive_neutral_model = neutral_model_label(x),
+    ecodive_mpd_ses       = 'Net Relatedness Index (NRI)',
+    ecodive_mntd_ses      = 'Nearest Taxon Index (NTI)',
     ecodive_first_differences = 'First Differences',
     ecodive_first_distances   = 'First Distances',
     ecodive_mantel_correlogram = 'Mantel correlogram',
@@ -397,6 +399,10 @@ print.ecodive_decontam_not     <- print_table_result
 print.ecodive_rarefaction_curve <- print_table_result
 #' @export
 print.ecodive_neutral_model   <- print_table_result
+#' @export
+print.ecodive_mpd_ses         <- print_table_result
+#' @export
+print.ecodive_mntd_ses        <- print_table_result
 #' @export
 print.ecodive_first_differences <- print_table_result
 #' @export

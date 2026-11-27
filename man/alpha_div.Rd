@@ -14,7 +14,8 @@ alpha_div(
   margin = 1L,
   q = 2,
   bias_corrected = TRUE,
-  cpus = n_cpus()
+  cpus = n_cpus(),
+  taxa_dm = NULL
 )
 }
 \arguments{
@@ -22,7 +23,7 @@ alpha_div(
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted.}
 
-\item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis')}. Case-insensitive and partial name matching is supported,
+\item{metric}{The name of an alpha diversity metric. One of \code{c('ace', 'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini', 'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef', 'mcintosh', 'mcintosh_evenness', 'menhinick', 'mntd', 'mpd', 'observed', 'pielou', 'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong', 'tsallis', 'weighted_mntd', 'weighted_mpd')}. Case-insensitive and partial name matching is supported,
 as are scikit-bio's names (such as \code{'pielou_e'}, \code{'simpson_d'},
 \code{'observed_features'} and \code{'enspie'}). Programmatic access via
 \code{list_metrics('alpha')}.}
@@ -72,6 +73,10 @@ a sample has both singletons and doubletons (\code{FALSE}). See
 \item{cpus}{How many parallel processing threads should be used. The
 default, \code{n_cpus()}, is the CPU cores this R process may use,
 within any limits set on it. Results are the same for any \code{cpus}.}
+
+\item{taxa_dm}{For \code{\link[=mpd]{mpd()}}, \code{\link[=mntd]{mntd()}}, \code{\link[=weighted_mpd]{weighted_mpd()}} and
+\code{\link[=weighted_mntd]{weighted_mntd()}} only: dissimilarities among the taxa, instead of
+\code{tree} (see \code{\link[=mpd]{mpd()}}).}
 }
 \value{
 A numeric vector, one value per sample, named by the samples.
@@ -118,6 +123,7 @@ integer counts will return an error message.
 \item Simpson's and Strong's Dominance Indices
 \item Gini Index
 \item Faith's PD
+\item MPD and MNTD, and their abundance-weighted forms
 }
 }
 

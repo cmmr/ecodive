@@ -110,6 +110,8 @@ Chen, J., Bittinger, K., Charlson, E. S., Hoffmann, C., Lewis, J., Wu, G. D., ..
 
 Other Phylogenetic metrics:
 \code{\link[=faith]{faith()}},
+\code{\link[=mpd]{mpd()}},
+\code{\link[=mpd_ses]{mpd_ses()}},
 \code{\link[=normalized_unifrac]{normalized_unifrac()}},
 \code{\link[=philr_distance]{philr_distance()}},
 \code{\link[=unweighted_unifrac]{unweighted_unifrac()}},

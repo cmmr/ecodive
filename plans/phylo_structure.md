@@ -352,3 +352,122 @@ item that couldn't be matched). "Same names in other packages":
   doi:10.1007/978-3-642-33122-0_3
 - Bender, M. A., & Farach-Colton, M. (2000). The LCA problem revisited.
   *LATIN 2000*, LNCS 1776, 88–94. doi:10.1007/10719839_9
+
+
+## Decisions made while implementing
+
+Answers from the user (one round of questions, 2026-11-27):
+
+- **No `nri()` / `nti()` wrappers.** The SES results carry `nri` / `nti`
+  columns, and the docs name NRI / NTI prominently.
+- **METRICS rows: both join.** `mpd()`, `weighted_mpd()`, `mntd()` and
+  `weighted_mntd()` are four exported alpha metrics with fixed weighting,
+  UniFrac-style (ids `mpd`, `weighted_mpd`, `mntd`, `weighted_mntd`;
+  aliases `wmpd`, `wmntd`, `mnnd`). The SES functions keep `weighted =`.
+  Item 73 should give `beta_mpd()` / `beta_mntd()` METRICS rows the same
+  way (`beta_mpd`, `weighted_beta_mpd`, ...), as the user decided both
+  together.
+- **`null_model = 'exact'` included now**, for MPD (see below).
+
+My own calls:
+
+- **`alpha_div()` gains `taxa_dm = NULL`, as its last argument** (after
+  `cpus`, so positional calls are unaffected): `alpha_div()` passes a
+  metric's formals with `mget()`, so every formal of a metric must exist
+  in `alpha_div()`.
+- **Black-box protocol, from picante 1.8.4's outputs** (source never read):
+  - (a) Weighted MPD's denominator includes the diagonal:
+    sum over i, j of x_i x_j d_ij / W² (as phylocom's `MeanDistance()`).
+  - (b) S = 0 or 1: picante's `mpd()` / `mntd()` give `NA` (phylocom's
+    MNTD gives 0). `ses.*` gives `NaN` null means; ecodive gives `NA`.
+  - (c) `mpd.obs.rank` averages ties (half-integer ranks seen).
+  - (d) `taxa.labels` and `phylogeny.pool` draw from every tip of `dis`
+    (null means match the mean over all 40 tips of a tree with 20 table
+    taxa, not over the table's).
+  - (e) NA draws (frequency) are left out of mean and sd (`na.rm`), and
+    sort last in the rank; `runs` (the `p` denominator) still counts them.
+    ecodive divides by the draws used plus one instead (documented).
+  - (f) Abundances follow the shuffled taxa under the pool models and
+    `richness`; under the swaps, each taxon keeps its values (column
+    multisets kept, row sums not), as in phylocom's swap code. So
+    `weighted = TRUE` is supported for every model.
+  - Also found: `ses.mpd(null.model = 'sample.pool')` gives exactly the
+    same communities as `'richness'` (identical results with the same
+    seed), i.e. it draws from every column of the table, empty ones
+    included. ecodive's `sample_pool` draws only from taxa present in some
+    sample, as documented; they agree when no column is empty.
+  - Also found: picante's `richness` and `frequency` shuffles are not
+    uniform (each position's chance of a value varies 0.465–0.536 where
+    0.5 is expected, over 20,000 draws), so its null means for these two
+    models are off by 5–11 standard errors from a uniform shuffle's.
+    ecodive's are uniform; the tests check them against exact moments
+    (richness, sample_pool) and a base-R uniform shuffle (frequency)
+    instead of picante.
+  - The draws of a seeded `ses.mpd()` call are exactly those of
+    `taxaShuffle(dis)` / `randomizeMatrix(samp, model)` called `runs`
+    times after the same `set.seed()`, so the fixture script rebuilds
+    them and the tests feed them to ecodive's internal hook.
+- **Internal hook:** `phylo_ses(..., null_tables = )`, a list of null
+  tables (samples × tips, matched by column name) used instead of draws,
+  as `assoc_network_compare()`'s `ari_perms` and `dmm()`'s `init`. Given
+  picante's tables, ecodive's `null_mean`, `null_sd`, `z`, `rank` and
+  `p_value` equal picante's to ≤ 1.8e-14, for all 6 rebuildable models ×
+  both weightings × MPD / MNTD × tree and `taxa_dm` routes.
+- **Ties** in the rank: a null value within 1e-12 (relative) of `obs`
+  counts as a tie, so values equal in exact arithmetic tie whatever the
+  rounding (documented).
+- **Swaps:** each draw is a chain of its own from the observed table (as
+  picante; phylocom continues one chain). Independent swap counts
+  successful swaps, trial swap attempts. When every pair of samples is
+  nested no swap is possible: picante's independent swap would loop
+  forever; ecodive detects it in O(nnz) (samples ranked by richness: each
+  taxon must be in exactly the first k samples) and warns, using the
+  observed table. The swap state is a dense samples × taxa `int` map per
+  thread (4 bytes per cell), cleared entry by entry after each draw.
+  `pcg32_bounded()` replaces phylocom's biased `random() % n`.
+- **Streams:** `taxa_labels`, `frequency` and the swaps use PCG stream
+  `r` for draw r; `richness`, `sample_pool` and `phylogeny_pool` stream
+  `r * n + i` for sample i. Draws are summed per sample in draw order
+  (Welford mean and sum of squares) after each batch of draws, so results
+  are identical for any `cpus`, and batch size can depend on `n` and
+  `cpus`.
+- **Virtual tree:** instead of sorting the 2S − 1 nodes, the tree is built
+  with a stack holding the root path to the latest tip (the classic
+  construction), using only the LCAs of tips adjacent in preorder (a
+  range minimum over the LCAs of globally adjacent tips, from a sparse
+  table, with a log table). Nodes leave the stack in postorder, which is
+  reversed for the numbering. Tips are radix-sorted (8-bit digits) above
+  48. This made draws about 4× faster than a heapsort-and-sort first
+  version. `ptree_t`, `ptree_init()`, `ptree_ws_init()`, `ptree_vtree()`
+  and `ptree_pair_sum()` are declared in `src/ecodive.h` for item 73.
+- **Exact moments** (MPD only, both weightings): derived from first
+  principles, because the Tsirogiannis et al. papers were not reachable
+  (Wiley returned 403, Springer redirects to a login) and PhyloMeasures
+  (GPL-3, archived from CRAN) could not be installed here (the install was
+  refused by the session's permission classifier). With distances centred
+  on their mean μ over distinct pairs: E[Z] = μ Σa,
+  Var[Z] = A2 P2/(T)_2 + A1 (R2 − P2)/(T)_3 + A0 (2 P2 − 4 R2)/(T)_4
+  (see `src/phylo_structure.c`). Centring keeps the cancellation mild. On
+  a tree, Σ_{a<b} d, each tip's row sum, and Σ_{a<b} d² take
+  two passes. Checked against full enumeration of every ordered draw on a
+  7-tip and a 9-tip tree (≤ 4.4e-16), and against `phylogeny_pool` /
+  `taxa_labels` draws. With `'exact'`, `rank`, `p_value` and `n_draws` are
+  `NA`. **No exact MNTD**: I found no tractable exact variance (the pairwise
+  terms need the joint distribution of two tips' nearest neighbours), so
+  `mntd_ses(null_model = 'exact')` is an error saying so.
+- **Result:** `n_draws` column = draws used (non-NA); `p_value = rank /
+  (n_draws + 1)`. A sample with fewer than 2 taxa: `obs`, `z`, `nri`,
+  `rank`, `p_value` `NA` (null mean/sd still given where defined).
+  Attributes `method`, `null_model`, `n_draws`, `n_swaps` (swaps only),
+  `weighted`; `display$title` "Net Relatedness Index (NRI)" / "Nearest
+  Taxon Index (NTI)".
+- **`null_model` matching:** exact after lower-casing and dropping `.`,
+  `_` and spaces, so picante's `'taxa.labels'`, `'independentswap'` work.
+- **phylocom `comstruct`:** its source (BSD-3) was fetched through
+  jsDelivr and compiled, but running the binary was refused by the
+  session's permission classifier, so no phylocom outputs were compared;
+  picante's are the reference.
+- **Reference index:** a "Phylogenetic community structure" subtitle under
+  Community Assembly, pointing to `faith()`.
+- **README:** `mpd()`, `mntd()` in the Alpha diversity row; `mpd_ses()`,
+  `mntd_ses()` in the Community assembly row (no new row).

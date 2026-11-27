@@ -129,6 +129,18 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "Moran's I and its spatial weights (moran_i()), ported from 'esda' and 'libpysal'"),
     person(
+      "Campbell O.", "Webb",
+      role    = c("ctb", "cph"),
+      comment = "phylocom's independent and trial swaps (mpd_ses(), mntd_ses())"),
+    person(
+      "David D.", "Ackerly",
+      role    = c("ctb", "cph"),
+      comment = "phylocom's independent and trial swaps (mpd_ses(), mntd_ses())"),
+    person(
+      "Steven W.", "Kembel",
+      role    = c("ctb", "cph"),
+      comment = "phylocom's independent and trial swaps (mpd_ses(), mntd_ses())"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

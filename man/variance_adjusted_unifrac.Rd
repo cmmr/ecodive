@@ -101,6 +101,8 @@ Chang, Q., Luan, Y., & Sun, F. (2011). Variance adjusted weighted UniFrac: a pow
 Other Phylogenetic metrics:
 \code{\link[=faith]{faith()}},
 \code{\link[=generalized_unifrac]{generalized_unifrac()}},
+\code{\link[=mpd]{mpd()}},
+\code{\link[=mpd_ses]{mpd_ses()}},
 \code{\link[=normalized_unifrac]{normalized_unifrac()}},
 \code{\link[=philr_distance]{philr_distance()}},
 \code{\link[=unweighted_unifrac]{unweighted_unifrac()}},

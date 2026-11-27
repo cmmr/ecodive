@@ -101,6 +101,8 @@ Lozupone, C., & Knight, R. (2005). UniFrac: a new phylogenetic method for compar
 Other Phylogenetic metrics:
 \code{\link[=faith]{faith()}},
 \code{\link[=generalized_unifrac]{generalized_unifrac()}},
+\code{\link[=mpd]{mpd()}},
+\code{\link[=mpd_ses]{mpd_ses()}},
 \code{\link[=normalized_unifrac]{normalized_unifrac()}},
 \code{\link[=philr_distance]{philr_distance()}},
 \code{\link[=variance_adjusted_unifrac]{variance_adjusted_unifrac()}},

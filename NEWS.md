@@ -1086,6 +1086,27 @@
   the fitted curve and its band over the features (`type = "binomial"`
   adds the binomial model's curve).
 
+* New `mpd()`, `mntd()`, `weighted_mpd()` and `weighted_mntd()`: the mean
+  pairwise and mean nearest taxon distances among each sample's taxa (Webb
+  2000; Webb et al. 2002), unweighted or weighted by abundance, along a
+  `tree` or any `taxa_dm`. They are also alpha metrics (`alpha_div(counts,
+  "mpd", tree = tree)`; `alpha_div()` gains `taxa_dm`). New `mpd_ses()` and
+  `mntd_ses()` give their standardized effect sizes against a null model,
+  the Net Relatedness and Nearest Taxon Indices (NRI = -SES(MPD), NTI =
+  -SES(MNTD), positive for clustering), with ranks and lower-tail p-values,
+  as picante's `ses.mpd()` and `ses.mntd()`: `null_model` is picante's
+  `"taxa_labels"`, `"richness"`, `"frequency"`, `"sample_pool"`,
+  `"phylogeny_pool"`, `"independent_swap"` or `"trial_swap"` (swap moves
+  from phylocom 4.2, BSD-3), or, for `mpd_ses()`, `"exact"`: the exact
+  null mean and standard deviation over random sets of tips, with no
+  draws. Values match picante 1.8.4 to about 1e-14, and its SES, ranks and
+  p-values to the same given the same random communities. No tips x tips
+  matrix is formed: each sample's taxa span a "virtual tree" built in
+  O(S log S) from lowest common ancestors, so 999 draws for 500 samples on
+  a 5,000-tip tree take about 4 s on one thread (picante: about 17 min).
+  Draws run in threaded C, each with its own random stream, the same for
+  any `cpus`. `plot()` draws a dot chart of NRI (NTI) per sample.
+
 * Longitudinal analyses, ported from q2-longitudinal 2026.10.0 (Bokulich
   et al. 2018, BSD-3), for repeated measures of the same subjects over time
   (`subjects` and numeric `states` given per sample or as columns of

@@ -23,7 +23,7 @@
   # Diversity metrics. ====
 
   for (m in list_metrics('alpha', 'id')) {
-    a <- if (m == 'faith') alpha_div(ecodive::ex_counts, m, tree = ecodive::ex_tree) else alpha_div(counts, m, cpus = cpus)
+    a <- if (m %in% list_metrics('alpha', 'id', phylo = TRUE)) alpha_div(ecodive::ex_counts, m, tree = ecodive::ex_tree, cpus = cpus) else alpha_div(counts, m, cpus = cpus)
     expect_true(is.numeric(a) && length(a) > 0 && all(is.finite(a)), info = m)
   }
 
@@ -170,6 +170,18 @@
   nmod <- neutral_model(nc, 'grp', meta, cpus = cpus)
   expect_true(inherits(nmod, 'ecodive_neutral_model') && nrow(nmod) == 60L && is.factor(nmod$partition))
   expect_true(all(is.finite(attr(nmod, 'm'))) && all(attr(nmod, 'm') > 0) && identical(names(attr(nmod, 'm')), c('a', 'b')))
+
+  # Phylogenetic structure: MPD, MNTD, NRI, NTI.
+  for (f in list(mpd, mntd, weighted_mpd, weighted_mntd)) {
+    v <- f(ecodive::ex_counts, ecodive::ex_tree, cpus = cpus)
+    expect_true(is.numeric(v) && length(v) == 4L && all(is.finite(v)) && all(v > 0))
+  }
+  nri <- mpd_ses(ecodive::ex_counts, ecodive::ex_tree, n_draws = 9L, cpus = cpus)
+  expect_true(inherits(nri, 'ecodive_mpd_ses') && nrow(nri) == 4L && all(is.finite(nri$obs)) && all(nri$p_value > 0 & nri$p_value <= 1))
+  nti <- mntd_ses(ecodive::ex_counts, ecodive::ex_tree, weighted = TRUE, null_model = 'independent_swap', n_draws = 9L, n_swaps = 50L, cpus = cpus)
+  expect_true(inherits(nti, 'ecodive_mntd_ses') && nrow(nti) == 4L && all(is.finite(nti$obs)) && identical(attr(nti, 'n_swaps'), 50L))
+  nre <- mpd_ses(ecodive::ex_counts, ecodive::ex_tree, null_model = 'exact')
+  expect_true(all(is.finite(nre$null_mean)) && all(nre$null_sd >= 0) && all(is.na(nre$p_value)))
 
   # Longitudinal: 5 subjects at 4 states.
   lm_meta <- data.frame(
@@ -513,6 +525,8 @@
   expect_true(drawn(dc))   # decontam()
   expect_true(drawn(dc, 'prevalence'))
   expect_true(drawn(nmod))   # neutral_model()
+  expect_true(drawn(nri))    # mpd_ses()
+  expect_true(drawn(nti))    # mntd_ses()
   expect_true(drawn(fdi))    # first_differences()
   expect_true(drawn(fdt))    # first_distances()
   expect_true(drawn(vol))    # volatility()
