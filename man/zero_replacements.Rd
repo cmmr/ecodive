@@ -63,4 +63,7 @@ Programmatic access to the list of zero replacement methods that
     m <- match_zero_replacement('multRepl')
     m$id
 
+    # zCompositions' 'cmultRepl' defaults to GBM.
+    match_zero_replacement('cmultRepl')$id
+
 }

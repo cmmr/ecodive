@@ -108,6 +108,7 @@ extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_medoid_accum(SEXP, SEXP, SEXP);
 extern SEXP C_row_medians(SEXP, SEXP);
 extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
+extern SEXP C_replace_zeros_cmult(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rng_dist(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rf_grow(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rf_importance(SEXP, SEXP);
@@ -229,6 +230,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_medoid_accum", (DL_FUNC) &C_medoid_accum, 3},
   {"C_row_medians",  (DL_FUNC) &C_row_medians,  2},
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
+  {"C_replace_zeros_cmult", (DL_FUNC) &C_replace_zeros_cmult, 6},
   {"C_rng_dist",  (DL_FUNC) &C_rng_dist,  5},
   {"C_rf_grow",        (DL_FUNC) &C_rf_grow,        11},
   {"C_rf_importance",  (DL_FUNC) &C_rf_importance,   2},

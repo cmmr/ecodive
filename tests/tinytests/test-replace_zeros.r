@@ -215,16 +215,20 @@
   df <- list_zero_replacements()
   expect_true(is.data.frame(df))
   expect_identical(names(df), c('name', 'id'))
-  expect_identical(df$id, 'mult')
-  expect_identical(rownames(list_zero_replacements(nm = 'id')), 'mult')
-  expect_identical(list_zero_replacements('id'), 'mult')
-  expect_identical(list_zero_replacements('name'), 'Multiplicative Replacement')
-  expect_identical(list_zero_replacements('id', nm = 'name'), c('Multiplicative Replacement' = 'mult'))
-  expect_identical(list_zero_replacements('func'), list(mult = replace_zeros_mult))
+  ids <- c('mult', 'czm', 'gbm', 'sq', 'bl')
+  expect_identical(df$id, ids)
+  expect_identical(rownames(list_zero_replacements(nm = 'id')), ids)
+  expect_identical(list_zero_replacements('id'), ids)
+  expect_identical(list_zero_replacements('name')[[1]], 'Multiplicative Replacement')
+  expect_identical(list_zero_replacements('id', nm = 'name')[1:2],
+                   c('Multiplicative Replacement' = 'mult', 'Count Zero Multiplicative' = 'czm'))
+  expect_identical(list_zero_replacements('func'), list(
+    mult = replace_zeros_mult, czm = replace_zeros_czm, gbm = replace_zeros_gbm,
+    sq = replace_zeros_sq, bl = replace_zeros_bl ))
   expect_identical(list_zero_replacements('list')$mult, match_zero_replacement('mult'))
   expect_identical(names(formals(list_zero_replacements)), names(formals(list_count_ords)))
 
-  expect_error(replace_zeros(m, 'xyz'),  'does not match any option: mult')
+  expect_error(replace_zeros(m, 'xyz'),  'does not match any option: bl, czm, gbm, mult, sq')
   expect_error(replace_zeros(m, 123),    'character')
   expect_error(replace_zeros(m, c('mult', 'mult')), 'length 1')
   expect_error(replace_zeros(m, '-'),    'alphabetic')
@@ -246,11 +250,12 @@
 
 
   # -----------------------------------------------------------------------
-  # Names, now and for the planned methods (item 34)
+  # Names: the planned registry (item 15) is now the registry (item 55)
   # -----------------------------------------------------------------------
 
   # The planned registry: every code and alias selects its own row, and each
-  # bare code matches only its own row, exactly or by prefix.
+  # bare code matches only its own row, exactly or by prefix. Item 55 built
+  # it as planned.
   planned <- data.frame(
     stringsAsFactors = FALSE,
     name    = c('Multiplicative Replacement', 'Count Zero Multiplicative',
@@ -264,11 +269,15 @@
   for (i in seq_len(nrow(planned)))
     for (a in c(planned$id[[i]], strsplit(planned$alt_ids[[i]], ' ')[[1]]))
       expect_identical(unique(unname(hay[startsWith(names(hay), a)])), planned$id[[i]], info = a)
+  expect_identical(ZERO_REPLACEMENTS <- ecodive:::ZERO_REPLACEMENTS, planned)
+  for (i in seq_len(nrow(planned)))
+    for (a in c(planned$id[[i]], strsplit(planned$alt_ids[[i]], ' ')[[1]]))
+      expect_identical(match_zero_replacement(a)$id, planned$id[[i]], info = a)
 
   # The current registry's ids and aliases begin no name of the other
   # registries' entries exactly (where the other wrappers look).
   ours <- names(ecodive:::exact_names('ZERO_REPLACEMENTS'))
-  for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS'))
+  for (reg in c('METRICS', 'ORDINATIONS', 'COUNT_ORDS', 'DIST_TESTS', 'DA_TESTS', 'FEATURE_ASSOCS'))
     expect_identical(intersect(c(ours, planned$id), names(ecodive:::exact_names(reg))), character(0), info = reg)
 
 
