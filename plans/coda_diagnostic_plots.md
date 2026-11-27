@@ -257,3 +257,28 @@ Follows [README.md](README.md) § "Result attributes and plots".
 - **Fixtures:** `data-raw/expected/coda_diagnostics.r` stores
   compositions 2.0.9's `variation()` and `mvar()` (two positive tables)
   and zCompositions 1.6.2's `zPatterns()` ids (three tables with zeros).
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commit:** `212a876` (code, docs, tests, fixtures).
+- **Files:** `R/coda_diagnostics.r`, `src/coda_diagnostics.c`
+  (`C_zero_pattern`), a variation mode in `src/proportionality.c`,
+  `test-coda_diagnostics.r` (141 tests), 4 smoke lines,
+  `data-raw/expected/coda_diagnostics.r` and its `.rds`.
+- **References:** compositions 2.0.9 `variation()`: largest relative
+  difference 8e-16 (tested at 1e-12); `mvar()` against `total_var`, 7e-15
+  absolute. Upper triangle `identical()` to `vlr()`; lower triangle within
+  1.3e-15 of the column means of logs; `clr_var` within 6e-16 (relative)
+  of `apply(clr, 2, var)`. zCompositions 1.6.2 `zPatterns()`: the same
+  number of patterns, sample counts and partition on all 4 tables tried
+  (6 × 4 hand-built, 40 × 8, `ex_counts`, 100 × 15 with 89 patterns).
+- **Determinism:** dense, `dgCMatrix`, slam and `margin = 2` results
+  `identical()`; `cpus` 1, 2 and 4 `identical()`.
+- **Tests:** 34,151 at home (baseline 34,006) and 481 in CRAN mode
+  (baseline 477), all passing, against an `-O2` install, R 4.3.3. `R CMD
+  check --no-manual --ignore-vignettes`: only the existing installed-size
+  NOTE.
+- **Plots** checked by eye as PNG: 6, 25 and 120 features (variation
+  array); 4 to 80 patterns, `n_patterns = 1, n_features = 1`, and a small
+  device where the subtitle wraps (zero patterns).

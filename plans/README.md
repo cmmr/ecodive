@@ -366,7 +366,7 @@ can't be mistaken for one another:
 | Associations and networks (`feature_assoc`) | ✓ `vlr`, ✓ `rho_p`, ✓ `phi_s`, ✓ `sparcc`, ✓ `assoc_pairs`, `spiec_easi_mb`, `spiec_easi_glasso`, `secom_pearson`, `secom_distance`, ✓ `assoc_network`, ✓ `assoc_network_compare`, ✓ `assoc_network_diff` |
 | Associations between two tables | ✓ `cross_assoc`, `halla` |
 | Community types | ✓ `enterotype`, ✓ `valencia`, `dmm` |
-| Compositional plots | ✓ `ternary_plot`, `variation_array`, `zero_pattern`, ✓ `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
+| Compositional plots | ✓ `ternary_plot`, ✓ `variation_array`, ✓ `zero_pattern`, ✓ `composition_barplot`, `coda_dendrogram`, `tree_plot` (plus new `plot()` types and `scaling`; see [compositional.md](compositional.md)) |
 | Spatial | ✓ `moran_i`, ✓ `dbmem` |
 | Compositional regression | `coda_lasso`, `coda_lasso_pairwise` |
 | Source tracking | ✓ `sourcetracker`, `feast` |
