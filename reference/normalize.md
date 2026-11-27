@@ -51,6 +51,16 @@ normalize(counts, norm, margin = 1L, pseudocount = NULL, cpus = n_cpus())
     one constant per sample. Zeros get a value too, so the result is
     dense. See **Pseudocount** below.
 
+  - `'chisq'`: The chi-square transformation (Legendre & Gallagher 2001;
+    vegan's `decostand(x, "chi.square")`): \\\sqrt{T} x\_{ij} / (r_i
+    \sqrt{c_j})\\, with \\r_i\\ the sample's total, \\c_j\\ the
+    feature's total over all samples, and \\T\\ the grand total.
+    Euclidean distances between the results are chi-square distances
+    ([`chisq_distance()`](https://cmmr.github.io/ecodive/reference/chisq_distance.md)).
+    It depends on the whole table: the same sample gets other values in
+    another table. Features that are absent from every sample, and
+    samples that are empty, stay zero (vegan gives `NaN` for them).
+
   - `'none'`: No transformation.
 
 - margin:

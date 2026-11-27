@@ -21,7 +21,7 @@ especially with large datasets. `ecodive` addresses this by providing:
   making it lightweight, stable, and easy to install. This also makes it
   an ideal and secure backend for other R packages.
 
-- **Comprehensive Metrics:** It implements 14 alpha and 38 beta
+- **Comprehensive Metrics:** It implements 25 alpha and 55 beta
   diversity metrics, including classic and phylogenetic-aware methods
   like **Faith’s PD**, the **complete UniFrac family** and the
   compositional **PhILR distance**.
@@ -46,7 +46,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 | Task | Wrapper | Functions |
 |:---|:---|:---|
 | Alpha diversity | [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md) | [`shannon()`](https://cmmr.github.io/ecodive/reference/shannon.md), [`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md), [`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md), [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md), [`pielou()`](https://cmmr.github.io/ecodive/reference/pielou.md), [`hill()`](https://cmmr.github.io/ecodive/reference/hill.md), and 19 more |
-| Beta diversity | [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md) | [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md), [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/weighted_unifrac.md), and 42 more |
+| Beta diversity | [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md) | [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md), [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/weighted_unifrac.md), and 51 more |
 | Ordination | [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) | [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md), [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md), [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md), [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md), [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md), [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md), [`capda()`](https://cmmr.github.io/ecodive/reference/capda.md) |
 | Ordination of counts | [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md) | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md), [`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md), [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md), [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md), [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) |
 | Biplots |  | [`pcoa_biplot()`](https://cmmr.github.io/ecodive/reference/pcoa_biplot.md), [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) |
@@ -283,25 +283,34 @@ list_metrics('alpha', 'id')
 
 # Beta Diversity
 list_metrics('beta', 'id')
-#>  [1] "aitchison"                 "bhattacharyya"            
-#>  [3] "bray"                      "canberra"                 
-#>  [5] "chebyshev"                 "chord"                    
-#>  [7] "clark"                     "sorensen"                 
-#>  [9] "divergence"                "euclidean"                
-#> [11] "generalized_unifrac"       "gower"                    
-#> [13] "hamming"                   "hellinger"                
-#> [15] "horn"                      "jaccard"                  
-#> [17] "jensen"                    "jsd"                      
-#> [19] "lorentzian"                "manhattan"                
-#> [21] "matusita"                  "minkowski"                
-#> [23] "morisita"                  "motyka"                   
-#> [25] "normalized_unifrac"        "ochiai"                   
-#> [27] "philr_distance"            "psym_chisq"               
-#> [29] "robust_aitchison"          "soergel"                  
-#> [31] "squared_chisq"             "squared_chord"            
-#> [33] "squared_euclidean"         "topsoe"                   
-#> [35] "unweighted_unifrac"        "variance_adjusted_unifrac"
-#> [37] "wave_hedges"               "weighted_unifrac"
+#>  [1] "aitchison"                 "alt_gower"                
+#>  [3] "bhattacharyya"             "binomial_deviance"        
+#>  [5] "bray_gradient"             "bray_balanced"            
+#>  [7] "bray"                      "canberra"                 
+#>  [9] "cao"                       "chao_jaccard"             
+#> [11] "chebyshev"                 "chisq_distance"           
+#> [13] "chord"                     "clark"                    
+#> [15] "sorensen"                  "divergence"               
+#> [17] "euclidean"                 "generalized_unifrac"      
+#> [19] "gower"                     "hamming"                  
+#> [21] "hellinger"                 "horn"                     
+#> [23] "jaccard"                   "jaccard_nestedness"       
+#> [25] "jaccard_turnover"          "jensen"                   
+#> [27] "jsd"                       "kulczynski"               
+#> [29] "lorentzian"                "mahalanobis_distance"     
+#> [31] "manhattan"                 "matusita"                 
+#> [33] "minkowski"                 "morisita"                 
+#> [35] "motyka"                    "mountford"                
+#> [37] "normalized_unifrac"        "ochiai"                   
+#> [39] "philr_distance"            "psym_chisq"               
+#> [41] "raup_crick"                "robust_aitchison"         
+#> [43] "soergel_gradient"          "soergel_balanced"         
+#> [45] "sorensen_turnover"         "soergel"                  
+#> [47] "sorensen_nestedness"       "squared_chisq"            
+#> [49] "squared_chord"             "squared_euclidean"        
+#> [51] "topsoe"                    "unweighted_unifrac"       
+#> [53] "variance_adjusted_unifrac" "wave_hedges"              
+#> [55] "weighted_unifrac"         
 
 # Ordination methods that take distances
 list_dist_ords('id')
@@ -494,14 +503,24 @@ Distance measures using quantitative abundance data.
 
 - [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md)
   : Aitchison distance
+- [`alt_gower()`](https://cmmr.github.io/ecodive/reference/alt_gower.md)
+  : Alternative Gower distance
 - [`bhattacharyya()`](https://cmmr.github.io/ecodive/reference/bhattacharyya.md)
   : Bhattacharyya distance
+- [`binomial_deviance()`](https://cmmr.github.io/ecodive/reference/binomial_deviance.md)
+  : Binomial deviance dissimilarity
 - [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md) :
   Bray-Curtis dissimilarity
 - [`canberra()`](https://cmmr.github.io/ecodive/reference/canberra.md) :
   Canberra distance
+- [`cao()`](https://cmmr.github.io/ecodive/reference/cao.md) : Cao
+  dissimilarity (CYd)
+- [`chao_jaccard()`](https://cmmr.github.io/ecodive/reference/chao_jaccard.md)
+  : Chao-Jaccard dissimilarity
 - [`chebyshev()`](https://cmmr.github.io/ecodive/reference/chebyshev.md)
   : Chebyshev distance
+- [`chisq_distance()`](https://cmmr.github.io/ecodive/reference/chisq_distance.md)
+  : Chi-square distance
 - [`chord()`](https://cmmr.github.io/ecodive/reference/chord.md) : Chord
   distance
 - [`clark()`](https://cmmr.github.io/ecodive/reference/clark.md) :
@@ -520,8 +539,12 @@ Distance measures using quantitative abundance data.
   Jensen-Shannon distance
 - [`jsd()`](https://cmmr.github.io/ecodive/reference/jsd.md) :
   Jensen-Shannon divergence (JSD)
+- [`kulczynski()`](https://cmmr.github.io/ecodive/reference/kulczynski.md)
+  : Kulczynski dissimilarity
 - [`lorentzian()`](https://cmmr.github.io/ecodive/reference/lorentzian.md)
   : Lorentzian distance
+- [`mahalanobis_distance()`](https://cmmr.github.io/ecodive/reference/mahalanobis_distance.md)
+  : Mahalanobis distance
 - [`manhattan()`](https://cmmr.github.io/ecodive/reference/manhattan.md)
   : Manhattan distance
 - [`matusita()`](https://cmmr.github.io/ecodive/reference/matusita.md) :
@@ -557,8 +580,12 @@ Distance measures using binary (presence/absence) data.
   Hamming distance
 - [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md) :
   Jaccard distance
+- [`mountford()`](https://cmmr.github.io/ecodive/reference/mountford.md)
+  : Mountford dissimilarity
 - [`ochiai()`](https://cmmr.github.io/ecodive/reference/ochiai.md) :
   Otsuka-Ochiai dissimilarity
+- [`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md)
+  : Raup-Crick dissimilarity
 - [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md) :
   Dice-Sorensen dissimilarity
 

@@ -74,6 +74,10 @@ plsda(
   - `'log'`: Log relative abundance (log-TSS), with `pseudocount` added
     to every value first.
 
+  - `'chisq'`: The chi-square transformation, which uses the whole
+    table's feature totals (see
+    [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)).
+
   Default: `'none'`.
 
 - pseudocount:

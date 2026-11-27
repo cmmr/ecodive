@@ -31,7 +31,7 @@ beta_div(
 - metric:
 
   The name of a beta diversity metric. One of
-  `c('aitchison', 'bhattacharyya', 'bray', 'bray_balanced', 'bray_gradient', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jaccard_nestedness', 'jaccard_turnover', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'philr_distance', 'psym_chisq', 'robust_aitchison', 'soergel', 'soergel_balanced', 'soergel_gradient', 'sorensen', 'sorensen_nestedness', 'sorensen_turnover', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')`.
+  `c('aitchison', 'alt_gower', 'bhattacharyya', 'binomial_deviance', 'bray', 'bray_balanced', 'bray_gradient', 'canberra', 'cao', 'chao_jaccard', 'chebyshev', 'chisq_distance', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jaccard_nestedness', 'jaccard_turnover', 'jensen', 'jsd', 'kulczynski', 'lorentzian', 'mahalanobis_distance', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'mountford', 'normalized_unifrac', 'ochiai', 'philr_distance', 'psym_chisq', 'raup_crick', 'robust_aitchison', 'soergel', 'soergel_balanced', 'soergel_gradient', 'sorensen', 'sorensen_nestedness', 'sorensen_turnover', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')`.
   Flexible matching is supported (see below). Programmatic access via
   `list_metrics('beta')`.
 
@@ -61,6 +61,10 @@ beta_div(
 
   - `'log'`: Log relative abundance (log-TSS), with `pseudocount` added
     to every value first.
+
+  - `'chisq'`: The chi-square transformation, which uses the whole
+    table's feature totals (see
+    [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)).
 
   Default: `'none'`.
 
@@ -165,12 +169,17 @@ method (see
 |----|----|
 | Option / Function Name | Metric Name |
 | `aitchison` | Aitchison distance |
+| `alt_gower` | Alternative Gower distance |
 | `bhattacharyya` | Bhattacharyya distance |
+| `binomial_deviance` | Binomial deviance dissimilarity |
 | `bray` | Bray-Curtis dissimilarity |
 | `bray_balanced` | Bray-Curtis balanced variation |
 | `bray_gradient` | Bray-Curtis abundance gradient |
 | `canberra` | Canberra distance |
+| `cao` | Cao dissimilarity (CYd) |
+| `chao_jaccard` | Chao-Jaccard dissimilarity |
 | `chebyshev` | Chebyshev distance |
+| `chisq_distance` | Chi-square distance |
 | `chord` | Chord distance |
 | `clark` | Clark's divergence distance |
 | `divergence` | Divergence |
@@ -185,16 +194,20 @@ method (see
 | `jaccard_turnover` | Jaccard turnover |
 | `jensen` | Jensen-Shannon distance |
 | `jsd` | Jesen-Shannon divergence (JSD) |
+| `kulczynski` | Kulczynski dissimilarity |
 | `lorentzian` | Lorentzian distance |
+| `mahalanobis_distance` | Mahalanobis distance |
 | `manhattan` | Manhattan distance |
 | `matusita` | Matusita distance |
 | `minkowski` | Minkowski distance |
 | `morisita` | Morisita dissimilarity |
 | `motyka` | Motyka dissimilarity |
+| `mountford` | Mountford dissimilarity |
 | `normalized_unifrac` | Normalized Weighted UniFrac |
 | `ochiai` | Otsuka-Ochiai dissimilarity |
 | `philr_distance` | PhILR distance |
 | `psym_chisq` | Probabilistic Symmetric Chi-Squared distance |
+| `raup_crick` | Raup-Crick dissimilarity |
 | `soergel` | Soergel distance |
 | `soergel_balanced` | Ruzicka (Soergel) balanced variation |
 | `soergel_gradient` | Ruzicka (Soergel) abundance gradient |
@@ -222,6 +235,33 @@ matching.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the metrics list.
+
+**vegan's `vegdist()`**
+
+Every method of vegan's `vegdist()` has a metric here. Most have the
+same name; the others are `"jaccard"` (quantitative):
+[`soergel()`](https://cmmr.github.io/ecodive/reference/soergel.md);
+`"binomial"`:
+[`binomial_deviance()`](https://cmmr.github.io/ecodive/reference/binomial_deviance.md);
+`"chao"`:
+[`chao_jaccard()`](https://cmmr.github.io/ecodive/reference/chao_jaccard.md);
+`"raup"`:
+[`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md);
+`"altGower"`:
+[`alt_gower()`](https://cmmr.github.io/ecodive/reference/alt_gower.md);
+`"mahalanobis"`:
+[`mahalanobis_distance()`](https://cmmr.github.io/ecodive/reference/mahalanobis_distance.md);
+`"chisq"`:
+[`chisq_distance()`](https://cmmr.github.io/ecodive/reference/chisq_distance.md);
+and `"robust.aitchison"`:
+[`robust_aitchison()`](https://cmmr.github.io/ecodive/reference/robust_aitchison.md).
+vegan's `binary = TRUE` is `norm = 'binary'`, and
+`vegdist(x, "jaccard", binary = TRUE)` is
+[`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md). As
+`metric`, vegan's names `"binomial"`, `"chao"`, `"raup"`, `"altGower"`,
+`"mahalanobis"`, `"chisq"` and `"robust.aitchison"` find their metrics;
+`"jaccard"` finds ecodive's (binary)
+[`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md).
 
 The turnover / nestedness and balanced / gradient components are
 Baselga's partition of `sorensen`, `jaccard`, `bray` and `soergel`; see

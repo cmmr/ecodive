@@ -24,6 +24,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/aitchison.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/alpha_div.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/alr.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/alt_gower.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ancombc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ancombc_global.html</loc></url>
@@ -43,6 +44,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/beta_partition.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/beta_partition_multi.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bhattacharyya.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/binomial_deviance.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bioenv.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/blas_threads.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/bray.html</loc></url>
@@ -50,11 +52,14 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/brillouin.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ca.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/canberra.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/cao.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/capda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/capscale.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/cca.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/chao1.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/chao_jaccard.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/chebyshev.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/chisq_distance.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/chord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/clark.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/composition_barplot.html</loc></url>
@@ -112,6 +117,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/jaccard.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/jensen.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/jsd.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/kulczynski.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/lda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/lefse.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/linda.html</loc></url>
@@ -120,6 +126,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/log_ratio_pseudocount_section.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/lorentzian.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/maaslin3.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/mahalanobis_distance.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/manhattan.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mantel.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mantel_correlogram.html</loc></url>
@@ -137,6 +144,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/moran_i.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/morisita.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/motyka.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/mountford.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/mrpp.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/n_cpus.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/neutral_model.html</loc></url>
@@ -208,6 +216,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefaction_curve.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefied_diversity.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rarefy.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/raup_crick.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/rda.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/read_tree.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/renyi.html</loc></url>

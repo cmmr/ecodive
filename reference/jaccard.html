@@ -117,6 +117,9 @@ $$1 - \frac{J}{(A + B - J)}$$</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">ex_counts</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">ex_counts</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span></span>
 <span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span> <span class="op">&amp;</span> <span class="va">y</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span> <span class="op">|</span> <span class="va">y</span><span class="op">)</span></span></code></pre><p></p></div>
+<p>It is vegan's <code>vegdist(x, "jaccard", binary = TRUE)</code>. vegan's
+<code>vegdist(x, "jaccard")</code> without <code>binary</code> is the quantitative form,
+ecodive's <code><a href="soergel.html">soergel()</a></code> (the Ruzicka dissimilarity).</p>
     </div>
     <div class="section level2">
     <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
@@ -142,7 +145,9 @@ seamlessly supports objects from the following biological data packages:</p><ul>
     <div class="dont-index"><p><code><a href="beta_div.html">beta_div()</a></code>, <code><a href="../articles/bdiv.html">vignette('bdiv')</a></code>, <code>vignette('bdiv_guide')</code></p>
 <p>Other Presence/Absence metrics:
 <code><a href="hamming.html">hamming()</a></code>,
+<code><a href="mountford.html">mountford()</a></code>,
 <code><a href="ochiai.html">ochiai()</a></code>,
+<code><a href="raup_crick.html">raup_crick()</a></code>,
 <code><a href="sorensen.html">sorensen()</a></code></p></div>
     </div>
 

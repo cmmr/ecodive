@@ -94,6 +94,8 @@ transformation).</p></li>
 <li><p><code>'rclr'</code>: Robust centered log ratio.</p></li>
 <li><p><code>'log'</code>: Log relative abundance (log-TSS), with <code>pseudocount</code> added
 to every value first.</p></li>
+<li><p><code>'chisq'</code>: The chi-square transformation, which uses the whole
+table's feature totals (see <code><a href="normalize.html">normalize()</a></code>).</p></li>
 </ul><p>Default: <code>'none'</code>.</p></dd>
 
 
@@ -203,10 +205,15 @@ Costea et al. (2014) for the impact on community clustering.</p>
     <div class="dont-index"><p><code><a href="beta_div.html">beta_div()</a></code>, <code><a href="../articles/bdiv.html">vignette('bdiv')</a></code>, <code>vignette('bdiv_guide')</code></p>
 <p>Other Abundance metrics:
 <code><a href="aitchison.html">aitchison()</a></code>,
+<code><a href="alt_gower.html">alt_gower()</a></code>,
 <code><a href="bhattacharyya.html">bhattacharyya()</a></code>,
+<code><a href="binomial_deviance.html">binomial_deviance()</a></code>,
 <code><a href="bray.html">bray()</a></code>,
 <code><a href="canberra.html">canberra()</a></code>,
+<code><a href="cao.html">cao()</a></code>,
+<code><a href="chao_jaccard.html">chao_jaccard()</a></code>,
 <code><a href="chebyshev.html">chebyshev()</a></code>,
+<code><a href="chisq_distance.html">chisq_distance()</a></code>,
 <code><a href="chord.html">chord()</a></code>,
 <code><a href="clark.html">clark()</a></code>,
 <code><a href="divergence.html">divergence()</a></code>,
@@ -216,7 +223,9 @@ Costea et al. (2014) for the impact on community clustering.</p>
 <code><a href="horn.html">horn()</a></code>,
 <code><a href="jensen.html">jensen()</a></code>,
 <code><a href="jsd.html">jsd()</a></code>,
+<code><a href="kulczynski.html">kulczynski()</a></code>,
 <code><a href="lorentzian.html">lorentzian()</a></code>,
+<code><a href="mahalanobis_distance.html">mahalanobis_distance()</a></code>,
 <code><a href="manhattan.html">manhattan()</a></code>,
 <code><a href="matusita.html">matusita()</a></code>,
 <code><a href="morisita.html">morisita()</a></code>,

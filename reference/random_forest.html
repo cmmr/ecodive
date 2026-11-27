@@ -124,8 +124,9 @@ class (e.g. <code>phyloseq</code>). Default: <code>1</code></p></dd>
 <dd><p>How to normalize each sample before growing the trees:
 <code>'percent'</code> (relative abundances, the default), <code>'none'</code> (the values
 as given, for any numeric table), or one of <code><a href="normalize.html">normalize()</a></code>'s other
-choices. Trees don't change under monotone transforms of a feature, so
-only transforms across features (percent, clr, chord, ...) matter.
+choices except <code>'chisq'</code>, which depends on the whole table. Trees
+don't change under monotone transforms of a feature, so only
+transforms across features (percent, clr, chord, ...) matter.
 Default: <code>'percent'</code></p></dd>
 
 

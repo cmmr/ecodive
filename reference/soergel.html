@@ -88,6 +88,8 @@ transformation).</p></li>
 <li><p><code>'rclr'</code>: Robust centered log ratio.</p></li>
 <li><p><code>'log'</code>: Log relative abundance (log-TSS), with <code>pseudocount</code> added
 to every value first.</p></li>
+<li><p><code>'chisq'</code>: The chi-square transformation, which uses the whole
+table's feature totals (see <code><a href="normalize.html">normalize()</a></code>).</p></li>
 </ul><p>Default: <code>'none'</code>.</p></dd>
 
 
@@ -144,6 +146,11 @@ $$\frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} \max(X_i, Y_i)}$$</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">ex_counts</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">ex_counts</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></code></pre><p></p></div>
+<p>It is also the Ruzicka dissimilarity, \(1 - \sum \min(X_i, Y_i) /
+\sum \max(X_i, Y_i)\), and vegan's quantitative Jaccard,
+<code>vegan::vegdist(x, "jaccard")</code> (\(2B / (1 + B)\), with \(B\) the
+Bray-Curtis dissimilarity). ecodive's <code><a href="jaccard.html">jaccard()</a></code> is the binary form,
+<code>vegdist(x, "jaccard", binary = TRUE)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="input-types">Input Types<a class="anchor" aria-label="anchor" href="#input-types"></a></h2>
@@ -189,10 +196,15 @@ Costea et al. (2014) for the impact on community clustering.</p>
     <div class="dont-index"><p><code><a href="beta_div.html">beta_div()</a></code>, <code><a href="../articles/bdiv.html">vignette('bdiv')</a></code>, <code>vignette('bdiv_guide')</code></p>
 <p>Other Abundance metrics:
 <code><a href="aitchison.html">aitchison()</a></code>,
+<code><a href="alt_gower.html">alt_gower()</a></code>,
 <code><a href="bhattacharyya.html">bhattacharyya()</a></code>,
+<code><a href="binomial_deviance.html">binomial_deviance()</a></code>,
 <code><a href="bray.html">bray()</a></code>,
 <code><a href="canberra.html">canberra()</a></code>,
+<code><a href="cao.html">cao()</a></code>,
+<code><a href="chao_jaccard.html">chao_jaccard()</a></code>,
 <code><a href="chebyshev.html">chebyshev()</a></code>,
+<code><a href="chisq_distance.html">chisq_distance()</a></code>,
 <code><a href="chord.html">chord()</a></code>,
 <code><a href="clark.html">clark()</a></code>,
 <code><a href="divergence.html">divergence()</a></code>,
@@ -202,7 +214,9 @@ Costea et al. (2014) for the impact on community clustering.</p>
 <code><a href="horn.html">horn()</a></code>,
 <code><a href="jensen.html">jensen()</a></code>,
 <code><a href="jsd.html">jsd()</a></code>,
+<code><a href="kulczynski.html">kulczynski()</a></code>,
 <code><a href="lorentzian.html">lorentzian()</a></code>,
+<code><a href="mahalanobis_distance.html">mahalanobis_distance()</a></code>,
 <code><a href="manhattan.html">manhattan()</a></code>,
 <code><a href="matusita.html">matusita()</a></code>,
 <code><a href="minkowski.html">minkowski()</a></code>,

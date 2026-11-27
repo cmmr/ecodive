@@ -87,7 +87,7 @@
 
 - Every function that returns a distance matrix,
   [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
-  and its 38 metric functions,
+  and its 55 metric functions,
   [`vlr()`](https://cmmr.github.io/ecodive/reference/vlr.md),
   [`rho_p()`](https://cmmr.github.io/ecodive/reference/rho_p.md) and
   [`phi_s()`](https://cmmr.github.io/ecodive/reference/phi_s.md), takes
@@ -151,6 +151,46 @@
   - `beta_div(x, "Bray-Curtis")` (alias `"braycurtis"`, or `"bc"`) still
     selects [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md)
     now that other metric names begin with “Bray-Curtis”.
+
+- Nine new beta metrics complete vegan’s `vegdist()`, every one
+  multithreaded and run by
+  [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
+  like any other:
+  [`kulczynski()`](https://cmmr.github.io/ecodive/reference/kulczynski.md),
+  [`binomial_deviance()`](https://cmmr.github.io/ecodive/reference/binomial_deviance.md)
+  (`"binomial"`),
+  [`cao()`](https://cmmr.github.io/ecodive/reference/cao.md),
+  [`chao_jaccard()`](https://cmmr.github.io/ecodive/reference/chao_jaccard.md)
+  (`"chao"`),
+  [`alt_gower()`](https://cmmr.github.io/ecodive/reference/alt_gower.md)
+  (`"altGower"`),
+  [`mahalanobis_distance()`](https://cmmr.github.io/ecodive/reference/mahalanobis_distance.md)
+  (`"mahalanobis"`) and
+  [`chisq_distance()`](https://cmmr.github.io/ecodive/reference/chisq_distance.md)
+  (`"chisq"`) of abundances, and
+  [`mountford()`](https://cmmr.github.io/ecodive/reference/mountford.md)
+  and
+  [`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md)
+  (`"raup"`) of presence/absence. They equal `vegdist()`‘s values
+  (Mountford’s to about 1e-10 where vegan’s iterations converge; for
+  richer samples ecodive’s is the exact root).
+  [`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md)
+  is vegdist’s analytic index, not vegan’s simulated `raupcrick()`.
+  [`mahalanobis_distance()`](https://cmmr.github.io/ecodive/reference/mahalanobis_distance.md)
+  stops with an error where the features’ covariance is singular, where
+  vegan returns near-constant values. The docs of
+  [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md),
+  [`soergel()`](https://cmmr.github.io/ecodive/reference/soergel.md) and
+  [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md)
+  give how every `vegdist()` method maps to ecodive’s metrics.
+
+- New `norm = 'chisq'`, the chi-square transformation (vegan’s
+  `decostand(x, "chi.square")`), for every metric with a `norm` argument
+  and for
+  [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md);
+  `euclidean(x, norm = 'chisq')` is `chisq_distance(x)`.
+  [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md)
+  refuses it, since it scales by the whole table’s feature totals.
 
 - Distance matrices, ordinations, permutation tests and
   [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md) have

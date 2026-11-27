@@ -49,20 +49,27 @@ available options programmatically.
 ``` r
 
 list_metrics('beta', 'id', weighted = FALSE)
-#> [1] "sorensen"  "hamming"  "jaccard"  "ochiai"  "unweighted_unifrac"
+#>  [1] "sorensen"            "hamming"             "jaccard"            
+#>  [4] "jaccard_nestedness"  "jaccard_turnover"    "mountford"          
+#>  [7] "ochiai"              "raup_crick"          "sorensen_turnover"  
+#> [10] "sorensen_nestedness" "unweighted_unifrac" 
 
 list_metrics('beta', 'id', weighted = TRUE)
-#>  [1] "aitchison"            "bhattacharyya"              "bray"                     
-#>  [4] "canberra"             "chebyshev"                  "chord"                    
-#>  [7] "clark"                "divergence"                 "euclidean"                
-#> [10] "generalized_unifrac"  "gower"                      "hellinger"                
-#> [13] "horn"                 "jensen"                     "jsd"                      
-#> [16] "lorentzian"           "manhattan"                  "matusita"                 
-#> [19] "minkowski"            "morisita"                   "motyka"                   
-#> [22] "normalized_unifrac"   "psym_chisq"                 "soergel"                  
-#> [25] "squared_chisq"        "squared_chord"              "squared_euclidean"        
-#> [28] "topsoe"               "variance_adjusted_unifrac"  "wave_hedges"
-#> [31] "weighted_unifrac"
+#>  [1] "aitchison"                 "alt_gower"                 "bhattacharyya"            
+#>  [4] "binomial_deviance"         "bray_gradient"             "bray_balanced"            
+#>  [7] "bray"                      "canberra"                  "cao"                      
+#> [10] "chao_jaccard"              "chebyshev"                 "chisq_distance"           
+#> [13] "chord"                     "clark"                     "divergence"               
+#> [16] "euclidean"                 "generalized_unifrac"       "gower"                    
+#> [19] "hellinger"                 "horn"                      "jensen"                   
+#> [22] "jsd"                       "kulczynski"                "lorentzian"               
+#> [25] "mahalanobis_distance"      "manhattan"                 "matusita"                 
+#> [28] "minkowski"                 "morisita"                  "motyka"                   
+#> [31] "normalized_unifrac"        "philr_distance"            "psym_chisq"               
+#> [34] "robust_aitchison"          "soergel_gradient"          "soergel_balanced"         
+#> [37] "soergel"                   "squared_chisq"             "squared_chord"            
+#> [40] "squared_euclidean"         "topsoe"                    "variance_adjusted_unifrac"
+#> [43] "wave_hedges"               "weighted_unifrac"         
 ```
 
 ## Formulas
@@ -100,7 +107,9 @@ Given:
 > [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md)
 > is equivalent to `bray(norm = 'binary')`, and
 > [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md) is
-> equivalent to `soergel(norm = 'binary')`.
+> equivalent to `soergel(norm = 'binary')`. vegan’s quantitative
+> `vegdist(x, "jaccard")` is
+> [`soergel()`](https://cmmr.github.io/ecodive/reference/soergel.md).
 
 ### Phylogenetic
 

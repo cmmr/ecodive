@@ -119,7 +119,9 @@ between species. *Ecology*, 26(3), 297–302.
 Other Presence/Absence metrics:
 [`hamming()`](https://cmmr.github.io/ecodive/reference/hamming.md),
 [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md),
-[`ochiai()`](https://cmmr.github.io/ecodive/reference/ochiai.md)
+[`mountford()`](https://cmmr.github.io/ecodive/reference/mountford.md),
+[`ochiai()`](https://cmmr.github.io/ecodive/reference/ochiai.md),
+[`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md)
 
 ## Examples
 

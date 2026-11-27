@@ -80,6 +80,12 @@ Base R Equivalent:
     y <- ex_counts[2,]
     1 - sum(x & y) / sum(x | y)
 
+It is vegan's `vegdist(x, "jaccard", binary = TRUE)`. vegan's
+`vegdist(x, "jaccard")` without `binary` is the quantitative form,
+ecodive's
+[`soergel()`](https://cmmr.github.io/ecodive/reference/soergel.md) (the
+Ruzicka dissimilarity).
+
 ## Input Types
 
 The `counts` parameter is designed to accept a simple numeric matrix,
@@ -118,7 +124,9 @@ Jaccard, P. (1908). Nouvelles recherches sur la distribution florale.
 
 Other Presence/Absence metrics:
 [`hamming()`](https://cmmr.github.io/ecodive/reference/hamming.md),
+[`mountford()`](https://cmmr.github.io/ecodive/reference/mountford.md),
 [`ochiai()`](https://cmmr.github.io/ecodive/reference/ochiai.md),
+[`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md),
 [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md)
 
 ## Examples

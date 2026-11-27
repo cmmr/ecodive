@@ -100,14 +100,24 @@ Distance measures using quantitative abundance data.
 
 - [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md)
   : Aitchison distance
+- [`alt_gower()`](https://cmmr.github.io/ecodive/reference/alt_gower.md)
+  : Alternative Gower distance
 - [`bhattacharyya()`](https://cmmr.github.io/ecodive/reference/bhattacharyya.md)
   : Bhattacharyya distance
+- [`binomial_deviance()`](https://cmmr.github.io/ecodive/reference/binomial_deviance.md)
+  : Binomial deviance dissimilarity
 - [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md) :
   Bray-Curtis dissimilarity
 - [`canberra()`](https://cmmr.github.io/ecodive/reference/canberra.md) :
   Canberra distance
+- [`cao()`](https://cmmr.github.io/ecodive/reference/cao.md) : Cao
+  dissimilarity (CYd)
+- [`chao_jaccard()`](https://cmmr.github.io/ecodive/reference/chao_jaccard.md)
+  : Chao-Jaccard dissimilarity
 - [`chebyshev()`](https://cmmr.github.io/ecodive/reference/chebyshev.md)
   : Chebyshev distance
+- [`chisq_distance()`](https://cmmr.github.io/ecodive/reference/chisq_distance.md)
+  : Chi-square distance
 - [`chord()`](https://cmmr.github.io/ecodive/reference/chord.md) : Chord
   distance
 - [`clark()`](https://cmmr.github.io/ecodive/reference/clark.md) :
@@ -126,8 +136,12 @@ Distance measures using quantitative abundance data.
   Jensen-Shannon distance
 - [`jsd()`](https://cmmr.github.io/ecodive/reference/jsd.md) :
   Jensen-Shannon divergence (JSD)
+- [`kulczynski()`](https://cmmr.github.io/ecodive/reference/kulczynski.md)
+  : Kulczynski dissimilarity
 - [`lorentzian()`](https://cmmr.github.io/ecodive/reference/lorentzian.md)
   : Lorentzian distance
+- [`mahalanobis_distance()`](https://cmmr.github.io/ecodive/reference/mahalanobis_distance.md)
+  : Mahalanobis distance
 - [`manhattan()`](https://cmmr.github.io/ecodive/reference/manhattan.md)
   : Manhattan distance
 - [`matusita()`](https://cmmr.github.io/ecodive/reference/matusita.md) :
@@ -163,8 +177,12 @@ Distance measures using binary (presence/absence) data.
   Hamming distance
 - [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md) :
   Jaccard distance
+- [`mountford()`](https://cmmr.github.io/ecodive/reference/mountford.md)
+  : Mountford dissimilarity
 - [`ochiai()`](https://cmmr.github.io/ecodive/reference/ochiai.md) :
   Otsuka-Ochiai dissimilarity
+- [`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md)
+  : Raup-Crick dissimilarity
 - [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md) :
   Dice-Sorensen dissimilarity
 

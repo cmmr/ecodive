@@ -149,19 +149,19 @@ will be applied to the
 
     # A data.frame of all available metrics.
     head(list_metrics())
-#>                                       name            id phylo weighted
-#> 1 Abundance-based Coverage Estimator (ACE)           ace FALSE     TRUE
-#> 2                       Aitchison Distance     aitchison FALSE     TRUE
-#> 3                      Berger-Parker Index        berger FALSE     TRUE
-#> 4                   Bhattacharyya Distance bhattacharyya FALSE     TRUE
-#> 5           Bray-Curtis Abundance Gradient bray_gradient FALSE     TRUE
-#> 6           Bray-Curtis Balanced Variation bray_balanced FALSE     TRUE
+#>                                       name                id phylo weighted
+#> 1 Abundance-based Coverage Estimator (ACE)               ace FALSE     TRUE
+#> 2                       Aitchison Distance         aitchison FALSE     TRUE
+#> 3               Alternative Gower Distance         alt_gower FALSE     TRUE
+#> 4                      Berger-Parker Index            berger FALSE     TRUE
+#> 5                   Bhattacharyya Distance     bhattacharyya FALSE     TRUE
+#> 6          Binomial Deviance Dissimilarity binomial_deviance FALSE     TRUE
 #>   int_only true_metric   div
 #> 1     TRUE          NA alpha
 #> 2    FALSE        TRUE  beta
-#> 3    FALSE          NA alpha
-#> 4    FALSE        TRUE  beta
-#> 5    FALSE       FALSE  beta
+#> 3    FALSE       FALSE  beta
+#> 4    FALSE          NA alpha
+#> 5    FALSE        TRUE  beta
 #> 6    FALSE       FALSE  beta
     
     # All alpha diversity function names.

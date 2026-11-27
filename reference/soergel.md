@@ -51,6 +51,10 @@ soergel(
   - `'log'`: Log relative abundance (log-TSS), with `pseudocount` added
     to every value first.
 
+  - `'chisq'`: The chi-square transformation, which uses the whole
+    table's feature totals (see
+    [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)).
+
   Default: `'none'`.
 
 - pseudocount:
@@ -117,6 +121,13 @@ Base R Equivalent:
     y <- ex_counts[2,]
     sum(abs(x - y)) / sum(pmax(x, y))
 
+It is also the Ruzicka dissimilarity, \\1 - \sum \min(X_i, Y_i) / \sum
+\max(X_i, Y_i)\\, and vegan's quantitative Jaccard,
+`vegan::vegdist(x, "jaccard")` (\\2B / (1 + B)\\, with \\B\\ the
+Bray-Curtis dissimilarity). ecodive's
+[`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md) is
+the binary form, `vegdist(x, "jaccard", binary = TRUE)`.
+
 ## Input Types
 
 The `counts` parameter is designed to accept a simple numeric matrix,
@@ -175,10 +186,15 @@ Mathematical Models and Methods in Applied Sciences*, 1(4), 300–307.
 
 Other Abundance metrics:
 [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md),
+[`alt_gower()`](https://cmmr.github.io/ecodive/reference/alt_gower.md),
 [`bhattacharyya()`](https://cmmr.github.io/ecodive/reference/bhattacharyya.md),
+[`binomial_deviance()`](https://cmmr.github.io/ecodive/reference/binomial_deviance.md),
 [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md),
 [`canberra()`](https://cmmr.github.io/ecodive/reference/canberra.md),
+[`cao()`](https://cmmr.github.io/ecodive/reference/cao.md),
+[`chao_jaccard()`](https://cmmr.github.io/ecodive/reference/chao_jaccard.md),
 [`chebyshev()`](https://cmmr.github.io/ecodive/reference/chebyshev.md),
+[`chisq_distance()`](https://cmmr.github.io/ecodive/reference/chisq_distance.md),
 [`chord()`](https://cmmr.github.io/ecodive/reference/chord.md),
 [`clark()`](https://cmmr.github.io/ecodive/reference/clark.md),
 [`divergence()`](https://cmmr.github.io/ecodive/reference/divergence.md),
@@ -188,7 +204,9 @@ Other Abundance metrics:
 [`horn()`](https://cmmr.github.io/ecodive/reference/horn.md),
 [`jensen()`](https://cmmr.github.io/ecodive/reference/jensen.md),
 [`jsd()`](https://cmmr.github.io/ecodive/reference/jsd.md),
+[`kulczynski()`](https://cmmr.github.io/ecodive/reference/kulczynski.md),
 [`lorentzian()`](https://cmmr.github.io/ecodive/reference/lorentzian.md),
+[`mahalanobis_distance()`](https://cmmr.github.io/ecodive/reference/mahalanobis_distance.md),
 [`manhattan()`](https://cmmr.github.io/ecodive/reference/manhattan.md),
 [`matusita()`](https://cmmr.github.io/ecodive/reference/matusita.md),
 [`minkowski()`](https://cmmr.github.io/ecodive/reference/minkowski.md),

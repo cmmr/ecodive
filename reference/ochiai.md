@@ -115,6 +115,8 @@ Scientific Fisheries*, 22, 526-530.
 Other Presence/Absence metrics:
 [`hamming()`](https://cmmr.github.io/ecodive/reference/hamming.md),
 [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md),
+[`mountford()`](https://cmmr.github.io/ecodive/reference/mountford.md),
+[`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md),
 [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md)
 
 ## Examples

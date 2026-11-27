@@ -68,9 +68,10 @@ random_forest(
   (relative abundances, the default), `'none'` (the values as given, for
   any numeric table), or one of
   [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md)'s
-  other choices. Trees don't change under monotone transforms of a
-  feature, so only transforms across features (percent, clr, chord, ...)
-  matter. Default: `'percent'`
+  other choices except `'chisq'`, which depends on the whole table.
+  Trees don't change under monotone transforms of a feature, so only
+  transforms across features (percent, clr, chord, ...) matter. Default:
+  `'percent'`
 
 - pseudocount:
 

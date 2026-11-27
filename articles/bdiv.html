@@ -129,20 +129,27 @@ specific metric falls into or to list all available options
 programmatically.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "sorensen"  "hamming"  "jaccard"  "ochiai"  "unweighted_unifrac"</span></span>
+<span><span class="co">#&gt;  [1] "sorensen"            "hamming"             "jaccard"            </span></span>
+<span><span class="co">#&gt;  [4] "jaccard_nestedness"  "jaccard_turnover"    "mountford"          </span></span>
+<span><span class="co">#&gt;  [7] "ochiai"              "raup_crick"          "sorensen_turnover"  </span></span>
+<span><span class="co">#&gt; [10] "sorensen_nestedness" "unweighted_unifrac" </span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/metrics.html">list_metrics</a></span><span class="op">(</span><span class="st">'beta'</span>, <span class="st">'id'</span>, weighted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "aitchison"            "bhattacharyya"              "bray"                     </span></span>
-<span><span class="co">#&gt;  [4] "canberra"             "chebyshev"                  "chord"                    </span></span>
-<span><span class="co">#&gt;  [7] "clark"                "divergence"                 "euclidean"                </span></span>
-<span><span class="co">#&gt; [10] "generalized_unifrac"  "gower"                      "hellinger"                </span></span>
-<span><span class="co">#&gt; [13] "horn"                 "jensen"                     "jsd"                      </span></span>
-<span><span class="co">#&gt; [16] "lorentzian"           "manhattan"                  "matusita"                 </span></span>
-<span><span class="co">#&gt; [19] "minkowski"            "morisita"                   "motyka"                   </span></span>
-<span><span class="co">#&gt; [22] "normalized_unifrac"   "psym_chisq"                 "soergel"                  </span></span>
-<span><span class="co">#&gt; [25] "squared_chisq"        "squared_chord"              "squared_euclidean"        </span></span>
-<span><span class="co">#&gt; [28] "topsoe"               "variance_adjusted_unifrac"  "wave_hedges"</span></span>
-<span><span class="co">#&gt; [31] "weighted_unifrac"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "aitchison"                 "alt_gower"                 "bhattacharyya"            </span></span>
+<span><span class="co">#&gt;  [4] "binomial_deviance"         "bray_gradient"             "bray_balanced"            </span></span>
+<span><span class="co">#&gt;  [7] "bray"                      "canberra"                  "cao"                      </span></span>
+<span><span class="co">#&gt; [10] "chao_jaccard"              "chebyshev"                 "chisq_distance"           </span></span>
+<span><span class="co">#&gt; [13] "chord"                     "clark"                     "divergence"               </span></span>
+<span><span class="co">#&gt; [16] "euclidean"                 "generalized_unifrac"       "gower"                    </span></span>
+<span><span class="co">#&gt; [19] "hellinger"                 "horn"                      "jensen"                   </span></span>
+<span><span class="co">#&gt; [22] "jsd"                       "kulczynski"                "lorentzian"               </span></span>
+<span><span class="co">#&gt; [25] "mahalanobis_distance"      "manhattan"                 "matusita"                 </span></span>
+<span><span class="co">#&gt; [28] "minkowski"                 "morisita"                  "motyka"                   </span></span>
+<span><span class="co">#&gt; [31] "normalized_unifrac"        "philr_distance"            "psym_chisq"               </span></span>
+<span><span class="co">#&gt; [34] "robust_aitchison"          "soergel_gradient"          "soergel_balanced"         </span></span>
+<span><span class="co">#&gt; [37] "soergel"                   "squared_chisq"             "squared_chord"            </span></span>
+<span><span class="co">#&gt; [40] "squared_euclidean"         "topsoe"                    "variance_adjusted_unifrac"</span></span>
+<span><span class="co">#&gt; [43] "wave_hedges"               "weighted_unifrac"         </span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="formulas">Formulas<a class="anchor" aria-label="anchor" href="#formulas"></a>
@@ -190,9 +197,29 @@ min).</li>
 </tr>
 <tr class="even">
 <td align="left">
+<strong>Alternative Gower distance</strong> <br><code><a href="../reference/alt_gower.html">alt_gower()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\displaystyle
+\frac{1}{N_Z}\sum_{i=1}^{n} |X_i - Y_i|</span> <br> Where <span class="math inline">N_Z</span> is the number of features not zero in
+both samples.</td>
+</tr>
+<tr class="odd">
+<td align="left">
 <strong>Bhattacharyya distance</strong> <br><code><a href="../reference/bhattacharyya.html">bhattacharyya()</a></code>
 </td>
 <td align="left"><span class="math inline">-\ln{\sum_{i=1}^{n}\sqrt{P_{i}Q_{i}}}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Binomial deviance dissimilarity</strong> <br><code><a href="../reference/binomial_deviance.html">binomial_deviance()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\displaystyle
+\sum_{i=1}^{n}\frac{X_i\ln\frac{X_i}{N_i} + Y_i\ln\frac{Y_i}{N_i} -
+N_i\ln\frac{1}{2}}{N_i}</span> <br> Where <span class="math inline">N_i
+= X_i + Y_i</span>, over features with <span class="math inline">N_i
+&gt; 0</span>.</td>
 </tr>
 <tr class="odd">
 <td align="left">
@@ -211,11 +238,41 @@ Y_i)}</span></td>
 </tr>
 <tr class="odd">
 <td align="left">
+<strong>Cao dissimilarity (CYd)</strong> <br><code><a href="../reference/cao.html">cao()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\displaystyle
+\frac{1}{S}\sum_{i=1}^{S}\left[\ln\frac{X_i + Y_i}{2} - \frac{X_i\ln Y_i
++ Y_i\ln X_i}{X_i + Y_i}\right]</span> <br> Over the <span class="math inline">S</span> features in either sample, with values
+below 0.1 raised to 0.1.</td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Chao-Jaccard dissimilarity</strong> <br>
+(integers only) <br><code><a href="../reference/chao_jaccard.html">chao_jaccard()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\displaystyle 1 - \frac{UV}{U
++ V - UV}</span> <br> Where <span class="math inline">U</span> and <span class="math inline">V</span> estimate the shares of each sample’s
+individuals in shared species (see <code><a href="../reference/chao_jaccard.html">chao_jaccard()</a></code>).</td>
+</tr>
+<tr class="odd">
+<td align="left">
 <strong>Chebyshev distance</strong> <br><code><a href="../reference/chebyshev.html">chebyshev()</a></code>
 </td>
 <td align="left"><span class="math inline">\max(|X_i - Y_i|)</span></td>
 </tr>
 <tr class="even">
+<td align="left">
+<strong>Chi-square distance</strong> <br><code><a href="../reference/chisq_distance.html">chisq_distance()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\displaystyle
+\sqrt{T\sum_{i=1}^{n}\frac{1}{c_i}\left(P_i - Q_i\right)^2}</span> <br>
+Where <span class="math inline">c_i</span> is the <span class="math inline">i</span>-th feature’s total over all samples and
+<span class="math inline">T</span> the table’s total.</td>
+</tr>
+<tr class="odd">
 <td align="left">
 <strong>Chord distance</strong> <br><code><a href="../reference/chord.html">chord()</a></code>
 </td>
@@ -223,7 +280,7 @@ Y_i)}</span></td>
 \sqrt{\sum_{i=1}^{n} \left(\frac{X_i}{\sqrt{\sum_{j=1}^{n} X_j^2}} -
 \frac{Y_i}{\sqrt{\sum_{j=1}^{n} Y_j^2}}\right)^2}</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Clark’s divergence distance</strong> <br><code><a href="../reference/clark.html">clark()</a></code>
 </td>
@@ -231,35 +288,35 @@ Y_i)}</span></td>
 \sqrt{\sum_{i=1}^{n}\left(\frac{X_i - Y_i}{X_i +
 Y_i}\right)^{2}}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Divergence</strong> <br><code><a href="../reference/divergence.html">divergence()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle 2\sum_{i=1}^{n}
 \frac{(P_i - Q_i)^2}{(P_i + Q_i)^2}</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Euclidean distance</strong> <br><code><a href="../reference/euclidean.html">euclidean()</a></code>
 </td>
 <td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n} (X_i -
 Y_i)^2}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Gower distance</strong> <br><code><a href="../reference/gower.html">gower()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
 \frac{1}{n}\sum_{i=1}^{n}\frac{|X_i - Y_i|}{R_i}</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Hellinger distance</strong> <br><code><a href="../reference/hellinger.html">hellinger()</a></code>
 </td>
 <td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n}(\sqrt{P_i} -
 \sqrt{Q_i})^{2}}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Horn-Morisita dissimilarity</strong> <br><code><a href="../reference/horn.html">horn()</a></code>
 </td>
@@ -267,7 +324,7 @@ Y_i)^2}</span></td>
 \frac{2\sum_{i=1}^{n}P_{i}Q_{i}}{\sum_{i=1}^{n}P_i^2 +
 \sum_{i=1}^{n}Q_i^2}</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Jensen-Shannon distance</strong> <br><code><a href="../reference/jensen.html">jensen()</a></code>
 </td>
@@ -276,7 +333,7 @@ Y_i)^2}</span></td>
 Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i +
 Q_i}\right)\right]}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Jensen-Shannon divergence (JSD)</strong> <br><code><a href="../reference/jsd.html">jsd()</a></code>
 </td>
@@ -284,6 +341,14 @@ Q_i}\right)\right]}</span></td>
 \frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right)
 + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i +
 Q_i}\right)\right]</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Kulczynski dissimilarity</strong> <br><code><a href="../reference/kulczynski.html">kulczynski()</a></code>
+</td>
+<td align="left"><span class="math inline">\displaystyle 1 -
+\frac{1}{2}\left(\frac{\sum_{i=1}^{n}\min(X_i, Y_i)}{X_T} +
+\frac{\sum_{i=1}^{n}\min(X_i, Y_i)}{Y_T}\right)</span></td>
 </tr>
 <tr class="odd">
 <td align="left">
@@ -294,19 +359,28 @@ Y_i|)}</span></td>
 </tr>
 <tr class="even">
 <td align="left">
+<strong>Mahalanobis distance</strong> <br><code><a href="../reference/mahalanobis_distance.html">mahalanobis_distance()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\sqrt{(X -
+Y)^{T}\Sigma^{-1}(X - Y)}</span> <br> Where <span class="math inline">\Sigma</span> is the features’ covariance over all
+samples.</td>
+</tr>
+<tr class="odd">
+<td align="left">
 <strong>Manhattan distance</strong> <br><code><a href="../reference/manhattan.html">manhattan()</a></code>
 </td>
 <td align="left"><span class="math inline">\sum_{i=1}^{n} |X_i -
 Y_i|</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Matusita distance</strong> <br><code><a href="../reference/matusita.html">matusita()</a></code>
 </td>
 <td align="left"><span class="math inline">\sqrt{\sum_{i=1}^{n}\left(\sqrt{P_i} -
 \sqrt{Q_i}\right)^2}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Minkowski distance</strong> <br><code><a href="../reference/minkowski.html">minkowski()</a></code>
 </td>
@@ -315,7 +389,7 @@ Y_i|</span></td>
 - Y_i)^p}</span> <br> Where <span class="math inline">p</span> is the
 geometry of the space.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Morisita dissimilarity</strong> <br> (integers
 only) <br><code><a href="../reference/morisita.html">morisita()</a></code>
@@ -326,7 +400,7 @@ only) <br><code><a href="../reference/morisita.html">morisita()</a></code>
 \frac{\sum_{i=1}^{n}Y_i(Y_i - 1)}{Y_T(Y_T -
 1)}\right)X_{T}Y_{T}}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Motyka dissimilarity</strong> <br><code><a href="../reference/motyka.html">motyka()</a></code>
 </td>
@@ -334,21 +408,21 @@ only) <br><code><a href="../reference/morisita.html">morisita()</a></code>
 \frac{\sum_{i=1}^{n} \max(X_i, Y_i)}{\sum_{i=1}^{n} (X_i +
 Y_i)}</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Probabilistic Symmetric <span class="math inline">\chi^2</span> distance</strong> <br><code><a href="../reference/psym_chisq.html">psym_chisq()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
 2\sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Robust Aitchison distance</strong> <br><code><a href="../reference/robust_aitchison.html">robust_aitchison()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle
 \sqrt{\sum_{i=1}^{n} (X^*_i - Y^*_i)^2}</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Soergel distance</strong> <br><code><a href="../reference/soergel.html">soergel()</a></code>
 </td>
@@ -356,7 +430,7 @@ Y_i)}</span></td>
 \frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} \max(X_i,
 Y_i)}</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Squared <span class="math inline">\chi^2</span>
 distance</strong> <br><code><a href="../reference/squared_chisq.html">squared_chisq()</a></code>
@@ -364,21 +438,21 @@ distance</strong> <br><code><a href="../reference/squared_chisq.html">squared_ch
 <td align="left"><span class="math inline">\displaystyle
 \sum_{i=1}^{n}\frac{(P_i - Q_i)^2}{P_i + Q_i}</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Squared Chord distance</strong> <br><code><a href="../reference/squared_chord.html">squared_chord()</a></code>
 </td>
 <td align="left"><span class="math inline">\sum_{i=1}^{n}\left(\sqrt{P_i} -
 \sqrt{Q_i}\right)^2</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Squared Euclidean distance</strong> <br><code><a href="../reference/squared_euclidean.html">squared_euclidean()</a></code>
 </td>
 <td align="left"><span class="math inline">\sum_{i=1}^{n} (X_i -
 Y_i)^2</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">
 <strong>Topsoe distance</strong> <br><code><a href="../reference/topsoe.html">topsoe()</a></code>
 </td>
@@ -386,7 +460,7 @@ Y_i)^2</span></td>
 \sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) +
 \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">
 <strong>Wave Hedges distance</strong> <br><code><a href="../reference/wave_hedges.html">wave_hedges()</a></code>
 </td>
@@ -436,17 +510,36 @@ common.</li>
 </tr>
 <tr class="even">
 <td align="left">
+<strong>Mountford dissimilarity</strong> <br><code><a href="../reference/mountford.html">mountford()</a></code>
+</td>
+<td align="left">
+<span class="math inline">\ln 2 - M</span>, where <span class="math inline">e^{AM} + e^{BM} = 1 + e^{(A + B - J)M}</span>
+</td>
+</tr>
+<tr class="odd">
+<td align="left">
 <strong>Otsuka-Ochiai dissimilarity</strong> <br><code><a href="../reference/ochiai.html">ochiai()</a></code>
 </td>
 <td align="left"><span class="math inline">\displaystyle 1 -
 \frac{J}{\sqrt{AB}}</span></td>
+</tr>
+<tr class="even">
+<td align="left">
+<strong>Raup-Crick dissimilarity</strong> <br><code><a href="../reference/raup_crick.html">raup_crick()</a></code>
+</td>
+<td align="left">
+<span class="math inline">P(X \ge J)</span>, <span class="math inline">X</span> hypergeometric: <span class="math inline">A</span> and <span class="math inline">B</span> of
+the table’s <span class="math inline">S</span> features drawn at
+random</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
 <p><strong>Note:</strong> <code><a href="../reference/sorensen.html">sorensen()</a></code> is equivalent to
 <code>bray(norm = 'binary')</code>, and <code><a href="../reference/jaccard.html">jaccard()</a></code> is
-equivalent to <code>soergel(norm = 'binary')</code>.</p>
+equivalent to <code>soergel(norm = 'binary')</code>. vegan’s
+quantitative <code>vegdist(x, "jaccard")</code> is
+<code><a href="../reference/soergel.html">soergel()</a></code>.</p>
 </blockquote>
 </div>
 <div class="section level3">

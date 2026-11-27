@@ -114,7 +114,9 @@ System Technical Journal*, 29(2), 147-160.
 
 Other Presence/Absence metrics:
 [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md),
+[`mountford()`](https://cmmr.github.io/ecodive/reference/mountford.md),
 [`ochiai()`](https://cmmr.github.io/ecodive/reference/ochiai.md),
+[`raup_crick()`](https://cmmr.github.io/ecodive/reference/raup_crick.md),
 [`sorensen()`](https://cmmr.github.io/ecodive/reference/sorensen.md)
 
 ## Examples
