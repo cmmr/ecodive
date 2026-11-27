@@ -64,7 +64,7 @@
 // e30126. doi:10.1371/journal.pone.0030126
 
 #include "ecodive.h"
-#include <Rmath.h> // lgammafn: no global state for positive arguments
+#include <Rmath.h> // lgammafn, for the constants (once per call)
 
 
 //======================================================
@@ -94,6 +94,59 @@ static double dmm_trigamma (double x) {
 }
 
 
+// lgamma(x) for x > 0: the recurrence lgamma(x) = lgamma(x + n) -
+// log(x (x + 1) ... (x + n - 1)) up to x >= 10, then Stirling's series
+// (Abramowitz & Stegun 6.1.41), to about 1e-15 absolute. No state.
+static double dmm_lgamma (double x) {
+  double p = 1;
+  while (x < 10) { p *= x; x += 1; }
+  double f = 1 / (x * x);
+  double t = (1.0 / 12 + f * (-1.0 / 360 + f * (1.0 / 1260 + f * (-1.0 / 1680 +
+             f * (1.0 / 1188 + f * (-691.0 / 360360 + f * (1.0 / 156))))))) / x;
+  return (x - 0.5) * log(x) - x + 0.91893853320467274178 + t - log(p);
+}
+
+
+// The model needs only differences at a = alpha (or A) and a count x:
+// lgamma(a + x) - lgamma(a), psi(a + x) - psi(a), psi1(a + x) - psi1(a).
+// For a whole x up to DM_SMALL they are a log of a product and sums,
+//   log(a (a + 1) ... (a + x - 1)),  sum_t 1 / (a + t),  -sum_t 1 / (a + t)^2,
+// which are faster and more accurate than differences of the functions.
+// Otherwise they are the differences, given the values at a (fa).
+#define DM_SMALL 16
+
+static inline int dm_small (double a, double x) {
+  return x <= DM_SMALL && x == floor(x) && a < 1e15;
+}
+
+static inline double lg_diff (double a, double x, double fa) {
+  if (dm_small(a, x)) {
+    double p = a;
+    for (int t = 1; t < x; t++) p *= a + t;
+    return log(p);
+  }
+  return dmm_lgamma(a + x) - fa;
+}
+
+static inline double dg_diff (double a, double x, double fa) {
+  if (dm_small(a, x)) {
+    double s = 0;
+    for (int t = 0; t < x; t++) s += 1 / (a + t);
+    return s;
+  }
+  return dmm_digamma(a + x) - fa;
+}
+
+static inline double tg_diff (double a, double x, double fa) {
+  if (dm_small(a, x)) {
+    double s = 0;
+    for (int t = 0; t < x; t++) { double u = a + t; s -= 1 / (u * u); }
+    return s;
+  }
+  return dmm_trigamma(a + x) - fa;
+}
+
+
 
 //======================================================
 // The table, by sample (CSR) and by feature (CSC).
@@ -116,11 +169,14 @@ static double *dm_pi;    // K
 static double *dm_z;     // n x K, column-major
 static double *dm_lse;   // n: log sum_k pi_k exp(l_ik)
 static double *dm_lga;   // K x S: lgamma(alpha)
+static double *dm_A;     // K: sum of alpha
+static double *dm_lgA;   // K: lgamma(A)
 
 // One M-step evaluation, for type dm_k.
 static int     dm_k;
 static double *dm_ev_a;  // S: alpha
 static double  dm_ev_A;
+static double  dm_ev_f[3]; // lgamma, psi, psi1 of A
 static double *dm_fv, *dm_fg, *dm_fh; // S: per-feature sums
 static double *dm_sv, *dm_sg, *dm_sh; // n: per-sample terms
 static int     dm_hess;               // 1: also the Hessian's sums
@@ -154,12 +210,11 @@ static void *estep_worker (void *arg) {
       if (!(dm_pi[k] > 0)) { ll[k] = R_NegInf; continue; }
       const double *a  = dm_alpha + (size_t) k * S;
       const double *lg = dm_lga   + (size_t) k * S;
-      double A = 0;
-      for (int j = 0; j < S; j++) A += a[j];
-      double s = lgammafn(A) - lgammafn(A + dm_J[i]);
+      double A = dm_A[k];
+      double s = -lg_diff(A, dm_J[i], dm_lgA[k]);
       for (int p = dm_pos[i]; p < dm_pos[i + 1]; p++) {
         int j = dm_otu[p];
-        s += lgammafn(a[j] + dm_val[p]) - lg[j];
+        s += lg_diff(a[j], dm_val[p], lg[j]);
       }
       ll[k] = s + log(dm_pi[k]);
       if (ll[k] > mx) mx = ll[k];
@@ -200,7 +255,8 @@ static double log_prior (void) {
 // E-step, then the negative log posterior.
 static double estep (int n_threads) {
   int K = dm_K, S = dm_S;
-  for (size_t q = 0; q < (size_t) K * S; q++) dm_lga[q] = lgammafn(dm_alpha[q]);
+  for (size_t q = 0; q < (size_t) K * S; q++) dm_lga[q] = dmm_lgamma(dm_alpha[q]);
+  for (int k = 0; k < K; k++) { dm_A[k] = alpha_sum(k); dm_lgA[k] = dmm_lgamma(dm_A[k]); }
   int nt = threads_for(n_threads, (double) (dm_pos[dm_n] + dm_n) * K * 40, 1e5);
   run_parallel(estep_worker, nt, dm_n < 100 ? 100 : dm_n);
   double ll = 0;
@@ -230,15 +286,15 @@ static void *mstep_worker (void *arg) {
     if (t < S) {
       int j = t;
       double aj = a[j], v = 0, g = 0, h = 0;
-      double lga = lgammafn(aj), dga = dmm_digamma(aj);
+      double lga = dmm_lgamma(aj), dga = dmm_digamma(aj);
       double tga = hess ? dmm_trigamma(aj) : 0;
       for (int p = dm_fpos[j]; p < dm_fpos[j + 1]; p++) {
         double w = z[dm_fsam[p]];
         if (w == 0) continue;
-        double c = aj + dm_fval[p];
-        v += w * (lgammafn(c) - lga);
-        g += w * (dmm_digamma(c) - dga);
-        if (hess) h += w * (dmm_trigamma(c) - tga);
+        double x = dm_fval[p];
+        v += w * lg_diff(aj, x, lga);
+        g += w * dg_diff(aj, x, dga);
+        if (hess) h += w * tg_diff(aj, x, tga);
       }
       dm_fv[j] = v;
       dm_fg[j] = g;
@@ -249,10 +305,10 @@ static void *mstep_worker (void *arg) {
       int i = t - S;
       double w = z[i];
       if (w == 0) { dm_sv[i] = dm_sg[i] = dm_sh[i] = 0; continue; }
-      double C = A + dm_J[i];
-      dm_sv[i] = w * (lgammafn(A) - lgammafn(C));
-      dm_sg[i] = w * (dmm_digamma(C) - dmm_digamma(A));
-      dm_sh[i] = hess ? w * (dmm_trigamma(C) - dmm_trigamma(A)) : 0;
+      double J = dm_J[i];
+      dm_sv[i] = -w * lg_diff(A, J, dm_ev_f[0]);
+      dm_sg[i] =  w * dg_diff(A, J, dm_ev_f[1]);
+      dm_sh[i] = hess ? w * tg_diff(A, J, dm_ev_f[2]) : 0;
     }
   }
 
@@ -273,6 +329,9 @@ static double mstep_eval_full (const double *lam, double *grad, int hess, double
   memcpy(dm_ev_a, a, (size_t) S * sizeof(double));
   dm_ev_A = A;
   dm_hess = hess;
+  dm_ev_f[0] = dmm_lgamma(A);
+  dm_ev_f[1] = dmm_digamma(A);
+  dm_ev_f[2] = hess ? dmm_trigamma(A) : 0;
 
   int nt = threads_for(dm_n_threads, (double) (dm_pos[n] + n) * (hess ? 90 : 60), 1e5);
   run_parallel(mstep_worker, nt, S + n < 100 ? 100 : S + n);
@@ -727,6 +786,8 @@ SEXP C_dmm (SEXP sexp_counts, SEXP sexp_margin, SEXP sexp_types,
   dm_lga   = (double *) safe_malloc((KS + 1) * sizeof(double));
   dm_cent  = (double *) safe_malloc((KS + 1) * sizeof(double));
   dm_pi    = (double *) safe_malloc((size_t) (Kmax + 1) * sizeof(double));
+  dm_A     = (double *) safe_malloc((size_t) (Kmax + 1) * sizeof(double));
+  dm_lgA   = (double *) safe_malloc((size_t) (Kmax + 1) * sizeof(double));
   dm_cc    = (double *) safe_malloc((size_t) (Kmax + 1) * sizeof(double));
   dm_z     = (double *) safe_malloc(((size_t) n * Kmax + 1) * sizeof(double));
   dm_lse   = (double *) safe_malloc((size_t) (n + 1) * sizeof(double));

@@ -738,11 +738,15 @@ R 4.3.3, GSL 2.7.1):
   small-alpha directions take ~100 evaluations per M-step. It was removed
   before committing, so there is no ported code, no `COPYRIGHTS` stanza and
   no `Authors@R` entry.
-- **digamma and trigamma** are the recurrence plus asymptotic series in
-  `src/dmm.c` (no state, so thread-safe; ~1e-16), not Rmath's; `lgammafn`
-  is Rmath's (no state for positive arguments, as `src/alpha_div.c`
-  notes). The tests check the criteria against R's `digamma()`/`trigamma()`
-  at 1e-8.
+- **lgamma, digamma and trigamma** are the recurrence plus asymptotic
+  series in `src/dmm.c` (Stirling's for lgamma; no state, so thread-safe;
+  ~1e-15), not Rmath's. The model needs only differences at alpha (or A)
+  and a count x; for a whole x up to 16 they are computed exactly as
+  log(a (a+1) ... (a+x-1)), sum 1/(a+t) and -sum 1/(a+t)^2, which is
+  faster and avoids cancellation. Rmath's `lgammafn` is used only for the
+  constants. (Added after the first push: 1.6-2.1x faster on one thread,
+  results the same to 1e-14 relative.) The tests check the criteria against
+  R's `lgamma()`, `digamma()` and `trigamma()` at 1e-8.
 - **log|H| in O(S)** as sum log d_j + log(1 + c sum alpha_j^2/d_j): no
   S x S matrix and no Cholesky, so the plan's O(K S^3) cost and the warning
   above S = 2,000 are unnecessary; `laplace` is `NaN` (with a warning) if a
