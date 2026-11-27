@@ -510,9 +510,12 @@ varpart(
 #> [d]  residuals NA    0.6795        0.7361    FALSE
 ```
 
-[`principal_response_curves()`](https://cmmr.github.io/ecodive/reference/principal_response_curves.md),
-which is planned, will also build on
-[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md).
+[`principal_response_curves()`](https://cmmr.github.io/ecodive/reference/principal_response_curves.md)
+also builds on
+[`rda()`](https://cmmr.github.io/ecodive/reference/rda.md). For a
+treatment-by-time experiment, it fits a partial RDA with time as the
+condition, and draws each treatment’s departure from the control at each
+time.
 
 [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), canonical
 **correspondence** analysis (not canonical correlation analysis), is the

@@ -95,9 +95,9 @@
 </h2>
 <table class="table">
 <colgroup>
-<col width="16%">
 <col width="12%">
-<col width="70%">
+<col width="8%">
+<col width="78%">
 </colgroup>
 <thead><tr>
 <th align="left">Task</th>
@@ -115,7 +115,7 @@
 <td align="left">Beta diversity</td>
 <td align="left"><code><a href="reference/beta_div.html">beta_div()</a></code></td>
 <td align="left">
-<code><a href="reference/bray.html">bray()</a></code>, <code><a href="reference/jaccard.html">jaccard()</a></code>, <code><a href="reference/aitchison.html">aitchison()</a></code>, <code><a href="reference/weighted_unifrac.html">weighted_unifrac()</a></code>, and 33 more</td>
+<code><a href="reference/bray.html">bray()</a></code>, <code><a href="reference/jaccard.html">jaccard()</a></code>, <code><a href="reference/aitchison.html">aitchison()</a></code>, <code><a href="reference/weighted_unifrac.html">weighted_unifrac()</a></code>, and 42 more</td>
 </tr>
 <tr>
 <td align="left">Ordination</td>
@@ -128,7 +128,7 @@
 <td align="left">Ordination of counts</td>
 <td align="left"><code><a href="reference/count_ord.html">count_ord()</a></code></td>
 <td align="left">
-<code><a href="reference/pca.html">pca()</a></code>, <code><a href="reference/rpca.html">rpca()</a></code>, <code><a href="reference/rda.html">rda()</a></code>, <code><a href="reference/cca.html">cca()</a></code>, <code><a href="reference/ca.html">ca()</a></code>, <code><a href="reference/lda.html">lda()</a></code>, <code><a href="reference/plsda.html">plsda()</a></code>, <code><a href="reference/oplsda.html">oplsda()</a></code>
+<code><a href="reference/pca.html">pca()</a></code>, <code><a href="reference/rpca.html">rpca()</a></code>, <code><a href="reference/rpca_phylo.html">rpca_phylo()</a></code>, <code><a href="reference/dpcoa.html">dpcoa()</a></code>, <code><a href="reference/rda.html">rda()</a></code>, <code><a href="reference/cca.html">cca()</a></code>, <code><a href="reference/ca.html">ca()</a></code>, <code><a href="reference/lda.html">lda()</a></code>, <code><a href="reference/plsda.html">plsda()</a></code>, <code><a href="reference/oplsda.html">oplsda()</a></code>
 </td>
 </tr>
 <tr>
@@ -149,7 +149,7 @@
 <td align="left">Model building</td>
 <td align="left"></td>
 <td align="left">
-<code><a href="reference/varpart.html">varpart()</a></code>, <code><a href="reference/forward_select.html">forward_select()</a></code>, <code><a href="reference/bioenv.html">bioenv()</a></code>
+<code><a href="reference/varpart.html">varpart()</a></code>, <code><a href="reference/forward_select.html">forward_select()</a></code>, <code><a href="reference/bioenv.html">bioenv()</a></code>, <code><a href="reference/principal_response_curves.html">principal_response_curves()</a></code>, <code><a href="reference/mantel_regression.html">mantel_regression()</a></code>
 </td>
 </tr>
 <tr>
@@ -160,16 +160,98 @@
 </td>
 </tr>
 <tr>
+<td align="left">Interpreting differences</td>
+<td align="left"></td>
+<td align="left"><code><a href="reference/simper.html">simper()</a></code></td>
+</tr>
+<tr>
+<td align="left">Spatial</td>
+<td align="left"></td>
+<td align="left">
+<code><a href="reference/moran_i.html">moran_i()</a></code>, <code><a href="reference/dbmem.html">dbmem()</a></code>, <code><a href="reference/mantel_correlogram.html">mantel_correlogram()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Differential abundance</td>
+<td align="left"><code><a href="reference/da_test.html">da_test()</a></code></td>
+<td align="left">
+<code><a href="reference/ancom.html">ancom()</a></code>, <code><a href="reference/ancombc.html">ancombc()</a></code>, <code><a href="reference/linda.html">linda()</a></code>, <code><a href="reference/maaslin3.html">maaslin3()</a></code>, <code><a href="reference/dirmult_ttest.html">dirmult_ttest()</a></code>, <code><a href="reference/dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="reference/lefse.html">lefse()</a></code>, <code><a href="reference/indicator_species.html">indicator_species()</a></code>, <code><a href="reference/da_wilcoxon.html">da_wilcoxon()</a></code>, <code><a href="reference/da_sensitivity.html">da_sensitivity()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Compositional data</td>
+<td align="left"><code><a href="reference/replace_zeros.html">replace_zeros()</a></code></td>
+<td align="left">
+<code><a href="reference/replace_zeros_mult.html">replace_zeros_mult()</a></code>, <code><a href="reference/alr.html">alr()</a></code>, <code><a href="reference/ilr.html">ilr()</a></code>, <code><a href="reference/philr.html">philr()</a></code>, <code><a href="reference/log_ratio.html">log_ratio()</a></code>, <code><a href="reference/balance.html">balance()</a></code>, <code><a href="reference/log_ratio_features.html">log_ratio_features()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Feature associations</td>
+<td align="left"><code><a href="reference/feature_assoc.html">feature_assoc()</a></code></td>
+<td align="left">
+<code><a href="reference/vlr.html">vlr()</a></code>, <code><a href="reference/rho_p.html">rho_p()</a></code>, <code><a href="reference/phi_s.html">phi_s()</a></code>, <code><a href="reference/sparcc.html">sparcc()</a></code>, <code><a href="reference/assoc_pairs.html">assoc_pairs()</a></code>, <code><a href="reference/assoc_network.html">assoc_network()</a></code>, <code><a href="reference/cross_assoc.html">cross_assoc()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Absolute abundance</td>
+<td align="left"></td>
+<td align="left">
+<code><a href="reference/qmp.html">qmp_scale()</a></code>, <code><a href="reference/qmp.html">qmp_rarefy()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Community types</td>
+<td align="left"></td>
+<td align="left">
+<code><a href="reference/enterotype.html">enterotype()</a></code>, <code><a href="reference/valencia.html">valencia()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Source tracking</td>
+<td align="left"></td>
+<td align="left"><code><a href="reference/sourcetracker.html">sourcetracker()</a></code></td>
+</tr>
+<tr>
+<td align="left">Quality control</td>
+<td align="left"></td>
+<td align="left"><code><a href="reference/decontam.html">decontam()</a></code></td>
+</tr>
+<tr>
+<td align="left">Community assembly</td>
+<td align="left"></td>
+<td align="left"><code><a href="reference/neutral_model.html">neutral_model()</a></code></td>
+</tr>
+<tr>
+<td align="left">Longitudinal</td>
+<td align="left"></td>
+<td align="left">
+<code><a href="reference/first_differences.html">first_differences()</a></code>, <code><a href="reference/first_distances.html">first_distances()</a></code>, <code><a href="reference/volatility.html">volatility()</a></code>, <code><a href="reference/nmit.html">nmit()</a></code>, <code><a href="reference/feature_volatility.html">feature_volatility()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Batch correction</td>
+<td align="left"></td>
+<td align="left">
+<code><a href="reference/batch_mmuphin.html">batch_mmuphin()</a></code>, <code><a href="reference/batch_combat.html">batch_combat()</a></code>
+</td>
+</tr>
+<tr>
+<td align="left">Prediction</td>
+<td align="left"></td>
+<td align="left"><code><a href="reference/random_forest.html">random_forest()</a></code></td>
+</tr>
+<tr>
 <td align="left">Plotting</td>
 <td align="left"></td>
 <td align="left">
-<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> of distance matrices, ordinations, tests, <code><a href="reference/envfit.html">envfit()</a></code>, <code><a href="reference/varpart.html">varpart()</a></code>, and the other results</td>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> of distance matrices, ordinations, tests, and the other results; <code><a href="reference/composition_barplot.html">composition_barplot()</a></code>, <code><a href="reference/ternary_plot.html">ternary_plot()</a></code>
+</td>
 </tr>
 <tr>
 <td align="left">Data preparation</td>
 <td align="left"></td>
 <td align="left">
-<code><a href="reference/rarefy.html">rarefy()</a></code>, <code><a href="reference/normalize.html">normalize()</a></code>, <code><a href="reference/read_tree.html">read_tree()</a></code>
+<code><a href="reference/rarefy.html">rarefy()</a></code>, <code><a href="reference/rarefaction_curve.html">rarefaction_curve()</a></code>, <code><a href="reference/normalize.html">normalize()</a></code>, <code><a href="reference/read_tree.html">read_tree()</a></code>
 </td>
 </tr>
 </tbody>

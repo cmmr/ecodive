@@ -635,8 +635,10 @@ east-west gradient and pH:</p>
 <span><span class="co">#&gt; [b]      space  2    0.2090        0.1757     TRUE</span></span>
 <span><span class="co">#&gt; [c] ph &amp; space NA    0.0027       -0.0067    FALSE</span></span>
 <span><span class="co">#&gt; [d]  residuals NA    0.6795        0.7361    FALSE</span></span></code></pre></div>
-<p><code><a href="../reference/principal_response_curves.html">principal_response_curves()</a></code>, which is planned, will also
-build on <code><a href="../reference/rda.html">rda()</a></code>.</p>
+<p><code><a href="../reference/principal_response_curves.html">principal_response_curves()</a></code> also builds on
+<code><a href="../reference/rda.html">rda()</a></code>. For a treatment-by-time experiment, it fits a
+partial RDA with time as the condition, and draws each treatment’s
+departure from the control at each time.</p>
 <p><code><a href="../reference/cca.html">cca()</a></code>, canonical <strong>correspondence</strong>
 analysis (not canonical correlation analysis), is the unimodal
 counterpart of RDA: it constrains a correspondence analysis, which
