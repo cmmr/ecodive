@@ -11,23 +11,26 @@ replace_zeros(counts, method, ...)
 \eqn{\times} features), or any of the objects listed under \strong{Input
 Types}. Counts or proportions.}
 
-\item{method}{The name of a zero replacement method: \code{"mult"}. Flexible
-matching is supported (see below). Programmatic access via
-\code{list_zero_replacements()}. Required: there is no default, because
-the choice of method affects every downstream log ratio.}
+\item{method}{The name of a zero replacement method: \code{"mult"}, \code{"czm"},
+\code{"gbm"}, \code{"sq"} or \code{"bl"}. Flexible matching is supported (see
+below). Programmatic access via \code{list_zero_replacements()}.
+Required: there is no default, because the choice of method affects
+every downstream log ratio. \code{"gbm"} is the common choice for count
+tables (it is zCompositions' default).}
 
 \item{...}{Further arguments for the method's function, such as
-\code{margin} and \code{\link[=replace_zeros_mult]{replace_zeros_mult()}}'s \code{delta}. Each method keeps its
-own defaults.}
+\code{margin}, \code{\link[=replace_zeros_mult]{replace_zeros_mult()}}'s \code{delta}, or \code{frac}, \code{threshold}
+and \code{adjust} (see \code{\link[=replace_zeros_gbm]{replace_zeros_gbm()}}). Each method keeps its own
+defaults.}
 }
 \value{
 The method's result: a dense numeric \code{matrix} of proportions with
 no zeros, in the orientation of \code{counts} (samples \eqn{\times} features
 for \code{margin = 1}, features \eqn{\times} samples for \code{margin = 2}), with
-its names. Each sample sums to 1. Attributes \code{method} (the method's id)
-and the method's parameters, ending with \code{n_replaced}, the number of
-zeros replaced. \code{replace_zeros(counts, 'mult', ...)} is the same as
-\code{replace_zeros_mult(counts, ...)}.
+its names. Each sample sums to 1. Attributes \code{method} (the method's id),
+then the method's results, ending with \code{n_replaced}, the number of
+zeros replaced. \code{replace_zeros(counts, 'gbm', ...)} is the same as
+\code{replace_zeros_gbm(counts, ...)}.
 }
 \description{
 Replaces the zeros of a count table with small positive values, so that
@@ -47,13 +50,23 @@ without a pseudocount (and without the warning that \code{pseudocount = NULL}
 gives for zeros). The result is in proportions: every log-ratio method is
 scale invariant, so nothing is lost.
 
+\code{mult} gives every zero the same proportion, whatever the sample's depth.
+The other methods are for counts: \code{czm} imputes a fraction of one read in
+each sample, and the Bayesian-multiplicative methods (\code{gbm}, \code{sq}, \code{bl})
+also use how abundant the feature is in the other samples. \code{gbm} is the
+common default for count tables.
+
 Conclusions that depend on how zeros were treated are fragile. Repeating
 an analysis with each method of \code{list_zero_replacements('id')} is a
 simple check.
 
 \strong{List of Zero Replacement Methods}\tabular{ll}{
    Option / Function Name \tab Method Name \cr
-   \code{mult} \tab Multiplicative replacement, with a fixed value \eqn{\delta} \cr
+   \code{mult} \tab Multiplicative replacement, with a fixed value \eqn{\delta} (\code{\link[=replace_zeros_mult]{replace_zeros_mult()}}) \cr
+   \code{czm} \tab Count zero multiplicative (\code{\link[=replace_zeros_czm]{replace_zeros_czm()}}) \cr
+   \code{gbm} \tab Geometric Bayesian-multiplicative (\code{\link[=replace_zeros_gbm]{replace_zeros_gbm()}}) \cr
+   \code{sq} \tab Square-root Bayesian-multiplicative (\code{\link[=replace_zeros_sq]{replace_zeros_sq()}}) \cr
+   \code{bl} \tab Bayes-Laplace Bayesian-multiplicative (\code{\link[=replace_zeros_bl]{replace_zeros_bl()}}) \cr
 }
 
 
@@ -61,8 +74,11 @@ simple check.
 
 Case insensitive and partial matching, ignoring anything but letters. E.g.
 \code{method = 'MULT'}, \code{'multiplicative'} or \code{'multiplicative replacement'}
-selects \code{mult}. Common other names also work: \code{'multRepl'} (from
-zCompositions) and \code{'multi_replace'} (from scikit-bio) for \code{mult}.
+selects \code{mult}, and \code{'GBM'} or \code{'geometric Bayesian-multiplicative'}
+selects \code{gbm}. Common other names also work: \code{'multRepl'} (from
+zCompositions) and \code{'multi_replace'} (from scikit-bio) for \code{mult};
+\code{'cmultRepl'} (zCompositions' function, whose default method is GBM) for
+\code{gbm}; \code{'square root'} for \code{sq}; and \code{'Laplace'} for \code{bl}.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -90,7 +106,7 @@ For large datasets, standard matrix operations may be slow. See
 }
 
 \examples{
-    x <- replace_zeros(ex_counts, 'mult')
+    x <- replace_zeros(ex_counts, 'gbm')
     x[1:3, 1:4]
     attr(x, 'n_replaced')
 
@@ -109,12 +125,18 @@ Martín-Fernández, J. A., Barceló-Vidal, C., & Pawlowsky-Glahn, V.
 using nonparametric imputation. \emph{Mathematical Geology}, 35, 253–278.
 \doi{10.1023/A:1023866030544}
 
+Martín-Fernández, J. A., Hron, K., Templ, M., Filzmoser, P., &
+Palarea-Albaladejo, J. (2015). Bayesian-multiplicative treatment of count
+zeros in compositional data sets. \emph{Statistical Modelling}, 15, 134–158.
+\doi{10.1177/1471082X14535524}
+
 Lubbe, S., Filzmoser, P., & Templ, M. (2021). Comparison of zero
 replacement strategies for compositional data with large numbers of
 zeros. \emph{Chemometrics and Intelligent Laboratory Systems}, 210, 104248.
 \doi{10.1016/j.chemolab.2021.104248}
 }
 \seealso{
-\code{\link[=replace_zeros_mult]{replace_zeros_mult()}}, \code{\link[=list_zero_replacements]{list_zero_replacements()}}; \code{\link[=aitchison]{aitchison()}},
-\code{\link[=alr]{alr()}}, \code{\link[=ilr]{ilr()}} and \code{\link[=normalize]{normalize()}} (\code{'clr'}), which take the result.
+\code{\link[=replace_zeros_mult]{replace_zeros_mult()}}, \code{\link[=replace_zeros_gbm]{replace_zeros_gbm()}},
+\code{\link[=list_zero_replacements]{list_zero_replacements()}}; \code{\link[=aitchison]{aitchison()}}, \code{\link[=alr]{alr()}}, \code{\link[=ilr]{ilr()}} and
+\code{\link[=normalize]{normalize()}} (\code{'clr'}), which take the result.
 }

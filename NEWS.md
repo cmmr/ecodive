@@ -663,6 +663,23 @@
   attributes, and takes every table type: a sparse 2,000 by 5,000 table
   takes 0.2 seconds.
 
+* New zero replacements for count tables, the methods of zCompositions'
+  `cmultRepl()` (Martín-Fernández et al. 2015), also run by
+  `replace_zeros()`: `replace_zeros_gbm()` (geometric
+  Bayesian-multiplicative, `cmultRepl()`'s default and the usual choice),
+  `replace_zeros_sq()` (square-root Bayesian-multiplicative),
+  `replace_zeros_bl()` (Bayes-Laplace Bayesian-multiplicative) and
+  `replace_zeros_czm()` (count zero multiplicative). Each zero becomes a
+  proportion that depends on the sample's depth and, for the Bayesian
+  methods, on the feature's abundance in the other samples; with `adjust =
+  TRUE` (the default), no zero is imputed above the smallest proportion
+  observed for its feature. Results equal `cmultRepl(output = "prop")` of
+  zCompositions 1.6.2 to within about 1e-15, and are identical for dense
+  and sparse input. Unlike `cmultRepl()`, no sample or feature is ever
+  dropped: a feature zero in every sample (or, for GBM, non-zero in only
+  one) is an error that names it. `da_sensitivity(zeros = TRUE)` now tries
+  all five zero replacements.
+
 * New `log_ratio()` and `balance()` give one log ratio per sample between
   a `numerator` and a `denominator` group of features (names, indices or
   logical vectors), as a named vector that drops straight into metadata or
@@ -822,6 +839,26 @@
   missing from the table (VALENCIA matches taxa by exact name).
   `plot(x, "scores")` compares the samples' scores with VALENCIA's
   reference ones, as VALENCIA's own plot does.
+
+* New `dmm()` clusters samples into community types with Dirichlet-
+  multinomial mixtures (Holmes, Harris & Quince 2012): each type is a
+  Dirichlet distribution of compositions, fitted to raw counts by EM for
+  each number of types (`n_types`, default 1 to 7), with the number chosen
+  by the Laplace approximation to the model evidence, or by AIC or BIC
+  (`criterion`). It is threaded C written from the paper: each EM iteration
+  costs time in proportion to the table's non-zero counts, and each type's
+  Hessian, a diagonal plus a rank-one matrix, gives exact Newton steps and
+  the Laplace term without any features x features matrix. From the same
+  starting weights, its fits match Bioconductor's DirichletMultinomial
+  `dmn()` (posteriors, weights, the negative log posterior, AIC and BIC);
+  the Laplace approximation matches for one type and, for more, uses the
+  posterior's Hessian, where DirichletMultinomial's is not positive
+  definite. Starts are k-means++ clusters drawn from `seed` (`n_starts`
+  for more), so results are the same for any `cpus`; `eta` and `nu` set the
+  Gamma prior. The result is an `ecodive_types` data frame with each
+  sample's type and posterior probability, and as attributes each type's
+  weight, precision and Dirichlet means, every posterior, and the criteria
+  for every number of types.
 
 * New `ancom()` runs ANCOM (Mandal et al. 2015), the analysis of
   composition of microbiomes: it tests every log ratio between two features
@@ -1242,6 +1279,22 @@
   share of the three groups' mean relative abundances, sized by abundance
   and coloured by the group that holds most of it. Sparse tables stay
   sparse.
+
+* New `variation_array()` gives Aitchison's variation array, the standard
+  first summary of a composition: for every pair of features, the variance
+  of their log ratio (the same as `vlr()`, above the diagonal) and its mean
+  (row over column, below), with each feature's clr variance and the total
+  variance as attributes. It matches `compositions::variation()` and
+  `mvar()`. `clust` orders the features by clustering the square roots of
+  the variances, and `plot()` draws both triangles as heatmaps, with each
+  feature's share of the total variance beside its row.
+
+* New `zero_pattern()` groups the samples by which features are zero in
+  them, as zCompositions' `zPatterns()` does (same patterns and counts),
+  and gives each feature's proportion of zeros; `plot()` draws the most
+  frequent patterns with bars of both. A look at the zeros before choosing
+  a pseudocount or `replace_zeros()`, or testing `structural_zeros()`.
+  Sparse tables stay sparse in both.
 
 * `plot()` of an ordination takes `scaling` and `links`, for compositional
   biplots (Aitchison & Greenacre 2002). For `pca()`, `rpca()` and

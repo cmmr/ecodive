@@ -2,15 +2,14 @@
 # Licensed under the MIT License: https://opensource.org/license/mit
 
 
-# Community types: the result that enterotype() and valencia() (and the
-# planned dmm()) return, with its print() and plot() methods. See
-# ?ecodive_types.
+# Community types: the result that enterotype(), valencia() and dmm()
+# return, with its print() and plot() methods. See ?ecodive_types.
 
 
 
 #' Community types
 #'
-#' [enterotype()] and [valencia()] (and the planned `dmm()`) assign each
+#' [enterotype()], [valencia()] and [dmm()] assign each
 #' sample to one of a few community types, and return a data frame of class
 #' `c("ecodive_<method>", "ecodive_types", "data.frame")`, with one row per
 #' sample, in the input's order, and the sample names as row names.
@@ -18,28 +17,30 @@
 #' @section Columns:
 #' * `sample`: the sample's name (or its position, for unnamed samples).
 #' * `type`: the type assigned to it, a factor whose levels are the types in
-#'   order: `"1"`, `"2"`, ... for [enterotype()]; the sub-CSTs `"I-A"` to
-#'   `"V"` for [valencia()].
+#'   order: `"1"`, `"2"`, ... for [enterotype()] and [dmm()]; the sub-CSTs
+#'   `"I-A"` to `"V"` for [valencia()].
 #' * Columns of the method: for [enterotype()], `silhouette`, the sample's
 #'   silhouette width; for [valencia()], `cst` (the higher-order community
 #'   state type), `score` (the similarity to the assigned centroid) and
-#'   `matched`.
+#'   `matched`; for [dmm()], `probability`, the posterior probability of the
+#'   assigned type.
 #'
 #' @section Attributes:
 #' * `types`: a data frame, one row per type: `type`, `n_samples`,
 #'   `top_feature` (the feature of largest mean proportion, Arumugam et
 #'   al.'s "driver"; `NA` without abundances), and columns of the method,
-#'   such as [enterotype()]'s `medoid` and `silhouette`, or [valencia()]'s
-#'   `cst` and reference scores.
+#'   such as [enterotype()]'s `medoid` and `silhouette`, [valencia()]'s
+#'   `cst` and reference scores, or [dmm()]'s `weight` and `precision`.
 #' * `profiles`: a types \eqn{\times} features matrix of each type's mean
 #'   proportions (`NULL` without abundances); for [valencia()], the
-#'   centroids.
+#'   centroids; for [dmm()], the Dirichlet means.
 #' * `selection`: a data frame, one row per number of types tried, with the
 #'   criterion that chose among them, and `selected`, `TRUE` for the one
 #'   chosen. Absent (`NULL`) for [valencia()], whose centroids fix the
 #'   types.
 #' * Attributes of the method, such as [valencia()]'s `scores` (every
-#'   sample's similarity to every centroid).
+#'   sample's similarity to every centroid), or [dmm()]'s `posterior` and
+#'   `alpha`.
 #' * `method`: the function that made the result, such as `"enterotype"`.
 #'
 #' @section Using the types:
@@ -48,7 +49,7 @@
 #' samples by type.
 #'
 #' @name ecodive_types
-#' @seealso [enterotype()], [valencia()], [plot.ecodive_types()]
+#' @seealso [enterotype()], [valencia()], [dmm()], [plot.ecodive_types()]
 #' @examples
 #'     et <- enterotype(iris[, 1:4], n_types = 2:5)
 #'     et
@@ -67,19 +68,34 @@ NULL
 # `selection` column that chose the number of types, with its label and
 # whether its largest ('max') or smallest ('min') value wins.
 # valencia() has no criterion: its centroids fix the number of types, and
-# its `selection` is NULL.
+# its `selection` is NULL. dmm() can choose by another criterion (its
+# `criterion` argument); the result's `criterion` attribute then names the
+# column, labelled from TYPES_CRITERIA.
 COMMUNITY_TYPES <- data.frame(
   stringsAsFactors = FALSE,
-  id              = c('enterotype',              'valencia'),
-  name            = c('Enterotypes',             'VALENCIA Community State Types'),
-  criterion       = c('ch',                      NA),
-  criterion_label = c('Calinski-Harabasz index', NA),
-  best            = c('max',                     NA) )
+  id              = c('enterotype',              'valencia',                       'dmm'),
+  name            = c('Enterotypes',             'VALENCIA Community State Types', 'Dirichlet-Multinomial Mixtures'),
+  criterion       = c('ch',                      NA,                               'laplace'),
+  criterion_label = c('Calinski-Harabasz index', NA,                               'Laplace approximation'),
+  best            = c('max',                     NA,                               'min') )
+
+TYPES_CRITERIA <- c(
+  ch      = 'Calinski-Harabasz index',
+  laplace = 'Laplace approximation',
+  aic     = 'AIC',
+  bic     = 'BIC' )
 
 
 community_types_row <- function (x) {
   i <- match(attr(x, 'method', exact = TRUE), COMMUNITY_TYPES$id)
-  if (is.na(i)) NULL else COMMUNITY_TYPES[i, , drop = FALSE]
+  if (is.na(i)) return (NULL)
+  reg  <- COMMUNITY_TYPES[i, , drop = FALSE]
+  crit <- attr(x, 'criterion', exact = TRUE)
+  if (is.character(crit) && length(crit) == 1 && crit %in% names(TYPES_CRITERIA)) {
+    reg$criterion       <- crit
+    reg$criterion_label <- TYPES_CRITERIA[[crit]]
+  }
+  reg
 }
 
 
@@ -189,15 +205,17 @@ print_range <- function (v) {
 
 #' Plot community types
 #'
-#' Draws a result of [enterotype()] or [valencia()] with base graphics.
+#' Draws a result of [enterotype()], [valencia()] or [dmm()] with base
+#' graphics.
 #'
 #' * `"profiles"` (the default): stacked bars of each type's composition
 #'   (for [enterotype()], its samples' mean proportions; for [valencia()],
-#'   the centroids), with the `n_features` features that reach the largest
+#'   the centroids; for [dmm()], the Dirichlet means), with the `n_features` features that reach the largest
 #'   proportion in any type, and the rest pooled as "Other". The bars are
 #'   labelled with the type and its number of samples.
 #' * `"selection"`: the criterion that chose the number of types (for
-#'   [enterotype()], the Calinski-Harabasz index) against the number of
+#'   [enterotype()], the Calinski-Harabasz index; for [dmm()], the Laplace
+#'   approximation, or the AIC or BIC that chose) against the number of
 #'   types, with the one chosen circled. Not for [valencia()], whose
 #'   centroids fix the types.
 #' * `"scores"` ([valencia()] only): boxplots of the samples' scores (their
@@ -208,7 +226,7 @@ print_range <- function (v) {
 #'
 #' The types keep the order of `levels(x$type)` in every plot.
 #'
-#' @param x  A result of [enterotype()] or [valencia()].
+#' @param x  A result of [enterotype()], [valencia()] or [dmm()].
 #'
 #' @param type  `"profiles"`, `"selection"` or `"scores"`.
 #'

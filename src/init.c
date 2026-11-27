@@ -45,6 +45,7 @@ extern SEXP C_feature_lm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_feature_lmm(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dirmult_ttest(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_dirmult_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_dmm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_envfit(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_isomap(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_helmert_basis(SEXP);
@@ -108,6 +109,7 @@ extern SEXP C_read_tree(SEXP, SEXP);
 extern SEXP C_medoid_accum(SEXP, SEXP, SEXP);
 extern SEXP C_row_medians(SEXP, SEXP);
 extern SEXP C_replace_zeros_mult(SEXP, SEXP, SEXP);
+extern SEXP C_replace_zeros_cmult(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rng_dist(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rf_grow(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rf_importance(SEXP, SEXP);
@@ -131,6 +133,7 @@ extern SEXP C_umap_spectral(SEXP, SEXP, SEXP);
 extern SEXP C_unifrac(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_valencia(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_zero_counts(SEXP, SEXP);
+extern SEXP C_zero_pattern(SEXP, SEXP);
 
 extern void init_blas_threads(void);
 extern void init_cpu_info(void);
@@ -175,6 +178,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_feature_lmm",   (DL_FUNC) &C_feature_lmm,   4},
   {"C_dirmult_ttest", (DL_FUNC) &C_dirmult_ttest, 11},
   {"C_dirmult_lm",    (DL_FUNC) &C_dirmult_lm, 17},
+  {"C_dmm",           (DL_FUNC) &C_dmm,           11},
   {"C_envfit",    (DL_FUNC) &C_envfit,   12},
   {"C_isomap",    (DL_FUNC) &C_isomap,    7},
   {"C_lda",       (DL_FUNC) &C_lda,       5},
@@ -229,6 +233,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_medoid_accum", (DL_FUNC) &C_medoid_accum, 3},
   {"C_row_medians",  (DL_FUNC) &C_row_medians,  2},
   {"C_replace_zeros_mult", (DL_FUNC) &C_replace_zeros_mult, 3},
+  {"C_replace_zeros_cmult", (DL_FUNC) &C_replace_zeros_cmult, 6},
   {"C_rng_dist",  (DL_FUNC) &C_rng_dist,  5},
   {"C_rf_grow",        (DL_FUNC) &C_rf_grow,        11},
   {"C_rf_importance",  (DL_FUNC) &C_rf_importance,   2},
@@ -261,6 +266,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_unifrac",   (DL_FUNC) &C_unifrac,   7},
   {"C_valencia",  (DL_FUNC) &C_valencia,  6},
   {"C_zero_counts", (DL_FUNC) &C_zero_counts, 2},
+  {"C_zero_pattern", (DL_FUNC) &C_zero_pattern, 2},
   {NULL, NULL, 0}
 };
 

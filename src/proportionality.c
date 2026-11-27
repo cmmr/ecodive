@@ -65,6 +65,7 @@
 #define PROP_VLR   1
 #define PROP_RHO_P 2
 #define PROP_PHI_S 3
+#define PROP_VARIATION 4   // vlr, plus each feature's mean log (variation_array())
 
 static int           pr_method;
 static int           pr_n;        // samples
@@ -143,7 +144,9 @@ static void *pair_worker(void *arg) {
 // R interface for vlr(), rho_p() and phi_s(): the packed
 // lower triangle over the kept features, as a `dist`.
 //
-// sexp_method: 1 vlr, 2 rho_p, 3 phi_s.
+// sexp_method: 1 vlr, 2 rho_p, 3 phi_s, 4 vlr with
+//              attribute `mean_log`: each feature's mean
+//              log over the samples (variation_array()).
 // sexp_ref:    0-based features whose mean log is the
 //              reference g, or NULL for all (the clr).
 //              Unused by vlr.
@@ -194,6 +197,8 @@ SEXP C_proportionality(
     }
 
   // Centre each feature over the samples, summing in sample order.
+  SEXP sexp_means = PROTECT(allocVector(REALSXP, method == PROP_VARIATION ? D : 0));
+  double *means   = REAL(sexp_means);
   for (int f = 0; f < D; f++) {
     double sum = 0;
     int    e   = fpos[f], e_end = fpos[f + 1];
@@ -202,6 +207,7 @@ SEXP C_proportionality(
       else                           sum += lz;
     }
     double mean = sum / n;
+    if (method == PROP_VARIATION) means[f] = mean;
     for (e = fpos[f]; e < e_end; e++) fval[e] -= mean;
     fzero[f] = lz - mean;
   }
@@ -276,8 +282,9 @@ SEXP C_proportionality(
   setAttrib(result, install("Diag"),   sexp_diag);
   setAttrib(result, install("Upper"),  sexp_upper);
   setAttrib(result, R_ClassSymbol,     sexp_class);
+  if (method == PROP_VARIATION) setAttrib(result, install("mean_log"), sexp_means);
 
   free_all();
-  UNPROTECT(5);
+  UNPROTECT(6);
   return result;
 }

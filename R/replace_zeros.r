@@ -5,6 +5,11 @@
 # scikit-bio 0.7.4 (skbio/stats/composition/_base.py), Copyright (c) 2013--,
 # scikit-bio development team, under the BSD-3 license given in
 # src/replace_zeros.c and inst/COPYRIGHTS.
+#
+# replace_zeros_czm(), _gbm(), _sq() and _bl() are a clean-room
+# implementation of zCompositions' cmultRepl() methods (GPL): their formulas
+# come from its documentation and its outputs, never its source (see
+# plans/zero_replacement.md and data-raw/expected/zero_replacement_probe.r).
 
 
 
@@ -23,8 +28,12 @@ ZERO_REPLACEMENTS <- local({
     stringsAsFactors = FALSE,
     na.strings       = "",
     text             = "
-      name,                         id,   alt_ids
-      Multiplicative Replacement,   mult, multiplicative multreplacement multirepl multireplace
+      name,                                    id,   alt_ids
+      Multiplicative Replacement,              mult, multiplicative multreplacement multirepl multireplace
+      Count Zero Multiplicative,               czm,  countzeromultiplicative
+      Geometric Bayesian-Multiplicative,       gbm,  geometricbayesianmultiplicative cmultrepl
+      Square-Root Bayesian-Multiplicative,     sq,   squareroot sqrtbm
+      Bayes-Laplace Bayesian-Multiplicative,   bl,   bayeslaplace laplace
   " )
 
   return (df)
@@ -42,22 +51,25 @@ ZERO_REPLACEMENTS <- local({
 #'        \eqn{\times} features), or any of the objects listed under **Input
 #'        Types**. Counts or proportions.
 #'
-#' @param method   The name of a zero replacement method: `"mult"`. Flexible
-#'        matching is supported (see below). Programmatic access via
-#'        `list_zero_replacements()`. Required: there is no default, because
-#'        the choice of method affects every downstream log ratio.
+#' @param method   The name of a zero replacement method: `"mult"`, `"czm"`,
+#'        `"gbm"`, `"sq"` or `"bl"`. Flexible matching is supported (see
+#'        below). Programmatic access via `list_zero_replacements()`.
+#'        Required: there is no default, because the choice of method affects
+#'        every downstream log ratio. `"gbm"` is the common choice for count
+#'        tables (it is zCompositions' default).
 #'
 #' @param ...   Further arguments for the method's function, such as
-#'        `margin` and [replace_zeros_mult()]'s `delta`. Each method keeps its
-#'        own defaults.
+#'        `margin`, [replace_zeros_mult()]'s `delta`, or `frac`, `threshold`
+#'        and `adjust` (see [replace_zeros_gbm()]). Each method keeps its own
+#'        defaults.
 #'
 #' @return The method's result: a dense numeric `matrix` of proportions with
 #'   no zeros, in the orientation of `counts` (samples \eqn{\times} features
 #'   for `margin = 1`, features \eqn{\times} samples for `margin = 2`), with
-#'   its names. Each sample sums to 1. Attributes `method` (the method's id)
-#'   and the method's parameters, ending with `n_replaced`, the number of
-#'   zeros replaced. `replace_zeros(counts, 'mult', ...)` is the same as
-#'   `replace_zeros_mult(counts, ...)`.
+#'   its names. Each sample sums to 1. Attributes `method` (the method's id),
+#'   then the method's results, ending with `n_replaced`, the number of
+#'   zeros replaced. `replace_zeros(counts, 'gbm', ...)` is the same as
+#'   `replace_zeros_gbm(counts, ...)`.
 #'
 #' @details
 #'
@@ -73,6 +85,12 @@ ZERO_REPLACEMENTS <- local({
 #' gives for zeros). The result is in proportions: every log-ratio method is
 #' scale invariant, so nothing is lost.
 #'
+#' `mult` gives every zero the same proportion, whatever the sample's depth.
+#' The other methods are for counts: `czm` imputes a fraction of one read in
+#' each sample, and the Bayesian-multiplicative methods (`gbm`, `sq`, `bl`)
+#' also use how abundant the feature is in the other samples. `gbm` is the
+#' common default for count tables.
+#'
 #' Conclusions that depend on how zeros were treated are fragile. Repeating
 #' an analysis with each method of `list_zero_replacements('id')` is a
 #' simple check.
@@ -81,15 +99,22 @@ ZERO_REPLACEMENTS <- local({
 #'
 #' | Option / Function Name | Method Name                                |
 #' | :--------------------- | :----------------------------------------- |
-#' | `mult`                 | Multiplicative replacement, with a fixed value \eqn{\delta} |
+#' | `mult`                 | Multiplicative replacement, with a fixed value \eqn{\delta} ([replace_zeros_mult()]) |
+#' | `czm`                  | Count zero multiplicative ([replace_zeros_czm()]) |
+#' | `gbm`                  | Geometric Bayesian-multiplicative ([replace_zeros_gbm()]) |
+#' | `sq`                   | Square-root Bayesian-multiplicative ([replace_zeros_sq()]) |
+#' | `bl`                   | Bayes-Laplace Bayesian-multiplicative ([replace_zeros_bl()]) |
 #'
 #'
 #' **Flexible name matching**
 #'
 #' Case insensitive and partial matching, ignoring anything but letters. E.g.
 #' `method = 'MULT'`, `'multiplicative'` or `'multiplicative replacement'`
-#' selects `mult`. Common other names also work: `'multRepl'` (from
-#' zCompositions) and `'multi_replace'` (from scikit-bio) for `mult`.
+#' selects `mult`, and `'GBM'` or `'geometric Bayesian-multiplicative'`
+#' selects `gbm`. Common other names also work: `'multRepl'` (from
+#' zCompositions) and `'multi_replace'` (from scikit-bio) for `mult`;
+#' `'cmultRepl'` (zCompositions' function, whose default method is GBM) for
+#' `gbm`; `'square root'` for `sq`; and `'Laplace'` for `bl`.
 #'
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the list of methods.
@@ -108,17 +133,23 @@ ZERO_REPLACEMENTS <- local({
 #' using nonparametric imputation. *Mathematical Geology*, 35, 253–278.
 #' \doi{10.1023/A:1023866030544}
 #'
+#' Martín-Fernández, J. A., Hron, K., Templ, M., Filzmoser, P., &
+#' Palarea-Albaladejo, J. (2015). Bayesian-multiplicative treatment of count
+#' zeros in compositional data sets. *Statistical Modelling*, 15, 134–158.
+#' \doi{10.1177/1471082X14535524}
+#'
 #' Lubbe, S., Filzmoser, P., & Templ, M. (2021). Comparison of zero
 #' replacement strategies for compositional data with large numbers of
 #' zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
 #' \doi{10.1016/j.chemolab.2021.104248}
 #'
-#' @seealso [replace_zeros_mult()], [list_zero_replacements()]; [aitchison()],
-#'   [alr()], [ilr()] and [normalize()] (`'clr'`), which take the result.
+#' @seealso [replace_zeros_mult()], [replace_zeros_gbm()],
+#'   [list_zero_replacements()]; [aitchison()], [alr()], [ilr()] and
+#'   [normalize()] (`'clr'`), which take the result.
 #'
 #' @export
 #' @examples
-#'     x <- replace_zeros(ex_counts, 'mult')
+#'     x <- replace_zeros(ex_counts, 'gbm')
 #'     x[1:3, 1:4]
 #'     attr(x, 'n_replaced')
 #'
@@ -201,6 +232,9 @@ replace_zeros <- function (counts, method, ...) {
 #'     # Find the method for zCompositions' 'multRepl'.
 #'     m <- match_zero_replacement('multRepl')
 #'     m$id
+#'
+#'     # zCompositions' 'cmultRepl' defaults to GBM.
+#'     match_zero_replacement('cmultRepl')$id
 #'
 list_zero_replacements <- function (
     val = c('data.frame', 'list', 'func', 'id', 'name'),
@@ -405,6 +439,233 @@ replace_zeros_mult <- function (counts, margin = 1L, delta = NULL) {
 
 
 
+#' Bayesian-Multiplicative and Count Zero Replacement
+#'
+#' Replaces the zeros of a count table with small proportions that depend on
+#' each sample's depth, and scales each sample's non-zero proportions down by
+#' the same factor, keeping their ratios. The methods of zCompositions'
+#' `cmultRepl()` (Martín-Fernández et al. 2015): geometric
+#' Bayesian-multiplicative (`gbm`, the usual choice), square-root
+#' Bayesian-multiplicative (`sq`), Bayes-Laplace Bayesian-multiplicative
+#' (`bl`), and count zero multiplicative (`czm`).
+#'
+#' @inheritParams replace_zeros
+#' @inheritParams documentation
+#'
+#' @param counts  A numeric matrix of non-negative counts (samples
+#'        \eqn{\times} features), or any of the objects listed under **Input
+#'        Types**. Each sample's total is its number of reads, so give counts,
+#'        not proportions (other values give a warning).
+#'
+#' @param frac  For `czm`, the fraction of the upper limit (`threshold`
+#'        reads) that a zero becomes; and, with `adjust`, the fraction of a
+#'        feature's smallest observed proportion that an imputed value above
+#'        it becomes. Between 0 and 1 (exclusive). Default: `0.65`.
+#'
+#' @param threshold  For `czm`, the upper limit of a zero, in reads: a zero
+#'        in a sample of \eqn{n} reads is below `threshold / n`. Above 0 and
+#'        at most 1. Default: `0.5`.
+#'
+#' @param adjust  If `TRUE` (the default), an imputed proportion above the
+#'        smallest proportion observed for that feature in any sample is
+#'        replaced by `frac` times that proportion, so that no zero is
+#'        imputed above what was actually seen.
+#'
+#' @return A dense numeric `matrix` of proportions with no zeros, in the
+#'   orientation of `counts` (samples \eqn{\times} features for `margin =
+#'   1`, features \eqn{\times} samples for `margin = 2`, and for a single
+#'   sample given as a vector), with its names. Each sample sums to 1.
+#'   Attributes:
+#'
+#'   * `method`: `'gbm'`, `'sq'`, `'bl'` or `'czm'`.
+#'   * `n_adjusted`: the number of imputed values that `adjust` lowered.
+#'   * `n_replaced`: the number of zeros replaced.
+#'
+#' @details
+#' For sample \eqn{i} with counts \eqn{c_{ij}}, depth
+#' \eqn{n_i = \sum_j c_{ij}}, proportions \eqn{x_{ij} = c_{ij} / n_i} and
+#' \eqn{D} features, each zero becomes a proportion \eqn{r_{ij}}, and each
+#' non-zero proportion is scaled so that the sample sums to 1:
+#' \deqn{r_{ij} = x_{ij} \Bigl(1 - \sum_{k:\, c_{ik} = 0} r_{ik}\Bigr)
+#'       \quad \text{if } c_{ij} > 0.}
+#'
+#' **Bayesian-multiplicative methods** (`gbm`, `sq`, `bl`). A zero is the
+#' posterior estimate of a multinomial probability under a Dirichlet prior
+#' with expectation \eqn{t_{ij}} and strength \eqn{s_i}:
+#' \deqn{r_{ij} = \frac{s_i\, t_{ij}}{n_i + s_i} \quad \text{if } c_{ij} = 0.}
+#' The prior expectation is the feature's pooled proportion in the other
+#' samples,
+#' \deqn{t_{ij} = \frac{\sum_{k \ne i} c_{kj}}{\sum_{k \ne i} n_k},}
+#' so a feature that is abundant elsewhere gets a larger value. The methods
+#' differ in the strength:
+#'
+#' | Method | \eqn{s_i} |
+#' | :----- | :-------- |
+#' | `gbm`  | \eqn{1 / g_i}, with \eqn{g_i} the geometric mean of \eqn{t_{i1}, \ldots, t_{iD}} |
+#' | `sq`   | \eqn{\sqrt{n_i}} |
+#' | `bl`   | \eqn{D} |
+#'
+#' **Count zero multiplicative** (`czm`). Every zero of sample \eqn{i}
+#' becomes \eqn{r_{ij} = frac \cdot threshold / n_i}: by default 65% of
+#' half a read. The other samples are used only by `adjust`.
+#'
+#' **Adjustment.** With `adjust = TRUE`, an \eqn{r_{ij}} above
+#' \eqn{m_j = \min_{k:\, c_{kj} > 0} x_{kj}}, the smallest proportion of
+#' feature \eqn{j} observed in any sample, becomes \eqn{frac \cdot m_j}
+#' (before the non-zero parts are scaled). This happens mostly in shallow
+#' samples.
+#'
+#' **Requirements.** No sample may be all zeros. The Bayesian methods need
+#' at least two samples, and no feature may be zero in every sample (its
+#' prior would be 0). `gbm` also needs every feature to be non-zero in at
+#' least two samples: a feature seen in a single sample makes that sample's
+#' \eqn{t_{ij}} zero, its geometric mean zero and its prior strength
+#' infinite. Filter such features out first (e.g.
+#' `counts[, colSums(counts > 0) >= 2]`), or use `sq` or `bl`, which handle
+#' them. `czm` works on a single sample, and replaces the zeros of a
+#' feature that is zero everywhere like any other.
+#'
+#' The proportion of zeros is not checked: features that are zeros in most
+#' samples, as are most features of a microbiome table, are imputed mostly
+#' from their prior. zCompositions warns about (or drops) rows and columns
+#' that are at least 80% zeros; ecodive never drops any.
+#'
+#' **Compared with zCompositions.** The results equal `cmultRepl(counts,
+#' method = ..., output = "prop", z.delete = FALSE)` of zCompositions 1.6.2,
+#' to within about \eqn{10^{-15}} (relative). Unlike `cmultRepl()`, a table
+#' without zeros gives its proportions instead of an error, `czm` accepts a
+#' single sample and features that are zero everywhere, and `czm` refuses
+#' zeros whose imputed values would leave the sample's non-zero parts at
+#' zero or below.
+#'
+#' The result feeds straight into [aitchison()], [alr()], [ilr()] and any
+#' function with `norm = 'clr'`, with no pseudocount.
+#'
+#' @inheritSection documentation Input Types
+#'
+#' @references
+#' Martín-Fernández, J. A., Hron, K., Templ, M., Filzmoser, P., &
+#' Palarea-Albaladejo, J. (2015). Bayesian-multiplicative treatment of count
+#' zeros in compositional data sets. *Statistical Modelling*, 15, 134–158.
+#' \doi{10.1177/1471082X14535524}
+#'
+#' Palarea-Albaladejo, J., & Martín-Fernández, J. A. (2015). zCompositions
+#' — R package for multivariate imputation of left-censored data under a
+#' compositional approach. *Chemometrics and Intelligent Laboratory
+#' Systems*, 143, 85–96. \doi{10.1016/j.chemolab.2015.02.019}
+#'
+#' @seealso [replace_zeros()], [replace_zeros_mult()],
+#'   [list_zero_replacements()]
+#'
+#' @rdname replace_zeros_cmult
+#' @export
+#' @examples
+#'     # Geometric Bayesian-multiplicative replacement.
+#'     x <- replace_zeros_gbm(ex_counts)
+#'     x
+#'
+#'     # The ratios between non-zero parts are kept.
+#'     nz <- ex_counts[1, ] > 0
+#'     all.equal(x[1, nz] / sum(x[1, nz]), ex_counts[1, nz] / sum(ex_counts[1, nz]))
+#'
+#'     # The other methods.
+#'     replace_zeros_sq(ex_counts)
+#'     replace_zeros_bl(ex_counts)
+#'     replace_zeros_czm(ex_counts)
+#'
+#'     # Without the adjustment.
+#'     attr(replace_zeros_czm(ex_counts), 'n_adjusted')
+#'     attr(replace_zeros_czm(ex_counts, adjust = FALSE), 'n_adjusted')
+#'
+replace_zeros_gbm <- function (counts, margin = 1L, frac = 0.65, adjust = TRUE) {
+  cmult_replace('gbm', frac, adjust = adjust)
+}
+
+
+#' @rdname replace_zeros_cmult
+#' @export
+replace_zeros_sq <- function (counts, margin = 1L, frac = 0.65, adjust = TRUE) {
+  cmult_replace('sq', frac, adjust = adjust)
+}
+
+
+#' @rdname replace_zeros_cmult
+#' @export
+replace_zeros_bl <- function (counts, margin = 1L, frac = 0.65, adjust = TRUE) {
+  cmult_replace('bl', frac, adjust = adjust)
+}
+
+
+#' @rdname replace_zeros_cmult
+#' @export
+replace_zeros_czm <- function (
+    counts, margin = 1L, frac = 0.65, threshold = 0.5, adjust = TRUE ) {
+  cmult_replace('czm', frac, threshold, adjust)
+}
+
+
+# The shared body of replace_zeros_czm(), _gbm(), _sq() and _bl(), with the
+# caller's `counts` and `margin`. See src/replace_zeros.c for the formulas.
+cmult_replace <- function (
+    method, frac, threshold = 0.5, adjust = TRUE, env = parent.frame() ) {
+
+  if (!is.numeric(frac) || length(frac) != 1 || is.na(frac) || !(frac > 0 && frac < 1))
+    stop('`frac` must be a single number between 0 and 1 (exclusive).', call. = FALSE)
+  if (!is.numeric(threshold) || length(threshold) != 1 || is.na(threshold) ||
+      !(threshold > 0 && threshold <= 1))
+    stop('`threshold` must be a single number above 0 and at most 1.', call. = FALSE)
+  if (!is.logical(adjust) || length(adjust) != 1 || is.na(adjust))
+    stop('`adjust` must be TRUE or FALSE.', call. = FALSE)
+
+  bayes <- method != 'czm'
+  info  <- zero_replacement_input(
+    empty_features_ok = !bayes, whole = TRUE,
+    min_samples = if (bayes) 2L else 1L, env = env )
+
+  if (method == 'gbm') {
+    single <- which(info$feature_nonzeros == 1L)
+    if (length(single))
+      stop(
+        sprintf(
+          paste0(
+            '`counts` has %d feature%s that %s non-zero in only one sample ',
+            '(%s). GBM cannot be computed for that sample: the feature\'s ',
+            'prior there is zero, so the prior strength is infinite. ',
+            'Remove %s first (e.g. keep the features found in at least 2 ',
+            'samples), or use `sq` or `bl`.' ),
+          length(single), if (length(single) == 1) '' else 's',
+          if (length(single) == 1) 'is' else 'are',
+          name_list(if (is.null(info$features)) single else info$features[single]),
+          if (length(single) == 1) 'it' else 'them' ),
+        call. = FALSE )
+  }
+
+  code <- match(method, c('czm', 'bl', 'sq', 'gbm')) - 1L
+  res  <- .Call(
+    C_replace_zeros_cmult, env$counts, env$margin, code,
+    as.double(frac), as.double(threshold), adjust )
+
+  # Only czm can impute more than a sample holds: a Bayesian imputation is
+  # below the sample's share n / (n + s) of its zero parts' priors.
+  bad <- which(!(res$kept > 0))
+  if (length(bad))
+    stop(
+      sprintf(
+        paste0(
+          'Count zero multiplicative replacement created negative proportions ',
+          '(or zeros) in %d sample%s (%s): the values imputed for %s zeros ',
+          'add up to 1 or more. Use a smaller `frac` or `threshold`.' ),
+        length(bad), if (length(bad) == 1) '' else 's',
+        name_list(if (is.null(info$samples)) bad else info$samples[bad]),
+        if (length(bad) == 1) 'its' else 'their' ),
+      call. = FALSE )
+
+  zero_replacement_result(
+    res$result, info, env$margin, method, list(n_adjusted = res$n_adjusted) )
+}
+
+
+
 # Checks the table of a zero replacement in the calling function, and sets
 # its `counts` (a table the C code reads) and `margin`. Returns the table's
 # sizes and names, and its zeros:
@@ -423,9 +684,11 @@ replace_zeros_mult <- function (counts, margin = 1L, delta = NULL) {
 #                      method uses each sample's depth).
 #   mostly_zero        TRUE: warn when any sample or feature is at least 80%
 #                      zeros.
+#   min_samples        2: refuse a single sample (the method estimates each
+#                      sample's prior from the others).
 zero_replacement_input <- function (
     empty_features_ok = TRUE, whole = FALSE, mostly_zero = FALSE,
-    env = parent.frame() ) {
+    min_samples = 1L, env = parent.frame() ) {
 
   validate_counts(env)
   validate_margin(env)
@@ -463,6 +726,12 @@ zero_replacement_input <- function (
   n <- as.integer(dims[[margin]])
   features <- if (length(dn[[3L - margin]])) as.character(dn[[3L - margin]])
   samples  <- if (length(dn[[margin]]))      as.character(dn[[margin]])
+
+  if (n < min_samples)
+    stop(
+      'This method needs at least ', min_samples, ' samples: the prior of ',
+      'each sample is estimated from the others. Use `czm` for a single ',
+      'sample.', call. = FALSE )
 
   zc <- .Call(C_zero_counts, counts, margin)
 

@@ -153,10 +153,13 @@
   # log base).
   res <- da_sensitivity(x, 'lefse', 'grp', meta, n_boots = 5L, seed = 4L, zeros = TRUE, cpus = 1)
   fits <- attr(res, 'fits')
-  expect_identical(length(fits), 2L)
+  zs <- list_zero_replacements('id')  # mult first; czm, gbm, sq, bl since item 55
+  expect_identical(length(fits), 1L + length(zs))
   expect_identical(fits[[1]], lefse(x, 'grp', meta, n_boots = 5L, seed = 4L, cpus = 1))
   expect_identical(fits[[2]], lefse(xz, 'grp', meta, n_boots = 5L, seed = 4L, cpus = 1))
-  for (k in 0:1) expect_true(same_rows(res, k, fits[[k + 1]], 'lda_score'), info = k)
+  for (k in seq_along(zs)[-1])
+    expect_identical(fits[[k + 1]], lefse(replace_zeros(x, zs[[k]]), 'grp', meta, n_boots = 5L, seed = 4L, cpus = 1), info = zs[[k]])
+  for (k in seq_along(fits) - 1L) expect_true(same_rows(res, k, fits[[k + 1]], 'lda_score'), info = k)
   expect_identical(attr(res, 'log_base'), NA_real_)
   expect_error(da_sensitivity(x, 'lefse', 'grp', meta, pseudocounts = TRUE), 'no `pseudocount` argument')
 
