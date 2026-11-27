@@ -34,18 +34,31 @@ with large datasets. `ecodive` addresses this by providing:
 
 ## What's Included
 
-| Task                  | Wrapper         | Functions                                                                                |
-| :-------------------- | :-------------- | :--------------------------------------------------------------------------------------- |
-| Alpha diversity       | `alpha_div()`   | `shannon()`, `simpson()`, `chao1()`, `faith()`, `pielou()`, `hill()`, and 19 more         |
-| Beta diversity        | `beta_div()`    | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 33 more                   |
-| Ordination            | `dist_ord()`    | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`, `capda()` |
-| Ordination of counts  | `count_ord()`   | `pca()`, `rpca()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`              |
-| Biplots               |                 | `pcoa_biplot()`, `envfit()`                                                              |
-| Comparing ordinations |                 | `procrustes()`, `procrustes_test()`                                                      |
-| Model building        |                 | `varpart()`, `forward_select()`, `bioenv()`                                              |
-| Statistical tests     | `dist_test()`   | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`        |
-| Plotting              |                 | `plot()` of distance matrices, ordinations, tests, `envfit()`, `varpart()`, and the other results |
-| Data preparation      |                 | `rarefy()`, `normalize()`, `read_tree()`                                                 |
+| Task                     | Wrapper           | Functions                                                                                                                                                 |
+| :----------------------- | :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Alpha diversity          | `alpha_div()`     | `shannon()`, `simpson()`, `chao1()`, `faith()`, `pielou()`, `hill()`, and 19 more                                                                         |
+| Beta diversity           | `beta_div()`      | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 42 more                                                                                   |
+| Ordination               | `dist_ord()`      | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`, `capda()`                                                           |
+| Ordination of counts     | `count_ord()`     | `pca()`, `rpca()`, `rpca_phylo()`, `dpcoa()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`                                                    |
+| Biplots                  |                   | `pcoa_biplot()`, `envfit()`                                                                                                                               |
+| Comparing ordinations    |                   | `procrustes()`, `procrustes_test()`                                                                                                                       |
+| Model building           |                   | `varpart()`, `forward_select()`, `bioenv()`, `principal_response_curves()`, `mantel_regression()`                                                         |
+| Statistical tests        | `dist_test()`     | `permanova()`, `permdisp()`, `anosim()`, `mrpp()`, `mantel()`, `mantel_partial()`                                                                         |
+| Interpreting differences |                   | `simper()`                                                                                                                                                |
+| Spatial                  |                   | `moran_i()`, `dbmem()`, `mantel_correlogram()`                                                                                                            |
+| Differential abundance   | `da_test()`       | `ancom()`, `ancombc()`, `linda()`, `maaslin3()`, `dirmult_ttest()`, `dirmult_lm()`, `lefse()`, `indicator_species()`, `da_wilcoxon()`, `da_sensitivity()` |
+| Compositional data       | `replace_zeros()` | `replace_zeros_mult()`, `alr()`, `ilr()`, `philr()`, `log_ratio()`, `balance()`, `log_ratio_features()`                                                   |
+| Feature associations     | `feature_assoc()` | `vlr()`, `rho_p()`, `phi_s()`, `sparcc()`, `assoc_pairs()`, `assoc_network()`, `cross_assoc()`                                                            |
+| Absolute abundance       |                   | `qmp_scale()`, `qmp_rarefy()`                                                                                                                             |
+| Community types          |                   | `enterotype()`, `valencia()`                                                                                                                              |
+| Source tracking          |                   | `sourcetracker()`                                                                                                                                         |
+| Quality control          |                   | `decontam()`                                                                                                                                              |
+| Community assembly       |                   | `neutral_model()`                                                                                                                                         |
+| Longitudinal             |                   | `first_differences()`, `first_distances()`, `volatility()`, `nmit()`, `feature_volatility()`                                                              |
+| Batch correction         |                   | `batch_mmuphin()`, `batch_combat()`                                                                                                                       |
+| Prediction               |                   | `random_forest()`                                                                                                                                         |
+| Plotting                 |                   | `plot()` of distance matrices, ordinations, tests, and the other results; `composition_barplot()`, `ternary_plot()`                                       |
+| Data preparation         |                   | `rarefy()`, `rarefaction_curve()`, `normalize()`, `read_tree()`                                                                                           |
 
 Each wrapper runs its functions by name, such as `beta_div(counts, 'bray')`
 or `dist_ord(dm, 'nmds')`.

@@ -311,8 +311,10 @@ varpart(
   data = cbind(sites, mem), norm = 'hellinger' )
 ```
 
-`principal_response_curves()`, which is planned, will also build on
-`rda()`.
+`principal_response_curves()` also builds on `rda()`. For a
+treatment-by-time experiment, it fits a partial RDA with time as the
+condition, and draws each treatment's departure from the control at each
+time.
 
 `cca()`, canonical **correspondence** analysis (not canonical correlation
 analysis), is the unimodal counterpart of RDA: it constrains a
