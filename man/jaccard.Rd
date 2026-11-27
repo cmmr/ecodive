@@ -65,6 +65,10 @@ Base R Equivalent:
 y <- ex_counts[2,]
 1 - sum(x & y) / sum(x | y)
 }\if{html}{\out{</div>}}
+
+It is vegan's \code{vegdist(x, "jaccard", binary = TRUE)}. vegan's
+\code{vegdist(x, "jaccard")} without \code{binary} is the quantitative form,
+ecodive's \code{\link[=soergel]{soergel()}} (the Ruzicka dissimilarity).
 }
 \section{Input Types}{
 
@@ -96,7 +100,9 @@ Jaccard, P. (1908). Nouvelles recherches sur la distribution florale. \emph{Bull
 
 Other Presence/Absence metrics:
 \code{\link[=hamming]{hamming()}},
+\code{\link[=mountford]{mountford()}},
 \code{\link[=ochiai]{ochiai()}},
+\code{\link[=raup_crick]{raup_crick()}},
 \code{\link[=sorensen]{sorensen()}}
 }
 \concept{Presence/Absence metrics}

@@ -95,6 +95,8 @@ Ochiai, A. (1957). Zoogeographic studies on the soleoid fishes found in Japan an
 Other Presence/Absence metrics:
 \code{\link[=hamming]{hamming()}},
 \code{\link[=jaccard]{jaccard()}},
+\code{\link[=mountford]{mountford()}},
+\code{\link[=raup_crick]{raup_crick()}},
 \code{\link[=sorensen]{sorensen()}}
 }
 \concept{Presence/Absence metrics}

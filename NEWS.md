@@ -45,7 +45,7 @@
     `ancombc_global()` and `ancombc_trend()` a dot chart of their
     statistics.
 
-* Every function that returns a distance matrix, `beta_div()` and its 38
+* Every function that returns a distance matrix, `beta_div()` and its 55
   metric functions, `vlr()`, `rho_p()` and `phi_s()`, takes `clust`, to
   cluster the samples before returning it: one of `stats::hclust()`'s
   linkage methods (`"average"`, `"complete"`, `"single"`, `"ward.D"`,
@@ -82,6 +82,26 @@
     draws the draws' densities.
   * `beta_div(x, "Bray-Curtis")` (alias `"braycurtis"`, or `"bc"`) still
     selects `bray()` now that other metric names begin with "Bray-Curtis".
+
+* Nine new beta metrics complete vegan's `vegdist()`, every one multithreaded
+  and run by `beta_div()` like any other: `kulczynski()`,
+  `binomial_deviance()` (`"binomial"`), `cao()`, `chao_jaccard()`
+  (`"chao"`), `alt_gower()` (`"altGower"`), `mahalanobis_distance()`
+  (`"mahalanobis"`) and `chisq_distance()` (`"chisq"`) of abundances, and
+  `mountford()` and `raup_crick()` (`"raup"`) of presence/absence. They
+  equal `vegdist()`'s values (Mountford's to about 1e-10 where vegan's
+  iterations converge; for richer samples ecodive's is the exact root).
+  `raup_crick()` is vegdist's analytic index, not vegan's simulated
+  `raupcrick()`. `mahalanobis_distance()` stops with an error where the
+  features' covariance is singular, where vegan returns near-constant
+  values. The docs of `jaccard()`, `soergel()` and `beta_div()` give how
+  every `vegdist()` method maps to ecodive's metrics.
+
+* New `norm = 'chisq'`, the chi-square transformation (vegan's
+  `decostand(x, "chi.square")`), for every metric with a `norm` argument
+  and for `normalize()`; `euclidean(x, norm = 'chisq')` is
+  `chisq_distance(x)`. `random_forest()` refuses it, since it scales by the
+  whole table's feature totals.
 
 * Distance matrices, ordinations, permutation tests and `envfit()` have a
   title, which `plot()` uses unless given `main` (`?ecodive_display`): the

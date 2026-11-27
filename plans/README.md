@@ -352,7 +352,7 @@ can't be mistaken for one another:
 | Alpha metrics (`alpha_div`) | ✓ `pielou`, ✓ `heip`, ✓ `simpson_evenness`, ✓ `mcintosh_evenness`, ✓ `goods_coverage`, ✓ `hill`, ✓ `renyi`, ✓ `tsallis`, ✓ `dominance`, ✓ `strong`, ✓ `gini` (id `gini`, not `gini_index`: the user's choice, 2026-11-24) |
 | Alpha diversity tests (`alpha_test`) | `alpha_wilcoxon`, `alpha_kruskal`, `alpha_ttest`, `alpha_lm`, `alpha_cor` |
 | Sampling effort | ✓ `rarefaction_curve`, `hill_extrapolation`, `hill_standardize` |
-| Beta metrics (`beta_div`) | ✓ `philr_distance`, ✓ `sorensen_turnover`, ✓ `sorensen_nestedness`, ✓ `jaccard_turnover`, ✓ `jaccard_nestedness`, ✓ `bray_balanced`, ✓ `bray_gradient`, ✓ `soergel_balanced`, ✓ `soergel_gradient`, `kulczynski`, `mountford`, `raup_crick`, `binomial_deviance`, `chao_jaccard`, `cao`, `mahalanobis_distance`, `alt_gower`, `chisq_distance` |
+| Beta metrics (`beta_div`) | ✓ `philr_distance`, ✓ `sorensen_turnover`, ✓ `sorensen_nestedness`, ✓ `jaccard_turnover`, ✓ `jaccard_nestedness`, ✓ `bray_balanced`, ✓ `bray_gradient`, ✓ `soergel_balanced`, ✓ `soergel_gradient`, ✓ `kulczynski`, ✓ `mountford`, ✓ `raup_crick`, ✓ `binomial_deviance`, ✓ `chao_jaccard`, ✓ `cao`, ✓ `mahalanobis_distance`, ✓ `alt_gower`, ✓ `chisq_distance` |
 | Beta partitioning | ✓ `beta_partition`, ✓ `beta_partition_multi` |
 | Community assembly | `mpd`, `mntd`, `mpd_ses`, `mntd_ses`, `beta_mntd`, `beta_mpd`, `beta_nti`, `raup_crick_bray`, `assembly_processes`, ✓ `neutral_model` |
 | Zero replacement (`replace_zeros`) | ✓ `replace_zeros_mult`, ✓ `replace_zeros_czm`, ✓ `replace_zeros_gbm`, ✓ `replace_zeros_sq`, ✓ `replace_zeros_bl` |

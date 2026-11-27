@@ -32,6 +32,15 @@ sample's proportions after adding \code{pseudocount} to every value,
 \eqn{\log((x + pseudocount) / \sum (x + pseudocount))}. It is the
 clr shifted by one constant per sample. Zeros get a value too, so the
 result is dense. See \strong{Pseudocount} below.
+\item \code{'chisq'}: The chi-square transformation (Legendre & Gallagher
+2001; vegan's \code{decostand(x, "chi.square")}):
+\eqn{\sqrt{T} x_{ij} / (r_i \sqrt{c_j})}, with \eqn{r_i} the sample's
+total, \eqn{c_j} the feature's total over all samples, and \eqn{T}
+the grand total. Euclidean distances between the results are
+chi-square distances (\code{\link[=chisq_distance]{chisq_distance()}}). It depends on the whole
+table: the same sample gets other values in another table. Features
+that are absent from every sample, and samples that are empty, stay
+zero (vegan gives \code{NaN} for them).
 \item \code{'none'}: No transformation.
 }}
 

@@ -26,6 +26,14 @@ BDIV_SORENSEN      <- 21L
 BDIV_SQUARED_CHISQ <- 22L
 BDIV_SQUARED_CHORD <- 23L
 BDIV_WAVE_HEDGES   <- 24L
+BDIV_KULCZYNSKI    <- 33L
+BDIV_MOUNTFORD     <- 34L
+BDIV_RAUP_CRICK    <- 35L
+BDIV_BINOMIAL      <- 36L
+BDIV_CHAO_JACCARD  <- 37L
+BDIV_CAO           <- 38L
+BDIV_MAHALANOBIS   <- 39L
+BDIV_ALT_GOWER     <- 40L
 
 U_UNIFRAC <- 1L
 W_UNIFRAC <- 2L
@@ -47,15 +55,18 @@ V_UNIFRAC <- 5L
 #'        proportions are also accepted by some diversity metrics.
 #' 
 #' @param metric   The name of a beta diversity metric. One of `c('aitchison',
-#'   'bhattacharyya', 'bray', 'bray_balanced', 'bray_gradient', 'canberra',
-#'   'chebyshev', 'chord', 'clark', 'divergence', 'euclidean',
-#'   'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn',
-#'   'jaccard', 'jaccard_nestedness', 'jaccard_turnover', 'jensen', 'jsd',
-#'   'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka',
+#'   'alt_gower', 'bhattacharyya', 'binomial_deviance', 'bray',
+#'   'bray_balanced', 'bray_gradient', 'canberra', 'cao', 'chao_jaccard',
+#'   'chebyshev', 'chisq_distance', 'chord', 'clark', 'divergence',
+#'   'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger',
+#'   'horn', 'jaccard', 'jaccard_nestedness', 'jaccard_turnover', 'jensen',
+#'   'jsd', 'kulczynski', 'lorentzian', 'mahalanobis_distance', 'manhattan',
+#'   'matusita', 'minkowski', 'morisita', 'motyka', 'mountford',
 #'   'normalized_unifrac', 'ochiai', 'philr_distance', 'psym_chisq',
-#'   'robust_aitchison', 'soergel', 'soergel_balanced', 'soergel_gradient',
-#'   'sorensen', 'sorensen_nestedness', 'sorensen_turnover', 'squared_chisq',
-#'   'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac',
+#'   'raup_crick', 'robust_aitchison', 'soergel', 'soergel_balanced',
+#'   'soergel_gradient', 'sorensen', 'sorensen_nestedness',
+#'   'sorensen_turnover', 'squared_chisq', 'squared_chord',
+#'   'squared_euclidean', 'topsoe', 'unweighted_unifrac',
 #'   'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')`. Flexible
 #'   matching is supported (see below). Programmatic access via
 #'   `list_metrics('beta')`.
@@ -96,12 +107,17 @@ V_UNIFRAC <- 5L
 #' | Option / Function Name      | Metric Name                                      |
 #' | :-------------------------- | :----------------------------------------------- |
 #' | `aitchison`                 | Aitchison distance                               |
+#' | `alt_gower`                 | Alternative Gower distance                       |
 #' | `bhattacharyya`             | Bhattacharyya distance                           |
+#' | `binomial_deviance`         | Binomial deviance dissimilarity                  |
 #' | `bray`                      | Bray-Curtis dissimilarity                        |
 #' | `bray_balanced`             | Bray-Curtis balanced variation                   |
 #' | `bray_gradient`             | Bray-Curtis abundance gradient                   |
 #' | `canberra`                  | Canberra distance                                |
+#' | `cao`                       | Cao dissimilarity (CYd)                          |
+#' | `chao_jaccard`              | Chao-Jaccard dissimilarity                       |
 #' | `chebyshev`                 | Chebyshev distance                               |
+#' | `chisq_distance`            | Chi-square distance                              |
 #' | `chord`                     | Chord distance                                   |
 #' | `clark`                     | Clark's divergence distance                      |
 #' | `divergence`                | Divergence                                       |
@@ -116,16 +132,20 @@ V_UNIFRAC <- 5L
 #' | `jaccard_turnover`          | Jaccard turnover                                 |
 #' | `jensen`                    | Jensen-Shannon distance                          |
 #' | `jsd`                       | Jesen-Shannon divergence (JSD)                   |
+#' | `kulczynski`                | Kulczynski dissimilarity                         |
 #' | `lorentzian`                | Lorentzian distance                              |
+#' | `mahalanobis_distance`      | Mahalanobis distance                             |
 #' | `manhattan`                 | Manhattan distance                               |
 #' | `matusita`                  | Matusita distance                                |
 #' | `minkowski`                 | Minkowski distance                               |
 #' | `morisita`                  | Morisita dissimilarity                           |
 #' | `motyka`                    | Motyka dissimilarity                             |
+#' | `mountford`                 | Mountford dissimilarity                          |
 #' | `normalized_unifrac`        | Normalized Weighted UniFrac                      |
 #' | `ochiai`                    | Otsuka-Ochiai dissimilarity                      |
 #' | `philr_distance`            | PhILR distance                                   |
 #' | `psym_chisq`                | Probabilistic Symmetric Chi-Squared distance     |
+#' | `raup_crick`                | Raup-Crick dissimilarity                         |
 #' | `soergel`                   | Soergel distance                                 |
 #' | `soergel_balanced`          | Ruzicka (Soergel) balanced variation             |
 #' | `soergel_gradient`          | Ruzicka (Soergel) abundance gradient             |
@@ -154,6 +174,20 @@ V_UNIFRAC <- 5L
 #' 
 #' Finished code should always use the full primary option name to avoid
 #' ambiguity with future additions to the metrics list.
+#' 
+#' **vegan's `vegdist()`**
+#' 
+#' Every method of vegan's `vegdist()` has a metric here. Most have the
+#' same name; the others are `"jaccard"` (quantitative): [soergel()];
+#' `"binomial"`: [binomial_deviance()]; `"chao"`: [chao_jaccard()];
+#' `"raup"`: [raup_crick()]; `"altGower"`: [alt_gower()]; `"mahalanobis"`:
+#' [mahalanobis_distance()]; `"chisq"`: [chisq_distance()]; and
+#' `"robust.aitchison"`: [robust_aitchison()]. vegan's `binary = TRUE` is
+#' `norm = 'binary'`, and `vegdist(x, "jaccard", binary = TRUE)` is
+#' [jaccard()]. As `metric`, vegan's names `"binomial"`, `"chao"`,
+#' `"raup"`, `"altGower"`, `"mahalanobis"`, `"chisq"` and
+#' `"robust.aitchison"` find their metrics; `"jaccard"` finds ecodive's
+#' (binary) [jaccard()].
 #' 
 #' The turnover / nestedness and balanced / gradient components are
 #' Baselga's partition of `sorensen`, `jaccard`, `bray` and `soergel`; see
@@ -1151,6 +1185,12 @@ robust_aitchison <- function (counts, margin = 1L, pairs = NULL, clust = NULL, c
 #' sum(abs(x - y)) / sum(pmax(x, y))
 #' ```
 #' 
+#' It is also the Ruzicka dissimilarity, \eqn{1 - \sum \min(X_i, Y_i) /
+#' \sum \max(X_i, Y_i)}, and vegan's quantitative Jaccard,
+#' `vegan::vegdist(x, "jaccard")` (\eqn{2B / (1 + B)}, with \eqn{B} the
+#' Bray-Curtis dissimilarity). ecodive's [jaccard()] is the binary form,
+#' `vegdist(x, "jaccard", binary = TRUE)`.
+#' 
 #' @references
 #' Cha, S.-H. (2007). Comprehensive survey on distance/similarity measures between probability density functions. *International Journal of Mathematical Models and Methods in Applied Sciences*, 1(4), 300–307.
 #' 
@@ -1434,6 +1474,10 @@ hamming <- function (counts, margin = 1L, pairs = NULL, clust = NULL, cpus = n_c
 #' y <- ex_counts[2,]
 #' 1 - sum(x & y) / sum(x | y)
 #' ```
+#' 
+#' It is vegan's `vegdist(x, "jaccard", binary = TRUE)`. vegan's
+#' `vegdist(x, "jaccard")` without `binary` is the quantitative form,
+#' ecodive's [soergel()] (the Ruzicka dissimilarity).
 #' 
 #' @references
 #' Jaccard, P. (1912). The distribution of the flora in the alpine zone. *New Phytologist*, 11(2), 37-50. \doi{10.1111/j.1469-8137.1912.tb05611.x}

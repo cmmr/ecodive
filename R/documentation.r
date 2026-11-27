@@ -41,6 +41,8 @@
 #'   * `'rclr'`: Robust centered log ratio.
 #'   * `'log'`: Log relative abundance (log-TSS), with `pseudocount` added
 #'     to every value first.
+#'   * `'chisq'`: The chi-square transformation, which uses the whole
+#'     table's feature totals (see [normalize()]).
 #'   
 #'   Default: `'none'`.
 #' 

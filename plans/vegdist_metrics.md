@@ -313,3 +313,156 @@ note: none (the names were chosen to avoid `stats`'). NEWS.
   (2011). Using null models to disentangle variation in community
   dissimilarity from variation in α-diversity. *Ecosphere*, 2, art24.
   doi:10.1890/ES10-00117.1
+
+
+## Decisions made while implementing
+
+Implemented 2026-11-27 (item 79). Everything below was settled from the
+vegdist() Rd, the papers, and vegan 2.7-8's **outputs** (protocol scripts
+in the session's scratch directory; vegan's R and C source were never
+opened).
+
+**The user's choices (the plan's two questions):**
+
+- **Chi-square: both.** `chisq_distance()` is a metric (aliases `chisq`,
+  `chisquare`), and `norm = 'chisq'` is a new choice for every metric with
+  `norm` and for `normalize()` (`NORM_CHISQ = 8`; column sums summed
+  serially in sample order, then a threaded per-sample scaling).
+  `chisq_distance(x)` is `euclidean(x, norm = 'chisq')`, bit for bit.
+  `random_forest()` refuses `norm = 'chisq'` (its `predict()` would scale
+  new samples by other feature totals); `pca()`'s name table and the
+  `norm` docs (`?documentation`, `?normalize`) list it.
+- **Integers: Chao errors, Cao silent.** `chao_jaccard()` calls
+  `assert_integer_counts()` (`int_only = YES`); `cao()` doesn't check at
+  all (`int_only = NO`, not the plan table's YES). Note that vegan *warns*
+  for non-integer data with both `"cao"` and `"chao"`; ecodive's `cao()` is
+  silent by the user's choice, and its Rd says vegan warns.
+
+**Settled from vegan's outputs:**
+
+- **Mountford** returns **log(2) − M** (not M, M / log 2 or 1 − M / log 2):
+  max |vegan − (log 2 − M)| = 5.6e-11 over a = b = 1..12, with M from a
+  high-precision root. j = 0 gives log 2; j = a or j = b gives 0; **an
+  empty sample gives NaN** (vegan NA), so ecodive returns NaN for it. Solved
+  in the overflow-free form g(M) = expm1(−(b−j)M) + expm1(−(a−j)M) −
+  expm1(−(a+b−j)M) = 0, Newton with a bisection bracket, from the root of
+  g's second-order expansion, to ~4 ulp. **vegan's own Newton iterations
+  fail for rich samples**: the error is ≤ 2e-10 while a, b ≤ 50, then up to
+  0.65 at a, b ≈ 80–3000 (checked: ecodive's M satisfies the equation to
+  1e-15, vegan's leaves g ≈ −0.07). So fixtures keep richness ≤ 45 and the
+  tests match vegan at **1e-9** (measured max 5.7e-11), and check the root
+  directly beyond that. Documented as a difference from vegan.
+- **Raup-Crick** is **P(X ≥ j)** = `phyper(j − 1, a, S − a, b, lower.tail =
+  FALSE)`, S = ncol (empty features included). vegan computes it as 1 −
+  P(X < j), so it returns 0 where the true value is below ~1e-16 (e.g.
+  7.3e-29 at S = 100, a = b = j = 40) and loses relative precision in the
+  far upper tail. ecodive sums the smaller tail (upper when j > ab/S) from
+  its far end with a log-factorial table (`lgammafn()` once per run, in the
+  setup), and complements otherwise; it matches `phyper()` to 1e-12
+  relative on the grid and vegan to 1.9e-13 absolute. a = 0 or b = 0 gives
+  1, as vegan.
+- **Cao:** every value is raised to **max(x, 0.1)**, and that value also
+  enters n_i; the mean runs over the features with x + y > 0 in the
+  original data. (The 0.1 is *not* applied only to zeros: 0.05 becomes
+  0.1.) Natural logs. Both samples empty: NaN.
+- **Chao-Jaccard:** f2 = 0 is replaced by **1** (a1 / 2, not the
+  bias-corrected a1(a1 − 1)/2), and **U and V are capped at 1**. No shared
+  features gives 1; two empty samples NaN (as vegan).
+- **Chi-square:** the √T factor is right (vegan = `dist()` of √T x / (r
+  √c), features with c = 0 dropped, to 4e-16). An **empty sample** is all
+  zeros after ecodive's transform (as `norm = 'percent'` leaves it), so its
+  distances are finite; vegan gives NA. Documented as a difference; tests
+  check finiteness there instead.
+- **Binomial:** two empty samples give NaN (as vegan); one empty sample is
+  finite (log 2 per feature of the other).
+- **Kulczynski, altGower:** vegan's formulas exactly; both-empty pairs are
+  NaN (0/0), as vegan.
+- **Mahalanobis:** QR without pivoting, Householder on the centred dense
+  table (serial), then Y = √(n − 1) X_c R⁻¹ row by row (threaded, rows
+  independent), then the Euclidean kernel on Y. **Rank tolerance:** a
+  column whose remaining norm is ≤ 1e-9 × the largest centred column norm
+  stops with "Mahalanobis distances need more samples than features and no
+  collinear features; reduce the features first (e.g. pca())"; D ≥ n stops
+  before the QR. Zero-variance columns hit the same error. Matches vegan
+  and SciPy to ~1e-12 relative (tests at 1e-10). `norm = 'clr'`,
+  `'percent'`, `'chisq'` always make it singular (documented).
+
+**Other choices:**
+
+- **Negative values** are refused (`` `counts` contains negative values. ``)
+  by all the new metrics **except `mahalanobis_distance()`**, whose natural
+  inputs (environmental variables, ordination scores) can be negative.
+- **`true_metric`:** NO for kulczynski, binomial, cao, alt_gower, mountford
+  (each has a triangle violation in the tests: a brute-force search on a
+  random 15 × 8 table, and for alt_gower the triple (0,0,0,1), (1,0,1,1),
+  (0,5,0,0) found by search), raup_crick and chao_jaccard; YES for
+  mahalanobis and chisq (Euclidean embeddings).
+- **`chao` alias:** `chao1` (alpha) also normalizes to "chao", so
+  `match_metric('chao')` **without `div`** now says it matches two metrics
+  (it gave chao1 before); `alpha_div(x, 'chao')` and `beta_div(x, 'chao')`
+  pick by `div`. Accepted (tested both ways).
+- The R functions live in `R/vegdist_metrics.r`; their `BDIV_*` codes
+  (33–40) are in `R/beta_div.r` and `src/beta_div.c`; no new `.Call`
+  entry point, so `src/init.c` is unchanged.
+- vegan's `binary = TRUE` is compared with `norm = 'binary'` for
+  kulczynski, binomial and altGower (and Mahalanobis on one table).
+  `cao()`, `chao_jaccard()` take no `norm` (per the plan), so vegan's
+  binary forms of those aren't offered.
+- Fixtures: `data-raw/expected/vegdist_metrics.r` (+ `.py` for SciPy) →
+  `tests/tinytests/expected/vegdist_metrics.rds` (94 KB): ex_counts, an
+  edge table (two empty samples, identical, nested, disjoint, singletons),
+  a sparse 30 × 200 table, dune, varespec (not integers), proportions; the
+  Mountford grid (a, b ≤ 12, with empty samples) and the Raup grid (S ∈
+  {5, 10, 25, 60} plus far tails at S = 100); abdiv for kulczynski,
+  binomial and altGower; SciPy and vegan for Mahalanobis on three tables.
+- Docs: `beta_div()` has a "vegan's vegdist()" section mapping every
+  method; `jaccard()` and `soergel()` state the mapping; the README,
+  `vignette('bdiv')` (lists and formula tables), `vignette('ecodive')`
+  (metric table) and DESCRIPTION's count (80 indices: 25 alpha + 55 beta)
+  are updated.
+- **Registry row order matters for prefix matching:** `make_haystack()`
+  drops a name that prefixes one already in the haystack, whatever its ID.
+  With the Chao-Jaccard row (alias `chao`) before Chao1, both of chao1's
+  names ("chao") were dropped and `alpha_div(x, 'c')` (an `alpha_div()`
+  example) stopped matching chao1. The Chao1 row now comes first; every
+  ID of every registry was checked to keep at least one haystack entry
+  (DA_TESTS' `ancombc2` has none, which predates this item and still
+  matches exactly). A test guards `match_metric('c', div = 'alpha')`.
+- Two existing tests ran every beta metric on tables with more features
+  than samples; `test-dist_clust.r` now gives `mahalanobis_distance()`
+  iris' 150 × 4 measurements, and `test-ecomatrix.r` leaves it out of its
+  12 × 30 table.
+- Not ported from abdiv or SciPy (only compared), so `inst/COPYRIGHTS` and
+  `Authors@R` are unchanged.
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commit:** `4c816f8` (implementation, tests, fixtures, docs); a second
+  commit ticks item 79 and adds this section.
+- **Tests:** full tinytest suite against an `-O2` install, R 4.3.3,
+  `LANG=C.UTF-8`: **34,311 OK at home** (baseline 34,006) and **505 OK in
+  CRAN mode** (baseline 477). `test-vegdist_metrics.r` has 233
+  expectations. `R CMD check --no-manual --ignore-vignettes`: 1 NOTE
+  (installed size, pre-existing).
+- **Largest differences from the references:**
+
+  | Metric | vegan 2.7-8 | other |
+  |:-------|:------------|:------|
+  | kulczynski | 2.2e-16 | abdiv `weighted_kulczynski_second` ≤ 1e-12 (test tolerance) |
+  | mountford | 5.7e-11 (richness ≤ 45; vegan fails beyond ~50) | exact root: g(M) < 1e-13 |
+  | raup_crick | 1.9e-13 | `phyper()` upper tail, 1e-12 relative |
+  | binomial_deviance | 7.1e-15 | abdiv ≤ 1e-12 |
+  | chao_jaccard | 0 | |
+  | cao | 1.3e-15 | |
+  | alt_gower | 0 | abdiv `modified_mean_character_difference` ≤ 1e-12 |
+  | chisq_distance | 1.8e-15 | plain-R √T x/(r√c) transform |
+  | mahalanobis_distance | 9e-13 (abs) / ≤ 1e-10 rel. | SciPy `mahalanobis(VI = inv(cov))` ≤ 1e-10 rel.; plain-R `chol()` whitening |
+  | soergel (vegdist "jaccard") | ≤ 1e-12 | |
+
+- **Speed** (400 × 2,000 sparse counts, this container): vegan 0.3–0.5 s
+  per metric; ecodive 0.02–0.07 s on 1 thread, 0.01–0.03 s on 4, identical
+  for any `cpus`.
+- **Open issues:** none for this item. Noticed in passing (pre-existing,
+  not changed): DA_TESTS' `ancombc2` has no entry in the prefix haystack
+  (it still matches exactly).

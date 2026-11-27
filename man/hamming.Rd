@@ -94,7 +94,9 @@ Hamming, R. W. (1950). Error detecting and error correcting codes. \emph{Bell Sy
 
 Other Presence/Absence metrics:
 \code{\link[=jaccard]{jaccard()}},
+\code{\link[=mountford]{mountford()}},
 \code{\link[=ochiai]{ochiai()}},
+\code{\link[=raup_crick]{raup_crick()}},
 \code{\link[=sorensen]{sorensen()}}
 }
 \concept{Presence/Absence metrics}

@@ -12,6 +12,7 @@
 #define NORM_RCLR    5
 #define NORM_HELLINGER 6
 #define NORM_LOG     7
+#define NORM_CHISQ   8
 
 static int     n_samples;
 static int     n_otus;
@@ -226,6 +227,42 @@ static void *norm_rclr(void *arg) {
 }
 
 
+//======================================================
+// Chi-square transformation (Legendre & Gallagher 2001)
+// sqrt(T) * x / (r * sqrt(c)): r the sample's total, c the
+// feature's total over all samples, T the grand total.
+// Euclidean distances between the results are the
+// chi-square distances. Empty samples stay all zero.
+//======================================================
+static double *chisq_scale_vec; // sqrt(T) / sqrt(c), per feature
+static int    *chisq_otu_vec;
+
+static void *norm_chisq(void *arg) {
+  FOREACH_SAMPLE(
+    double depth = 0;
+    FOREACH_VAL(depth += *val);
+    int *otu = chisq_otu_vec + (val_begin - val_vec);
+    FOREACH_VAL(*val = *val / depth * chisq_scale_vec[*otu]; otu++);
+  );
+  return NULL;
+}
+
+// The column sums, summed in sample order, and the grand
+// total, summed in feature order: the same for any thread
+// count.
+static void chisq_setup(ecomatrix_t *em) {
+  double *col = (double*) R_alloc((size_t) n_otus, sizeof(double));
+  for (int k = 0; k < n_otus; k++) col[k] = 0;
+  for (int e = 0; e < em->nnz; e++) col[em->otu_vec[e]] += em->val_vec[e];
+  double total = 0;
+  for (int k = 0; k < n_otus; k++) total += col[k];
+  double sqrt_total = sqrt(total);
+  for (int k = 0; k < n_otus; k++) col[k] = col[k] > 0 ? sqrt_total / sqrt(col[k]) : 0;
+  chisq_scale_vec = col;
+  chisq_otu_vec   = em->otu_vec;
+}
+
+
 void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
   
   n_samples = em->n_samples;
@@ -255,6 +292,7 @@ void normalize(ecomatrix_t *em, int norm, int n_threads, double pseudocount_) {
     case NORM_RCLR:    norm_func = norm_rclr;    break;
     case NORM_HELLINGER: norm_func = norm_hellinger; break;
     case NORM_LOG:     norm_func = norm_log;     break;
+    case NORM_CHISQ:   norm_func = norm_chisq;   chisq_setup(em); break;
   }
   
   pseudocount = pseudocount_;

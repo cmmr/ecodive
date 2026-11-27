@@ -149,6 +149,8 @@
   set.seed(3)
   for (dims in list(c(12, 30, 0.3), c(25, 8, 0.7))) {
     n <- dims[[1]]; p <- dims[[2]]
+    # Mahalanobis distances need more samples than features.
+    beta_ids <- setdiff(list_metrics('beta', val = 'id'), if (p >= n) 'mahalanobis_distance')
     m <- matrix(rpois(n * p, 20) * rbinom(n * p, 1, dims[[3]]), n, p,
                 dimnames = list(paste0('S', 1:n), paste0('OTU', 1:p)))
     m[,1] <- m[,1] + 1 # no empty samples

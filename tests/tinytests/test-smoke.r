@@ -49,6 +49,14 @@
 
   expect_identical(match_metric('bray')$id, 'bray')
 
+  # The vegdist() metrics.
+  for (f in c('kulczynski', 'mountford', 'raup_crick', 'binomial_deviance', 'chao_jaccard',
+              'cao', 'alt_gower', 'chisq_distance', 'mahalanobis_distance')) {
+    d <- do.call(f, list(counts, cpus = cpus))
+    expect_true(inherits(d, 'ecodive_dist') && length(d) == 190L && all(is.finite(d)), info = f)
+  }
+  expect_true(all(is.finite(normalize(counts, 'chisq'))))
+
   # Partition of beta diversity.
   bp <- beta_partition(counts, 'bray', cpus = cpus)
   expect_inherits(bp, 'ecodive_beta_partition')

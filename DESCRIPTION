@@ -132,7 +132,7 @@ Authors@R: c(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,
-    memory-efficient manner using 'C' and 'pthreads'. Implements 51 classic,
+    memory-efficient manner using 'C' and 'pthreads'. Implements 80 classic,
     compositional, and phylogenetic indices including 'Shannon', 'Bray-Curtis',
     'Faith', 'JSD', 'Hellinger', 'Robust Aitchison', and the 'UniFrac' family.
     Ordinates beta diversity distances by principal coordinates analysis

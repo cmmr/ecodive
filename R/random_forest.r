@@ -43,8 +43,9 @@
 #' @param norm   How to normalize each sample before growing the trees:
 #'   `'percent'` (relative abundances, the default), `'none'` (the values
 #'   as given, for any numeric table), or one of [normalize()]'s other
-#'   choices. Trees don't change under monotone transforms of a feature, so
-#'   only transforms across features (percent, clr, chord, ...) matter.
+#'   choices except `'chisq'`, which depends on the whole table. Trees
+#'   don't change under monotone transforms of a feature, so only
+#'   transforms across features (percent, clr, chord, ...) matter.
 #'   Default: `'percent'`
 #'
 #' @param n_trees   The number of trees in each forest. Default: `500`
@@ -358,6 +359,10 @@ rf_run <- function (env, numpy_random_state = NULL, sparse = NULL, details = FAL
     validate_cpus()
     validate_seed()
   })
+  if (identical(env$norm, NORM_CHISQ))
+    stop("`norm = 'chisq'` scales by the whole table's feature totals, so new ",
+         "samples could not be scaled as the training ones; choose another `norm`.",
+         call. = FALSE)
   counts <- env$counts; margin <- env$margin; norm <- env$norm
   pseudocount <- env$pseudocount; cpus <- env$cpus; seed <- env$seed
 

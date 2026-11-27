@@ -38,6 +38,8 @@ transformation).
 \item \code{'rclr'}: Robust centered log ratio.
 \item \code{'log'}: Log relative abundance (log-TSS), with \code{pseudocount} added
 to every value first.
+\item \code{'chisq'}: The chi-square transformation, which uses the whole
+table's feature totals (see \code{\link[=normalize]{normalize()}}).
 }
 
 Default: \code{'none'}.}
@@ -164,10 +166,15 @@ Minkowski, H. (1896). \emph{Geometrie der Zahlen}. Teubner.
 
 Other Abundance metrics:
 \code{\link[=aitchison]{aitchison()}},
+\code{\link[=alt_gower]{alt_gower()}},
 \code{\link[=bhattacharyya]{bhattacharyya()}},
+\code{\link[=binomial_deviance]{binomial_deviance()}},
 \code{\link[=bray]{bray()}},
 \code{\link[=canberra]{canberra()}},
+\code{\link[=cao]{cao()}},
+\code{\link[=chao_jaccard]{chao_jaccard()}},
 \code{\link[=chebyshev]{chebyshev()}},
+\code{\link[=chisq_distance]{chisq_distance()}},
 \code{\link[=chord]{chord()}},
 \code{\link[=clark]{clark()}},
 \code{\link[=divergence]{divergence()}},
@@ -177,7 +184,9 @@ Other Abundance metrics:
 \code{\link[=horn]{horn()}},
 \code{\link[=jensen]{jensen()}},
 \code{\link[=jsd]{jsd()}},
+\code{\link[=kulczynski]{kulczynski()}},
 \code{\link[=lorentzian]{lorentzian()}},
+\code{\link[=mahalanobis_distance]{mahalanobis_distance()}},
 \code{\link[=manhattan]{manhattan()}},
 \code{\link[=matusita]{matusita()}},
 \code{\link[=morisita]{morisita()}},
