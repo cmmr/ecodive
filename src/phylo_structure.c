@@ -859,8 +859,9 @@ SEXP C_phylo_structure (
   int *spos = NULL, *sidx = NULL, smax = 0;
   double *sval = NULL;
   if (model == PS_SUPPLIED) {
+    SEXP sexp_one = PROTECT(ScalarInteger(1));
     init_n_ptrs(20);
-    ecomatrix_t *sm = new_ecomatrix(sexp_supplied, ScalarInteger(1));
+    ecomatrix_t *sm = new_ecomatrix(sexp_supplied, sexp_one);
     if (sm->n_otus != T || (R_xlen_t) sm->n_samples != (R_xlen_t) n * n_draws)
       STOP("Invalid arguments to C_phylo_structure()."); // # nocov
     size_t rows = (size_t) sm->n_samples;
@@ -881,6 +882,7 @@ SEXP C_phylo_structure (
       if (k - spos[i] > smax) smax = k - spos[i];
     }
     free_all();
+    UNPROTECT(1);
   }
 
   // Distances.
