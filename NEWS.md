@@ -1223,6 +1223,22 @@
   and coloured by the group that holds most of it. Sparse tables stay
   sparse.
 
+* New `variation_array()` gives Aitchison's variation array, the standard
+  first summary of a composition: for every pair of features, the variance
+  of their log ratio (the same as `vlr()`, above the diagonal) and its mean
+  (row over column, below), with each feature's clr variance and the total
+  variance as attributes. It matches `compositions::variation()` and
+  `mvar()`. `clust` orders the features by clustering the square roots of
+  the variances, and `plot()` draws both triangles as heatmaps, with each
+  feature's share of the total variance beside its row.
+
+* New `zero_pattern()` groups the samples by which features are zero in
+  them, as zCompositions' `zPatterns()` does (same patterns and counts),
+  and gives each feature's proportion of zeros; `plot()` draws the most
+  frequent patterns with bars of both. A look at the zeros before choosing
+  a pseudocount or `replace_zeros()`, or testing `structural_zeros()`.
+  Sparse tables stay sparse in both.
+
 * `plot()` of an ordination takes `scaling` and `links`, for compositional
   biplots (Aitchison & Greenacre 2002). For `pca()`, `rpca()` and
   `rpca_phylo()`: `scaling = 'form'` (the default, as before),

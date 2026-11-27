@@ -99,6 +99,11 @@ reference:
   - vlr
   - rho_p
   - phi_s
+- subtitle: Diagnostics
+  desc: First looks at a composition before analysing it. variation_array() summarizes every pair of features' log ratios and each feature's share of the total variance; zero_pattern() shows which features are zero together, before choosing a pseudocount or replace_zeros() method.
+  contents:
+  - variation_array
+  - zero_pattern
 - subtitle: Associations and networks
   desc: Correlations between features' absolute abundances, estimated from relative abundances (a dist over the features), the pairs above a cutoff, and the networks they make. feature_assoc() runs any association measure by name.
   contents:
@@ -280,6 +285,8 @@ reference:
   - plot.ecodive_mantel_correlogram
   - plot.ecodive_mantel_regression
   - plot.ecodive_log_ratio
+  - plot.ecodive_variation_array
+  - plot.ecodive_zero_pattern
   - ecodive_display
   - print_ecodive
 - subtitle: Compositional displays

@@ -212,3 +212,48 @@ Follows [README.md](README.md) § "Result attributes and plots".
   R package for multivariate imputation of left-censored data under a
   compositional approach. *Chemometrics and Intelligent Laboratory Systems*,
   143, 85–96. \doi{10.1016/j.chemolab.2015.02.019}
+
+
+## Decisions made while implementing
+
+- **Clustering distance (the user's choice, 2026-11-27):** \eqn{\sqrt{\tau}}
+  for both `variation_array(clust =)` and the plot's default order (average
+  linkage), so that `clust = 'average'` and the default plot agree. The plan
+  had \eqn{\tau} itself for the plot default; that order can differ from
+  `plot(vlr(x))`'s.
+- **Printing (the user's choice, 2026-11-27):** `print()` shows a header
+  (features, samples, total variance), the top-left block of at most
+  10 × 10 features at 3 significant digits, a footer naming how many
+  features are not shown, then the shown features' % clr variance. Not the
+  whole matrix (README: results never print every value).
+- **The means from C:** `C_proportionality()` takes a fourth method code
+  (vlr plus attribute `mean_log`, each feature's mean log from the same
+  pass that centres the logs), so \eqn{\tau} is bit-identical to `vlr()`
+  and sparse input stays sparse. No new entry point for the variation
+  array; `init.c` gains only `C_zero_pattern`.
+- **`zero_pattern()` in C** (`src/coda_diagnostics.c`): samples are sorted
+  by their lists of non-zero features (length, then features, then sample:
+  a total order, so deterministic), and runs of equal lists are the
+  patterns. Single-threaded (`cpus` isn't an argument: the plan's
+  signature). Explicitly stored zeros in sparse input count as zeros (the
+  ecomatrix reader drops them).
+- **Labels:** a variation array always has dimnames: feature positions
+  when `counts` has no feature names (as `dist_reorder()` labels unnamed
+  samples).
+- **`pseudocount` attribute:** `0` when none was added.
+- **Arithmetic** (`Ops`, `Math`) on a variation array returns a plain
+  matrix, as for `ecodive_log_ratio`; `[` already does.
+- **Zero-pattern plot:** title and subtitle in the outer margins (the
+  layout has three panels), wrapped to the device's width; `main` and
+  `sub` in `...` replace them. The top bars' axis runs to the largest
+  shown proportion of zeros (rounded up), not always 100%. White grid
+  lines between cells up to 80 × 80. The subtitle breaks the hidden
+  features down into never zero, always zero and beyond `n_features`.
+  With no feature that varies, the main panel says so.
+- **Variation-array plot:** `dist_plot_key()` (R/plot_dist.r) gained
+  optional `x` and `y` placements so the two keys share the right margin;
+  its default placement is unchanged. Bars' values are written up to 40
+  features; cell values up to 15 (as planned).
+- **Fixtures:** `data-raw/expected/coda_diagnostics.r` stores
+  compositions 2.0.9's `variation()` and `mvar()` (two positive tables)
+  and zCompositions 1.6.2's `zPatterns()` ids (three tables with zeros).

@@ -98,6 +98,7 @@ same thing.
 | `feature_groups`, `n_feature_groups` | **(new, 2026-11-24, item 47)** each feature's higher-level group (e.g. its phylum; the feature-side counterpart of `groups`): one value per feature, matched by name when named by every feature, else by position, `NA` = `"Unassigned"`; and how many groups to draw (`n_<unit>` rule) | `composition_barplot` |
 | `parts` | **(new, 2026-11-26, item 54)** the three parts of a ternary plot (the CoDa term): a selector of exactly 3 features (names, indices or a logical vector, `feature_set()`'s forms), or a list of 3 selectors whose features are summed (amalgamation), one of which may be `NA` for every other feature | `ternary_plot` |
 | `center` | **(new, item 54)** centre compositions by perturbation with the inverse of their closed geometric mean (R's spelling, as `scale(center =)`) | `ternary_plot` |
+| `n_patterns` | **(new, 2026-11-27, item 60)** how many zero patterns a plot draws, the most frequent first (`n_<unit>` rule; with `n_features`, the features drawn) | `plot.ecodive_zero_pattern` |
 | `ellipses` | **(new, item 54)** which regions to draw around each group in ilr coordinates: `'none'`, `'confidence'` (Hotelling's region for the mean) or `'prediction'`, at `conf_level` | `ternary_plot` |
 | `grid` | **(new, item 54)** whether to draw gridlines (`TRUE`/`FALSE`) | `ternary_plot` |
 | `heatmap` | **(new, item 47)** also draw a heatmap (of centred clr values) below a plot | `composition_barplot` |

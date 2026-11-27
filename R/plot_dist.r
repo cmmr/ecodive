@@ -244,14 +244,19 @@ dist_plot_name <- function (x) {
 
 
 # A vertical colour key in the right margin: one box per colour of `pal`
-# between the `brk`s, labelled with round values.
-dist_plot_key <- function (pal, brk, title) {
+# between the `brk`s, labelled with round values. `x` and `y` (user
+# coordinates, each a pair) place it; by default it spans the plot's height
+# just right of it.
+dist_plot_key <- function (pal, brk, title, x = NULL, y = NULL) {
 
   usr <- graphics::par('usr')
   w   <- diff(usr[1:2])
-  x0  <- usr[[2]] + 0.04 * w
-  x1  <- usr[[2]] + 0.08 * w
-  y   <- usr[[3]] + (brk - brk[[1]]) / diff(range(brk)) * diff(usr[3:4])
+  if (is.null(x)) x <- usr[[2]] + c(0.04, 0.08) * w
+  if (is.null(y)) y <- usr[3:4]
+  x0  <- x[[1]]
+  x1  <- x[[2]]
+  y0  <- y[[1]]
+  y   <- y0 + (brk - brk[[1]]) / diff(range(brk)) * diff(y)
   k   <- length(pal)
 
   graphics::rect(x0, y[-(k + 1)], x1, y[-1], col = pal, border = NA, xpd = NA)
@@ -259,10 +264,10 @@ dist_plot_key <- function (pal, brk, title) {
 
   at <- pretty(range(brk), 5)
   at <- at[at >= min(brk) & at <= max(brk)]
-  ya <- usr[[3]] + (at - brk[[1]]) / diff(range(brk)) * diff(usr[3:4])
+  ya <- y0 + (at - brk[[1]]) / diff(range(brk)) * (y[[k + 1]] - y0)
   graphics::segments(x1, ya, x1 + 0.01 * w, ya, xpd = NA)
   graphics::text(x1 + 0.015 * w, ya, format(at, trim = TRUE), adj = c(0, 0.5), cex = 0.7, xpd = NA)
-  graphics::text((x0 + x1) / 2, usr[[4]], title, pos = 3, cex = 0.75, xpd = NA)
+  graphics::text((x0 + x1) / 2, y[[k + 1]], title, pos = 3, cex = 0.75, xpd = NA)
 
   invisible()
 }
