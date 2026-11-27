@@ -10,6 +10,7 @@ NORM_BINARY  <- 4L
 NORM_RCLR    <- 5L
 NORM_HELLINGER <- 6L
 NORM_LOG     <- 7L
+NORM_CHISQ   <- 8L
 
 
 # The stored values of a count table, with repeated (i, j) entries of a
@@ -354,6 +355,10 @@ validate_pseudocount <- function (env = parent.frame()) {
       if (identical(norm, NORM_HELLINGER) && isTRUE(any(stored_values(counts) < 0)))
         stop('`counts` contains negative values; cannot perform Hellinger normalization.')
 
+      # sqrt() of a negative feature total would be NaN.
+      if (identical(norm, NORM_CHISQ) && isTRUE(any(stored_values(counts) < 0)))
+        stop('`counts` contains negative values; cannot perform chi-square normalization.')
+
       pseudocount <- 0
     }
 
@@ -463,7 +468,7 @@ validate_norm <- function (env = parent.frame()) {
     norm <- switch(
       EXPR = match.arg(
         arg     = tolower(norm), 
-        choices = c('none', 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log') ),
+        choices = c('none', 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log', 'chisq') ),
       'none'      = NORM_NONE,
       'percent'   = NORM_PERCENT,
       'chord'     = NORM_CHORD,
@@ -471,7 +476,8 @@ validate_norm <- function (env = parent.frame()) {
       'binary'    = NORM_BINARY,
       'clr'       = NORM_CLR,
       'rclr'      = NORM_RCLR,
-      'log'       = NORM_LOG )
+      'log'       = NORM_LOG,
+      'chisq'     = NORM_CHISQ )
     
   })
 }

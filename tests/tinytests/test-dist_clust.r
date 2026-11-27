@@ -143,7 +143,10 @@
   for (f in list_metrics('beta', 'func')) {
     id <- names(which(vapply(list_metrics('beta', 'func'), identical, TRUE, f)))
     d  <- if (id %in% list_metrics('beta', 'id', phylo = TRUE))
-      f(ex + 1, tree = ecodive::ex_tree, cpus = cpus) else f(ex + 1, cpus = cpus)
+      f(ex + 1, tree = ecodive::ex_tree, cpus = cpus)
+    else if (id == 'mahalanobis_distance')
+      f(x, cpus = cpus)  # needs more samples than features
+    else f(ex + 1, cpus = cpus)
     expect_identical(attr(d, 'method'), id, info = id)
     expect_identical(attr(d, 'display')$title, match_metric(id)$name, info = id)
   }

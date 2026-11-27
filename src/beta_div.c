@@ -31,6 +31,7 @@
 // (2010, 2012, 2017), and checked against betapart's outputs only.
 
 #include "ecodive.h"
+#include <Rmath.h> // lgammafn
 
 #define BDIV_BHATTACHARYYA  1
 #define BDIV_BRAY           2
@@ -65,6 +66,17 @@
 #define BDIV_BRAY_GRADIENT       30
 #define BDIV_SOERGEL_BALANCED    31
 #define BDIV_SOERGEL_GRADIENT    32
+
+// The vegdist() metrics (plans/vegdist_metrics.md). Written from vegan's
+// documentation, the papers and vegan's outputs only.
+#define BDIV_KULCZYNSKI   33
+#define BDIV_MOUNTFORD    34
+#define BDIV_RAUP_CRICK   35
+#define BDIV_BINOMIAL     36
+#define BDIV_CHAO_JACCARD 37
+#define BDIV_CAO          38
+#define BDIV_MAHALANOBIS  39
+#define BDIV_ALT_GOWER    40
 
 // The families of beta_partition() and beta_partition_multi().
 #define PART_SORENSEN 1
@@ -737,8 +749,393 @@ static void *wave_hedges(void *arg) {
       else       { distance += (y - x) / y; }
     );
   );
-  
+
   return NULL;
+}
+
+
+
+
+//======================================================
+// The vegdist() metrics ecodive lacked. Formulas from
+// vegan's vegdist() documentation and the cited papers;
+// details (Mountford's map, Raup-Crick's tail, Cao's
+// zeros, Chao's a2 = 0 and cap) settled from vegan's
+// outputs, as plans/vegdist_metrics.md records.
+//======================================================
+
+
+//======================================================
+// Kulczynski (quantitative; Faith et al. 1987)
+// 1 - (sum(pmin(x, y)) / sum(x) + sum(pmin(x, y)) / sum(y)) / 2
+//======================================================
+static void *kulczynski(void *arg) {
+  FOREACH_PAIR(
+    double min_sum = 0; double sum_x = 0; double sum_y = 0;
+    FOREACH_OTU(
+      min_sum += (x < y) ? x : y;
+      sum_x   += x;
+      sum_y   += y;
+    );
+    distance = 1 - (min_sum / sum_x + min_sum / sum_y) / 2;
+  );
+  return NULL;
+}
+
+
+//======================================================
+// Binomial deviance (Anderson & Millar 2004)
+// n = x + y over features with n > 0;
+// sum((x log(x/n) + y log(y/n) - n log(1/2)) / n), 0 log 0 = 0
+//======================================================
+static void *binomial(void *arg) {
+  FOREACH_PAIR(
+    double total = 0;
+    FOREACH_OTU(
+      double n = x + y;
+      total += n;
+      if (n > 0) {
+        double t = n * M_LN2;
+        if (x > 0) t += x * log(x / n);
+        if (y > 0) t += y * log(y / n);
+        distance += t / n;
+      }
+    );
+    if (total == 0) distance = R_NaN; // Two empty samples, as vegan.
+  );
+  return NULL;
+}
+
+
+//======================================================
+// Cao's CYd (Cao et al. 1997), natural logs
+// Over the S features present in either sample, each
+// value raised to at least 0.1: x' = max(x, 0.1),
+// y' = max(y, 0.1), n' = x' + y';
+// mean(log(n'/2) - (x' log(y') + y' log(x')) / n')
+//======================================================
+static void *cao(void *arg) {
+  FOREACH_PAIR(
+    double n_feat = 0;
+    FOREACH_OTU(
+      if (x != 0 || y != 0) {
+        double xp = (x < 0.1) ? 0.1 : x;
+        double yp = (y < 0.1) ? 0.1 : y;
+        double n  = xp + yp;
+        distance += log(n / 2) - (xp * log(yp) + yp * log(xp)) / n;
+        n_feat++;
+      }
+    );
+    distance /= n_feat;
+  );
+  return NULL;
+}
+
+
+//======================================================
+// Alternative Gower (Anderson et al. 2006)
+// sum(abs(x - y)) / sum(x != 0 | y != 0)
+// With clr (no zeros), every feature counts.
+//======================================================
+static void *alt_gower(void *arg) {
+  FOREACH_PAIR(
+    double nz = 0;
+    FOREACH_OTU(
+      distance += fabs(x - y);
+      nz++;
+    );
+    distance /= nz;
+  );
+  return NULL;
+}
+
+
+//======================================================
+// Chao's abundance-based Jaccard (Chao et al. 2005)
+// 1 - U V / (U + V - U V), with
+//   U = C_x / N_x + (N_y - 1) / N_y * f1 / (2 f2) * S1_x / N_x
+// C_x: individuals in x of the shared features; N_x: all
+// individuals in x; f1, f2: shared features with 1 and 2
+// individuals in y (f2 = 0 counts as 1); S1_x: individuals
+// in x of the shared features with 1 individual in y. V the
+// same with x and y swapped. U and V are capped at 1.
+// No shared features: 1 (NaN if both samples are empty).
+//======================================================
+static void *chao_jaccard(void *arg) {
+  FOREACH_PAIR(
+    double n_x = 0; double n_y = 0; double c_x = 0; double c_y = 0;
+    double shared = 0; double s1_x = 0; double s1_y = 0;
+    double f1_x = 0; double f2_x = 0; double f1_y = 0; double f2_y = 0;
+    FOREACH_OTU(
+      n_x += x;
+      n_y += y;
+      if (x > 0 && y > 0) {
+        shared++;
+        c_x += x;
+        c_y += y;
+        if      (y == 1) { f1_y++; s1_x += x; }
+        else if (y == 2) { f2_y++;            }
+        if      (x == 1) { f1_x++; s1_y += y; }
+        else if (x == 2) { f2_x++;            }
+      }
+    );
+    if (shared == 0) {
+      distance = (n_x > 0 || n_y > 0) ? 1 : R_NaN;
+    }
+    else {
+      double u = c_x / n_x + (n_y - 1) / n_y * f1_y / (2 * (f2_y > 0 ? f2_y : 1)) * s1_x / n_x;
+      double v = c_y / n_y + (n_x - 1) / n_x * f1_x / (2 * (f2_x > 0 ? f2_x : 1)) * s1_y / n_y;
+      if (u > 1) u = 1;
+      if (v > 1) v = 1;
+      distance = 1 - u * v / (u + v - u * v);
+    }
+  );
+  return NULL;
+}
+
+
+//======================================================
+// Mountford (1962)
+// M is the positive root of exp(aM) + exp(bM) = 1 +
+// exp((a + b - j) M), with a and b the samples' richness
+// and j the shared features. Divided by exp((a + b - j) M)
+// and with p = b - j, q = a - j, t = a + b - j, that is
+//   g(M) = expm1(-pM) + expm1(-qM) - expm1(-tM) = 0,
+// which can't overflow. g(0) = 0, g'(0) = j > 0, and g
+// falls to -1, so there is one positive root. The result
+// is log(2) - M: log(2) for j = 0, and 0 when j equals a
+// or b; NaN when a sample is empty, as vegan. Solved by
+// Newton's method, safeguarded by bisection, to the last
+// bits; vegan's own solution agrees to about 1e-10 while
+// a and b are at most about 50.
+//======================================================
+static double mountford_root(double a, double b, double j) {
+
+  double p = b - j, q = a - j, t = a + b - j;
+
+  // The start: the root of g's second-order Taylor expansion.
+  double m  = 2 * j / (t * t - p * p - q * q);
+  double lo = 0, hi = m;
+
+  // Bracket the root: g(lo) > 0 > g(hi).
+  while (expm1(-p * hi) + expm1(-q * hi) - expm1(-t * hi) > 0) {
+    lo = hi;
+    hi *= 2;
+  }
+
+  for (int iter = 0; iter < 200; iter++) {
+    double ep = exp(-p * m), eq = exp(-q * m), et = exp(-t * m);
+    double g  = expm1(-p * m) + expm1(-q * m) - expm1(-t * m);
+    double dg = -p * ep - q * eq + t * et;
+
+    if (g > 0) lo = m; else if (g < 0) hi = m; else return m;
+
+    double next = m - g / dg;
+    if (!(next > lo && next < hi)) next = (lo + hi) / 2;
+
+    if (fabs(next - m) <= 4 * DBL_EPSILON * next) return next;
+    m = next;
+    if (hi - lo <= 4 * DBL_EPSILON * m) return m;
+  }
+
+  return m; // # nocov
+}
+
+static void *mountford(void *arg) {
+  FOREACH_PAIR(
+    WITH_ABJ(
+      if      (A == 0 || B == 0)               distance = R_NaN;
+      else if (J == 0)                         distance = M_LN2;
+      else if (J == A || J == B)               distance = 0;
+      else    distance = M_LN2 - mountford_root(A, B, J);
+    );
+  );
+  return NULL;
+}
+
+
+//======================================================
+// Raup-Crick, analytic (Raup & Crick 1979)
+// P(X >= j) for X hypergeometric: a features of the
+// table's S drawn for one sample, b for the other, and X
+// shared. S is the number of features in the table,
+// empty ones included. The smaller tail is summed from its
+// far end inwards, and the other found as its complement,
+// so that small probabilities keep their precision.
+//======================================================
+static double *raup_lfact; // log(k!) for k = 0 .. n_otus
+
+static double raup_lpmf(int x, int a, int b, int s) {
+  return
+    raup_lfact[a] - raup_lfact[x] - raup_lfact[a - x] +
+    raup_lfact[s - a] - raup_lfact[b - x] - raup_lfact[s - a - b + x] -
+    raup_lfact[s] + raup_lfact[b] + raup_lfact[s - b];
+}
+
+static void *raup_crick(void *arg) {
+  int s = n_otus;
+  FOREACH_PAIR(
+    WITH_ABJ(
+      int na = (int) A; int nb = (int) B; int nj = (int) J;
+      int x_lo = na + nb - s; if (x_lo < 0) x_lo = 0;
+      int x_hi = (na < nb) ? na : nb;
+
+      if (nj <= x_lo) {
+        distance = 1;
+      }
+      else {
+        // The mean, a * b / s: the upper tail from j is the
+        // smaller one when j is above it.
+        double mean = (double) na * nb / s;
+        double tail = 0;
+        if (nj > mean) {
+          for (int x = x_hi; x >= nj; x--) tail += exp(raup_lpmf(x, na, nb, s));
+          distance = tail;
+        }
+        else {
+          for (int x = x_lo; x < nj; x++) tail += exp(raup_lpmf(x, na, nb, s));
+          distance = 1 - tail;
+        }
+        if (distance > 1) distance = 1;
+        if (distance < 0) distance = 0;
+      }
+    );
+  );
+  return NULL;
+}
+
+static pthread_func_t raup_crick_setup(void) {
+  raup_lfact = (double*) safe_malloc((size_t) (n_otus + 1) * sizeof(double));
+  for (int k = 0; k <= n_otus; k++) raup_lfact[k] = lgammafn(k + 1.0);
+  return raup_crick;
+}
+
+
+//======================================================
+// Mahalanobis (Mahalanobis 1936; Mardia et al. 1979)
+// sqrt((x - y)' S^-1 (x - y)), S the features' sample
+// covariance (n - 1). Without S^-1: the centred n x D
+// table X = Q R (Householder), and Y = sqrt(n - 1) X R^-1,
+// whose Euclidean distances are the Mahalanobis distances.
+// The setup runs serially; the rows of Y and the distances
+// in parallel, each in a fixed order.
+//======================================================
+static double *maha_x;   // n_samples x n_otus, row-major: the centred table
+static double *maha_r;   // n_otus x n_otus, row-major: R (upper triangle)
+static double *maha_y;   // n_samples x n_otus, row-major: the whitened table
+
+static void *maha_rows(void *arg) {
+  int    thread_i  = ((worker_t *)arg)->i;
+  int    n_threads = ((worker_t *)arg)->n;
+  int    d         = n_otus;
+  double scale     = sqrt((double) n_samples - 1);
+  for (int s = thread_i; s < n_samples; s += n_threads) {
+    const double *x = maha_x + (size_t) s * d;
+    double       *y = maha_y + (size_t) s * d;
+    // y R = x, solved left to right.
+    for (int k = 0; k < d; k++) {
+      double v = x[k];
+      for (int i = 0; i < k; i++) v -= y[i] * maha_r[(size_t) i * d + k];
+      y[k] = v / maha_r[(size_t) k * d + k];
+    }
+    for (int k = 0; k < d; k++) y[k] *= scale;
+  }
+  return NULL;
+}
+
+static void *mahalanobis(void *arg) {
+  int d = n_otus;
+  FOREACH_PAIR(
+    const double *yi = maha_y + (size_t) sam_i * d;
+    const double *yj = maha_y + (size_t) sam_j * d;
+    for (int k = 0; k < d; k++) {
+      double diff = yi[k] - yj[k];
+      distance += diff * diff;
+    }
+    distance = sqrt(distance);
+  );
+  return NULL;
+}
+
+static pthread_func_t mahalanobis_setup(int n_threads) {
+
+  int n = n_samples, d = n_otus;
+
+  if (d >= n) {
+    free_all();
+    error(
+      "Mahalanobis distances need more samples than features and no "
+      "collinear features; reduce the features first (e.g. pca()).");
+  }
+
+  size_t nd = (size_t) n * d;
+  maha_x = (double*) safe_malloc(nd * sizeof(double));
+  maha_y = (double*) safe_malloc(nd * sizeof(double));
+  maha_r = (double*) safe_malloc((size_t) d * d * sizeof(double));
+  double *a = maha_y; // column-major n x d work copy for the QR
+
+  // The dense table (absent features are 0, or the sample's
+  // value for zero after CLR), then centred by column.
+  for (size_t i = 0; i < nd; i++) maha_x[i] = 0;
+  for (int s = 0; s < n; s++) {
+    double zero = clr_vec ? clr_vec[s] : 0;
+    double *row = maha_x + (size_t) s * d;
+    if (zero != 0) for (int k = 0; k < d; k++) row[k] = zero;
+    for (int e = pos_vec[s]; e < pos_vec[s + 1]; e++) row[otu_vec[e]] = val_vec[e];
+  }
+  for (int k = 0; k < d; k++) {
+    double mean = 0;
+    for (int s = 0; s < n; s++) mean += maha_x[(size_t) s * d + k];
+    mean /= n;
+    for (int s = 0; s < n; s++) {
+      maha_x[(size_t) s * d + k] -= mean;
+      a[s + (size_t) k * n] = maha_x[(size_t) s * d + k];
+    }
+  }
+
+  // Householder QR of the centred table; R's diagonal is
+  // checked against a relative tolerance.
+  double max_norm = 0;
+  for (int k = 0; k < d; k++) {
+    double nrm = 0;
+    for (int s = 0; s < n; s++) nrm += a[s + (size_t) k * n] * a[s + (size_t) k * n];
+    nrm = sqrt(nrm);
+    if (nrm > max_norm) max_norm = nrm;
+  }
+
+  int bad = (max_norm == 0);
+  for (int k = 0; k < d && !bad; k++) {
+    double *col = a + (size_t) k * n;
+    double  nrm = 0;
+    for (int s = k; s < n; s++) nrm += col[s] * col[s];
+    nrm = sqrt(nrm);
+    if (!(nrm > 1e-9 * max_norm)) { bad = 1; break; }
+    double alpha = (col[k] > 0) ? -nrm : nrm;
+    double v0    = col[k] - alpha;
+    // v = (v0, col[k+1..n-1]); H = I - 2 v v' / (v'v)
+    double vtv = v0 * v0;
+    for (int s = k + 1; s < n; s++) vtv += col[s] * col[s];
+    for (int c = k + 1; c < d; c++) {
+      double *cc  = a + (size_t) c * n;
+      double  dot = v0 * cc[k];
+      for (int s = k + 1; s < n; s++) dot += col[s] * cc[s];
+      double f = 2 * dot / vtv;
+      cc[k] -= f * v0;
+      for (int s = k + 1; s < n; s++) cc[s] -= f * col[s];
+    }
+    col[k] = alpha;
+    for (int c = k; c < d; c++) maha_r[(size_t) k * d + c] = a[k + (size_t) c * n];
+  }
+
+  if (bad) {
+    free_all();
+    error(
+      "Mahalanobis distances need more samples than features and no "
+      "collinear features; reduce the features first (e.g. pca()).");
+  }
+
+  run_parallel(maha_rows, n_threads, n);
+  return mahalanobis;
 }
 
 
@@ -1040,6 +1437,14 @@ SEXP C_beta_div(
     case BDIV_BRAY_GRADIENT:       part_mode = 1; bdiv_func = bray_part;     break;
     case BDIV_SOERGEL_BALANCED:    part_mode = 0; bdiv_func = soergel_part;  break;
     case BDIV_SOERGEL_GRADIENT:    part_mode = 1; bdiv_func = soergel_part;  break;
+    case BDIV_KULCZYNSKI:    bdiv_func = kulczynski;          break;
+    case BDIV_MOUNTFORD:     bdiv_func = mountford;           break;
+    case BDIV_RAUP_CRICK:    bdiv_func = raup_crick_setup();  break;
+    case BDIV_BINOMIAL:      bdiv_func = binomial;            break;
+    case BDIV_CHAO_JACCARD:  bdiv_func = chao_jaccard;        break;
+    case BDIV_CAO:           bdiv_func = cao;                 break;
+    case BDIV_MAHALANOBIS:   bdiv_func = mahalanobis_setup(n_threads); break;
+    case BDIV_ALT_GOWER:     bdiv_func = alt_gower;           break;
   }
   
   if (bdiv_func == NULL) { // # nocov start

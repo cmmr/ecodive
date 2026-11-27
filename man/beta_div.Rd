@@ -23,7 +23,7 @@ beta_div(
 Typically contains absolute abundances (integer counts), though
 proportions are also accepted by some diversity metrics.}
 
-\item{metric}{The name of a beta diversity metric. One of \code{c('aitchison', 'bhattacharyya', 'bray', 'bray_balanced', 'bray_gradient', 'canberra', 'chebyshev', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jaccard_nestedness', 'jaccard_turnover', 'jensen', 'jsd', 'lorentzian', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'normalized_unifrac', 'ochiai', 'philr_distance', 'psym_chisq', 'robust_aitchison', 'soergel', 'soergel_balanced', 'soergel_gradient', 'sorensen', 'sorensen_nestedness', 'sorensen_turnover', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')}. Flexible
+\item{metric}{The name of a beta diversity metric. One of \code{c('aitchison', 'alt_gower', 'bhattacharyya', 'binomial_deviance', 'bray', 'bray_balanced', 'bray_gradient', 'canberra', 'cao', 'chao_jaccard', 'chebyshev', 'chisq_distance', 'chord', 'clark', 'divergence', 'euclidean', 'generalized_unifrac', 'gower', 'hamming', 'hellinger', 'horn', 'jaccard', 'jaccard_nestedness', 'jaccard_turnover', 'jensen', 'jsd', 'kulczynski', 'lorentzian', 'mahalanobis_distance', 'manhattan', 'matusita', 'minkowski', 'morisita', 'motyka', 'mountford', 'normalized_unifrac', 'ochiai', 'philr_distance', 'psym_chisq', 'raup_crick', 'robust_aitchison', 'soergel', 'soergel_balanced', 'soergel_gradient', 'sorensen', 'sorensen_nestedness', 'sorensen_turnover', 'squared_chisq', 'squared_chord', 'squared_euclidean', 'topsoe', 'unweighted_unifrac', 'variance_adjusted_unifrac', 'wave_hedges', 'weighted_unifrac')}. Flexible
 matching is supported (see below). Programmatic access via
 \code{list_metrics('beta')}.}
 
@@ -42,6 +42,8 @@ transformation).
 \item \code{'rclr'}: Robust centered log ratio.
 \item \code{'log'}: Log relative abundance (log-TSS), with \code{pseudocount} added
 to every value first.
+\item \code{'chisq'}: The chi-square transformation, which uses the whole
+table's feature totals (see \code{\link[=normalize]{normalize()}}).
 }
 
 Default: \code{'none'}.}
@@ -117,12 +119,17 @@ Beta Diversity Wrapper Function
 \strong{List of Beta Diversity Metrics}\tabular{ll}{
    Option / Function Name \tab Metric Name \cr
    \code{aitchison} \tab Aitchison distance \cr
+   \code{alt_gower} \tab Alternative Gower distance \cr
    \code{bhattacharyya} \tab Bhattacharyya distance \cr
+   \code{binomial_deviance} \tab Binomial deviance dissimilarity \cr
    \code{bray} \tab Bray-Curtis dissimilarity \cr
    \code{bray_balanced} \tab Bray-Curtis balanced variation \cr
    \code{bray_gradient} \tab Bray-Curtis abundance gradient \cr
    \code{canberra} \tab Canberra distance \cr
+   \code{cao} \tab Cao dissimilarity (CYd) \cr
+   \code{chao_jaccard} \tab Chao-Jaccard dissimilarity \cr
    \code{chebyshev} \tab Chebyshev distance \cr
+   \code{chisq_distance} \tab Chi-square distance \cr
    \code{chord} \tab Chord distance \cr
    \code{clark} \tab Clark's divergence distance \cr
    \code{divergence} \tab Divergence \cr
@@ -137,16 +144,20 @@ Beta Diversity Wrapper Function
    \code{jaccard_turnover} \tab Jaccard turnover \cr
    \code{jensen} \tab Jensen-Shannon distance \cr
    \code{jsd} \tab Jesen-Shannon divergence (JSD) \cr
+   \code{kulczynski} \tab Kulczynski dissimilarity \cr
    \code{lorentzian} \tab Lorentzian distance \cr
+   \code{mahalanobis_distance} \tab Mahalanobis distance \cr
    \code{manhattan} \tab Manhattan distance \cr
    \code{matusita} \tab Matusita distance \cr
    \code{minkowski} \tab Minkowski distance \cr
    \code{morisita} \tab Morisita dissimilarity \cr
    \code{motyka} \tab Motyka dissimilarity \cr
+   \code{mountford} \tab Mountford dissimilarity \cr
    \code{normalized_unifrac} \tab Normalized Weighted UniFrac \cr
    \code{ochiai} \tab Otsuka-Ochiai dissimilarity \cr
    \code{philr_distance} \tab PhILR distance \cr
    \code{psym_chisq} \tab Probabilistic Symmetric Chi-Squared distance \cr
+   \code{raup_crick} \tab Raup-Crick dissimilarity \cr
    \code{soergel} \tab Soergel distance \cr
    \code{soergel_balanced} \tab Ruzicka (Soergel) balanced variation \cr
    \code{soergel_gradient} \tab Ruzicka (Soergel) abundance gradient \cr
@@ -175,6 +186,20 @@ UniFrac names can be shortened to the first letter plus "unifrac". E.g.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the metrics list.
+
+\strong{vegan's \code{vegdist()}}
+
+Every method of vegan's \code{vegdist()} has a metric here. Most have the
+same name; the others are \code{"jaccard"} (quantitative): \code{\link[=soergel]{soergel()}};
+\code{"binomial"}: \code{\link[=binomial_deviance]{binomial_deviance()}}; \code{"chao"}: \code{\link[=chao_jaccard]{chao_jaccard()}};
+\code{"raup"}: \code{\link[=raup_crick]{raup_crick()}}; \code{"altGower"}: \code{\link[=alt_gower]{alt_gower()}}; \code{"mahalanobis"}:
+\code{\link[=mahalanobis_distance]{mahalanobis_distance()}}; \code{"chisq"}: \code{\link[=chisq_distance]{chisq_distance()}}; and
+\code{"robust.aitchison"}: \code{\link[=robust_aitchison]{robust_aitchison()}}. vegan's \code{binary = TRUE} is
+\code{norm = 'binary'}, and \code{vegdist(x, "jaccard", binary = TRUE)} is
+\code{\link[=jaccard]{jaccard()}}. As \code{metric}, vegan's names \code{"binomial"}, \code{"chao"},
+\code{"raup"}, \code{"altGower"}, \code{"mahalanobis"}, \code{"chisq"} and
+\code{"robust.aitchison"} find their metrics; \code{"jaccard"} finds ecodive's
+(binary) \code{\link[=jaccard]{jaccard()}}.
 
 The turnover / nestedness and balanced / gradient components are
 Baselga's partition of \code{sorensen}, \code{jaccard}, \code{bray} and \code{soergel}; see

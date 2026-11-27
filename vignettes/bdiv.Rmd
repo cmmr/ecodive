@@ -52,20 +52,27 @@ into or to list all available options programmatically.
 
 ``` r
 list_metrics('beta', 'id', weighted = FALSE)
-#> [1] "sorensen"  "hamming"  "jaccard"  "ochiai"  "unweighted_unifrac"
+#>  [1] "sorensen"            "hamming"             "jaccard"            
+#>  [4] "jaccard_nestedness"  "jaccard_turnover"    "mountford"          
+#>  [7] "ochiai"              "raup_crick"          "sorensen_turnover"  
+#> [10] "sorensen_nestedness" "unweighted_unifrac" 
 
 list_metrics('beta', 'id', weighted = TRUE)
-#>  [1] "aitchison"            "bhattacharyya"              "bray"                     
-#>  [4] "canberra"             "chebyshev"                  "chord"                    
-#>  [7] "clark"                "divergence"                 "euclidean"                
-#> [10] "generalized_unifrac"  "gower"                      "hellinger"                
-#> [13] "horn"                 "jensen"                     "jsd"                      
-#> [16] "lorentzian"           "manhattan"                  "matusita"                 
-#> [19] "minkowski"            "morisita"                   "motyka"                   
-#> [22] "normalized_unifrac"   "psym_chisq"                 "soergel"                  
-#> [25] "squared_chisq"        "squared_chord"              "squared_euclidean"        
-#> [28] "topsoe"               "variance_adjusted_unifrac"  "wave_hedges"
-#> [31] "weighted_unifrac"
+#>  [1] "aitchison"                 "alt_gower"                 "bhattacharyya"            
+#>  [4] "binomial_deviance"         "bray_gradient"             "bray_balanced"            
+#>  [7] "bray"                      "canberra"                  "cao"                      
+#> [10] "chao_jaccard"              "chebyshev"                 "chisq_distance"           
+#> [13] "chord"                     "clark"                     "divergence"               
+#> [16] "euclidean"                 "generalized_unifrac"       "gower"                    
+#> [19] "hellinger"                 "horn"                      "jensen"                   
+#> [22] "jsd"                       "kulczynski"                "lorentzian"               
+#> [25] "mahalanobis_distance"      "manhattan"                 "matusita"                 
+#> [28] "minkowski"                 "morisita"                  "motyka"                   
+#> [31] "normalized_unifrac"        "philr_distance"            "psym_chisq"               
+#> [34] "robust_aitchison"          "soergel_gradient"          "soergel_balanced"         
+#> [37] "soergel"                   "squared_chisq"             "squared_chord"            
+#> [40] "squared_euclidean"         "topsoe"                    "variance_adjusted_unifrac"
+#> [43] "wave_hedges"               "weighted_unifrac"         
 ```
 
 
@@ -88,10 +95,15 @@ Given:
 |                  |                                    |
 | :--------------- | :--------------------------------- |
 | **Aitchison distance**                          <br> `aitchison()`         | $\sqrt{\sum_{i=1}^{n} [(\ln{X_i} - X_L) - (\ln{Y_i} - Y_L)]^2}$ |
+| **Alternative Gower distance**                 <br> `alt_gower()`         | $\displaystyle \frac{1}{N_Z}\sum_{i=1}^{n} |X_i - Y_i|$ <br> Where $N_Z$ is the number of features not zero in both samples. |
 | **Bhattacharyya distance**                      <br> `bhattacharyya()`     | $-\ln{\sum_{i=1}^{n}\sqrt{P_{i}Q_{i}}}$ |
+| **Binomial deviance dissimilarity**             <br> `binomial_deviance()` | $\displaystyle \sum_{i=1}^{n}\frac{X_i\ln\frac{X_i}{N_i} + Y_i\ln\frac{Y_i}{N_i} - N_i\ln\frac{1}{2}}{N_i}$ <br> Where $N_i = X_i + Y_i$, over features with $N_i > 0$. |
 | **Bray-Curtis dissimilarity**                   <br> `bray()`              | $\displaystyle \frac{\sum_{i=1}^{n} |X_i - Y_i|}{\sum_{i=1}^{n} (X_i + Y_i)}$ |
 | **Canberra distance**                           <br> `canberra()`          | $\displaystyle \sum_{i=1}^{n} \frac{|X_i - Y_i|}{X_i + Y_i}$ |
+| **Cao dissimilarity (CYd)**                     <br> `cao()`               | $\displaystyle \frac{1}{S}\sum_{i=1}^{S}\left[\ln\frac{X_i + Y_i}{2} - \frac{X_i\ln Y_i + Y_i\ln X_i}{X_i + Y_i}\right]$ <br> Over the $S$ features in either sample, with values below 0.1 raised to 0.1. |
+| **Chao-Jaccard dissimilarity** <br> (integers only) <br> `chao_jaccard()` | $\displaystyle 1 - \frac{UV}{U + V - UV}$ <br> Where $U$ and $V$ estimate the shares of each sample's individuals in shared species (see `chao_jaccard()`). |
 | **Chebyshev distance**                          <br> `chebyshev()`         | $\max(|X_i - Y_i|)$ |
+| **Chi-square distance**                         <br> `chisq_distance()`    | $\displaystyle \sqrt{T\sum_{i=1}^{n}\frac{1}{c_i}\left(P_i - Q_i\right)^2}$ <br> Where $c_i$ is the $i$-th feature's total over all samples and $T$ the table's total. |
 | **Chord distance**                              <br> `chord()`             | $\displaystyle \sqrt{\sum_{i=1}^{n} \left(\frac{X_i}{\sqrt{\sum_{j=1}^{n} X_j^2}} - \frac{Y_i}{\sqrt{\sum_{j=1}^{n} Y_j^2}}\right)^2}$ |
 | **Clark's divergence distance**                 <br> `clark()`             | $\displaystyle \sqrt{\sum_{i=1}^{n}\left(\frac{X_i - Y_i}{X_i + Y_i}\right)^{2}}$ |
 | **Divergence**                                  <br> `divergence()`        | $\displaystyle 2\sum_{i=1}^{n} \frac{(P_i - Q_i)^2}{(P_i + Q_i)^2}$ |
@@ -101,7 +113,9 @@ Given:
 | **Horn-Morisita dissimilarity**                 <br> `horn()`              | $\displaystyle 1 - \frac{2\sum_{i=1}^{n}P_{i}Q_{i}}{\sum_{i=1}^{n}P_i^2 + \sum_{i=1}^{n}Q_i^2}$ |
 | **Jensen-Shannon distance**                     <br> `jensen()`            | $\displaystyle \sqrt{\frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)\right]}$ |
 | **Jensen-Shannon divergence (JSD)**             <br> `jsd()`               | $\displaystyle \frac{1}{2}\left[\sum_{i=1}^{n}P_i\ln\left(\frac{2P_i}{P_i + Q_i}\right) + \sum_{i=1}^{n}Q_i\ln\left(\frac{2Q_i}{P_i + Q_i}\right)\right]$ |
+| **Kulczynski dissimilarity**                    <br> `kulczynski()`        | $\displaystyle 1 - \frac{1}{2}\left(\frac{\sum_{i=1}^{n}\min(X_i, Y_i)}{X_T} + \frac{\sum_{i=1}^{n}\min(X_i, Y_i)}{Y_T}\right)$ |
 | **Lorentzian distance**                         <br> `lorentzian()`        | $\sum_{i=1}^{n}\ln{(1 + |X_i - Y_i|)}$ |
+| **Mahalanobis distance**                        <br> `mahalanobis_distance()` | $\sqrt{(X - Y)^{T}\Sigma^{-1}(X - Y)}$ <br> Where $\Sigma$ is the features' covariance over all samples. |
 | **Manhattan distance**                          <br> `manhattan()`         | $\sum_{i=1}^{n} |X_i - Y_i|$ |
 | **Matusita distance**                           <br> `matusita()`          | $\sqrt{\sum_{i=1}^{n}\left(\sqrt{P_i} - \sqrt{Q_i}\right)^2}$ |
 | **Minkowski distance**                          <br> `minkowski()`         | $\sqrt[p]{\sum_{i=1}^{n} (X_i - Y_i)^p}$ <br> Where $p$ is the geometry of the space. |
@@ -129,9 +143,11 @@ Given:
 | **Dice-Sorensen dissimilarity** <br> `sorensen()` | $\displaystyle 1 - \frac{2J}{(A + B)}$    |
 | **Hamming distance**            <br> `hamming()`  | $\displaystyle (A + B) - 2J$              |
 | **Jaccard distance**            <br> `jaccard()`  | $\displaystyle 1 - \frac{J}{(A + B - J)}$ |
+| **Mountford dissimilarity**     <br> `mountford()` | $\ln 2 - M$, where $e^{AM} + e^{BM} = 1 + e^{(A + B - J)M}$ |
 | **Otsuka-Ochiai dissimilarity** <br> `ochiai()`   | $\displaystyle 1 - \frac{J}{\sqrt{AB}}$   |
+| **Raup-Crick dissimilarity**    <br> `raup_crick()` | $P(X \ge J)$, $X$ hypergeometric: $A$ and $B$ of the table's $S$ features drawn at random |
 
-> **Note:** `sorensen()` is equivalent to `bray(norm = 'binary')`, and `jaccard()` is equivalent to `soergel(norm = 'binary')`.
+> **Note:** `sorensen()` is equivalent to `bray(norm = 'binary')`, and `jaccard()` is equivalent to `soergel(norm = 'binary')`. vegan's quantitative `vegdist(x, "jaccard")` is `soergel()`.
 
 
 ## Phylogenetic

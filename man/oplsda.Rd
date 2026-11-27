@@ -49,6 +49,8 @@ transformation).
 \item \code{'rclr'}: Robust centered log ratio.
 \item \code{'log'}: Log relative abundance (log-TSS), with \code{pseudocount} added
 to every value first.
+\item \code{'chisq'}: The chi-square transformation, which uses the whole
+table's feature totals (see \code{\link[=normalize]{normalize()}}).
 }
 
 Default: \code{'none'}.}

@@ -22,7 +22,7 @@ with large datasets. `ecodive` addresses this by providing:
 
 * **Zero Dependencies:** The package has no external R dependencies, making it lightweight, stable, and easy to install. This also makes it an ideal and secure backend for other R packages.
 
-* **Comprehensive Metrics:** It implements 14 alpha and 38 beta diversity metrics, including classic and phylogenetic-aware methods like **Faith's PD**, the **complete UniFrac family** and the compositional **PhILR distance**.
+* **Comprehensive Metrics:** It implements 25 alpha and 55 beta diversity metrics, including classic and phylogenetic-aware methods like **Faith's PD**, the **complete UniFrac family** and the compositional **PhILR distance**.
 
 * **Ordination and Statistics:** Ten ordination methods (PCoA, NMDS, UMAP, t-SNE, db-RDA, robust Aitchison PCA, and more), biplots, and five permutation tests (PERMANOVA, PERMDISP, ANOSIM, MRPP, and Mantel), so a whole analysis needs no other package.
 
@@ -37,7 +37,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Task                     | Wrapper           | Functions                                                                                                                                                 |
 | :----------------------- | :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Alpha diversity          | `alpha_div()`     | `shannon()`, `simpson()`, `chao1()`, `faith()`, `pielou()`, `hill()`, and 19 more                                                                         |
-| Beta diversity           | `beta_div()`      | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 42 more                                                                                   |
+| Beta diversity           | `beta_div()`      | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 51 more                                                                                   |
 | Ordination               | `dist_ord()`      | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`, `capda()`                                                           |
 | Ordination of counts     | `count_ord()`     | `pca()`, `rpca()`, `rpca_phylo()`, `dpcoa()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`                                                    |
 | Biplots                  |                   | `pcoa_biplot()`, `envfit()`                                                                                                                               |
@@ -260,25 +260,34 @@ list_metrics('alpha', 'id')
 
 # Beta Diversity
 list_metrics('beta', 'id')
-#>  [1] "aitchison"                 "bhattacharyya"            
-#>  [3] "bray"                      "canberra"                 
-#>  [5] "chebyshev"                 "chord"                    
-#>  [7] "clark"                     "sorensen"                 
-#>  [9] "divergence"                "euclidean"                
-#> [11] "generalized_unifrac"       "gower"                    
-#> [13] "hamming"                   "hellinger"                
-#> [15] "horn"                      "jaccard"                  
-#> [17] "jensen"                    "jsd"                      
-#> [19] "lorentzian"                "manhattan"                
-#> [21] "matusita"                  "minkowski"                
-#> [23] "morisita"                  "motyka"                   
-#> [25] "normalized_unifrac"        "ochiai"                   
-#> [27] "philr_distance"            "psym_chisq"               
-#> [29] "robust_aitchison"          "soergel"                  
-#> [31] "squared_chisq"             "squared_chord"            
-#> [33] "squared_euclidean"         "topsoe"                   
-#> [35] "unweighted_unifrac"        "variance_adjusted_unifrac"
-#> [37] "wave_hedges"               "weighted_unifrac"
+#>  [1] "aitchison"                 "alt_gower"                
+#>  [3] "bhattacharyya"             "binomial_deviance"        
+#>  [5] "bray_gradient"             "bray_balanced"            
+#>  [7] "bray"                      "canberra"                 
+#>  [9] "cao"                       "chao_jaccard"             
+#> [11] "chebyshev"                 "chisq_distance"           
+#> [13] "chord"                     "clark"                    
+#> [15] "sorensen"                  "divergence"               
+#> [17] "euclidean"                 "generalized_unifrac"      
+#> [19] "gower"                     "hamming"                  
+#> [21] "hellinger"                 "horn"                     
+#> [23] "jaccard"                   "jaccard_nestedness"       
+#> [25] "jaccard_turnover"          "jensen"                   
+#> [27] "jsd"                       "kulczynski"               
+#> [29] "lorentzian"                "mahalanobis_distance"     
+#> [31] "manhattan"                 "matusita"                 
+#> [33] "minkowski"                 "morisita"                 
+#> [35] "motyka"                    "mountford"                
+#> [37] "normalized_unifrac"        "ochiai"                   
+#> [39] "philr_distance"            "psym_chisq"               
+#> [41] "raup_crick"                "robust_aitchison"         
+#> [43] "soergel_gradient"          "soergel_balanced"         
+#> [45] "sorensen_turnover"         "soergel"                  
+#> [47] "sorensen_nestedness"       "squared_chisq"            
+#> [49] "squared_chord"             "squared_euclidean"        
+#> [51] "topsoe"                    "unweighted_unifrac"       
+#> [53] "variance_adjusted_unifrac" "wave_hedges"              
+#> [55] "weighted_unifrac"         
 
 # Ordination methods that take distances
 list_dist_ords('id')

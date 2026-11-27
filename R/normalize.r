@@ -32,6 +32,15 @@
 #'     \eqn{\log((x + pseudocount) / \sum (x + pseudocount))}. It is the
 #'     clr shifted by one constant per sample. Zeros get a value too, so the
 #'     result is dense. See **Pseudocount** below.
+#'   * `'chisq'`: The chi-square transformation (Legendre & Gallagher
+#'     2001; vegan's `decostand(x, "chi.square")`):
+#'     \eqn{\sqrt{T} x_{ij} / (r_i \sqrt{c_j})}, with \eqn{r_i} the sample's
+#'     total, \eqn{c_j} the feature's total over all samples, and \eqn{T}
+#'     the grand total. Euclidean distances between the results are
+#'     chi-square distances ([chisq_distance()]). It depends on the whole
+#'     table: the same sample gets other values in another table. Features
+#'     that are absent from every sample, and samples that are empty, stay
+#'     zero (vegan gives `NaN` for them).
 #'   * `'none'`: No transformation.
 #'
 #' @return The normalized table, with the same orientation (samples in rows
@@ -93,10 +102,10 @@ normalize <- function (
     counts, norm, margin = 1L, pseudocount = NULL, cpus = n_cpus() ) {
 
   if (missing(norm))
-    stop("`norm` is required: 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log', or 'none'.",
+    stop("`norm` is required: 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log', 'chisq', or 'none'.",
          call. = FALSE)
   if (!is.character(norm) || length(norm) != 1 || is.na(norm))
-    stop("`norm` must be one of 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log', or 'none'.",
+    stop("`norm` must be one of 'percent', 'chord', 'hellinger', 'binary', 'clr', 'rclr', 'log', 'chisq', or 'none'.",
          call. = FALSE)
 
   validate_counts()

@@ -26,7 +26,7 @@ same thing.
 | `axes` | **which** axes of an input ordination to use (indices) | `envfit`; planned `procrustes`; `log_ratio_features` (one axis, 2026-11-24, item 46) |
 | `groups`, `data`, `formula` | the grouping variable or model, and the sample metadata it comes from. DA model methods (2026-11-20, `da_test()`): `formula` is the model and `groups` its term of interest; `groups` alone is `formula = ~ groups` | tests, `dbrda`, `capscale`, DA methods, `neutral_model` (one fit per group, 2026-11-24), and planned constrained and discriminant methods |
 | `given` | distances (or variables) whose effect is partialled out | `mantel` (moving to `mantel_partial`); planned `bioenv`; `cross_assoc` (covariates: a formula over `data`, column names, or a table) |
-| `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20) | everything that takes `counts` |
+| `margin`, `norm`, `pseudocount` | the count table's orientation and transformation (`norm = 'log'`, log-TSS, added 2026-11-20; `norm = 'chisq'`, the chi-square transformation, added 2026-11-27, item 79) | everything that takes `counts` |
 | `scale` | standardise features to unit variance | `pca`; planned `rda`, `plsda`, `oplsda`, `splsda` |
 | `scaling` | how a biplot scales samples against features: `'form'` (1), `'covariance'` (2), `'contribution'`; vegan's 1, 2, 3 for `rda`, `cca`, `ca` (item 44, 2026-11-24); vegan's 1, 2, 3 (`'sites'`, `'species'`, `'symmetric'`) for the coefficients and weights of `principal_response_curves` (item 57) | `plot.ecodive_ord`, `principal_response_curves` |
 | `links` | pairs of features joined in a covariance biplot (Aitchison & Greenacre's term) | `plot.ecodive_ord` |

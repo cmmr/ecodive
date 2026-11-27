@@ -158,7 +158,7 @@ pca <- function (
   k <- ord_k(n_axes)
 
   # The transform's name (validate_norm() leaves its code), for the result.
-  norm_name <- c('none', 'percent', 'clr', 'chord', 'binary', 'rclr', 'hellinger', 'log')[[norm + 1L]]
+  norm_name <- c('none', 'percent', 'clr', 'chord', 'binary', 'rclr', 'hellinger', 'log', 'chisq')[[norm + 1L]]
 
   if (!isTRUE(scale) && !isFALSE(scale))
     stop('`scale` must be TRUE or FALSE.', call. = FALSE)

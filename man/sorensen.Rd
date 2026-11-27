@@ -97,6 +97,8 @@ Dice, L. R. (1945). Measures of the amount of ecologic association between speci
 Other Presence/Absence metrics:
 \code{\link[=hamming]{hamming()}},
 \code{\link[=jaccard]{jaccard()}},
-\code{\link[=ochiai]{ochiai()}}
+\code{\link[=mountford]{mountford()}},
+\code{\link[=ochiai]{ochiai()}},
+\code{\link[=raup_crick]{raup_crick()}}
 }
 \concept{Presence/Absence metrics}

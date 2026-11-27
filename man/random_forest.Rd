@@ -49,8 +49,9 @@ class (e.g. \code{phyloseq}). Default: \code{1}}
 \item{norm}{How to normalize each sample before growing the trees:
 \code{'percent'} (relative abundances, the default), \code{'none'} (the values
 as given, for any numeric table), or one of \code{\link[=normalize]{normalize()}}'s other
-choices. Trees don't change under monotone transforms of a feature, so
-only transforms across features (percent, clr, chord, ...) matter.
+choices except \code{'chisq'}, which depends on the whole table. Trees
+don't change under monotone transforms of a feature, so only
+transforms across features (percent, clr, chord, ...) matter.
 Default: \code{'percent'}}
 
 \item{pseudocount}{Value added to counts to handle zeros when
