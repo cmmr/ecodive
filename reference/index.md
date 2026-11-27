@@ -224,6 +224,11 @@ replace_zeros() runs any method by name.
   : Zero Replacement
 - [`replace_zeros_mult()`](https://cmmr.github.io/ecodive/reference/replace_zeros_mult.md)
   : Multiplicative Zero Replacement
+- [`replace_zeros_gbm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)
+  [`replace_zeros_sq()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)
+  [`replace_zeros_bl()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)
+  [`replace_zeros_czm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)
+  : Bayesian-Multiplicative and Count Zero Replacement
 - [`list_zero_replacements()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md)
   [`match_zero_replacement()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md)
   : Find and Browse Zero Replacement Methods

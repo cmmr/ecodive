@@ -78,11 +78,19 @@ will be applied to the
 
     # A data.frame of all available methods.
     list_zero_replacements()
-#>                         name   id
-#> 1 Multiplicative Replacement mult
+#>                                    name   id
+#> 1            Multiplicative Replacement mult
+#> 2             Count Zero Multiplicative  czm
+#> 3     Geometric Bayesian-Multiplicative  gbm
+#> 4   Square-Root Bayesian-Multiplicative   sq
+#> 5 Bayes-Laplace Bayesian-Multiplicative   bl
 
     # Find the method for zCompositions' 'multRepl'.
     m <- match_zero_replacement('multRepl')
     m$id
 #> [1] "mult"
+
+    # zCompositions' 'cmultRepl' defaults to GBM.
+    match_zero_replacement('cmultRepl')$id
+#> [1] "gbm"
 ```

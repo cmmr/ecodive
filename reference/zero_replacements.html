@@ -106,13 +106,21 @@ be applied to the <code><a href="https://rdrr.io/r/base/colnames.html" class="ex
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># A data.frame of all available methods.</span></span></span>
 <span class="r-in"><span>    <span class="fu">list_zero_replacements</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                         name   id</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Multiplicative Replacement mult</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                    name   id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            Multiplicative Replacement mult</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2             Count Zero Multiplicative  czm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     Geometric Bayesian-Multiplicative  gbm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   Square-Root Bayesian-Multiplicative   sq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 Bayes-Laplace Bayesian-Multiplicative   bl</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># Find the method for zCompositions' 'multRepl'.</span></span></span>
 <span class="r-in"><span>    <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">match_zero_replacement</span><span class="op">(</span><span class="st">'multRepl'</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">m</span><span class="op">$</span><span class="va">id</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mult"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>    <span class="co"># zCompositions' 'cmultRepl' defaults to GBM.</span></span></span>
+<span class="r-in"><span>    <span class="fu">match_zero_replacement</span><span class="op">(</span><span class="st">'cmultRepl'</span><span class="op">)</span><span class="op">$</span><span class="va">id</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gbm"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

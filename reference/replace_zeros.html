@@ -71,16 +71,19 @@ Types</strong>. Counts or proportions.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>The name of a zero replacement method: <code>"mult"</code>. Flexible
-matching is supported (see below). Programmatic access via
-<code><a href="zero_replacements.html">list_zero_replacements()</a></code>. Required: there is no default, because
-the choice of method affects every downstream log ratio.</p></dd>
+<dd><p>The name of a zero replacement method: <code>"mult"</code>, <code>"czm"</code>,
+<code>"gbm"</code>, <code>"sq"</code> or <code>"bl"</code>. Flexible matching is supported (see
+below). Programmatic access via <code><a href="zero_replacements.html">list_zero_replacements()</a></code>.
+Required: there is no default, because the choice of method affects
+every downstream log ratio. <code>"gbm"</code> is the common choice for count
+tables (it is zCompositions' default).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Further arguments for the method's function, such as
-<code>margin</code> and <code><a href="replace_zeros_mult.html">replace_zeros_mult()</a></code>'s <code>delta</code>. Each method keeps its
-own defaults.</p></dd>
+<code>margin</code>, <code><a href="replace_zeros_mult.html">replace_zeros_mult()</a></code>'s <code>delta</code>, or <code>frac</code>, <code>threshold</code>
+and <code>adjust</code> (see <code><a href="replace_zeros_cmult.html">replace_zeros_gbm()</a></code>). Each method keeps its own
+defaults.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -88,10 +91,10 @@ own defaults.</p></dd>
     <p>The method's result: a dense numeric <code>matrix</code> of proportions with
 no zeros, in the orientation of <code>counts</code> (samples \(\times\) features
 for <code>margin = 1</code>, features \(\times\) samples for <code>margin = 2</code>), with
-its names. Each sample sums to 1. Attributes <code>method</code> (the method's id)
-and the method's parameters, ending with <code>n_replaced</code>, the number of
-zeros replaced. <code>replace_zeros(counts, 'mult', ...)</code> is the same as
-<code>replace_zeros_mult(counts, ...)</code>.</p>
+its names. Each sample sums to 1. Attributes <code>method</code> (the method's id),
+then the method's results, ending with <code>n_replaced</code>, the number of
+zeros replaced. <code>replace_zeros(counts, 'gbm', ...)</code> is the same as
+<code>replace_zeros_gbm(counts, ...)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -105,14 +108,22 @@ parts down to make room for it, keeping their ratios.</p>
 without a pseudocount (and without the warning that <code>pseudocount = NULL</code>
 gives for zeros). The result is in proportions: every log-ratio method is
 scale invariant, so nothing is lost.</p>
+<p><code>mult</code> gives every zero the same proportion, whatever the sample's depth.
+The other methods are for counts: <code>czm</code> imputes a fraction of one read in
+each sample, and the Bayesian-multiplicative methods (<code>gbm</code>, <code>sq</code>, <code>bl</code>)
+also use how abundant the feature is in the other samples. <code>gbm</code> is the
+common default for count tables.</p>
 <p>Conclusions that depend on how zeros were treated are fragile. Repeating
 an analysis with each method of <code>list_zero_replacements('id')</code> is a
 simple check.</p>
-<p><strong>List of Zero Replacement Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>mult</code></td><td>Multiplicative replacement, with a fixed value \(\delta\)</td></tr></table><p><strong>Flexible name matching</strong></p>
+<p><strong>List of Zero Replacement Methods</strong></p><table class="table table"><tr><td>Option / Function Name</td><td>Method Name</td></tr><tr><td><code>mult</code></td><td>Multiplicative replacement, with a fixed value \(\delta\) (<code><a href="replace_zeros_mult.html">replace_zeros_mult()</a></code>)</td></tr><tr><td><code>czm</code></td><td>Count zero multiplicative (<code><a href="replace_zeros_cmult.html">replace_zeros_czm()</a></code>)</td></tr><tr><td><code>gbm</code></td><td>Geometric Bayesian-multiplicative (<code><a href="replace_zeros_cmult.html">replace_zeros_gbm()</a></code>)</td></tr><tr><td><code>sq</code></td><td>Square-root Bayesian-multiplicative (<code><a href="replace_zeros_cmult.html">replace_zeros_sq()</a></code>)</td></tr><tr><td><code>bl</code></td><td>Bayes-Laplace Bayesian-multiplicative (<code><a href="replace_zeros_cmult.html">replace_zeros_bl()</a></code>)</td></tr></table><p><strong>Flexible name matching</strong></p>
 <p>Case insensitive and partial matching, ignoring anything but letters. E.g.
 <code>method = 'MULT'</code>, <code>'multiplicative'</code> or <code>'multiplicative replacement'</code>
-selects <code>mult</code>. Common other names also work: <code>'multRepl'</code> (from
-zCompositions) and <code>'multi_replace'</code> (from scikit-bio) for <code>mult</code>.</p>
+selects <code>mult</code>, and <code>'GBM'</code> or <code>'geometric Bayesian-multiplicative'</code>
+selects <code>gbm</code>. Common other names also work: <code>'multRepl'</code> (from
+zCompositions) and <code>'multi_replace'</code> (from scikit-bio) for <code>mult</code>;
+<code>'cmultRepl'</code> (zCompositions' function, whose default method is GBM) for
+<code>gbm</code>; <code>'square root'</code> for <code>sq</code>; and <code>'Laplace'</code> for <code>bl</code>.</p>
 <p>Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.</p>
 <p><strong>Same names in other packages</strong></p>
@@ -139,6 +150,10 @@ seamlessly supports objects from the following biological data packages:</p><ul>
 (2003). Dealing with zeros and missing values in compositional data sets
 using nonparametric imputation. <em>Mathematical Geology</em>, 35, 253–278.
 <a href="https://doi.org/10.1023/A%3A1023866030544" class="external-link">doi:10.1023/A:1023866030544</a></p>
+<p>Martín-Fernández, J. A., Hron, K., Templ, M., Filzmoser, P., &amp;
+Palarea-Albaladejo, J. (2015). Bayesian-multiplicative treatment of count
+zeros in compositional data sets. <em>Statistical Modelling</em>, 15, 134–158.
+<a href="https://doi.org/10.1177/1471082X14535524" class="external-link">doi:10.1177/1471082X14535524</a></p>
 <p>Lubbe, S., Filzmoser, P., &amp; Templ, M. (2021). Comparison of zero
 replacement strategies for compositional data with large numbers of
 zeros. <em>Chemometrics and Intelligent Laboratory Systems</em>, 210, 104248.
@@ -146,18 +161,19 @@ zeros. <em>Chemometrics and Intelligent Laboratory Systems</em>, 210, 104248.
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="replace_zeros_mult.html">replace_zeros_mult()</a></code>, <code><a href="zero_replacements.html">list_zero_replacements()</a></code>; <code><a href="aitchison.html">aitchison()</a></code>,
-<code><a href="alr.html">alr()</a></code>, <code><a href="ilr.html">ilr()</a></code> and <code><a href="normalize.html">normalize()</a></code> (<code>'clr'</code>), which take the result.</p></div>
+    <div class="dont-index"><p><code><a href="replace_zeros_mult.html">replace_zeros_mult()</a></code>, <code><a href="replace_zeros_cmult.html">replace_zeros_gbm()</a></code>,
+<code><a href="zero_replacements.html">list_zero_replacements()</a></code>; <code><a href="aitchison.html">aitchison()</a></code>, <code><a href="alr.html">alr()</a></code>, <code><a href="ilr.html">ilr()</a></code> and
+<code><a href="normalize.html">normalize()</a></code> (<code>'clr'</code>), which take the result.</p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">replace_zeros</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'mult'</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span>    <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">replace_zeros</span><span class="op">(</span><span class="va">ex_counts</span>, <span class="st">'gbm'</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">x</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        Streptococcus Bacteroides Corynebacterium Haemophilus</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Saliva    0.44347826 0.005475040      0.02777778 0.492753623</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gums      0.87017181 0.004389265      0.02777778 0.095466516</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Nose      0.02176063 0.001978239      0.49258160 0.001978239</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Saliva    0.46872444 0.005786721     0.001056911 0.520804933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums      0.89408789 0.004509901     0.001056911 0.098090349</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose      0.02176063 0.001978239     0.492581602 0.001978239</span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">'n_replaced'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
 <span class="r-in"><span></span></span>
@@ -166,9 +182,9 @@ zeros. <em>Chemometrics and Intelligent Laboratory Systems</em>, 210, 104248.
 <span class="r-out co"><span class="r-pr">#&gt;</span> # A dist: 4 samples (lower triangle)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Aitchison Distance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       Saliva  Gums Nose</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Gums    3.12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Nose    8.58  9.54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   9.89 10.1  9.63</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums    1.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose   11.2  10.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   9.36  9.09 10.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="co"># The same analysis with every method.</span></span></span>
@@ -182,6 +198,42 @@ zeros. <em>Chemometrics and Intelligent Laboratory Systems</em>, 210, 104248.
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gums    3.12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Nose    8.58  9.54</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Stool   9.89 10.1  9.63</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A dist: 4 samples (lower triangle)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Aitchison Distance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Saliva  Gums Nose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums    1.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose   11.1  11.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   9.35  9.28 10.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A dist: 4 samples (lower triangle)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Aitchison Distance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Saliva  Gums Nose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums    1.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose   11.2  10.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   9.36  9.09 10.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A dist: 4 samples (lower triangle)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Aitchison Distance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Saliva  Gums Nose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums    1.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose   11.2  10.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   9.36  9.09 10.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # A dist: 4 samples (lower triangle)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Aitchison Distance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Saliva  Gums Nose</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Gums    1.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nose   11.2  10.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Stool   9.36  9.11 10.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Attributes: method</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>

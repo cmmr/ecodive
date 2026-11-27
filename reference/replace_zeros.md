@@ -22,27 +22,31 @@ replace_zeros(counts, method, ...)
 
 - method:
 
-  The name of a zero replacement method: `"mult"`. Flexible matching is
-  supported (see below). Programmatic access via
+  The name of a zero replacement method: `"mult"`, `"czm"`, `"gbm"`,
+  `"sq"` or `"bl"`. Flexible matching is supported (see below).
+  Programmatic access via
   [`list_zero_replacements()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md).
   Required: there is no default, because the choice of method affects
-  every downstream log ratio.
+  every downstream log ratio. `"gbm"` is the common choice for count
+  tables (it is zCompositions' default).
 
 - ...:
 
-  Further arguments for the method's function, such as `margin` and
+  Further arguments for the method's function, such as `margin`,
   [`replace_zeros_mult()`](https://cmmr.github.io/ecodive/reference/replace_zeros_mult.md)'s
-  `delta`. Each method keeps its own defaults.
+  `delta`, or `frac`, `threshold` and `adjust` (see
+  [`replace_zeros_gbm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)).
+  Each method keeps its own defaults.
 
 ## Value
 
 The method's result: a dense numeric `matrix` of proportions with no
 zeros, in the orientation of `counts` (samples \\\times\\ features for
 `margin = 1`, features \\\times\\ samples for `margin = 2`), with its
-names. Each sample sums to 1. Attributes `method` (the method's id) and
-the method's parameters, ending with `n_replaced`, the number of zeros
-replaced. `replace_zeros(counts, 'mult', ...)` is the same as
-`replace_zeros_mult(counts, ...)`.
+names. Each sample sums to 1. Attributes `method` (the method's id),
+then the method's results, ending with `n_replaced`, the number of zeros
+replaced. `replace_zeros(counts, 'gbm', ...)` is the same as
+`replace_zeros_gbm(counts, ...)`.
 
 ## Details
 
@@ -61,6 +65,12 @@ without a pseudocount (and without the warning that `pseudocount = NULL`
 gives for zeros). The result is in proportions: every log-ratio method
 is scale invariant, so nothing is lost.
 
+`mult` gives every zero the same proportion, whatever the sample's
+depth. The other methods are for counts: `czm` imputes a fraction of one
+read in each sample, and the Bayesian-multiplicative methods (`gbm`,
+`sq`, `bl`) also use how abundant the feature is in the other samples.
+`gbm` is the common default for count tables.
+
 Conclusions that depend on how zeros were treated are fragile. Repeating
 an analysis with each method of `list_zero_replacements('id')` is a
 simple check.
@@ -70,15 +80,22 @@ simple check.
 |  |  |
 |----|----|
 | Option / Function Name | Method Name |
-| `mult` | Multiplicative replacement, with a fixed value \\\delta\\ |
+| `mult` | Multiplicative replacement, with a fixed value \\\delta\\ ([`replace_zeros_mult()`](https://cmmr.github.io/ecodive/reference/replace_zeros_mult.md)) |
+| `czm` | Count zero multiplicative ([`replace_zeros_czm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)) |
+| `gbm` | Geometric Bayesian-multiplicative ([`replace_zeros_gbm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)) |
+| `sq` | Square-root Bayesian-multiplicative ([`replace_zeros_sq()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)) |
+| `bl` | Bayes-Laplace Bayesian-multiplicative ([`replace_zeros_bl()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)) |
 
 **Flexible name matching**
 
 Case insensitive and partial matching, ignoring anything but letters.
 E.g. `method = 'MULT'`, `'multiplicative'` or
-`'multiplicative replacement'` selects `mult`. Common other names also
-work: `'multRepl'` (from zCompositions) and `'multi_replace'` (from
-scikit-bio) for `mult`.
+`'multiplicative replacement'` selects `mult`, and `'GBM'` or
+`'geometric Bayesian-multiplicative'` selects `gbm`. Common other names
+also work: `'multRepl'` (from zCompositions) and `'multi_replace'` (from
+scikit-bio) for `mult`; `'cmultRepl'` (zCompositions' function, whose
+default method is GBM) for `gbm`; `'square root'` for `sq`; and
+`'Laplace'` for `bl`.
 
 Finished code should always use the full primary option name to avoid
 ambiguity with future additions to the list of methods.
@@ -114,6 +131,12 @@ Martín-Fernández, J. A., Barceló-Vidal, C., & Pawlowsky-Glahn, V.
 using nonparametric imputation. *Mathematical Geology*, 35, 253–278.
 [doi:10.1023/A:1023866030544](https://doi.org/10.1023/A%3A1023866030544)
 
+Martín-Fernández, J. A., Hron, K., Templ, M., Filzmoser, P., &
+Palarea-Albaladejo, J. (2015). Bayesian-multiplicative treatment of
+count zeros in compositional data sets. *Statistical Modelling*, 15,
+134–158.
+[doi:10.1177/1471082X14535524](https://doi.org/10.1177/1471082X14535524)
+
 Lubbe, S., Filzmoser, P., & Templ, M. (2021). Comparison of zero
 replacement strategies for compositional data with large numbers of
 zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
@@ -122,6 +145,7 @@ zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
 ## See also
 
 [`replace_zeros_mult()`](https://cmmr.github.io/ecodive/reference/replace_zeros_mult.md),
+[`replace_zeros_gbm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md),
 [`list_zero_replacements()`](https://cmmr.github.io/ecodive/reference/zero_replacements.md);
 [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md),
 [`alr()`](https://cmmr.github.io/ecodive/reference/alr.md),
@@ -132,12 +156,12 @@ zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
 ## Examples
 
 ``` r
-    x <- replace_zeros(ex_counts, 'mult')
+    x <- replace_zeros(ex_counts, 'gbm')
     x[1:3, 1:4]
 #>        Streptococcus Bacteroides Corynebacterium Haemophilus
-#> Saliva    0.44347826 0.005475040      0.02777778 0.492753623
-#> Gums      0.87017181 0.004389265      0.02777778 0.095466516
-#> Nose      0.02176063 0.001978239      0.49258160 0.001978239
+#> Saliva    0.46872444 0.005786721     0.001056911 0.520804933
+#> Gums      0.89408789 0.004509901     0.001056911 0.098090349
+#> Nose      0.02176063 0.001978239     0.492581602 0.001978239
     attr(x, 'n_replaced')
 #> [1] 4
 
@@ -146,9 +170,9 @@ zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
 #> # A dist: 4 samples (lower triangle)
 #> # Aitchison Distance
 #>       Saliva  Gums Nose
-#> Gums    3.12
-#> Nose    8.58  9.54
-#> Stool   9.89 10.1  9.63
+#> Gums    1.95
+#> Nose   11.2  10.6
+#> Stool   9.36  9.09 10.4
 #> # Attributes: method
 
     # The same analysis with every method.
@@ -162,6 +186,42 @@ zeros. *Chemometrics and Intelligent Laboratory Systems*, 210, 104248.
 #> Gums    3.12
 #> Nose    8.58  9.54
 #> Stool   9.89 10.1  9.63
+#> # Attributes: method
+#> 
+#> [[2]]
+#> # A dist: 4 samples (lower triangle)
+#> # Aitchison Distance
+#>       Saliva  Gums Nose
+#> Gums    1.9
+#> Nose   11.1  11.1
+#> Stool   9.35  9.28 10.5
+#> # Attributes: method
+#> 
+#> [[3]]
+#> # A dist: 4 samples (lower triangle)
+#> # Aitchison Distance
+#>       Saliva  Gums Nose
+#> Gums    1.95
+#> Nose   11.2  10.6
+#> Stool   9.36  9.09 10.4
+#> # Attributes: method
+#> 
+#> [[4]]
+#> # A dist: 4 samples (lower triangle)
+#> # Aitchison Distance
+#>       Saliva  Gums Nose
+#> Gums    1.95
+#> Nose   11.2  10.6
+#> Stool   9.36  9.09 10.4
+#> # Attributes: method
+#> 
+#> [[5]]
+#> # A dist: 4 samples (lower triangle)
+#> # Aitchison Distance
+#>       Saliva  Gums Nose
+#> Gums    1.95
+#> Nose   11.2  10.6
+#> Stool   9.36  9.11 10.3
 #> # Attributes: method
 #> 
 ```

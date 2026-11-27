@@ -937,6 +937,28 @@
   and `n_replaced` attributes, and takes every table type: a sparse
   2,000 by 5,000 table takes 0.2 seconds.
 
+- New zero replacements for count tables, the methods of zCompositions’
+  `cmultRepl()` (Martín-Fernández et al. 2015), also run by
+  [`replace_zeros()`](https://cmmr.github.io/ecodive/reference/replace_zeros.md):
+  [`replace_zeros_gbm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)
+  (geometric Bayesian-multiplicative, `cmultRepl()`’s default and the
+  usual choice),
+  [`replace_zeros_sq()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)
+  (square-root Bayesian-multiplicative),
+  [`replace_zeros_bl()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)
+  (Bayes-Laplace Bayesian-multiplicative) and
+  [`replace_zeros_czm()`](https://cmmr.github.io/ecodive/reference/replace_zeros_cmult.md)
+  (count zero multiplicative). Each zero becomes a proportion that
+  depends on the sample’s depth and, for the Bayesian methods, on the
+  feature’s abundance in the other samples; with `adjust = TRUE` (the
+  default), no zero is imputed above the smallest proportion observed
+  for its feature. Results equal `cmultRepl(output = "prop")` of
+  zCompositions 1.6.2 to within about 1e-15, and are identical for dense
+  and sparse input. Unlike `cmultRepl()`, no sample or feature is ever
+  dropped: a feature zero in every sample (or, for GBM, non-zero in only
+  one) is an error that names it. `da_sensitivity(zeros = TRUE)` now
+  tries all five zero replacements.
+
 - New
   [`log_ratio()`](https://cmmr.github.io/ecodive/reference/log_ratio.md)
   and [`balance()`](https://cmmr.github.io/ecodive/reference/balance.md)
