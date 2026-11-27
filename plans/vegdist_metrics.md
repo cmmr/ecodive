@@ -434,3 +434,35 @@ opened).
   12 × 30 table.
 - Not ported from abdiv or SciPy (only compared), so `inst/COPYRIGHTS` and
   `Authors@R` are unchanged.
+
+
+## Outcome (from the implementing session's final report)
+
+- **Commit:** `4c816f8` (implementation, tests, fixtures, docs); a second
+  commit ticks item 79 and adds this section.
+- **Tests:** full tinytest suite against an `-O2` install, R 4.3.3,
+  `LANG=C.UTF-8`: **34,311 OK at home** (baseline 34,006) and **505 OK in
+  CRAN mode** (baseline 477). `test-vegdist_metrics.r` has 233
+  expectations. `R CMD check --no-manual --ignore-vignettes`: 1 NOTE
+  (installed size, pre-existing).
+- **Largest differences from the references:**
+
+  | Metric | vegan 2.7-8 | other |
+  |:-------|:------------|:------|
+  | kulczynski | 2.2e-16 | abdiv `weighted_kulczynski_second` ≤ 1e-12 (test tolerance) |
+  | mountford | 5.7e-11 (richness ≤ 45; vegan fails beyond ~50) | exact root: g(M) < 1e-13 |
+  | raup_crick | 1.9e-13 | `phyper()` upper tail, 1e-12 relative |
+  | binomial_deviance | 7.1e-15 | abdiv ≤ 1e-12 |
+  | chao_jaccard | 0 | |
+  | cao | 1.3e-15 | |
+  | alt_gower | 0 | abdiv `modified_mean_character_difference` ≤ 1e-12 |
+  | chisq_distance | 1.8e-15 | plain-R √T x/(r√c) transform |
+  | mahalanobis_distance | 9e-13 (abs) / ≤ 1e-10 rel. | SciPy `mahalanobis(VI = inv(cov))` ≤ 1e-10 rel.; plain-R `chol()` whitening |
+  | soergel (vegdist "jaccard") | ≤ 1e-12 | |
+
+- **Speed** (400 × 2,000 sparse counts, this container): vegan 0.3–0.5 s
+  per metric; ecodive 0.02–0.07 s on 1 thread, 0.01–0.03 s on 4, identical
+  for any `cpus`.
+- **Open issues:** none for this item. Noticed in passing (pre-existing,
+  not changed): DA_TESTS' `ancombc2` has no entry in the prefix haystack
+  (it still matches exactly).
