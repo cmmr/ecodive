@@ -84,6 +84,12 @@
   r <- rarefy(counts, coverage = 0.9, cpus = cpus)
   expect_true(is.matrix(r) && ncol(r) == 12L && all(rowSums(r) <= rowSums(counts)[rownames(r)]))
 
+  # Interpolated and extrapolated Hill numbers.
+  z <- hill_extrapolation(counts, n_depths = 6, n_boot = 2, cpus = cpus)
+  expect_true(inherits(z, 'ecodive_hill_extrapolation') && all(is.finite(z$size$estimate)) && nrow(z$asymptotic) == 60L)
+  z <- hill_standardize(counts, n_boot = 2, cpus = cpus)
+  expect_true(is.matrix(z) && identical(dim(z), c(20L, 3L)) && all(is.finite(z)) && is.matrix(attr(z, 'lower')))
+
   # Absolute abundance.
   load <- seq(1, 2, length.out = 20) * 1e9
   z <- qmp_scale(counts, load, cpus = cpus)

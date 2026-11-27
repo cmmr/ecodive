@@ -23,7 +23,9 @@
 #'        matrix of class `ecodive_source` (from [sourcetracker()]), or a
 #'        batch-corrected table of class `ecodive_batch` (from
 #'        [batch_mmuphin()] or [batch_combat()]), or Moran's eigenvector maps
-#'        of class `ecodive_dbmem` (from [dbmem()]). A community-types result (see
+#'        of class `ecodive_dbmem` (from [dbmem()]), or Hill numbers at a
+#'        common coverage or depth, of class `ecodive_hill_standardize`
+#'        (from [hill_standardize()]). A community-types result (see
 #'        [ecodive_types]) prints its types and how their number was chosen
 #'        before its first samples.
 #'

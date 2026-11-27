@@ -206,6 +206,10 @@ double rng_norm(rng_t *r);
 double rng_gamma(rng_t *r, double shape);
 double rng_log_gamma(rng_t *r, double shape);
 
+/* --- rng_binomial.c: binomial and multinomial draws (NumPy's sampler) --- */
+int64_t rng_binom(rng_t *rng, int64_t n, double p);
+void    rng_multinom(rng_t *rng, int64_t n, const double *p, int d, int64_t *out);
+
 /* --- rank_tests.c: rank tests shared by ancom.c and lefse.c --- */
 typedef struct { double v; int g; } vg_t;   // a value and its group
 

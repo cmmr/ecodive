@@ -35,7 +35,7 @@ Authors@R: c(
     person(
       "NumPy Developers",
       role    = "cph",
-      comment = "numpy's pairwise summation, followed by replace_zeros_mult() and random_forest(), and its legacy random draws (random_forest()'s tests)"),
+      comment = "numpy's pairwise summation, followed by replace_zeros_mult() and random_forest(), its legacy random draws (random_forest()'s tests), and its binomial sampler (hill_extrapolation()'s bootstrap)"),
     person(
       "Cameron", "Martino",
       role    = c("ctb", "cph"),

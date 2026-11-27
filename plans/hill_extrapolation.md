@@ -388,3 +388,114 @@ plot(x, type = 'size', q = NULL, samples = NULL, ...)
 - Good, I. J. (1953). The population frequencies of species and the estimation of population parameters. *Biometrika*, 40, 237–264. doi:10.1093/biomet/40.3-4.237
 - Hill, M. O. (1973). Diversity and evenness: a unifying notation and its consequences. *Ecology*, 54, 427–432. doi:10.2307/1934352
 - Kachitvichyanukul, V., & Schmeiser, B. W. (1988). Binomial random variate generation. *Communications of the ACM*, 31, 216–222. doi:10.1145/42372.42381 (BTPE, the algorithm of NumPy's sampler)
+
+
+## Decisions made while implementing (2026-11-27)
+
+The user's answers to the upfront questions:
+
+- **`hill_standardize()`'s default base is coverage** (Chao & Jost 2012's
+  recommendation): with neither `coverage` nor `depth`, the smallest
+  coverage among the samples extrapolated to twice their size, which is
+  `estimateD(base = 'coverage')`'s default level. `estimateD()`'s own default
+  (`base = 'size'`) is listed under "Differences from iNEXT".
+- **`q` is limited to 0, 1 and 2** in this version (Later steps unchanged).
+- **`plot()` types are `'depth'` (alias `'size'`), `'completeness'` and
+  `'coverage'`**, as `plot.ecodive_rarefaction_curve()`; the result's table
+  stays `size`.
+
+Settled from iNEXT 3.0.2's outputs (the black-box protocol; ✱ items):
+
+- **(a) Knots.** With endpoint \eqn{M > n} and \eqn{K} knots:
+  `floor(seq(1, n - 1, length.out = K %/% 2 - 1))`, then \eqn{n}, then
+  `floor(seq(n + 1, M, length.out = K %/% 2))`; with \eqn{M \le n},
+  `floor(seq(1, M, length.out = K))`; duplicates dropped. Verified on 300
+  random (n, endpoint, knots) cases; iNEXT differs only for `knots` < 4
+  (it then drops \eqn{n} and adds 1), which ecodive doesn't copy. With
+  `size`, iNEXT adds \eqn{n - 1, n, n + 1}; ecodive's `depths` adds only
+  \eqn{n}.
+- **(b) Shannon extrapolation.** iNEXT 3 does **not** use Eq. 10c (0.8% off
+  at \eqn{2n} for spider's Girdled), nor the discovery-rate truncation, the
+  expected plug-in entropy under the Appendix G assemblage, or a weight
+  \eqn{1 - (1 - A)^{m^*}}; its \eqn{q = 3} extrapolation also differs from
+  the expected plug-in power sum, so iNEXT 3 uses a newer general-order
+  extrapolation (Chao et al. 2020, Ecological Research, Supporting
+  Information, "guided by Chao & Jost 2015"). That Supporting Information
+  isn't openly reachable (the publishers refuse automated fetches; the
+  open Zenodo copy of the article, read, has no formulas, only pointers to
+  Eq. S1.7). **ecodive uses Eq. 10c**, the formula of Chao et al. (2014) and
+  this plan; documented under "Differences from iNEXT". Every other point
+  estimate matches iNEXT to about 1e-13 (1.4e-11 at 30,000 reads).
+- **(c) f2 = 0, f1 = 0, all singletons, one feature.** Chao1's
+  \eqn{\hat f_0} with \eqn{f_1 (f_1 - 1) / 2} when \eqn{f_2 = 0}; \eqn{\hat
+  C(n)} and its extrapolation with Appendix G's \eqn{(n-1)(f_1-1) /
+  ((n-1)(f_1-1) + 2)}; \eqn{A = 2/((n-1)(f_1-1)+2)} in \eqn{\hat H} when
+  \eqn{f_2 = 0}, and no second term when \eqn{A = 1} or \eqn{f_1 = 0}. All
+  singletons give an infinite Simpson asymptote, as iNEXT. All match.
+- **(d) Bootstrap.** Each replicate is a multinomial sample of size \eqn{n}
+  (not \eqn{m}) from the Appendix G assemblage (detected species' adjusted
+  \eqn{\hat p_i}, plus \eqn{\lceil \hat f_0 \rceil} undetected ones when
+  \eqn{\hat f_0 > 0} and \eqn{\hat C < 1}); iNEXT draws
+  `rmultinom(nboot, n, sort(p, decreasing = TRUE))` and takes `sd()`.
+  Intervals: estimate ± z SE; diversity lower limits stop at 0 (the
+  asymptotic richness's at \eqn{S_{obs}}); coverage limits at 0 and 1;
+  upper limits aren't clipped. **iNEXT's asymptotic SEs always use 100
+  replicates**, the next 100 draws after the curves', whatever `nboot`;
+  ecodive uses `n_boot` for them too. At fixed coverage, each replicate
+  solves for its own depth for the level (iNEXT 3.0's "confidence limits at
+  fixed coverage"), from the curves' draws. `estimateD()` uses the same
+  draws. With these draws passed through the internal hook (`hx_run(boot =
+  )`), ecodive reproduces iNEXT's SEs to 1e-10 (size-based, coverage,
+  asymptotes, `estimateD(base = 'size')`) and to 1e-5 at fixed coverage
+  (iNEXT's search error).
+- **(e) Coverage-based depths.** Between whole depths, iNEXT takes every
+  estimate (and coverage) on the straight line between the two whole
+  depths' values (matched to 1e-14 at iNEXT's own fractional depths); it
+  finds the depth by a numerical search, about 1e-5 off. ecodive solves
+  exactly (closed form above \eqn{n}; below it, the bracketing whole depths
+  by interpolation search, then the line). A level below the coverage of
+  one observation is taken at depth 1 (as iNEXT); a level of 1 gives the
+  asymptotes, at depth `Inf`. Where coverage is flat over a range of depths
+  (\eqn{f_2 = 0} makes it flat near \eqn{n}), ecodive takes the smallest
+  depth (coverages within 1e-14 count as equal) and the coverage table keeps
+  one row per level; iNEXT's search lands anywhere in the range and repeats
+  rows (and drops the levels at coverage 1). `coverage_based`'s grid is the
+  size-based rows' coverages.
+- **(f) `estimateD()`.** Default levels: `base = 'size'`, the smallest
+  \eqn{2n}; `base = 'coverage'`, the smallest \eqn{\hat C(2n)}. Method labels
+  by depth against \eqn{n}. Both reproduced (`hill_standardize(depth = )`
+  matches `base = 'size'` at 1e-10).
+
+Other decisions:
+
+- **Shannon interpolation** sums each abundance class's hypergeometric pmf
+  outward from its mode by ratios, normalized by its own sum, tails stopped
+  below 1e-17 of the sum, with a shared table of `log(j)`: agreement with
+  iNEXT stays at 1e-13 (the ✱ check). \eqn{\hat H}'s first term uses the
+  identity \eqn{\sum_k \frac1k \sum_X \frac Xn \binom{n-X}{k}/\binom{n-1}{k}
+  = \sum_X \frac Xn \sum_{j=X}^{n-1} \frac1j} (one pass of harmonic sums);
+  its second term is summed as \eqn{\frac{f_1}{n}\sum_{t \ge 1} x^t/(n-1+t)},
+  or from the closed form when \eqn{nA \le 5}.
+- **Absence probabilities** use a local copy of `rc_absence()` that
+  multiplies numerators and denominators in chunks of 16 (16× faster for
+  the bootstrap; `rc_absence()` itself is unchanged, so
+  `rarefaction_curve()`'s results are too).
+- **Threads:** point estimates one sample per task; the bootstrap in tasks
+  of 8 replicates of one sample, Welford within a task and Chan's update
+  over tasks in order, run in batches with interrupt checks between them on
+  the main thread. Results are `identical()` for any `cpus`.
+- **Results:** as planned. `hill_extrapolation()`'s interval columns are
+  `NA` without a bootstrap (`n_boot` 0 or 1). `hill_standardize()` returns
+  class `c('ecodive_hill_standardize', 'matrix', 'array')` with a
+  `print_ecodive`-style preview (README: results never print every value);
+  `is.matrix()` holds, and `unclass()` gives the plain matrix. Its `depth`
+  must be a whole number (iNEXT accepts fractions).
+- **Names:** `n_boot` as planned, though the glossary has `n_resamples`
+  (q2-longitudinal, 2026-11-24) for bootstrap counts; recorded in
+  parameter_names.md for the user to unify if wanted.
+- **NumPy's sampler** ported from NumPy 2.3.5 into `src/rng_binomial.c`
+  (BSD-3 header, `inst/COPYRIGHTS` stanza; "NumPy Developers" was already
+  in `Authors@R`, its comment extended).
+- **pkgdown:** a "Depth and coverage" subtitle under Alpha Diversity with
+  `hill_extrapolation`, its `plot()` and `rarefaction_curve` (which also
+  stays under the tools section).
