@@ -1,9 +1,10 @@
 # Plot community types
 
 Draws a result of
-[`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
-or [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md)
-with base graphics.
+[`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md),
+[`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md) or
+[`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md) with base
+graphics.
 
 ## Usage
 
@@ -17,9 +18,9 @@ plot(x, type = c("profiles", "selection", "scores"), n_features = 10, ...)
 - x:
 
   A result of
-  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
-  or
-  [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md).
+  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md),
+  [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md)
+  or [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md).
 
 - type:
 
@@ -48,14 +49,18 @@ plot(x, type = c("profiles", "selection", "scores"), n_features = 10, ...)
   [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md),
   its samples' mean proportions; for
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md),
-  the centroids), with the `n_features` features that reach the largest
-  proportion in any type, and the rest pooled as "Other". The bars are
-  labelled with the type and its number of samples.
+  the centroids; for
+  [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md), the
+  Dirichlet means), with the `n_features` features that reach the
+  largest proportion in any type, and the rest pooled as "Other". The
+  bars are labelled with the type and its number of samples.
 
 - `"selection"`: the criterion that chose the number of types (for
   [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md),
-  the Calinski-Harabasz index) against the number of types, with the one
-  chosen circled. Not for
+  the Calinski-Harabasz index; for
+  [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md), the
+  Laplace approximation, or the AIC or BIC that chose) against the
+  number of types, with the one chosen circled. Not for
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md),
   whose centroids fix the types.
 

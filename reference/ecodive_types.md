@@ -1,9 +1,9 @@
 # Community types
 
-[`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
-and [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md)
-(and the planned `dmm()`) assign each sample to one of a few community
-types, and return a data frame of class
+[`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md),
+[`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md) and
+[`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md) assign each
+sample to one of a few community types, and return a data frame of class
 `c("ecodive_<method>", "ecodive_types", "data.frame")`, with one row per
 sample, in the input's order, and the sample names as row names.
 
@@ -13,8 +13,9 @@ sample, in the input's order, and the sample names as row names.
 
 - `type`: the type assigned to it, a factor whose levels are the types
   in order: `"1"`, `"2"`, ... for
-  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md);
-  the sub-CSTs `"I-A"` to `"V"` for
+  [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
+  and [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md); the
+  sub-CSTs `"I-A"` to `"V"` for
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md).
 
 - Columns of the method: for
@@ -22,7 +23,9 @@ sample, in the input's order, and the sample names as row names.
   `silhouette`, the sample's silhouette width; for
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md),
   `cst` (the higher-order community state type), `score` (the similarity
-  to the assigned centroid) and `matched`.
+  to the assigned centroid) and `matched`; for
+  [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md),
+  `probability`, the posterior probability of the assigned type.
 
 ## Attributes
 
@@ -31,14 +34,18 @@ sample, in the input's order, and the sample names as row names.
   al.'s "driver"; `NA` without abundances), and columns of the method,
   such as
   [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)'s
-  `medoid` and `silhouette`, or
+  `medoid` and `silhouette`,
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md)'s
-  `cst` and reference scores.
+  `cst` and reference scores, or
+  [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md)'s `weight`
+  and `precision`.
 
 - `profiles`: a types \\\times\\ features matrix of each type's mean
   proportions (`NULL` without abundances); for
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md),
-  the centroids.
+  the centroids; for
+  [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md), the
+  Dirichlet means.
 
 - `selection`: a data frame, one row per number of types tried, with the
   criterion that chose among them, and `selected`, `TRUE` for the one
@@ -48,7 +55,9 @@ sample, in the input's order, and the sample names as row names.
 
 - Attributes of the method, such as
   [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md)'s
-  `scores` (every sample's similarity to every centroid).
+  `scores` (every sample's similarity to every centroid), or
+  [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md)'s
+  `posterior` and `alpha`.
 
 - `method`: the function that made the result, such as `"enterotype"`.
 
@@ -65,6 +74,7 @@ samples by type.
 
 [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md),
 [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md),
+[`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md),
 [`plot.ecodive_types()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_types.md)
 
 ## Examples

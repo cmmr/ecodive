@@ -207,6 +207,7 @@ Sciences*, 108, 4680-4687.
 [`plot.ecodive_types()`](https://cmmr.github.io/ecodive/reference/plot.ecodive_types.md)
 
 Other community types:
+[`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md),
 [`enterotype()`](https://cmmr.github.io/ecodive/reference/enterotype.md)
 
 ## Examples

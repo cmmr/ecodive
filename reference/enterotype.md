@@ -215,6 +215,7 @@ Computational and Applied Mathematics*, 20, 53-65.
 [`jensen()`](https://cmmr.github.io/ecodive/reference/jensen.md)
 
 Other community types:
+[`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md),
 [`valencia()`](https://cmmr.github.io/ecodive/reference/valencia.md)
 
 ## Examples

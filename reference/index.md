@@ -381,6 +381,8 @@ or ordination plot.
   VALENCIA community state types
 - [`valencia_centroids`](https://cmmr.github.io/ecodive/reference/valencia_centroids.md)
   : VALENCIA's reference centroids
+- [`dmm()`](https://cmmr.github.io/ecodive/reference/dmm.md) :
+  Dirichlet-multinomial mixtures
 - [`ecodive_types`](https://cmmr.github.io/ecodive/reference/ecodive_types.md)
   : Community types
 
