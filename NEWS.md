@@ -1048,10 +1048,10 @@
     `permanova()` on the result is NMIT's test.
   * New `feature_volatility()` runs q2's feature-volatility pipeline: a
     `random_forest()` regression of the state on the features, on a random
-    80% of the samples (`test_size`), with its accuracy on the rest, after
-    q2's recursive feature elimination (scikit-learn's RFECV; `rfe`,
-    `rfe_step`, `rfe_folds`); the `n_features` most important selected
-    features with q2's statistics (cumulative increase and decrease of the
+    80% of the samples (`test_size`), with its accuracy on the rest,
+    optionally after q2's recursive feature elimination (scikit-learn's
+    RFECV; `rfe = TRUE`, `rfe_step`, `rfe_folds`); the `n_features` most
+    important features with q2's statistics (cumulative increase and decrease of the
     mean between states, net change, global mean, median, variance, SD and
     CV); and each one's volatility chart numbers. Given q2's
     `random_state`, the split, RFECV's scores and selection, importances

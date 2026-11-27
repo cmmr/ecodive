@@ -12,7 +12,7 @@ feature_volatility(
   data = NULL,
   n_features = 100L,
   test_size = 0.2,
-  rfe = TRUE,
+  rfe = FALSE,
   rfe_step = 0.05,
   rfe_folds = 5L,
   importance = "impurity",
@@ -65,7 +65,9 @@ trains on every sample (accuracy then only out of bag). Default:
 \item{rfe}{Whether to select features first by recursive feature
 elimination with cross-validation (scikit-learn's \code{RFECV}), as q2's
 pipeline always does (its \code{optimize_feature_selection}). Default:
-\code{TRUE}. With \code{FALSE}, one forest on every feature ranks them all.}
+\code{FALSE}: one forest on every feature ranks them all. \code{TRUE} is
+q2's pipeline, at the cost of about \eqn{(}\code{rfe_folds}
+\eqn{+ 1) / } \code{rfe_step} forests instead of one.}
 
 \item{rfe_step}{How many features recursive feature elimination drops at
 each round: a fraction of the features (below 1) or a count.
@@ -149,7 +151,7 @@ the selected ones, then 2, 3, ... for those dropped later to earlier),
 and \code{scores}, a data frame of each number of features tried
 (\code{n_features}), the mean and SD (divisor n, as scikit-learn's) of the
 folds' \eqn{R^2}, and each fold's (\code{fold_1}, ...). \code{NULL} with
-\code{rfe = FALSE}.}
+\code{rfe = FALSE} (the default).}
 \item{\code{forest}}{The \code{\link[=random_forest]{random_forest()}} result, trained on the training
 samples (with \code{rfe}, on the selected features only): every feature's
 importances (0 for the features not selected), out-of-bag

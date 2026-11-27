@@ -568,10 +568,11 @@ Made while implementing:
 After the first push, the user asked for q2's recursive feature
 elimination. Made while implementing:
 
-- **On by default:** `rfe = TRUE`, as q2's pipeline (which hard-codes
-  `optimize_feature_selection = True`), with `rfe_step = 0.05` and
-  `rfe_folds = 5L` (q2's `step` and `cv`); `rfe = FALSE` gives the
-  forest on every feature. Not `n_folds`, which `...` passes to the
+- **Off by default** (the user's choice, after first defaulting to `TRUE`
+  as q2's pipeline, which hard-codes `optimize_feature_selection = True`):
+  `rfe = FALSE`, with `rfe_step = 0.05` and `rfe_folds = 5L` (q2's `step`
+  and `cv`) for `rfe = TRUE`. RFE costs about (`rfe_folds` + 1) /
+  `rfe_step` forests (126 by default) instead of one. Not `n_folds`, which `...` passes to the
   final forest's own cross-validation.
 - **The port:** `rf_rfe()` in `R/random_forest.r` follows scikit-learn
   1.9.1's `RFE._fit()` and `RFECV.fit()`: `int(max(1, step * p))`

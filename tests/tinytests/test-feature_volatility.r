@@ -51,7 +51,7 @@ for (cs in E$cases) {
     expect_true(all(imp$impurity[cs$rfe$ranking[imp$feature] > 1L] == 0), info = info)
     # The same from a sparse table (a CSC forest, as scikit-learn grows from q2's).
     fs <- fv_details(cnt, 'subject', 'state', 'group', data = meta, n_features = Inf,
-                     norm = 'none', numpy_random_state = cs$random_state, sparse = TRUE, cpus = 2L)
+                     norm = 'none', rfe = TRUE, numpy_random_state = cs$random_state, sparse = TRUE, cpus = 2L)
     expect_identical(fs$rfe, fv$rfe, info = info)
     expect_identical(fs$features, fv$features, info = info)
   }
@@ -299,7 +299,7 @@ expect_identical(attr(f5, 'n_resamples'), 50L)
 #--------------------------------------------------
 # Recursive feature elimination (PCG).
 #--------------------------------------------------
-fr <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_trees = 30, cpus = 1L)
+fr <- feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_trees = 30, rfe = TRUE, cpus = 1L)
 rk <- fr$rfe$ranking
 expect_identical(names(rk), colnames(cnt))
 sel <- names(which(rk == 1L))
@@ -327,17 +327,17 @@ expect_identical(fr$features$importance, imp$impurity[match(fr$features$feature,
 expect_true(all(predict(fr$forest, cnt, cpus = 1L) > -Inf))
 expect_true(any(grepl('Recursive feature elimination kept', capture.output(print(fr)))))
 for (cpus in 2:max_cpus)
-  expect_identical(feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_trees = 30, cpus = cpus),
+  expect_identical(feature_volatility(cnt, 'subject', 'state', 'group', data = meta, n_trees = 30, rfe = TRUE, cpus = cpus),
                    fr, info = cpus)
 expect_identical(attr(fr$forest, 'max_features'), length(sel))
 
 # Steps as counts or fractions: 25, 20, ..., 5, then 1.
-fr5 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_trees = 10, rfe_step = 5,
+fr5 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_trees = 10, rfe = TRUE, rfe_step = 5,
                           rfe_folds = 3L, cpus = 1L)
 expect_identical(fr5$rfe$scores$n_features, c(1L, 5L, 10L, 15L, 20L, 25L))
 expect_identical(names(fr5$rfe$scores), c('n_features', 'mean', 'sd', paste0('fold_', 1:3)))
 expect_true(sum(fr5$rfe$ranking == 1L) %in% c(1L, 5L, 10L, 15L, 20L, 25L))
-fr2 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_trees = 10, rfe_step = 0.2,
+fr2 <- feature_volatility(cnt, 'subject', 'state', data = meta, n_trees = 10, rfe = TRUE, rfe_step = 0.2,
                           rfe_folds = 3L, cpus = 1L)
 expect_identical(fr2$rfe$scores$n_features, fr5$rfe$scores$n_features)
 expect_identical(fr2$rfe, fr5$rfe)
@@ -347,9 +347,9 @@ expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_step =
 expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_step = 1.5), '`rfe_step`')
 expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_folds = 1), '`rfe_folds`')
 expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_folds = 2.5), '`rfe_folds`')
-expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe_folds = 40, n_trees = 5),
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe = TRUE, rfe_folds = 40, n_trees = 5),
              'at least two samples in each of its 40 folds')
-expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, max_features = c(2, 5), n_trees = 5),
+expect_error(feature_volatility(cnt, 'subject', 'state', data = meta, rfe = TRUE, max_features = c(2, 5), n_trees = 5),
              'must be single values')
 
 

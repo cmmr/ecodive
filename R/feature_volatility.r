@@ -92,7 +92,9 @@
 #' @param rfe  Whether to select features first by recursive feature
 #'        elimination with cross-validation (scikit-learn's `RFECV`), as q2's
 #'        pipeline always does (its `optimize_feature_selection`). Default:
-#'        `TRUE`. With `FALSE`, one forest on every feature ranks them all.
+#'        `FALSE`: one forest on every feature ranks them all. `TRUE` is
+#'        q2's pipeline, at the cost of about \eqn{(}`rfe_folds`
+#'        \eqn{+ 1) / } `rfe_step` forests instead of one.
 #'
 #' @param rfe_step  How many features recursive feature elimination drops at
 #'        each round: a fraction of the features (below 1) or a count.
@@ -163,7 +165,7 @@
 #'     and `scores`, a data frame of each number of features tried
 #'     (`n_features`), the mean and SD (divisor n, as scikit-learn's) of the
 #'     folds' \eqn{R^2}, and each fold's (`fold_1`, ...). `NULL` with
-#'     `rfe = FALSE`.}
+#'     `rfe = FALSE` (the default).}
 #'   \item{`forest`}{The [random_forest()] result, trained on the training
 #'     samples (with `rfe`, on the selected features only): every feature's
 #'     importances (0 for the features not selected), out-of-bag
@@ -259,7 +261,7 @@
 #'     plot(fv)
 feature_volatility <- function (
     counts, subjects, states, groups = NULL, data = NULL,
-    n_features = 100L, test_size = 0.2, rfe = TRUE, rfe_step = 0.05,
+    n_features = 100L, test_size = 0.2, rfe = FALSE, rfe_step = 0.05,
     rfe_folds = 5L, importance = 'impurity',
     margin = 1L, norm = 'percent', pseudocount = NULL, n_trees = 100L,
     conf_level = 0.95, n_resamples = 1000L, seed = 0L, cpus = n_cpus(),
@@ -281,7 +283,7 @@ feature_volatility <- function (
 # the order drawn.
 feature_volatility_details <- function (
     counts, subjects, states, groups = NULL, data = NULL,
-    n_features = 100L, test_size = 0.2, rfe = TRUE, rfe_step = 0.05,
+    n_features = 100L, test_size = 0.2, rfe = FALSE, rfe_step = 0.05,
     rfe_folds = 5L, importance = 'impurity',
     margin = 1L, norm = 'percent', pseudocount = NULL, n_trees = 100L,
     conf_level = 0.95, n_resamples = 1000L, seed = 0L, cpus = n_cpus(),
