@@ -565,3 +565,29 @@ Made while implementing:
 14. **No new copyright stanza:** nothing was ported (clean room), so
     `inst/COPYRIGHTS` and `Authors@R` are unchanged; the C and R headers
     say how the formulas were established.
+
+
+## Outcome (item 55, from the implementing session's final report)
+
+Done 2026-11-27. Commits `54fb100` (work), then this tick.
+
+- `replace_zeros_czm()`, `replace_zeros_gbm()`, `replace_zeros_sq()`,
+  `replace_zeros_bl()`: registry rows `czm`, `gbm`, `sq`, `bl` with the
+  planned aliases; one Rd page (`replace_zeros_cmult.Rd`); one C entry
+  point, `C_replace_zeros_cmult()`.
+- Formulas confirmed by black-box probes before any C was written (see
+  "Confirmed formulas"). BL and SQ use zCompositions' pooled leave-one-out
+  prior, not the paper's 1/D; `adjust` applies to CZM too.
+- zCompositions 1.6.2 `cmultRepl(output = "prop", z.delete = FALSE,
+  z.warning = 1)`: 70 fixture cases (probe tables, `ex_counts`, a sparse
+  25 × 60 table with 72% zeros; every method × `adjust`, and non-default
+  `frac` / `threshold`) within 1.9e-15 relative (tested at 1e-13); 213
+  random tables within 2.1e-15. Dense, sparse (`dgCMatrix`,
+  `TsparseMatrix`, slam) and margin-2 input give identical bits.
+- Tests: 34,792 at home and 490 in CRAN mode, all OK (baseline 34,006 and
+  477). `R CMD check --no-manual --ignore-vignettes`: one NOTE, the
+  pre-existing installed package size.
+- The user's decisions: GBM errors on single-sample features; no `cpus`;
+  no 80%-zeros warning for any method.
+- Open: none for these methods. `zero_replacement_input(mostly_zero =
+  TRUE)` is now unused (kept for a later method that wants it).
