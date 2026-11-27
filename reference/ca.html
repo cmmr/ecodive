@@ -57,7 +57,7 @@ correspondence analysis."><meta property="og:image" content="https://cmmr.github
 
     <div class="ref-description section level2">
     <p>Unconstrained ordination of samples from their feature abundances in the
-chi-square metric. Gives the same results as <code>vegan::ca()</code>,
+chi-square metric. Gives the same results as <code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::ca()</a></code>,
 computed straight from sparse input without forming any
 \(n \times n\) or dense table, so it takes far less time and
 memory for large datasets. <code><a href="cca.html">cca()</a></code> is its constrained form, canonical
@@ -104,7 +104,7 @@ within any limits set on it. Results are the same for any <code>cpus</code>.</p>
 named <code>"CA1"</code>, <code>"CA2"</code>, etc., as described in "Ordination result"
 below. The values are <code>vegan</code>'s site scores in scaling 2: what
 <code>vegan::scores(vegan::ca(counts), display = "sites")</code> returns and what
-<code>phyloseq::plot_ordination()</code> plots. Its attributes are:</p><ul><li><p><code>method</code>: <code>"ca"</code>.</p></li>
+<code><a href="https://rdrr.io/pkg/phyloseq/man/plot_ordination.html" class="external-link">phyloseq::plot_ordination()</a></code> plots. Its attributes are:</p><ul><li><p><code>method</code>: <code>"ca"</code>.</p></li>
 <li><p><code>eig</code>: The eigenvalue (inertia) of each axis.</p></li>
 <li><p><code>prop</code>: The proportion of the total inertia that each axis explains,
 <code>eig / trace</code>. <code>vegan</code>'s "Proportion Explained".</p></li>
@@ -147,16 +147,16 @@ first).</p>
 <p><code>ca()</code> gives the same site scores, eigenvalues, inertia and species
 scores as <code>vegan::ca(counts)</code> and <code>vegan::cca(counts)</code> (scaling 2), and as
 <code>skbio.stats.ordination.ca()</code> in scaling 2, up to the signs of the axes.
-<code>ade4::dudi.coa()</code> gives the same eigenvalues; its <code>$l1</code> (row scores of
+<code><a href="https://adeverse.github.io/ade4/reference/dudi.coa.html" class="external-link">ade4::dudi.coa()</a></code> gives the same eigenvalues; its <code>$l1</code> (row scores of
 unit weighted variance) are <code>ca()</code>'s scores, and its <code>$co</code> (column
 principal coordinates) are <code>ca()</code>'s loadings. Samples with no observations are
 an error, as in <code>vegan</code> and <code>ade4</code>; features with no observations have
 no weight, and get loadings of 0.</p>
 <p><strong>Same names in other packages</strong></p>
-<p><code>vegan::ca()</code> and <code>ca::ca()</code> share their name with ecodive's <code>ca()</code>, and
+<p><code><a href="https://vegandevs.github.io/vegan/reference/cca.html" class="external-link">vegan::ca()</a></code> and <code>ca::ca()</code> share their name with ecodive's <code>ca()</code>, and
 whichever package was attached last masks the other's. Write
 <code>ecodive::ca()</code>, or use <code><a href="count_ord.html">count_ord()</a></code>, which always runs ecodive's, to be
-sure. <code>ade4::dudi.coa()</code> computes the same analysis under another name.</p>
+sure. <code><a href="https://adeverse.github.io/ade4/reference/dudi.coa.html" class="external-link">ade4::dudi.coa()</a></code> computes the same analysis under another name.</p>
 <p><strong>Axis signs and reproducibility</strong></p>
 <p>An eigenvector's sign is arbitrary, so different software can return
 mirror images of the same axis. <code>ca()</code> flips each axis so that its

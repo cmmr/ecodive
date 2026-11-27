@@ -62,7 +62,7 @@ straight from the distances."><meta property="og:image" content="https://cmmr.gi
     <div class="ref-description section level2">
     <p>Tests whether samples are more similar to the other samples in their group
 than to samples in other groups. Gives the same statistics as
-<code>vegan::mrpp()</code>: the observed and expected weighted mean within-group
+<code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code>: the observed and expected weighted mean within-group
 distance (\(\delta\)), the chance-corrected within-group agreement
 \(A\), the mean distance within each group, and a permutation p-value.
 Also gives the standardized effect size \(z\) that
@@ -115,12 +115,12 @@ Default: <code>NULL</code>.</p></dd>
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
 <dd><p>How to weight each group's mean within-group distance in
 \(\delta\), by its number of samples \(n\):</p><ul><li><p><code>'n'</code>: \(n\), as recommended by Mielke &amp; Berry (2001). The default,
-and <code>vegan::mrpp()</code>'s <code>weight.type = 1</code>.</p></li>
+and <code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code>'s <code>weight.type = 1</code>.</p></li>
 <li><p><code>'n-1'</code>: \(n - 1\). <code>weight.type = 2</code>.</p></li>
 <li><p><code>'n(n-1)'</code>: \(n(n - 1)\), the number of pairs of samples, so that
 \(\delta\) is the mean of all within-group distances.
 <code>weight.type = 3</code>.</p></li>
-</ul><p><code>1</code>, <code>2</code>, or <code>3</code> are also accepted, as in <code>vegan::mrpp()</code>.</p></dd>
+</ul><p><code>1</code>, <code>2</code>, or <code>3</code> are also accepted, as in <code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code>.</p></dd>
 
 
 <dt id="arg-pairwise">pairwise<a class="anchor" aria-label="anchor" href="#arg-pairwise"></a></dt>
@@ -142,7 +142,7 @@ Default: <code>'holm'</code>.</p></dd>
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of permutations. Default: <code>999</code>.
 Alternatively, a matrix with one permutation of <code>1:n</code> per row, as
-from <code>permute::shuffleSet()</code>, to use instead of random ones.</p></dd>
+from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
@@ -195,7 +195,7 @@ Otherwise <code>NULL</code>.</p></li>
 <li><p><code>permutation</code>: How samples were permuted: <code>'free'</code>, <code>'within strata'</code>,
 or <code>'supplied matrix'</code>.</p></li>
 </ul><p>Attribute <code>delta_perm</code> holds the \(\delta\) of each permutation, as
-<code>vegan::mrpp()</code>'s <code>boot.deltas</code>.</p>
+<code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code>'s <code>boot.deltas</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -207,7 +207,7 @@ pairs of samples in group \(g\), the test statistic is their weighted
 mean
 $$\delta = \sum_g C_g \bar{d}_g, \quad C_g = w_g / \sum_h w_h$$
 with weights \(w_g\) from <code>weights</code>. Groups of one sample have no pairs,
-so they are left out, as in <code>vegan::mrpp()</code>. The expected value of
+so they are left out, as in <code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code>. The expected value of
 \(\delta\) over all permutations of the samples is the mean of all the
 distances, and the chance-corrected within-group agreement is
 \(A = 1 - \delta / E(\delta)\) (McCune &amp; Grace 2002): 1 when samples are
@@ -216,7 +216,7 @@ negative when they are less alike.</p>
 <p>For each permutation, the group labels are shuffled among the samples and
 \(\delta\) is recomputed. The p-value is
 \((1 + \#\{\delta_{perm} \le \delta\}) / (1 + permutations)\). As in
-<code>vegan::mrpp()</code>, permuted values within <code>sqrt(.Machine$double.eps)</code> of the
+<code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code>, permuted values within <code>sqrt(.Machine$double.eps)</code> of the
 observed one count as ties. The standardized effect size \(z\) compares
 the observed \(\delta\) with the permuted ones, using their mean and
 (sample) standard deviation, as <code>summary(vegan::permustats())</code> does. It is
@@ -232,19 +232,19 @@ over the distances, and permutations run in parallel.</p>
 <p>The permutations come from <code>seed</code>, not from R's random number generator,
 so <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> has no effect, and each permutation has a random number
 stream of its own. Results are identical from run to run and for any
-number of <code>cpus</code>. The random permutations differ from <code>vegan::mrpp()</code>'s,
+number of <code>cpus</code>. The random permutations differ from <code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code>'s,
 so p-values and \(z\) agree with it only up to sampling error, unless
 the same <code>permutations</code> matrix is given to both.</p>
 <p><strong>Differences from vegan::mrpp()</strong></p><ul><li><p><code>mrpp()</code> takes distances, not a community table: compute them first
 with <code><a href="beta_div.html">beta_div()</a></code> or a metric function such as <code><a href="bray.html">bray()</a></code>.</p></li>
-<li><p><code>A</code> is reported even with <code>permutations = 0</code>; <code>vegan::mrpp()</code> gives
+<li><p><code>A</code> is reported even with <code>permutations = 0</code>; <code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code> gives
 <code>NA</code> then.</p></li>
 <li><p>A group of one sample has a <code>class_delta</code> of <code>NA</code>, where
-<code>vegan::mrpp()</code> has <code>NaN</code>.</p></li>
+<code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code> has <code>NaN</code>.</p></li>
 <li><p><code>mrpp()</code> does not compute the classification strength (<code>CS</code>), which
-<code>vegan::mrpp()</code> also leaves <code>NA</code>.</p></li>
+<code><a href="https://vegandevs.github.io/vegan/reference/mrpp.html" class="external-link">vegan::mrpp()</a></code> also leaves <code>NA</code>.</p></li>
 <li><p><code>strata</code> permutes freely within strata. For other restricted designs,
-pass a <code>permutations</code> matrix from <code>permute::shuffleSet()</code>.</p></li>
+pass a <code>permutations</code> matrix from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="pairwise-comparisons">Pairwise comparisons<a class="anchor" aria-label="anchor" href="#pairwise-comparisons"></a></h2>

@@ -87,6 +87,20 @@ Diversity based on phylogenetic branch lengths.
 - [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md) :
   Faith's Phylogenetic Diversity (PD)
 
+### Depth and coverage
+
+Diversity against sequencing depth and sample coverage. Rarefaction and
+extrapolation of Hill numbers (iNEXT), and every sample’s Hill numbers
+at one common depth or coverage, to compare or test.
+
+- [`hill_extrapolation()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md)
+  [`hill_standardize()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md)
+  : Interpolated and extrapolated Hill numbers
+- [`plot(`*`<ecodive_hill_extrapolation>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_hill_extrapolation.md)
+  : Plot interpolated and extrapolated Hill numbers
+- [`rarefaction_curve()`](https://cmmr.github.io/ecodive/reference/rarefaction_curve.md)
+  : Rarefaction Curves
+
 ## Beta Diversity
 
 Calculate between-sample similarity or distance.
@@ -694,6 +708,7 @@ than every value.
 - [`print(`*`<ecodive_batch>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_dbmem>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+  [`print(`*`<ecodive_hill_standardize>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_source>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)

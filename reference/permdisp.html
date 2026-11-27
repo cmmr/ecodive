@@ -58,7 +58,7 @@ that the default centre differs: see type."><meta property="og:image" content="h
     <div class="ref-description section level2">
     <p>Tests whether groups of samples differ in how spread out they are: their
 multivariate dispersion, or beta diversity. Gives the same results as
-<code>vegan::betadisper()</code> followed by <code>vegan::permutest()</code>: each sample's
+<code><a href="https://vegandevs.github.io/vegan/reference/betadisper.html" class="external-link">vegan::betadisper()</a></code> followed by <code><a href="https://vegandevs.github.io/vegan/reference/anova.cca.html" class="external-link">vegan::permutest()</a></code>: each sample's
 distance to its group's centre, each group's mean distance, and a
 permutation test of whether those distances differ between groups. Note
 that the default centre differs: see <code>type</code>.</p>
@@ -114,7 +114,7 @@ Default: <code>NULL</code>.</p></dd>
 large data sets.</p></li>
 <li><p><code>'median'</code>: The spatial median, the point with the smallest sum of
 distances to the group's samples. More robust to skewed data and
-outlying samples. The default of <code>vegan::betadisper()</code> and
+outlying samples. The default of <code><a href="https://vegandevs.github.io/vegan/reference/betadisper.html" class="external-link">vegan::betadisper()</a></code> and
 scikit-bio's <code>permdisp</code>, so pass <code>type = 'median'</code> to compare with
 them.</p></li>
 </ul></dd>
@@ -144,7 +144,7 @@ Default: <code>'holm'</code>.</p></dd>
 <dt id="arg-permutations">permutations<a class="anchor" aria-label="anchor" href="#arg-permutations"></a></dt>
 <dd><p>The number of permutations. Default: <code>999</code>.
 Alternatively, a matrix with one permutation of <code>1:n</code> per row, as
-from <code>permute::shuffleSet()</code>, to use instead of random ones.</p></dd>
+from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>, to use instead of random ones.</p></dd>
 
 
 <dt id="arg-strata">strata<a class="anchor" aria-label="anchor" href="#arg-strata"></a></dt>
@@ -234,7 +234,7 @@ needs only the distances within each group, so it is much faster for
 many samples (see below).</p></li>
 <li><p><code>'median'</code> is the robust alternative for skewed or outlier-prone data,
 as the median-based (Brown-Forsythe) version of Levene's test is
-(Anderson 2006). It is the default of <code>vegan::betadisper()</code> and of
+(Anderson 2006). It is the default of <code><a href="https://vegandevs.github.io/vegan/reference/betadisper.html" class="external-link">vegan::betadisper()</a></code> and of
 scikit-bio's (and so QIIME 2's) <code>permdisp</code>: to compare with them, pass
 <code>type = 'median'</code>.</p></li>
 </ul><p><code>betadisper()</code> stops its search for the spatial median early, so its
@@ -278,7 +278,7 @@ are not tested on their own: their \(t\) statistics come from the
 whole test's distances to the group centres, and their permutation
 p-values from its permutations, as in <code>permutest()</code>.</p></li>
 <li><p><code>strata</code> permutes freely within strata. For other restricted designs,
-pass a <code>permutations</code> matrix from <code>permute::shuffleSet()</code>.</p></li>
+pass a <code>permutations</code> matrix from <code><a href="https://gavinsimpson.github.io/permute/reference/shuffleSet.html" class="external-link">permute::shuffleSet()</a></code>.</p></li>
 <li><p><code>betadisper()</code>'s <code>sqrt.dist</code> and <code>add</code> options transform the distances
 first: pass <code>sqrt(dm)</code> instead, for instance.</p></li>
 </ul></div>

@@ -23,6 +23,9 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
 # S3 method for class 'ecodive_dbmem'
 print(x, n = NULL, width = NULL, digits = 3L, ...)
 
+# S3 method for class 'ecodive_hill_standardize'
+print(x, n = NULL, width = NULL, digits = 3L, ...)
+
 # S3 method for class 'ecodive_ord'
 print(x, n = NULL, width = NULL, digits = 3L, ...)
 
@@ -65,8 +68,11 @@ print(x, n = NULL, width = NULL, digits = 3L, ...)
   or
   [`batch_combat()`](https://cmmr.github.io/ecodive/reference/batch_combat.md)),
   or Moran's eigenvector maps of class `ecodive_dbmem` (from
-  [`dbmem()`](https://cmmr.github.io/ecodive/reference/dbmem.md)). A
-  community-types result (see
+  [`dbmem()`](https://cmmr.github.io/ecodive/reference/dbmem.md)), or
+  Hill numbers at a common coverage or depth, of class
+  `ecodive_hill_standardize` (from
+  [`hill_standardize()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md)).
+  A community-types result (see
   [ecodive_types](https://cmmr.github.io/ecodive/reference/ecodive_types.md))
   prints its types and how their number was chosen before its first
   samples.

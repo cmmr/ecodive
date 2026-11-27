@@ -109,7 +109,8 @@
 <td align="left">Alpha diversity</td>
 <td align="left"><code><a href="reference/alpha_div.html">alpha_div()</a></code></td>
 <td align="left">
-<code><a href="reference/shannon.html">shannon()</a></code>, <code><a href="reference/simpson.html">simpson()</a></code>, <code><a href="reference/chao1.html">chao1()</a></code>, <code><a href="reference/faith.html">faith()</a></code>, <code><a href="reference/pielou.html">pielou()</a></code>, <code><a href="reference/hill.html">hill()</a></code>, and 19 more</td>
+<code><a href="reference/shannon.html">shannon()</a></code>, <code><a href="reference/simpson.html">simpson()</a></code>, <code><a href="reference/chao1.html">chao1()</a></code>, <code><a href="reference/faith.html">faith()</a></code>, <code><a href="reference/pielou.html">pielou()</a></code>, <code><a href="reference/hill.html">hill()</a></code>, and 19 more; <code><a href="reference/hill_extrapolation.html">hill_extrapolation()</a></code>, <code><a href="reference/hill_extrapolation.html">hill_standardize()</a></code>
+</td>
 </tr>
 <tr>
 <td align="left">Beta diversity</td>
@@ -280,7 +281,7 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cmmr.github.io/ecodive/">ecodive</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">esophagus</span>, package <span class="op">=</span> <span class="st">'phyloseq'</span><span class="op">)</span></span>
-<span><span class="va">hmp50</span> <span class="op">&lt;-</span> <span class="fu">rbiom</span><span class="fu">::</span><span class="va">hmp50</span></span>
+<span><span class="va">hmp50</span> <span class="op">&lt;-</span> <span class="fu">rbiom</span><span class="fu">::</span><span class="va"><a href="https://cmmr.github.io/rbiom/reference/hmp50.html" class="external-link">hmp50</a></span></span>
 <span></span>
 <span><span class="co"># Calculate weighted UniFrac distance</span></span>
 <span><span class="va">w_unifrac</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/weighted_unifrac.html">weighted_unifrac</a></span><span class="op">(</span><span class="va">esophagus</span><span class="op">)</span></span>

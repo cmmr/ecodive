@@ -45,7 +45,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 
 | Task | Wrapper | Functions |
 |:---|:---|:---|
-| Alpha diversity | [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md) | [`shannon()`](https://cmmr.github.io/ecodive/reference/shannon.md), [`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md), [`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md), [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md), [`pielou()`](https://cmmr.github.io/ecodive/reference/pielou.md), [`hill()`](https://cmmr.github.io/ecodive/reference/hill.md), and 19 more |
+| Alpha diversity | [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md) | [`shannon()`](https://cmmr.github.io/ecodive/reference/shannon.md), [`simpson()`](https://cmmr.github.io/ecodive/reference/simpson.md), [`chao1()`](https://cmmr.github.io/ecodive/reference/chao1.md), [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md), [`pielou()`](https://cmmr.github.io/ecodive/reference/pielou.md), [`hill()`](https://cmmr.github.io/ecodive/reference/hill.md), and 19 more; [`hill_extrapolation()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md), [`hill_standardize()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md) |
 | Beta diversity | [`beta_div()`](https://cmmr.github.io/ecodive/reference/beta_div.md) | [`bray()`](https://cmmr.github.io/ecodive/reference/bray.md), [`jaccard()`](https://cmmr.github.io/ecodive/reference/jaccard.md), [`aitchison()`](https://cmmr.github.io/ecodive/reference/aitchison.md), [`weighted_unifrac()`](https://cmmr.github.io/ecodive/reference/weighted_unifrac.md), and 51 more |
 | Ordination | [`dist_ord()`](https://cmmr.github.io/ecodive/reference/dist_ord.md) | [`pcoa()`](https://cmmr.github.io/ecodive/reference/pcoa.md), [`mds()`](https://cmmr.github.io/ecodive/reference/mds.md), [`nmds()`](https://cmmr.github.io/ecodive/reference/nmds.md), [`isomap()`](https://cmmr.github.io/ecodive/reference/isomap.md), [`tsne()`](https://cmmr.github.io/ecodive/reference/tsne.md), [`umap()`](https://cmmr.github.io/ecodive/reference/umap.md), [`dbrda()`](https://cmmr.github.io/ecodive/reference/dbrda.md), [`capscale()`](https://cmmr.github.io/ecodive/reference/capscale.md), [`capda()`](https://cmmr.github.io/ecodive/reference/capda.md) |
 | Ordination of counts | [`count_ord()`](https://cmmr.github.io/ecodive/reference/count_ord.md) | [`pca()`](https://cmmr.github.io/ecodive/reference/pca.md), [`rpca()`](https://cmmr.github.io/ecodive/reference/rpca.md), [`rpca_phylo()`](https://cmmr.github.io/ecodive/reference/rpca_phylo.md), [`dpcoa()`](https://cmmr.github.io/ecodive/reference/dpcoa.md), [`rda()`](https://cmmr.github.io/ecodive/reference/rda.md), [`cca()`](https://cmmr.github.io/ecodive/reference/cca.md), [`ca()`](https://cmmr.github.io/ecodive/reference/ca.md), [`lda()`](https://cmmr.github.io/ecodive/reference/lda.md), [`plsda()`](https://cmmr.github.io/ecodive/reference/plsda.md), [`oplsda()`](https://cmmr.github.io/ecodive/reference/oplsda.md) |
@@ -489,6 +489,20 @@ Diversity based on phylogenetic branch lengths.
 
 - [`faith()`](https://cmmr.github.io/ecodive/reference/faith.md) :
   Faith's Phylogenetic Diversity (PD)
+
+### Depth and coverage
+
+Diversity against sequencing depth and sample coverage. Rarefaction and
+extrapolation of Hill numbers (iNEXT), and every sample’s Hill numbers
+at one common depth or coverage, to compare or test.
+
+- [`hill_extrapolation()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md)
+  [`hill_standardize()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md)
+  : Interpolated and extrapolated Hill numbers
+- [`plot(`*`<ecodive_hill_extrapolation>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_hill_extrapolation.md)
+  : Plot interpolated and extrapolated Hill numbers
+- [`rarefaction_curve()`](https://cmmr.github.io/ecodive/reference/rarefaction_curve.md)
+  : Rarefaction Curves
 
 ## Beta Diversity
 
@@ -1097,6 +1111,7 @@ than every value.
 - [`print(`*`<ecodive_batch>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_types>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_dbmem>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
+  [`print(`*`<ecodive_hill_standardize>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_ord>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_dist>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)
   [`print(`*`<ecodive_source>`*`)`](https://cmmr.github.io/ecodive/reference/print_ecodive.md)

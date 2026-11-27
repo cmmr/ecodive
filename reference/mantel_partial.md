@@ -4,9 +4,9 @@ Tests whether two distance matrices are correlated after removing the
 effect of a third: for instance, whether samples with more different
 communities are also more different in pH, beyond what geographic
 distance between them explains. Gives the same statistic as
-`vegan::mantel.partial()` (Pearson, Spearman, or Kendall partial
-correlation), with permutation p-values, computed in parallel C straight
-from the distances.
+[`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html)
+(Pearson, Spearman, or Kendall partial correlation), with permutation
+p-values, computed in parallel C straight from the distances.
 [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md) is the
 simple Mantel test.
 
@@ -51,9 +51,11 @@ mantel_partial(
 - given:
 
   The distances whose effect is removed from the correlation of `dm` and
-  `y`, as `vegan::mantel.partial()`'s `zdis`: such as geographic
-  distances between the samples. Given in any of the forms `y` takes,
-  including as a column name of `data`. Required.
+  `y`, as
+  [`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
+  `zdis`: such as geographic distances between the samples. Given in any
+  of the forms `y` takes, including as a column name of `data`.
+  Required.
 
 - data:
 
@@ -73,7 +75,8 @@ mantel_partial(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  `permute::shuffleSet()`, to use instead of random ones.
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
+  to use instead of random ones.
 
 - strata:
 
@@ -87,9 +90,10 @@ mantel_partial(
 - alternative:
 
   Which correlations count as more extreme than the observed one:
-  `'greater'` (more positive, as in `vegan::mantel()`), `'less'` (more
-  negative), or `'two.sided'` (larger in absolute value). Default:
-  `'greater'`.
+  `'greater'` (more positive, as in
+  [`vegan::mantel()`](https://vegandevs.github.io/vegan/reference/mantel.html)),
+  `'less'` (more negative), or `'two.sided'` (larger in absolute value).
+  Default: `'greater'`.
 
 - seed:
 
@@ -109,7 +113,8 @@ A list of class `c('ecodive_mantel', 'ecodive_test')`, as from
 [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md), with:
 
 - `statistic`: The partial Mantel statistic, `c(r = ...)`: the partial
-  correlation of `dm` and `y` given `given`. `vegan::mantel.partial()`'s
+  correlation of `dm` and `y` given `given`.
+  [`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
   `statistic`.
 
 - `p_value`: The permutation p-value.
@@ -131,9 +136,9 @@ A list of class `c('ecodive_mantel', 'ecodive_test')`, as from
   or `'supplied matrix'`.
 
 Attribute `r_perm` is a vector of the statistics of the permutations, as
-`vegan::mantel.partial()`'s `perm`.
-[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) gives the
-main results as one row, with `test = 'mantel_partial'`.
+[`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
+`perm`. [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+gives the main results as one row, with `test = 'mantel_partial'`.
 
 ## Details
 
@@ -145,11 +150,12 @@ removing the effect of `given` (\\z\\), as the partial correlation
 \$\$r\_{xy.z} = \frac{r\_{xy} - r\_{xz} r\_{yz}}{\sqrt{1 - r\_{xz}^2}
 \sqrt{1 - r\_{yz}^2}}\$\$ where each \\r\\ is the Pearson, Spearman, or
 Kendall correlation of two sets of distances. As in
-`vegan::mantel.partial()`, the p-value comes from permutations of the
-samples of `dm`, with `y` and `given` held fixed: \\r\_{xy}\\ and
-\\r\_{xz}\\ are recomputed for each permutation, and \\r\_{yz}\\ is
-computed once. The p-value is the proportion of permutations, counting
-the observed one, with a partial correlation at least as extreme, as in
+[`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html),
+the p-value comes from permutations of the samples of `dm`, with `y` and
+`given` held fixed: \\r\_{xy}\\ and \\r\_{xz}\\ are recomputed for each
+permutation, and \\r\_{yz}\\ is computed once. The p-value is the
+proportion of permutations, counting the observed one, with a partial
+correlation at least as extreme, as in
 [`mantel()`](https://cmmr.github.io/ecodive/reference/mantel.md).
 
 Its p-values can be too small when the distances are spatially
@@ -166,8 +172,9 @@ each permutation is one pass over the distances (two correlations,
 \\r\_{xy}\\ and \\r\_{xz}\\, in the same pass), with no \\n \times n\\
 matrix, and permutations run in parallel. They come from `seed`, so
 p-values are identical from run to run and for any number of `cpus`, and
-agree with `vegan::mantel.partial()`'s exactly when the same
-`permutations` matrix is given to both.
+agree with
+[`vegan::mantel.partial()`](https://vegandevs.github.io/vegan/reference/mantel.html)'s
+exactly when the same `permutations` matrix is given to both.
 
 **Differences from vegan::mantel.partial()**
 

@@ -5,8 +5,9 @@ chance: PROTEST (Jackson 1995; Peres-Neto & Jackson 2001). The statistic
 is the symmetric Procrustes correlation, \\r = \sqrt{1 - m^2}\\, from
 [`procrustes()`](https://cmmr.github.io/ecodive/reference/procrustes.md)
 with `symmetric = TRUE`, and its p-value comes from permutations of
-`ord`'s samples. Gives the same statistic as `vegan::protest()`, and the
-same p-values for the same permutations, computed in parallel C.
+`ord`'s samples. Gives the same statistic as
+[`vegan::protest()`](https://vegandevs.github.io/vegan/reference/procrustes.html),
+and the same p-values for the same permutations, computed in parallel C.
 
 ## Usage
 
@@ -50,8 +51,9 @@ procrustes_test(
   Which axes (columns) of `ord` and `target` to use: whole numbers, as
   in [`envfit()`](https://cmmr.github.io/ecodive/reference/envfit.md).
   When one of the two has fewer columns than asked for, it is padded
-  with columns of zeros, as in `vegan::procrustes()`. Default: `NULL`,
-  the first `min(ncol(ord), ncol(target))` axes.
+  with columns of zeros, as in
+  [`vegan::procrustes()`](https://vegandevs.github.io/vegan/reference/procrustes.html).
+  Default: `NULL`, the first `min(ncol(ord), ncol(target))` axes.
 
 - n_axes:
 
@@ -64,7 +66,8 @@ procrustes_test(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  `permute::shuffleSet()`, to use instead of random ones.
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
+  to use instead of random ones.
 
 - strata:
 
@@ -90,7 +93,9 @@ procrustes_test(
 A list of class `c('ecodive_procrustes_test', 'ecodive_test')`, with:
 
 - `statistic`: The symmetric Procrustes correlation, `c(r = ...)`:
-  \\\sqrt{1 - m^2}\\. `vegan::protest()`'s `t0`.
+  \\\sqrt{1 - m^2}\\.
+  [`vegan::protest()`](https://vegandevs.github.io/vegan/reference/procrustes.html)'s
+  `t0`.
 
 - `p_value`: The permutation p-value: the proportion of permutations,
   counting the observed one, with \\r\\ at least as large.
@@ -100,7 +105,8 @@ A list of class `c('ecodive_procrustes_test', 'ecodive_test')`, with:
 - `n_perm`: The number of permutations.
 
 - `ss`: The symmetric Procrustes sum of squares, \\m^2\\.
-  `vegan::protest()`'s `ss`.
+  [`vegan::protest()`](https://vegandevs.github.io/vegan/reference/procrustes.html)'s
+  `ss`.
 
 - `n`: The number of samples.
 
@@ -114,9 +120,9 @@ A list of class `c('ecodive_procrustes_test', 'ecodive_test')`, with:
   or `'supplied matrix'`.
 
 Attribute `r_perm` is a vector of the statistics of the permutations, as
-`vegan::protest()`'s `t`.
-[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) gives the
-main results as one row.
+[`vegan::protest()`](https://vegandevs.github.io/vegan/reference/procrustes.html)'s
+`t`. [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+gives the main results as one row.
 
 ## Details
 
@@ -138,8 +144,9 @@ Each permutation is one pass over the samples, \\O(n k^2)\\, and a \\k
 \times k\\ singular value decomposition; permutations run in parallel.
 They come from `seed`, not from R's random number generator, so p-values
 are identical from run to run and for any number of `cpus`, and agree
-with `vegan::protest()`'s exactly when the same `permutations` matrix is
-given to both.
+with
+[`vegan::protest()`](https://vegandevs.github.io/vegan/reference/procrustes.html)'s
+exactly when the same `permutations` matrix is given to both.
 
 **Differences from vegan::protest()**
 

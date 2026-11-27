@@ -171,14 +171,16 @@ a fixed point, which is often not the best one: random starts
 
 Beta diversity distances are often tied, e.g. at 1 for every pair of
 samples with no taxa in common. With `ties = "primary"` (Kruskal's
-primary approach, as in `vegan::metaMDS()`), tied distances only have to
-stay in order with the other distances: on the plot, they may differ
-from each other. With `"secondary"` (as in scikit-learn), tied distances
-get one shared disparity, the mean of their distances on the plot, so
-the solution tries to make them equal too; this is a stronger
-requirement, so its stress is higher. Heavily tied data (e.g. Jaccard or
-Bray-Curtis on few taxa or rarefied counts) have many local minima of
-similar stress, and benefit from more `n_starts`; see `n_best`.
+primary approach, as in
+[`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)),
+tied distances only have to stay in order with the other distances: on
+the plot, they may differ from each other. With `"secondary"` (as in
+scikit-learn), tied distances get one shared disparity, the mean of
+their distances on the plot, so the solution tries to make them equal
+too; this is a stronger requirement, so its stress is higher. Heavily
+tied data (e.g. Jaccard or Bray-Curtis on few taxa or rarefied counts)
+have many local minima of similar stress, and benefit from more
+`n_starts`; see `n_best`.
 
 Distances count as tied when they are within \\10^{-15}\\ times the
 largest distance of the first of their group (sorted increasingly),
@@ -189,7 +191,8 @@ disparity of 0 with either approach, as in scikit-learn: they are pulled
 towards the same point. (Under the primary approach, a zero would
 otherwise just be the smallest tie, free to take any small distance on
 the plot; but identical samples should coincide.) So when `dm` has no
-zeros, `stress` with `ties = "primary"` equals `vegan::metaMDS()`'s
+zeros, `stress` with `ties = "primary"` equals
+[`vegan::metaMDS()`](https://vegandevs.github.io/vegan/reference/metaMDS.html)'s
 stress for the same configuration; when it has zeros, it is higher.
 
 SMACOF only finds a local minimum of stress. So:

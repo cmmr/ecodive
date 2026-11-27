@@ -56,7 +56,7 @@ the same results as dbrda()."><meta property="og:image" content="https://cmmr.gi
     <div class="ref-description section level2">
     <p>Constrained ordination of samples from their distances, like <code><a href="dbrda.html">dbrda()</a></code>,
 but of the principal coordinates with positive eigenvalues only. Gives
-the same results as <code>vegan::capscale()</code> (and so as
+the same results as <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code> (and so as
 <code>phyloseq::ordinate(method = "CAP")</code>). For Euclidean distances it gives
 the same results as <code><a href="dbrda.html">dbrda()</a></code>.</p>
     </div>
@@ -73,7 +73,7 @@ the same results as <code><a href="dbrda.html">dbrda()</a></code>.</p>
 <dl><dt id="arg-dm">dm<a class="anchor" aria-label="anchor" href="#arg-dm"></a></dt>
 <dd><p>A <code>dist</code> object, such as from <code><a href="beta_div.html">beta_div()</a></code> or <code><a href="bray.html">bray()</a></code>, or a
 symmetric numeric matrix of distances. Must not contain <code>NA</code>s or
-negative values. Alternatively, as in <code>vegan::dbrda()</code>, a formula
+negative values. Alternatively, as in <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>, a formula
 with the distances on its left-hand side and the constraints on its
 right, such as <code>dm ~ treatment</code>, in place of <code>dm</code> and <code>formula</code>;
 the metadata may then be given second, as in
@@ -104,7 +104,7 @@ one-sided formula naming the variables in <code>data</code> that constrain the
 ordination, such as <code>~ treatment + ph</code>. Factors, numeric
 covariates, and interactions are all allowed. Wrap variables in
 <code>Condition()</code> to remove their effect first (a partial analysis), as
-in <code>vegan::dbrda()</code>: <code>~ treatment + Condition(site)</code>. With only
+in <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::dbrda()</a></code>: <code>~ treatment + Condition(site)</code>. With only
 <code>Condition()</code> terms, the result is the unconstrained ordination
 after removing their effect. A left-hand side, if given, is
 ignored. Give <code>groups</code> or <code>formula</code>: there is no default model.
@@ -183,13 +183,13 @@ going on would cost about as much as the full eigen-decomposition,
 <code>capscale()</code> stops looking and decomposes \(G\), as below, which gives
 the same results either way.</p>
 <p>Otherwise, \(G_+\) needs every eigenvalue of \(G\), as in
-<code>vegan::capscale()</code>: <code>capscale()</code> forms \(G\) (\(8n^2\) bytes, such as
+<code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code>: <code>capscale()</code> forms \(G\) (\(8n^2\) bytes, such as
 200 MB for 5000 samples), reduces it to tridiagonal form, finds all of its
 eigenvalues, and then the eigenvectors of the positive ones, or of the
 others if they are fewer, by inverse iteration. That takes time
 proportional to \(n^3\), though several times less than a full
 eigen-decomposition: for 2000 Bray-Curtis distances, about 2 seconds on
-one core, against 12 for <code>vegan::capscale()</code>. The reduction and the
+one core, against 12 for <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code>. The reduction and the
 eigenvectors are computed in parallel on <code>cpus</code> threads.</p>
 <p><strong>capscale() or dbrda()?</strong></p>
 <p>See <code><a href="dbrda.html">dbrda()</a></code>. In short: <code><a href="dbrda.html">dbrda()</a></code> analyzes the distances as they are,
@@ -203,12 +203,12 @@ and then to use <code><a href="dbrda.html">dbrda()</a></code>.</p>
 <p><strong>Matching vegan</strong></p>
 <p><code>capscale()</code> gives the same scores, eigenvalues, inertia (including the
 imaginary inertia), \(R^2\), biplot scores and centroids as
-<code>vegan::capscale()</code> given distances, up to the signs of the axes. As
+<code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code> given distances, up to the signs of the axes. As
 there, distances are divided by \(\sqrt{n-1}\) when any is 4 or more
-(see "Scale" in <code><a href="dbrda.html">dbrda()</a></code>). <code>vegan::capscale()</code> can also take a community
+(see "Scale" in <code><a href="dbrda.html">dbrda()</a></code>). <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code> can also take a community
 table, add a constant to the distances (<code>add</code>), or take their square roots
 (<code>sqrt.dist</code>), and gives species scores; <code>capscale()</code> does not.</p>
-<p><code>capscale()</code> is named after <code>vegan::capscale()</code>. Anderson &amp; Willis's (2003)
+<p><code>capscale()</code> is named after <code><a href="https://vegandevs.github.io/vegan/reference/dbrda.html" class="external-link">vegan::capscale()</a></code>. Anderson &amp; Willis's (2003)
 "canonical analysis of principal coordinates" (CAP) is a related but
 different method.</p>
 <p><strong>Axis signs and reproducibility</strong></p>

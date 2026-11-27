@@ -183,6 +183,39 @@ goods_coverage(counts)
 #> 0.9971014 1.0000000 1.0000000 0.9884058 
 ```
 
+### Equal Depth or Equal Coverage
+
+Rarefying throws reads away to make samples equally deep. Instead,
+[`hill_extrapolation()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md)
+estimates each sample’s Hill numbers (q = 0, 1, 2) at any depth, by
+rarefaction below its size and extrapolation above it, with its sample
+coverage there and its asymptotic estimates (Chao et al. 2014, as iNEXT
+does), and [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+draws the curves.
+[`hill_standardize()`](https://cmmr.github.io/ecodive/reference/hill_extrapolation.md)
+then gives every sample’s Hill numbers at one common **coverage** (the
+default: equally complete samples, as Chao & Jost 2012 recommend) or one
+common depth, ready to compare or test. Bootstrap intervals come with
+`n_boot`.
+
+``` r
+
+hill_standardize(ex_counts, n_boot = 0)
+#> # A matrix: 4 samples x 3 orders
+#> # Hill numbers at coverage 0.9967
+#>          q0   q1   q2
+#> Saliva 3.92 2.1  2.03
+#> Gums   3.61 1.44 1.23
+#> Nose   4.72 3.1  2.76
+#> Stool  7.92 1.05 1.01
+#> # Attributes: depth, coverage, method, level, base, conf_level
+
+# The depth each sample needs to reach that coverage
+round(attr(hill_standardize(ex_counts, n_boot = 0), 'depth'))
+#> Saliva   Gums   Nose  Stool 
+#>    318    336    205   1230 
+```
+
 ### Several Metrics at Once
 
 [`alpha_div()`](https://cmmr.github.io/ecodive/reference/alpha_div.md)

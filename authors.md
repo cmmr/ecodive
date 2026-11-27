@@ -32,7 +32,8 @@
 
 - **NumPy Developers**. Copyright holder.  
   numpy's pairwise summation, followed by replace_zeros_mult() and
-  random_forest(), and its legacy random draws (random_forest()'s tests)
+  random_forest(), its legacy random draws (random_forest()'s tests),
+  and its binomial sampler (hill_extrapolation()'s bootstrap)
 
 - **Cameron Martino**. Contributor, copyright holder.  
   'gemelli' robust Aitchison PCA and phylogenetic robust Aitchison PCA

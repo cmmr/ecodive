@@ -195,7 +195,7 @@ prediction.</p></li>
 <code>QMP.R</code> (BSD-3, © 2017 Raes Lab), except:</p><ul><li><p>It doesn't apply <code><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling()</a></code> to <code>counts</code>; non-integer counts are an
 error.</p></li>
 <li><p>Targets \(s_{min} L_i\) are floored (as the script's call to
-<code>phyloseq::rarefy_even_depth()</code> does), but a value within
+<code><a href="https://rdrr.io/pkg/phyloseq/man/rarefy_even_depth.html" class="external-link">phyloseq::rarefy_even_depth()</a></code> does), but a value within
 \(10^{-9}\) (relative) of a whole number counts as that number, so
 that floating-point rounding never costs a read; the sample with the
 smallest sampling depth keeps all its reads.</p></li>

@@ -201,7 +201,7 @@ the way to search for better ones.</p>
 <p><strong>Ties and zeros</strong></p>
 <p>Beta diversity distances are often tied, e.g. at 1 for every pair of
 samples with no taxa in common. With <code>ties = "primary"</code> (Kruskal's primary
-approach, as in <code>vegan::metaMDS()</code>), tied distances only have to stay in
+approach, as in <code><a href="https://vegandevs.github.io/vegan/reference/metaMDS.html" class="external-link">vegan::metaMDS()</a></code>), tied distances only have to stay in
 order with the other distances: on the plot, they may differ from each
 other. With <code>"secondary"</code> (as in scikit-learn), tied distances get one
 shared disparity, the mean of their distances on the plot, so the
@@ -217,7 +217,7 @@ disparity of 0 with either approach, as in scikit-learn: they are pulled
 towards the same point. (Under the primary approach, a zero would
 otherwise just be the smallest tie, free to take any small distance on
 the plot; but identical samples should coincide.) So when <code>dm</code> has no
-zeros, <code>stress</code> with <code>ties = "primary"</code> equals <code>vegan::metaMDS()</code>'s stress
+zeros, <code>stress</code> with <code>ties = "primary"</code> equals <code><a href="https://vegandevs.github.io/vegan/reference/metaMDS.html" class="external-link">vegan::metaMDS()</a></code>'s stress
 for the same configuration; when it has zeros, it is higher.</p>
 <p>SMACOF only finds a local minimum of stress. So:</p><ol><li><p>The first start is the PCoA solution, from <code><a href="pcoa.html">pcoa()</a></code>. (An axis without
 a positive eigenvalue gets small random coordinates instead.)</p></li>

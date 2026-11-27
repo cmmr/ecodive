@@ -85,8 +85,8 @@ mantel_regression(
 
   The number of permutations. Default: `999`. Alternatively, a matrix
   with one permutation of `1:n` per row, as from
-  `permute::shuffleSet()`, to use instead of random ones. Give `0` for
-  no p-values.
+  [`permute::shuffleSet()`](https://gavinsimpson.github.io/permute/reference/shuffleSet.html),
+  to use instead of random ones. Give `0` for no p-values.
 
 - backward:
 

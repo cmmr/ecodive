@@ -66,7 +66,7 @@ closely as possible, and reports how close the fit is: the Procrustes sum
 of squares, \(m^2\). Use it to ask how similar two pictures of the same
 samples are: the same samples under two beta diversity metrics, say, or
 from 16S and from shotgun metagenomics. Gives the same results as
-<code>vegan::procrustes()</code>. <code><a href="procrustes_test.html">procrustes_test()</a></code> tests whether the fit is better
+<code><a href="https://vegandevs.github.io/vegan/reference/procrustes.html" class="external-link">vegan::procrustes()</a></code>. <code><a href="procrustes_test.html">procrustes_test()</a></code> tests whether the fit is better
 than chance (PROTEST).</p>
     </div>
 
@@ -106,7 +106,7 @@ they must be in the same order.</p></dd>
 <dd><p>Which axes (columns) of <code>ord</code> and <code>target</code> to use: whole
 numbers, as in <code><a href="envfit.html">envfit()</a></code>. When one of the two has fewer columns
 than asked for, it is padded with columns of zeros, as in
-<code>vegan::procrustes()</code>. Default: <code>NULL</code>, the first
+<code><a href="https://vegandevs.github.io/vegan/reference/procrustes.html" class="external-link">vegan::procrustes()</a></code>. Default: <code>NULL</code>, the first
 <code>min(ncol(ord), ncol(target))</code> axes.</p></dd>
 
 
@@ -114,12 +114,12 @@ than asked for, it is padded with columns of zeros, as in
 <dd><p>Use the symmetric Procrustes statistic: scale both <code>ord</code>
 and <code>target</code> to unit sum of squares first, so that \(m^2\) is
 between 0 and 1 and is the same whichever of the two is rotated.
-As <code>vegan::procrustes()</code>'s <code>symmetric</code>. Default: <code>FALSE</code>.</p></dd>
+As <code><a href="https://vegandevs.github.io/vegan/reference/procrustes.html" class="external-link">vegan::procrustes()</a></code>'s <code>symmetric</code>. Default: <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-dilate">dilate<a class="anchor" aria-label="anchor" href="#arg-dilate"></a></dt>
 <dd><p>Allow a uniform dilation (scaling) of <code>ord</code>, as well as the
-rotation and reflection. <code>vegan::procrustes()</code>'s <code>scale</code>, renamed
+rotation and reflection. <code><a href="https://vegandevs.github.io/vegan/reference/procrustes.html" class="external-link">vegan::procrustes()</a></code>'s <code>scale</code>, renamed
 because <code>scale</code> means "standardise each feature" elsewhere in
 ecodive. Default: <code>TRUE</code>.</p></dd>
 
@@ -140,7 +140,7 @@ within any limits set on it. Results are the same for any <code>cpus</code>.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The rotated <code>ord</code>: a numeric matrix of class <code>ecodive_ord</code>, with
 one row per sample and one column per axis (named for <code>target</code>'s axes),
-as <code>vegan::procrustes()</code>'s <code>Yrot</code>. It is centred, and in <code>target</code>'s
+as <code><a href="https://vegandevs.github.io/vegan/reference/procrustes.html" class="external-link">vegan::procrustes()</a></code>'s <code>Yrot</code>. It is centred, and in <code>target</code>'s
 frame: <code>target</code>'s centred coordinates (scaled to unit sum of squares, if
 <code>symmetric</code>) are attribute <code>target</code>. Its attributes:</p><ul><li><p><code>method</code>: <code>'procrustes'</code>.</p></li>
 <li><p><code>eig</code>, <code>prop</code>: <code>NA</code> for each axis, as Procrustes rotation has no
@@ -157,7 +157,7 @@ each row of the uncentred <code>ord</code>) gives the fitted coordinates. Zero
 when <code>symmetric</code>, as both are centred first. vegan's <code>translation</code>.</p></li>
 <li><p><code>dilation</code>: The dilation factor applied to <code>ord</code>: 1 when <code>dilate = FALSE</code>. vegan's <code>scale</code>.</p></li>
 <li><p><code>residuals</code>: Each sample's distance between <code>target</code> and the rotated
-<code>ord</code>, as <code><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals()</a></code> of a <code>vegan::procrustes()</code> result.</p></li>
+<code>ord</code>, as <code><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals()</a></code> of a <code><a href="https://vegandevs.github.io/vegan/reference/procrustes.html" class="external-link">vegan::procrustes()</a></code> result.</p></li>
 <li><p><code>symmetric</code>: Whether the symmetric statistic was used.</p></li>
 <li><p><code>target</code>: <code>target</code>'s coordinates as fitted: centred, scaled to unit
 sum of squares if <code>symmetric</code>, and padded with zeros to the same
@@ -197,7 +197,7 @@ attributes. <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="
 place in <code>target</code> (see <code><a href="plot.ecodive_ord.html">plot.ecodive_ord()</a></code>); there is no <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code>
 method.</p></li>
 </ul><p><strong>Same names in other packages</strong></p>
-<p><code>vegan::procrustes()</code> takes its arguments the other way round (see
+<p><code><a href="https://vegandevs.github.io/vegan/reference/procrustes.html" class="external-link">vegan::procrustes()</a></code> takes its arguments the other way round (see
 above). When both packages are attached, the one attached last masks the
 other: call <code>ecodive::procrustes()</code> to be sure.</p>
     </div>

@@ -3,9 +3,10 @@
 Finds the subset of environmental variables whose distances among the
 samples best match the community distances: for each subset size, the
 subset with the highest (rank) correlation between its distances and
-`dm`. This is BIOENV (Clarke & Ainsworth 1993), as `vegan::bioenv()` and
-scikit-bio's `bioenv()` (QIIME 2's `diversity bioenv`) compute it, with
-the same results. Every subset is searched, in parallel C.
+`dm`. This is BIOENV (Clarke & Ainsworth 1993), as
+[`vegan::bioenv()`](https://vegandevs.github.io/vegan/reference/bioenv.html)
+and scikit-bio's `bioenv()` (QIIME 2's `diversity bioenv`) compute it,
+with the same results. Every subset is searched, in parallel C.
 
 ## Usage
 
@@ -72,18 +73,19 @@ bioenv(
 
 - max_vars:
 
-  The largest subset size to search, as `vegan::bioenv()`'s `upto`.
-  Default: `NULL`, every size up to the number of variables.
+  The largest subset size to search, as
+  [`vegan::bioenv()`](https://vegandevs.github.io/vegan/reference/bioenv.html)'s
+  `upto`. Default: `NULL`, every size up to the number of variables.
 
 - given:
 
   Distances whose effect is removed from each correlation, as
-  `vegan::bioenv()`'s `partial`: the partial correlation of `dm` and
-  each subset's distances, given these. A `dist` object or a symmetric
-  matrix, matched to `dm`'s samples by name when both have names;
-  numeric values, one per row of `data`, whose absolute differences are
-  the distances; or the name of a numeric column of `data`. Default:
-  `NULL`.
+  [`vegan::bioenv()`](https://vegandevs.github.io/vegan/reference/bioenv.html)'s
+  `partial`: the partial correlation of `dm` and each subset's
+  distances, given these. A `dist` object or a symmetric matrix, matched
+  to `dm`'s samples by name when both have names; numeric values, one
+  per row of `data`, whose absolute differences are the distances; or
+  the name of a numeric column of `data`. Default: `NULL`.
 
 - cpus:
 
@@ -96,7 +98,9 @@ bioenv(
 
 A data frame of class `c('ecodive_bioenv', 'data.frame')`, with one row
 per subset size, as [`summary()`](https://rdrr.io/r/base/summary.html)
-of `vegan::bioenv()` and scikit-bio's `bioenv()`:
+of
+[`vegan::bioenv()`](https://vegandevs.github.io/vegan/reference/bioenv.html)
+and scikit-bio's `bioenv()`:
 
 - `size`: The number of variables.
 
@@ -175,9 +179,9 @@ parallel. Results are identical for any number of `cpus`.
 
 **Same names in other packages**
 
-`vegan::bioenv()` has the same name. When both packages are attached,
-the one attached last masks the other; call `ecodive::bioenv()` to be
-sure.
+[`vegan::bioenv()`](https://vegandevs.github.io/vegan/reference/bioenv.html)
+has the same name. When both packages are attached, the one attached
+last masks the other; call `ecodive::bioenv()` to be sure.
 
 ## References
 

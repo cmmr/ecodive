@@ -56,10 +56,10 @@ Where:
 
 - \\F_2\\ : Number of features observed twice (doubletons).
 
-`vegan::estimateR()` and iNEXT multiply the bias-corrected term by
-\\(N - 1)/N\\, where \\N\\ is the number of observations, so their
-estimates are slightly smaller than these for shallow samples with
-singletons.
+[`vegan::estimateR()`](https://vegandevs.github.io/vegan/reference/specpool.html)
+and iNEXT multiply the bias-corrected term by \\(N - 1)/N\\, where \\N\\
+is the number of observations, so their estimates are slightly smaller
+than these for shallow samples with singletons.
 
 ecodive before version 2.4.0 used the classic form without the fallback,
 which gave `Inf` without doubletons and `NaN` without singletons and

@@ -55,7 +55,7 @@ as.matrix(x) or unclass(x) print it in full."><meta property="og:image" content=
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Print ecodive's results</h1>
-      <small class="dont-index">Source: <a href="https://github.com/cmmr/ecodive/blob/main/R/batch_correct.r" class="external-link"><code>R/batch_correct.r</code></a>, <a href="https://github.com/cmmr/ecodive/blob/main/R/community_types.r" class="external-link"><code>R/community_types.r</code></a>, <a href="https://github.com/cmmr/ecodive/blob/main/R/dbmem.r" class="external-link"><code>R/dbmem.r</code></a>, and 3 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/cmmr/ecodive/blob/main/R/batch_correct.r" class="external-link"><code>R/batch_correct.r</code></a>, <a href="https://github.com/cmmr/ecodive/blob/main/R/community_types.r" class="external-link"><code>R/community_types.r</code></a>, <a href="https://github.com/cmmr/ecodive/blob/main/R/dbmem.r" class="external-link"><code>R/dbmem.r</code></a>, and 4 more</small>
       <div class="d-none name"><code>print_ecodive.Rd</code></div>
     </div>
 
@@ -79,6 +79,9 @@ other attributes. The object itself is unchanged: <code>as.data.frame(x)</code>,
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, digits <span class="op">=</span> <span class="fl">3L</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'ecodive_dbmem'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, digits <span class="op">=</span> <span class="fl">3L</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'ecodive_hill_standardize'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, digits <span class="op">=</span> <span class="fl">3L</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'ecodive_ord'</span></span>
@@ -106,7 +109,9 @@ other attributes. The object itself is unchanged: <code>as.data.frame(x)</code>,
 matrix of class <code>ecodive_source</code> (from <code><a href="sourcetracker.html">sourcetracker()</a></code>), or a
 batch-corrected table of class <code>ecodive_batch</code> (from
 <code><a href="batch_mmuphin.html">batch_mmuphin()</a></code> or <code><a href="batch_combat.html">batch_combat()</a></code>), or Moran's eigenvector maps
-of class <code>ecodive_dbmem</code> (from <code><a href="dbmem.html">dbmem()</a></code>). A community-types result (see
+of class <code>ecodive_dbmem</code> (from <code><a href="dbmem.html">dbmem()</a></code>), or Hill numbers at a
+common coverage or depth, of class <code>ecodive_hill_standardize</code>
+(from <code><a href="hill_extrapolation.html">hill_standardize()</a></code>). A community-types result (see
 <a href="ecodive_types.html">ecodive_types</a>) prints its types and how their number was chosen
 before its first samples.</p></dd>
 
