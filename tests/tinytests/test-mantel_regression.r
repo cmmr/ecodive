@@ -340,4 +340,107 @@
   expect_error(mantel_regression(dm, a = dph, cpus = 0))
   expect_error(mantel_regression(dm ~ log(nope2), data = meta), 'Not found in `data`')
 
+
+  # Backward elimination. ====
+
+  set.seed(5)
+  noise <- lapply(1:3, function (i) dist(stats::setNames(rnorm(m), rownames(meta))))
+  names(noise) <- paste0('noise', 1:3)
+  all_terms <- c(list(ph = dph, temp = dtmp, soil = dsoil, geo = dgeo), noise)
+
+  bw <- do.call(mantel_regression, c(list(dm), all_terms, list(permutations = 99, backward = TRUE, seed = 7)))
+  el <- bw$elimination
+
+  expect_identical(names(bw), c(
+    'coefficients', 'r_squared', 'F', 'p_value', 'df', 'n_perm', 'method', 'n',
+    'permutation', 'alpha', 'elimination' ))
+  expect_identical(bw$alpha, 0.05)
+  expect_identical(names(el), c('step', 'term', 't', 'p_value', 'r_squared_before', 'r_squared_after'))
+  expect_true(nrow(el) >= 1)
+  expect_identical(el$step, seq_len(nrow(el)))
+  expect_true(all(bw$coefficients$p_value[-1] <= 0.05))
+  expect_true('ph' %in% bw$coefficients$term)
+  expect_identical(sort(c(bw$coefficients$term[-1], el$term)), sort(names(all_terms)))
+
+  # Each step: refit the terms left, with the same permutations; the term
+  # removed has the largest p-value (above alpha), and among ties the
+  # smallest |t|.
+  left <- names(all_terms)
+  for (k in seq_len(nrow(el))) {
+    fk <- do.call(mantel_regression, c(list(dm), all_terms[left], list(permutations = 99, seed = 7)))
+    cf <- fk$coefficients[-1, ]
+    info <- paste('step', k)
+    expect_identical(el$term[[k]], cf$term[order(-cf$p_value, abs(cf$t))[[1]]], info = info)
+    expect_true(el$p_value[[k]] > 0.05, info = info)
+    expect_identical(el$p_value[[k]], cf$p_value[cf$term == el$term[[k]]], info = info)
+    expect_identical(el$t[[k]], cf$t[cf$term == el$term[[k]]], info = info)
+    expect_identical(el$r_squared_before[[k]], fk$r_squared, info = info)
+    left <- setdiff(left, el$term[[k]])
+  }
+  expect_identical(el$r_squared_after[-nrow(el)], el$r_squared_before[-1])
+
+  # The final model is the plain fit of the terms left.
+  fin <- do.call(mantel_regression, c(list(dm), all_terms[left], list(permutations = 99, seed = 7)))
+  expect_identical(bw$coefficients, fin$coefficients)
+  expect_identical(bw$r_squared, fin$r_squared)
+  expect_identical(utils::tail(el$r_squared_after, 1), fin$r_squared)
+  expect_identical(attr(bw, 'f_perm'), attr(fin, 'f_perm'))
+  expect_identical(attr(bw, 't_perm'), attr(fin, 't_perm'))
+  expect_identical(bw[1:9], fin[1:9])
+
+  # A supplied matrix and strata are used at every step; any cpus.
+  pmat <- t(replicate(99, sample(m)))
+  b1 <- do.call(mantel_regression, c(list(dm), all_terms, list(permutations = pmat, backward = TRUE, alpha = 0.2, cpus = 1)))
+  for (cpus in if (at_home()) c(2, 3, 4, 8) else 2) {
+    b2 <- do.call(mantel_regression, c(list(dm), all_terms, list(permutations = pmat, backward = TRUE, alpha = 0.2, cpus = cpus)))
+    expect_identical(b2, b1, info = paste('cpus', cpus))
+  }
+  expect_identical(b1$alpha, 0.2)
+  expect_true(all(b1$coefficients$p_value[-1] <= 0.2))
+  bs <- mantel_regression(dm, ph = dph, temp = dtmp, soil = dsoil, data = meta, strata = 'blk',
+                          permutations = 99, backward = TRUE, seed = 3)
+  expect_identical(bs$permutation, 'within strata')
+
+  # Nothing to remove: the full model, and an empty table.
+  b0 <- mantel_regression(dm, ph = dph, permutations = 99, backward = TRUE)
+  expect_identical(b0[1:9], mantel_regression(dm, ph = dph, permutations = 99)[1:9])
+  expect_identical(nrow(b0$elimination), 0L)
+  expect_identical(names(b0$elimination), names(el))
+  expect_true(any(grepl('no term removed', capture.output(b0), fixed = TRUE)))
+
+  # Everything removed: the intercept alone, the mean distance.
+  ba <- mantel_regression(dm, n1 = noise$noise1, n2 = noise$noise2, permutations = 99,
+                          backward = TRUE, alpha = 0)
+  cf2 <- mantel_regression(dm, n1 = noise$noise1, n2 = noise$noise2, permutations = 99)$coefficients[-1, ]
+  expect_identical(ba$elimination$term, cf2$term[order(-cf2$p_value, abs(cf2$t))])
+  expect_identical(ba$coefficients$term, '(Intercept)')
+  expect_equal(ba$coefficients$estimate, mean(vec(dm)), tolerance = 1e-14)
+  fit0 <- summary(stats::lm(vec(dm) ~ 1))
+  expect_equal(ba$coefficients$t, unname(stats::coef(fit0)[1, 3]), tolerance = 1e-12)
+  expect_identical(ba$coefficients$p_value, 1)
+  expect_identical(ba$r_squared, 0)
+  expect_true(is.na(ba$F) && is.na(ba$p_value))
+  expect_identical(ba$df, c(0, m * (m - 1) / 2 - 1))
+  expect_identical(utils::tail(ba$elimination$r_squared_after, 1), 0)
+  expect_identical(dim(attr(ba, 't_perm')), c(99L, 1L))
+  expect_identical(length(attr(ba, 'f_perm')), 99L)
+  expect_true(any(grepl('R2 = 0, F = NA, p = NA', capture.output(ba), fixed = TRUE)))
+  grDevices::pdf(NULL)
+  expect_error(plot(ba), 'no terms to plot')
+  expect_true(drawn(bw))
+  grDevices::dev.off()
+
+  out <- capture.output(bw)
+  expect_true(any(grepl(sprintf('Backward elimination (alpha = 0.05): %d term', nrow(el)), out, fixed = TRUE)))
+  expect_true(any(grepl('r_squared_before', out, fixed = TRUE)))
+
+  # Without backward elimination, no such fields.
+  expect_false(any(c('alpha', 'elimination') %in% names(fin)))
+
+  expect_error(mantel_regression(dm, ph = dph, backward = 'yes'), '`backward` must be TRUE or FALSE')
+  expect_error(mantel_regression(dm, ph = dph, backward = NA), '`backward` must be TRUE or FALSE')
+  expect_error(mantel_regression(dm, ph = dph, alpha = 2), '`alpha` must be a single number')
+  expect_error(mantel_regression(dm, ph = dph, alpha = NA), '`alpha` must be a single number')
+  expect_error(mantel_regression(dm, ph = dph, backward = TRUE, permutations = 0), 'needs permutations')
+
 #})

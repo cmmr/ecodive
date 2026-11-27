@@ -59,6 +59,7 @@ same thing.
 | `n_resamples` | **(new, 2026-11-24)** an exact count of bootstrap resamples (`n_<unit>` rule) | `volatility`, `feature_volatility` |
 | `test_size` | **(new, 2026-11-26, item 63)** the fraction of samples held out of a model to measure its accuracy on (scikit-learn's and q2's `test_size`; `0`: none) | `feature_volatility` |
 | `rfe`, `rfe_step`, `rfe_folds` | **(new, 2026-11-26, item 63)** recursive feature elimination with cross-validation (scikit-learn's RFECV; q2's `optimize_feature_selection`): whether to run it, how many features to drop each round (a fraction below 1 or a count; q2's `step`), and its number of folds (q2's `cv`; not `n_folds`, which is the forest's own cross-validation) | `feature_volatility` |
+| `backward` | **(new, 2026-11-26, item 69 follow-up)** whether to simplify a regression model by backward elimination of terms (Lichstein 2007), with `alpha` as the level a term's p-value must reach to stay (as `forward_select()`'s `alpha` for adding one) | `mantel_regression` |
 | `fit` | **(new)** a fitted result given to a post-hoc test | planned `ancombc_*` |
 | `family`, `l1_ratio`, `lambda`, `n_lambdas`, `lambda_min_ratio` | **(new, 2026-11-19)** the outcome distribution (`'gaussian'`, `'binomial'`), elastic-net mixing (1 = lasso), and the penalty path | planned `coda_lasso`, `coda_lasso_pairwise` |
 | `n_folds`, `folds`, `select` | **(new)** cross-validation: a fold count or a per-sample fold vector (overrides `seed`), and which λ to report (`'min'`, `'1se'`) | `random_forest` (`n_folds`, `folds`; exists, 2026-11-25); planned `coda_lasso`, `coda_lasso_pairwise` |
@@ -200,8 +201,8 @@ don't** (layouts optimised in a fixed number of dimensions).
   names (2026-11-19), which users know from its documentation. None is a
   significance level, and `beta` is not beta diversity; the docs say so.
   The elastic-net mixing in `coda_lasso()` is `l1_ratio`, not glmnet's
-  `alpha`, because `alpha` is already a significance level in `ancom()`
-  and `forward_select()`.
+  `alpha`, because `alpha` is already a significance level in `ancom()`,
+  `forward_select()` and `mantel_regression()` (backward elimination).
 - **`envfit(na.rm =)`** keeps the dot, against the snake_case rule,
   because `na.rm` is base R's universal idiom.
 - **Wrapper selector names differ by design:** `beta_div(metric)`,
