@@ -499,3 +499,40 @@ Other decisions:
 - **pkgdown:** a "Depth and coverage" subtitle under Alpha Diversity with
   `hill_extrapolation`, its `plot()` and `rarefaction_curve` (which also
   stays under the tools section).
+
+
+## Outcome (from the implementing session's final report)
+
+Committed in c75ea2f (2026-11-27).
+
+- **Reference comparisons** (iNEXT 3.0.2): every size-based estimate,
+  coverage, asymptote and DataInfo value matches to ≤ 5e-14 on the spider,
+  ex_counts and edge tables, and ≤ 1.4e-11 at 30,000 reads; `estimateD()`
+  matches at 1e-10 (size base, and coverage base when extrapolating) and at
+  1e-5 when rarefying to a coverage (iNEXT's search error), 1e-14 at iNEXT's
+  own fractional depths. The exception is **Shannon diversity above a
+  sample's size** (Eq. 10c, as decided; 0.8% off iNEXT 3 at twice the size
+  for spider's Girdled). Bootstrap SEs with iNEXT's own draws through the
+  test hook: 1e-13 (size-based, coverage, asymptotes with iNEXT's fixed 100
+  replicates, `estimateD()`); at fixed coverage 1e-6. With ecodive's own
+  draws, SEs from 2,000 replicates are within 10% of iNEXT's.
+- **Tests:** 810 in test-hill_extrapolation.r plus 2 smoke tests; full
+  suite 36,295 at home and 528 in CRAN mode (baseline 35,483 and 526), all
+  ok; `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed
+  size, as before).
+- **Speed** (simulated 800-taxon samples of 30,000 reads, 4-core container):
+  2 samples with 50 replicates, iNEXT 54.7 s, ecodive 0.23 s on 1 thread
+  (≈ 240×), 0.09 s on 4; without a bootstrap 1.03 s vs 0.009 s. 300
+  samples with 50 replicates: 31.7 s on 1 thread, 10.9 s on 4 (iNEXT would
+  take ≈ 2 hours). `hill_standardize()` on 300 samples: 0.9 s.
+- **For item 48 (`alpha_test()`):** `hill_standardize()` returns a samples
+  × orders matrix (`q0`, `q1`, `q2`; class `ecodive_hill_standardize`, still
+  `is.matrix()`), rows named by sample, with `lower`/`upper`, `depth`,
+  `coverage`, `method`, `level` and `base` attributes; `unclass()` gives the
+  plain matrix, and empty samples are `NA` rows. The internal `hx_run()`
+  (R) and `C_hill_ext()` (C) take per-sample depths or coverage levels and
+  return estimates and bootstrap SDs, if alpha_test() needs per-sample
+  values at other levels.
+- **Open:** iNEXT 3's newer Shannon (and general-order) extrapolation, from
+  Chao et al. (2020, Ecological Research) Supporting Information, which
+  wasn't reachable; with that text, it is a small change in `hx_at()`.
