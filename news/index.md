@@ -1770,6 +1770,37 @@
   values, or the grid’s out-of-bag errors.
 
 - New
+  [`coda_lasso()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md)
+  and
+  [`coda_lasso_pairwise()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md):
+  penalized log-contrast regression, the compositional lasso. They
+  predict a measurement (gaussian) or one of two classes (binomial) from
+  a feature table and pick out a signature: the features whose weighted
+  log ratio predicts the outcome, with coefficients that sum to zero, so
+  the fit doesn’t depend on each sample’s total.
+  [`coda_lasso()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md)
+  ports zeroSum 2.0.7’s elastic net under the zero-sum constraint (MIT;
+  Altenbuchinger et al. 2017): its coordinate descent over pairs of
+  coefficients, lambda path and cross-validation, matching its
+  coefficients to its convergence tolerance and its cost to about 1e-10,
+  a little faster than zeroSum on one thread (gaussian fits use
+  covariance updates).
+  [`coda_lasso_pairwise()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md)
+  fits coda4microbiome 0.2.4’s model (MIT; Calle et al. 2023), an
+  elastic net on all pairwise log ratios with glmnet’s conventions
+  (standardization, the path and its early stop, cv.glmnet’s AUC or MSE
+  and the 1-SE rule), without forming the table of log ratios: it
+  reproduces coda_glmnet()’s lambda path, choice, selected taxa and
+  cross-validated AUC. Both take `l1_ratio` (the elastic-net mix),
+  `given` covariates (fitted unpenalized, or as an offset), `n_folds` or
+  `folds` (stratified by class for binomial), and thread over the folds,
+  the same for any `cpus`.
+  [`predict()`](https://rdrr.io/r/stats/predict.html) scores new
+  samples, and [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  draws the signature (the coefficients, and the score by outcome), the
+  coefficient path or the CV curve.
+
+- New
   [`moran_i()`](https://cmmr.github.io/ecodive/reference/moran_i.md):
   Moran’s I test of spatial autocorrelation, whether a variable (a
   taxon’s abundance, alpha diversity) is more alike at nearby sites,

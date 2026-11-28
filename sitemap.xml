@@ -62,6 +62,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/chisq_distance.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/chord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/clark.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/coda_lasso.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/composition_barplot.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/count_ord.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/count_ords.html</loc></url>
@@ -174,6 +175,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_batch.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_beta_partition.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_bioenv.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_coda_lasso.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_cross_assoc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_sensitivity.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.html</loc></url>
@@ -208,6 +210,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_zero_pattern.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot_longitudinal.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plsda.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/predict.ecodive_coda_lasso.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/predict.ecodive_random_forest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/principal_response_curves.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/print_ecodive.html</loc></url>

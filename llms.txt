@@ -65,7 +65,7 @@ especially with large datasets. `ecodive` addresses this by providing:
 | Community assembly |  | [`neutral_model()`](https://cmmr.github.io/ecodive/reference/neutral_model.md), [`mpd_ses()`](https://cmmr.github.io/ecodive/reference/mpd_ses.md) (NRI), [`mntd_ses()`](https://cmmr.github.io/ecodive/reference/mpd_ses.md) (NTI) |
 | Longitudinal |  | [`first_differences()`](https://cmmr.github.io/ecodive/reference/first_differences.md), [`first_distances()`](https://cmmr.github.io/ecodive/reference/first_distances.md), [`volatility()`](https://cmmr.github.io/ecodive/reference/volatility.md), [`nmit()`](https://cmmr.github.io/ecodive/reference/nmit.md), [`feature_volatility()`](https://cmmr.github.io/ecodive/reference/feature_volatility.md) |
 | Batch correction |  | [`batch_mmuphin()`](https://cmmr.github.io/ecodive/reference/batch_mmuphin.md), [`batch_combat()`](https://cmmr.github.io/ecodive/reference/batch_combat.md) |
-| Prediction |  | [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md) |
+| Prediction |  | [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md), [`coda_lasso()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md), [`coda_lasso_pairwise()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md) |
 | Plotting |  | [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of distance matrices, ordinations, tests, and the other results; [`composition_barplot()`](https://cmmr.github.io/ecodive/reference/composition_barplot.md), [`ternary_plot()`](https://cmmr.github.io/ecodive/reference/ternary_plot.md) |
 | Data preparation |  | [`rarefy()`](https://cmmr.github.io/ecodive/reference/rarefy.md), [`rarefaction_curve()`](https://cmmr.github.io/ecodive/reference/rarefaction_curve.md), [`normalize()`](https://cmmr.github.io/ecodive/reference/normalize.md), [`read_tree()`](https://cmmr.github.io/ecodive/reference/read_tree.md) |
 
@@ -914,7 +914,9 @@ table while keeping the effects of named covariates (MMUPHin, ComBat).
 Predict each sample’s class or a number from its features with a random
 forest (q2-sample-classifier’s workflow on scikit-learn’s trees), with
 cross-validated and out-of-bag accuracy, ROC curves and feature
-importances.
+importances; or with a compositional lasso (penalized log-contrast
+regression, zeroSum’s and coda4microbiome’s), which picks out the
+features whose log ratio predicts the outcome.
 
 - [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md)
   : Random forests
@@ -922,6 +924,15 @@ importances.
   : Predict with a random forest
 - [`plot(`*`<ecodive_random_forest>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_random_forest.md)
   : Plot a random forest
+- [`coda_lasso()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md)
+  [`coda_lasso_pairwise()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md)
+  : Compositional lasso: penalized log-contrast regression
+- [`predict(`*`<ecodive_coda_lasso>`*`)`](https://cmmr.github.io/ecodive/reference/predict.ecodive_coda_lasso.md)
+  [`predict(`*`<ecodive_coda_lasso_pairwise>`*`)`](https://cmmr.github.io/ecodive/reference/predict.ecodive_coda_lasso.md)
+  : Predictions from a compositional lasso
+- [`plot(`*`<ecodive_coda_lasso>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_coda_lasso.md)
+  [`plot(`*`<ecodive_coda_lasso_pairwise>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_coda_lasso.md)
+  : Plot a compositional lasso
 
 ## Ordination
 

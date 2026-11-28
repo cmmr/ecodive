@@ -116,6 +116,16 @@
   Moran's I and its spatial weights (moran_i()), ported from 'esda' and
   'libpysal'
 
+- **Thorsten Rehberg**. Contributor, copyright holder.  
+  the zero-sum elastic net (coda_lasso()), ported from 'zeroSum'
+
+- **Michael Altenbuchinger**. Contributor.  
+  co-author of 'zeroSum'
+
+- **coda4microbiome authors**. Contributor, copyright holder.  
+  the pairwise log-ratio elastic net (coda_lasso_pairwise()), following
+  'coda4microbiome'
+
 - **Campbell O. Webb**. Contributor, copyright holder.  
   phylocom's independent and trial swaps (mpd_ses(), mntd_ses())
 

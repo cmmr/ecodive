@@ -1320,7 +1320,7 @@
       </dl></div><div class="section level2">
       <h2 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a></h2>
 
-      <div class="section-desc"><p>Predict each sample’s class or a number from its features with a random forest (q2-sample-classifier’s workflow on scikit-learn’s trees), with cross-validated and out-of-bag accuracy, ROC curves and feature importances.</p></div>
+      <div class="section-desc"><p>Predict each sample’s class or a number from its features with a random forest (q2-sample-classifier’s workflow on scikit-learn’s trees), with cross-validated and out-of-bag accuracy, ROC curves and feature importances; or with a compositional lasso (penalized log-contrast regression, zeroSum’s and coda4microbiome’s), which picks out the features whose log ratio predicts the outcome.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -1347,6 +1347,27 @@
 
         </dt>
         <dd>Plot a random forest</dd>
+
+        <dt>
+
+          <code><a href="coda_lasso.html">coda_lasso()</a></code> <code><a href="coda_lasso.html">coda_lasso_pairwise()</a></code>
+
+        </dt>
+        <dd>Compositional lasso: penalized log-contrast regression</dd>
+
+        <dt>
+
+          <code><a href="predict.ecodive_coda_lasso.html">predict(<i>&lt;ecodive_coda_lasso&gt;</i>)</a></code> <code><a href="predict.ecodive_coda_lasso.html">predict(<i>&lt;ecodive_coda_lasso_pairwise&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predictions from a compositional lasso</dd>
+
+        <dt>
+
+          <code><a href="plot.ecodive_coda_lasso.html">plot(<i>&lt;ecodive_coda_lasso&gt;</i>)</a></code> <code><a href="plot.ecodive_coda_lasso.html">plot(<i>&lt;ecodive_coda_lasso_pairwise&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot a compositional lasso</dd>
       </dl></div><div class="section level2">
       <h2 id="ordination">Ordination<a class="anchor" aria-label="anchor" href="#ordination"></a></h2>
 

@@ -511,7 +511,9 @@ table while keeping the effects of named covariates (MMUPHin, ComBat).
 Predict each sample’s class or a number from its features with a random
 forest (q2-sample-classifier’s workflow on scikit-learn’s trees), with
 cross-validated and out-of-bag accuracy, ROC curves and feature
-importances.
+importances; or with a compositional lasso (penalized log-contrast
+regression, zeroSum’s and coda4microbiome’s), which picks out the
+features whose log ratio predicts the outcome.
 
 - [`random_forest()`](https://cmmr.github.io/ecodive/reference/random_forest.md)
   : Random forests
@@ -519,6 +521,15 @@ importances.
   : Predict with a random forest
 - [`plot(`*`<ecodive_random_forest>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_random_forest.md)
   : Plot a random forest
+- [`coda_lasso()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md)
+  [`coda_lasso_pairwise()`](https://cmmr.github.io/ecodive/reference/coda_lasso.md)
+  : Compositional lasso: penalized log-contrast regression
+- [`predict(`*`<ecodive_coda_lasso>`*`)`](https://cmmr.github.io/ecodive/reference/predict.ecodive_coda_lasso.md)
+  [`predict(`*`<ecodive_coda_lasso_pairwise>`*`)`](https://cmmr.github.io/ecodive/reference/predict.ecodive_coda_lasso.md)
+  : Predictions from a compositional lasso
+- [`plot(`*`<ecodive_coda_lasso>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_coda_lasso.md)
+  [`plot(`*`<ecodive_coda_lasso_pairwise>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_coda_lasso.md)
+  : Plot a compositional lasso
 
 ## Ordination
 
