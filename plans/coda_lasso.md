@@ -583,3 +583,58 @@ Decided while implementing (my judgement):
 - **Not done:** c-lasso and FLORAL cross-checks (the objective checks
   against zeroSum and glmnet and the pairwise/constrained equivalence test
   cover the same ground); Cox and multinomial families.
+
+
+## Outcome (from the implementing session's final report)
+
+Implemented in `1104dfd` on 2026-11-27/28.
+
+- **Files:** `src/coda_lasso.c` (the zeroSum port: pair moves, polish,
+  binomial approximation, CV weights and error; gradient shortcut and
+  gaussian covariance updates), `src/coda_lasso_pairwise.c` (coordinate
+  descent on pairwise log ratios without the pair matrix: strong rules, KKT
+  checks, IRLS, glmnet's early path stop), `R/coda_lasso.r` (both
+  functions, `predict()`, `print()`, `plot()` with `type = 'signature'`,
+  `'path'`, `'cv'`), `test-coda_lasso.r` (224 tests) and two smoke lines,
+  fixtures from `data-raw/expected/coda_lasso.r` (261 KB `.rds`).
+- **zeroSum 2.0.7** (6 cases on 40 x 30 plus 200 x 500 with 48% zeros;
+  gaussian and binomial, lasso and elastic net, standardize, covariates;
+  fixed lambda path and folds): costs agree to ~1e-11; coefficients to
+  zeroSum's convergence (largest difference 1.5e-3, binomial elastic net;
+  2e-4 gaussian; the objective is flat there); CV errors to ~1e-3; the
+  chosen lambda (min and zeroSum's 1se) identical; the default lambda path
+  to 4e-15. Without the constraint the same solver matches glmnet's lasso
+  to 1e-5.
+- **coda4microbiome 0.2.4 / cv.glmnet** (gaussian and binomial, with and
+  without covariates): lambda path (including early stops) to 1e-15, chosen
+  lambda (1se) identical, selected taxa identical, binomial apparent and CV
+  AUC (mean, SE) identical, CV curves to ~1e-2 (both at thresh 1e-7),
+  coefficients to ~6e-3 of the largest against glmnet at thresh 1e-14 at
+  the far end of the path (objectives to ~1e-9), predictions to ~2e-3.
+- **Equivalence:** `coda_lasso_pairwise(lambda = 2 l, l1_ratio = 1,
+  standardize = FALSE)` and `coda_lasso(lambda = l)` reach the same cost to
+  1e-7 and select the same taxa.
+- **Determinism:** `identical()` for `cpus` 1-4; sparse (slam, Matrix),
+  dense and `margin = 2` input identical. Valgrind: 0 errors.
+- **Speed** (4-core container): zeroSum's 200 x 500 case 5.4 s on one
+  thread vs zeroSum's 7.2 s (2.4 s vs 3.7 s on 4); 100 x 100, default path,
+  10 folds: gaussian 10.7 s vs 12.2 s, binomial ~10.5 s vs 10.1 s (4.0-4.2
+  s on 4 threads). Pairwise vs coda_glmnet() on 100 samples: 30 taxa 0.04
+  s vs 0.21 s (gaussian), 0.19 s vs 2.1 s (binomial); 100 taxa (4,950 pairs)
+  0.31 s vs 0.97 s and 0.52 s vs 2.0 s on one thread, 3x less on 4.
+- **Tests:** 35,709 at home and 528 in CRAN mode (35,483 and 526 at
+  b90c956). `R CMD check --no-manual --ignore-vignettes`: the existing NOTE
+  (installed size) only.
+- **Open issues:** c-lasso and FLORAL cross-checks not done; Cox and
+  multinomial families not done; binomial `coda_lasso()` is only on par
+  with zeroSum on one thread (its per-move exp() refresh, kept).
+- **For item 81 (ConQuR):** its "logistic lasso with CV" for presence is
+  `coda_lasso()`'s binomial solver without the constraint:
+  `ecodive:::cl_zerosum(L, y, Z, fold, K, binom = TRUE, alpha, lambda,
+  n_lambdas, lmr, standardize, select, tol, max_iters, cpus, zero_sum =
+  FALSE)` (or `C_coda_lasso` directly, with `u` = 1 and `zero_sum = 0`,
+  which uses zeroSum's single-coordinate `cdMove`; `v` = 0 leaves
+  covariates such as batch unpenalized). It returns the coefficient path,
+  intercepts, CV error/SD (deviance) and held-out linear predictors per
+  lambda, threaded over folds; folds from `rf_folds()`. A quantile lasso
+  would need a different loss (not here).
