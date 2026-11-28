@@ -74,12 +74,17 @@ ADIV_TSALLIS     <- 25L
 #' @param metric   The name of an alpha diversity metric. One of `c('ace',
 #'   'berger', 'brillouin', 'chao1', 'dominance', 'faith', 'fisher', 'gini',
 #'   'goods_coverage', 'heip', 'hill', 'inv_simpson', 'margalef',
-#'   'mcintosh', 'mcintosh_evenness', 'menhinick', 'observed', 'pielou',
-#'   'renyi', 'shannon', 'simpson', 'simpson_evenness', 'squares', 'strong',
-#'   'tsallis')`. Case-insensitive and partial name matching is supported,
+#'   'mcintosh', 'mcintosh_evenness', 'menhinick', 'mntd', 'mpd',
+#'   'observed', 'pielou', 'renyi', 'shannon', 'simpson',
+#'   'simpson_evenness', 'squares', 'strong', 'tsallis', 'weighted_mntd',
+#'   'weighted_mpd')`. Case-insensitive and partial name matching is supported,
 #'   as are scikit-bio's names (such as `'pielou_e'`, `'simpson_d'`,
 #'   `'observed_features'` and `'enspie'`). Programmatic access via
 #'   `list_metrics('alpha')`.
+#' 
+#' @param taxa_dm   For [mpd()], [mntd()], [weighted_mpd()] and
+#'   [weighted_mntd()] only: dissimilarities among the taxa, instead of
+#'   `tree` (see [mpd()]).
 #' 
 #' @return A numeric vector, one value per sample, named by the samples.
 #'   To compute several metrics, call `alpha_div()` once for each (see the
@@ -122,6 +127,7 @@ ADIV_TSALLIS     <- 25L
 #' * Simpson's and Strong's Dominance Indices
 #' * Gini Index
 #' * Faith's PD
+#' * MPD and MNTD, and their abundance-weighted forms
 #' 
 #' 
 #' ## Differences from scikit-bio
@@ -174,7 +180,8 @@ alpha_div <- function (
     margin = 1L,
     q      = 2,
     bias_corrected = TRUE,
-    cpus   = n_cpus() ) {
+    cpus   = n_cpus(),
+    taxa_dm = NULL ) {
   
   metric <- match_metric(metric, div = 'alpha')
   args   <- mget(metric$params, environment())

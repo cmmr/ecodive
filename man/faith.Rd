@@ -66,6 +66,8 @@ Faith, D. P. (1992). Conservation evaluation and phylogenetic diversity. \emph{B
 
 Other Phylogenetic metrics:
 \code{\link[=generalized_unifrac]{generalized_unifrac()}},
+\code{\link[=mpd]{mpd()}},
+\code{\link[=mpd_ses]{mpd_ses()}},
 \code{\link[=normalized_unifrac]{normalized_unifrac()}},
 \code{\link[=philr_distance]{philr_distance()}},
 \code{\link[=unweighted_unifrac]{unweighted_unifrac()}},

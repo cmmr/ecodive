@@ -101,6 +101,8 @@ Lozupone, C. A., Hamady, M., Kelley, S. T., & Knight, R. (2007). Quantitative an
 Other Phylogenetic metrics:
 \code{\link[=faith]{faith()}},
 \code{\link[=generalized_unifrac]{generalized_unifrac()}},
+\code{\link[=mpd]{mpd()}},
+\code{\link[=mpd_ses]{mpd_ses()}},
 \code{\link[=normalized_unifrac]{normalized_unifrac()}},
 \code{\link[=philr_distance]{philr_distance()}},
 \code{\link[=unweighted_unifrac]{unweighted_unifrac()}},

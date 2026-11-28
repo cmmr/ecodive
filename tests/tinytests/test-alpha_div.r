@@ -288,7 +288,7 @@
   expect_identical(goods_coverage(e)[[2]], 0)
   # An empty sample is NA for every metric.
   for (m in list_metrics('alpha', 'id'))
-    if (m != 'faith') expect_true(is.na(alpha_div(e, m)[[3]]), info = m)
+    if (!m %in% list_metrics('alpha', 'id', phylo = TRUE)) expect_true(is.na(alpha_div(e, m)[[3]]), info = m)
   # tsallis(q = Inf) is 0.
   expect_true(all(tsallis(x, q = Inf) == 0))
   # The Gini index changes with absent features; the others don't.

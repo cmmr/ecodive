@@ -38,6 +38,9 @@ extern SEXP C_da_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_batch_combat(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_batch_mmuphin(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_da_tests(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_hill_ext(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rng_binom(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_rng_multinom(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_indicator_species(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lefse_kw(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_lefse_columns(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -79,6 +82,7 @@ extern SEXP C_pca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_philr_coords(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_philr_stats(SEXP, SEXP, SEXP);
 extern SEXP C_philr_tree(SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_phylo_structure(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_proportionality(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_oplsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_plsda(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -173,6 +177,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_batch_combat",  (DL_FUNC) &C_batch_combat,  13},
   {"C_batch_mmuphin", (DL_FUNC) &C_batch_mmuphin, 11},
   {"C_da_tests",      (DL_FUNC) &C_da_tests,      7},
+  {"C_hill_ext",  (DL_FUNC) &C_hill_ext,  12},
+  {"C_rng_binom", (DL_FUNC) &C_rng_binom,  4},
+  {"C_rng_multinom", (DL_FUNC) &C_rng_multinom, 4},
   {"C_indicator_species", (DL_FUNC) &C_indicator_species, 13},
   {"C_lefse_kw",       (DL_FUNC) &C_lefse_kw,        6},
   {"C_lefse_columns",  (DL_FUNC) &C_lefse_columns,   5},
@@ -214,6 +221,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_philr_coords", (DL_FUNC) &C_philr_coords, 9},
   {"C_philr_stats",  (DL_FUNC) &C_philr_stats,  3},
   {"C_philr_tree",   (DL_FUNC) &C_philr_tree,   4},
+  {"C_phylo_structure", (DL_FUNC) &C_phylo_structure, 15},
   {"C_proportionality", (DL_FUNC) &C_proportionality, 8},
   {"C_oplsda",    (DL_FUNC) &C_oplsda,    8},
   {"C_plsda",     (DL_FUNC) &C_plsda,     8},

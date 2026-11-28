@@ -16,6 +16,8 @@ METRICS <- local({
     text             = "
       name,                                          id,                        phylo, weighted, int_only, true_metric, div,   alt_ids
       Abundance-based Coverage Estimator (ACE),      ace,                       NO,    YES,      YES,      NA,          alpha, 
+      Abundance-Weighted Mean Nearest Taxon Distance, weighted_mntd,            YES,   YES,      NO,       NA,          alpha, wmntd
+      Abundance-Weighted Mean Pairwise Distance,     weighted_mpd,              YES,   YES,      NO,       NA,          alpha, wmpd
       Aitchison Distance,                            aitchison,                 NO,    YES,      NO,       YES,         beta,  
       Alternative Gower Distance,                    alt_gower,                 NO,    YES,      NO,       NO,          beta,  altgower modifiedmeancharacterdifference
       Berger-Parker Index,                           berger,                    NO,    YES,      NO,       NA,          alpha, bergerparkerd
@@ -62,6 +64,8 @@ METRICS <- local({
       Matusita Distance,                             matusita,                  NO,    YES,      NO,       YES,         beta,  
       McIntosh Index,                                mcintosh,                  NO,    YES,      YES,      NA,          alpha, mcintoshd
       McIntosh's Evenness,                           mcintosh_evenness,         NO,    YES,      YES,      NA,          alpha, mcintoshe
+      Mean Nearest Taxon Distance (MNTD),            mntd,                      YES,   NO,       NO,       NA,          alpha, mnnd
+      Mean Pairwise Distance (MPD),                  mpd,                       YES,   NO,       NO,       NA,          alpha, 
       Menhinick's Richness Index,                    menhinick,                 NO,    YES,      YES,      NA,          alpha, 
       Minkowski Distance,                            minkowski,                 NO,    YES,      NO,       YES,         beta,  
       Morisita Dissimilarity,                        morisita,                  NO,    YES,      YES,      NO,          beta,  

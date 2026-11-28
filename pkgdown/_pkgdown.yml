@@ -45,6 +45,12 @@ reference:
   desc: Diversity based on phylogenetic branch lengths.
   contents:
   - faith
+- subtitle: Depth and coverage
+  desc: Diversity against sequencing depth and sample coverage. Rarefaction and extrapolation of Hill numbers (iNEXT), and every sample's Hill numbers at one common depth or coverage, to compare or test.
+  contents:
+  - hill_extrapolation
+  - plot.ecodive_hill_extrapolation
+  - rarefaction_curve
 
 - title: Beta Diversity
   desc: Calculate between-sample similarity or distance.
@@ -168,6 +174,11 @@ reference:
   contents:
   - neutral_model
   - plot.ecodive_neutral_model
+- subtitle: Phylogenetic community structure
+  desc: How closely related the taxa in each sample are along a phylogeny (mean pairwise and nearest taxon distances), and whether more or less than in random communities (NRI and NTI). See also Faith's PD, faith().
+  contents:
+  - mpd
+  - mpd_ses
 
 - title: Longitudinal
   desc: Repeated measures of the same subjects over time (q2-longitudinal). Each subject's change from one time point to the next or from a baseline, a control chart of a variable over time, distances between subjects in how their features vary together (NMIT, then tested with permanova()), and the features that change most predictably over time (feature volatility, with random_forest()).

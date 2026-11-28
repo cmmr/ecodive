@@ -36,7 +36,7 @@ with large datasets. `ecodive` addresses this by providing:
 
 | Task                     | Wrapper           | Functions                                                                                                                                                 |
 | :----------------------- | :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Alpha diversity          | `alpha_div()`     | `shannon()`, `simpson()`, `chao1()`, `faith()`, `pielou()`, `hill()`, and 19 more                                                                         |
+| Alpha diversity          | `alpha_div()`     | `shannon()`, `simpson()`, `chao1()`, `faith()`, `pielou()`, `hill()`, `mpd()`, `mntd()`, and 21 more; `hill_extrapolation()`, `hill_standardize()`       |
 | Beta diversity           | `beta_div()`      | `bray()`, `jaccard()`, `aitchison()`, `weighted_unifrac()`, and 51 more                                                                                   |
 | Ordination               | `dist_ord()`      | `pcoa()`, `mds()`, `nmds()`, `isomap()`, `tsne()`, `umap()`, `dbrda()`, `capscale()`, `capda()`                                                           |
 | Ordination of counts     | `count_ord()`     | `pca()`, `rpca()`, `rpca_phylo()`, `dpcoa()`, `rda()`, `cca()`, `ca()`, `lda()`, `plsda()`, `oplsda()`                                                    |
@@ -53,7 +53,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Community types          |                   | `enterotype()`, `valencia()`, `dmm()`                                                                                                                     |
 | Source tracking          |                   | `sourcetracker()`                                                                                                                                         |
 | Quality control          |                   | `decontam()`                                                                                                                                              |
-| Community assembly       |                   | `neutral_model()`                                                                                                                                         |
+| Community assembly       |                   | `neutral_model()`, `mpd_ses()` (NRI), `mntd_ses()` (NTI)                                                                                                  |
 | Longitudinal             |                   | `first_differences()`, `first_distances()`, `volatility()`, `nmit()`, `feature_volatility()`                                                              |
 | Batch correction         |                   | `batch_mmuphin()`, `batch_combat()`                                                                                                                       |
 | Prediction               |                   | `random_forest()`, `coda_lasso()`, `coda_lasso_pairwise()`                                                                                                |
