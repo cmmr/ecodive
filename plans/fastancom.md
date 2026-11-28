@@ -183,3 +183,144 @@ that couldn't be matched exactly). Glossary: `detect_rate`, `ref_rate`
   doi:10.1186/s13059-024-03390-9.
 - Pelto, J., et al. (2025). *Briefings in Bioinformatics*, 26(2),
   bbaf130. doi:10.1093/bib/bbaf130.
+
+
+## Decisions made while implementing (item 80, 2026-11-27)
+
+Asked of the user at the start:
+
+- **`pseudocount`:** `NULL`, the shared rule (nothing added to a zero-free
+  table, half the smallest non-zero value with a warning otherwise), not
+  fastANCOM's 0.5 (the user's choice; the plan's signature said 0.5).
+  `0` is allowed for a table without zeros, an error otherwise ("`counts`
+  has zeros, and `pseudocount = 0` leaves their logs undefined.").
+- **`p_adjust`:** `'holm'`, as ecodive's other DA methods (fastANCOM: BH).
+- **More than two levels:** implemented now (the user's choice), as
+  ecodive's own design, because fastANCOM 0.0.4's `global` and pairwise
+  paths fail on every input tried (character, factor, integer 0/1/2 and
+  1/2/3 `x`, named or not, `global` TRUE or FALSE, `zero_cut` 0.9 or 1:
+  "contrasts can be applied only to factors with 2 or more levels", "0
+  (non-NA) cases", "subscript out of bounds", "object 'res2' not found").
+  Its internal function (`.fANCOM`, named in a warning) is not in the
+  namespace, so it couldn't be observed without reading the source.
+- **Result layout:** a `covariate` column (the user's choice), as `linda()`:
+  one row per feature and comparison, feature-major.
+
+Settled from fastANCOM's outputs (the black-box protocol; probes in the
+session's scratch directory, not kept):
+
+- **Log base and pseudocount:** \eqn{\log_2(Y + \text{pseudo})}, the
+  pseudocount added to every value (zeros-only is off by 0.05 in β);
+  `pseudo = 0` is accepted on a zero-free table. Proportions are used as
+  given (plus 0.5). `x` is coded by `lm()`'s treatment contrasts (character
+  levels sorted, a factor's kept, logical FALSE first); a numeric `x` is
+  continuous. `Z` is a numeric vector or matrix (a data.frame errors).
+- **Marginal model:** OLS of each feature on \eqn{[1, x, Z]}; `marginal$cov`
+  is \eqn{c_{xx} E^\top E / (n - \mathrm{rank})} exactly.
+- **Joint (pairwise) tests:** `joint$beta[k, j]` \eqn{= \beta_k - \beta_j},
+  `se` \eqn{= \sqrt{C_{kk} + C_{jj} - 2 C_{kj}}}, `statistic` \eqn{= -|t|}.
+  W counts \eqn{p < \alpha} with **no row adjustment**, p from the **t
+  distribution** (not normal). The degrees of freedom are **\eqn{n - 2}
+  whatever the covariates** (W fits only \eqn{n - 2} on a 300-feature table
+  with 1, 2 or 3 numeric covariates, and a 3-level character `Z`); the
+  final p-values too. So with covariates fastANCOM's variances use \eqn{n -
+  p} and its tests \eqn{n - 2}: `fastancom()` uses \eqn{n - p} for both
+  (documented). Without covariates the two agree.
+- **Reference set:** the first `length(1:(ref.rate * K))` features of
+  `order(W)` (stable: ties in feature order). R's `:` adds a fuzz, so 0.29
+  × 100 = 28.999999999999996 gives 29, 19.95 gives 19, and anything below
+  1 gives 1 (with the warning "Only take ... components as reference!"
+  below 5, which `fastancom()` doesn't give). `log2FC` \eqn{= \beta_k -
+  \mathrm{mean}_R \beta}.
+- **Standard errors:** \eqn{\sqrt{C_{kk} + \sum_{R,R} C / m^2 - 2
+  \sum_R C_{k\cdot} / m}} with \eqn{m} = `ref.rate * K` (at least 1), not
+  the set's size: so they are the standard errors of `log2FC` only when
+  `ref.rate * K` is a whole number (or below 1). Found from a feature alone
+  in the reference set, whose SE grows as \eqn{(1 - 1/m)} with \eqn{m}.
+  **Not copied:** `fastancom()` divides by the size for both, so that `se`
+  is `log2_fc`'s standard error (documented); every fixture has a whole
+  `ref.rate * K` or one below 1. p-values: \eqn{2 F_t(-|t|, n - 2)}; q-values:
+  `p.adjust(, 'BH')` over the non-NaN p-values.
+- **Decisions** (`REJECT`): with `effect = FALSE`, fastANCOM returns
+  `detected` and `detect0.7` instead, which showed the rule:
+  - `detect0.7` is \eqn{W \ge 0.7 K}, with 0.7 fixed whatever
+    `detect.rate` (4,000 of 4,000 random tables);
+  - `detected` is the **original ANCOM's empirical cutoff** (Mandal et al.
+    2015, as its R code): \eqn{c_0 = \max W / K}, cutoffs \eqn{c_0 - (0.05,
+    \ldots, 0.25)}, proportions with \eqn{W \ge K c_i}, τ = 0.02, \eqn{\nu}
+    chosen among the **first four** cutoffs (scikit-bio's `ancom()`, which
+    ecodive's `ancom()` follows, picks among the last four), detected = W
+    at least the smallest \eqn{W \ge \nu K}; nothing for \eqn{K < 10} or
+    \eqn{c_0 < 0.26} (boundary between 46/177 = 0.2599, none, and 13/50 =
+    0.26, detected; 4,000 of 4,000);
+  - `REJECT` \eqn{= (W \ge \text{detect.rate} \cdot K) \lor (\text{detected}
+    \land W \ge K/2)} (5,500 of 5,500 random tables, `detect.rate` from 0.05
+    to 0.95). Not \eqn{W > \text{detect.rate}\,(K - 1)} as the plan guessed.
+  The rule is `fastancom_reject()`; the `cutoff` attribute is the smallest
+  W it rejects, \eqn{\min(aK, \max(\text{up}, K/2))}.
+
+Decided along the way:
+
+- **Signature:** `fastancom(counts, formula = NULL, data = NULL, groups =
+  NULL, margin = 1L, pseudocount = NULL, alpha = 0.05, detect_rate = 0.7,
+  ref_rate = 0.05, p_adjust = 'holm', cpus = n_cpus())`. `ref_rate` in (0,
+  0.5] (fastANCOM's docs: "between 0 and 0.5"); `detect_rate` and `alpha`
+  strictly in (0, 1). `groups` is required when `formula` has more than one
+  term. The model must have an intercept (`- 1` is an error), and a
+  rank-deficient design is an error (`da_design()`'s warning is turned into
+  one), as are \eqn{n \le p}, NA in `data` and single-level factors
+  (`da_design()`'s checks).
+- **Columns:** `feature, covariate, log2_fc, se, statistic, w, p_value,
+  p_adjusted, reject`; `statistic` added (t, or F for a global test).
+  Attributes: `method, formula, groups, design, alpha, detect_rate,
+  ref_rate, p_adjust, pseudocount, log_base` (2), `dof, cutoff` (per
+  comparison), `reference` (per comparison, feature names), `coef` (D × P,
+  fastANCOM's marginal β in column `x`), `mean` (mean log2 abundance, for
+  the MA plot).
+- **Comparisons for a factor of L > 2 levels:** first the global test (row
+  `covariate` = the term's name), then each level against the reference
+  (`'statusb'`), then each other pair (`'statusc - statusb'`). Global: the
+  F-test of the term's \eqn{q} coefficients on each log ratio, \eqn{F =
+  d^\top A d / (q s^2)} with \eqn{A = (\Lambda^\top (X^\top X)^{-1}
+  \Lambda)^{-1}}; without covariates its W is `ancom(sig_test = 'anova',
+  p_adjust = 'none')`'s, as the two-group W is. Its effect row has
+  `log2_fc` and `se` NaN, and the F-test of the feature against the
+  reference set's mean coefficients as `statistic` / `p_value`. Pairs are
+  contrasts in the full model (variance from all samples), not refits on
+  the two groups' samples (which is probably what fastANCOM intended,
+  judging from its "0 (non-NA) cases" error). Each comparison has its own W,
+  reference set and decisions. A non-factor term of several columns
+  (`poly(t, 2)`) gets the global test only.
+- **C (`src/fastancom.c`):** three phases, each dealt to threads in turn:
+  (1) per feature, `log2(x + pc)`, the fit with `feature_lm.c`'s QR (one
+  decomposition, shared read-only) and its residuals (new `flm_resid()`,
+  factored out of `flm_se()` with the same arithmetic), and each
+  comparison's contrasts; (2) per row k of the pair triangle, \eqn{\lVert e_k
+  - e_j \rVert^2} and every comparison's F, counted against the critical
+  value `qf(1 - alpha, q, n - p)` (equivalent to \eqn{p < \alpha}) into
+  per-thread integer counts summed afterwards; (3) per comparison, the
+  reference set by a stable counting sort of W and its mean residuals (on
+  the main thread, fixed order), then per feature the effect, SE and
+  statistic. No \eqn{K \times K} matrix: memory is the n × K residuals.
+  Results identical for any `cpus` (checked 1-8), dense, `Matrix`, `slam`
+  and `margin = 2`.
+- **Exact zero variance:** a feature whose log values are all equal gets
+  coefficients (its value, 0, ...) and residuals of exactly 0, so two such
+  features' log ratio has no test (0/0, not counted), as `ancom()`'s
+  constant log ratios. A log ratio with zero residual and a non-zero
+  difference has F = ∞ (counted).
+- **No warning** for a small reference set (fastANCOM warns below 5).
+- **Plots:** `plot.ecodive_fastancom(x, covariate, type = c('w', 'volcano',
+  'ma', 'forest', 'rank'), ...)`: `'w'` is `plot_ranked()` (ancom's dot
+  chart) titled "W of fastANCOM" with the `cutoff` line; the others are
+  `da_plot()`'s ("Volcano plot of fastANCOM"). The default comparison is
+  the global test when there is one. A global test has no fold changes:
+  only `'w'`.
+- **`da_sensitivity()`** works unchanged (the comparisons are its
+  covariates); its docs list `fastancom`.
+- **Fixtures** (`data-raw/expected/fastancom.r`): the manual's example, a
+  numeric `x`, two groups with a numeric covariate (with
+  `joint$statistic`, so the tests count W on \eqn{n - p}), zeros with other
+  `sig`/`detect.rate`/`ref.rate`, `pseudo = 1`, `pseudo = 0`, proportions,
+  8 features, `ref.rate = 0.29` (the `:` fuzz) and W ties; and 600 random
+  tables' W, `detected` and `REJECT` for the rules.

@@ -271,6 +271,7 @@ void   flm_fit(const flm_t *q, const double *y, double *qty, double *coef,
                double *rss);
 void   flm_se(const flm_t *q, const double *y, const double *qty, double rss,
               int se_type, double *se, double *resid);
+void   flm_resid(const flm_t *q, const double *qty, double *resid);
 
 /* --- feature_lmm.c: REML random-intercept models for many responses --- */
 typedef struct {

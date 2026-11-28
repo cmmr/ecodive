@@ -16,8 +16,8 @@
 #'
 #' @param method   The name of a DA method, as for [da_test()]: `"ancom"`,
 #'        `"ancombc"`, `"ancombc2"`, `"da_lm"`, `"da_ttest"`,
-#'        `"da_wilcoxon"`, `"dirmult_lm"`, `"dirmult_ttest"`, or `"linda"`. Flexible
-#'        matching is supported.
+#'        `"da_wilcoxon"`, `"dirmult_lm"`, `"dirmult_ttest"`, `"fastancom"`, or
+#'        `"linda"`. Flexible matching is supported.
 #'
 #' @param ...   The base run: everything [da_test()] takes after `method`
 #'        (`groups`, `data`, `formula`) and the method's own arguments
@@ -54,7 +54,8 @@
 #'
 #'   * `feature`: the feature's name, as in the method's result.
 #'   * `covariate`: for the model methods ([ancombc()], [ancombc2()],
-#'     [da_lm()], [dirmult_lm()], [linda()]), the column of the design; every covariate but the
+#'     [da_lm()], [dirmult_lm()], [fastancom()], [linda()]), the column of the
+#'     design (for [fastancom()], the comparison); every covariate but the
 #'     intercept is kept. `NA` for the group methods.
 #'   * `run`: the run's number, `0` for the base run.
 #'   * `parameter`: what the run changed: `'base'`, `'pseudocount'`,
@@ -120,7 +121,7 @@
 #' **What each setting means.**
 #'
 #' * `pseudocounts`: what `pseudocount` means differs by method. For
-#'   [ancom()], [da_wilcoxon()], [da_ttest()] and [da_lm()] it is added to
+#'   [ancom()], [fastancom()], [da_wilcoxon()], [da_ttest()] and [da_lm()] it is added to
 #'   every value before the logs, to patch the zeros (for the last three,
 #'   only with `norm = 'clr'` or `'log'`, the norms that take logs). For
 #'   [ancombc()]

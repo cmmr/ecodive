@@ -295,6 +295,9 @@
   z <- maaslin3(cz, ~ grp + x, meta, n_sims = 200L, cpus = cpus)
   expect_true(inherits(z, 'ecodive_maaslin3') && nrow(z) == 24L && !anyNA(z$reject) && identical(attr(z, 'method'), 'maaslin3'))
   expect_true(all(z$p_value >= 0 & z$p_value <= 1, na.rm = TRUE) && any(is.finite(z$coef_abundance)))
+  z <- suppressWarnings(fastancom(cz, ~ grp + x, meta, groups = 'grp', cpus = cpus))
+  expect_true(inherits(z, 'ecodive_fastancom') && nrow(z) == 12L && identical(attr(z, 'method'), 'fastancom'))
+  expect_true(all(is.finite(z$log2_fc)) && all(z$w >= 0L & z$w <= 11L) && is.logical(z$reject) && !anyNA(z$reject))
   expect_true(is.data.frame(list_da_tests()) && 'da_ttest' %in% list_da_tests('id'))
   expect_identical(match_da_test('Mann-Whitney')$id, 'da_wilcoxon')
   z <- da_sensitivity(counts, 'da_ttest', 'grp', meta, pseudocounts = TRUE, cpus = cpus)
@@ -529,6 +532,8 @@
   expect_true(drawn(da_ttest(counts, 'grp', meta, cpus = cpus)))
   expect_true(drawn(da_lm(counts, ~ grp + x, meta, cpus = cpus)))
   expect_true(drawn(linda(counts, ~ grp + x, meta, cpus = cpus)))
+  expect_true(drawn(fastancom(counts, ~ grp + x, meta, groups = 'grp', cpus = cpus)))
+  expect_true(drawn(fastancom(counts, 'grp', meta, cpus = cpus), type = 'volcano'))
   expect_true(drawn(maaslin3(cz, ~ grp + x, meta, n_sims = 200L, cpus = cpus)))
   for (nm in names(tests)) {
     expect_true(drawn(tests[[nm]]), info = nm)

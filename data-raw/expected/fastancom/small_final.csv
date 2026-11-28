@@ -1,0 +1,9 @@
+"feature","beta","log2FC","SD","pval","qval","W","REJECT"
+"F01","0x1.c3515a2bbec72p+0","0x1.c1ca2c2632534p+0","0x1.303cd98336082p-3","0x1.67732e069f798p-22","0x1.3a84c845cb8a5p-19",7,TRUE
+"F02","0x1.4f0a9e5ea59b8p+0","0x1.4d8370591927ap+0","0x1.49c03170a1c3dp-3","0x1.65acc12aeb5c1p-17","0x1.38f729058df09p-15",7,TRUE
+"F03","-0x1.4b1bf1d61bddap-3","-0x1.575562027f7cbp-3","0x1.33394a7c2febfp-3","0x1.28da207e7ff2dp-2","0x1.98962f6accd51p-2",3,FALSE
+"F04","0x1.872e058c73e2bp-8","0x0p+0","0x0p+0","NaN","NaN",2,FALSE
+"F05","-0x1.82caf720f7e86p-3","-0x1.8f04674d5b877p-3","0x1.8ffc16cb2744ap-3","0x1.5e37965b8affcp-2","0x1.98962f6accd51p-2",3,FALSE
+"F06","-0x1.0f8ae176c1e78p-2","-0x1.15a7998cf3b71p-2","0x1.939c9da8fc4f4p-3","0x1.9757b2daa3279p-3","0x1.646cbc7f4ec2ap-2",3,FALSE
+"F07","-0x1.15e9397691f25p-3","-0x1.2222a9a2f5916p-3","0x1.76bef6c069927p-3","0x1.d3ad3acc35472p-2","0x1.d3ad3acc35472p-2",2,FALSE
+"F08","0x1.430ae142dbf12p-2","0x1.3cee292caa219p-2","0x1.61e4df48755e1p-3","0x1.a81ab7cfffdabp-4","0x1.eec9d672aa7f3p-3",5,TRUE

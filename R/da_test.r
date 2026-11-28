@@ -47,6 +47,7 @@ DA_TESTS <- local({
       Wilcoxon Rank-Sum Test,                  da_wilcoxon,   groups,  median_diff, norm, TRUE,         TRUE,   wilcoxon wilcox wilcoxontest mannwhitney mannwhitneyu ranksum
       Welch t-test,                            da_ttest,      groups,  diff,        norm, TRUE,         TRUE,   ttest welch studentttest
       Linear Model,                            da_lm,         formula, estimate,    norm, TRUE,         TRUE,   lm linearregression ols
+      fastANCOM,                               fastancom,     formula, log2_fc,     2,    TRUE,         TRUE,
       LinDA,                                   linda,         formula, log2_fc,     2,    TRUE,         TRUE,
       MaAsLin 3,                               maaslin3,      formula, coef_abundance, 2, FALSE,        TRUE,   maaslin
       LEfSe,                                   lefse,         groups,  lda_score,   ,     TRUE,         FALSE,  lefser
@@ -75,8 +76,8 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #'
 #' @param method   The name of a DA method: `"ancom"`, `"ancombc"`,
 #'        `"ancombc2"`, `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`,
-#'        `"dirmult_lm"`, `"dirmult_ttest"`, `"indicator_species"`, `"lefse"`,
-#'        `"linda"`, or `"maaslin3"`. Flexible matching is supported
+#'        `"dirmult_lm"`, `"dirmult_ttest"`, `"fastancom"`,
+#'        `"indicator_species"`, `"lefse"`, `"linda"`, or `"maaslin3"`. Flexible matching is supported
 #'        (see below). Programmatic access via `list_da_tests()`.
 #'
 #' @param groups  The grouping to compare: the name of a column of `data`,
@@ -98,8 +99,8 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #'        [da_wilcoxon()], [dirmult_ttest()]), `norm` and `pseudocount`. Each
 #'        method keeps its own defaults; see [ancom()], [ancombc()],
 #'        [ancombc2()], [da_lm()], [da_ttest()], [da_wilcoxon()],
-#'        [dirmult_lm()], [dirmult_ttest()], [indicator_species()], [lefse()],
-#'        [linda()], and [maaslin3()]. `seed` is ignored by the methods that
+#'        [dirmult_lm()], [dirmult_ttest()], [fastancom()],
+#'        [indicator_species()], [lefse()], [linda()], and [maaslin3()]. `seed` is ignored by the methods that
 #'        have no random parts (all but [dirmult_lm()], [dirmult_ttest()],
 #'        [indicator_species()], [lefse()] and [maaslin3()]).
 #'
@@ -122,6 +123,7 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #' | `da_wilcoxon`          | Wilcoxon rank-sum test per feature     | groups  |
 #' | `dirmult_lm`           | Dirichlet-multinomial linear model with a scale model (ALDEx3) | formula |
 #' | `dirmult_ttest`        | Dirichlet-multinomial t-test (ALDEx2-style) | groups |
+#' | `fastancom`            | ANCOM from marginal models, with log fold changes (fastANCOM) | formula |
 #' | `indicator_species`    | Indicator species analysis (IndVal, multilevel pattern analysis) | groups |
 #' | `lefse`                | LDA effect size (LEfSe)                | groups  |
 #' | `linda`                | Linear models for differential abundance (LinDA) | formula |
@@ -186,7 +188,7 @@ DA_DIGIT_ALIASES <- c(aldex3 = 'dirmult_lm')
 #' \doi{10.1093/bib/bbaf130}
 #'
 #' @seealso [ancom()], [ancombc()], [da_lm()], [da_ttest()],
-#'   [da_wilcoxon()], [dirmult_lm()], [dirmult_ttest()], [indicator_species()], [lefse()], [linda()], [maaslin3()], [list_da_tests()];
+#'   [da_wilcoxon()], [dirmult_lm()], [dirmult_ttest()], [fastancom()], [indicator_species()], [lefse()], [linda()], [maaslin3()], [list_da_tests()];
 #'   [replace_zeros()] for the zeros; [da_sensitivity()] to rerun a method
 #'   over pseudocounts, zero replacements and scale uncertainties.
 #'

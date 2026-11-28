@@ -130,6 +130,7 @@ reference:
   - ancombc
   - ancombc_global
   - structural_zeros
+  - fastancom
   - dirmult_ttest
   - dirmult_lm
   - da_wilcoxon
@@ -271,6 +272,7 @@ reference:
   - plot.ecodive_dirmult_lm
   - plot.ecodive_ancom
   - plot.ecodive_ancombc
+  - plot.ecodive_fastancom
   - plot.ecodive_da_ttest
   - plot.ecodive_linda
   - plot.ecodive_maaslin3

@@ -222,6 +222,28 @@ void flm_fit(const flm_t *q, const double *y, double *qty, double *coef, double 
 
 
 //======================================================
+// The residuals (n): Q (0, (Q'y)[rank + 1:n]), from flm_fit()'s
+// Q'y. Uses no scratch, so worker threads can share `q`.
+//======================================================
+void flm_resid(const flm_t *q, const double *qty, double *resid) {
+
+  int n = q->n, rank = q->rank;
+
+  for (int i = 0; i < n; i++) resid[i] = i < rank ? 0 : qty[i];
+  for (int r = rank - 1; r >= 0; r--) {
+    if (q->qraux[r] == 0) continue;
+    const double *u = q->a + (size_t) n * r;
+    long double d = (long double) q->qraux[r] * resid[r];
+    for (int i = r + 1; i < n; i++) d += (long double) u[i] * resid[i];
+    double t = (double) (-d / q->qraux[r]);
+    resid[r] += t * q->qraux[r];
+    for (int i = r + 1; i < n; i++) resid[i] += t * u[i];
+  }
+}
+
+
+
+//======================================================
 // Standard errors (p, NaN where aliased or without
 // residual degrees of freedom): se_type 0 classical,
 // 1 HC0, 2 HC3 (these need q1). `resid` (n) gets the
@@ -248,17 +270,7 @@ void flm_se(
     return;
   }
 
-  // Residuals: Q (0, (Q'y)[rank + 1:n]).
-  for (int i = 0; i < n; i++) resid[i] = i < rank ? 0 : qty[i];
-  for (int r = rank - 1; r >= 0; r--) {
-    if (q->qraux[r] == 0) continue;
-    const double *u = q->a + (size_t) n * r;
-    long double d = (long double) q->qraux[r] * resid[r];
-    for (int i = r + 1; i < n; i++) d += (long double) u[i] * resid[i];
-    double t = (double) (-d / q->qraux[r]);
-    resid[r] += t * q->qraux[r];
-    for (int i = r + 1; i < n; i++) resid[i] += t * u[i];
-  }
+  flm_resid(q, qty, resid);
 
   // Var(b_k) = sum_j A_kj^2 w_j, A = R^-1 Q1'.
   for (int k = 0; k < rank; k++) {

@@ -21,8 +21,8 @@ Types}.}
 
 \item{method}{The name of a DA method, as for \code{\link[=da_test]{da_test()}}: \code{"ancom"},
 \code{"ancombc"}, \code{"ancombc2"}, \code{"da_lm"}, \code{"da_ttest"},
-\code{"da_wilcoxon"}, \code{"dirmult_lm"}, \code{"dirmult_ttest"}, or \code{"linda"}. Flexible
-matching is supported.}
+\code{"da_wilcoxon"}, \code{"dirmult_lm"}, \code{"dirmult_ttest"}, \code{"fastancom"}, or
+\code{"linda"}. Flexible matching is supported.}
 
 \item{...}{The base run: everything \code{\link[=da_test]{da_test()}} takes after \code{method}
 (\code{groups}, \code{data}, \code{formula}) and the method's own arguments
@@ -59,7 +59,8 @@ methods) and run, with columns:
 \itemize{
 \item \code{feature}: the feature's name, as in the method's result.
 \item \code{covariate}: for the model methods (\code{\link[=ancombc]{ancombc()}}, \code{\link[=ancombc2]{ancombc2()}},
-\code{\link[=da_lm]{da_lm()}}, \code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=linda]{linda()}}), the column of the design; every covariate but the
+\code{\link[=da_lm]{da_lm()}}, \code{\link[=dirmult_lm]{dirmult_lm()}}, \code{\link[=fastancom]{fastancom()}}, \code{\link[=linda]{linda()}}), the column of the
+design (for \code{\link[=fastancom]{fastancom()}}, the comparison); every covariate but the
 intercept is kept. \code{NA} for the group methods.
 \item \code{run}: the run's number, \code{0} for the base run.
 \item \code{parameter}: what the run changed: \code{'base'}, \code{'pseudocount'},
@@ -131,7 +132,7 @@ run already gave them.
 \strong{What each setting means.}
 \itemize{
 \item \code{pseudocounts}: what \code{pseudocount} means differs by method. For
-\code{\link[=ancom]{ancom()}}, \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=da_ttest]{da_ttest()}} and \code{\link[=da_lm]{da_lm()}} it is added to
+\code{\link[=ancom]{ancom()}}, \code{\link[=fastancom]{fastancom()}}, \code{\link[=da_wilcoxon]{da_wilcoxon()}}, \code{\link[=da_ttest]{da_ttest()}} and \code{\link[=da_lm]{da_lm()}} it is added to
 every value before the logs, to patch the zeros (for the last three,
 only with \code{norm = 'clr'} or \code{'log'}, the norms that take logs). For
 \code{\link[=ancombc]{ancombc()}}

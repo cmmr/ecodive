@@ -293,6 +293,7 @@ print_df_label <- function (x) {
     ecodive_da_ttest      = ,
     ecodive_da_lm         = ,
     ecodive_dirmult_lm    = ,
+    ecodive_fastancom     = ,
     ecodive_linda         = ,
     ecodive_maaslin3      = {
       # Subsetting rows with `[` drops the `method` attribute.
@@ -377,6 +378,8 @@ print.ecodive_da_lm            <- print_table_result
 print.ecodive_lefse            <- print_table_result
 #' @export
 print.ecodive_indicator_species <- print_table_result
+#' @export
+print.ecodive_fastancom        <- print_table_result
 #' @export
 print.ecodive_linda            <- print_table_result
 #' @export
