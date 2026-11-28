@@ -558,6 +558,17 @@
 
 
 
+  # Prediction: compositional lasso. ====
+
+  cl <- coda_lasso(counts, 'x', meta, n_folds = 3, cpus = cpus)
+  expect_true(inherits(cl, 'ecodive_coda_lasso') && nrow(cl) == 12L &&
+              abs(sum(cl$coefficient)) < 1e-8 && all(is.finite(predict(cl, counts))))
+  cl <- coda_lasso_pairwise(counts, 'x', meta, n_folds = 3, cpus = cpus)
+  expect_true(inherits(cl, 'ecodive_coda_lasso_pairwise') && nrow(cl) == 12L &&
+              abs(sum(cl$coefficient)) < 1e-8 && all(is.finite(predict(cl, counts))))
+
+
+
   # Spatial: Moran's eigenvector maps. ====
 
   mem <- dbmem(data.frame(row.names = rownames(counts), x = meta$x, y = rep(0:1, 10)), cpus = cpus)

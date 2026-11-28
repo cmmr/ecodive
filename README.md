@@ -56,7 +56,7 @@ with large datasets. `ecodive` addresses this by providing:
 | Community assembly       |                   | `neutral_model()`                                                                                                                                         |
 | Longitudinal             |                   | `first_differences()`, `first_distances()`, `volatility()`, `nmit()`, `feature_volatility()`                                                              |
 | Batch correction         |                   | `batch_mmuphin()`, `batch_combat()`                                                                                                                       |
-| Prediction               |                   | `random_forest()`                                                                                                                                         |
+| Prediction               |                   | `random_forest()`, `coda_lasso()`, `coda_lasso_pairwise()`                                                                                                |
 | Plotting                 |                   | `plot()` of distance matrices, ordinations, tests, and the other results; `composition_barplot()`, `ternary_plot()`                                       |
 | Data preparation         |                   | `rarefy()`, `rarefaction_curve()`, `normalize()`, `read_tree()`                                                                                           |
 

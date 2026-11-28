@@ -129,6 +129,18 @@ Authors@R: c(
       role    = c("ctb", "cph"),
       comment = "Moran's I and its spatial weights (moran_i()), ported from 'esda' and 'libpysal'"),
     person(
+      "Thorsten", "Rehberg",
+      role    = c("ctb", "cph"),
+      comment = "the zero-sum elastic net (coda_lasso()), ported from 'zeroSum'"),
+    person(
+      "Michael", "Altenbuchinger",
+      role    = "ctb",
+      comment = "co-author of 'zeroSum'"),
+    person(
+      "coda4microbiome authors",
+      role    = c("ctb", "cph"),
+      comment = "the pairwise log-ratio elastic net (coda_lasso_pairwise()), following 'coda4microbiome'"),
+    person(
       "Alkek Center for Metagenomics and Microbiome Research", 
       role = c("cph", "fnd") ))
 Description: Computes alpha and beta diversity metrics in a parallel,

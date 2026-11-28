@@ -24,6 +24,8 @@ extern SEXP C_blas_settable(void);
 extern SEXP C_blas_threads(SEXP);
 extern SEXP C_capda_trace(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cca(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_coda_lasso(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP C_coda_lasso_pairwise(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_cpu_info(SEXP);
 extern SEXP C_comp_bar_means(SEXP, SEXP, SEXP);
 extern SEXP C_comp_bar_segments(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -157,6 +159,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_blas_threads",  (DL_FUNC) &C_blas_threads,  1},
   {"C_capda_trace", (DL_FUNC) &C_capda_trace, 6},
   {"C_cca",       (DL_FUNC) &C_cca,      10},
+  {"C_coda_lasso", (DL_FUNC) &C_coda_lasso, 15},
+  {"C_coda_lasso_pairwise", (DL_FUNC) &C_coda_lasso_pairwise, 13},
   {"C_cpu_info",  (DL_FUNC) &C_cpu_info,  1},
   {"C_comp_bar_means",    (DL_FUNC) &C_comp_bar_means,     3},
   {"C_comp_bar_segments", (DL_FUNC) &C_comp_bar_segments, 10},

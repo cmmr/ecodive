@@ -2075,3 +2075,72 @@ License:
    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Files: src/coda_lasso.c R/coda_lasso.r
+Copyright: 2019 Thorsten Rehberg
+Comment: coda_lasso() ports zeroSum 2.0.7 (github.com/rehbergT/zeroSum, MIT):
+   the coordinate descent over pairs of coefficients, the intercept moves,
+   the local-search polish, the quadratic approximation of the binomial
+   likelihood, the cost function and the cross-validation weights and error
+   (src/zeroSumCoordinateDescent.cpp, zeroSumMoves.cpp,
+   zeroSumApproximation.cpp, zeroSumCostFunction.cpp, zeroSumUtils.cpp,
+   zeroSumCV.cpp), and its lambda path, lambdaMax and lambda choices
+   (R/regressionObject.R, R/zeroSumObject.R, src/CallWrapper.cpp),
+   restructured for ecodive (see plans/coda_lasso.md). The rest of these
+   files is Copyright 2026 ecodive authors, under the MIT license above.
+License:
+   MIT License
+
+   Copyright (c) 2019 Thorsten Rehberg
+
+   Permission is hereby granted, free of charge, to any person obtaining a
+   copy of this software and associated documentation files (the
+   "Software"), to deal in the Software without restriction, including
+   without limitation the rights to use, copy, modify, merge, publish,
+   distribute, sublicense, and/or sell copies of the Software, and to permit
+   persons to whom the Software is furnished to do so, subject to the
+   following conditions:
+
+   The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+   NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+   USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+Files: R/coda_lasso.r
+Copyright: 2022 coda4microbiome authors
+Comment: coda_lasso_pairwise() follows coda_glmnet() in coda4microbiome 0.2.4
+   (CRAN, MIT; R/coda4microbiome_functions.R): the model on all pairwise log
+   ratios, the covariates' offset, and the performance summary (apparent and
+   cross-validated AUC or R-squared and MSE). The rest of the file is
+   Copyright 2026 ecodive authors, under the MIT license above.
+License:
+   MIT License
+
+   Copyright (c) 2022 coda4microbiome authors
+
+   Permission is hereby granted, free of charge, to any person obtaining a
+   copy of this software and associated documentation files (the
+   "Software"), to deal in the Software without restriction, including
+   without limitation the rights to use, copy, modify, merge, publish,
+   distribute, sublicense, and/or sell copies of the Software, and to permit
+   persons to whom the Software is furnished to do so, subject to the
+   following conditions:
+
+   The above copyright notice and this permission notice shall be included
+   in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+   NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+   USE OR OTHER DEALINGS IN THE SOFTWARE.

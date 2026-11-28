@@ -188,11 +188,14 @@ reference:
   - plot.ecodive_batch
 
 - title: Prediction
-  desc: Predict each sample's class or a number from its features with a random forest (q2-sample-classifier's workflow on scikit-learn's trees), with cross-validated and out-of-bag accuracy, ROC curves and feature importances.
+  desc: Predict each sample's class or a number from its features with a random forest (q2-sample-classifier's workflow on scikit-learn's trees), with cross-validated and out-of-bag accuracy, ROC curves and feature importances; or with a compositional lasso (penalized log-contrast regression, zeroSum's and coda4microbiome's), which picks out the features whose log ratio predicts the outcome.
   contents:
   - random_forest
   - predict.ecodive_random_forest
   - plot.ecodive_random_forest
+  - coda_lasso
+  - predict.ecodive_coda_lasso
+  - plot.ecodive_coda_lasso
 
 - title: Ordination
   desc: Place samples on a few axes for plotting. dist_ord() runs the methods that take beta diversity distances, and count_ord() the methods that take the count table.
