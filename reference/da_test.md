@@ -22,9 +22,9 @@ da_test(counts, method, groups = NULL, data = NULL, formula = NULL, ...)
 
   The name of a DA method: `"ancom"`, `"ancombc"`, `"ancombc2"`,
   `"da_lm"`, `"da_ttest"`, `"da_wilcoxon"`, `"dirmult_lm"`,
-  `"dirmult_ttest"`, `"indicator_species"`, `"lefse"`, `"linda"`, or
-  `"maaslin3"`. Flexible matching is supported (see below). Programmatic
-  access via
+  `"dirmult_ttest"`, `"fastancom"`, `"indicator_species"`, `"lefse"`,
+  `"linda"`, or `"maaslin3"`. Flexible matching is supported (see
+  below). Programmatic access via
   [`list_da_tests()`](https://cmmr.github.io/ecodive/reference/da_tests.md).
 
 - groups:
@@ -63,6 +63,7 @@ da_test(counts, method, groups = NULL, data = NULL, formula = NULL, ...)
   [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
   [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
   [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+  [`fastancom()`](https://cmmr.github.io/ecodive/reference/fastancom.md),
   [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md),
   [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md),
   [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md), and
@@ -96,6 +97,7 @@ methods) and a `method` attribute, the method's id.
 | `da_wilcoxon` | Wilcoxon rank-sum test per feature | groups |
 | `dirmult_lm` | Dirichlet-multinomial linear model with a scale model (ALDEx3) | formula |
 | `dirmult_ttest` | Dirichlet-multinomial t-test (ALDEx2-style) | groups |
+| `fastancom` | ANCOM from marginal models, with log fold changes (fastANCOM) | formula |
 | `indicator_species` | Indicator species analysis (IndVal, multilevel pattern analysis) | groups |
 | `lefse` | LDA effect size (LEfSe) | groups |
 | `linda` | Linear models for differential abundance (LinDA) | formula |
@@ -187,6 +189,7 @@ abundance analysis. *Briefings in Bioinformatics*, 26, bbaf130.
 [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
 [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
 [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md),
+[`fastancom()`](https://cmmr.github.io/ecodive/reference/fastancom.md),
 [`indicator_species()`](https://cmmr.github.io/ecodive/reference/indicator_species.md),
 [`lefse()`](https://cmmr.github.io/ecodive/reference/lefse.md),
 [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md),

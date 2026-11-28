@@ -107,10 +107,11 @@ will be applied to the
 #> 6                  Wilcoxon Rank-Sum Test       da_wilcoxon  groups
 #> 7                            Welch t-test          da_ttest  groups
 #> 8                            Linear Model             da_lm formula
-#> 9                                   LinDA             linda formula
-#> 10                              MaAsLin 3          maaslin3 formula
-#> 11                                  LEfSe             lefse  groups
-#> 12             Indicator Species Analysis indicator_species  groups
+#> 9                               fastANCOM         fastancom formula
+#> 10                                  LinDA             linda formula
+#> 11                              MaAsLin 3          maaslin3 formula
+#> 12                                  LEfSe             lefse  groups
+#> 13             Indicator Species Analysis indicator_species  groups
 #>            effect base zero_free_ok signed
 #> 1            <NA> <NA>         TRUE  FALSE
 #> 2          log_fc    e         TRUE   TRUE
@@ -121,9 +122,10 @@ will be applied to the
 #> 7            diff norm         TRUE   TRUE
 #> 8        estimate norm         TRUE   TRUE
 #> 9         log2_fc    2         TRUE   TRUE
-#> 10 coef_abundance    2        FALSE   TRUE
-#> 11      lda_score <NA>         TRUE  FALSE
-#> 12           stat <NA>        FALSE  FALSE
+#> 10        log2_fc    2         TRUE   TRUE
+#> 11 coef_abundance    2        FALSE   TRUE
+#> 12      lda_score <NA>         TRUE  FALSE
+#> 13           stat <NA>        FALSE  FALSE
 
     # Find the method for 'Mann-Whitney'.
     m <- match_da_test('Mann-Whitney')

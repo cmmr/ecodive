@@ -94,6 +94,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/ex_counts.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/ex_tree.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/faith.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/fastancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/feature_assoc.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/feature_assocs.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/feature_volatility.html</loc></url>
@@ -185,6 +186,7 @@
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dirmult_ttest.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_dist.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_envfit.html</loc></url>
+<url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_fastancom.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_feature_volatility.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_forward_select.html</loc></url>
 <url><loc>https://cmmr.github.io/ecodive/reference/plot.ecodive_hill_extrapolation.html</loc></url>

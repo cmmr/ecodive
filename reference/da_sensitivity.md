@@ -32,8 +32,8 @@ da_sensitivity(
   The name of a DA method, as for
   [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md):
   `"ancom"`, `"ancombc"`, `"ancombc2"`, `"da_lm"`, `"da_ttest"`,
-  `"da_wilcoxon"`, `"dirmult_lm"`, `"dirmult_ttest"`, or `"linda"`.
-  Flexible matching is supported.
+  `"da_wilcoxon"`, `"dirmult_lm"`, `"dirmult_ttest"`, `"fastancom"`, or
+  `"linda"`. Flexible matching is supported.
 
 - ...:
 
@@ -93,9 +93,12 @@ columns:
   [`ancombc2()`](https://cmmr.github.io/ecodive/reference/ancombc.md),
   [`da_lm()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
   [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md),
+  [`fastancom()`](https://cmmr.github.io/ecodive/reference/fastancom.md),
   [`linda()`](https://cmmr.github.io/ecodive/reference/linda.md)), the
-  column of the design; every covariate but the intercept is kept. `NA`
-  for the group methods.
+  column of the design (for
+  [`fastancom()`](https://cmmr.github.io/ecodive/reference/fastancom.md),
+  the comparison); every covariate but the intercept is kept. `NA` for
+  the group methods.
 
 - `run`: the run's number, `0` for the base run.
 
@@ -179,6 +182,7 @@ each, and not when the base run already gave them.
 
 - `pseudocounts`: what `pseudocount` means differs by method. For
   [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md),
+  [`fastancom()`](https://cmmr.github.io/ecodive/reference/fastancom.md),
   [`da_wilcoxon()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md),
   [`da_ttest()`](https://cmmr.github.io/ecodive/reference/da_wilcoxon.md)
   and

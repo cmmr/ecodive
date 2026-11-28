@@ -374,6 +374,8 @@ don’t matter.
   : Post-hoc tests for ANCOM-BC and ANCOM-BC2
 - [`structural_zeros()`](https://cmmr.github.io/ecodive/reference/structural_zeros.md)
   : Structural zeros
+- [`fastancom()`](https://cmmr.github.io/ecodive/reference/fastancom.md)
+  : ANCOM from Marginal Models (fastANCOM)
 - [`dirmult_ttest()`](https://cmmr.github.io/ecodive/reference/dirmult_ttest.md)
   : Dirichlet-multinomial Welch t-tests (ALDEx2-style)
 - [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md)
@@ -693,6 +695,8 @@ than every value.
   [`plot(`*`<ecodive_ancombc_global>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
   [`plot(`*`<ecodive_ancombc_trend>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_ancombc.md)
   : Plot an ANCOM-BC result
+- [`plot(`*`<ecodive_fastancom>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_fastancom.md)
+  : Plot a fastANCOM Result
 - [`plot(`*`<ecodive_da_ttest>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
   [`plot(`*`<ecodive_da_wilcoxon>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)
   [`plot(`*`<ecodive_da_lm>`*`)`](https://cmmr.github.io/ecodive/reference/plot.ecodive_da_ttest.md)

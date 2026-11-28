@@ -126,14 +126,14 @@ Other longitudinal:
 #> # First Distances of Bray-Curtis Dissimilarity
 #>   sample subject state_from state distance
 #>   <chr>  <chr>        <dbl> <dbl>    <dbl>
-#> 1 s02    a                0     7    0.117
-#> 2 s05    b                0     7    0.207
-#> 3 s08    c                0     7    0.125
-#> 4 s11    d                0     7    0.152
-#> 5 s03    a                7    14    0.177
-#> 6 s06    b                7    14    0.068
-#> 7 s09    c                7    14    0.146
-#> 8 s12    d                7    14    0.145
+#> 1 s02    a                0     7   0.104
+#> 2 s05    b                0     7   0.0742
+#> 3 s08    c                0     7   0.141
+#> 4 s11    d                0     7   0.189
+#> 5 s03    a                7    14   0.0947
+#> 6 s06    b                7    14   0.0691
+#> 7 s09    c                7    14   0.135
+#> 8 s12    d                7    14   0.156
     plot(fd)
 
 
@@ -143,13 +143,13 @@ Other longitudinal:
 #> # First Distances of Bray-Curtis Dissimilarity
 #>   sample subject state_from state distance
 #>   <chr>  <chr>        <dbl> <dbl>    <dbl>
-#> 1 s02    a                0     7   0.117
-#> 2 s05    b                0     7   0.207
-#> 3 s08    c                0     7   0.125
-#> 4 s11    d                0     7   0.152
-#> 5 s03    a                0    14   0.101
-#> 6 s06    b                0    14   0.172
-#> 7 s09    c                0    14   0.112
-#> 8 s12    d                0    14   0.0632
+#> 1 s02    a                0     7   0.104
+#> 2 s05    b                0     7   0.0742
+#> 3 s08    c                0     7   0.141
+#> 4 s11    d                0     7   0.189
+#> 5 s03    a                0    14   0.11
+#> 6 s06    b                0    14   0.0619
+#> 7 s09    c                0    14   0.082
+#> 8 s12    d                0    14   0.25
 #> # Attributes: baseline
 ```

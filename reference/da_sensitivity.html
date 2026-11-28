@@ -84,8 +84,8 @@ Types</strong>.</p></dd>
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>The name of a DA method, as for <code><a href="da_test.html">da_test()</a></code>: <code>"ancom"</code>,
 <code>"ancombc"</code>, <code>"ancombc2"</code>, <code>"da_lm"</code>, <code>"da_ttest"</code>,
-<code>"da_wilcoxon"</code>, <code>"dirmult_lm"</code>, <code>"dirmult_ttest"</code>, or <code>"linda"</code>. Flexible
-matching is supported.</p></dd>
+<code>"da_wilcoxon"</code>, <code>"dirmult_lm"</code>, <code>"dirmult_ttest"</code>, <code>"fastancom"</code>, or
+<code>"linda"</code>. Flexible matching is supported.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -132,7 +132,8 @@ each other: each of them is crossed with each <code>scale_sds</code>.</p></dd>
     <p>A data frame of class <code>c('ecodive_da_sensitivity', 'data.frame')</code>, one row per feature (and covariate, for the model
 methods) and run, with columns:</p><ul><li><p><code>feature</code>: the feature's name, as in the method's result.</p></li>
 <li><p><code>covariate</code>: for the model methods (<code><a href="ancombc.html">ancombc()</a></code>, <code><a href="ancombc.html">ancombc2()</a></code>,
-<code><a href="da_wilcoxon.html">da_lm()</a></code>, <code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="linda.html">linda()</a></code>), the column of the design; every covariate but the
+<code><a href="da_wilcoxon.html">da_lm()</a></code>, <code><a href="dirmult_lm.html">dirmult_lm()</a></code>, <code><a href="fastancom.html">fastancom()</a></code>, <code><a href="linda.html">linda()</a></code>), the column of the
+design (for <code><a href="fastancom.html">fastancom()</a></code>, the comparison); every covariate but the
 intercept is kept. <code>NA</code> for the group methods.</p></li>
 <li><p><code>run</code>: the run's number, <code>0</code> for the base run.</p></li>
 <li><p><code>parameter</code>: what the run changed: <code>'base'</code>, <code>'pseudocount'</code>,
@@ -190,7 +191,7 @@ that the runs differ by their settings and not by random draws, and its
 base run of <code><a href="ancombc.html">ancombc()</a></code> and <code><a href="ancombc.html">ancombc2()</a></code> are made with <code>sensitivity = FALSE</code>. Warnings from the runs are given once each, and not when the base
 run already gave them.</p>
 <p><strong>What each setting means.</strong></p><ul><li><p><code>pseudocounts</code>: what <code>pseudocount</code> means differs by method. For
-<code><a href="ancom.html">ancom()</a></code>, <code><a href="da_wilcoxon.html">da_wilcoxon()</a></code>, <code><a href="da_wilcoxon.html">da_ttest()</a></code> and <code><a href="da_wilcoxon.html">da_lm()</a></code> it is added to
+<code><a href="ancom.html">ancom()</a></code>, <code><a href="fastancom.html">fastancom()</a></code>, <code><a href="da_wilcoxon.html">da_wilcoxon()</a></code>, <code><a href="da_wilcoxon.html">da_ttest()</a></code> and <code><a href="da_wilcoxon.html">da_lm()</a></code> it is added to
 every value before the logs, to patch the zeros (for the last three,
 only with <code>norm = 'clr'</code> or <code>'log'</code>, the norms that take logs). For
 <code><a href="ancombc.html">ancombc()</a></code>

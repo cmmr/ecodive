@@ -1538,6 +1538,28 @@
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 - New
+  [`fastancom()`](https://cmmr.github.io/ecodive/reference/fastancom.md):
+  fastANCOM (Zhou et al. 2022), ANCOM’s tests of every log ratio from
+  one linear model per feature, of any `formula` (covariates allowed),
+  with each feature’s W and decision (`detect_rate`, and the original
+  ANCOM’s empirical cutoff) and a log2 fold change against a reference
+  set of the features with the smallest W (`ref_rate`), with its
+  standard error and p-value. A factor of more than two levels gets a
+  global F-test and every pairwise comparison. It matches fastANCOM
+  0.0.4 (W and decisions identical; fold changes, standard errors and
+  p-values to about 1e-12), except where fastANCOM is inconsistent (its
+  standard errors when `ref_rate` times the number of features isn’t
+  whole; its degrees of freedom with covariates). Without covariates,
+  its W is
+  [`ancom()`](https://cmmr.github.io/ecodive/reference/ancom.md)’s with
+  `sig_test = "anova"` and no adjustment. Parallel C from a sparse
+  table, the same for any `cpus`; one of
+  [`da_test()`](https://cmmr.github.io/ecodive/reference/da_test.md)’s
+  and
+  [`da_sensitivity()`](https://cmmr.github.io/ecodive/reference/da_sensitivity.md)’s
+  methods, with W, volcano, MA, forest and rank plots.
+
+- New
   [`dirmult_lm()`](https://cmmr.github.io/ecodive/reference/dirmult_lm.md):
   ALDEx3’s linear models (McGovern & Silverman 2026; Nixon et al. 2025),
   the regression form of
