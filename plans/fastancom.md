@@ -324,3 +324,25 @@ Decided along the way:
   `sig`/`detect.rate`/`ref.rate`, `pseudo = 1`, `pseudo = 0`, proportions,
   8 features, `ref.rate = 0.29` (the `:` fuzz) and W ties; and 600 random
   tables' W, `detected` and `REJECT` for the rules.
+
+
+## Outcome (from the implementing session's final report)
+
+**Item 80, done 2026-11-28.** Commits `08c2201` (work), plus the tick commit.
+
+- Tests: 37,518 at home (+2,035 from 35,483), 530 in CRAN mode (+4 from
+  526). `R CMD check --no-manual --ignore-vignettes`: 1 NOTE (installed
+  size, as before).
+- fastANCOM 0.0.4, 10 cases (manual example, numeric `x`, covariate, zeros,
+  `pseudo` 1 and 0, proportions, 8 features, `ref.rate = 0.29`, W ties): W
+  and REJECT identical; marginal β, log2 FC, SE, statistic, p and q within
+  1.1e-12 relative (p and q not compared for the covariate case, whose df
+  differs by design; W there counted from its stored statistics on n − p).
+  Decision rules identical on 600 random tables (5,500 in the probes).
+  Without covariates W is `ancom(sig_test = 'anova', p_adjust = 'none')`'s,
+  for two and three groups.
+- Speed (4 cores, 3,000 features × 200 samples): 0.16 s (0.59 s on 1 core);
+  fastANCOM 1.71 s (and three K × K matrices, 216 MB), `ancom()` 3.4 s.
+- Open: fastANCOM's multi-group path couldn't be compared (it fails on
+  every input); ecodive's global and pairwise tests are checked against an
+  independent per-log-ratio `lm.fit()` computation instead.
