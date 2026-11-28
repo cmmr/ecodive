@@ -421,3 +421,220 @@ Follows [README.md](README.md) § "Result attributes and plots".
   Statistical Software*, 33(1), 1–22.
 - Tibshirani, R., Bien, J., Friedman, J., et al. (2012). Strong rules for
   discarding predictors in lasso-type problems. *JRSS B*, 74, 245–266.
+
+
+## Decisions made while implementing (2026-11-27)
+
+The user's answers (one round, at the start):
+
+1. **Names:** `coda_lasso()` and `coda_lasso_pairwise()`, as planned.
+2. **`select`:** each function defaults to its reference: `'min'`
+   (zeroSum) for `coda_lasso()`, `'1se'` (coda4microbiome) for
+   `coda_lasso_pairwise()`.
+3. **Folds:** stratified by class for binomial `y` (random_forest()'s
+   `rf_folds()`, StratifiedKFold on PCG), plain KFold for gaussian. Neither
+   reference stratifies (both shuffle `rep(1:K)`); fixtures pass `folds`.
+4. **Zeros in `coda_lasso_pairwise()`:** ecodive's shared rule
+   (`log_pseudocount()`), not coda4microbiome's `impute_zeros()`.
+
+What the reference code settled (the plan's open questions):
+
+- **coda4microbiome 0.2.4's `coda_glmnet()`:** `standardize` is glmnet's
+  default (`TRUE`); `type.measure = 'auc'` (binomial) or `'deviance'` (= MSE,
+  gaussian); `impute_zeros()` adds 1 to **every** cell if the smallest
+  non-zero value is >= 1, else half of it, and only when the table has a
+  zero; `covar` enters as an **offset**: `lm(y ~ ., covar)` or
+  `glm(..., binomial)` fitted once on all samples, its linear predictor
+  passed to `cv.glmnet(offset =)` (so the folds reuse the full-data
+  offset) and to `predict(newoffset =)`. It rescales the reported
+  coefficients to sum(|beta|) = 2 (we don't), reports glmnet's `cvsd` as
+  "sd cv-AUC" (it is a standard error), sets the apparent AUC to 0.5 / R^2
+  to 0 when nothing is selected, and reports the deviance as "mean cv-AUC"
+  when glmnet falls back to it (we always report the AUC).
+- **zeroSum 2.0.7:**
+  - `standardize = TRUE` only multiplies the penalty factors `v` by each
+    column's sd (x is not scaled; the constraint stays sum(beta) = 0 on the
+    original scale), so it is **not** scale invariant: the sds depend on
+    the samples' totals. ecodive therefore logs the values as given
+    (`log(x + pc)`), not log proportions; without `standardize` the fit is
+    invariant either way.
+  - The gaussian fit multiplies lambda by sd(y) and divides `v` by it, which
+    leaves the lasso term alone and divides the ridge term by sd(y)
+    (glmnet's behaviour); ported.
+  - `lambdaMax` loops over pairs `k = 2..P-1, s = 1..k-1` (0-based), so it
+    **skips the first feature**. ecodive uses every pair; the fixture's data
+    are chosen so that the paths agree (and they do, to 4e-15).
+  - Its '1se' is not glmnet's: the lambda no smaller than lambda.min whose
+    CV error is **closest to** min + SD. Ported as is for `coda_lasso()`.
+  - CV error: -2 loglik per fold with the held-out samples weighted
+    1/fold size (MSE or mean deviance), averaged over folds; SD
+    `sqrt((mean(e^2) - mean(e)^2) / (K - 1))`. Training weights are
+    1/(n - fold size).
+  - `rotatedUpdates` is off by default, and the polish (`lsSaMove` with
+    delta = -beta_k) is **deterministic**: no RNG is needed, so `seed` only
+    draws the folds.
+  - Covariates: `zeroSum.weights = 0` and `penalty.factor = 0` put them in
+    the model unpenalized and outside the constraint (updated by `cdMove`).
+    ecodive does that; its lambda max uses the residuals of `y` on the
+    covariates (zeroSum's uses the intercept-only model).
+  - `cvStop = 0.1` (stop once the CV error has risen for 10% of the path)
+    is **not** ported: the whole path is always fitted (the fixtures use
+    `cvStop = FALSE`).
+- **glmnet (outputs only, checked numerically):** lambda max
+  `max |<x_c, r>| / (n a_c max(alpha, 1e-3))`; lambda.min.ratio 0.01 when n
+  < number of columns (here p(p-1)/2 pairs); the default path **stops
+  early** after lambda m (m >= 5) when dev.ratio > 0.999, or (gaussian)
+  dev.ratio_m - dev.ratio_{m-1} < 1e-5 dev.ratio_m, or (binomial) the same
+  difference < 1e-5 absolute; with a user lambda it doesn't stop; in
+  cv.glmnet the fold fits stop by the same rule and predict from their last
+  fit beyond. `cvm` is the fold-size-weighted mean of the per-fold MSE /
+  deviance / AUC, `cvsd = sqrt(weighted var / (K - 1))`; binomial deviance
+  clamps p to [1e-5, 1 - 1e-5]; `type.measure = 'auc'` falls back to
+  deviance (with a warning) when n / K < 10 (ported, with our own warning);
+  lambda.1se is the largest lambda within one SE (for AUC, of the max). All
+  of these reproduce cv.glmnet's `lambda`, `cvm`, `cvsd` (exactly, given its
+  predictions) and `lambda.1se`.
+
+Decided while implementing (my judgement):
+
+- **zeroSum's algorithm, restructured:** each training set (fold or full
+  data) runs its whole lambda path on its own thread (`run_parallel()`, a
+  fold claimed by an atomic counter; each writes only its own slots; the CV
+  error is reduced in fold order), so results are `identical()` for any
+  `cpus`. Two speed-ups that leave the sequence of moves alone: (1) a pair
+  with a zero coefficient is first tested, from cached gradients, for
+  whether its 1-d minimum is "no change" (the four sign patterns then all
+  fail), skipping the O(n) update; (2) gaussian fits (fixed weights) do the
+  convergence sweeps and the polish with **covariance updates**: a cached
+  weighted Gram matrix of the features ever active, gradients updated in
+  O(|active|) per move, residuals recomputed by the cost function after each
+  sweep. Binomial fits keep zeroSum's direct updates (the weights change
+  after every move). Sums use four interleaved partial sums (zeroSum uses
+  AVX). On the 200 x 500 fixture (12 lambdas, 5 folds) this is 5.4 s on one
+  thread against zeroSum's 7.2 s (and 23 s before the changes), 2.4 s on
+  4 threads (zeroSum 3.7 s). With the default 100-lambda path and 10 folds
+  on 100 x 100: gaussian 10.7 s (zeroSum 12.2 s), 4.2 s on 4 threads;
+  binomial about 10.5 s (zeroSum 10.1 s), 4.0 s on 4 threads: two thirds of
+  a binomial fit is zeroSum's refresh of the quadratic approximation (an
+  exp() per sample after every successful move), which the port keeps;
+  samples outside a fold's training set skip it.
+- **zeroSum can't be matched beyond its convergence:** its stop rule is
+  |change in cost| < `precision` (1e-8), and the solution is flat in some
+  directions, so two correct implementations (AVX sums vs ours) end up to
+  ~1e-3 apart in the coefficients while their costs agree to ~1e-11. The
+  tests compare coefficients at 2e-3 (gaussian) / 5e-3 (binomial) of the
+  largest, CV errors at 5e-3, the chosen lambda exactly, and the costs at
+  1e-6 relative (observed ~1e-11). With `tol` much below 1e-10 zeroSum's
+  "the cost rose, restore and stop" rule trips on rounding and both
+  implementations can stall early (seen at 1e-15); documented by the
+  default, not changed.
+- **The pairwise solver** is written from Friedman et al. (2010) and the
+  strong rules, not ported (scikit-learn's `_cd_fast.pyx` wasn't needed,
+  so its credit wasn't extended). It keeps theta sparse (only the working
+  set: strong-rule pairs plus every pair ever in it) and never forms the
+  pair matrix: column (j,k) is built on the fly, gradients are G_j - G_k
+  from G = L'Wr, and with `standardize` the pair sds come from the p x p
+  weighted covariance of L (one per thread). The strong-rule and KKT
+  scans are O(p^2) per lambda and run inside each fold's thread (the
+  parallel unit is the fold, as in `coda_lasso()`), not threaded over
+  taxa as the plan suggested. Binomial: IRLS around the coordinate
+  descent, p clamped to [1e-5, 1 - 1e-5] (glmnet.control's `pmin`).
+  Convergence: the largest xv_c * change^2 below `tol` x the null
+  deviance (glmnet's `thresh` semantics).
+- **The pairwise path matches glmnet's**, including its early stop, to
+  1e-15; CV curves to the solvers' tolerance (both 1e-7); the coefficients
+  agree with glmnet at `thresh = 1e-14` to ~6e-3 of the largest at the far
+  end of the path (near-collinear pairs: the objective is flat in theta),
+  while the objectives agree to ~1e-9. coda_glmnet()'s selected taxa,
+  chosen lambda and binomial AUCs (apparent and CV mean / SE) are matched
+  exactly; its predictions to ~2e-3.
+- **`y`:** numeric means gaussian unless `family = 'binomial'` and `y` is
+  0/1; a factor, character (radix-sorted) or logical `y` with two values is
+  binomial, the second level being the event; three or more classes error.
+  `NA` in `y` (and in `given`) is left out with a warning, as
+  `random_forest()`.
+- **`given`:** a one-sided formula over `data`, column names of `data`, or a
+  data frame (rows matched by name); `model.matrix()` columns; aliased
+  columns dropped with a warning (`qr()` of `cbind(1, Z)`). The terms and
+  factor levels are kept (attribute `given_model`) for `predict()`.
+- **No CV:** `n_folds` 0 or 1 is allowed only with a single `lambda`
+  (choosing lambda needs CV); `cv_error` etc. are then `NA`.
+- **Constant gaussian `y`:** a warning and an all-zero path (zeroSum would
+  divide by sd(y) = 0). A single class is an error.
+- **Performance:** gaussian `r_squared` = cor(fitted, y)^2 (coda4microbiome's
+  apparent R^2), `cv_mse` and `cv_mse_se` from the path at the chosen lambda;
+  binomial `auc` (Mann–Whitney, ties 1/2), `cv_auc` and `cv_auc_se` averaged
+  over folds as cv.glmnet does, for both functions.
+- **Result:** as planned, plus `cv_measure`, `cv_link` (each sample's
+  cross-validated linear predictor at the chosen lambda), `covariates` and
+  the internal `given_model`. The display names live in a small registry
+  (`CODA_LASSO_NAMES`, keyed by `method`); no `display` title (the title
+  doesn't name an input).
+- **print():** its own short method (header, lambda and selection,
+  performance, then the numerator and denominator features by |beta|, the
+  attributes in a footer), since most rows are zeros; a row subset falls
+  back to `print_table_result()`.
+- **plot():** `type = 'signature'` (the plan's two panels), plus `'path'`
+  (coefficients against log lambda) and `'cv'` (the CV curve with SE bars
+  and the number selected on top), both marking the chosen lambda.
+- **pkgdown:** in "Prediction" next to `random_forest()` (where the README
+  lists it), not under "Compositional Data"; the Rd inherits the "Machine
+  learning" section.
+- **Not done:** c-lasso and FLORAL cross-checks (the objective checks
+  against zeroSum and glmnet and the pairwise/constrained equivalence test
+  cover the same ground); Cox and multinomial families.
+
+
+## Outcome (from the implementing session's final report)
+
+Implemented in `1104dfd` on 2026-11-27/28.
+
+- **Files:** `src/coda_lasso.c` (the zeroSum port: pair moves, polish,
+  binomial approximation, CV weights and error; gradient shortcut and
+  gaussian covariance updates), `src/coda_lasso_pairwise.c` (coordinate
+  descent on pairwise log ratios without the pair matrix: strong rules, KKT
+  checks, IRLS, glmnet's early path stop), `R/coda_lasso.r` (both
+  functions, `predict()`, `print()`, `plot()` with `type = 'signature'`,
+  `'path'`, `'cv'`), `test-coda_lasso.r` (224 tests) and two smoke lines,
+  fixtures from `data-raw/expected/coda_lasso.r` (261 KB `.rds`).
+- **zeroSum 2.0.7** (6 cases on 40 x 30 plus 200 x 500 with 48% zeros;
+  gaussian and binomial, lasso and elastic net, standardize, covariates;
+  fixed lambda path and folds): costs agree to ~1e-11; coefficients to
+  zeroSum's convergence (largest difference 1.5e-3, binomial elastic net;
+  2e-4 gaussian; the objective is flat there); CV errors to ~1e-3; the
+  chosen lambda (min and zeroSum's 1se) identical; the default lambda path
+  to 4e-15. Without the constraint the same solver matches glmnet's lasso
+  to 1e-5.
+- **coda4microbiome 0.2.4 / cv.glmnet** (gaussian and binomial, with and
+  without covariates): lambda path (including early stops) to 1e-15, chosen
+  lambda (1se) identical, selected taxa identical, binomial apparent and CV
+  AUC (mean, SE) identical, CV curves to ~1e-2 (both at thresh 1e-7),
+  coefficients to ~6e-3 of the largest against glmnet at thresh 1e-14 at
+  the far end of the path (objectives to ~1e-9), predictions to ~2e-3.
+- **Equivalence:** `coda_lasso_pairwise(lambda = 2 l, l1_ratio = 1,
+  standardize = FALSE)` and `coda_lasso(lambda = l)` reach the same cost to
+  1e-7 and select the same taxa.
+- **Determinism:** `identical()` for `cpus` 1-4; sparse (slam, Matrix),
+  dense and `margin = 2` input identical. Valgrind: 0 errors.
+- **Speed** (4-core container): zeroSum's 200 x 500 case 5.4 s on one
+  thread vs zeroSum's 7.2 s (2.4 s vs 3.7 s on 4); 100 x 100, default path,
+  10 folds: gaussian 10.7 s vs 12.2 s, binomial ~10.5 s vs 10.1 s (4.0-4.2
+  s on 4 threads). Pairwise vs coda_glmnet() on 100 samples: 30 taxa 0.04
+  s vs 0.21 s (gaussian), 0.19 s vs 2.1 s (binomial); 100 taxa (4,950 pairs)
+  0.31 s vs 0.97 s and 0.52 s vs 2.0 s on one thread, 3x less on 4.
+- **Tests:** 35,709 at home and 528 in CRAN mode (35,483 and 526 at
+  b90c956). `R CMD check --no-manual --ignore-vignettes`: the existing NOTE
+  (installed size) only.
+- **Open issues:** c-lasso and FLORAL cross-checks not done; Cox and
+  multinomial families not done; binomial `coda_lasso()` is only on par
+  with zeroSum on one thread (its per-move exp() refresh, kept).
+- **For item 81 (ConQuR):** its "logistic lasso with CV" for presence is
+  `coda_lasso()`'s binomial solver without the constraint:
+  `ecodive:::cl_zerosum(L, y, Z, fold, K, binom = TRUE, alpha, lambda,
+  n_lambdas, lmr, standardize, select, tol, max_iters, cpus, zero_sum =
+  FALSE)` (or `C_coda_lasso` directly, with `u` = 1 and `zero_sum = 0`,
+  which uses zeroSum's single-coordinate `cdMove`; `v` = 0 leaves
+  covariates such as batch unpenalized). It returns the coefficient path,
+  intercepts, CV error/SD (deviance) and held-out linear predictors per
+  lambda, threaded over folds; folds from `rf_folds()`. A quantile lasso
+  would need a different loss (not here).

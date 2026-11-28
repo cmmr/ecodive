@@ -1101,6 +1101,27 @@
   the fitted curve and its band over the features (`type = "binomial"`
   adds the binomial model's curve).
 
+* New `mpd()`, `mntd()`, `weighted_mpd()` and `weighted_mntd()`: the mean
+  pairwise and mean nearest taxon distances among each sample's taxa (Webb
+  2000; Webb et al. 2002), unweighted or weighted by abundance, along a
+  `tree` or any `taxa_dm`. They are also alpha metrics (`alpha_div(counts,
+  "mpd", tree = tree)`; `alpha_div()` gains `taxa_dm`). New `mpd_ses()` and
+  `mntd_ses()` give their standardized effect sizes against a null model,
+  the Net Relatedness and Nearest Taxon Indices (NRI = -SES(MPD), NTI =
+  -SES(MNTD), positive for clustering), with ranks and lower-tail p-values,
+  as picante's `ses.mpd()` and `ses.mntd()`: `null_model` is picante's
+  `"taxa_labels"`, `"richness"`, `"frequency"`, `"sample_pool"`,
+  `"phylogeny_pool"`, `"independent_swap"` or `"trial_swap"` (swap moves
+  from phylocom 4.2, BSD-3), or, for `mpd_ses()`, `"exact"`: the exact
+  null mean and standard deviation over random sets of tips, with no
+  draws. Values match picante 1.8.4 to about 1e-14, and its SES, ranks and
+  p-values to the same given the same random communities. No tips x tips
+  matrix is formed: each sample's taxa span a "virtual tree" built in
+  O(S log S) from lowest common ancestors, so 999 draws for 500 samples on
+  a 5,000-tip tree take about 4 s on one thread (picante: about 17 min).
+  Draws run in threaded C, each with its own random stream, the same for
+  any `cpus`. `plot()` draws a dot chart of NRI (NTI) per sample.
+
 * Longitudinal analyses, ported from q2-longitudinal 2026.10.0 (Bokulich
   et al. 2018, BSD-3), for repeated measures of the same subjects over time
   (`subjects` and numeric `states` given per sample or as columns of
@@ -1171,6 +1192,29 @@
   as scikit-learn). `predict()` matches new samples' features by name, and
   `plot()` draws the importances, ROC curves, confusion matrix, predicted
   against observed values, or the grid's out-of-bag errors.
+
+* New `coda_lasso()` and `coda_lasso_pairwise()`: penalized log-contrast
+  regression, the compositional lasso. They predict a measurement
+  (gaussian) or one of two classes (binomial) from a feature table and pick
+  out a signature: the features whose weighted log ratio predicts the
+  outcome, with coefficients that sum to zero, so the fit doesn't depend on
+  each sample's total. `coda_lasso()` ports zeroSum 2.0.7's elastic net
+  under the zero-sum constraint (MIT; Altenbuchinger et al. 2017): its
+  coordinate descent over pairs of coefficients, lambda path and
+  cross-validation, matching its coefficients to its convergence tolerance
+  and its cost to about 1e-10, a little faster than zeroSum on one thread
+  (gaussian fits use covariance updates). `coda_lasso_pairwise()` fits
+  coda4microbiome 0.2.4's model (MIT; Calle et al. 2023), an elastic net on
+  all pairwise log ratios with glmnet's conventions (standardization, the
+  path and its early stop, cv.glmnet's AUC or MSE and the 1-SE rule),
+  without forming the table of log ratios: it reproduces coda_glmnet()'s
+  lambda path, choice, selected taxa and cross-validated AUC. Both take
+  `l1_ratio` (the elastic-net mix), `given` covariates (fitted unpenalized,
+  or as an offset), `n_folds` or `folds` (stratified by class for
+  binomial), and thread over the folds, the same for any `cpus`.
+  `predict()` scores new samples, and `plot()` draws the signature (the
+  coefficients, and the score by outcome), the coefficient path or the CV
+  curve.
 
 * New `moran_i()`: Moran's I test of spatial autocorrelation, whether a
   variable (a taxon's abundance, alpha diversity) is more alike at nearby
@@ -1269,6 +1313,20 @@
   also has the expected sample coverage (Chao & Jost 2012), and `plot()`
   draws depth, coverage-based or sample-completeness curves, by group,
   with a line at a planned rarefaction depth.
+
+* New `hill_extrapolation()` and `hill_standardize()`: interpolated and
+  extrapolated Hill numbers of orders 0, 1 and 2 (richness, Shannon and
+  Simpson diversity), as iNEXT's `iNEXT()` and `estimateD()` give them
+  (Chao et al. 2014). `hill_extrapolation()` gives each sample's curves by
+  depth and by sample coverage, from rarefaction below its size to
+  extrapolation above it, its asymptotic estimates and its frequency
+  counts, with bootstrap intervals and a `plot()` (size-based,
+  completeness and coverage-based curves). `hill_standardize()` gives
+  every sample's Hill numbers at one common coverage (by default) or
+  depth, as a matrix ready for testing. The estimates equal iNEXT 3.0.2's
+  to rounding; the bootstrap runs in C, with one random stream per
+  replicate, so results are the same for any `cpus`, and is a few hundred
+  times faster than iNEXT per thread at microbiome depths.
 
 * New `composition_barplot()` draws stacked bars of relative abundance, one
   per sample and never averaged, ordered so they can be read: samples by

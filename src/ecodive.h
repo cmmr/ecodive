@@ -206,6 +206,40 @@ double rng_norm(rng_t *r);
 double rng_gamma(rng_t *r, double shape);
 double rng_log_gamma(rng_t *r, double shape);
 
+/* --- phylo_structure.c: patristic distances among a sample's tips --- */
+// A binary tree over tips 0 .. T - 1, by preorder number q = 0 .. N - 1.
+typedef struct {
+  int     T, N;     // tips; nodes (2T - 1)
+  double *dep;      // q: distance from the root
+  int    *size;     // q: nodes in its subtree (preorder span)
+  int    *par;      // q: parent's preorder number (-1: root)
+  double *len;      // q: length of the edge to its parent
+  int    *tip;      // q: tip id, or -1
+  int    *tpos;     // tip id: rank among the tips in preorder
+  int    *tpre;     // rank: preorder number
+  int    *rmq;      // sparse table: LCAs of tips adjacent in preorder
+  int     levels;
+  int    *lg;       // 0 .. T: floor(log2(x))
+} ptree_t;
+
+// Scratch for one sample's virtual tree (per thread).
+typedef struct {
+  int     cap;      // most tips
+  int    *key, *node, *par, *c1, *stk, *leaf, *tq, *tp, *tpo;
+  double *kw, *len, *w, *b1, *b2, *tw;
+} ptree_ws_t;
+
+int    ptree_init(ptree_t *pt, int T, const int *epar, const int *echd,
+                  const double *elen);
+void   ptree_ws_init(ptree_ws_t *ws, int cap);
+int    ptree_vtree(const ptree_t *pt, ptree_ws_t *ws, int S, const int *tips,
+                   const double *wt);
+double ptree_pair_sum(ptree_ws_t *ws, int m);
+
+/* --- rng_binomial.c: binomial and multinomial draws (NumPy's sampler) --- */
+int64_t rng_binom(rng_t *rng, int64_t n, double p);
+void    rng_multinom(rng_t *rng, int64_t n, const double *p, int d, int64_t *out);
+
 /* --- rank_tests.c: rank tests shared by ancom.c and lefse.c --- */
 typedef struct { double v; int g; } vg_t;   // a value and its group
 
